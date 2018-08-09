@@ -1358,9 +1358,8 @@ void CorrelationPlotItem::rebuildPlot()
 
     for(size_t x = 0U; x < _columnCount; x++)
     {
-        auto labelName = _labelNames.at(static_cast<int>(_sortMap[x]));
-        categoryTicker->addTick(x, QFontMetrics(_defaultFont9Pt).elidedText(
-            labelName, Qt::ElideRight, _elideLabelWidth));
+        auto labelName = elideLabel(_labelNames.at(static_cast<int>(_sortMap[x])));
+        categoryTicker->addTick(x, labelName);
     }
 
     if(_elideLabelWidth <= 0)
@@ -1635,6 +1634,22 @@ void CorrelationPlotItem::setColumnSortAnnotation(const QString& columnSortAnnot
     }
 }
 
+QString CorrelationPlotItem::elideLabel(const QString& label)
+{
+    auto cacheEntry = _labelElisionCache.find(label);
+    if(cacheEntry != _labelElisionCache.end())
+    {
+        if(cacheEntry->contains(_elideLabelWidth))
+            return cacheEntry->value(_elideLabelWidth);
+    }
+
+    auto elidedLabel = _defaultFontMetrics.elidedText(label, Qt::ElideRight, _elideLabelWidth);
+
+    _labelElisionCache[label].insert(_elideLabelWidth, elidedLabel);
+
+    return elidedLabel;
+}
+
 QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
 {
     QStringList list;
@@ -1714,9 +1729,8 @@ double CorrelationPlotItem::visibleHorizontalFraction() const
 
 double CorrelationPlotItem::labelHeight() const
 {
-    QFontMetrics metrics(_defaultFont9Pt);
     const unsigned int columnPadding = 1;
-    return metrics.height() + columnPadding;
+    return _defaultFontMetrics.height() + columnPadding;
 }
 
 double CorrelationPlotItem::columnAxisWidth() const

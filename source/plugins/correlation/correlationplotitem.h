@@ -179,6 +179,7 @@ private:
     QCPItemRect* _hoverColorRect = nullptr;
     QCPItemTracer* _itemTracer = nullptr;
     QFont _defaultFont9Pt;
+    QFontMetrics _defaultFontMetrics{_defaultFont9Pt};
 
     QCustomPlot _customPlot;
     QCPLayoutGrid* _mainAxisLayout = nullptr;
@@ -226,14 +227,17 @@ private:
 
     QCPLayer* _lineGraphLayer = nullptr;
 
-    struct CacheEntry
+    struct LineCacheEntry
     {
         QCPGraph* _graph = nullptr;
         double _minY = std::numeric_limits<double>::max();
         double _maxY = std::numeric_limits<double>::lowest();
     };
 
-    QMap<int, CacheEntry> _lineGraphCache;
+    QMap<int, LineCacheEntry> _lineGraphCache;
+
+    using LabelElisionCacheEntry = QMap<int, QString>;
+    QMap<QString, LabelElisionCacheEntry> _labelElisionCache;
 
     std::recursive_mutex _mutex;
     QThread _plotRenderThread;
@@ -266,6 +270,8 @@ private:
     void updateSortMap();
     void setColumnSortType(int columnSortType);
     void setColumnSortAnnotation(const QString& columnSortAnnotation);
+
+    QString elideLabel(const QString& label);
 
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
