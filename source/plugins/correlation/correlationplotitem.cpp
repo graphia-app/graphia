@@ -496,7 +496,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
 
 inline const auto MinimumMainPlotHeight = 100;
 
-void CorrelationPlotItem::updateColumnAnnotaionVisibility()
+void CorrelationPlotItem::updateColumnAnnotationVisibility()
 {
     auto mainPlotHeight = height() - columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
     bool showColumnAnnotations = mainPlotHeight >= MinimumMainPlotHeight;
@@ -1739,7 +1739,7 @@ double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
 void CorrelationPlotItem::updatePlotSize()
 {
     computeXAxisRange();
-    updateColumnAnnotaionVisibility();
+    updateColumnAnnotationVisibility();
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 

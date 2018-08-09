@@ -278,7 +278,7 @@ private:
     void setYAxisRange(double min, double max);
     QVector<double> meanAverageData(double& min, double& max);
 
-    void updateColumnAnnotaionVisibility();
+    void updateColumnAnnotationVisibility();
     bool canShowColumnAnnotationSelection() const;
 
     double visibleHorizontalFraction() const;
