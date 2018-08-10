@@ -372,7 +372,7 @@ void CorrelationPlotItem::updateTooltip()
             auto xf = bottomRange.lower + 0.5 +
                 static_cast<double>(point.x() * bottomSize) / axisRectUnderCursor->width();
 
-            int x = static_cast<int>(xf);
+            auto x = static_cast<int>(xf);
             int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
             y = static_cast<int>(numVisibleColumnAnnotations()) - y - 1;
 
@@ -1649,8 +1649,8 @@ void CorrelationPlotItem::setColumnSortAnnotation(const QString& columnSortAnnot
 
 QString CorrelationPlotItem::elideLabel(const QString& label)
 {
-    auto cacheEntry = _labelElisionCache.find(label);
-    if(cacheEntry != _labelElisionCache.end())
+    auto cacheEntry = _labelElisionCache.constFind(label);
+    if(cacheEntry != _labelElisionCache.constEnd())
     {
         if(cacheEntry->contains(_elideLabelWidth))
             return cacheEntry->value(_elideLabelWidth);
