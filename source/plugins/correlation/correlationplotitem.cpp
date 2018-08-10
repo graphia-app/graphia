@@ -1044,39 +1044,6 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     colorMap->data()->setRange(QCPRange(0, _columnCount - 1), QCPRange(0, range));
 
-    using AnnotationValue = std::tuple<QString, bool>;
-    std::set<AnnotationValue> uniqueValues;
-
-    for(const auto& columnAnnotation : _columnAnnotations)
-    {
-        bool visible = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
-
-        for(const auto& value : columnAnnotation._values)
-            uniqueValues.emplace(value, visible);
-    }
-
-    std::map<AnnotationValue, double> stringColorIndexMap;
-
-    QCPColorGradient colorGradient;
-    colorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
-
-    int i = 0;
-    for(const auto& value : uniqueValues)
-    {
-        auto index = uniqueValues.size() == 1 ? 0.0 :
-            static_cast<double>(i++) / (uniqueValues.size() - 1);
-        stringColorIndexMap[value] = index;
-
-        const auto& stringValue = std::get<0>(value);
-        auto visible = std::get<1>(value);
-        auto color = u::colorForString(stringValue);
-
-        if(!visible)
-            color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
-
-        colorGradient.setColorStopAt(index, color);
-    }
-
     QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
     size_t y = numColumnAnnotations - 1;
@@ -1097,15 +1064,14 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         for(size_t x = 0U; x < _columnCount; x++)
         {
             auto stringValue = columnAnnotation._values.at(static_cast<int>(_sortMap[x]));
-            AnnotationValue value(stringValue, visible);
-            auto cellValue = stringColorIndexMap[value];
-            colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), cellValue);
+            auto index = _columnAnnotationColorIndexMap.at({stringValue, visible});
+            colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), index);
         }
 
         y--;
     }
 
-    colorMap->setGradient(colorGradient);
+    colorMap->setGradient(_columnAnnotationColorGradient);
     colorMap->setDataRange(QCPRange(0.0, 1.0));
 
     caYAxis->setTicker(columnAnnotationTicker);
@@ -1558,6 +1524,36 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
 
         _visibleColumnAnnotationNames.emplace(name);
         _columnAnnotations.push_back({name, values});
+    }
+
+    std::set<AnnotationIndex> uniqueValues;
+
+    for(const auto& columnAnnotation : _columnAnnotations)
+    {
+        for(const auto& value : columnAnnotation._values)
+        {
+            uniqueValues.emplace(value, false);
+            uniqueValues.emplace(value, true);
+        }
+    }
+
+    _columnAnnotationColorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
+
+    int i = 0;
+    for(const auto& value : uniqueValues)
+    {
+        auto index = uniqueValues.size() == 1 ? 0.0 :
+            static_cast<double>(i++) / (uniqueValues.size() - 1);
+        _columnAnnotationColorIndexMap[value] = index;
+
+        const auto& stringValue = std::get<0>(value);
+        auto visible = std::get<1>(value);
+        auto color = u::colorForString(stringValue);
+
+        if(!visible)
+            color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
+
+        _columnAnnotationColorGradient.setColorStopAt(index, color);
     }
 }
 

@@ -226,6 +226,10 @@ private:
     std::set<QString> _visibleColumnAnnotationNames;
     bool _showColumnAnnotations = true;
 
+    using AnnotationIndex = std::tuple<QString, bool>;
+    std::map<AnnotationIndex, double> _columnAnnotationColorIndexMap;
+    QCPColorGradient _columnAnnotationColorGradient;
+
     QCPLayer* _lineGraphLayer = nullptr;
 
     struct LineCacheEntry
