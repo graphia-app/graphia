@@ -366,7 +366,13 @@ void CorrelationPlotItem::updateTooltip()
             axisRectUnderCursor->rect().contains(_hoverPoint.toPoint()))
         {
             auto point = _hoverPoint - axisRectUnderCursor->topLeft();
-            int x = (point.x() * _columnCount) / axisRectUnderCursor->width();
+            auto bottomAxis = axisRectUnderCursor->axis(QCPAxis::atBottom);
+            const auto& bottomRange = bottomAxis->range();
+            auto bottomSize = bottomRange.size();
+            auto xf = bottomRange.lower + 0.5 +
+                static_cast<double>(point.x() * bottomSize) / axisRectUnderCursor->width();
+
+            int x = static_cast<int>(xf);
             int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
             y = static_cast<int>(numVisibleColumnAnnotations()) - y - 1;
 
