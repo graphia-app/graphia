@@ -1543,7 +1543,8 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
         }
     }
 
-    _columnAnnotationColorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
+    if(uniqueValues.size() >= 2)
+        _columnAnnotationColorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
 
     int i = 0;
     for(const auto& value : uniqueValues)
