@@ -60,13 +60,13 @@ void main()
     vOutlineColor = outlineColor;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 
-    // Map 2D UV's to node Hemisphere
+    // Map 2D UVs to node Hemisphere
     // Create orientation matrix based on vector from eyespace nodePosition
     // This keeps the node "facing" the camera
     vec3 eyeNodeCenter = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
     mat4 perspectiveOrientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCenter));
     vec4 eyeNodeNormal = perspectiveOrientationMatrix * vec4(normal, 1.0);
-    // Project hemisphere normal to UV's
-    uv = vec2(0.5 + asin(eyeNodeNormal.x) / PI,
-                   0.5 + asin(eyeNodeNormal.y) / PI);
+
+    // Project hemisphere normal to UVs
+    uv = vec2(0.5 + asin(eyeNodeNormal.x) / PI, 0.5 + asin(eyeNodeNormal.y) / PI);
 }

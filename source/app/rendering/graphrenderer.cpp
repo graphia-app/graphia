@@ -227,7 +227,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             auto& nodeVisual = _graphModel->nodeVisual(nodeId);
 
-            // Create and Add NodeData
+            // Create and add NodeData
             GPUGraphData::NodeData nodeData;
             nodeData._position[0] = nodePosition.x();
             nodeData._position[1] = nodePosition.y();

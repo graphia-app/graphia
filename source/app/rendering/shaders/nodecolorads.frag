@@ -77,13 +77,13 @@ void main()
     // Hemisphere projection means the UV's are NOT linear
 
     // Center color of Node calculation
-    // We want 0,0 to be the center for dot
+    // We want 0, 0 to be the center for dot
     vec2 scaledUV = (uv.xy - 0.5) * 2.0;
-    // Step threshold indicates the size of dot
-    vec4 fragmentColor = vec4(mix(outerVColor, innerVColor,
-                            step(length(scaledUV), 0.2)), 1.0);
 
-    vec3 color = adsModel(position, normalize(normal), fragmentColor);
+    // Step threshold indicates the size of dot
+    vec4 fragColor = vec4(mix(outerVColor, innerVColor, step(length(scaledUV), 0.2)), 1.0);
+
+    vec3 color = adsModel(position, normalize(normal), fragColor);
     outColor = vec4(color, 1.0);
     outSelection = vec4(vOutlineColor, 1.0);
 }
