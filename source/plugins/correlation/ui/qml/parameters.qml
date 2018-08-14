@@ -499,6 +499,10 @@ ListTabDialog
                         decimals: 3
                         stepSize: (maximumValue - minimumValue) / 100.0
 
+                        onValueChanged:
+                        {
+                            parameters.minimumCorrelation = value;
+                        }
                     }
 
                     Slider
