@@ -52,6 +52,7 @@ void DataRectTableModel::setTabularData(TabularData& data)
 {
     beginResetModel();
     _data = std::move(data);
+    _data.setTransposed(_transposed);
     endResetModel();
 }
 
