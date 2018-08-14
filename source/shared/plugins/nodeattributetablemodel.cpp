@@ -106,7 +106,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
     {
         NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
 
-        if(!_document->graphModel()->graph().containsNodeId(nodeId))
+        if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
             // The graph doesn't necessarily have a node for every row since
             // it may have been transformed, leaving empty rows

@@ -255,9 +255,11 @@ private:
 
 protected:
     NodeId nextNodeId() const override;
+    NodeId lastNodeIdInUse() const override;
     NodeId largestNodeId() const { return nextNodeId() - 1; }
     virtual void reserveNodeId(NodeId nodeId);
     EdgeId nextEdgeId() const override;
+    EdgeId lastEdgeIdInUse() const override;
     EdgeId largestEdgeId() const { return nextEdgeId() - 1; }
     virtual void reserveEdgeId(EdgeId edgeId);
 

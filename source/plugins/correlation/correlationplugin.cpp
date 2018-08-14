@@ -513,7 +513,9 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
     for(size_t i = 0; i < _numRows; i++)
     {
         auto nodeId = _userNodeData.elementIdForRowIndex(i);
-        colors.append(graphModel()->nodeVisual(nodeId).outerColor());
+        auto color = !nodeId.isNull() ? graphModel()->nodeVisual(nodeId).outerColor() : QColor{};
+
+        colors.append(color);
     }
 
     return colors;
@@ -651,8 +653,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressF
     jsonObject["data"] = jsonArrayFrom(_data, progressFn);
 
     graph.setPhase(QObject::tr("Pearson Values"));
-    auto range = make_iterator_range(_pearsonValues->cbegin(), _pearsonValues->cbegin() + static_cast<int>(graph.nextEdgeId()));
-    jsonObject["pearsonValues"] = jsonArrayFrom(range);
+    jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;

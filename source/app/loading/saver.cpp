@@ -155,15 +155,15 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
     graph.setPhase(QObject::tr("Positions"));
     json positions;
 
-    auto range = make_iterator_range(nodePositions.cbegin(), nodePositions.cbegin() + static_cast<int>(graph.nextNodeId()));
+    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
     uint64_t i = 0;
-    for(const auto& nodePosition : range)
+    for(const auto& nodePosition : nodePositions)
     {
         auto v = nodePosition.newest();
         json vector({v.x(), v.y(), v.z()});
 
         positions.emplace_back(vector);
-        progressFn((i++ * 100) / range.size());
+        progressFn((i++ * 100) / numNodePositions);
     }
 
     progressFn(-1);

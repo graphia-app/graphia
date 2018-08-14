@@ -222,9 +222,19 @@ NodeId Graph::nextNodeId() const
     return _nextNodeId;
 }
 
+NodeId Graph::lastNodeIdInUse() const
+{
+    return nodeIds().back();
+}
+
 EdgeId Graph::nextEdgeId() const
 {
     return _nextEdgeId;
+}
+
+EdgeId Graph::lastEdgeIdInUse() const
+{
+    return edgeIds().back();
 }
 
 void Graph::reserveNodeId(NodeId nodeId)

@@ -117,7 +117,6 @@ public:
         return elementFor(index);
     }
 
-
     // get and set have to be implemented without elementFor because of std::vector<bool>
     Element get(Index index) const
     {
@@ -144,14 +143,6 @@ public:
     {
         return !operator==(other);
     }
-
-    //FIXME these iterators do not lock when locking is enabled; need to wrap in own iterator types
-    typename std::vector<Element>::iterator begin() { return _array.begin(); }
-    typename std::vector<Element>::const_iterator begin() const { return _array.begin(); }
-    typename std::vector<Element>::const_iterator cbegin() const { return _array.cbegin(); }
-    typename std::vector<Element>::iterator end() { return _array.end(); }
-    typename std::vector<Element>::const_iterator end() const { return _array.end(); }
-    typename std::vector<Element>::const_iterator cend() const { return _array.cend(); }
 
     int size() const
     {
@@ -261,6 +252,17 @@ public:
         if(this->_graph != nullptr)
             this->_graph->eraseNodeArray(this);
     }
+
+    typename std::vector<Element>::const_iterator begin() const
+    {
+        return this->_array.begin();
+    }
+
+    typename std::vector<Element>::const_iterator end() const
+    {
+        auto highest = static_cast<int>(this->_graph->lastNodeIdInUse());
+        return begin() + highest;
+    }
 };
 
 template<typename Element, typename Locking = void>
@@ -309,6 +311,17 @@ public:
     {
         if(this->_graph != nullptr)
             this->_graph->eraseEdgeArray(this);
+    }
+
+    typename std::vector<Element>::const_iterator begin() const
+    {
+        return this->_array.begin();
+    }
+
+    typename std::vector<Element>::const_iterator end() const
+    {
+        auto highest = static_cast<int>(this->_graph->lastEdgeIdInUse());
+        return begin() + highest;
     }
 };
 
@@ -363,6 +376,9 @@ public:
         if(this->_graph != nullptr)
             this->_graph->eraseComponentArray(this);
     }
+
+    typename std::vector<Element>::const_iterator begin() const { return this->_array.begin(); }
+    typename std::vector<Element>::const_iterator end() const { return this->_array.end(); }
 };
 
 template<typename ElementId, typename Element>

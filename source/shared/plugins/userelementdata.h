@@ -51,8 +51,12 @@ public:
 
     E elementIdForRowIndex(size_t row) const
     {
-        Q_ASSERT(u::contains(_rowToElementIdMap, row));
-        return _rowToElementIdMap.at(row);
+        if(u::contains(_rowToElementIdMap, row))
+            return _rowToElementIdMap.at(row);
+
+        // This can happen if the user has deleted some nodes then saved and reloaded
+        // In this case the ElementIds may no longer exist for the row in question
+        return {};
     }
 
     size_t rowIndexFor(E elementId) const

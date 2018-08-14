@@ -15,6 +15,9 @@ public:
     virtual NodeId nextNodeId() const = 0;
     virtual EdgeId nextEdgeId() const = 0;
 
+    virtual NodeId lastNodeIdInUse() const = 0;
+    virtual EdgeId lastEdgeIdInUse() const = 0;
+
     virtual void insertNodeArray(IGraphArray* nodeArray) const = 0;
     virtual void eraseNodeArray(IGraphArray* nodeArray) const = 0;
 
