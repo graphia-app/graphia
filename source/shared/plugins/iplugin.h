@@ -61,6 +61,7 @@ public:
     virtual QString failureReason(const QUrl& url) const = 0;
 
     virtual bool editable() const = 0;
+    virtual bool directed() const = 0;
 
     virtual QString parametersQmlPath() const = 0;
     virtual QString qmlPath() const = 0;

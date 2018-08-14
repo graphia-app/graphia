@@ -61,6 +61,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool interacting READ interacting NOTIFY interactingChanged)
     Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
+    Q_PROPERTY(bool directed READ directed NOTIFY directedChanged)
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
@@ -131,6 +132,7 @@ public:
     bool busy() const;
     bool interacting() const;
     bool editable() const;
+    bool directed() const;
     bool graphChanging() const;
 
     int commandProgress() const;
@@ -290,6 +292,7 @@ signals:
     void busyChanged();
     void interactingChanged();
     void editableChanged();
+    void directedChanged();
 
     void graphWillChange(const Graph* graph);
     void graphChanged(const Graph* graph, bool changeOccurred);

@@ -78,6 +78,7 @@ public:
     const QString& name() const { return _name; }
 
     bool editable() const;
+    bool directed() const;
     QString pluginName() const;
     int pluginDataVersion() const;
     QString pluginQmlPath() const;

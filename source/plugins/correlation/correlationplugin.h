@@ -294,6 +294,7 @@ public:
     QString failureReason(const QUrl& url) const override;
 
     bool editable() const override { return true; }
+    bool directed() const override { return false; }
 
     QString parametersQmlPath() const override { return QStringLiteral("qrc:///qml/parameters.qml"); }
     QString qmlPath() const override { return QStringLiteral("qrc:///qml/correlationplugin.qml"); }

@@ -132,6 +132,14 @@ bool Document::editable() const
     return !busy() && _graphModel->editable();
 }
 
+bool Document::directed() const
+{
+    if(_graphModel == nullptr)
+        return true;
+
+    return _graphModel->directed();
+}
+
 bool Document::graphChanging() const
 {
     return _graphChanging;
@@ -666,6 +674,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit commandIsCancellableChanged();
     emit busyChanged();
     emit editableChanged();
+    emit directedChanged();
     emit commandVerbChanged(); // Stop showing loading message
 
     // Load DocumentUI saved data

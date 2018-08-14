@@ -153,6 +153,9 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
 
     // Default to no UI
     QString qmlPath() const override { return {}; }
+
+    // Default to directed graphs
+    bool directed() const override { return true; }
 };
 
 #endif // BASEPLUGIN_H

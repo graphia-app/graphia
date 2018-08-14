@@ -209,6 +209,10 @@ void GraphRenderer::updateGPUDataIfRequired()
     auto showEdgeText = static_cast<TextState>(u::pref("visuals/showEdgeText").toInt());
     auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
 
+    // Ignore the setting if the graph is directed
+    if(_graphModel->directed())
+        edgeVisualType = EdgeVisualType::Cylinder;
+
     for(auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;

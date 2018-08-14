@@ -1274,7 +1274,11 @@ ApplicationWindow
                 MenuItem { action: showSelectedEdgeTextAction }
                 MenuItem { action: showAllEdgeTextAction }
             }
-            MenuItem { action: toggleEdgeDirectionAction }
+            MenuItem
+            {
+                action: toggleEdgeDirectionAction
+                visible: currentDocument && currentDocument.directed
+            }
             MenuItem { action: toggleMultiElementIndicatorsAction }
             MenuSeparator {}
             MenuItem { action: copyImageToClipboardAction }

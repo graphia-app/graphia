@@ -62,6 +62,7 @@ Item
 
     property bool busy: document.busy
     property bool editable: document.editable
+    property bool directed: document.directed
     property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
 
     property bool loading: !document.loadComplete

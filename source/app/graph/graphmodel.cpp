@@ -123,15 +123,18 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
-    GraphModel::createAttribute(tr("Node In Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
-        .intRange().setMin(0)
-        .setDescription(tr("A node's in degree is its number of inbound edges."));
+    if(directed())
+    {
+        GraphModel::createAttribute(tr("Node In Degree"))
+            .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
+            .intRange().setMin(0)
+            .setDescription(tr("A node's in degree is its number of inbound edges."));
 
-    GraphModel::createAttribute(tr("Node Out Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
-        .intRange().setMin(0)
-        .setDescription(tr("A node's out degree is its number of outbound edges."));
+        GraphModel::createAttribute(tr("Node Out Degree"))
+            .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
+            .intRange().setMin(0)
+            .setDescription(tr("A node's out degree is its number of outbound edges."));
+    }
 
     GraphModel::createAttribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId)
@@ -268,6 +271,8 @@ void GraphModel::setNodeName(NodeId nodeId, const QString& name)
 }
 
 bool GraphModel::editable() const { return _plugin->editable(); }
+bool GraphModel::directed() const { return _plugin->directed(); }
+
 QString GraphModel::pluginName() const { return _plugin->name(); }
 int GraphModel::pluginDataVersion() const { return _plugin->dataVersion(); }
 QString GraphModel::pluginQmlPath() const { return _plugin->qmlPath(); }
