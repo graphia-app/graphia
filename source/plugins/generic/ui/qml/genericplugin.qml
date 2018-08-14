@@ -64,6 +64,22 @@ PluginContent
 
             model: plugin.model.nodeAttributeTableModel
 
+            onVisibleRowsChanged:
+            {
+                selection.clear();
+
+                if(rowCount > 0)
+                    selection.selectAll();
+            }
+
+            onSelectedRowsChanged:
+            {
+                // If the tableView's selection is less than complete, highlight
+                // the corresponding nodes in the graph, otherwise highlight nothing
+                plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
+                    tableView.selectedRows : [];
+            }
+
             onSortIndicatorColumnChanged: { root.saveRequired = true; }
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }

@@ -221,8 +221,9 @@ bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTextu
 
 void GPUGraphData::reset()
 {
-    _alpha1 = 0.0f;
-    _alpha2 = 0.0f;
+    _componentAlpha = 0.0f;
+    _unhighlightAlpha = 0.0f;
+    _alwaysDrawnLast = false;
     _nodeData.clear();
     _edgeData.clear();
     _glyphData.clear();
@@ -278,12 +279,22 @@ int GPUGraphData::numEdges() const
 
 float GPUGraphData::alpha() const
 {
-    return _alpha1 * _alpha2;
+    return _componentAlpha * _unhighlightAlpha;
+}
+
+float GPUGraphData::componentAlpha() const
+{
+    return _componentAlpha;
+}
+
+float GPUGraphData::unhighlightAlpha() const
+{
+    return _unhighlightAlpha;
 }
 
 bool GPUGraphData::unused() const
 {
-    return _alpha1 == 0.0f && _alpha2 == 0.0f;
+    return _componentAlpha == 0.0f && _unhighlightAlpha == 0.0f;
 }
 
 GraphRendererCore::GraphRendererCore()
@@ -451,18 +462,44 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float alpha1, float alpha2
     {
         if(gpuGraphData.unused())
         {
-            gpuGraphData._alpha1 = alpha1;
-            gpuGraphData._alpha2 = alpha2;
+            gpuGraphData._componentAlpha = alpha1;
+            gpuGraphData._unhighlightAlpha = alpha2;
             return &gpuGraphData;
         }
 
-        if(gpuGraphData._alpha1 == alpha1 && gpuGraphData._alpha2 == alpha2)
+        if(gpuGraphData._componentAlpha == alpha1 && gpuGraphData._unhighlightAlpha == alpha2)
             return &gpuGraphData;
     }
 
     qWarning() << "Not enough gpuGraphData instances for" << alpha1 << alpha2;
     for(auto& gpuGraphData : _gpuGraphData)
-        qWarning() << "  " << gpuGraphData._alpha1 << gpuGraphData._alpha2;
+        qWarning() << "  " << gpuGraphData._componentAlpha << gpuGraphData._unhighlightAlpha;
+
+    return nullptr;
+}
+
+GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
+{
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
+        if(gpuGraphData.unused())
+        {
+            gpuGraphData._componentAlpha = alpha;
+            gpuGraphData._unhighlightAlpha = 1.0f;
+            gpuGraphData._alwaysDrawnLast = true;
+            return &gpuGraphData;
+        }
+
+        if(gpuGraphData._alwaysDrawnLast)
+            return &gpuGraphData;
+    }
+
+    qWarning() << "Not enough gpuGraphData instances for overlay" << alpha;
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
+        qWarning() << "  " << gpuGraphData._componentAlpha <<
+            gpuGraphData._unhighlightAlpha << gpuGraphData._alwaysDrawnLast;
+    }
 
     return nullptr;
 }
@@ -536,10 +573,16 @@ std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
 
     std::sort(renderOrder.begin(), renderOrder.end(), [this](auto a, auto b)
     {
-        if(_gpuGraphData.at(a)._alpha1 == _gpuGraphData.at(b)._alpha1)
-            return _gpuGraphData.at(a)._alpha2 > _gpuGraphData.at(b)._alpha2;
+        const auto& ggda = _gpuGraphData.at(a);
+        const auto& ggdb = _gpuGraphData.at(b);
 
-        return _gpuGraphData.at(a)._alpha1 > _gpuGraphData.at(b)._alpha1;
+        if(ggda._alwaysDrawnLast && !ggdb._alwaysDrawnLast)
+            return false;
+
+        if(ggda._componentAlpha == ggdb._componentAlpha)
+            return ggda._unhighlightAlpha > ggdb._unhighlightAlpha;
+
+        return ggda._componentAlpha > ggdb._componentAlpha;
     });
 
     while(!renderOrder.empty() && _gpuGraphData.at(renderOrder.back()).alpha() <= 0.0f)
@@ -569,9 +612,9 @@ void GraphRendererCore::renderGraph()
         auto& gpuGraphData = _gpuGraphData.at(i);
 
         // Clear the depth buffer, but only when we're about to render graph elements
-        // that are found, so that subsequent render passes of not found elements
+        // that are found, so that subsequent render passes of not highlighted elements
         // use the existing depth information
-        if(gpuGraphData._alpha2 >= 1.0f)
+        if(gpuGraphData._unhighlightAlpha >= 1.0f)
             gpuGraphData.clearDepthbuffer();
 
         if(hasSampleShading())
@@ -593,7 +636,7 @@ void GraphRendererCore::renderGraph()
         renderText(gpuGraphData);
     }
 
-    glDisable(GL_SAMPLE_SHADING);
+    glDisable(GL_SAMPLE_SHADING_ARB);
     glDisable(GL_MULTISAMPLE);
 }
 
@@ -697,7 +740,7 @@ void GraphRendererCore::renderToFramebuffer()
     _selectionShader.bind();
     _selectionShader.setUniformValue("projectionMatrix", m);
     _selectionShader.setUniformValue("highlightColor",
-                                     u::pref("visuals/highlightColor").value<QColor>());
+        u::pref("visuals/highlightColor").value<QColor>());
     _selectionShader.release();
 
     _screenQuadDataBuffer.bind();
@@ -705,8 +748,14 @@ void GraphRendererCore::renderToFramebuffer()
 
     for(auto i : gpuGraphDataRenderOrder())
     {
-        render2DComposite(*this, _screenShader,    _gpuGraphData.at(i)._colorTexture,     _gpuGraphData.at(i).alpha());
-        render2DComposite(*this, _selectionShader, _gpuGraphData.at(i)._selectionTexture, _gpuGraphData.at(i).alpha());
+        render2DComposite(*this, _screenShader,
+            _gpuGraphData.at(i)._colorTexture,
+            _gpuGraphData.at(i).alpha());
+
+        // Always render the selection outline fully opaque
+        render2DComposite(*this, _selectionShader,
+            _gpuGraphData.at(i)._selectionTexture,
+            _gpuGraphData.at(i).componentAlpha());
     }
 
     _screenQuadDataBuffer.release();

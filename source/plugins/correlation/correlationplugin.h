@@ -72,6 +72,9 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
     Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
+    Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
+        WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
+
 public:
     CorrelationPluginInstance();
 
@@ -189,6 +192,9 @@ private:
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
     double _missingDataReplacementValue = 0.0;
 
+    // The rows that are selected in the table view
+    QVector<int> _highlightedRows;
+
     void initialise(const IPlugin* plugin, IDocument* document,
                     const IParserThread* parserThread) override;
 
@@ -214,6 +220,8 @@ private:
         std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
         double minimumThreshold, Cancellable* cancellable = nullptr,
         const ProgressFn* progressFn = nullptr);
+
+     void setHighlightedRows(const QVector<int>& highlightedRows);
 
 public:
     void setDimensions(size_t numColumns, size_t numRows);
@@ -259,6 +267,8 @@ signals:
 
     void columnNamesChanged();
     void rowNamesChanged();
+
+    void highlightedRowsChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

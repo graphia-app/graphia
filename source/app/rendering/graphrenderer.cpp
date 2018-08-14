@@ -215,7 +215,7 @@ void GraphRenderer::updateGPUDataIfRequired()
         if(!componentRenderer->visible())
             continue;
 
-        const float NotFoundAlpha = 0.15f;
+        const float UnhighlightedAlpha = 0.15f;
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
@@ -249,20 +249,21 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._outlineColor[2] = outlineColor.blueF();
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                nodeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                nodeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
             {
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-                if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::NotFound))
+                if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
                 if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
                     continue;
 
                 createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
-                    nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
+                    nodeVisual._size, nodePosition, componentIndex,
+                    gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
         }
 
@@ -324,13 +325,13 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._outlineColor[2] = 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                edgeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                edgeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
             {
                 gpuGraphData->_edgeData.push_back(edgeData);
 
-                if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::NotFound))
+                if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
                 if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
@@ -338,7 +339,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
                 QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
                 createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
-                    edgeVisual._size, midPoint, componentIndex, gpuGraphData);
+                    edgeVisual._size, midPoint, componentIndex,
+                    gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
         }
 

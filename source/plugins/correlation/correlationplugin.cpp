@@ -349,6 +349,22 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
     return edges;
 }
 
+void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
+{
+    _highlightedRows = highlightedRows;
+
+    NodeIdSet highlightedNodeIds;
+    for(auto row : highlightedRows)
+    {
+        auto nodeId = _userNodeData.elementIdForRowIndex(static_cast<size_t>(row));
+        highlightedNodeIds.insert(nodeId);
+    }
+
+    document()->highlightNodes(highlightedNodeIds);
+
+    emit highlightedRowsChanged();
+}
+
 std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
     const QString& fileName, double minimumThreshold, Cancellable& cancellable, const ProgressFn& progressFn)
 {

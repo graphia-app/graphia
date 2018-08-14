@@ -2,6 +2,7 @@
 #define IDOCUMENT_H
 
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
 #include "shared/utils/flags.h"
 
 #include <vector>
@@ -53,6 +54,9 @@ public:
 
     virtual void moveFocusToNode(NodeId nodeId) = 0;
     virtual void moveFocusToNodes(const std::vector<NodeId>& nodeIds) = 0;
+
+    virtual void clearHighlightedNodes() = 0;
+    virtual void highlightNodes(const NodeIdSet& nodeIds) = 0;
 };
 
 #endif // IDOCUMENT_H

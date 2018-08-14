@@ -44,6 +44,8 @@ struct GPUGraphData : OpenGLFunctions
     Primitive::Rectangle _rectangle;
 
     float alpha() const;
+    float componentAlpha() const;
+    float unhighlightAlpha() const;
 
     bool unused() const;
 
@@ -86,8 +88,10 @@ struct GPUGraphData : OpenGLFunctions
     // depending on their purpose. The rendering occurs in order based on _alpha1,
     // going from opaque to transparent, then resorting to _alpha2 in the same order,
     // when the values of _alpha1 match
-    float _alpha1 = 0.0f;
-    float _alpha2 = 0.0f;
+    float _componentAlpha = 0.0f;
+    float _unhighlightAlpha = 0.0f;
+
+    bool _alwaysDrawnLast = false;
 
     std::vector<NodeData> _nodeData;
     QOpenGLBuffer _nodeVBO;
@@ -116,7 +120,7 @@ private:
     int _width = 0;
     int _height = 0;
 
-    std::array<GPUGraphData, 6> _gpuGraphData;
+    std::array<GPUGraphData, 7> _gpuGraphData;
 
     QOpenGLShaderProgram _nodesShader;
     QOpenGLShaderProgram _edgesShader;
@@ -150,6 +154,7 @@ protected:
     bool resize(int width, int height);
 
     GPUGraphData* gpuGraphDataForAlpha(float alpha1, float alpha2);
+    GPUGraphData* gpuGraphDataForOverlay(float alpha);
     void resetGPUGraphData();
     void uploadGPUGraphData();
 

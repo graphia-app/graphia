@@ -7,9 +7,9 @@
 
 enum VisualFlags
 {
-    None     = 0x0,
-    Selected = 0x1,
-    NotFound = 0x2
+    None          = 0x0,
+    Selected      = 0x1,
+    Unhighlighted = 0x2
 };
 
 struct IElementVisual

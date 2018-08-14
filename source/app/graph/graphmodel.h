@@ -1,6 +1,7 @@
 #ifndef GRAPHMODEL_H
 #define GRAPHMODEL_H
 
+#include "shared/graph/elementid_containers.h"
 #include "shared/graph/grapharray.h"
 #include "attributes/attribute.h"
 
@@ -122,8 +123,11 @@ public:
     void initialiseAttributeRanges();
     void initialiseUniqueAttributeValues();
 
+    void clearHighlightedNodes();
+    void highlightNodes(const NodeIdSet& nodeIds);
+
     void enableVisualUpdates();
-    void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);
+    void updateVisuals();
 
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);

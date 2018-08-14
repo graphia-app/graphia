@@ -20,6 +20,9 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
 
+    Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
+        WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
+
 private:
     UserNodeData _userNodeData;
     UserEdgeData _userEdgeData;
@@ -36,10 +39,14 @@ public:
     bool load(const QByteArray&, int, IMutableGraph&, Cancellable& cancellable, const ProgressFn&) override;
 
 private:
+    // The rows that are selected in the table view
+    QVector<int> _highlightedRows;
+
     void initialise(const IPlugin* plugin, IDocument* document,
                     const IParserThread* parserThread) override;
 
     QString selectedNodeNames() const;
+    void setHighlightedRows(const QVector<int>& highlightedRows);
 
 private slots:
     void onLoadSuccess();
@@ -48,6 +55,7 @@ private slots:
 
 signals:
     void selectedNodeNamesChanged();
+    void highlightedRowsChanged();
 };
 
 class BaseGenericPlugin : public BasePlugin

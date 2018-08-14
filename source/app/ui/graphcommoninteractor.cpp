@@ -33,7 +33,7 @@ NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
     auto component = graphModel.graph().componentById(componentId);
     for(NodeId nodeId : component->nodeIds())
     {
-        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
             continue;
 
         const QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
@@ -56,7 +56,7 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
 
     for(auto nodeId : nodeIds)
     {
-        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
             continue;
 
         float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);

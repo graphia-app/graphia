@@ -88,6 +88,10 @@ private:
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
+
+    NodeIdSet _selectedNodeIds;
+    NodeIdSet _foundNodeIds;
+    NodeIdSet _highlightedNodeIds;
 };
 
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
@@ -694,6 +698,18 @@ void GraphModel::initialiseUniqueAttributeValues()
     findSharedAttributeValues(&graph(), _->_attributes);
 }
 
+void GraphModel::clearHighlightedNodes()
+{
+    _->_highlightedNodeIds.clear();
+    updateVisuals();
+}
+
+void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
+{
+    _->_highlightedNodeIds = nodeIds;
+    updateVisuals();
+}
+
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
@@ -711,7 +727,7 @@ static float mappedSize(float min, float max, float user, float mapped)
     return min + (out * (max - min));
 }
 
-void GraphModel::updateVisuals(const SelectionManager* selectionManager, const SearchManager* searchManager)
+void GraphModel::updateVisuals()
 {
     if(!_visualUpdatesEnabled)
         return;
@@ -729,21 +745,10 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
     auto maxEdgeSize    = u::maxPref("visuals/defaultEdgeSize").toFloat();
     auto meIndicators   = u::pref("visuals/showMultiElementIndicators").toBool();
 
-    if(selectionManager != nullptr)
-    {
-        // Clear all edge Selected flags as we can't know what to change unless
-        // we have the previous selection state to hand
-        for(auto edgeId : graph().edgeIds())
-            _->_edgeVisuals[edgeId]._state.reset(VisualFlags::Selected);
-    }
-
-    if(searchManager != nullptr)
-    {
-        // Clear all edge NotFound flags as we can't know what to change unless
-        // we have the previous search state to hand
-        for(auto edgeId : graph().edgeIds())
-            _->_edgeVisuals[edgeId]._state.reset(VisualFlags::NotFound);
-    }
+    // Clear all edge flags as we can't know what to
+    // change unless we have the previous state to hand
+    for(auto edgeId : graph().edgeIds())
+        _->_edgeVisuals[edgeId]._state.reset(VisualFlags::Selected, VisualFlags::Unhighlighted);
 
     for(auto nodeId : graph().nodeIds())
     {
@@ -771,31 +776,28 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         else
             _->_nodeVisuals[nodeId]._text = nodeName(nodeId);
 
-        if(selectionManager != nullptr)
+        auto nodeIsSelected = u::contains(_->_selectedNodeIds, nodeId);
+
+        _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
+
+        if(nodeIsSelected)
         {
-            auto nodeIsSelected = selectionManager->nodeIsSelected(nodeId);
-
-            _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
-
-            if(nodeIsSelected)
-            {
-                for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _->_edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
-            }
+            for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+                _->_edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
         }
 
-        if(searchManager != nullptr)
+        const NodeIdSet& highlightedNodeIds = !_->_highlightedNodeIds.empty() ?
+            _->_highlightedNodeIds : _->_foundNodeIds;
+
+        auto nodeUnhighlighted = !highlightedNodeIds.empty() &&
+            !u::contains(highlightedNodeIds, nodeId);
+
+        _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
+
+        if(nodeUnhighlighted)
         {
-            auto nodeWasFound = !searchManager->foundNodeIds().empty() &&
-                    !searchManager->nodeWasFound(nodeId);
-
-            _->_nodeVisuals[nodeId]._state.setState(VisualFlags::NotFound, nodeWasFound);
-
-            if(nodeWasFound)
-            {
-                for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _->_edgeVisuals[edgeId]._state.set(VisualFlags::NotFound);
-            }
+            for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+                _->_edgeVisuals[edgeId]._state.set(VisualFlags::Unhighlighted);
         }
     }
 
@@ -837,12 +839,15 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
 void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
-    updateVisuals(selectionManager, nullptr);
+    _->_selectedNodeIds = selectionManager->selectedNodes();
+    clearHighlightedNodes();
+    updateVisuals();
 }
 
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 {
-    updateVisuals(nullptr, searchManager);
+    _->_foundNodeIds = searchManager->foundNodeIds();
+    updateVisuals();
 }
 
 void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)

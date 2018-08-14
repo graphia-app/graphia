@@ -496,7 +496,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
         _searchManager->refresh();
-        _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
+        _graphModel->updateVisuals();
     });
 
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
@@ -1128,6 +1128,18 @@ void Document::moveFocusToNode(NodeId nodeId)
 void Document::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
 {
     _graphQuickItem->moveFocusToNodes(nodeIds);
+}
+
+void Document::clearHighlightedNodes()
+{
+    if(_graphModel != nullptr)
+        _graphModel->clearHighlightedNodes();
+}
+
+void Document::highlightNodes(const NodeIdSet& nodeIds)
+{
+    if(_graphModel != nullptr)
+        _graphModel->highlightNodes(nodeIds);
 }
 
 void Document::setSaveRequired()

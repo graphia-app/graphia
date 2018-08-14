@@ -106,6 +106,22 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     return s;
 }
 
+void BaseGenericPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
+{
+    _highlightedRows = highlightedRows;
+
+    NodeIdSet highlightedNodeIds;
+    for(auto row : highlightedRows)
+    {
+        auto nodeId = _userNodeData.elementIdForRowIndex(static_cast<size_t>(row));
+        highlightedNodeIds.insert(nodeId);
+    }
+
+    document()->highlightNodes(highlightedNodeIds);
+
+    emit highlightedRowsChanged();
+}
+
 void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
