@@ -185,12 +185,10 @@ Rectangle
 
     onVisibleChanged:
     {
-        passwordField.text = "";
-        refocus();
-    }
-
-    Component.onCompleted:
-    {
-        refocus();
+        if(visible)
+        {
+            passwordField.text = "";
+            refocus();
+        }
     }
 }
