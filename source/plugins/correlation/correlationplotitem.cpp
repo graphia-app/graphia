@@ -1373,17 +1373,14 @@ void CorrelationPlotItem::computeXAxisRange()
 {
     auto min = 0.0;
     auto max = static_cast<double>(_columnCount - 1);
-    if(_showColumnNames)
-    {
-        auto maxVisibleColumns = columnAxisWidth() / labelHeight();
-        auto numHiddenColumns = max - maxVisibleColumns;
+    auto maxVisibleColumns = columnAxisWidth() / minColumnWidth();
+    auto numHiddenColumns = max - maxVisibleColumns;
 
-        if(numHiddenColumns > 0.0)
-        {
-            double position = numHiddenColumns * _horizontalScrollPosition;
-            min = position;
-            max = position + maxVisibleColumns;
-        }
+    if(numHiddenColumns > 0.0)
+    {
+        double position = numHiddenColumns * _horizontalScrollPosition;
+        min = position;
+        max = position + maxVisibleColumns;
     }
 
     const auto padding = 0.5;
@@ -1496,11 +1493,10 @@ void CorrelationPlotItem::setColumnCount(size_t columnCount)
 
 void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
 {
-    bool changed = (_showColumnNames != showColumnNames);
-    _showColumnNames = showColumnNames;
-
-    if(changed)
+    if(_showColumnNames != showColumnNames)
     {
+        _showColumnNames = showColumnNames;
+        computeXAxisRange();
         emit visibleHorizontalFractionChanged();
         rebuildPlot();
     }
@@ -1735,16 +1731,20 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
 double CorrelationPlotItem::visibleHorizontalFraction() const
 {
-    if(_showColumnNames)
-        return (columnAxisWidth() / (labelHeight() * _columnCount));
+    auto f = (columnAxisWidth() / (minColumnWidth() * _columnCount));
 
-    return 1.0;
+    return std::min(f, 1.0);
 }
 
 double CorrelationPlotItem::labelHeight() const
 {
     const unsigned int columnPadding = 1;
     return _defaultFontMetrics.height() + columnPadding;
+}
+
+double CorrelationPlotItem::minColumnWidth() const
+{
+    return _showColumnNames ? labelHeight() : 3.0;
 }
 
 double CorrelationPlotItem::columnAxisWidth() const

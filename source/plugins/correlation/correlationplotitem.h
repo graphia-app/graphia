@@ -294,6 +294,7 @@ private:
 
     double visibleHorizontalFraction() const;
     double labelHeight() const;
+    double minColumnWidth() const;
     double columnAxisWidth() const;
     double columnAnnotaionsHeight(bool allAttributes) const;
 
