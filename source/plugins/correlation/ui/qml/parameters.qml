@@ -497,7 +497,6 @@ ListTabDialog
                         maximumValue: 1.0
 
                         decimals: 3
-                        stepSize: (maximumValue - minimumValue) / 100.0
 
                         onValueChanged:
                         {
@@ -545,7 +544,6 @@ ListTabDialog
                         maximumValue: 1.0
 
                         decimals: 3
-                        stepSize: (maximumValue - minimumValue) / 100.0
 
                         onValueChanged:
                         {
