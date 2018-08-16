@@ -217,18 +217,34 @@ private:
 
     struct ColumnAnnotation
     {
+        ColumnAnnotation(QString name, std::vector<QString> values) :
+            _name(std::move(name)), _values(std::move(values))
+        {
+            for(const auto& value : _values)
+                _uniqueValues.emplace(value);
+
+            _uniqueIndices.reserve(_values.size());
+            for(const auto& value : _values)
+                _uniqueIndices.emplace_back(indexForUniqueValue(value));
+        }
+
         QString _name;
-        QStringList _values;
+
+        std::vector<QString> _values;
+        std::vector<size_t> _uniqueIndices;
+
+        std::set<QString> _uniqueValues;
+
+        size_t indexForUniqueValue(const QString& value) const
+        {
+            return std::distance(_uniqueValues.begin(), _uniqueValues.find(value));
+        }
     };
 
     std::vector<ColumnAnnotation> _columnAnnotations;
 
     std::set<QString> _visibleColumnAnnotationNames;
     bool _showColumnAnnotations = true;
-
-    using AnnotationIndex = std::tuple<QString, bool>;
-    std::map<AnnotationIndex, double> _columnAnnotationColorIndexMap;
-    QCPColorGradient _columnAnnotationColorGradient;
 
     QCPLayer* _lineGraphLayer = nullptr;
 

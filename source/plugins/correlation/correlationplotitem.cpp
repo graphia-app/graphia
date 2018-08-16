@@ -6,6 +6,7 @@
 #include "shared/utils/random.h"
 #include "shared/utils/color.h"
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 
 #include <QDesktopServices>
 #include <QSet>
@@ -332,8 +333,16 @@ void CorrelationPlotItem::updateTooltip()
 
     if(_hoverPoint.x() >= 0.0 && _hoverPoint.y() >= 0.0)
     {
-        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
         axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
+        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
+
+        if(plottableUnderCursor != nullptr &&
+            plottableUnderCursor->keyAxis()->axisRect() != axisRectUnderCursor)
+        {
+            // The plottable under the cursor is not on the axisRect
+            // under the cursor (!?)
+            plottableUnderCursor = nullptr;
+        }
     }
 
     bool showTooltip = false;
@@ -344,50 +353,48 @@ void CorrelationPlotItem::updateTooltip()
 
     if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
     {
-        showTooltip = true;
-
-        if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
+        if(axisRectUnderCursor == _mainAxisRect)
         {
-            _itemTracer->setGraph(graph);
-            _itemTracer->setGraphKey(_mainXAxis->pixelToCoord(_hoverPoint.x()));
+            if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
+            {
+                _itemTracer->setGraph(graph);
+                _itemTracer->setGraphKey(_mainXAxis->pixelToCoord(_hoverPoint.x()));
+                showTooltip = true;
+            }
+            else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
+            {
+                auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
+                _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+                showTooltip = true;
+            }
+            else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
+            {
+                // Only show simple tooltips for now, can extend this later...
+                auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
+                _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+                showTooltip = true;
+            }
         }
-        else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
+        else if(axisRectUnderCursor == _columnAnnotationsAxisRect)
         {
-            auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
-            _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+            if(axisRectUnderCursor->rect().contains(_hoverPoint.toPoint()))
+            {
+                auto point = _hoverPoint - axisRectUnderCursor->topLeft();
+                auto bottomAxis = axisRectUnderCursor->axis(QCPAxis::atBottom);
+                const auto& bottomRange = bottomAxis->range();
+                auto bottomSize = bottomRange.size();
+                auto xf = bottomRange.lower + 0.5 +
+                        (static_cast<double>(point.x() * bottomSize) / axisRectUnderCursor->width());
+
+                auto x = static_cast<int>(xf);
+                int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
+
+                _itemTracer->position->setPixelPosition(_hoverPoint);
+                _hoverLabel->setText(columnAnnotationValueAt(x, y));
+
+                showTooltip = true;
+            }
         }
-        else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
-        {
-            // Only show simple tooltips for now, can extend this later...
-            auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
-            _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
-        }
-        else if(axisRectUnderCursor == _columnAnnotationsAxisRect &&
-            axisRectUnderCursor->rect().contains(_hoverPoint.toPoint()))
-        {
-            auto point = _hoverPoint - axisRectUnderCursor->topLeft();
-            auto bottomAxis = axisRectUnderCursor->axis(QCPAxis::atBottom);
-            const auto& bottomRange = bottomAxis->range();
-            auto bottomSize = bottomRange.size();
-            auto xf = bottomRange.lower + 0.5 +
-                static_cast<double>(point.x() * bottomSize) / axisRectUnderCursor->width();
-
-            auto x = static_cast<int>(xf);
-            int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
-            y = static_cast<int>(numVisibleColumnAnnotations()) - y - 1;
-
-            _itemTracer->position->setPixelPosition(_hoverPoint);
-            _hoverLabel->setText(columnAnnotationValueAt(x, y));
-
-            auto plottables = _columnAnnotationsAxisRect->plottables();
-            Q_ASSERT(plottables.size() == 1);
-            auto colorMap = dynamic_cast<QCPColorMap*>(plottables.first());
-
-            if(colorMap != nullptr)
-                color = colorMap->gradient().colorStops().value(colorMap->data()->data(x, y));
-        }
-        else
-            showTooltip = false;
     }
 
     if(showTooltip)
@@ -399,12 +406,19 @@ void CorrelationPlotItem::updateTooltip()
 
         _hoverLabel->setVisible(true);
 
-        if(_hoverLabel->text().isEmpty() && plottableUnderCursor != nullptr)
+        auto key = _itemTracer->position->key();
+
+        if(_hoverLabel->text().isEmpty() && plottableUnderCursor != nullptr && key >= 0.0)
         {
-            auto mappedCol = static_cast<int>(_sortMap.at(static_cast<size_t>(_itemTracer->position->key())));
-            _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                .arg(plottableUnderCursor->name(), _labelNames.at(mappedCol))
-                .arg(_itemTracer->position->value()));
+            auto index = static_cast<size_t>(key);
+
+            if(index < _columnCount)
+            {
+                auto mappedCol = static_cast<int>(_sortMap.at(index));
+                _hoverLabel->setText(QStringLiteral("%1, %2: %3")
+                    .arg(plottableUnderCursor->name(), _labelNames.at(mappedCol))
+                    .arg(_itemTracer->position->value()));
+            }
         }
 
         const auto COLOR_RECT_WIDTH = 10.0;
@@ -1005,6 +1019,8 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     if(!_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty())
         return xAxis;
 
+    size_t numColumnAnnotations = numVisibleColumnAnnotations();
+
     _columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, _columnAnnotationsAxisRect);
 
@@ -1023,64 +1039,85 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     auto caXAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
     auto caYAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
-    auto* colorMap = new QCPColorMap(caXAxis, caYAxis);
-
-    auto *colorScale = new QCPColorScale(&_customPlot);
-    colorMap->setColorScale(colorScale);
-    colorMap->setInterpolate(false);
-
-    size_t numColumnAnnotations = numVisibleColumnAnnotations();
-
-    colorMap->data()->setSize(static_cast<int>(_columnCount),
-        static_cast<int>(numColumnAnnotations));
 
     auto h = columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
     _columnAnnotationsAxisRect->setMinimumSize(0, h);
     _columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 
-    auto range = 1.0;
-    auto padding = 0.0;
-    if(numColumnAnnotations > 1)
+    QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
+    QCPBars* lastAddedBars = nullptr;
+    size_t y = numColumnAnnotations - 1;
+
+    QVector<double> ticks; ticks.reserve(_columnCount);
+    QVector<double> empty; empty.reserve(_columnCount);
+
+    for(size_t x = 0U; x < _columnCount; x++)
     {
-        range = numColumnAnnotations - 1.0;
-        padding = 0.5;
+        ticks.append(static_cast<double>(x));
+        empty.append(0.0);
     }
 
-    caYAxis->setRange(0.0 - padding, range + padding);
-
-    colorMap->data()->setRange(QCPRange(0, _columnCount - 1), QCPRange(0, range));
-
-    QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
-
-    size_t y = numColumnAnnotations - 1;
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        auto visible = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
-        if(!visible && !_columnAnnotationSelectionModeEnabled)
-            continue;
+        auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
+        bool visible = selected || _columnAnnotationSelectionModeEnabled;
 
-        QString postfix;
-
-        if(_columnAnnotationSelectionModeEnabled)
-            postfix = visible ? QStringLiteral(" ☑") : QStringLiteral(" ☐");
-
-        double tickPosition = numColumnAnnotations > 1 ? static_cast<double>(y) : 0.5;
-        columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name + postfix);
-
-        for(size_t x = 0U; x < _columnCount; x++)
+        for(const auto& uniqueValue : columnAnnotation._uniqueValues)
         {
-            auto stringValue = columnAnnotation._values.at(static_cast<int>(_sortMap[x]));
-            auto index = _columnAnnotationColorIndexMap.at({stringValue, visible});
-            colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), index);
+            auto* bars = new QCPBars(caXAxis, caYAxis);
+
+            bars->setAntialiased(false);
+            bars->setAntialiasedFill(false);
+            bars->setStackingGap(0);
+
+            auto color = u::colorForString(uniqueValue);
+
+            if(!selected)
+                color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
+
+            bars->setPen(QPen(color));
+            bars->setBrush(color);
+            bars->setWidth(1.0);
+
+            if(visible)
+            {
+                QVector<double> data;
+                data.reserve(_columnCount);
+
+                auto uniqueIndex = columnAnnotation.indexForUniqueValue(uniqueValue);
+                for(size_t x = 0U; x < _columnCount; x++)
+                {
+                    auto index = columnAnnotation._uniqueIndices.at(static_cast<int>(_sortMap[x]));
+                    data.append(index == uniqueIndex ? 1.0 : 0.0);
+                }
+
+                bars->setData(ticks, data, true);
+            }
+            else
+                bars->setData(ticks, empty, true);
+
+            if(lastAddedBars != nullptr)
+                bars->moveBelow(lastAddedBars);
+
+            lastAddedBars = bars;
         }
 
-        y--;
+        if(visible)
+        {
+            QString postfix;
+
+            if(_columnAnnotationSelectionModeEnabled)
+                postfix = selected ? QStringLiteral(" ☑") : QStringLiteral(" ☐");
+
+            double tickPosition = static_cast<double>(y) + 0.5;
+            columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name + postfix);
+
+            y--;
+        }
     }
 
-    colorMap->setGradient(_columnAnnotationColorGradient);
-    colorMap->setDataRange(QCPRange(0.0, 1.0));
-
     caYAxis->setTicker(columnAnnotationTicker);
+    caYAxis->setRange(0.0, numColumnAnnotations);
 
     caXAxis->setBasePen(QPen(Qt::transparent));
     caYAxis->setBasePen(QPen(Qt::transparent));
@@ -1522,41 +1559,10 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
     {
         auto columnAnnotaionMap = columnAnnotation.toMap();
         auto name = columnAnnotaionMap[QStringLiteral("name")].toString();
-        auto values = columnAnnotaionMap[QStringLiteral("values")].toStringList();
+        auto values = u::toQStringVector(columnAnnotaionMap[QStringLiteral("values")].toStringList());
 
         _visibleColumnAnnotationNames.emplace(name);
-        _columnAnnotations.push_back({name, values});
-    }
-
-    std::set<AnnotationIndex> uniqueValues;
-
-    for(const auto& columnAnnotation : _columnAnnotations)
-    {
-        for(const auto& value : columnAnnotation._values)
-        {
-            uniqueValues.emplace(value, false);
-            uniqueValues.emplace(value, true);
-        }
-    }
-
-    if(uniqueValues.size() >= 2)
-        _columnAnnotationColorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
-
-    int i = 0;
-    for(const auto& value : uniqueValues)
-    {
-        auto index = uniqueValues.size() == 1 ? 0.0 :
-            static_cast<double>(i++) / (uniqueValues.size() - 1);
-        _columnAnnotationColorIndexMap[value] = index;
-
-        const auto& stringValue = std::get<0>(value);
-        auto visible = std::get<1>(value);
-        auto color = u::colorForString(stringValue);
-
-        if(!visible)
-            color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
-
-        _columnAnnotationColorGradient.setColorStopAt(index, color);
+        _columnAnnotations.emplace_back(name, values);
     }
 }
 
@@ -1712,7 +1718,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 {
     std::vector<size_t> visibleRowIndices;
 
-    size_t index = _columnAnnotations.size() - 1;
+    size_t index = 0;
     for(const auto& columnAnnotation : _columnAnnotations)
     {
         if(_columnAnnotationSelectionModeEnabled ||
@@ -1721,7 +1727,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
             visibleRowIndices.push_back(index);
         }
 
-        index--;
+        index++;
     }
 
     const auto& columnAnnotation = _columnAnnotations.at(visibleRowIndices.at(y));
