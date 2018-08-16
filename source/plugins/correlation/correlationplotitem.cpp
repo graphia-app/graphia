@@ -1048,14 +1048,17 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     QCPBars* lastAddedBars = nullptr;
     size_t y = numColumnAnnotations - 1;
 
-    QVector<double> ticks; ticks.reserve(_columnCount);
-    QVector<double> empty; empty.reserve(_columnCount);
+    QVector<double> ticks; ticks.reserve(static_cast<int>(_columnCount));
+    QVector<double> empty; empty.reserve(static_cast<int>(_columnCount));
 
     for(size_t x = 0U; x < _columnCount; x++)
     {
         ticks.append(static_cast<double>(x));
         empty.append(0.0);
     }
+
+    QVector<double> data;
+    data.reserve(static_cast<int>(_columnCount));
 
     for(const auto& columnAnnotation : _columnAnnotations)
     {
@@ -1081,8 +1084,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
             if(visible)
             {
-                QVector<double> data;
-                data.reserve(_columnCount);
+                data.clear();
 
                 auto uniqueIndex = columnAnnotation.indexForUniqueValue(uniqueValue);
                 for(size_t x = 0U; x < _columnCount; x++)
