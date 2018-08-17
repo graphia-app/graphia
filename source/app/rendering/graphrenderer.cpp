@@ -895,6 +895,8 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
 
     if(_glyphMap->updateRequired())
     {
+        glyphMapLock.unlock();
+
         auto job = std::make_unique<SDFComputeJob>(&_sdfTexture, _glyphMap.get());
         job->executeWhenComplete([this, onCompleteFn]
         {
@@ -911,8 +913,6 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
         });
 
         _gpuComputeThread->enqueue(job);
-
-        glyphMapLock.unlock();
     }
     else
         onCompleteFn();
