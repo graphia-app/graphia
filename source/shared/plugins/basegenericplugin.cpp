@@ -108,6 +108,9 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 
 void BaseGenericPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
 {
+    if(_highlightedRows.isEmpty() && highlightedRows.isEmpty())
+        return;
+
     _highlightedRows = highlightedRows;
 
     NodeIdSet highlightedNodeIds;

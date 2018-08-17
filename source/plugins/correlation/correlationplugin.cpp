@@ -351,6 +351,9 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
 
 void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
 {
+    if(_highlightedRows.isEmpty() && highlightedRows.isEmpty())
+        return;
+
     _highlightedRows = highlightedRows;
 
     NodeIdSet highlightedNodeIds;

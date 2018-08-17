@@ -705,12 +705,18 @@ void GraphModel::initialiseUniqueAttributeValues()
 
 void GraphModel::clearHighlightedNodes()
 {
+    if(_->_highlightedNodeIds.empty())
+        return;
+
     _->_highlightedNodeIds.clear();
     updateVisuals();
 }
 
 void GraphModel::highlightNodes(const NodeIdSet& nodeIds)
 {
+    if(_->_highlightedNodeIds.empty() && nodeIds.empty())
+        return;
+
     _->_highlightedNodeIds = nodeIds;
     updateVisuals();
 }
