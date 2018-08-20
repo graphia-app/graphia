@@ -422,7 +422,7 @@ ListTabDialog
     function repopulateTableView()
     {
         while(dataRectView.columnCount > 0)
-            dataRectView.removeColumn(0);
+            dataRectView.removeColumn(dataRectView.columnCount - 1);
 
         dataRectView.model = null;
         dataRectView.model = preParser.model;
