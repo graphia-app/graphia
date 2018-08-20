@@ -61,21 +61,21 @@ ListTabDialog
         for(i = 0; i < y; ++i)
             runningHeight += dataRectView.__listView.contentItem.children[1].height;
         dataFrameAnimationX.to = Math.min(runningWidth,
-                                          dataRectView.flickableItem.contentWidth -
-                                          dataRectView.flickableItem.width);
+                                          tableView.flickableItem.contentWidth -
+                                          tableView.flickableItem.width);
         // Pre-2017 ECMA doesn't have Math.clamp...
         dataFrameAnimationX.to = Math.max(dataFrameAnimationX.to, 0);
 
         // Only animate if we need to
-        if(dataRectView.flickableItem.contentX !== dataFrameAnimationX.to)
+        if(tableView.flickableItem.contentX !== dataFrameAnimationX.to)
             dataFrameAnimationX.running = true;
 
         dataFrameAnimationY.to = Math.min(runningHeight,
-                                          dataRectView.flickableItem.contentHeight -
-                                          dataRectView.flickableItem.height);
+                                          tableView.flickableItem.contentHeight -
+                                          tableView.flickableItem.height);
         dataFrameAnimationY.to = Math.max(dataFrameAnimationY.to, 0);
 
-        if(dataRectView.flickableItem.contentY !== dataFrameAnimationY.to)
+        if(tableView.flickableItem.contentY !== dataFrameAnimationY.to)
             dataFrameAnimationY.running = true;
     }
 
@@ -163,8 +163,12 @@ ListTabDialog
             }
             onDataLoaded:
             {
-                repopulateTableView();
-                Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+                // Initialise the table if it hasn't already
+                if(dataRectView.columnCount == 0)
+                {
+                    repopulateTableView();
+                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+                }
             }
         }
 
@@ -227,9 +231,6 @@ ListTabDialog
 
             TableView
             {
-                // Hack to prevent TableView crawling when it adds a large number of columns
-                // Should be fixed with new tableview?
-                property int maxColumns: 200
                 id: dataRectView
                 headerVisible: false
                 Layout.fillHeight: true
@@ -345,7 +346,7 @@ ListTabDialog
                             anchors.fill: parent
                             onClicked:
                             {
-                                if(styleData.column === dataRectView.maxColumns)
+                                if(styleData.column === preParser.model.MAX_COLUMNS)
                                     return;
                                 tooltipNonNumerical.visible = false;
                                 nonNumericalTimer.stop();
@@ -378,11 +379,11 @@ ListTabDialog
 
                             text:
                             {
-                                if(styleData.column >= dataRectView.maxColumns)
+                                if(styleData.column >= preParser.model.MAX_COLUMNS)
                                 {
                                     if(styleData.row === 0)
                                     {
-                                        return (preParser.model.columnCount() - dataRectView.maxColumns) +
+                                        return (preParser.model.columnCount() - preParser.model.MAX_COLUMNS) +
                                                 qsTr(" more columns…");
                                     }
                                     else
@@ -431,8 +432,10 @@ ListTabDialog
             dataRectView.addColumn(columnComponent.createObject(dataRectView,
                                                                 {"role": i}));
 
+            // FIX ME - TY QT TABLEVIEW 1.
+            // https://bugreports.qt.io/browse/QTBUG-70069
             // Cap the column count since a huge number of columns causes a large slowdown
-            if(i == dataRectView.maxColumns - 1)
+            if(i == preParser.model.MAX_COLUMNS - 1)
             {
                 // Add a blank
                 dataRectView.addColumn(columnComponent.createObject(dataRectView));

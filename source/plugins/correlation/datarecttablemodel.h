@@ -9,8 +9,10 @@
 class DataRectTableModel : public QAbstractTableModel
 {
     Q_OBJECT
+    Q_PROPERTY(int MAX_COLUMNS MEMBER MAX_COLUMNS CONSTANT)
 private:
-    TabularData _data;
+    int MAX_COLUMNS = 200;
+    TabularData* _data = nullptr;
     bool _transposed = false;
 public:
     int rowCount(const QModelIndex& parent) const override;

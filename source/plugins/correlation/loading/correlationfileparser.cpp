@@ -219,7 +219,7 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        _dataRect = findLargestDataRect(*_model.tabularData(), column, row);
+        _dataRect = findLargestDataRect(_data, column, row);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }

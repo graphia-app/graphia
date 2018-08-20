@@ -12,19 +12,24 @@ void DataRectTableModel::setTransposed(bool transposed)
     {
         beginResetModel();
         _transposed = transposed;
-        _data.setTransposed(_transposed);
+        if(_data != nullptr)
+            _data->setTransposed(_transposed);
         endResetModel();
     }
 }
 
 int DataRectTableModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(_data.numRows());
+    if(_data != nullptr)
+        return static_cast<int>(_data->numRows());
+    return 0;
 }
 
 int DataRectTableModel::columnCount(const QModelIndex&) const
 {
-    return static_cast<int>(_data.numColumns());
+    if(_data != nullptr)
+        return static_cast<int>(_data->numColumns());
+    return 0;
 }
 
 QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
@@ -34,7 +39,9 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
     size_t row = index.row();
     size_t column = (role - Qt::UserRole);
 
-    auto& value = _data.valueAt(column, row);
+    if(row >= _data->numRows() || column >= _data->numColumns())
+        return  {};
+    auto& value = _data->valueAt(column, row);
 
     return QString::fromStdString(value);
 }
@@ -42,7 +49,9 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 QHash<int, QByteArray> DataRectTableModel::roleNames() const
 {
     QHash<int, QByteArray> _roleNames;
-    for(int i = 0; i < static_cast<int>(_data.numColumns()); ++i)
+    // FIX-ME: Have to hard limit rolenames or else tableview will crash.
+    // https://bugreports.qt.io/browse/QTBUG-70069
+    for(int i = 0; i < std::min(MAX_COLUMNS, static_cast<int>(_data->numColumns())); ++i)
         _roleNames.insert(Qt::UserRole + i, QByteArray::number(i));
 
     return _roleNames;
@@ -51,12 +60,7 @@ QHash<int, QByteArray> DataRectTableModel::roleNames() const
 void DataRectTableModel::setTabularData(TabularData& data)
 {
     beginResetModel();
-    _data = std::move(data);
-    _data.setTransposed(_transposed);
+    _data = &data;
+    _data->setTransposed(true);
     endResetModel();
-}
-
-TabularData* DataRectTableModel::tabularData()
-{
-    return &_data;
 }
