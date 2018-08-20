@@ -135,9 +135,9 @@ ListTabDialog
         Connections
         {
             target: root
-            onAnimatingChanged:
+            onListTabShown:
             {
-                if(!root.animating && root.currentItem === dataRectPage)
+                if(listTab === dataRectPage)
                 {
                     if(root.fileUrl !== "" && root.fileType !== "" && preParser.model.rowCount() === 0)
                         preParser.parse();

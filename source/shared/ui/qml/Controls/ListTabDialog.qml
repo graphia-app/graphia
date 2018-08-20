@@ -234,7 +234,16 @@ BaseParameterDialog
         properties: "x"
         to: currentIndex * -(contentContainer.width)
         easing.type: Easing.OutQuad
+
+        onStarted: { root.animationStarted(); }
+        onStopped: { root.animationStopped(); }
     }
+
+    signal animationStarted();
+    signal animationStopped();
+
+    onAnimationStopped: { root.listTabShown(currentItem); }
+    signal listTabShown(var listTab);
 
     Component.onCompleted:
     {
