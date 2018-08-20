@@ -217,8 +217,8 @@ private:
 
     struct ColumnAnnotation
     {
-        ColumnAnnotation(QString name, const std::vector<QString>& values) :
-            _name(std::move(name)), _values(values)
+        ColumnAnnotation(QString name, std::vector<QString> values) :
+            _name(std::move(name)), _values(std::move(values))
         {
             for(const auto& value : _values)
                 _uniqueValues.emplace(value);
