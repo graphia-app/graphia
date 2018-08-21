@@ -119,12 +119,13 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     tabularData->setTransposed(_plugin->transpose());
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
-    setProgress(-1);
-
     // May be set by parameters
     if(_dataRect.isEmpty())
+    {
+        graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
+        setProgress(-1);
         _dataRect = findLargestDataRect(*tabularData);
+    }
 
     if(_dataRect.isEmpty() || cancelled())
         return false;
