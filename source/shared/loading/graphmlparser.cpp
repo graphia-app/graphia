@@ -8,9 +8,9 @@
 #include <QDebug>
 #include <QUrl>
 
-GraphMLHandler::GraphMLHandler(IGraphModel& graphModel, const ProgressFn &progress,
+GraphMLHandler::GraphMLHandler(GraphMLParser& parser, IGraphModel& graphModel,
                                UserNodeData* userNodeData, int lineCount)
-                               : _graphModel(&graphModel), _progress(&progress),
+                               : _parser(&parser), _graphModel(&graphModel),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
 {}
 
@@ -209,7 +209,7 @@ bool GraphMLHandler::startElement(const QString&, const QString& localName, cons
 
 bool GraphMLHandler::endElement(const QString &, const QString &localName, const QString &)
 {
-    (*_progress)(_locator->lineNumber() * 100 / _lineCount );
+    _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
 
     if(localName == QLatin1String("node"))
         _activeNodes.pop();
@@ -278,8 +278,12 @@ GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GraphMLParser::parse(const QUrl &url, IGraphModel& graphModel, const ProgressFn &progress)
+bool GraphMLParser::parse(const QUrl &url, IGraphModel* graphModel)
 {
+    Q_ASSERT(graphModel != nullptr);
+    if(graphModel == nullptr)
+        return false;
+
     QFile file(url.toLocalFile());
     int lineCount = 0;
     if(file.open(QFile::ReadOnly))
@@ -297,9 +301,9 @@ bool GraphMLParser::parse(const QUrl &url, IGraphModel& graphModel, const Progre
         return false;
     }
 
-    progress(-1);
+    setProgress(-1);
 
-    GraphMLHandler handler(graphModel, progress, _userNodeData, lineCount);
+    GraphMLHandler handler(*this, *graphModel, _userNodeData, lineCount);
     auto *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);

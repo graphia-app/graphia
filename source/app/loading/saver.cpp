@@ -21,7 +21,7 @@
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
 
-static bool compress(const QByteArray& byteArray, const QString& filePath, const ProgressFn& progressFn)
+static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
 {
     QFile file(filePath);
 
@@ -56,7 +56,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
         auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
         bytePosition += numBytes;
-        progressFn((bytePosition * 100) / totalBytes);
+        progressable.setProgress((bytePosition * 100) / totalBytes);
 
         zstream.avail_in = numBytes;
         zstream.next_in = static_cast<z_const Bytef*>(inBuffer.data());
@@ -85,7 +85,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     return true;
 }
 
-static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
+static json graphAsJson(const IGraph& graph, Progressable& progressable)
 {
     json jsonObject;
 
@@ -101,10 +101,10 @@ static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
         node["id"] = static_cast<int>(nodeId);
 
         nodes.emplace_back(node);
-        progressFn((i++ * 100) / graph.numNodes());
+        progressable.setProgress((i++ * 100) / graph.numNodes());
     }
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     jsonObject["nodes"] = nodes;
 
@@ -120,10 +120,10 @@ static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
         jsonEdge["target"] = static_cast<int>(edge.targetId());
 
         edges.emplace_back(jsonEdge);
-        progressFn((i++ * 100) / graph.numEdges());
+        progressable.setProgress((i++ * 100) / graph.numEdges());
     }
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     jsonObject["edges"] = edges;
 
@@ -131,7 +131,7 @@ static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
 }
 
 static json nodeNamesAsJson(IGraphModel& graphModel,
-                            const ProgressFn& progressFn)
+                            Progressable& progressable)
 {
     graphModel.mutableGraph().setPhase(QObject::tr("Names"));
     json names;
@@ -141,16 +141,16 @@ static json nodeNamesAsJson(IGraphModel& graphModel,
     for(NodeId nodeId : nodeIds)
     {
         names.emplace_back(graphModel.nodeName(nodeId));
-        progressFn(static_cast<int>((i++ * 100) / nodeIds.size()));
+        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
     }
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     return names;
 }
 
 static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
-                                const ProgressFn& progressFn)
+                                Progressable& progressable)
 {
     graph.setPhase(QObject::tr("Positions"));
     json positions;
@@ -163,10 +163,10 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
         json vector({v.x(), v.y(), v.z()});
 
         positions.emplace_back(vector);
-        progressFn((i++ * 100) / numNodePositions);
+        progressable.setProgress((i++ * 100) / numNodePositions);
     }
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     return positions;
 }
@@ -205,7 +205,7 @@ static json layoutSettingsAsJson(const Document& document)
     return jsonObject;
 }
 
-bool Saver::encode(const ProgressFn& progressFn)
+bool Saver::encode(Progressable& progressable)
 {
     json jsonArray;
 
@@ -224,8 +224,8 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     json content;
 
-    content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
-    content["nodeNames"] = nodeNamesAsJson(*graphModel, progressFn);
+    content["graph"] = graphAsJson(graphModel->mutableGraph(), progressable);
+    content["nodeNames"] = nodeNamesAsJson(*graphModel, progressable);
 
     json layout;
 
@@ -233,7 +233,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     layout["settings"] = layoutSettingsAsJson(*_document);
     layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
                                               graphModel->nodePositions(),
-                                              progressFn);
+                                              progressable);
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
@@ -251,9 +251,9 @@ bool Saver::encode(const ProgressFn& progressFn)
         content["ui"] = uiDataJson;
 
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
-    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressFn);
+    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressable);
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     auto pluginDataJson = json::parse(pluginData.begin(), pluginData.end(), nullptr, false);
 
@@ -274,7 +274,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     jsonArray.emplace_back(content);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
-    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), progressFn);
+    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), progressable);
 }
 
 #include "thirdparty/zlib/zlib_enable_warnings.h"

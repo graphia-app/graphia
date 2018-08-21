@@ -62,6 +62,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/passkey.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h

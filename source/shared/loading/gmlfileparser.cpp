@@ -115,9 +115,8 @@ AttributeVector processAttribute(const KeyValue& attribute)
     return boost::apply_visitor(Visitor(attribute._key), attribute._value);
 }
 
-bool build(const List& gml, IGraphModel& graphModel,
-    UserNodeData& userNodeData, UserEdgeData& userEdgeData,
-    const ProgressFn& progressFn, const Cancellable& cancellable)
+bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
+    UserNodeData& userNodeData, UserEdgeData& userEdgeData)
 {
     auto findIntValue = [](const List& list, const QString& key) -> const int*
     {
@@ -223,7 +222,7 @@ bool build(const List& gml, IGraphModel& graphModel,
             uint64_t i = 0;
             for(const auto& element : *graph)
             {
-                progressFn(static_cast<int>((i++ * 100) / graph->size()));
+                parser.setProgress(static_cast<int>((i++ * 100) / graph->size()));
 
                 const auto& type = element.get()._key;
                 const auto* value = boost::get<List>(&element.get()._value);
@@ -238,7 +237,7 @@ bool build(const List& gml, IGraphModel& graphModel,
                 else if(type == QStringLiteral("edge"))
                     success = processEdge(*value);
 
-                if(!success || cancellable.cancelled())
+                if(!success || parser.cancelled())
                     return false;
             }
         }
@@ -256,8 +255,12 @@ GmlFileParser::GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeD
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
+bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
+    Q_ASSERT(graphModel != nullptr);
+    if(graphModel == nullptr)
+        return false;
+
     QString localFile = url.toLocalFile();
     QFileInfo fileInfo(localFile);
 
@@ -266,7 +269,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
 
     auto fileSize = fileInfo.size();
 
-    progressFn(-1);
+    setProgress(-1);
 
     std::ifstream stream(localFile.toStdString());
     stream.unsetf(std::ios::skipws);
@@ -277,15 +280,15 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
     GmlIterator end;
 
     it.onPositionChanged(
-    [&fileSize, &progressFn](size_t position)
+    [this, &fileSize](size_t position)
     {
-        progressFn(static_cast<int>((position * 100) / fileSize));
+        setProgress(static_cast<int>((position * 100) / fileSize));
     });
 
     auto cancelledFn = [this] { return cancelled(); };
     it.setCancelledFn(cancelledFn);
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
+    graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
 
     SpiritGmlParser::List gml;
     bool success = false;
@@ -300,10 +303,9 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
     if(cancelled() || !success || it != end)
         return false;
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Building Graph"));
-    progressFn(-1);
+    graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
+    setProgress(-1);
 
-    return SpiritGmlParser::build(gml, graphModel,
-        *_userNodeData, *_userEdgeData,
-        progressFn, *this);
+    return SpiritGmlParser::build(*this, gml, *graphModel,
+        *_userNodeData, *_userEdgeData);
 }

@@ -86,8 +86,8 @@ public:
     QStringList defaultVisualisations() const override { return {}; }
 
     // Save and restore no state, by default
-    QByteArray save(IMutableGraph&, const ProgressFn&) const override { return {}; }
-    bool load(const QByteArray&, int, IMutableGraph&, Cancellable&, const ProgressFn&) override { return true; }
+    QByteArray save(IMutableGraph&, Progressable&) const override { return {}; }
+    bool load(const QByteArray&, int, IMutableGraph&, IParser&) override { return true; }
 
     void setSaveRequired() const { emit saveRequired(); }
 

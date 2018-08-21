@@ -45,47 +45,46 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     return nullptr;
 }
 
-QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
+QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
 {
     json jsonObject;
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
-    jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
-    jsonObject["userEdgeData"] = _userEdgeData.save(graph, progressFn);
+    jsonObject["userNodeData"] = _userNodeData.save(graph, progressable);
+    jsonObject["userEdgeData"] = _userEdgeData.save(graph, progressable);
 
     return QByteArray::fromStdString(jsonObject.dump());
 }
 
 bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
-                                     IMutableGraph& graph, Cancellable& cancellable,
-                                     const ProgressFn& progressFn)
+                                     IMutableGraph& graph, IParser& parser)
 {
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    json jsonObject = parseJsonFrom(data, progressFn, [&cancellable] { return cancellable.cancelled(); });
+    json jsonObject = parseJsonFrom(data, parser);
 
-    if(cancellable.cancelled())
+    if(parser.cancelled())
         return false;
 
     if(jsonObject.is_null() || !jsonObject.is_object())
         return false;
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     if(!u::contains(jsonObject, "userNodeData") || !jsonObject["userNodeData"].is_object())
         return false;
 
     graph.setPhase(QObject::tr("Node Data"));
-    if(!_userNodeData.load(jsonObject["userNodeData"], progressFn))
+    if(!_userNodeData.load(jsonObject["userNodeData"], parser))
         return false;
 
     if(!u::contains(jsonObject, "userEdgeData") || !jsonObject["userEdgeData"].is_object())
         return false;
 
     graph.setPhase(QObject::tr("Edge Data"));
-    if(!_userEdgeData.load(jsonObject["userEdgeData"], progressFn))
+    if(!_userEdgeData.load(jsonObject["userEdgeData"], parser))
         return false; // NOLINT
 
     return true;

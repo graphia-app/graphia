@@ -30,10 +30,12 @@ PairwiseTxtFileParser::PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdg
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
+bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
+    Q_ASSERT(graphModel != nullptr);
+
     std::ifstream file(url.toLocalFile().toStdString());
-    if(!file)
+    if(!file || graphModel == nullptr)
         return false;
 
     auto fileSize = file.tellg();
@@ -46,7 +48,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     std::string token;
     std::vector<std::string> tokens;
 
-    progressFn(-1);
+    setProgress(-1);
 
     file.seekg(0, std::ios::beg);
     while(u::getline(file, line))
@@ -178,14 +180,14 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
             if(!u::contains(nodeIdMap, firstToken))
             {
-                firstNodeId = graphModel.mutableGraph().addNode();
+                firstNodeId = graphModel->mutableGraph().addNode();
                 nodeIdMap.emplace(firstToken, firstNodeId);
 
                 if(_userNodeData != nullptr)
                 {
                     auto nodeName = QString::fromStdString(firstToken);
                     _userNodeData->setValueBy(firstNodeId, QObject::tr("Node Name"), nodeName);
-                    graphModel.setNodeName(firstNodeId, nodeName);
+                    graphModel->setNodeName(firstNodeId, nodeName);
                 }
             }
             else
@@ -193,20 +195,20 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
             if(!u::contains(nodeIdMap, secondToken))
             {
-                secondNodeId = graphModel.mutableGraph().addNode();
+                secondNodeId = graphModel->mutableGraph().addNode();
                 nodeIdMap.emplace(secondToken, secondNodeId);
 
                 if(_userNodeData != nullptr)
                 {
                     auto nodeName = QString::fromStdString(secondToken);
                     _userNodeData->setValueBy(secondNodeId, QObject::tr("Node Name"), nodeName);
-                    graphModel.setNodeName(secondNodeId, nodeName);
+                    graphModel->setNodeName(secondNodeId, nodeName);
                 }
             }
             else
                 secondNodeId = nodeIdMap[secondToken];
 
-            auto edgeId = graphModel.mutableGraph().addEdge(firstNodeId, secondNodeId);
+            auto edgeId = graphModel->mutableGraph().addEdge(firstNodeId, secondNodeId);
 
             if(tokens.size() >= 3)
             {
@@ -227,7 +229,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
         auto filePosition = file.tellg();
         if(filePosition >= 0)
-            progressFn(static_cast<int>(filePosition * 100 / fileSize));
+            setProgress(static_cast<int>(filePosition * 100 / fileSize));
     }
 
     return true;

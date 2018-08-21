@@ -48,7 +48,7 @@ private:
     const IParser* _parent = nullptr;
 
     template<typename TokenFn>
-    bool tokenise(const QUrl& url, const ProgressFn& progressFn, TokenFn tokenFn)
+    bool tokenise(const QUrl& url, TokenFn tokenFn)
     {
         std::ifstream file(url.toLocalFile().toStdString());
         if(!file)
@@ -63,7 +63,7 @@ private:
         size_t currentColumn = 0;
         size_t currentRow = 0;
 
-        progressFn(-1);
+        setProgress(-1);
 
         file.seekg(0, std::ios::beg);
         while(u::getline(file, line))
@@ -120,7 +120,7 @@ private:
 
             auto filePosition = file.tellg();
             if(filePosition >= 0)
-                progressFn(static_cast<int>(filePosition * 100 / fileSize));
+                setProgress(static_cast<int>(filePosition * 100 / fileSize));
         }
 
         return true;
@@ -129,41 +129,24 @@ private:
 public:
     explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) :
         _parent(parent)
-    {}
-
-    bool preParse(const QUrl& url)
     {
-        size_t columns = 0;
-        size_t rows = 0;
-
-        // First pass to determine the size of the table
-        bool success = tokenise(url, [](int){},
-        [&columns, &rows](size_t column, size_t row, auto)
+        setProgressFn(
+        [parent](int percent)
         {
-            columns = std::max(columns, column + 1);
-            rows = std::max(rows, row + 1);
-        });
-
-        if(!success)
-            return false;
-
-        _tabularData.initialise(columns, rows);
-
-        return tokenise(url, [](int){},
-        [this](size_t column, size_t row, auto&& token)
-        {
-            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
+            parent->setProgress(percent);
         });
     }
 
-    bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override
+    bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
     {
         size_t columns = 0;
         size_t rows = 0;
 
         // First pass to determine the size of the table
-        graphModel.mutableGraph().setPhase(QObject::tr("Finding size"));
-        bool success = tokenise(url, progressFn,
+        if(graphModel != nullptr)
+            graphModel->mutableGraph().setPhase(QObject::tr("Finding size"));
+
+        bool success = tokenise(url,
         [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
@@ -175,8 +158,10 @@ public:
 
         _tabularData.initialise(columns, rows);
 
-        graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
-        return tokenise(url, progressFn,
+        if(graphModel != nullptr)
+            graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+
+        return tokenise(url,
         [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));

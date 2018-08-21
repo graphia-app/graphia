@@ -8,9 +8,10 @@
 #include <atomic>
 #include <cassert>
 
+#include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 
-class ICommand : public Cancellable
+class ICommand : public Progressable, public Cancellable
 {
 public:
     ~ICommand() override = default;
@@ -23,7 +24,12 @@ public:
     virtual bool execute() = 0;
     virtual void undo() { Q_ASSERT(!"undo() not implemented for this ICommand"); }
 
-    virtual void setProgress(int progress) { _progress = progress; }
+    virtual void setProgress(int progress)
+    {
+        Progressable::setProgress(progress);
+        _progress = progress;
+    }
+
     virtual int progress() const { return _progress; }
 
     virtual void initialise()

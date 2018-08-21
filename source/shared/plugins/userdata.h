@@ -4,7 +4,7 @@
 #include "userdatavector.h"
 
 #include "shared/utils/pair_iterator.h"
-#include "shared/loading/progressfn.h"
+#include "shared/utils/progressable.h"
 
 #include <QString>
 #include <QVariant>
@@ -39,8 +39,8 @@ public:
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 
-    json save(const ProgressFn& progressFn) const;
-    bool load(const json& jsonObject, const ProgressFn& progressFn);
+    json save(Progressable& progressable) const;
+    bool load(const json& jsonObject, Progressable& progressable);
 };
 
 #endif // USERDATA_H

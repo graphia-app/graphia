@@ -19,7 +19,7 @@ private:
 
 public:
     explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName, QRect dataRect);
-    bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override;
+    bool parse(const QUrl& url, IGraphModel* graphModel) override;
 };
 
 class CorrelationPreParser : public QObject
@@ -60,6 +60,7 @@ signals:
     void fileTypeChanged();
     void dataLoaded();
     void transposeChanged();
+
 public slots:
     void onDataParsed();
 };

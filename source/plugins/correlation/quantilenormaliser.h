@@ -7,7 +7,7 @@ class QuantileNormaliser : public Normaliser
 {
 public:
     bool process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                 Cancellable& cancellable, const ProgressFn& progress) const override;
+                 IParser& parser) const override;
 };
 
 #endif // QUANTILENORMALISER_H

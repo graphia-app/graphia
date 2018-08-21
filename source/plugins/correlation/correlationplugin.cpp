@@ -48,8 +48,8 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
                                "the linear relationship between two variables."));
 }
 
-bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                                             Cancellable& cancellable, const ProgressFn& progressFn)
+bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
+    size_t firstDataColumn, size_t firstDataRow, IParser& parser)
 {
     if(firstDataColumn == 0 || firstDataRow == 0)
     {
@@ -57,7 +57,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
         return false;
     }
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
@@ -65,12 +65,12 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            if(cancellable.cancelled())
+            if(parser.cancelled())
                 return false;
 
             uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
             uint64_t dataPoint = columnIndex + rowOffset;
-            progressFn(static_cast<int>((dataPoint * 100) / numDataPoints));
+            parser.setProgress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
             QString value = tabularData.valueAsQString(columnIndex, rowIndex);
 
@@ -215,24 +215,24 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
         }
     }
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     return true;
 }
 
-bool CorrelationPluginInstance::normalise(Cancellable& cancellable, const ProgressFn& progressFn)
+bool CorrelationPluginInstance::normalise(IParser& parser)
 {
     switch(_normalisation)
     {
     case NormaliseType::MinMax:
     {
         MinMaxNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, cancellable, progressFn);
+        return normaliser.process(_data, _numColumns, _numRows, parser);
     }
     case NormaliseType::Quantile:
     {
         QuantileNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, cancellable, progressFn);
+        return normaliser.process(_data, _numColumns, _numRows, parser);
     }
     default:
         break;
@@ -296,10 +296,10 @@ void CorrelationPluginInstance::createAttributes()
 
 std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
         std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
-        double minimumThreshold, Cancellable* cancellable, const ProgressFn* progressFn)
+        double minimumThreshold, IParser* parser)
 {
-    if(progressFn != nullptr)
-        (*progressFn)(-1);
+    if(parser != nullptr)
+        parser->setProgress(-1);
 
     uint64_t totalCost = 0;
     for(auto& row : _dataRows)
@@ -313,7 +313,7 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
         const auto& rowA = *rowAIt;
         std::vector<CorrelationEdge> edges;
 
-        if(cancellable != nullptr && cancellable->cancelled())
+        if(parser != nullptr && parser->cancelled())
             return edges;
 
         for(const auto& rowB : make_iterator_range(rowAIt + 1, end))
@@ -330,16 +330,16 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
 
         cost += rowA.computeCostHint();
 
-        if(progressFn != nullptr)
-            (*progressFn)((cost * 100) / totalCost);
+        if(parser != nullptr)
+            parser->setProgress((cost * 100) / totalCost);
 
         return edges;
     });
 
-    if(progressFn != nullptr)
+    if(parser != nullptr)
     {
         // Returning the results might take time
-        (*progressFn)(-1);
+        parser->setProgress(-1);
     }
 
     std::vector<CorrelationEdge> edges;
@@ -369,7 +369,7 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
 }
 
 std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
-    const QString& fileName, double minimumThreshold, Cancellable& cancellable, const ProgressFn& progressFn)
+    const QString& fileName, double minimumThreshold, IParser& parser)
 {
     // Perform a preliminary correlation on a small random sample of the input data, so we can
     // tell if the user is trying to create an absurdly large graph and then give them the
@@ -398,25 +398,24 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
 
         if(warningResult == MessageBoxButton::No)
         {
-            cancellable.cancel();
+            parser.cancel();
             return {};
         }
     }
 
-    return pearsonCorrelation(_dataRows.cbegin(), _dataRows.cend(), minimumThreshold, &cancellable, &progressFn);
+    return pearsonCorrelation(_dataRows.cbegin(), _dataRows.cend(), minimumThreshold, &parser);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationPluginInstance::CorrelationEdge>& edges,
-                                            Cancellable& cancellable,
-                                            const ProgressFn& progressFn)
+                                            IParser& parser)
 {
-    progressFn(-1);
+    parser.setProgress(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
-        if(cancellable.cancelled())
+        if(parser.cancelled())
             return false;
 
-        progressFn(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
+        parser.setProgress(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
@@ -642,18 +641,18 @@ QStringList CorrelationPluginInstance::defaultVisualisations() const
     return {};
 }
 
-QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
+QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
 {
     json jsonObject;
 
     jsonObject["numColumns"] = static_cast<int>(_numColumns);
     jsonObject["numRows"] = static_cast<int>(_numRows);
-    jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
-    jsonObject["userColumnData"] =_userColumnData.save(progressFn);
-    jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, progressFn);
+    jsonObject["userNodeData"] = _userNodeData.save(graph, progressable);
+    jsonObject["userColumnData"] =_userColumnData.save(progressable);
+    jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
     graph.setPhase(QObject::tr("Data"));
-    jsonObject["data"] = jsonArrayFrom(_data, progressFn);
+    jsonObject["data"] = jsonArrayFrom(_data, &progressable);
 
     graph.setPhase(QObject::tr("Pearson Values"));
     jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
@@ -669,14 +668,14 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressF
 }
 
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-                                     Cancellable& cancellable, const ProgressFn& progressFn)
+                                     IParser& parser)
 {
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    json jsonObject = parseJsonFrom(data, progressFn, [&cancellable] { return cancellable.cancelled(); });
+    json jsonObject = parseJsonFrom(data, parser);
 
-    if(cancellable.cancelled())
+    if(parser.cancelled())
         return false;
 
     if(jsonObject.is_null() || !jsonObject.is_object())
@@ -691,13 +690,13 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(!u::contains(jsonObject, "userNodeData") || !u::contains(jsonObject, "userColumnData"))
         return false;
 
-    if(!_userNodeData.load(jsonObject["userNodeData"], progressFn))
+    if(!_userNodeData.load(jsonObject["userNodeData"], parser))
         return false;
 
-    if(!_userColumnData.load(jsonObject["userColumnData"], progressFn))
+    if(!_userColumnData.load(jsonObject["userColumnData"], parser))
         return false;
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     if(!u::contains(jsonObject, "dataColumnNames"))
         return false;
@@ -715,10 +714,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     for(const auto& value : jsonData)
     {
         _data.emplace_back(value);
-        progressFn(static_cast<int>((i++ * 100) / jsonData.size()));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonData.size()));
     }
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     for(size_t row = 0; row < _numRows; row++)
     {
@@ -732,10 +731,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         auto nodeId = _userNodeData.elementIdForRowIndex(row);
         _dataRows.emplace_back(begin, end, nodeId, computeCost);
 
-        progressFn(static_cast<int>((row * 100) / _numRows));
+        parser.setProgress(static_cast<int>((row * 100) / _numRows));
     }
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     createAttributes();
 
@@ -750,10 +749,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         if(graph.containsEdgeId(i))
             _pearsonValues->set(i, pearsonValue);
 
-        progressFn(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
     }
 
-    progressFn(-1);
+    parser.setProgress(-1);
 
     if(!u::containsAllOf(jsonObject, {"minimumCorrelationValue", "transpose", "scaling",
         "normalisation", "missingDataType", "missingDataReplacementValue"}))

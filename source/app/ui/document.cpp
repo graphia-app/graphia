@@ -605,6 +605,8 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData, const QBy
     saver.setPluginInstance(_pluginInstance.get());
     saver.setPluginUiData(pluginUiData);
 
+
+
     _commandManager.executeOnce(
         {
             QString(tr("Save %1")).arg(fileUrl.fileName()),
@@ -613,14 +615,8 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData, const QBy
         },
     [this, fileUrl, saver = std::move(saver)](Command& command) mutable
     {
-        auto success = saver.encode(
-            [&command](int progress)
-            {
-                command.setProgress(progress);
-            });
-
+        auto success = saver.encode(command);
         emit saveComplete(success, fileUrl);
-
         return success;
     });
 

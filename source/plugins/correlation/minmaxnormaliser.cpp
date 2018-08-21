@@ -6,7 +6,7 @@
 #include <algorithm>
 
 bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                               Cancellable& cancellable, const ProgressFn& progress) const
+                               IParser& parser) const
 {
     std::vector<double> minColumn;
     std::vector<double> maxColumn;
@@ -18,7 +18,7 @@ bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, siz
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancellable.cancelled())
+        if(parser.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)
@@ -28,13 +28,13 @@ bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, siz
             minColumn[column] = std::min(minColumn[column], data.at(index));
             maxColumn[column] = std::max(maxColumn[column], data.at(index));
 
-            progress(static_cast<int>((i++ * 50) / data.size()));
+            parser.setProgress(static_cast<int>((i++ * 50) / data.size()));
         }
     }
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancellable.cancelled())
+        if(parser.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)
@@ -48,11 +48,11 @@ bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, siz
             else
                 value = 0.0;
 
-            progress(static_cast<int>((i++ * 50) / data.size()));
+            parser.setProgress(static_cast<int>((i++ * 50) / data.size()));
         }
     }
 
-    progress(-1);
+    parser.setProgress(-1);
 
     return true;
 }

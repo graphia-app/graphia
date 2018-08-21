@@ -1,7 +1,7 @@
 #ifndef SAVER_H
 #define SAVER_H
 
-#include "shared/loading/progressfn.h"
+#include "shared/utils/progressable.h"
 
 #include <QUrl>
 #include <QStringList>
@@ -33,7 +33,7 @@ public:
     void setUiData(const QByteArray& uiData) { _uiData = uiData; }
     void setPluginUiData(const QByteArray& pluginUiData) { _pluginUiData = pluginUiData; }
 
-    bool encode(const ProgressFn& progressFn);
+    bool encode(Progressable& progressable);
 };
 
 #endif // SAVER_H

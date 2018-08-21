@@ -29,7 +29,7 @@
 
 using json = nlohmann::json;
 
-#include "shared/loading/progressfn.h"
+#include "shared/loading/iparser.h"
 #include "shared/loading/progress_iterator.h"
 
 #include <QString>
@@ -46,7 +46,7 @@ inline void from_json(const json& j, QString& s)
 }
 
 template<typename C>
-json jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
+json jsonArrayFrom(const C& container, Progressable* progressable = nullptr)
 {
     json array;
 
@@ -54,16 +54,18 @@ json jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
     for(const auto& value : container)
     {
         array.emplace_back(value);
-        progressFn(static_cast<int>((i++) * 100 / container.size()));
+
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((i++) * 100 / container.size()));
     }
 
-    progressFn(-1);
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
 
     return array;
 }
 
-template<typename ProgressFn, typename CancelledFn>
-json parseJsonFrom(const QByteArray& byteArray, const ProgressFn& progressFn, const CancelledFn& cancelledFn)
+inline json parseJsonFrom(const QByteArray& byteArray, IParser& parser)
 {
     json result;
 
@@ -72,12 +74,12 @@ json parseJsonFrom(const QByteArray& byteArray, const ProgressFn& progressFn, co
     JSONByteArrayIterator end(byteArray.end());
 
     it.onPositionChanged(
-    [&byteArray, &progressFn](size_t position)
+    [&byteArray, &parser](size_t position)
     {
-        progressFn(static_cast<int>((position * 100) / byteArray.size()));
+        parser.setProgress(static_cast<int>((position * 100) / byteArray.size()));
     });
 
-    it.setCancelledFn(cancelledFn);
+    it.setCancelledFn([&parser] { return parser.cancelled(); });
 
     try
     {

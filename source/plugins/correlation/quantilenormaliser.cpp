@@ -8,7 +8,7 @@
 #include <QtGlobal>
 
 bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                                 Cancellable& cancellable, const ProgressFn& progress) const
+                                 IParser& parser) const
 {
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
     std::vector<size_t> ranking(data.size());
@@ -17,7 +17,7 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
 
     for(size_t column = 0; column < numColumns; column++)
     {
-        if(cancellable.cancelled())
+        if(parser.cancelled())
             return false;
 
         std::vector<double> columnValues;
@@ -49,14 +49,14 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
                 i++;
             }
 
-            progress(static_cast<int>((j++ * 100) / data.size()));
+            parser.setProgress(static_cast<int>((j++ * 100) / data.size()));
         }
 
         // Copy Result to sortedColumns
         sortedColumnValues[column] = sortedValues;
     }
 
-    progress(-1);
+    parser.setProgress(-1);
 
     std::vector<double> rowMeans(numRows);
 
@@ -72,7 +72,7 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancellable.cancelled())
+        if(parser.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)

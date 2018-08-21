@@ -81,7 +81,7 @@ QVariant UserData::value(size_t index, const QString& name) const
     return {};
 }
 
-json UserData::save(const ProgressFn& progressFn) const
+json UserData::save(Progressable& progressable) const
 {
     json jsonObject;
     int i = 0;
@@ -95,17 +95,17 @@ json UserData::save(const ProgressFn& progressFn) const
         const auto& name = userDataVector.first.toStdString();
         vector.emplace(name, userDataVector.second.save());
         vectors.emplace_back(vector);
-        progressFn((i++ * 100) / static_cast<int>(_userDataVectors.size()));
+        progressable.setProgress((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
 
     jsonObject["vectors"] = vectors;
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     return jsonObject;
 }
 
-bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
+bool UserData::load(const json& jsonObject, Progressable& progressable)
 {
     uint64_t i = 0;
 
@@ -133,10 +133,10 @@ bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
         _vectorNames.emplace_back(name);
         _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
 
-        progressFn(static_cast<int>((i++ * 100) / vectorsObject.size()));
+        progressable.setProgress(static_cast<int>((i++ * 100) / vectorsObject.size()));
     }
 
-    progressFn(-1);
+    progressable.setProgress(-1);
 
     for(const auto& userDataVector : _userDataVectors)
         _numValues = std::max(_numValues, userDataVector.second.numValues());

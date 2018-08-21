@@ -93,7 +93,7 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
     return dataRect;
 }
 
-bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
+bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     CsvFileParser csvFileParser(this);
     TsvFileParser tsvFileParser(this);
@@ -101,14 +101,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     TabularData* tabularData = nullptr;
     if(_urlTypeName == QLatin1String("CorrelationCSV"))
     {
-        if(!csvFileParser.parse(url, graphModel, progressFn))
+        if(!csvFileParser.parse(url, graphModel))
             return false;
 
         tabularData = &(csvFileParser.tabularData());
     }
     else if(_urlTypeName == QLatin1String("CorrelationTSV"))
     {
-        if(!tsvFileParser.parse(url, graphModel, progressFn))
+        if(!tsvFileParser.parse(url, graphModel))
             return false;
 
         tabularData = &(tsvFileParser.tabularData());
@@ -119,8 +119,8 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
     tabularData->setTransposed(_plugin->transpose());
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Finding Data Points"));
-    progressFn(-1);
+    graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
+    setProgress(-1);
 
     // May be set by parameters
     if(_dataRect.isEmpty())
@@ -131,34 +131,34 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
     _plugin->setDimensions(_dataRect.width(), _dataRect.height());
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, _dataRect.left(), _dataRect.top(), *this, progressFn))
+    graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
+    if(!_plugin->loadUserData(*tabularData, _dataRect.left(), _dataRect.top(), *this))
         return false;
 
     if(_plugin->requiresNormalisation())
     {
-        graphModel.mutableGraph().setPhase(QObject::tr("Normalisation"));
-        if(!_plugin->normalise(*this, progressFn))
+        graphModel->mutableGraph().setPhase(QObject::tr("Normalisation"));
+        if(!_plugin->normalise(*this))
             return false;
     }
 
-    progressFn(-1);
+    setProgress(-1);
 
     _plugin->finishDataRows();
     _plugin->createAttributes();
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
+    graphModel->mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
     auto edges = _plugin->pearsonCorrelation(url.fileName(),
-        _plugin->minimumCorrelation(), *this, progressFn);
+        _plugin->minimumCorrelation(), *this);
 
     if(cancelled())
         return false;
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Building Graph"));
-    if(!_plugin->createEdges(edges, *this, progressFn))
+    graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
+    if(!_plugin->createEdges(edges, *this))
         return false;
 
-    graphModel.mutableGraph().clearPhase();
+    graphModel->mutableGraph().clearPhase();
 
     return true;
 }
@@ -188,22 +188,23 @@ bool CorrelationPreParser::parse()
 {
     QFuture<void> future = QtConcurrent::run([this]()
     {
-        CsvFileParser csvFileParser;
-        TsvFileParser tsvFileParser;
-
         if(_fileType.isEmpty() || _fileUrl.isEmpty())
             return;
 
         if(_fileType == QLatin1String("CorrelationCSV"))
         {
-            if(!csvFileParser.preParse(_fileUrl))
+            CsvFileParser csvFileParser;
+
+            if(!csvFileParser.parse(_fileUrl))
                 return;
 
             _data = std::move(csvFileParser.tabularData());
         }
         else if(_fileType == QLatin1String("CorrelationTSV"))
         {
-            if(!tsvFileParser.preParse(_fileUrl))
+            TsvFileParser tsvFileParser;
+
+            if(!tsvFileParser.parse(_fileUrl))
                 return;
 
             _data = std::move(tsvFileParser.tabularData());

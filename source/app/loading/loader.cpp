@@ -39,7 +39,7 @@ static bool isCompressed(const QString& filePath)
 }
 
 static bool decompress(const QString& filePath, QByteArray& byteArray,
-                       int maxReadSize = -1, ProgressFn progressFn = [](int){}) // NOLINT
+                       int maxReadSize = -1, Loader* loader = nullptr)
 {
     QFile file(filePath);
 
@@ -74,7 +74,9 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
         bytesRead += numBytes;
-        progressFn((bytesRead * 100) / totalBytes);
+
+        if(loader != nullptr)
+            loader->setProgress((bytesRead * 100) / totalBytes);
 
         zstream.avail_in = numBytes;
         if(zstream.avail_in == 0)
@@ -115,14 +117,14 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
 static bool load(const QString& filePath, QByteArray& byteArray,
                  int maxReadSize = -1, IGraph* graph = nullptr,
-                 ProgressFn progressFn = [](int){}) // NOLINT
+                 Loader* loader = nullptr)
 {
     if(isCompressed(filePath))
     {
         if(graph != nullptr)
             graph->setPhase(QObject::tr("Decompressing"));
 
-        return decompress(filePath, byteArray, maxReadSize, progressFn);
+        return decompress(filePath, byteArray, maxReadSize, loader);
     }
 
     QFile file(filePath);
@@ -147,7 +149,9 @@ static bool load(const QString& filePath, QByteArray& byteArray,
         byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
 
         bytesRead += numBytes;
-        progressFn((bytesRead * 100) / totalBytes);
+
+        if(loader != nullptr)
+            loader->setProgress((bytesRead * 100) / totalBytes);
 
         // Check if we've read more than we've been asked to
         if(maxReadSize >= 0 && bytesRead >= maxReadSize)
@@ -230,8 +234,12 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     return true;
 }
 
-bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
+bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 {
+    Q_ASSERT(graphModel != nullptr);
+    if(graphModel == nullptr)
+        return false;
+
     Header header;
     if(!parseHeader(url, &header))
         return false;
@@ -240,12 +248,12 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
     QByteArray byteArray;
 
-    if(!load(url.toLocalFile(), byteArray, -1, &graphModel.mutableGraph(), progressFn))
+    if(!load(url.toLocalFile(), byteArray, -1, &graphModel->mutableGraph(), this))
         return false;
 
-    progressFn(-1);
+    setProgress(-1);
 
-    auto jsonArray = parseJsonFrom(byteArray, progressFn, [this] { return cancelled(); });
+    auto jsonArray = parseJsonFrom(byteArray, *this);
 
     if(cancelled())
         return false;
@@ -280,25 +288,25 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
     uint64_t i = 0;
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Nodes"));
+    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(const auto& jsonNode : jsonNodes)
     {
         NodeId nodeId = jsonNode["id"].get<int>();
 
         if(!nodeId.isNull())
         {
-            graphModel.mutableGraph().reserveNodeId(nodeId);
-            graphModel.mutableGraph().addNode(nodeId);
+            graphModel->mutableGraph().reserveNodeId(nodeId);
+            graphModel->mutableGraph().addNode(nodeId);
         }
 
-        progressFn(static_cast<int>((i++ * 100) /jsonNodes.size()));
+        setProgress(static_cast<int>((i++ * 100) /jsonNodes.size()));
     }
 
-    progressFn(-1);
+    setProgress(-1);
 
     i = 0;
 
-    graphModel.mutableGraph().setPhase(QObject::tr("Edges"));
+    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(const auto& jsonEdge : jsonEdges)
     {
         EdgeId edgeId = jsonEdge["id"].get<int>();
@@ -307,22 +315,22 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
         if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
         {
-            graphModel.mutableGraph().reserveEdgeId(edgeId);
-            graphModel.mutableGraph().addEdge(edgeId, sourceId, targetId);
+            graphModel->mutableGraph().reserveEdgeId(edgeId);
+            graphModel->mutableGraph().addEdge(edgeId, sourceId, targetId);
         }
 
-        progressFn(static_cast<int>((i++ * 100) / jsonEdges.size()));
+        setProgress(static_cast<int>((i++ * 100) / jsonEdges.size()));
     }
 
-    progressFn(-1);
+    setProgress(-1);
 
     if(u::contains(jsonBody, "nodeNames"))
     {
         NodeId nodeId(0);
         for(const auto& jsonNodeName : jsonBody["nodeNames"])
         {
-            if(graphModel.mutableGraph().containsNodeId(nodeId))
-                graphModel.setNodeName(nodeId, jsonNodeName);
+            if(graphModel->mutableGraph().containsNodeId(nodeId))
+                graphModel->setNodeName(nodeId, jsonNodeName);
 
             nodeId++;
         }
@@ -409,12 +417,12 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
         if(u::contains(jsonLayout, "positions"))
         {
-            _nodePositions = std::make_unique<ExactNodePositions>(graphModel.mutableGraph());
+            _nodePositions = std::make_unique<ExactNodePositions>(graphModel->mutableGraph());
 
             NodeId nodeId(0);
             for(const auto& jsonPosition : jsonLayout["positions"])
             {
-                if(graphModel.mutableGraph().containsNodeId(nodeId))
+                if(graphModel->mutableGraph().containsNodeId(nodeId))
                 {
                     const auto& jsonPositionArray = jsonPosition;
 
@@ -455,7 +463,7 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
     else
         return false;
 
-    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel.mutableGraph(), *this, progressFn))
+    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel->mutableGraph(), *this))
         return false;
 
     const auto pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";

@@ -9,6 +9,8 @@
 #include <QtXml/QXmlDefaultHandler>
 #include <stack>
 
+class GraphMLParser;
+
 class GraphMLHandler : public QXmlDefaultHandler
 {
 public:
@@ -58,9 +60,9 @@ private:
         }
     };
 
-    IGraphModel* _graphModel;
+    GraphMLParser* _parser = nullptr;
+    IGraphModel* _graphModel = nullptr;
 
-    const ProgressFn* _progress;
     QString _errorString = QString();
 
     AttributeData<NodeId> _nodeAttributes;
@@ -87,7 +89,7 @@ private:
     UserNodeData* _userNodeData;
 
 public:
-    GraphMLHandler(IGraphModel& graphModel, const ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
+    GraphMLHandler(GraphMLParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData, int lineCount);
     bool startDocument() override;
     bool endDocument() override;
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) override;
@@ -110,7 +112,7 @@ private:
 
 public:
     explicit GraphMLParser(UserNodeData *userNodeData);
-    bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progress) override;
+    bool parse(const QUrl& url, IGraphModel* graphModel) override;
 };
 
 #endif // GRAPHMLPARSER_H

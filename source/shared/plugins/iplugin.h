@@ -31,11 +31,10 @@ public:
     virtual QStringList defaultTransforms() const = 0;
     virtual QStringList defaultVisualisations() const = 0;
 
-    virtual QByteArray save(IMutableGraph& mutableGraph, const ProgressFn& progressFn) const = 0;
+    virtual QByteArray save(IMutableGraph& mutableGraph, Progressable& progressable) const = 0;
     virtual bool load(const QByteArray& data, int dataVersion,
                       IMutableGraph& mutableGraph,
-                      Cancellable& cancellable,
-                      const ProgressFn& progressFn) = 0;
+                      IParser& parser) = 0;
 };
 
 class IPluginInstanceProvider

@@ -8,6 +8,7 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/utils/container.h"
+#include "shared/utils/progressable.h"
 
 #include <map>
 #include <memory>
@@ -130,9 +131,9 @@ public:
         }
     }
 
-    json save(const IMutableGraph&, const ProgressFn& progressFn) const
+    json save(const IMutableGraph&, Progressable& progressable) const
     {
-        json jsonObject = UserData::save(progressFn);
+        json jsonObject = UserData::save(progressable);
 
         json jsonIndexes;
         for(auto index : *_indexes)
@@ -143,9 +144,9 @@ public:
         return jsonObject;
     }
 
-    bool load(const json& jsonObject, const ProgressFn& progressFn)
+    bool load(const json& jsonObject, Progressable& progressable)
     {
-        if(!UserData::load(jsonObject, progressFn))
+        if(!UserData::load(jsonObject, progressable))
             return false;
 
         _indexes->resetElements();

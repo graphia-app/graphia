@@ -53,7 +53,7 @@ void ParserThread::run()
         std::atomic<int> percentage;
         percentage = -1;
 
-        result = _parser->parse(_url, *_graphModel, [this, &percentage](int newPercentage)
+        _parser->setProgressFn([this, &percentage](int newPercentage)
         {
 #ifdef _DEBUG
             if(newPercentage < -1 || newPercentage > 100)
@@ -81,6 +81,8 @@ void ParserThread::run()
                 emit progress(newPercentage);
             }
         });
+
+        result = _parser->parse(_url, _graphModel);
 
         if(!result)
         {

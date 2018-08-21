@@ -218,38 +218,35 @@ private:
 
     std::vector<CorrelationEdge> pearsonCorrelation(
         std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
-        double minimumThreshold, Cancellable* cancellable = nullptr,
-        const ProgressFn* progressFn = nullptr);
+        double minimumThreshold, IParser* parser = nullptr);
 
      void setHighlightedRows(const QVector<int>& highlightedRows);
 
 public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                      Cancellable& cancellable, const ProgressFn& progressFn);
+                      IParser& parser);
     bool requiresNormalisation() const { return _normalisation != NormaliseType::None; }
-    bool normalise(Cancellable& cancellable, const ProgressFn& progressFn);
+    bool normalise(IParser& parser);
     void finishDataRows();
     void createAttributes();
 
     std::vector<CorrelationEdge> pearsonCorrelation(const QString& fileName, double minimumThreshold,
-        Cancellable& cancellable, const ProgressFn& progressFn);
+        IParser& parser);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
     bool createEdges(const std::vector<CorrelationEdge>& edges,
-                     Cancellable& cancellable,
-                     const ProgressFn& progressFn);
+                     IParser& parser);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;
     QStringList defaultTransforms() const override;
     QStringList defaultVisualisations() const override;
 
-    QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const override;
-    bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-              Cancellable& cancellable, const ProgressFn& progressFn) override;
+    QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
+    bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;
 
 private slots:
     void onLoadSuccess();
