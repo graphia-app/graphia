@@ -13,6 +13,16 @@ QStringList UserDataVector::toStringList() const
     return list;
 }
 
+int UserDataVector::numUniqueValues() const
+{
+    auto v = _values;
+    std::sort(v.begin(), v.end());
+    auto last = std::unique(v.begin(), v.end());
+    v.erase(last, v.end());
+
+    return static_cast<int>(v.size());
+}
+
 void UserDataVector::set(size_t index, const QString& value)
 {
     if(index >= _values.size())

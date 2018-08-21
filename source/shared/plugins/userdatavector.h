@@ -41,6 +41,7 @@ public:
 
     const QString& name() const { return _name; }
     int numValues() const { return static_cast<int>(_values.size()); }
+    int numUniqueValues() const;
     void reserve(int size) { _values.reserve(size); }
 
     int intMin() const { return _intMin; }
