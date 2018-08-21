@@ -24,7 +24,7 @@ public:
     virtual bool execute() = 0;
     virtual void undo() { Q_ASSERT(!"undo() not implemented for this ICommand"); }
 
-    virtual void setProgress(int progress)
+    void setProgress(int progress) override
     {
         Progressable::setProgress(progress);
         _progress = progress;
