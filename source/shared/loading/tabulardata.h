@@ -130,11 +130,14 @@ public:
     explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) :
         _parent(parent)
     {
-        setProgressFn(
-        [parent](int percent)
+        if(parent != nullptr)
         {
-            parent->setProgress(percent);
-        });
+            setProgressFn(
+            [parent](int percent)
+            {
+                parent->setProgress(percent);
+            });
+        }
     }
 
     bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
