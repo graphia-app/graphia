@@ -61,6 +61,6 @@ void DataRectTableModel::setTabularData(TabularData& data)
 {
     beginResetModel();
     _data = &data;
-    _data->setTransposed(true);
+    _data->setTransposed(_transposed);
     endResetModel();
 }
