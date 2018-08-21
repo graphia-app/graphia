@@ -67,7 +67,7 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
     Q_PROPERTY(QVector<QColor> nodeColors READ nodeColors NOTIFY nodeColorsChanged)
 
-    Q_PROPERTY(QVariantList columnAnnotations READ columnAnnotations NOTIFY columnAnnotationsChanged)
+    Q_PROPERTY(QVariantList columnAnnotations MEMBER _columnAnnotations NOTIFY columnAnnotationsChanged)
 
     Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
     Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
@@ -83,6 +83,7 @@ private:
     size_t _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
+    QVariantList _columnAnnotations;
 
     UserNodeData _userNodeData;
     UserData _userColumnData;
@@ -211,8 +212,7 @@ private:
     QVector<double> rawData();
     QVector<QColor> nodeColors();
 
-    QStringList columnAnnotationNames();
-    QVariantList columnAnnotations();
+    void buildColumnAnnotations();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -220,7 +220,7 @@ private:
         std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
         double minimumThreshold, IParser* parser = nullptr);
 
-     void setHighlightedRows(const QVector<int>& highlightedRows);
+    void setHighlightedRows(const QVector<int>& highlightedRows);
 
 public:
     void setDimensions(size_t numColumns, size_t numRows);

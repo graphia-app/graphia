@@ -500,6 +500,7 @@ void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateRoleNames();
+    buildColumnAnnotations();
 }
 
 QVector<double> CorrelationPluginInstance::rawData()
@@ -546,32 +547,28 @@ QStringList CorrelationPluginInstance::rowNames()
     return list;
 }
 
-QStringList CorrelationPluginInstance::columnAnnotationNames()
+void CorrelationPluginInstance::buildColumnAnnotations()
 {
-    QStringList list;
-    list.reserve(static_cast<int>(_userColumnData.vectorNames().size()));
-
-    for(const auto& name : _userColumnData.vectorNames())
-        list.append(name);
-
-    return list;
-}
-
-QVariantList CorrelationPluginInstance::columnAnnotations()
-{
-    QVariantList list;
-    list.reserve(_userColumnData.numUserDataVectors());
+    _columnAnnotations.reserve(_userColumnData.numUserDataVectors());
 
     for(const auto& [name, values] : _userColumnData)
     {
+        auto numValues = values.numValues();
+        auto numUniqueValues = values.numUniqueValues();
+
+        // If the number of unique values is more than a quarter of the total
+        // number of values, skip it, since a large number of unique values
+        // causes performance problems, and it's probably not a useful annotation
+        // in the first place
+        if(numUniqueValues * 4 > numValues)
+            continue;
+
         QVariantMap columnAnnotation;
         columnAnnotation.insert(QStringLiteral("name"), name);
         columnAnnotation.insert(QStringLiteral("values"), values.toStringList());
 
-        list.append(columnAnnotation);
+        _columnAnnotations.append(columnAnnotation);
     }
-
-    return list;
 }
 
 const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
