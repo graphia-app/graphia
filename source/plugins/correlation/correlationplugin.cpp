@@ -107,105 +107,19 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 else if(isColumnInDataRect)
                     _userColumnData.setValue(dataColumnIndex, tabularData.valueAsQString(0, rowIndex), value);
             }
-            else if(isColumnInDataRect) // Check it's in the datarect
+            else if(isColumnInDataRect)
             {
                 double transformedValue = 0.0;
-                // Check missing value
-                if(value.isEmpty())
+
+                if(!value.isEmpty())
                 {
-                    // Impute
-                    switch(_missingDataType)
-                    {
-                    case MissingDataType::Constant:
-                    {
-                        transformedValue = _missingDataReplacementValue;
-                        break;
-                    }
-                    case MissingDataType::ColumnAverage:
-                    {
-                        // Calculate column averages
-                        double averageValue = 0.0;
-                        size_t rowCount = 0;
-                        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
-                        {
-                            auto value = tabularData.valueAsQString(columnIndex, avgRowIndex);
-                            if(!value.isEmpty())
-                            {
-                                averageValue += value.toDouble();
-                                rowCount++;
-                            }
-                        }
-
-                        if(rowCount > 0)
-                            averageValue /= rowCount;
-
-                        transformedValue = averageValue;
-                        break;
-                    }
-                    case MissingDataType::RowInterpolation:
-                    {
-                        double rightValue = 0.0;
-                        double leftValue = 0.0;
-                        size_t leftDistance = 0;
-                        size_t rightDistance = 0;
-                        bool rightValueFound = false;
-                        bool leftValueFound = false;
-
-                        // Find right value
-                        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
-                        {
-                            auto value = tabularData.valueAsQString(rightColumn, rowIndex);
-                            if(!value.isEmpty())
-                            {
-                                rightValue = value.toDouble();
-                                rightValueFound = true;
-                                rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
-                                break;
-                            }
-                        }
-                        // Find left value
-                        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
-                        {
-                            auto value = tabularData.valueAsQString(leftColumn, rowIndex);
-                            if(!value.isEmpty())
-                            {
-                                leftValue = value.toDouble();
-                                leftValueFound = true;
-                                leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
-                                break;
-                            }
-                        }
-
-                        // Lerp the result if possible, otherwise just set to found value
-                        if(leftValueFound && rightValueFound)
-                        {
-                            size_t totalDistance = leftDistance + rightDistance;
-                            double tween = leftDistance / static_cast<double>(totalDistance);
-                            // https://devblogs.nvidia.com/lerp-faster-cuda/
-                            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
-                            transformedValue = lerpedValue;
-                        }
-                        else if(leftValueFound && !rightValueFound)
-                            transformedValue = leftValue;
-                        else if(!leftValueFound && rightValueFound)
-                            transformedValue = rightValue;
-                        else // Nothing on the row, just zero it
-                            transformedValue = 0.0;
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-                }
-                else
-                {
-                    // Value is not empty so convert to double
                     bool success = false;
                     transformedValue = value.toDouble(&success);
                     Q_ASSERT(success);
                 }
+                else
+                    transformedValue = imputeValue(tabularData, firstDataColumn, firstDataRow, columnIndex, rowIndex);
 
-                // Scale
                 transformedValue = scaleValue(transformedValue);
 
                 setData(dataColumnIndex, dataRowIndex, transformedValue);
@@ -468,6 +382,98 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
 
     auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
+}
+
+double CorrelationPluginInstance::imputeValue(const TabularData& tabularData,
+    size_t firstDataColumn, size_t firstDataRow,
+    size_t columnIndex, size_t rowIndex)
+{
+    double imputedValue = 0.0;
+
+    switch(_missingDataType)
+    {
+    case MissingDataType::Constant:
+    {
+        imputedValue = _missingDataReplacementValue;
+        break;
+    }
+    case MissingDataType::ColumnAverage:
+    {
+        // Calculate column averages
+        double averageValue = 0.0;
+        size_t rowCount = 0;
+        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
+        {
+            auto value = tabularData.valueAsQString(columnIndex, avgRowIndex);
+            if(!value.isEmpty())
+            {
+                averageValue += value.toDouble();
+                rowCount++;
+            }
+        }
+
+        if(rowCount > 0)
+            averageValue /= rowCount;
+
+        imputedValue = averageValue;
+        break;
+    }
+    case MissingDataType::RowInterpolation:
+    {
+        double rightValue = 0.0;
+        double leftValue = 0.0;
+        size_t leftDistance = 0;
+        size_t rightDistance = 0;
+        bool rightValueFound = false;
+        bool leftValueFound = false;
+
+        // Find right value
+        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
+        {
+            auto value = tabularData.valueAsQString(rightColumn, rowIndex);
+            if(!value.isEmpty())
+            {
+                rightValue = value.toDouble();
+                rightValueFound = true;
+                rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
+                break;
+            }
+        }
+        // Find left value
+        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
+        {
+            auto value = tabularData.valueAsQString(leftColumn, rowIndex);
+            if(!value.isEmpty())
+            {
+                leftValue = value.toDouble();
+                leftValueFound = true;
+                leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
+                break;
+            }
+        }
+
+        // Lerp the result if possible, otherwise just set to found value
+        if(leftValueFound && rightValueFound)
+        {
+            size_t totalDistance = leftDistance + rightDistance;
+            double tween = leftDistance / static_cast<double>(totalDistance);
+            // https://devblogs.nvidia.com/lerp-faster-cuda/
+            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
+            imputedValue = lerpedValue;
+        }
+        else if(leftValueFound && !rightValueFound)
+            imputedValue = leftValue;
+        else if(!leftValueFound && rightValueFound)
+            imputedValue = rightValue;
+        else // Nothing on the row, just zero it
+            imputedValue = 0.0;
+        break;
+    }
+    default:
+        break;
+    }
+
+    return imputedValue;
 }
 
 double CorrelationPluginInstance::scaleValue(double value)
