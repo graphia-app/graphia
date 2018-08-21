@@ -389,10 +389,15 @@ void CorrelationPlotItem::updateTooltip()
                 auto x = static_cast<int>(xf);
                 int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
 
-                _itemTracer->position->setPixelPosition(_hoverPoint);
-                _hoverLabel->setText(columnAnnotationValueAt(x, y));
+                auto text = columnAnnotationValueAt(x, y);
 
-                showTooltip = true;
+                if(!text.isEmpty())
+                {
+                    _itemTracer->position->setPixelPosition(_hoverPoint);
+                    _hoverLabel->setText(text);
+
+                    showTooltip = true;
+                }
             }
         }
     }
@@ -1075,7 +1080,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
             auto color = u::colorForString(uniqueValue);
 
-            if(!selected)
+            if(uniqueValue.isEmpty())
+                color = Qt::transparent;
+            else if(!selected)
                 color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
 
             bars->setPen(QPen(color));
