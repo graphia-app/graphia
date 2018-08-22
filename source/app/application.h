@@ -162,6 +162,8 @@ public:
 
     Q_INVOKABLE void reportScopeTimers();
 
+    Q_INVOKABLE void aboutQt() const;
+
     static QString resolvedExe(const QString& exe);
 
 signals:

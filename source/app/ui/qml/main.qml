@@ -1095,6 +1095,13 @@ ApplicationWindow
 
     Action
     {
+        id: aboutQtAction
+        text: qsTr("About Qt…")
+        onTriggered: { application.aboutQt(); }
+    }
+
+    Action
+    {
         id: signOutAction
         text: qsTr("&Sign Out")
         onTriggered:
@@ -1397,6 +1404,7 @@ ApplicationWindow
         {
             title: qsTr("&Help")
             MenuItem { action: aboutPluginsAction }
+            MenuItem { action: aboutQtAction }
 
             MenuItem
             {

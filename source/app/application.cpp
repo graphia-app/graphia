@@ -343,6 +343,11 @@ void Application::reportScopeTimers()
     ScopeTimerManager::instance()->reportToQDebug();
 }
 
+void Application::aboutQt() const
+{
+    QMessageBox::aboutQt(nullptr);
+}
+
 QString Application::resolvedExe(const QString& exe)
 {
     QString fullyQualifiedExe(
