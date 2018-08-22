@@ -46,6 +46,9 @@
 		<file>Tango/16x16/actions/format-justify-fill.png</file>
 		<file>Tango/22x22/actions/format-justify-fill.png</file>
 		<file>Tango/32x32/actions/format-justify-fill.png</file>
+		<file>Tango/16x16/actions/format-justify-right.png</file>
+		<file>Tango/22x22/actions/format-justify-right.png</file>
+		<file>Tango/32x32/actions/format-justify-right.png</file>
 		<file>Tango/16x16/actions/format-text-bold.png</file>
 		<file>Tango/22x22/actions/format-text-bold.png</file>
 		<file>Tango/32x32/actions/format-text-bold.png</file>
@@ -61,9 +64,6 @@
 		<file>Tango/16x16/actions/go-top.png</file>
 		<file>Tango/22x22/actions/go-top.png</file>
 		<file>Tango/32x32/actions/go-top.png</file>
-		<file>Tango/16x16/apps/help-browser.png</file>
-		<file>Tango/22x22/apps/help-browser.png</file>
-		<file>Tango/32x32/apps/help-browser.png</file>
 		<file>Tango/16x16/actions/list-add.png</file>
 		<file>Tango/22x22/actions/list-add.png</file>
 		<file>Tango/32x32/actions/list-add.png</file>
@@ -103,5 +103,8 @@
 		<file>Tango/16x16/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/22x22/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/32x32/mimetypes/x-office-spreadsheet.png</file>
+		<file>Tango/16x16/apps/help-browser.png</file>
+		<file>Tango/22x22/apps/help-browser.png</file>
+		<file>Tango/32x32/apps/help-browser.png</file>
 	</qresource>
 </RCC>
