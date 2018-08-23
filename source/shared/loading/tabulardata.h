@@ -37,6 +37,8 @@ public:
 
     void setTransposed(bool transposed) { _transposed = transposed; }
     void setValueAt(size_t column, size_t row, std::string&& value);
+
+    void reset();
 };
 
 template<const char Delimiter> class TextDelimitedTabularDataParser : public IParser

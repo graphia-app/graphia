@@ -226,6 +226,11 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
+void CorrelationPreParser::clearData()
+{
+    _data.reset();
+}
+
 void CorrelationPreParser::onDataParsed()
 {
     _model.setTabularData(_data);

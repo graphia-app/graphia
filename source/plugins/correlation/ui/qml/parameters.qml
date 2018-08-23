@@ -1079,12 +1079,20 @@ ListTabDialog
         var DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
                 ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
 
-        parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION, initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
+        parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
+            initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.None };
 
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
+    }
+
+    onClosing:
+    {
+        // The parse can utilise a significant amount of memory, so clear it
+        // out before closing
+        preParser.clearData();
     }
 }

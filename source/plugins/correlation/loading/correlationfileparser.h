@@ -47,6 +47,8 @@ public:
     Q_INVOKABLE bool parse();
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
 
+    Q_INVOKABLE void clearData();
+
     DataRectTableModel* tableModel();
     bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
 

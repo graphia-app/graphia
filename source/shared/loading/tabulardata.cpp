@@ -33,6 +33,14 @@ void TabularData::setValueAt(size_t column, size_t row, std::string&& value)
     _data.at(index(column, row)) = std::move(value);
 }
 
+void TabularData::reset()
+{
+    _data.clear();
+    _columns = 0;
+    _rows = 0;
+    _transposed = false;
+}
+
 const std::string& TabularData::valueAt(size_t column, size_t row) const
 {
     return _data.at(index(column, row));
