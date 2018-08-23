@@ -1116,7 +1116,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
             QString postfix;
 
             if(_columnAnnotationSelectionModeEnabled)
-                postfix = selected ? QStringLiteral(" ☑") : QStringLiteral(" ☐");
+                postfix = selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
 
             double tickPosition = static_cast<double>(y) + 0.5;
             columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name + postfix);
