@@ -5,6 +5,7 @@ import QtQuick.Window 2.2
 import com.kajeka 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
+import "../../../../shared/ui/qml/Utils.js" as Utils
 import "Controls"
 
 ListTabDialog
@@ -500,6 +501,7 @@ ListTabDialog
                         maximumValue: 1.0
 
                         decimals: 3
+                        stepSize: Utils.incrementForRange(minimumValue, maximumValue);
 
                         onValueChanged:
                         {
@@ -547,6 +549,7 @@ ListTabDialog
                         maximumValue: 1.0
 
                         decimals: 3
+                        stepSize: Utils.incrementForRange(minimumValue, maximumValue);
 
                         onValueChanged:
                         {
