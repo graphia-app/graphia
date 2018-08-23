@@ -464,7 +464,7 @@ Item
             id: graphItem
 
             Layout.fillHeight: true
-            Layout.minimumHeight: splitView.height * 0.5
+            Layout.minimumHeight: 200
 
             Graph
             {
@@ -1000,17 +1000,13 @@ Item
 
         Layout.minimumHeight:
         {
-            var h = 0;
-
             if(!enabled)
-                return h;
+                return 0;
 
             if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
-                h = plugin.content.minimumHeight;
-            else
-                h = defaultPluginContent.minimumHeight;
+                return plugin.content.minimumHeight;
 
-            return Math.min(h, splitView.height * 0.5);
+            return defaultPluginContent.minimumHeight;
         }
 
         Layout.maximumHeight: minimised && !root.pluginPoppedOut ? 0 : Number.POSITIVE_INFINITY
@@ -1151,10 +1147,7 @@ Item
     property int pluginSplitSize:
     {
         if(!pluginPoppedOut)
-        {
-            return splitView.orientation == Qt.Vertical ?
-                        plugin.height : plugin.width;
-        }
+            return plugin.height;
         else
             return window.pluginSplitSize
     }
@@ -1295,10 +1288,7 @@ Item
         if(plugin.content.toolStrip !== undefined)
             plugin.content.toolStrip.parent = pluginContainerToolStrip;
 
-        if(splitView.orientation == Qt.Vertical)
-            pluginContainer.height = pluginSplitSize;
-        else
-            pluginContainer.width = pluginSplitSize;
+        pluginContainer.height = pluginSplitSize;
 
         root.pluginPoppedOut = false;
     }
