@@ -28,6 +28,8 @@ public:
     void cancel();
     bool cancelled() const;
 
+    void reset();
+
 private:
     void run();
 

@@ -639,6 +639,8 @@ void Document::onLoadProgress(int percentage)
 
 void Document::onLoadComplete(const QUrl&, bool success)
 {
+    _graphFileParserThread->reset();
+
     if(!success)
     {
         // Give up now because the whole Document object will be
