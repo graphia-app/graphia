@@ -36,7 +36,7 @@ private:
 public:
     explicit QCPColumnAnnotations(QCPAxis *keyAxis, QCPAxis *valueAxis);
 
-    double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = 0) const override;
+    double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = nullptr) const override;
     QCPRange getKeyRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const override;
     QCPRange getValueRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth,
         const QCPRange& inKeyRange = QCPRange()) const override;

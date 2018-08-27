@@ -1212,7 +1212,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
             if(index < _columnAnnotations.size())
             {
                 const auto& columnAnnotation = _columnAnnotations.at(index);
-                auto name = columnAnnotation.name();
+                const auto& name = columnAnnotation.name();
 
                 if(u::contains(_visibleColumnAnnotationNames, name))
                     _visibleColumnAnnotationNames.erase(name);

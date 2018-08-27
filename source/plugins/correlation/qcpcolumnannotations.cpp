@@ -30,7 +30,8 @@ void QCPColumnAnnotations::setData(size_t y, std::vector<size_t> indices,
     _rows.emplace(y, Row(std::move(indices), selected, columnAnnotation));
 }
 
-void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y, size_t w, QColor color)
+void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
+    size_t w, const QColor& color)
 {
     const auto cellWidth = mKeyAxis->coordToPixel(1.0) -  mKeyAxis->coordToPixel(0.0);
     const auto cellHeight = mValueAxis->coordToPixel(0.0) - mValueAxis->coordToPixel(1.0);
