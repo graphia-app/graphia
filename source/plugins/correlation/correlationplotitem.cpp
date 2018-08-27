@@ -1,5 +1,7 @@
 #include "correlationplotitem.h"
 
+#include "qcpcolumnannotations.h"
+
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/utils.h"
@@ -349,8 +351,6 @@ void CorrelationPlotItem::updateTooltip()
     _hoverLabel->setText(QStringLiteral(""));
     _itemTracer->setGraph(nullptr);
 
-    QColor color;
-
     if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
     {
         if(axisRectUnderCursor == _mainAxisRect)
@@ -448,15 +448,19 @@ void CorrelationPlotItem::updateTooltip()
 
         _hoverLabel->position->setPixelPosition(targetPosition);
 
-        _hoverColorRect->setVisible(true);
+        if(plottableUnderCursor != nullptr)
+        {
+            _hoverColorRect->setVisible(true);
 
-        if(!color.isValid() && plottableUnderCursor != nullptr)
-            color = plottableUnderCursor->pen().color();
+            QColor color = plottableUnderCursor->pen().color();
 
-        _hoverColorRect->setBrush(QBrush(color));
-        _hoverColorRect->bottomRight->setPixelPosition(
-            {_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
-            _hoverLabel->bottomRight->pixelPosition().y()});
+            _hoverColorRect->setBrush(QBrush(color));
+            _hoverColorRect->bottomRight->setPixelPosition(
+                {_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
+                _hoverLabel->bottomRight->pixelPosition().y()});
+        }
+        else
+            _hoverColorRect->setVisible(false);
     }
     else if(_itemTracer->visible())
     {
@@ -1050,66 +1054,17 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     _columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 
     QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
-    QCPBars* lastAddedBars = nullptr;
     size_t y = numColumnAnnotations - 1;
 
-    QVector<double> ticks; ticks.reserve(static_cast<int>(_columnCount));
-    QVector<double> empty; empty.reserve(static_cast<int>(_columnCount));
-
-    for(size_t x = 0U; x < _columnCount; x++)
-    {
-        ticks.append(static_cast<double>(x));
-        empty.append(0.0);
-    }
-
-    QVector<double> data;
-    data.reserve(static_cast<int>(_columnCount));
+    auto* qcpColumnAnnotations = new QCPColumnAnnotations(caXAxis, caYAxis);
 
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
+        auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
         bool visible = selected || _columnAnnotationSelectionModeEnabled;
 
-        for(const auto& uniqueValue : columnAnnotation._uniqueValues)
-        {
-            auto* bars = new QCPBars(caXAxis, caYAxis);
-
-            bars->setAntialiased(false);
-            bars->setAntialiasedFill(false);
-            bars->setStackingGap(0);
-
-            auto color = u::colorForString(uniqueValue);
-
-            if(uniqueValue.isEmpty())
-                color = Qt::transparent;
-            else if(!selected)
-                color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
-
-            bars->setPen(QPen(color));
-            bars->setBrush(color);
-            bars->setWidth(1.0);
-
-            if(visible)
-            {
-                data.clear();
-
-                auto uniqueIndex = columnAnnotation.indexForUniqueValue(uniqueValue);
-                for(size_t x = 0U; x < _columnCount; x++)
-                {
-                    auto index = columnAnnotation._uniqueIndices.at(static_cast<int>(_sortMap[x]));
-                    data.append(index == uniqueIndex ? 1.0 : 0.0);
-                }
-
-                bars->setData(ticks, data, true);
-            }
-            else
-                bars->setData(ticks, empty, true);
-
-            if(lastAddedBars != nullptr)
-                bars->moveBelow(lastAddedBars);
-
-            lastAddedBars = bars;
-        }
+        if(visible)
+            qcpColumnAnnotations->setData(y, _sortMap, selected, &columnAnnotation);
 
         if(visible)
         {
@@ -1119,15 +1074,17 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
                 postfix = selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
 
             double tickPosition = static_cast<double>(y) + 0.5;
-            columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name + postfix);
+            columnAnnotationTicker->addTick(tickPosition, columnAnnotation.name() + postfix);
 
             y--;
         }
     }
 
+    caYAxis->setTickPen(QPen(Qt::transparent));
     caYAxis->setTicker(columnAnnotationTicker);
     caYAxis->setRange(0.0, numColumnAnnotations);
 
+    caXAxis->setTickPen(QPen(Qt::transparent));
     caXAxis->setBasePen(QPen(Qt::transparent));
     caYAxis->setBasePen(QPen(Qt::transparent));
 
@@ -1255,7 +1212,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
             if(index < _columnAnnotations.size())
             {
                 const auto& columnAnnotation = _columnAnnotations.at(index);
-                auto name = columnAnnotation._name;
+                auto name = columnAnnotation.name();
 
                 if(u::contains(_visibleColumnAnnotationNames, name))
                     _visibleColumnAnnotationNames.erase(name);
@@ -1610,20 +1567,20 @@ void CorrelationPlotItem::updateSortMap()
             return;
 
         auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
-            [this](const auto& v) { return v._name == _columnSortAnnotation; });
+            [this](const auto& v) { return v.name() == _columnSortAnnotation; });
 
         Q_ASSERT(it != _columnAnnotations.end());
         if(it == _columnAnnotations.end())
             return;
 
-        const auto& columnAnnotationValues = it->_values;
+        const auto& columnAnnotation = *it;
 
         std::sort(_sortMap.begin(), _sortMap.end(),
-        [&collator, &columnAnnotationValues](size_t a, size_t b)
+        [&collator, &columnAnnotation](size_t a, size_t b)
         {
             return collator.compare(
-                columnAnnotationValues.at(static_cast<int>(a)),
-                columnAnnotationValues.at(static_cast<int>(b))) < 0;
+                columnAnnotation.valueAt(static_cast<int>(a)),
+                columnAnnotation.valueAt(static_cast<int>(b))) < 0;
         });
 
         break;
@@ -1731,7 +1688,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
     for(const auto& columnAnnotation : _columnAnnotations)
     {
         if(_columnAnnotationSelectionModeEnabled ||
-            u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
+            u::contains(_visibleColumnAnnotationNames, columnAnnotation.name()))
         {
             visibleRowIndices.push_back(index);
         }
@@ -1741,7 +1698,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
     const auto& columnAnnotation = _columnAnnotations.at(visibleRowIndices.at(y));
 
-    return columnAnnotation._values.at(static_cast<int>(_sortMap[x]));
+    return columnAnnotation.valueAt(static_cast<int>(_sortMap[x]));
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction() const

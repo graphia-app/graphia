@@ -1,6 +1,8 @@
 #ifndef CORRELATIONPLOTITEM_H
 #define CORRELATIONPLOTITEM_H
 
+#include "columnannotation.h"
+
 #include "shared/utils/qmlenum.h"
 
 #include "thirdparty/qcustomplot/qcustomplot_disable_warnings.h"
@@ -214,32 +216,6 @@ private:
     bool _includeYZero = false;
 
     std::vector<size_t> _sortMap;
-
-    struct ColumnAnnotation
-    {
-        ColumnAnnotation(QString name, std::vector<QString> values) :
-            _name(std::move(name)), _values(std::move(values))
-        {
-            for(const auto& value : _values)
-                _uniqueValues.emplace(value);
-
-            _uniqueIndices.reserve(_values.size());
-            for(const auto& value : _values)
-                _uniqueIndices.emplace_back(indexForUniqueValue(value));
-        }
-
-        QString _name;
-
-        std::vector<QString> _values;
-        std::vector<size_t> _uniqueIndices;
-
-        std::set<QString> _uniqueValues;
-
-        size_t indexForUniqueValue(const QString& value) const
-        {
-            return std::distance(_uniqueValues.begin(), _uniqueValues.find(value));
-        }
-    };
 
     std::vector<ColumnAnnotation> _columnAnnotations;
 

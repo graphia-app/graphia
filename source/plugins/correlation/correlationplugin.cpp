@@ -562,11 +562,11 @@ void CorrelationPluginInstance::buildColumnAnnotations()
         auto numValues = values.numValues();
         auto numUniqueValues = values.numUniqueValues();
 
-        // If the number of unique values is more than a quarter of the total
+        // If the number of unique values is more than a half of the total
         // number of values, skip it, since a large number of unique values
-        // causes performance problems, and it's probably not a useful annotation
-        // in the first place
-        if(numUniqueValues * 4 > numValues)
+        // potentially causes performance problems, and it's probably not a
+        // useful annotation in the first place
+        if(numUniqueValues * 2 > numValues)
             continue;
 
         QVariantMap columnAnnotation;

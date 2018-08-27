@@ -12,6 +12,8 @@ set(CMAKE_AUTORCC ON)
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/columnannotation.h
+    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
     ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
@@ -23,6 +25,8 @@ list(APPEND HEADERS
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/columnannotation.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.cpp
