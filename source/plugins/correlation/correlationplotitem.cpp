@@ -1759,7 +1759,7 @@ double CorrelationPlotItem::labelHeight() const
 
 double CorrelationPlotItem::minColumnWidth() const
 {
-    return _showColumnNames ? labelHeight() : 3.0;
+    return _showColumnNames ? labelHeight() : 1.0;
 }
 
 double CorrelationPlotItem::columnAxisWidth() const
