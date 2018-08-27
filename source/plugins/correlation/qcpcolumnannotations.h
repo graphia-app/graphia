@@ -13,7 +13,7 @@
 #include <vector>
 #include <map>
 
-class QCP_LIB_DECL QCPColumnAnnotations : public QCPAbstractPlottable
+class QCPColumnAnnotations : public QCPAbstractPlottable
 {
     Q_OBJECT
 

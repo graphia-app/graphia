@@ -36,10 +36,10 @@ void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y, s
     const auto cellHeight = mValueAxis->coordToPixel(0.0) - mValueAxis->coordToPixel(1.0);
     const auto halfCellWidth = cellWidth * 0.5;
 
-    auto xPixel = mKeyAxis->coordToPixel(x);
-    auto yPixel = mValueAxis->coordToPixel(y);
+    auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
+    auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
 
-    QRect rect(xPixel - halfCellWidth, yPixel - cellHeight, (w * cellWidth), cellHeight);
+    QRectF rect(xPixel - halfCellWidth, yPixel - cellHeight, (w * cellWidth), cellHeight);
 
     painter->setPen(color);
     painter->setBrush(color);
