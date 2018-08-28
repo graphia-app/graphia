@@ -43,9 +43,9 @@ PluginContent
         text: qsTr("Show &Column Names")
         iconName: "format-text-bold"
         checkable: true
-        checked: true
+        checked: plot.showColumnNames
 
-        onCheckedChanged: { root.saveRequired = true; }
+        onTriggered: { plot.showColumnNames = !plot.showColumnNames; }
     }
 
     Action
@@ -118,6 +118,17 @@ PluginContent
         checked: plot.includeYZero
 
         onTriggered: { plot.includeYZero = !plot.includeYZero; }
+    }
+
+    Action
+    {
+        id: toggleForceAllColumnsVisible
+        text: qsTr("Force All Columns Visible")
+        enabled: !plot.showColumnNames
+        checkable: true
+        checked: plot.forceAllColumnsVisible
+
+        onTriggered: { plot.forceAllColumnsVisible = !plot.forceAllColumnsVisible; }
     }
 
     ExclusiveGroup
@@ -355,6 +366,7 @@ PluginContent
         case 1:
             menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
+            menu.addItem("").action = toggleForceAllColumnsVisible;
 
             if(plugin.model.columnAnnotations.length > 0)
                 menu.addItem("").action = selectColumnAnnotationsAction;
@@ -554,7 +566,6 @@ PluginContent
                 rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames
                 selectedRows: tableView.selectedRows
-                showColumnNames: toggleColumnNamesAction.checked
 
                 columnAnnotations: plugin.model.columnAnnotations
 
@@ -685,10 +696,11 @@ PluginContent
         var data =
         {
             "sideBySide": toggleUiOrientationAction.checked,
-            "showColumnNames": toggleColumnNamesAction.checked,
             "sortColumn": tableView.sortIndicatorColumn,
             "sortOrder": tableView.sortIndicatorOrder,
             "hiddenColumns": tableView.hiddenColumns,
+
+            "showColumnNames": plot.showColumnNames,
 
             "plotScaling": plot.plotScaleType,
             "plotAveraging": plot.plotAveragingType,
@@ -696,6 +708,7 @@ PluginContent
             "plotDispersionVisual": plot.plotDispersionVisualType,
 
             "plotIncludeYZero": plot.includeYZero,
+            "plotForceAllColumnsVisible": plot.forceAllColumnsVisible,
 
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines,
@@ -710,24 +723,26 @@ PluginContent
 
     function load(data, version)
     {
-        if(data.sideBySide !== undefined)               toggleUiOrientationAction.checked = data.sideBySide;
-        if(data.showColumnNames !== undefined)          toggleColumnNamesAction.checked = data.showColumnNames;
-        if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
-        if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
-        if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
+        if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
+        if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)                tableView.hiddenColumns = data.hiddenColumns;
 
-        if(data.plotScaling !== undefined)              plot.plotScaleType = data.plotScaling;
-        if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
-        if(data.plotDispersion !== undefined)           plot.plotDispersionType = data.plotDispersion;
-        if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
+        if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
 
-        if(data.plotIncludeYZero !== undefined)         plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotScaling !== undefined)                  plot.plotScaleType = data.plotScaling;
+        if(data.plotAveraging !== undefined)                plot.plotAveragingType = data.plotAveraging;
+        if(data.plotDispersion !== undefined)               plot.plotDispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)         plot.plotDispersionVisualType = data.plotDispersionVisual;
 
-        if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
-        if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
+        if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotForceAllColumnsVisible !== undefined)   plot.forceAllColumnsVisible = data.plotForceAllColumnsVisible;
 
-        if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
-        if(data.plotColumnSortType !== undefined)       plot.columnSortType = data.plotColumnSortType;
-        if(data.plotColumnSortAnnotation !== undefined) plot.columnSortAnnotation = data.plotColumnSortAnnotation;
+        if(data.plotLegend !== undefined)                   plot.showLegend = data.plotLegend;
+        if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
+
+        if(data.columnAnnotations !== undefined)            plot.visibleColumnAnnotationNames = data.columnAnnotations;
+        if(data.plotColumnSortType !== undefined)           plot.columnSortType = data.plotColumnSortType;
+        if(data.plotColumnSortAnnotation !== undefined)     plot.columnSortAnnotation = data.plotColumnSortAnnotation;
     }
 }

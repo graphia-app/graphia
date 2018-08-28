@@ -1428,6 +1428,14 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
     rebuildPlot();
 }
 
+void CorrelationPlotItem::setForceAllColumnsVisible(bool forceAllColumnsVisible)
+{
+    _forceAllColumnsVisible = forceAllColumnsVisible;
+    emit visibleHorizontalFractionChanged();
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
 void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
 {
     _xAxisLabel = plotXAxisLabel;
@@ -1501,6 +1509,7 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
         _showColumnNames = showColumnNames;
         computeXAxisRange();
         emit visibleHorizontalFractionChanged();
+        emit plotOptionsChanged();
         rebuildPlot();
     }
 }
@@ -1715,7 +1724,13 @@ double CorrelationPlotItem::labelHeight() const
 
 double CorrelationPlotItem::minColumnWidth() const
 {
-    return _showColumnNames ? labelHeight() : 1.0;
+    if(_showColumnNames)
+        return labelHeight();
+
+    if(_forceAllColumnsVisible)
+        return columnAxisWidth() / _columnCount;
+
+    return 1.0;
 }
 
 double CorrelationPlotItem::columnAxisWidth() const

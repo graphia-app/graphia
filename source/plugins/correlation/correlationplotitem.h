@@ -124,7 +124,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
-    Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
+    Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
@@ -138,6 +138,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool forceAllColumnsVisible MEMBER _forceAllColumnsVisible
+        WRITE setForceAllColumnsVisible NOTIFY plotOptionsChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -154,6 +156,7 @@ public:
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
     void setIncludeYZero(bool includeYZero);
+    void setForceAllColumnsVisible(bool forceAllColumnsVisible);
     void setPlotAveragingType(int plotAveragingType);
     void setPlotDispersionVisualType(int plotDispersionVisualType);
 
@@ -214,6 +217,7 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
     bool _includeYZero = false;
+    bool _forceAllColumnsVisible = false;
 
     std::vector<size_t> _sortMap;
 
