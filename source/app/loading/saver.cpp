@@ -173,7 +173,7 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
 
 static json bookmarksAsJson(const Document& document)
 {
-    json jsonObject;
+    json jsonObject = json::object();
 
     auto bookmarks = document.bookmarks();
     for(const auto& bookmark : bookmarks)
