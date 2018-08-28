@@ -1326,7 +1326,7 @@ void CorrelationPlotItem::rebuildPlot()
     // Don't show an emphasised vertical zero line
     xAxis->grid()->setZeroLinePen(xAxis->grid()->pen());
 
-    xAxis->setLabel(_yAxisLabel);
+    _mainYAxis->setLabel(_yAxisLabel);
 
     _mainAxisLayout->setRowSpacing(0);
     _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
