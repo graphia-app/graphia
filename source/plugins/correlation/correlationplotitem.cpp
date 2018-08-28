@@ -1527,7 +1527,6 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
         auto name = columnAnnotaionMap[QStringLiteral("name")].toString();
         auto values = u::toQStringVector(columnAnnotaionMap[QStringLiteral("values")].toStringList());
 
-        _visibleColumnAnnotationNames.emplace(name);
         _columnAnnotations.emplace_back(name, values);
     }
 }

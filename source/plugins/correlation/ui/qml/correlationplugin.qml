@@ -558,12 +558,6 @@ PluginContent
 
                 columnAnnotations: plugin.model.columnAnnotations
 
-                Component.onCompleted:
-                {
-                    // Show all column annotations by default
-                    visibleColumnAnnotationNames = root._availableColumnAnnotationNames;
-                }
-
                 onPlotOptionsChanged: { root.saveRequired = true; }
                 onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
                 onColumnSortTypeChanged: { root.saveRequired = true; }
