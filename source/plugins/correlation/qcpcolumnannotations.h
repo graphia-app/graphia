@@ -33,6 +33,10 @@ private:
 
     std::map<size_t, Row> _rows;
 
+    double _cellWidth = 0.0;
+    double _cellHeight = 0.0;
+    double _halfCellWidth = 0.0;
+
 public:
     explicit QCPColumnAnnotations(QCPAxis *keyAxis, QCPAxis *valueAxis);
 
@@ -49,7 +53,9 @@ protected:
     void drawLegendIcon(QCPPainter* painter, const QRectF &rect) const override;
 
 private:
-    void renderRect(QCPPainter* painter, size_t x, size_t y, size_t w, const QColor& color);
+    void renderRect(QCPPainter* painter, size_t x, size_t y,
+        size_t w, const QString& value, bool selected,
+        std::map<QString, int> valueWidths);
 };
 
 #endif // QCPCOLUMNANNOTATIONS_H
