@@ -1219,7 +1219,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
                 else
                     _visibleColumnAnnotationNames.insert(name);
 
-                emit visibleColumnAnnotationNamesChanged();
+                emit plotOptionsChanged();
 
                 rebuildPlot();
             }
@@ -1594,7 +1594,7 @@ void CorrelationPlotItem::setColumnSortType(int columnSortType)
     if(_columnSortType != columnSortType)
     {
         _columnSortType = columnSortType;
-        emit columnSortTypeChanged();
+        emit plotOptionsChanged();
 
         invalidateLineGraphCache();
         rebuildPlot();
@@ -1606,7 +1606,7 @@ void CorrelationPlotItem::setColumnSortAnnotation(const QString& columnSortAnnot
     if(_columnSortAnnotation != columnSortAnnotation)
     {
         _columnSortAnnotation = columnSortAnnotation;
-        emit columnSortAnnotationChanged();
+        emit plotOptionsChanged();
 
         if(static_cast<PlotColumnSortType>(_columnSortType) == PlotColumnSortType::ColumnAnnotation)
         {
@@ -1649,7 +1649,7 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     for(const auto& columnAnnotation : columnAnnotations)
         _visibleColumnAnnotationNames.emplace(columnAnnotation);
 
-    emit visibleColumnAnnotationNamesChanged();
+    emit plotOptionsChanged();
 }
 
 bool CorrelationPlotItem::columnAnnotationSelectionModeEnabled() const

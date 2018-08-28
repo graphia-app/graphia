@@ -116,7 +116,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
 
     Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
-        WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
+        WRITE setVisibleColumnAnnotationNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
@@ -132,9 +132,9 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
         WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int columnSortType MEMBER _columnSortType WRITE setColumnSortType NOTIFY columnSortTypeChanged)
+    Q_PROPERTY(int columnSortType MEMBER _columnSortType WRITE setColumnSortType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString columnSortAnnotation MEMBER _columnSortAnnotation
-        WRITE setColumnSortAnnotation NOTIFY columnSortAnnotationChanged)
+        WRITE setColumnSortAnnotation NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
@@ -311,9 +311,6 @@ signals:
     void plotOptionsChanged();
     void busyChanged();
 
-    void visibleColumnAnnotationNamesChanged();
     void columnAnnotationSelectionModeEnabledChanged();
-    void columnSortTypeChanged();
-    void columnSortAnnotationChanged();
 };
 #endif // CORRELATIONPLOTITEM_H
