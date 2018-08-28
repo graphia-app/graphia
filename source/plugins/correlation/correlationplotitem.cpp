@@ -557,7 +557,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     auto* graph = _customPlot.addGraph();
-    graph->setPen(QPen(Qt::black));
+    graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
     graph->setName(tr("Mean average of selection"));
 
     QVector<double> xData(static_cast<int>(_columnCount));
@@ -592,7 +592,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     auto* graph = _customPlot.addGraph();
-    graph->setPen(QPen(Qt::black));
+    graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
     graph->setName(tr("Median average of selection"));
 
     QVector<double> xData(static_cast<int>(_columnCount));
