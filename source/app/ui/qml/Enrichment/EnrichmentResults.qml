@@ -150,7 +150,7 @@ ApplicationWindow
                                     enabled: showOnlyEnrichedButton.checked
                                     expression:
                                     {
-                                        return Number(model["OverRep"]) > 1.0 && Number(model["AdjustedFishers"]) < 0.05;
+                                        return Number(model["OverRep"]) > 1.0 && Number(model["AdjustedFishers"]) <= 0.05;
                                     }
                                 }
                             }
@@ -226,6 +226,8 @@ ApplicationWindow
                                 Layout.preferredWidth: (tab.width * 0.5) - 5
                                 model: qtObject
                                 elideLabelWidth: 100
+                                showOnlyEnriched: showOnlyEnrichedButton.checked
+
                                 onPlotValueClicked:
                                 {
                                     var convertedRow = proxyModel.mapFromSource(row);

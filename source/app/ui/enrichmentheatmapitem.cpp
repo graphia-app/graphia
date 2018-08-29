@@ -194,30 +194,39 @@ void EnrichmentHeatmapItem::buildPlot()
     _attributeACount = static_cast<int>(attributeValueSetA.size());
     _attributeBCount = static_cast<int>(attributeValueSetB.size());
 
-    for(int i=0; i<_tableModel->rowCount(); i++)
+    for(int i = 0; i < _tableModel->rowCount(); i++)
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell
         auto xValue = fullLabelToXAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionA)).toString()];
         auto yValue = fullLabelToYAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString()];
-        _colorMap->data()->setCell(xValue + 1,
-                                   yValue + 1,
-                                   _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble());
 
+        auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
+
+        if(_showOnlyEnriched)
+        {
+            auto overRep = _tableModel->data(i, QStringLiteral("OverRep")).toDouble();
+            if(overRep <= 1.0)
+            {
+                //
+                pValue = 1.0;
+            }
+        }
+
+        _colorMap->data()->setCell(xValue + 1, yValue + 1, pValue);
 
         // Ugly hack: Colors blend from margin cells. I recolour them to match adjacent cells so you can't tell
         // 200 IQ fix really...
         if(xValue == 0)
         {
-            _colorMap->data()->setCell(xValue,
-                                       yValue + 1,
-                                       _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble());
+            _colorMap->data()->setCell(xValue, yValue + 1,
+                _colorMap->data()->cell(xValue + 1, yValue + 1));
         }
+
         if(yValue == static_cast<int>(attributeValueSetB.size()) - 1)
         {
-            _colorMap->data()->setCell(xValue + 1,
-                                       yValue + 2,
-                                       _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble());
+            _colorMap->data()->setCell(xValue + 1, yValue + 2,
+                _colorMap->data()->cell(xValue + 1, yValue + 1));
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
@@ -287,6 +296,16 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
     }
 }
 
+void EnrichmentHeatmapItem::setShowOnlyEnriched(bool showOnlyEnriched)
+{
+    if(showOnlyEnriched != _showOnlyEnriched)
+    {
+        _showOnlyEnriched = showOnlyEnriched;
+        buildPlot();
+        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
 void EnrichmentHeatmapItem::setScrollXAmount(double scrollAmount)
 {
     _scrollXAmount = scrollAmount;
@@ -325,9 +344,10 @@ void EnrichmentHeatmapItem::showTooltip()
     double key, value;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
 
-    double pvalue = _colorMap->data()->data(key,value);
+    auto i = static_cast<int>(std::round(value));
+    auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
 
-    _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberForDisplay(pvalue)));
+    _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberForDisplay(pValue)));
 
     const auto COLOR_RECT_WIDTH = 10.0;
     const auto HOVER_MARGIN = 10.0;

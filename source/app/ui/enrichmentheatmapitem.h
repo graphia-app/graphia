@@ -19,6 +19,8 @@ class EnrichmentHeatmapItem : public QQuickPaintedItem
     Q_PROPERTY(double scrollYAmount MEMBER _scrollYAmount WRITE setScrollYAmount NOTIFY scrollAmountChanged)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
 
+    Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched)
+
 private:
     QCPLayer* _textLayer = nullptr;
     QCPColorMap* _colorMap = nullptr;
@@ -41,6 +43,8 @@ private:
     int _elideLabelWidth = 120;
     const double _HEATMAP_OFFSET = 0.5;
 
+    bool _showOnlyEnriched = false;
+
 public:
     explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
     void setData(EnrichmentTableModel::Table table);
@@ -58,6 +62,8 @@ public:
     void setScrollXAmount(double scrollAmount);
     void setScrollYAmount(double scrollAmount);
     void setElideLabelWidth(int elideLabelWidth);
+
+    void setShowOnlyEnriched(bool showOnlyEnriched);
 
     Q_INVOKABLE void buildPlot();
     Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList &extensions);

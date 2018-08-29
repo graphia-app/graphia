@@ -33,16 +33,18 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 
 QVariant EnrichmentTableModel::data(int row, const QString& role)
 {
-    return data(index(row,0), roleNames().key(role.toUtf8()));
+    return data(index(row, 0), roleNames().key(role.toUtf8()));
 }
 
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
 {
     for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
-        if(data(rowIndex, QStringLiteral("SelectionA")) == attributeA
-                && data(rowIndex, QStringLiteral("SelectionB")) == attributeB)
+        if(data(rowIndex, QStringLiteral("SelectionA")) == attributeA &&
+            data(rowIndex, QStringLiteral("SelectionB")) == attributeB)
+        {
             return rowIndex;
+        }
     }
     return -1;
 }
