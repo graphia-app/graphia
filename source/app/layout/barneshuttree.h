@@ -14,11 +14,30 @@ struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq = 0.0f; };
 class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
 {
 private:
-    static Q_DECL_CONSTEXPR QVector3D differenceEpsilon() { return {0.0f, 0.0f, 0.0001f}; }
-    static Q_DECL_CONSTEXPR float distanceSqEpsilon()
+    static constexpr float E = 0.0001f;
+
+    // Cycle through different epsilon vectors so that there is enough
+    // variation that the forces don't get stuck in 2 or fewer dimensions
+    mutable size_t _di = 0;
+    QVector3D differenceEpsilon() const
     {
-        auto e = differenceEpsilon();
-        return e.x() + e.x() + e.y() + e.y() + e.z() + e.z();
+        static std::array<QVector3D, 6> vs =
+        {{
+            {   E, 0.0f, 0.0f},
+            {0.0f,    E, 0.0f},
+            {0.0f, 0.0f,    E},
+            {  -E, 0.0f, 0.0f},
+            {0.0f,   -E, 0.0f},
+            {0.0f, 0.0f,   -E},
+        }};
+
+        _di = (_di + 1) % vs.size();
+        return vs.at(_di);
+    }
+
+    float constexpr distanceSqEpsilon() const
+    {
+        return E * E;
     }
 
     float _theta = 0.8f;
