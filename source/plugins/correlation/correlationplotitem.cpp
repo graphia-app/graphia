@@ -231,6 +231,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::isWideChanged);
 }
 
 CorrelationPlotItem::~CorrelationPlotItem()
@@ -1428,9 +1429,9 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
     rebuildPlot();
 }
 
-void CorrelationPlotItem::setForceAllColumnsVisible(bool forceAllColumnsVisible)
+void CorrelationPlotItem::setShowAllColumns(bool showAllColumns)
 {
-    _forceAllColumnsVisible = forceAllColumnsVisible;
+    _showAllColumns = showAllColumns;
     emit visibleHorizontalFractionChanged();
     emit plotOptionsChanged();
     rebuildPlot();
@@ -1722,15 +1723,22 @@ double CorrelationPlotItem::labelHeight() const
     return _defaultFontMetrics.height() + columnPadding;
 }
 
+const double minColumnPixelWidth = 1.0;
+
+bool CorrelationPlotItem::isWide() const
+{
+    return (_columnCount * minColumnPixelWidth) > columnAxisWidth();
+}
+
 double CorrelationPlotItem::minColumnWidth() const
 {
     if(_showColumnNames)
         return labelHeight();
 
-    if(_forceAllColumnsVisible)
+    if(_showAllColumns)
         return columnAxisWidth() / _columnCount;
 
-    return 1.0;
+    return minColumnPixelWidth;
 }
 
 double CorrelationPlotItem::columnAxisWidth() const

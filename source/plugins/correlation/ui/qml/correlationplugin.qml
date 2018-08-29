@@ -122,13 +122,13 @@ PluginContent
 
     Action
     {
-        id: toggleForceAllColumnsVisible
-        text: qsTr("Force All Columns Visible")
+        id: toggleShowAllColumns
+        text: qsTr("Show All Columns")
         enabled: !plot.showColumnNames
         checkable: true
-        checked: plot.forceAllColumnsVisible
+        checked: plot.showAllColumns
 
-        onTriggered: { plot.forceAllColumnsVisible = !plot.forceAllColumnsVisible; }
+        onTriggered: { plot.showAllColumns = !plot.showAllColumns; }
     }
 
     ExclusiveGroup
@@ -366,7 +366,10 @@ PluginContent
         case 1:
             menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
-            menu.addItem("").action = toggleForceAllColumnsVisible;
+
+            var showAllColumnsMenu = menu.addItem("");
+            showAllColumnsMenu.action = toggleShowAllColumns;
+            showAllColumnsMenu.visible = Qt.binding(function() { return plot.isWide; });
 
             if(plugin.model.columnAnnotations.length > 0)
                 menu.addItem("").action = selectColumnAnnotationsAction;
@@ -708,7 +711,7 @@ PluginContent
             "plotDispersionVisual": plot.plotDispersionVisualType,
 
             "plotIncludeYZero": plot.includeYZero,
-            "plotForceAllColumnsVisible": plot.forceAllColumnsVisible,
+            "plotShowAllColumns": plot.showAllColumns,
 
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines,
@@ -723,26 +726,26 @@ PluginContent
 
     function load(data, version)
     {
-        if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
-        if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
-        if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
-        if(data.hiddenColumns !== undefined)                tableView.hiddenColumns = data.hiddenColumns;
+        if(data.sideBySide !== undefined)               toggleUiOrientationAction.checked = data.sideBySide;
+        if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
 
-        if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
+        if(data.showColumnNames !== undefined)          plot.showColumnNames = data.showColumnNames;
 
-        if(data.plotScaling !== undefined)                  plot.plotScaleType = data.plotScaling;
-        if(data.plotAveraging !== undefined)                plot.plotAveragingType = data.plotAveraging;
-        if(data.plotDispersion !== undefined)               plot.plotDispersionType = data.plotDispersion;
-        if(data.plotDispersionVisual !== undefined)         plot.plotDispersionVisualType = data.plotDispersionVisual;
+        if(data.plotScaling !== undefined)              plot.plotScaleType = data.plotScaling;
+        if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
+        if(data.plotDispersion !== undefined)           plot.plotDispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
 
-        if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
-        if(data.plotForceAllColumnsVisible !== undefined)   plot.forceAllColumnsVisible = data.plotForceAllColumnsVisible;
+        if(data.plotIncludeYZero !== undefined)         plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotShowAllColumns !== undefined)       plot.showAllColumns = data.plotShowAllColumns;
 
-        if(data.plotLegend !== undefined)                   plot.showLegend = data.plotLegend;
-        if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
+        if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
+        if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
 
-        if(data.columnAnnotations !== undefined)            plot.visibleColumnAnnotationNames = data.columnAnnotations;
-        if(data.plotColumnSortType !== undefined)           plot.columnSortType = data.plotColumnSortType;
-        if(data.plotColumnSortAnnotation !== undefined)     plot.columnSortAnnotation = data.plotColumnSortAnnotation;
+        if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
+        if(data.plotColumnSortType !== undefined)       plot.columnSortType = data.plotColumnSortType;
+        if(data.plotColumnSortAnnotation !== undefined) plot.columnSortAnnotation = data.plotColumnSortAnnotation;
     }
 }

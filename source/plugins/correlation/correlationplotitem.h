@@ -138,8 +138,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
-    Q_PROPERTY(bool forceAllColumnsVisible MEMBER _forceAllColumnsVisible
-        WRITE setForceAllColumnsVisible NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool showAllColumns MEMBER _showAllColumns WRITE setShowAllColumns NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool isWide READ isWide NOTIFY isWideChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -156,7 +156,7 @@ public:
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
     void setIncludeYZero(bool includeYZero);
-    void setForceAllColumnsVisible(bool forceAllColumnsVisible);
+    void setShowAllColumns(bool showAllColumns);
     void setPlotAveragingType(int plotAveragingType);
     void setPlotDispersionVisualType(int plotDispersionVisualType);
 
@@ -217,7 +217,7 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
     bool _includeYZero = false;
-    bool _forceAllColumnsVisible = false;
+    bool _showAllColumns = false;
 
     std::vector<size_t> _sortMap;
 
@@ -289,6 +289,7 @@ private:
     bool canShowColumnAnnotationSelection() const;
 
     double visibleHorizontalFraction() const;
+    bool isWide() const;
     double labelHeight() const;
     double minColumnWidth() const;
     double columnAxisWidth() const;
@@ -312,6 +313,7 @@ signals:
     void rightClick();
     void horizontalScrollPositionChanged();
     void visibleHorizontalFractionChanged();
+    void isWideChanged();
     void plotOptionsChanged();
     void busyChanged();
 
