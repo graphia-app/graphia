@@ -98,6 +98,14 @@ Window
 
                         if(_transform.defaultVisualisations !== undefined)
                             visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
+
+                        // This is a hack that forces the scrollView to reconsider the size of its
+                        // content and avoid cutting the bottom off after some combination of clicking
+                        // on transforms in the list. It appears to be related to the Layout.margins
+                        // that are enabled when the scrollbar is visible.
+                        // See LAYOUT_MARGINS_HACK comment for the Layout.margins in question.
+                        scrollView.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff;
+                        scrollView.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
                     }
 
                     description.update();
@@ -144,14 +152,17 @@ Window
                 horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 verticalScrollBarPolicy: Qt.ScrollBarAsNeeded
 
-                RowLayout
+                contentItem: RowLayout
                 {
                     width: scrollView.viewport.width
 
                     ColumnLayout
                     {
                         Layout.fillWidth: true
+
+                        // LAYOUT_MARGINS_HACK
                         Layout.margins: scrollView.frameVisible ? Constants.margin : 0
+
                         spacing: 20
 
                         RowLayout
