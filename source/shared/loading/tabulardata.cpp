@@ -27,7 +27,7 @@ size_t TabularData::numRows() const
     return !_transposed ? _rows : _columns;
 }
 
-void TabularData::setValueAt(size_t column, size_t row, std::string&& value, int progressHint)
+void TabularData::setValueAt(size_t column, size_t row, QString&& value, int progressHint)
 {
     size_t columns = column >= _columns ? column + 1 : _columns;
     size_t rows = row >= _rows ? row + 1 : _rows;
@@ -70,7 +70,7 @@ void TabularData::setValueAt(size_t column, size_t row, std::string&& value, int
     }
 
     _data.resize(newSize);
-    _data.at(index(column, row)) = std::move(value);
+    _data.at(index(column, row)) = value.trimmed();
 }
 
 void TabularData::shrinkToFit()
@@ -86,13 +86,7 @@ void TabularData::reset()
     _transposed = false;
 }
 
-const std::string& TabularData::valueAt(size_t column, size_t row) const
+const QString& TabularData::valueAt(size_t column, size_t row) const
 {
     return _data.at(index(column, row));
-}
-
-QString TabularData::valueAsQString(size_t column, size_t row) const
-{
-    // Note that the whitespace is trimmed
-    return QString::fromStdString(valueAt(column, row)).trimmed();
 }

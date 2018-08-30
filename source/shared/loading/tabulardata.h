@@ -8,6 +8,7 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QString>
 
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@
 class TabularData
 {
 private:
-    std::vector<std::string> _data;
+    std::vector<QString> _data;
     size_t _columns = 0;
     size_t _rows = 0;
     bool _transposed = false;
@@ -30,11 +31,10 @@ public:
     size_t numColumns() const;
     size_t numRows() const;
     bool transposed() const { return _transposed; }
-    const std::string& valueAt(size_t column, size_t row) const;
-    QString valueAsQString(size_t column, size_t row) const;
+    const QString& valueAt(size_t column, size_t row) const;
 
     void setTransposed(bool transposed) { _transposed = transposed; }
-    void setValueAt(size_t column, size_t row, std::string&& value, int progressHint = -1);
+    void setValueAt(size_t column, size_t row, QString&& value, int progressHint = -1);
 
     void shrinkToFit();
 
@@ -83,7 +83,8 @@ private:
                 {
                     if(inQuotes)
                     {
-                        tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
+                        tokenFn(currentColumn++, currentRow,
+                            QString::fromStdString(currentToken), progress);
                         currentToken.clear();
 
                         // Quote closed, but there is text before the delimiter
@@ -99,7 +100,8 @@ private:
 
                     if(delimiter && !inQuotes)
                     {
-                        tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
+                        tokenFn(currentColumn++, currentRow,
+                            QString::fromStdString(currentToken), progress);
                         currentToken.clear();
                     }
                     else
@@ -109,7 +111,8 @@ private:
 
             if(!currentToken.empty())
             {
-                tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
+                tokenFn(currentColumn++, currentRow,
+                    QString::fromStdString(currentToken), progress);
                 currentToken.clear();
             }
 

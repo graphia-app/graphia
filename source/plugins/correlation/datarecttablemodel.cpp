@@ -41,9 +41,8 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 
     if(row >= _data->numRows() || column >= _data->numColumns())
         return  {};
-    auto& value = _data->valueAt(column, row);
 
-    return QString::fromStdString(value);
+    return _data->valueAt(column, row);
 }
 
 QHash<int, QByteArray> DataRectTableModel::roleNames() const

@@ -26,7 +26,7 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
         for(size_t row = tabularData.numRows(); row-- > startRow; )
         {
             auto& value = tabularData.valueAt(column, row);
-            if(u::isNumeric(value) || value.empty())
+            if(u::isNumeric(value) || value.isEmpty())
                 heightHistogram.at(column)++;
             else
                 break;
