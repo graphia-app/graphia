@@ -6,8 +6,6 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
 
-#include "thirdparty/utfcpp/utf8.h"
-
 #include <QObject>
 #include <QUrl>
 
@@ -79,15 +77,9 @@ private:
 
             bool inQuotes = false;
 
-            std::string validatedLine;
-            utf8::replace_invalid(line.begin(), line.end(), std::back_inserter(validatedLine));
-            auto it = validatedLine.begin();
-            auto end = validatedLine.end();
-            while(it < end)
+            for(size_t i = 0; i < line.length(); i++)
             {
-                uint32_t codePoint = utf8::next(it, end);
-
-                if(codePoint == '\"')
+                if(line[i] == '\"')
                 {
                     if(inQuotes)
                     {
@@ -95,15 +87,15 @@ private:
                         currentToken.clear();
 
                         // Quote closed, but there is text before the delimiter
-                        while(it < end && codePoint != Delimiter)
-                            codePoint = utf8::next(it, end);
+                        while(i < line.length() && line[i] != Delimiter)
+                            i++;
                     }
 
                     inQuotes = !inQuotes;
                 }
                 else
                 {
-                    bool delimiter = (codePoint == Delimiter);
+                    bool delimiter = (line[i] == Delimiter);
 
                     if(delimiter && !inQuotes)
                     {
@@ -111,7 +103,7 @@ private:
                         currentToken.clear();
                     }
                     else
-                        utf8::unchecked::append(codePoint, std::back_inserter(currentToken));
+                        currentToken += line[i];
                 }
             }
 
