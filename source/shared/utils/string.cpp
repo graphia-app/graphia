@@ -30,6 +30,8 @@ bool u::isNumeric(const std::string& string)
 bool u::isNumeric(const QString& string)
 {
     bool success = false;
+
+    // cppcheck-suppress ignoredReturnValue
     string.toDouble(&success);
 
     return success;

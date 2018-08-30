@@ -72,7 +72,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             uint64_t dataPoint = columnIndex + rowOffset;
             parser.setProgress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
-            QString value = tabularData.valueAt(columnIndex, rowIndex);
+            const auto& value = tabularData.valueAt(columnIndex, rowIndex);
 
             size_t dataColumnIndex = columnIndex - firstDataColumn;
             size_t dataRowIndex = rowIndex - firstDataRow;
@@ -404,7 +404,7 @@ double CorrelationPluginInstance::imputeValue(const TabularData& tabularData,
         size_t rowCount = 0;
         for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
         {
-            auto value = tabularData.valueAt(columnIndex, avgRowIndex);
+            const auto& value = tabularData.valueAt(columnIndex, avgRowIndex);
             if(!value.isEmpty())
             {
                 averageValue += value.toDouble();
@@ -430,7 +430,7 @@ double CorrelationPluginInstance::imputeValue(const TabularData& tabularData,
         // Find right value
         for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
         {
-            auto value = tabularData.valueAt(rightColumn, rowIndex);
+            const auto& value = tabularData.valueAt(rightColumn, rowIndex);
             if(!value.isEmpty())
             {
                 rightValue = value.toDouble();
@@ -442,7 +442,7 @@ double CorrelationPluginInstance::imputeValue(const TabularData& tabularData,
         // Find left value
         for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
         {
-            auto value = tabularData.valueAt(leftColumn, rowIndex);
+            const auto& value = tabularData.valueAt(leftColumn, rowIndex);
             if(!value.isEmpty())
             {
                 leftValue = value.toDouble();

@@ -39,7 +39,7 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
         auto it = _data.begin() + _columns;
 
         size_t rowsToPad = rows - 1;
-        while(rowsToPad--)
+        while(rowsToPad-- != 0u)
         {
             _data.insert(it, numNewColumns, {});
             it += columns;
