@@ -18198,7 +18198,6 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter)
   int textHeight = qMax(textRect.height(), iconSize.height());  // if text has smaller height than icon, center text vertically in icon height, else align tops
   textRect = QRectF(mRect.x()+iconSize.width()+mParentLegend->iconTextPadding(), mRect.y(), textRect.width(), textHeight);
   painter->save();
-  painter->setClipRect(textRect);
   painter->drawText(textRect, Qt::TextDontClip, mPlottable->name());
   painter->restore();
   // draw icon:
