@@ -27,7 +27,7 @@ private:
     size_t index(size_t column, size_t row) const;
 
 public:
-    void initialise(size_t columns, size_t rows);
+    void reserve(size_t columns, size_t rows);
 
     size_t numColumns() const;
     size_t numRows() const;
@@ -36,7 +36,9 @@ public:
     QString valueAsQString(size_t column, size_t row) const;
 
     void setTransposed(bool transposed) { _transposed = transposed; }
-    void setValueAt(size_t column, size_t row, std::string&& value);
+    void setValueAt(size_t column, size_t row, std::string&& value, int progressHint = -1);
+
+    void shrinkToFit();
 
     void reset();
 };
@@ -70,6 +72,8 @@ private:
         file.seekg(0, std::ios::beg);
         while(u::getline(file, line))
         {
+            auto progress = static_cast<int>(file.tellg() * 100 / fileSize);
+
             if(_parent != nullptr && _parent->cancelled())
                 return false;
 
@@ -87,7 +91,7 @@ private:
                 {
                     if(inQuotes)
                     {
-                        tokenFn(currentColumn++, currentRow, std::move(currentToken));
+                        tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
                         currentToken.clear();
 
                         // Quote closed, but there is text before the delimiter
@@ -103,7 +107,7 @@ private:
 
                     if(delimiter && !inQuotes)
                     {
-                        tokenFn(currentColumn++, currentRow, std::move(currentToken));
+                        tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
                         currentToken.clear();
                     }
                     else
@@ -113,16 +117,14 @@ private:
 
             if(!currentToken.empty())
             {
-                tokenFn(currentColumn++, currentRow, std::move(currentToken));
+                tokenFn(currentColumn++, currentRow, std::move(currentToken), progress);
                 currentToken.clear();
             }
 
             currentRow++;
             currentColumn = 0;
 
-            auto filePosition = file.tellg();
-            if(filePosition >= 0)
-                setProgress(static_cast<int>(filePosition * 100 / fileSize));
+            setProgress(progress);
         }
 
         return true;
@@ -144,33 +146,20 @@ public:
 
     bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
     {
-        size_t columns = 0;
-        size_t rows = 0;
-
-        // First pass to determine the size of the table
-        if(graphModel != nullptr)
-            graphModel->mutableGraph().setPhase(QObject::tr("Finding size"));
-
-        bool success = tokenise(url,
-        [&columns, &rows](size_t column, size_t row, auto)
-        {
-            columns = std::max(columns, column + 1);
-            rows = std::max(rows, row + 1);
-        });
-
-        if(!success)
-            return false;
-
-        _tabularData.initialise(columns, rows);
-
         if(graphModel != nullptr)
             graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
 
-        return tokenise(url,
-        [this](size_t column, size_t row, auto&& token)
+        auto result = tokenise(url,
+        [this](size_t column, size_t row, auto&& token, int progress)
         {
-            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
+            _tabularData.setValueAt(column, row,
+                std::forward<decltype(token)>(token), progress);
         });
+
+        // Free up any over-allocation
+        _tabularData.shrinkToFit();
+
+        return result;
     }
 
     TabularData& tabularData() { return _tabularData; }
