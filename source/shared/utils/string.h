@@ -11,6 +11,7 @@ class QStringList;
 namespace u
 {
     bool isNumeric(const std::string& string);
+    bool isNumeric(const QString& string);
 
     std::vector<QString> toQStringVector(const QStringList& stringList);
     QStringList toQStringList(const std::vector<QString>& qStringVector);

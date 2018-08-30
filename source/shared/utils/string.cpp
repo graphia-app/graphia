@@ -27,6 +27,14 @@ bool u::isNumeric(const std::string& string)
     return pos == string.size() && !std::isnan(value);
 }
 
+bool u::isNumeric(const QString& string)
+{
+    bool success = false;
+    string.toDouble(&success);
+
+    return success;
+}
+
 std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
     std::vector<QString> v;
