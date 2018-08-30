@@ -208,7 +208,7 @@ void EnrichmentHeatmapItem::buildPlot()
             auto overRep = _tableModel->data(i, QStringLiteral("OverRep")).toDouble();
             if(overRep <= 1.0)
             {
-                //
+                // Set a value that will map to grey, so that the heatmap matches the table
                 pValue = 1.0;
             }
         }
