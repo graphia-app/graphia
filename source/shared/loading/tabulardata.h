@@ -7,7 +7,6 @@
 #include "shared/utils/string.h"
 #include "thirdparty/csv/parser.hpp"
 
-
 #include <QObject>
 #include <QUrl>
 #include <QString>
@@ -63,13 +62,8 @@ private:
     template<typename TokenFn>
     bool tokenise(const QUrl& url, TokenFn tokenFn)
     {
-        std::string line;
-        std::string currentToken;
         size_t currentColumn = 0;
         size_t currentRow = 0;
-
-        currentRow = 0;
-        currentColumn = 0;
 
         std::ifstream matrixFile(url.toLocalFile().toStdString());
         auto matrixfileSize = matrixFile.tellg();

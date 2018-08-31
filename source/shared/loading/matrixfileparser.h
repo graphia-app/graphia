@@ -40,6 +40,7 @@ public:
             for(size_t rowIndex = 0; rowIndex < tabularData->numRows(); rowIndex++)
             {
                 auto stringValue = tabularData->valueAt(0, rowIndex);
+
                 bool success = false;
                 stringValue.toDouble(&success);
                 if(success)
@@ -53,6 +54,7 @@ public:
             for(size_t columnIndex = 0; columnIndex < tabularData->numColumns(); columnIndex++)
             {
                 auto stringValue = tabularData->valueAt(columnIndex, 0);
+
                 bool success = false;
                 stringValue.toDouble(&success);
                 if(success)
@@ -72,6 +74,7 @@ public:
                     auto nodeId = graphModel->mutableGraph().addNode();
                     _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
                                               tabularData->valueAt(columnIndex, 0));
+
                     tablePositionToNodeId[columnIndex] = nodeId;
                 }
             }
@@ -85,6 +88,7 @@ public:
                         // Check row and column match (they should!)
                         auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId[rowIndex], QObject::tr("Node Name"));
                         auto actualRowName = tabularData->valueAt(0, rowIndex);
+
                         if(expectedRowName.toString() != actualRowName)
                             return false;
                     }
@@ -108,6 +112,7 @@ public:
                 {
                     // Node names
                     auto nodeId = graphModel->mutableGraph().addNode();
+
                     _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
                                               QObject::tr("Node %1").arg(rowIndex + 1));
                     tablePositionToNodeId[rowIndex] = nodeId;
