@@ -44,7 +44,13 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<GraphMLParser>(&_userNodeData);
 
     if(urlTypeName == QLatin1String("MatrixCSV"))
-        return std::make_unique<MatrixFileParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<MatrixFileParser<','>>(&_userNodeData, &_userEdgeData);
+
+    if(urlTypeName == QLatin1String("MatrixSSV"))
+        return std::make_unique<MatrixFileParser<';'>>(&_userNodeData, &_userEdgeData);
+
+    if(urlTypeName == QLatin1String("MatrixTSV"))
+        return std::make_unique<MatrixFileParser<'\t'>>(&_userNodeData, &_userEdgeData);
 
     return nullptr;
 }
@@ -146,101 +152,56 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("GML"), QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
     registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
     registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
-    registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Matrix CSV File"), QObject::tr("Matrix CSV Files"), {"csv"});
-    registerUrlType(QStringLiteral("Matrix"), QObject::tr("Matrix File"), QObject::tr("Matrix Files"), {"matrix"});
+    registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Matrix CSV File"), QObject::tr("Matrix CSV Files"), {"csv", "matrix"});
+    registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Matrix SSV File"), QObject::tr("Matrix SSV Files"), {"csv", "matrix"});
+    registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Matrix File"), QObject::tr("Matrix Files"), {"tsv", "matrix"});
 }
-
-
-static QStringList contentIdentityOf(const QUrl& url)
-{
-    QStringList result;
-
-    std::ifstream file(url.toLocalFile().toStdString());
-    std::string line;
-
-    QFile qFile(url.toLocalFile());
-    qFile.open(QFile::ReadOnly | QIODevice::Truncate);
-    QTextStream stream(&qFile);
-
-    //Matrix Scanning
-    QString qline = stream.readLine().trimmed();
-    QStringList potentialColumnHeaders = qline.split(QRegExp("(\\s|,)"));
-    qDebug() << potentialColumnHeaders;
-    const int LINE_SCAN_COUNT = 5;
-    bool isMatrix = true;
-
-    // Check if row and column headers match, if so it's very likely a matrix
-    if(!potentialColumnHeaders.isEmpty())
-    {
-        bool headerIsDouble = false;
-        for(QString header : potentialColumnHeaders)
-        {
-            bool success = false;
-            header.toDouble(&success);
-            if(success && !header.isEmpty())
-            {
-                headerIsDouble = true;
-                break;
-            }
-        }
-        for(int i = 0; i < LINE_SCAN_COUNT && !stream.atEnd(); ++i)
-        {
-            QString line = stream.readLine();
-            QStringList splitline = line.split(QRegExp("(\\s|,)"));
-            qDebug() << splitline;
-            if(!splitline.isEmpty())
-            {
-                if(splitline.first() != potentialColumnHeaders[i])
-                {
-                    isMatrix = false;
-                    qDebug() << "Didn't match!";
-                }
-            }
-        }
-    }
-    qDebug() << "Is Matrix" << isMatrix;
-
-
-    if(file && u::getline(file, line))
-    {
-        size_t numCommas = 0;
-        size_t numTabs = 0;
-        size_t numSpaces = 0;
-        bool inQuotes = false;
-
-        for(auto character : line)
-        {
-            switch(character)
-            {
-            case '"': inQuotes = !inQuotes; break;
-            case ',': if(!inQuotes) { numCommas++; } break;
-            case '\t': if(!inQuotes) { numTabs++; } break;
-            case ' ': if(!inQuotes) { numSpaces++; } break;
-            default: break;
-            }
-        }
-
-        auto max = std::max({numCommas, numTabs, numSpaces});
-
-        if(numTabs == max)
-            result.append(QStringLiteral("CorrelationTSV"));
-        if(numCommas == max)
-            result.append(QStringLiteral("CorrelationCSV"));
-        if(numSpaces == max)
-            result.append(QStringLiteral("PairwiseTXT"));
-    }
-
-    return result;
-}
-
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 {
     auto urlTypes = identifyByExtension(url);
-    contentIdentityOf(url);
 
     if(urlTypes.isEmpty())
         return {};
 
-    return urlTypes;
+    QStringList result;
+
+    for(auto& typeString : urlTypes)
+    {
+        if(typeString == "GML")
+        {
+            GmlFileParser parser(nullptr, nullptr);
+            if(parser.isType(url))
+                result.push_back(typeString);
+        }
+        else if(typeString == "PairwiseTXT")
+        {
+            PairwiseTxtFileParser parser(nullptr, nullptr);
+            if(parser.isType(url))
+                result.push_back(typeString);
+        }
+        else if(typeString == "GraphML")
+        {
+            GraphMLParser parser(nullptr);
+            if(parser.isType(url))
+                result.push_back(typeString);
+        }
+        else if(typeString == "MatrixCSV")
+        {
+            if(MatrixFileParser<','>::isType(url))
+                result.push_back(typeString);
+        }
+        else if(typeString == "MatrixSSV")
+        {
+            if(MatrixFileParser<';'>::isType(url))
+                result.push_back(typeString);
+        }
+        else if(typeString == "MatrixTSV")
+        {
+            if(MatrixFileParser<'\t'>::isType(url))
+                result.push_back(typeString);
+        }
+    }
+
+    return result;
 }

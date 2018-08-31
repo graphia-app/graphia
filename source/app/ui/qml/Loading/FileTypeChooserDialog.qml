@@ -23,12 +23,6 @@ Dialog
     property string fileType
     property bool inNewTab
 
-    onVisibleChanged:
-    {
-        if(!visible)
-            mapping.length = 0;
-    }
-
     GridLayout
     {
         columns: 2

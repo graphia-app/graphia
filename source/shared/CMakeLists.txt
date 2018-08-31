@@ -84,7 +84,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/matrixfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp

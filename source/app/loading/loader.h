@@ -58,6 +58,8 @@ public:
 
     static QString pluginNameFor(const QUrl& url);
     static bool canOpen(const QUrl& url);
+
+    static bool isType(const QUrl&) { return true; }
 };
 
 #endif // LOADER_H

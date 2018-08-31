@@ -14,6 +14,7 @@ public:
     explicit PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    static bool isType(const QUrl&) { return true; }
 };
 
 #endif // PAIRWISETXTFILEPARSER_H

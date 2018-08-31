@@ -5,6 +5,8 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
+#include "thirdparty/csv/parser.hpp"
+
 
 #include <QObject>
 #include <QUrl>
@@ -61,76 +63,34 @@ private:
     template<typename TokenFn>
     bool tokenise(const QUrl& url, TokenFn tokenFn)
     {
-        std::ifstream file(url.toLocalFile().toStdString());
-        if(!file)
-            return false;
-
-        auto fileSize = file.tellg();
-        file.seekg(0, std::ios::end);
-        fileSize = file.tellg() - fileSize;
-
         std::string line;
         std::string currentToken;
         size_t currentColumn = 0;
         size_t currentRow = 0;
 
-        setProgress(-1);
+        currentRow = 0;
+        currentColumn = 0;
 
-        file.seekg(0, std::ios::beg);
-        while(u::getline(file, line))
+        std::ifstream matrixFile(url.toLocalFile().toStdString());
+        auto matrixfileSize = matrixFile.tellg();
+        matrixFile.seekg(0, std::ios::end);
+        matrixfileSize = matrixFile.tellg() - matrixfileSize;
+        matrixFile.seekg(0, std::ios::beg);
+
+        aria::csv::CsvParser testParser(matrixFile);
+        for(auto& row : testParser)
         {
-            auto progress = static_cast<int>(file.tellg() * 100 / fileSize);
-
-            if(_parent != nullptr && _parent->cancelled())
-                return false;
-
-            bool inQuotes = false;
-
-            for(size_t i = 0; i < line.length(); i++)
-            {
-                if(line[i] == '\"')
-                {
-                    if(inQuotes)
-                    {
-                        tokenFn(currentColumn++, currentRow,
-                            QString::fromStdString(currentToken), progress);
-                        currentToken.clear();
-
-                        // Quote closed, but there is text before the delimiter
-                        while(i < line.length() && line[i] != Delimiter)
-                            i++;
-                    }
-
-                    inQuotes = !inQuotes;
-                }
-                else
-                {
-                    bool delimiter = (line[i] == Delimiter);
-
-                    if(delimiter && !inQuotes)
-                    {
-                        tokenFn(currentColumn++, currentRow,
-                            QString::fromStdString(currentToken), progress);
-                        currentToken.clear();
-                    }
-                    else
-                        currentToken += line[i];
-                }
-            }
-
-            if(!currentToken.empty())
+            auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
+            setProgress(progress);
+            for (auto field : row)
             {
                 tokenFn(currentColumn++, currentRow,
-                    QString::fromStdString(currentToken), progress);
-                currentToken.clear();
+                        QString::fromStdString(field), progress);
             }
 
             currentRow++;
             currentColumn = 0;
-
-            setProgress(progress);
         }
-
         return true;
     }
 
@@ -167,6 +127,12 @@ public:
     }
 
     TabularData& tabularData() { return _tabularData; }
+
+    static bool isType(const QUrl&)
+    { 
+        return true;
+    }
+
 };
 
 using CsvFileParser = TextDelimitedTabularDataParser<','>;

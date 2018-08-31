@@ -113,6 +113,7 @@ private:
 public:
     explicit GraphMLParser(UserNodeData *userNodeData);
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    static bool isType(const QUrl &) { return true; }
 };
 
 #endif // GRAPHMLPARSER_H
