@@ -45,7 +45,11 @@ PluginContent
         checkable: true
         checked: plot.showColumnNames
 
-        onTriggered: { plot.showColumnNames = !plot.showColumnNames; }
+        onTriggered:
+        {
+            plot.showAllColumns = false;
+            plot.showColumnNames = !plot.showColumnNames;
+        }
     }
 
     Action
@@ -124,11 +128,14 @@ PluginContent
     {
         id: toggleShowAllColumns
         text: qsTr("Show All Columns")
-        enabled: !plot.showColumnNames
         checkable: true
         checked: plot.showAllColumns
 
-        onTriggered: { plot.showAllColumns = !plot.showAllColumns; }
+        onTriggered:
+        {
+            plot.showColumnNames = false;
+            plot.showAllColumns = !plot.showAllColumns;
+        }
     }
 
     ExclusiveGroup
