@@ -366,8 +366,8 @@ ApplicationWindow
             }
             else
             {
-                if(failureReasons.length === 1)
-                    errorOpeningFileMessageDialog.text = failureReasons[0];
+                if(failureReasons.length > 0)
+                    errorOpeningFileMessageDialog.text += failureReasons[0];
             }
 
             errorOpeningFileMessageDialog.open();

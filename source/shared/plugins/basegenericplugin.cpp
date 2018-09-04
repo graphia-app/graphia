@@ -205,3 +205,14 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 
     return result;
 }
+
+QString BaseGenericPlugin::failureReason(const QUrl &url) const
+{
+    auto urlTypes = identifyByExtension(url);
+    if(!urlTypes.isEmpty())
+    {
+        return tr("The files contents does not match its filename extension. Extension Type: %1")
+                    .arg(urlTypes.join(','));
+    }
+    return {};
+}

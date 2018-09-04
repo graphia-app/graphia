@@ -86,7 +86,7 @@ public:
                     if(hasColumnHeaders)
                     {
                         // Check row and column match (they should!)
-                        auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId[rowIndex], QObject::tr("Node Name"));
+                        auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId.at(rowIndex), QObject::tr("Node Name"));
                         auto actualRowName = tabularData->valueAt(0, rowIndex);
 
                         if(expectedRowName.toString() != actualRowName)
@@ -106,7 +106,6 @@ public:
             // No headers start from top left
             if(!hasColumnHeaders && !hasRowHeaders)
             {
-                qDebug() << "Creating Nodes..." << tabularData->numRows();
                 // Populate with "Node 1, Node 2..."
                 for(size_t rowIndex = 0; rowIndex < tabularData->numRows(); rowIndex++)
                 {
@@ -127,11 +126,24 @@ public:
                     auto qStringValue = tabularData->valueAt(columnIndex, rowIndex);
                     bool success = false;
                     double doubleValue = qStringValue.toDouble(&success);
+                    NodeId targetNode, sourceNode;
+
+                    // Headers shift the map slightly
+                    if(hasColumnHeaders && hasRowHeaders)
+                    {
+                        targetNode = tablePositionToNodeId.at(columnIndex);
+                        sourceNode = tablePositionToNodeId.at(rowIndex);
+                    }
+                    else
+                    {
+                        targetNode = tablePositionToNodeId.at(columnIndex - dataStartColumn);
+                        sourceNode = tablePositionToNodeId.at(rowIndex - dataStartRow);
+                    }
 
                     if(success && doubleValue != 0.0)
                     {
-                        auto edgeId = graphModel->mutableGraph().addEdge(tablePositionToNodeId[rowIndex],
-                                                                        tablePositionToNodeId[columnIndex]);
+                        auto edgeId = graphModel->mutableGraph().addEdge(sourceNode,
+                                                                        targetNode);
                         _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(doubleValue));
                     }
                 }
@@ -141,77 +153,27 @@ public:
     }
     static bool isType(const QUrl &url)
     {
-        //Matrix Scanning
-        std::string potentialDelimiters = ",;\t ";
-        std::vector<std::string> potentialColumnHeaders;
-        std::vector<size_t> columnAppearances(potentialDelimiters.size());
-
-        std::ifstream matrixFile(url.toLocalFile().toStdString());
-        char delimiter = '\0';
-
-        const int LINE_SCAN_COUNT = 5;
-        const int ALLOWED_COLUMN_COUNT_DELTA = 1;
-
-        // Find the appropriate delimiter from list
-        for(size_t i = 0; i < potentialDelimiters.size(); ++i)
+        if(TextDelimitedTabularDataParser<Delimiter>::isType(url))
         {
-            auto testDelimiter = potentialDelimiters[i];
-            aria::csv::CsvParser testParser(matrixFile);
-            testParser.delimiter(testDelimiter);
-
-            // Scan first few rows for matching columns
-            size_t rowIndex = 0;
-            size_t columnAppearancesMin = std::numeric_limits<size_t>::max();
-            for(auto testRow : testParser)
-            {
-                if(rowIndex >= LINE_SCAN_COUNT)
-                    break;
-
-                columnAppearances[i] = std::max(testRow.size(), columnAppearances[i]);
-                columnAppearancesMin = std::min(testRow.size(), columnAppearancesMin);
-
-                if(columnAppearances[i] - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
-                {
-                    // Inconsistant column count so not a matrix
-                    columnAppearances[i] = 0;
-                    break;
-                }
-
-                rowIndex++;
-            }
-
-            matrixFile.clear();
-            matrixFile.seekg(0, std::ios::beg);
-        }
-        std::vector<char> likelyDelimiters;
-        size_t maxColumns = *std::max_element(columnAppearances.begin(), columnAppearances.end());
-        if(maxColumns > 0)
-        {
-            for(size_t i = 0; i < columnAppearances.size(); ++i)
-            {
-                if(columnAppearances[i] >= maxColumns)
-                    likelyDelimiters.push_back(potentialDelimiters[i]);
-            }
-        }
-
-        if(likelyDelimiters.size() > 0)
-        {
-            //TO-DO: Handle multiple delimiters?
-            delimiter = likelyDelimiters[0];
-
-            // Found delimiter doesn't match the required delimiters so fail
-            if(Delimiter != delimiter)
-                return false;
+            std::ifstream matrixFile(url.toLocalFile().toStdString());
 
             aria::csv::CsvParser parser(matrixFile);
-            parser.delimiter(delimiter);
+            parser.delimiter(Delimiter);
+
+            std::vector<std::string> potentialColumnHeaders;
 
             bool headerMatch = true;
             bool firstColumnAllDouble = true;
             bool firstRowAllDouble = true;
             size_t rowIndex = 0;
+
+            const int LINE_SCAN_COUNT = 5;
+
             for(auto& row : parser)
             {
+                if(row.size() < 2)
+                    return false;
+
                 int fieldIndex = 0;
                 for (auto& field : row)
                 {
@@ -219,8 +181,7 @@ public:
                     {
                         bool isDouble = false;
                         QString::fromStdString(field).toDouble(&isDouble);
-                        qDebug() << QString::fromStdString(field) << isDouble;
-                        if(!isDouble && field != "")
+                        if(!isDouble && field != "" && fieldIndex > 0)
                             firstRowAllDouble = false;
 
                         potentialColumnHeaders.push_back(field);
@@ -232,14 +193,15 @@ public:
                                 || potentialColumnHeaders[rowIndex] != field)
                         {
                             headerMatch = false;
+                        }
+
+                        // The first entry could be headers so don't check for a double
+                        if(rowIndex > 0)
+                        {
                             bool isDouble = false;
-                            if(rowIndex < potentialColumnHeaders.size() - 1)
-                            {
-                                QString::fromStdString(field).toDouble(&isDouble);
-                                qDebug() << QString::fromStdString(field) << isDouble;
-                                if(!isDouble && field != "")
-                                    firstColumnAllDouble = false;
-                            }
+                            QString::fromStdString(field).toDouble(&isDouble);
+                            if(!isDouble && field != "")
+                                firstColumnAllDouble = false;
                         }
                     }
                     fieldIndex++;

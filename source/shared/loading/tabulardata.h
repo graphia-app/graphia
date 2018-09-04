@@ -72,6 +72,7 @@ private:
         matrixFile.seekg(0, std::ios::beg);
 
         aria::csv::CsvParser testParser(matrixFile);
+        testParser.delimiter(Delimiter);
         for(auto& row : testParser)
         {
             auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
@@ -122,12 +123,72 @@ public:
 
     TabularData& tabularData() { return _tabularData; }
 
-    static bool isType(const QUrl&)
-    { 
-        return true;
-    }
+    static bool isType(const QUrl &url)
+    {
+        //Matrix Scanning
+        std::string potentialDelimiters = ",;\t ";
+        std::vector<size_t> columnAppearances(potentialDelimiters.size());
 
+        std::ifstream file(url.toLocalFile().toStdString());
+        char delimiter = '\0';
+
+        const int LINE_SCAN_COUNT = 5;
+        const int ALLOWED_COLUMN_COUNT_DELTA = 1;
+
+        // Find the appropriate delimiter from list
+        for(size_t i = 0; i < potentialDelimiters.size(); ++i)
+        {
+            auto testDelimiter = potentialDelimiters[i];
+            aria::csv::CsvParser testParser(file);
+            testParser.delimiter(testDelimiter);
+
+            // Scan first few rows for matching columns
+            size_t rowIndex = 0;
+            size_t columnAppearancesMin = std::numeric_limits<size_t>::max();
+            for(auto testRow : testParser)
+            {
+                if(rowIndex >= LINE_SCAN_COUNT)
+                    break;
+
+                columnAppearances[i] = std::max(testRow.size(), columnAppearances[i]);
+                columnAppearancesMin = std::min(testRow.size(), columnAppearancesMin);
+
+                if(columnAppearances[i] - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
+                {
+                    // Inconsistant column count so not a matrix
+                    columnAppearances[i] = 0;
+                    break;
+                }
+
+                rowIndex++;
+            }
+
+            file.clear();
+            file.seekg(0, std::ios::beg);
+        }
+        std::vector<char> likelyDelimiters;
+        size_t maxColumns = *std::max_element(columnAppearances.begin(), columnAppearances.end());
+        if(maxColumns > 0)
+        {
+            for(size_t i = 0; i < columnAppearances.size(); ++i)
+            {
+                if(columnAppearances[i] >= maxColumns)
+                    likelyDelimiters.push_back(potentialDelimiters[i]);
+            }
+        }
+
+        if(likelyDelimiters.size() > 0)
+        {
+            delimiter = likelyDelimiters[0];
+
+            if(Delimiter == delimiter)
+                return true;
+        }
+
+        return false;
+    }
 };
+
 
 using CsvFileParser = TextDelimitedTabularDataParser<','>;
 using TsvFileParser = TextDelimitedTabularDataParser<'\t'>;

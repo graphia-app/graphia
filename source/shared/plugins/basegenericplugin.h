@@ -61,12 +61,11 @@ signals:
 class BaseGenericPlugin : public BasePlugin
 {
     Q_OBJECT
-
 public:
     BaseGenericPlugin();
 
     QStringList identifyUrl(const QUrl& url) const override;
-    QString failureReason(const QUrl&) const override { return {}; }
+    QString failureReason(const QUrl&) const override;
 
     bool editable() const override { return true; }
 };
