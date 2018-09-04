@@ -300,6 +300,16 @@ void CommandManager::cancel()
     }
 }
 
+void CommandManager::wait()
+{
+    do
+    {
+        if(_thread.joinable())
+            _thread.join();
+    }
+    while(commandsArePending());
+}
+
 void CommandManager::timerEvent(QTimerEvent*)
 {
     std::unique_lock<std::mutex> lock(_currentCommandMutex);

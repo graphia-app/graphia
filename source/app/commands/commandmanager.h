@@ -61,6 +61,8 @@ public:
 
     void cancel();
 
+    void wait();
+
 private:
     template<typename Fn> void doCommand(ICommand* command,
                                          const QString& verb, Fn&& fn)

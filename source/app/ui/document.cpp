@@ -62,6 +62,9 @@ Document::Document(QObject* parent) :
 
 Document::~Document()
 {
+    // Wait for any executing commands to complete
+    _commandManager.wait();
+
     // Execute anything pending (primarily to avoid deadlock)
     executeDeferred();
 
@@ -604,8 +607,6 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData, const QBy
     saver.setUiData(uiData);
     saver.setPluginInstance(_pluginInstance.get());
     saver.setPluginUiData(pluginUiData);
-
-
 
     _commandManager.executeOnce(
         {
