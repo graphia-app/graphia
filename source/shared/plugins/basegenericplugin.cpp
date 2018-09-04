@@ -170,20 +170,17 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
     {
         if(typeString == "GML")
         {
-            GmlFileParser parser(nullptr, nullptr);
-            if(parser.isType(url))
+            if(GmlFileParser::isType(url))
                 result.push_back(typeString);
         }
         else if(typeString == "PairwiseTXT")
         {
-            PairwiseTxtFileParser parser(nullptr, nullptr);
-            if(parser.isType(url))
+            if(PairwiseTxtFileParser::isType(url))
                 result.push_back(typeString);
         }
         else if(typeString == "GraphML")
         {
-            GraphMLParser parser(nullptr);
-            if(parser.isType(url))
+            if(GraphMLParser::isType(url))
                 result.push_back(typeString);
         }
         else if(typeString == "MatrixCSV")
