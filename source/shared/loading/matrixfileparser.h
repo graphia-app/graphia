@@ -6,16 +6,19 @@
 #include "shared/plugins/userelementdata.h"
 #include "thirdparty/csv/parser.hpp"
 
-template<const char Delimiter> class MatrixFileParser : public IParser
+template<const char Delimiter>
+class MatrixFileParser : public IParser
 {
     UserNodeData* _userNodeData;
     UserEdgeData* _userEdgeData;
-public:
-    MatrixFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData)
-        : _userNodeData(userNodeData), _userEdgeData(userEdgeData) {}
 
 public:
-    bool parse(const QUrl &url, IGraphModel *graphModel) override
+    MatrixFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+        _userNodeData(userNodeData), _userEdgeData(userEdgeData)
+    {}
+
+public:
+    bool parse(const QUrl& url, IGraphModel* graphModel) override
     {
         TextDelimitedTabularDataParser<Delimiter> fileParser(this);
         TabularData* tabularData = nullptr;
@@ -65,7 +68,8 @@ public:
             if(hasColumnHeaders)
             {
                 dataStartRow = 1;
-                for(size_t columnIndex = hasRowHeaders ? 1 : 0; columnIndex < tabularData->numColumns(); columnIndex++)
+                for(size_t columnIndex = hasRowHeaders ? 1 : 0; columnIndex < tabularData->numColumns();
+                    columnIndex++)
                 {
                     // Add column headers as nodes
                     auto nodeId = graphModel->mutableGraph().addNode();
@@ -84,7 +88,8 @@ public:
                     {
                         // Nodes have already been added
                         // Check row and column match (they should!)
-                        auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId.at(rowIndex), QObject::tr("Node Name"));
+                        auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId.at(rowIndex),
+                                                                      QObject::tr("Node Name"));
                         auto actualRowName = tabularData->valueAt(0, rowIndex);
 
                         if(expectedRowName.toString() != actualRowName)
@@ -122,7 +127,8 @@ public:
             // Generate Edges from dataset
             for(size_t rowIndex = dataStartRow; rowIndex < tabularData->numRows(); rowIndex++)
             {
-                for(size_t columnIndex = dataStartColumn; columnIndex < tabularData->numColumns(); columnIndex++)
+                for(size_t columnIndex = dataStartColumn; columnIndex < tabularData->numColumns();
+                    columnIndex++)
                 {
                     // Edges
                     auto qStringValue = tabularData->valueAt(columnIndex, rowIndex);
@@ -144,16 +150,16 @@ public:
 
                     if(success && doubleValue != 0.0)
                     {
-                        auto edgeId = graphModel->mutableGraph().addEdge(sourceNode,
-                                                                        targetNode);
-                        _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(doubleValue));
+                        auto edgeId = graphModel->mutableGraph().addEdge(sourceNode, targetNode);
+                        _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"),
+                                                  QString::number(doubleValue));
                     }
                 }
             }
         }
         return true;
     }
-    static bool isType(const QUrl &url)
+    static bool isType(const QUrl& url)
     {
         // To check for a matrix first check the selected delimiter is valid for the file.
         // Then scan for headers. A matrix can optionally have column or row headers. Or none.
@@ -180,7 +186,7 @@ public:
                     return false;
 
                 int columnIndex = 0;
-                for (auto& field : row)
+                for(auto& field : row)
                 {
                     if(rowIndex == 0)
                     {
@@ -194,8 +200,8 @@ public:
 
                     if(columnIndex == 0)
                     {
-                        if(rowIndex >= potentialColumnHeaders.size()
-                                || potentialColumnHeaders[rowIndex] != field)
+                        if(rowIndex >= potentialColumnHeaders.size() ||
+                           potentialColumnHeaders[rowIndex] != field)
                         {
                             headerMatch = false;
                         }

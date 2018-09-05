@@ -8,13 +8,13 @@
 #include "thirdparty/csv/parser.hpp"
 
 #include <QObject>
-#include <QUrl>
 #include <QString>
+#include <QUrl>
 
+#include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <fstream>
 
 class TabularData
 {
@@ -51,7 +51,8 @@ public:
     void reset();
 };
 
-template<const char Delimiter> class TextDelimitedTabularDataParser : public IParser
+template<const char Delimiter>
+class TextDelimitedTabularDataParser : public IParser
 {
     static_assert(Delimiter != '\"', "Delimiter cannot be a quotemark");
 
@@ -77,10 +78,9 @@ private:
         {
             auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
             setProgress(progress);
-            for (auto field : row)
+            for(auto field : row)
             {
-                tokenFn(currentColumn++, currentRow,
-                        QString::fromStdString(field), progress);
+                tokenFn(currentColumn++, currentRow, QString::fromStdString(field), progress);
             }
 
             currentRow++;
@@ -90,16 +90,11 @@ private:
     }
 
 public:
-    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) :
-        _parent(parent)
+    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) : _parent(parent)
     {
         if(parent != nullptr)
         {
-            setProgressFn(
-            [parent](int percent)
-            {
-                parent->setProgress(percent);
-            });
+            setProgressFn([parent](int percent) { parent->setProgress(percent); });
         }
     }
 
@@ -108,11 +103,8 @@ public:
         if(graphModel != nullptr)
             graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
 
-        auto result = tokenise(url,
-        [this](size_t column, size_t row, auto&& token, int progress)
-        {
-            _tabularData.setValueAt(column, row,
-                std::forward<decltype(token)>(token), progress);
+        auto result = tokenise(url, [this](size_t column, size_t row, auto&& token, int progress) {
+            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token), progress);
         });
 
         // Free up any over-allocation
@@ -123,7 +115,7 @@ public:
 
     TabularData& tabularData() { return _tabularData; }
 
-    static bool isType(const QUrl &url)
+    static bool isType(const QUrl& url)
     {
         // Scans a few lines and identifies the delimiter based on the consistancy
         // of the column count it produces on each row (within a delta tolerance)
@@ -193,7 +185,6 @@ public:
         return false;
     }
 };
-
 
 using CsvFileParser = TextDelimitedTabularDataParser<','>;
 using TsvFileParser = TextDelimitedTabularDataParser<'\t'>;
