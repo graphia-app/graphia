@@ -14,7 +14,7 @@ public:
     explicit GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
-    static bool isType(const QUrl&) { return true; }
+    static bool canLoad(const QUrl&) { return true; }
 };
 
 #endif // GMLFILEPARSER_H

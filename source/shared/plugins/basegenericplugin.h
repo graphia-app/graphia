@@ -61,6 +61,7 @@ signals:
 class BaseGenericPlugin : public BasePlugin
 {
     Q_OBJECT
+
 public:
     BaseGenericPlugin();
 

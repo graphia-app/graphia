@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 
 class TabularData
 {
@@ -117,21 +118,21 @@ public:
 
     static bool isType(const QUrl& url)
     {
-        // Scans a few lines and identifies the delimiter based on the consistancy
+        // Scans a few lines and identifies the delimiter based on the consistency
         // of the column count it produces on each row (within a delta tolerance)
         // with each potential delimiter.
-        // Largest consistant column count within the tolerance delta wins
-        const std::string POTENTIAL_DELIMITERS = ",;\t ";
+        // Largest consistent column count within the tolerance delta wins
+        const char POTENTIAL_DELIMITERS[] = ",;\t ";
         const int LINE_SCAN_COUNT = 5;
         const int ALLOWED_COLUMN_COUNT_DELTA = 1;
 
-        std::vector<size_t> columnAppearances(POTENTIAL_DELIMITERS.size());
+        std::array<size_t, sizeof(POTENTIAL_DELIMITERS) - 1> columnAppearances;
 
         std::ifstream file(url.toLocalFile().toStdString());
         char delimiter = '\0';
 
         // Find the appropriate delimiter from list
-        for(size_t i = 0; i < POTENTIAL_DELIMITERS.size(); ++i)
+        for(size_t i = 0; i < std::strlen(POTENTIAL_DELIMITERS); ++i)
         {
             auto testDelimiter = POTENTIAL_DELIMITERS[i];
             aria::csv::CsvParser testParser(file);
@@ -150,7 +151,7 @@ public:
 
                 if(columnAppearances[i] - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
                 {
-                    // Inconsistant column count so not a matrix
+                    // Inconsistent column count so not a matrix
                     columnAppearances[i] = 0;
                     break;
                 }

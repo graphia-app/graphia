@@ -168,42 +168,24 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 
     for(auto& typeString : urlTypes)
     {
-        if(typeString == "GML")
-        {
-            if(GmlFileParser::isType(url))
+        if(typeString == "GML" && GmlFileParser::canLoad(url))
                 result.push_back(typeString);
-        }
-        else if(typeString == "PairwiseTXT")
-        {
-            if(PairwiseTxtFileParser::isType(url))
+        if(typeString == "PairwiseTXT" && PairwiseTxtFileParser::canLoad(url))
                 result.push_back(typeString);
-        }
-        else if(typeString == "GraphML")
-        {
-            if(GraphMLParser::isType(url))
+        else if(typeString == "GraphML" && GraphMLParser::canLoad(url))
                 result.push_back(typeString);
-        }
-        else if(typeString == "MatrixCSV")
-        {
-            if(MatrixFileCSVParser::isType(url))
+        else if(typeString == "MatrixCSV" && MatrixFileCSVParser::canLoad(url))
                 result.push_back(typeString);
-        }
-        else if(typeString == "MatrixSSV")
-        {
-            if(MatrixFileSSVParser::isType(url))
+        else if(typeString == "MatrixSSV" && MatrixFileSSVParser::canLoad(url))
                 result.push_back(typeString);
-        }
-        else if(typeString == "MatrixTSV")
-        {
-            if(MatrixFileTSVParser::isType(url))
+        else if(typeString == "MatrixTSV" && MatrixFileTSVParser::canLoad(url))
                 result.push_back(typeString);
-        }
     }
 
     return result;
 }
 
-QString BaseGenericPlugin::failureReason(const QUrl &url) const
+QString BaseGenericPlugin::failureReason(const QUrl& url) const
 {
     auto urlTypes = identifyByExtension(url);
     if(!urlTypes.isEmpty())
