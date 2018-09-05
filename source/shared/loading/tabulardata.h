@@ -74,9 +74,9 @@ private:
         matrixfileSize = matrixFile.tellg() - matrixfileSize;
         matrixFile.seekg(0, std::ios::beg);
 
-        aria::csv::CsvParser testParser(matrixFile);
-        testParser.delimiter(Delimiter);
-        for(auto& row : testParser)
+        auto testParser = std::make_unique<aria::csv::CsvParser>(matrixFile);
+        testParser->delimiter(Delimiter);
+        for(auto& row : *testParser)
         {
             auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
             setProgress(progress);
@@ -134,13 +134,13 @@ public:
         for(size_t i = 0; i < POTENTIAL_DELIMITERS.length(); ++i)
         {
             auto testDelimiter = POTENTIAL_DELIMITERS.at(i);
-            aria::csv::CsvParser testParser(file);
-            testParser.delimiter(testDelimiter);
+            auto testParser = std::make_unique<aria::csv::CsvParser>(file);
+            testParser->delimiter(testDelimiter);
 
             // Scan first few rows for matching columns
             size_t rowIndex = 0;
             size_t columnAppearancesMin = std::numeric_limits<size_t>::max();
-            for(const auto& testRow : testParser)
+            for(const auto& testRow : *testParser)
             {
                 if(rowIndex >= LINE_SCAN_COUNT)
                     break;

@@ -160,8 +160,8 @@ public:
         {
             std::ifstream matrixFile(url.toLocalFile().toStdString());
 
-            aria::csv::CsvParser parser(matrixFile);
-            parser.delimiter(Delimiter);
+            auto parser = std::make_unique<aria::csv::CsvParser>(matrixFile);
+            parser->delimiter(Delimiter);
 
             std::vector<std::string> potentialColumnHeaders;
 
@@ -172,7 +172,7 @@ public:
 
             const int LINE_SCAN_COUNT = 5;
 
-            for(auto& row : parser)
+            for(auto& row : *parser)
             {
                 if(row.size() < 2)
                     return false;
