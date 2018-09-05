@@ -24,7 +24,7 @@ private:
 public:
     explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName, TabularData& tabularData, QRect dataRect);
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
-    static bool isType(const QUrl&) { return true; }
+    static bool canLoad(const QUrl&) { return true; }
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
