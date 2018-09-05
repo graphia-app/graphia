@@ -26,31 +26,27 @@ public:
         tabularData = &(fileParser.tabularData());
         std::map<size_t, NodeId> tablePositionToNodeId;
 
-        bool hasColumnHeaders = false;
-        bool hasRowHeaders = false;
+        bool hasColumnHeaders = true;
+        bool hasRowHeaders = true;
         size_t dataStartRow = 0;
         size_t dataStartColumn = 0;
 
-        // Prepass for headers
         if(tabularData->numRows() > 0 && tabularData->numColumns() > 0)
         {
-            // Set temporarily to true
-            hasRowHeaders = true;
-            hasColumnHeaders = true;
+            // Check first column for row headers
             for(size_t rowIndex = 0; rowIndex < tabularData->numRows(); rowIndex++)
             {
                 auto stringValue = tabularData->valueAt(0, rowIndex);
-
                 bool success = false;
                 stringValue.toDouble(&success);
+                // Not a header if I can convert to double
                 if(success)
                 {
-                    // Probably doesnt if I can convert the header to double
                     hasRowHeaders = false;
                     break;
                 }
             }
-            // Column Headers
+            // Check first row for column headers
             for(size_t columnIndex = 0; columnIndex < tabularData->numColumns(); columnIndex++)
             {
                 auto stringValue = tabularData->valueAt(columnIndex, 0);
@@ -65,12 +61,13 @@ public:
                 }
             }
 
+            // Populate Nodes from headers
             if(hasColumnHeaders)
             {
                 dataStartRow = 1;
                 for(size_t columnIndex = hasRowHeaders ? 1 : 0; columnIndex < tabularData->numColumns(); columnIndex++)
                 {
-                    // Add Node names
+                    // Add column headers as nodes
                     auto nodeId = graphModel->mutableGraph().addNode();
                     _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
                                               tabularData->valueAt(columnIndex, 0));
@@ -85,6 +82,7 @@ public:
                 {
                     if(hasColumnHeaders)
                     {
+                        // Nodes have already been added
                         // Check row and column match (they should!)
                         auto expectedRowName = _userNodeData->valueBy(tablePositionToNodeId.at(rowIndex), QObject::tr("Node Name"));
                         auto actualRowName = tabularData->valueAt(0, rowIndex);
@@ -94,7 +92,7 @@ public:
                     }
                     else
                     {
-                        // Add Node names
+                        // Add row headers as nodes
                         auto nodeId = graphModel->mutableGraph().addNode();
                         _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
                                                   tabularData->valueAt(0, rowIndex));
@@ -103,13 +101,16 @@ public:
                 }
             }
 
-            // No headers start from top left
+            // Check datarect is square
+            if(tabularData->numRows() - dataStartRow != tabularData->numColumns() - dataStartColumn)
+                return false;
+
+            // Generate Node names if there are no headers
             if(!hasColumnHeaders && !hasRowHeaders)
             {
-                // Populate with "Node 1, Node 2..."
+                // "Node 1, Node 2..."
                 for(size_t rowIndex = 0; rowIndex < tabularData->numRows(); rowIndex++)
                 {
-                    // Node names
                     auto nodeId = graphModel->mutableGraph().addNode();
 
                     _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
@@ -118,6 +119,7 @@ public:
                 }
             }
 
+            // Generate Edges from dataset
             for(size_t rowIndex = dataStartRow; rowIndex < tabularData->numRows(); rowIndex++)
             {
                 for(size_t columnIndex = dataStartColumn; columnIndex < tabularData->numColumns(); columnIndex++)
@@ -128,7 +130,7 @@ public:
                     double doubleValue = qStringValue.toDouble(&success);
                     NodeId targetNode, sourceNode;
 
-                    // Headers shift the map slightly
+                    // Headers shift the index/node map slightly
                     if(hasColumnHeaders && hasRowHeaders)
                     {
                         targetNode = tablePositionToNodeId.at(columnIndex);
@@ -153,6 +155,9 @@ public:
     }
     static bool isType(const QUrl &url)
     {
+        // To check for a matrix first check the selected delimiter is valid for the file.
+        // Then scan for headers. A matrix can optionally have column or row headers. Or none.
+        // A matrix data rect must be square.
         if(TextDelimitedTabularDataParser<Delimiter>::isType(url))
         {
             std::ifstream matrixFile(url.toLocalFile().toStdString());
@@ -174,20 +179,20 @@ public:
                 if(row.size() < 2)
                     return false;
 
-                int fieldIndex = 0;
+                int columnIndex = 0;
                 for (auto& field : row)
                 {
                     if(rowIndex == 0)
                     {
                         bool isDouble = false;
                         QString::fromStdString(field).toDouble(&isDouble);
-                        if(!isDouble && field != "" && fieldIndex > 0)
+                        if(!isDouble && field != "" && columnIndex > 0)
                             firstRowAllDouble = false;
 
                         potentialColumnHeaders.push_back(field);
                     }
 
-                    if(fieldIndex == 0)
+                    if(columnIndex == 0)
                     {
                         if(rowIndex >= potentialColumnHeaders.size()
                                 || potentialColumnHeaders[rowIndex] != field)
@@ -195,7 +200,7 @@ public:
                             headerMatch = false;
                         }
 
-                        // The first entry could be headers so don't check for a double
+                        // The first entry could be headers so don't enforce check for a double
                         if(rowIndex > 0)
                         {
                             bool isDouble = false;
@@ -204,7 +209,7 @@ public:
                                 firstColumnAllDouble = false;
                         }
                     }
-                    fieldIndex++;
+                    columnIndex++;
                 }
                 rowIndex++;
 
@@ -219,5 +224,9 @@ public:
         return false;
     }
 };
+
+using MatrixFileTSVParser = MatrixFileParser<'\t'>;
+using MatrixFileSSVParser = MatrixFileParser<';'>;
+using MatrixFileCSVParser = MatrixFileParser<','>;
 
 #endif // MATRIXFILEPARSER_H

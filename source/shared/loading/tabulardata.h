@@ -125,20 +125,23 @@ public:
 
     static bool isType(const QUrl &url)
     {
-        //Matrix Scanning
-        std::string potentialDelimiters = ",;\t ";
-        std::vector<size_t> columnAppearances(potentialDelimiters.size());
+        // Scans a few lines and identifies the delimiter based on the consistancy
+        // of the column count it produces on each row (within a delta tolerance)
+        // with each potential delimiter.
+        // Largest consistant column count within the tolerance delta wins
+        const std::string POTENTIAL_DELIMITERS = ",;\t ";
+        const int LINE_SCAN_COUNT = 5;
+        const int ALLOWED_COLUMN_COUNT_DELTA = 1;
+
+        std::vector<size_t> columnAppearances(POTENTIAL_DELIMITERS.size());
 
         std::ifstream file(url.toLocalFile().toStdString());
         char delimiter = '\0';
 
-        const int LINE_SCAN_COUNT = 5;
-        const int ALLOWED_COLUMN_COUNT_DELTA = 1;
-
         // Find the appropriate delimiter from list
-        for(size_t i = 0; i < potentialDelimiters.size(); ++i)
+        for(size_t i = 0; i < POTENTIAL_DELIMITERS.size(); ++i)
         {
-            auto testDelimiter = potentialDelimiters[i];
+            auto testDelimiter = POTENTIAL_DELIMITERS[i];
             aria::csv::CsvParser testParser(file);
             testParser.delimiter(testDelimiter);
 
@@ -173,10 +176,12 @@ public:
             for(size_t i = 0; i < columnAppearances.size(); ++i)
             {
                 if(columnAppearances[i] >= maxColumns)
-                    likelyDelimiters.push_back(potentialDelimiters[i]);
+                    likelyDelimiters.push_back(POTENTIAL_DELIMITERS[i]);
             }
         }
 
+        // It is possible for more than one delimiter to give the same results
+        // however it is very unlikely. If it happens just use the first one we find.
         if(likelyDelimiters.size() > 0)
         {
             delimiter = likelyDelimiters[0];

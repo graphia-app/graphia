@@ -44,13 +44,13 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<GraphMLParser>(&_userNodeData);
 
     if(urlTypeName == QLatin1String("MatrixCSV"))
-        return std::make_unique<MatrixFileParser<','>>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<MatrixFileCSVParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("MatrixSSV"))
-        return std::make_unique<MatrixFileParser<';'>>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<MatrixFileSSVParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("MatrixTSV"))
-        return std::make_unique<MatrixFileParser<'\t'>>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<MatrixFileTSVParser>(&_userNodeData, &_userEdgeData);
 
     return nullptr;
 }
@@ -185,17 +185,17 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
         }
         else if(typeString == "MatrixCSV")
         {
-            if(MatrixFileParser<','>::isType(url))
+            if(MatrixFileCSVParser::isType(url))
                 result.push_back(typeString);
         }
         else if(typeString == "MatrixSSV")
         {
-            if(MatrixFileParser<';'>::isType(url))
+            if(MatrixFileSSVParser::isType(url))
                 result.push_back(typeString);
         }
         else if(typeString == "MatrixTSV")
         {
-            if(MatrixFileParser<'\t'>::isType(url))
+            if(MatrixFileTSVParser::isType(url))
                 result.push_back(typeString);
         }
     }
