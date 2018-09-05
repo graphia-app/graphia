@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <cstring>
 
 class TabularData
 {
