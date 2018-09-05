@@ -2078,7 +2078,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         }
 
         QTextStream stream(&file);
-        stream << rowString << endl;
+        stream << rowString << "\r\n";
 
         auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rowCount")).toInt();
         auto model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
@@ -2102,7 +2102,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
                         rowString.append(valueString);
                 }
 
-                stream << rowString << endl;
+                stream << rowString << "\r\n";
             }
         }
     });
