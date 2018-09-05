@@ -2058,7 +2058,10 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
             if(string.contains(QRegularExpression(QStringLiteral("[\",]"))))
             {
                 QString escaped = string;
-                escaped.replace(QLatin1String("\""), QLatin1String("\\\""));
+
+                // Encode " as ""
+                escaped.replace(QLatin1String("\""), QLatin1String("\"\""));
+
                 return QStringLiteral("\"%1\"").arg(escaped);
             }
 
