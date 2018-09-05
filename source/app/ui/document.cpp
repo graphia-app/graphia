@@ -2072,7 +2072,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         for(const auto& columnRole : columnRoles)
         {
             if(!rowString.isEmpty())
-                rowString.append(", ");
+                rowString.append(",");
 
             rowString.append(escapedString(columnRole));
         }
@@ -2090,7 +2090,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
                 for(const auto& columnRole : columnRoles)
                 {
                     if(!rowString.isEmpty())
-                        rowString.append(", ");
+                        rowString.append(",");
 
                     auto value = model->data(model->index(row, 0),
                         model->roleNames().key(columnRole.toUtf8(), -1));
