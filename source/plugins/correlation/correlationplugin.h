@@ -185,6 +185,7 @@ private:
     double _minimumCorrelationValue = 0.7;
     double _initialCorrelationThreshold = 0.85;
     bool _transpose = false;
+    TabularData _tabularData;
     QRect _dataRect;
     ScalingType _scaling = ScalingType::None;
     NormaliseType _normalisation = NormaliseType::None;

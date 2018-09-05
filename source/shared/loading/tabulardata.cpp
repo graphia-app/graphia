@@ -5,6 +5,11 @@ void TabularData::reserve(size_t columns, size_t rows)
     _data.reserve(columns * rows);
 }
 
+bool TabularData::empty() const
+{
+    return _data.empty();
+}
+
 size_t TabularData::index(size_t column, size_t row) const
 {
     Q_ASSERT(column < numColumns());

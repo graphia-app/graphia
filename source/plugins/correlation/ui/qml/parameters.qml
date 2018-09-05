@@ -170,6 +170,8 @@ ListTabDialog
                     repopulateTableView();
                     Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
                 }
+
+                parameters.data = preParser.data;
             }
         }
 
@@ -1090,12 +1092,5 @@ ListTabDialog
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
-    }
-
-    onClosing:
-    {
-        // The parse can utilise a significant amount of memory, so clear it
-        // out before closing
-        preParser.clearData();
     }
 }

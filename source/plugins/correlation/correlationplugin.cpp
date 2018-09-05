@@ -590,7 +590,7 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == QLatin1String("CorrelationCSV") || urlTypeName == QLatin1String("CorrelationTSV"))
-        return std::make_unique<CorrelationFileParser>(this, urlTypeName, _dataRect);
+        return std::make_unique<CorrelationFileParser>(this, urlTypeName, _tabularData, _dataRect);
 
     return nullptr;
 }
@@ -617,6 +617,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _clusteringType = static_cast<ClusteringType>(value.toInt());
     else if(name == QLatin1String("edgeReductionType"))
         _edgeReductionType = static_cast<EdgeReductionType>(value.toInt());
+    else if(name == QLatin1String("data") && value.canConvert<std::shared_ptr<TabularData>>())
+        _tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const

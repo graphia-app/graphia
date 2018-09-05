@@ -28,6 +28,7 @@ private:
 public:
     void reserve(size_t columns, size_t rows);
 
+    bool empty() const;
     size_t numColumns() const;
     size_t numRows() const;
     bool transposed() const { return _transposed; }

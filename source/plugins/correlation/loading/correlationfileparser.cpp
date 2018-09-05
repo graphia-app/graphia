@@ -13,8 +13,9 @@
 #include <utility>
 
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
-                                             QRect dataRect) :
-    _plugin(plugin), _urlTypeName(std::move(urlTypeName)), _dataRect(dataRect)
+                                             TabularData& tabularData, QRect dataRect) :
+    _plugin(plugin), _urlTypeName(std::move(urlTypeName)),
+    _tabularData(std::move(tabularData)), _dataRect(dataRect)
 {}
 
 static QRect findLargestDataRect(const TabularData& tabularData, size_t startColumn = 0, size_t startRow = 0)
@@ -95,36 +96,39 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
 
 bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
-    CsvFileParser csvFileParser(this);
-    TsvFileParser tsvFileParser(this);
-
-    TabularData* tabularData = nullptr;
-    if(_urlTypeName == QLatin1String("CorrelationCSV"))
+    if(_tabularData.empty())
     {
-        if(!csvFileParser.parse(url, graphModel))
-            return false;
+        if(_urlTypeName == QLatin1String("CorrelationCSV"))
+        {
+            CsvFileParser csvFileParser(this);
 
-        tabularData = &(csvFileParser.tabularData());
+            if(!csvFileParser.parse(url, graphModel))
+                return false;
+
+            _tabularData = std::move(csvFileParser.tabularData());
+        }
+        else if(_urlTypeName == QLatin1String("CorrelationTSV"))
+        {
+            TsvFileParser tsvFileParser(this);
+
+            if(!tsvFileParser.parse(url, graphModel))
+                return false;
+
+            _tabularData = std::move(tsvFileParser.tabularData());
+        }
     }
-    else if(_urlTypeName == QLatin1String("CorrelationTSV"))
-    {
-        if(!tsvFileParser.parse(url, graphModel))
-            return false;
 
-        tabularData = &(tsvFileParser.tabularData());
-    }
-
-    if(tabularData == nullptr || cancelled())
+    if(_tabularData.empty() || cancelled())
         return false;
 
-    tabularData->setTransposed(_plugin->transpose());
+    _tabularData.setTransposed(_plugin->transpose());
 
     // May be set by parameters
     if(_dataRect.isEmpty())
     {
         graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
         setProgress(-1);
-        _dataRect = findLargestDataRect(*tabularData);
+        _dataRect = findLargestDataRect(_tabularData);
     }
 
     if(_dataRect.isEmpty() || cancelled())
@@ -133,8 +137,11 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     _plugin->setDimensions(_dataRect.width(), _dataRect.height());
 
     graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, _dataRect.left(), _dataRect.top(), *this))
+    if(!_plugin->loadUserData(_tabularData, _dataRect.left(), _dataRect.top(), *this))
         return false;
+
+    // We don't need this any more, so free up any memory it's consuming
+    _tabularData.reset();
 
     if(_plugin->requiresNormalisation())
     {
@@ -199,7 +206,7 @@ bool CorrelationPreParser::parse()
             if(!csvFileParser.parse(_fileUrl))
                 return;
 
-            _data = std::move(csvFileParser.tabularData());
+            _dataPtr = std::make_shared<TabularData>(std::move(csvFileParser.tabularData()));
         }
         else if(_fileType == QLatin1String("CorrelationTSV"))
         {
@@ -208,10 +215,10 @@ bool CorrelationPreParser::parse()
             if(!tsvFileParser.parse(_fileUrl))
                 return;
 
-            _data = std::move(tsvFileParser.tabularData());
+            _dataPtr = std::make_shared<TabularData>(std::move(tsvFileParser.tabularData()));
         }
 
-        _dataRect = findLargestDataRect(_data);
+        _dataRect = findLargestDataRect(*_dataPtr);
     });
     _dataParserWatcher.setFuture(future);
     return true;
@@ -221,19 +228,20 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        _dataRect = findLargestDataRect(_data, column, row);
+        _dataRect = findLargestDataRect(*_dataPtr, column, row);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
 void CorrelationPreParser::clearData()
 {
-    _data.reset();
+    if(_dataPtr != nullptr)
+        _dataPtr->reset();
 }
 
 void CorrelationPreParser::onDataParsed()
 {
-    _model.setTabularData(_data);
+    _model.setTabularData(*_dataPtr);
 }
 
 DataRectTableModel* CorrelationPreParser::tableModel()
