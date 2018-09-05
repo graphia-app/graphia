@@ -80,7 +80,7 @@ private:
         {
             auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
             setProgress(progress);
-            for(auto field : row)
+            for(const auto& field : row)
             {
                 tokenFn(currentColumn++, currentRow, QString::fromStdString(field), progress);
             }
@@ -123,37 +123,35 @@ public:
         // of the column count it produces on each row (within a delta tolerance)
         // with each potential delimiter.
         // Largest consistent column count within the tolerance delta wins
-        const char POTENTIAL_DELIMITERS[] = ",;\t ";
+        const std::string POTENTIAL_DELIMITERS = ",;\t ";
         const int LINE_SCAN_COUNT = 5;
         const int ALLOWED_COLUMN_COUNT_DELTA = 1;
 
-        std::array<size_t, sizeof(POTENTIAL_DELIMITERS) - 1> columnAppearances;
-
+        std::vector<size_t> columnAppearances(POTENTIAL_DELIMITERS.length());
         std::ifstream file(url.toLocalFile().toStdString());
-        char delimiter = '\0';
 
         // Find the appropriate delimiter from list
-        for(size_t i = 0; i < std::strlen(POTENTIAL_DELIMITERS); ++i)
+        for(size_t i = 0; i < POTENTIAL_DELIMITERS.length(); ++i)
         {
-            auto testDelimiter = POTENTIAL_DELIMITERS[i];
+            auto testDelimiter = POTENTIAL_DELIMITERS.at(i);
             aria::csv::CsvParser testParser(file);
             testParser.delimiter(testDelimiter);
 
             // Scan first few rows for matching columns
             size_t rowIndex = 0;
             size_t columnAppearancesMin = std::numeric_limits<size_t>::max();
-            for(auto testRow : testParser)
+            for(const auto& testRow : testParser)
             {
                 if(rowIndex >= LINE_SCAN_COUNT)
                     break;
 
-                columnAppearances[i] = std::max(testRow.size(), columnAppearances[i]);
+                columnAppearances.at(i) = std::max(testRow.size(), columnAppearances[i]);
                 columnAppearancesMin = std::min(testRow.size(), columnAppearancesMin);
 
-                if(columnAppearances[i] - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
+                if(columnAppearances.at(i) - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
                 {
                     // Inconsistent column count so not a matrix
-                    columnAppearances[i] = 0;
+                    columnAppearances.at(i) = 0;
                     break;
                 }
 
@@ -169,16 +167,16 @@ public:
         {
             for(size_t i = 0; i < columnAppearances.size(); ++i)
             {
-                if(columnAppearances[i] >= maxColumns)
-                    likelyDelimiters.push_back(POTENTIAL_DELIMITERS[i]);
+                if(columnAppearances.at(i) >= maxColumns)
+                    likelyDelimiters.push_back(POTENTIAL_DELIMITERS.at(i));
             }
         }
 
         // It is possible for more than one delimiter to give the same results
         // however it is very unlikely. If it happens just use the first one we find.
-        if(likelyDelimiters.size() > 0)
+        if(!likelyDelimiters.empty())
         {
-            delimiter = likelyDelimiters[0];
+            char delimiter = likelyDelimiters[0];
 
             if(Delimiter == delimiter)
                 return true;

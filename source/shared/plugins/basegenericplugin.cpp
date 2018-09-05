@@ -166,20 +166,20 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 
     QStringList result;
 
-    for(auto& typeString : urlTypes)
+    for(const auto& urlType : urlTypes)
     {
-        if(typeString == "GML" && GmlFileParser::canLoad(url))
-                result.push_back(typeString);
-        if(typeString == "PairwiseTXT" && PairwiseTxtFileParser::canLoad(url))
-                result.push_back(typeString);
-        else if(typeString == "GraphML" && GraphMLParser::canLoad(url))
-                result.push_back(typeString);
-        else if(typeString == "MatrixCSV" && MatrixFileCSVParser::canLoad(url))
-                result.push_back(typeString);
-        else if(typeString == "MatrixSSV" && MatrixFileSSVParser::canLoad(url))
-                result.push_back(typeString);
-        else if(typeString == "MatrixTSV" && MatrixFileTSVParser::canLoad(url))
-                result.push_back(typeString);
+        if(urlType == QStringLiteral("GML") && GmlFileParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("PairwiseTXT") && PairwiseTxtFileParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("MatrixCSV") && MatrixFileCSVParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("MatrixSSV") && MatrixFileSSVParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("MatrixTSV") && MatrixFileTSVParser::canLoad(url))
+            result.push_back(urlType);
     }
 
     return result;

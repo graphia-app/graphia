@@ -38,7 +38,7 @@ public:
             // Check first column for row headers
             for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
             {
-                auto stringValue = tabularData.valueAt(0, rowIndex);
+                const auto& stringValue = tabularData.valueAt(0, rowIndex);
                 // Not a header if I can convert to double
                 if(u::isNumeric(stringValue))
                 {
@@ -49,7 +49,7 @@ public:
             // Check first row for column headers
             for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
             {
-                auto stringValue = tabularData.valueAt(columnIndex, 0);
+                const auto& stringValue = tabularData.valueAt(columnIndex, 0);
                 if(u::isNumeric(stringValue))
                 {
                     // Probably doesnt have headers if I can convert the header to double
@@ -86,7 +86,7 @@ public:
                         // Check row and column match (they should!)
                         auto expectedRowName = _userNodeData->valueBy(rowToNodeId.at(rowIndex),
                                                                       QObject::tr("Node Name"));
-                        auto actualRowName = tabularData.valueAt(0, rowIndex);
+                        const auto& actualRowName = tabularData.valueAt(0, rowIndex);
 
                         if(expectedRowName.toString() != actualRowName)
                             return false;
@@ -131,7 +131,7 @@ public:
                     columnIndex++)
                 {
                     // Edges
-                    auto qStringValue = tabularData.valueAt(columnIndex, rowIndex);
+                    const auto& qStringValue = tabularData.valueAt(columnIndex, rowIndex);
                     bool success = false;
                     double doubleValue = qStringValue.toDouble(&success);
                     NodeId targetNode, sourceNode;
@@ -182,7 +182,7 @@ public:
                 {
                     if(rowIndex == 0)
                     {
-                        if(!u::isNumeric(field) && field != "" && columnIndex > 0)
+                        if(!u::isNumeric(field) && field.empty() && columnIndex > 0)
                             firstRowAllDouble = false;
 
                         potentialColumnHeaders.push_back(field);
@@ -199,7 +199,7 @@ public:
                         // The first entry could be headers so don't enforce check for a double
                         if(rowIndex > 0)
                         {
-                            if(!u::isNumeric(field) && field != "")
+                            if(!u::isNumeric(field) && field.empty())
                                 firstColumnAllDouble = false;
                         }
                     }
