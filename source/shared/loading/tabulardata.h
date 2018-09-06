@@ -26,6 +26,14 @@ private:
     size_t index(size_t column, size_t row) const;
 
 public:
+    TabularData() = default;
+    TabularData(TabularData&&) = default;
+    TabularData& operator=(TabularData&&) = default;
+
+    // Make it harder to copy TabularData
+    TabularData(const TabularData&) = delete;
+    TabularData& operator=(const TabularData&) = delete;
+
     void reserve(size_t columns, size_t rows);
 
     bool empty() const;
