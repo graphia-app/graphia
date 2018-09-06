@@ -156,7 +156,7 @@ public:
         // To check for a matrix first check the selected delimiter is valid for the file.
         // Then scan for headers. A matrix can optionally have column or row headers. Or none.
         // A matrix data rect must be square.
-        if(TextDelimitedTabularDataParser<Delimiter>::isType(url))
+        if(TextDelimitedTabularDataParser<Delimiter>::canLoad(url))
         {
             std::ifstream matrixFile(url.toLocalFile().toStdString());
 

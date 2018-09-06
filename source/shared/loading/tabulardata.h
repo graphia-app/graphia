@@ -117,7 +117,7 @@ public:
 
     TabularData& tabularData() { return _tabularData; }
 
-    static bool isType(const QUrl& url)
+    static bool canLoad(const QUrl& url)
     {
         // Scans a few lines and identifies the delimiter based on the consistency
         // of the column count it produces on each row (within a delta tolerance)
