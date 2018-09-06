@@ -275,7 +275,7 @@ signals:
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "correlationplugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID FILE "CorrelationPlugin.json")
 
 public:
     CorrelationPlugin();
@@ -297,8 +297,8 @@ public:
     bool editable() const override { return true; }
     bool directed() const override { return false; }
 
-    QString parametersQmlPath() const override { return QStringLiteral("qrc:///qml/parameters.qml"); }
-    QString qmlPath() const override { return QStringLiteral("qrc:///qml/correlationplugin.qml"); }
+    QString parametersQmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationParameters.qml"); }
+    QString qmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationPlugin.qml"); }
 };
 
 #endif // CORRELATIONPLUGIN_H

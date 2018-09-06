@@ -17,7 +17,7 @@ public:
 class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<SkeletonPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "skeletonplugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID FILE "SkeletonPlugin.json")
 
 public:
     QString name() const override { return QStringLiteral("Skeleton"); }
@@ -33,7 +33,7 @@ public:
     QString failureReason(const QUrl&) const override { return {}; }
 
     bool editable() const override { return true; }
-    QString qmlPath() const override { return QStringLiteral("qrc:///qml/skeletonplugin.qml"); }
+    QString qmlPath() const override { return QStringLiteral("qrc:///qml/SkeletonPlugin.qml"); }
 };
 
 #endif // SKELETONPLUGIN_H

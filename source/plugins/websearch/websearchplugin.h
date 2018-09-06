@@ -11,7 +11,7 @@ class WebSearchPluginInstance : public BaseGenericPluginInstance
 class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSearchPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "websearchplugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID FILE "WebsearchPlugin.json")
 
 public:
     QString name() const { return "WebSearch"; }
@@ -22,7 +22,7 @@ public:
     }
     QString imageSource() const { return "qrc:///globe.svg"; }
     int dataVersion() const { return 1; }
-    QString qmlPath() const { return "qrc:///qml/websearchplugin.qml"; }
+    QString qmlPath() const { return "qrc:///qml/WebsearchPlugin.qml"; }
 };
 
 #endif // WEBSEARCHPLUGIN_H

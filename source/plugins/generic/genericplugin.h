@@ -11,7 +11,7 @@ class GenericPluginInstance : public BaseGenericPluginInstance
 class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<GenericPluginInstance>
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID IPluginIID FILE "genericplugin.json")
+    Q_PLUGIN_METADATA(IID IPluginIID FILE "GenericPlugin.json")
 
 public:
     QString name() const { return "Generic"; }
@@ -22,7 +22,7 @@ public:
     }
     QString imageSource() const { return "qrc:///tools.svg"; }
     int dataVersion() const { return 1; }
-    QString qmlPath() const { return "qrc:///qml/genericplugin.qml"; }
+    QString qmlPath() const { return "qrc:///qml/GenericPlugin.qml"; }
 };
 
 #endif // GENERICPLUGIN_H

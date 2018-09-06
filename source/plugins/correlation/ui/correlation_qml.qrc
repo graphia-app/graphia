@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/correlationplugin.qml</file>
-        <file>qml/parameters.qml</file>
+        <file>qml/CorrelationPlugin.qml</file>
+        <file>qml/CorrelationParameters.qml</file>
         <file>plots.svg</file>
     </qresource>
 </RCC>
