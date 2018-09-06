@@ -11,7 +11,7 @@ import "../../shared/ui/qml/Constants.js" as Constants
 //
 // Child Items should be a ListTab with a title string
 // Failing to do so will leave an empty tab title
-BaseParameterDialog
+Item
 {
     id: root
     default property list<Item> listTabs
@@ -26,8 +26,6 @@ BaseParameterDialog
     {
         return listTabs[currentIndex];
     }
-
-    modality: Qt.ApplicationModal
 
     //FIXME Set these based on the content tabs
     //minimumWidth: 640
@@ -181,7 +179,7 @@ BaseParameterDialog
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.close(); }
+                onClicked: { root.cancel(); }
             }
         }
     }
@@ -245,6 +243,9 @@ BaseParameterDialog
     onAnimationStopped: { root.listTabShown(currentItem); }
     signal listTabShown(var listTab);
 
+    signal accepted();
+    signal cancel();
+
     Component.onCompleted:
     {
         for(var i = 0; i < listTabs.length; i++)
@@ -257,10 +258,5 @@ BaseParameterDialog
             listTabs[i].width = Qt.binding(function() { return (contentContainer.width); });
             listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
         }
-    }
-
-    onAccepted:
-    {
-        close();
     }
 }

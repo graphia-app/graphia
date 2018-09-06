@@ -5,7 +5,7 @@
         <file>qml/Controls/Wizard.qml</file>
         <file>qml/Controls/BaseParameterDialog.qml</file>
         <file>qml/Controls/SlidingPanel.qml</file>
-        <file>qml/Controls/ListTabDialog.qml</file>
+        <file>qml/Controls/ListTabView.qml</file>
         <file>qml/Controls/ListTab.qml</file>
         <file>qml/Controls/HelpTooltip.qml</file>
         <file>qml/Controls/Hubble.qml</file>
