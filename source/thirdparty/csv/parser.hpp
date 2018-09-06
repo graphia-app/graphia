@@ -82,19 +82,19 @@ namespace aria {
       }
 
       // Change the quote character
-      CsvParser quote(char c) noexcept {
+      CsvParser& quote(char c) noexcept {
         m_quote = c;
         return *this;
       }
 
       // Change the delimiter character
-      CsvParser delimiter(char c) noexcept {
+      CsvParser& delimiter(char c) noexcept {
         m_delimiter = c;
         return *this;
       }
 
       // Change the terminator character
-      CsvParser terminator(char c) noexcept {
+      CsvParser& terminator(char c) noexcept {
         m_terminator = static_cast<Term>(c);
         return *this;
       }
