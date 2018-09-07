@@ -629,8 +629,21 @@ void Document::saveFile(const QUrl& fileUrl, int exporterId, const QByteArray& u
     }
     else
     {
-        auto& exporter = _application->getExporter(exporterId);
-        exporter.save(fileUrl, graphModel());
+        IExporter& exporter = _application->getExporter(exporterId);
+
+        _commandManager.executeOnce(
+            {
+                QString(tr("Save %1")).arg(fileUrl.fileName()),
+                QString(tr("Saving %1")).arg(fileUrl.fileName()),
+                QString(tr("Saved %1")).arg(fileUrl.fileName())
+            },
+        [this, fileUrl, &exporter](Command& command) mutable
+        {
+            exporter.setProgressFn([&command](int percentage){ command.setProgress(percentage); });
+            bool success = exporter.save(fileUrl, graphModel());
+            emit saveComplete(success, fileUrl);
+            return success;
+        });
     }
 }
 

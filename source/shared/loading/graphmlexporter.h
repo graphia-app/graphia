@@ -11,8 +11,7 @@ public:
     void uncancel() override;
     void cancel() override;
     bool cancelled() const override;
-    void setProgress(int percent) override;
-    bool save(const QUrl &url, IGraphModel *graphModel) const override;
+    bool save(const QUrl &url, IGraphModel *graphModel) override;
     QString name() const override;
     QString extension() const override;
 };

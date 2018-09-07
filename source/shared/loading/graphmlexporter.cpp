@@ -26,14 +26,15 @@ bool GraphMLExporter::cancelled() const
     return false;
 }
 
-void GraphMLExporter::setProgress(int percent)
-{
-}
-
-bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel) const
+bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
 {
     QFile file(url.toLocalFile());
     file.open(QIODevice::WriteOnly);
+
+    size_t fileCount = graphModel->attributeNames().size() +
+            graphModel->graph().numNodes() + graphModel->graph().numEdges();
+    size_t runningCount = 0;
+
     QXmlStreamWriter stream(&file);
     stream.setAutoFormatting(true);
 
@@ -41,11 +42,34 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel) const
     stream.writeStartElement("graph");
     stream.writeAttribute("edgedefault", "directed");
 
+    // Add position attribute keys
+    stream.writeStartElement("key");
+    stream.writeAttribute("id", QStringLiteral("x"));
+    stream.writeAttribute("attr.name", QStringLiteral("x"));
+    stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeEndElement();
+
+    stream.writeStartElement("key");
+    stream.writeAttribute("id", QStringLiteral("y"));
+    stream.writeAttribute("attr.name", QStringLiteral("y"));
+    stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeEndElement();
+
+    stream.writeStartElement("key");
+    stream.writeAttribute("id", QStringLiteral("z"));
+    stream.writeAttribute("attr.name", QStringLiteral("z"));
+    stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeEndElement();
+
+    // Add attribute keys
     int keyId = 0;
     std::map<QString, QString> idToAttribute;
     std::map<QString, QString> attributeToId;
     for(const auto& attributeName : graphModel->attributeNames())
     {
+        runningCount++;
+        setProgress(runningCount * 100 / fileCount);
+
         auto attribute = graphModel->attributeByName(attributeName);
         stream.writeStartElement("key");
         stream.writeAttribute("id", QStringLiteral("d%1").arg(keyId));
@@ -85,6 +109,9 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel) const
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
+        runningCount++;
+        setProgress(runningCount * 100 / fileCount);
+
         stream.writeStartElement("node");
         stream.writeAttribute("id", QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
         for(const auto& nodeAttributeName : graphModel->attributeNames(ElementType::Node))
@@ -100,6 +127,9 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel) const
     int edgeCount = 0;
     for(auto edgeId : graphModel->graph().edgeIds())
     {
+        runningCount++;
+        setProgress(runningCount * 100 / fileCount);
+
         auto& edge = graphModel->graph().edgeById(edgeId);
         stream.writeStartElement("edge");
         stream.writeAttribute("id", QStringLiteral("e%1").arg(edgeCount++));
