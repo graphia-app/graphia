@@ -204,7 +204,7 @@ Item
         return true;
     }
 
-    function saveAsNamedFile(desiredFileUrl)
+    function saveAsNamedFile(desiredFileUrl, exporterIndex)
     {
         var uiData =
         {
@@ -219,7 +219,7 @@ Item
         if(typeof(pluginUiData) === "object")
             pluginUiData = JSON.stringify(pluginUiData);
 
-        document.saveFile(desiredFileUrl, uiData, pluginUiData);
+        document.saveFile(desiredFileUrl, exporterIndex, uiData, pluginUiData);
         mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
@@ -238,12 +238,28 @@ Item
             title: qsTr("Save File...")
             fileMode: Labs.FileDialog.SaveFile
             defaultSuffix: selectedNameFilter.extensions[0]
-            nameFilters: [ appName + " files (*." + application.nativeExtension + ")", "All files (*)" ]
+            nameFilters:
+            {
+                var filters = [];
+                filters.push(appName + " files (*." + application.nativeExtension + ")");
+
+                var names = application.saveFileNames();
+                var extensions = application.saveFileUrls();
+                for(var i=0; i < names.length; i++)
+                {
+                    filters.push(names[i] + " files (*" + extensions[i] + ")");
+                }
+
+                filters.push("All files (*)");
+                return filters;
+            }
 
             onAccepted:
             {
+                var exporterName = application.saveFileNames()[selectedNameFilter.index - 1];
+
                 misc.fileSaveInitialFolder = folder.toString();
-                saveAsNamedFile(file);
+                saveAsNamedFile(file, exporterName);
             }
         }
     }

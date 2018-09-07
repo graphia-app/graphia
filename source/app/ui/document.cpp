@@ -5,6 +5,7 @@
 #include "attributes/enrichmentcalculator.h"
 
 #include "shared/plugins/iplugin.h"
+#include "shared/loading/iexporter.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
@@ -599,30 +600,38 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData, const QByteArray& pluginUiData)
+void Document::saveFile(const QUrl& fileUrl, int exporterId, const QByteArray& uiData, const QByteArray& pluginUiData)
 {
-    Saver saver(fileUrl);
-
-    saver.setDocument(this);
-    saver.setUiData(uiData);
-    saver.setPluginInstance(_pluginInstance.get());
-    saver.setPluginUiData(pluginUiData);
-
-    _commandManager.executeOnce(
-        {
-            QString(tr("Save %1")).arg(fileUrl.fileName()),
-            QString(tr("Saving %1")).arg(fileUrl.fileName()),
-            QString(tr("Saved %1")).arg(fileUrl.fileName())
-        },
-    [this, fileUrl, saver = std::move(saver)](Command& command) mutable
+    if(exporterId < 0)
     {
-        auto success = saver.encode(command);
-        emit saveComplete(success, fileUrl);
-        return success;
-    });
+        Saver saver(fileUrl);
 
-    _saveRequired = false;
-    emit saveRequiredChanged();
+        saver.setDocument(this);
+        saver.setUiData(uiData);
+        saver.setPluginInstance(_pluginInstance.get());
+        saver.setPluginUiData(pluginUiData);
+
+        _commandManager.executeOnce(
+            {
+                QString(tr("Save %1")).arg(fileUrl.fileName()),
+                QString(tr("Saving %1")).arg(fileUrl.fileName()),
+                QString(tr("Saved %1")).arg(fileUrl.fileName())
+            },
+        [this, fileUrl, saver = std::move(saver)](Command& command) mutable
+        {
+            auto success = saver.encode(command);
+            emit saveComplete(success, fileUrl);
+            return success;
+        });
+
+        _saveRequired = false;
+        emit saveRequiredChanged();
+    }
+    else
+    {
+        auto& exporter = _application->getExporter(exporterId);
+        exporter.save(fileUrl, graphModel());
+    }
 }
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)

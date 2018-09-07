@@ -30,6 +30,7 @@
 
 class GraphModel;
 class IParser;
+class IExporter;
 class IPlugin;
 
 struct LoadedPlugin
@@ -123,6 +124,7 @@ public:
     static constexpr const char* NativeFileType = "Native";
 
     explicit Application(QObject *parent = nullptr);
+    ~Application();
 
     IPlugin* pluginForName(const QString& pluginName) const;
 
@@ -138,6 +140,11 @@ public:
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
+
+    void registerSaveFileType(std::unique_ptr<IExporter> exporter);
+    const IExporter& getExporter(int id) { return *_exporters[id].get(); }
+    Q_INVOKABLE QStringList saveFileNames();
+    Q_INVOKABLE QStringList saveFileUrls();
 
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
     Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName) const;
@@ -186,6 +193,7 @@ private:
 
     std::vector<LoadedPlugin> _loadedPlugins;
     PluginDetailsModel _pluginDetails;
+    std::vector<std::unique_ptr<IExporter>> _exporters;
 
     void loadPlugins();
     void initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);

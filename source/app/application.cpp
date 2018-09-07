@@ -6,6 +6,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/preferences.h"
+#include "shared/loading/graphmlexporter.h"
 
 #include "loading/loader.h"
 
@@ -39,7 +40,11 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::stateChanged, this, &Application::authenticatedChanged);
     connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
+
+    registerSaveFileType(std::make_unique<GraphMLExporter>());
 }
+
+Application::~Application() = default;
 
 IPlugin* Application::pluginForName(const QString& pluginName) const
 {
@@ -151,6 +156,27 @@ QStringList Application::failureReasons(const QUrl& url) const
     failureReasons.removeDuplicates();
 
     return failureReasons;
+}
+
+void Application::registerSaveFileType(std::unique_ptr<IExporter> exporter)
+{
+    _exporters.emplace_back(std::move(exporter));
+}
+
+QStringList Application::saveFileNames()
+{
+    QStringList list;
+    for(auto& exporter : _exporters)
+        list.append(exporter->name());
+    return list;
+}
+
+QStringList Application::saveFileUrls()
+{
+    QStringList list;
+    for(auto& exporter : _exporters)
+        list.append(exporter->extension());
+    return list;
 }
 
 QStringList Application::pluginNames(const QString& urlTypeName) const
