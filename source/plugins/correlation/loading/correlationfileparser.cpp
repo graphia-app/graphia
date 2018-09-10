@@ -190,11 +190,7 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
         if(fileType == QLatin1String("CorrelationCSV"))
         {
             CsvFileParser csvFileParser;
-
-            csvFileParser.setProgressFn([this](int progress)
-            {
-                setProgress(progress);
-            });
+            csvFileParser.setProgressFn([this](int progress) { setProgress(progress); });
 
             if(!csvFileParser.parse(fileUrl))
                 return;
@@ -204,11 +200,7 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
         else if(fileType == QLatin1String("CorrelationTSV"))
         {
             TsvFileParser tsvFileParser;
-
-            tsvFileParser.setProgressFn([this](int progress)
-            {
-                setProgress(progress);
-            });
+            tsvFileParser.setProgressFn([this](int progress) { setProgress(progress); });
 
             if(!tsvFileParser.parse(fileUrl))
                 return;
