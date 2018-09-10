@@ -96,28 +96,6 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
 
 bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
-    if(_tabularData.empty())
-    {
-        if(_urlTypeName == QLatin1String("CorrelationCSV"))
-        {
-            CsvFileParser csvFileParser(this);
-
-            if(!csvFileParser.parse(url, graphModel))
-                return false;
-
-            _tabularData = std::move(csvFileParser.tabularData());
-        }
-        else if(_urlTypeName == QLatin1String("CorrelationTSV"))
-        {
-            TsvFileParser tsvFileParser(this);
-
-            if(!tsvFileParser.parse(url, graphModel))
-                return false;
-
-            _tabularData = std::move(tsvFileParser.tabularData());
-        }
-    }
-
     if(_tabularData.empty() || cancelled())
         return false;
 
@@ -181,44 +159,68 @@ void CorrelationPreParser::setTransposed(bool transposed)
     _model.setTransposed(transposed);
 }
 
+void CorrelationPreParser::setProgress(int progress)
+{
+    if(progress != _progress)
+    {
+        _progress = progress;
+        emit progressChanged();
+    }
+}
+
 CorrelationPreParser::CorrelationPreParser()
 {
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::busyChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::busyChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataRectChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::onDataParsed);
+
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::onDataLoaded);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataLoaded);
 }
 
-bool CorrelationPreParser::parse()
+bool CorrelationPreParser::parse(const QUrl& fileUrl, const QString& fileType)
 {
-    QFuture<void> future = QtConcurrent::run([this]()
+    QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
     {
-        if(_fileType.isEmpty() || _fileUrl.isEmpty())
+        if(fileUrl.isEmpty() || fileType.isEmpty())
             return;
 
-        if(_fileType == QLatin1String("CorrelationCSV"))
+        if(fileType == QLatin1String("CorrelationCSV"))
         {
             CsvFileParser csvFileParser;
 
-            if(!csvFileParser.parse(_fileUrl))
+            csvFileParser.setProgressFn([this](int progress)
+            {
+                setProgress(progress);
+            });
+
+            if(!csvFileParser.parse(fileUrl))
                 return;
 
             _dataPtr = std::make_shared<TabularData>(std::move(csvFileParser.tabularData()));
         }
-        else if(_fileType == QLatin1String("CorrelationTSV"))
+        else if(fileType == QLatin1String("CorrelationTSV"))
         {
             TsvFileParser tsvFileParser;
 
-            if(!tsvFileParser.parse(_fileUrl))
+            tsvFileParser.setProgressFn([this](int progress)
+            {
+                setProgress(progress);
+            });
+
+            if(!tsvFileParser.parse(fileUrl))
                 return;
 
             _dataPtr = std::make_shared<TabularData>(std::move(tsvFileParser.tabularData()));
         }
 
-        _dataRect = findLargestDataRect(*_dataPtr);
+        setProgress(-1);
+
+        Q_ASSERT(_dataPtr != nullptr);
+        if(_dataPtr != nullptr)
+            _dataRect = findLargestDataRect(*_dataPtr);
     });
     _dataParserWatcher.setFuture(future);
     return true;
@@ -239,9 +241,13 @@ void CorrelationPreParser::clearData()
         _dataPtr->reset();
 }
 
-void CorrelationPreParser::onDataParsed()
+void CorrelationPreParser::onDataLoaded()
 {
-    _model.setTabularData(*_dataPtr);
+    if(_dataPtr != nullptr)
+        _model.setTabularData(*_dataPtr);
+
+    _complete = true;
+    emit completeChanged();
 }
 
 DataRectTableModel* CorrelationPreParser::tableModel()

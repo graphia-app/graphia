@@ -68,17 +68,18 @@ private:
         size_t currentColumn = 0;
         size_t currentRow = 0;
 
-        std::ifstream matrixFile(url.toLocalFile().toStdString());
-        auto matrixfileSize = matrixFile.tellg();
-        matrixFile.seekg(0, std::ios::end);
-        matrixfileSize = matrixFile.tellg() - matrixfileSize;
-        matrixFile.seekg(0, std::ios::beg);
+        std::ifstream file(url.toLocalFile().toStdString());
+        auto fileSize = file.tellg();
+        file.seekg(0, std::ios::end);
+        fileSize = file.tellg() - fileSize;
+        file.seekg(0, std::ios::beg);
 
-        auto testParser = std::make_unique<aria::csv::CsvParser>(matrixFile);
-        testParser->delimiter(Delimiter);
-        for(auto& row : *testParser)
+        auto parser = std::make_unique<aria::csv::CsvParser>(file);
+        parser->delimiter(Delimiter);
+        for(auto& row : *parser)
         {
-            auto progress = static_cast<int>(testParser->position() * 100 / matrixfileSize);
+            auto progress = file.eof() ? 100 :
+                static_cast<int>(parser->position() * 100 / fileSize);
             setProgress(progress);
 
             for(const auto& field : row)

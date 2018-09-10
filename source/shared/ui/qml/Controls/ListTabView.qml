@@ -240,8 +240,8 @@ Item
     signal animationStarted();
     signal animationStopped();
 
-    onAnimationStopped: { root.listTabShown(currentItem); }
-    signal listTabShown(var listTab);
+    onAnimationStopped: { root.listTabChanged(); }
+    signal listTabChanged();
 
     signal accepted();
     signal cancel();

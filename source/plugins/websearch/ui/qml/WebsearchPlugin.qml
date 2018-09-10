@@ -48,7 +48,7 @@ PluginContent
             height: 3
             Layout.fillWidth: true
             style: ProgressBarStyle { background: Item {} }
-            z: -2;
+            z: -2
             minimumValue: 0
             maximumValue: 100
             value: webEngineView.loadProgress < 100 ? webEngineView.loadProgress : 0

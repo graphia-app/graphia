@@ -82,10 +82,76 @@ BaseParameterDialog
             dataFrameAnimationY.running = true;
     }
 
+    function scrollToDataRect()
+    {
+        if(listTabView.currentItem === dataRectPage)
+            Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+    }
+
+    CorrelationPreParser
+    {
+        id: preParser
+
+        onDataRectChanged:
+        {
+            parameters.dataFrame = dataRect;
+            if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
+                selectedCol >= 0 && selectedRow >= 0)
+            {
+                scrollToDataRect();
+
+                tooltipNonNumerical.visible = _clickedCell;
+                _clickedCell = false;
+            }
+        }
+
+        onDataLoaded:
+        {
+            listTabView.repopulateTableView();
+            parameters.data = preParser.data;
+        }
+    }
+
+    ColumnLayout
+    {
+        anchors.centerIn: parent
+        visible: !preParser.complete
+
+        Text { text: qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…" }
+
+        RowLayout
+        {
+            Layout.alignment: Qt.AlignHCenter
+
+            ProgressBar
+            {
+                value: preParser.progress >= 0.0 ? preParser.progress / 100.0 : 0.0
+                indeterminate: preParser.progress < 0.0
+            }
+
+            Button
+            {
+                text: qsTr("Cancel")
+                onClicked:
+                {
+                    preParser.cancelParse();
+                    root.close();
+                }
+            }
+        }
+    }
+
     ListTabView
     {
         id: listTabView
         anchors.fill: parent
+        visible: preParser.complete
+
+        onListTabChanged:
+        {
+            if(currentItem == dataRectPage)
+                scrollToDataRect();
+        }
 
         ListTab
         {
@@ -138,50 +204,7 @@ BaseParameterDialog
         {
             title: qsTr("Data Selection")
             id: dataRectPage
-            property bool _busy: preParser.isRunning || listTabView.animating
-
-            Connections
-            {
-                target: listTabView
-                onListTabShown:
-                {
-                    if(listTab === dataRectPage)
-                    {
-                        if(root.fileUrl !== "" && root.fileType !== "" && preParser.model.rowCount() === 0)
-                            preParser.parse();
-                    }
-                }
-            }
-
-            CorrelationPreParser
-            {
-                id: preParser
-                fileType: root.fileType
-                fileUrl: root.fileUrl
-                onDataRectChanged:
-                {
-                    parameters.dataFrame = dataRect;
-                    if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
-                            selectedCol >= 0 && selectedRow >= 0)
-                    {
-                        scrollToCell(dataRectView, dataRect.x, dataRect.y)
-                        tooltipNonNumerical.visible = _clickedCell;
-                        _clickedCell = false;
-                    }
-                }
-
-                onDataLoaded:
-                {
-                    // Initialise the table if it hasn't already
-                    if(dataRectView.columnCount == 0)
-                    {
-                        listTabView.repopulateTableView();
-                        Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
-                    }
-
-                    parameters.data = preParser.data;
-                }
-            }
+            property bool _busy: preParser.busy || listTabView.animating
 
             Component
             {
@@ -1095,7 +1118,7 @@ BaseParameterDialog
         onCancel: { root.close(); }
     }
 
-    Component.onCompleted: initialise();
+    Component.onCompleted: { initialise(); }
     function initialise()
     {
         var DEFAULT_MINIMUM_CORRELATION = 0.7;
@@ -1110,5 +1133,16 @@ BaseParameterDialog
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
+    }
+
+    onVisibleChanged:
+    {
+        if(visible)
+        {
+            if(root.fileUrl.length !== 0 && root.fileType.length !== 0)
+                preParser.parse(root.fileUrl, root.fileType);
+            else
+                console.log("ERROR: fileUrl or fileType are empty");
+        }
     }
 }
