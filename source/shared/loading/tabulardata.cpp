@@ -63,7 +63,14 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
         {
             // If we've made it some significant way through the input, we can be
             // reasonably confident of the total memory requirement...
-            reserveSize = std::max(reserveSize, (100 * newSize) / progressHint);
+
+            // We over-allocate ever so slightly to avoid the case where our estimate
+            // is on the small side. Otherwise, when we hit 100, we would default to
+            // reallocating for each new element -- exactly what we're trying to avoid
+            const auto extraFudgeFactor = 2;
+            auto estimate = ((100 + extraFudgeFactor) * newSize) / progressHint;
+
+            reserveSize = std::max(reserveSize, estimate);
         }
         else
         {

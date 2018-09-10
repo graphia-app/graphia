@@ -222,6 +222,7 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
         if(_dataPtr != nullptr)
             _dataRect = findLargestDataRect(*_dataPtr);
     });
+
     _dataParserWatcher.setFuture(future);
     return true;
 }
