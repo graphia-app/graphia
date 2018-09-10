@@ -69,6 +69,7 @@ namespace aria {
       bool m_eof = false;
       size_t m_cursor = INPUTBUF_CAP;
       size_t m_inputbuf_size = INPUTBUF_CAP;
+      std::streamoff m_scanposition = -INPUTBUF_CAP;
     public:
       // Creates the CSV parser which by default, splits on commas,
       // uses quotes to escape, and handles CSV files that end in either
@@ -103,6 +104,13 @@ namespace aria {
       // no more tokens left to read from the input buffer
       bool empty() {
         return m_state == State::EMPTY;
+      }
+
+      // Not the actual position in the stream (its buffered) just the
+      // position up to last availiable token
+      std::streamoff position() const
+      {
+          return m_scanposition + static_cast<std::streamoff>(m_cursor);
       }
 
       // Reads a single field from the CSV
@@ -229,6 +237,7 @@ namespace aria {
 
         // Refill the input buffer if it's been fully read
         if (m_cursor == m_inputbuf_size) {
+          m_scanposition += static_cast<std::streamoff>(m_cursor);
           m_cursor = 0;
           m_input.read(m_inputbuf, INPUTBUF_CAP);
 

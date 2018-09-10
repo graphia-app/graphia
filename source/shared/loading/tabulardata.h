@@ -78,12 +78,11 @@ private:
         testParser->delimiter(Delimiter);
         for(auto& row : *testParser)
         {
-            auto progress = static_cast<int>(matrixFile.tellg() * 100 / matrixfileSize);
+            auto progress = static_cast<int>(testParser->position() * 100 / matrixfileSize);
             setProgress(progress);
+
             for(const auto& field : row)
-            {
                 tokenFn(currentColumn++, currentRow, QString::fromStdString(field), progress);
-            }
 
             currentRow++;
             currentColumn = 0;
