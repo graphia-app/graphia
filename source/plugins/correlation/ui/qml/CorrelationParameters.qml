@@ -85,12 +85,15 @@ BaseParameterDialog
     function scrollToDataRect()
     {
         if(listTabView.currentItem === dataRectPage)
-            Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+        {
+            Qt.callLater(scrollToCell, dataRectView,
+                tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
+        }
     }
 
-    CorrelationPreParser
+    TabularDataParser
     {
-        id: preParser
+        id: tabularDataParser
 
         onDataRectChanged:
         {
@@ -108,14 +111,14 @@ BaseParameterDialog
         onDataLoaded:
         {
             listTabView.repopulateTableView();
-            parameters.data = preParser.data;
+            parameters.data = tabularDataParser.data;
         }
     }
 
     ColumnLayout
     {
         anchors.centerIn: parent
-        visible: !preParser.complete
+        visible: !tabularDataParser.complete
 
         Text { text: qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…" }
 
@@ -125,8 +128,8 @@ BaseParameterDialog
 
             ProgressBar
             {
-                value: preParser.progress >= 0.0 ? preParser.progress / 100.0 : 0.0
-                indeterminate: preParser.progress < 0.0
+                value: tabularDataParser.progress >= 0.0 ? tabularDataParser.progress / 100.0 : 0.0
+                indeterminate: tabularDataParser.progress < 0.0
             }
 
             Button
@@ -134,7 +137,7 @@ BaseParameterDialog
                 text: qsTr("Cancel")
                 onClicked:
                 {
-                    preParser.cancelParse();
+                    tabularDataParser.cancelParse();
                     root.close();
                 }
             }
@@ -145,7 +148,7 @@ BaseParameterDialog
     {
         id: listTabView
         anchors.fill: parent
-        visible: preParser.complete
+        visible: tabularDataParser.complete
 
         onListTabChanged:
         {
@@ -204,7 +207,7 @@ BaseParameterDialog
         {
             title: qsTr("Data Selection")
             id: dataRectPage
-            property bool _busy: preParser.busy || listTabView.animating
+            property bool _busy: tabularDataParser.busy || listTabView.animating
 
             Component
             {
@@ -241,7 +244,7 @@ BaseParameterDialog
                         onCheckedChanged:
                         {
                             parameters.transpose = checked;
-                            preParser.transposed = checked;
+                            tabularDataParser.transposed = checked;
                         }
                     }
                     HelpTooltip
@@ -269,7 +272,7 @@ BaseParameterDialog
                     headerVisible: false
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    model: preParser.model
+                    model: tabularDataParser.model
                     selectionMode: SelectionMode.NoSelection
                     enabled: !dataRectPage._busy
 
@@ -362,7 +365,7 @@ BaseParameterDialog
 
                         property var isInDataFrame:
                         {
-                            return isInsideRect(styleData.column, styleData.row, preParser.dataRect);
+                            return isInsideRect(styleData.column, styleData.row, tabularDataParser.dataRect);
                         }
 
                         Rectangle
@@ -380,14 +383,14 @@ BaseParameterDialog
                                 anchors.fill: parent
                                 onClicked:
                                 {
-                                    if(styleData.column === preParser.model.MAX_COLUMNS)
+                                    if(styleData.column === tabularDataParser.model.MAX_COLUMNS)
                                         return;
                                     tooltipNonNumerical.visible = false;
                                     nonNumericalTimer.stop();
                                     selectedCol = styleData.column;
                                     selectedRow = styleData.row;
                                     _clickedCell = true;
-                                    preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                                    tabularDataParser.autoDetectDataRectangle(styleData.column, styleData.row);
                                 }
                             }
 
@@ -413,11 +416,11 @@ BaseParameterDialog
 
                                 text:
                                 {
-                                    if(styleData.column >= preParser.model.MAX_COLUMNS)
+                                    if(styleData.column >= tabularDataParser.model.MAX_COLUMNS)
                                     {
                                         if(styleData.row === 0)
                                         {
-                                            return (preParser.model.columnCount() - preParser.model.MAX_COLUMNS) +
+                                            return (tabularDataParser.model.columnCount() - tabularDataParser.model.MAX_COLUMNS) +
                                                     qsTr(" more columns…");
                                         }
                                         else
@@ -441,14 +444,14 @@ BaseParameterDialog
 
                 Connections
                 {
-                    target: preParser.model
+                    target: tabularDataParser.model
 
                     onModelReset:
                     {
                         listTabView.repopulateTableView();
                         selectedCol = 0;
                         selectedRow = 0;
-                        preParser.autoDetectDataRectangle();
+                        tabularDataParser.autoDetectDataRectangle();
                     }
                 }
             }
@@ -460,8 +463,8 @@ BaseParameterDialog
                 dataRectView.removeColumn(dataRectView.columnCount - 1);
 
             dataRectView.model = null;
-            dataRectView.model = preParser.model;
-            for(var i = 0; i < preParser.model.columnCount(); i++)
+            dataRectView.model = tabularDataParser.model;
+            for(var i = 0; i < tabularDataParser.model.columnCount(); i++)
             {
                 dataRectView.addColumn(columnComponent.createObject(dataRectView,
                                                                     {"role": i}));
@@ -469,7 +472,7 @@ BaseParameterDialog
                 // FIX ME - TY QT TABLEVIEW 1.
                 // https://bugreports.qt.io/browse/QTBUG-70069
                 // Cap the column count since a huge number of columns causes a large slowdown
-                if(i == preParser.model.MAX_COLUMNS - 1)
+                if(i == tabularDataParser.model.MAX_COLUMNS - 1)
                 {
                     // Add a blank
                     dataRectView.addColumn(columnComponent.createObject(dataRectView));
@@ -1076,13 +1079,13 @@ BaseParameterDialog
                         var summaryString = "";
                         summaryString += qsTr("Minimum Correlation: ") + minimumCorrelationSpinBox.value + "\n";
                         summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "\n";
-                        if(preParser.dataRect != Qt.rect(0,0,0,0))
+                        if(!tabularDataParser.dataRect !== Qt.rect(0, 0, 0, 0))
                         {
                             summaryString += qsTr("Data Frame:") +
-                                    qsTr(" [ Column: ") + preParser.dataRect.x +
-                                    qsTr(" Row: ") + preParser.dataRect.y +
-                                    qsTr(" Width: ") + preParser.dataRect.width +
-                                    qsTr(" Height: ") + preParser.dataRect.height + " ]\n";
+                                    qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
+                                    qsTr(" Row: ") + tabularDataParser.dataRect.y +
+                                    qsTr(" Width: ") + tabularDataParser.dataRect.width +
+                                    qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]\n";
                         }
                         else
                         {
@@ -1140,7 +1143,7 @@ BaseParameterDialog
         if(visible)
         {
             if(root.fileUrl.length !== 0 && root.fileType.length !== 0)
-                preParser.parse(root.fileUrl, root.fileType);
+                tabularDataParser.parse(root.fileUrl, root.fileType);
             else
                 console.log("ERROR: fileUrl or fileType are empty");
         }

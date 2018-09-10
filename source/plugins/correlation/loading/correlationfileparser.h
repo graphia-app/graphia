@@ -32,7 +32,7 @@ public:
 
 Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
 
-class CorrelationPreParser : public QObject, public Cancellable
+class TabularDataParser : public QObject, public Cancellable
 {
     Q_OBJECT
 
@@ -59,7 +59,7 @@ private:
     void setProgress(int progress);
 
 public:
-    CorrelationPreParser();
+    TabularDataParser();
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
     Q_INVOKABLE void cancelParse() { cancel(); }
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);

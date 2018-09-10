@@ -149,17 +149,17 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     return true;
 }
 
-bool CorrelationPreParser::transposed() const
+bool TabularDataParser::transposed() const
 {
     return _model.transposed();
 }
 
-void CorrelationPreParser::setTransposed(bool transposed)
+void TabularDataParser::setTransposed(bool transposed)
 {
     _model.setTransposed(transposed);
 }
 
-void CorrelationPreParser::setProgress(int progress)
+void TabularDataParser::setProgress(int progress)
 {
     if(progress != _progress)
     {
@@ -168,19 +168,19 @@ void CorrelationPreParser::setProgress(int progress)
     }
 }
 
-CorrelationPreParser::CorrelationPreParser()
+TabularDataParser::TabularDataParser()
 {
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataRectChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataRectChanged);
 
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::busyChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::busyChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::onDataLoaded);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataLoaded);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::onDataLoaded);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataLoaded);
 }
 
-bool CorrelationPreParser::parse(const QUrl& fileUrl, const QString& fileType)
+bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
 {
     QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
     {
@@ -226,7 +226,7 @@ bool CorrelationPreParser::parse(const QUrl& fileUrl, const QString& fileType)
     return true;
 }
 
-void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
+void TabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
@@ -235,13 +235,13 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
-void CorrelationPreParser::clearData()
+void TabularDataParser::clearData()
 {
     if(_dataPtr != nullptr)
         _dataPtr->reset();
 }
 
-void CorrelationPreParser::onDataLoaded()
+void TabularDataParser::onDataLoaded()
 {
     if(_dataPtr != nullptr)
         _model.setTabularData(*_dataPtr);
@@ -250,7 +250,7 @@ void CorrelationPreParser::onDataLoaded()
     emit completeChanged();
 }
 
-DataRectTableModel* CorrelationPreParser::tableModel()
+DataRectTableModel* TabularDataParser::tableModel()
 {
     return &_model;
 }
