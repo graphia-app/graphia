@@ -36,25 +36,26 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
 {
     size_t columns = column >= _columns ? column + 1 : _columns;
     size_t rows = row >= _rows ? row + 1 : _rows;
+    auto newSize = columns * rows;
 
-    if(columns > _columns)
+    if(rows > 1 && columns > _columns)
     {
-        // Pad any existing rows with blank values
-        size_t numNewColumns = columns - _columns;
-        auto offset = _columns;
+        _data.resize(newSize);
 
-        size_t rowsToPad = rows - 1;
-        while(rowsToPad-- != 0u)
+        for(size_t offset = _rows - 1; offset > 0; offset--)
         {
-            _data.insert(_data.begin() + offset, numNewColumns, {});
-            offset += columns;
+            auto oldPosition = _data.begin() + (offset * _columns);
+            auto newPosition = _data.begin() + (offset * columns);
+
+            std::move_backward(oldPosition,
+                oldPosition + _columns,
+                newPosition + _columns);
         }
     }
 
     _columns = columns;
     _rows = rows;
 
-    auto newSize = _columns * _rows;
     if(newSize > _data.capacity())
     {
         size_t reserveSize = newSize;
