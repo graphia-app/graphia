@@ -142,7 +142,7 @@ public:
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
 
     void registerSaveFileType(std::unique_ptr<IExporter> exporter);
-    IExporter& getExporter(int id) { return *_exporters[id].get(); }
+    IExporter* exporterByName(const QString& name);
     Q_INVOKABLE QStringList saveFileNames();
     Q_INVOKABLE QStringList saveFileUrls();
 

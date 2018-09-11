@@ -48,6 +48,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h

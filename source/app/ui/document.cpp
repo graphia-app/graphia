@@ -600,9 +600,26 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, int exporterId, const QByteArray& uiData, const QByteArray& pluginUiData)
+void Document::saveFile(const QUrl& fileUrl, QString exporterName, const QByteArray& uiData, const QByteArray& pluginUiData)
 {
-    if(exporterId < 0)
+    auto* exporter = _application->exporterByName(exporterName);
+    if(exporter != nullptr)
+    {
+        _commandManager.executeOnce(
+            {
+                QString(tr("Save %1")).arg(fileUrl.fileName()),
+                QString(tr("Saving %1")).arg(fileUrl.fileName()),
+                QString(tr("Saved %1")).arg(fileUrl.fileName())
+            },
+        [this, fileUrl, &exporter](Command& command) mutable
+        {
+            exporter->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
+            bool success = exporter->save(fileUrl, graphModel());
+            emit saveComplete(success, fileUrl);
+            return success;
+        });
+    }
+    else
     {
         Saver saver(fileUrl);
 
@@ -626,24 +643,6 @@ void Document::saveFile(const QUrl& fileUrl, int exporterId, const QByteArray& u
 
         _saveRequired = false;
         emit saveRequiredChanged();
-    }
-    else
-    {
-        IExporter& exporter = _application->getExporter(exporterId);
-
-        _commandManager.executeOnce(
-            {
-                QString(tr("Save %1")).arg(fileUrl.fileName()),
-                QString(tr("Saving %1")).arg(fileUrl.fileName()),
-                QString(tr("Saved %1")).arg(fileUrl.fileName())
-            },
-        [this, fileUrl, &exporter](Command& command) mutable
-        {
-            exporter.setProgressFn([&command](int percentage){ command.setProgress(percentage); });
-            bool success = exporter.save(fileUrl, graphModel());
-            emit saveComplete(success, fileUrl);
-            return success;
-        });
     }
 }
 

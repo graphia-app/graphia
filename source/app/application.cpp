@@ -8,6 +8,7 @@
 #include "shared/utils/preferences.h"
 
 #include "loading/graphmlexporter.h"
+#include "loading/gmlexporter.h"
 #include "loading/loader.h"
 
 #include <QDir>
@@ -42,6 +43,7 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
 
     registerSaveFileType(std::make_unique<GraphMLExporter>());
+    registerSaveFileType(std::make_unique<GMLExporter>());
 }
 
 Application::~Application() = default;
@@ -161,6 +163,16 @@ QStringList Application::failureReasons(const QUrl& url) const
 void Application::registerSaveFileType(std::unique_ptr<IExporter> exporter)
 {
     _exporters.emplace_back(std::move(exporter));
+}
+
+IExporter* Application::exporterByName(const QString &name)
+{
+    for(auto& exporter : _exporters)
+    {
+        if(exporter->name() == name)
+            return exporter.get();
+    }
+    return nullptr;
 }
 
 QStringList Application::saveFileNames()

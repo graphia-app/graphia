@@ -1,33 +1,24 @@
 #include "graphmlexporter.h"
 
-#include <QString>
-#include <QFile>
-#include <QUrl>
-#include <QXmlStreamWriter>
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 #include "layout/nodepositions.h"
-#include "graph/graph.h"
 #include "shared/attributes/iattribute.h"
 
-GraphMLExporter::GraphMLExporter()
-{
+#include <QFile>
+#include <QString>
+#include <QUrl>
+#include <QXmlStreamWriter>
 
-}
+GraphMLExporter::GraphMLExporter() {}
 
-void GraphMLExporter::uncancel()
-{
-}
+void GraphMLExporter::uncancel() {}
 
-void GraphMLExporter::cancel()
-{
-}
+void GraphMLExporter::cancel() {}
 
-bool GraphMLExporter::cancelled() const
-{
-    return false;
-}
+bool GraphMLExporter::cancelled() const { return false; }
 
-bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
+bool GraphMLExporter::save(const QUrl& url, IGraphModel* igraphModel)
 {
     auto graphModel = dynamic_cast<GraphModel*>(igraphModel);
     Q_ASSERT(graphModel != nullptr);
@@ -36,8 +27,8 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     size_t fileCount = graphModel->attributeNames().size() +
-            static_cast<size_t>(graphModel->graph().numNodes()) +
-            static_cast<size_t>(graphModel->graph().numEdges());
+                       static_cast<size_t>(graphModel->graph().numNodes()) +
+                       static_cast<size_t>(graphModel->graph().numEdges());
     size_t runningCount = 0;
 
     QXmlStreamWriter stream(&file);
@@ -94,21 +85,11 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
         QString valueTypeToString = "";
         switch(attribute->valueType())
         {
-        case ValueType::Int:
-            valueTypeToString = "int";
-            break;
-        case ValueType::Float:
-            valueTypeToString = "float";
-            break;
-        case ValueType::String:
-            valueTypeToString = "string";
-            break;
-        case ValueType::Numerical:
-            valueTypeToString = "float";
-            break;
-        default:
-            valueTypeToString = "string";
-            break;
+        case ValueType::Int: valueTypeToString = "int"; break;
+        case ValueType::Float: valueTypeToString = "float"; break;
+        case ValueType::String: valueTypeToString = "string"; break;
+        case ValueType::Numerical: valueTypeToString = "float"; break;
+        default: valueTypeToString = "string"; break;
         }
         stream.writeAttribute("attr.type", valueTypeToString);
         stream.writeEndElement();
@@ -175,12 +156,6 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
     return true;
 }
 
-QString GraphMLExporter::name() const
-{
-    return "GraphML";
-}
+QString GraphMLExporter::name() const { return "GraphML"; }
 
-QString GraphMLExporter::extension() const
-{
-    return ".graphml";
-}
+QString GraphMLExporter::extension() const { return ".graphml"; }
