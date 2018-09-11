@@ -46,7 +46,6 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     }
 
     QTextStream stream(&file);
-    stream.setFieldWidth(1);
     stream << "graph" << endl << "[" << endl;
     level++;
 

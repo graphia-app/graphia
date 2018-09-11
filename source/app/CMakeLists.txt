@@ -53,6 +53,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.h
@@ -165,6 +166,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.cpp

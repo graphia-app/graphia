@@ -9,6 +9,7 @@
 
 #include "loading/graphmlexporter.h"
 #include "loading/gmlexporter.h"
+#include "loading/pairwiseexporter.h"
 #include "loading/loader.h"
 
 #include <QDir>
@@ -44,6 +45,7 @@ Application::Application(QObject *parent) :
 
     registerSaveFileType(std::make_unique<GraphMLExporter>());
     registerSaveFileType(std::make_unique<GMLExporter>());
+    registerSaveFileType(std::make_unique<PairwiseExporter>());
 }
 
 Application::~Application() = default;
