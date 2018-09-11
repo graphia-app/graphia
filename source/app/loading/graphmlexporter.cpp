@@ -134,15 +134,15 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
         const auto& pos = graphModel->nodePositions().get(nodeId);
         stream.writeStartElement("data");
         stream.writeAttribute("key", "x");
-        stream.writeCharacters(QString::number(pos.x()));
+        stream.writeCharacters(QString::number(static_cast<double>(pos.x())));
         stream.writeEndElement();
         stream.writeStartElement("data");
         stream.writeAttribute("key", "y");
-        stream.writeCharacters(QString::number(pos.y()));
+        stream.writeCharacters(QString::number(static_cast<double>(pos.y())));
         stream.writeEndElement();
         stream.writeStartElement("data");
         stream.writeAttribute("key", "z");
-        stream.writeCharacters(QString::number(pos.z()));
+        stream.writeCharacters(QString::number(static_cast<double>(pos.z())));
         stream.writeEndElement();
 
         stream.writeEndElement();
