@@ -49,7 +49,6 @@ public:
     void setValueAt(size_t column, size_t row, QString&& value, int progressHint = -1);
 
     void shrinkToFit();
-
     void reset();
 };
 
@@ -62,11 +61,20 @@ private:
     TabularData _tabularData;
     const IParser* _parent = nullptr;
 
-    template<typename TokenFn>
-    bool tokenise(const QUrl& url, TokenFn tokenFn)
+public:
+    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) : _parent(parent)
     {
-        size_t currentColumn = 0;
-        size_t currentRow = 0;
+        if(parent != nullptr)
+            setProgressFn([parent](int percent) { parent->setProgress(percent); });
+    }
+
+    bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
+    {
+        if(graphModel != nullptr)
+            graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+
+        size_t columnIndex = 0;
+        size_t rowIndex = 0;
 
         std::ifstream file(url.toLocalFile().toStdString());
         auto fileSize = file.tellg();
@@ -83,36 +91,19 @@ private:
             setProgress(progress);
 
             for(const auto& field : row)
-                tokenFn(currentColumn++, currentRow, QString::fromStdString(field), progress);
+            {
+                _tabularData.setValueAt(columnIndex++, rowIndex,
+                    QString::fromStdString(field), progress);
+            }
 
-            currentRow++;
-            currentColumn = 0;
+            rowIndex++;
+            columnIndex = 0;
         }
-        return true;
-    }
-
-public:
-    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) : _parent(parent)
-    {
-        if(parent != nullptr)
-        {
-            setProgressFn([parent](int percent) { parent->setProgress(percent); });
-        }
-    }
-
-    bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
-    {
-        if(graphModel != nullptr)
-            graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
-
-        auto result = tokenise(url, [this](size_t column, size_t row, auto&& token, int progress) {
-            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token), progress);
-        });
 
         // Free up any over-allocation
         _tabularData.shrinkToFit();
 
-        return result;
+        return true;
     }
 
     TabularData& tabularData() { return _tabularData; }
