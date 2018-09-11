@@ -1320,6 +1320,7 @@ void CorrelationPlotItem::rebuildPlot()
 
     xAxis->setLabel({});
     xAxis->setTicker(categoryTicker);
+    xAxis->setTicks(minColumnWidth() >= 1.0);
 
     xAxis->grid()->setVisible(_showGridLines);
     _mainYAxis->grid()->setVisible(_showGridLines);
