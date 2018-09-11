@@ -6,8 +6,8 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/preferences.h"
-#include "shared/loading/graphmlexporter.h"
 
+#include "loading/graphmlexporter.h"
 #include "loading/loader.h"
 
 #include <QDir>

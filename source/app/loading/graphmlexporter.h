@@ -1,7 +1,7 @@
 #ifndef GRAPHMLEXPORTER_H
 #define GRAPHMLEXPORTER_H
 
-#include "iexporter.h"
+#include "loading/iexporter.h"
 
 class GraphMLExporter : public IExporter
 {

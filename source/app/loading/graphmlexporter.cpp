@@ -4,9 +4,10 @@
 #include <QFile>
 #include <QUrl>
 #include <QXmlStreamWriter>
-#include <shared/graph/igraphmodel.h>
-#include <shared/graph/igraph.h>
-#include <shared/attributes/iattribute.h>
+#include "graph/graphmodel.h"
+#include "layout/nodepositions.h"
+#include "graph/graph.h"
+#include "shared/attributes/iattribute.h"
 
 GraphMLExporter::GraphMLExporter()
 {
@@ -26,13 +27,17 @@ bool GraphMLExporter::cancelled() const
     return false;
 }
 
-bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
+bool GraphMLExporter::save(const QUrl &url, IGraphModel *igraphModel)
 {
+    auto graphModel = dynamic_cast<GraphModel*>(igraphModel);
+    Q_ASSERT(graphModel != nullptr);
+
     QFile file(url.toLocalFile());
-    file.open(QIODevice::WriteOnly);
+    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     size_t fileCount = graphModel->attributeNames().size() +
-            graphModel->graph().numNodes() + graphModel->graph().numEdges();
+            static_cast<size_t>(graphModel->graph().numNodes()) +
+            static_cast<size_t>(graphModel->graph().numEdges());
     size_t runningCount = 0;
 
     QXmlStreamWriter stream(&file);
@@ -47,18 +52,21 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
     stream.writeAttribute("id", QStringLiteral("x"));
     stream.writeAttribute("attr.name", QStringLiteral("x"));
     stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeAttribute("for", "node");
     stream.writeEndElement();
 
     stream.writeStartElement("key");
     stream.writeAttribute("id", QStringLiteral("y"));
     stream.writeAttribute("attr.name", QStringLiteral("y"));
     stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeAttribute("for", "node");
     stream.writeEndElement();
 
     stream.writeStartElement("key");
     stream.writeAttribute("id", QStringLiteral("z"));
     stream.writeAttribute("attr.name", QStringLiteral("z"));
     stream.writeAttribute("attr.type", QStringLiteral("float"));
+    stream.writeAttribute("for", "node");
     stream.writeEndElement();
 
     // Add attribute keys
@@ -68,7 +76,7 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
     for(const auto& attributeName : graphModel->attributeNames())
     {
         runningCount++;
-        setProgress(runningCount * 100 / fileCount);
+        setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
         auto attribute = graphModel->attributeByName(attributeName);
         stream.writeStartElement("key");
@@ -110,7 +118,7 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
     for(auto nodeId : graphModel->graph().nodeIds())
     {
         runningCount++;
-        setProgress(runningCount * 100 / fileCount);
+        setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
         stream.writeStartElement("node");
         stream.writeAttribute("id", QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
@@ -122,13 +130,28 @@ bool GraphMLExporter::save(const QUrl &url, IGraphModel *graphModel)
             stream.writeCharacters(attribute->stringValueOf(nodeId));
             stream.writeEndElement();
         }
+
+        const auto& pos = graphModel->nodePositions().get(nodeId);
+        stream.writeStartElement("data");
+        stream.writeAttribute("key", "x");
+        stream.writeCharacters(QString::number(pos.x()));
+        stream.writeEndElement();
+        stream.writeStartElement("data");
+        stream.writeAttribute("key", "y");
+        stream.writeCharacters(QString::number(pos.y()));
+        stream.writeEndElement();
+        stream.writeStartElement("data");
+        stream.writeAttribute("key", "z");
+        stream.writeCharacters(QString::number(pos.z()));
+        stream.writeEndElement();
+
         stream.writeEndElement();
     }
     int edgeCount = 0;
     for(auto edgeId : graphModel->graph().edgeIds())
     {
         runningCount++;
-        setProgress(runningCount * 100 / fileCount);
+        setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
         auto& edge = graphModel->graph().edgeById(edgeId);
         stream.writeStartElement("edge");

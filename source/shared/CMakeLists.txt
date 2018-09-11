@@ -29,8 +29,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/imutablegraph.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iurltypes.h
@@ -84,7 +82,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp

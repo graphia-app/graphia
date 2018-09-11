@@ -5,7 +5,6 @@
 #include "attributes/enrichmentcalculator.h"
 
 #include "shared/plugins/iplugin.h"
-#include "shared/loading/iexporter.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
@@ -16,6 +15,7 @@
 #include "loading/parserthread.h"
 #include "loading/loader.h"
 #include "loading/saver.h"
+#include "loading/iexporter.h"
 
 #include "layout/forcedirectedlayout.h"
 #include "layout/layout.h"

@@ -48,6 +48,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.h
@@ -159,6 +161,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.cpp
