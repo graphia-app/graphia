@@ -98,7 +98,7 @@ static json graphAsJson(const IGraph& graph, Progressable& progressable)
     for(auto nodeId : graph.nodeIds())
     {
         json node;
-        node["id"] = static_cast<int>(nodeId);
+        node["id"] = std::to_string(static_cast<int>(nodeId));
 
         nodes.emplace_back(node);
         progressable.setProgress((i++ * 100) / graph.numNodes());
@@ -115,9 +115,9 @@ static json graphAsJson(const IGraph& graph, Progressable& progressable)
         const auto& edge = graph.edgeById(edgeId);
 
         json jsonEdge;
-        jsonEdge["id"] = static_cast<int>(edgeId);
-        jsonEdge["source"] = static_cast<int>(edge.sourceId());
-        jsonEdge["target"] = static_cast<int>(edge.targetId());
+        jsonEdge["id"] = std::to_string(static_cast<int>(edgeId));
+        jsonEdge["source"] = std::to_string(static_cast<int>(edge.sourceId()));
+        jsonEdge["target"] = std::to_string(static_cast<int>(edge.targetId()));
 
         edges.emplace_back(jsonEdge);
         progressable.setProgress((i++ * 100) / graph.numEdges());
@@ -213,7 +213,7 @@ bool Saver::encode(Progressable& progressable)
     Q_ASSERT(graphModel != nullptr);
 
     json header;
-    header["version"] = 2;
+    header["version"] = 3;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
     jsonArray.emplace_back(header);

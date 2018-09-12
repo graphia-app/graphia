@@ -291,7 +291,21 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
     graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(const auto& jsonNode : jsonNodes)
     {
-        NodeId nodeId = jsonNode["id"].get<int>();
+        NodeId nodeId;
+        if(version >= 3)
+        {
+            try
+            {
+                 nodeId = std::stoi(jsonNode["id"].get<std::string>());
+            }
+            catch(...)
+            {
+                return false;
+            }
+        }
+        else
+            nodeId = jsonNode["id"].get<int>();
+
 
         if(!nodeId.isNull())
         {
@@ -309,9 +323,29 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
     graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(const auto& jsonEdge : jsonEdges)
     {
-        EdgeId edgeId = jsonEdge["id"].get<int>();
-        NodeId sourceId = jsonEdge["source"].get<int>();
-        NodeId targetId = jsonEdge["target"].get<int>();
+        EdgeId edgeId;
+        NodeId sourceId;
+        NodeId targetId;
+
+        if(version >= 3)
+        {
+            try
+            {
+                edgeId = std::stoi(jsonEdge["id"].get<std::string>());
+                sourceId = std::stoi(jsonEdge["source"].get<std::string>());
+                targetId = std::stoi(jsonEdge["target"].get<std::string>());
+            }
+            catch(...)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            edgeId = jsonEdge["id"].get<int>();
+            sourceId = jsonEdge["source"].get<int>();
+            targetId = jsonEdge["target"].get<int>();
+        }
 
         if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
         {
