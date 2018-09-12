@@ -8,6 +8,7 @@
 #include "shared/utils/preferences.h"
 
 #include "loading/graphmlexporter.h"
+#include "loading/jsongraphexporter.h"
 #include "loading/gmlexporter.h"
 #include "loading/pairwiseexporter.h"
 #include "loading/loader.h"
@@ -46,6 +47,7 @@ Application::Application(QObject *parent) :
     registerSaveFileType(std::make_unique<GraphMLExporter>());
     registerSaveFileType(std::make_unique<GMLExporter>());
     registerSaveFileType(std::make_unique<PairwiseExporter>());
+    registerSaveFileType(std::make_unique<JSONGraphExporter>());
 }
 
 Application::~Application() = default;

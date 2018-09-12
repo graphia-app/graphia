@@ -2,6 +2,7 @@
 #define SAVER_H
 
 #include "shared/utils/progressable.h"
+#include "json_helper.h"
 
 #include <QUrl>
 #include <QStringList>
@@ -9,6 +10,7 @@
 #include <QByteArray>
 
 class Document;
+class IGraph;
 class IPluginInstance;
 
 class Saver
@@ -23,6 +25,7 @@ private:
 
 public:
     static const int MaxHeaderSize = 1 << 12;
+    static json graphAsJson(const IGraph &graph, Progressable &progressable);
 
     explicit Saver(const QUrl& fileUrl) { _fileUrl = fileUrl; }
 

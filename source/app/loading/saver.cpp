@@ -16,8 +16,6 @@
 
 #include <vector>
 
-#include "json_helper.h"
-
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
 
@@ -85,7 +83,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
-static json graphAsJson(const IGraph& graph, Progressable& progressable)
+json Saver::graphAsJson(const IGraph& graph, Progressable& progressable)
 {
     json jsonObject;
 

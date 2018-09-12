@@ -51,6 +51,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphexporter.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.h
@@ -164,6 +165,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphexporter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.cpp
