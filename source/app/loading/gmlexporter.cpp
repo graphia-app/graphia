@@ -4,6 +4,13 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
+static QString escape(QString unescaped)
+{
+    QString escaped = unescaped;
+    escaped.replace("\"", "\\\"");
+    return escaped;
+}
+
 bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
 {
     QFile file(url.toLocalFile());
@@ -51,25 +58,28 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
+        QString nodeName = escape(graphModel->nodeName(nodeId));
         stream << indent(level) << "node" << endl;
         stream << indent(level) << "[" << endl;
         level++;
         stream << indent(level) << "id " << static_cast<int>(nodeId) << endl;
-        stream << indent(level) << "label " << QStringLiteral("\"%1\"").arg(graphModel->nodeName(nodeId))
-               << endl;
+        QString labelString = QStringLiteral("\"%1\"").arg(nodeName);
+        stream << indent(level) << "label " << labelString << endl;
 
+        // Attributes
         for(const auto& nodeAttributeName : graphModel->attributeNames(ElementType::Node))
         {
             const auto& attribute = graphModel->attributeByName(nodeAttributeName);
+            QString escapedValue = escape(attribute->stringValueOf(nodeId));
             if(attribute->valueType() == ValueType::String)
             {
                 stream << indent(level) << alphanumAttributeNames[nodeAttributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(attribute->stringValueOf(nodeId)) << endl;
+                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
             }
             else
             {
                 stream << indent(level) << alphanumAttributeNames[nodeAttributeName] << " "
-                       << attribute->stringValueOf(nodeId) << endl;
+                       << escapedValue << endl;
             }
         }
         stream << indent(--level) << "]" << endl; // node
@@ -88,18 +98,20 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         stream << indent(level) << "source " << static_cast<int>(edge.sourceId()) << endl;
         stream << indent(level) << "target " << static_cast<int>(edge.targetId()) << endl;
 
+        // Attributes
         for(const auto& edgeAttributeName : graphModel->attributeNames(ElementType::Edge))
         {
             const auto& attribute = graphModel->attributeByName(edgeAttributeName);
+            auto escapedValue = escape(attribute->stringValueOf(edgeId));
             if(attribute->valueType() == ValueType::String)
             {
                 stream << indent(level) << alphanumAttributeNames[edgeAttributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(attribute->stringValueOf(edgeId)) << endl;
+                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
             }
             else
             {
                 stream << indent(level) << alphanumAttributeNames[edgeAttributeName] << " "
-                       << attribute->stringValueOf(edgeId) << endl;
+                       << escapedValue << endl;
             }
         }
         stream << indent(--level) << "]" << endl; // edge

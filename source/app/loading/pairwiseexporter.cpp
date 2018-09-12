@@ -5,8 +5,16 @@
 #include "shared/attributes/iattribute.h"
 
 #include <QFile>
+#include <QRegularExpression>
 #include <QString>
 #include <QTextStream>
+
+static QString escape(const QString& unescaped)
+{
+    QString escaped = unescaped;
+    escaped.replace("\"", "\\\"");
+    return escaped;
+}
 
 bool PairwiseExporter::save(const QUrl &url, IGraphModel *graphModel)
 {
@@ -20,8 +28,8 @@ bool PairwiseExporter::save(const QUrl &url, IGraphModel *graphModel)
     for(auto edgeId : graphModel->graph().edgeIds())
     {
         auto& edge = graphModel->graph().edgeById(edgeId);
-        auto sourceName = graphModel->nodeName(edge.sourceId());
-        auto targetName = graphModel->nodeName(edge.targetId());
+        auto sourceName = escape(graphModel->nodeName(edge.sourceId()));
+        auto targetName = escape(graphModel->nodeName(edge.targetId()));
 
         if(sourceName.isEmpty())
             sourceName = QString::number(static_cast<int>(edge.sourceId()));
