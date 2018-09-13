@@ -1,6 +1,8 @@
 #ifndef SAVER_H
 #define SAVER_H
 
+#include <utility>
+
 #include "shared/utils/progressable.h"
 #include "json_helper.h"
 
@@ -27,7 +29,7 @@ public:
     static const int MaxHeaderSize = 1 << 12;
     static json graphAsJson(const IGraph &graph, Progressable &progressable);
 
-    explicit Saver(const QUrl& fileUrl) : _fileUrl(fileUrl) {}
+    explicit Saver(QUrl fileUrl) : _fileUrl(std::move(fileUrl)) {}
 
     QUrl fileUrl() const { return _fileUrl; }
 

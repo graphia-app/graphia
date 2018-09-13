@@ -68,7 +68,7 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
         auto attribute = graphModel->attributeByName(attributeName);
-        stream.writeStartElement("key");
+        stream.writeStartElement(QStringLiteral("key"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("d%1").arg(keyId));
         idToAttribute[QStringLiteral("d%1").arg(keyId)] = attributeName;
         attributeToId[attributeName] = QStringLiteral("d%1").arg(keyId);
@@ -80,7 +80,7 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
 
         stream.writeAttribute(QStringLiteral("attr.name"), attributeName);
 
-        QString valueTypeToString = "";
+        QString valueTypeToString;
         switch(attribute->valueType())
         {
         case ValueType::Int: valueTypeToString = QStringLiteral("int"); break;

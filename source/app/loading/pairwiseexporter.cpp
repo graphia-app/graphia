@@ -35,8 +35,8 @@ bool PairwiseExporter::save(const QUrl& url, IGraphModel* graphModel)
         if(targetName.isEmpty())
             targetName = QString::number(static_cast<int>(edge.targetId()));
 
-        if(graphModel->attributeExists("Edge Weight") &&
-           graphModel->attributeByName("Edge Weight")->valueType() == ValueType::Numerical)
+        if(graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
+           graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() == ValueType::Numerical)
         {
             auto* attribute = graphModel->attributeByName(QStringLiteral("Edge Weight"));
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
