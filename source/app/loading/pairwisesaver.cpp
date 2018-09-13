@@ -1,9 +1,10 @@
-#include "pairwiseexporter.h"
+#include "pairwisesaver.h"
 
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
+#include "ui/document.h"
 
 #include <QFile>
 #include <QRegularExpression>
@@ -16,31 +17,31 @@ static QString escape(QString string)
     return string;
 }
 
-bool PairwiseExporter::save(const QUrl& url, IGraphModel* graphModel)
+bool PairwiseSaver::save()
 {
-    QFile file(url.toLocalFile());
+    QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     QTextStream stream(&file);
-    int edgeCount = graphModel->graph().numEdges();
+    int edgeCount = _graphModel->graph().numEdges();
     int runningCount = 0;
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
-    for(auto edgeId : graphModel->graph().edgeIds())
+    _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    for(auto edgeId : _graphModel->graph().edgeIds())
     {
-        auto& edge = graphModel->graph().edgeById(edgeId);
-        auto sourceName = escape(graphModel->nodeName(edge.sourceId()));
-        auto targetName = escape(graphModel->nodeName(edge.targetId()));
+        auto& edge = _graphModel->graph().edgeById(edgeId);
+        auto sourceName = escape(_graphModel->nodeName(edge.sourceId()));
+        auto targetName = escape(_graphModel->nodeName(edge.targetId()));
 
         if(sourceName.isEmpty())
             sourceName = QString::number(static_cast<int>(edge.sourceId()));
         if(targetName.isEmpty())
             targetName = QString::number(static_cast<int>(edge.targetId()));
 
-        if(graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
-           graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() == ValueType::Numerical)
+        if(_graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
+           _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() == ValueType::Numerical)
         {
-            auto* attribute = graphModel->attributeByName(QStringLiteral("Edge Weight"));
+            auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
                    << QStringLiteral("\"%1\"").arg(targetName) << " " << attribute->floatValueOf(edgeId)
                    << endl;
@@ -56,6 +57,9 @@ bool PairwiseExporter::save(const QUrl& url, IGraphModel* graphModel)
     return true;
 }
 
-QString PairwiseExporter::name() const { return QStringLiteral("Pairwise Text"); }
-
-QString PairwiseExporter::extension() const { return QStringLiteral(".txt"); }
+std::unique_ptr<ISaver> PairwiseSaverFactory::create(const QUrl& url, Document* document,
+                                                    const IPluginInstance*, const QByteArray&,
+                                                    const QByteArray&)
+{
+    return std::make_unique<PairwiseSaver>(url, document->graphModel());
+}

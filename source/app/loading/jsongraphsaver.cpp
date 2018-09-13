@@ -1,41 +1,42 @@
-#include "jsongraphexporter.h"
+#include "jsongraphsaver.h"
 
-#include "saver.h"
 #include "json_helper.h"
+#include "saver.h"
+#include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/attributes/iattribute.h"
+#include "ui/document.h"
 
-#include <QFile>
 #include <QDebug>
+#include <QFile>
 
-bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
+bool JSONGraphSaver::save()
 {
     json fileObject;
-    fileObject["graph"] = Saver::graphAsJson(graphModel->graph(), *this);
+    fileObject["graph"] = Saver::graphAsJson(_graphModel->graph(), *this);
     setProgress(-1);
 
-    int fileSize = graphModel->graph().numNodes() + graphModel->graph().numEdges();
+    int fileSize = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
     int runningCount = 0;
 
     // Node Attributes
-    graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
+    _graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
     for(auto& node : fileObject["graph"]["nodes"])
     {
         NodeId nodeId = std::stoi(node["id"].get<std::string>());
-        for(const auto& nodeAttributeName : graphModel->attributeNames(ElementType::Node))
+        for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
-            const auto& attribute = graphModel->attributeByName(nodeAttributeName);
+            const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
 
             auto byteArray = nodeAttributeName.toUtf8();
             auto name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
                 node["metadata"][name] = attribute->stringValueOf(nodeId);
-            else if (attribute->valueType() == ValueType::Int)
+            else if(attribute->valueType() == ValueType::Int)
                 node["metadata"][name] = attribute->intValueOf(nodeId);
-            else if (attribute->valueType() == ValueType::Float)
+            else if(attribute->valueType() == ValueType::Float)
                 node["metadata"][name] = attribute->floatValueOf(nodeId);
         }
 
@@ -44,22 +45,22 @@ bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
     }
 
     // Edge Attributes
-    graphModel->mutableGraph().setPhase(QObject::tr("Edge Attributes"));
+    _graphModel->mutableGraph().setPhase(QObject::tr("Edge Attributes"));
     for(auto& edge : fileObject["graph"]["edges"])
     {
         EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
-        for(const auto& edgeAttributeName : graphModel->attributeNames(ElementType::Edge))
+        for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
-            const auto& attribute = graphModel->attributeByName(edgeAttributeName);
+            const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
 
             auto byteArray = edgeAttributeName.toUtf8();
             auto name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
                 edge["metadata"][name] = attribute->stringValueOf(edgeId);
-            else if (attribute->valueType() == ValueType::Int)
+            else if(attribute->valueType() == ValueType::Int)
                 edge["metadata"][name] = attribute->intValueOf(edgeId);
-            else if (attribute->valueType() == ValueType::Float)
+            else if(attribute->valueType() == ValueType::Float)
                 edge["metadata"][name] = attribute->floatValueOf(edgeId);
         }
 
@@ -67,19 +68,16 @@ bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
         setProgress(runningCount * 100 / fileSize);
     }
 
-    QFile file(url.toLocalFile());
+    QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     file.write(QByteArray::fromStdString(fileObject.dump()));
     file.close();
     return true;
 }
 
-QString JSONGraphExporter::name() const
+std::unique_ptr<ISaver> JSONGraphSaverFactory::create(const QUrl& url, Document* document,
+                                                      const IPluginInstance*, const QByteArray&,
+                                                      const QByteArray&)
 {
-    return QStringLiteral("JSON Graph");
-}
-
-QString JSONGraphExporter::extension() const
-{
-    return QStringLiteral(".json");
+    return std::make_unique<JSONGraphSaver>(url, document->graphModel());
 }

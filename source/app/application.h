@@ -30,7 +30,7 @@
 
 class GraphModel;
 class IParser;
-class IExporter;
+class ISaverFactory;
 class IPlugin;
 
 struct LoadedPlugin
@@ -141,8 +141,8 @@ public:
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
 
-    void registerSaveFileType(std::unique_ptr<IExporter> exporter);
-    IExporter* exporterByName(const QString& name);
+    void registerSaveFactory(std::unique_ptr<ISaverFactory> saver);
+    ISaverFactory* saverByName(const QString& name);
     Q_INVOKABLE QStringList saveFileNames();
     Q_INVOKABLE QStringList saveFileUrls();
 
@@ -193,7 +193,7 @@ private:
 
     std::vector<LoadedPlugin> _loadedPlugins;
     PluginDetailsModel _pluginDetails;
-    std::vector<std::unique_ptr<IExporter>> _exporters;
+    std::vector<std::unique_ptr<ISaverFactory>> _factories;
 
     void loadPlugins();
     void initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);

@@ -48,13 +48,13 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlexporter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/iexporter.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphexporter.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.h
@@ -164,11 +164,11 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlexporter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphexporter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/loader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwiseexporter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/saver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.cpp

@@ -204,7 +204,7 @@ Item
         return true;
     }
 
-    function saveAsNamedFile(desiredFileUrl, exporterName)
+    function saveAsNamedFile(desiredFileUrl, saverName)
     {
         var uiData =
         {
@@ -219,7 +219,7 @@ Item
         if(typeof(pluginUiData) === "object")
             pluginUiData = JSON.stringify(pluginUiData);
 
-        document.saveFile(desiredFileUrl, exporterName, uiData, pluginUiData);
+        document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
         mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
@@ -256,12 +256,12 @@ Item
 
             onAccepted:
             {
-                var exporterName = "";
+                var saverName = "";
                 if (selectedNameFilter.index > 0)
-                    exporterName = application.saveFileNames()[selectedNameFilter.index - 1];
+                    saverName = application.saveFileNames()[selectedNameFilter.index - 1];
 
                 misc.fileSaveInitialFolder = folder.toString();
-                saveAsNamedFile(file, exporterName);
+                saveAsNamedFile(file, saverName);
             }
         }
     }

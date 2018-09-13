@@ -1,33 +1,28 @@
-#include "graphmlexporter.h"
+#include "graphmlsaver.h"
 
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
-#include "shared/graph/imutablegraph.h"
 #include "layout/nodepositions.h"
 #include "shared/attributes/iattribute.h"
+#include "shared/graph/imutablegraph.h"
+#include "ui/document.h"
 
 #include <QFile>
 #include <QString>
 #include <QUrl>
 #include <QXmlStreamWriter>
 
-void GraphMLExporter::uncancel() {}
-
-void GraphMLExporter::cancel() {}
-
-bool GraphMLExporter::cancelled() const { return false; }
-
-bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
+bool GraphMLSaver::save()
 {
-    auto castGraphModel = dynamic_cast<GraphModel*>(graphModel);
+    auto castGraphModel = dynamic_cast<GraphModel*>(_graphModel);
     Q_ASSERT(castGraphModel != nullptr);
 
-    QFile file(url.toLocalFile());
+    QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
-    size_t fileCount = graphModel->attributeNames().size() +
-                       static_cast<size_t>(graphModel->graph().numNodes()) +
-                       static_cast<size_t>(graphModel->graph().numEdges());
+    size_t fileCount = _graphModel->attributeNames().size() +
+                       static_cast<size_t>(_graphModel->graph().numNodes()) +
+                       static_cast<size_t>(_graphModel->graph().numEdges());
     size_t runningCount = 0;
 
     QXmlStreamWriter stream(&file);
@@ -60,16 +55,16 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     stream.writeEndElement();
 
     // Add attribute keys
-    graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
+    _graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
     int keyId = 0;
     std::map<QString, QString> idToAttribute;
     std::map<QString, QString> attributeToId;
-    for(const auto& attributeName : graphModel->attributeNames())
+    for(const auto& attributeName : _graphModel->attributeNames())
     {
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
-        auto attribute = graphModel->attributeByName(attributeName);
+        auto attribute = _graphModel->attributeByName(attributeName);
         stream.writeStartElement(QStringLiteral("key"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("d%1").arg(keyId));
         idToAttribute[QStringLiteral("d%1").arg(keyId)] = attributeName;
@@ -96,17 +91,17 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         keyId++;
     }
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
-    for(auto nodeId : graphModel->graph().nodeIds())
+    _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
+    for(auto nodeId : _graphModel->graph().nodeIds())
     {
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
         stream.writeStartElement(QStringLiteral("node"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
-        for(const auto& nodeAttributeName : graphModel->attributeNames(ElementType::Node))
+        for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
-            const auto& attribute = graphModel->attributeByName(nodeAttributeName);
+            const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
             stream.writeStartElement(QStringLiteral("data"));
             stream.writeAttribute(QStringLiteral("key"), attributeToId.at(nodeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(nodeId));
@@ -130,21 +125,23 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         stream.writeEndElement();
     }
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     int edgeCount = 0;
-    for(auto edgeId : graphModel->graph().edgeIds())
+    for(auto edgeId : _graphModel->graph().edgeIds())
     {
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / fileCount));
 
-        auto& edge = graphModel->graph().edgeById(edgeId);
+        auto& edge = _graphModel->graph().edgeById(edgeId);
         stream.writeStartElement(QStringLiteral("edge"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("e%1").arg(edgeCount++));
-        stream.writeAttribute(QStringLiteral("source"), QStringLiteral("n%1").arg(static_cast<int>(edge.sourceId())));
-        stream.writeAttribute(QStringLiteral("target"), QStringLiteral("n%1").arg(static_cast<int>(edge.targetId())));
-        for(const auto& edgeAttributeName : graphModel->attributeNames(ElementType::Edge))
+        stream.writeAttribute(QStringLiteral("source"),
+                              QStringLiteral("n%1").arg(static_cast<int>(edge.sourceId())));
+        stream.writeAttribute(QStringLiteral("target"),
+                              QStringLiteral("n%1").arg(static_cast<int>(edge.targetId())));
+        for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
-            const auto& attribute = graphModel->attributeByName(edgeAttributeName);
+            const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
             stream.writeStartElement(QStringLiteral("data"));
             stream.writeAttribute(QStringLiteral("key"), attributeToId.at(edgeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(edgeId));
@@ -159,6 +156,9 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     return true;
 }
 
-QString GraphMLExporter::name() const { return QStringLiteral("GraphML"); }
-
-QString GraphMLExporter::extension() const { return QStringLiteral(".graphml"); }
+std::unique_ptr<ISaver> GraphMLSaverFactory::create(const QUrl& url, Document* document,
+                                                    const IPluginInstance*, const QByteArray&,
+                                                    const QByteArray&)
+{
+    return std::make_unique<GraphMLSaver>(url, document->graphModel());
+}

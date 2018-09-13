@@ -7,10 +7,10 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/preferences.h"
 
-#include "loading/graphmlexporter.h"
-#include "loading/jsongraphexporter.h"
-#include "loading/gmlexporter.h"
-#include "loading/pairwiseexporter.h"
+#include "loading/graphmlsaver.h"
+#include "loading/jsongraphsaver.h"
+#include "loading/gmlsaver.h"
+#include "loading/pairwisesaver.h"
 #include "loading/loader.h"
 
 #include <QDir>
@@ -44,10 +44,10 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
 
-    registerSaveFileType(std::make_unique<GraphMLExporter>());
-    registerSaveFileType(std::make_unique<GMLExporter>());
-    registerSaveFileType(std::make_unique<PairwiseExporter>());
-    registerSaveFileType(std::make_unique<JSONGraphExporter>());
+    registerSaveFactory(std::make_unique<GraphMLSaverFactory>());
+    registerSaveFactory(std::make_unique<GMLSaverFactory>());
+    registerSaveFactory(std::make_unique<PairwiseSaverFactory>());
+    registerSaveFactory(std::make_unique<JSONGraphSaverFactory>());
 }
 
 Application::~Application() = default;
@@ -164,17 +164,17 @@ QStringList Application::failureReasons(const QUrl& url) const
     return failureReasons;
 }
 
-void Application::registerSaveFileType(std::unique_ptr<IExporter> exporter)
+void Application::registerSaveFactory(std::unique_ptr<ISaverFactory> saver)
 {
-    _exporters.emplace_back(std::move(exporter));
+    _factories.emplace_back(std::move(saver));
 }
 
-IExporter* Application::exporterByName(const QString &name)
+ISaverFactory* Application::saverByName(const QString &name)
 {
-    for(const auto& exporter : _exporters)
+    for(const auto& factory : _factories)
     {
-        if(exporter->name() == name)
-            return exporter.get();
+        if(factory->name() == name)
+            return factory.get();
     }
     return nullptr;
 }
@@ -182,16 +182,16 @@ IExporter* Application::exporterByName(const QString &name)
 QStringList Application::saveFileNames()
 {
     QStringList list;
-    for(auto& exporter : _exporters)
-        list.append(exporter->name());
+    for(auto& saver : _factories)
+        list.append(saver->name());
     return list;
 }
 
 QStringList Application::saveFileUrls()
 {
     QStringList list;
-    for(auto& exporter : _exporters)
-        list.append(exporter->extension());
+    for(auto& saver : _factories)
+        list.append(saver->extension());
     return list;
 }
 

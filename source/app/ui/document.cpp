@@ -15,7 +15,7 @@
 #include "loading/parserthread.h"
 #include "loading/loader.h"
 #include "loading/saver.h"
-#include "loading/iexporter.h"
+#include "loading/isaver.h"
 
 #include "layout/forcedirectedlayout.h"
 #include "layout/layout.h"
@@ -600,23 +600,25 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, const QString& exporterName, const QByteArray& uiData, const QByteArray& pluginUiData)
+void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QByteArray& uiData, const QByteArray& pluginUiData)
 {
-    auto* exporter = _application->exporterByName(exporterName);
-    if(exporter != nullptr)
+    auto* factory = _application->saverByName(saverName);
+    if(factory != nullptr)
     {
+        auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
+
         _commandManager.executeOnce(
             {
                 QString(tr("Save %1")).arg(fileUrl.fileName()),
                 QString(tr("Saving %1")).arg(fileUrl.fileName()),
                 QString(tr("Saved %1")).arg(fileUrl.fileName())
             },
-        [this, fileUrl, exporter](Command& command) mutable
+        [this, fileUrl, saver = std::move(saver)](Command& command) mutable
         {
-            exporter->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
-            bool success = exporter->save(fileUrl, graphModel());
+            saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
+            bool success = saver->save();
             emit saveComplete(success, fileUrl);
-            return success;
+            return true;
         });
     }
     else
