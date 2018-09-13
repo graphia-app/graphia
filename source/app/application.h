@@ -124,7 +124,7 @@ public:
     static constexpr const char* NativeFileType = "Native";
 
     explicit Application(QObject *parent = nullptr);
-    ~Application();
+    ~Application() override;
 
     IPlugin* pluginForName(const QString& pluginName) const;
 

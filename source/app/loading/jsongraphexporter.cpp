@@ -64,10 +64,10 @@ bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
 
 QString JSONGraphExporter::name() const
 {
-    return "JSON Graph";
+    return QStringLiteral("JSON Graph");
 }
 
 QString JSONGraphExporter::extension() const
 {
-    return ".json";
+    return QStringLiteral(".json");
 }

@@ -12,8 +12,8 @@ private:
 
 public:
     bool save(const QUrl& url, IGraphModel* graphModel) override;
-    QString name() const override { return "GML"; }
-    QString extension() const override { return ".gml"; }
+    QString name() const override { return QStringLiteral("GML"); }
+    QString extension() const override { return QStringLiteral(".gml"); }
 };
 
 #endif // GMLEXPORTER_H

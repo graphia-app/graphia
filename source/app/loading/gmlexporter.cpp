@@ -4,11 +4,10 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-static QString escape(QString unescaped)
+static QString escape(QString string)
 {
-    QString escaped = unescaped;
-    escaped.replace("\"", "\\\"");
-    return escaped;
+    string.replace(QStringLiteral("\""), QStringLiteral("\\\""));
+    return string;
 }
 
 bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
@@ -26,14 +25,14 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     for(const auto& nodeAttributeName : graphModel->attributeNames())
     {
         auto cleanName = nodeAttributeName;
-        cleanName.remove(QRegularExpression("[^a-zA-Z\\d]"));
+        cleanName.remove(QRegularExpression(QStringLiteral("[^a-zA-Z\\d]")));
         if(cleanName.isEmpty())
-            cleanName = "Attribute";
+            cleanName = QStringLiteral("Attribute");
 
-        int suffix = 0;
         // Duplicate attributenames can occur when removing non alphanum chars, append a number.
         if(alphanumAttributeNames.find(cleanName) != alphanumAttributeNames.end())
         {
+            int suffix = 0;
             do
             {
                 auto uniqueCleanName = cleanName;

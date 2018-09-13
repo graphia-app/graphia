@@ -600,7 +600,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, QString exporterName, const QByteArray& uiData, const QByteArray& pluginUiData)
+void Document::saveFile(const QUrl& fileUrl, const QString& exporterName, const QByteArray& uiData, const QByteArray& pluginUiData)
 {
     auto* exporter = _application->exporterByName(exporterName);
     if(exporter != nullptr)

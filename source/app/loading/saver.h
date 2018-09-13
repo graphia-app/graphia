@@ -27,7 +27,7 @@ public:
     static const int MaxHeaderSize = 1 << 12;
     static json graphAsJson(const IGraph &graph, Progressable &progressable);
 
-    explicit Saver(const QUrl& fileUrl) { _fileUrl = fileUrl; }
+    explicit Saver(const QUrl& fileUrl) : _fileUrl(fileUrl) {}
 
     QUrl fileUrl() const { return _fileUrl; }
 

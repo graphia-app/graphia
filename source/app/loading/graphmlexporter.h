@@ -6,8 +6,6 @@
 class GraphMLExporter : public IExporter
 {
 public:
-    GraphMLExporter();
-
     void uncancel() override;
     void cancel() override;
     bool cancelled() const override;
