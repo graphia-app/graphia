@@ -611,7 +611,7 @@ void Document::saveFile(const QUrl& fileUrl, QString exporterName, const QByteAr
                 QString(tr("Saving %1")).arg(fileUrl.fileName()),
                 QString(tr("Saved %1")).arg(fileUrl.fileName())
             },
-        [this, fileUrl, &exporter](Command& command) mutable
+        [this, fileUrl, exporter](Command& command) mutable
         {
             exporter->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
             bool success = exporter->save(fileUrl, graphModel());

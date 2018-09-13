@@ -171,7 +171,7 @@ void Application::registerSaveFileType(std::unique_ptr<IExporter> exporter)
 
 IExporter* Application::exporterByName(const QString &name)
 {
-    for(auto& exporter : _exporters)
+    for(const auto& exporter : _exporters)
     {
         if(exporter->name() == name)
             return exporter.get();
