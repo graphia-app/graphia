@@ -4,6 +4,7 @@
 #include "json_helper.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/graph/imutablegraph.h"
 #include "shared/attributes/iattribute.h"
 
 #include <QFile>
@@ -11,11 +12,15 @@
 
 bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
 {
-    setProgress(-1);
     json fileObject;
     fileObject["graph"] = Saver::graphAsJson(graphModel->graph(), *this);
+    setProgress(-1);
+
+    int fileSize = graphModel->graph().numNodes() + graphModel->graph().numEdges();
+    int runningCount = 0;
 
     // Node Attributes
+    graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
     for(auto& node : fileObject["graph"]["nodes"])
     {
         NodeId nodeId = std::stoi(node["id"].get<std::string>());
@@ -33,9 +38,13 @@ bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
             else if (attribute->valueType() == ValueType::Float)
                 node["metadata"][name] = attribute->floatValueOf(nodeId);
         }
+
+        runningCount++;
+        setProgress(runningCount * 100 / fileSize);
     }
 
     // Edge Attributes
+    graphModel->mutableGraph().setPhase(QObject::tr("Edge Attributes"));
     for(auto& edge : fileObject["graph"]["edges"])
     {
         EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
@@ -53,6 +62,9 @@ bool JSONGraphExporter::save(const QUrl &url, IGraphModel *graphModel)
             else if (attribute->valueType() == ValueType::Float)
                 edge["metadata"][name] = attribute->floatValueOf(edgeId);
         }
+
+        runningCount++;
+        setProgress(runningCount * 100 / fileSize);
     }
 
     QFile file(url.toLocalFile());

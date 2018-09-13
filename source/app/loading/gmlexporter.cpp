@@ -1,5 +1,7 @@
 #include "gmlexporter.h"
 
+#include "shared/graph/imutablegraph.h"
+
 #include <QFile>
 #include <QRegularExpression>
 #include <QTextStream>
@@ -22,6 +24,7 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     size_t runningCount = 0;
 
     std::map<QString, QString> alphanumAttributeNames;
+    graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
     for(const auto& nodeAttributeName : graphModel->attributeNames())
     {
         auto cleanName = nodeAttributeName;
@@ -55,6 +58,7 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     stream << "graph" << endl << "[" << endl;
     level++;
 
+    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : graphModel->graph().nodeIds())
     {
         QString nodeName = escape(graphModel->nodeName(nodeId));
@@ -87,6 +91,7 @@ bool GMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         setProgress(static_cast<int>(runningCount * 100 / fileCount));
     }
 
+    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : graphModel->graph().edgeIds())
     {
         auto& edge = graphModel->graph().edgeById(edgeId);

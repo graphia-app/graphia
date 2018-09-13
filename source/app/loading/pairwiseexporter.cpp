@@ -3,6 +3,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/graph/imutablegraph.h"
 
 #include <QFile>
 #include <QRegularExpression>
@@ -21,9 +22,10 @@ bool PairwiseExporter::save(const QUrl& url, IGraphModel* graphModel)
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     QTextStream stream(&file);
-    auto edgeCount = static_cast<size_t>(graphModel->graph().numEdges());
-    size_t runningCount = 0;
+    int edgeCount = graphModel->graph().numEdges();
+    int runningCount = 0;
 
+    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : graphModel->graph().edgeIds())
     {
         auto& edge = graphModel->graph().edgeById(edgeId);
@@ -48,7 +50,7 @@ bool PairwiseExporter::save(const QUrl& url, IGraphModel* graphModel)
                    << QStringLiteral("\"%1\"").arg(targetName) << endl;
 
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / edgeCount));
+        setProgress(runningCount * 100 / edgeCount);
     }
 
     return true;

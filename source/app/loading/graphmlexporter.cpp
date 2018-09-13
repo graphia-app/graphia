@@ -2,6 +2,7 @@
 
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
+#include "shared/graph/imutablegraph.h"
 #include "layout/nodepositions.h"
 #include "shared/attributes/iattribute.h"
 
@@ -59,6 +60,7 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
     stream.writeEndElement();
 
     // Add attribute keys
+    graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
     int keyId = 0;
     std::map<QString, QString> idToAttribute;
     std::map<QString, QString> attributeToId;
@@ -94,6 +96,7 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
         keyId++;
     }
 
+    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : graphModel->graph().nodeIds())
     {
         runningCount++;
@@ -126,6 +129,8 @@ bool GraphMLExporter::save(const QUrl& url, IGraphModel* graphModel)
 
         stream.writeEndElement();
     }
+
+    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     int edgeCount = 0;
     for(auto edgeId : graphModel->graph().edgeIds())
     {
