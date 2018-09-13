@@ -27,7 +27,7 @@ public:
 
     virtual std::unique_ptr<ISaver> create(const QUrl& url, Document* document,
                                            const IPluginInstance* pluginInstance, const QByteArray& uiData,
-                                           const QByteArray& pluginUiData);
+                                           const QByteArray& pluginUiData) = 0;
     virtual QString name() const = 0;
     virtual QString extension() const = 0;
 };

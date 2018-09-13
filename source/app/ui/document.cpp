@@ -605,20 +605,19 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     auto* factory = _application->saverByName(saverName);
     if(factory != nullptr)
     {
-        auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
-
         _commandManager.executeOnce(
             {
                 QString(tr("Save %1")).arg(fileUrl.fileName()),
                 QString(tr("Saving %1")).arg(fileUrl.fileName()),
                 QString(tr("Saved %1")).arg(fileUrl.fileName())
             },
-        [this, fileUrl, saver = std::move(saver)](Command& command) mutable
+        [this, fileUrl, uiData, pluginUiData, factory](Command& command) mutable
         {
+            auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
             saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
             bool success = saver->save();
             emit saveComplete(success, fileUrl);
-            return true;
+            return success;
         });
     }
     else
