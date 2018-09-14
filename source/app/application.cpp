@@ -11,6 +11,7 @@
 #include "loading/jsongraphsaver.h"
 #include "loading/gmlsaver.h"
 #include "loading/pairwisesaver.h"
+#include "loading/saver.h"
 #include "loading/loader.h"
 
 #include <QDir>
@@ -44,6 +45,7 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
 
+    registerSaveFactory(std::make_unique<SaverFactory>());
     registerSaveFactory(std::make_unique<GraphMLSaverFactory>());
     registerSaveFactory(std::make_unique<GMLSaverFactory>());
     registerSaveFactory(std::make_unique<PairwiseSaverFactory>());

@@ -1,23 +1,23 @@
 #include "saver.h"
 
 #include "shared/plugins/iplugin.h"
-#include "shared/utils/scope_exit.h"
 #include "shared/utils/iterator_range.h"
+#include "shared/utils/scope_exit.h"
 #include "shared/utils/string.h"
 
-#include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
+#include "graph/mutablegraph.h"
 
 #include "ui/document.h"
 
-#include <QFile>
 #include <QDataStream>
+#include <QFile>
 #include <QStringList>
 
 #include <vector>
 
-#include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
+#include "thirdparty/zlib/zlib_disable_warnings.h"
 
 static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
 {
@@ -38,10 +38,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     if(ret != Z_OK)
         return false;
 
-    auto atExit = std::experimental::make_scope_exit([&zstream]
-    {
-       deflateEnd(&zstream);
-    });
+    auto atExit = std::experimental::make_scope_exit([&zstream] { deflateEnd(&zstream); });
     Q_UNUSED(atExit);
 
     int flush = Z_ERRNO;
@@ -71,7 +68,8 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
                 return false;
 
             numBytes = ChunkSize - zstream.avail_out;
-            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer.data()), numBytes) != numBytes) // NOLINT
+            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer.data()), numBytes) !=
+               numBytes) // NOLINT
                 return false;
 
         } while(zstream.avail_out == 0);
@@ -91,7 +89,8 @@ json Saver::graphAsJson(const IGraph& graph, Progressable& progressable)
 
     int i;
 
-    graph.setPhase(QObject::tr("Nodes")); i = 0;
+    graph.setPhase(QObject::tr("Nodes"));
+    i = 0;
     json nodes;
     for(auto nodeId : graph.nodeIds())
     {
@@ -106,7 +105,8 @@ json Saver::graphAsJson(const IGraph& graph, Progressable& progressable)
 
     jsonObject["nodes"] = nodes;
 
-    graph.setPhase(QObject::tr("Edges")); i = 0;
+    graph.setPhase(QObject::tr("Edges"));
+    i = 0;
     json edges;
     for(auto edgeId : graph.edgeIds())
     {
@@ -128,8 +128,7 @@ json Saver::graphAsJson(const IGraph& graph, Progressable& progressable)
     return jsonObject;
 }
 
-static json nodeNamesAsJson(IGraphModel& graphModel,
-                            Progressable& progressable)
+static json nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
 {
     graphModel.mutableGraph().setPhase(QObject::tr("Names"));
     json names;
@@ -203,7 +202,7 @@ static json layoutSettingsAsJson(const Document& document)
     return jsonObject;
 }
 
-bool Saver::encode(Progressable& progressable)
+bool Saver::save()
 {
     json jsonArray;
 
@@ -222,16 +221,14 @@ bool Saver::encode(Progressable& progressable)
 
     json content;
 
-    content["graph"] = graphAsJson(graphModel->mutableGraph(), progressable);
-    content["nodeNames"] = nodeNamesAsJson(*graphModel, progressable);
+    content["graph"] = graphAsJson(graphModel->mutableGraph(), *this);
+    content["nodeNames"] = nodeNamesAsJson(*graphModel, *this);
 
     json layout;
 
     layout["algorithm"] = _document->layoutName();
     layout["settings"] = layoutSettingsAsJson(*_document);
-    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
-                                              graphModel->nodePositions(),
-                                              progressable);
+    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
@@ -249,9 +246,9 @@ bool Saver::encode(Progressable& progressable)
         content["ui"] = uiDataJson;
 
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
-    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressable);
+    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), *this);
 
-    progressable.setProgress(-1);
+    setProgress(-1);
 
     auto pluginDataJson = json::parse(pluginData.begin(), pluginData.end(), nullptr, false);
 
@@ -272,7 +269,14 @@ bool Saver::encode(Progressable& progressable)
     jsonArray.emplace_back(content);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
-    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), progressable);
+    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), *this);
 }
 
 #include "thirdparty/zlib/zlib_enable_warnings.h"
+
+std::unique_ptr<ISaver> SaverFactory::create(const QUrl& url, Document* document,
+                                             const IPluginInstance* pluginInstance, const QByteArray& uiData,
+                                             const QByteArray& pluginUiData)
+{
+    return std::make_unique<Saver>(url, document, pluginInstance, uiData, pluginUiData);
+}

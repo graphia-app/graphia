@@ -241,8 +241,6 @@ Item
             nameFilters:
             {
                 var filters = [];
-                filters.push(appName + " files (*." + application.nativeExtension + ")");
-
                 var names = application.saveFileNames();
                 var extensions = application.saveFileUrls();
                 for(var i=0; i < names.length; i++)
@@ -257,8 +255,14 @@ Item
             onAccepted:
             {
                 var saverName = "";
-                if (selectedNameFilter.index > 0)
-                    saverName = application.saveFileNames()[selectedNameFilter.index - 1];
+                var saverCount = application.saveFileNames().length;
+                var savers = application.saveFileNames();
+
+                // If no saver is found fall back to default saver (All Files filter will do this)
+                if (selectedNameFilter.index < saverCount)
+                    saverName = savers[selectedNameFilter.index];
+                else
+                    saverName = appName;
 
                 misc.fileSaveInitialFolder = folder.toString();
                 saveAsNamedFile(file, saverName);

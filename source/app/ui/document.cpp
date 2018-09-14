@@ -619,28 +619,6 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
             emit saveComplete(success, fileUrl);
             return success;
         });
-    }
-    else
-    {
-        Saver saver(fileUrl);
-
-        saver.setDocument(this);
-        saver.setUiData(uiData);
-        saver.setPluginInstance(_pluginInstance.get());
-        saver.setPluginUiData(pluginUiData);
-
-        _commandManager.executeOnce(
-            {
-                QString(tr("Save %1")).arg(fileUrl.fileName()),
-                QString(tr("Saving %1")).arg(fileUrl.fileName()),
-                QString(tr("Saved %1")).arg(fileUrl.fileName())
-            },
-        [this, fileUrl, saver = std::move(saver)](Command& command) mutable
-        {
-            auto success = saver.encode(command);
-            emit saveComplete(success, fileUrl);
-            return success;
-        });
 
         _saveRequired = false;
         emit saveRequiredChanged();
