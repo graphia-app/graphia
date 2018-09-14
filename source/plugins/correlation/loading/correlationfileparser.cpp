@@ -1,8 +1,14 @@
 #include "correlationfileparser.h"
 
+#include "correlationplugin.h"
+#include "minmaxnormaliser.h"
+#include "quantilenormaliser.h"
+
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "correlationplugin.h"
+
+#include "shared/utils/iterator_range.h"
+#include "shared/utils/threadpool.h"
 
 #include "shared/loading/tabulardata.h"
 
@@ -94,7 +100,214 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
     return dataRect;
 }
 
-bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
+double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
+    double replacementValue, const TabularData& tabularData,
+    size_t firstDataColumn, size_t firstDataRow,
+    size_t columnIndex, size_t rowIndex)
+{
+    double imputedValue = 0.0;
+
+    switch(missingDataType)
+    {
+    case MissingDataType::Constant:
+    {
+        imputedValue = replacementValue;
+        break;
+    }
+    case MissingDataType::ColumnAverage:
+    {
+        // Calculate column averages
+        double averageValue = 0.0;
+        size_t rowCount = 0;
+        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
+        {
+            const auto& value = tabularData.valueAt(columnIndex, avgRowIndex);
+            if(!value.isEmpty())
+            {
+                averageValue += value.toDouble();
+                rowCount++;
+            }
+        }
+
+        if(rowCount > 0)
+            averageValue /= rowCount;
+
+        imputedValue = averageValue;
+        break;
+    }
+    case MissingDataType::RowInterpolation:
+    {
+        double rightValue = 0.0;
+        double leftValue = 0.0;
+        size_t leftDistance = 0;
+        size_t rightDistance = 0;
+        bool rightValueFound = false;
+        bool leftValueFound = false;
+
+        // Find right value
+        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
+        {
+            const auto& value = tabularData.valueAt(rightColumn, rowIndex);
+            if(!value.isEmpty())
+            {
+                rightValue = value.toDouble();
+                rightValueFound = true;
+                rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
+                break;
+            }
+        }
+        // Find left value
+        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
+        {
+            const auto& value = tabularData.valueAt(leftColumn, rowIndex);
+            if(!value.isEmpty())
+            {
+                leftValue = value.toDouble();
+                leftValueFound = true;
+                leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
+                break;
+            }
+        }
+
+        // Lerp the result if possible, otherwise just set to found value
+        if(leftValueFound && rightValueFound)
+        {
+            size_t totalDistance = leftDistance + rightDistance;
+            double tween = leftDistance / static_cast<double>(totalDistance);
+            // https://devblogs.nvidia.com/lerp-faster-cuda/
+            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
+            imputedValue = lerpedValue;
+        }
+        else if(leftValueFound && !rightValueFound)
+            imputedValue = leftValue;
+        else if(!leftValueFound && rightValueFound)
+            imputedValue = rightValue;
+        else // Nothing on the row, just zero it
+            imputedValue = 0.0;
+        break;
+    }
+    default:
+        break;
+    }
+
+    return imputedValue;
+}
+
+double CorrelationFileParser::scaleValue(ScalingType scalingType, double value)
+{
+    // LogY(x+c) where c is EPSILON
+    // This prevents LogY(0) which is -inf
+    // Log2(0+c) = -1057
+    // Document this!
+    const double EPSILON = std::nextafter(0.0, 1.0);
+
+    switch(scalingType)
+    {
+    case ScalingType::Log2:
+        return std::log2(value + EPSILON);
+    case ScalingType::Log10:
+        return std::log10(value + EPSILON);
+    case ScalingType::AntiLog2:
+        return std::pow(2.0, value);
+    case ScalingType::AntiLog10:
+        return std::pow(10.0, value);
+    case ScalingType::ArcSin:
+        return std::asin(value);
+    default:
+        break;
+    }
+    return value;
+}
+
+void CorrelationFileParser::normalise(NormaliseType normaliseType,
+    std::vector<CorrelationDataRow>& dataRows, IParser* parser)
+{
+    switch(normaliseType)
+    {
+    case NormaliseType::MinMax:
+    {
+        MinMaxNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    case NormaliseType::Quantile:
+    {
+        QuantileNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    default:
+        break;
+    }
+
+    if(normaliseType != NormaliseType::None)
+    {
+        for(auto& dataRow : dataRows)
+            dataRow.update();
+    }
+}
+
+std::vector<CorrelationEdge> CorrelationFileParser::pearsonCorrelation(
+    const std::vector<CorrelationDataRow>& rows,
+    double minimumThreshold, IParser* parser)
+{
+    if(rows.empty())
+        return {};
+
+    size_t numColumns = std::distance(rows.front().cbegin(), rows.front().cend());
+
+    if(parser != nullptr)
+        parser->setProgress(-1);
+
+    uint64_t totalCost = 0;
+    for(const auto& row : rows)
+        totalCost += row.computeCostHint();
+
+    std::atomic<uint64_t> cost(0);
+
+    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(rows.begin(), rows.end(),
+    [&](std::vector<CorrelationDataRow>::const_iterator rowAIt)
+    {
+        const auto& rowA = *rowAIt;
+        std::vector<CorrelationEdge> edges;
+
+        if(parser != nullptr && parser->cancelled())
+            return edges;
+
+        for(const auto& rowB : make_iterator_range(rowAIt + 1, rows.end()))
+        {
+            double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
+            double numerator = (numColumns * productSum) - (rowA._sum * rowB._sum);
+            double denominator = rowA._variability * rowB._variability;
+
+            double r = numerator / denominator;
+
+            if(std::isfinite(r) && r >= minimumThreshold)
+                edges.push_back({rowA._nodeId, rowB._nodeId, r});
+        }
+
+        cost += rowA.computeCostHint();
+
+        if(parser != nullptr)
+            parser->setProgress((cost * 100) / totalCost);
+
+        return edges;
+    });
+
+    if(parser != nullptr)
+    {
+        // Returning the results might take time
+        parser->setProgress(-1);
+    }
+
+    std::vector<CorrelationEdge> edges;
+    edges.reserve(std::distance(results.begin(), results.end()));
+    edges.insert(edges.end(), std::make_move_iterator(results.begin()), std::make_move_iterator(results.end()));
+
+    return edges;
+}
+
+bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 {
     if(_tabularData.empty() || cancelled())
         return false;
@@ -121,21 +334,23 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     // We don't need this any more, so free up any memory it's consuming
     _tabularData.reset();
 
+    setProgress(-1);
+    _plugin->finishDataRows();
+
     if(_plugin->requiresNormalisation())
     {
         graphModel->mutableGraph().setPhase(QObject::tr("Normalisation"));
-        if(!_plugin->normalise(*this))
-            return false;
+        _plugin->normalise(this);
     }
 
-    setProgress(-1);
+    if(cancelled())
+        return false;
 
-    _plugin->finishDataRows();
+    setProgress(-1);
     _plugin->createAttributes();
 
     graphModel->mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(url.fileName(),
-        _plugin->minimumCorrelation(), *this);
+    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), *this);
 
     if(cancelled())
         return false;
@@ -157,6 +372,7 @@ bool TabularDataParser::transposed() const
 void TabularDataParser::setTransposed(bool transposed)
 {
     _model.setTransposed(transposed);
+    emit transposedChanged();
 }
 
 void TabularDataParser::setProgress(int progress)
@@ -178,6 +394,27 @@ TabularDataParser::TabularDataParser()
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::onDataLoaded);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataLoaded);
+
+    connect(this, &TabularDataParser::dataRectChanged, this, [this] { estimateGraphSize(); });
+    connect(this, &TabularDataParser::parameterChanged, this, [this] { estimateGraphSize(); });
+
+    connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::started,
+        this, &TabularDataParser::graphSizeEstimateInProgressChanged);
+    connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished,
+        this, &TabularDataParser::graphSizeEstimateInProgressChanged);
+
+    connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished, [this]
+    {
+        _graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
+        emit graphSizeEstimateChanged();
+
+        qDebug() << _graphSizeEstimate["keys"].value<QVector<double>>();
+        qDebug() << _graphSizeEstimate["numNodes"].value<QVector<double>>();
+
+        // Another estimate was queued while we were busy
+        if(_graphSizeEstimateQueued)
+            estimateGraphSize();
+    });
 }
 
 bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
@@ -213,6 +450,8 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
         Q_ASSERT(_dataPtr != nullptr);
         if(_dataPtr != nullptr)
             _dataRect = findLargestDataRect(*_dataPtr);
+
+        estimateGraphSize();
     });
 
     _dataParserWatcher.setFuture(future);
@@ -234,6 +473,147 @@ void TabularDataParser::clearData()
 {
     if(_dataPtr != nullptr)
         _dataPtr->reset();
+}
+
+std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSamples)
+{
+    std::vector<CorrelationDataRow> dataRows;
+
+    std::vector<double> rowData;
+    rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
+
+    // Choose numSamples random row indices from tabularData
+    std::vector<size_t> rowIndices(_dataPtr->numRows() - _dataRect.y());
+    std::iota(rowIndices.begin(), rowIndices.end(), _dataRect.y());
+    rowIndices = u::randomSample(rowIndices, numSamples);
+    std::sort(rowIndices.begin(), rowIndices.end());
+
+    NodeId nodeId(0);
+
+    for(size_t rowIndex : rowIndices)
+    {
+        rowData.clear();
+
+        for(auto columnIndex = static_cast<size_t>(_dataRect.x());
+            columnIndex < _dataPtr->numColumns(); columnIndex++)
+        {
+            const auto& value = _dataPtr->valueAt(columnIndex, rowIndex);
+            double transformedValue = 0.0;
+
+            if(!value.isEmpty())
+            {
+                bool success = false;
+                transformedValue = value.toDouble(&success);
+                Q_ASSERT(success);
+            }
+            else
+            {
+                transformedValue = CorrelationFileParser::imputeValue(
+                    static_cast<MissingDataType>(_missingDataType), _replacementValue,
+                    *_dataPtr, _dataRect.x(), _dataRect.y(), columnIndex, rowIndex);
+            }
+
+            transformedValue = CorrelationFileParser::scaleValue(
+                static_cast<ScalingType>(_scalingType), transformedValue);
+
+            rowData.emplace_back(transformedValue);
+        }
+
+        dataRows.emplace_back(rowData, nodeId++);
+    }
+
+    CorrelationFileParser::normalise(static_cast<NormaliseType>(_normaliseType), dataRows);
+
+    return dataRows;
+}
+
+void TabularDataParser::estimateGraphSize()
+{
+    if(_dataPtr == nullptr)
+        return;
+
+    if(_graphSizeEstimateFutureWatcher.isRunning())
+    {
+        _graphSizeEstimateQueued = true;
+        return;
+    }
+
+    _graphSizeEstimateQueued = false;
+
+    QFuture<QVariantMap> future = QtConcurrent::run(
+    [this]
+    {
+        const size_t maxSampleRows = 2000;
+        const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
+        size_t percent = numSampleRows * 100 / _dataPtr->numRows();
+        percent = percent < 1 ? 1 : percent;
+        auto percentSq = percent * percent;
+
+        auto dataRows = sampledDataRows(numSampleRows);
+        auto sampleEdges = CorrelationFileParser::pearsonCorrelation(dataRows, _minimumCorrelation);
+
+        if(sampleEdges.empty())
+            return QVariantMap();
+
+        std::sort(sampleEdges.begin(), sampleEdges.end(),
+            [](const auto& a, const auto& b) { return a._r > b._r; });
+
+        const auto numEstimateSamples = 100;
+        const auto sampleQuantum = (1.0 - _minimumCorrelation) / (numEstimateSamples - 1);
+        auto sampleCutoff = 1.0;
+
+        QVector<double> keys;
+        QVector<double> estimatedNumNodes;
+        QVector<double> estimatedNumEdges;
+
+        keys.reserve(static_cast<int>(sampleEdges.size()));
+        estimatedNumNodes.reserve(static_cast<int>(sampleEdges.size()));
+        estimatedNumEdges.reserve(static_cast<int>(sampleEdges.size()));
+
+        size_t numSampledEdges = 0;
+        NodeIdSet nonSingletonNodes;
+
+        for(const auto& sampleEdge : sampleEdges)
+        {
+            nonSingletonNodes.insert(sampleEdge._source);
+            nonSingletonNodes.insert(sampleEdge._target);
+            numSampledEdges++;
+
+            if(sampleEdge._r <= sampleCutoff)
+            {
+                keys.append(sampleEdge._r);
+                auto numNodes = (nonSingletonNodes.size() * 100) / percent;
+                auto numEdges = (numSampledEdges * 10000) / percentSq;
+                estimatedNumNodes.append(numNodes);
+                estimatedNumEdges.append(numEdges);
+
+                sampleCutoff -= sampleQuantum;
+            }
+        }
+
+        keys.append(sampleEdges.back()._r);
+        auto numNodes = (nonSingletonNodes.size() * 100) / percent;
+        auto numEdges = (numSampledEdges * 10000) / percentSq;
+        estimatedNumNodes.append(numNodes);
+        estimatedNumEdges.append(numEdges);
+
+        std::reverse(keys.begin(), keys.end());
+        std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());
+        std::reverse(estimatedNumEdges.begin(), estimatedNumEdges.end());
+
+        QVariantMap map;
+        map.insert(QStringLiteral("keys"), QVariant::fromValue(keys));
+        map.insert(QStringLiteral("numNodes"), QVariant::fromValue(estimatedNumNodes));
+        map.insert(QStringLiteral("numEdges"), QVariant::fromValue(estimatedNumEdges));
+        return map;
+    });
+
+    _graphSizeEstimateFutureWatcher.setFuture(future);
+}
+
+QVariantMap TabularDataParser::graphSizeEstimate() const
+{
+    return _graphSizeEstimate;
 }
 
 void TabularDataParser::onDataLoaded()

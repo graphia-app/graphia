@@ -95,6 +95,12 @@ BaseParameterDialog
     {
         id: tabularDataParser
 
+        minimumCorrelation: minimumCorrelationSpinBox.value
+        scalingType: { return scaling.model.get(scaling.currentIndex).value; }
+        normaliseType: { return normalise.model.get(normalise.currentIndex).value; }
+        missingDataType: { return missingDataType.model.get(missingDataType.currentIndex).value; }
+        replacementValue: replacementConstant.text
+
         onDataRectChanged:
         {
             parameters.dataFrame = dataRect;
@@ -658,7 +664,7 @@ BaseParameterDialog
 
                         ComboBox
                         {
-                            id: missingDataMethod
+                            id: missingDataType
                             Layout.alignment: Qt.AlignRight
                             model: ListModel
                             {
@@ -746,7 +752,7 @@ BaseParameterDialog
                         {
                             Layout.columnSpan: 3
                             Layout.alignment: Qt.AlignHCenter
-                            visible: missingDataMethod.currentText === qsTr("Constant")
+                            visible: missingDataType.currentText === qsTr("Constant")
 
                             Text
                             {
@@ -1094,8 +1100,8 @@ BaseParameterDialog
                         summaryString += qsTr("Data Transpose: ") + transposeCheckBox.checked + "\n";
                         summaryString += qsTr("Data Scaling: ") + scaling.currentText + "\n";
                         summaryString += qsTr("Data Normalise: ") + normalise.currentText + "\n";
-                        summaryString += qsTr("Missing Data Replacement: ") + missingDataMethod.currentText + "\n";
-                        if(missingDataMethod.model.get(missingDataMethod.currentIndex).value === MissingDataType.Constant)
+                        summaryString += qsTr("Missing Data Replacement: ") + missingDataType.currentText + "\n";
+                        if(missingDataType.model.get(missingDataType.currentIndex).value === MissingDataType.Constant)
                             summaryString += qsTr("Replacement Constant: ") + replacementConstant.text + "\n";
                         var transformString = ""
                         if(clustering.model.get(clustering.currentIndex).value !== ClusteringType.None)

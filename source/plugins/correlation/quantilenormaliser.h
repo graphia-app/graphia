@@ -6,8 +6,7 @@
 class QuantileNormaliser : public Normaliser
 {
 public:
-    bool process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                 IParser& parser) const override;
+    bool process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const override;
 };
 
 #endif // QUANTILENORMALISER_H

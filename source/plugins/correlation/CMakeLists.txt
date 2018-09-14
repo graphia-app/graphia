@@ -10,6 +10,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/correlationedge.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.h

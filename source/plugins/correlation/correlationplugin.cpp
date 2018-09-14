@@ -1,7 +1,6 @@
 #include "correlationplugin.h"
 
 #include "correlationplotitem.h"
-#include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
@@ -80,7 +79,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             bool isColumnInDataRect = firstDataColumn <= columnIndex;
 
             if((isColumnInDataRect && dataColumnIndex >= _numColumns) ||
-                    (isRowInDataRect && dataRowIndex >= _numRows))
+                (isRowInDataRect && dataRowIndex >= _numRows))
             {
                 qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
                                     "dataRect of dimensions (%3, %4)")
@@ -96,9 +95,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 if(!isColumnInDataRect)
                     _userNodeData.add(value);
                 else
-                {
                     setDataColumnName(dataColumnIndex, value);
-                }
             }
             else if(!isRowInDataRect)
             {
@@ -118,9 +115,12 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                     Q_ASSERT(success);
                 }
                 else
-                    transformedValue = imputeValue(tabularData, firstDataColumn, firstDataRow, columnIndex, rowIndex);
+                {
+                    transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
+                        tabularData, firstDataColumn, firstDataRow, columnIndex, rowIndex);
+                }
 
-                transformedValue = scaleValue(transformedValue);
+                transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
 
                 setData(dataColumnIndex, dataRowIndex, transformedValue);
             }
@@ -134,25 +134,15 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     return true;
 }
 
-bool CorrelationPluginInstance::normalise(IParser& parser)
+void CorrelationPluginInstance::normalise(IParser* parser)
 {
-    switch(_normalisation)
-    {
-    case NormaliseType::MinMax:
-    {
-        MinMaxNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, parser);
-    }
-    case NormaliseType::Quantile:
-    {
-        QuantileNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, parser);
-    }
-    default:
-        break;
-    }
+    CorrelationFileParser::normalise(_normaliseType, _dataRows, parser);
 
-    return true;
+    // Normalising obviously changes all the values in _dataRows, so we
+    // must sync _data up so that it matches
+    _data.clear();
+    for(const auto& dataRow : _dataRows)
+        _data.insert(_data.end(), dataRow.begin(), dataRow.end());
 }
 
 void CorrelationPluginInstance::finishDataRows()
@@ -208,61 +198,6 @@ void CorrelationPluginInstance::createAttributes()
                                "divided by the mean."));
 }
 
-std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
-        std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
-        double minimumThreshold, IParser* parser)
-{
-    if(parser != nullptr)
-        parser->setProgress(-1);
-
-    uint64_t totalCost = 0;
-    for(auto& row : _dataRows)
-        totalCost += row.computeCostHint();
-
-    std::atomic<uint64_t> cost(0);
-
-    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(begin, end,
-    [&](std::vector<DataRow>::const_iterator rowAIt)
-    {
-        const auto& rowA = *rowAIt;
-        std::vector<CorrelationEdge> edges;
-
-        if(parser != nullptr && parser->cancelled())
-            return edges;
-
-        for(const auto& rowB : make_iterator_range(rowAIt + 1, end))
-        {
-            double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
-            double numerator = (_numColumns * productSum) - (rowA._sum * rowB._sum);
-            double denominator = rowA._variability * rowB._variability;
-
-            double r = numerator / denominator;
-
-            if(std::isfinite(r) && r >= minimumThreshold)
-                edges.push_back({rowA._nodeId, rowB._nodeId, r});
-        }
-
-        cost += rowA.computeCostHint();
-
-        if(parser != nullptr)
-            parser->setProgress((cost * 100) / totalCost);
-
-        return edges;
-    });
-
-    if(parser != nullptr)
-    {
-        // Returning the results might take time
-        parser->setProgress(-1);
-    }
-
-    std::vector<CorrelationEdge> edges;
-    edges.reserve(std::distance(results.begin(), results.end()));
-    edges.insert(edges.end(), std::make_move_iterator(results.begin()), std::make_move_iterator(results.end()));
-
-    return edges;
-}
-
 void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
 {
     if(_highlightedRows.isEmpty() && highlightedRows.isEmpty())
@@ -282,46 +217,12 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
     emit highlightedRowsChanged();
 }
 
-std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
-    const QString& fileName, double minimumThreshold, IParser& parser)
+std::vector<CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(double minimumThreshold, IParser& parser)
 {
-    // Perform a preliminary correlation on a small random sample of the input data, so we can
-    // tell if the user is trying to create an absurdly large graph and then give them the
-    // option to cancel incase they made a mistake
-    const int percent = 1;
-    const auto numSampleRows = (_dataRows.size() * percent) / 100;
-    const auto sample = u::randomSample(_dataRows, numSampleRows);
-    const auto sampleEdges = pearsonCorrelation(sample.cbegin(), sample.cend(), minimumThreshold);
-    const auto numEdgesEstimate = (sampleEdges.size() * 10000) / (percent * percent);
-
-    const auto numNodes = _dataRows.size();
-    const auto warningThreshold = static_cast<double>(5e6);
-
-    if(numNodes > warningThreshold || numEdgesEstimate > warningThreshold)
-    {
-        auto warningResult = document()->messageBox(MessageBoxIcon::Warning,
-            QObject::tr("Correlation"), QString(QObject::tr(
-                "Loading '%1' at a minimum threshold of %2 will result in a very large "
-                "graph (%3 nodes, approx. %4 edges). This has the potential to exhaust "
-                "system resources and lead to instability or freezes. Are you sure you "
-                "wish to continue?"))
-                .arg(fileName, QString::number(minimumThreshold),
-                     u::formatNumberSIPostfix(numNodes),
-                     u::formatNumberSIPostfix(numEdgesEstimate)),
-            {MessageBoxButton::Yes, MessageBoxButton::No});
-
-        if(warningResult == MessageBoxButton::No)
-        {
-            parser.cancel();
-            return {};
-        }
-    }
-
-    return pearsonCorrelation(_dataRows.cbegin(), _dataRows.cend(), minimumThreshold, &parser);
+    return CorrelationFileParser::pearsonCorrelation(_dataRows, minimumThreshold, &parser);
 }
 
-bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationPluginInstance::CorrelationEdge>& edges,
-                                            IParser& parser)
+bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)
 {
     parser.setProgress(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
@@ -369,137 +270,14 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
 {
     Q_ASSERT(row < _numRows);
 
-    auto dataStartIndex = row * _numColumns;
-    auto dataEndIndex = dataStartIndex + _numColumns;
-
-    auto begin =_data.cbegin() + dataStartIndex;
-    auto end = _data.cbegin() + dataEndIndex;
     auto nodeId = graphModel()->mutableGraph().addNode();
     auto computeCost = static_cast<int>(_numRows - row + 1);
 
-    _dataRows.emplace_back(begin, end, nodeId, computeCost);
+    _dataRows.emplace_back(_data, row, _numColumns, nodeId, computeCost);
     _userNodeData.setElementIdForRowIndex(nodeId, row);
 
     auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
-}
-
-double CorrelationPluginInstance::imputeValue(const TabularData& tabularData,
-    size_t firstDataColumn, size_t firstDataRow,
-    size_t columnIndex, size_t rowIndex)
-{
-    double imputedValue = 0.0;
-
-    switch(_missingDataType)
-    {
-    case MissingDataType::Constant:
-    {
-        imputedValue = _missingDataReplacementValue;
-        break;
-    }
-    case MissingDataType::ColumnAverage:
-    {
-        // Calculate column averages
-        double averageValue = 0.0;
-        size_t rowCount = 0;
-        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
-        {
-            const auto& value = tabularData.valueAt(columnIndex, avgRowIndex);
-            if(!value.isEmpty())
-            {
-                averageValue += value.toDouble();
-                rowCount++;
-            }
-        }
-
-        if(rowCount > 0)
-            averageValue /= rowCount;
-
-        imputedValue = averageValue;
-        break;
-    }
-    case MissingDataType::RowInterpolation:
-    {
-        double rightValue = 0.0;
-        double leftValue = 0.0;
-        size_t leftDistance = 0;
-        size_t rightDistance = 0;
-        bool rightValueFound = false;
-        bool leftValueFound = false;
-
-        // Find right value
-        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
-        {
-            const auto& value = tabularData.valueAt(rightColumn, rowIndex);
-            if(!value.isEmpty())
-            {
-                rightValue = value.toDouble();
-                rightValueFound = true;
-                rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
-                break;
-            }
-        }
-        // Find left value
-        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
-        {
-            const auto& value = tabularData.valueAt(leftColumn, rowIndex);
-            if(!value.isEmpty())
-            {
-                leftValue = value.toDouble();
-                leftValueFound = true;
-                leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
-                break;
-            }
-        }
-
-        // Lerp the result if possible, otherwise just set to found value
-        if(leftValueFound && rightValueFound)
-        {
-            size_t totalDistance = leftDistance + rightDistance;
-            double tween = leftDistance / static_cast<double>(totalDistance);
-            // https://devblogs.nvidia.com/lerp-faster-cuda/
-            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
-            imputedValue = lerpedValue;
-        }
-        else if(leftValueFound && !rightValueFound)
-            imputedValue = leftValue;
-        else if(!leftValueFound && rightValueFound)
-            imputedValue = rightValue;
-        else // Nothing on the row, just zero it
-            imputedValue = 0.0;
-        break;
-    }
-    default:
-        break;
-    }
-
-    return imputedValue;
-}
-
-double CorrelationPluginInstance::scaleValue(double value)
-{
-    // LogY(x+c) where c is EPSILON
-    // This prevents LogY(0) which is -inf
-    // Log2(0+c) = -1057
-    // Document this!
-    const double EPSILON = std::nextafter(0.0, 1.0);
-
-    switch(_scaling)
-    {
-    case ScalingType::Log2:
-        return std::log2(value + EPSILON);
-    case ScalingType::Log10:
-        return std::log10(value + EPSILON);
-    case ScalingType::AntiLog2:
-        return std::pow(2.0, value);
-    case ScalingType::AntiLog10:
-        return std::pow(10.0, value);
-    case ScalingType::ArcSin:
-        return std::asin(value);
-    default:
-        break;
-    }
-    return value;
 }
 
 void CorrelationPluginInstance::onLoadSuccess()
@@ -577,7 +355,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     }
 }
 
-const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
+const CorrelationDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
     return _dataRows.at(_userNodeData.rowIndexFor(nodeId));
 }
@@ -604,9 +382,9 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QLatin1String("transpose"))
         _transpose = (value == QLatin1String("true"));
     else if(name == QLatin1String("scaling"))
-        _scaling = static_cast<ScalingType>(value.toInt());
+        _scalingType = static_cast<ScalingType>(value.toInt());
     else if(name == QLatin1String("normalise"))
-        _normalisation = static_cast<NormaliseType>(value.toInt());
+        _normaliseType = static_cast<NormaliseType>(value.toInt());
     else if(name == QLatin1String("missingDataType"))
         _missingDataType = static_cast<MissingDataType>(value.toInt());
     else if(name == QLatin1String("missingDataValue"))
@@ -664,8 +442,8 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
-    jsonObject["scaling"] = static_cast<int>(_scaling);
-    jsonObject["normalisation"] = static_cast<int>(_normalisation);
+    jsonObject["scaling"] = static_cast<int>(_scalingType);
+    jsonObject["normalisation"] = static_cast<int>(_normaliseType);
     jsonObject["missingDataType"] = static_cast<int>(_missingDataType);
     jsonObject["missingDataReplacementValue"] = _missingDataReplacementValue;
 
@@ -726,15 +504,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     for(size_t row = 0; row < _numRows; row++)
     {
-        auto dataStartIndex = row * _numColumns;
-        auto dataEndIndex = dataStartIndex + _numColumns;
-
-        auto begin =_data.cbegin() + dataStartIndex;
-        auto end = _data.cbegin() + dataEndIndex;
-        auto computeCost = static_cast<int>(_numRows - row + 1);
-
         auto nodeId = _userNodeData.elementIdForRowIndex(row);
-        _dataRows.emplace_back(begin, end, nodeId, computeCost);
+        _dataRows.emplace_back(_data, row, _numColumns, nodeId);
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));
     }
@@ -767,8 +538,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     _minimumCorrelationValue = jsonObject["minimumCorrelationValue"];
     _transpose = jsonObject["transpose"];
-    _scaling = static_cast<ScalingType>(jsonObject["scaling"]);
-    _normalisation = static_cast<NormaliseType>(jsonObject["normalisation"]);
+    _scalingType = static_cast<ScalingType>(jsonObject["scaling"]);
+    _normaliseType = static_cast<NormaliseType>(jsonObject["normalisation"]);
     _missingDataType = static_cast<MissingDataType>(jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 

@@ -8,9 +8,11 @@
 #include "shared/plugins/userdata.h"
 #include "shared/plugins/userelementdata.h"
 
+#include "loading/correlationfileparser.h"
+
+#include "correlationedge.h"
+#include "correlationdatarow.h"
 #include "correlationnodeattributetablemodel.h"
-#include "minmaxnormaliser.h"
-#include "quantilenormaliser.h"
 
 #include <vector>
 #include <functional>
@@ -21,40 +23,10 @@
 #include <QStringList>
 #include <QVector>
 #include <QVariantList>
+#include <QVariantMap>
 #include <QColor>
 #include <QRect>
-
-DEFINE_QML_ENUM(Q_GADGET, ScalingType,
-                None,
-                Log2,
-                Log10,
-                AntiLog2,
-                AntiLog10,
-                ArcSin);
-
-DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
-                None,
-                MinMax,
-                Quantile);
-
-DEFINE_QML_ENUM(Q_GADGET, MissingDataType,
-                None,
-                Constant,
-                ColumnAverage,
-                RowInterpolation);
-
-DEFINE_QML_ENUM(Q_GADGET, ClusteringType,
-                None,
-                MCL);
-
-DEFINE_QML_ENUM(Q_GADGET, EdgeReductionType,
-                None,
-                KNN);
-
-DEFINE_QML_ENUM(Q_GADGET, CorrelationType,
-                Pearson,
-                Spearman);
-
+#include <QFutureWatcher>
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
@@ -90,96 +62,9 @@ private:
 
     CorrelationNodeAttributeTableModel _nodeAttributeTableModel;
 
-    using ConstDataIterator = std::vector<double>::const_iterator;
-    using DataIterator = std::vector<double>::iterator;
-    using DataOffset = std::vector<double>::size_type;
-
     std::vector<double> _data;
 
-    struct DataRow
-    {
-        DataRow() = default;
-        DataRow(const DataRow&) = default;
-        DataRow(ConstDataIterator _begin, ConstDataIterator _end, NodeId nodeId, int computeCost) :
-            _data(_begin, _end), _nodeId(nodeId), _cost(computeCost)
-        {
-            _sortedData = _data;
-            std::sort(_sortedData.begin(), _sortedData.end());
-
-            sum();
-        }
-
-        std::vector<double> _data;
-        std::vector<double> _sortedData;
-
-        DataIterator begin() { return _data.begin(); }
-        DataIterator end() { return _data.end(); }
-
-        ConstDataIterator cbegin() const { return _data.cbegin(); }
-        ConstDataIterator cend() const { return _data.cend(); }
-
-        DataIterator sortedBegin() { return _sortedData.begin(); }
-        DataIterator sortedEnd() { return _sortedData.end(); }
-
-        NodeId _nodeId;
-
-        int _cost = 0;
-        int computeCostHint() const { return _cost; }
-
-        double _sum = 0.0;
-        double _sumSq = 0.0;
-        double _sumAllSq = 0.0;
-        double _variability = 0.0;
-
-        double _mean = 0.0;
-        double _variance = 0.0;
-        double _stddev = 0.0;
-        double _coefVar = 0.0;
-
-        double _minValue = std::numeric_limits<double>::max();
-        double _maxValue = std::numeric_limits<double>::lowest();
-
-        void sum()
-        {
-            auto numColumns = std::distance(begin(), end());
-            bool allPositive = true;
-
-            for(auto value : *this)
-            {
-                allPositive = allPositive && !std::signbit(value);
-
-                _sum += value;
-                _sumSq += value * value;
-                _mean += value / numColumns;
-                _minValue = std::min(_minValue, value);
-                _maxValue = std::max(_maxValue, value);
-            }
-
-            _sumAllSq = _sum * _sum;
-            _variability = std::sqrt((numColumns * _sumSq) - _sumAllSq);
-
-            double sum = 0.0;
-            for(auto value : *this)
-            {
-                double x = (value - _mean);
-                x *= x;
-                sum += x;
-            }
-
-            _variance = sum / numColumns;
-            _stddev = std::sqrt(_variance);
-            _coefVar = (allPositive && _mean > 0.0) ? _stddev / _mean : std::nan("1");
-        }
-    };
-
-    std::vector<DataRow> _dataRows;
-
-    struct CorrelationEdge
-    {
-        NodeId _source;
-        NodeId _target;
-        double _r = 0.0;
-    };
+    std::vector<CorrelationDataRow> _dataRows;
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
@@ -187,8 +72,8 @@ private:
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
-    ScalingType _scaling = ScalingType::None;
-    NormaliseType _normalisation = NormaliseType::None;
+    ScalingType _scalingType = ScalingType::None;
+    NormaliseType _normaliseType = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
@@ -218,11 +103,7 @@ private:
 
     void buildColumnAnnotations();
 
-    const DataRow& dataRowForNodeId(NodeId nodeId) const;
-
-    std::vector<CorrelationEdge> pearsonCorrelation(
-        std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
-        double minimumThreshold, IParser* parser = nullptr);
+    const CorrelationDataRow& dataRowForNodeId(NodeId nodeId) const;
 
     void setHighlightedRows(const QVector<int>& highlightedRows);
 
@@ -230,19 +111,17 @@ public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
                       IParser& parser);
-    bool requiresNormalisation() const { return _normalisation != NormaliseType::None; }
-    bool normalise(IParser& parser);
+    bool requiresNormalisation() const { return _normaliseType != NormaliseType::None; }
+    void normalise(IParser* parser);
     void finishDataRows();
     void createAttributes();
 
-    std::vector<CorrelationEdge> pearsonCorrelation(const QString& fileName, double minimumThreshold,
-        IParser& parser);
+    std::vector<CorrelationEdge> pearsonCorrelation(double minimumThreshold, IParser& parser);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
-    bool createEdges(const std::vector<CorrelationEdge>& edges,
-                     IParser& parser);
+    bool createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;
