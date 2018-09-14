@@ -2,7 +2,7 @@
 #define GMLEXPORTER_H
 
 #include "graph/graphmodel.h"
-#include "loading/isaver.h"
+#include "loading/saverfactory.h"
 
 class GMLSaver : public ISaver
 {
@@ -16,14 +16,11 @@ public:
     bool save() override;
 };
 
-class GMLSaverFactory : public ISaverFactory
+class GMLSaverFactory : public SaverFactory<GMLSaver>
 {
 public:
     QString name() const override { return QStringLiteral("GML"); }
     QString extension() const override { return QStringLiteral(".gml"); }
-    virtual std::unique_ptr<ISaver> create(const QUrl& url, Document* document,
-                                           const IPluginInstance* pluginInstance, const QByteArray& uiData,
-                                           const QByteArray& pluginUiData);
 };
 
 

@@ -52,10 +52,11 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/loader.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/saver.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/saverfactory.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/circle.h
@@ -166,10 +167,10 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/loader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/saver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.cpp

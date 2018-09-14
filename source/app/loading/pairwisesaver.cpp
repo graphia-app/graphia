@@ -56,10 +56,3 @@ bool PairwiseSaver::save()
 
     return true;
 }
-
-std::unique_ptr<ISaver> PairwiseSaverFactory::create(const QUrl& url, Document* document,
-                                                    const IPluginInstance*, const QByteArray&,
-                                                    const QByteArray&)
-{
-    return std::make_unique<PairwiseSaver>(url, document->graphModel());
-}

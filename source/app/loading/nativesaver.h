@@ -20,7 +20,7 @@ class Document;
 class IGraph;
 class IPluginInstance;
 
-class Saver : public ISaver
+class NativeSaver : public ISaver
 {
 private:
     QUrl _fileUrl;
@@ -33,7 +33,7 @@ public:
     static const int MaxHeaderSize = 1 << 12;
     static json graphAsJson(const IGraph& graph, Progressable& progressable);
 
-    Saver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, const QByteArray& uiData,
+    NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, const QByteArray& uiData,
           const QByteArray& pluginUiData) :
         _fileUrl(std::move(fileUrl)),
         _document(document), _pluginInstance(pluginInstance), _uiData(uiData), _pluginUiData(pluginUiData)
@@ -42,7 +42,7 @@ public:
     bool save() override;
 };
 
-class SaverFactory : public ISaverFactory
+class NativeSaverFactory : public ISaverFactory
 {
 public:
     QString name() const override { return Application::name(); }

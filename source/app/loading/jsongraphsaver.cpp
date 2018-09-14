@@ -1,7 +1,7 @@
 #include "jsongraphsaver.h"
 
 #include "json_helper.h"
-#include "saver.h"
+#include "nativesaver.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
@@ -14,7 +14,7 @@
 bool JSONGraphSaver::save()
 {
     json fileObject;
-    fileObject["graph"] = Saver::graphAsJson(_graphModel->graph(), *this);
+    fileObject["graph"] = NativeSaver::graphAsJson(_graphModel->graph(), *this);
     setProgress(-1);
 
     int fileSize = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
@@ -73,11 +73,4 @@ bool JSONGraphSaver::save()
     file.write(QByteArray::fromStdString(fileObject.dump()));
     file.close();
     return true;
-}
-
-std::unique_ptr<ISaver> JSONGraphSaverFactory::create(const QUrl& url, Document* document,
-                                                      const IPluginInstance*, const QByteArray&,
-                                                      const QByteArray&)
-{
-    return std::make_unique<JSONGraphSaver>(url, document->graphModel());
 }

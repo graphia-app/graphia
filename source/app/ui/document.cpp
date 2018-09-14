@@ -13,8 +13,8 @@
 #include "graph/graphmodel.h"
 
 #include "loading/parserthread.h"
-#include "loading/loader.h"
-#include "loading/saver.h"
+#include "loading/nativeloader.h"
+#include "loading/nativesaver.h"
 #include "loading/isaver.h"
 
 #include "layout/forcedirectedlayout.h"

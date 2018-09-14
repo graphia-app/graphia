@@ -1,4 +1,4 @@
-#include "saver.h"
+#include "nativesaver.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/iterator_range.h"
@@ -81,7 +81,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
-json Saver::graphAsJson(const IGraph& graph, Progressable& progressable)
+json NativeSaver::graphAsJson(const IGraph& graph, Progressable& progressable)
 {
     json jsonObject;
 
@@ -202,7 +202,7 @@ static json layoutSettingsAsJson(const Document& document)
     return jsonObject;
 }
 
-bool Saver::save()
+bool NativeSaver::save()
 {
     json jsonArray;
 
@@ -274,9 +274,9 @@ bool Saver::save()
 
 #include "thirdparty/zlib/zlib_enable_warnings.h"
 
-std::unique_ptr<ISaver> SaverFactory::create(const QUrl& url, Document* document,
+std::unique_ptr<ISaver> NativeSaverFactory::create(const QUrl& url, Document* document,
                                              const IPluginInstance* pluginInstance, const QByteArray& uiData,
                                              const QByteArray& pluginUiData)
 {
-    return std::make_unique<Saver>(url, document, pluginInstance, uiData, pluginUiData);
+    return std::make_unique<NativeSaver>(url, document, pluginInstance, uiData, pluginUiData);
 }

@@ -1,7 +1,7 @@
 #ifndef JSONGRAPHEXPORTER_H
 #define JSONGRAPHEXPORTER_H
 
-#include "isaver.h"
+#include "saverfactory.h"
 
 #include <QString>
 
@@ -15,14 +15,11 @@ public:
     bool save() override;
 };
 
-class JSONGraphSaverFactory : public ISaverFactory
+class JSONGraphSaverFactory : public SaverFactory<JSONGraphSaver>
 {
 public:
     QString name() const override { return QStringLiteral("JSON Graph"); }
     QString extension() const override { return QStringLiteral(".json"); }
-    std::unique_ptr<ISaver> create(const QUrl &url, Document *document,
-                                   const IPluginInstance *pluginInstance,
-                                   const QByteArray &uiData, const QByteArray &pluginUiData) override;
 };
 
 

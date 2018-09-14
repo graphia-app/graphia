@@ -1,5 +1,5 @@
-#include "loader.h"
-#include "saver.h"
+#include "nativeloader.h"
+#include "nativesaver.h"
 
 #include "application.h"
 
@@ -173,7 +173,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
 {
     QByteArray byteArray;
 
-    if(!load(url.toLocalFile(), byteArray, Saver::MaxHeaderSize))
+    if(!load(url.toLocalFile(), byteArray, NativeSaver::MaxHeaderSize))
         return false;
 
     // byteArray now has a JSON fragment that hopefully includes the header

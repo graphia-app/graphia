@@ -155,10 +155,3 @@ bool GraphMLSaver::save()
     stream.writeEndDocument();
     return true;
 }
-
-std::unique_ptr<ISaver> GraphMLSaverFactory::create(const QUrl& url, Document* document,
-                                                    const IPluginInstance*, const QByteArray&,
-                                                    const QByteArray&)
-{
-    return std::make_unique<GraphMLSaver>(url, document->graphModel());
-}
