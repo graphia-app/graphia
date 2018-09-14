@@ -9,7 +9,7 @@ class SaverFactory : public ISaverFactory
 {
     std::unique_ptr<ISaver> create(const QUrl& url, Document* document,
                                            const IPluginInstance*, const QByteArray&,
-                                           const QByteArray&)
+                                           const QByteArray&) override
     {
         return std::make_unique<SaverT>(url, document->graphModel());
     }
