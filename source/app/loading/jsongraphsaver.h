@@ -11,16 +11,13 @@ private:
     const QUrl& _url;
     IGraphModel* _graphModel;
 public:
+    // For the factory template we must appease
+    static QString name() { return QStringLiteral("JSON Graph"); }
+    static QString extension() { return QStringLiteral(".json"); }
     JSONGraphSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };
 
-class JSONGraphSaverFactory : public SaverFactory<JSONGraphSaver>
-{
-public:
-    QString name() const override { return QStringLiteral("JSON Graph"); }
-    QString extension() const override { return QStringLiteral(".json"); }
-};
-
+using JSONGraphSaverFactory = SaverFactory<JSONGraphSaver>;
 
 #endif // JSONGRAPHEXPORTER_H

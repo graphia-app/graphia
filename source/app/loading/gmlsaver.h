@@ -12,16 +12,13 @@ private:
     QString indent(int level) { return QStringLiteral("    ").repeated(level); }
 
 public:
+    // For the factory
+    static QString name() { return QStringLiteral("GML"); }
+    static QString extension() { return QStringLiteral(".gml"); }
     GMLSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };
 
-class GMLSaverFactory : public SaverFactory<GMLSaver>
-{
-public:
-    QString name() const override { return QStringLiteral("GML"); }
-    QString extension() const override { return QStringLiteral(".gml"); }
-};
-
+using GMLSaverFactory = SaverFactory<GMLSaver>;
 
 #endif // GMLEXPORTER_H
