@@ -623,6 +623,11 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
         _saveRequired = false;
         emit saveRequiredChanged();
     }
+    else
+    {
+        QMessageBox::critical(nullptr, tr("Save Error"),
+                              QStringLiteral("%1 %2").arg(tr("Unable to find registered saver with name:"), saverName));
+    }
 }
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)

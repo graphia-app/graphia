@@ -184,6 +184,7 @@ ISaverFactory* Application::saverByName(const QString &name)
 QStringList Application::saveFileNames()
 {
     QStringList list;
+    list.reserve(static_cast<int>(_factories.size()));
     for(auto& saver : _factories)
         list.append(saver->name());
     return list;
@@ -192,6 +193,7 @@ QStringList Application::saveFileNames()
 QStringList Application::saveFileUrls()
 {
     QStringList list;
+    list.reserve(static_cast<int>(_factories.size()));
     for(auto& saver : _factories)
         list.append(saver->extension());
     return list;
