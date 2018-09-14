@@ -33,10 +33,10 @@ public:
     static const int MaxHeaderSize = 1 << 12;
     static json graphAsJson(const IGraph& graph, Progressable& progressable);
 
-    NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, const QByteArray& uiData,
-          const QByteArray& pluginUiData) :
+    NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, QByteArray uiData,
+          QByteArray pluginUiData) :
         _fileUrl(std::move(fileUrl)),
-        _document(document), _pluginInstance(pluginInstance), _uiData(uiData), _pluginUiData(pluginUiData)
+        _document(document), _pluginInstance(pluginInstance), _uiData(std::move(uiData)), _pluginUiData(std::move(pluginUiData))
     {}
 
     bool save() override;

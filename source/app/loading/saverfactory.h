@@ -13,8 +13,8 @@ class SaverFactory : public ISaverFactory
     {
         return std::make_unique<SaverT>(url, document->graphModel());
     }
-    QString name() const { return SaverT::name(); }
-    QString extension() const { return SaverT::extension(); }
+    QString name() const override { return SaverT::name(); }
+    QString extension() const override { return SaverT::extension(); }
 };
 
 #endif // SAVERFACTORY_H
