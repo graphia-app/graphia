@@ -7,7 +7,7 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-static QString escape(QString string)
+static QString escape(const QString& string)
 {
     return string.toHtmlEscaped();
 }

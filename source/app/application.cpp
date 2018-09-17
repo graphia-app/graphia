@@ -187,8 +187,8 @@ QVariantList Application::saverFileTypes()
     for(auto& saver : _factories)
     {
         QVariantMap map;
-        map.insert("name", saver->name());
-        map.insert("extension", saver->extension());
+        map.insert(QStringLiteral("name"), saver->name());
+        map.insert(QStringLiteral("extension"), saver->extension());
         saverData.push_back(map);
     }
     return saverData;
