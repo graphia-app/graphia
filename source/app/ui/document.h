@@ -344,7 +344,7 @@ public:
                               const QVariantMap& parameters);
 
     Q_INVOKABLE void saveFile(const QUrl& fileUrl,
-                              const QString &saverName,
+                              const QString& saverName,
                               const QByteArray& uiData,
                               const QByteArray& pluginUiData);
 

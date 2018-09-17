@@ -20,7 +20,7 @@ bool GraphMLSaver::save()
     QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
-    size_t fileCount = _graphModel->attributeNames().size() +
+    size_t numElements = _graphModel->attributeNames().size() +
                        static_cast<size_t>(_graphModel->graph().numNodes()) +
                        static_cast<size_t>(_graphModel->graph().numEdges());
     size_t runningCount = 0;
@@ -62,7 +62,7 @@ bool GraphMLSaver::save()
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         auto attribute = _graphModel->attributeByName(attributeName);
         stream.writeStartElement(QStringLiteral("key"));
@@ -95,7 +95,7 @@ bool GraphMLSaver::save()
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         stream.writeStartElement(QStringLiteral("node"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
@@ -130,7 +130,7 @@ bool GraphMLSaver::save()
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         auto& edge = _graphModel->graph().edgeById(edgeId);
         stream.writeStartElement(QStringLiteral("edge"));

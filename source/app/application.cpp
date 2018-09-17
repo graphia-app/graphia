@@ -45,11 +45,11 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
 
-    registerSaveFactory(std::make_unique<NativeSaverFactory>());
-    registerSaveFactory(std::make_unique<GraphMLSaverFactory>());
-    registerSaveFactory(std::make_unique<GMLSaverFactory>());
-    registerSaveFactory(std::make_unique<PairwiseSaverFactory>());
-    registerSaveFactory(std::make_unique<JSONGraphSaverFactory>());
+    registerSaverFactory(std::make_unique<NativeSaverFactory>());
+    registerSaverFactory(std::make_unique<GraphMLSaverFactory>());
+    registerSaverFactory(std::make_unique<GMLSaverFactory>());
+    registerSaverFactory(std::make_unique<PairwiseSaverFactory>());
+    registerSaverFactory(std::make_unique<JSONGraphSaverFactory>());
 }
 
 Application::~Application() = default;
@@ -166,12 +166,12 @@ QStringList Application::failureReasons(const QUrl& url) const
     return failureReasons;
 }
 
-void Application::registerSaveFactory(std::unique_ptr<ISaverFactory> saver)
+void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
 {
     _factories.emplace_back(std::move(saver));
 }
 
-ISaverFactory* Application::saverByName(const QString &name)
+ISaverFactory* Application::saverFactoryByName(const QString& name)
 {
     for(const auto& factory : _factories)
     {
@@ -181,22 +181,17 @@ ISaverFactory* Application::saverByName(const QString &name)
     return nullptr;
 }
 
-QStringList Application::saveFileNames()
+QVariantList Application::saverFileTypes()
 {
-    QStringList list;
-    list.reserve(static_cast<int>(_factories.size()));
+    QVariantList saverData;
     for(auto& saver : _factories)
-        list.append(saver->name());
-    return list;
-}
-
-QStringList Application::saveFileUrls()
-{
-    QStringList list;
-    list.reserve(static_cast<int>(_factories.size()));
-    for(auto& saver : _factories)
-        list.append(saver->extension());
-    return list;
+    {
+        QVariantMap map;
+        map.insert("name", saver->name());
+        map.insert("extension", saver->extension());
+        saverData.push_back(map);
+    }
+    return saverData;
 }
 
 QStringList Application::pluginNames(const QString& urlTypeName) const

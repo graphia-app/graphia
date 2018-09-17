@@ -241,12 +241,9 @@ Item
             nameFilters:
             {
                 var filters = [];
-                var names = application.saveFileNames();
-                var extensions = application.saveFileUrls();
-                for(var i=0; i < names.length; i++)
-                {
-                    filters.push(names[i] + " files (*" + extensions[i] + ")");
-                }
+                var saverTypes = application.saverFileTypes();
+                for(var i = 0; i < saverTypes.length; i++)
+                    filters.push(saverTypes[i].name + " files (*." + saverTypes[i].extension + ")");
 
                 filters.push("All files (*)");
                 return filters;
@@ -255,12 +252,11 @@ Item
             onAccepted:
             {
                 var saverName = "";
-                var saverCount = application.saveFileNames().length;
-                var savers = application.saveFileNames();
+                var saverTypes = application.saverFileTypes();
 
                 // If no saver is found fall back to default saver (All Files filter will do this)
-                if (selectedNameFilter.index < saverCount)
-                    saverName = savers[selectedNameFilter.index];
+                if (selectedNameFilter.index < saverTypes.length)
+                    saverName = saverTypes[selectedNameFilter.index].name;
                 else
                     saverName = appName;
 

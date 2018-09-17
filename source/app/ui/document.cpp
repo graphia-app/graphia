@@ -600,9 +600,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QByteArray& uiData, const QByteArray& pluginUiData)
+void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QByteArray& uiData,
+                        const QByteArray& pluginUiData)
 {
-    auto* factory = _application->saverByName(saverName);
+    auto* factory = _application->saverFactoryByName(saverName);
     if(factory != nullptr)
     {
         _commandManager.executeOnce(

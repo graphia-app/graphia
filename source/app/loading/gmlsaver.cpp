@@ -9,8 +9,7 @@
 
 static QString escape(QString string)
 {
-    string.replace(QStringLiteral("\""), QStringLiteral("\\\""));
-    return string;
+    return string.toHtmlEscaped();
 }
 
 bool GMLSaver::save()
@@ -19,7 +18,7 @@ bool GMLSaver::save()
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     int level = 0;
 
-    size_t fileCount = _graphModel->attributeNames().size() +
+    size_t numElements = _graphModel->attributeNames().size() +
                        static_cast<size_t>(_graphModel->graph().numNodes()) +
                        static_cast<size_t>(_graphModel->graph().numEdges());
     size_t runningCount = 0;
@@ -36,8 +35,8 @@ bool GMLSaver::save()
         // Duplicate attributenames can occur when removing non alphanum chars, append a number.
         if(alphanumAttributeNames.find(cleanName) != alphanumAttributeNames.end())
         {
-            int suffix = 0;
-            do
+            int suffix = 1;
+            while(true)
             {
                 auto uniqueCleanName = cleanName;
                 uniqueCleanName.append(QString::number(suffix++));
@@ -46,13 +45,13 @@ bool GMLSaver::save()
                     cleanName = uniqueCleanName;
                     break;
                 }
-            } while(true);
+            }
         }
 
         alphanumAttributeNames[nodeAttributeName] = cleanName;
 
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
     QTextStream stream(&file);
@@ -89,7 +88,7 @@ bool GMLSaver::save()
         stream << indent(--level) << "]" << endl; // node
 
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
     _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
@@ -122,7 +121,7 @@ bool GMLSaver::save()
         stream << indent(--level) << "]" << endl; // edge
 
         runningCount++;
-        setProgress(static_cast<int>(runningCount * 100 / fileCount));
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
     stream << indent(--level) << "]" << endl; // graph

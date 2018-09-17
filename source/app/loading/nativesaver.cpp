@@ -1,4 +1,5 @@
 #include "nativesaver.h"
+#include "jsongraphsaver.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/iterator_range.h"
@@ -81,127 +82,6 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
-json NativeSaver::graphAsJson(const IGraph& graph, Progressable& progressable)
-{
-    json jsonObject;
-
-    jsonObject["directed"] = true;
-
-    int i;
-
-    graph.setPhase(QObject::tr("Nodes"));
-    i = 0;
-    json nodes;
-    for(auto nodeId : graph.nodeIds())
-    {
-        json node;
-        node["id"] = std::to_string(static_cast<int>(nodeId));
-
-        nodes.emplace_back(node);
-        progressable.setProgress((i++ * 100) / graph.numNodes());
-    }
-
-    progressable.setProgress(-1);
-
-    jsonObject["nodes"] = nodes;
-
-    graph.setPhase(QObject::tr("Edges"));
-    i = 0;
-    json edges;
-    for(auto edgeId : graph.edgeIds())
-    {
-        const auto& edge = graph.edgeById(edgeId);
-
-        json jsonEdge;
-        jsonEdge["id"] = std::to_string(static_cast<int>(edgeId));
-        jsonEdge["source"] = std::to_string(static_cast<int>(edge.sourceId()));
-        jsonEdge["target"] = std::to_string(static_cast<int>(edge.targetId()));
-
-        edges.emplace_back(jsonEdge);
-        progressable.setProgress((i++ * 100) / graph.numEdges());
-    }
-
-    progressable.setProgress(-1);
-
-    jsonObject["edges"] = edges;
-
-    return jsonObject;
-}
-
-static json nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
-{
-    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
-    json names;
-
-    uint64_t i = 0;
-    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
-    for(NodeId nodeId : nodeIds)
-    {
-        names.emplace_back(graphModel.nodeName(nodeId));
-        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
-    }
-
-    progressable.setProgress(-1);
-
-    return names;
-}
-
-static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
-                                Progressable& progressable)
-{
-    graph.setPhase(QObject::tr("Positions"));
-    json positions;
-
-    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
-    uint64_t i = 0;
-    for(const auto& nodePosition : nodePositions)
-    {
-        auto v = nodePosition.newest();
-        json vector({v.x(), v.y(), v.z()});
-
-        positions.emplace_back(vector);
-        progressable.setProgress((i++ * 100) / numNodePositions);
-    }
-
-    progressable.setProgress(-1);
-
-    return positions;
-}
-
-static json bookmarksAsJson(const Document& document)
-{
-    json jsonObject = json::object();
-
-    auto bookmarks = document.bookmarks();
-    for(const auto& bookmark : bookmarks)
-    {
-        json nodeIds;
-        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
-            nodeIds.emplace_back(static_cast<int>(nodeId));
-
-        auto byteArray = bookmark.toUtf8();
-        auto bookmarkName = byteArray.constData();
-        jsonObject[bookmarkName] = nodeIds;
-    }
-
-    return jsonObject;
-}
-
-static json layoutSettingsAsJson(const Document& document)
-{
-    json jsonObject;
-
-    auto settings = document.layoutSettings();
-    for(const auto& setting : settings)
-    {
-        auto byteArray = setting.name().toUtf8();
-        auto settingName = byteArray.constData();
-        jsonObject[settingName] = setting.value();
-    }
-
-    return jsonObject;
-}
-
 bool NativeSaver::save()
 {
     json jsonArray;
@@ -221,21 +101,21 @@ bool NativeSaver::save()
 
     json content;
 
-    content["graph"] = graphAsJson(graphModel->mutableGraph(), *this);
-    content["nodeNames"] = nodeNamesAsJson(*graphModel, *this);
+    content["graph"] = JSONGraphSaver::graphAsJson(graphModel->mutableGraph(), *this);
+    content["nodeNames"] = JSONGraphSaver::nodeNamesAsJson(*graphModel, *this);
 
     json layout;
 
     layout["algorithm"] = _document->layoutName();
-    layout["settings"] = layoutSettingsAsJson(*_document);
-    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
+    layout["settings"] = JSONGraphSaver::layoutSettingsAsJson(*_document);
+    layout["positions"] = JSONGraphSaver::nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());
 
-    content["bookmarks"] = bookmarksAsJson(*_document);
+    content["bookmarks"] = JSONGraphSaver::bookmarksAsJson(*_document);
 
     for(auto table : *_document->enrichmentTableModels())
         content["enrichmentTables"].push_back(table->toJson());

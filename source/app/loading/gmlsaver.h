@@ -12,9 +12,8 @@ private:
     QString indent(int level) { return QStringLiteral("    ").repeated(level); }
 
 public:
-    // For the factory
     static QString name() { return QStringLiteral("GML"); }
-    static QString extension() { return QStringLiteral(".gml"); }
+    static QString extension() { return QStringLiteral("gml"); }
     GMLSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };

@@ -31,12 +31,12 @@ private:
 
 public:
     static const int MaxHeaderSize = 1 << 12;
-    static json graphAsJson(const IGraph& graph, Progressable& progressable);
 
     NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, QByteArray uiData,
-          QByteArray pluginUiData) :
+                QByteArray pluginUiData) :
         _fileUrl(std::move(fileUrl)),
-        _document(document), _pluginInstance(pluginInstance), _uiData(std::move(uiData)), _pluginUiData(std::move(pluginUiData))
+        _document(document), _pluginInstance(pluginInstance), _uiData(std::move(uiData)),
+        _pluginUiData(std::move(pluginUiData))
     {}
 
     bool save() override;
@@ -46,7 +46,7 @@ class NativeSaverFactory : public ISaverFactory
 {
 public:
     QString name() const override { return Application::name(); }
-    QString extension() const override { return QStringLiteral(".%1").arg(Application::nativeExtension()); }
+    QString extension() const override { return Application::nativeExtension(); }
     std::unique_ptr<ISaver> create(const QUrl& url, Document* document, const IPluginInstance* pluginInstance,
                                    const QByteArray& uiData, const QByteArray& pluginUiData) override;
 };

@@ -12,9 +12,8 @@ private:
     const QUrl& _url;
     IGraphModel* _graphModel;
 public:
-    // For the factory template we must appease
     static QString name() { return QStringLiteral("GraphML"); }
-    static QString extension() { return QStringLiteral(".graphml"); }
+    static QString extension() { return QStringLiteral("graphml"); }
     GraphMLSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };

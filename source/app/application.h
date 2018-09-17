@@ -141,10 +141,9 @@ public:
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
 
-    void registerSaveFactory(std::unique_ptr<ISaverFactory> saver);
-    ISaverFactory* saverByName(const QString& name);
-    Q_INVOKABLE QStringList saveFileNames();
-    Q_INVOKABLE QStringList saveFileUrls();
+    void registerSaverFactory(std::unique_ptr<ISaverFactory> saver);
+    ISaverFactory* saverFactoryByName(const QString& name);
+    Q_INVOKABLE QVariantList saverFileTypes();
 
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
     Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName) const;

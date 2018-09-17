@@ -35,6 +35,7 @@ bool PairwiseSaver::save()
 
         if(sourceName.isEmpty())
             sourceName = QString::number(static_cast<int>(edge.sourceId()));
+
         if(targetName.isEmpty())
             targetName = QString::number(static_cast<int>(edge.targetId()));
 
@@ -47,8 +48,10 @@ bool PairwiseSaver::save()
                    << endl;
         }
         else
+        {
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
                    << QStringLiteral("\"%1\"").arg(targetName) << endl;
+        }
 
         runningCount++;
         setProgress(runningCount * 100 / edgeCount);
