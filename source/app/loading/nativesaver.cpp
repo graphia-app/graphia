@@ -102,20 +102,20 @@ bool NativeSaver::save()
     json content;
 
     content["graph"] = JSONGraphSaver::graphAsJson(graphModel->mutableGraph(), *this);
-    content["nodeNames"] = JSONGraphSaver::nodeNamesAsJson(*graphModel, *this);
+    content["nodeNames"] = nodeNamesAsJson(*graphModel, *this);
 
     json layout;
 
     layout["algorithm"] = _document->layoutName();
-    layout["settings"] = JSONGraphSaver::layoutSettingsAsJson(*_document);
-    layout["positions"] = JSONGraphSaver::nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
+    layout["settings"] = layoutSettingsAsJson(*_document);
+    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());
 
-    content["bookmarks"] = JSONGraphSaver::bookmarksAsJson(*_document);
+    content["bookmarks"] = bookmarksAsJson(*_document);
 
     for(auto table : *_document->enrichmentTableModels())
         content["enrichmentTables"].push_back(table->toJson());
@@ -159,4 +159,78 @@ std::unique_ptr<ISaver> NativeSaverFactory::create(const QUrl& url, Document* do
                                              const QByteArray& pluginUiData)
 {
     return std::make_unique<NativeSaver>(url, document, pluginInstance, uiData, pluginUiData);
+}
+
+json NativeSaver::nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
+{
+    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
+    json names;
+
+    uint64_t i = 0;
+    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
+    for(NodeId nodeId : nodeIds)
+    {
+        names.emplace_back(graphModel.nodeName(nodeId));
+        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
+    }
+
+    progressable.setProgress(-1);
+
+    return names;
+}
+
+json NativeSaver::nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
+                                Progressable& progressable)
+{
+    graph.setPhase(QObject::tr("Positions"));
+    json positions;
+
+    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
+    uint64_t i = 0;
+    for(const auto& nodePosition : nodePositions)
+    {
+        auto v = nodePosition.newest();
+        json vector({v.x(), v.y(), v.z()});
+
+        positions.emplace_back(vector);
+        progressable.setProgress((i++ * 100) / numNodePositions);
+    }
+
+    progressable.setProgress(-1);
+
+    return positions;
+}
+
+json NativeSaver::bookmarksAsJson(const Document& document)
+{
+    json jsonObject = json::object();
+
+    auto bookmarks = document.bookmarks();
+    for(const auto& bookmark : bookmarks)
+    {
+        json nodeIds;
+        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
+            nodeIds.emplace_back(static_cast<int>(nodeId));
+
+        auto byteArray = bookmark.toUtf8();
+        auto bookmarkName = byteArray.constData();
+        jsonObject[bookmarkName] = nodeIds;
+    }
+
+    return jsonObject;
+}
+
+json NativeSaver::layoutSettingsAsJson(const Document& document)
+{
+    json jsonObject;
+
+    auto settings = document.layoutSettings();
+    for(const auto& setting : settings)
+    {
+        auto byteArray = setting.name().toUtf8();
+        auto settingName = byteArray.constData();
+        jsonObject[settingName] = setting.value();
+    }
+
+    return jsonObject;
 }
