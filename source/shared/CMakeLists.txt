@@ -27,6 +27,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraph.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraphmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/imutablegraph.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparser.h
@@ -80,6 +81,7 @@ list(APPEND HEADERS
 
 list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
