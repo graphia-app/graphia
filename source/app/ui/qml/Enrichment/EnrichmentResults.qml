@@ -52,6 +52,7 @@ ApplicationWindow
                 id: showHeatmapButton
                 iconName: "x-office-spreadsheet"
                 checkable: true
+                checked: true
                 tooltip: qsTr("Show Heatmap")
             }
             ToolButton
