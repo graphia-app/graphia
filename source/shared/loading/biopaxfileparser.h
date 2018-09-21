@@ -16,6 +16,7 @@ class BiopaxHandler : public QXmlDefaultHandler
 {
     QStringList _edgeElementNames =
     {
+        //CamalCase is Class definitions, mixedCase is properties
         "Interaction",
         "Conversion",
         "GeneticInteraction",
@@ -25,8 +26,9 @@ class BiopaxHandler : public QXmlDefaultHandler
         "memberPhysicalEntity",
         "left",
         "right",
-        "Controller",
-        "Controlled"
+        "controller",
+        "controlled",
+        "component"
     };
     QStringList _nodeElementNames =
     {

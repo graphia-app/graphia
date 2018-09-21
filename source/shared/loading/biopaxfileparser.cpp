@@ -48,9 +48,8 @@ bool BiopaxHandler::endDocument()
 
 bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts)
 {
-    if(_edgeElementNames.contains(localName, Qt::CaseInsensitive))
+    if(_edgeElementNames.contains(localName))
     {
-        qDebug() << "Edge Found" << localName << atts.value(QStringLiteral("rdf:ID"));
 
         _temporaryEdges.push_back({});
         _activeTemporaryEdges.push(&_temporaryEdges.back());
@@ -58,7 +57,6 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
         if(!_activeNodes.empty())
         {
             auto targetString = atts.value(QStringLiteral("rdf:resource")).remove("#");
-            qDebug() << "Edge Found" << _nodeIdToNameMap[_activeNodes.top()] << atts.value(QStringLiteral("rdf:resource")).remove("#");
 
             _temporaryEdges.back()._sources.push_back(_nodeIdToNameMap[_activeNodes.top()]);
             _temporaryEdges.back()._targets.push_back(targetString);
@@ -70,19 +68,20 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
         }
     }
 
-    if(_nodeElementNames.contains(localName, Qt::CaseInsensitive))
+    if(_nodeElementNames.contains(localName) &&
+        !(!_activeElements.empty() && _nodeElementNames.contains(_activeElements.top())))
     {
+
         auto nodeId = _graphModel->mutableGraph().addNode();
         _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
         _nodeIdToNameMap[nodeId] = atts.value(QStringLiteral("rdf:ID"));
         _activeNodes.push(nodeId);
 
-        qDebug() << "Node Found" << localName << atts.value(QStringLiteral("rdf:ID"));
-
         if(_userNodeData != nullptr)
         {
             auto id = atts.value(QStringLiteral("rdf:ID"));
             _userNodeData->setValueBy(nodeId, QObject::tr("ID"), id);
+            _userNodeData->setValueBy(nodeId, QObject::tr("Class"), localName);
         }
     }
 
@@ -92,10 +91,10 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
 
 bool BiopaxHandler::endElement(const QString &namespaceURI, const QString &localName, const QString &qName)
 {
-    if(_nodeElementNames.contains(localName, Qt::CaseInsensitive))
+    if(_nodeElementNames.contains(localName))
         _activeNodes.pop();
 
-    if(_edgeElementNames.contains(localName, Qt::CaseInsensitive))
+    if(_edgeElementNames.contains(localName))
         _activeTemporaryEdges.pop();
 
     _activeElements.pop();
