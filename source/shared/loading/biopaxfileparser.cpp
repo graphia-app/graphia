@@ -48,67 +48,72 @@ bool BiopaxHandler::endDocument()
 
 bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts)
 {
-//    qDebug() << namespaceURI;
-//    qDebug() << localName;
-//    for(int i = 0; i < atts.count(); ++i)
-//    {
-//        qDebug() << atts.localName(i) << atts.value(i) << atts.uri(i);
-//    }
-
-    if(!_activeTemporaryEdges.empty())
+    if(_edgeElementNames.contains(localName, Qt::CaseInsensitive))
     {
-        qDebug() << "Active Edges not empty" << localName;
+        qDebug() << "Edge Found" << localName << atts.value(QStringLiteral("rdf:ID"));
 
-        if(localName == QStringLiteral("left"))
+        _temporaryEdges.push_back({});
+        _activeTemporaryEdges.push(&_temporaryEdges.back());
+
+        if(!_activeNodes.empty())
         {
-            _activeTemporaryEdges.top()->_sources.push_back(atts.value("rdf:resource").remove("#"));
-            qDebug() << "LEFT" << localName;
-        }
-        if(localName == QStringLiteral("right"))
-        {
-            _activeTemporaryEdges.top()->_targets.push_back(atts.value("rdf:resource").remove("#"));
-            qDebug() << "RIGHT" << localName;
+            auto targetString = atts.value(QStringLiteral("rdf:resource")).remove("#");
+            qDebug() << "Edge Found" << _nodeIdToNameMap[_activeNodes.top()] << atts.value(QStringLiteral("rdf:resource")).remove("#");
+
+            _temporaryEdges.back()._sources.push_back(_nodeIdToNameMap[_activeNodes.top()]);
+            _temporaryEdges.back()._targets.push_back(targetString);
+            if(localName == "right")
+            {
+                _temporaryEdges.back()._sources.push_back(targetString);
+                _temporaryEdges.back()._targets.push_back(_nodeIdToNameMap[_activeNodes.top()]);
+            }
         }
     }
 
-    if(nodeElementNames.contains(localName))
+    if(_nodeElementNames.contains(localName, Qt::CaseInsensitive))
     {
         auto nodeId = _graphModel->mutableGraph().addNode();
         _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
+        _nodeIdToNameMap[nodeId] = atts.value(QStringLiteral("rdf:ID"));
         _activeNodes.push(nodeId);
 
         qDebug() << "Node Found" << localName << atts.value(QStringLiteral("rdf:ID"));
 
         if(_userNodeData != nullptr)
         {
-            auto nodeName = atts.value(QStringLiteral("rdf:ID"));
-            _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
-            _graphModel->setNodeName(nodeId, nodeName);
+            auto id = atts.value(QStringLiteral("rdf:ID"));
+            _userNodeData->setValueBy(nodeId, QObject::tr("ID"), id);
         }
     }
-    if(edgeElementNames.contains(localName))
-    {
-        qDebug() << "Edge Found" << localName << atts.value(QStringLiteral("rdf:ID"));
 
-        _temporaryEdges.push_back({});
-        _activeTemporaryEdges.push(&_temporaryEdges.back());
-    }
+    _activeElements.push(localName);
     return true;
 }
 
 bool BiopaxHandler::endElement(const QString &namespaceURI, const QString &localName, const QString &qName)
 {
-    if(nodeElementNames.contains(localName))
+    if(_nodeElementNames.contains(localName, Qt::CaseInsensitive))
         _activeNodes.pop();
 
-    if(edgeElementNames.contains(localName))
+    if(_edgeElementNames.contains(localName, Qt::CaseInsensitive))
         _activeTemporaryEdges.pop();
+
+    _activeElements.pop();
 
     return true;
 }
 
 bool BiopaxHandler::characters(const QString &ch)
 {
+    if(!_activeNodes.empty())
+    {
+        if(_activeElements.top() == QStringLiteral("displayName"))
+        {
+            _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Node Name"), ch);
+            _graphModel->setNodeName(_activeNodes.top(), ch);
+        }
+    }
+
     return true;
 }
 

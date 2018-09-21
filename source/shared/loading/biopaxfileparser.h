@@ -14,21 +14,23 @@ class BiopaxFileParser;
 
 class BiopaxHandler : public QXmlDefaultHandler
 {
-public:
-    QStringList edgeElementNames =
+    QStringList _edgeElementNames =
     {
         "Interaction",
-        "Control",
         "Conversion",
         "GeneticInteraction",
         "MolecularInteraction",
-        "BiochemicalReaction",
-        "TemplateReaction"
+        "TemplateReaction",
+        "Component",
+        "memberPhysicalEntity",
+        "left",
+        "right",
+        "Controller",
+        "Controlled"
     };
-    QStringList nodeElementNames =
+    QStringList _nodeElementNames =
     {
         "PhysicalEntity",
-        // Physical Entity Subclasses
         "DnaRegion",
         "SmallMolecule",
         "Dna",
@@ -36,11 +38,12 @@ public:
         "Complex",
         "Protein",
         "RnaRegion",
-        // Gene Entity
         "Gene",
         "Complex",
-
+        "BiochemicalReaction",
+        "Control"
     };
+public:
     struct AttributeKey
     {
         QString _name;
@@ -100,6 +103,7 @@ private:
     std::map<QString, TemporaryEdge> _temporaryEdgeMap;
     std::vector<TemporaryEdge> _temporaryEdges;
     std::map<QString, NodeId> _nodeMap;
+    std::map<NodeId, QString> _nodeIdToNameMap;
     std::map<TemporaryEdge, EdgeId> _edgeIdMap;
     // Key = pair(Attribute Key ID, 'For' element name)
     std::map<std::pair<QString, QString>, AttributeKey> _attributeKeyMap;
