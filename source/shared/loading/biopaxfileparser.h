@@ -49,6 +49,7 @@ class BiopaxHandler : public QXmlDefaultHandler
     };
     // Edges are participant object members subclasses
     // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
+    // Complex and Pathway components are linked by edges too
     QStringList _edgeElementNames =
     {
         "pathwayComponent",
@@ -164,7 +165,7 @@ private:
     BiopaxHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
-    BiopaxFileParser(UserNodeData* userNodeData);
+    explicit BiopaxFileParser(UserNodeData* userNodeData);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     static bool canLoad(const QUrl&) { return true; }

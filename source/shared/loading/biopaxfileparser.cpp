@@ -15,7 +15,7 @@ bool BiopaxHandler::endDocument()
 {
     for(const auto& tempEdge : _temporaryEdges)
     {
-        for(auto sourceNodeString : tempEdge._sources)
+        for(const auto& sourceNodeString : tempEdge._sources)
         {
             auto sourceNodeId = _nodeMap.find(sourceNodeString);
             if(sourceNodeId == _nodeMap.end())
@@ -24,7 +24,7 @@ bool BiopaxHandler::endDocument()
                 return false;
             }
 
-            for(auto targetNodeString : tempEdge._targets)
+            for(const auto& targetNodeString : tempEdge._targets)
             {
                 auto targetNodeId = _nodeMap.find(targetNodeString);
                 if(targetNodeId == _nodeMap.end())
@@ -53,11 +53,13 @@ bool BiopaxHandler::startElement(const QString&, const QString& localName, const
 
         if(!_activeNodes.empty())
         {
-            auto targetString = atts.value(QStringLiteral("rdf:resource")).remove("#");
+            auto targetString = atts.value(QStringLiteral("rdf:resource")).remove(QStringLiteral("#"));
 
             _temporaryEdges.back()._sources.push_back(_nodeIdToNameMap[_activeNodes.top()]);
             _temporaryEdges.back()._targets.push_back(targetString);
-            if(localName == "right")
+
+            // Some members infer a target edge
+            if(localName == QStringLiteral("right") || localName == QStringLiteral("controlled"))
             {
                 _temporaryEdges.back()._sources.push_back(targetString);
                 _temporaryEdges.back()._targets.push_back(_nodeIdToNameMap[_activeNodes.top()]);
@@ -107,6 +109,11 @@ bool BiopaxHandler::characters(const QString& ch)
         if(_activeElements.top() == QStringLiteral("displayName"))
         {
             _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Node Name"), ch);
+            _graphModel->setNodeName(_activeNodes.top(), ch);
+        }
+        if(_activeElements.top() == QStringLiteral("comment"))
+        {
+            _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Comment"), ch);
             _graphModel->setNodeName(_activeNodes.top(), ch);
         }
     }
