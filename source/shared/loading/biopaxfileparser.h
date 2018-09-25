@@ -47,7 +47,7 @@ class BiopaxHandler : public QXmlDefaultHandler
         "Transport",
         "TransportWithBiochemicalReaction"
     };
-    // Edges are participant members subclasses
+    // Edges are participant object members subclasses
     // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
     QStringList _edgeElementNames =
     {
@@ -63,6 +63,7 @@ class BiopaxHandler : public QXmlDefaultHandler
         "template",
         "participant"
     };
+
 public:
     struct AttributeKey
     {
@@ -71,8 +72,7 @@ public:
         QString _type;
         friend bool operator<(const AttributeKey& l, const AttributeKey& r)
         {
-            return std::tie(l._name, l._default, l._type)
-                 < std::tie(r._name, r._default, r._type);
+            return std::tie(l._name, l._default, l._type) < std::tie(r._name, r._default, r._type);
         }
     };
 
@@ -105,8 +105,7 @@ private:
         QStringList _targets;
         friend bool operator<(const TemporaryEdge& l, const TemporaryEdge& r)
         {
-            return std::tie(l._sources, l._targets)
-                 < std::tie(r._sources, r._targets);
+            return std::tie(l._sources, l._targets) < std::tie(r._sources, r._targets);
         }
     };
 
@@ -140,21 +139,23 @@ private:
     UserNodeData* _userNodeData;
 
 public:
-    BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData, int lineCount);
+    BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
+                  int lineCount);
     bool startDocument() override;
     bool endDocument() override;
-    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) override;
-    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) override;
-    bool characters(const QString &ch) override;
-    void setDocumentLocator(QXmlLocator *locator) override;
+    bool startElement(const QString& namespaceURI, const QString& localName, const QString& qName,
+                      const QXmlAttributes& atts) override;
+    bool endElement(const QString& namespaceURI, const QString& localName, const QString& qName) override;
+    bool characters(const QString& ch) override;
+    void setDocumentLocator(QXmlLocator* locator) override;
 
     QString errorString() const override;
-    bool warning(const QXmlParseException &exception) override;
-    bool error(const QXmlParseException &exception) override;
-    bool fatalError(const QXmlParseException &exception) override;
+    bool warning(const QXmlParseException& exception) override;
+    bool error(const QXmlParseException& exception) override;
+    bool fatalError(const QXmlParseException& exception) override;
 };
 
-class BiopaxFileParser: public IParser
+class BiopaxFileParser : public IParser
 {
 
 private:
@@ -165,8 +166,8 @@ private:
 public:
     BiopaxFileParser(UserNodeData* userNodeData);
 
-    bool parse(const QUrl &url, IGraphModel *graphModel) override;
-    static bool canLoad(const QUrl &) { return true; }
+    bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    static bool canLoad(const QUrl&) { return true; }
 };
 
 #endif // BIOPAXFILEPARSER_H

@@ -1,10 +1,9 @@
 #include "biopaxfileparser.h"
 
-
-BiopaxHandler::BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel,
-                               UserNodeData* userNodeData, int lineCount)
-                               : _parser(&parser), _graphModel(&graphModel),
-                                 _lineCount(lineCount), _userNodeData(userNodeData)
+BiopaxHandler::BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
+                             int lineCount) :
+    _parser(&parser),
+    _graphModel(&graphModel), _lineCount(lineCount), _userNodeData(userNodeData)
 {}
 
 bool BiopaxHandler::startDocument()
@@ -30,11 +29,13 @@ bool BiopaxHandler::endDocument()
                 auto targetNodeId = _nodeMap.find(targetNodeString);
                 if(targetNodeId == _nodeMap.end())
                 {
-                    _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(sourceNodeString, targetNodeString);
+                    _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2")
+                                       .arg(sourceNodeString, targetNodeString);
                     return false;
                 }
 
-                const EdgeId& edgeId = _graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
+                const EdgeId& edgeId =
+                    _graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
                 _edgeIdMap[tempEdge] = edgeId;
             }
         }
@@ -42,7 +43,8 @@ bool BiopaxHandler::endDocument()
     return true;
 }
 
-bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts)
+bool BiopaxHandler::startElement(const QString&, const QString& localName, const QString&,
+                                 const QXmlAttributes& atts)
 {
     if(_edgeElementNames.contains(localName))
     {
@@ -64,7 +66,7 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
     }
 
     if(_nodeElementNames.contains(localName) &&
-        !(!_activeElements.empty() && _nodeElementNames.contains(_activeElements.top())))
+       !(!_activeElements.empty() && _nodeElementNames.contains(_activeElements.top())))
     {
         auto nodeId = _graphModel->mutableGraph().addNode();
         _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
@@ -83,8 +85,10 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
     return true;
 }
 
-bool BiopaxHandler::endElement(const QString &namespaceURI, const QString &localName, const QString &qName)
+bool BiopaxHandler::endElement(const QString&, const QString& localName, const QString&)
 {
+    _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
+
     if(_nodeElementNames.contains(localName))
         _activeNodes.pop();
 
@@ -96,7 +100,7 @@ bool BiopaxHandler::endElement(const QString &namespaceURI, const QString &local
     return true;
 }
 
-bool BiopaxHandler::characters(const QString &ch)
+bool BiopaxHandler::characters(const QString& ch)
 {
     if(!_activeNodes.empty())
     {
@@ -110,38 +114,38 @@ bool BiopaxHandler::characters(const QString &ch)
     return true;
 }
 
-void BiopaxHandler::setDocumentLocator(QXmlLocator *locator)
+void BiopaxHandler::setDocumentLocator(QXmlLocator* locator)
 {
-
+    _locator = locator;
 }
 
 QString BiopaxHandler::errorString() const
 {
-    return "";
+    return _errorString;
 }
 
-bool BiopaxHandler::warning(const QXmlParseException &exception)
+bool BiopaxHandler::warning(const QXmlParseException &)
 {
     return true;
 }
 
-bool BiopaxHandler::error(const QXmlParseException &exception)
+bool BiopaxHandler::error(const QXmlParseException &)
 {
     return true;
 }
 
-bool BiopaxHandler::fatalError(const QXmlParseException &exception)
+bool BiopaxHandler::fatalError(const QXmlParseException &)
 {
     return true;
 }
 
-BiopaxFileParser::BiopaxFileParser(UserNodeData* userNodeData) :
-    _userNodeData(userNodeData)
+BiopaxFileParser::BiopaxFileParser(UserNodeData* userNodeData) : _userNodeData(userNodeData)
 {
+    // Add this up front, so that it appears first in the attribute table
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool BiopaxFileParser::parse(const QUrl &url, IGraphModel *graphModel)
+bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     Q_ASSERT(graphModel != nullptr);
     if(graphModel == nullptr)
@@ -167,7 +171,7 @@ bool BiopaxFileParser::parse(const QUrl &url, IGraphModel *graphModel)
     setProgress(-1);
 
     BiopaxHandler handler(*this, *graphModel, _userNodeData, lineCount);
-    auto *source = new QXmlInputSource(&file);
+    auto* source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);
     xmlReader.setErrorHandler(&handler);
