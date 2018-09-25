@@ -14,12 +14,10 @@ bool BiopaxHandler::startDocument()
 
 bool BiopaxHandler::endDocument()
 {
-    qDebug() << "End Document";
     for(const auto& tempEdge : _temporaryEdges)
     {
         for(auto sourceNodeString : tempEdge._sources)
         {
-            qDebug() << "Source String" << sourceNodeString;
             auto sourceNodeId = _nodeMap.find(sourceNodeString);
             if(sourceNodeId == _nodeMap.end())
             {
@@ -29,8 +27,6 @@ bool BiopaxHandler::endDocument()
 
             for(auto targetNodeString : tempEdge._targets)
             {
-                qDebug() << "Target String" << sourceNodeString;
-
                 auto targetNodeId = _nodeMap.find(targetNodeString);
                 if(targetNodeId == _nodeMap.end())
                 {
@@ -50,7 +46,6 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
 {
     if(_edgeElementNames.contains(localName))
     {
-
         _temporaryEdges.push_back({});
         _activeTemporaryEdges.push(&_temporaryEdges.back());
 
@@ -71,7 +66,6 @@ bool BiopaxHandler::startElement(const QString &namespaceURI, const QString &loc
     if(_nodeElementNames.contains(localName) &&
         !(!_activeElements.empty() && _nodeElementNames.contains(_activeElements.top())))
     {
-
         auto nodeId = _graphModel->mutableGraph().addNode();
         _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
         _nodeIdToNameMap[nodeId] = atts.value(QStringLiteral("rdf:ID"));

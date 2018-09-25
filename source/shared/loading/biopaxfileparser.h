@@ -14,25 +14,18 @@ class BiopaxFileParser;
 
 class BiopaxHandler : public QXmlDefaultHandler
 {
-    QStringList _edgeElementNames =
-    {
-        //CamalCase is Class definitions, mixedCase is properties
-        "Interaction",
-        "Conversion",
-        "GeneticInteraction",
-        "MolecularInteraction",
-        "TemplateReaction",
-        "Component",
-        "memberPhysicalEntity",
-        "left",
-        "right",
-        "controller",
-        "controlled",
-        "component"
-    };
+    // http://www.biopax.org/owldoc/Level3/
+    // Effectively, Entity and all subclasses are Nodes.
+    // The members and properties of entities define the edges
+
+    //CamalCase is Class definitions, mixedCase is properties
     QStringList _nodeElementNames =
     {
+        "Entity",
+        "Interaction",
         "PhysicalEntity",
+        "Conversion",
+        "Pathway",
         "DnaRegion",
         "SmallMolecule",
         "Dna",
@@ -43,7 +36,32 @@ class BiopaxHandler : public QXmlDefaultHandler
         "Gene",
         "Complex",
         "BiochemicalReaction",
-        "Control"
+        "Control",
+        "Catalysis",
+        "Degradation",
+        "GeneticInteraction",
+        "MolecularInteraction",
+        "Modulation",
+        "TemplateReaction",
+        "TemplateReactionRegulation",
+        "Transport",
+        "TransportWithBiochemicalReaction"
+    };
+    // Edges are participant members subclasses
+    // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
+    QStringList _edgeElementNames =
+    {
+        "pathwayComponent",
+        "memberPhysicalEntity",
+        "left",
+        "right",
+        "controller",
+        "controlled",
+        "component",
+        "product",
+        "cofactor",
+        "template",
+        "participant"
     };
 public:
     struct AttributeKey
