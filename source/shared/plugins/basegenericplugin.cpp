@@ -13,7 +13,6 @@
 
 #include "thirdparty/json/json_helper.h"
 
-
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
