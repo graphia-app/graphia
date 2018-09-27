@@ -14,6 +14,7 @@ class BiopaxFileParser;
 
 class BiopaxHandler : public QXmlDefaultHandler
 {
+private:
     // http://www.biopax.org/owldoc/Level3/
     // Effectively, Entity and all subclasses are Nodes.
     // The members and properties of entities define the edges
@@ -65,41 +66,6 @@ class BiopaxHandler : public QXmlDefaultHandler
         "participant"
     };
 
-public:
-    struct AttributeKey
-    {
-        QString _name;
-        QVariant _default;
-        QString _type;
-        friend bool operator<(const AttributeKey& l, const AttributeKey& r)
-        {
-            return std::tie(l._name, l._default, l._type) < std::tie(r._name, r._default, r._type);
-        }
-    };
-
-    struct Attribute
-    {
-        QString _name;
-        QVariant _default;
-        QString _type;
-        QVariant _value;
-
-        // cppcheck-suppress noExplicitConstructor
-        Attribute(const AttributeKey& key) // NOLINT
-        {
-            _name = key._name;
-            _default = key._default;
-            _type = key._type;
-            _value = key._default;
-        }
-
-        Attribute() = default;
-    };
-
-    template<typename T>
-    using AttributeData = std::map<AttributeKey, std::map<T, Attribute>>;
-
-private:
     struct TemporaryEdge
     {
         QStringList _sources;
@@ -115,24 +81,15 @@ private:
 
     QString _errorString = QString();
 
-    AttributeData<NodeId> _nodeAttributes;
-    AttributeData<EdgeId> _edgeAttributes;
-    AttributeData<TemporaryEdge> _tempEdgeAttributes;
-
     // Key = AttributeKeyID
-    std::map<QString, TemporaryEdge> _temporaryEdgeMap;
     std::vector<TemporaryEdge> _temporaryEdges;
     std::map<QString, NodeId> _nodeMap;
     std::map<NodeId, QString> _nodeIdToNameMap;
     std::map<TemporaryEdge, EdgeId> _edgeIdMap;
-    // Key = pair(Attribute Key ID, 'For' element name)
-    std::map<std::pair<QString, QString>, AttributeKey> _attributeKeyMap;
 
     std::stack<NodeId> _activeNodes;
     std::stack<TemporaryEdge*> _activeTemporaryEdges;
     std::stack<QString> _activeElements;
-    std::stack<AttributeKey*> _activeAttributeKeys;
-    std::stack<Attribute*> _activeAttributes;
 
     QXmlLocator* _locator = nullptr;
     int _lineCount = 0;
@@ -161,8 +118,6 @@ class BiopaxFileParser : public IParser
 
 private:
     UserNodeData* _userNodeData;
-    BiopaxHandler::AttributeData<NodeId> _nodeAttributeData;
-    BiopaxHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
     explicit BiopaxFileParser(UserNodeData* userNodeData);
