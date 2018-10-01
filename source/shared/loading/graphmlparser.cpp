@@ -9,8 +9,7 @@
 #include <QUrl>
 
 GraphMLHandler::GraphMLHandler(GraphMLParser& parser, IGraphModel& graphModel,
-                               UserNodeData* userNodeData, int lineCount)
-                               : _parser(&parser), _graphModel(&graphModel),
+                               UserNodeData* userNodeData, int lineCount) : _parser(&parser), _graphModel(&graphModel),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
 {}
 

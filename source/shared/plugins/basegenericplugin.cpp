@@ -5,6 +5,7 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/matrixfileparser.h"
+#include "shared/loading/matfileparser.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -55,6 +56,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
     if(urlTypeName == QLatin1String("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
+    
+    if(urlTypeName == QLatin1String("MatFile"))
+        return std::make_unique<MatFileParser>(&_userNodeData, &_userEdgeData);
 
     return nullptr;
 }
@@ -160,6 +164,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Matrix SSV File"), QObject::tr("Matrix SSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Matrix File"), QObject::tr("Matrix Files"), {"tsv", "matrix"});
     registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL File"), {"owl"});
+    registerUrlType(QStringLiteral("MatFile"), QObject::tr("Matlab Data File"), QObject::tr("MatFile Files"), {"mat"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
@@ -186,6 +191,8 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
         else if(urlType == QStringLiteral("MatrixTSV") && MatrixFileTSVParser::canLoad(url))
             result.push_back(urlType);
         else if(urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url))
+            result.push_back(urlType);
+	else if(urlType == QStringLiteral("MatFile") && MatFileParser::canLoad(url))
             result.push_back(urlType);
     }
 
