@@ -82,6 +82,80 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
+static json nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
+{
+    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
+    json names;
+
+    uint64_t i = 0;
+    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
+    for(NodeId nodeId : nodeIds)
+    {
+        names.emplace_back(graphModel.nodeName(nodeId));
+        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
+    }
+
+    progressable.setProgress(-1);
+
+    return names;
+}
+
+static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
+                                Progressable& progressable)
+{
+    graph.setPhase(QObject::tr("Positions"));
+    json positions;
+
+    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
+    uint64_t i = 0;
+    for(const auto& nodePosition : nodePositions)
+    {
+        auto v = nodePosition.newest();
+        json vector({v.x(), v.y(), v.z()});
+
+        positions.emplace_back(vector);
+        progressable.setProgress((i++ * 100) / numNodePositions);
+    }
+
+    progressable.setProgress(-1);
+
+    return positions;
+}
+
+static json bookmarksAsJson(const Document& document)
+{
+    json jsonObject = json::object();
+
+    auto bookmarks = document.bookmarks();
+    for(const auto& bookmark : bookmarks)
+    {
+        json nodeIds;
+        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
+            nodeIds.emplace_back(static_cast<int>(nodeId));
+
+        auto byteArray = bookmark.toUtf8();
+        auto bookmarkName = byteArray.constData();
+        jsonObject[bookmarkName] = nodeIds;
+    }
+
+    return jsonObject;
+}
+
+static json layoutSettingsAsJson(const Document& document)
+{
+    json jsonObject;
+
+    auto settings = document.layoutSettings();
+    for(const auto& setting : settings)
+    {
+        auto byteArray = setting.name().toUtf8();
+        auto settingName = byteArray.constData();
+        jsonObject[settingName] = setting.value();
+    }
+
+    return jsonObject;
+}
+
 bool NativeSaver::save()
 {
     json jsonArray;
@@ -159,78 +233,4 @@ std::unique_ptr<ISaver> NativeSaverFactory::create(const QUrl& url, Document* do
                                              const QByteArray& pluginUiData)
 {
     return std::make_unique<NativeSaver>(url, document, pluginInstance, uiData, pluginUiData);
-}
-
-json NativeSaver::nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
-{
-    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
-    json names;
-
-    uint64_t i = 0;
-    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
-    for(NodeId nodeId : nodeIds)
-    {
-        names.emplace_back(graphModel.nodeName(nodeId));
-        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
-    }
-
-    progressable.setProgress(-1);
-
-    return names;
-}
-
-json NativeSaver::nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
-                                Progressable& progressable)
-{
-    graph.setPhase(QObject::tr("Positions"));
-    json positions;
-
-    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
-    uint64_t i = 0;
-    for(const auto& nodePosition : nodePositions)
-    {
-        auto v = nodePosition.newest();
-        json vector({v.x(), v.y(), v.z()});
-
-        positions.emplace_back(vector);
-        progressable.setProgress((i++ * 100) / numNodePositions);
-    }
-
-    progressable.setProgress(-1);
-
-    return positions;
-}
-
-json NativeSaver::bookmarksAsJson(const Document& document)
-{
-    json jsonObject = json::object();
-
-    auto bookmarks = document.bookmarks();
-    for(const auto& bookmark : bookmarks)
-    {
-        json nodeIds;
-        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
-            nodeIds.emplace_back(static_cast<int>(nodeId));
-
-        auto byteArray = bookmark.toUtf8();
-        auto bookmarkName = byteArray.constData();
-        jsonObject[bookmarkName] = nodeIds;
-    }
-
-    return jsonObject;
-}
-
-json NativeSaver::layoutSettingsAsJson(const Document& document)
-{
-    json jsonObject;
-
-    auto settings = document.layoutSettings();
-    for(const auto& setting : settings)
-    {
-        auto byteArray = setting.name().toUtf8();
-        auto settingName = byteArray.constData();
-        jsonObject[settingName] = setting.value();
-    }
-
-    return jsonObject;
 }
