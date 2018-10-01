@@ -6,6 +6,8 @@
 
 #include <QByteArray>
 
+#include <memory>
+
 class QUrl;
 class QString;
 class IGraphModel;
