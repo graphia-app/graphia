@@ -223,7 +223,9 @@ void TabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        _dataRect = findLargestDataRect(*_dataPtr, column, row);
+        Q_ASSERT(_dataPtr != nullptr);
+        if(_dataPtr != nullptr)
+            _dataRect = findLargestDataRect(*_dataPtr, column, row);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
