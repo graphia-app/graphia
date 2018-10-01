@@ -75,7 +75,7 @@ public:
 private:
     // If the concurrent function returns a value, give the ResultsType class a std::vector _values
     // member, which contains the results from each thread
-    template<typename ResultsVectorOrVoid, bool = std::is_void<ResultsVectorOrVoid>::value>
+    template<typename ResultsVectorOrVoid, bool = std::is_void_v<ResultsVectorOrVoid>>
     class ResultMember;
 
     template<typename ResultsVectorOrVoid>
@@ -106,7 +106,7 @@ private:
             {
                 future.wait();
 
-                if constexpr(!std::is_void<ResultsVectorOrVoid>::value)
+                if constexpr(!std::is_void_v<ResultsVectorOrVoid>)
                     this->_values.emplace_back(std::move(future.get()));
             }
         }
@@ -115,7 +115,7 @@ private:
         class iterator
         {
         private:
-            template<typename T, bool = is_std_sequence_container<typename T::value_type>::value>
+            template<typename T, bool = is_std_sequence_container_v<typename T::value_type>>
             struct impl {};
 
             // If the concurrent function's return type is a sequence container, collapse its
@@ -320,11 +320,11 @@ private:
         };
 
         template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<!std::is_void<T>::value, iterator>
+        typename std::enable_if_t<!std::is_void_v<T>, iterator>
         begin() { return iterator(this, false); }
 
         template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<!std::is_void<T>::value, iterator>
+        typename std::enable_if_t<!std::is_void_v<T>, iterator>
         end() { return iterator(this, true); }
     };
 
@@ -337,12 +337,12 @@ private:
 
         // Fn argument is an iterator
         template<typename T = ReturnType>
-        static typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, It>::value, T>
+        static typename std::enable_if_t<std::is_convertible_v<ArgumentType<Fn>, It>, T>
         invoke(Fn& f, It& it) { return f(it); }
 
         // Fn argument is an value/reference
         template<typename T = ReturnType>
-        static typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value, T>
+        static typename std::enable_if_t<std::is_convertible_v<ArgumentType<Fn>, typename It::value_type>, T>
         invoke(Fn& f, It it) { return f(*it); }
     };
 
@@ -407,8 +407,8 @@ private:
     // it will cost and balance the thread/work allocation accordingly
     template<typename It>
     struct Coster<It,
-        std::enable_if_t<std::is_member_function_pointer<
-            decltype(&It::value_type::computeCostHint)>::value>> :
+        std::enable_if_t<std::is_member_function_pointer_v<
+            decltype(&It::value_type::computeCostHint)>>> :
         public CosterBase<It>
     {
         using CosterBase<It>::CosterBase;
@@ -439,8 +439,8 @@ public:
         const auto costPerThread = totalCost / numThreads +
                 ((totalCost % numThreads) ? 1 : 0);
 
-        static_assert(std::is_convertible<ArgumentType<Fn>, It>::value ||
-                      std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value,
+        static_assert(std::is_convertible_v<ArgumentType<Fn>, It> ||
+                      std::is_convertible_v<ArgumentType<Fn>, typename It::value_type>,
                       "Fn's argument must be an It or an It::value_type");
 
         FnExecutor<It, Fn> executor;

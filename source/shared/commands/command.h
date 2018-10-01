@@ -15,12 +15,12 @@ class CommandFn
 public:
     template<typename Fn, typename ReturnType>
     using EnableIfFnReturnTypeIs = typename std::enable_if_t<
-        std::is_same<
+        std::is_same_v<
             typename std::result_of_t<Fn(Command&)>,
             ReturnType
-        >::value &&
+        > &&
         // Avoid enabling the universal move constructors if Fn is a CommandFn
-        !std::is_same<std::remove_reference_t<Fn>, CommandFn>::value
+        !std::is_same_v<std::remove_reference_t<Fn>, CommandFn>
     >;
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, bool>>

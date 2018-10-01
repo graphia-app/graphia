@@ -28,7 +28,7 @@ template<typename Index, typename Element, typename Locking = void>
 class GenericGraphArray : public IGraphArray
 {
 private:
-    static_assert(std::is_nothrow_move_constructible<Element>::value,
+    static_assert(std::is_nothrow_move_constructible_v<Element>,
                   "GraphArray Element needs a noexcept move constructor");
 
     using MaybeLock = _MaybeLock<std::recursive_mutex, Locking>;

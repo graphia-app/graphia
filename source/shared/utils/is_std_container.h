@@ -46,6 +46,9 @@ template<typename T> struct is_std_container
     static constexpr bool const value = is_std_container_impl::is_std_container<std::decay_t<T>>::value;
 };
 
+template<typename T>
+inline constexpr bool is_std_container_v = is_std_container<T>::value;
+
 // Specialize a type for all of the std sequence containers
 namespace is_std_sequence_container_impl
 {
@@ -61,5 +64,8 @@ template<typename T> struct is_std_sequence_container
 {
     static constexpr bool const value = is_std_sequence_container_impl::is_std_sequence_container<std::decay_t<T>>::value;
 };
+
+template<typename T>
+inline constexpr bool is_std_sequence_container_v = is_std_sequence_container<T>::value;
 
 #endif // IS_STD_CONTAINER_H

@@ -8,9 +8,12 @@ template<typename Iterator>
 struct is_const_iterator
 {
     using pointer = typename std::iterator_traits<Iterator>::pointer;
-    static const bool value =
-        std::is_const<typename std::remove_pointer<pointer>::type>::value;
+    static constexpr bool value =
+        std::is_const_v<typename std::remove_pointer<pointer>::type>;
 };
+
+template<typename Iterator>
+inline constexpr bool is_const_iterator_v = is_const_iterator<Iterator>::value;
 
 template<typename BeginIt, typename EndIt> class iterator_range
 {
@@ -21,16 +24,16 @@ public:
     BeginIt& begin() { return _begin; }
     EndIt& end() { return _end; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator<T>::value, const T&>
+    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
     begin() const { return _begin; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator<T>::value, const T&>
+    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
     end() const { return _end; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator<T>::value, const T&>
+    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
     cbegin() const { return _begin; }
 
-    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator<T>::value, const T&>
+    template<typename T = BeginIt> typename std::enable_if_t<is_const_iterator_v<T>, const T&>
     cend() const { return _end; }
 
     auto size() const { return std::distance(begin(), end()); }

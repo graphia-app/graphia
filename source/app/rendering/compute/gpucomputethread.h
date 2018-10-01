@@ -38,7 +38,7 @@ public:
     void destroySurface();
     void run();
 
-    template<typename T> typename std::enable_if<std::is_base_of<GPUComputeJob, T>::value, void>::type
+    template<typename T> typename std::enable_if<std::is_base_of_v<GPUComputeJob, T>, void>::type
     enqueue(std::unique_ptr<T>& computeJob)
     {
         std::unique_lock<std::mutex> lock(_mutex);
