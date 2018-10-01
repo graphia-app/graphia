@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <mutex>
+#include <type_traits>
 
 #include <QDebug>
 
@@ -183,19 +184,11 @@ protected:
     void resize(int size) override
     {
         MaybeLock lock(_mutex);
-        resize_(size);
-    }
 
-    template<typename T = Element> typename std::enable_if<std::is_copy_constructible<T>::value>::type
-    resize_(int size)
-    {
-        _array.resize(size, _defaultValue);
-    }
-
-    template<typename T = Element> typename std::enable_if<!std::is_copy_constructible<T>::value>::type
-    resize_(int size)
-    {
-        _array.resize(size);
+        if constexpr(std::is_copy_constructible_v<Element>)
+            _array.resize(size, _defaultValue);
+        else
+            _array.resize(size);
     }
 
     void invalidate() override
