@@ -4,13 +4,12 @@
 #include "shared/graph/elementid.h"
 
 #include <vector>
-#include <algorithm>
 #include <limits>
 #include <iterator>
-#include <cmath>
 
-struct CorrelationDataRow
+class CorrelationDataRow
 {
+public:
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;
     using DataOffset = std::vector<double>::size_type;
@@ -20,24 +19,10 @@ struct CorrelationDataRow
 
     CorrelationDataRow(const std::vector<double>& data,
         size_t row, size_t numColumns,
-        NodeId nodeId, int computeCost = 0) :
-        _nodeId(nodeId), _cost(computeCost)
-    {
-        auto cbegin = data.cbegin() + (row * numColumns);
-        auto cend = cbegin + numColumns;
-        _data = {cbegin, cend};
-        _numColumns = std::distance(begin(), end());
-
-        update();
-    }
+        NodeId nodeId, int computeCost = 0);
 
     CorrelationDataRow(const std::vector<double>& dataRow,
-        NodeId nodeId, int computeCost = 0) :
-        CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
-    {}
-
-    std::vector<double> _data;
-    std::vector<double> _sortedData;
+        NodeId nodeId, int computeCost = 0);
 
     DataIterator begin() { return _data.begin(); }
     DataIterator end() { return _data.end(); }
@@ -51,12 +36,35 @@ struct CorrelationDataRow
     DataIterator sortedBegin() { return _sortedData.begin(); }
     DataIterator sortedEnd() { return _sortedData.end(); }
 
+    int computeCostHint() const { return _cost; }
+
+    size_t numColumns() const { return _numColumns; }
+    double valueAt(size_t column) const { return _data.at(column); }
+    void setValueAt(size_t column, double value) { _data[column] = value; }
+
+    NodeId nodeId() const { return _nodeId; }
+
+    double sum() const { return _sum; }
+    double variability() const { return _variability; }
+    double mean() const { return _mean; }
+    double variance() const { return _variance; }
+    double stddev() const { return _stddev; }
+    double coefVar() const { return _coefVar; }
+
+    double minValue() const { return _minValue; }
+    double maxValue() const { return _maxValue; }
+
+    void update();
+
+private:
+    std::vector<double> _data;
+    std::vector<double> _sortedData;
+
     size_t _numColumns = 0;
 
     NodeId _nodeId;
 
     int _cost = 0;
-    int computeCostHint() const { return _cost; }
 
     double _sum = 0.0;
     double _sumSq = 0.0;
@@ -70,53 +78,6 @@ struct CorrelationDataRow
 
     double _minValue = std::numeric_limits<double>::max();
     double _maxValue = std::numeric_limits<double>::lowest();
-
-    void update()
-    {
-        _sum = 0.0;
-        _sumSq = 0.0;
-        _sumAllSq = 0.0;
-        _variability = 0.0;
-
-        _mean = 0.0;
-        _variance = 0.0;
-        _stddev = 0.0;
-        _coefVar = 0.0;
-
-        _minValue = std::numeric_limits<double>::max();
-        _maxValue = std::numeric_limits<double>::lowest();
-
-        _sortedData = _data;
-        std::sort(_sortedData.begin(), _sortedData.end());
-
-        bool allPositive = true;
-
-        for(auto value : *this)
-        {
-            allPositive = allPositive && !std::signbit(value);
-
-            _sum += value;
-            _sumSq += value * value;
-            _mean += value / _numColumns;
-            _minValue = std::min(_minValue, value);
-            _maxValue = std::max(_maxValue, value);
-        }
-
-        _sumAllSq = _sum * _sum;
-        _variability = std::sqrt((_numColumns * _sumSq) - _sumAllSq);
-
-        double sum = 0.0;
-        for(auto value : *this)
-        {
-            double x = (value - _mean);
-            x *= x;
-            sum += x;
-        }
-
-        _variance = sum / _numColumns;
-        _stddev = std::sqrt(_variance);
-        _coefVar = (allPositive && _mean > 0.0) ? _stddev / _mean : std::nan("1");
-    }
 };
 
 #endif // CORRELATIONDATAROW_H

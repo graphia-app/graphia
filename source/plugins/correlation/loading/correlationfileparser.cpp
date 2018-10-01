@@ -277,13 +277,13 @@ std::vector<CorrelationEdge> CorrelationFileParser::pearsonCorrelation(
         for(const auto& rowB : make_iterator_range(rowAIt + 1, rows.end()))
         {
             double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
-            double numerator = (numColumns * productSum) - (rowA._sum * rowB._sum);
-            double denominator = rowA._variability * rowB._variability;
+            double numerator = (numColumns * productSum) - (rowA.sum() * rowB.sum());
+            double denominator = rowA.variability() * rowB.variability();
 
             double r = numerator / denominator;
 
             if(std::isfinite(r) && r >= minimumThreshold)
-                edges.push_back({rowA._nodeId, rowB._nodeId, r});
+                edges.push_back({rowA.nodeId(), rowB.nodeId(), r});
         }
 
         cost += rowA.computeCostHint();

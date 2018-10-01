@@ -13,7 +13,7 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
     if(dataRows.empty())
         return true;
 
-    auto numColumns = dataRows.at(0)._numColumns;
+    auto numColumns = dataRows.at(0).numColumns();
 
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
     std::vector<size_t> ranking(dataRows.size() * numColumns);
@@ -31,7 +31,7 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
 
         // Get column values
         for(const auto& dataRow : dataRows)
-            columnValues.push_back(dataRow._data.at(column));
+            columnValues.push_back(dataRow.valueAt(column));
 
         // Sort
         auto sortedValues = columnValues;
@@ -49,7 +49,7 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
             size_t i = 0;
             for(auto uniqueValue : uniqueSortedValues)
             {
-                if(uniqueValue == dataRow._data.at(column))
+                if(uniqueValue == dataRow.valueAt(column))
                     ranking[index] = i;
 
                 i++;
@@ -92,7 +92,7 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
             auto rank = ranking[index];
             Q_ASSERT(rank < rowMeans.size());
 
-            dataRow._data[column] = rowMeans[rank];
+            dataRow.setValueAt(column, rowMeans[rank]);
         }
 
         row++;

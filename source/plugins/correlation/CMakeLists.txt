@@ -25,6 +25,7 @@ list(APPEND HEADERS
 )
 
 list(APPEND SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.cpp
