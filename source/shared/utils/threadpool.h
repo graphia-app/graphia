@@ -100,26 +100,15 @@ private:
         {}
 
     public:
-        // When the concurrent function returns a value, move it out of the future into the
-        // _values vector, provided by inheriting from the ResultsMember specialisation
-        template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<!std::is_void<T>::value, void>
-        wait() const
+        void wait() const
         {
             for(auto& future : _futures)
             {
                 future.wait();
-                this->_values.emplace_back(std::move(future.get()));
-            }
-        }
 
-        // When the concurrent function doesn't return a value, just wait for the results
-        template<typename T = ResultsVectorOrVoid>
-        typename std::enable_if_t<std::is_void<T>::value, void>
-        wait() const
-        {
-            for(auto& future : _futures)
-                future.wait();
+                if constexpr(!std::is_void<ResultsVectorOrVoid>::value)
+                    this->_values.emplace_back(std::move(future.get()));
+            }
         }
 
         // This iterator allows the results to be iterated over in a single pass
