@@ -496,8 +496,7 @@ BaseParameterDialog
             title: qsTr("Correlation")
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.fill: parent
 
                 Text
                 {
@@ -508,6 +507,8 @@ BaseParameterDialog
 
                 ColumnLayout
                 {
+                    Layout.fillHeight: true
+
                     spacing: 20
 
                     Text
@@ -621,6 +622,56 @@ BaseParameterDialog
                                            "A lower value filters fewer, whereas a higher value filters more. " +
                                            "Its value can be changed later, after the graph has been created.")
                             }
+                        }
+                    }
+
+                    GraphSizeEstimatePlot
+                    {
+                        id: graphSizeEstimatePlot
+
+                        graphSizeEstimate: tabularDataParser.graphSizeEstimate
+                        threshold: initialCorrelationSpinBox.value
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        property bool _timedBusy: false
+
+                        Timer
+                        {
+                            id: busyIndicationTimer
+                            interval: 250
+                            repeat: false
+                            onTriggered:
+                            {
+                                if(tabularDataParser.graphSizeEstimateInProgress)
+                                    graphSizeEstimatePlot._timedBusy = true;
+                            }
+                        }
+
+                        Connections
+                        {
+                            target: tabularDataParser
+
+                            onGraphSizeEstimateInProgressChanged:
+                            {
+                                if(!tabularDataParser.graphSizeEstimateInProgress)
+                                {
+                                    busyIndicationTimer.stop();
+                                    graphSizeEstimatePlot._timedBusy = false;
+                                }
+                                else
+                                    busyIndicationTimer.start();
+                            }
+                        }
+
+                        BusyIndicator
+                        {
+                            anchors.centerIn: parent
+                            width: { return Math.min(64, parent.width); }
+                            height: { return Math.min(64, parent.height); }
+
+                            visible: graphSizeEstimatePlot._timedBusy
                         }
                     }
                 }

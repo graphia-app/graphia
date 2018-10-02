@@ -408,9 +408,6 @@ TabularDataParser::TabularDataParser()
         _graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
         emit graphSizeEstimateChanged();
 
-        qDebug() << _graphSizeEstimate["keys"].value<QVector<double>>();
-        qDebug() << _graphSizeEstimate["numNodes"].value<QVector<double>>();
-
         // Another estimate was queued while we were busy
         if(_graphSizeEstimateQueued)
             estimateGraphSize();

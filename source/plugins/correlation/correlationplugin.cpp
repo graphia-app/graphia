@@ -1,6 +1,7 @@
 #include "correlationplugin.h"
 
 #include "correlationplotitem.h"
+#include "graphsizeestimateplotitem.h"
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
@@ -551,6 +552,7 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
+    qmlRegisterType<GraphSizeEstimatePlotItem>("com.kajeka", 1, 0, "GraphSizeEstimatePlot");
     qmlRegisterType<TabularDataParser>("com.kajeka", 1, 0, "TabularDataParser");
     qmlRegisterType<DataRectTableModel>("com.kajeka", 1, 0, "DataRectTableModel");
 }

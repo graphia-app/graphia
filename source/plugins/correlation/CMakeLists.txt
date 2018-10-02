@@ -10,31 +10,33 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/correlationedge.h
-    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.h
-    ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
-    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.h
-    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
-    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationedge.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
-    ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.h
-    ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
+    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.h
+    ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
+    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
+    ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
 )
 
 list(APPEND SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
 )
 
 list(APPEND RESOURCES
