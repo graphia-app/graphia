@@ -1,5 +1,7 @@
 #include "graphsizeestimateplotitem.h"
 
+#include "shared/utils/utils.h"
+
 #include <QVariantMap>
 #include <QVector>
 
@@ -10,6 +12,7 @@ GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
 
     _customPlot.setOpenGl(true);
 
+    setAcceptedMouseButtons(Qt::AllButtons);
     setFlag(QQuickItem::ItemHasContents, true);
 
     connect(this, &QQuickPaintedItem::widthChanged, this, &GraphSizeEstimatePlotItem::updatePlotSize);
@@ -27,13 +30,22 @@ double GraphSizeEstimatePlotItem::threshold() const
     return _threshold;
 }
 
-void GraphSizeEstimatePlotItem::setThreshold(double threshold_)
+void GraphSizeEstimatePlotItem::setThreshold(double threshold)
 {
-    if(threshold_ != _threshold)
+    if(threshold != _threshold)
     {
-        _threshold = threshold_;
+        if(!_keys.isEmpty())
+            threshold = u::clamp(qAsConst(_keys).first(), 1.0, threshold);
+
+        _threshold = threshold;
         emit thresholdChanged();
-        buildPlot();
+
+        if(_thresholdIndicator != nullptr)
+        {
+            _thresholdIndicator->point1->setCoords(_threshold, 0.0);
+            _thresholdIndicator->point2->setCoords(_threshold, 1.0);
+            _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        }
     }
 }
 
@@ -73,15 +85,14 @@ void GraphSizeEstimatePlotItem::buildPlot()
     edgesGraph->setPen(QPen(Qt::blue));
     edgesGraph->setName(tr("Edges"));
 
-    auto thresholdIndicator = new QCPItemStraightLine(&_customPlot);
+    _thresholdIndicator = new QCPItemStraightLine(&_customPlot);
 
     QPen indicatorPen;
     indicatorPen.setStyle(Qt::DashLine);
-    indicatorPen.setWidth(2);
-    thresholdIndicator->setPen(indicatorPen);
+    _thresholdIndicator->setPen(indicatorPen);
 
-    thresholdIndicator->point1->setCoords(_threshold, 0.0);
-    thresholdIndicator->point2->setCoords(_threshold, 1.0);
+    _thresholdIndicator->point1->setCoords(_threshold, 0.0);
+    _thresholdIndicator->point2->setCoords(_threshold, 1.0);
 
     _customPlot.yAxis->setScaleType(QCPAxis::stLogarithmic);
     QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
@@ -102,6 +113,46 @@ void GraphSizeEstimatePlotItem::buildPlot()
 void GraphSizeEstimatePlotItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
+
+    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
+    // a resizeEvent, so its viewport never gets set, so we must do so manually
+    _customPlot.setViewport(_customPlot.geometry());
+}
+
+void GraphSizeEstimatePlotItem::mousePressEvent(QMouseEvent* event)
+{
+    routeMouseEvent(event);
+    if(event->button() == Qt::MouseButton::LeftButton)
+    {
+        _dragging = true;
+        auto xValue = _customPlot.xAxis->pixelToCoord(event->pos().x());
+        setThreshold(xValue);
+    }
+}
+
+void GraphSizeEstimatePlotItem::mouseReleaseEvent(QMouseEvent* event)
+{
+    routeMouseEvent(event);
+    if(event->button() == Qt::MouseButton::LeftButton)
+        _dragging = false;
+}
+
+void GraphSizeEstimatePlotItem::mouseMoveEvent(QMouseEvent* event)
+{
+    routeMouseEvent(event);
+    if(_dragging)
+    {
+        auto xValue = _customPlot.xAxis->pixelToCoord(event->pos().x());
+        setThreshold(xValue);
+    }
+}
+
+void GraphSizeEstimatePlotItem::routeMouseEvent(QMouseEvent* event)
+{
+    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
+                                     event->button(), event->buttons(),
+                                     event->modifiers());
+    QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
 void GraphSizeEstimatePlotItem::onReplot()

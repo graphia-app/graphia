@@ -22,20 +22,28 @@ public:
 
 private:
     QCustomPlot _customPlot;
+    QCPItemStraightLine* _thresholdIndicator = nullptr;
 
     QVector<double> _keys;
     QVector<double> _numNodes;
     QVector<double> _numEdges;
 
     double _threshold = 0.0;
+    bool _dragging = false;
 
     double threshold() const;
-    void setThreshold(double threshold_);
+    void setThreshold(double threshold);
 
     void setGraphSizeEstimate(const QVariantMap& graphSizeEstimate);
 
     void buildPlot();
     void updatePlotSize();
+
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+    void routeMouseEvent(QMouseEvent* event);
 
 private slots:
     void onReplot();

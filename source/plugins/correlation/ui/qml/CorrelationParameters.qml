@@ -475,7 +475,7 @@ BaseParameterDialog
                 dataRectView.addColumn(columnComponent.createObject(dataRectView,
                                                                     {"role": i}));
 
-                // FIX ME - TY QT TABLEVIEW 1.
+                // FIXME - TY QT TABLEVIEW 1.
                 // https://bugreports.qt.io/browse/QTBUG-70069
                 // Cap the column count since a huge number of columns causes a large slowdown
                 if(i == tabularDataParser.model.MAX_COLUMNS - 1)
@@ -509,7 +509,7 @@ BaseParameterDialog
                 {
                     Layout.fillHeight: true
 
-                    spacing: 20
+                    spacing: 10
 
                     Text
                     {
@@ -524,20 +524,16 @@ BaseParameterDialog
                         Layout.fillWidth: true
                     }
 
-                    GridLayout
+                    RowLayout
                     {
-                        columns: 4
-                        Text
-                        {
-                            text: qsTr("Minimum Correlation:")
-                            Layout.alignment: Qt.AlignRight
-                        }
+                        Layout.fillWidth: true
+
+                        Text { text: qsTr("Minimum:") }
 
                         SpinBox
                         {
                             id: minimumCorrelationSpinBox
 
-                            Layout.alignment: Qt.AlignLeft
                             implicitWidth: 70
 
                             minimumValue: 0.0
@@ -549,12 +545,26 @@ BaseParameterDialog
                             onValueChanged:
                             {
                                 parameters.minimumCorrelation = value;
+
+                                // When the minimum value is increased beyond the initial
+                                // value, the latter can get (visually) lost against the extreme
+                                // left of the plot, so just punt it over a bit
+                                var range = maximumValue - value;
+                                var adjustedInitial = value + (range * 0.1);
+
+                                if(initialCorrelationSpinBox.value <= adjustedInitial)
+                                    initialCorrelationSpinBox.value = adjustedInitial;
                             }
                         }
 
                         Slider
                         {
                             id: minimumSlider
+
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 50
+                            Layout.maximumWidth: 175
+
                             minimumValue: 0.0
                             maximumValue: 1.0
                             value: minimumCorrelationSpinBox.value
@@ -572,23 +582,19 @@ BaseParameterDialog
                                 wrapMode: Text.WordWrap
                                 text: qsTr("The minimum correlation value above which an edge " +
                                            "will be created in the graph. Using a lower minimum value will " +
-                                           "increase the computation time.")
+                                           "increase the compute and memory requirements.")
                             }
                         }
 
-                        Text
-                        {
-                            text: qsTr("Initial Correlation Threshold:")
-                            Layout.alignment: Qt.AlignRight
-                        }
+                        Text { text: qsTr("Initial:") }
 
                         SpinBox
                         {
                             id: initialCorrelationSpinBox
 
-                            Layout.alignment: Qt.AlignLeft
                             implicitWidth: 70
 
+                            minimumValue: minimumCorrelationSpinBox.value
                             maximumValue: 1.0
 
                             decimals: 3
@@ -597,18 +603,7 @@ BaseParameterDialog
                             onValueChanged:
                             {
                                 parameters.initialThreshold = value;
-                                initialSlider.value = value;
-                            }
-                        }
-
-                        Slider
-                        {
-                            id: initialSlider
-                            minimumValue: minimumCorrelationSpinBox.value
-                            maximumValue: 1.0
-                            onValueChanged:
-                            {
-                                initialCorrelationSpinBox.value = value;
+                                graphSizeEstimatePlot.threshold = value;
                             }
                         }
 
@@ -618,8 +613,8 @@ BaseParameterDialog
                             Text
                             {
                                 wrapMode: Text.WordWrap
-                                text: qsTr("Sets the initial correlation threshold, below which edges in the graph are filtered. " +
-                                           "A lower value filters fewer, whereas a higher value filters more. " +
+                                text: qsTr("The initial correlation threshold, below which edges in the graph are filtered. " +
+                                           "A lower value filters fewer edges, and results in a more complex graph. " +
                                            "Its value can be changed later, after the graph has been created.")
                             }
                         }
@@ -630,10 +625,14 @@ BaseParameterDialog
                         id: graphSizeEstimatePlot
 
                         graphSizeEstimate: tabularDataParser.graphSizeEstimate
-                        threshold: initialCorrelationSpinBox.value
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+
+                        onThresholdChanged:
+                        {
+                            initialCorrelationSpinBox.value = threshold;
+                        }
 
                         property bool _timedBusy: false
 
