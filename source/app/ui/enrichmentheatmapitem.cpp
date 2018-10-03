@@ -235,6 +235,11 @@ void EnrichmentHeatmapItem::buildPlot()
 void EnrichmentHeatmapItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
+
+    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
+    // a resizeEvent, so its viewport never gets set, so we must do so manually
+    _customPlot.setViewport(_customPlot.geometry());
+
     scaleXAxis();
     scaleYAxis();
 }

@@ -109,6 +109,10 @@ void CorrelationPlotWorker::renderPixmap()
 
     _customPlot->setGeometry(0, 0, _width, _height);
 
+    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
+    // a resizeEvent, so its viewport never gets set, so we must do so manually
+    _customPlot->setViewport(_customPlot->geometry());
+
     auto elements = _customPlot->plotLayout()->elements(true);
     for(auto* element : elements)
     {
