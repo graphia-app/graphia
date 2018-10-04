@@ -576,7 +576,7 @@ BaseParameterDialog
 
                         HelpTooltip
                         {
-                            title: qsTr("Minimum Correlation")
+                            title: qsTr("Minimum Correlation Value")
                             Text
                             {
                                 wrapMode: Text.WordWrap
@@ -1125,48 +1125,107 @@ BaseParameterDialog
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+
                 TextArea
                 {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     readOnly: true
+                    textFormat: TextEdit.RichText
+
                     text:
                     {
                         var summaryString = "";
-                        summaryString += qsTr("Minimum Correlation: ") + minimumCorrelationSpinBox.value + "\n";
-                        summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "\n";
+                        summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
+                        summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
+
                         if(!tabularDataParser.dataRect !== Qt.rect(0, 0, 0, 0))
                         {
                             summaryString += qsTr("Data Frame:") +
-                                    qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
-                                    qsTr(" Row: ") + tabularDataParser.dataRect.y +
-                                    qsTr(" Width: ") + tabularDataParser.dataRect.width +
-                                    qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]\n";
+                                qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
+                                qsTr(" Row: ") + tabularDataParser.dataRect.y +
+                                qsTr(" Width: ") + tabularDataParser.dataRect.width +
+                                qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]<br>";
                         }
                         else
                         {
-                            summaryString += qsTr("Data Frame: Automatic\n");
+                            summaryString += qsTr("Data Frame: Automatic<br>");
                         }
-                        summaryString += qsTr("Data Transpose: ") + transposeCheckBox.checked + "\n";
-                        summaryString += qsTr("Data Scaling: ") + scaling.currentText + "\n";
-                        summaryString += qsTr("Data Normalise: ") + normalise.currentText + "\n";
-                        summaryString += qsTr("Missing Data Replacement: ") + missingDataType.currentText + "\n";
+
+                        summaryString += qsTr("Data Transpose: ") + transposeCheckBox.checked + "<br>";
+                        summaryString += qsTr("Data Scaling: ") + scaling.currentText + "<br>";
+                        summaryString += qsTr("Data Normalise: ") + normalise.currentText + "<br>";
+                        summaryString += qsTr("Missing Data Replacement: ") + missingDataType.currentText + "<br>";
+
                         if(missingDataType.model.get(missingDataType.currentIndex).value === MissingDataType.Constant)
-                            summaryString += qsTr("Replacement Constant: ") + replacementConstant.text + "\n";
+                            summaryString += qsTr("Replacement Constant: ") + replacementConstant.text + "<br>";
+
                         var transformString = ""
                         if(clustering.model.get(clustering.currentIndex).value !== ClusteringType.None)
-                            transformString += qsTr("Clustering (") + clustering.currentText + ")\n";
+                            transformString += qsTr("Clustering (") + clustering.currentText + ")<br>";
+
                         if(edgeReduction.model.get(edgeReduction.currentIndex).value !== EdgeReductionType.None)
-                            transformString += qsTr("Edge Reduction (") + edgeReduction.currentText + ")\n";
+                            transformString += qsTr("Edge Reduction (") + edgeReduction.currentText + ")<br>";
+
                         if(!transformString)
                             transformString = qsTr("None")
+
                         summaryString += qsTr("Initial Transforms: ") + transformString;
+
+                        var normalFont = "<font>";
+                        var warningFont = "<font color=\"red\">";
+
+                        if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                        {
+                            summaryString += "<br><br>" + qsTr("Estimated Pre-Transform Graph Size: ");
+
+                            var warningThreshold = 5e6;
+
+                            var numNodes = tabularDataParser.graphSizeEstimate.numNodes[0];
+                            var numEdges = tabularDataParser.graphSizeEstimate.numEdges[0];
+
+                            var nodesFont = normalFont;
+                            if(numNodes > warningThreshold)
+                                nodesFont = warningFont;
+
+                            var edgesFont = normalFont;
+                            if(numEdges > warningThreshold)
+                                edgesFont = warningFont;
+
+                            summaryString +=
+                                nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
+                                ", " +
+                                edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
+
+                            if(numNodes > warningThreshold || numEdges > warningThreshold)
+                            {
+                                summaryString += "<br><br>" + warningFont +
+                                    qsTr("WARNING: This is a very large graph which has the potential " +
+                                    "to exhaust system resources and lead to instability " +
+                                    "or freezes. Increasing the Minimum Correlation Value will " +
+                                    "usually reduce the graph size.") + "</font>";
+                            }
+                        }
+                        else
+                        {
+                            summaryString += "<br><br>" + warningFont +
+                                qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
+                        }
+
                         return summaryString;
+                    }
+
+                    enabled: !tabularDataParser.graphSizeEstimateInProgress
+                    BusyIndicator
+                    {
+                        anchors.centerIn: parent
+                        running: tabularDataParser.graphSizeEstimateInProgress
                     }
                 }
             }
         }
 
+        finishEnabled: !tabularDataParser.graphSizeEstimateInProgress
 
         onAccepted:
         {
