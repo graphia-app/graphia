@@ -16,7 +16,6 @@ Item
     id: root
     default property list<Item> listTabs
     property int currentIndex: 0
-    property int enableFinishAtIndex: 0
     property bool nextEnabled: true
     property bool finishEnabled: true
     property bool summaryEnabled: true
@@ -159,13 +158,17 @@ Item
             Button
             {
                 id: finishButton
+
+                property bool _onFinishPage: currentIndex === listTabs.length - 1
+
                 text:
                 {
-                    if(summaryEnabled && currentIndex !== listTabs.length - 1)
+                    if(summaryEnabled && !_onFinishPage)
                         return qsTr("Confirm");
                     else
                         return qsTr("Finish");
                 }
+
                 onClicked:
                 {
                     if(summaryEnabled && currentIndex !== listTabs.length - 1)
@@ -173,7 +176,14 @@ Item
                     else
                         root.accepted();
                 }
-                enabled: (currentIndex >= enableFinishAtIndex) ? finishEnabled : false
+
+                enabled:
+                {
+                    if(_onFinishPage)
+                        return finishEnabled;
+
+                    return true;
+                }
             }
 
             Button
