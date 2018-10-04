@@ -534,7 +534,7 @@ void TabularDataParser::estimateGraphSize()
     QFuture<QVariantMap> future = QtConcurrent::run(
     [this]
     {
-        const size_t maxSampleRows = 2000;
+        const size_t maxSampleRows = 1400;
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
         size_t percent = numSampleRows * 100 / _dataPtr->numRows();
         percent = percent < 1 ? 1 : percent;
