@@ -96,9 +96,12 @@ void GraphSizeEstimatePlotItem::buildPlot()
 
     _customPlot.yAxis->setScaleType(QCPAxis::stLogarithmic);
     QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
+    logTicker->setLogBase(10);
+    logTicker->setSubTickCount(3);
     _customPlot.yAxis->setTicker(logTicker);
     _customPlot.yAxis->setNumberFormat(QStringLiteral("eb"));
     _customPlot.yAxis->setNumberPrecision(0);
+    _customPlot.yAxis->grid()->setSubGridVisible(true);
 
     _customPlot.xAxis->setRange(qAsConst(_keys).first(), 1.0);
     _customPlot.yAxis->rescale();
