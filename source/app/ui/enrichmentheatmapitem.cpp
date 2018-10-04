@@ -1,7 +1,10 @@
 #include "enrichmentheatmapitem.h"
+
+#include "shared/utils/utils.h"
+#include "shared/utils/string.h"
+
 #include <set>
 #include <iterator>
-#include "shared/utils/utils.h"
 
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
@@ -352,7 +355,7 @@ void EnrichmentHeatmapItem::showTooltip()
     auto i = static_cast<int>(std::round(value));
     auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
 
-    _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberForDisplay(pValue)));
+    _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberScientific(pValue)));
 
     const auto COLOR_RECT_WIDTH = 10.0;
     const auto HOVER_MARGIN = 10.0;

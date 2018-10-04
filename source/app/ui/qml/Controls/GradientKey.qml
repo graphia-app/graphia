@@ -106,7 +106,7 @@ Item
             id: minimumLabel
 
             visible: root.showLabels
-            text: QmlUtils.formatForDisplay(root.minimum)
+            text: QmlUtils.formatNumberScientific(root.minimum)
             color: root.textColor
         }
 
@@ -142,7 +142,7 @@ Item
             id: maximumLabel
 
             visible: root.showLabels
-            text: QmlUtils.formatForDisplay(root.maximum)
+            text: QmlUtils.formatNumberScientific(root.maximum)
             color: root.textColor
         }
     }

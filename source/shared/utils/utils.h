@@ -6,12 +6,6 @@
 
 namespace u
 {
-    QString stripZeroes(QString value);
-
-    QString formatNumberForDisplay(double value, int minDecimalPlaces = 0, int maxDecimalPlaces = 0,
-                                   int minScientificformattedStringDigitsThreshold = 4,
-                                   int maxScientificformattedStringDigitsThreshold = 5);
-
     template<typename T> T interpolate(const T& a, const T& b, float f)
     {
         return a + ((b - a) * f);

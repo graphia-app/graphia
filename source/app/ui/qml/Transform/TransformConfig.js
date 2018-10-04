@@ -240,7 +240,7 @@ function Create(transform)
                                 if(parameterData.valueType === ValueType.String)
                                     labelText += " \\\"" + operand + "\\\"";
                                 else
-                                    labelText += " " + QmlUtils.formatForDisplay(operand);
+                                    labelText += " " + QmlUtils.formatNumberScientific(operand);
                             }
                             else
                                 addLabel();

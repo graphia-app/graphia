@@ -184,7 +184,7 @@ ApplicationWindow
                                         var column = tableView.getColumn(styleData.column);
 
                                         if(column !== null && !isNaN(styleData.value) && styleData.value !== "")
-                                            return QmlUtils.formatForDisplay(styleData.value, 1);
+                                            return QmlUtils.formatNumberScientific(styleData.value, 1);
 
                                         return styleData.value;
                                     }

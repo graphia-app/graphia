@@ -2,7 +2,8 @@
 #define QMLUTILS_H
 
 #include "shared/utils/thread.h"
-#include "utils.h"
+#include "shared/utils/utils.h"
+#include "shared/utils/string.h"
 
 #include <QObject>
 #include <QUrl>
@@ -65,10 +66,16 @@ public:
         return new QmlUtils;
     }
 
-    Q_INVOKABLE QString formatForDisplay(double value)
+    Q_INVOKABLE QString formatNumberScientific(double value)
     {
-        return u::formatNumberForDisplay(value);
+        return u::formatNumberScientific(value);
     }
+
+    Q_INVOKABLE QString formatNumberSIPostfix(double value)
+    {
+        return u::formatNumberSIPostfix(value);
+    }
+
 private:
     QCollator _collator;
 };

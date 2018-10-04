@@ -114,25 +114,6 @@ function incrementForRange(min, max)
     return 100000.0;
 }
 
-// http://stackoverflow.com/questions/9461621
-function formatUsingSIPostfix(num)
-{
-    var si =
-        [
-            { threshold: 1E9, divider: 1E9, symbol: "B" },
-            { threshold: 1E6, divider: 1E6, symbol: "M" },
-            { threshold: 1E4, divider: 1E3, symbol: "k" }
-        ], i;
-
-    for(i = 0; i < si.length; i++)
-    {
-        if(num >= si[i].threshold)
-            return (num / si[i].divider).toFixed(1).replace(/\.?0+$/, "") + si[i].symbol;
-    }
-
-    return num;
-}
-
 function desaturate(colorString, factor)
 {
     var c = Qt.darker(colorString, 1.0);

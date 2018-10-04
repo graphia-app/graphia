@@ -695,7 +695,7 @@ Item
                         text:
                         {
                             var nodeText = document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
-                            var numNodes = Utils.formatUsingSIPostfix(document.numInvisibleNodesSelected);
+                            var numNodes = QmlUtils.formatNumberSIPostfix(document.numInvisibleNodesSelected);
                             return "<i>" + qsTr("(") + numNodes +
                                 qsTr(" selected ") + nodeText + qsTr(" not currently visible)") + "</i>";
                         }
@@ -757,9 +757,9 @@ Item
 
                             if(numNodes >= 0)
                             {
-                                s += Utils.formatUsingSIPostfix(numNodes);
+                                s += QmlUtils.formatNumberSIPostfix(numNodes);
                                 if(numVisibleNodes !== numNodes)
-                                    s += " (" + Utils.formatUsingSIPostfix(numVisibleNodes) + ")";
+                                    s += " (" + QmlUtils.formatNumberSIPostfix(numVisibleNodes) + ")";
                             }
 
                             return s;
@@ -784,9 +784,9 @@ Item
 
                             if(numEdges >= 0)
                             {
-                                s += Utils.formatUsingSIPostfix(numEdges);
+                                s += QmlUtils.formatNumberSIPostfix(numEdges);
                                 if(numVisibleEdges !== numEdges)
-                                    s += " (" + Utils.formatUsingSIPostfix(numVisibleEdges) + ")";
+                                    s += " (" + QmlUtils.formatNumberSIPostfix(numVisibleEdges) + ")";
                             }
 
                             return s;
@@ -808,7 +808,7 @@ Item
                             var s = "";
 
                             if(graph.numComponents >= 0)
-                                s += Utils.formatUsingSIPostfix(graph.numComponents);
+                                s += QmlUtils.formatNumberSIPostfix(graph.numComponents);
 
                             return s;
                         }

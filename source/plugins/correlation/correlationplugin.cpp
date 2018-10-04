@@ -306,8 +306,8 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
                 "system resources and lead to instability or freezes. Are you sure you "
                 "wish to continue?"))
                 .arg(fileName, QString::number(minimumThreshold),
-                     u::formatUsingSIPostfix(numNodes),
-                     u::formatUsingSIPostfix(numEdgesEstimate)),
+                     u::formatNumberSIPostfix(numNodes),
+                     u::formatNumberSIPostfix(numEdgesEstimate)),
             {MessageBoxButton::Yes, MessageBoxButton::No});
 
         if(warningResult == MessageBoxButton::No)
