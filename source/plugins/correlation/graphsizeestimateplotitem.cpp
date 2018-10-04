@@ -23,6 +23,9 @@ GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
 
 void GraphSizeEstimatePlotItem::paint(QPainter* painter)
 {
+    if(_keys.isEmpty())
+        return;
+
     painter->drawPixmap(0, 0, _customPlot.toPixmap());
 }
 
@@ -138,6 +141,11 @@ void GraphSizeEstimatePlotItem::buildPlot()
 
 void GraphSizeEstimatePlotItem::updatePlotSize()
 {
+    // QML does some spurious resizing, which can result in odd
+    // sizes that things get upset with
+    if(width() <= 0.0 || height() <= 0.0)
+        return;
+
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
 
     // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
