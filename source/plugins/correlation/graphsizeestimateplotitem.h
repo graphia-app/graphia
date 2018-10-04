@@ -36,6 +36,7 @@ private:
 
     void setGraphSizeEstimate(const QVariantMap& graphSizeEstimate);
 
+    void updateThresholdIndicator();
     void buildPlot();
     void updatePlotSize();
 

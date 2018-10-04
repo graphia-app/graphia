@@ -1,6 +1,7 @@
 #include "graphsizeestimateplotitem.h"
 
 #include "shared/utils/utils.h"
+#include "shared/utils/string.h"
 
 #include <QVariantMap>
 #include <QVector>
@@ -40,12 +41,8 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
         _threshold = threshold;
         emit thresholdChanged();
 
-        if(_thresholdIndicator != nullptr)
-        {
-            _thresholdIndicator->point1->setCoords(_threshold, 0.0);
-            _thresholdIndicator->point2->setCoords(_threshold, 1.0);
-            _customPlot.replot(QCustomPlot::rpQueuedReplot);
-        }
+        updateThresholdIndicator();
+        _customPlot.replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -65,6 +62,34 @@ void GraphSizeEstimatePlotItem::setGraphSizeEstimate(const QVariantMap& graphSiz
     _numEdges = graphSizeEstimate.value(QStringLiteral("numEdges")).value<QVector<double>>();
 
     buildPlot();
+}
+
+void GraphSizeEstimatePlotItem::updateThresholdIndicator()
+{
+    if(_thresholdIndicator == nullptr || _keys.isEmpty())
+        return;
+
+    _thresholdIndicator->point1->setCoords(_threshold, 0.0);
+    _thresholdIndicator->point2->setCoords(_threshold, 1.0);
+
+    int index = 0;
+    while(_keys.at(index) < _threshold && index < _keys.size() - 1)
+        index++;
+
+    index++;
+
+    int numNodes = 0;
+    int numEdges = 0;
+
+    if(index < _keys.size())
+    {
+        numNodes = _numNodes.at(index);
+        numEdges = _numEdges.at(index);
+    }
+
+    _customPlot.xAxis->setLabel(tr("Estimated Graph Size: %1 Nodes, %2 Edges")
+        .arg(u::formatNumberSIPostfix(numNodes))
+        .arg(u::formatNumberSIPostfix(numEdges)));
 }
 
 void GraphSizeEstimatePlotItem::buildPlot()
@@ -91,8 +116,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     indicatorPen.setStyle(Qt::DashLine);
     _thresholdIndicator->setPen(indicatorPen);
 
-    _thresholdIndicator->point1->setCoords(_threshold, 0.0);
-    _thresholdIndicator->point2->setCoords(_threshold, 1.0);
+    updateThresholdIndicator();
 
     _customPlot.yAxis->setScaleType(QCPAxis::stLogarithmic);
     QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
