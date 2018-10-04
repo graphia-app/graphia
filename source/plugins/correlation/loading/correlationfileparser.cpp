@@ -443,12 +443,6 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
         }
 
         setProgress(-1);
-
-        Q_ASSERT(_dataPtr != nullptr);
-        if(_dataPtr != nullptr)
-            _dataRect = findLargestDataRect(*_dataPtr);
-
-        estimateGraphSize();
     });
 
     _dataParserWatcher.setFuture(future);
