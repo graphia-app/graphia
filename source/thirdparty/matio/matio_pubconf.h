@@ -42,8 +42,6 @@
 /* Matio version string */
 #define MATIO_VERSION_STR "1.5.12"
 
-#define HAVE_ZLIB 1
-
 /* Default file format */
 #define MAT_FT_DEFAULT MAT_FT_MAT5
 

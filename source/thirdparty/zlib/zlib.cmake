@@ -1,3 +1,5 @@
+add_definitions(-DZLIB_DLL)
+
 list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/adler32.c
     ${CMAKE_CURRENT_LIST_DIR}/compress.c

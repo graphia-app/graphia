@@ -1,5 +1,9 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
+add_definitions(-DHAVE_ZLIB)
+add_definitions(-DMAT73)
+add_definitions(-DHAVE_HDF5)
+
 list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/endian.c
     ${CMAKE_CURRENT_LIST_DIR}/inflate.c

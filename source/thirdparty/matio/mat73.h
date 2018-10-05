@@ -32,7 +32,7 @@
 #ifdef __cplusplus
 #   define EXTERN extern "C"
 #else
-#   define EXTERN extern
+#   define EXTERN extern __declspec(dllexport)
 #endif
 
 EXTERN mat_t    *Mat_Create73(const char *matname,const char *hdr_str);

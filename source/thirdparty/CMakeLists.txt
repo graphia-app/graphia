@@ -11,6 +11,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/breakpad/breakpad.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cryptopp/cryptopp.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qcustomplot/qcustomplot.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/matio/matio.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/hdf5/hdf5.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qt-qml-models/QtQmlModels.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication/qtsingleapplication.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/SortFilterProxyModel/SortFilterProxyModel.cmake)
@@ -30,8 +31,6 @@ add_library(thirdparty SHARED
     ${SHARED_THIRDPARTY_SOURCES}
     ${SHARED_THIRDPARTY_HEADERS}
     ${SHARED_THIRDPARTY_RESOURCES})
-
-add_definitions(-DZLIB_DLL)
 
 # Disable all warnings
 if(MSVC)
