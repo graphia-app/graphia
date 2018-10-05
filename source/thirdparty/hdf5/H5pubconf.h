@@ -14,6 +14,8 @@
 #ifndef H5_CONFIG_H_
 #define H5_CONFIG_H_
 
+// Windows only configuration options here
+#ifdef _WIN32
 /* Define if the Windows virtual file driver should be compiled */
 #define H5_HAVE_WINDOWS 1
 
@@ -25,6 +27,13 @@
 
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #define H5_HAVE_VISUAL_STUDIO 1
+
+/* Define if your system has window style path name. */
+#define H5_HAVE_WINDOW_PATH 1
+
+/* Define to 1 if you have the <winsock2.h> header file. */
+#define H5_HAVE_WINSOCK2_H 1
+#endif
 
 /* Define if building universal (internal helper macro) */
 /* #undef H5_AC_APPLE_UNIVERSAL_BUILD */
@@ -419,12 +428,6 @@
 
 /* Define to 1 if you have the 'InitOnceExecuteOnce' function. */
 /* #undef H5_HAVE_WIN_THREADS */
-
-/* Define if your system has window style path name. */
-#define H5_HAVE_WINDOW_PATH 1
-
-/* Define to 1 if you have the <winsock2.h> header file. */
-#define H5_HAVE_WINSOCK2_H 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #define H5_HAVE_ZLIB_H 1
