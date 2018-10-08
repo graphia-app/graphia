@@ -4,6 +4,8 @@
 #include "shared/utils/cancellable.h"
 #include "shared/utils/progressable.h"
 
+#include <memory>
+
 #include <QByteArray>
 
 #include <memory>

@@ -40,7 +40,7 @@
 #ifdef __cplusplus
 #   define EXTERN extern "C"
 #else
-#   define EXTERN extern __declspec(dllexport)
+#   define EXTERN extern
 #endif
 
 /** @defgroup MAT Matlab MAT File I/O Library */
