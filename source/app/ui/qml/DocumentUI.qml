@@ -1235,7 +1235,8 @@ Item
         toolBar: ToolBar
         {
             id: pluginWindowToolStrip
-            visible: plugin.content !== undefined && plugin.content.toolStrip !== undefined
+            visible: plugin.content !== undefined && plugin.content.toolStrip !== null &&
+                plugin.content.toolStrip !== undefined
         }
 
         RowLayout
@@ -1292,7 +1293,7 @@ Item
         root.pluginPoppedOut = true;
         plugin.parent = pluginWindowContent;
 
-        if(plugin.content.toolStrip !== undefined)
+        if(plugin.content.toolStrip !== null && plugin.content.toolStrip !== undefined)
             plugin.content.toolStrip.parent = pluginWindowToolStrip.contentItem;
 
         pluginWindow.x = pluginX;
@@ -1303,7 +1304,7 @@ Item
     {
         plugin.parent = pluginContainer;
 
-        if(plugin.content.toolStrip !== undefined)
+        if(plugin.content.toolStrip !== null && plugin.content.toolStrip !== undefined)
             plugin.content.toolStrip.parent = pluginContainerToolStrip;
 
         pluginContainer.height = pluginSplitSize;
