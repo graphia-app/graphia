@@ -133,16 +133,6 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
 {
     QString path = QDir::tempPath();
 
-    // Avoid using the CrashHandler if we're started by something that's probably an IDE
-    auto parentProcess = u::parentProcessName();
-    if(parentProcess.contains("qtcreator", Qt::CaseInsensitive) ||
-       parentProcess.contains("devenv", Qt::CaseInsensitive))
-    {
-        std::cerr << "Invoked by " << parentProcess.toStdString() <<
-                     ", not installing CrashHandler\n";
-        return;
-    }
-
 #if defined(Q_OS_WIN32)
     if(IsDebuggerPresent())
     {
@@ -164,6 +154,15 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
                 minidumpCallback, this,
                 google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 #else
+    // Avoid using the CrashHandler if we're started by something that's probably an IDE
+    auto parentProcess = u::parentProcessName();
+    if(parentProcess.contains("qtcreator", Qt::CaseInsensitive))
+    {
+        std::cerr << "Invoked by " << parentProcess.toStdString() <<
+                     ", not installing CrashHandler\n";
+        return;
+    }
+
     strncpy(_crashReporterExecutableName,
             static_cast<const char*>(crashReporterExecutableName.toLatin1()),
             sizeof(_crashReporterExecutableName) - 1);
