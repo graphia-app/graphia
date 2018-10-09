@@ -138,7 +138,7 @@
 #define H5_HAVE_FEATURES_H 1
 
 /* Define if support for deflate (zlib) filter is enabled */
-/* #undef H5_HAVE_FILTER_DEFLATE */
+#define H5_HAVE_FILTER_DEFLATE 1
 
 /* Define if support for szip filter is enabled */
 /* #undef H5_HAVE_FILTER_SZIP */
@@ -427,7 +427,7 @@
 /* #undef H5_HAVE_WINSOCK2_H */
 
 /* Define to 1 if you have the <zlib.h> header file. */
-/* #undef H5_HAVE_ZLIB_H */
+# define H5_HAVE_ZLIB_H 1
 
 /* Define to 1 if you have the `_getvideoconfig' function. */
 /* #undef H5_HAVE__GETVIDEOCONFIG */
