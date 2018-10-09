@@ -37,6 +37,20 @@ ApplicationWindow
             sourceSize.height: 96
             Layout.margins: Constants.margin
             Layout.rowSpan: 2
+
+            MouseArea
+            {
+                anchors.fill: parent
+
+                property int _doubleClickCount: 0
+                onDoubleClicked:
+                {
+                    _doubleClickCount++;
+
+                    if(_doubleClickCount >= 3)
+                        Qt.exit(127);
+                }
+            }
         }
 
         Text

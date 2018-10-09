@@ -172,7 +172,8 @@ int main(int argc, char *argv[])
 
     int exitCode = QCoreApplication::exec();
 
-    uploadReport(report._email, report._text, QCoreApplication::arguments().at(1), attachmentsDir);
+    if(exitCode != 127)
+        uploadReport(report._email, report._text, QCoreApplication::arguments().at(1), attachmentsDir);
 
     return exitCode;
 }
