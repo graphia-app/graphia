@@ -68,7 +68,7 @@ static void launch(const char* program, const char* dmpFile, const char* dir)
 
 static bool minidumpCallback(
 #if defined(Q_OS_WIN32)
-    const wchar_t* dumpDir, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS*, MDRawAssertionInfo*, bool success
+    const wchar_t* dumpDir, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS* ex_info, MDRawAssertionInfo*, bool success
 #elif defined(Q_OS_LINUX)
     const google_breakpad::MinidumpDescriptor& md, void* context, bool success
 #elif defined(Q_OS_MACOS)
@@ -76,6 +76,32 @@ static bool minidumpCallback(
 #endif
 )
 {
+#if defined(Q_OS_WIN32)
+    if(ex_info != nullptr && ex_info->ExceptionRecord != nullptr)
+    {
+        // Occasionally we see exceptions that aren't really crashes at all
+        // Instead of handling and reporting these, we just pass them on
+        static const DWORD PASS_ON_EXCEPTIONS[] =
+        {
+            RPC_S_SERVER_UNAVAILABLE
+        };
+
+        static const size_t NUM_PASS_ON_EXCEPTIONS = sizeof(PASS_ON_EXCEPTIONS) /
+            sizeof(PASS_ON_EXCEPTIONS[0]);
+
+        const auto thrownCode = HRESULT_CODE(ex_info->ExceptionRecord->ExceptionCode);
+        for(size_t i = 0; i < NUM_PASS_ON_EXCEPTIONS; i++)
+        {
+            const auto code = PASS_ON_EXCEPTIONS[i];
+            if(thrownCode == code)
+            {
+                std::cerr << "Caught HRESULT " << thrownCode << ", ignoring and passing on...\n";
+                return false;
+            }
+        }
+    }
+#endif
+
     std::cerr << "Handling crash...\n";
 
     if(!success)
