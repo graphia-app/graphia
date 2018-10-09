@@ -8,7 +8,8 @@
 
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
+    //FIXME commented until QTBUG-70148 is fixed
+    //setRenderTarget(RenderTarget::FramebufferObject);
 
     _customPlot.setOpenGl(true);
     _customPlot.addLayer(QStringLiteral("textLayer"));

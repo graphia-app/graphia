@@ -146,7 +146,8 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent),
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
+    //FIXME commented until QTBUG-70148 is fixed
+    //setRenderTarget(RenderTarget::FramebufferObject);
 
     // Discard the defaults...
     _customPlot.plotLayout()->clear();
