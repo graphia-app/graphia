@@ -1,5 +1,5 @@
-#ifdef __WIN32
+#ifdef _WIN32
 #include "matioConfig_win.h"
-#elif __linux__
+#elif defined __linux__
 #include "matioConfig_unix.h"
 #endif

@@ -40,7 +40,7 @@
 #ifdef __cplusplus
 #   define EXTERN extern "C"
 #else
-#   ifdef __WIN32
+#   ifdef _WIN32
 #       define EXTERN extern __declspec(dllexport)
 #   else
 #       define EXTERN extern
