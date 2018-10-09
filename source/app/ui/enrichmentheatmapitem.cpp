@@ -352,11 +352,17 @@ double EnrichmentHeatmapItem::verticalRangeSize()
 
 void EnrichmentHeatmapItem::showTooltip()
 {
-    _hoverLabel->setVisible(true);
     double key, value;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
 
     auto i = static_cast<int>(std::round(value));
+
+    // Bounds check the row
+    if(i >= _tableModel->rowCount() || i < 0)
+        return;
+
+    _hoverLabel->setVisible(true);
+
     auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
 
     _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberScientific(pValue)));
