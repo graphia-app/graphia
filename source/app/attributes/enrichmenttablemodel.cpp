@@ -22,8 +22,8 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 {
     if(role < Qt::UserRole)
         return {};
-    size_t row = static_cast<size_t>(index.row());
-    size_t column = static_cast<size_t>(role - Qt::UserRole);
+    auto row = static_cast<size_t>(index.row());
+    auto column = static_cast<size_t>(role - Qt::UserRole);
 
     Q_ASSERT(row < static_cast<size_t>(rowCount()));
     Q_ASSERT(column < static_cast<size_t>(columnCount()));
