@@ -24,6 +24,7 @@ Item
 
     property url fileUrl
     property url savedFileUrl
+    property string savedFileSaver
     property string fileType
 
     property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length > 0; }
@@ -199,7 +200,10 @@ Item
         this.fileType = fileType;
 
         if(fileType === "Native")
+        {
             this.savedFileUrl = fileUrl;
+            this.savedFileSaver = appName;
+        }
 
         return true;
     }
@@ -291,7 +295,7 @@ Item
         if(!hasBeenSaved)
             saveAsFile();
         else
-            saveAsNamedFile(savedFileUrl);
+            saveAsNamedFile(savedFileUrl, savedFileSaver);
     }
 
     MessageDialog
@@ -1417,7 +1421,10 @@ Item
                 errorSavingFileMessageDialog.open();
             }
             else
+            {
                 savedFileUrl = fileUrl;
+                savedFileSaver = saverName;
+            }
         }
     }
 

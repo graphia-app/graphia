@@ -333,7 +333,7 @@ signals:
     void enrichmentTableModelsChanged();
     void enrichmentAnalysisComplete();
 
-    void saveComplete(bool success, QUrl fileUrl);
+    void saveComplete(bool success, QUrl fileUrl, const QString& saverName);
     void nodeAttributeGroupNamesChanged();
 
 public:

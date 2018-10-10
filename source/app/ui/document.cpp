@@ -612,12 +612,12 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
                 QString(tr("Saving %1")).arg(fileUrl.fileName()),
                 QString(tr("Saved %1")).arg(fileUrl.fileName())
             },
-        [this, fileUrl, uiData, pluginUiData, factory](Command& command) mutable
+        [=](Command& command) mutable
         {
             auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
             saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
             bool success = saver->save();
-            emit saveComplete(success, fileUrl);
+            emit saveComplete(success, fileUrl, saverName);
             return success;
         });
 
