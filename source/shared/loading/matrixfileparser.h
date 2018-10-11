@@ -28,8 +28,8 @@ public:
         std::map<size_t, NodeId> rowToNodeId;
         std::map<size_t, NodeId> columnToNodeId;
 
-        bool hasColumnHeaders = true;
-        bool hasRowHeaders = true;
+        bool hasColumnHeaders = false;
+        bool hasRowHeaders = false;
         size_t dataStartRow = 0;
         size_t dataStartColumn = 0;
 
@@ -40,9 +40,9 @@ public:
             {
                 const auto& stringValue = tabularData.valueAt(0, rowIndex);
                 // Not a header if I can convert to double
-                if(u::isNumeric(stringValue))
+                if(!u::isNumeric(stringValue))
                 {
-                    hasRowHeaders = false;
+                    hasRowHeaders = true;
                     break;
                 }
             }
@@ -50,10 +50,10 @@ public:
             for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
             {
                 const auto& stringValue = tabularData.valueAt(columnIndex, 0);
-                if(u::isNumeric(stringValue))
+                if(!u::isNumeric(stringValue))
                 {
                     // Probably doesnt have headers if I can convert the header to double
-                    hasColumnHeaders = false;
+                    hasColumnHeaders = true;
                     break;
                 }
             }
