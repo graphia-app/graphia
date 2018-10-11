@@ -25,11 +25,11 @@ public:
     {
         size_t height = matvar.dims[0];
         size_t width = matvar.dims[1];
-        int nodeAndEdgeCount = static_cast<int>((height * width) + height);
+        auto nodeAndEdgeCount = static_cast<int>((height * width) + height);
         int progress = 0;
 
         std::map<size_t, NodeId> indexToNodeId;
-        T* dataptr = static_cast<T*>(matvar.data);
+        auto* dataptr = static_cast<T*>(matvar.data);
 
         for(size_t row = 0; row < height; ++row)
         {
