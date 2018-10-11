@@ -5,3 +5,5 @@
 #else
 #include "H5pubconf_unix.h"
 #endif
+
+#undef ZLIB_DLL

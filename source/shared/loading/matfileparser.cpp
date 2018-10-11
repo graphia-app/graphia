@@ -1,7 +1,5 @@
 #include "matfileparser.h"
 
-#include "thirdparty/matio/matio.h"
-
 #include <QDebug>
 #include <QImage>
 #include <QUrl>

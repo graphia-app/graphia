@@ -47,6 +47,9 @@
 #   endif
 #endif
 
+// Since ZLIB is actually local to thirdparty
+#undef ZLIB_DLL
+
 /** @defgroup MAT Matlab MAT File I/O Library */
 /** @defgroup mat_util MAT File I/O Utility Functions */
 /** @if mat_devman @defgroup mat_internal Internal Functions @endif */
