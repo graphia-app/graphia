@@ -662,7 +662,7 @@ Item
 
             RowLayout
             {
-                visible: !document.interacting && graph._inComponentMode
+                visible: graph._inComponentMode
 
                 anchors.horizontalCenter: graph.horizontalCenter
                 anchors.bottom: graph.bottom
