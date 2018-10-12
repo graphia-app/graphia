@@ -345,9 +345,11 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
         size = _graphModel->nodeVisual(_viewData._focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
-    delta *= (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET);
+    const float MIN_SEPARATION = 2.0f;
+    auto separation = std::max(((_targetZoomDistance - size) - INTERSECTION_AVOIDANCE_OFFSET), MIN_SEPARATION);
+    auto step = delta * separation;
 
-    _targetZoomDistance -= delta;
+    _targetZoomDistance -= step;
     _targetZoomDistance = std::max(_targetZoomDistance, MINIMUM_ZOOM_DISTANCE);
 
     if(_targetZoomDistance > _entireComponentZoomDistance)
@@ -360,6 +362,10 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
     }
 
     float startZoomDistance = _viewData._zoomDistance;
+
+    // Don't do anything if there would be no change
+    if(qFuzzyCompare(startZoomDistance, _targetZoomDistance))
+        return;
 
     if(visible())
     {
