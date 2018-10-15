@@ -3,6 +3,7 @@
 
 #include "visualisationchannel.h"
 #include "colorgradient.h"
+#include "colorpalette.h"
 
 class ColorVisualisationChannel : public VisualisationChannel
 {
@@ -21,6 +22,7 @@ public:
 
 private:
     ColorGradient _colorGradient;
+    ColorPalette _colorPalette;
 };
 
 #endif // COLORVISUALISATIONCHANNEL_H

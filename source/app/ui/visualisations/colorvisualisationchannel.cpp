@@ -1,7 +1,5 @@
 #include "colorvisualisationchannel.h"
 
-#include "shared/utils/color.h"
-
 #include <QObject>
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
@@ -14,7 +12,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     if(value.isEmpty())
         return;
 
-    elementVisual._outerColor = u::colorForString(value);
+    elementVisual._outerColor = _colorPalette.get(value);
 }
 
 QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
@@ -58,6 +56,27 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
         break;
 
     case ValueType::String:
+        parameters.insert(QStringLiteral("palette"),
+            R"("[
+              \"#1DAA14\",
+              \"#8126C0\",
+              \"#FF7700\",
+              \"#29D0D0\",
+              \"#FD1111\",
+              \"#502E0F\",
+              \"#EEEEEE\",
+              \"#2A4BD7\",
+              \"#9D2323\",
+              \"#FFEE33\",
+              \"#AAAAAA\",
+              \"#9DAFFF\",
+              \"#E08FCD\",
+              \"#404040\",
+              \"#E9505E\",
+              \"#111111\"
+            ]")");
+        break;
+
     default:
         break;
     }
@@ -69,4 +88,6 @@ void ColorVisualisationChannel::setParameter(const QString& name, const QString&
 {
     if(name == QLatin1String("gradient"))
         _colorGradient = ColorGradient(value);
+    else if(name == QLatin1String("palette"))
+        _colorPalette = ColorPalette(value);
 }
