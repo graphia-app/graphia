@@ -208,6 +208,12 @@ bool GraphMLHandler::startElement(const QString&, const QString& localName, cons
 
 bool GraphMLHandler::endElement(const QString &, const QString &localName, const QString &)
 {
+    if(_parser->cancelled())
+    {
+        _errorString = QObject::tr("User cancelled");
+        return false;
+    }
+
     _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
 
     if(localName == QLatin1String("node"))

@@ -33,6 +33,9 @@ public:
 
         for(size_t row = 0; row < height; ++row)
         {
+            if(cancelled())
+                return false;
+
             auto nodeId = graphModel->mutableGraph().addNode();
             indexToNodeId[row] = nodeId;
 
@@ -45,6 +48,9 @@ public:
         {
             for(size_t column = 0; column < width; ++column)
             {
+                if(cancelled())
+                    return false;
+
                 T value = *(dataptr + (column * matvar.dims[0]) + row);
 
                 auto edgeId = graphModel->mutableGraph().addEdge(indexToNodeId[row], indexToNodeId[column]);
@@ -62,19 +68,18 @@ public:
     {
         switch(matvar.data_type)
         {
-        case MAT_T_DOUBLE: matVarToGraph<double>(matvar, graphModel); break;
-        case MAT_T_SINGLE: matVarToGraph<float>(matvar, graphModel); break;
-        case MAT_T_INT64: matVarToGraph<mat_int64_t>(matvar, graphModel); break;
-        case MAT_T_UINT64: matVarToGraph<mat_uint64_t>(matvar, graphModel); break;
-        case MAT_T_INT32: matVarToGraph<mat_int32_t>(matvar, graphModel); break;
-        case MAT_T_UINT32: matVarToGraph<mat_uint32_t>(matvar, graphModel); break;
-        case MAT_T_INT16: matVarToGraph<mat_int16_t>(matvar, graphModel); break;
-        case MAT_T_UINT16: matVarToGraph<mat_uint16_t>(matvar, graphModel); break;
-        case MAT_T_INT8: matVarToGraph<mat_int8_t>(matvar, graphModel); break;
-        case MAT_T_UINT8: matVarToGraph<mat_uint8_t>(matvar, graphModel); break;
+        case MAT_T_DOUBLE: return matVarToGraph<double>(matvar, graphModel);
+        case MAT_T_SINGLE: return matVarToGraph<float>(matvar, graphModel);
+        case MAT_T_INT64: return matVarToGraph<mat_int64_t>(matvar, graphModel);
+        case MAT_T_UINT64: return matVarToGraph<mat_uint64_t>(matvar, graphModel);
+        case MAT_T_INT32: return matVarToGraph<mat_int32_t>(matvar, graphModel);
+        case MAT_T_UINT32: return matVarToGraph<mat_uint32_t>(matvar, graphModel);
+        case MAT_T_INT16: return matVarToGraph<mat_int16_t>(matvar, graphModel);
+        case MAT_T_UINT16: return matVarToGraph<mat_uint16_t>(matvar, graphModel);
+        case MAT_T_INT8: return matVarToGraph<mat_int8_t>(matvar, graphModel);
+        case MAT_T_UINT8: return matVarToGraph<mat_uint8_t>(matvar, graphModel);
         default: return false;
         }
-        return true;
     }
 };
 

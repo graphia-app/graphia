@@ -89,6 +89,12 @@ bool BiopaxHandler::startElement(const QString&, const QString& localName, const
 
 bool BiopaxHandler::endElement(const QString&, const QString& localName, const QString&)
 {
+    if(_parser->cancelled())
+    {
+        _errorString = QObject::tr("User cancelled");
+        return false;
+    }
+
     _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
 
     if(_nodeElementNames.contains(localName))
