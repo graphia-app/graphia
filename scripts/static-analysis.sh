@@ -43,7 +43,7 @@ else
 
   INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-I) *.*?(?= )' | \
-    grep -vE "thirdparty|autogen" \
+    grep -vE "thirdparty|autogen" | \
     sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
 
@@ -110,9 +110,15 @@ missing-typeinfo,\
 returning-void-expression,\
 virtual-call-ctor,\
 assert-with-side-effects,\
-bogus-dynamic-cast,\
 detaching-member,\
-thread-with-slots"
+thread-with-slots,\
+connect-by-name,\
+skipped-base-method,\
+fully-qualified-moc-types,\
+qhash-with-char-pointer-key,\
+wrong-qevent-cast,\
+static-pmf,\
+empty-qstringliteral"
 
 if [ "${VERBOSE}" != 0 ]
 then
@@ -121,7 +127,9 @@ then
 fi
 
 parallel -n1 -P${NUM_CORES} \
-  clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS} {} \
+  clazy-standalone -p ${BUILD_DIR}/compile_commands.json \
+  -header-filter="\"^((?!thirdparty).)*$\"" \
+  ${CHECKS} {} \
   ::: ${CPP_FILES}
 
 # qmllint

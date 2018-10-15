@@ -354,7 +354,7 @@ void CorrelationPlotItem::updateTooltip()
     }
 
     bool showTooltip = false;
-    _hoverLabel->setText(QStringLiteral(""));
+    _hoverLabel->setText(QString());
     _itemTracer->setGraph(nullptr);
 
     if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
