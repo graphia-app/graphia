@@ -167,6 +167,23 @@ public:
         }
 
         case ValueType::String:
+        {
+            // For shared values, map to a uniform set (namely numbers as strings)
+            // In this way we get predictable visualisations from different sets
+            // of input values
+            bool hasSharedValues = !attribute.sharedValues().empty();
+            std::map<QString, QString> m;
+            if(hasSharedValues)
+            {
+                int normalised = 0;
+
+                for(const auto& sharedValue : attribute.sharedValues())
+                {
+                    m[sharedValue._value] = QString::number(normalised);
+                    normalised++;
+                }
+            }
+
             for(auto elementId : *_elementIds)
             {
                 if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
@@ -175,9 +192,14 @@ public:
                     continue;
                 }
 
-                apply(attribute.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
+                auto stringValue = attribute.stringValueOf(elementId);
+                if(hasSharedValues && !stringValue.isEmpty())
+                    stringValue = m.at(stringValue);
+
+                apply(stringValue, channel, elementId, _numAppliedVisualisations);
             }
             break;
+        }
 
         default:
             break;
