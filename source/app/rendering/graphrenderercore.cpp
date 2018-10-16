@@ -6,13 +6,13 @@
 #include <QColor>
 
 template<typename T>
-void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
+void setupTexture(T t, GLuint& texture, int width, int height, GLint format, int numMultiSamples)
 {
     if(texture == 0)
         t->glGenTextures(1, &texture);
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
     t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
-        GraphRendererCore::NUM_MULTISAMPLES, format, width, height, GL_FALSE);
+        numMultiSamples, format, width, height, GL_FALSE);
     t->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
@@ -198,10 +198,10 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     _arrow.vertexArrayObject()->release();
 }
 
-bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture)
+bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples)
 {
-    setupTexture(this, _colorTexture,     width, height, GL_RGBA);
-    setupTexture(this, _selectionTexture, width, height, GL_RGBA);
+    setupTexture(this, _colorTexture,     width, height, GL_RGBA, numMultiSamples);
+    setupTexture(this, _selectionTexture, width, height, GL_RGBA, numMultiSamples);
 
     if(_fbo == 0)
         glGenFramebuffers(1, &_fbo);
@@ -300,6 +300,15 @@ bool GPUGraphData::unused() const
 GraphRendererCore::GraphRendererCore()
 {
     resolveOpenGLFunctions();
+
+    GLint maxSamples;
+    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+
+    // Despite the fact that (as far as can be made out) OpenGL specifies a minimum value
+    // of 4 for GL_MAX_SAMPLES, some implementations (notably VMWare's GL passthrough driver)
+    // actually manage less than this, so we need to check what it's actually capable of
+    const GLint PREFERRED_NUM_MULTISAMPLES = 4;
+    _numMultiSamples = std::min(maxSamples, PREFERRED_NUM_MULTISAMPLES);
 
     ShaderTools::loadShaderProgram(_screenShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/screen.frag"));
     ShaderTools::loadShaderProgram(_selectionShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/selection.frag"));
@@ -528,15 +537,15 @@ bool GraphRendererCore::resize(int width, int height)
 
     if(width > 0 && height > 0)
     {
-        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT);
+        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT, _numMultiSamples);
 
         if(!_gpuGraphData.empty())
         {
             FBOcomplete = true;
             for(auto& gpuGraphData : _gpuGraphData)
             {
-                FBOcomplete = FBOcomplete &&
-                    gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
+                FBOcomplete = FBOcomplete && gpuGraphData.prepareRenderBuffers(width, height,
+                    _depthTexture, _numMultiSamples);
             }
         }
         else
@@ -799,14 +808,14 @@ void GraphRendererCore::prepareQuad()
     _screenShader.enableAttributeArray("position");
     _screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     _screenShader.setUniformValue("frameBufferTexture", 0);
-    _screenShader.setUniformValue("multisamples", NUM_MULTISAMPLES);
+    _screenShader.setUniformValue("multisamples", _numMultiSamples);
     _screenShader.release();
 
     _selectionShader.bind();
     _selectionShader.enableAttributeArray("position");
     _selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     _selectionShader.setUniformValue("frameBufferTexture", 0);
-    _selectionShader.setUniformValue("multisamples", NUM_MULTISAMPLES);
+    _selectionShader.setUniformValue("multisamples", _numMultiSamples);
     _selectionShader.release();
 
     _screenQuadDataBuffer.release();

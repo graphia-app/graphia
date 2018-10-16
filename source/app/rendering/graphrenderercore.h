@@ -28,7 +28,8 @@ struct GPUGraphData : OpenGLFunctions
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
     void prepareTextVAO(QOpenGLShaderProgram& shader);
 
-    bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
+    bool prepareRenderBuffers(int width, int height,
+        GLuint depthTexture, GLint numMultiSamples);
 
     void reset();
     void clearFramebuffer();
@@ -114,9 +115,9 @@ public:
     GraphRendererCore();
     ~GraphRendererCore() override;
 
-    static const int NUM_MULTISAMPLES = 4;
-
 private:
+    GLint _numMultiSamples = 0;
+
     int _width = 0;
     int _height = 0;
 
