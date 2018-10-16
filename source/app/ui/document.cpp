@@ -1972,8 +1972,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     if(commands.size() > 1)
     {
         _commandManager.execute({tr("Apply Transforms and Visualisations"),
-                                 tr("Applying Transforms and Visualisations")},
-                                std::move(commands));
+            tr("Applying Transforms and Visualisations")}, std::move(commands));
     }
     else if(commands.size() == 1)
         _commandManager.execute(std::move(commands.front()));

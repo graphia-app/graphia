@@ -74,7 +74,9 @@ public:
     };
 
     Command(CommandDescription commandDescription,
+            // cppcheck-suppress passedByValue
             CommandFn executeFn,
+            // cppcheck-suppress passedByValue
             CommandFn undoFn = [](Command&) { Q_ASSERT(!"undoFn not implemented"); }) :
         _description(std::move(commandDescription._description)),
         _verb(commandDescription._verb),

@@ -14,7 +14,6 @@
         { \
             NOINLINE void operator()() \
             { \
-                /* cppcheck-suppress nullPointer */ \
                 int* p = nullptr; \
                 *p = 0; \
             } \

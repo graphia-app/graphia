@@ -22,11 +22,13 @@ public:
     }
 
     void execute(const Command::CommandDescription& commandDescription,
+                 // cppcheck-suppress passedByValue
                  std::vector<std::unique_ptr<ICommand>> commands)
     {
         execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
+    // cppcheck-suppress passedByValue
     void execute(std::vector<std::unique_ptr<ICommand>> commands)
     {
         execute(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
@@ -42,11 +44,13 @@ public:
     }
 
     void executeOnce(const Command::CommandDescription& commandDescription,
+                     // cppcheck-suppress passedByValue
                      std::vector<std::unique_ptr<ICommand>> commands)
     {
         executeOnce(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
+    // cppcheck-suppress passedByValue
     void executeOnce(std::vector<std::unique_ptr<ICommand>> commands)
     {
         executeOnce(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
