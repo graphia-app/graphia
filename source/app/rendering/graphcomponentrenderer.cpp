@@ -19,14 +19,15 @@
 #include "ui/visualisations/elementvisual.h"
 
 #include "shared/graph/elementid_debug.h"
-#include <QObject>
 
+#include <QObject>
 #include <QKeyEvent>
 #include <QMouseEvent>
-
 #include <QtMath>
+
 #include <cmath>
 #include <mutex>
+#include <algorithm>
 
 const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 2.5f;
 const float GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS = MINIMUM_ZOOM_DISTANCE * 2.5f;
@@ -386,7 +387,7 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
 
 void GraphComponentRenderer::zoomToDistance(float distance)
 {
-    distance = u::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, distance);
+    distance = std::clamp(distance, MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance);
     _viewData._zoomDistance = _targetZoomDistance = distance;
 }
 
@@ -427,7 +428,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         zoomDistance = newPosition.distanceToPoint(focus);
     }
 
-    zoomDistance = u::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, zoomDistance);
+    zoomDistance = std::clamp(zoomDistance, MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance);
 
     if(!_zoomTransition.active())
         zoomToDistance(zoomDistance);

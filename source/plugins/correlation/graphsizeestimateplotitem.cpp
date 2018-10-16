@@ -6,6 +6,8 @@
 #include <QVariantMap>
 #include <QVector>
 
+#include <algorithm>
+
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent)
 {
@@ -40,7 +42,7 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
     if(threshold != _threshold)
     {
         if(!_keys.isEmpty())
-            threshold = u::clamp(qAsConst(_keys).first(), 1.0, threshold);
+            threshold = std::clamp(threshold, qAsConst(_keys).first(), 1.0);
 
         _threshold = threshold;
         emit thresholdChanged();

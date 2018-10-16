@@ -195,7 +195,7 @@ void GraphOverviewScene::setOffset(float x, float y)
     float xMax = std::max(xDiff, 0.0f);
 
     if(scaledBoundingWidth > _width)
-        x = u::clamp(xMin, xMax, x);
+        x = std::clamp(x, xMin, xMax);
     else
         x = (xMin + xMax) * 0.5f;
 
@@ -204,7 +204,7 @@ void GraphOverviewScene::setOffset(float x, float y)
     float yMax = std::max(yDiff, 0.0f);
 
     if(scaledBoundingHeight > _height)
-        y = u::clamp(yMin, yMax, y);
+        y = std::clamp(y, yMin, yMax);
     else
         y = (yMin + yMax) * 0.5f;
 

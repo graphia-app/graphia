@@ -5,6 +5,8 @@
 
 #include <QDebug>
 
+#include <algorithm>
+
 bool Transition::update(float dTime)
 {
     if(!active())
@@ -12,7 +14,7 @@ bool Transition::update(float dTime)
 
     _elapsed += dTime;
 
-    float f = _duration > 0.0f ? u::clamp(0.0f, 1.0f, _elapsed / _duration) : 1.0f;
+    float f = _duration > 0.0f ? std::clamp(_elapsed / _duration, 0.0f, 1.0f) : 1.0f;
 
     switch(_type)
     {

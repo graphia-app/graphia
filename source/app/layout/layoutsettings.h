@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <utility>
+#include <algorithm>
 
 enum class LayoutSettingScaleType { Linear, Log };
 
@@ -31,7 +32,7 @@ public:
     float minimumValue() const { return _minimumValue; }
     float maximumValue() const { return _maximumValue; }
     float range() const { return _maximumValue - _minimumValue; }
-    void setValue(float value) { _value = u::clamp(_minimumValue, _maximumValue, value); }
+    void setValue(float value) { _value = std::clamp(value, _minimumValue, _maximumValue); }
     void setNormalisedValue(float normalisedValue);
     void resetValue() { _value = _defaultValue; }
     const QString& name() const { return _name; }

@@ -22,7 +22,9 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QtMath>
+
 #include <cmath>
+#include <algorithm>
 
 NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
                                ComponentId componentId,
@@ -302,7 +304,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
     float dot = QVector3D::dotProduct(previous, current);
     float value = dot / (previous.length() * current.length());
-    value = u::clamp(-1.0f, 1.0f, value);
+    value = std::clamp(value, -1.0f, 1.0f);
     float radians = std::acos(value);
     float angle = -qRadiansToDegrees(radians);
 

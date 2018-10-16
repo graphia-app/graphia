@@ -15,6 +15,7 @@
 #include <QCollator>
 
 #include <cmath>
+#include <algorithm>
 
 CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     QCustomPlot& customPlot, QCPLayer& tooltipLayer) :
@@ -1529,7 +1530,7 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 
 void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
-    _horizontalScrollPosition = u::clamp(0.0, 1.0, horizontalScrollPosition);
+    _horizontalScrollPosition = std::clamp(horizontalScrollPosition, 0.0, 1.0);
     computeXAxisRange();
 
     updatePixmap(CorrelationPlotUpdateType::Render);
