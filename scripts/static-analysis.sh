@@ -58,6 +58,10 @@ if [ "${VERBOSE}" != 0 ]
 then
   echo "Files to be analysed:"
   echo ${CPP_FILES}
+  echo "Included directories:"
+  echo ${INCLUDE_DIRS}
+  echo "Preprocessor defines:"
+  echo ${DEFINES}
 fi
 
 # cppcheck
