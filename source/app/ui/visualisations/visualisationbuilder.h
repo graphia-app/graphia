@@ -12,6 +12,7 @@
 #include <vector>
 #include <array>
 
+#include <QCollator>
 #include <QtGlobal>
 
 template<typename ElementId>
@@ -176,8 +177,20 @@ public:
             if(hasSharedValues)
             {
                 int normalised = 0;
+                auto sharedValues = attribute.sharedValues();
 
-                for(const auto& sharedValue : attribute.sharedValues())
+                QCollator collator;
+                collator.setNumericMode(true);
+
+                // Sort in natural order so that e.g. "Thing 1" is always
+                // assigned a visualisation before "Thing 2"
+                std::sort(sharedValues.begin(), sharedValues.end(),
+                [&collator](const auto& a, const auto& b)
+                {
+                    return collator.compare(a._value, b._value) < 0;
+                });
+
+                for(const auto& sharedValue : sharedValues)
                 {
                     m[sharedValue._value] = QString::number(normalised);
                     normalised++;
