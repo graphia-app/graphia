@@ -27,8 +27,11 @@
         int id() const { return static_cast<int>(_id); } \
     };
 
+// cppcheck-suppress noExplicitConstructor
 QML_ELEMENTID(NodeId) // NOLINT
+// cppcheck-suppress noExplicitConstructor
 QML_ELEMENTID(EdgeId) // NOLINT
+// cppcheck-suppress noExplicitConstructor
 QML_ELEMENTID(ComponentId) // NOLINT
 
 inline void registerQmlElementIdTypes()

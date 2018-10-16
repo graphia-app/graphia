@@ -71,6 +71,7 @@ public:
     GenericGraphArray(GenericGraphArray&& other) noexcept :
         _graph(other._graph),
         _array(std::move(other._array)),
+        _mutex(),
         _defaultValue(std::move(other._defaultValue))
     {}
 

@@ -24,10 +24,12 @@ public:
     >;
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, bool>>
+    // cppcheck-suppress noExplicitConstructor
     CommandFn(Fn&& fn) : // NOLINT
         _boolFn(fn) {}
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, void>, typename = void>
+    // cppcheck-suppress noExplicitConstructor
     CommandFn(Fn&& fn) : // NOLINT
         _voidFn(fn) {}
 

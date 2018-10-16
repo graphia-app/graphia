@@ -10,6 +10,7 @@ private:
     int _value;
 
 public:
+    // cppcheck-suppress noExplicitConstructor
     ElementId(int value = NullValue) : // NOLINT
         _value(value)
     {

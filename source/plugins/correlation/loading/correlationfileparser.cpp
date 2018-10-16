@@ -510,7 +510,8 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
             rowData.emplace_back(transformedValue);
         }
 
-        dataRows.emplace_back(rowData, nodeId++);
+        dataRows.emplace_back(rowData, nodeId);
+        ++nodeId;
     }
 
     CorrelationFileParser::normalise(static_cast<NormaliseType>(_normaliseType), dataRows);

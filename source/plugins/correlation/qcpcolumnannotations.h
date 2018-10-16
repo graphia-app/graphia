@@ -20,6 +20,7 @@ class QCPColumnAnnotations : public QCPAbstractPlottable
 private:
     struct Row
     {
+        // cppcheck-suppress passedByValue
         Row(std::vector<size_t> indices, bool selected,
             const ColumnAnnotation* columnAnnotation) :
             _indices(std::move(indices)), _selected(selected),

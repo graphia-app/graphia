@@ -1,5 +1,6 @@
 #include "columnannotation.h"
 
+// cppcheck-suppress passedByValue
 ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
     _name(std::move(name)), _values(std::move(values))
 {

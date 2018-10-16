@@ -28,13 +28,13 @@ public:
         std::map<size_t, NodeId> rowToNodeId;
         std::map<size_t, NodeId> columnToNodeId;
 
-        bool hasColumnHeaders = false;
-        bool hasRowHeaders = false;
-        size_t dataStartRow = 0;
-        size_t dataStartColumn = 0;
-
         if(tabularData.numRows() > 0 && tabularData.numColumns() > 0)
         {
+            bool hasColumnHeaders = false;
+            bool hasRowHeaders = false;
+            size_t dataStartRow = 0;
+            size_t dataStartColumn = 0;
+
             // Check first column for row headers
             for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
             {

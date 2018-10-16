@@ -11,6 +11,7 @@ private:
 
 public:
     Flags() = default;
+    // cppcheck-suppress noExplicitConstructor
     Flags(Enum value) : // NOLINT
         _value(value)
     {}

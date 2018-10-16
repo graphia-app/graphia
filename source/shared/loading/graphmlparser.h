@@ -34,13 +34,12 @@ public:
         QVariant _value;
 
         // cppcheck-suppress noExplicitConstructor
-        Attribute(const AttributeKey& key) // NOLINT
-        {
-            _name = key._name;
-            _default = key._default;
-            _type = key._type;
-            _value = key._default;
-        }
+        Attribute(const AttributeKey& key) : // NOLINT
+            _name(key._name),
+            _default(key._default),
+            _type(key._type),
+            _value(key._default)
+        {}
 
         Attribute() = default;
     };

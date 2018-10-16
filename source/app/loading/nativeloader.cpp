@@ -366,7 +366,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
             if(graphModel->mutableGraph().containsNodeId(nodeId))
                 graphModel->setNodeName(nodeId, jsonNodeName);
 
-            nodeId++;
+            ++nodeId;
         }
     }
 
@@ -466,7 +466,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
                         jsonPositionArray.at(2)));
                 }
 
-                nodeId++;
+                ++nodeId;
             }
         }
 

@@ -386,6 +386,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         matrixStream.str(std::string());
     }
 
+    // cppcheck-suppress variableScope
     bool isEquiDistrubuted = true;
     // Start the MCL loop
     int iter = 0;
