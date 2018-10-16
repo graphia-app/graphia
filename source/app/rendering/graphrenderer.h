@@ -191,8 +191,6 @@ private:
 
     OpenGLDebugLogger _openGLDebugLogger;
 
-    QOpenGLShaderProgram _sdfShader;
-
     QOpenGLShaderProgram _debugLinesShader;
 
     bool _resized = false;
@@ -226,7 +224,6 @@ private:
 
     PerformanceCounter _performanceCounter;
 
-    void prepareSDFTextures();
     void prepareScreenshotFBO();
 
     GLuint sdfTexture() const override;

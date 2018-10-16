@@ -52,13 +52,11 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _layoutChanged(true),
     _performanceCounter(std::chrono::seconds(1))
 {
-    ShaderTools::loadShaderProgram(_sdfShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/sdf.frag"));
     ShaderTools::loadShaderProgram(_debugLinesShader, QStringLiteral(":/shaders/debuglines.vert"), QStringLiteral(":/shaders/debuglines.frag"));
 
     prepareScreenshotFBO();
 
     _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
-    prepareSDFTextures();
 
     auto graph = &_graphModel->graph();
 
@@ -1224,14 +1222,6 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
     GraphComponentRenderer* renderer = _componentRenderers.at(componentId);
     Q_ASSERT(renderer != nullptr);
     return renderer;
-}
-
-void GraphRenderer::prepareSDFTextures()
-{
-    _sdfShader.bind();
-    _sdfShader.enableAttributeArray("position");
-    _sdfShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-    _sdfShader.release();
 }
 
 void GraphRenderer::prepareScreenshotFBO()
