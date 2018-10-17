@@ -87,7 +87,8 @@ Item
             if(mouseArea.containsMouse && hoverEnabled)
                 return root.hoverColor;
             else if(selected)
-                return systemPalette.highlight
+                return systemPalette.highlight;
+
             return "transparent";
         }
     }
@@ -127,9 +128,9 @@ Item
                 anchors.centerIn: parent
                 width: parent.height
                 height: parent.width
-                radius: 4
+                radius: 2
 
-                border.width: 1
+                border.width: 0.5
                 border.color: root.textColor
 
                 rotation: root.invert ? 90 : -90

@@ -77,7 +77,7 @@ Item
         Label
         {
             id: channelLabel
-            visible: !gradientKey.visible
+            visible: !gradientKey.visible && !paletteKey.visible
             text: channel
             enabled: enabledMenuItem.checked
             color: root.textColor
@@ -108,6 +108,18 @@ Item
                 else
                     mouse.accepted = false;
             }
+        }
+
+        PaletteKey
+        {
+            id: paletteKey
+            visible: false
+            enabled: enabledMenuItem.checked
+
+            textColor: root.textColor
+            hoverColor: root.hoverColor
+
+            propogatePresses: true
         }
 
         Hamburger
@@ -267,21 +279,27 @@ Item
     function parseParameters(valid)
     {
         gradientKey.visible = false;
+        paletteKey.visible = false;
+
+        if(!valid)
+            return;
 
         for(var key in parameters)
         {
             var value = parameters[key];
+            var unescaped = Utils.unescapeQuotes(value);
 
             switch(key)
             {
             case "gradient":
-                if(valid)
-                {
-                    var unescaped = Utils.unescapeQuotes(value);
-                    gradientKey.configuration = unescaped;
-                    gradientKey.visible = true;
-                    gradientKey.showLabels = !isFlagSet("disabled");
-                }
+                gradientKey.configuration = unescaped;
+                gradientKey.visible = true;
+                gradientKey.showLabels = !isFlagSet("disabled");
+                break;
+
+            case "palette":
+                paletteKey.configuration = unescaped;
+                paletteKey.visible = true;
                 break;
             }
         }
