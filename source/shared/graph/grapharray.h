@@ -255,7 +255,7 @@ public:
     typename std::vector<Element>::const_iterator end() const
     {
         auto highest = static_cast<int>(this->_graph->lastNodeIdInUse());
-        return begin() + highest;
+        return begin() + highest + 1;
     }
 };
 
@@ -315,7 +315,7 @@ public:
     typename std::vector<Element>::const_iterator end() const
     {
         auto highest = static_cast<int>(this->_graph->lastEdgeIdInUse());
-        return begin() + highest;
+        return begin() + highest + 1;
     }
 };
 
