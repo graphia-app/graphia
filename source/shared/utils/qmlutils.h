@@ -4,6 +4,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
+#include "shared/utils/color.h"
 
 #include <QObject>
 #include <QUrl>
@@ -74,6 +75,11 @@ public:
     Q_INVOKABLE QString formatNumberSIPostfix(double value)
     {
         return u::formatNumberSIPostfix(value);
+    }
+
+    Q_INVOKABLE QColor contrastingColor(const QColor& color)
+    {
+        return u::contrastingColor(color);
     }
 
 private:
