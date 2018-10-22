@@ -64,8 +64,6 @@ static int H5_mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag
 /* Library Private Variables */
 /*****************************/
 
-char H5libhdf5_settings[]="";
-
 /* HDF5 API Entered variable */
 /* (move to H5.c when new FUNC_ENTER macros in actual use -QAK) */
 hbool_t H5_api_entered_g = FALSE;
@@ -91,7 +89,7 @@ H5_debug_t              H5_debug_g; /* debugging info */
 /*******************/
 /* Local Variables */
 /*******************/
-
+char H5libhdf5_settings[]="";
 
 /*--------------------------------------------------------------------------
  * NAME
