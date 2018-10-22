@@ -1829,11 +1829,13 @@ bool Document::hasVisualisationInfo() const
 QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
+    QVariantList stringValues;
 
     map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
     map.insert(QStringLiteral("alertText"), "");
     map.insert(QStringLiteral("minimumNumericValue"), 0.0);
     map.insert(QStringLiteral("maximumNumericValue"), 1.0);
+    map.insert(QStringLiteral("stringValues"), stringValues);
 
     if(_graphModel == nullptr)
         return map;
@@ -1842,6 +1844,11 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 
     map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.min());
     map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.max());
+
+    for(const auto& stringValue : visualisationInfo.stringValues())
+        stringValues.append(stringValue);
+
+    map.insert(QStringLiteral("stringValues"), stringValues);
 
     auto alerts = visualisationInfo.alerts();
 

@@ -194,6 +194,8 @@ public:
                 {
                     m[sharedValue._value] = QString::number(normalised);
                     normalised++;
+
+                    visualisationInfo.addStringValue(sharedValue._value);
                 }
             }
 

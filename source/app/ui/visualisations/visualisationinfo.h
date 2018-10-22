@@ -6,12 +6,15 @@
 #include <vector>
 #include <limits>
 
+#include <QString>
+
 class VisualisationInfo
 {
 private:
     std::vector<Alert> _alerts;
     double _min = std::numeric_limits<double>::max();
     double _max = std::numeric_limits<double>::lowest();
+    std::vector<QString> _stringValues;
 
 public:
     template<typename... Args>
@@ -21,11 +24,14 @@ public:
     }
 
     auto alerts() const { return _alerts; }
+
     auto min() const { return _min; }
     auto max() const { return _max; }
-
     void setMin(double min) { _min = min; }
     void setMax(double max) { _max = max; }
+
+    void addStringValue(const QString& value) { _stringValues.emplace_back(value); }
+    auto stringValues() const { return _stringValues; }
 };
 
 using VisualisationInfosMap = std::map<int, VisualisationInfo>;
