@@ -2,6 +2,8 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQml 2.8
 
+import com.kajeka 1.0
+
 Item
 {
     id: root
@@ -14,6 +16,15 @@ Item
     property string selectedValue: ""
     property color hoverColor
     property color textColor
+
+    property color _contrastingColor:
+    {
+        if(mouseArea.containsMouse)
+            return QmlUtils.contrastingColor(hoverColor);
+
+        return textColor;
+    }
+
     property bool propogatePresses: false
 
     property alias model: instantiator.model
@@ -64,7 +75,7 @@ Item
             }
 
             text: root.selectedValue != "" ? root.selectedValue : root.text
-            color: root.textColor
+            color: root._contrastingColor
             font.bold: true
         }
     }

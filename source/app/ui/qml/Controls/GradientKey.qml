@@ -26,6 +26,14 @@ Item
     property color hoverColor
     property color textColor
 
+    property color _contrastingColor:
+    {
+        if(mouseArea.containsMouse && hoverEnabled)
+            return QmlUtils.contrastingColor(hoverColor);
+
+        return textColor;
+    }
+
     property bool selected: false
 
 
@@ -108,7 +116,7 @@ Item
 
             visible: root.showLabels
             text: QmlUtils.formatNumberScientific(root.minimum)
-            color: root.textColor
+            color: root._contrastingColor
         }
 
         Item
@@ -131,7 +139,7 @@ Item
                 radius: 2
 
                 border.width: 0.5
-                border.color: root.textColor
+                border.color: root._contrastingColor
 
                 rotation: root.invert ? 90 : -90
                 gradient: Gradient {}
@@ -144,7 +152,7 @@ Item
 
             visible: root.showLabels
             text: QmlUtils.formatNumberScientific(root.maximum)
-            color: root.textColor
+            color: root._contrastingColor
         }
     }
 
