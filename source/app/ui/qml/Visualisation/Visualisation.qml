@@ -281,9 +281,6 @@ Item
         gradientKey.visible = false;
         paletteKey.visible = false;
 
-        if(!valid)
-            return;
-
         for(var key in parameters)
         {
             var value = parameters[key];
@@ -294,7 +291,7 @@ Item
             case "gradient":
                 gradientKey.configuration = unescaped;
                 gradientKey.visible = true;
-                gradientKey.showLabels = !isFlagSet("disabled");
+                gradientKey.showLabels = !isFlagSet("disabled") && valid;
                 break;
 
             case "palette":
