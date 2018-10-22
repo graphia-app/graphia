@@ -274,6 +274,8 @@ Item
 
         gradientKey.minimum = visualisationInfo.minimumNumericValue;
         gradientKey.maximum = visualisationInfo.maximumNumericValue;
+
+        paletteKey.stringValues = visualisationInfo.stringValues;
     }
 
     function parseParameters(valid)

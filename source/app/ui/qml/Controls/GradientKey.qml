@@ -11,12 +11,13 @@ Item
     id: root
 
     implicitWidth: layout.implicitWidth + _padding
-    implicitHeight: minimumLabel.implicitHeight + _paddingTopBottom
+    implicitHeight: root.keyHeight + _paddingTopBottom
 
     property int _padding: 2 * 4
     property int _paddingTopBottom: 2 * 4
 
     property int keyWidth
+    property int keyHeight: 20
 
     property double minimum
     property double maximum
