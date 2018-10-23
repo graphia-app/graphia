@@ -155,11 +155,10 @@ Item
 
                     text: qsTr("Invert")
                     checkable: true
-                    enabled:
-                    {
-                        if(alertIcon.type === "error")
-                            return false;
+                    enabled: alertIcon.type !== "error"
 
+                    visible:
+                    {
                         var valueType = document.attribute(attribute).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
