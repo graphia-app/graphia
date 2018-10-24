@@ -51,9 +51,9 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     case ValueType::Float:
         parameters.insert(QStringLiteral("gradient"),
             R"("{
-              \"0\":    \"Red\",
-              \"0.66\": \"Yellow\",
-              \"1\":    \"White\"
+              \"0\":    \"White\",
+              \"0.33\": \"Yellow\",
+              \"1\":    \"Red\"
             }")");
         break;
 
