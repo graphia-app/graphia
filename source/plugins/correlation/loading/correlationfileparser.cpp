@@ -389,6 +389,12 @@ TabularDataParser::TabularDataParser()
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataRectChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, [this]
+    {
+        // An estimate was started while the data rectangle was being calculated
+        if(_graphSizeEstimateQueued)
+            estimateGraphSize();
+    });
 
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
@@ -470,6 +476,9 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
 {
     std::vector<CorrelationDataRow> dataRows;
 
+    Q_ASSERT(static_cast<size_t>(_dataRect.x() + _dataRect.width() - 1) < _dataPtr->numColumns());
+    Q_ASSERT(static_cast<size_t>(_dataRect.y() + _dataRect.height() - 1) < _dataPtr->numRows());
+
     std::vector<double> rowData;
     rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
 
@@ -524,7 +533,7 @@ void TabularDataParser::estimateGraphSize()
     if(_dataPtr == nullptr)
         return;
 
-    if(_graphSizeEstimateFutureWatcher.isRunning())
+    if(_graphSizeEstimateFutureWatcher.isRunning() || _autoDetectDataRectangleWatcher.isRunning())
     {
         _graphSizeEstimateQueued = true;
         return;
@@ -532,8 +541,7 @@ void TabularDataParser::estimateGraphSize()
 
     _graphSizeEstimateQueued = false;
 
-    QFuture<QVariantMap> future = QtConcurrent::run(
-    [this]
+    QFuture<QVariantMap> future = QtConcurrent::run([this]
     {
         const size_t maxSampleRows = 1400;
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
