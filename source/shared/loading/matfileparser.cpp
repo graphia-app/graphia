@@ -16,20 +16,18 @@ bool MatFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     matvar_t* matVar;
     matVar = Mat_VarReadNext(matFile);
+    bool result = false;
 
-    while(matVar != nullptr)
+    // Check all stored variables within the matfile for a numerical matrix
+    while(matVar != nullptr && !result)
     {
-        // Check it's a 2D matrix if not just fail
-        if(matVar->rank != 2)
-            return false;
-
-        if (!processMatVarData(*matVar, graphModel))
-            return false;
+        if(matVar->rank == 2)
+            result = processMatVarData(*matVar, graphModel);
 
         Mat_VarFree(matVar);
         matVar = Mat_VarReadNext(matFile);
     }
 
     Mat_Close(matFile);
-    return true;
+    return result;
 }

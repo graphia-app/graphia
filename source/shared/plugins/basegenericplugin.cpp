@@ -192,7 +192,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             result.push_back(urlType);
         else if(urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url))
             result.push_back(urlType);
-	else if(urlType == QStringLiteral("MatFile") && MatFileParser::canLoad(url))
+        else if(urlType == QStringLiteral("MatFile") && MatFileParser::canLoad(url))
             result.push_back(urlType);
     }
 
