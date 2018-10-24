@@ -797,11 +797,9 @@ void GraphModel::updateVisuals()
                 _->_edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
         }
 
-        const NodeIdSet& highlightedNodeIds = !_->_highlightedNodeIds.empty() ?
-            _->_highlightedNodeIds : _->_foundNodeIds;
-
-        auto nodeUnhighlighted = !highlightedNodeIds.empty() &&
-            !u::contains(highlightedNodeIds, nodeId);
+        auto nodeUnhighlighted =
+            (!_->_foundNodeIds.empty() && !u::contains(_->_foundNodeIds, nodeId)) ||
+            (!_->_highlightedNodeIds.empty() && nodeIsSelected && !u::contains(_->_highlightedNodeIds, nodeId));
 
         _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
 
