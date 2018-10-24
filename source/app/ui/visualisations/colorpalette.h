@@ -10,6 +10,7 @@ class ColorPalette
 {
 private:
     std::vector<QColor> _colors;
+    QColor _otherColor;
 
 public:
     ColorPalette() = default;

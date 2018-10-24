@@ -57,21 +57,23 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
 
     case ValueType::String:
         parameters.insert(QStringLiteral("palette"),
-            R"("[
-              \"#199311\",
-              \"#FF7700\",
-              \"#8126C0\",
-              \"#1DF3F3\",
-              \"#FFEE33\",
-              \"#FD1111\",
-              \"#DDDDDD\",
-              \"#FF69B4\",
-              \"#003BFF\",
-              \"#8AFF1E\",
-              \"#9D2323\",
-              \"#798FF0\",
-              \"#111111\"
-            ]")");
+            R"("{
+              \"baseColors\": [
+                \"#199311\",
+                \"#FF7700\",
+                \"#8126C0\",
+                \"#1DF3F3\",
+                \"#FFEE33\",
+                \"#FD1111\",
+                \"#FF69B4\",
+                \"#003BFF\",
+                \"#8AFF1E\",
+                \"#9D2323\",
+                \"#798FF0\",
+                \"#111111\"
+              ],
+              \"otherColor\": \"#DDDDDD\"
+            }")");
         break;
 
     default:

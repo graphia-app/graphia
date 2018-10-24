@@ -3,6 +3,7 @@
 #include "shared/utils/utils.h"
 
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QJsonArray>
 #include <QRegularExpression>
 #include <QDebug>
@@ -20,19 +21,42 @@ ColorPalette::ColorPalette(const QString& descriptor)
         return;
     }
 
-    if(!jsonDocument.isArray())
+    if(!jsonDocument.isObject())
     {
-        qDebug() << "ColorPalette is not an array";
+        qDebug() << "ColorPalette is not an object";
         return;
     }
 
-    auto jsonArray = jsonDocument.array();
+    auto jsonObject = jsonDocument.object();
+    auto baseColorsValue = jsonObject.value(QStringLiteral("baseColors"));
 
-    for(const auto& value : jsonArray)
+    if(!baseColorsValue.isArray())
     {
-        auto colorString = value.toString();
+        qDebug() << "ColorPalette does not have baseColors array";
+        return;
+    }
+
+    auto baseColorsArray = baseColorsValue.toArray();
+
+    for(const auto& color : baseColorsArray)
+    {
+        auto colorString = color.toString();
         _colors.emplace_back(colorString);
     }
+
+    auto otherColorValue = jsonObject.value(QStringLiteral("otherColor"));
+
+    if(otherColorValue.isUndefined())
+        return;
+
+    if(!otherColorValue.isString())
+    {
+        qDebug() << "ColorPalette.otherColor is not a string";
+        return;
+    }
+
+    auto otherColorString = otherColorValue.toString();
+    _otherColor = QColor(otherColorString);
 }
 
 QColor ColorPalette::get(const QString& value) const
@@ -80,6 +104,9 @@ QColor ColorPalette::get(const QString& value) const
         auto hIndex = digitValue / _colors.size();
         if(hIndex > 0)
         {
+            if(_otherColor.isValid())
+                return _otherColor;
+
             // If the base color has low saturation or
             // low value, adjust these before touching the hue
             if(s < 128 && (hIndex > 1 || v >= 128))

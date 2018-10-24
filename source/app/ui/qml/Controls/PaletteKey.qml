@@ -51,12 +51,21 @@ Item
 
     property alias hoverEnabled: mouseArea.hoverEnabled
 
+    property bool _lastColorIsOther: false
+
     function updatePalette()
     {
         if(configuration === undefined || configuration.length === 0)
             return;
 
-        repeater.model = JSON.parse(configuration);
+        var palette = JSON.parse(configuration);
+        var colors = palette.baseColors;
+
+        _lastColorIsOther = (palette.otherColor !== undefined);
+        if(_lastColorIsOther)
+            colors.push(palette.otherColor)
+
+        repeater.model = colors;
     }
 
     onEnabledChanged:
@@ -107,7 +116,9 @@ Item
             {
                 id: key
 
-                property bool _hovered: index === root._indexUnderCursor
+                property bool _isLastColor: root._lastColorIsOther &&
+                    index === (repeater.count - 1)
+                property bool _hovered: !_isLastColor && index === root._indexUnderCursor
 
                 implicitWidth:
                 {
@@ -119,7 +130,7 @@ Item
 
                     var d = repeater.count;
 
-                    if(root._indexUnderCursor !== -1)
+                    if(!root._lastColorhovered && root._indexUnderCursor !== -1)
                     {
                         w -= root.highlightSize;
                         d--;
@@ -166,6 +177,32 @@ Item
                     color: QmlUtils.contrastingColor(key.color)
                     text: parent.stringValue
                 }
+
+                Canvas
+                {
+                    anchors.fill: parent
+                    visible: key._isLastColor
+
+                    onPaint:
+                    {
+                        var ctx = getContext("2d");
+
+                        var stripeColor = QmlUtils.contrastingColor(key.color);
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = stripeColor;
+                        ctx.lineWidth = 0.5;
+                        ctx.lineCap = 'round';
+
+                        ctx.moveTo(key.radius, key.radius);
+                        ctx.lineTo(width - key.radius, height - key.radius);
+                        ctx.stroke();
+
+                        ctx.moveTo(key.radius, height - key.radius);
+                        ctx.lineTo(width - key.radius, key.radius);
+                        ctx.stroke();
+                    }
+                }
             }
         }
     }
@@ -181,8 +218,13 @@ Item
 
         var index = Math.floor(f * repeater.count);
 
+        if(index >= repeater.count)
+            return -1;
+
         return index;
     }
+
+    property bool _lastColorhovered: (repeater.count - 1) === root._indexUnderCursor
 
     MouseArea
     {
