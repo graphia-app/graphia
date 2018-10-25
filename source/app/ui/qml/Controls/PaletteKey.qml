@@ -14,18 +14,19 @@ Item
 
     property int _padding: 2 * 4
 
+    property int _numKeys: Math.min(repeater.count, stringValues.length)
     property var stringValues
 
     property double _minimumWidth:
     {
         return root.highlightSize +
-            ((repeater.count - 1) * (row.spacing + _minimumKeySize));
+            ((root._numKeys - 1) * (row.spacing + _minimumKeySize));
     }
 
     property double _width:
     {
-        var w = (repeater.count * root.keyWidth) +
-            ((repeater.count - 1) * row.spacing);
+        var w = (root._numKeys * root.keyWidth) +
+            ((root._numKeys - 1) * row.spacing);
 
         return Math.max(w, _minimumWidth);
     }
@@ -60,9 +61,16 @@ Item
             return;
 
         var palette = JSON.parse(configuration);
-        var colors = palette.baseColors;
 
-        _lastColorIsOther = (palette.otherColor !== undefined);
+        var numKeys = Math.min(palette.baseColors.length, stringValues.length);
+
+        var colors = [];
+        for(var key = 0; key < numKeys; key++)
+            colors.push(palette.baseColors[key]);
+
+        _lastColorIsOther = (palette.otherColor !== undefined) &&
+            colors.length < stringValues.length;
+
         if(_lastColorIsOther)
             colors.push(palette.otherColor)
 
@@ -118,7 +126,7 @@ Item
                 id: key
 
                 property bool _isLastColor: root._lastColorIsOther &&
-                    index === (repeater.count - 1)
+                    index === (root._numKeys - 1)
                 property bool _hovered: !_isLastColor && index === root._indexUnderCursor
 
                 implicitWidth:
@@ -127,9 +135,9 @@ Item
                         return root.highlightSize;
 
                     var w = root._width;
-                    w -= (repeater.count - 1) * row.spacing;
+                    w -= (root._numKeys - 1) * row.spacing;
 
-                    var d = repeater.count;
+                    var d = root._numKeys;
 
                     if(!root._lastColorhovered && root._indexUnderCursor !== -1)
                     {
@@ -217,15 +225,15 @@ Item
         var w = row.width + row.spacing;
         var f = (coord.x - (row.spacing * 0.5)) / w;
 
-        var index = Math.floor(f * repeater.count);
+        var index = Math.floor(f * root._numKeys);
 
-        if(index >= repeater.count)
+        if(index >= root._numKeys)
             return -1;
 
         return index;
     }
 
-    property bool _lastColorhovered: (repeater.count - 1) === root._indexUnderCursor
+    property bool _lastColorhovered: root._lastColorIsOther && (root._numKeys - 1) === root._indexUnderCursor
 
     MouseArea
     {
