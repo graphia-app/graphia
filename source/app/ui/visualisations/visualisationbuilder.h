@@ -2,6 +2,7 @@
 #define VISUALISATIONBUILDER_H
 
 #include "visualisationchannel.h"
+#include "visualisationconfig.h"
 #include "visualisationinfo.h"
 
 #include "graph/graph.h"
@@ -107,7 +108,8 @@ public:
 
     void build(const Attribute& attribute,
                const VisualisationChannel& channel,
-               bool invert, int index, VisualisationInfo& visualisationInfo)
+               const VisualisationConfig& config,
+               int index, VisualisationInfo& visualisationInfo)
     {
         for(int c = 0; c < NumChannels; c++)
             _applications.at(c).emplace_back(index, *_graph);
@@ -138,6 +140,8 @@ public:
                 visualisationInfo.addAlert(AlertType::Warning, QObject::tr("No Numeric Range To Map To"));
                 return;
             }
+
+            bool invert = config.isFlagSet(QStringLiteral("invert"));
 
             for(auto elementId : *_elementIds)
             {

@@ -506,7 +506,6 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         const auto& attributeName = visualisationConfig._attributeName;
         const auto& channelName = visualisationConfig._channelName;
         auto& info = _->_visualisationInfos[index];
-        bool invert = visualisationConfig.isFlagSet(QStringLiteral("invert"));
 
         if(!attributeExists(attributeName))
         {
@@ -537,11 +536,13 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel, invert, index, _->_visualisationInfos[index]);
+            nodeVisualisationsBuilder.build(attribute, *channel,
+                visualisationConfig, index, _->_visualisationInfos[index]);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel, invert, index, _->_visualisationInfos[index]);
+            edgeVisualisationsBuilder.build(attribute, *channel,
+                visualisationConfig, index, _->_visualisationInfos[index]);
             break;
 
         default:
