@@ -24,15 +24,16 @@ Item
 
     property double _width:
     {
-        var w = (repeater.count * root.keySize) +
+        var w = (repeater.count * root.keyWidth) +
             ((repeater.count - 1) * row.spacing);
 
         return Math.max(w, _minimumWidth);
     }
 
     property double _minimumKeySize: 10
-    property double keySize: 20
-    property double highlightSize: 100
+    property double keyHeight: 20
+    property double keyWidth: 30
+    property double highlightSize: 120
 
     property color hoverColor
     property color textColor
@@ -139,7 +140,7 @@ Item
                     return w / d;
                 }
 
-                implicitHeight: root.keySize
+                implicitHeight: root.keyHeight
 
                 radius: 2
 
