@@ -30,8 +30,8 @@ private:
 
 public:
     TabularData() = default;
-    TabularData(TabularData&&) = default;
-    TabularData& operator=(TabularData&&) = default;
+    TabularData(TabularData&&);
+    TabularData& operator=(TabularData&&);
 
     // Make it harder to copy TabularData
     TabularData(const TabularData&) = delete;

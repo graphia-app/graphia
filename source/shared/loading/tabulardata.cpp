@@ -1,5 +1,30 @@
 #include "tabulardata.h"
 
+TabularData::TabularData(TabularData&& other) :
+    _data(std::move(other._data)),
+    _columns(other._columns),
+    _rows(other._rows),
+    _transposed(other._transposed)
+
+{
+    other.reset();
+}
+
+TabularData& TabularData::operator=(TabularData&& other)
+{
+    if(this != &other)
+    {
+        _data = std::move(other._data);
+        _columns = other._columns;
+        _rows = other._rows;
+        _transposed = other._transposed;
+
+        other.reset();
+    }
+
+    return *this;
+}
+
 void TabularData::reserve(size_t columns, size_t rows)
 {
     _data.reserve(columns * rows);
