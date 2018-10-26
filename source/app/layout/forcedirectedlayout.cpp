@@ -244,6 +244,12 @@ void ForceDirectedLayout::finishChangeDetection()
     _prevAvgForces.clear();
 }
 
+void ForceDirectedLayout::unfinish()
+{
+    if(_changeDetectionPhase == ChangeDetectionPhase::Finished)
+        _changeDetectionPhase = ChangeDetectionPhase::Initial;
+}
+
 // Allows the layout algorithm to further calculate small layout changes until the change amount
 // falls below FINETUNE_STDDEV_DELTA, where it moves the phase to Finished
 void ForceDirectedLayout::fineTuneChangeDetection()

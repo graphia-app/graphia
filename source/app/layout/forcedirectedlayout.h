@@ -71,7 +71,7 @@ public:
     {}
 
     bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
-    void unfinish() override { _changeDetectionPhase = ChangeDetectionPhase::Initial; }
+    void unfinish() override;
 
     void executeReal(bool firstIteration) override;
 };
