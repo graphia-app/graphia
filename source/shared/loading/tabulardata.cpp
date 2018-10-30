@@ -1,6 +1,6 @@
 #include "tabulardata.h"
 
-TabularData::TabularData(TabularData&& other) :
+TabularData::TabularData(TabularData&& other) noexcept :
     _data(std::move(other._data)),
     _columns(other._columns),
     _rows(other._rows),
@@ -10,7 +10,7 @@ TabularData::TabularData(TabularData&& other) :
     other.reset();
 }
 
-TabularData& TabularData::operator=(TabularData&& other)
+TabularData& TabularData::operator=(TabularData&& other) noexcept
 {
     if(this != &other)
     {
