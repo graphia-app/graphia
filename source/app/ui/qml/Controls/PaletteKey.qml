@@ -14,8 +14,15 @@ Item
 
     property int _padding: 2 * 4
 
-    property int _numKeys: Math.min(repeater.count, stringValues.length)
-    property var stringValues
+    property int _numKeys:
+    {
+        if(!enabled)
+            return repeater.count;
+
+        return Math.min(repeater.count, stringValues.length);
+    }
+
+    property var stringValues: []
 
     property double _minimumWidth:
     {
@@ -62,7 +69,10 @@ Item
 
         var palette = JSON.parse(configuration);
 
-        var numKeys = Math.min(palette.baseColors.length, stringValues.length);
+        var numKeys = palette.baseColors.length;
+
+        if(stringValues.length > 0 && stringValues.length < numKeys)
+            numKeys = stringValues.length;
 
         var colors = [];
         for(var key = 0; key < numKeys; key++)
