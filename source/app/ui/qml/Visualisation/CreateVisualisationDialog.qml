@@ -23,7 +23,7 @@ Window
     minimumHeight: 250
 
     property var document
-    property string visualisationExpression
+    property var visualisationExpressions: []
 
     Preferences
     {
@@ -53,7 +53,7 @@ Window
                     var attribute = document.attribute(selectedValue);
                     channelList.model = document.availableVisualisationChannelNames(attribute.valueType);
                     description.update();
-                    updateVisualisationExpression();
+                    updateVisualisationExpressions();
                 }
 
                 AttributeListSortMenu { attributeList: attributeList }
@@ -65,10 +65,12 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                allowMultipleSelection: true
+
                 onSelectedValueChanged:
                 {
                     description.update();
-                    updateVisualisationExpression();
+                    updateVisualisationExpressions();
                 }
             }
 
@@ -110,7 +112,7 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: { return document.visualisationIsValid(visualisationExpression); }
+                enabled: { return visualisationExpressions.every(document.visualisationIsValid); }
                 onClicked: { root.accept(); }
             }
 
@@ -157,27 +159,32 @@ Window
     signal accepted()
     signal rejected()
 
-    function updateVisualisationExpression()
+    function updateVisualisationExpressions()
     {
-        var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue +"\"";
+        visualisationExpressions = [];
 
-        var attribute = document.attribute(attributeList.selectedValue);
-        var parameters = document.visualisationDefaultParameters(attribute.valueType,
-                                                                 channelList.selectedValue);
+        channelList.selectedValues.forEach(function(channelName)
+        {
+            var expression = "\"" + attributeList.selectedValue + "\" \"" + channelName +"\"";
 
-        if(Object.keys(parameters).length !== 0)
-            expression += " with ";
+            var attribute = document.attribute(attributeList.selectedValue);
+            var parameters = document.visualisationDefaultParameters(attribute.valueType,
+                                                                     channelName);
 
-        for(var key in parameters)
-            expression += " " + key + " = " + parameters[key];
+            if(Object.keys(parameters).length !== 0)
+                expression += " with ";
 
-        visualisationExpression = expression;
+            for(var key in parameters)
+                expression += " " + key + " = " + parameters[key];
+
+            visualisationExpressions.push(expression);
+        });
     }
 
     onAccepted:
     {
-        updateVisualisationExpression();
-        document.update([], [visualisationExpression]);
+        updateVisualisationExpressions();
+        document.update([], visualisationExpressions);
     }
 
     onVisibleChanged:
