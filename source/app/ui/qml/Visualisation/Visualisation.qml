@@ -134,6 +134,8 @@ Item
 
             menu: Menu
             {
+                id: optionsMenu
+
                 MenuItem
                 {
                     id: enabledMenuItem
@@ -159,6 +161,11 @@ Item
 
                     visible:
                     {
+                        // Inversion doesn't really make sense unless
+                        // we're dealing with a gradient
+                        if(!gradientKey.visible)
+                            return false;
+
                         var valueType = document.attribute(attribute).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
@@ -169,6 +176,51 @@ Item
                         updateExpression();
                     }
                 }
+
+                property bool _showAssignByOptions:
+                {
+                    if(!paletteKey.visible)
+                        return false;
+
+                    var valueType = document.attribute(attribute).valueType;
+                    return valueType === ValueType.String;
+                }
+
+                ExclusiveGroup { id: sortByExclusiveGroup }
+
+                MenuSeparator { visible: optionsMenu._showAssignByOptions }
+
+                MenuItem
+                {
+                    id: sortByValueMenuItem
+
+                    enabled: alertIcon.type !== "error"
+                    visible: optionsMenu._showAssignByOptions
+
+                    text: qsTr("By Value")
+                    checkable: true
+                    exclusiveGroup: sortByExclusiveGroup
+                }
+
+                MenuItem
+                {
+                    id: sortBySharedValuesMenuItem
+
+                    enabled: alertIcon.type !== "error"
+                    visible: optionsMenu._showAssignByOptions
+
+                    text: qsTr("By Quantity")
+                    checkable: true
+                    exclusiveGroup: sortByExclusiveGroup
+
+                    onCheckedChanged:
+                    {
+                        setFlag("assignByQuantity", checked);
+                        updateExpression();
+                    }
+                }
+
+                MenuSeparator { visible: optionsMenu._showAssignByOptions }
 
                 MenuItem
                 {
@@ -323,11 +375,14 @@ Item
                 setVisualisationInfo(visualisationInfo);
 
                 error = visualisationInfo.alertType === AlertType.Error;
-                parseParameters(!error);
             }
+
+            parseParameters(!error);
 
             enabledMenuItem.checked = !isFlagSet("disabled") && !error;
             invertMenuItem.checked = isFlagSet("invert");
+            sortByValueMenuItem.checked = !isFlagSet("assignByQuantity");
+            sortBySharedValuesMenuItem.checked = isFlagSet("assignByQuantity");
             attributeList.currentIndex = attributeList.find(attribute);
 
             ready = true;
