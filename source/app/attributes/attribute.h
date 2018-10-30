@@ -332,9 +332,10 @@ public:
     const IAttributeRange<double>& numericRange() const override { return _numericRange; }
 
     template<typename E>
-    void updateSharedValuesForElements(const std::vector<E>& elementIds)
+    std::vector<SharedValue> findSharedValuesForElements(const std::vector<E>& elementIds,
+        bool ignoreIfAllUnique = false) const
     {
-        _._sharedValues.clear();
+        std::vector<SharedValue> result;
 
         bool hasSharedValues = false;
         std::map<QString, int> values;
@@ -352,16 +353,18 @@ public:
         }
 
         // Every single value observed is unique
-        if(!hasSharedValues)
-            return;
+        if(!hasSharedValues && ignoreIfAllUnique)
+            return result;
+
+        result.reserve(values.size());
 
         for(auto& value : values)
-            _._sharedValues.push_back({value.first, value.second});
+            result.push_back({value.first, value.second});
 
         // Sort in reverse order of how often the value occurs
         QCollator collator;
         collator.setNumericMode(true);
-        std::sort(_._sharedValues.begin(), _._sharedValues.end(),
+        std::sort(result.begin(), result.end(),
         [collator = std::move(collator)](const auto& a, const auto& b)
         {
             if(a._count == b._count)
@@ -369,6 +372,14 @@ public:
 
             return a._count > b._count;
         });
+
+        return result;
+    }
+
+    template<typename E>
+    void updateSharedValuesForElements(const std::vector<E>& elementIds)
+    {
+        _._sharedValues = findSharedValuesForElements(elementIds, true);
     }
 
     template<typename T, typename E, typename Fn>
