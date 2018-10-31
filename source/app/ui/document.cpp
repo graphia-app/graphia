@@ -2079,13 +2079,17 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
 
             // "The IANA standard for TSV achieves simplicity
             // by simply disallowing tabs within fields."
-            return escaped.replace("\t", "");
+            return escaped.replace(QStringLiteral("\t"), QString());
         };
 
-        std::function escapedString = (extension == "tsv") ?
-            tsvEscapedString : csvEscapedString;
+        std::function<QString(const QString&)> escapedString = csvEscapedString;
+        QString separator = QStringLiteral(",");
 
-        QString separator = (extension == "tsv") ? "\t" : ",";
+        if(extension == QStringLiteral("tsv"))
+        {
+            escapedString = tsvEscapedString;
+            separator = QStringLiteral("\t");
+        }
 
         QString rowString;
         for(const auto& columnRole : columnRoles)
