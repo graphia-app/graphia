@@ -60,6 +60,7 @@ public:
     QMatrix4x4 screenshotTileProjectionMatrix(float tileSize) const;
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
+    void moveSavedFocusToNode(NodeId nodeId, float radius);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToPositionAndRadius(const QVector3D& position, float radius,

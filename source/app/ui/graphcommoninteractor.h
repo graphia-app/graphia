@@ -101,6 +101,7 @@ protected:
     Qt::KeyboardModifiers modifiers() const;
 
     bool mouseMoving() const { return _mouseMoving; }
+    NodeId clickedNodeId() const { return _clickedNodeId; }
     NodeId nearClickNodeId() const { return _nearClickNodeId; }
 
     GraphComponentRenderer* clickedRenderer() const { return _clickedRenderer; }

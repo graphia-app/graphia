@@ -100,7 +100,8 @@ public:
     void setTextColor(QColor textColor);
 
     void switchToOverviewMode(bool doTransition = true);
-    void switchToComponentMode(bool doTransition = true, ComponentId componentId = ComponentId());
+    void switchToComponentMode(bool doTransition = true,
+        ComponentId componentId = ComponentId(), NodeId nodeId = NodeId());
     void rendererStartedTransition();
     void rendererFinishedTransition();
     void sceneFinishedTransition();

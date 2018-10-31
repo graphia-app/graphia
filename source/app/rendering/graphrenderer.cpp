@@ -739,17 +739,24 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
     }, QStringLiteral("GraphRenderer::switchToOverviewMode"));
 }
 
-void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId)
+void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId)
 {
-    executeOnRendererThread([this, componentId, doTransition]
+    executeOnRendererThread([this, componentId, nodeId, doTransition]
     {
         _graphComponentScene->setComponentId(componentId);
 
         if(mode() != GraphRenderer::Mode::Component && doTransition)
         {
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
-            [this]
+            [this, componentId, nodeId]
             {
+                if(!nodeId.isNull())
+                {
+                    Q_ASSERT(_graphModel->graph().componentIdOfNode(nodeId) == componentId);
+                    componentRendererForId(componentId)->moveSavedFocusToNode(nodeId,
+                        GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS);
+                }
+
                 if(!_graphComponentScene->savedViewIsReset())
                 {
                     _transition.willBeImmediatelyReused();
