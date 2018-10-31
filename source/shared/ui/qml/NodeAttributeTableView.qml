@@ -212,13 +212,12 @@ Item
         visible: false
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 1
         title: qsTr("Export Table")
-        nameFilters: ["CSV File (*.csv)"]
+        nameFilters: ["CSV File (*.csv)", "TSV File (*.tsv)"]
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            document.writeTableViewToFile(tableView, file);
+            document.writeTableViewToFile(tableView, file, defaultSuffix);
         }
     }
 

@@ -2019,7 +2019,7 @@ void Document::cancelCommand()
         _commandManager.cancel();
 }
 
-void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
+void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, const QString& extension)
 {
     // We have to do this part on the same thread as the caller, because we can't invoke
     // methods across threads; hopefully it's relatively quick
@@ -2058,7 +2058,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
             return;
         }
 
-        auto escapedString = [](const QString& string)
+        auto csvEscapedString = [](const QString& string)
         {
             if(string.contains(QRegularExpression(QStringLiteral("[\",]"))))
             {
@@ -2073,11 +2073,25 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
             return string;
         };
 
+        auto tsvEscapedString = [](const QString& string)
+        {
+            QString escaped = string;
+
+            // "The IANA standard for TSV achieves simplicity
+            // by simply disallowing tabs within fields."
+            return escaped.replace("\t", "");
+        };
+
+        std::function escapedString = (extension == "tsv") ?
+            tsvEscapedString : csvEscapedString;
+
+        QString separator = (extension == "tsv") ? "\t" : ",";
+
         QString rowString;
         for(const auto& columnRole : columnRoles)
         {
             if(!rowString.isEmpty())
-                rowString.append(",");
+                rowString.append(separator);
 
             rowString.append(escapedString(columnRole));
         }
@@ -2095,7 +2109,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
                 for(const auto& columnRole : columnRoles)
                 {
                     if(!rowString.isEmpty())
-                        rowString.append(",");
+                        rowString.append(separator);
 
                     auto value = model->data(model->index(row, 0),
                         model->roleNames().key(columnRole.toUtf8(), -1));
