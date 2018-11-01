@@ -15,57 +15,6 @@ class BiopaxFileParser;
 class BiopaxHandler : public QXmlDefaultHandler
 {
 private:
-    // http://www.biopax.org/owldoc/Level3/
-    // Effectively, Entity and all subclasses are Nodes.
-    // The members and properties of entities define the edges
-
-    //CamalCase is Class definitions, mixedCase is properties
-    QStringList _nodeElementNames =
-    {
-        "Entity",
-        "Interaction",
-        "PhysicalEntity",
-        "Conversion",
-        "Pathway",
-        "DnaRegion",
-        "SmallMolecule",
-        "Dna",
-        "Rna",
-        "Complex",
-        "Protein",
-        "RnaRegion",
-        "Gene",
-        "Complex",
-        "BiochemicalReaction",
-        "Control",
-        "Catalysis",
-        "Degradation",
-        "GeneticInteraction",
-        "MolecularInteraction",
-        "Modulation",
-        "TemplateReaction",
-        "TemplateReactionRegulation",
-        "Transport",
-        "TransportWithBiochemicalReaction"
-    };
-    // Edges are participant object members subclasses
-    // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
-    // Complex and Pathway components are linked by edges too
-    QStringList _edgeElementNames =
-    {
-        "pathwayComponent",
-        "memberPhysicalEntity",
-        "left",
-        "right",
-        "controller",
-        "controlled",
-        "component",
-        "product",
-        "cofactor",
-        "template",
-        "participant"
-    };
-
     struct TemporaryEdge
     {
         QStringList _sources;
@@ -96,6 +45,8 @@ private:
 
     UserNodeData* _userNodeData;
 
+    bool isNodeElementName(const QString& name);
+    bool isEdgeElementName(const QString& name);
 public:
     BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
                   int lineCount);

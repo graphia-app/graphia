@@ -8,7 +8,7 @@ bool MatFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     setProgress(-1);
 
-    mat_t *matFile;
+    mat_t* matFile;
     matFile = Mat_Open(url.toLocalFile().toUtf8().data(), MAT_ACC_RDONLY);
 
     if(matFile == nullptr)

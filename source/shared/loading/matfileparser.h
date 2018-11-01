@@ -25,7 +25,7 @@ public:
     {
         size_t height = matvar.dims[0];
         size_t width = matvar.dims[1];
-        auto nodeAndEdgeCount = static_cast<int>((height * width) + height);
+        auto totalIterations = static_cast<int>((height * width) + height);
         int progress = 0;
 
         std::map<size_t, NodeId> indexToNodeId;
@@ -41,7 +41,7 @@ public:
 
             _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), QObject::tr("Node %1").arg(row + 1));
             progress++;
-            setProgress(static_cast<int>(progress * 100 / nodeAndEdgeCount));
+            setProgress(static_cast<int>(progress * 100 / totalIterations));
         }
 
         for(size_t row = 0; row < height; ++row)
@@ -57,7 +57,7 @@ public:
                 _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(value));
                 progress++;
 
-                setProgress(static_cast<int>(progress * 100 / nodeAndEdgeCount));
+                setProgress(static_cast<int>(progress * 100 / totalIterations));
             }
         }
 

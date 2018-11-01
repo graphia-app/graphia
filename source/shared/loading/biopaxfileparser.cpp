@@ -1,5 +1,66 @@
 #include "biopaxfileparser.h"
 
+// http://www.biopax.org/owldoc/Level3/
+// Effectively, Entity and all subclasses are Nodes.
+// The members and properties of entities define the edges
+
+// CamelCase is Class definitions, mixedCase is properties
+
+bool BiopaxHandler::isNodeElementName(const QString& name)
+{
+    QStringList nodeElementNames =
+    {
+        "Entity",
+        "Interaction",
+        "PhysicalEntity",
+        "Conversion",
+        "Pathway",
+        "DnaRegion",
+        "SmallMolecule",
+        "Dna",
+        "Rna",
+        "Complex",
+        "Protein",
+        "RnaRegion",
+        "Gene",
+        "Complex",
+        "BiochemicalReaction",
+        "Control",
+        "Catalysis",
+        "Degradation",
+        "GeneticInteraction",
+        "MolecularInteraction",
+        "Modulation",
+        "TemplateReaction",
+        "TemplateReactionRegulation",
+        "Transport",
+        "TransportWithBiochemicalReaction"
+    };
+    return nodeElementNames.contains(name);
+}
+
+bool BiopaxHandler::isEdgeElementName(const QString& name)
+{
+    // Edges are participant object members subclasses
+    // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
+    // Complex and Pathway components are linked by edges too
+    QStringList edgeElementNames =
+    {
+        "pathwayComponent",
+        "memberPhysicalEntity",
+        "left",
+        "right",
+        "controller",
+        "controlled",
+        "component",
+        "product",
+        "cofactor",
+        "template",
+        "participant"
+    };
+    return edgeElementNames.contains(name);
+}
+
 BiopaxHandler::BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
                              int lineCount) :
     _parser(&parser),
@@ -46,7 +107,7 @@ bool BiopaxHandler::endDocument()
 bool BiopaxHandler::startElement(const QString&, const QString& localName, const QString&,
                                  const QXmlAttributes& atts)
 {
-    if(_edgeElementNames.contains(localName))
+    if(isEdgeElementName(localName))
     {
         _temporaryEdges.push_back({});
         _activeTemporaryEdges.push(&_temporaryEdges.back());
@@ -67,8 +128,8 @@ bool BiopaxHandler::startElement(const QString&, const QString& localName, const
         }
     }
 
-    if(_nodeElementNames.contains(localName) &&
-       !(!_activeElements.empty() && _nodeElementNames.contains(_activeElements.top())))
+    if(isNodeElementName(localName) &&
+       (_activeElements.empty() || !isNodeElementName(_activeElements.top())))
     {
         auto nodeId = _graphModel->mutableGraph().addNode();
         _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
@@ -97,10 +158,10 @@ bool BiopaxHandler::endElement(const QString&, const QString& localName, const Q
 
     _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
 
-    if(_nodeElementNames.contains(localName))
+    if(isNodeElementName(localName))
         _activeNodes.pop();
 
-    if(_edgeElementNames.contains(localName))
+    if(isEdgeElementName(localName))
         _activeTemporaryEdges.pop();
 
     _activeElements.pop();
@@ -117,7 +178,7 @@ bool BiopaxHandler::characters(const QString& ch)
             _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Node Name"), ch);
             _graphModel->setNodeName(_activeNodes.top(), ch);
         }
-        if(_activeElements.top() == QStringLiteral("comment"))
+        else if(_activeElements.top() == QStringLiteral("comment"))
         {
             _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Comment"), ch);
             _graphModel->setNodeName(_activeNodes.top(), ch);

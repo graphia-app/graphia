@@ -18,8 +18,8 @@
 
 #include "json_helper.h"
 
-#include <zlib_disable_warnings.h>
-#include <zlib.h>
+#include "zlib_disable_warnings.h"
+#include "zlib.h"
 
 static bool isCompressed(const QString& filePath)
 {
