@@ -753,8 +753,7 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
                 if(!nodeId.isNull())
                 {
                     Q_ASSERT(_graphModel->graph().componentIdOfNode(nodeId) == componentId);
-                    componentRendererForId(componentId)->moveSavedFocusToNode(nodeId,
-                        GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS);
+                    componentRendererForId(componentId)->moveSavedFocusToNode(nodeId);
                 }
 
                 if(!_graphComponentScene->savedViewIsReset())

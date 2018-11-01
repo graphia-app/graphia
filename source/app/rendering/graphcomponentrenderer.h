@@ -60,7 +60,7 @@ public:
     QMatrix4x4 screenshotTileProjectionMatrix(float tileSize) const;
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
-    void moveSavedFocusToNode(NodeId nodeId, float radius);
+    void moveSavedFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToPositionAndRadius(const QVector3D& position, float radius,
@@ -166,6 +166,7 @@ private:
     float _entireComponentZoomDistance = 0.0f;
     float zoomDistanceForRadius(float radius) const;
     void updateFocusPosition();
+    float entireComponentZoomDistanceFor(NodeId nodeId);
     void updateEntireComponentZoomDistance();
 };
 

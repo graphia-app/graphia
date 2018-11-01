@@ -193,18 +193,38 @@ void GraphComponentRenderer::updateFocusPosition()
                                                                             component->nodeIds());
 }
 
-void GraphComponentRenderer::updateEntireComponentZoomDistance()
+float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
 {
     // If we're frozen then it's probably because the component is going away, and if
     // this is the case then we won't be able to get at its nodeIds, so don't update
     if(_frozen)
-        return;
+        return -1.0f;
 
-    updateFocusPosition();
+    QVector3D position;
+
+    if(!nodeId.isNull())
+    {
+        position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+    }
+    else
+    {
+        updateFocusPosition();
+        position = _viewData._focusPosition;
+    }
 
     auto component = _graphModel->graph().componentById(_componentId);
-    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, focusPosition(), component->nodeIds());
-    _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
+    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, component->nodeIds());
+
+    return zoomDistanceForRadius(maxDistance);
+}
+
+void GraphComponentRenderer::updateEntireComponentZoomDistance()
+{
+    auto distance = entireComponentZoomDistanceFor(_viewData._focusNodeId);
+    if(distance < 0.0f)
+        return;
+
+    _entireComponentZoomDistance = distance;
 }
 
 void GraphComponentRenderer::update(float t)
@@ -479,7 +499,12 @@ void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
 
     _savedViewData._focusNodeId = nodeId;
     _savedViewData._autoZooming = false;
-    _savedViewData._zoomDistance = zoomDistanceForRadius(radius);
+
+    float zoomDistance = entireComponentZoomDistanceFor(_savedViewData._focusNodeId);
+    if(radius >= 0.0f)
+        zoomDistance = zoomDistanceForRadius(radius);
+
+    _savedViewData._zoomDistance = _targetZoomDistance = zoomDistance;
 }
 
 void GraphComponentRenderer::resetView()
