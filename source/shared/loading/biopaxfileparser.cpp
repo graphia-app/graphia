@@ -6,7 +6,7 @@
 
 // CamelCase is Class definitions, mixedCase is properties
 
-bool BiopaxHandler::isNodeElementName(const QString& name)
+static bool isNodeElementName(const QString& name)
 {
     QStringList nodeElementNames =
     {
@@ -39,7 +39,7 @@ bool BiopaxHandler::isNodeElementName(const QString& name)
     return nodeElementNames.contains(name);
 }
 
-bool BiopaxHandler::isEdgeElementName(const QString& name)
+static bool isEdgeElementName(const QString& name)
 {
     // Edges are participant object members subclasses
     // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html

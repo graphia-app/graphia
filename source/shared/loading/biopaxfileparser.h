@@ -44,9 +44,6 @@ private:
     int _lineCount = 0;
 
     UserNodeData* _userNodeData;
-
-    bool isNodeElementName(const QString& name);
-    bool isEdgeElementName(const QString& name);
 public:
     BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
                   int lineCount);
