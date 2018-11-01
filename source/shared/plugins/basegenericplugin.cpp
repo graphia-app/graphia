@@ -12,7 +12,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/iterator_range.h"
 
-#include "thirdparty/json/json_helper.h"
+#include <json_helper.h>
 
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {

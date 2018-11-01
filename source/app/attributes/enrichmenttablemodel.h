@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QAbstractTableModel>
 
-#include "json_helper.h"
+#include <json_helper.h>
 
 class EnrichmentTableModel : public QAbstractTableModel
 {

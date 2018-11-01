@@ -10,7 +10,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/ui/visualisations/ielementvisual.h"
 
-#include "thirdparty/json/json_helper.h"
+#include <json_helper.h>
 
 CorrelationPluginInstance::CorrelationPluginInstance()
 {

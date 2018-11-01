@@ -1,12 +1,13 @@
 #include "jsongraphsaver.h"
 
-#include "json_helper.h"
 #include "nativesaver.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "ui/document.h"
+
+#include <json_helper.h>
 
 #include <QDebug>
 #include <QFile>

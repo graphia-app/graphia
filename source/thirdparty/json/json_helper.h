@@ -1,31 +1,13 @@
 #ifndef JSON_HELPER_H
 #define JSON_HELPER_H
 
-#include "thirdparty/gccdiagaware.h"
-
-#ifdef GCC_DIAGNOSTIC_AWARE
-#pragma GCC diagnostic push
-
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wlogical-op"
-#endif
-#endif
-
 #ifdef _MSC_VER
 // MSVC warnings
 #pragma warning( push )
 #pragma warning( disable : 28020 ) // The expression ... is not true at this call
 #endif
 
-#include "json.hpp"
-
-#ifdef GCC_DIAGNOSTIC_AWARE
-#pragma GCC diagnostic pop
-#endif
-
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
+#include <json.hpp>
 
 using json = nlohmann::json;
 

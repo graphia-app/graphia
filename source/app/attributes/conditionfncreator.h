@@ -13,10 +13,8 @@
 #include "transform/graphtransformconfigparser.h"
 #include "attribute.h"
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/variant.hpp"
-#include "boost/variant/static_visitor.hpp"
-#include "thirdparty/boost/boost_enable_warnings.h"
+#include <boost/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 #include <algorithm>
 

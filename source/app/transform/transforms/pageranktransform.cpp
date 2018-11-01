@@ -6,9 +6,7 @@
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
-#include "blaze_disable_warnings.h"
-#include "blaze/Blaze.h"
-#include "blaze_enable_warnings.h"
+#include <blaze/Blaze.h>
 
 #include <QElapsedTimer>
 

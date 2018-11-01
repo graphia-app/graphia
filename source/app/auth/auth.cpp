@@ -1,10 +1,8 @@
 #include "auth.h"
 
-#include "thirdparty/cryptopp/cryptopp_disable_warnings.h"
-#include "thirdparty/cryptopp/rsa.h"
-#include "thirdparty/cryptopp/osrng.h"
-#include "thirdparty/cryptopp/modes.h"
-#include "thirdparty/cryptopp/cryptopp_enable_warnings.h"
+#include <cryptopp/rsa.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/modes.h>
 
 #include "shared/utils/preferences.h"
 

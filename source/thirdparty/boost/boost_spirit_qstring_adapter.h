@@ -1,9 +1,7 @@
 #ifndef BOOST_SPIRIT_QSTRING_ADAPTER_H
 #define BOOST_SPIRIT_QSTRING_ADAPTER_H
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/spirit/home/x3/support/traits/container_traits.hpp"
-#include "thirdparty/boost/boost_enable_warnings.h"
+#include <boost/spirit/home/x3/support/traits/container_traits.hpp>
 
 #include <QString>
 

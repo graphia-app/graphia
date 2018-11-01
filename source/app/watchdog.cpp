@@ -5,15 +5,8 @@
 
 #include "application.h"
 
-// Disable warnings from Valgrind
 #ifndef _MSC_VER
-#include "thirdparty/gccdiagaware.h"
-#ifdef GCC_DIAGNOSTIC_AWARE
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
-
-#include "thirdparty/valgrind/valgrind.h"
+#include <valgrind/valgrind.h>
 #else
 #define RUNNING_ON_VALGRIND 0
 #endif

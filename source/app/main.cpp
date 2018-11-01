@@ -31,8 +31,8 @@
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
 
-#include "thirdparty/qtsingleapplication/qtsingleapplication.h"
-#include "thirdparty/breakpad/crashhandler.h"
+#include <qtsingleapplication/qtsingleapplication.h>
+#include <breakpad/crashhandler.h>
 
 #include "watchdog.h"
 

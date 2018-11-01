@@ -17,8 +17,7 @@
 
 #include <vector>
 
-#include "thirdparty/zlib/zlib.h"
-#include "thirdparty/zlib/zlib_disable_warnings.h"
+#include <zlib.h>
 
 static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
 {
@@ -225,8 +224,6 @@ bool NativeSaver::save()
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
     return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), *this);
 }
-
-#include "thirdparty/zlib/zlib_enable_warnings.h"
 
 std::unique_ptr<ISaver> NativeSaverFactory::create(const QUrl& url, Document* document,
                                              const IPluginInstance* pluginInstance, const QByteArray& uiData,

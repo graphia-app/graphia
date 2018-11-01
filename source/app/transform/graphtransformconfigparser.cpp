@@ -1,9 +1,8 @@
 #include "graphtransformconfigparser.h"
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/spirit/home/x3.hpp"
-#include "boost/fusion/include/adapt_struct.hpp"
-#include "thirdparty/boost/boost_spirit_qstring_adapter.h"
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/boost_spirit_qstring_adapter.h>
 
 #include <QRegularExpression>
 

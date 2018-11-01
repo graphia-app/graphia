@@ -69,7 +69,6 @@ cppcheck --version
 cppcheck -v --enable=all --xml \
   --suppress=unusedFunction \
   --suppress=unusedPrivateFunction \
-  --suppress="*:*thirdparty*" \
   --inline-suppr \
   --library=scripts/cppcheck.cfg \
   ${INCLUDE_DIRS} ${DEFINES} \

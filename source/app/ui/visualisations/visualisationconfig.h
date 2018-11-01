@@ -6,10 +6,8 @@
 
 #include <vector>
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/variant.hpp"
-#include "boost/variant/recursive_wrapper.hpp"
-#include "thirdparty/boost/boost_enable_warnings.h"
+#include <boost/variant.hpp>
+#include <boost/variant/recursive_wrapper.hpp>
 
 struct VisualisationConfig
 {

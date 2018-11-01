@@ -5,7 +5,8 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
-#include "thirdparty/csv/parser.hpp"
+
+#include <csv/parser.hpp>
 
 #include <QObject>
 #include <QString>

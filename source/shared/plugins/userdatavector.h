@@ -5,7 +5,7 @@
 
 #include "shared/utils/typeidentity.h"
 
-#include "thirdparty/json/json_helper.h"
+#include <json_helper.h>
 
 #include <vector>
 #include <limits>

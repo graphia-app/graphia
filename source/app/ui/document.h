@@ -16,9 +16,10 @@
 #include "transform/availabletransformsmodel.h"
 #include "ui/findoptions.h"
 
-#include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
-#include "thirdparty/qt-qml-models/QQmlObjectListModel.h"
 #include "attributes/enrichmenttablemodel.h"
+
+#include <QQmlVariantListModel.h>
+#include <QQmlObjectListModel.h>
 
 #include <QQuickItem>
 #include <QString>

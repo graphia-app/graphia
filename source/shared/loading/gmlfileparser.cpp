@@ -1,10 +1,9 @@
 #include "gmlfileparser.h"
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/spirit/home/x3.hpp"
-#include "boost/fusion/include/adapt_struct.hpp"
-#include "boost/spirit/home/support/iterators/istream_iterator.hpp"
-#include "thirdparty/boost/boost_spirit_qstring_adapter.h"
+#include <boost/spirit/home/x3.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/home/support/iterators/istream_iterator.hpp>
+#include <boost/boost_spirit_qstring_adapter.h>
 
 #include "progress_iterator.h"
 
@@ -50,23 +49,23 @@ using x3::int_;
 using x3::lexeme;
 using ascii::char_;
 
-const x3::rule<class L, List> list = "list";
+const x3::rule<class L, List> gmlList = "list";
 
 const x3::rule<class NoQuotesString, QString> noQuotesString = "noQuotesString";
 const auto noQuotesString_def = lexeme[x3::lit('"') >> *(~char_('"')) >> x3::lit('"')];
 
-const x3::rule<class V, Value> value = "value";
-const auto value_def = double_ | int_ | noQuotesString | (x3::lit('[') >> list >> x3::lit(']'));
+const x3::rule<class V, Value> gmlValue = "value";
+const auto gmlValue_def = double_ | int_ | noQuotesString | (x3::lit('[') >> gmlList >> x3::lit(']'));
 
-const x3::rule<class K, QString> key = "key";
-const auto key_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
+const x3::rule<class K, QString> gmlKey = "key";
+const auto gmlKey_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const x3::rule<class KV, KeyValue> keyValue = "keyValue";
-const auto keyValue_def = key >> value;
+const x3::rule<class KV, KeyValue> gmlKeyValue = "keyValue";
+const auto gmlKeyValue_def = gmlKey >> gmlValue;
 
-const auto list_def = *keyValue;
+const auto gmlList_def = *gmlKeyValue;
 
-BOOST_SPIRIT_DEFINE(list, noQuotesString, key, value, keyValue)
+BOOST_SPIRIT_DEFINE(gmlList, noQuotesString, gmlKey, gmlValue, gmlKeyValue)
 
 struct Attribute
 {
@@ -296,7 +295,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     try
     {
         success = SpiritGmlParser::x3::phrase_parse(it, end,
-            SpiritGmlParser::list, SpiritGmlParser::ascii::space, gml);
+            SpiritGmlParser::gmlList, SpiritGmlParser::ascii::space, gml);
     }
     catch(GmlIterator::cancelled_exception&) {}
 

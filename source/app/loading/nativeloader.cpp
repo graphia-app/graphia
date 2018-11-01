@@ -16,10 +16,9 @@
 
 #include <vector>
 
-#include "json_helper.h"
+#include <json_helper.h>
 
-#include "zlib_disable_warnings.h"
-#include "zlib.h"
+#include <zlib.h>
 
 static bool isCompressed(const QString& filePath)
 {
@@ -544,5 +543,3 @@ bool Loader::canOpen(const QUrl& url)
 
     return result;
 }
-
-#include "thirdparty/zlib/zlib_enable_warnings.h"

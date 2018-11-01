@@ -6,7 +6,7 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/userelementdata.h"
 
-#include "thirdparty/utfcpp/utf8.h"
+#include <utfcpp/utf8.h>
 
 #include <QFile>
 #include <QTextStream>

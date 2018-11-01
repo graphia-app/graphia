@@ -10,7 +10,7 @@
 #include <QVariant>
 #include <QSet>
 
-#include "thirdparty/json/json_helper.h"
+#include <json_helper.h>
 
 #include <vector>
 

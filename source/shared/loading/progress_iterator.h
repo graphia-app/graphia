@@ -1,9 +1,7 @@
 #ifndef PROGRESS_ITERATOR_H
 #define PROGRESS_ITERATOR_H
 
-#include "thirdparty/boost/boost_disable_warnings.h"
-#include "boost/iterator/iterator_adaptor.hpp"
-#include "thirdparty/boost/boost_spirit_qstring_adapter.h"
+#include <boost/iterator/iterator_adaptor.hpp>
 
 #include <functional>
 

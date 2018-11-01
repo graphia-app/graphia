@@ -4,7 +4,8 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/plugins/userelementdata.h"
-#include "thirdparty/csv/parser.hpp"
+
+#include <csv/parser.hpp>
 
 template<const char Delimiter>
 class MatrixFileParser : public IParser

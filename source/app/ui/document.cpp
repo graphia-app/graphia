@@ -37,7 +37,7 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
-#include "json_helper.h"
+#include <json_helper.h>
 
 #include <QQmlProperty>
 #include <QMetaObject>
