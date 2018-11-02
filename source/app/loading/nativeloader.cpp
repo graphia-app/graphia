@@ -9,6 +9,7 @@
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
 #include "shared/loading/progress_iterator.h"
+#include "shared/loading/jsongraphparser.h"
 
 #include <QString>
 #include <QFileInfo>
@@ -276,84 +277,8 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     const auto& jsonGraph = jsonBody["graph"];
 
-    if(!u::contains(jsonGraph, "nodes") || !u::contains(jsonGraph, "edges"))
+    if(!JsonGraphParser::parseGraphObject(jsonGraph, graphModel, *this))
         return false;
-
-    if(!u::contains(jsonGraph, "nodes") || !u::contains(jsonGraph, "edges"))
-        return false;
-
-    const auto& jsonNodes = jsonGraph["nodes"];
-    const auto& jsonEdges = jsonGraph["edges"];
-
-    uint64_t i = 0;
-
-    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
-    for(const auto& jsonNode : jsonNodes)
-    {
-        NodeId nodeId;
-        if(version >= 3)
-        {
-            try
-            {
-                 nodeId = std::stoi(jsonNode["id"].get<std::string>());
-            }
-            catch(...)
-            {
-                return false;
-            }
-        }
-        else
-            nodeId = jsonNode["id"].get<int>();
-
-
-        if(!nodeId.isNull())
-        {
-            graphModel->mutableGraph().reserveNodeId(nodeId);
-            graphModel->mutableGraph().addNode(nodeId);
-        }
-
-        setProgress(static_cast<int>((i++ * 100) /jsonNodes.size()));
-    }
-
-    setProgress(-1);
-
-    i = 0;
-
-    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
-    for(const auto& jsonEdge : jsonEdges)
-    {
-        EdgeId edgeId;
-        NodeId sourceId;
-        NodeId targetId;
-
-        if(version >= 3)
-        {
-            try
-            {
-                edgeId = std::stoi(jsonEdge["id"].get<std::string>());
-                sourceId = std::stoi(jsonEdge["source"].get<std::string>());
-                targetId = std::stoi(jsonEdge["target"].get<std::string>());
-            }
-            catch(...)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            edgeId = jsonEdge["id"].get<int>();
-            sourceId = jsonEdge["source"].get<int>();
-            targetId = jsonEdge["target"].get<int>();
-        }
-
-        if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
-        {
-            graphModel->mutableGraph().reserveEdgeId(edgeId);
-            graphModel->mutableGraph().addEdge(edgeId, sourceId, targetId);
-        }
-
-        setProgress(static_cast<int>((i++ * 100) / jsonEdges.size()));
-    }
 
     setProgress(-1);
 

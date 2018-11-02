@@ -33,6 +33,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iurltypes.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
@@ -86,6 +87,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/matfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
