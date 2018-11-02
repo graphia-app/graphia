@@ -8,6 +8,16 @@
 #include <QFile>
 #include <QUrl>
 
+static QString jsonIdToQString(const json& idObject)
+{
+    if(idObject.is_number_integer())
+        return QString::number(idObject.get<int>());
+    else if(idObject.is_string())
+        return QString::fromStdString(idObject.get<std::string>());
+    else
+        return {};
+}
+
 bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 {
     QFile file(url.toLocalFile());
@@ -74,10 +84,9 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         if(u::contains(jsonNode, "id"))
         {
-            if(jsonNode["id"].is_number_integer())
-                nodeJsonId = QString::number(jsonNode["id"].get<int>());
-            else if(jsonNode["id"].is_string())
-                nodeJsonId = QString::fromStdString(jsonNode["id"].get<std::string>());
+            nodeJsonId = jsonIdToQString(jsonNode["id"]);
+            if(nodeJsonId.isEmpty())
+                continue;
 
             nodeId = graphModel->mutableGraph().addNode();
             jsonIdToNodeId[nodeJsonId] = nodeId;
@@ -119,15 +128,19 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         if(u::contains(jsonEdge, "source") && u::contains(jsonEdge, "target"))
         {
-            if(jsonEdge["source"].is_number_integer())
-                sourceId = jsonIdToNodeId.at(QString::number(jsonEdge["source"].get<int>()));
-            else if(jsonEdge["source"].is_string())
-                sourceId = jsonIdToNodeId.at(QString::fromStdString(jsonEdge["source"].get<std::string>()));
+            QString jsonSourceId = jsonIdToQString(jsonEdge["source"]);
 
-            if(jsonEdge["target"].is_number_integer())
-                targetId = jsonIdToNodeId.at(QString::number(jsonEdge["target"].get<int>()));
-            else if(jsonEdge["target"].is_string())
-                targetId = jsonIdToNodeId.at(QString::fromStdString(jsonEdge["target"].get<std::string>()));
+            if(jsonSourceId.isEmpty())
+                continue;
+
+            sourceId = jsonIdToNodeId.at(jsonSourceId);
+
+            QString jsonEdgeId = jsonIdToQString(jsonEdge["target"]);
+
+            if(jsonEdgeId.isEmpty())
+                continue;
+
+            targetId = jsonIdToNodeId.at(jsonEdgeId);
 
             edgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
 
