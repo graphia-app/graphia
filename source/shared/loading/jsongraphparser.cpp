@@ -37,10 +37,6 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 
         setProgress((bytesRead * 100) / totalBytes);
 
-        // Check if we've read more than we've been asked to
-        if(-1 >= 0 && bytesRead >= -1)
-            return true;
-
     } while(!input.atEnd());
 
     auto jsonBody = parseJsonFrom(byteArray, *this);
@@ -63,8 +59,6 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 {
     if(!u::contains(jsonGraphObject, "nodes") || !u::contains(jsonGraphObject, "edges"))
         return false;
-
-    qDebug() << "Parsing";
 
     const auto& jsonNodes = jsonGraphObject["nodes"];
     const auto& jsonEdges = jsonGraphObject["edges"];
@@ -110,8 +104,6 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
         progressable.setProgress(static_cast<int>((i++ * 100) / jsonNodes.size()));
     }
 
-    qDebug() << "json nodes Done";
-
     progressable.setProgress(-1);
 
     i = 0;
@@ -147,8 +139,6 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         progressable.setProgress(static_cast<int>((i++ * 100) / jsonEdges.size()));
     }
-
-    qDebug() << "json edges Done";
 
     progressable.setProgress(-1);
     return true;
