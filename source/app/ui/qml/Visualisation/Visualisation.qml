@@ -21,17 +21,17 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    property var gradientList
+    property var gradientEditor
     Connections
     {
-        target: gradientList
+        target: gradientEditor
 
         onConfigurationChanged:
         {
-            if(gradientList.visualisationIndex !== index)
+            if(gradientEditor.visualisationIndex !== index)
                 return;
 
-            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientList.configuration) + "\"";
+            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientEditor.configuration) + "\"";
             root.updateExpression();
         }
     }
@@ -101,9 +101,9 @@ Item
             {
                 if(mouse.button === Qt.LeftButton)
                 {
-                    gradientList.visualisationIndex = index;
-                    gradientList.selected = gradientKey.configuration;
-                    gradientList.show();
+                    gradientEditor.visualisationIndex = index;
+                    gradientEditor.selected = gradientKey.configuration;
+                    gradientEditor.show();
                 }
                 else
                     mouse.accepted = false;

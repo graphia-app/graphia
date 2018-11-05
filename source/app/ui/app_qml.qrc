@@ -29,7 +29,7 @@
         <file>qml/Controls/error.png</file>
         <file>qml/Controls/ToolTip.qml</file>
         <file>qml/Controls/GradientKey.qml</file>
-        <file>qml/Controls/GradientList.qml</file>
+        <file>qml/Controls/GradientEditor.qml</file>
         <file>qml/Controls/GradientPickerItem.qml</file>
         <file>qml/Controls/TreeBox.qml</file>
         <file>qml/LayoutSettings.qml</file>

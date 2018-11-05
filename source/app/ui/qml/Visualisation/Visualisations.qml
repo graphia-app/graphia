@@ -28,9 +28,9 @@ Item
         document: root.document
     }
 
-    GradientList
+    GradientEditor
     {
-        id: _gradientList
+        id: _gradientEditor
     }
 
     ColumnLayout
@@ -102,7 +102,7 @@ Item
                     Visualisation
                     {
                         property var document: root.document
-                        gradientList: _gradientList
+                        gradientEditor: _gradientEditor
 
                         Component.onCompleted:
                         {
