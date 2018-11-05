@@ -12,7 +12,8 @@ static QString jsonIdToQString(const json& idObject)
 {
     if(idObject.is_number_integer())
         return QString::number(idObject.get<int>());
-    else if(idObject.is_string())
+
+    if(idObject.is_string())
         return QString::fromStdString(idObject.get<std::string>());
 
     return {};
@@ -93,7 +94,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         if(u::contains(jsonNode, "label"))
         {
-            std::string nodeJsonLabel = jsonNode["label"].get<std::string>();
+            auto nodeJsonLabel = jsonNode["label"].get<std::string>();
             graphModel->setNodeName(nodeId, QString::fromStdString(nodeJsonLabel));
         }
 
