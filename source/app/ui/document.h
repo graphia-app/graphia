@@ -406,6 +406,8 @@ public:
     Q_INVOKABLE bool attributeExists(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
 
+    Q_INVOKABLE QStringList createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
+
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
     Q_INVOKABLE void removeGraphTransform(int index);

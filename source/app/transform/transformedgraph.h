@@ -34,6 +34,7 @@ public:
     void cancelRebuild();
     void addTransform(std::unique_ptr<GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
     void clearTransforms() { _transforms.clear(); }
+    int numTransforms() const { return static_cast<int>(_transforms.size()); }
 
     void setCommand(ICommand* command) { _command = command; }
 

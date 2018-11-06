@@ -96,6 +96,7 @@ public:
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
     std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
+    std::vector<QString> createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
 
     bool opIsUnary(const QString& op) const;
 

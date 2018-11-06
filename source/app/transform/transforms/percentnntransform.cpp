@@ -28,7 +28,10 @@ void PercentNNTransform::apply(TransformedGraph& target) const
     auto minimum = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
 
     if(hasUnknownAttributes({attributeName}, *_graphModel))
+    {
+        addAlert(AlertType::Error, QObject::tr("Unknown attribute"));
         return;
+    }
 
     auto attribute = _graphModel->attributeValueByName(attributeName);
 

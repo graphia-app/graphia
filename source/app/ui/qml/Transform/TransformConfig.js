@@ -62,7 +62,7 @@ function sanitiseOp(text)
     return text;
 }
 
-function Create(transform)
+function Create(transformIndex, transform)
 {
     var parameterIndex = 1;
 
@@ -272,6 +272,18 @@ function Create(transform)
                     if(document.attributeExists(parameter.attribute))
                     {
                         parameterData.initialValue = document.attribute(parameter.attribute).similar;
+
+                        var unavailableAttributeNames =
+                            document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
+
+                        // Don't allow the user to choose attributes that don't exist at the point
+                        // in time when the transform is executed
+                        parameterData.initialValue = parameterData.initialValue.filter(
+                        function(attributeName)
+                        {
+                            return unavailableAttributeNames.indexOf(attributeName) < 0;
+                        });
+
                         parameterData.initialIndex = parameterData.initialValue.indexOf(parameter.attribute);
                     }
                     else

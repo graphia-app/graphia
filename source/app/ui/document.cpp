@@ -1708,6 +1708,16 @@ QVariantMap Document::attribute(const QString& attributeName) const
     return map;
 }
 
+QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
+{
+    QStringList attributeNames;
+
+    for(const auto& attributeName : _graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex))
+        attributeNames.append(attributeName);
+
+    return attributeNames;
+}
+
 QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
 {
     if(_graphModel == nullptr)

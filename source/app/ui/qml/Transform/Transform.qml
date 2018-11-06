@@ -270,7 +270,7 @@ Item
                 error = transformInfo.alertType === AlertType.Error;
             }
 
-            var transformConfig = new TransformConfig.Create(document.parseGraphTransform(value));
+            var transformConfig = new TransformConfig.Create(index, document.parseGraphTransform(value));
             flags = transformConfig.flags;
             template = transformConfig.template;
 

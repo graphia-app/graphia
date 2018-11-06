@@ -429,6 +429,20 @@ std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndex(int index
     return _->_transformedGraph.createdAttributeNamesAtTransformIndex(index);
 }
 
+std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
+{
+    std::vector<QString> attributeNames;
+
+    for(int index = firstIndex; index < _->_transformedGraph.numTransforms(); index++)
+    {
+        auto createdAttributeNames = createdAttributeNamesAtTransformIndex(index);
+        attributeNames.insert(attributeNames.end(),
+            createdAttributeNames.begin(), createdAttributeNames.end());
+    }
+
+    return attributeNames;
+}
+
 bool GraphModel::opIsUnary(const QString& op) const
 {
     return GraphTransformConfigParser::opIsUnary(op);
