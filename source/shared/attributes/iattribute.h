@@ -50,6 +50,10 @@ public:
     virtual double floatValueOf(EdgeId edgeId) const = 0;
     virtual double floatValueOf(const IGraphComponent& graphComponent) const = 0;
 
+    virtual double numericValueOf(NodeId nodeId) const = 0;
+    virtual double numericValueOf(EdgeId edgeId) const = 0;
+    virtual double numericValueOf(const IGraphComponent& graphComponent) const = 0;
+
     virtual QString stringValueOf(NodeId nodeId) const = 0;
     virtual QString stringValueOf(EdgeId edgeId) const = 0;
     virtual QString stringValueOf(const IGraphComponent& graphComponent) const = 0;

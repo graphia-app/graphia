@@ -285,6 +285,13 @@ public:
         return floatValueOf<const IGraphComponent&>(graphComponent);
     }
 
+    double numericValueOf(NodeId nodeId) const override { return numericValueOf<NodeId>(nodeId); }
+    double numericValueOf(EdgeId edgeId) const override { return numericValueOf<EdgeId>(edgeId); }
+    double numericValueOf(const IGraphComponent& graphComponent) const override
+    {
+        return numericValueOf<const IGraphComponent&>(graphComponent);
+    }
+
     QString stringValueOf(NodeId nodeId) const override { return stringValueOf<NodeId>(nodeId); }
     QString stringValueOf(EdgeId edgeId) const override { return stringValueOf<EdgeId>(edgeId); }
     QString stringValueOf(const IGraphComponent& graphComponent) const override
