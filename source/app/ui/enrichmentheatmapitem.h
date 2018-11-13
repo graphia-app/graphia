@@ -29,10 +29,9 @@ private:
     QCPAbstractPlottable* _hoverPlottable = nullptr;
     QPointF _hoverPoint;
     QCustomPlot _customPlot;
-    QStringList _xAttributeValues;
-    QStringList _yAttributeValues;
     std::map<int, QString> _xAxisToFullLabel;
     std::map<int, QString> _yAxisToFullLabel;
+    std::map<std::pair<int, int>, int> _colorMapKeyValueToTableIndex;
 
     EnrichmentTableModel* _tableModel = nullptr;
     QFont _defaultFont9Pt;

@@ -151,6 +151,7 @@ void EnrichmentHeatmapItem::buildPlot()
 
     _xAxisToFullLabel.clear();
     _yAxisToFullLabel.clear();
+    _colorMapKeyValueToTableIndex.clear();
 
     for(int i = 0; i < _tableModel->rowCount(); ++i)
     {
@@ -206,6 +207,8 @@ void EnrichmentHeatmapItem::buildPlot()
         auto yValue = fullLabelToYAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString()];
 
         auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
+
+        _colorMapKeyValueToTableIndex.emplace(std::make_pair(xValue, yValue), i);
 
         if(_showOnlyEnriched)
         {
@@ -355,15 +358,19 @@ void EnrichmentHeatmapItem::showTooltip()
     double key, value;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
 
-    auto i = static_cast<int>(std::round(value));
+    std::pair<int, int> colorMapIndexPair = {std::round(key), std::round(value)};
+    if(!u::containsKey(_colorMapKeyValueToTableIndex, colorMapIndexPair))
+        return;
+
+    auto tableIndex = _colorMapKeyValueToTableIndex.at(colorMapIndexPair);
 
     // Bounds check the row
-    if(i >= _tableModel->rowCount() || i < 0)
+    if(tableIndex >= _tableModel->rowCount() || tableIndex < 0)
         return;
 
     _hoverLabel->setVisible(true);
 
-    auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
+    auto pValue = _tableModel->data(tableIndex, QStringLiteral("AdjustedFishers")).toDouble();
 
     _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberScientific(pValue)));
 
