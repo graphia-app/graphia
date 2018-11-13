@@ -58,6 +58,29 @@ bool GMLSaver::save()
     stream << "graph" << endl << "[" << endl;
     level++;
 
+    auto attributes = [&](auto elementId, const std::vector<QString>& attributeNames)
+    {
+        for(const auto& attributeName : attributeNames)
+        {
+            const auto& attribute = _graphModel->attributeByName(attributeName);
+            if(attribute->valueType() == ValueType::String)
+            {
+                QString escapedValue = escape(attribute->stringValueOf(elementId));
+                stream << indent(level) << alphanumAttributeNames[attributeName] << " "
+                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
+            }
+            else if(attribute->valueType() & ValueType::Numerical)
+            {
+                auto value = attribute->numericValueOf(elementId);
+                if(!std::isnan(value))
+                {
+                    stream << indent(level) << alphanumAttributeNames[attributeName] << " "
+                           << value << endl;
+                }
+            }
+        }
+    };
+
     _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
@@ -68,23 +91,7 @@ bool GMLSaver::save()
         stream << indent(level) << "id " << static_cast<int>(nodeId) << endl;
         QString labelString = QStringLiteral("\"%1\"").arg(nodeName);
         stream << indent(level) << "label " << labelString << endl;
-
-        // Attributes
-        for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
-        {
-            const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
-            QString escapedValue = escape(attribute->stringValueOf(nodeId));
-            if(attribute->valueType() == ValueType::String)
-            {
-                stream << indent(level) << alphanumAttributeNames[nodeAttributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
-            }
-            else
-            {
-                stream << indent(level) << alphanumAttributeNames[nodeAttributeName] << " "
-                       << escapedValue << endl;
-            }
-        }
+        attributes(nodeId, _graphModel->attributeNames(ElementType::Node));
         stream << indent(--level) << "]" << endl; // node
 
         runningCount++;
@@ -101,23 +108,7 @@ bool GMLSaver::save()
         level++;
         stream << indent(level) << "source " << static_cast<int>(edge.sourceId()) << endl;
         stream << indent(level) << "target " << static_cast<int>(edge.targetId()) << endl;
-
-        // Attributes
-        for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
-        {
-            const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
-            auto escapedValue = escape(attribute->stringValueOf(edgeId));
-            if(attribute->valueType() == ValueType::String)
-            {
-                stream << indent(level) << alphanumAttributeNames[edgeAttributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
-            }
-            else
-            {
-                stream << indent(level) << alphanumAttributeNames[edgeAttributeName] << " "
-                       << escapedValue << endl;
-            }
-        }
+        attributes(edgeId, _graphModel->attributeNames(ElementType::Edge));
         stream << indent(--level) << "]" << endl; // edge
 
         runningCount++;
