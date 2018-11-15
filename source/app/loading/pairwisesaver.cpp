@@ -40,7 +40,7 @@ bool PairwiseSaver::save()
             targetName = QString::number(static_cast<int>(edge.targetId()));
 
         if(_graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
-           _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() == ValueType::Numerical)
+           _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() & ValueType::Numerical)
         {
             auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
