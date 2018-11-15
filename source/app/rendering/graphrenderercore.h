@@ -18,6 +18,17 @@
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
+    GPUGraphData(GPUGraphData& gpuGraphData)
+        : _componentAlpha(gpuGraphData._componentAlpha),
+          _unhighlightAlpha(gpuGraphData._unhighlightAlpha),
+          _alwaysDrawnLast(gpuGraphData._alwaysDrawnLast),
+          _nodeData(gpuGraphData._nodeData),
+          _glyphData(gpuGraphData._glyphData),
+          _edgeData(gpuGraphData._edgeData)
+    {
+        resolveOpenGLFunctions();
+        prepareVertexBuffers();
+    }
     ~GPUGraphData() override;
 
     void initialise(QOpenGLShaderProgram& nodesShader,
@@ -106,6 +117,32 @@ struct GPUGraphData : OpenGLFunctions
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;
     GLuint _selectionTexture = 0;
+
+    GPUGraphData& operator=(const GPUGraphData &gpuGraphData)
+    {
+        if(this == &gpuGraphData)
+            return *this;
+
+        _componentAlpha = gpuGraphData._componentAlpha;
+        _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
+        _alwaysDrawnLast = gpuGraphData._alwaysDrawnLast;
+        _nodeData = gpuGraphData._nodeData;
+        _glyphData = gpuGraphData._glyphData;
+        _edgeData = gpuGraphData._edgeData;
+
+        // Cause VBO to be recreated
+        _fbo = 0;
+        _colorTexture = 0;
+        _selectionTexture = 0;
+
+        _edgeVBO.destroy();
+        _nodeVBO.destroy();
+        _textVBO.destroy();
+
+        prepareVertexBuffers();
+
+        return *this;
+    }
 };
 
 class GraphRendererCore :
@@ -113,6 +150,7 @@ class GraphRendererCore :
 {
 public:
     GraphRendererCore();
+    GraphRendererCore(GraphRendererCore& graphRendererCore);
     ~GraphRendererCore() override;
 
 private:
@@ -147,6 +185,8 @@ private:
     void prepareQuad();
 
     std::vector<int> gpuGraphDataRenderOrder() const;
+
+    void prepare();
 
 protected:
     int width() const { return _width; }

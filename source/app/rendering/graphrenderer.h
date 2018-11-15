@@ -72,6 +72,7 @@ class GraphRenderer :
     Q_OBJECT
 
     friend class GraphComponentRenderer;
+    friend class ScreenshotRenderer;
     friend void initialiseFromGraph<GraphRenderer>(const Graph*, GraphRenderer&);
 
 public:
@@ -140,21 +141,6 @@ private:
     GraphModel* _graphModel = nullptr;
     int _numComponents = 0;
 
-    const int TILE_SIZE = 1024;
-
-    GLuint _screenshotFBO = 0;
-    GLuint _screenshotTex = 0;
-
-    bool _isScreenshot = false;
-    bool _isPreview = false;
-    int _screenshotHeight = 0;
-    int _screenshotWidth = 0;
-    int _currentTileX = 0;
-    int _currentTileY = 0;
-    int _tileXCount = 0;
-    int _tileYCount = 0;
-    QPixmap _fullScreenshot;
-
     SelectionManager* _selectionManager = nullptr;
 
     GPUComputeThread* _gpuComputeThread = nullptr;
@@ -212,6 +198,7 @@ private:
     bool _gpuDataRequiresUpdate = false;
 
     QRect _selectionRect;
+    ScreenshotRenderer* _screenshotRenderer;
 
     QTime _time;
     float _lastTime = 0.0f;
@@ -224,8 +211,6 @@ private:
     Transition _transition;
 
     PerformanceCounter _performanceCounter;
-
-    void prepareScreenshotFBO();
 
     GLuint sdfTexture() const override;
     GLuint sdfTextureOffscreen() const;

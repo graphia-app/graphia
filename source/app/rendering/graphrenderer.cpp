@@ -17,6 +17,7 @@
 #include "ui/visualisations/elementvisual.h"
 
 #include "shadertools.h"
+#include "screenshotrenderer.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>
@@ -53,8 +54,6 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _performanceCounter(std::chrono::seconds(1))
 {
     ShaderTools::loadShaderProgram(_debugLinesShader, QStringLiteral(":/shaders/debuglines.vert"), QStringLiteral(":/shaders/debuglines.frag"));
-
-    prepareScreenshotFBO();
 
     _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
 
@@ -362,86 +361,16 @@ void GraphRenderer::updateGPUData(GraphRenderer::When when)
 
 void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
 {
-    _isPreview = true;
-
-    _screenshotWidth = width;
-    _screenshotHeight = height;
-
-    float viewportAspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
-
-    if(!fillSize)
-        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
-
-    int preScreenshotX = this->width();
-    int preScreenshotY = this->height();
-
-    _FBOcomplete = resize(_screenshotWidth, _screenshotHeight);
-    _resized = true;
-
-    glBindTexture(GL_TEXTURE_2D, _screenshotTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-    render();
-
-    _FBOcomplete = resize(preScreenshotX, preScreenshotY);
-    _resized = true;
-    _isPreview = false;
+    _screenshotRenderer = new ScreenshotRenderer(*this);
+    connect(_screenshotRenderer, &ScreenshotRenderer::previewComplete, this, &GraphRenderer::previewComplete);
+    _screenshotRenderer->onPreviewRequested(width, height, fillSize);
 }
 
 void GraphRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
 {
-    _isScreenshot = true;
-
-    float viewportAspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
-
-    _screenshotWidth = width;
-    _screenshotHeight = height;
-
-    if(!fillSize)
-    {
-        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
-        if(_screenshotHeight > height)
-        {
-            _screenshotWidth = static_cast<float>(height) * viewportAspectRatio;
-            _screenshotHeight = height;
-        }
-    }
-
-    int preScreenshotX = this->width();
-    int preScreenshotY = this->height();
-
-    _FBOcomplete = resize(TILE_SIZE, TILE_SIZE);
-    _resized = true;
-
-    // Need a pixmap to construct the full image
-    _fullScreenshot = QPixmap(_screenshotWidth, _screenshotHeight);
-
-    glBindTexture(GL_TEXTURE_2D, _screenshotTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-    _tileXCount = std::ceil(static_cast<float>(_screenshotWidth) / this->width());
-    _tileYCount = std::ceil(static_cast<float>(_screenshotHeight) / this->height());
-    for(_currentTileX = 0; _currentTileX < _tileXCount; _currentTileX++)
-    {
-        for(_currentTileY = 0; _currentTileY < _tileYCount; _currentTileY++)
-        {
-            render();
-        }
-    }
-
-    auto image = _fullScreenshot.toImage();
-
-    // Destroy the pixmap, not needed anymore!
-    _fullScreenshot = {};
-
-    const double INCHES_PER_METER = 39.3700787;
-    image.setDotsPerMeterX(dpi * INCHES_PER_METER);
-    image.setDotsPerMeterY(dpi * INCHES_PER_METER);
-    emit screenshotComplete(image, path);
-
-    _FBOcomplete = resize(preScreenshotX, preScreenshotY);
-    _resized = true;
-    _isScreenshot = false;
+    _screenshotRenderer = new ScreenshotRenderer(*this);
+    connect(_screenshotRenderer, &ScreenshotRenderer::screenshotComplete, this, &GraphRenderer::screenshotComplete);
+    _screenshotRenderer->onScreenshotRequested(width, height, path, dpi, fillSize);
 }
 
 void GraphRenderer::updateComponentGPUData()
@@ -470,30 +399,8 @@ void GraphRenderer::updateComponentGPUData()
             componentData.push_back(componentRenderer->modelViewMatrix().data()[i]);
 
         // Projection
-        if(_isScreenshot)
-        {
-            // Tile projection for high res screenshots
-            float tileWidthRatio = static_cast<float>(width()) / _screenshotWidth;
-            float tileHeightRatio = static_cast<float>(height()) / _screenshotHeight;
-
-            float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * _currentTileX);
-            float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * _currentTileY);
-
-            QMatrix4x4 projMatrix = componentRenderer->screenshotTileProjectionMatrix(TILE_SIZE);
-            QMatrix4x4 tileTranslation;
-
-            tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);
-            projMatrix = tileTranslation * projMatrix;
-
-            for(int i = 0; i < 16; i++)
-                componentData.push_back(projMatrix.data()[i]);
-        }
-        else
-        {
-            // Normal projection
-            for(int i = 0; i < 16; i++)
-                componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
-        }
+        for(int i = 0; i < 16; i++)
+            componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
@@ -952,8 +859,8 @@ void GraphRenderer::updateScene()
         _resized = false;
     }
 
-    if(_isScreenshot || _isPreview)
-        _scene->setViewportSize(_screenshotWidth, _screenshotHeight);
+//    if(_isScreenshot || _isPreview)
+//        _scene->setViewportSize(_screenshotWidth, _screenshotHeight);
 
     ifSceneUpdateEnabled([this]
     {
@@ -1084,56 +991,13 @@ void GraphRenderer::render()
     updateScene();
     renderGraph();
 
-    if(_isScreenshot || _isPreview)
-    {
-        render2D();
+    render2D(_selectionRect);
 
-        // Bind to screenshot FBO
-        glBindFramebuffer(GL_FRAMEBUFFER, _screenshotFBO);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _screenshotTex, 0);
+    // Check the normal FBO
+    if(!framebufferObject()->bind())
+        qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
 
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
-
-        renderToFramebuffer();
-
-        if(_isScreenshot)
-        {
-            int pixelCount = width() * height() * 4;
-            std::vector<GLubyte> pixels(pixelCount);
-
-            glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-            QImage screenTile(pixels.data(), width(), height(), QImage::Format_RGBA8888);
-
-            QPainter painter(&_fullScreenshot);
-            painter.drawImage(_currentTileX * TILE_SIZE,
-                             (_screenshotHeight - TILE_SIZE) - (_currentTileY * TILE_SIZE),
-                              screenTile.mirrored(false, true));
-        }
-        else if(_isPreview)
-        {
-            int pixelCount = width() * height() * 4;
-            std::vector<GLubyte> pixels(pixelCount);
-
-            glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-            QImage screenTile(pixels.data(), width(), height(), QImage::Format_RGBA8888);
-            QByteArray byteArray;
-            QBuffer buffer(&byteArray);
-            screenTile.mirrored().save(&buffer, "PNG");
-            // QML Can't load raw QImages so as a hack we just base64 encode a png
-            emit previewComplete(QString::fromLatin1(byteArray.toBase64().data()));
-        }
-    }
-    else
-    {
-        render2D(_selectionRect);
-
-        // Check the normal FBO
-        if(!framebufferObject()->bind())
-            qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
-
-        renderToFramebuffer();
-    }
+    renderToFramebuffer();
 
     std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
     resetOpenGLState();
@@ -1228,13 +1092,6 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
     GraphComponentRenderer* renderer = _componentRenderers.at(componentId);
     Q_ASSERT(renderer != nullptr);
     return renderer;
-}
-
-void GraphRenderer::prepareScreenshotFBO()
-{
-    // Screenshot FBO
-    glGenFramebuffers(1, &_screenshotFBO);
-    glGenTextures(1, &_screenshotTex);
 }
 
 void GraphRenderer::enableSceneUpdate()
