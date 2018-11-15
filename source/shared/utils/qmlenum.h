@@ -62,6 +62,16 @@ constexpr bool static_strcmp(char const* a, char const* b)
             _REFLECTOR(ENUM_NAME)::initialise(); \
     } \
     Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
+    inline bool operator&(QML_ENUM_PROPERTY(ENUM_NAME) lhs, \
+        QML_ENUM_PROPERTY(ENUM_NAME) rhs) \
+    { \
+        /* Allow QML_ENUMs to be compared for intersection, via \
+        the & operator. We return a truthy value rather than a \
+        bitwise combination since the latter cannot be used in \
+        a boolean context, which is the most common situation */ \
+        return static_cast<bool>(static_cast<int>(lhs) & \
+            static_cast<int>(rhs)); \
+    } \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
 
 /*
