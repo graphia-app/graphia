@@ -9,25 +9,20 @@
 #include "ui/visualisations/elementvisual.h"
 
 #include <QBuffer>
+#include <QDir>
 
 
 ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     GraphRendererCore(renderer),
     _graphModel(renderer.graphModel()),
     _componentRenderers(renderer.graphModel()->graph()),
+    _selectionManager(renderer._selectionManager),
     _hiddenNodes(_graphModel->graph()),
     _hiddenEdges(_graphModel->graph()),
-    _selectionManager(renderer._selectionManager)
+    _mainRenderer(renderer)
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
-    {
         *componentRendererForId(componentId) = *renderer.componentRendererForId(componentId);
-        componentRendererForId(componentId)->initialise(_graphModel, componentId,
-                                                        _selectionManager, nullptr);
-        componentRendererForId(componentId)->setViewportSize(_screenshotWidth, _screenshotHeight);
-        componentRendererForId(componentId)->setDimensions(QRectF(0, 0, _screenshotWidth, _screenshotHeight));
-        componentRendererForId(componentId)->setVisible(true);
-    }
 
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
@@ -40,23 +35,24 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     _sdfTexture = 0;
     glGenTextures(1, &_sdfTexture);
 
-    _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
+    int renderWidth = 0;
+    int renderHeight = 0;
+
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
 
     if(renderer._glyphMap->images().size() > 0)
     {
-        auto glyphMapWidth = renderer._glyphMap->images().front().width();
-        auto glyphMapHeight = renderer._glyphMap->images().front().height();
-
         // SDF texture
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
 
         // Generate FBO texture
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-                     glyphMapWidth, glyphMapHeight, renderer._glyphMap->images().size(),
+                     renderWidth, renderHeight, renderer._glyphMap->images().size(),
                      0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
         for(int layer = 0; layer < renderer._glyphMap->images().size(); layer++)
         {
@@ -65,18 +61,12 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
             GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
             glDrawBuffers(1, DrawBuffers);
 
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            {
-                glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-                glViewport(0, 0, glyphMapWidth, glyphMapHeight);
-                glReadBuffer(GL_COLOR_ATTACHMENT0);
-                glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, glyphMapWidth, glyphMapHeight);
-            }
+            glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+            glViewport(0, 0, renderWidth, renderHeight);
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
+            glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, renderWidth, renderHeight);
         }
     }
-
-    // Copy component data
-
 
     uploadGPUGraphData();
 }
@@ -94,14 +84,12 @@ void ScreenshotRenderer::onPreviewRequested(int width, int height, bool fillSize
         _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
 
     _FBOcomplete = resize(_screenshotWidth, _screenshotHeight);
-    _resized = true;
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     render();
 
-    _resized = true;
     _isPreview = false;
 }
 
@@ -180,7 +168,6 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
     }
 
     _FBOcomplete = resize(TILE_SIZE, TILE_SIZE);
-    _resized = true;
 
     // Need a pixmap to construct the full image
     _fullScreenshot = QPixmap(_screenshotWidth, _screenshotHeight);
@@ -208,14 +195,12 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
     image.setDotsPerMeterY(dpi * INCHES_PER_METER);
     emit screenshotComplete(image, path);
 
-    _resized = true;
     _isScreenshot = false;
 }
 
 void ScreenshotRenderer::updateGPUDataIfRequired()
 {
     std::unique_lock<std::recursive_mutex> nodePositionsLock(_graphModel->nodePositions().mutex());
-    std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     int componentIndex = 0;
 
@@ -288,9 +273,9 @@ void ScreenshotRenderer::updateGPUDataIfRequired()
                 if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
                     continue;
 
-//                createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
-//                    nodeVisual._size, nodePosition, componentIndex,
-//                    gpuGraphDataForOverlay(componentRenderer->alpha()));
+                _mainRenderer.createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
+                    nodeVisual._size, nodePosition, componentIndex,
+                    gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
         }
 
@@ -365,9 +350,9 @@ void ScreenshotRenderer::updateGPUDataIfRequired()
                     continue;
 
                 QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
-//                createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
-//                    edgeVisual._size, midPoint, componentIndex,
-//                    gpuGraphDataForOverlay(componentRenderer->alpha()));
+                _mainRenderer.createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
+                                                 edgeVisual._size, midPoint, componentIndex,
+                                                 gpuGraphDataForOverlay(componentRenderer->alpha()));
             }
         }
 
@@ -455,5 +440,5 @@ void ScreenshotRenderer::updateComponentGPUData()
 
 GLuint ScreenshotRenderer::sdfTexture() const
 {
-    return 0;
+    return _sdfTexture;
 }
