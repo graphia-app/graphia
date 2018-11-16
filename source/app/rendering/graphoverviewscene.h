@@ -36,16 +36,6 @@ class GraphOverviewScene :
 public:
     explicit GraphOverviewScene(CommandManager* commandManager,
                                 GraphRenderer* graphRenderer);
-//    GraphOverviewScene(GraphOverviewScene& scene) :
-//        _width(scene._width), _height(scene._height), _zoomFactor(scene._zoomFactor),
-//        _zoomCentre(scene._zoomCentre), _zoomTransition(scene._zoomTransition),
-//        _autoZooming(scene._autoZooming), _offset(scene._offset),
-//        _previousComponentAlpha(scene._previousComponentAlpha), _componentAlpha(scene._componentAlpha),
-//        _n
-//    {
-
-//    }
-
 
     void update(float t) override;
     void setViewportSize(int width, int height) override;

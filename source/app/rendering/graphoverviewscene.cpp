@@ -52,7 +52,6 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
 }
 
-
 void GraphOverviewScene::update(float t)
 {
     _zoomTransition.update(t);

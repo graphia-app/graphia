@@ -75,8 +75,6 @@ public:
                     SelectionManager* selectionManager,
                     GraphRenderer* graphRenderer);
 
-
-
     bool visible() const { return _initialised && _visible; }
     void setVisible(bool visible);
 

@@ -859,9 +859,6 @@ void GraphRenderer::updateScene()
         _resized = false;
     }
 
-//    if(_isScreenshot || _isPreview)
-//        _scene->setViewportSize(_screenshotWidth, _screenshotHeight);
-
     ifSceneUpdateEnabled([this]
     {
         // _synchronousLayoutChanged can only ever be (atomically) true in this scope
