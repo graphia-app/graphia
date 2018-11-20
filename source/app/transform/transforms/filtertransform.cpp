@@ -19,28 +19,12 @@ void FilterTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = config().referencedAttributeNames();
 
-    if(hasUnknownAttributes(attributeNames, *_graphModel))
-        return;
-
-    bool invalidAttributes =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return !_graphModel->attributeValueByName(attributeName).isValid();
-        });
-
-    if(invalidAttributes)
-    {
-        addAlert(AlertType::Error, QObject::tr("One more more invalid attributes"));
-        return;
-    }
-
     bool ignoreTails =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-        });
+    std::any_of(attributeNames.begin(), attributeNames.end(),
+    [this](const auto& attributeName)
+    {
+        return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
+    });
 
     // The elements to be filtered are calculated first and then removed, because
     // removing elements during the filtering could affect the result of filter functions

@@ -14,26 +14,13 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Attribute Synthesis"));
 
-    const auto attributeNames = config().attributeNames();
-
-    if(attributeNames.empty())
+    if(config().attributeNames().empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
         return;
     }
 
-    auto sourceAttributeName = attributeNames.front();
-
-    if(hasUnknownAttributes({sourceAttributeName}, *_graphModel))
-        return;
-
-    auto sourceAttribute = _graphModel->attributeValueByName(sourceAttributeName);
-
-    if(!sourceAttribute.isValid())
-    {
-        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
-        return;
-    }
+    auto sourceAttribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
     auto regexString = config().parameterByName(QStringLiteral("Regular Expression"))->valueAsString();

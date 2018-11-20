@@ -12,24 +12,6 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Boolean Attribute"));
 
-    auto attributeNames = config().referencedAttributeNames();
-
-    if(hasUnknownAttributes(attributeNames, *_graphModel))
-        return;
-
-    bool invalidAttributes =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return !_graphModel->attributeValueByName(attributeName).isValid();
-        });
-
-    if(invalidAttributes)
-    {
-        addAlert(AlertType::Error, QObject::tr("One more more invalid attributes"));
-        return;
-    }
-
     auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
@@ -38,6 +20,8 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
         addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
         return;
     }
+
+    auto attributeNames = config().referencedAttributeNames();
 
     bool ignoreTails =
     std::any_of(attributeNames.begin(), attributeNames.end(),

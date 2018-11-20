@@ -13,28 +13,12 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = config().referencedAttributeNames();
 
-    if(hasUnknownAttributes(attributeNames, *_graphModel))
-        return;
-
-    bool invalidAttributes =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return !_graphModel->attributeValueByName(attributeName).isValid();
-        });
-
-    if(invalidAttributes)
-    {
-        addAlert(AlertType::Error, QObject::tr("One more more invalid attributes"));
-        return;
-    }
-
     bool ignoreTails =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-        });
+    std::any_of(attributeNames.begin(), attributeNames.end(),
+    [this](const auto& attributeName)
+    {
+        return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
+    });
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);
     if(conditionFn == nullptr)

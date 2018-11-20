@@ -22,20 +22,8 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
         return;
     }
 
-    auto firstAttributeName = attributeNames.at(0);
-    auto secondAttributeName = attributeNames.at(1);
-
-    if(hasUnknownAttributes({firstAttributeName, secondAttributeName}, *_graphModel))
-        return;
-
-    auto firstAttribute = _graphModel->attributeValueByName(firstAttributeName);
-    auto secondAttribute = _graphModel->attributeValueByName(secondAttributeName);
-
-    if(!firstAttribute.isValid() || !secondAttribute.isValid())
-    {
-        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
-        return;
-    }
+    auto firstAttribute = _graphModel->attributeValueByName(attributeNames.at(0));
+    auto secondAttribute = _graphModel->attributeValueByName(attributeNames.at(1));
 
     if(firstAttribute.elementType() != secondAttribute.elementType())
     {

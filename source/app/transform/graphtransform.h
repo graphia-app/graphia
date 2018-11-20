@@ -40,7 +40,7 @@ public:
     ~GraphTransform() override = default;
 
     virtual void apply(TransformedGraph&) const {}
-    bool applyAndUpdate(TransformedGraph& target) const;
+    bool applyAndUpdate(TransformedGraph& target, const GraphModel& graphModel) const;
 
     bool repeating() const { return _repeating; }
     void setRepeating(bool repeating) { _repeating = repeating; }
@@ -64,10 +64,6 @@ public:
 private:
     void setIndex(int index) { _index = index; }
     void setConfig(const GraphTransformConfig& config) { _config = config; }
-
-protected:
-    bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
-                              const GraphModel& graphModel) const;
 
 private:
     mutable TransformInfo* _info = nullptr;

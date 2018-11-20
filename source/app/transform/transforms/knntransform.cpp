@@ -14,31 +14,15 @@ void KNNTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("k-NN"));
 
-    const auto attributeNames = config().attributeNames();
-
-    if(attributeNames.empty())
+    if(config().attributeNames().empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
         return;
     }
 
-    auto attributeName = attributeNames.front();
+    auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     auto k = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
-
-    if(hasUnknownAttributes({attributeName}, *_graphModel))
-    {
-        addAlert(AlertType::Error, QObject::tr("Unknown attribute"));
-        return;
-    }
-
-    auto attribute = _graphModel->attributeValueByName(attributeName);
-
-    if(!attribute.isValid())
-    {
-        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
-        return;
-    }
 
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));

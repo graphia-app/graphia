@@ -14,32 +14,16 @@ void PercentNNTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("%-NN"));
 
-    const auto attributeNames = config().attributeNames();
-
-    if(attributeNames.empty())
+    if(config().attributeNames().empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
         return;
     }
 
-    auto attributeName = attributeNames.front();
-
     auto percent = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Percent"))->_value));
     auto minimum = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
 
-    if(hasUnknownAttributes({attributeName}, *_graphModel))
-    {
-        addAlert(AlertType::Error, QObject::tr("Unknown attribute"));
-        return;
-    }
-
-    auto attribute = _graphModel->attributeValueByName(attributeName);
-
-    if(!attribute.isValid())
-    {
-        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
-        return;
-    }
+    auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));

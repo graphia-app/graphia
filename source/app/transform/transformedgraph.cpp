@@ -140,7 +140,7 @@ void TransformedGraph::rebuild()
             setCurrentTransform(transform.get());
             transform->uncancel();
 
-            if(transform->applyAndUpdate(*this))
+            if(transform->applyAndUpdate(*this, *_graphModel))
             {
                 result._graph = std::make_unique<MutableGraph>(_target);
 
