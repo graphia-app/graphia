@@ -26,6 +26,7 @@
 #include "transform/transforms/spanningtreetransform.h"
 #include "transform/transforms/attributesynthesistransform.h"
 #include "transform/transforms/combineattributestransform.h"
+#include "transform/transforms/conditionalattributetransform.h"
 #include "transform/transforms/removeleavestransform.h"
 #include "transform/graphtransformconfigparser.h"
 
@@ -193,6 +194,8 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Eccentricity"),             std::make_unique<EccentricityTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Separate By Attribute"),    std::make_unique<SeparateByAttributeTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Boolean Node Attribute"),   std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Node));
+    _->_graphTransformFactories.emplace(tr("Boolean Edge Attribute"),   std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Edge));
     _->_graphTransformFactories.emplace(tr("k-NN"),                     std::make_unique<KNNTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("%-NN"),                     std::make_unique<PercentNNTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Edge Reduction"),           std::make_unique<EdgeReductionTransformFactory>(this));

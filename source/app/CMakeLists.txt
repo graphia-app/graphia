@@ -96,6 +96,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformedgraph.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforminfo.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/attributesynthesistransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/conditionalattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/contractbyattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/combineattributestransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.h
@@ -201,6 +202,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformcache.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformedgraph.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/attributesynthesistransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/conditionalattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/contractbyattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/combineattributestransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.cpp
