@@ -55,27 +55,14 @@ private:
     };
 
     SelectionManager* _selectionManager;
-
     OpenGLDebugLogger _openGLDebugLogger;
-
     GLuint _sdfTexture;
-
     bool _FBOcomplete = false;
-
-    GraphRenderer& _mainRenderer;
-
-    // When elements are added to the scene, it may be that they would lie
-    // outside the confines of where they should be rendered, until a transition
-    // is completed, so these arrays allow us to hide the elements until such
-    // transitions are complete
-    NodeArray<bool> _hiddenNodes;
-    EdgeArray<bool> _hiddenEdges;
 
     GLuint sdfTexture() const override;
 
     void render();
     void updateComponentGPUData();
-    void updateGPUDataIfRequired();
     GraphComponentRenderer *componentRendererForId(ComponentId componentId) const;
 signals:
     // Base64 encoded png image for QML...

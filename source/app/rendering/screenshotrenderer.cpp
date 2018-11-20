@@ -16,10 +16,7 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     GraphRendererCore(renderer),
     _graphModel(renderer.graphModel()),
     _componentRenderers(renderer.graphModel()->graph()),
-    _selectionManager(renderer._selectionManager),
-    _hiddenNodes(_graphModel->graph()),
-    _hiddenEdges(_graphModel->graph()),
-    _mainRenderer(renderer)
+    _selectionManager(renderer._selectionManager)
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
         *componentRendererForId(componentId) = *renderer.componentRendererForId(componentId);
@@ -104,7 +101,6 @@ void ScreenshotRenderer::render()
     glViewport(0, 0, width(), height());
 
     // Update Scene
-    updateGPUDataIfRequired();
     updateComponentGPUData();
 
     renderGraph();
@@ -196,170 +192,6 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
     emit screenshotComplete(image, path);
 
     _isScreenshot = false;
-}
-
-void ScreenshotRenderer::updateGPUDataIfRequired()
-{
-    std::unique_lock<std::recursive_mutex> nodePositionsLock(_graphModel->nodePositions().mutex());
-
-    int componentIndex = 0;
-
-    auto& nodePositions = _graphModel->nodePositions();
-
-    resetGPUGraphData();
-
-    NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
-
-    float textScale = u::pref("visuals/textSize").toFloat();
-    auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
-    auto textColor = Document::contrastingColorForBackground();
-    auto showNodeText = static_cast<TextState>(u::pref("visuals/showNodeText").toInt());
-    auto showEdgeText = static_cast<TextState>(u::pref("visuals/showEdgeText").toInt());
-    auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
-
-    // Ignore the setting if the graph is undirected
-    if(!_graphModel->directed())
-        edgeVisualType = EdgeVisualType::Cylinder;
-
-    for(auto& componentRendererRef : _componentRenderers)
-    {
-        GraphComponentRenderer* componentRenderer = componentRendererRef;
-        if(!componentRenderer->visible())
-            continue;
-
-        const float UnhighlightedAlpha = 0.15f;
-
-        for(auto nodeId : componentRenderer->nodeIds())
-        {
-            if(_hiddenNodes.get(nodeId))
-                continue;
-
-            const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
-            scaledAndSmoothedNodePositions[nodeId] = nodePosition;
-
-            auto& nodeVisual = _graphModel->nodeVisual(nodeId);
-
-            // Create and add NodeData
-            GPUGraphData::NodeData nodeData;
-            nodeData._position[0] = nodePosition.x();
-            nodeData._position[1] = nodePosition.y();
-            nodeData._position[2] = nodePosition.z();
-            nodeData._component = componentIndex;
-            nodeData._size = nodeVisual._size;
-            nodeData._outerColor[0] = nodeVisual._outerColor.redF();
-            nodeData._outerColor[1] = nodeVisual._outerColor.greenF();
-            nodeData._outerColor[2] = nodeVisual._outerColor.blueF();
-            nodeData._innerColor[0] = nodeVisual._innerColor.redF();
-            nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
-            nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
-
-            QColor outlineColor = nodeVisual._state.test(VisualFlags::Selected) ?
-                Qt::white : Qt::black;
-
-            nodeData._outlineColor[0] = outlineColor.redF();
-            nodeData._outlineColor[1] = outlineColor.greenF();
-            nodeData._outlineColor[2] = outlineColor.blueF();
-
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                nodeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
-
-            if(gpuGraphData != nullptr)
-            {
-                gpuGraphData->_nodeData.push_back(nodeData);
-
-                if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::Unhighlighted))
-                    continue;
-
-                if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
-                    continue;
-
-                _mainRenderer.createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
-                    nodeVisual._size, nodePosition, componentIndex,
-                    gpuGraphDataForOverlay(componentRenderer->alpha()));
-            }
-        }
-
-        for(auto& edge : componentRenderer->edges())
-        {
-            if(_hiddenEdges.get(edge->id()) || _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()))
-                continue;
-
-            const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
-            const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
-
-            auto& edgeVisual = _graphModel->edgeVisual(edge->id());
-            auto& sourceNodeVisual = _graphModel->nodeVisual(edge->sourceId());
-            auto& targetNodeVisual = _graphModel->nodeVisual(edge->targetId());
-
-            auto nodeRadiusSumSq = sourceNodeVisual._size + targetNodeVisual._size;
-            nodeRadiusSumSq *= nodeRadiusSumSq;
-            const auto edgeLengthSq = (targetPosition - sourcePosition).lengthSquared();
-
-            if(edgeLengthSq < nodeRadiusSumSq)
-            {
-                // The edge's nodes are intersecting. Their overlap defines a lens of a
-                // certain radius. If this is greater than the edge radius, the edge is
-                // entirely enclosed within the nodes and we can safely skip rendering
-                // it altogether since it is entirely occluded.
-
-                const auto sourceRadiusSq = sourceNodeVisual._size * sourceNodeVisual._size;
-                const auto targetRadiusSq = targetNodeVisual._size * targetNodeVisual._size;
-                const auto term = edgeLengthSq + sourceRadiusSq - targetRadiusSq;
-                const auto intersectionLensRadiusSq = (edgeLengthSq * edgeLengthSq * sourceRadiusSq) -
-                    ((edgeLengthSq * term * term) / 4.0f);
-                const auto edgeRadiusSq = edgeVisual._size * edgeVisual._size;
-
-                if(edgeRadiusSq < intersectionLensRadiusSq)
-                    continue;
-            }
-
-            GPUGraphData::EdgeData edgeData;
-            edgeData._sourcePosition[0] = sourcePosition.x();
-            edgeData._sourcePosition[1] = sourcePosition.y();
-            edgeData._sourcePosition[2] = sourcePosition.z();
-            edgeData._targetPosition[0] = targetPosition.x();
-            edgeData._targetPosition[1] = targetPosition.y();
-            edgeData._targetPosition[2] = targetPosition.z();
-            edgeData._sourceSize = _graphModel->nodeVisual(edge->sourceId())._size;
-            edgeData._targetSize = _graphModel->nodeVisual(edge->targetId())._size;
-            edgeData._edgeType = static_cast<int>(edgeVisualType);
-            edgeData._component = componentIndex;
-            edgeData._size = edgeVisual._size;
-            edgeData._outerColor[0] = edgeVisual._outerColor.redF();
-            edgeData._outerColor[1] = edgeVisual._outerColor.greenF();
-            edgeData._outerColor[2] = edgeVisual._outerColor.blueF();
-            edgeData._innerColor[0] = edgeVisual._innerColor.redF();
-            edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
-            edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
-
-            edgeData._outlineColor[0] = 0.0f;
-            edgeData._outlineColor[1] = 0.0f;
-            edgeData._outlineColor[2] = 0.0f;
-
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                edgeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
-
-            if(gpuGraphData != nullptr)
-            {
-                gpuGraphData->_edgeData.push_back(edgeData);
-
-                if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::Unhighlighted))
-                    continue;
-
-                if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
-                    continue;
-
-                QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
-                _mainRenderer.createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
-                                                 edgeVisual._size, midPoint, componentIndex,
-                                                 gpuGraphDataForOverlay(componentRenderer->alpha()));
-            }
-        }
-
-        componentIndex++;
-    }
-
-    uploadGPUGraphData();
 }
 
 GraphComponentRenderer* ScreenshotRenderer::componentRendererForId(ComponentId componentId) const
