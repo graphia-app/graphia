@@ -655,9 +655,11 @@ public:
     {
         if constexpr(std::is_same_v<E, NodeId>)
             return node(graphModel, condition);
-        else if constexpr(std::is_same_v<E, EdgeId>)
+
+        if constexpr(std::is_same_v<E, EdgeId>)
             return edge(graphModel, condition);
-        else if constexpr(std::is_same_v<E, const IGraphComponent&>)
+
+        if constexpr(std::is_same_v<E, const IGraphComponent&>)
             return component(graphModel, condition);
     }
 
@@ -690,9 +692,11 @@ public:
     {
         if constexpr(std::is_same_v<E, NodeId>)
             return node(attribute, op, value);
-        else if constexpr(std::is_same_v<E, EdgeId>)
+
+        if constexpr(std::is_same_v<E, EdgeId>)
             return edge(attribute, op, value);
-        else if constexpr(std::is_same_v<E, const IGraphComponent&>)
+
+        if constexpr(std::is_same_v<E, const IGraphComponent&>)
             return component(attribute, op, value);
     }
 };
