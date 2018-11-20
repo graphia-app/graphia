@@ -649,6 +649,18 @@ public:
         return boost::apply_visitor(ConditionVisitor<const IGraphComponent&>(ElementType::Component, graphModel), condition);
     }
 
+    template<typename E>
+    static auto elementType(const GraphModel& graphModel,
+                            const GraphTransformConfig::Condition& condition)
+    {
+        if constexpr(std::is_same_v<E, NodeId>)
+            return node(graphModel, condition);
+        else if constexpr(std::is_same_v<E, EdgeId>)
+            return edge(graphModel, condition);
+        else if constexpr(std::is_same_v<E, const IGraphComponent&>)
+            return component(graphModel, condition);
+    }
+
     template<typename Op, typename Value>
     static auto node(const Attribute& attribute, Op op, Value value)
     {
@@ -671,6 +683,17 @@ public:
         GraphTransformConfig::TerminalOp terminalOp = op;
         AttributeValueOpVistor<const IGraphComponent&> visitor(attribute, TerminalValueWrapper(value), false);
         return boost::apply_visitor(visitor, terminalOp);
+    }
+
+    template<typename E, typename Op, typename Value>
+    static auto elementType(const Attribute& attribute, Op op, Value value)
+    {
+        if constexpr(std::is_same_v<E, NodeId>)
+            return node(attribute, op, value);
+        else if constexpr(std::is_same_v<E, EdgeId>)
+            return edge(attribute, op, value);
+        else if constexpr(std::is_same_v<E, const IGraphComponent&>)
+            return component(attribute, op, value);
     }
 };
 
