@@ -66,7 +66,14 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
         synthesise(target.edgeIds());
 }
 
-std::unique_ptr<GraphTransform> ConditionalAttributeTransformFactory::create(const GraphTransformConfig&) const
+std::unique_ptr<GraphTransform> ConditionalAttributeTransformFactory::create(
+    const GraphTransformConfig& graphTransformConfig) const
 {
+    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+
+    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
+    if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
+        return nullptr;
+
     return std::make_unique<ConditionalAttributeTransform>(elementType(), *graphModel());
 }

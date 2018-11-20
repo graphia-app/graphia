@@ -480,6 +480,7 @@ Window
                                         {
                                             var transformParameter = TransformConfig.createTransformParameter(document,
                                                 controlPlaceholder, parameterData, updateTransformExpression);
+                                            transformParameter.updateValueImmediately = true;
                                             transformParameter.direction = Qt.Vertical;
                                             parameters._values[modelData] = transformParameter;
                                         }
