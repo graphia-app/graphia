@@ -33,6 +33,8 @@ private:
 
     bool _isScreenshot = false;
     bool _isPreview = false;
+    int _viewportWidth = 0;
+    int _viewportHeight = 0;
     int _screenshotHeight = 0;
     int _screenshotWidth = 0;
     int _currentTileX = 0;
@@ -46,7 +48,7 @@ private:
     // able to use the existing renderers while this occurs. If the array stored
     // values, then the storage for the renderers themselves would potentially be
     // moved around, as opposed to just the storage for the pointers.
-    ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray> _componentRenderers;
+    ComponentArray<MovablePointer<Camera>, LockingGraphArray> _componentCameras;
 
     enum class Mode
     {
@@ -63,7 +65,6 @@ private:
 
     void render();
     void updateComponentGPUData();
-    GraphComponentRenderer *componentRendererForId(ComponentId componentId) const;
 signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;

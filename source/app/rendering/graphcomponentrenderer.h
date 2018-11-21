@@ -97,7 +97,6 @@ public:
 
     QMatrix4x4 modelViewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
-    QMatrix4x4 screenshotTileProjectionMatrix(float tileSize) const;
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveSavedFocusToNode(NodeId nodeId, float radius = -1.0f);
@@ -146,6 +145,7 @@ public:
                                           const QVector3D& centre,
                                           const std::vector<NodeId>& nodeIds);
 
+    QMatrix4x4 projectionMatrixDebug() const;
 private:
     GraphRenderer* _graphRenderer = nullptr;
 

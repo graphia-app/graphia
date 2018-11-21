@@ -15,11 +15,17 @@
 ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     GraphRendererCore(renderer),
     _graphModel(renderer.graphModel()),
-    _componentRenderers(renderer.graphModel()->graph()),
+    _viewportWidth(renderer.width()),
+    _viewportHeight(renderer.height()),
+    _componentCameras(renderer.graphModel()->graph()),
     _selectionManager(renderer._selectionManager)
+
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
-        *componentRendererForId(componentId) = *renderer.componentRendererForId(componentId);
+    {
+        Camera* camera = _componentCameras.at(componentId);
+        *camera = *renderer.componentRendererForId(componentId)->camera();
+    }
 
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
@@ -148,7 +154,7 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
 {
     _isScreenshot = true;
 
-    float viewportAspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
+    float viewportAspectRatio = static_cast<float>(_viewportWidth) / static_cast<float>(_viewportHeight);
 
     _screenshotWidth = width;
     _screenshotHeight = height;
@@ -194,16 +200,6 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
     _isScreenshot = false;
 }
 
-GraphComponentRenderer* ScreenshotRenderer::componentRendererForId(ComponentId componentId) const
-{
-    if(componentId.isNull())
-        return nullptr;
-
-    GraphComponentRenderer* renderer = _componentRenderers.at(componentId);
-    Q_ASSERT(renderer != nullptr);
-    return renderer;
-}
-
 void ScreenshotRenderer::updateComponentGPUData()
 {
     //FIXME this doesn't necessarily need to be entirely regenerated and rebuffered
@@ -215,42 +211,48 @@ void ScreenshotRenderer::updateComponentGPUData()
 
     for(ComponentId componentId : _graphModel->graph().componentIds())
     {
-        componentRendererForId(componentId)->initialise(_graphModel, componentId,
-                                                        _selectionManager, nullptr);
-        componentRendererForId(componentId)->setViewportSize(_screenshotWidth, _screenshotHeight);
-        componentRendererForId(componentId)->setDimensions(QRectF(0, 0, _screenshotWidth, _screenshotHeight));
-        componentRendererForId(componentId)->setVisible(true);
+        Camera* camera = _componentCameras.at(componentId);
+        float aspectRatio = static_cast<float>(_screenshotWidth) / static_cast<float>(_screenshotHeight);
+        auto _fovy = 60.0f;
+
+        camera->setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+        camera->setViewportWidth(_screenshotWidth);
+        camera->setViewportHeight(_screenshotHeight);
     }
 
-    for(auto& componentRendererRef : _componentRenderers)
+    for(auto& componentCameraRef : _componentCameras)
     {
-        GraphComponentRenderer* componentRenderer = componentRendererRef;
-        if(componentRenderer == nullptr)
+        Camera* componentCamera = componentCameraRef;
+        if(componentCamera == nullptr)
         {
-            qWarning() << "null component renderer";
+            qWarning() << "null component camera";
             continue;
         }
 
-        if(!componentRenderer->visible())
-            continue;
-
         // Model View
         for(int i = 0; i < 16; i++)
-            componentData.push_back(componentRenderer->modelViewMatrix().data()[i]);
+            componentData.push_back(componentCamera->viewMatrix().data()[i]);
 
         // Projection
         if(_isScreenshot)
         {
-            // Tile projection for high res screenshots
-            float tileWidthRatio = static_cast<float>(width()) / _screenshotWidth;
-            float tileHeightRatio = static_cast<float>(height()) / _screenshotHeight;
+            // Tile translation for high res screenshots
+            float tileWidthRatio = static_cast<float>(TILE_SIZE) / _screenshotWidth;
+            float tileHeightRatio = static_cast<float>(TILE_SIZE) / _screenshotHeight;
 
             float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * _currentTileX);
             float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * _currentTileY);
 
-            QMatrix4x4 projMatrix = componentRenderer->screenshotTileProjectionMatrix(TILE_SIZE);
-            QMatrix4x4 tileTranslation;
+            // Calculate tile projection matrix
+            QMatrix4x4 projMatrix;
+            QMatrix4x4 translation;
 
+            float xScale = static_cast<float>(_screenshotWidth) / TILE_SIZE;
+            float yScale = static_cast<float>(_screenshotHeight) / TILE_SIZE;
+            translation.scale(xScale, yScale);
+            projMatrix = translation * componentCamera->projectionMatrix();
+
+            QMatrix4x4 tileTranslation;
             tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);
             projMatrix = tileTranslation * projMatrix;
 
@@ -261,7 +263,7 @@ void ScreenshotRenderer::updateComponentGPUData()
         {
             // Normal projection
             for(int i = 0; i < 16; i++)
-                componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
+                componentData.push_back(componentCamera->projectionMatrix().data()[i]);
         }
     }
 
