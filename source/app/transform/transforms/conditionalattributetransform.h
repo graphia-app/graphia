@@ -34,7 +34,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr("Create an attibute whose value is the "
+        return QObject::tr("Create an attribute whose value is the "
             "result of the specified condition.");
     }
     GraphTransformCategory category() const override { return GraphTransformCategory::Attribute; }
