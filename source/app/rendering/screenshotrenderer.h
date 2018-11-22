@@ -16,6 +16,7 @@ class ScreenshotRenderer :
 
 public:
     ScreenshotRenderer(GraphRenderer& renderer);
+    ~ScreenshotRenderer();
 
     void copyTextureObject();
     void updateGPU();
@@ -50,13 +51,6 @@ private:
     // moved around, as opposed to just the storage for the pointers.
     ComponentArray<MovablePointer<Camera>, LockingGraphArray> _componentCameras;
 
-    enum class Mode
-    {
-        Overview,
-        Component
-    };
-
-    SelectionManager* _selectionManager;
     OpenGLDebugLogger _openGLDebugLogger;
     GLuint _sdfTexture;
     bool _FBOcomplete = false;

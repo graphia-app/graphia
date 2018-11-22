@@ -17,9 +17,7 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     _graphModel(renderer.graphModel()),
     _viewportWidth(renderer.width()),
     _viewportHeight(renderer.height()),
-    _componentCameras(renderer.graphModel()->graph()),
-    _selectionManager(renderer._selectionManager)
-
+    _componentCameras(renderer.graphModel()->graph())
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
     {
@@ -41,6 +39,7 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
     int renderWidth = 0;
     int renderHeight = 0;
 
+    glBindTexture(GL_TEXTURE_2D_ARRAY, renderer.sdfTexture());
     glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
     glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
 
@@ -71,7 +70,16 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
         }
     }
 
+    glDeleteFramebuffers(1, &textureFBO);
+
     uploadGPUGraphData();
+}
+
+ScreenshotRenderer::~ScreenshotRenderer()
+{
+    glDeleteFramebuffers(1, &_screenshotFBO);
+    glDeleteTextures(1, &_sdfTexture);
+    glDeleteTextures(1, &_screenshotTex);
 }
 
 void ScreenshotRenderer::onPreviewRequested(int width, int height, bool fillSize)

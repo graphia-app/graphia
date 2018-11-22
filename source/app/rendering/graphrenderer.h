@@ -198,7 +198,6 @@ private:
     bool _gpuDataRequiresUpdate = false;
 
     QRect _selectionRect;
-    ScreenshotRenderer* _screenshotRenderer;
 
     QTime _time;
     float _lastTime = 0.0f;
