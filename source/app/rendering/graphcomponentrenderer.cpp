@@ -29,8 +29,9 @@
 #include <mutex>
 #include <algorithm>
 
-const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 2.5f;
-const float GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS = MINIMUM_ZOOM_DISTANCE * 2.5f;
+// This value should be larger than the maximum node size
+const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 3.5f;
+const float GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS = MINIMUM_ZOOM_DISTANCE * 2.0f;
 
 void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId componentId,
                                         SelectionManager* selectionManager,
