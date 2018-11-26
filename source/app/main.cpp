@@ -144,10 +144,10 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("visuals/edgeVisualType"),                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     preferences.define(QStringLiteral("visuals/textAlignment"),                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
     preferences.define(QStringLiteral("visuals/showMultiElementIndicators"),    true);
-    preferences.define(QStringLiteral("visuals/savedGradients"),                DEFAULT_GRADIENT_PRESETS);
-    preferences.define(QStringLiteral("visuals/defaultGradient"),               DEFAULT_GRADIENT);
-    preferences.define(QStringLiteral("visuals/savedPalettes"),                 DEFAULT_PALETTE_PRESETS);
-    preferences.define(QStringLiteral("visuals/defaultPalette"),                DEFAULT_PALETTE);
+    preferences.define(QStringLiteral("visuals/savedGradients"),                Defaults::GRADIENT_PRESETS);
+    preferences.define(QStringLiteral("visuals/defaultGradient"),               Defaults::GRADIENT);
+    preferences.define(QStringLiteral("visuals/savedPalettes"),                 Defaults::PALETTE_PRESETS);
+    preferences.define(QStringLiteral("visuals/defaultPalette"),                Defaults::PALETTE);
 
     preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
     preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);

@@ -1,7 +1,9 @@
 #ifndef DEFAULTPALETTES_H
 #define DEFAULTPALETTES_H
 
-const char* const DEFAULT_PALETTE_PRESETS =
+namespace Defaults
+{
+const char* const PALETTE_PRESETS =
 R"([{
     "autoColors": [
       "#199311",
@@ -20,7 +22,7 @@ R"([{
     "defaultColor": "#DDDDDD"
 }])";
 
-const char* const DEFAULT_PALETTE =
+const char* const PALETTE =
 R"({
     "autoColors": [
     "#199311",
@@ -38,5 +40,6 @@ R"({
     ],
     "defaultColor": "#DDDDDD"
 })";
+}
 
 #endif // DEFAULTPALETTES_H

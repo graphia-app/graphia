@@ -1,7 +1,9 @@
 #ifndef DEFAULTGRADIENTS_H
 #define DEFAULTGRADIENTS_H
 
-const char* const DEFAULT_GRADIENT_PRESETS =
+namespace Defaults
+{
+const char* const GRADIENT_PRESETS =
 R"([{
     "0":    "Red",
     "0.66": "Yellow",
@@ -54,11 +56,12 @@ R"([{
     "1.0":  "#00FAFA"
 }])";
 
-const char* const DEFAULT_GRADIENT =
+const char* const GRADIENT =
 R"({
     "0":    "Red",
     "0.66": "Yellow",
     "1":    "White"
 })";
+}
 
 #endif // DEFAULTGRADIENTS_H
