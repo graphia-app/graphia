@@ -82,6 +82,11 @@ public:
         return u::contrastingColor(color);
     }
 
+    Q_INVOKABLE QColor colorForString(const QString& string)
+    {
+        return u::colorForString(string);
+    }
+
 private:
     QCollator _collator;
 };
