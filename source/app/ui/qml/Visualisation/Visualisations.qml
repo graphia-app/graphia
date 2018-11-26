@@ -28,10 +28,8 @@ Item
         document: root.document
     }
 
-    GradientEditor
-    {
-        id: _gradientEditor
-    }
+    GradientEditor { id: _gradientEditor }
+    PaletteSelector { id: _paletteSelector }
 
     ColumnLayout
     {
@@ -103,6 +101,7 @@ Item
                     {
                         property var document: root.document
                         gradientEditor: _gradientEditor
+                        paletteSelector: _paletteSelector
 
                         Component.onCompleted:
                         {

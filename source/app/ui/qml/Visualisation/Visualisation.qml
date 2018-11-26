@@ -36,6 +36,21 @@ Item
         }
     }
 
+    property var paletteSelector
+    Connections
+    {
+        target: paletteSelector
+
+        onConfigurationChanged:
+        {
+            if(paletteSelector.visualisationIndex !== index)
+                return;
+
+            parameters["palette"] = "\"" + Utils.escapeQuotes(paletteSelector.configuration) + "\"";
+            root.updateExpression();
+        }
+    }
+
     MouseArea
     {
         anchors.fill: row
@@ -97,6 +112,11 @@ Item
             invert: isFlagSet("invert");
             propogatePresses: true
 
+            minimum: root._visualisationInfo.minimumNumericValue !== undefined ?
+                root._visualisationInfo.minimumNumericValue : 0.0
+            maximum: root._visualisationInfo.maximumNumericValue !== undefined ?
+                root._visualisationInfo.maximumNumericValue : 0.0
+
             onClicked:
             {
                 if(mouse.button === Qt.LeftButton)
@@ -119,7 +139,21 @@ Item
             textColor: root.textColor
             hoverColor: root.hoverColor
 
-            propogatePresses: true
+            stringValues: root._visualisationInfo.stringValues !== undefined ?
+                root._visualisationInfo.stringValues : []
+
+            onClicked:
+            {
+                if(mouse.button === Qt.LeftButton)
+                {
+                    paletteSelector.visualisationIndex = index;
+                    paletteSelector.configuration = paletteKey.configuration;
+                    paletteSelector.stringValues = root._visualisationInfo.stringValues;
+                    paletteSelector.show();
+                }
+                else
+                    mouse.accepted = false;
+            }
         }
 
         Hamburger
@@ -302,6 +336,8 @@ Item
         document.update();
     }
 
+    property var _visualisationInfo: ({})
+
     function setVisualisationInfo(visualisationInfo)
     {
         switch(visualisationInfo.alertType)
@@ -322,11 +358,6 @@ Item
         case AlertType.None:
             alertIcon.visible = false;
         }
-
-        gradientKey.minimum = visualisationInfo.minimumNumericValue;
-        gradientKey.maximum = visualisationInfo.maximumNumericValue;
-
-        paletteKey.stringValues = visualisationInfo.stringValues;
     }
 
     function parseParameters(valid)
@@ -371,10 +402,10 @@ Item
             var error = false;
             if(document.hasVisualisationInfo() && index >= 0)
             {
-                var visualisationInfo = document.visualisationInfoAtIndex(index);
-                setVisualisationInfo(visualisationInfo);
+                root._visualisationInfo = document.visualisationInfoAtIndex(index);
+                setVisualisationInfo(root._visualisationInfo);
 
-                error = visualisationInfo.alertType === AlertType.Error;
+                error = root._visualisationInfo.alertType === AlertType.Error;
             }
 
             parseParameters(!error);

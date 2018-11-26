@@ -45,5 +45,7 @@
         <file>qml/Enrichment/EnrichmentResults.qml</file>
         <file>qml/Enrichment/EnrichmentWizard.qml</file>
         <file>qml/Controls/PaletteKey.qml</file>
+        <file>qml/Controls/PaletteSelector.qml</file>
+        <file>qml/Controls/PaletteEditor.qml</file>
     </qresource>
 </RCC>
