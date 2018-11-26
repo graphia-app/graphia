@@ -4,6 +4,8 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/boost_spirit_qstring_adapter.h>
 
+#include <QDebug>
+
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig::Parameter,
     (QString, _name),
@@ -54,7 +56,7 @@ const auto visualisation_def =
 BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation, parameter)
 } // namespace SpiritVisualisationParser
 
-bool VisualisationConfigParser::parse(const QString& text)
+bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
 {
     auto stdString = text.toStdString();
     auto begin = stdString.begin();
@@ -68,6 +70,9 @@ bool VisualisationConfigParser::parse(const QString& text)
     {
         _success = false;
         _failedInput = QString::fromStdString(std::string(begin, end));
+
+        if(warnOnFailure)
+            qWarning() << "Failed to parse" << _failedInput;
     }
 
     return _success;

@@ -5,6 +5,7 @@
 #include <boost/boost_spirit_qstring_adapter.h>
 
 #include <QRegularExpression>
+#include <QDebug>
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,
@@ -159,7 +160,7 @@ const auto transform_def =
 BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, parameter, condition, terminalCondition, unaryCondition)
 } // namespace SpiritGraphTranformConfigParser
 
-bool GraphTransformConfigParser::parse(const QString& text)
+bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
 {
     auto stdString = text.toStdString();
     auto begin = stdString.begin();
@@ -173,6 +174,9 @@ bool GraphTransformConfigParser::parse(const QString& text)
     {
         _success = false;
         _failedInput = QString::fromStdString(std::string(begin, end));
+
+        if(warnOnFailure)
+            qWarning() << "Failed to parse" << _failedInput;
     }
 
     return _success;

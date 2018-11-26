@@ -289,7 +289,7 @@ QString GraphModel::pluginQmlPath() const { return _plugin->qmlPath(); }
 bool GraphModel::graphTransformIsValid(const QString& transform) const
 {
     GraphTransformConfigParser p;
-    bool parsed = p.parse(transform);
+    bool parsed = p.parse(transform, false);
 
     if(parsed)
     {
@@ -460,7 +460,7 @@ bool GraphModel::opIsUnary(const QString& op) const
 bool GraphModel::visualisationIsValid(const QString& visualisation) const
 {
     VisualisationConfigParser p;
-    bool parsed = p.parse(visualisation);
+    bool parsed = p.parse(visualisation, false);
 
     if(parsed)
     {

@@ -15,7 +15,7 @@ private:
     QString _failedInput;
 
 public:
-    bool parse(const QString& text);
+    bool parse(const QString& text, bool warnOnFailure = true);
 
     const GraphTransformConfig& result() const { return _result; }
     bool success() const { return _success; }
