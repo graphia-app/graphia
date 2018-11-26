@@ -12,7 +12,7 @@ class ColorPalette
 private:
     std::map<QString, QColor> _fixedColors;
     std::vector<QColor> _colors;
-    QColor _otherColor;
+    QColor _defaultColor;
 
 public:
     ColorPalette() = default;

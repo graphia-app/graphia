@@ -16,7 +16,6 @@ ColumnLayout
     property var stringValues: []
 
     readonly property int _removeButtonSize: 24
-    property bool _lastColorIsOther: false
 
     function setup(configuration)
     {
@@ -37,14 +36,14 @@ ColumnLayout
 
         paletteAutoColorListRepeater.model = root._autoColors;
 
-        if(palette.otherColor !== undefined)
+        if(palette.defaultColor !== undefined)
         {
-            otherColorKey.color = palette.otherColor;
-            otherColorRadioButton.checked = true;
+            defaultColorKey.color = palette.defaultColor;
+            defaultColorRadioButton.checked = true;
         }
         else
         {
-            otherColorKey.color = "lightgrey";
+            defaultColorKey.color = "lightgrey";
             generateColorsRadioButton.checked = true;
         }
 
@@ -70,11 +69,11 @@ ColumnLayout
     function updateRadioButtons()
     {
         if(!generateColorsRadioButton.enabled)
-            otherColorRadioButton.checked = true;
+            defaultColorRadioButton.checked = true;
     }
 
     property var _autoColors: []
-    property string _otherColor: ""
+    property string _defaultColor: ""
     property var _fixedColors: []
 
     property string configuration:
@@ -83,8 +82,8 @@ ColumnLayout
 
         o.autoColors = root._autoColors;
 
-        if(otherColorRadioButton.checked)
-            o.otherColor = Utils.colorToString(otherColorKey.color);
+        if(defaultColorRadioButton.checked)
+            o.defaultColor = Utils.colorToString(defaultColorKey.color);
 
         if(root._fixedColors.length > 0)
         {
@@ -243,7 +242,7 @@ ColumnLayout
             text: qsTr("Other Values")
         }
 
-        ExclusiveGroup { id: otherColorsGroup }
+        ExclusiveGroup { id: defaultColorsGroup }
 
         RowLayout
         {
@@ -251,18 +250,18 @@ ColumnLayout
 
             RadioButton
             {
-                id: otherColorRadioButton
+                id: defaultColorRadioButton
 
                 Layout.fillWidth: true
 
                 text: qsTr("Fixed")
-                exclusiveGroup: otherColorsGroup
+                exclusiveGroup: defaultColorsGroup
             }
 
             ColorPickButton
             {
-                enabled: otherColorRadioButton.checked
-                id: otherColorKey
+                enabled: defaultColorRadioButton.checked
+                id: defaultColorKey
             }
 
             // Padding so that all the colours are in a column
@@ -281,7 +280,7 @@ ColumnLayout
                 root._fixedColors.length > 0
 
             text: qsTr("Generate")
-            exclusiveGroup: otherColorsGroup
+            exclusiveGroup: defaultColorsGroup
         }
     }
 

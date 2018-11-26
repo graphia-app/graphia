@@ -17,7 +17,7 @@ R"([{
       "#798FF0",
       "#111111"
     ],
-    "otherColor": "#DDDDDD"
+    "defaultColor": "#DDDDDD"
 }])";
 
 const char* const DEFAULT_PALETTE =
@@ -36,7 +36,7 @@ R"({
     "#798FF0",
     "#111111"
     ],
-    "otherColor": "#DDDDDD"
+    "defaultColor": "#DDDDDD"
 })";
 
 #endif // DEFAULTPALETTES_H

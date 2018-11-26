@@ -411,12 +411,12 @@ Window
         else if((paletteA.fixedColors !== undefined) !== (paletteB.fixedColors !== undefined))
             return false;
 
-        if((paletteA.otherColor !== undefined) && (paletteB.otherColor !== undefined))
+        if((paletteA.defaultColor !== undefined) && (paletteB.defaultColor !== undefined))
         {
-            if(!Qt.colorEqual(paletteA.otherColor, paletteB.otherColor))
+            if(!Qt.colorEqual(paletteA.defaultColor, paletteB.defaultColor))
                 return false;
         }
-        else if((paletteA.otherColor !== undefined) !== (paletteB.otherColor !== undefined))
+        else if((paletteA.defaultColor !== undefined) !== (paletteB.defaultColor !== undefined))
             return false;
 
         return true;

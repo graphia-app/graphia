@@ -58,19 +58,19 @@ ColorPalette::ColorPalette(const QString& descriptor)
             _fixedColors[key] = fixedColorsObject.value(key).toString();
     }
 
-    auto otherColorValue = jsonObject.value(QStringLiteral("otherColor"));
+    auto defaultColorValue = jsonObject.value(QStringLiteral("defaultColor"));
 
-    if(otherColorValue.isUndefined())
+    if(defaultColorValue.isUndefined())
         return;
 
-    if(!otherColorValue.isString())
+    if(!defaultColorValue.isString())
     {
-        qDebug() << "ColorPalette.otherColor is not a string";
+        qDebug() << "ColorPalette.defaultColor is not a string";
         return;
     }
 
-    auto otherColorString = otherColorValue.toString();
-    _otherColor = QColor(otherColorString);
+    auto defaultColorString = defaultColorValue.toString();
+    _defaultColor = QColor(defaultColorString);
 }
 
 QColor ColorPalette::get(const QString& value, const std::vector<QString>& values) const
@@ -131,8 +131,8 @@ QColor ColorPalette::get(const QString& value, const std::vector<QString>& value
         auto hueIndex = index / _colors.size();
         if(hueIndex > 0)
         {
-            if(_otherColor.isValid())
-                return _otherColor;
+            if(_defaultColor.isValid())
+                return _defaultColor;
 
             // If the base color has low saturation or
             // low value, adjust these before touching the hue
@@ -160,8 +160,8 @@ QColor ColorPalette::get(const QString& value, const std::vector<QString>& value
 
         return QColor::fromHsv(h, s, v);
     }
-    else if(_otherColor.isValid())
-        return _otherColor;
+    else if(_defaultColor.isValid())
+        return _defaultColor;
 
     return u::colorForString(value);
 }

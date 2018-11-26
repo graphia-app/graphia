@@ -67,7 +67,7 @@ Item
     property bool hoverEnabled: true
 
     property var _fixedColors: []
-    property bool _lastColorIsOther: false
+    property bool _lastColorIsDefault: false
 
     function updatePalette()
     {
@@ -113,11 +113,11 @@ Item
             root._fixedColors = fixedColors;
         }
 
-        root._lastColorIsOther = (palette.otherColor !== undefined) &&
+        root._lastColorIsDefault = (palette.defaultColor !== undefined) &&
             ((colors.length < stringValues.length) || stringValues.length === 0);
 
-        if(root._lastColorIsOther)
-            colors.push(palette.otherColor)
+        if(root._lastColorIsDefault)
+            colors.push(palette.defaultColor)
 
         repeater.model = colors;
     }
@@ -165,7 +165,7 @@ Item
             {
                 id: key
 
-                property bool _isLastColor: root._lastColorIsOther &&
+                property bool _isLastColor: root._lastColorIsDefault &&
                     index === (root._numKeys - 1)
                 property bool _hovered: !_isLastColor && index === root._indexUnderCursor
 
@@ -297,7 +297,7 @@ Item
         return index;
     }
 
-    property bool _lastColorhovered: root._lastColorIsOther && (root._numKeys - 1) === root._indexUnderCursor
+    property bool _lastColorhovered: root._lastColorIsDefault && (root._numKeys - 1) === root._indexUnderCursor
 
     MouseArea
     {
