@@ -120,6 +120,61 @@ function desaturate(colorString, factor)
     return Qt.hsla(c.hslHue, c.hslSaturation * factor, c.hslLightness, c.a);
 }
 
+function colorToString(color)
+{
+    if(typeof(color) === "string")
+        return color;
+    else if(typeof(color) !== "object")
+    {
+        console.log("color is not an object");
+        return "black";
+    }
+
+    var normalisedToHex = function(normalised)
+    {
+        var decimal = Math.floor(normalised * 255);
+        var hex = decimal.toString(16).toUpperCase();
+
+        while(hex.length < 2)
+            hex = "0" + hex;
+
+        return hex;
+    };
+
+    var colorString = "#";
+
+    if(color.a !== 1)
+        colorString += normalisedToHex(color.a);
+
+    colorString += normalisedToHex(color.r);
+    colorString += normalisedToHex(color.g);
+    colorString += normalisedToHex(color.b);
+
+    return colorString;
+}
+
+function generateColorFrom(color)
+{
+    if(typeof(color) === "string")
+        color = Qt.lighter(color, 1.0);
+
+    var goldenAngle = 137.5 / 360.0;
+    var hue = color.hsvHue;
+
+    if(hue >= 0.0)
+    {
+        hue += goldenAngle;
+        if(hue > 1.0)
+            hue -= 1.0;
+
+        color.hsvHue = hue;
+
+        return colorToString(color);
+    }
+
+    return "#FF0000";
+}
+
 function pluralise(count, singular, plural)
 {
     if(count === 1)
