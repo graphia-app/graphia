@@ -175,7 +175,13 @@ Window
                 expression += " with ";
 
             for(var key in parameters)
-                expression += " " + key + " = " + parameters[key];
+            {
+                var parameter = parameters[key];
+                parameter = Utils.sanitiseJson(parameter);
+                parameter = Utils.escapeQuotes(parameter);
+
+                expression += " " + key + " = \"" + parameter + "\"";
+            }
 
             visualisationExpressions.push(expression);
         });

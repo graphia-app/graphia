@@ -740,14 +740,20 @@ Window
                 var expression = "\"" + attributeName + "\" \"" + channelName + "\"";
 
                 var valueType = _transform.defaultVisualisations[attributeName].valueType;
-                var parameters = document.visualisationDefaultParameters(valueType,
-                                                                         channelName);
+                var parameters = document.visualisationDefaultParameters(
+                    valueType, channelName);
 
                 if(Object.keys(parameters).length !== 0)
                     expression += " with ";
 
                 for(var key in parameters)
-                    expression += " " + key + " = " + parameters[key];
+                {
+                    var parameter = parameters[key];
+                    parameter = Utils.sanitiseJson(parameter);
+                    parameter = Utils.escapeQuotes(parameter);
+
+                    expression += " " + key + " = \"" + parameter + "\"";
+                }
 
                 defaultVisualisations.push(expression);
             }
