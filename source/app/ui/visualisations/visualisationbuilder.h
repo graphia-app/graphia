@@ -173,52 +173,6 @@ public:
 
         case ValueType::String:
         {
-            QCollator collator;
-            collator.setNumericMode(true);
-
-            // Map to a uniform set (namely numbers as strings) of values
-            // In this way we get predictable visualisations from different sets
-            // of input values
-            std::map<QString, QString> m;
-            auto sharedValues = attribute.sharedValues();
-            if(sharedValues.empty())
-                sharedValues = attribute.findSharedValuesForElements(*_elementIds);
-
-            if(!config.isFlagSet(QStringLiteral("assignByQuantity")))
-            {
-                // Sort in natural order so that e.g. "Thing 1" is always
-                // assigned a visualisation before "Thing 2"
-                std::sort(sharedValues.begin(), sharedValues.end(),
-                [&collator](const auto& a, const auto& b)
-                {
-                    return collator.compare(a._value, b._value) < 0;
-                });
-            }
-            else
-            {
-                // Shared values should already be sorted at this point,
-                // but resort anyway as in that case it'll be cheap and
-                // if it's not sorted (for whatever reason), we need it
-                // to be sorted
-                std::sort(sharedValues.begin(), sharedValues.end(),
-                [&collator](const auto& a, const auto& b)
-                {
-                    if(a._count == b._count)
-                        return collator.compare(a._value, b._value) < 0;
-
-                    return a._count > b._count;
-                });
-            }
-
-            int normalised = 0;
-            for(const auto& sharedValue : sharedValues)
-            {
-                m[sharedValue._value] = QString::number(normalised);
-                normalised++;
-
-                visualisationInfo.addStringValue(sharedValue._value);
-            }
-
             for(auto elementId : *_elementIds)
             {
                 if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
@@ -228,9 +182,6 @@ public:
                 }
 
                 auto stringValue = attribute.stringValueOf(elementId);
-                if(!stringValue.isEmpty())
-                    stringValue = m.at(stringValue);
-
                 apply(stringValue, channel, elementId, _numAppliedVisualisations);
             }
             break;

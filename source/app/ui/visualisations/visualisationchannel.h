@@ -27,8 +27,15 @@ public:
 
     virtual QString description(ElementType, ValueType) const { return {}; }
 
+    virtual void reset();
     virtual QVariantMap defaultParameters(ValueType) const { return {}; }
     virtual void setParameter(const QString& /*name*/, const QString& /*value*/) {}
+
+    const std::vector<QString>& values() const { return _values; }
+    void addValue(const QString& value);
+
+private:
+    std::vector<QString> _values;
 };
 
 #endif // VISUALISATIONCHANNEL_H

@@ -232,6 +232,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.cpp

@@ -527,22 +527,70 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             continue;
         }
 
+        channel->reset();
+
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
+
 
         if(attribute.elementType() == ElementType::Edge && channelName == QStringLiteral("Text"))
             _->_hasValidEdgeTextVisualisation = true;
 
+        if(attribute.valueType() == ValueType::String)
+        {
+            QCollator collator;
+            collator.setNumericMode(true);
+
+            auto sharedValues = attribute.sharedValues();
+            if(sharedValues.empty())
+            {
+                if(attribute.elementType() == ElementType::Node)
+                    sharedValues = attribute.findSharedValuesForElements(graph().nodeIds());
+                else if(attribute.elementType() == ElementType::Edge)
+                    sharedValues = attribute.findSharedValuesForElements(graph().edgeIds());
+            }
+
+            if(!visualisationConfig.isFlagSet(QStringLiteral("assignByQuantity")))
+            {
+                // Sort in natural order so that e.g. "Thing 1" is always
+                // assigned a visualisation before "Thing 2"
+                std::sort(sharedValues.begin(), sharedValues.end(),
+                [&collator](const auto& a, const auto& b)
+                {
+                    return collator.compare(a._value, b._value) < 0;
+                });
+            }
+            else
+            {
+                // Shared values should already be sorted at this point,
+                // but resort anyway as in that case it'll be cheap and
+                // if it's not sorted (for whatever reason), we need it
+                // to be sorted
+                std::sort(sharedValues.begin(), sharedValues.end(),
+                [&collator](const auto& a, const auto& b)
+                {
+                    if(a._count == b._count)
+                        return collator.compare(a._value, b._value) < 0;
+
+                    return a._count > b._count;
+                });
+            }
+
+            for(const auto& sharedValue : sharedValues)
+            {
+                channel->addValue(sharedValue._value);
+                info.addStringValue(sharedValue._value);
+            }
+        }
+
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel,
-                visualisationConfig, index, _->_visualisationInfos[index]);
+            nodeVisualisationsBuilder.build(attribute, *channel, visualisationConfig, index, info);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel,
-                visualisationConfig, index, _->_visualisationInfos[index]);
+            edgeVisualisationsBuilder.build(attribute, *channel, visualisationConfig, index, info);
             break;
 
         default:

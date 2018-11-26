@@ -1,5 +1,7 @@
 #include "colorvisualisationchannel.h"
 
+#include "shared/utils/preferences.h"
+
 #include <QObject>
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
@@ -12,7 +14,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     if(value.isEmpty())
         return;
 
-    elementVisual._outerColor = _colorPalette.get(value);
+    elementVisual._outerColor = _colorPalette.get(value, values());
 }
 
 QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
@@ -39,6 +41,14 @@ QString ColorVisualisationChannel::description(ElementType elementType, ValueTyp
     return {};
 }
 
+void ColorVisualisationChannel::reset()
+{
+    VisualisationChannel::reset();
+
+    _colorGradient = {};
+    _colorPalette = {};
+}
+
 QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) const
 {
     QVariantMap parameters;
@@ -48,32 +58,12 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     case ValueType::Int:
     case ValueType::Float:
         parameters.insert(QStringLiteral("gradient"),
-            R"("{
-              \"0\":    \"White\",
-              \"0.33\": \"Yellow\",
-              \"1\":    \"Red\"
-            }")");
+            u::pref("visuals/defaultGradient").toString());
         break;
 
     case ValueType::String:
         parameters.insert(QStringLiteral("palette"),
-            R"("{
-              \"baseColors\": [
-                \"#199311\",
-                \"#FF7700\",
-                \"#8126C0\",
-                \"#1DF3F3\",
-                \"#FFEE33\",
-                \"#FD1111\",
-                \"#FF69B4\",
-                \"#003BFF\",
-                \"#8AFF1E\",
-                \"#9D2323\",
-                \"#798FF0\",
-                \"#111111\"
-              ],
-              \"otherColor\": \"#DDDDDD\"
-            }")");
+            u::pref("visuals/defaultPalette").toString());
         break;
 
     default:
@@ -85,8 +75,8 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
 
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
 {
-    if(name == QLatin1String("gradient"))
+    if(name == QStringLiteral("gradient"))
         _colorGradient = ColorGradient(value);
-    else if(name == QLatin1String("palette"))
+    else if(name == QStringLiteral("palette"))
         _colorPalette = ColorPalette(value);
 }

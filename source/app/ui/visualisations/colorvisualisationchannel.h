@@ -5,6 +5,9 @@
 #include "colorgradient.h"
 #include "colorpalette.h"
 
+#include <vector>
+#include <QString>
+
 class ColorVisualisationChannel : public VisualisationChannel
 {
 public:
@@ -17,12 +20,14 @@ public:
 
     QString description(ElementType, ValueType) const override;
 
+    void reset() override;
     QVariantMap defaultParameters(ValueType valueType) const override;
     void setParameter(const QString& name, const QString& value) override;
 
 private:
     ColorGradient _colorGradient;
     ColorPalette _colorPalette;
+    std::vector<QString> _sharedValues;
 };
 
 #endif // COLORVISUALISATIONCHANNEL_H

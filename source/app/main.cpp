@@ -20,6 +20,7 @@
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/visualisations/defaultgradients.h"
+#include "ui/visualisations/defaultpalettes.h"
 #include "ui/hovermousepassthrough.h"
 #include "ui/enrichmentheatmapitem.h"
 
@@ -143,7 +144,10 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("visuals/edgeVisualType"),                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     preferences.define(QStringLiteral("visuals/textAlignment"),                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
     preferences.define(QStringLiteral("visuals/showMultiElementIndicators"),    true);
-    preferences.define(QStringLiteral("visuals/savedGradients"),                DEFAULT_GRADIENTS);
+    preferences.define(QStringLiteral("visuals/savedGradients"),                DEFAULT_GRADIENT_PRESETS);
+    preferences.define(QStringLiteral("visuals/defaultGradient"),               DEFAULT_GRADIENT);
+    preferences.define(QStringLiteral("visuals/savedPalettes"),                 DEFAULT_PALETTE_PRESETS);
+    preferences.define(QStringLiteral("visuals/defaultPalette"),                DEFAULT_PALETTE);
 
     preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
     preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);
