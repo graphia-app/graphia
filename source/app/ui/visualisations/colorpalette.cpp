@@ -83,7 +83,8 @@ QColor ColorPalette::get(const QString& value, const std::vector<QString>& value
         auto fixedColor = _fixedColors.at(value);
         return fixedColor;
     }
-    else if(index < 0)
+
+    if(index < 0)
     {
         // No index available, so derive one from the value itself
 
@@ -160,7 +161,8 @@ QColor ColorPalette::get(const QString& value, const std::vector<QString>& value
 
         return QColor::fromHsv(h, s, v);
     }
-    else if(_defaultColor.isValid())
+
+    if(_defaultColor.isValid())
         return _defaultColor;
 
     return u::colorForString(value);
