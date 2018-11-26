@@ -16,9 +16,10 @@ namespace u
         container.erase(std::remove(container.begin(), container.end(), value), container.end());
     }
 
-    template<typename C, typename T> size_t indexOf(C& container, const T& value)
+    template<typename C, typename T> int indexOf(C& container, const T& value)
     {
-        return std::distance(container.begin(), std::find(container.begin(), container.end(), value));
+        auto it = std::find(container.begin(), container.end(), value);
+        return it != container.end() ? std::distance(container.begin(), it) : -1;
     }
 
     template<typename C, typename T>
