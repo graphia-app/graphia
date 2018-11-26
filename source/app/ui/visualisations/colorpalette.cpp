@@ -30,20 +30,20 @@ ColorPalette::ColorPalette(const QString& descriptor)
     }
 
     auto jsonObject = jsonDocument.object();
-    auto baseColorsValue = jsonObject.value(QStringLiteral("baseColors"));
+    auto autoColorsValue = jsonObject.value(QStringLiteral("autoColors"));
     auto fixedColorsValue = jsonObject.value(QStringLiteral("fixedColors"));
 
-    if(!baseColorsValue.isArray() && !fixedColorsValue.isObject())
+    if(!autoColorsValue.isArray() && !fixedColorsValue.isObject())
     {
-        qDebug() << "ColorPalette does not have baseColors array or fixedColors object";
+        qDebug() << "ColorPalette does not have autoColors array or fixedColors object";
         return;
     }
 
-    if(baseColorsValue.isArray())
+    if(autoColorsValue.isArray())
     {
-        auto baseColorsArray = baseColorsValue.toArray();
+        auto autoColorsArray = autoColorsValue.toArray();
 
-        for(const auto& color : baseColorsArray)
+        for(const auto& color : autoColorsArray)
         {
             auto colorString = color.toString();
             _colors.emplace_back(colorString);

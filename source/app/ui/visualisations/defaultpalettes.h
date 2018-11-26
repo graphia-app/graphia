@@ -3,7 +3,7 @@
 
 const char* const DEFAULT_PALETTE_PRESETS =
 R"([{
-    "baseColors": [
+    "autoColors": [
       "#199311",
       "#FF7700",
       "#8126C0",
@@ -22,7 +22,7 @@ R"([{
 
 const char* const DEFAULT_PALETTE =
 R"({
-    "baseColors": [
+    "autoColors": [
     "#199311",
     "#FF7700",
     "#8126C0",

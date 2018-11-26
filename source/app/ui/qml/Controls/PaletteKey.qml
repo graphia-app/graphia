@@ -79,15 +79,15 @@ Item
         var colors = [];
         var i = 0;
 
-        if(palette.baseColors !== undefined)
+        if(palette.autoColors !== undefined)
         {
-            var numKeys = palette.baseColors.length;
+            var numKeys = palette.autoColors.length;
 
             if(stringValues.length > 0 && stringValues.length < numKeys)
                 numKeys = stringValues.length;
 
             for(i = 0; i < numKeys; i++)
-                colors.push(palette.baseColors[i]);
+                colors.push(palette.autoColors[i]);
         }
 
         if(palette.fixedColors !== undefined)

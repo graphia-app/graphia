@@ -378,17 +378,17 @@ Window
             paletteB = JSON.parse(paletteB);
         }
 
-        if((paletteA.baseColors !== undefined) && (paletteB.baseColors !== undefined))
+        if((paletteA.autoColors !== undefined) && (paletteB.autoColors !== undefined))
         {
-            if(paletteA.baseColors.length !== paletteB.baseColors.length)
+            if(paletteA.autoColors.length !== paletteB.autoColors.length)
                 return false;
         }
-        else if((paletteA.baseColors !== undefined) !== (paletteB.baseColors !== undefined))
+        else if((paletteA.autoColors !== undefined) !== (paletteB.autoColors !== undefined))
             return false;
 
-        for(var i = 0; i < paletteA.baseColors.length; i++)
+        for(var i = 0; i < paletteA.autoColors.length; i++)
         {
-            if(!Qt.colorEqual(paletteA.baseColors[i], paletteB.baseColors[i]))
+            if(!Qt.colorEqual(paletteA.autoColors[i], paletteB.autoColors[i]))
                 return false;
         }
 

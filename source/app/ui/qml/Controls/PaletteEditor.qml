@@ -24,15 +24,15 @@ ColumnLayout
 
         paletteAutoColorListRepeater.model = root._autoColors = [];
 
-        if(palette.baseColors !== undefined)
+        if(palette.autoColors !== undefined)
         {
-            var numKeys = palette.baseColors.length;
+            var numKeys = palette.autoColors.length;
 
             if(root.stringValues.length > 0 && root.stringValues.length < numKeys)
                 numKeys = root.stringValues.length;
 
             for(var key = 0; key < numKeys; key++)
-                root._autoColors.push(palette.baseColors[key]);
+                root._autoColors.push(palette.autoColors[key]);
         }
 
         paletteAutoColorListRepeater.model = root._autoColors;
@@ -81,7 +81,7 @@ ColumnLayout
     {
         var o = {};
 
-        o.baseColors = root._autoColors;
+        o.autoColors = root._autoColors;
 
         if(otherColorRadioButton.checked)
             o.otherColor = Utils.colorToString(otherColorKey.color);
