@@ -90,6 +90,21 @@ function unescapeQuotes(text)
     return text;
 }
 
+function sanitiseJson(text)
+{
+    try
+    {
+        var o = JSON.parse(text);
+        text = JSON.stringify(o);
+    }
+    catch(e)
+    {
+        // It's not JSON
+    }
+
+    return text;
+}
+
 function decimalPointsForValue(value)
 {
     if(value <= 0.001)
