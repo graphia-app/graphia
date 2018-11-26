@@ -146,6 +146,8 @@ public:
                                           const std::vector<NodeId>& nodeIds);
 
     QMatrix4x4 projectionMatrixDebug() const;
+    QRectF dimensions() const;
+
 private:
     GraphRenderer* _graphRenderer = nullptr;
 

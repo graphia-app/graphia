@@ -175,6 +175,11 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     return maxDistance;
 }
 
+QRectF GraphComponentRenderer::dimensions() const
+{
+    return _dimensions;
+}
+
 float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
 {
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);

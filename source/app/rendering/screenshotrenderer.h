@@ -20,6 +20,7 @@ public:
 
     void copyTextureObject();
     void updateGPU();
+
 public slots:
     void onPreviewRequested(int width, int height, bool fillSize);
     void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
@@ -44,12 +45,8 @@ private:
     int _tileYCount = 0;
     QPixmap _fullScreenshot;
 
-    // It's important that these are pointers and not values, because the array will
-    // be resized during ComponentManager::update, and we still want to be
-    // able to use the existing renderers while this occurs. If the array stored
-    // values, then the storage for the renderers themselves would potentially be
-    // moved around, as opposed to just the storage for the pointers.
     ComponentArray<MovablePointer<Camera>, LockingGraphArray> _componentCameras;
+    ComponentArray<QRectF> _componentViewports;
 
     OpenGLDebugLogger _openGLDebugLogger;
     GLuint _sdfTexture;
@@ -59,6 +56,7 @@ private:
 
     void render();
     void updateComponentGPUData();
+    QMatrix4x4 subViewportMatrix(QRectF scaledDimensions);
 signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;
