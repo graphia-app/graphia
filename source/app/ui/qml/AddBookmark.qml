@@ -105,6 +105,6 @@ Rectangle
         closeAction.trigger();
     }
 
-    signal shown();
-    signal hidden();
+    signal shown()
+    signal hidden()
 }
