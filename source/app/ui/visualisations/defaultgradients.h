@@ -62,6 +62,6 @@ R"({
     "0.66": "Yellow",
     "1":    "White"
 })";
-}
+} // namespace Defaults
 
 #endif // DEFAULTGRADIENTS_H

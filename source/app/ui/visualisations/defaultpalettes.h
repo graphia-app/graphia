@@ -40,6 +40,6 @@ R"({
     ],
     "defaultColor": "#DDDDDD"
 })";
-}
+} // namespace Defaults
 
 #endif // DEFAULTPALETTES_H
