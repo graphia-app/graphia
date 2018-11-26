@@ -1,6 +1,8 @@
 #include "colorpalette.h"
 
 #include "shared/utils/utils.h"
+#include "shared/utils/container.h"
+#include "shared/utils/color.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -29,19 +31,31 @@ ColorPalette::ColorPalette(const QString& descriptor)
 
     auto jsonObject = jsonDocument.object();
     auto baseColorsValue = jsonObject.value(QStringLiteral("baseColors"));
+    auto fixedColorsValue = jsonObject.value(QStringLiteral("fixedColors"));
 
-    if(!baseColorsValue.isArray())
+    if(!baseColorsValue.isArray() && !fixedColorsValue.isObject())
     {
-        qDebug() << "ColorPalette does not have baseColors array";
+        qDebug() << "ColorPalette does not have baseColors array or fixedColors object";
         return;
     }
 
-    auto baseColorsArray = baseColorsValue.toArray();
-
-    for(const auto& color : baseColorsArray)
+    if(baseColorsValue.isArray())
     {
-        auto colorString = color.toString();
-        _colors.emplace_back(colorString);
+        auto baseColorsArray = baseColorsValue.toArray();
+
+        for(const auto& color : baseColorsArray)
+        {
+            auto colorString = color.toString();
+            _colors.emplace_back(colorString);
+        }
+    }
+
+    if(fixedColorsValue.isObject())
+    {
+        auto fixedColorsObject = fixedColorsValue.toObject();
+
+        for(const auto& key : fixedColorsObject.keys())
+            _fixedColors[key] = fixedColorsObject.value(key).toString();
     }
 
     auto otherColorValue = jsonObject.value(QStringLiteral("otherColor"));
@@ -59,71 +73,84 @@ ColorPalette::ColorPalette(const QString& descriptor)
     _otherColor = QColor(otherColorString);
 }
 
-QColor ColorPalette::get(const QString& value) const
+QColor ColorPalette::get(const QString& value, const std::vector<QString>& values) const
 {
-    QString nonDigitValue;
-    int digitValue = 0;
+    auto index = u::indexOf(values, value);
 
-    // Sum up all the sections of digits in the value
-    const QRegularExpression re(QStringLiteral(R"(([^\d]*)(\d*)([^\d]*))"));
-    auto i = re.globalMatch(value);
-    while(i.hasNext())
+    if(u::contains(_fixedColors, value))
     {
-        auto m = i.next();
-        if(m.hasMatch())
+        // Fixed colors always take precedence
+        auto fixedColor = _fixedColors.at(value);
+        return fixedColor;
+    }
+    else if(index < 0)
+    {
+        // No index available, so derive one from the value itself
+
+        QString nonDigitValue;
+        index = 0;
+
+        // Sum up all the sections of digits in the value
+        const QRegularExpression re(QStringLiteral(R"(([^\d]*)(\d*)([^\d]*))"));
+        auto i = re.globalMatch(value);
+        while(i.hasNext())
         {
-            auto prefix = m.captured(1);
-            auto digits = m.captured(2);
-            auto postfix = m.captured(3);
-
-            nonDigitValue += prefix + postfix;
-
-            if(!digits.isEmpty())
+            auto m = i.next();
+            if(m.hasMatch())
             {
-                bool success;
-                auto n = digits.toInt(&success);
+                auto prefix = m.captured(1);
+                auto digits = m.captured(2);
+                auto postfix = m.captured(3);
 
-                if(success)
-                    digitValue += n;
+                nonDigitValue += prefix + postfix;
+
+                if(!digits.isEmpty())
+                {
+                    bool success;
+                    auto n = digits.toInt(&success);
+
+                    if(success)
+                        index += n;
+                }
             }
         }
-    }
 
-    // Add the unicode values of each non-digit character to the total
-    for(const auto c : qAsConst(nonDigitValue))
-        digitValue += c.unicode();
+        // Add the unicode values of each non-digit character to the total
+        for(const auto c : qAsConst(nonDigitValue))
+            index += c.unicode();
+    }
 
     if(!_colors.empty())
     {
-        auto index = digitValue % _colors.size();
-        auto color = _colors.at(index);
+        auto colorIndex = index % _colors.size();
+        auto color = _colors.at(colorIndex);
         auto h = color.hue();
         auto s = color.saturation();
         auto v = color.value();
 
-        auto hIndex = digitValue / _colors.size();
-        if(hIndex > 0)
+        auto hueIndex = index / _colors.size();
+        if(hueIndex > 0)
         {
             if(_otherColor.isValid())
                 return _otherColor;
 
             // If the base color has low saturation or
             // low value, adjust these before touching the hue
-            if(s < 128 && (hIndex > 1 || v >= 128))
+            if(s < 128 && (hueIndex > 1 || v >= 128))
             {
-                hIndex--;
+                hueIndex--;
                 s += 128;
             }
 
             if(v < 128)
             {
-                hIndex--;
+                hueIndex--;
                 v += 128;
             }
 
             // Rotate the hue around the base hue
             const int hRange = 90;
-            int hValue = (hIndex * 31) % hRange;
+            int hValue = (hueIndex * 31) % hRange;
             if(hValue > (hRange / 2))
                 hValue -= hRange;
             hValue += 360;
@@ -133,7 +160,8 @@ QColor ColorPalette::get(const QString& value) const
 
         return QColor::fromHsv(h, s, v);
     }
+    else if(_otherColor.isValid())
+        return _otherColor;
 
-    qWarning() << "ColorPalette is empty, using default color for" << value;
-    return Qt::black;
+    return u::colorForString(value);
 }

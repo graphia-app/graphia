@@ -5,10 +5,12 @@
 #include <QColor>
 
 #include <vector>
+#include <map>
 
 class ColorPalette
 {
 private:
+    std::map<QString, QColor> _fixedColors;
     std::vector<QColor> _colors;
     QColor _otherColor;
 
@@ -18,7 +20,7 @@ public:
     ColorPalette& operator=(const ColorPalette&) = default;
     explicit ColorPalette(const QString& descriptor);
 
-    QColor get(const QString& value) const;
+    QColor get(const QString& value, const std::vector<QString>& values = {}) const;
 };
 
 #endif // COLORPALETTE_H
