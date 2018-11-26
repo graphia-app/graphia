@@ -4,19 +4,25 @@ import QtQuick.Controls 1.5
 import com.kajeka 1.0
 
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Item
 {
     id: root
 
-    implicitWidth: _width + _padding
-    implicitHeight: row.implicitHeight + _padding
+    implicitWidth: _width + root._padding
+    implicitHeight: row.implicitHeight + root._padding
 
-    property int _padding: 2 * 4
+    property double _borderRadius: 2
+    property double _borderWidth: 0.5
+
+    property bool separateKeys: true
+
+    property int _padding: hoverEnabled ? Constants.padding : 0
 
     property int _numKeys:
     {
-        if(!enabled)
+        if(!enabled || stringValues.length === 0)
             return repeater.count;
 
         return Math.min(repeater.count, stringValues.length);
@@ -26,8 +32,12 @@ Item
 
     property double _minimumWidth:
     {
-        return root.highlightSize +
-            ((root._numKeys - 1) * (row.spacing + _minimumKeySize));
+        var w = (root._numKeys - 1) * (row.spacing + _minimumKeySize)
+
+        if(hoverEnabled)
+            w += root.highlightSize;
+
+        return w;
     }
 
     property double _width:
@@ -48,18 +58,15 @@ Item
 
     property color _contrastingColor:
     {
-        if(mouseArea.containsMouse && hoverEnabled)
+        if(mouseArea.containsMouse && root.hoverEnabled)
             return QmlUtils.contrastingColor(hoverColor);
 
         return textColor;
     }
 
-    property bool selected: false
+    property bool hoverEnabled: true
 
-    property bool propogatePresses: false
-
-    property alias hoverEnabled: mouseArea.hoverEnabled
-
+    property var _fixedColors: []
     property bool _lastColorIsOther: false
 
     function updatePalette()
@@ -69,19 +76,47 @@ Item
 
         var palette = JSON.parse(configuration);
 
-        var numKeys = palette.baseColors.length;
-
-        if(stringValues.length > 0 && stringValues.length < numKeys)
-            numKeys = stringValues.length;
-
         var colors = [];
-        for(var key = 0; key < numKeys; key++)
-            colors.push(palette.baseColors[key]);
+        var i = 0;
 
-        _lastColorIsOther = (palette.otherColor !== undefined) &&
-            colors.length < stringValues.length;
+        if(palette.baseColors !== undefined)
+        {
+            var numKeys = palette.baseColors.length;
 
-        if(_lastColorIsOther)
+            if(stringValues.length > 0 && stringValues.length < numKeys)
+                numKeys = stringValues.length;
+
+            for(i = 0; i < numKeys; i++)
+                colors.push(palette.baseColors[i]);
+        }
+
+        if(palette.fixedColors !== undefined)
+        {
+            var fixedColors = [];
+
+            for(var stringValue in palette.fixedColors)
+            {
+                var color = palette.fixedColors[stringValue];
+
+                var index = root.stringValues.indexOf(stringValue);
+                if(index < 0 || index >= colors.length)
+                {
+                    index = colors.length;
+                    colors.push(color);
+                }
+                else
+                    colors[index] = color;
+
+                fixedColors.push({"index": index, "stringValue": stringValue});
+            }
+
+            root._fixedColors = fixedColors;
+        }
+
+        root._lastColorIsOther = (palette.otherColor !== undefined) &&
+            ((colors.length < stringValues.length) || stringValues.length === 0);
+
+        if(root._lastColorIsOther)
             colors.push(palette.otherColor)
 
         repeater.model = colors;
@@ -108,10 +143,8 @@ Item
         radius: 2
         color:
         {
-            if(mouseArea.containsMouse && hoverEnabled)
+            if(mouseArea.containsMouse && root.hoverEnabled)
                 return root.hoverColor;
-            else if(selected)
-                return systemPalette.highlight;
 
             return "transparent";
         }
@@ -123,10 +156,7 @@ Item
 
         anchors.centerIn: parent
 
-        width: root.width !== undefined ? root.width - _padding : undefined
-        height: root.height !== undefined ? root.height - _padding : undefined
-
-        spacing: 2
+        spacing: root.separateKeys ? 2 : 0
 
         Repeater
         {
@@ -144,7 +174,7 @@ Item
                     if(_hovered)
                         return root.highlightSize;
 
-                    var w = root._width;
+                    var w = root.width - root._padding;
                     w -= (root._numKeys - 1) * row.spacing;
 
                     var d = root._numKeys;
@@ -160,13 +190,21 @@ Item
 
                 implicitHeight: root.keyHeight
 
-                radius: 2
+                radius: root.separateKeys ? root._borderRadius : 0.0
 
-                border.width: 0.5
-                border.color: root._contrastingColor
+                border.width: root.separateKeys ? root._borderWidth : 0.0
+                border.color: root.separateKeys ? root._contrastingColor : "transparent"
 
                 property string stringValue:
                 {
+                    var fixedAssignment = root._fixedColors.find(function(element)
+                    {
+                        return element.index === index;
+                    });
+
+                    if(fixedAssignment !== undefined)
+                        return fixedAssignment.stringValue;
+
                     if(index >= root.stringValues.length)
                         return "";
 
@@ -226,9 +264,25 @@ Item
         }
     }
 
+    // Draw a border around everything, if we're not displaying the keys separately
+    Rectangle
+    {
+        anchors.centerIn: parent
+
+        visible: !root.separateKeys
+
+        width: row.width
+        height: row.height
+
+        color: "transparent"
+
+        border.width: root._borderWidth
+        border.color: root._contrastingColor
+    }
+
     property int _indexUnderCursor:
     {
-        if(!mouseArea.containsMouse)
+        if(!mouseArea.containsMouse || !mouseArea.hoverEnabled)
             return -1;
 
         var coord = mapToItem(row, mouseArea.mouseX, mouseArea.mouseY);
@@ -254,9 +308,9 @@ Item
         onClicked: root.clicked(mouse)
         onDoubleClicked: root.doubleClicked(mouse)
 
-        hoverEnabled: true
+        hoverEnabled: root.hoverEnabled
 
-        onPressed: { mouse.accepted = !propogatePresses; }
+        onPressed: { mouse.accepted = false; }
     }
 
     signal clicked(var mouse)
