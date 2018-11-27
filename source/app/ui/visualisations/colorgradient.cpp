@@ -2,36 +2,32 @@
 
 #include "shared/utils/utils.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
+#include <json_helper.h>
+
 #include <QDebug>
 
 #include <algorithm>
 
 ColorGradient::ColorGradient(const QString& descriptor)
 {
-    QJsonParseError error{0, QJsonParseError::ParseError::NoError};
-    auto jsonDocument = QJsonDocument::fromJson(descriptor.toUtf8(), &error);
+    auto jsonDocument = parseJsonFrom(descriptor.toUtf8());
 
-    if(jsonDocument.isNull())
+    if(jsonDocument.is_null())
     {
-        qDebug() << "ColorGradient failed to parse:" << error.errorString() << descriptor;
+        qDebug() << "ColorGradient failed to parse" << descriptor;
         return;
     }
 
-    if(!jsonDocument.isObject())
+    if(!jsonDocument.is_object())
     {
-        qDebug() << "ColorGradient is not an object";
+        qDebug() << "ColorGradient is not an object" << descriptor;
         return;
     }
 
-    auto jsonObject = jsonDocument.object();
-    const auto keys = jsonObject.keys();
-
-    for(const auto& key : keys)
+    for(const auto& i : jsonDocument.items())
     {
-        auto value = key.toDouble();
-        auto colorString = jsonObject.value(key).toString();
+        auto value = std::stod(i.key());
+        auto colorString = QString::fromStdString(i.value());
 
         _stops.emplace_back(Stop{value, colorString});
     }

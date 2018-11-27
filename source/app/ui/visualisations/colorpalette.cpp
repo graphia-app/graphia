@@ -4,9 +4,8 @@
 #include "shared/utils/container.h"
 #include "shared/utils/color.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
+#include <json_helper.h>
+
 #include <QRegularExpression>
 #include <QDebug>
 
@@ -14,63 +13,71 @@
 
 ColorPalette::ColorPalette(const QString& descriptor)
 {
-    QJsonParseError error{0, QJsonParseError::ParseError::NoError};
-    auto jsonDocument = QJsonDocument::fromJson(descriptor.toUtf8(), &error);
+    auto jsonDocument = parseJsonFrom(descriptor.toUtf8());
 
-    if(jsonDocument.isNull())
+    if(jsonDocument.is_null())
     {
-        qDebug() << "ColorPalette failed to parse:" << error.errorString() << descriptor;
+        qDebug() << "ColorPalette failed to parse" << descriptor;
         return;
     }
 
-    if(!jsonDocument.isObject())
+    if(!jsonDocument.is_object())
     {
-        qDebug() << "ColorPalette is not an object";
+        qDebug() << "ColorPalette is not an object" << descriptor;
         return;
     }
 
-    auto jsonObject = jsonDocument.object();
-    auto autoColorsValue = jsonObject.value(QStringLiteral("autoColors"));
-    auto fixedColorsValue = jsonObject.value(QStringLiteral("fixedColors"));
+    bool hasAutoColors = u::contains(jsonDocument, "autoColors");
+    bool hasFixedColors = u::contains(jsonDocument, "fixedColors");
 
-    if(!autoColorsValue.isArray() && !fixedColorsValue.isObject())
+    if(!hasAutoColors && !hasFixedColors)
+    {
+        qDebug() << "ColorPalette does not contain autoColors or fixedColors";
+        return;
+    }
+
+    auto autoColorsValue = jsonDocument["autoColors"];
+    auto fixedColorsValue = jsonDocument["fixedColors"];
+
+    if(!autoColorsValue.is_array() && !fixedColorsValue.is_object())
     {
         qDebug() << "ColorPalette does not have autoColors array or fixedColors object";
         return;
     }
 
-    if(autoColorsValue.isArray())
+    if(hasAutoColors)
     {
-        auto autoColorsArray = autoColorsValue.toArray();
-
-        for(const auto& color : autoColorsArray)
+        for(const auto& color : autoColorsValue)
         {
-            auto colorString = color.toString();
+            auto colorString = QString::fromStdString(color);
             _colors.emplace_back(colorString);
         }
     }
 
-    if(fixedColorsValue.isObject())
+    if(hasFixedColors)
     {
-        auto fixedColorsObject = fixedColorsValue.toObject();
+        for(const auto& i : fixedColorsValue.items())
+        {
+            auto value = QString::fromStdString(i.key());
+            auto colorString = QString::fromStdString(i.value());
 
-        for(const auto& key : fixedColorsObject.keys())
-            _fixedColors[key] = fixedColorsObject.value(key).toString();
+            _fixedColors[value] = colorString;
+        }
     }
 
-    auto defaultColorValue = jsonObject.value(QStringLiteral("defaultColor"));
-
-    if(defaultColorValue.isUndefined())
-        return;
-
-    if(!defaultColorValue.isString())
+    if(u::contains(jsonDocument, "defaultColor"))
     {
-        qDebug() << "ColorPalette.defaultColor is not a string";
-        return;
-    }
+        auto defaultColorValue = jsonDocument["defaultColor"];
 
-    auto defaultColorString = defaultColorValue.toString();
-    _defaultColor = QColor(defaultColorString);
+        if(!defaultColorValue.is_string())
+        {
+            qDebug() << "ColorPalette.defaultColor is not a string";
+            return;
+        }
+
+        auto defaultColorString = QString::fromStdString(defaultColorValue);
+        _defaultColor = QColor(defaultColorString);
+    }
 }
 
 QColor ColorPalette::get(const QString& value, const std::vector<QString>& values) const
