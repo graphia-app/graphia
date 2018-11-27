@@ -31,7 +31,7 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
         return;
     }
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
     auto attributeValue = config().parameterByName(QStringLiteral("Attribute Value"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
@@ -115,7 +115,7 @@ std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(
     if(firstAttribute.elementType() != secondAttribute.elementType())
         return nullptr;
 
-    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))

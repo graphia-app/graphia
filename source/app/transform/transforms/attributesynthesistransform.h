@@ -48,7 +48,7 @@ public:
         return
         {
             {
-                "New Attribute Name",
+                "Name",
                 ValueType::String,
                 QObject::tr("The name of the new attribute."),
                 QObject::tr("New Attribute")

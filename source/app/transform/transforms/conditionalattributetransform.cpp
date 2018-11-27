@@ -12,7 +12,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Boolean Attribute"));
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
@@ -69,7 +69,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 std::unique_ptr<GraphTransform> ConditionalAttributeTransformFactory::create(
     const GraphTransformConfig& graphTransformConfig) const
 {
-    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))

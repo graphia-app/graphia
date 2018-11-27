@@ -22,7 +22,7 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
 
     auto sourceAttribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
     auto regexString = config().parameterByName(QStringLiteral("Regular Expression"))->valueAsString();
     auto attributeValue = config().parameterByName(QStringLiteral("Attribute Value"))->valueAsString();
 
@@ -105,7 +105,7 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
 std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(
     const GraphTransformConfig& graphTransformConfig) const
 {
-    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
+    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
