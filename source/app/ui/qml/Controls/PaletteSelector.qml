@@ -402,9 +402,13 @@ Window
 
             for(i = 0; i < aValues.length; i++)
             {
-                var value = aValues[i];
+                var aValue = aValues[i];
+                var bValue = bValues[i];
 
-                if(!Qt.colorEqual(paletteA.fixedColors[value], paletteA.fixedColors[value]))
+                if(aValue !== bValue)
+                    return false;
+
+                if(!Qt.colorEqual(paletteA.fixedColors[aValue], paletteB.fixedColors[bValue]))
                     return false;
             }
         }
