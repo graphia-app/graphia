@@ -210,6 +210,7 @@ private:
     Transition _transition;
 
     PerformanceCounter _performanceCounter;
+    std::unique_ptr<ScreenshotRenderer> _screenshotRenderer;
 
     GLuint sdfTexture() const override;
     GLuint sdfTextureOffscreen() const;

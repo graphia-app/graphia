@@ -11,71 +11,11 @@
 #include <QBuffer>
 #include <QDir>
 
-
-ScreenshotRenderer::ScreenshotRenderer(const GraphRenderer& renderer) :
-    GraphRendererCore(renderer),
-    _graphModel(renderer.graphModel()),
-    _viewportWidth(renderer.width()),
-    _viewportHeight(renderer.height()),
-    _componentCameras(renderer.graphModel()->graph()),
-    _componentViewports(renderer.graphModel()->graph())
+ScreenshotRenderer::ScreenshotRenderer() : GraphRendererCore()
 {
-    for(ComponentId componentId : _graphModel->graph().componentIds())
-    {
-        Camera* camera = _componentCameras.at(componentId);
-        *camera = *renderer.componentRendererForId(componentId)->camera();
-        QRectF& rect = _componentViewports.at(componentId);
-        rect = renderer.componentRendererForId(componentId)->dimensions();
-    }
-
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);
-
-    // Just copy the SDF texture
-    GLuint textureFBO = 0;
-    glGenFramebuffers(1, &textureFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-
-    _sdfTexture = 0;
     glGenTextures(1, &_sdfTexture);
-
-    int renderWidth = 0;
-    int renderHeight = 0;
-
-    glBindTexture(GL_TEXTURE_2D_ARRAY, renderer.sdfTexture());
-    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
-
-    if(renderer._glyphMap->images().size() > 0)
-    {
-        // SDF texture
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
-
-        // Generate FBO texture
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-                     renderWidth, renderHeight, static_cast<GLsizei>(renderer._glyphMap->images().size()),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        for(int layer = 0; layer < static_cast<int>(renderer._glyphMap->images().size()); layer++)
-        {
-            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderer.sdfTexture(), 0, layer);
-
-            GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-            glDrawBuffers(1, DrawBuffers);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
-            glViewport(0, 0, renderWidth, renderHeight);
-            glReadBuffer(GL_COLOR_ATTACHMENT0);
-            glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, renderWidth, renderHeight);
-        }
-    }
-
-    glDeleteFramebuffers(1, &textureFBO);
-
-    uploadGPUGraphData();
 }
 
 ScreenshotRenderer::~ScreenshotRenderer()
@@ -92,7 +32,7 @@ void ScreenshotRenderer::onPreviewRequested(int width, int height, bool fillSize
     _screenshotWidth = width;
     _screenshotHeight = height;
 
-    float viewportAspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
+    float viewportAspectRatio = static_cast<float>(_viewportWidth) / static_cast<float>(_viewportHeight);
 
     if(!fillSize)
         _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
@@ -238,10 +178,10 @@ void ScreenshotRenderer::updateComponentGPUData()
     double scaleX = static_cast<double>(_screenshotWidth) / _viewportWidth;
     double scaleY = static_cast<double>(_screenshotHeight) / _viewportHeight;
 
-    for(ComponentId componentId : _graphModel->graph().componentIds())
+    for(size_t i = 0; i < _componentCameras.size(); i++)
     {
-        Camera* componentCamera = _componentCameras.at(componentId);
-        QRectF componentViewport = _componentViewports.at(componentId);
+        Camera& componentCamera = _componentCameras.at(i);
+        QRectF& componentViewport = _componentViewports.at(i);
 
         QRectF scaledDimensions;
         scaledDimensions.setTopLeft({componentViewport.x() * scaleX, componentViewport.y() * scaleY});
@@ -250,19 +190,13 @@ void ScreenshotRenderer::updateComponentGPUData()
 
         float aspectRatio = static_cast<float>(scaledDimensions.width()) / static_cast<float>(scaledDimensions.height());
         auto _fovy = 60.0f;
-        componentCamera->setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
-        componentCamera->setViewportWidth(scaledDimensions.width());
-        componentCamera->setViewportHeight(scaledDimensions.height());
-
-        if(componentCamera == nullptr)
-        {
-            qWarning() << "null component camera";
-            continue;
-        }
+        componentCamera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+        componentCamera.setViewportWidth(scaledDimensions.width());
+        componentCamera.setViewportHeight(scaledDimensions.height());
 
         // Model View
         for(int i = 0; i < 16; i++)
-            componentData.push_back(componentCamera->viewMatrix().data()[i]);
+            componentData.push_back(componentCamera.viewMatrix().data()[i]);
 
         // Projection
         if(_isScreenshot)
@@ -278,7 +212,7 @@ void ScreenshotRenderer::updateComponentGPUData()
             float xScale = static_cast<float>(scaledDimensions.width()) / TILE_SIZE;
             float yScale = static_cast<float>(scaledDimensions.height()) / TILE_SIZE;
             translation.scale(xScale, yScale);
-            projMatrix = translation * componentCamera->projectionMatrix();
+            projMatrix = translation * componentCamera.projectionMatrix();
 
             // Per-Tile translation for high res screenshots
             float tileWidthRatio = static_cast<float>(TILE_SIZE) / _screenshotWidth;
@@ -297,7 +231,7 @@ void ScreenshotRenderer::updateComponentGPUData()
         }
         else
         {
-            auto projectionMatrix = subViewportMatrix(scaledDimensions) * componentCamera->projectionMatrix();
+            auto projectionMatrix = subViewportMatrix(scaledDimensions) * componentCamera.projectionMatrix();
 
             // Normal projection
             for(int i = 0; i < 16; i++)
@@ -308,6 +242,73 @@ void ScreenshotRenderer::updateComponentGPUData()
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
     glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
+}
+
+bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
+{
+    _graphModel = renderer.graphModel();
+    _viewportWidth = renderer.width();
+    _viewportHeight = renderer.height();
+    _componentCameras.clear();
+    _componentViewports.clear();
+    _gpuGraphData = renderer._gpuGraphData;
+
+    for(auto& gpuGraphData : _gpuGraphData)
+        gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
+
+    for(ComponentId componentId : _graphModel->graph().componentIds())
+    {
+        _componentCameras.emplace_back(*renderer.componentRendererForId(componentId)->camera());
+        _componentViewports.emplace_back(renderer.componentRendererForId(componentId)->dimensions());
+    }
+
+    // Just copy the SDF texture
+    GLuint textureFBO = 0;
+    glGenFramebuffers(1, &textureFBO);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+
+    int renderWidth = 0;
+    int renderHeight = 0;
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, renderer.sdfTexture());
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
+
+    if(renderer._glyphMap->images().size() > 0)
+    {
+        // SDF texture
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
+
+        // Generate FBO texture
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
+                     renderWidth, renderHeight, static_cast<GLsizei>(renderer._glyphMap->images().size()),
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        for(int layer = 0; layer < static_cast<int>(renderer._glyphMap->images().size()); layer++)
+        {
+            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderer.sdfTexture(), 0, layer);
+
+            GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+            glDrawBuffers(1, DrawBuffers);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+            glViewport(0, 0, renderWidth, renderHeight);
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
+            glCopyTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, layer, 0, 0, renderWidth, renderHeight);
+        }
+    }
+
+    glDeleteFramebuffers(1, &textureFBO);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    glReadBuffer(GL_BACK);
+
+    uploadGPUGraphData();
+
+    return true;
 }
 
 GLuint ScreenshotRenderer::sdfTexture() const

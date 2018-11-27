@@ -333,37 +333,6 @@ GraphRendererCore::GraphRendererCore()
     prepare();
 }
 
-GraphRendererCore::GraphRendererCore(const GraphRendererCore &graphRendererCore)
-    : _numMultiSamples(graphRendererCore._numMultiSamples),
-      _width(graphRendererCore._width),
-      _height(graphRendererCore._height),
-      _gpuGraphData(graphRendererCore._gpuGraphData)
-{
-    _depthTexture = 0;
-    _componentDataTBO = 0;
-    _componentDataTexture = 0;
-
-    // Regenerate buffers/textures
-    prepare();
-
-    // Copy component buffer
-    GLint size = 0;
-    // Get parent buffer size
-    glBindBuffer(GL_TEXTURE_BUFFER, graphRendererCore._componentDataTBO);
-    glGetBufferParameteriv(GL_TEXTURE_BUFFER, GL_BUFFER_SIZE, &size);
-    // Assign storage
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glBufferData(GL_TEXTURE_BUFFER, size, nullptr, GL_STATIC_DRAW);
-    // Bind to read/write buffers and copy
-    glBindBuffer(GL_COPY_READ_BUFFER, graphRendererCore._componentDataTBO);
-    glBindBuffer(GL_COPY_WRITE_BUFFER, _componentDataTBO);
-    glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
-    // Clear state
-    glBindBuffer(GL_COPY_READ_BUFFER, 0);
-    glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-}
-
 GraphRendererCore::~GraphRendererCore()
 {
     if(_componentDataTBO != 0)

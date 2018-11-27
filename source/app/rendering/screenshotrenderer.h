@@ -15,12 +15,14 @@ class ScreenshotRenderer :
     Q_OBJECT
 
 public:
+    ScreenshotRenderer();
     explicit ScreenshotRenderer(const GraphRenderer& renderer);
     ~ScreenshotRenderer() override;
 
     void copyTextureObject();
     void updateGPU();
 
+    bool cloneState(const GraphRenderer &renderer);
 public slots:
     void onPreviewRequested(int width, int height, bool fillSize);
     void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
@@ -45,11 +47,11 @@ private:
     int _tileYCount = 0;
     QPixmap _fullScreenshot;
 
-    ComponentArray<MovablePointer<Camera>, LockingGraphArray> _componentCameras;
-    ComponentArray<QRectF> _componentViewports;
+    std::vector<Camera> _componentCameras;
+    std::vector<QRectF> _componentViewports;
 
     OpenGLDebugLogger _openGLDebugLogger;
-    GLuint _sdfTexture;
+    GLuint _sdfTexture = 0;
     bool _FBOcomplete = false;
 
     GLuint sdfTexture() const override;

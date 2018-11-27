@@ -148,6 +148,7 @@ struct GPUGraphData : OpenGLFunctions
 class GraphRendererCore :
     public OpenGLFunctions
 {
+    friend class ScreenshotRenderer;
 public:
     GraphRendererCore();
     GraphRendererCore(const GraphRendererCore& graphRendererCore);

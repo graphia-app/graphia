@@ -83,6 +83,10 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     initialiseFromGraph(graph, *_graphOverviewScene);
     initialiseFromGraph(graph, *_graphComponentScene);
 
+    _screenshotRenderer = std::make_unique<ScreenshotRenderer>();
+    connect(_screenshotRenderer.get(), &ScreenshotRenderer::screenshotComplete, this, &GraphRenderer::screenshotComplete);
+    connect(_screenshotRenderer.get(), &ScreenshotRenderer::previewComplete, this, &GraphRenderer::previewComplete);
+
     // If the graph is a single component or empty, use component mode by default
     if(graph->numComponents() <= 1)
         switchToComponentMode(false);
@@ -361,16 +365,14 @@ void GraphRenderer::updateGPUData(GraphRenderer::When when)
 
 void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
 {
-    ScreenshotRenderer screenshotRenderer(*this);
-    connect(&screenshotRenderer, &ScreenshotRenderer::previewComplete, this, &GraphRenderer::previewComplete);
-    screenshotRenderer.onPreviewRequested(width, height, fillSize);
+    _screenshotRenderer->cloneState(*this);
+    _screenshotRenderer->onPreviewRequested(width, height, fillSize);
 }
 
 void GraphRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
 {
-    ScreenshotRenderer screenshotRenderer(*this);
-    connect(&screenshotRenderer, &ScreenshotRenderer::screenshotComplete, this, &GraphRenderer::screenshotComplete);
-    screenshotRenderer.onScreenshotRequested(width, height, path, dpi, fillSize);
+    _screenshotRenderer->cloneState(*this);
+    _screenshotRenderer->onScreenshotRequested(width, height, path, dpi, fillSize);
 }
 
 void GraphRenderer::updateComponentGPUData()
