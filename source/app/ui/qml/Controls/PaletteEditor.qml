@@ -16,6 +16,8 @@ ColumnLayout
     property var stringValues: []
 
     readonly property int _removeButtonSize: 24
+    readonly property int _maxAutoColors: 16
+    readonly property int _maxFixedColors: 16
 
     function setup(configuration)
     {
@@ -114,22 +116,42 @@ ColumnLayout
         {
             Layout.fillWidth: true
 
-            Label
+            RowLayout
             {
                 Layout.alignment: Qt.AlignTop
-                Layout.fillWidth: true
 
-                font.italic: true
-                font.bold: true
-                text: qsTr("Automatic Assignments")
+                HelpTooltip
+                {
+                    title: autoLabel.text
+
+                    Text
+                    {
+                        text: qsTr("These are colours that are automatically assigned " +
+                            "to attribute values, in whichever order is specified by the " +
+                            "visualisation. Zero or more colours may be added, up to a " +
+                            "maximum of ") + root._maxAutoColors + qsTr(".")
+                        wrapMode: Text.WordWrap
+                    }
+                }
+
+                Label
+                {
+                    id: autoLabel
+
+                    font.italic: true
+                    font.bold: true
+                    text: qsTr("Automatic Assignments")
+                }
             }
+
+            Item { Layout.fillWidth: true }
 
             ToolButton
             {
                 tooltip: qsTr("Add New Colour")
                 iconName: "list-add"
 
-                enabled: root._autoColors.length < 16
+                enabled: root._autoColors.length < root._maxAutoColors
 
                 onClicked:
                 {
@@ -237,11 +259,31 @@ ColumnLayout
         Layout.fillWidth: true
         Layout.margins: Constants.margin
 
-        Label
+        RowLayout
         {
-            font.italic: true
-            font.bold: true
-            text: qsTr("Other Values")
+            HelpTooltip
+            {
+                title: otherLabel.text
+
+                Text
+                {
+                    text: qsTr("When a value does not correspond to any automatic or fixed " +
+                        "assignments, it takes the colour indicated here. A fixed colour may " +
+                        "be selected, or alternatively a colour may be automatically generated " +
+                        "for each value, based on the automatically assigned colours " +
+                        "specified above.");
+                    wrapMode: Text.WordWrap
+                }
+            }
+
+            Label
+            {
+                id: otherLabel
+
+                font.italic: true
+                font.bold: true
+                text: qsTr("Other Values")
+            }
         }
 
         ExclusiveGroup { id: defaultColorsGroup }
@@ -297,22 +339,44 @@ ColumnLayout
         {
             Layout.fillWidth: true
 
-            Label
+            RowLayout
             {
                 Layout.alignment: Qt.AlignTop
-                Layout.fillWidth: true
 
-                font.italic: true
-                font.bold: true
-                text: qsTr("Fixed Assignments")
+                HelpTooltip
+                {
+                    title: fixedLabel.text
+
+                    Text
+                    {
+                        text: qsTr("This is a list of values that have a fixed assignment " +
+                            "to a particular colour. The value may be selected from the menu, " +
+                            "or manually entered. In either case, when visualised, the supplied " +
+                            "value will always be shown using its respective colour. Zero or more " +
+                            "colours may be added, up to a maximum of ") +
+                            root._maxFixedColors + qsTr(".")
+                        wrapMode: Text.WordWrap
+                    }
+                }
+
+                Label
+                {
+                    id: fixedLabel
+
+                    font.italic: true
+                    font.bold: true
+                    text: qsTr("Fixed Assignments")
+                }
             }
+
+            Item { Layout.fillWidth: true }
 
             ToolButton
             {
                 tooltip: qsTr("Add New Colour")
                 iconName: "list-add"
 
-                enabled: root._fixedColors.length < 16
+                enabled: root._fixedColors.length < root._maxFixedColors
 
                 onClicked:
                 {
