@@ -253,7 +253,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     setProgress(-1);
 
-    auto jsonArray = parseJsonFrom(byteArray, *this);
+    auto jsonArray = parseJsonFrom(byteArray, this);
 
     if(cancelled())
         return false;

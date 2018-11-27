@@ -85,7 +85,7 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    json jsonObject = parseJsonFrom(data, parser);
+    json jsonObject = parseJsonFrom(data, &parser);
 
     if(parser.cancelled())
         return false;

@@ -48,7 +48,7 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
         setProgress((bytesRead * 100) / totalBytes);
     } while(!input.atEnd());
 
-    auto jsonBody = parseJsonFrom(byteArray, *this);
+    auto jsonBody = parseJsonFrom(byteArray, this);
 
     if(cancelled())
         return false;

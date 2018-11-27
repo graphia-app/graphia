@@ -47,7 +47,7 @@ json jsonArrayFrom(const C& container, Progressable* progressable = nullptr)
     return array;
 }
 
-inline json parseJsonFrom(const QByteArray& byteArray, IParser& parser)
+inline json parseJsonFrom(const QByteArray& byteArray, IParser* parser = nullptr)
 {
     json result;
 
@@ -55,13 +55,16 @@ inline json parseJsonFrom(const QByteArray& byteArray, IParser& parser)
     JSONByteArrayIterator it(byteArray.begin());
     JSONByteArrayIterator end(byteArray.end());
 
-    it.onPositionChanged(
-    [&byteArray, &parser](size_t position)
+    if(parser != nullptr)
     {
-        parser.setProgress(static_cast<int>((position * 100) / byteArray.size()));
-    });
+        it.onPositionChanged(
+        [&byteArray, &parser](size_t position)
+        {
+            parser->setProgress(static_cast<int>((position * 100) / byteArray.size()));
+        });
 
-    it.setCancelledFn([&parser] { return parser.cancelled(); });
+        it.setCancelledFn([&parser] { return parser->cancelled(); });
+    }
 
     try
     {
