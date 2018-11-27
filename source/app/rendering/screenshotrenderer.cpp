@@ -178,10 +178,10 @@ void ScreenshotRenderer::updateComponentGPUData()
     double scaleX = static_cast<double>(_screenshotWidth) / _viewportWidth;
     double scaleY = static_cast<double>(_screenshotHeight) / _viewportHeight;
 
-    for(size_t i = 0; i < _componentCameras.size(); i++)
+    for(size_t componentIndex = 0; componentIndex < _componentCameras.size(); componentIndex++)
     {
-        Camera& componentCamera = _componentCameras.at(i);
-        QRectF& componentViewport = _componentViewports.at(i);
+        Camera& componentCamera = _componentCameras.at(componentIndex);
+        QRectF& componentViewport = _componentViewports.at(componentIndex);
 
         QRectF scaledDimensions;
         scaledDimensions.setTopLeft({componentViewport.x() * scaleX, componentViewport.y() * scaleY});
@@ -275,7 +275,7 @@ bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
     glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_WIDTH, &renderWidth);
     glGetTexLevelParameteriv(GL_TEXTURE_2D_ARRAY, 0, GL_TEXTURE_HEIGHT, &renderHeight);
 
-    if(renderer._glyphMap->images().size() > 0)
+    if(!renderer._glyphMap->images().empty())
     {
         // SDF texture
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
