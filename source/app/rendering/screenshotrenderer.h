@@ -15,8 +15,8 @@ class ScreenshotRenderer :
     Q_OBJECT
 
 public:
-    ScreenshotRenderer(GraphRenderer& renderer);
-    ~ScreenshotRenderer();
+    explicit ScreenshotRenderer(const GraphRenderer& renderer);
+    ~ScreenshotRenderer() override;
 
     void copyTextureObject();
     void updateGPU();

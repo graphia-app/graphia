@@ -12,7 +12,7 @@
 #include <QDir>
 
 
-ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
+ScreenshotRenderer::ScreenshotRenderer(const GraphRenderer& renderer) :
     GraphRendererCore(renderer),
     _graphModel(renderer.graphModel()),
     _viewportWidth(renderer.width()),
@@ -53,7 +53,7 @@ ScreenshotRenderer::ScreenshotRenderer(GraphRenderer &renderer) :
 
         // Generate FBO texture
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-                     renderWidth, renderHeight, renderer._glyphMap->images().size(),
+                     renderWidth, renderHeight, static_cast<GLsizei>(renderer._glyphMap->images().size()),
                      0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

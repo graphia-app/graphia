@@ -333,16 +333,15 @@ GraphRendererCore::GraphRendererCore()
     prepare();
 }
 
-GraphRendererCore::GraphRendererCore(GraphRendererCore &graphRendererCore)
+GraphRendererCore::GraphRendererCore(const GraphRendererCore &graphRendererCore)
     : _numMultiSamples(graphRendererCore._numMultiSamples),
       _width(graphRendererCore._width),
-      _height(graphRendererCore._height)
+      _height(graphRendererCore._height),
+      _gpuGraphData(graphRendererCore._gpuGraphData)
 {
     _depthTexture = 0;
     _componentDataTBO = 0;
     _componentDataTexture = 0;
-
-    _gpuGraphData = graphRendererCore._gpuGraphData;
 
     // Regenerate buffers/textures
     prepare();

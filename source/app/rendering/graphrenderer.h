@@ -90,7 +90,7 @@ public:
     GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;
     Transition& transition() { return _transition; }
 
-    GraphModel* graphModel() { return _graphModel; }
+    GraphModel* graphModel() const { return _graphModel; }
 
     QRect selectionRect() { return _selectionRect; }
     void setSelectionRect(const QRect& selectionRect) { _selectionRect = selectionRect; }

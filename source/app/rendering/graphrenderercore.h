@@ -18,7 +18,7 @@
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
-    GPUGraphData(GPUGraphData& gpuGraphData)
+    GPUGraphData(const GPUGraphData& gpuGraphData)
         : _componentAlpha(gpuGraphData._componentAlpha),
           _unhighlightAlpha(gpuGraphData._unhighlightAlpha),
           _alwaysDrawnLast(gpuGraphData._alwaysDrawnLast),
@@ -150,7 +150,7 @@ class GraphRendererCore :
 {
 public:
     GraphRendererCore();
-    GraphRendererCore(GraphRendererCore& graphRendererCore);
+    GraphRendererCore(const GraphRendererCore& graphRendererCore);
     ~GraphRendererCore() override;
 
 private:

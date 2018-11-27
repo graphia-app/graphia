@@ -40,7 +40,7 @@ public:
         _selectionManager(r._selectionManager), _entireComponentZoomDistance(r._entireComponentZoomDistance)
     {}
 
-    GraphComponentRenderer& operator=(GraphComponentRenderer& other)
+    GraphComponentRenderer& operator=(const GraphComponentRenderer& other)
     {
         if(&other == this)
             return *this;
