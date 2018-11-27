@@ -108,6 +108,8 @@ ColumnLayout
         Layout.fillWidth: true
         Layout.margins: Constants.margin
 
+        spacing: 2
+
         RowLayout
         {
             Layout.fillWidth: true
@@ -288,6 +290,8 @@ ColumnLayout
     {
         Layout.fillWidth: true
         Layout.margins: Constants.margin
+
+        spacing: 2
 
         RowLayout
         {
