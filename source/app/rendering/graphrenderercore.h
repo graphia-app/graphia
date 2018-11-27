@@ -15,6 +15,8 @@
 #include <array>
 #include <vector>
 
+class ScreenshotRenderer;
+
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
