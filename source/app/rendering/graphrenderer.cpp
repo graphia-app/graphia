@@ -366,13 +366,13 @@ void GraphRenderer::updateGPUData(GraphRenderer::When when)
 void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
 {
     _screenshotRenderer->cloneState(*this);
-    _screenshotRenderer->onPreviewRequested(width, height, fillSize);
+    _screenshotRenderer->requestPreview(width, height, fillSize);
 }
 
 void GraphRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
 {
     _screenshotRenderer->cloneState(*this);
-    _screenshotRenderer->onScreenshotRequested(width, height, path, dpi, fillSize);
+    _screenshotRenderer->requestScreenshot(width, height, path, dpi, fillSize);
 }
 
 void GraphRenderer::updateComponentGPUData()

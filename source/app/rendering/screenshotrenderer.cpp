@@ -25,7 +25,7 @@ ScreenshotRenderer::~ScreenshotRenderer()
     glDeleteTextures(1, &_screenshotTex);
 }
 
-void ScreenshotRenderer::onPreviewRequested(int width, int height, bool fillSize)
+void ScreenshotRenderer::requestPreview(int width, int height, bool fillSize)
 {
     _isPreview = true;
 
@@ -40,7 +40,8 @@ void ScreenshotRenderer::onPreviewRequested(int width, int height, bool fillSize
     _FBOcomplete = resize(_screenshotWidth, _screenshotHeight);
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 nullptr);
 
     render();
 
@@ -101,7 +102,7 @@ void ScreenshotRenderer::render()
     }
 }
 
-void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
+void ScreenshotRenderer::requestScreenshot(int width, int height, const QString& path, int dpi, bool fillSize)
 {
     _isScreenshot = true;
 
@@ -126,7 +127,8 @@ void ScreenshotRenderer::onScreenshotRequested(int width, int height, const QStr
     _fullScreenshot = QPixmap(_screenshotWidth, _screenshotHeight);
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 nullptr);
 
     _tileXCount = std::ceil(static_cast<float>(_screenshotWidth) / this->width());
     _tileYCount = std::ceil(static_cast<float>(_screenshotHeight) / this->height());
@@ -155,8 +157,10 @@ QMatrix4x4 ScreenshotRenderer::subViewportMatrix(QRectF scaledDimensions)
 {
     QMatrix4x4 projOffset;
 
-    float xTranslation = (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / _screenshotWidth) - 1.0f;
-    float yTranslation = (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / _screenshotHeight) - 1.0f;
+    float xTranslation =
+        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / _screenshotWidth) - 1.0f;
+    float yTranslation =
+        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / _screenshotHeight) - 1.0f;
     projOffset.translate(xTranslation, -yTranslation);
 
     float xScale = static_cast<float>(scaledDimensions.width()) / _screenshotWidth;
@@ -168,7 +172,7 @@ QMatrix4x4 ScreenshotRenderer::subViewportMatrix(QRectF scaledDimensions)
 
 void ScreenshotRenderer::updateComponentGPUData()
 {
-    //FIXME this doesn't necessarily need to be entirely regenerated and rebuffered
+    // FIXME this doesn't necessarily need to be entirely regenerated and rebuffered
     // every frame, so it makes sense to do partial updates as and when required.
     // OTOH, it's probably not ever going to be masses of data, so maybe we should
     // just suck it up; need to get a profiler on it and see how long we're spending
@@ -188,7 +192,8 @@ void ScreenshotRenderer::updateComponentGPUData()
         scaledDimensions.setWidth(componentViewport.width() * scaleX);
         scaledDimensions.setHeight(componentViewport.height() * scaleY);
 
-        float aspectRatio = static_cast<float>(scaledDimensions.width()) / static_cast<float>(scaledDimensions.height());
+        float aspectRatio =
+            static_cast<float>(scaledDimensions.width()) / static_cast<float>(scaledDimensions.height());
         auto _fovy = 60.0f;
         componentCamera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
         componentCamera.setViewportWidth(scaledDimensions.width());
@@ -205,8 +210,12 @@ void ScreenshotRenderer::updateComponentGPUData()
             QMatrix4x4 translation;
             QMatrix4x4 projMatrix;
 
-            float xTranslation = (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width() ) / TILE_SIZE) - (static_cast<float>(_screenshotWidth) / TILE_SIZE);
-            float yTranslation = (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) / TILE_SIZE) - (static_cast<float>(_screenshotHeight) / TILE_SIZE);
+            float xTranslation =
+                (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) / TILE_SIZE) -
+                (static_cast<float>(_screenshotWidth) / TILE_SIZE);
+            float yTranslation =
+                (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) / TILE_SIZE) -
+                (static_cast<float>(_screenshotHeight) / TILE_SIZE);
             translation.translate(xTranslation, -yTranslation);
 
             float xScale = static_cast<float>(scaledDimensions.width()) / TILE_SIZE;
@@ -240,7 +249,8 @@ void ScreenshotRenderer::updateComponentGPUData()
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
-    glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(), GL_STATIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(),
+                 GL_STATIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
@@ -281,9 +291,9 @@ bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
 
         // Generate FBO texture
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-                     renderWidth, renderHeight, static_cast<GLsizei>(renderer._glyphMap->images().size()),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, renderWidth, renderHeight,
+                     static_cast<GLsizei>(renderer._glyphMap->images().size()), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     nullptr);
 
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -292,7 +302,7 @@ bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
         {
             glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderer.sdfTexture(), 0, layer);
 
-            GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+            GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
             glDrawBuffers(1, DrawBuffers);
 
             glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
@@ -311,7 +321,4 @@ bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
     return true;
 }
 
-GLuint ScreenshotRenderer::sdfTexture() const
-{
-    return _sdfTexture;
-}
+GLuint ScreenshotRenderer::sdfTexture() const { return _sdfTexture; }

@@ -153,7 +153,6 @@ class GraphRendererCore :
     friend class ScreenshotRenderer;
 public:
     GraphRendererCore();
-    GraphRendererCore(const GraphRendererCore& graphRendererCore);
     ~GraphRendererCore() override;
 
 private:

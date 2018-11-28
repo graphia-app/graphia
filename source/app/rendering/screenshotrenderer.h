@@ -1,16 +1,14 @@
 #ifndef SCREENSHOTRENDERER_H
 #define SCREENSHOTRENDERER_H
 
-#include "graphrenderer.h"
 #include "graph/graphmodel.h"
+#include "graphrenderer.h"
 #include "graphrenderercore.h"
 #include "shared/graph/grapharray.h"
 
 #include <QObject>
 
-class ScreenshotRenderer :
-        public QObject,
-        public GraphRendererCore
+class ScreenshotRenderer : public QObject, public GraphRendererCore
 {
     Q_OBJECT
 
@@ -19,13 +17,9 @@ public:
     explicit ScreenshotRenderer(const GraphRenderer& renderer);
     ~ScreenshotRenderer() override;
 
-    void copyTextureObject();
-    void updateGPU();
-
-    bool cloneState(const GraphRenderer &renderer);
-public slots:
-    void onPreviewRequested(int width, int height, bool fillSize);
-    void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
+    bool cloneState(const GraphRenderer& renderer);
+    void requestPreview(int width, int height, bool fillSize);
+    void requestScreenshot(int width, int height, const QString& path, int dpi, bool fillSize);
 
 private:
     GraphModel* _graphModel = nullptr;
