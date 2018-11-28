@@ -25,8 +25,9 @@ ScreenshotRenderer::~ScreenshotRenderer()
     glDeleteTextures(1, &_screenshotTex);
 }
 
-void ScreenshotRenderer::requestPreview(int width, int height, bool fillSize)
+void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width, int height, bool fillSize)
 {
+    cloneState(renderer);
     _isPreview = true;
 
     _screenshotWidth = width;
@@ -102,8 +103,10 @@ void ScreenshotRenderer::render()
     }
 }
 
-void ScreenshotRenderer::requestScreenshot(int width, int height, const QString& path, int dpi, bool fillSize)
+void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int width, int height,
+                                           const QString& path, int dpi, bool fillSize)
 {
+    cloneState(renderer);
     _isScreenshot = true;
 
     float viewportAspectRatio = static_cast<float>(_viewportWidth) / static_cast<float>(_viewportHeight);
@@ -256,7 +259,6 @@ void ScreenshotRenderer::updateComponentGPUData()
 
 bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
 {
-    _graphModel = renderer.graphModel();
     _viewportWidth = renderer.width();
     _viewportHeight = renderer.height();
     _componentCameras.clear();
@@ -266,7 +268,7 @@ bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
 
-    for(ComponentId componentId : _graphModel->graph().componentIds())
+    for(ComponentId componentId : renderer.graphModel()->graph().componentIds())
     {
         _componentCameras.emplace_back(*renderer.componentRendererForId(componentId)->camera());
         _componentViewports.emplace_back(renderer.componentRendererForId(componentId)->dimensions());

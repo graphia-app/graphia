@@ -17,9 +17,9 @@ public:
     explicit ScreenshotRenderer(const GraphRenderer& renderer);
     ~ScreenshotRenderer() override;
 
-    bool cloneState(const GraphRenderer& renderer);
-    void requestPreview(int width, int height, bool fillSize);
-    void requestScreenshot(int width, int height, const QString& path, int dpi, bool fillSize);
+    void requestPreview(const GraphRenderer& renderer, int width, int height, bool fillSize);
+    void requestScreenshot(const GraphRenderer& renderer, int width, int height, const QString& path, int dpi,
+                           bool fillSize);
 
 private:
     GraphModel* _graphModel = nullptr;
@@ -28,6 +28,7 @@ private:
 
     GLuint _screenshotFBO = 0;
     GLuint _screenshotTex = 0;
+    GLuint _sdfTexture = 0;
 
     bool _isScreenshot = false;
     bool _isPreview = false;
@@ -45,13 +46,14 @@ private:
     std::vector<QRectF> _componentViewports;
 
     OpenGLDebugLogger _openGLDebugLogger;
-    GLuint _sdfTexture = 0;
     bool _FBOcomplete = false;
 
     GLuint sdfTexture() const override;
 
     void render();
     void updateComponentGPUData();
+    bool cloneState(const GraphRenderer& renderer);
+
     QMatrix4x4 subViewportMatrix(QRectF scaledDimensions);
 signals:
     // Base64 encoded png image for QML...
