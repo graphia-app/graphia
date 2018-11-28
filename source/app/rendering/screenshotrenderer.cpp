@@ -13,7 +13,7 @@
 
 static const int TILE_SIZE = 1024;
 
-QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
+static QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
 {
     QMatrix4x4 projOffset;
 
@@ -30,7 +30,7 @@ QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
     return projOffset;
 }
 
-QString fetchPreview(QSize screenshotSize)
+static QString fetchPreview(QSize screenshotSize)
 {
     int pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
     std::vector<GLubyte> pixels(pixelCount);
@@ -46,7 +46,7 @@ QString fetchPreview(QSize screenshotSize)
 }
 
 
-void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
+static void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
 {
     int pixelCount = TILE_SIZE * TILE_SIZE * 4;
     std::vector<GLubyte> pixels(pixelCount);
