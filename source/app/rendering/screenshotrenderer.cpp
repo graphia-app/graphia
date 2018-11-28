@@ -11,6 +11,55 @@
 #include <QBuffer>
 #include <QDir>
 
+static const int TILE_SIZE = 1024;
+
+QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
+{
+    QMatrix4x4 projOffset;
+
+    float xTranslation =
+        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / screenshotSize.width()) - 1.0f;
+    float yTranslation =
+        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / screenshotSize.height()) - 1.0f;
+    projOffset.translate(xTranslation, -yTranslation);
+
+    float xScale = static_cast<float>(scaledDimensions.width()) / screenshotSize.width();
+    float yScale = static_cast<float>(scaledDimensions.height()) / screenshotSize.height();
+    projOffset.scale(xScale, yScale);
+
+    return projOffset;
+}
+
+QString fetchPreview(QSize screenshotSize)
+{
+    int pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
+    std::vector<GLubyte> pixels(pixelCount);
+    glReadPixels(0, 0, screenshotSize.width(), screenshotSize.height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+    QImage screenTile(pixels.data(), screenshotSize.width(), screenshotSize.height(), QImage::Format_RGBA8888);
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    screenTile.mirrored().save(&buffer, "PNG");
+
+    // QML Can't load raw QImages so as a hack we just base64 encode a png
+    return QString::fromLatin1(byteArray.toBase64().data());
+}
+
+
+void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
+{
+    int pixelCount = TILE_SIZE * TILE_SIZE * 4;
+    std::vector<GLubyte> pixels(pixelCount);
+    glReadPixels(0, 0, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+    QImage screenTile(pixels.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
+
+    QPainter painter(&fullScreenshot);
+    painter.drawImage(currentTileX * TILE_SIZE,
+                      (screenshotSize.height() - TILE_SIZE) - (currentTileY * TILE_SIZE),
+                      screenTile.mirrored(false, true));
+}
+
 ScreenshotRenderer::ScreenshotRenderer() : GraphRendererCore()
 {
     glGenFramebuffers(1, &_screenshotFBO);
@@ -46,7 +95,8 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width
     updateComponentGPUData(ScreenshotType::Preview, screenshotSize, {renderer.width(), renderer.height()});
     render();
 
-    fetchPreview();
+    const QString& base64Image = fetchPreview(screenshotSize);
+    emit previewComplete(base64Image);
 }
 
 void ScreenshotRenderer::render()
@@ -69,34 +119,6 @@ void ScreenshotRenderer::render()
     glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
 
     renderToFramebuffer();
-}
-
-void ScreenshotRenderer::fetchPreview()
-{
-    int pixelCount = width() * height() * 4;
-    std::vector<GLubyte> pixels(pixelCount);
-    glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-
-    QImage screenTile(pixels.data(), width(), height(), QImage::Format_RGBA8888);
-    QByteArray byteArray;
-    QBuffer buffer(&byteArray);
-    screenTile.mirrored().save(&buffer, "PNG");
-    // QML Can't load raw QImages so as a hack we just base64 encode a png
-    emit previewComplete(QString::fromLatin1(byteArray.toBase64().data()));
-}
-
-void ScreenshotRenderer::fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
-{
-    int pixelCount = width() * height() * 4;
-    std::vector<GLubyte> pixels(pixelCount);
-    glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-
-    QImage screenTile(pixels.data(), width(), height(), QImage::Format_RGBA8888);
-
-    QPainter painter(&fullScreenshot);
-    painter.drawImage(currentTileX * TILE_SIZE,
-                      (screenshotSize.height() - TILE_SIZE) - (currentTileY * TILE_SIZE),
-                      screenTile.mirrored(false, true));
 }
 
 void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int width, int height,
@@ -146,23 +168,6 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     image.setDotsPerMeterX(dpi * INCHES_PER_METER);
     image.setDotsPerMeterY(dpi * INCHES_PER_METER);
     emit screenshotComplete(image, path);
-}
-
-QMatrix4x4 ScreenshotRenderer::subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
-{
-    QMatrix4x4 projOffset;
-
-    float xTranslation =
-        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / screenshotSize.width()) - 1.0f;
-    float yTranslation =
-        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / screenshotSize.height()) - 1.0f;
-    projOffset.translate(xTranslation, -yTranslation);
-
-    float xScale = static_cast<float>(scaledDimensions.width()) / screenshotSize.width();
-    float yScale = static_cast<float>(scaledDimensions.height()) / screenshotSize.height();
-    projOffset.scale(xScale, yScale);
-
-    return projOffset;
 }
 
 void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize, QSize viewportSize, int currentTileX, int currentTileY)

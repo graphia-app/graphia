@@ -4,7 +4,6 @@
 #include "graph/graphmodel.h"
 #include "graphrenderer.h"
 #include "graphrenderercore.h"
-#include "shared/graph/grapharray.h"
 
 #include <QObject>
 
@@ -26,7 +25,6 @@ public:
 private:
     GraphModel* _graphModel = nullptr;
 
-    const int TILE_SIZE = 1024;
 
     GLuint _screenshotFBO = 0;
     GLuint _screenshotTex = 0;
@@ -35,17 +33,12 @@ private:
     std::vector<Camera> _componentCameras;
     std::vector<QRectF> _componentViewports;
 
-    OpenGLDebugLogger _openGLDebugLogger;
-
     GLuint sdfTexture() const override;
 
     void render();
     bool cloneState(const GraphRenderer& renderer);
-    void fetchPreview();
-    void fetchAndDrawTile(QPixmap &fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY);
     void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
                                 QSize viewportSize, int currentTileX=0, int currentTileY=0);
-    QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize);
 signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;
