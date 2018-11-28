@@ -371,7 +371,7 @@ Dialog
                         onCurrentChanged:
                         {
                             preview.visible = false;
-                            refreshTimer.restart();
+                            requestPreview();
                         }
                     }
                     RadioButton
