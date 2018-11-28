@@ -29,36 +29,33 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width
 {
     cloneState(renderer);
 
-    _screenshotWidth = width;
-    _screenshotHeight = height;
+    QSize screenshotSize(width, height);
 
-    float viewportAspectRatio = static_cast<float>(_viewportWidth) / static_cast<float>(_viewportHeight);
+    float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
     if(!fillSize)
-        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
+        screenshotSize.setHeight(static_cast<float>(width) / viewportAspectRatio);
 
-    if(!resize(_screenshotWidth, _screenshotHeight))
+    if(!resize(screenshotSize.width(), screenshotSize.height()))
     {
         qWarning() << "Attempting to render incomplete FBO";
         return;
     }
 
-    render(ScreenshotType::Preview);
+    // Update Scene
+    updateComponentGPUData(ScreenshotType::Preview, screenshotSize, {renderer.width(), renderer.height()});
+    render();
 
     fetchPreview();
-
 }
 
-void ScreenshotRenderer::render(ScreenshotType screenshotType, int currentTileX, int currentTileY)
+void ScreenshotRenderer::render()
 {
     glViewport(0, 0, this->width(), this->height());
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  nullptr);
-
-    // Update Scene
-    updateComponentGPUData(screenshotType, currentTileX, currentTileY);
 
     renderGraph();
 
@@ -88,7 +85,7 @@ void ScreenshotRenderer::fetchPreview()
     emit previewComplete(QString::fromLatin1(byteArray.toBase64().data()));
 }
 
-void ScreenshotRenderer::fetchAndDrawTile(QPixmap& fullScreenshot, int currentTileX, int currentTileY)
+void ScreenshotRenderer::fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
 {
     int pixelCount = width() * height() * 4;
     std::vector<GLubyte> pixels(pixelCount);
@@ -98,7 +95,7 @@ void ScreenshotRenderer::fetchAndDrawTile(QPixmap& fullScreenshot, int currentTi
 
     QPainter painter(&fullScreenshot);
     painter.drawImage(currentTileX * TILE_SIZE,
-                      (_screenshotHeight - TILE_SIZE) - (currentTileY * TILE_SIZE),
+                      (screenshotSize.height() - TILE_SIZE) - (currentTileY * TILE_SIZE),
                       screenTile.mirrored(false, true));
 }
 
@@ -107,18 +104,17 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 {
     cloneState(renderer);
 
-    float viewportAspectRatio = static_cast<float>(_viewportWidth) / static_cast<float>(_viewportHeight);
+    float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
-    _screenshotWidth = width;
-    _screenshotHeight = height;
+    QSize screenshotSize(width, height);
 
     if(!fillSize)
     {
-        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
-        if(_screenshotHeight > height)
+        screenshotSize.setHeight(static_cast<float>(width) / viewportAspectRatio);
+        if(screenshotSize.height() > height)
         {
-            _screenshotWidth = static_cast<float>(height) * viewportAspectRatio;
-            _screenshotHeight = height;
+            screenshotSize.setWidth(static_cast<float>(height) * viewportAspectRatio);
+            screenshotSize.setHeight(height);
         }
     }
 
@@ -129,16 +125,18 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     }
 
     // Need a pixmap to construct the full image
-    auto fullScreenshot = QPixmap(_screenshotWidth, _screenshotHeight);
+    auto fullScreenshot = QPixmap(screenshotSize.width(), screenshotSize.height());
 
-    auto tileXCount = std::ceil(static_cast<float>(_screenshotWidth) / this->width());
-    auto tileYCount = std::ceil(static_cast<float>(_screenshotHeight) / this->height());
+    auto tileXCount = std::ceil(static_cast<float>(screenshotSize.width()) / this->width());
+    auto tileYCount = std::ceil(static_cast<float>(screenshotSize.height()) / this->height());
     for(auto currentTileX = 0; currentTileX < tileXCount; currentTileX++)
     {
         for(auto currentTileY = 0; currentTileY < tileYCount; currentTileY++)
         {
-            render(ScreenshotType::Tile, currentTileX, currentTileY);
-            fetchAndDrawTile(fullScreenshot, currentTileX, currentTileY);
+            updateComponentGPUData(ScreenshotType::Tile, screenshotSize, {renderer.width(), renderer.height()},
+                                   currentTileX, currentTileY);
+            render();
+            fetchAndDrawTile(fullScreenshot, screenshotSize, currentTileX, currentTileY);
         }
     }
 
@@ -150,29 +148,29 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     emit screenshotComplete(image, path);
 }
 
-QMatrix4x4 ScreenshotRenderer::subViewportMatrix(QRectF scaledDimensions)
+QMatrix4x4 ScreenshotRenderer::subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
 {
     QMatrix4x4 projOffset;
 
     float xTranslation =
-        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / _screenshotWidth) - 1.0f;
+        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / screenshotSize.width()) - 1.0f;
     float yTranslation =
-        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / _screenshotHeight) - 1.0f;
+        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / screenshotSize.height()) - 1.0f;
     projOffset.translate(xTranslation, -yTranslation);
 
-    float xScale = static_cast<float>(scaledDimensions.width()) / _screenshotWidth;
-    float yScale = static_cast<float>(scaledDimensions.height()) / _screenshotHeight;
+    float xScale = static_cast<float>(scaledDimensions.width()) / screenshotSize.width();
+    float yScale = static_cast<float>(scaledDimensions.height()) / screenshotSize.height();
     projOffset.scale(xScale, yScale);
 
     return projOffset;
 }
 
-void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, int currentTileX, int currentTileY)
+void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize, QSize viewportSize, int currentTileX, int currentTileY)
 {
     std::vector<GLfloat> componentData;
 
-    double scaleX = static_cast<double>(_screenshotWidth) / _viewportWidth;
-    double scaleY = static_cast<double>(_screenshotHeight) / _viewportHeight;
+    double scaleX = static_cast<double>(screenshotSize.width()) / viewportSize.width();
+    double scaleY = static_cast<double>(screenshotSize.height()) / viewportSize.height();
 
     for(size_t componentIndex = 0; componentIndex < _componentCameras.size(); componentIndex++)
     {
@@ -204,10 +202,10 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, i
 
             float xTranslation =
                 (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) / TILE_SIZE) -
-                (static_cast<float>(_screenshotWidth) / TILE_SIZE);
+                (static_cast<float>(screenshotSize.width()) / TILE_SIZE);
             float yTranslation =
                 (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) / TILE_SIZE) -
-                (static_cast<float>(_screenshotHeight) / TILE_SIZE);
+                (static_cast<float>(screenshotSize.height()) / TILE_SIZE);
             translation.translate(xTranslation, -yTranslation);
 
             float xScale = static_cast<float>(scaledDimensions.width()) / TILE_SIZE;
@@ -216,8 +214,8 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, i
             projMatrix = translation * componentCamera.projectionMatrix();
 
             // Per-Tile translation for high res screenshots
-            float tileWidthRatio = static_cast<float>(TILE_SIZE) / _screenshotWidth;
-            float tileHeightRatio = static_cast<float>(TILE_SIZE) / _screenshotHeight;
+            float tileWidthRatio = static_cast<float>(TILE_SIZE) / screenshotSize.width();
+            float tileHeightRatio = static_cast<float>(TILE_SIZE) / screenshotSize.height();
 
             float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * currentTileX);
             float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * currentTileY);
@@ -232,7 +230,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, i
         }
         else
         {
-            auto projectionMatrix = subViewportMatrix(scaledDimensions) * componentCamera.projectionMatrix();
+            auto projectionMatrix = subViewportMatrix(scaledDimensions, screenshotSize) * componentCamera.projectionMatrix();
 
             // Normal projection
             for(int i = 0; i < 16; i++)
@@ -248,8 +246,6 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, i
 
 bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
 {
-    _viewportWidth = renderer.width();
-    _viewportHeight = renderer.height();
     _componentCameras.clear();
     _componentViewports.clear();
     _gpuGraphData = renderer._gpuGraphData;

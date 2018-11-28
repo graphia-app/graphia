@@ -32,11 +32,6 @@ private:
     GLuint _screenshotTex = 0;
     GLuint _sdfTexture = 0;
 
-    int _viewportWidth = 0;
-    int _viewportHeight = 0;
-    int _screenshotHeight = 0;
-    int _screenshotWidth = 0;
-
     std::vector<Camera> _componentCameras;
     std::vector<QRectF> _componentViewports;
 
@@ -44,14 +39,13 @@ private:
 
     GLuint sdfTexture() const override;
 
-    void render(ScreenshotType type, int currentTileX = 0, int currentTileY = 0);
-    void updateComponentGPUData(ScreenshotType screenshotType, int currentTileX = 0, int currentTileY = 0);
+    void render();
     bool cloneState(const GraphRenderer& renderer);
-
-    QMatrix4x4 subViewportMatrix(QRectF scaledDimensions);
-
     void fetchPreview();
-    void fetchAndDrawTile(QPixmap &fullScreenshot, int currentTileX, int currentTileY);
+    void fetchAndDrawTile(QPixmap &fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY);
+    void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
+                                QSize viewportSize, int currentTileX=0, int currentTileY=0);
+    QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize);
 signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;
