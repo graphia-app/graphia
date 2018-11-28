@@ -441,6 +441,11 @@ QStringList Document::visualisationsFromUI() const
     return visualisations;
 }
 
+bool Document::hasValidEdgeTextVisualisation() const
+{
+    return _graphModel != nullptr ? _graphModel->hasValidEdgeTextVisualisation() : false;
+}
+
 void Document::initialiseLayoutSettingsModel()
 {
     _layoutSettingsModel.clear();
@@ -516,6 +521,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::nodeAttributeGroupNamesChanged);
+    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
 
     emit pluginInstanceChanged();
 
@@ -633,8 +639,13 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == QLatin1String("visuals/backgroundColor"))
+    if(key == QStringLiteral("visuals/backgroundColor"))
         emit contrastingColorChanged();
+    else if(key == QStringLiteral("visuals/showEdgeText"))
+    {
+        // showEdgeText affects the warning state of TextVisualisationChannel
+        setVisualisations(_visualisations);
+    }
 }
 
 void Document::onLoadProgress(int percentage)

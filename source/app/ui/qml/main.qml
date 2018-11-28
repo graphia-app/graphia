@@ -1277,6 +1277,19 @@ ApplicationWindow
             Menu
             {
                 title: qsTr("Show Edge Text")
+
+                MenuItem
+                {
+                    id: edgeTextWarning
+
+                    enabled: false
+                    visible: currentDocument && !currentDocument.hasValidEdgeTextVisualisation &&
+                        visuals.showEdgeText !== TextState.Off
+                    text: qsTr("⚠ Visualisation Required For Edge Text")
+                }
+
+                MenuSeparator { visible: edgeTextWarning.visible }
+
                 MenuItem { action: hideEdgeTextAction }
                 MenuItem { action: showSelectedEdgeTextAction }
                 MenuItem { action: showAllEdgeTextAction }

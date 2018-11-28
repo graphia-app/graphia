@@ -103,6 +103,9 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
 
+    Q_PROPERTY(bool hasValidEdgeTextVisualisation READ hasValidEdgeTextVisualisation
+        NOTIFY hasValidEdgeTextVisualisationChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
     ~Document() override;
@@ -219,7 +222,7 @@ private:
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
 
-    // This is a mildly awkard hack to ensure than the numNodeFoundChanged signal
+    // This is a mildly awkward hack to ensure than the numNodeFoundChanged signal
     // gets emitted /after/ the foundIndexChanged signal so that the number of
     // found nodes text in the UI gets updated minimally
     bool _numNodesFoundChanged = false;
@@ -249,6 +252,8 @@ private:
 
     QStringList graphTransformConfigurationsFromUI() const;
     QStringList visualisationsFromUI() const;
+
+    bool hasValidEdgeTextVisualisation() const;
 
     void maybeEmitBusyChanged();
 
@@ -336,6 +341,8 @@ signals:
 
     void saveComplete(bool success, QUrl fileUrl, const QString& saverName);
     void nodeAttributeGroupNamesChanged();
+
+    void hasValidEdgeTextVisualisationChanged();
 
 public:
     // Main QML interface

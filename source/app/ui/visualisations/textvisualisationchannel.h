@@ -15,6 +15,8 @@ public:
     bool requiresNormalisedValue() const override { return false; }
     bool requiresRange() const override { return false; }
 
+    void findErrors(VisualisationInfo& info) const override;
+
     QString description(ElementType, ValueType) const override;
 };
 

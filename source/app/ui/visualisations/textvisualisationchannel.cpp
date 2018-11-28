@@ -1,4 +1,9 @@
 #include "textvisualisationchannel.h"
+#include "visualisationinfo.h"
+
+#include "rendering/graphrenderer.h"
+
+#include "shared/utils/preferences.h"
 
 #include <QObject>
 
@@ -10,6 +15,15 @@ void TextVisualisationChannel::apply(double value, ElementVisual& elementVisual)
 void TextVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
 {
     elementVisual._text = value;
+}
+
+void TextVisualisationChannel::findErrors(VisualisationInfo& info) const
+{
+    if(u::pref("visuals/showEdgeText").toInt() == static_cast<int>(TextState::Off))
+    {
+        info.addAlert(AlertType::Warning,
+            QObject::tr("Edge text is disabled and will not be visible"));
+    }
 }
 
 QString TextVisualisationChannel::description(ElementType, ValueType) const

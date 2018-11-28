@@ -90,6 +90,12 @@ private:
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
 
+    // Slightly hacky state variable that tracks whether or not a edge text
+    // visualisation is present. This is required so that we can show a warning
+    // to the user, if they have edge text enabled, but do not have a
+    // corresponding visualisation
+    bool _hasValidEdgeTextVisualisation = false;
+
     NodeIdSet _selectedNodeIds;
     NodeIdSet _foundNodeIds;
     NodeIdSet _highlightedNodeIds;
@@ -478,6 +484,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     _->_mappedEdgeVisuals.resetElements();
     clearVisualisationInfos();
 
+    _->_hasValidEdgeTextVisualisation = false;
+
     VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _->_mappedNodeVisuals);
     VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _->_mappedEdgeVisuals);
 
@@ -497,12 +505,12 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         const auto& attributeName = visualisationConfig._attributeName;
         const auto& channelName = visualisationConfig._channelName;
+        auto& info = _->_visualisationInfos[index];
         bool invert = visualisationConfig.isFlagSet(QStringLiteral("invert"));
 
         if(!attributeExists(attributeName))
         {
-            _->_visualisationInfos[index].addAlert(AlertType::Error,
-                tr("Attribute doesn't exist"));
+            info.addAlert(AlertType::Error, tr("Attribute doesn't exist"));
             continue;
         }
 
@@ -512,15 +520,19 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         auto attribute = attributeValueByName(attributeName);
         auto& channel = _->_visualisationChannels.at(channelName);
 
+        channel->findErrors(info);
+
         if(!channel->supports(attribute.valueType()))
         {
-            _->_visualisationInfos[index].addAlert(AlertType::Error,
-                tr("Visualisation doesn't support attribute type"));
+            info.addAlert(AlertType::Error, tr("Visualisation doesn't support attribute type"));
             continue;
         }
 
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
+
+        if(attribute.elementType() == ElementType::Edge && channelName == QStringLiteral("Text"))
+            _->_hasValidEdgeTextVisualisation = true;
 
         switch(attribute.elementType())
         {
@@ -541,6 +553,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
     updateVisuals();
+}
+
+bool GraphModel::hasValidEdgeTextVisualisation() const
+{
+    return _->_hasValidEdgeTextVisualisation;
 }
 
 QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) const

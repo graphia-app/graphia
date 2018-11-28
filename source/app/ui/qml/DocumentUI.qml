@@ -114,6 +114,7 @@ Item
     property var enrichmentTableModels: document.enrichmentTableModels
     property var nodeAttributeGroupNames: document.nodeAttributeGroupNames
 
+    property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
 
     property color contrastingColor: document.contrastingColor
 
