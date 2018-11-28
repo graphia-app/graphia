@@ -20,17 +20,7 @@ class ScreenshotRenderer;
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
-    GPUGraphData(const GPUGraphData& gpuGraphData)
-        : _componentAlpha(gpuGraphData._componentAlpha),
-          _unhighlightAlpha(gpuGraphData._unhighlightAlpha),
-          _alwaysDrawnLast(gpuGraphData._alwaysDrawnLast),
-          _nodeData(gpuGraphData._nodeData),
-          _glyphData(gpuGraphData._glyphData),
-          _edgeData(gpuGraphData._edgeData)
-    {
-        resolveOpenGLFunctions();
-        prepareVertexBuffers();
-    }
+    GPUGraphData(const GPUGraphData& gpuGraphData);
     ~GPUGraphData() override;
 
     void initialise(QOpenGLShaderProgram& nodesShader,
@@ -120,31 +110,7 @@ struct GPUGraphData : OpenGLFunctions
     GLuint _colorTexture = 0;
     GLuint _selectionTexture = 0;
 
-    GPUGraphData& operator=(const GPUGraphData &gpuGraphData)
-    {
-        if(this == &gpuGraphData)
-            return *this;
-
-        _componentAlpha = gpuGraphData._componentAlpha;
-        _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
-        _alwaysDrawnLast = gpuGraphData._alwaysDrawnLast;
-        _nodeData = gpuGraphData._nodeData;
-        _glyphData = gpuGraphData._glyphData;
-        _edgeData = gpuGraphData._edgeData;
-
-        // Cause VBO to be recreated
-        _fbo = 0;
-        _colorTexture = 0;
-        _selectionTexture = 0;
-
-        _edgeVBO.destroy();
-        _nodeVBO.destroy();
-        _textVBO.destroy();
-
-        prepareVertexBuffers();
-
-        return *this;
-    }
+    GPUGraphData& operator=(const GPUGraphData &gpuGraphData);
 };
 
 class GraphRendererCore :

@@ -22,6 +22,17 @@ GPUGraphData::GPUGraphData()
     resolveOpenGLFunctions();
 }
 
+GPUGraphData::GPUGraphData(const GPUGraphData &gpuGraphData)
+    : _componentAlpha(gpuGraphData._componentAlpha),
+      _unhighlightAlpha(gpuGraphData._unhighlightAlpha),
+      _alwaysDrawnLast(gpuGraphData._alwaysDrawnLast),
+      _nodeData(gpuGraphData._nodeData),
+      _glyphData(gpuGraphData._glyphData),
+      _edgeData(gpuGraphData._edgeData)
+{
+    resolveOpenGLFunctions();
+}
+
 void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
                               QOpenGLShaderProgram& edgesShader,
                               QOpenGLShaderProgram& textShader)
@@ -297,7 +308,33 @@ bool GPUGraphData::unused() const
     return _componentAlpha == 0.0f && _unhighlightAlpha == 0.0f;
 }
 
-void GraphRendererCore::prepare()
+GPUGraphData &GPUGraphData::operator=(const GPUGraphData &gpuGraphData)
+{
+    if(this == &gpuGraphData)
+        return *this;
+
+    _componentAlpha = gpuGraphData._componentAlpha;
+    _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
+    _alwaysDrawnLast = gpuGraphData._alwaysDrawnLast;
+    _nodeData = gpuGraphData._nodeData;
+    _glyphData = gpuGraphData._glyphData;
+    _edgeData = gpuGraphData._edgeData;
+
+    // Cause VBO to be recreated
+    _fbo = 0;
+    _colorTexture = 0;
+    _selectionTexture = 0;
+
+    _edgeVBO.destroy();
+    _nodeVBO.destroy();
+    _textVBO.destroy();
+
+    prepareVertexBuffers();
+
+    return *this;
+}
+
+GraphRendererCore::GraphRendererCore()
 {
     resolveOpenGLFunctions();
 
@@ -326,11 +363,6 @@ void GraphRendererCore::prepare()
     prepareComponentDataTexture();
     prepareSelectionMarkerVAO();
     prepareQuad();
-}
-
-GraphRendererCore::GraphRendererCore()
-{
-    prepare();
 }
 
 GraphRendererCore::~GraphRendererCore()
