@@ -4,13 +4,13 @@
 #include "openglfunctions.h"
 
 #include "primitives/arrow.h"
-#include "primitives/sphere.h"
 #include "primitives/rectangle.h"
+#include "primitives/sphere.h"
 
-#include <QRect>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QRect>
 
 #include <array>
 #include <vector>
@@ -20,19 +20,17 @@ class ScreenshotRenderer;
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
-    GPUGraphData(const GPUGraphData& gpuGraphData);
     ~GPUGraphData() override;
 
-    void initialise(QOpenGLShaderProgram& nodesShader,
-                    QOpenGLShaderProgram& edgesShader,
+    void initialise(QOpenGLShaderProgram& nodesShader, QOpenGLShaderProgram& edgesShader,
                     QOpenGLShaderProgram& textShader);
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
     void prepareTextVAO(QOpenGLShaderProgram& shader);
 
-    bool prepareRenderBuffers(int width, int height,
-        GLuint depthTexture, GLint numMultiSamples);
+    bool prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples);
+    void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader, QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
 
     void reset();
     void clearFramebuffer();
@@ -109,14 +107,12 @@ struct GPUGraphData : OpenGLFunctions
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;
     GLuint _selectionTexture = 0;
-
-    GPUGraphData& operator=(const GPUGraphData &gpuGraphData);
 };
 
-class GraphRendererCore :
-    public OpenGLFunctions
+class GraphRendererCore : public OpenGLFunctions
 {
     friend class ScreenshotRenderer;
+
 public:
     GraphRendererCore();
     ~GraphRendererCore() override;

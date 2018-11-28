@@ -36,7 +36,7 @@ private:
     GLuint sdfTexture() const override;
 
     void render();
-    bool cloneState(const GraphRenderer& renderer);
+    bool copyState(const GraphRenderer& renderer);
     void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
                                 QSize viewportSize, int currentTileX=0, int currentTileY=0);
 signals:

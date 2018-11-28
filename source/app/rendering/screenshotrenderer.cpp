@@ -76,7 +76,7 @@ ScreenshotRenderer::~ScreenshotRenderer()
 
 void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width, int height, bool fillSize)
 {
-    cloneState(renderer);
+    copyState(renderer);
 
     QSize screenshotSize(width, height);
 
@@ -124,7 +124,7 @@ void ScreenshotRenderer::render()
 void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int width, int height,
                                            const QString& path, int dpi, bool fillSize)
 {
-    cloneState(renderer);
+    copyState(renderer);
 
     float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
@@ -249,14 +249,13 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
-bool ScreenshotRenderer::cloneState(const GraphRenderer& renderer)
+bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 {
     _componentCameras.clear();
     _componentViewports.clear();
-    _gpuGraphData = renderer._gpuGraphData;
 
-    for(auto& gpuGraphData : _gpuGraphData)
-        gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
+    for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
+        _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
 
     for(ComponentId componentId : renderer.graphModel()->graph().componentIds())
     {

@@ -22,17 +22,6 @@ GPUGraphData::GPUGraphData()
     resolveOpenGLFunctions();
 }
 
-GPUGraphData::GPUGraphData(const GPUGraphData &gpuGraphData)
-    : _componentAlpha(gpuGraphData._componentAlpha),
-      _unhighlightAlpha(gpuGraphData._unhighlightAlpha),
-      _alwaysDrawnLast(gpuGraphData._alwaysDrawnLast),
-      _nodeData(gpuGraphData._nodeData),
-      _glyphData(gpuGraphData._glyphData),
-      _edgeData(gpuGraphData._edgeData)
-{
-    resolveOpenGLFunctions();
-}
-
 void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
                               QOpenGLShaderProgram& edgesShader,
                               QOpenGLShaderProgram& textShader)
@@ -308,11 +297,11 @@ bool GPUGraphData::unused() const
     return _componentAlpha == 0.0f && _unhighlightAlpha == 0.0f;
 }
 
-GPUGraphData &GPUGraphData::operator=(const GPUGraphData &gpuGraphData)
+void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
+                                      QOpenGLShaderProgram& nodesShader,
+                                      QOpenGLShaderProgram& edgesShader,
+                                      QOpenGLShaderProgram& textShader)
 {
-    if(this == &gpuGraphData)
-        return *this;
-
     _componentAlpha = gpuGraphData._componentAlpha;
     _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
     _alwaysDrawnLast = gpuGraphData._alwaysDrawnLast;
@@ -329,9 +318,7 @@ GPUGraphData &GPUGraphData::operator=(const GPUGraphData &gpuGraphData)
     _nodeVBO.destroy();
     _textVBO.destroy();
 
-    prepareVertexBuffers();
-
-    return *this;
+    initialise(nodesShader, edgesShader, textShader);
 }
 
 GraphRendererCore::GraphRendererCore()
