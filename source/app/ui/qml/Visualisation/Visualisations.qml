@@ -28,7 +28,7 @@ Item
         document: root.document
     }
 
-    GradientEditor { id: _gradientEditor }
+    GradientSelector { id: _gradientSelector }
     PaletteSelector { id: _paletteSelector }
 
     ColumnLayout
@@ -100,7 +100,7 @@ Item
                     Visualisation
                     {
                         property var document: root.document
-                        gradientEditor: _gradientEditor
+                        gradientSelector: _gradientSelector
                         paletteSelector: _paletteSelector
 
                         Component.onCompleted:

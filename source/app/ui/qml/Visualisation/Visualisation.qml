@@ -21,17 +21,17 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    property var gradientEditor
+    property var gradientSelector
     Connections
     {
-        target: gradientEditor
+        target: gradientSelector
 
         onConfigurationChanged:
         {
-            if(gradientEditor.visualisationIndex !== index)
+            if(gradientSelector.visualisationIndex !== index)
                 return;
 
-            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientEditor.configuration) + "\"";
+            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientSelector.configuration) + "\"";
             root.updateExpression();
         }
     }
@@ -110,7 +110,6 @@ Item
             hoverColor: root.hoverColor
 
             invert: isFlagSet("invert");
-            propogatePresses: true
 
             minimum: root._visualisationInfo.minimumNumericValue !== undefined ?
                 root._visualisationInfo.minimumNumericValue : 0.0
@@ -121,9 +120,9 @@ Item
             {
                 if(mouse.button === Qt.LeftButton)
                 {
-                    gradientEditor.visualisationIndex = index;
-                    gradientEditor.selected = gradientKey.configuration;
-                    gradientEditor.show();
+                    gradientSelector.visualisationIndex = index;
+                    gradientSelector.configuration = gradientKey.configuration;
+                    gradientSelector.show();
                 }
                 else
                     mouse.accepted = false;

@@ -4,17 +4,17 @@ import QtQuick.Layouts 1.3
 
 import com.kajeka 1.0
 
+import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
 
 Item
 {
     id: root
 
-    implicitWidth: layout.implicitWidth + _padding
-    implicitHeight: root.keyHeight + _paddingTopBottom
+    implicitWidth: layout.implicitWidth + root._padding
+    implicitHeight: root.keyHeight + root._padding
 
-    property int _padding: 2 * 4
-    property int _paddingTopBottom: 2 * 4
+    property int _padding: hoverEnabled ? Constants.padding : 0
 
     property int keyWidth
     property int keyHeight: 20
@@ -40,7 +40,6 @@ Item
 
     property bool showLabels: true
     property bool invert: false
-    property bool propogatePresses: false
 
     property alias hoverEnabled: mouseArea.hoverEnabled
 
@@ -109,7 +108,7 @@ Item
         anchors.centerIn: parent
 
         width: root.width !== undefined ? root.width - _padding : undefined
-        height: root.height !== undefined ? root.height - _paddingTopBottom : undefined
+        height: root.height !== undefined ? root.height - _padding : undefined
 
         Label
         {
@@ -168,7 +167,7 @@ Item
 
         hoverEnabled: true
 
-        onPressed: { mouse.accepted = !propogatePresses; }
+        onPressed: { mouse.accepted = false; }
     }
 
     signal clicked(var mouse)
