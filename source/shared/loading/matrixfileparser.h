@@ -41,7 +41,7 @@ public:
             {
                 const auto& stringValue = tabularData.valueAt(0, rowIndex);
                 // Not a header if I can convert to double
-                if(!u::isNumeric(stringValue))
+                if(!u::isNumeric(stringValue) && rowIndex > 0)
                 {
                     hasRowHeaders = true;
                     break;
@@ -51,7 +51,7 @@ public:
             for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
             {
                 const auto& stringValue = tabularData.valueAt(columnIndex, 0);
-                if(!u::isNumeric(stringValue))
+                if(!u::isNumeric(stringValue) && columnIndex > 0)
                 {
                     // Probably doesnt have headers if I can convert the header to double
                     hasColumnHeaders = true;
