@@ -154,39 +154,6 @@ function desaturate(colorString, factor)
     return Qt.hsla(c.hslHue, c.hslSaturation * factor, c.hslLightness, c.a);
 }
 
-function colorToString(color)
-{
-    if(typeof(color) === "string")
-        return color;
-    else if(typeof(color) !== "object")
-    {
-        console.log("color is not an object");
-        return "black";
-    }
-
-    var normalisedToHex = function(normalised)
-    {
-        var decimal = Math.floor(normalised * 255);
-        var hex = decimal.toString(16).toUpperCase();
-
-        while(hex.length < 2)
-            hex = "0" + hex;
-
-        return hex;
-    };
-
-    var colorString = "#";
-
-    if(color.a !== 1)
-        colorString += normalisedToHex(color.a);
-
-    colorString += normalisedToHex(color.r);
-    colorString += normalisedToHex(color.g);
-    colorString += normalisedToHex(color.b);
-
-    return colorString;
-}
-
 function generateColorFrom(color)
 {
     if(typeof(color) === "string")

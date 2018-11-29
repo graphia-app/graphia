@@ -42,7 +42,7 @@ Item
 
         var newMarker = {};
         newMarker.value = value;
-        newMarker.color = Utils.colorToString(color);
+        newMarker.color = color.toString();
         markers.push(newMarker);
 
         markerRepeater.model = root._markers = markers;

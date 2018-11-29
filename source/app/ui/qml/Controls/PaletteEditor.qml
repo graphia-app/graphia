@@ -85,7 +85,7 @@ ColumnLayout
         o.autoColors = root._autoColors;
 
         if(defaultColorRadioButton.checked)
-            o.defaultColor = Utils.colorToString(defaultColorKey.color);
+            o.defaultColor = defaultColorKey.color.toString();
 
         if(root._fixedColors.length > 0)
         {
