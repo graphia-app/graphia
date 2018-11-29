@@ -182,6 +182,7 @@ Window
 
                                         implicitWidth: 0
                                         Layout.fillWidth: true
+                                        Layout.rightMargin: Constants.margin
 
                                         keyHeight: 20
                                         separateKeys: false
