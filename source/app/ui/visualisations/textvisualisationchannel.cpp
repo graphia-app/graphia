@@ -20,10 +20,7 @@ void TextVisualisationChannel::apply(const QString& value, ElementVisual& elemen
 void TextVisualisationChannel::findErrors(VisualisationInfo& info) const
 {
     if(u::pref("visuals/showEdgeText").toInt() == static_cast<int>(TextState::Off))
-    {
-        info.addAlert(AlertType::Warning,
-            QObject::tr("Edge Text Disabled"));
-    }
+        info.addAlert(AlertType::Warning, QObject::tr("Edge Text Disabled"));
 }
 
 QString TextVisualisationChannel::description(ElementType, ValueType) const

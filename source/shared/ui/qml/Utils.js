@@ -170,7 +170,7 @@ function generateColorFrom(color)
 
         color.hsvHue = hue;
 
-        return colorToString(color);
+        return color.toString();
     }
 
     return "#FF0000";
