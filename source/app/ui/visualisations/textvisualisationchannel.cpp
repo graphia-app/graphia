@@ -22,7 +22,7 @@ void TextVisualisationChannel::findErrors(VisualisationInfo& info) const
     if(u::pref("visuals/showEdgeText").toInt() == static_cast<int>(TextState::Off))
     {
         info.addAlert(AlertType::Warning,
-            QObject::tr("Edge text is disabled and will not be visible"));
+            QObject::tr("Edge Text Disabled"));
     }
 }
 
