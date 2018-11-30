@@ -2,8 +2,11 @@ call scripts\defaults.bat
 
 REM Use clcache (https://github.com/frerich/clcache) if available
 WHERE clcache >nul 2>&1 && (
+  echo Found clcache
   SET CC=clcache
   SET CXX=clcache
+) || (
+  echo clcache not found
 )
 
 set BUILD_DIR=build
