@@ -1,5 +1,11 @@
 call scripts\defaults.bat
 
+REM Use clcache (https://github.com/frerich/clcache) if available
+WHERE clcache >nul 2>&1 && (
+  SET CC=clcache
+  SET CXX=clcache
+)
+
 set BUILD_DIR=build
 rmdir /s /q %BUILD_DIR%
 mkdir %BUILD_DIR%
