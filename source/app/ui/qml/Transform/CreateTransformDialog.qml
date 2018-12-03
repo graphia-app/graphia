@@ -21,7 +21,7 @@ Window
     width: 900
     height: 350
     minimumWidth: 900
-    minimumHeight: 350
+    minimumHeight: 400
 
     property var document
     property string transformExpression
@@ -519,6 +519,17 @@ Window
 
                             property var _visualisations
 
+                            function update()
+                            {
+                                visualisations._visualisations = {};
+
+                                for(var i = 0; i < visualisationsRepeater.count; i++)
+                                {
+                                    var item = visualisationsRepeater.itemAt(i);
+                                    visualisations._visualisations[item.attributeName] = item.value;
+                                }
+                            }
+
                             Label
                             {
                                 Layout.alignment: Qt.AlignTop
@@ -535,6 +546,11 @@ Window
                                 {
                                     ColumnLayout
                                     {
+                                        property string attributeName:
+                                        {
+                                            return visualisations.resolvedAttributeName(modelData);
+                                        }
+
                                         property var visualisation: _transform !== undefined ?
                                             _transform.defaultVisualisations[modelData] : undefined
 
@@ -544,35 +560,53 @@ Window
 
                                             Label
                                             {
-                                                text: modelData
+                                                font.italic: attributeName.length === 0
+                                                text: attributeName.length > 0 ? attributeName : qsTr("Invalid Attribute Name")
                                             }
 
                                             ComboBox
                                             {
                                                 id: visualisationsComboBox
+                                                enabled: attributeName.length > 0
                                                 editable: false
-                                                onCurrentIndexChanged:
-                                                {
-                                                    var value = currentText;
-                                                    if(value === "None")
-                                                        value = "";
-
-                                                    visualisations._visualisations[modelData] = value;
-                                                }
                                             }
 
                                             Item { Layout.fillWidth: true }
                                         }
+
+                                        property string value:
+                                        {
+                                            if(visualisationsComboBox.currentText === "None")
+                                                return "";
+
+                                            return visualisationsComboBox.currentText;
+                                        }
+
+                                        onValueChanged: { visualisations.update(); }
 
                                         Component.onCompleted:
                                         {
                                             var visualisationChannelNames = document.availableVisualisationChannelNames(visualisation.valueType);
                                             visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
                                             visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(visualisation.channelName);
-                                            visualisations._visualisations[modelData] = visualisation.channelName;
                                         }
                                     }
                                 }
+                            }
+
+                            function resolvedAttributeName(attributeName)
+                            {
+                                if(_transform !== undefined &&
+                                    _transform.parameters.hasOwnProperty(attributeName) &&
+                                    _transform.parameters[attributeName].valueType === ValueType.String)
+                                {
+                                    // If the attribute name matches a parameter name, the parameter
+                                    // is (probably) the name of a new attribute, so use its value
+                                    var quotedAttributeName = parameters.valueOf(attributeName);
+                                    return quotedAttributeName.replace(/"/g, "");
+                                }
+
+                                return attributeName;
                             }
 
                             function selectedVisualisation(attributeName)
@@ -580,6 +614,7 @@ Window
                                 if(_visualisations === undefined)
                                     return "";
 
+                                attributeName = resolvedAttributeName(attributeName);
                                 var visualisationChannelName = _visualisations[attributeName];
 
                                 if(visualisationChannelName === undefined)
@@ -731,7 +766,15 @@ Window
     {
         defaultVisualisations = [];
 
+        var resolvedDefaultVisualisations = {};
         Object.keys(_transform.defaultVisualisations).forEach(function(attributeName)
+        {
+            var resolvedAttributeName = visualisations.resolvedAttributeName(attributeName);
+            resolvedDefaultVisualisations[resolvedAttributeName] =
+                _transform.defaultVisualisations[attributeName];
+        });
+
+        Object.keys(resolvedDefaultVisualisations).forEach(function(attributeName)
         {
             var channelName = visualisations.selectedVisualisation(attributeName);
 
@@ -739,7 +782,7 @@ Window
             {
                 var expression = "\"" + attributeName + "\" \"" + channelName + "\"";
 
-                var valueType = _transform.defaultVisualisations[attributeName].valueType;
+                var valueType = resolvedDefaultVisualisations[attributeName].valueType;
                 var parameters = document.visualisationDefaultParameters(
                     valueType, channelName);
 

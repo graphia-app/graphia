@@ -74,7 +74,10 @@ private:
 
 struct DefaultVisualisation
 {
+    // This can also be set to the name of a string parameter, in which case
+    // the parameter value will be used as the attribute name
     QString _attributeName;
+
     ValueType _attributeValueType;
     QString _channel;
 };
