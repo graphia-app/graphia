@@ -1,6 +1,7 @@
 #include "commandmanager.h"
 
 #include "shared/utils/thread.h"
+#include "shared/utils/preferences.h"
 
 #include <QDebug>
 
@@ -89,6 +90,16 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
                     _stack.pop_back();
 
                 _stack.push_back(std::move(command));
+
+                auto maxUndoLevels = u::pref("misc/maxUndoLevels").toInt();
+                if(maxUndoLevels > 0)
+                {
+                    // Lose commands at the bottom of the stack until
+                    // we reach the maximum stack size
+                    while(static_cast<int>(_stack.size()) > maxUndoLevels)
+                        _stack.pop_front();
+                }
+
                 _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
             }
             else if(_graphChanged)

@@ -18,6 +18,7 @@ Item
         property alias focusFoundComponents: focusFoundComponentsCheckbox.checked
         property alias disableHubbles: disableHubblesCheckbox.checked
         property alias webSearchEngineUrl: webSearchEngineField.text
+        property alias maxUndoLevels: maxUndoSpinBox.value
     }
 
     ColumnLayout
@@ -62,18 +63,35 @@ Item
         Label
         {
             font.bold: true
-            text: qsTr("Web Search Engine")
+            text: qsTr("Other")
         }
 
-        TextField
+        RowLayout
         {
-            id: webSearchEngineField
+            Label { text: qsTr("Web Search URL:") }
 
-            implicitWidth: 320
-
-            style: TextFieldStyle
+            TextField
             {
-                textColor: QmlUtils.urlIsValid(webSearchEngineField.text) ? "black" : "red"
+                id: webSearchEngineField
+
+                implicitWidth: 320
+
+                style: TextFieldStyle
+                {
+                    textColor: QmlUtils.urlIsValid(webSearchEngineField.text) ? "black" : "red"
+                }
+            }
+        }
+
+        RowLayout
+        {
+            Label { text: qsTr("Maximum Undo Levels:") }
+
+            SpinBox
+            {
+                id: maxUndoSpinBox
+                minimumValue: 0
+                maximumValue: 50
             }
         }
     }

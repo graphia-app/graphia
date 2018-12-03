@@ -152,6 +152,8 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
     preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);
 
+    preferences.define(QStringLiteral("misc/maxUndoLevels"),                    25);
+
     preferences.define(QStringLiteral("misc/showGraphMetrics"),                 false);
     preferences.define(QStringLiteral("misc/showLayoutSettings"),               false);
 
