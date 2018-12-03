@@ -8,6 +8,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
+#include "shared/utils/string.h"
 
 #include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
@@ -1721,12 +1722,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
 QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
 {
-    QStringList attributeNames;
-
-    for(const auto& attributeName : _graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex))
-        attributeNames.append(attributeName);
-
-    return attributeNames;
+    return u::toQStringList(_graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex));
 }
 
 QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
@@ -1845,7 +1841,9 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.min());
     map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.max());
 
-    for(const auto& stringValue : visualisationInfo.stringValues())
+    const auto& stringValuesVector = visualisationInfo.stringValues();
+    stringValues.reserve(static_cast<int>(stringValuesVector.size()));
+    for(const auto& stringValue : stringValuesVector)
         stringValues.append(stringValue);
 
     map.insert(QStringLiteral("stringValues"), stringValues);

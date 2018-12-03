@@ -199,8 +199,8 @@ private:
     bool _graphChangeOccurred = false;
     std::mutex _mutex;
 
-    void beginTransaction() override;
-    void endTransaction(bool graphChangeOccurred = true) override;
+    void beginTransaction() final;
+    void endTransaction(bool graphChangeOccurred = true) final;
 };
 
 #endif // MUTABLEGRAPH_H

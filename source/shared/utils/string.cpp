@@ -172,7 +172,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
             auto exponentValueString = stripZeroes(splitString[1]);
 
             exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
-            exponentValueString.replace(QStringLiteral("+"), QStringLiteral(""));
+            exponentValueString.replace(QStringLiteral("+"), QString());
 
             for(auto& character : exponentValueString)
             {

@@ -60,7 +60,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int 
                       screenTile.mirrored(false, true));
 }
 
-ScreenshotRenderer::ScreenshotRenderer() : GraphRendererCore()
+ScreenshotRenderer::ScreenshotRenderer()
 {
     glGenFramebuffers(1, &_screenshotFBO);
     glGenTextures(1, &_screenshotTex);

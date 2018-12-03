@@ -80,7 +80,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
     for(const auto& jsonNode : jsonNodes)
     {
         NodeId nodeId;
-        QString nodeJsonId = "";
+        QString nodeJsonId;
 
         if(!u::contains(jsonNode, "id"))
             continue;
