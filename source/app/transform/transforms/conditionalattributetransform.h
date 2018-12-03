@@ -54,6 +54,11 @@ public:
         };
     }
 
+    DefaultVisualisations defaultVisualisations() const override
+    {
+        return {{"Name", ValueType::String, QObject::tr("Colour")}};
+    }
+
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
