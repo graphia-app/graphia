@@ -1206,7 +1206,7 @@ BaseParameterDialog
                                     "usually reduce the graph size.") + "</font>";
                             }
                         }
-                        else
+                        else if(!tabularDataParser.graphSizeEstimateInProgress)
                         {
                             summaryString += "<br><br>" + warningFont +
                                 qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
