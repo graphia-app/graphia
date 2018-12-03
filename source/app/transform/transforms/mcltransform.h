@@ -48,7 +48,7 @@ public:
         {
             {
                 "Granularity", ValueType::Float,
-                QObject::tr("Controls the size of the resultant clusters. "
+                QObject::tr("The size of the resultant clusters. "
                     "A larger granularity value results in smaller clusters."),
                 2.2, 1.1, 3.5
             }
