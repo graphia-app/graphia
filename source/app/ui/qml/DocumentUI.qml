@@ -366,6 +366,11 @@ Item
     function availableAttributes(type) { return document.availableAttributes(type); }
     function attribute(attributeName) { return document.attribute(attributeName); }
 
+    function writeTableViewToFile(tableView, fileUrl, extension)
+    {
+        document.writeTableViewToFile(tableView, fileUrl, extension);
+    }
+
     function cancelCommand() { document.cancelCommand(); }
 
     function dumpGraph() { document.dumpGraph(); }

@@ -104,6 +104,14 @@ ApplicationWindow
                         id: splitView
                         TableView
                         {
+                            MouseArea
+                            {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.RightButton
+                                propagateComposedEvents: true
+                                onClicked: { exportTableMenu.popup(); }
+                            }
+
                             Text
                             {
                                 anchors.centerIn: parent
@@ -311,6 +319,27 @@ ApplicationWindow
         }
     }
 
+    Menu
+    {
+        id: exportTableMenu
+        MenuItem { action: exportTableAction }
+    }
+
+    Action
+    {
+        id: exportTableAction
+        enabled: tableView.rowCount > 0
+        text: qsTr("Export Table...")
+        iconName: "document-save"
+        onTriggered:
+        {
+            exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+                misc.fileSaveInitialFolder : "";
+
+            exportTableDialog.open();
+        }
+    }
+
     Labs.FileDialog
     {
         id: heatmapSaveDialog
@@ -324,6 +353,29 @@ ApplicationWindow
         {
             currentHeatmap.savePlotImage(file, selectedNameFilter.extensions);
         }
+    }
+
+    Labs.FileDialog
+    {
+        id: exportTableDialog
+        visible: false
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        title: qsTr("Export Table")
+        nameFilters: ["CSV File (*.csv)", "TSV File (*.tsv)"]
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = folder.toString();
+            wizard.document.writeTableViewToFile(tabView.tableViews[tabView.currentIndex], file, defaultSuffix);
+        }
+    }
+
+    Preferences
+    {
+        id: misc
+        section: "misc"
+
+        property var fileSaveInitialFolder
     }
 
     // Work around for QTBUG-58594
