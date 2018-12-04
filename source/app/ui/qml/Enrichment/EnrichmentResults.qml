@@ -328,9 +328,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: tabView.count > 0 &&
-            tabView.tableViews[tabView.currentIndex].rowCount > 0
-
+        enabled: models.size() > 0 && tabView.tableViews[tabView.currentIndex].rowCount > 0
         text: qsTr("Export Table...")
         iconName: "document-save"
         onTriggered:
