@@ -13,6 +13,7 @@ ApplicationWindow
     property var models
     property var currentHeatmap
     property var wizard
+    property var currentTableView
 
     title: qsTr("Enrichment Results")
     minimumHeight: 400
@@ -109,7 +110,11 @@ ApplicationWindow
                                 anchors.fill: parent
                                 acceptedButtons: Qt.RightButton
                                 propagateComposedEvents: true
-                                onClicked: { exportTableMenu.popup(); }
+                                onClicked:
+                                {
+                                    currentTableView = tableView;
+                                    exportTableMenu.popup();
+                                }
                             }
 
                             Text
@@ -328,7 +333,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: models.size() > 0 && tabView.tableViews[tabView.currentIndex].rowCount > 0
+        enabled: currentTableView != null && currentTableView.rowCount > 0;
         text: qsTr("Export Table...")
         iconName: "document-save"
         onTriggered:
