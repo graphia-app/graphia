@@ -528,6 +528,13 @@ Window
                                 for(var i = 0; i < visualisationsRepeater.count; i++)
                                 {
                                     var item = visualisationsRepeater.itemAt(i);
+                                    if(item === null)
+                                    {
+                                        // Not sure why this happens, but it
+                                        // does, so avoid the inevitable warning
+                                        continue;
+                                    }
+
                                     visualisations._visualisations[item.attributeName] = item.value;
                                 }
                             }
