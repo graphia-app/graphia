@@ -2229,7 +2229,7 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
-        executeOnMainThreadAndWait([this, tableModel]()
+        executeOnMainThreadAndWait([this, tableModel]
         {
             _enrichmentTableModels.append(tableModel);
         });
