@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>licensing/EULA.html</file>
+        <file>licensing/OSS.html</file>
+    </qresource>
+</RCC>

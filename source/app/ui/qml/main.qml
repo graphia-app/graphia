@@ -211,17 +211,6 @@ ApplicationWindow
 
     MessageDialog
     {
-        id: aboutMessageDialog
-        icon: StandardIcon.Information
-        title: qsTr("About ") + application.name
-        text: application.name + qsTr("\n\n") +
-              application.name + qsTr(" version ") + application.version +
-              qsTr(" is a tool for the visualisation and analysis of graphs.\n\n") +
-              application.copyright
-    }
-
-    MessageDialog
-    {
         id: errorOpeningFileMessageDialog
         icon: StandardIcon.Critical
         title: qsTr("Error Opening File")
@@ -238,6 +227,12 @@ ApplicationWindow
         id: optionsDialog
 
         enabled: !mainWindow._anyDocumentsBusy
+    }
+
+    AboutDialog
+    {
+        id: aboutDialog
+        application: application
     }
 
     AboutPluginsDialog
@@ -1095,6 +1090,17 @@ ApplicationWindow
 
     Action
     {
+        id: aboutAction
+        text: qsTr("About " + application.name + "…")
+        onTriggered:
+        {
+            aboutDialog.raise();
+            aboutDialog.show();
+        }
+    }
+
+    Action
+    {
         id: aboutQtAction
         text: qsTr("About Qt…")
         onTriggered: { application.aboutQt(); }
@@ -1417,16 +1423,8 @@ ApplicationWindow
         {
             title: qsTr("&Help")
             MenuItem { action: aboutPluginsAction }
+            MenuItem { action: aboutAction }
             MenuItem { action: aboutQtAction }
-
-            MenuItem
-            {
-                text: qsTr("About " + application.name + "…")
-                onTriggered:
-                {
-                    aboutMessageDialog.open();
-                }
-            }
 
             MenuItem
             {

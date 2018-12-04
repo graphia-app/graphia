@@ -47,5 +47,6 @@
         <file>qml/Controls/PaletteSelector.qml</file>
         <file>qml/Controls/PaletteEditor.qml</file>
         <file>qml/Controls/GradientSelector.qml</file>
+        <file>qml/AboutDialog.qml</file>
     </qresource>
 </RCC>
