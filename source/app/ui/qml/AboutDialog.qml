@@ -18,8 +18,8 @@ Window
     title: qsTr("About ") + application.name
     flags: Qt.Window|Qt.Dialog
 
-    minimumWidth: 550
-    minimumHeight: licenseTextArea.visible ? 400 : 200
+    minimumWidth: 500
+    minimumHeight: 200
 
     RowLayout
     {
@@ -52,6 +52,13 @@ Window
                 onLinkActivated:
                 {
                     licenseTextArea.text = Utils.readFile("qrc:///licensing/" + link + ".html");
+
+                    if(root.width < 700)
+                        root.width = 700;
+
+                    if(root.height < 400)
+                        root.height = 400;
+
                     licenseTextArea.visible = true;
                 }
             }
