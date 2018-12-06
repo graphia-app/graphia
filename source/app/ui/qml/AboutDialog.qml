@@ -86,6 +86,8 @@ Window
     {
         if(visible)
         {
+            root.width = root.minimumWidth;
+            root.height = root.minimumHeight;
             licenseTextArea.visible = false;
             root.height = root.minimumHeight;
         }
