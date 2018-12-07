@@ -37,15 +37,26 @@ Window
             Text
             {
                 Layout.fillWidth: true
-                Layout.fillHeight: !licenseTextArea.visible
 
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
 
                 text: application.name + qsTr(" version ") + application.version +
                     qsTr(" is a tool for the visualisation and analysis of graphs.<br><br>") +
-                    application.copyright + qsTr("<br><br>") +
-                    qsTr("<a href=\"EULA\">End User License</a>") +
+                    application.copyright
+            }
+
+            Text
+            {
+                Layout.fillWidth: true
+                Layout.fillHeight: !licenseTextArea.visible
+
+                wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+
+                text: qsTr("<a href=\"EULA\">End User License</a>") +
                         "&nbsp;&nbsp;&nbsp;" +
                     qsTr("<a href=\"OSS\">Open Source Licenses</a>")
 
@@ -66,6 +77,7 @@ Window
             TextArea
             {
                 id: licenseTextArea
+                visible: false
 
                 textFormat: Text.RichText
 
@@ -79,17 +91,6 @@ Window
                 Layout.alignment: Qt.AlignRight
                 onClicked: { root.close(); }
             }
-        }
-    }
-
-    onVisibleChanged:
-    {
-        if(visible)
-        {
-            root.width = root.minimumWidth;
-            root.height = root.minimumHeight;
-            licenseTextArea.visible = false;
-            root.height = root.minimumHeight;
         }
     }
 }
