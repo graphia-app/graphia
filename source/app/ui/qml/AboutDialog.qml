@@ -37,26 +37,15 @@ Window
             Text
             {
                 Layout.fillWidth: true
+                Layout.fillHeight: !licenseTextArea.visible
 
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
 
                 text: application.name + qsTr(" version ") + application.version +
                     qsTr(" is a tool for the visualisation and analysis of graphs.<br><br>") +
-                    application.copyright
-            }
-
-            Text
-            {
-                Layout.fillWidth: true
-                Layout.fillHeight: !licenseTextArea.visible
-
-                wrapMode: Text.WordWrap
-                textFormat: Text.StyledText
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-
-                text: qsTr("<a href=\"EULA\">End User License</a>") +
+                    application.copyright + qsTr("<br><br>") +
+                    qsTr("<a href=\"EULA\">End User License</a>") +
                         "&nbsp;&nbsp;&nbsp;" +
                     qsTr("<a href=\"OSS\">Open Source Licenses</a>")
 
@@ -78,6 +67,7 @@ Window
             {
                 id: licenseTextArea
                 visible: false
+                readOnly: true
 
                 textFormat: Text.RichText
 
