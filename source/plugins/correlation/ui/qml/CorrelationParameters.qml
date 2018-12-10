@@ -624,6 +624,7 @@ BaseParameterDialog
                     {
                         id: graphSizeEstimatePlot
 
+                        visible: tabularDataParser.graphSizeEstimate.keys !== undefined
                         graphSizeEstimate: tabularDataParser.graphSizeEstimate
 
                         Layout.fillWidth: true
@@ -672,6 +673,19 @@ BaseParameterDialog
 
                             visible: graphSizeEstimatePlot._timedBusy
                         }
+                    }
+
+                    Text
+                    {
+                        visible: !graphSizeEstimatePlot.visible
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        text: qsTr("Empty Graph")
+                        font.italic: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
                     }
                 }
             }
