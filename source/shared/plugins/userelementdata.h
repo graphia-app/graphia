@@ -159,7 +159,15 @@ public:
 
         E elementId(0);
         for(const auto& index : indexes)
+        {
+            if(u::contains(_rowToElementIdMap, index))
+            {
+                qWarning() << "userElementData uses an index more than once";
+                return false;
+            }
+
             setElementIdForRowIndex(elementId++, index);
+        }
 
         return true;
     }
