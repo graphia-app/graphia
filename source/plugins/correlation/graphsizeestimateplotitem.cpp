@@ -132,7 +132,11 @@ void GraphSizeEstimatePlotItem::buildPlot()
     _customPlot.yAxis->setNumberPrecision(0);
     _customPlot.yAxis->grid()->setSubGridVisible(true);
 
-    _customPlot.xAxis->setRange(qAsConst(_keys).first(), 1.0);
+    _customPlot.xAxis->setRange(qAsConst(_keys).first(),
+        // If the threshold is 1.0, stretch the X axis a little,
+        // so that the marker is always visible
+        qFuzzyCompare(_threshold, 1.0) ? 1.001 : 1.0);
+
     _customPlot.yAxis->rescale();
 
     _customPlot.legend->setVisible(true);
