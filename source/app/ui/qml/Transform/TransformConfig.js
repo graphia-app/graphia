@@ -112,20 +112,26 @@ function Create(transformIndex, transform)
             return "%" + parameterIndex++;
         }
 
-        var lhs = "";
-        var rhs = "";
+        var template = "";
 
         if(typeof condition.lhs === "object")
-            lhs = "(" + conditionToTemplate(condition.lhs) + ")";
+            template += "(" + conditionToTemplate(condition.lhs) + ")";
         else
-            lhs = templated(condition.lhs);
+            template += templated(condition.lhs);
 
-        if(typeof condition.rhs === "object")
-            rhs = "(" + conditionToTemplate(condition.rhs) + ")";
-        else
-            rhs = templated(condition.rhs);
+        template += " " + condition.op;
 
-        return lhs + " " + condition.op + " " + rhs;
+        if(condition.rhs !== undefined)
+        {
+            template += " ";
+
+            if(typeof condition.rhs === "object")
+                template += "(" + conditionToTemplate(condition.rhs) + ")";
+            else
+                template += templated(condition.rhs);
+        }
+
+        return template;
     }
 
     // Action
@@ -215,7 +221,7 @@ function Create(transformIndex, transform)
                         {
                             var parameterData = {};
 
-                            if(opposite.length > 0 && opposite[0] === '$')
+                            if(opposite !== undefined && opposite.length > 0 && opposite[0] === '$')
                             {
                                 var parameterName = opposite.substring(1);
                                 parameterData = document.findTransformParameter(that.action, parameterName);
@@ -254,8 +260,13 @@ function Create(transformIndex, transform)
                     }
 
                     addOperand(parameter.lhs, parameter.rhs);
-                    labelText += " " + sanitiseOp(parameter.op) + " ";
-                    addOperand(parameter.rhs, parameter.lhs);
+                    labelText += " " + sanitiseOp(parameter.op);
+
+                    if(parameter.rhs !== undefined)
+                    {
+                        labelText += " ";
+                        addOperand(parameter.rhs, parameter.lhs);
+                    }
                 }
                 else if(parameter.attribute !== undefined)
                 {
