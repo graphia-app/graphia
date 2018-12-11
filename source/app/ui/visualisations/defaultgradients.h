@@ -58,9 +58,9 @@ R"([{
 
 const char* const GRADIENT =
 R"({
-    "0":    "Red",
-    "0.66": "Yellow",
-    "1":    "White"
+    "0":    "White",
+    "0.33": "Yellow",
+    "1":    "Red"
 })";
 } // namespace Defaults
 

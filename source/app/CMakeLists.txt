@@ -127,6 +127,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultgradients.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultpalettes.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/elementvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/sizevisualisationchannel.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/textvisualisationchannel.h

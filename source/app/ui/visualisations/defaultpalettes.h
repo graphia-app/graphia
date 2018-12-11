@@ -91,8 +91,7 @@ R"({
     "#9D2323",
     "#798FF0",
     "#111111"
-  ],
-  "defaultColor":"#DDDDDD"
+  ]
 })";
 } // namespace Defaults
 
