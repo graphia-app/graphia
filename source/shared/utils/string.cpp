@@ -6,26 +6,20 @@
 
 #include <vector>
 #include <cmath>
+#include <sstream>
 
 bool u::isNumeric(const std::string& string)
 {
-    std::size_t pos;
-    long double value = 0.0;
-
-    try
-    {
-        value = std::stold(string, &pos);
-    }
-    catch(std::invalid_argument&)
-    {
+    if(string.empty())
         return false;
-    }
-    catch(std::out_of_range&)
-    {
-        return false;
-    }
 
-    return pos == string.size() && !std::isnan(value);
+    std::stringstream ss;
+    ss << string;
+
+    long double value;
+    ss >> value;
+
+    return ss.eof();
 }
 
 bool u::isNumeric(const QString& string)
