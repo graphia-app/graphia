@@ -53,11 +53,11 @@ Window
                 {
                     licenseTextArea.text = Utils.readFile("qrc:///licensing/" + link + ".html");
 
-                    if(root.width < 700)
-                        root.width = 700;
+                    if(root.width < 800)
+                        root.width = 800;
 
-                    if(root.height < 400)
-                        root.height = 400;
+                    if(root.height < 500)
+                        root.height = 500;
 
                     licenseTextArea.visible = true;
                 }
@@ -73,6 +73,8 @@ Window
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+
+                onLinkActivated: Qt.openUrlExternally(link);
             }
 
             Button

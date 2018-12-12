@@ -41,6 +41,12 @@ function appendLicenseFromHeader
   htmlify "${CLIPPED}" >> OSS.html
 }
 
+function appendLicense
+{
+  echo "<h3>$1</h3>" >> OSS.html
+  htmlify "$2" >> OSS.html
+}
+
 # Clear the file
 > OSS.html
 
@@ -64,6 +70,9 @@ appendLicenseFromUrl Matio https://raw.githubusercontent.com/tbeu/matio/master/C
 
 appendLicenseFromUrl SortFilterProxyModel \
   https://raw.githubusercontent.com/oKcerG/SortFilterProxyModel/master/LICENSE
+
+appendLicense Tango \
+  "Icons courtesy of the <a href=\"http://tango.freedesktop.org\">Tango Desktop Project</a>."
 
 appendLicenseFromHeader utfcpp ../../../thirdparty/utfcpp/utf8.h \
   "^Permission.*" ".*SOFTWARE\.$"
