@@ -189,10 +189,11 @@ function Create(transformIndex, transform)
         function addLabel()
         {
             labelText = labelText.trim();
-            Qt.createQmlObject(qsTr("import QtQuick 2.7\n\
-                                    import QtQuick.Controls 1.5\n\
-                                    Label { text: \"%1\"; color: root.textColor }")
-                                    .arg(Utils.normaliseWhitespace(labelText)), parent);
+            Qt.createQmlObject("import QtQuick 2.7\n" +
+                "import QtQuick.Controls 1.5\n" +
+                "Label { text: \"" +
+                Utils.normaliseWhitespace(labelText) +
+                "\"; color: root.textColor }", parent);
 
             labelText = "";
         }
