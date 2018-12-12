@@ -183,7 +183,7 @@ public:
                 {
                     if(rowIndex == 0)
                     {
-                        if(!u::isNumeric(field) && field.empty() && columnIndex > 0)
+                        if(!u::isNumeric(field) && !field.empty() && columnIndex > 0)
                             firstRowAllDouble = false;
 
                         potentialColumnHeaders.push_back(field);
@@ -200,7 +200,7 @@ public:
                         // The first entry could be headers so don't enforce check for a double
                         if(rowIndex > 0)
                         {
-                            if(!u::isNumeric(field) && field.empty())
+                            if(!u::isNumeric(field) && !field.empty())
                                 firstColumnAllDouble = false;
                         }
                     }
@@ -209,7 +209,7 @@ public:
                         // Check non header elements are doubles
                         // This will prevent loading obviously non-matrix files
                         // We could handle non-double matrix symbols in future (X, -, I, O etc)
-                        if(!u::isNumeric(field) && field.empty())
+                        if(!u::isNumeric(field) && !field.empty())
                             return false;
                     }
                     columnIndex++;
