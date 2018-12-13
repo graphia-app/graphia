@@ -310,7 +310,7 @@ Item
     }
 
     property string attribute
-    readonly property var similarAttributes: document.attribute(attribute).similar
+    readonly property var similarAttributes: document.attributesSimilarTo(attribute)
     property string channel
     property var parameters
 

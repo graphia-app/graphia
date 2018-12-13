@@ -134,6 +134,13 @@ function Create(transformIndex, transform)
         return template;
     }
 
+    // Collate the ValueTypes of all the transform attributes
+    var attributesValueTypes = 0;
+    transform.attributes.forEach(function(attributeName)
+    {
+        attributesValueTypes |= document.attribute(attributeName).valueType;
+    });
+
     // Action
     appendToElements(this._elements, transform.action);
 
@@ -283,7 +290,8 @@ function Create(transformIndex, transform)
 
                     if(document.attributeExists(parameter.attribute))
                     {
-                        parameterData.initialValue = document.attribute(parameter.attribute).similar;
+                        parameterData.initialValue = document.attributesSimilarTo(
+                            parameter.attribute, attributesValueTypes);
 
                         var unavailableAttributeNames =
                             document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);

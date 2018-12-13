@@ -1668,7 +1668,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
     if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
     {
-        const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
+        const auto& attribute = _graphModel->attributeValueByName(attributeName);
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
         map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
 
@@ -1680,32 +1680,6 @@ QVariantMap Document::attribute(const QString& attributeName) const
         if(attribute.numericRange().hasMax()) map.insert(QStringLiteral("maximumValue"), attribute.numericRange().max());
 
         map.insert(QStringLiteral("description"), attribute.description());
-        auto valueType = Flags<ValueType>(attribute.valueType());
-
-        // For similarity purposes, treat Int and Float as the same
-        if(valueType.anyOf(ValueType::Int, ValueType::Float))
-            valueType.set(ValueType::Numerical);
-
-        auto similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueType);
-        switch(parsedAttributeName._type)
-        {
-        case Attribute::EdgeNodeType::Source:
-        case Attribute::EdgeNodeType::Target:
-        {
-            auto sourceSimilarAttributes = similarAttributes;
-            auto targetSimilarAttributes = similarAttributes;
-            sourceSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
-            targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
-            similarAttributes = sourceSimilarAttributes + targetSimilarAttributes;
-            break;
-        }
-
-        default:
-        case Attribute::EdgeNodeType::None:
-            break;
-        }
-
-        map.insert(QStringLiteral("similar"), similarAttributes);
         map.insert(QStringLiteral("ops"), _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
 
         QStringList sharedValues;
@@ -1718,6 +1692,50 @@ QVariantMap Document::attribute(const QString& attributeName) const
     }
 
     return map;
+}
+
+QStringList Document::attributesSimilarTo(const QString& attributeName, int valueTypes) const
+{
+    QStringList similarAttributes;
+
+    if(_graphModel == nullptr)
+        return similarAttributes;
+
+    auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
+    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
+    {
+        const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
+
+        auto valueTypeFlags = Flags<ValueType>(attribute.valueType());
+        if(valueTypes != 0)
+            valueTypeFlags.set(static_cast<ValueType>(valueTypes));
+
+        // For similarity purposes, treat Int and Float as the same
+        if(valueTypeFlags.anyOf(ValueType::Int, ValueType::Float))
+            valueTypeFlags.set(ValueType::Numerical);
+
+        switch(parsedAttributeName._type)
+        {
+        case Attribute::EdgeNodeType::Source:
+        case Attribute::EdgeNodeType::Target:
+        {
+            similarAttributes = _graphModel->availableAttributes(ElementType::Node, *valueTypeFlags);
+            auto sourceSimilarAttributes = similarAttributes;
+            auto targetSimilarAttributes = similarAttributes;
+            sourceSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
+            targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
+            similarAttributes = sourceSimilarAttributes + targetSimilarAttributes;
+            break;
+        }
+
+        default:
+        case Attribute::EdgeNodeType::None:
+            similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueTypeFlags);
+            break;
+        }
+    }
+
+    return similarAttributes;
 }
 
 QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
