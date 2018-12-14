@@ -364,7 +364,7 @@ QStringList GraphModel::availableTransformNames() const
     for(auto& t : _->_graphTransformFactories)
     {
         auto elementType = _->_graphTransformFactories.at(t.first)->elementType();
-        bool attributesAvailable = !availableAttributes(elementType, ValueType::All).isEmpty();
+        bool attributesAvailable = !availableAttributeNames(elementType, ValueType::All).isEmpty();
 
         if(elementType == ElementType::None || attributesAvailable)
             stringList.append(t.first);
@@ -381,7 +381,8 @@ const GraphTransformFactory* GraphModel::transformFactory(const QString& transfo
     return nullptr;
 }
 
-QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes, AttributeFlag skipFlags) const
+QStringList GraphModel::availableAttributeNames(ElementType elementTypes,
+    ValueType valueTypes, AttributeFlag skipFlags) const
 {
     QStringList stringList;
 

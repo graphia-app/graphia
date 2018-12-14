@@ -516,7 +516,7 @@ Rectangle
 
     function refresh()
     {
-        proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
+        proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
 
         if(_type === Find.Advanced)
             attributeComboBox.refresh();

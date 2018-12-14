@@ -363,7 +363,14 @@ Item
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.open(); }
-    function availableAttributes(type) { return document.availableAttributes(type); }
+    function availableAttributeNames(elementTypes, valueTypes, skipFlags)
+    {
+        return document.availableAttributeNames(elementTypes, valueTypes, skipFlags);
+    }
+    function availableAttributesModel(elementTypes, valueTypes, skipFlags)
+    {
+        return document.availableAttributesModel(elementTypes, valueTypes, skipFlags);
+    }
     function attribute(attributeName) { return document.attribute(attributeName); }
 
     function writeTableViewToFile(tableView, fileUrl, extension)

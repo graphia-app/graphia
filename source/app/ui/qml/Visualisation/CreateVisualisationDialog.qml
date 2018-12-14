@@ -196,6 +196,6 @@ Window
     onVisibleChanged:
     {
         if(visible)
-            attributeList.model = document.availableAttributes(ElementType.Node|ElementType.Edge);
+            attributeList.model = document.availableAttributesModel(ElementType.Node|ElementType.Edge);
     }
 }

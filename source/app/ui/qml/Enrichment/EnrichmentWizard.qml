@@ -37,7 +37,7 @@ Wizard
     onVisibilityChanged:
     {
         reset();
-        proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
+        proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
     }
 
     Item

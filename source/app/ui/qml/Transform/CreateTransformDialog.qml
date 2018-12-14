@@ -84,7 +84,7 @@ Window
                         visualisations._visualisations = {};
 
                         root._transform = document.transform(selectedValue);
-                        lhsAttributeList.model = document.availableAttributes(
+                        lhsAttributeList.model = document.availableAttributesModel(
                             root._transform.elementType, ValueType.All,
                             AttributeFlag.DisableDuringTransfom);
                         valueRadioButton.checked = true;
@@ -321,7 +321,7 @@ Window
 
                                     if(parameterData.valueType !== undefined)
                                     {
-                                        rhsAttributeList.model = document.availableAttributes(
+                                        rhsAttributeList.model = document.availableAttributesModel(
                                             root._transform.elementType, parameterData.valueType,
                                             AttributeFlag.DisableDuringTransfom);
                                     }
@@ -412,7 +412,7 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            attributeParameterAttributeList.model = document.availableAttributes(
+                                            attributeParameterAttributeList.model = document.availableAttributesModel(
                                                 parameterData.elementType, parameterData.valueType,
                                                 AttributeFlag.DisableDuringTransfom);
                                         }

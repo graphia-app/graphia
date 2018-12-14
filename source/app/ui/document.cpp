@@ -1292,7 +1292,7 @@ void Document::selectByAttributeValue(const QString& attributeName, const QStrin
     std::vector<NodeId> nodeIds;
 
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
-    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
+    if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
 
@@ -1482,7 +1482,31 @@ AvailableTransformsModel* Document::availableTransforms() const
     return nullptr;
 }
 
-AvailableAttributesModel* Document::availableAttributes(int elementTypes, int valueTypes, int skipFlags) const
+
+QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes, int _skipFlags) const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    auto elementTypeFlags = Flags<ElementType>(static_cast<ElementType>(_elementTypes));
+    auto valueTypes = static_cast<ValueType>(_valueTypes);
+    auto skipFlags = static_cast<AttributeFlag>(_skipFlags);
+
+    auto attributeNames = _graphModel->availableAttributeNames(*elementTypeFlags, valueTypes, skipFlags);
+
+    if(elementTypeFlags.test(ElementType::Edge))
+    {
+        auto sourceAttributes =_graphModel->availableAttributeNames(ElementType::Node, valueTypes);
+        auto targetAttributes = sourceAttributes;
+        sourceAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
+        targetAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
+        attributeNames += sourceAttributes + targetAttributes;
+    }
+
+    return attributeNames;
+}
+
+AvailableAttributesModel* Document::availableAttributesModel(int elementTypes, int valueTypes, int skipFlags) const
 {
     if(_graphModel != nullptr)
     {
@@ -1666,7 +1690,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
         return map;
 
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
-    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
+    if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(attributeName);
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
@@ -1705,7 +1729,7 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
         return similarAttributes;
 
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
-    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
+    if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(attributeName);
         const auto& underlyingAttribute = _graphModel->attributeValueByName(parsedAttributeName._name);
@@ -1718,16 +1742,8 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
         if(valueTypeFlags.anyOf(ValueType::Int, ValueType::Float))
             valueTypeFlags.set(ValueType::Numerical);
 
-        similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueTypeFlags);
-
-        if(attribute.elementType() == ElementType::Edge)
-        {
-            auto sourceSimilarAttributes =_graphModel->availableAttributes(ElementType::Node, *valueTypeFlags);
-            auto targetSimilarAttributes = sourceSimilarAttributes;
-            sourceSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
-            targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
-            similarAttributes += sourceSimilarAttributes + targetSimilarAttributes;
-        }
+        similarAttributes = availableAttributeNames(static_cast<int>(attribute.elementType()),
+            static_cast<int>(*valueTypeFlags));
     }
     else
     {

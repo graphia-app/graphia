@@ -57,14 +57,14 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 {
     _root = new AvailableAttributesModel::Item(tr("Attribute"));
 
-    auto attributeList = graphModel.availableAttributes(elementTypes, valueTypes, skipFlags);
+    auto attributeList = graphModel.availableAttributeNames(elementTypes, valueTypes, skipFlags);
 
     for(const auto& attribute : attributeList)
         _root->addChild(new AvailableAttributesModel::Item(attribute));
 
     if(Flags<ElementType>(elementTypes).test(ElementType::Edge))
     {
-        attributeList = graphModel.availableAttributes(ElementType::Node, valueTypes);
+        attributeList = graphModel.availableAttributeNames(ElementType::Node, valueTypes);
 
         if(!attributeList.empty())
         {
