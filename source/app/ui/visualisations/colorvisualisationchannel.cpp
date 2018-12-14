@@ -14,7 +14,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     if(value.isEmpty())
         return;
 
-    elementVisual._outerColor = _colorPalette.get(value, values());
+    elementVisual._outerColor = _colorPalette.get(value, indexOf(value));
 }
 
 QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const

@@ -80,10 +80,8 @@ ColorPalette::ColorPalette(const QString& descriptor)
     }
 }
 
-QColor ColorPalette::get(const QString& value, const std::vector<QString>& values) const
+QColor ColorPalette::get(const QString& value, int index) const
 {
-    auto index = u::indexOf(values, value);
-
     if(u::contains(_fixedColors, value))
     {
         // Fixed colors always take precedence

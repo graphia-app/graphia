@@ -8,6 +8,9 @@
 #include <QString>
 #include <QVariantMap>
 
+#include <vector>
+#include <map>
+
 class VisualisationInfo;
 
 class VisualisationChannel
@@ -33,9 +36,11 @@ public:
 
     const std::vector<QString>& values() const { return _values; }
     void addValue(const QString& value);
+    int indexOf(const QString& value) const;
 
 private:
     std::vector<QString> _values;
+    std::map<QString, int> _valueIndexMap;
 };
 
 #endif // VISUALISATIONCHANNEL_H

@@ -20,7 +20,7 @@ public:
     ColorPalette& operator=(const ColorPalette&) = default;
     explicit ColorPalette(const QString& descriptor);
 
-    QColor get(const QString& value, const std::vector<QString>& values = {}) const;
+    QColor get(const QString& value, int index) const;
 };
 
 #endif // COLORPALETTE_H
