@@ -1704,9 +1704,10 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
     if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
     {
-        const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
+        const auto& attribute = _graphModel->attributeValueByName(attributeName);
+        const auto& underlyingAttribute = _graphModel->attributeValueByName(parsedAttributeName._name);
 
-        auto valueTypeFlags = Flags<ValueType>(attribute.valueType());
+        auto valueTypeFlags = Flags<ValueType>(underlyingAttribute.valueType());
         if(valueTypes != 0)
             valueTypeFlags.set(static_cast<ValueType>(valueTypes));
 
@@ -1714,24 +1715,15 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
         if(valueTypeFlags.anyOf(ValueType::Int, ValueType::Float))
             valueTypeFlags.set(ValueType::Numerical);
 
-        switch(parsedAttributeName._type)
+        similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueTypeFlags);
+
+        if(attribute.elementType() == ElementType::Edge)
         {
-        case Attribute::EdgeNodeType::Source:
-        case Attribute::EdgeNodeType::Target:
-        {
-            similarAttributes = _graphModel->availableAttributes(ElementType::Node, *valueTypeFlags);
-            auto sourceSimilarAttributes = similarAttributes;
-            auto targetSimilarAttributes = similarAttributes;
+            auto sourceSimilarAttributes =_graphModel->availableAttributes(ElementType::Node, *valueTypeFlags);
+            auto targetSimilarAttributes = sourceSimilarAttributes;
             sourceSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
             targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
-            similarAttributes = sourceSimilarAttributes + targetSimilarAttributes;
-            break;
-        }
-
-        default:
-        case Attribute::EdgeNodeType::None:
-            similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueTypeFlags);
-            break;
+            similarAttributes += sourceSimilarAttributes + targetSimilarAttributes;
         }
     }
 
