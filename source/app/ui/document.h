@@ -407,8 +407,8 @@ public:
 
     Q_INVOKABLE bool opIsUnary(const QString& op) const;
 
-    Q_INVOKABLE QStringList availableAttributeNames(int elementTypes = static_cast<int>(ElementType::All),
-        int valueTypes = static_cast<int>(ValueType::All), int skipFlags = static_cast<int>(AttributeFlag::None)) const;
+    Q_INVOKABLE QStringList availableAttributeNames(int _elementTypes = static_cast<int>(ElementType::All),
+        int _valueTypes = static_cast<int>(ValueType::All), int _skipFlags = static_cast<int>(AttributeFlag::None)) const;
     Q_INVOKABLE AvailableAttributesModel* availableAttributesModel(int elementTypes = static_cast<int>(ElementType::All),
         int valueTypes = static_cast<int>(ValueType::All), int skipFlags = static_cast<int>(AttributeFlag::None)) const;
     Q_INVOKABLE bool attributeExists(const QString& attributeName) const;
