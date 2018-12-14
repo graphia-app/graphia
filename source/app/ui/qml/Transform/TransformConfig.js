@@ -134,13 +134,6 @@ function Create(transformIndex, transform)
         return template;
     }
 
-    // Collate the ValueTypes of all the transform attributes
-    var attributesValueTypes = 0;
-    transform.attributes.forEach(function(attributeName)
-    {
-        attributesValueTypes |= document.attribute(attributeName).valueType;
-    });
-
     // Action
     appendToElements(this._elements, transform.action);
 
@@ -150,11 +143,19 @@ function Create(transformIndex, transform)
         this.template += " using";
         appendToElements(this._elements, " using ");
 
+        var transformPrototype = document.transform(transform.action);
+
         for(var i = 0; i < transform.attributes.length; i++)
         {
-            var attribute = transform.attributes[i];
+            var attributeName = transform.attributes[i];
+            var attributeParameters = transformPrototype.attributeParameters[i];
             this.template += " $%" + parameterIndex++;
-            appendToElements(this._elements, {attribute: attribute});
+            appendToElements(this._elements,
+                {
+                    attributeName: attributeName,
+                    elementType: attributeParameters.elementType,
+                    valueType: attributeParameters.valueType
+                });
         }
     }
 
@@ -276,41 +277,38 @@ function Create(transformIndex, transform)
                         addOperand(parameter.rhs, parameter.lhs);
                     }
                 }
-                else if(parameter.attribute !== undefined)
+                else if(parameter.attributeName !== undefined)
                 {
                     // The element is an attribute
 
                     if(locked)
-                        labelText += sanitiseAttribute(parameter.attribute);
+                        labelText += sanitiseAttribute(parameter.attributeName);
 
                     addLabel();
 
                     var parameterData = {};
                     parameterData.valueType = ValueType.StringList;
 
-                    if(document.attributeExists(parameter.attribute))
+                    parameterData.initialValue = document.availableAttributeNames(
+                        parameter.elementType, parameter.valueType);
+
+                    // If the currently selected attribute value isn't a valid selection
+                    // we need to add it so that the error displayed to the user makes sense
+                    if(!document.attributeExists(parameter.attributeName))
+                        parameterData.initialValue.push(parameter.attributeName);
+
+                    var unavailableAttributeNames =
+                        document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
+
+                    // Don't allow the user to choose attributes that don't exist at the point
+                    // in time when the transform is executed
+                    parameterData.initialValue = parameterData.initialValue.filter(
+                    function(attributeName)
                     {
-                        parameterData.initialValue = document.attributesSimilarTo(
-                            parameter.attribute, attributesValueTypes);
+                        return unavailableAttributeNames.indexOf(attributeName) < 0;
+                    });
 
-                        var unavailableAttributeNames =
-                            document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
-
-                        // Don't allow the user to choose attributes that don't exist at the point
-                        // in time when the transform is executed
-                        parameterData.initialValue = parameterData.initialValue.filter(
-                        function(attributeName)
-                        {
-                            return unavailableAttributeNames.indexOf(attributeName) < 0;
-                        });
-
-                        parameterData.initialIndex = parameterData.initialValue.indexOf(parameter.attribute);
-                    }
-                    else
-                    {
-                        parameterData.initialValue = ["Unknown Attribute"];
-                        parameterData.initialIndex = 0;
-                    }
+                    parameterData.initialIndex = parameterData.initialValue.indexOf(parameter.attributeName);
 
                     var parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it

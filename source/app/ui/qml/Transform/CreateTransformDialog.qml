@@ -360,7 +360,13 @@ Window
                                 {
                                     RowLayout
                                     {
-                                        property var parameterData: _transform.attributeParameters[modelData]
+                                        property var parameterData:
+                                        {
+                                            return _transform.attributeParameters.find(function(element)
+                                            {
+                                                return element.name === modelData;
+                                            });
+                                        }
 
                                         ColumnLayout
                                         {

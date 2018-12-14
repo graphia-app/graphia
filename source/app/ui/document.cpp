@@ -1546,12 +1546,12 @@ QVariantMap Document::transform(const QString& transformName) const
         map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
 
         QStringList attributeParameterNames;
-        QVariantMap attributeParameters;
+        QVariantList attributeParameters;
         for(const auto& attributeParameter : transformFactory->attributeParameters())
         {
             QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.name());
             attributeParameterNames.append(attributeParameter.name());
-            attributeParameters.insert(attributeParameter.name(), attributeParameterMap);
+            attributeParameters.append(attributeParameterMap);
         }
         map.insert(QStringLiteral("attributeParameterNames"), attributeParameterNames);
         map.insert(QStringLiteral("attributeParameters"), attributeParameters);

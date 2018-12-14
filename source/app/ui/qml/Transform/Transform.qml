@@ -262,29 +262,21 @@ Item
     {
         if(!ready)
         {
-            var error = false;
             if(document.hasTransformInfo() && index >= 0)
             {
                 var transformInfo = document.transformInfoAtIndex(index);
                 setAlertIcon(transformInfo);
-                error = transformInfo.alertType === AlertType.Error;
             }
 
             var transformConfig = new TransformConfig.Create(index, document.parseGraphTransform(value));
             flags = transformConfig.flags;
             template = transformConfig.template;
 
-            transformConfig.toComponents(document, expression, isFlagSet("locked") || error, updateExpression);
+            transformConfig.toComponents(document, expression, isFlagSet("locked"), updateExpression);
             _parameterComponents = transformConfig.parameters;
 
-            enabledMenuItem.enabled =
-                    lockedMenuItem.enabled =
-                    repeatingMenuItem.enabled =
-                    pinnedMenuItem.enabled =
-                    !error;
-
-            enabledMenuItem.checked = !isFlagSet("disabled") && !error;
-            lockedMenuItem.checked = isFlagSet("locked") || error;
+            enabledMenuItem.checked = !isFlagSet("disabled");
+            lockedMenuItem.checked = isFlagSet("locked");
             repeatingMenuItem.checked = isFlagSet("repeating");
             pinnedMenuItem.checked = isFlagSet("pinned");
             ready = true;
