@@ -1698,6 +1698,9 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
 {
     QStringList similarAttributes;
 
+    if(attributeName.isEmpty())
+        return similarAttributes;
+
     if(_graphModel == nullptr)
         return similarAttributes;
 
@@ -1725,6 +1728,11 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
             targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
             similarAttributes += sourceSimilarAttributes + targetSimilarAttributes;
         }
+    }
+    else
+    {
+        // The attribute in question doesn't exist, but it must be similar to itself, right?
+        similarAttributes.append(attributeName);
     }
 
     return similarAttributes;
