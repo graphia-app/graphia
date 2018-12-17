@@ -12,7 +12,7 @@
 
 static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphModel, const GraphTransformConfig& config)
 {
-    const auto attributeNames = config.attributeNames();
+    const auto& attributeNames = config.attributeNames();
     if(attributeNames.size() != 2)
         return {AlertType::Error, QObject::tr("Invalid parameters")};
 
