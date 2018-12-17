@@ -1718,7 +1718,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
     return map;
 }
 
-QStringList Document::attributesSimilarTo(const QString& attributeName, int valueTypes) const
+QStringList Document::attributesSimilarTo(const QString& attributeName) const
 {
     QStringList similarAttributes;
 
@@ -1735,8 +1735,6 @@ QStringList Document::attributesSimilarTo(const QString& attributeName, int valu
         const auto& underlyingAttribute = _graphModel->attributeValueByName(parsedAttributeName._name);
 
         auto valueTypeFlags = Flags<ValueType>(underlyingAttribute.valueType());
-        if(valueTypes != 0)
-            valueTypeFlags.set(static_cast<ValueType>(valueTypes));
 
         // For similarity purposes, treat Int and Float as the same
         if(valueTypeFlags.anyOf(ValueType::Int, ValueType::Float))
