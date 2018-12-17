@@ -292,8 +292,9 @@ function Create(transformIndex, transform)
                     parameterData.initialValue = document.availableAttributeNames(
                         parameter.elementType, parameter.valueType);
 
-                    // If the currently selected attribute value isn't a valid selection
-                    // we need to add it so that the error displayed to the user makes sense
+                    // If the currently selected attribute isn't a valid selection
+                    // we need to add it so that the error displayed to the
+                    // user makes sense
                     if(!document.attributeExists(parameter.attributeName))
                         parameterData.initialValue.push(parameter.attributeName);
 

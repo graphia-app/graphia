@@ -328,7 +328,7 @@ Item
         var newExpression = flagsString + "\"" + attributeList.currentText + "\" \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
-            newExpression += " with ";
+            newExpression += " with";
 
         for(var key in parameters)
             newExpression += " " + key + " = " + parameters[key];

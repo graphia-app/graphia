@@ -172,7 +172,7 @@ Window
                                                                      channelName);
 
             if(Object.keys(parameters).length !== 0)
-                expression += " with ";
+                expression += " with";
 
             for(var key in parameters)
             {

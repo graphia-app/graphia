@@ -508,7 +508,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!attributeExists(attributeName))
         {
-            info.addAlert(AlertType::Error, tr("Attribute doesn't exist"));
+            info.addAlert(AlertType::Error, tr("Attribute '%1' doesn't exist").arg(attributeName));
             continue;
         }
 
