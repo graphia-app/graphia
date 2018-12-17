@@ -59,6 +59,7 @@ public:
         return {{"Name", ValueType::String, QObject::tr("Colour")}};
     }
 
+    bool configIsValid(const GraphTransformConfig& graphTransformConfig) const override;
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 

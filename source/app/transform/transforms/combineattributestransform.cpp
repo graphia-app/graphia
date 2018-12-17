@@ -103,23 +103,28 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
         combine(target.edgeIds());
 }
 
-std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(
-    const GraphTransformConfig& graphTransformConfig) const
+bool CombineAttributesTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
 {
     if(graphTransformConfig.attributeNames().size() != 2)
-        return nullptr;
+        return false;
 
     auto firstAttribute = graphModel()->attributeValueByName(graphTransformConfig.attributeNames().at(0));
     auto secondAttribute = graphModel()->attributeValueByName(graphTransformConfig.attributeNames().at(1));
 
     if(firstAttribute.elementType() != secondAttribute.elementType())
-        return nullptr;
+        return false;
 
     auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
-        return nullptr;
+        return false;
 
+    return true;
+}
+
+std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(
+    const GraphTransformConfig&) const
+{
     return std::make_unique<CombineAttributesTransform>(*graphModel());
 }

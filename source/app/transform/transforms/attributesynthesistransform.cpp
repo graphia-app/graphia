@@ -102,18 +102,23 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
         synthesise(target.edgeIds());
 }
 
-std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(
-    const GraphTransformConfig& graphTransformConfig) const
+bool AttributeSynthesisTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
 {
     auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
-        return nullptr;
+        return false;
 
     auto regexString = graphTransformConfig.parameterByName(QStringLiteral("Regular Expression"))->valueAsString();
     if(!QRegularExpression(regexString).isValid())
-        return nullptr;
+        return false;
 
+    return true;
+}
+
+std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(
+    const GraphTransformConfig&) const
+{
     return std::make_unique<AttributeSynthesisTransform>(*graphModel());
 }

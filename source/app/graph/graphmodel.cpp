@@ -303,9 +303,7 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
         if(factory->requiresCondition() && !graphTransformConfig.hasCondition())
             return false;
 
-        auto graphTransform = factory->create(graphTransformConfig);
-
-        return graphTransform != nullptr;
+        return factory->configIsValid(graphTransformConfig);
     }
 
     return false;

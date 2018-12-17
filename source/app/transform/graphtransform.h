@@ -106,6 +106,7 @@ public:
     GraphTransformParameter parameter(const QString& parameterName) const;
     virtual DefaultVisualisations defaultVisualisations() const { return {}; }
 
+    virtual bool configIsValid(const GraphTransformConfig&) const { return true; }
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 
     GraphModel* graphModel() const { return _graphModel; }
