@@ -111,10 +111,7 @@ bool AttributeSynthesisTransformFactory::configIsValid(const GraphTransformConfi
         return false;
 
     auto regexString = graphTransformConfig.parameterByName(QStringLiteral("Regular Expression"))->valueAsString();
-    if(!QRegularExpression(regexString).isValid())
-        return false;
-
-    return true;
+    return QRegularExpression(regexString).isValid();
 }
 
 std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(

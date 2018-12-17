@@ -115,12 +115,11 @@ bool CombineAttributesTransformFactory::configIsValid(const GraphTransformConfig
         return false;
 
     auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
-
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
-    if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
+    if(newAttributeName.isEmpty())
         return false;
 
-    return true;
+    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
+    return newAttributeName.contains(attributeNameRegex);
 }
 
 std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(
