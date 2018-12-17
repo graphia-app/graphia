@@ -10,36 +10,43 @@
 #include <QObject>
 #include <QRegularExpression>
 
+static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphModel, const GraphTransformConfig& config)
+{
+    const auto attributeNames = config.attributeNames();
+    if(attributeNames.size() != 2)
+        return {AlertType::Error, QObject::tr("Invalid parameters")};
+
+    auto firstAttribute = graphModel.attributeValueByName(attributeNames.at(0));
+    auto secondAttribute = graphModel.attributeValueByName(attributeNames.at(1));
+
+    if(firstAttribute.elementType() != secondAttribute.elementType())
+        return {AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
+
+    auto newAttributeName = config.parameterByName(QStringLiteral("Name"))->valueAsString();
+    if(!GraphModel::attributeNameIsValid(newAttributeName))
+        return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
+
+    return {AlertType::None, {}};
+}
+
 void CombineAttributesTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Combine Attributes"));
 
-    const auto attributeNames = config().attributeNames();
-
-    if(attributeNames.size() != 2)
+    auto alert = combineAttributesTransformConfigIsValid(*_graphModel, config());
+    if(alert._type != AlertType::None)
     {
-        addAlert(AlertType::Error, QObject::tr("Invalid parameters"));
+        addAlert(alert);
         return;
     }
+
+    const auto attributeNames = config().attributeNames();
 
     auto firstAttribute = _graphModel->attributeValueByName(attributeNames.at(0));
     auto secondAttribute = _graphModel->attributeValueByName(attributeNames.at(1));
 
-    if(firstAttribute.elementType() != secondAttribute.elementType())
-    {
-        addAlert(AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture"));
-        return;
-    }
-
     auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
     auto attributeValue = config().parameterByName(QStringLiteral("Attribute Value"))->valueAsString();
-
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
-    if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
-    {
-        addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
-        return;
-    }
 
     auto combine =
     [&](const auto& elementIds)
@@ -105,21 +112,7 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
 
 bool CombineAttributesTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
 {
-    if(graphTransformConfig.attributeNames().size() != 2)
-        return false;
-
-    auto firstAttribute = graphModel()->attributeValueByName(graphTransformConfig.attributeNames().at(0));
-    auto secondAttribute = graphModel()->attributeValueByName(graphTransformConfig.attributeNames().at(1));
-
-    if(firstAttribute.elementType() != secondAttribute.elementType())
-        return false;
-
-    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
-    if(newAttributeName.isEmpty())
-        return false;
-
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
-    return newAttributeName.contains(attributeNameRegex);
+    return combineAttributesTransformConfigIsValid(*graphModel(), graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(

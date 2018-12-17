@@ -785,6 +785,15 @@ void GraphModel::initialiseUniqueAttributeValues()
     findSharedAttributeValues(&graph(), _->_attributes);
 }
 
+bool GraphModel::attributeNameIsValid(const QString& attributeName)
+{
+    if(attributeName.isEmpty())
+        return false;
+
+    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
+    return attributeNameRegex.match(attributeName).hasMatch();
+}
+
 void GraphModel::clearHighlightedNodes()
 {
     if(_->_highlightedNodeIds.empty())

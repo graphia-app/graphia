@@ -125,6 +125,8 @@ public:
     void initialiseAttributeRanges();
     void initialiseUniqueAttributeValues();
 
+    static bool attributeNameIsValid(const QString& attributeName);
+
     void clearHighlightedNodes();
     void highlightNodes(const NodeIdSet& nodeIds);
 

@@ -8,19 +8,27 @@
 
 #include <QObject>
 
+static Alert conditionalAttributeTransformConfigIsValid(const GraphTransformConfig& config)
+{
+    auto newAttributeName = config.parameterByName(QStringLiteral("Name"))->valueAsString();
+    if(!GraphModel::attributeNameIsValid(newAttributeName))
+        return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
+
+    return {AlertType::None, {}};
+}
+
 void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Boolean Attribute"));
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
-
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
-    if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
+    auto alert = conditionalAttributeTransformConfigIsValid(config());
+    if(alert._type != AlertType::None)
     {
-        addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
+        addAlert(alert);
         return;
     }
 
+    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
     auto attributeNames = config().referencedAttributeNames();
 
     bool ignoreTails =
@@ -68,12 +76,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 
 bool ConditionalAttributeTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
 {
-    auto newAttributeName = graphTransformConfig.parameterByName(QStringLiteral("Name"))->valueAsString();
-    if(newAttributeName.isEmpty())
-        return false;
-
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
-    return newAttributeName.contains(attributeNameRegex);
+    return conditionalAttributeTransformConfigIsValid(graphTransformConfig)._type == AlertType::None;
 }
 
 std::unique_ptr<GraphTransform> ConditionalAttributeTransformFactory::create(
