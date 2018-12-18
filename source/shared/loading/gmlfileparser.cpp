@@ -58,7 +58,7 @@ const x3::rule<class V, Value> gmlValue = "value";
 const auto gmlValue_def = double_ | int_ | noQuotesString | (x3::lit('[') >> gmlList >> x3::lit(']'));
 
 const x3::rule<class K, QString> gmlKey = "key";
-const auto gmlKey_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
+const auto gmlKey_def = lexeme[char_("a-zA-Z") >> *char_("a-zA-Z0-9")];
 
 const x3::rule<class KV, KeyValue> gmlKeyValue = "keyValue";
 const auto gmlKeyValue_def = gmlKey >> gmlValue;
