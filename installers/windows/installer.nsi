@@ -105,6 +105,8 @@ UninstallIcon "${MUI_UNICON}"
 
 WindowIcon on
 
+!insertmacro MUI_PAGE_LICENSE "source\app\ui\licensing\EULA.rtf"
+
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
 
@@ -168,6 +170,16 @@ SectionGroup "File associations"
 	SectionEnd
 	Section "Graph Modelling Language file (.gml)"
 		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
+				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+				"$INSTDIR\${EXE} $\"%1$\""
+	SectionEnd
+	Section "Graph Markup Language file (.graphml)"
+		!insertmacro APP_ASSOCIATE "graphml" "${PRODUCT_NAME}.graphml" "${PRODUCT_NAME} GraphML File" \
+				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+				"$INSTDIR\${EXE} $\"%1$\""
+	SectionEnd
+	Section "Biopax OWL file (.owl)"
+		!insertmacro APP_ASSOCIATE "owl" "${PRODUCT_NAME}.owl" "${PRODUCT_NAME} OWL File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$INSTDIR\${EXE} $\"%1$\""
 	SectionEnd
