@@ -105,6 +105,7 @@ UninstallIcon "${MUI_UNICON}"
 
 WindowIcon on
 
+!insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "source\app\ui\licensing\EULA.rtf"
 
 !define MUI_COMPONENTSPAGE_NODESC
