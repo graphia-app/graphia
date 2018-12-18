@@ -33,7 +33,6 @@
         <file>qml/Controls/TreeBox.qml</file>
         <file>qml/LayoutSettings.qml</file>
         <file>qml/Auth.qml</file>
-        <file>qml/bubbles.png</file>
         <file>qml/CaptureScreenshot.qml</file>
         <file>qml/Controls/AttributeListSortMenu.qml</file>
         <file>qml/Controls/TransformListSortMenu.qml</file>
@@ -48,5 +47,6 @@
         <file>qml/Controls/PaletteEditor.qml</file>
         <file>qml/Controls/GradientSelector.qml</file>
         <file>qml/AboutDialog.qml</file>
+        <file>qml/auth-background.png</file>
     </qresource>
 </RCC>

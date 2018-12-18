@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import QtQuick.Controls.Styles 1.4
 import com.kajeka 1.0
 
 import "../../../shared/ui/qml/Constants.js" as Constants
@@ -22,10 +23,10 @@ Rectangle
         anchors.right: root.right
         anchors.top: root.top
 
-        source: "bubbles.png"
+        source: "auth-background.png"
     }
 
-    color: "white"
+    color: "#575757"
 
     Preferences
     {
@@ -92,7 +93,14 @@ Rectangle
             CheckBox
             {
                 id: rememberMeCheckBox
-                text: qsTr("Remember Me")
+                style: CheckBoxStyle
+                {
+                    label: Text
+                    {
+                        text: qsTr("Remember Me")
+                        color: "white"
+                    }
+                }
             }
 
             Button
@@ -169,6 +177,7 @@ Rectangle
             Layout.alignment: Qt.AlignHCenter
 
             text: qsTr("Signing In…")
+            color: "white"
             font.pointSize: 22
         }
     }
