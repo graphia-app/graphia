@@ -163,7 +163,7 @@ Section "-Main Component"
 SectionEnd
 
 ; File Associations
-SectionGroup "File associations"
+SectionGroup /e "File associations"
 	Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
 		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}" "${PRODUCT_NAME} File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
@@ -186,7 +186,7 @@ SectionGroup "File associations"
 	SectionEnd
 SectionGroupEnd
 
-Section "Desktop shortcut"
+Section /o "Desktop shortcut"
 	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
 SectionEnd
 
