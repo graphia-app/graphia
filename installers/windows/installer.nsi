@@ -105,7 +105,14 @@ UninstallIcon "${MUI_UNICON}"
 
 WindowIcon on
 
+; This bitmap needs to be in BMP3 (Windows 3.x) format, for some reason
+!define MUI_WELCOMEFINISHPAGE_BITMAP "installers\windows\welcomepage.bmp"
+!define MUI_WELCOMEPAGE_TEXT \
+"Setup will guide you through the installation of ${PRODUCT_NAME}.$\r$\n$\r$\n\
+${PRODUCT_NAME} is a tool for the visualisation and analysis of graphs.$\r$\n$\r$\n\
+Click Next to continue."
 !insertmacro MUI_PAGE_WELCOME
+
 !insertmacro MUI_PAGE_LICENSE "source\app\ui\licensing\EULA.rtf"
 
 !define MUI_COMPONENTSPAGE_NODESC
