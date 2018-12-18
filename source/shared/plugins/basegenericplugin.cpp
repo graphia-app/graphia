@@ -167,9 +167,9 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Matrix CSV File"), QObject::tr("Matrix CSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Matrix SSV File"), QObject::tr("Matrix SSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Matrix File"), QObject::tr("Matrix Files"), {"tsv", "matrix"});
-    registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL File"), {"owl"});
-    registerUrlType(QStringLiteral("MatFile"), QObject::tr("Matlab Data File"), QObject::tr("MatFile Files"), {"mat"});
-    registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Files"), {"json"});
+    registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
+    registerUrlType(QStringLiteral("MatFile"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
+    registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
