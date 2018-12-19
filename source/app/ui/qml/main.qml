@@ -65,11 +65,16 @@ ApplicationWindow
 
         onAuthenticatedChanged:
         {
-            if(application.authenticated && !_authenticatedAtLeastOnce)
+            if(application.authenticated)
             {
-                _authenticatedAtLeastOnce = true;
-                processOnePendingArgument();
+                if(!_authenticatedAtLeastOnce)
+                {
+                    _authenticatedAtLeastOnce = true;
+                    processOnePendingArgument();
+                }
             }
+            else
+                authUI.enabled = true;
         }
 
         onAuthenticatingChanged:
