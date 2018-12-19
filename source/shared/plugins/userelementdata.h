@@ -135,9 +135,12 @@ public:
     {
         json jsonObject = UserData::save(progressable);
 
-        json jsonIndexes;
+        json jsonIndexes = json::array();
         for(auto index : *_indexes)
-            jsonIndexes.emplace_back(index._row);
+        {
+            if(index._set)
+                jsonIndexes.emplace_back(index._row);
+        }
 
         jsonObject["indexes"] = jsonIndexes;
 
