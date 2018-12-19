@@ -594,7 +594,14 @@ BaseParameterDialog
 
                             implicitWidth: 70
 
-                            minimumValue: minimumCorrelationSpinBox.value
+                            minimumValue:
+                            {
+                                if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                                    return tabularDataParser.graphSizeEstimate.keys[0];
+
+                                return minimumCorrelationSpinBox.value;
+                            }
+
                             maximumValue: 1.0
 
                             decimals: 3
