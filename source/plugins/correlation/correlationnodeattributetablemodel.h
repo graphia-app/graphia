@@ -19,14 +19,12 @@ private:
     int _firstDataColumnRole = -1;
 
     QStringList columnNames() const override;
-    QVariant dataValue(int row, int role) const override;
+    virtual QVariant dataValue(int row, const QString& attributeName) const override;
 
 public:
     void initialise(IDocument* document, UserNodeData* userNodeData,
                     std::vector<QString>* dataColumnNames = nullptr,
                     std::vector<double>* dataValues = nullptr);
-
-    void updateRoleNames() override;
 
     bool columnIsCalculated(const QString& columnName) const override;
     bool columnIsHiddenByDefault(const QString& columnName) const override;

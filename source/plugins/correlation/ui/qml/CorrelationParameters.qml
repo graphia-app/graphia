@@ -1,5 +1,7 @@
-import QtQuick 2.7
 import QtQuick.Controls 1.5
+import QtQuick 2.12
+import QtQml 2.12
+import QtQuick.Controls 2.4 as QQC2
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
 import com.kajeka 1.0
@@ -47,38 +49,20 @@ BaseParameterDialog
 
     function scrollToCell(tableView, x, y)
     {
-        if(x > 0)
-            x--;
-        if(y > 0)
-            y--;
-
-        var runningWidth = 0;
-        for(var i = 0; i < x; ++i)
-        {
-            var col = tableView.getColumn(i);
-            var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
-            if(col !== null)
-                runningWidth += col.width;
-        }
-        var runningHeight = 0;
-        for(i = 0; i < y; ++i)
-            runningHeight += dataRectView.__listView.contentItem.children[1].height;
-        dataFrameAnimationX.to = Math.min(runningWidth,
-                                          tableView.flickableItem.contentWidth -
-                                          tableView.flickableItem.width);
+        dataFrameAnimationX.to = Math.min(tableView.contentWidth,
+                                          (tableView.contentWidth / tableView.columns) * x);
         // Pre-2017 ECMA doesn't have Math.clamp...
         dataFrameAnimationX.to = Math.max(dataFrameAnimationX.to, 0);
 
+        var ref = dataRectView.childAt(dataFrameAnimationX.to, 1)
+        //for(var key in ref)
+            //console.log(key, ref[key]);
+
         // Only animate if we need to
-        if(tableView.flickableItem.contentX !== dataFrameAnimationX.to)
+        if(tableView.contentX !== dataFrameAnimationX.to)
             dataFrameAnimationX.running = true;
 
-        dataFrameAnimationY.to = Math.min(runningHeight,
-                                          tableView.flickableItem.contentHeight -
-                                          tableView.flickableItem.height);
-        dataFrameAnimationY.to = Math.max(dataFrameAnimationY.to, 0);
-
-        if(tableView.flickableItem.contentY !== dataFrameAnimationY.to)
+        if(tableView.contentY !== dataFrameAnimationY.to)
             dataFrameAnimationY.running = true;
     }
 
@@ -87,7 +71,7 @@ BaseParameterDialog
         if(listTabView.currentItem === dataRectPage)
         {
             Qt.callLater(scrollToCell, dataRectView,
-                tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
+                         tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
         }
     }
 
@@ -107,7 +91,7 @@ BaseParameterDialog
         {
             parameters.dataFrame = dataRect;
             if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
-                selectedCol >= 0 && selectedRow >= 0)
+                    selectedCol >= 0 && selectedRow >= 0)
             {
                 scrollToDataRect();
 
@@ -118,7 +102,6 @@ BaseParameterDialog
 
         onDataLoaded:
         {
-            listTabView.repopulateTableView();
             parameters.data = tabularDataParser.data;
         }
     }
@@ -276,20 +259,56 @@ BaseParameterDialog
                     text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input.")
                 }
 
+                TextMetrics
+                {
+                    id: textMetrics
+                    font: messageText.font
+                }
+
+                RowLayout
+                {
+                    Button
+                    {
+                        text: "Move Table to column"
+                        onPressedChanged:
+                        {
+                            console.log(tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
+                            scrollToCell(dataRectView, input.value, tabularDataParser.dataRect.y);
+                        }
+                    }
+                    SpinBox
+                    {
+                        id: input
+                        maximumValue: dataRectView.columns
+                        stepSize: 1
+                    }
+                }
+
                 TableView
                 {
+                    property var columnWidthCache: []
+                    property var visibleColumns: [];
+                    clip: true
+                    QQC2.ScrollBar.vertical: QQC2.ScrollBar { }
+                    QQC2.ScrollBar.horizontal: QQC2.ScrollBar { }
                     id: dataRectView
-                    headerVisible: false
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     model: tabularDataParser.model
-                    selectionMode: SelectionMode.NoSelection
+                    //selectionMode: SelectionMode.NoSelection
                     enabled: !dataRectPage._busy
+                    columnSpacing: 1
+                    rowSpacing: 1
+
+//                    columnWidthProvider: function(column)
+//                    {
+//                        return columnWidthCache[column];
+//                    }
 
                     PropertyAnimation
                     {
                         id: dataFrameAnimationX
-                        target: dataRectView.flickableItem
+                        target: dataRectView
                         easing.type: Easing.InOutQuad
                         property: "contentX"
                         to: 0
@@ -306,7 +325,7 @@ BaseParameterDialog
                     PropertyAnimation
                     {
                         id: dataFrameAnimationY
-                        target: dataRectView.flickableItem
+                        target: dataRectView
                         easing.type: Easing.InOutQuad
                         property: "contentY"
                         to: 0
@@ -366,16 +385,18 @@ BaseParameterDialog
                         id: sysPalette
                     }
 
-                    itemDelegate: Item
+                    delegate: Item
                     {
                         // Based on Qt source for BaseTableView delegate
-                        height: Math.max(16, label.implicitHeight)
-                        property int implicitWidth: label.implicitWidth + 16
+                        implicitHeight: Math.max(16, label.implicitHeight)
+                        implicitWidth: label.implicitWidth + 16
                         clip: true
+
+                        property var modelColumn: model.column
 
                         property var isInDataFrame:
                         {
-                            return isInsideRect(styleData.column, styleData.row, tabularDataParser.dataRect);
+                            return isInsideRect(model.column, model.row, tabularDataParser.dataRect);
                         }
 
                         Rectangle
@@ -393,14 +414,14 @@ BaseParameterDialog
                                 anchors.fill: parent
                                 onClicked:
                                 {
-                                    if(styleData.column === tabularDataParser.model.MAX_COLUMNS)
+                                    if(model.column === tabularDataParser.model.MAX_COLUMNS)
                                         return;
                                     tooltipNonNumerical.visible = false;
                                     nonNumericalTimer.stop();
-                                    selectedCol = styleData.column;
-                                    selectedRow = styleData.row;
+                                    selectedCol = model.column;
+                                    selectedRow = model.row;
                                     _clickedCell = true;
-                                    tabularDataParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                                    tabularDataParser.autoDetectDataRectangle(model.column, model.row);
                                 }
                             }
 
@@ -416,19 +437,13 @@ BaseParameterDialog
                                 width: parent.width
                                 anchors.left: parent.left
                                 anchors.right: parent.right
-                                anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                     horizontalAlignment === Text.AlignRight ? 1 : 8
-                                anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                                     || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                                horizontalAlignment: styleData.textAlignment
                                 anchors.verticalCenter: parent.verticalCenter
-                                elide: styleData.elideMode
 
                                 text:
                                 {
-                                    if(styleData.column >= tabularDataParser.model.MAX_COLUMNS)
+                                    if(model.column >= tabularDataParser.model.MAX_COLUMNS)
                                     {
-                                        if(styleData.row === 0)
+                                        if(model.row === 0)
                                         {
                                             return (tabularDataParser.model.columnCount() - tabularDataParser.model.MAX_COLUMNS) +
                                                     qsTr(" more columns…");
@@ -439,13 +454,8 @@ BaseParameterDialog
                                         }
                                     }
 
-                                    if(styleData.value === undefined)
-                                        return "";
-
-                                    return styleData.value;
+                                    return modelData;
                                 }
-
-                                color: styleData.textColor
                                 renderType: Text.NativeRendering
                             }
                         }
@@ -458,41 +468,11 @@ BaseParameterDialog
 
                     onModelReset:
                     {
-                        listTabView.repopulateTableView();
                         selectedCol = 0;
                         selectedRow = 0;
-                        tabularDataParser.autoDetectDataRectangle();
                     }
                 }
             }
-        }
-
-        function repopulateTableView()
-        {
-            while(dataRectView.columnCount > 0)
-                dataRectView.removeColumn(dataRectView.columnCount - 1);
-
-            dataRectView.model = null;
-            dataRectView.model = tabularDataParser.model;
-            for(var i = 0; i < tabularDataParser.model.columnCount(); i++)
-            {
-                dataRectView.addColumn(columnComponent.createObject(dataRectView,
-                    {"role": "column" + i}));
-
-                // FIXME - TY QT TABLEVIEW 1.
-                // https://bugreports.qt.io/browse/QTBUG-70069
-                // Cap the column count since a huge number of columns causes a large slowdown
-                if(i === tabularDataParser.model.MAX_COLUMNS - 1)
-                {
-                    // Add a blank
-                    dataRectView.addColumn(columnComponent.createObject(dataRectView));
-                    break;
-                }
-            }
-            // Qt.callLater is used as the TableView will not generate the columns until
-            // next loop has passed and there's no way to reliably listen for the change
-            // (Thanks TableView)
-            Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
         }
 
         ListTab
@@ -1044,7 +1024,7 @@ BaseParameterDialog
                                 Text
                                 {
                                     text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
-                                        "you require a log transform but the dataset contains negative numbers or zeros.");
+                                               "you require a log transform but the dataset contains negative numbers or zeros.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -1316,7 +1296,7 @@ BaseParameterDialog
                                 Text
                                 {
                                     text: qsTr("k-nearest neighbours ranks node edges and only " +
-                                        "keeps <i>k</i> number of edges per node.");
+                                               "keeps <i>k</i> number of edges per node.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -1443,23 +1423,23 @@ BaseParameterDialog
                                 edgesFont = warningFont;
 
                             summaryString +=
-                                nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
-                                ", " +
-                                edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
+                                    nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
+                                    ", " +
+                                    edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)
                             {
                                 summaryString += "<br><br>" + warningFont +
-                                    qsTr("WARNING: This is a very large graph which has the potential " +
-                                    "to exhaust system resources and lead to instability " +
-                                    "or freezes. Increasing the Minimum Correlation Value will " +
-                                    "usually reduce the graph size.") + "</font>";
+                                        qsTr("WARNING: This is a very large graph which has the potential " +
+                                             "to exhaust system resources and lead to instability " +
+                                             "or freezes. Increasing the Minimum Correlation Value will " +
+                                             "usually reduce the graph size.") + "</font>";
                             }
                         }
                         else if(!tabularDataParser.graphSizeEstimateInProgress)
                         {
                             summaryString += "<br><br>" + warningFont +
-                                qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
+                                    qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
                         }
 
                         return summaryString;

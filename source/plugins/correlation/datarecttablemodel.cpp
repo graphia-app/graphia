@@ -34,11 +34,8 @@ int DataRectTableModel::columnCount(const QModelIndex&) const
 
 QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 {
-    if(role < Qt::UserRole)
-        return {};
-
     size_t row = index.row();
-    size_t column = (role - Qt::UserRole);
+    size_t column = index.column();
 
     if(row >= _data->numRows() || column >= _data->numColumns())
         return  {};
@@ -48,17 +45,7 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 
 QHash<int, QByteArray> DataRectTableModel::roleNames() const
 {
-    if(_data == nullptr)
-        return {};
-
-    QHash<int, QByteArray> roleNames;
-
-    // FIXME: Have to hard limit rolenames or else tableview will crash.
-    // https://bugreports.qt.io/browse/QTBUG-70069
-    for(int i = 0; i < std::min(MAX_COLUMNS, static_cast<int>(_data->numColumns())); ++i)
-        roleNames.insert(Qt::UserRole + i, QStringLiteral("column%1").arg(i).toUtf8());
-
-    return roleNames;
+    return { {Qt::DisplayRole, "display"} };
 }
 
 void DataRectTableModel::setTabularData(TabularData& data)

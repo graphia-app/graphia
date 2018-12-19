@@ -149,7 +149,6 @@ void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
     _userEdgeData.exposeAsAttributes(*graphModel());
-    _nodeAttributeTableModel.updateRoleNames();
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)

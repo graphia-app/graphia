@@ -16,19 +16,9 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
     return list;
 }
 
-QVariant CorrelationNodeAttributeTableModel::dataValue(int row, int role) const
+QVariant CorrelationNodeAttributeTableModel::dataValue(int row, const QString& attributeName) const
 {
-    if(_dataColumnNames != nullptr && _dataValues != nullptr &&
-        _firstDataColumnRole > 0 && role >= _firstDataColumnRole)
-    {
-        size_t column = role - _firstDataColumnRole;
-        size_t index = (row * _dataColumnNames->size()) + column;
-
-        Q_ASSERT(index < _dataValues->size());
-        return _dataValues->at(index);
-    }
-
-    return NodeAttributeTableModel::dataValue(row, role);
+    return NodeAttributeTableModel::dataValue(row, attributeName);
 }
 
 void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
@@ -41,15 +31,6 @@ void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNod
     _dataValues = nullptr;//dataValues;
 
     NodeAttributeTableModel::initialise(document, userNodeData);
-}
-
-void CorrelationNodeAttributeTableModel::updateRoleNames()
-{
-    NodeAttributeTableModel::updateRoleNames();
-
-    _firstDataColumnRole = -1;
-    if(_dataColumnNames != nullptr && !_dataColumnNames->empty())
-        _firstDataColumnRole = roleNames().key(_dataColumnNames->front().toUtf8());
 }
 
 bool CorrelationNodeAttributeTableModel::columnIsCalculated(const QString& columnName) const

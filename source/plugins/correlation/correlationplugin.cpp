@@ -386,7 +386,6 @@ QStringList CorrelationPluginInstance::columnAnnotationNames() const
 void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
-    _nodeAttributeTableModel.updateRoleNames();
     buildColumnAnnotations();
 }
 

@@ -14,11 +14,13 @@
 
 void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
 {
+    _roleNames.insert(Roles::NodeIdRole, "nodeId");
+    _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
+    _roleNames.insert(Qt::DisplayRole, "display");
+
     _document = document;
     _userNodeData = userNodeData;
     _graph = &_document->graphModel()->graph();
-
-    updateRoleNames();
 
     auto graphModel = _document->graphModel();
 
@@ -64,9 +66,14 @@ QStringList NodeAttributeTableModel::columnNames() const
     return list;
 }
 
-QVariant NodeAttributeTableModel::dataValue(int row, int role) const
+int NodeAttributeTableModel::columnIndexForAttributeValue(QString attributeValue)
 {
-    auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
+    return columnNames().indexOf(attributeValue);
+}
+
+QVariant NodeAttributeTableModel::dataValue(int row, const QString& attributeName) const
+{
+    auto* attribute = _document->graphModel()->attributeByName(attributeName);
     if(attribute != nullptr && attribute->isValid())
     {
         auto nodeId = _userNodeData->elementIdForIndex(row);
@@ -87,7 +94,7 @@ void NodeAttributeTableModel::onRoleAdded(int role)
     else
         _pendingData.resize(index + 1);
 
-    updateColumn(role, _pendingData.at(index));
+    //updateColumn(role, _pendingData.at(index));
 }
 
 void NodeAttributeTableModel::onRoleRemoved(int role)
@@ -98,29 +105,31 @@ void NodeAttributeTableModel::onRoleRemoved(int role)
     _pendingData.erase(_pendingData.begin() + index);
 }
 
-void NodeAttributeTableModel::updateRole(int role)
+void NodeAttributeTableModel::updateRole(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    size_t index = role - (Qt::UserRole + 1);
+    size_t index = columnIndexForAttributeValue(attributeName);
 
     Q_ASSERT(index < _pendingData.size());
     auto& column = _pendingData.at(index);
 
-    updateColumn(role, column);
+    updateColumn(Qt::DisplayRole, attributeName, column);
 
-    QMetaObject::invokeMethod(this, "onUpdateRoleComplete", Q_ARG(int, role));
+    QMetaObject::invokeMethod(this, "onUpdateRoleComplete", Q_ARG(QString, attributeName));
 }
 
-void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column)
+void NodeAttributeTableModel::updateColumn(int role, const QString& attributeName, NodeAttributeTableModel::Column& column)
 {
-    column.resize(rowCount());
+    column.resize(rowCount() + 1);
 
-    for(int row = 0; row < rowCount(); row++)
+    for(int row = 0; row < rowCount() + 1; row++)
     {
-        NodeId nodeId = _userNodeData->elementIdForIndex(row);
+        NodeId nodeId = _userNodeData->elementIdForIndex(row - 1);
 
-        if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
+        if(row == 0)
+            column[row] = attributeName;
+        else if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
             // The graph doesn't necessarily have a node for every row since
             // it may have been transformed, leaving empty rows
@@ -131,7 +140,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
         else if(role == Roles::NodeSelectedRole)
             column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
         else
-            column[row] = dataValue(row, role);
+            column[row] = dataValue(row - 1, attributeName);
     }
 }
 
@@ -141,29 +150,26 @@ void NodeAttributeTableModel::update()
 
     _pendingData.clear();
 
-    for(int column = 0; column < _roleNames.size(); column++)
-    {
-        int role = Qt::UserRole + 1 + column;
+    updateColumn(Roles::NodeSelectedRole, "", _nodeSelectedColumn);
+    updateColumn(Roles::NodeIdRole, "", _nodeIdColumn);
 
-        _pendingData.emplace_back(rowCount());
-        updateColumn(role, _pendingData.back());
+    int i = 0;
+    for(auto columnName : columnNames())
+    {
+        _pendingData.emplace_back(i++);
+        updateColumn(Qt::DisplayRole, columnName, _pendingData.back());
     }
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::onUpdateRoleComplete(int role)
+void NodeAttributeTableModel::onUpdateRoleComplete(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    size_t index = role - (Qt::UserRole + 1);
-
-    Q_ASSERT(index < _data.size() && index < _pendingData.size());
-    if(index >= _data.size() || index >= _pendingData.size())
-        return;
-
     emit layoutAboutToBeChanged();
-    _data.at(index) = _pendingData.at(index);
+    int column = columnIndexForAttributeValue(attributeName);
+    _data.at(column) = _pendingData.at(column);
 
     //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
     // for some reason it's not, even with https://codereview.qt-project.org/#/c/219278/
@@ -196,24 +202,6 @@ void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
         update();
         _graph->clearPhase();
     }
-}
-
-void NodeAttributeTableModel::updateRoleNames()
-{
-    _roleNames.clear();
-    _roleNames.insert(Roles::NodeIdRole, "nodeId");
-    _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
-
-    int nextRole = Roles::FirstAttributeRole;
-    _columnNames = columnNames();
-    for(const auto& name : qAsConst(_columnNames))
-    {
-        _roleNames.insert(nextRole, name.toUtf8());
-        nextRole++;
-    }
-
-    _columnCount = _columnNames.size();
-    emit columnNamesChanged();
 }
 
 bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
@@ -254,11 +242,16 @@ bool NodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
     return false;
 }
 
+bool NodeAttributeTableModel::rowVisible(size_t row) const
+{
+    return _nodeSelectedColumn[row].toBool();
+}
+
 void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    auto byteArrayRoleNames =_roleNames.values();
+    auto byteArrayRoleNames = _roleNames.values();
     QStringList currentRoleNames;
     currentRoleNames.reserve(_roleNames.size());
     for(const auto& roleName : qAsConst(byteArrayRoleNames))
@@ -279,7 +272,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         // may have changed, so we need to update these individually
         while(!_rolesRequiringUpdates.empty())
         {
-            updateRole(_rolesRequiringUpdates.back());
+            updateRole(_roleNames.value(_rolesRequiringUpdates.back()));
             _rolesRequiringUpdates.pop_back();
         }
 
@@ -297,8 +290,6 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         onRoleRemoved(role);
         emit columnRemoved(columnIndex, name);
     }
-
-    updateRoleNames();
 
     for(const auto& name : added)
     {
@@ -323,11 +314,10 @@ void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attrib
     for(const auto& attributeName : attributeNames)
     {
         if(!u::contains(_roleNames.values(), attributeName.toUtf8()))
-            continue;
+                    continue;
 
         int role = _roleNames.key(attributeName.toUtf8());
-        _rolesRequiringUpdates.push_back(role);
-
+                    _rolesRequiringUpdates.push_back(role);
     }
 }
 
@@ -338,12 +328,12 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return _columnCount;
+    return _userNodeData->numUserDataVectors();
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
-    size_t column = role - (Qt::UserRole + 1);
+    size_t column = index.column();
     if(column >= _data.size())
         return {};
 
@@ -359,5 +349,6 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
 void NodeAttributeTableModel::onSelectionChanged()
 {
-    updateRole(Roles::NodeSelectedRole);
+    updateColumn(Roles::NodeSelectedRole, "", _nodeSelectedColumn);
+    emit selectionChanged();
 }

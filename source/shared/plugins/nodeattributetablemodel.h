@@ -42,6 +42,9 @@ private:
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;
 
+    Column _nodeSelectedColumn;
+    Column _nodeIdColumn;
+
     Table _pendingData; // Update actually occurs here, before being copied to _data on the UI thread
     Table _data;
 
@@ -50,17 +53,18 @@ private:
 
 protected:
     virtual QStringList columnNames() const;
-    virtual QVariant dataValue(int row, int role) const;
+    virtual QVariant dataValue(int row, const QString& attributeName) const;
 
+    int columnIndexForAttributeValue(QString attributeValue);
 private:
     void onRoleAdded(int role);
     void onRoleRemoved(int role);
-    void updateRole(int role);
-    void updateColumn(int role, Column& column);
+    void updateRole(const QString& attributeName);
+    void updateColumn(int role, const QString& attributeName, Column& column);
     void update();
 
 private slots:
-    void onUpdateRoleComplete(int role);
+    void onUpdateRoleComplete(const QString& attributeName);
     void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 
@@ -75,13 +79,13 @@ public:
     QHash<int, QByteArray> roleNames() const override { return _roleNames; }
 
     void onSelectionChanged();
-    virtual void updateRoleNames();
 
     Q_INVOKABLE virtual bool columnIsCalculated(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsHiddenByDefault(const QString& columnName) const;
     Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
+    Q_INVOKABLE virtual bool rowVisible(size_t row) const;
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);
@@ -91,6 +95,7 @@ signals:
     void columnNamesChanged();
     void columnAdded(int index, const QString& name);
     void columnRemoved(int index, const QString& name);
+    void selectionChanged();
 };
 
 #endif // NODEATTRIBUTETABLEMODEL_H

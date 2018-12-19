@@ -1,5 +1,7 @@
-import QtQuick 2.7
 import QtQuick.Controls 1.5
+import QtQuick 2.12
+import QtQml 2.12
+import QtQuick.Controls 2.4 as QQC2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Private 1.0 // StyleItem
 import QtGraphicalEffects 1.0
@@ -46,7 +48,7 @@ Item
         if(columnSelectionMode)
         {
             _sortEnabled = false;
-            tableView.headerDelegate = columnSelectionHeaderDelegate
+            //tableView.headerDelegate = columnSelectionHeaderDelegate
             columnSelectionControls.show();
         }
         else
@@ -55,12 +57,12 @@ Item
 
             // The column selection mode will probably have changed these values, so set them
             // back to what they were before
-            tableView.sortIndicatorColumn = root.sortIndicatorColumn;
-            tableView.sortIndicatorOrder = root.sortIndicatorOrder;
+            //tableView.sortIndicatorColumn = root.sortIndicatorColumn;
+            //tableView.sortIndicatorOrder = root.sortIndicatorOrder;
             _sortEnabled = true;
-            tableView.flickableItem.contentX = 0;
+            //tableView.flickableItem.contentX = 0;
 
-            tableView.headerDelegate = defaultTableView.headerDelegate;
+            //tableView.headerDelegate = defaultTableView.headerDelegate;
         }
 
         tableView._updateColumnVisibility();
@@ -68,38 +70,21 @@ Item
 
     property bool _sortEnabled: true
 
-    Connections
-    {
-        target: tableView
-
-        onSortIndicatorColumnChanged:
-        {
-            if(_sortEnabled)
-                root.sortIndicatorColumn = tableView.sortIndicatorColumn;
-        }
-
-        onSortIndicatorOrderChanged:
-        {
-            if(_sortEnabled)
-                root.sortIndicatorOrder = tableView.sortIndicatorOrder;
-        }
-    }
-
     property int sortIndicatorColumn
     onSortIndicatorColumnChanged:
     {
-        tableView.sortIndicatorColumn = root.sortIndicatorColumn;
+        //tableView.sortIndicatorColumn = root.sortIndicatorColumn;
     }
 
     property int sortIndicatorOrder
     onSortIndicatorOrderChanged:
     {
-        tableView.sortIndicatorOrder = root.sortIndicatorOrder;
+        //tableView.sortIndicatorOrder = root.sortIndicatorOrder;
     }
 
-    property alias selection: tableView.selection
-    property alias rowCount: tableView.rowCount
-    property alias viewport: tableView.viewport
+    //property alias selection: tableView.selection
+    property alias rowCount: tableView.rows
+    property alias viewport: tableView.childrenRect
 
     signal visibleRowsChanged();
 
@@ -189,14 +174,14 @@ Item
         Utils.cloneMenu(menu, contextMenu);
     }
 
-    Label
-    {
-        text: qsTr("No Visible Columns")
-        visible: tableView.numVisibleColumns <= 0
+//    Label
+//    {
+//        text: qsTr("No Visible Columns")
+//        visible: tableView.numVisibleColumns <= 0
 
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-    }
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        anchors.verticalCenter: parent.verticalCenter
+//    }
 
     Preferences
     {
@@ -238,134 +223,79 @@ Item
         }
     }
 
-    // This only exists to provide the real tableView with its default headerDelegate
-    TableView
-    {
-        id: defaultTableView
-        visible: false
-        sortIndicatorVisible: true
-        sortIndicatorColumn: root.sortIndicatorColumn
-        sortIndicatorOrder: root.sortIndicatorOrder
-    }
-
     TableView
     {
         id: tableView
+        clip: true
+        QQC2.ScrollBar.vertical: QQC2.ScrollBar { }
+        QQC2.ScrollBar.horizontal: QQC2.ScrollBar { }
+        model: root._nodeAttributesTableModel
 
-        visible: numVisibleColumns > 0
+        visible: true
         anchors.fill: parent
+        columnSpacing: 1
+        rowSpacing: 1
 
-        readonly property int numVisibleColumns:
+        rowHeightProvider: function(row)
         {
-            var count = 0;
+            return -1;
+            if(row === 0)
+                return -1;
+            return !tableView.model.rowVisible(row) ? 0 : -1;
+        }
 
-            for(var i = 0; i < tableView.columnCount; i++)
+        // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
+        // except for the text property
+        delegate: Item
+        {
+            // Based on Qt source for BaseTableView delegate
+            implicitHeight: Math.max(16, label.implicitHeight)
+            implicitWidth: label.implicitWidth + 16
+            clip: true
+
+            property var modelColumn: model.column
+
+            SystemPalette { id: systemPalette }
+
+            Rectangle
             {
-                var tableViewColumn = tableView.getColumn(i);
+                Rectangle
+                {
+                    anchors.right: parent.right
+                    height: parent.height
+                    width: 1
+                    color: systemPalette.light
+                }
 
-                if(tableViewColumn.visible)
-                    count++;
-            }
+                width: parent.width
+                anchors.centerIn: parent
+                height: parent.height
+                color: "transparent"
 
-            return count;
-        }
+                Text
+                {
+                    id: label
+                    objectName: "label"
+                    width: parent.width
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
 
-        Component
-        {
-            id: columnComponent
-            TableViewColumn { width: 120 }
-        }
-
-        function _updateColumnVisibility()
-        {
-            for(var i = 0; i < tableView.columnCount; i++)
-            {
-                var tableViewColumn = tableView.getColumn(i);
-
-                if(root.columnSelectionMode)
-                    tableViewColumn.visible = true;
-                else
-                    tableViewColumn.visible = !Utils.setContains(root.hiddenColumns, tableViewColumn.role);
-            }
-        }
-
-        sortIndicatorVisible: true
-
-        function _resetSortFilterProxyModel()
-        {
-            // For reasons not fully understood, we seem to require the TableView's model to be
-            // recreated whenever it has a structural change, otherwise the view and the model
-            // get out of sync in exciting and unpredictable ways; hopefully we can get to the
-            // bottom of this when we transition to the new TableView component
-            tableView.model = sfpmComponent.createObject(tableView);
-        }
-
-        Component
-        {
-            id: sfpmComponent
-
-            SortFilterProxyModel
-            {
-                sourceModel: root._nodeAttributesTableModel
-                sorters:
-                [
-                    RoleSorter
+                    text:
                     {
-                        enabled: _nodeAttributesTableModel.columnIsNumerical(roleName)
-                        roleName: root.sortRoleName
-                        sortOrder: root.sortIndicatorOrder
-                    },
-                    StringSorter
-                    {
-                        enabled: !_nodeAttributesTableModel.columnIsNumerical(roleName)
-                        roleName: root.sortRoleName
-                        sortOrder: root.sortIndicatorOrder
-                        numericMode: true
+                        return model.display;
                     }
-                ]
-
-                filterRoleName: 'nodeSelected'; filterValue: true
-
-                // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
-                // changes which in turn affects which rows the model reflects. When the visible
-                // rows change, we emit a signal so that the owners of the TableView can react.
-                // Qt.callLater is used because otherwise the signal is emitted before the
-                // TableView has had a chance to update.
-                // This is a gigantic hack; it would be much nicer to react when a TableView's
-                // contents change, but there is no obvious sane way to do this.
-                onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
+                    renderType: Text.NativeRendering
+                }
             }
         }
 
         Connections
         {
-            target: root._nodeAttributesTableModel
-
-            onColumnAdded:
+            target: plugin.model.nodeAttributeTableModel
+            onSelectionChanged:
             {
-                tableView._resetSortFilterProxyModel();
-
-                tableView.insertColumn(index, columnComponent.createObject(tableView,
-                    {"role": name, "title": name}));
-
-                tableView._updateColumnVisibility();
-            }
-
-            onColumnRemoved:
-            {
-                tableView._resetSortFilterProxyModel();
-
-                // Remove columns from the hidden columns list that no longer exist in the model
-                root.hiddenColumns = Utils.setIntersection(root.hiddenColumns,
-                    root._nodeAttributesTableModel.columnNames);
-
-                tableView.removeColumn(index);
-
-                tableView._updateColumnVisibility();
-
-                // Snap the view back to the start
-                // Tableview can be left scrolled out of bounds if column count reduces
-                tableView.flickableItem.contentX = 0;
+                tableView.forceLayout();
             }
         }
 
@@ -373,276 +303,126 @@ Item
         {
             tableView._resetSortFilterProxyModel();
 
-            for(var i = 0; i < root._nodeAttributesTableModel.columnNames.length; i++)
-            {
-                var columnName = root._nodeAttributesTableModel.columnNames[i];
-                tableView.addColumn(columnComponent.createObject(tableView,
-                    {"role": columnName, "title": columnName}));
-            }
-
             populateTableMenu(tableView._tableMenu);
         }
 
-        selectionMode: SelectionMode.ExtendedSelection
+        //selectionMode: SelectionMode.ExtendedSelection
 
-        // Implementing selectedRows using a binding results in a binding loop,
-        // for some reason, so do it by connection instead
-        Connections
-        {
-            target: tableView.selection
-            onSelectionChanged:
-            {
-                var rows = [];
-                tableView.selection.forEach(function(rowIndex)
-                {
-                    var sourceRowIndex = tableView.model.mapToSource(rowIndex);
-
-                    if(sourceRowIndex >= 0)
-                        rows.push(sourceRowIndex);
-                });
-
-                root.selectedRows = rows;
-            }
-        }
-
-        onDoubleClicked:
-        {
-            var mappedRow = model.mapToSource(row);
-            root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
-        }
+//        onDoubleClicked:
+//        {
+//            var mappedRow = model.mapToSource(row);
+//            root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
+//        }
 
         // This is just a reference to the menu, so we can repopulate it later as necessary
         property Menu _tableMenu
-
-        Component
-        {
-            id: columnSelectionHeaderDelegate
-
-            StyleItem
-            {
-                elementType: "header"
-
-                implicitWidth: checkbox.width + (2 * Constants.margin)
-                implicitHeight: checkbox.height
-
-                property int _clickedColumn
-
-                property bool _pressed: styleData.pressed
-                on_PressedChanged:
-                {
-                    // HACK: for some reason there are two styleDatas that get bound, one of which conveniently has
-                    // a resizable property whereas the other doesn't, so we just ignore one on that basis
-                    if(styleData.resizable === undefined)
-                        return;
-
-                    if(!styleData.pressed && _clickedColumn === styleData.column)
-                    {
-                        var columnShouldBeVisible = Utils.setContains(root.hiddenColumns, styleData.value);
-                        root.setColumnVisibility(styleData.value, columnShouldBeVisible);
-                    }
-                    else
-                        _clickedColumn = styleData.column;
-                }
-
-                SystemPalette { id: systemPalette }
-
-                // Highlight the selected columns with the blended system highlight colour
-                Rectangle
-                {
-                    anchors.fill: parent
-                    visible: checkbox.visible && checkbox.checked
-
-                    color:
-                    {
-                        var c = Qt.darker(systemPalette.highlight, 1.0);
-                        return Qt.rgba(c.r, c.g, c.b, 0.4);
-                    }
-                }
-
-                // Having a line under the header helps delineate the button controls
-                Rectangle
-                {
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    height: 1
-                    color: systemPalette.dark
-                }
-
-                Item
-                {
-                    anchors.leftMargin: Constants.margin
-                    anchors.rightMargin: Constants.margin
-                    anchors.fill: parent
-                    clip: true
-
-                    CheckBox
-                    {
-                        id: checkbox
-
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: styleData.value.length > 0
-                        text: styleData.value
-
-                        checked: { return !Utils.setContains(root.hiddenColumns, styleData.value); }
-                    }
-                }
-            }
-        }
-
-        // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
-        // except for the text property
-        itemDelegate: Item
-        {
-            height: Math.max(16, label.implicitHeight)
-            property int implicitWidth: label.implicitWidth + 16
-
-            Text
-            {
-                id: label
-                objectName: "label"
-                width: parent.width
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                    horizontalAlignment === Text.AlignRight ? 1 : 8
-                anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                     || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                horizontalAlignment: styleData.textAlignment
-                anchors.verticalCenter: parent.verticalCenter
-                elide: styleData.elideMode
-
-                text:
-                {
-                    if(styleData.value === undefined)
-                        return "";
-
-                    var column = tableView.getColumn(styleData.column);
-
-                    if(column !== null && _nodeAttributesTableModel.columnIsFloatingPoint(column.role))
-                        return QmlUtils.formatNumberScientific(styleData.value, 1);
-
-                    return styleData.value;
-                }
-
-                color: styleData.textColor
-                renderType: Text.NativeRendering
-            }
-        }
     }
 
-    ShaderEffectSource
-    {
-        id: effectSource
-        visible: columnSelectionMode
+//    ShaderEffectSource
+//    {
+//        id: effectSource
+//        visible: columnSelectionMode
 
-        x: tableView.contentItem.x + 1
-        y: tableView.contentItem.y + tableView.__listView.headerItem.height + 1
-        width: tableView.contentItem.width
-        height: tableView.contentItem.height - tableView.__listView.headerItem.height
+//        x: tableView.contentItem.x + 1
+//        y: tableView.contentItem.y + 10 + 1
+//        width: tableView.contentItem.width
+//        height: tableView.contentItem.height - 10
 
-        sourceItem: tableView
-        sourceRect: Qt.rect(x, y, width, height)
-    }
+//        sourceItem: tableView
+//        sourceRect: Qt.rect(x, y, width, height)
+//    }
 
-    FastBlur
-    {
-        visible: columnSelectionMode
-        anchors.fill: effectSource
-        source: effectSource
-        radius: 32
-    }
+//    FastBlur
+//    {
+//        visible: columnSelectionMode
+//        anchors.fill: effectSource
+//        source: effectSource
+//        radius: 32
+//    }
 
-    Item
-    {
-        clip: true
+//    Item
+//    {
+//        clip: true
 
-        anchors.fill: tableView
-        anchors.topMargin: tableView.__listView.headerItem.height + 1
+//        anchors.fill: tableView
+//        anchors.topMargin: 10 + 1
 
-        SlidingPanel
-        {
-            id: columnSelectionControls
-            visible: tableView.visible
+//        SlidingPanel
+//        {
+//            id: columnSelectionControls
+//            visible: tableView.visible
 
-            alignment: Qt.AlignTop|Qt.AlignLeft
+//            alignment: Qt.AlignTop|Qt.AlignLeft
 
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: -Constants.margin
-            anchors.topMargin: -Constants.margin
+//            anchors.left: parent.left
+//            anchors.top: parent.top
+//            anchors.leftMargin: -Constants.margin
+//            anchors.topMargin: -Constants.margin
 
-            initiallyOpen: false
-            disableItemWhenClosed: false
+//            initiallyOpen: false
+//            disableItemWhenClosed: false
 
-            item: Rectangle
-            {
-                width: row.width
-                height: row.height
+//            item: Rectangle
+//            {
+//                width: row.width
+//                height: row.height
 
-                border.color: "black"
-                border.width: 1
-                radius: 4
-                color: "white"
+//                border.color: "black"
+//                border.width: 1
+//                radius: 4
+//                color: "white"
 
-                RowLayout
-                {
-                    id: row
+//                RowLayout
+//                {
+//                    id: row
 
-                    // The RowLayout in a RowLayout is just a hack to get some padding
-                    RowLayout
-                    {
-                        Layout.topMargin: Constants.padding + Constants.margin - 2
-                        Layout.bottomMargin: Constants.padding
-                        Layout.leftMargin: Constants.padding + Constants.margin - 2
-                        Layout.rightMargin: Constants.padding
+//                    // The RowLayout in a RowLayout is just a hack to get some padding
+//                    RowLayout
+//                    {
+//                        Layout.topMargin: Constants.padding + Constants.margin - 2
+//                        Layout.bottomMargin: Constants.padding
+//                        Layout.leftMargin: Constants.padding + Constants.margin - 2
+//                        Layout.rightMargin: Constants.padding
 
-                        Button
-                        {
-                            text: qsTr("Show All")
-                            onClicked: { root.showAllColumns(); }
-                        }
+//                        Button
+//                        {
+//                            text: qsTr("Show All")
+//                            onClicked: { root.showAllColumns(); }
+//                        }
 
-                        Button
-                        {
-                            text: qsTr("Hide All")
-                            onClicked: { root.hideAllColumns(); }
-                        }
+//                        Button
+//                        {
+//                            text: qsTr("Hide All")
+//                            onClicked: { root.hideAllColumns(); }
+//                        }
 
-                        Button
-                        {
-                            text: qsTr("Show Calculated")
-                            onClicked: { root.showAllCalculatedColumns(); }
-                        }
+//                        Button
+//                        {
+//                            text: qsTr("Show Calculated")
+//                            onClicked: { root.showAllCalculatedColumns(); }
+//                        }
 
-                        Button
-                        {
-                            text: qsTr("Hide Calculated")
-                            onClicked: { root.hideAllCalculatedColumns(); }
-                        }
+//                        Button
+//                        {
+//                            text: qsTr("Hide Calculated")
+//                            onClicked: { root.hideAllCalculatedColumns(); }
+//                        }
 
-                        FloatingButton
-                        {
-                            text: qsTr("Done")
-                            iconName: "emblem-unreadable"
-                            onClicked: { columnSelectionMode = false; }
-                        }
-                    }
-                }
-            }
-        }
-    }
+//                        Button
+//                        {
+//                            text: qsTr("Done")
+//                            iconName: "emblem-unreadable"
+//                            onClicked: { columnSelectionMode = false; }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     Menu { id: contextMenu }
 
     signal rightClick();
     onRightClick: { contextMenu.popup(); }
 
-    MouseArea
-    {
-        anchors.fill: parent
-        acceptedButtons: Qt.RightButton
-        propagateComposedEvents: true
-        onClicked: { root.rightClick(); }
-    }
 }
