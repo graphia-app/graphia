@@ -10,7 +10,7 @@ Item
 {
     id: root
 
-    implicitWidth: _width + root._padding
+    implicitWidth: row.width + root._padding
     implicitHeight: row.implicitHeight + root._padding
 
     property double _borderRadius: 2
@@ -29,24 +29,6 @@ Item
     }
 
     property var stringValues: []
-
-    property double _minimumWidth:
-    {
-        var w = (root._numKeys - 1) * (row.spacing + _minimumKeySize)
-
-        if(hoverEnabled)
-            w += root.highlightSize;
-
-        return w;
-    }
-
-    property double _width:
-    {
-        var w = (root._numKeys * root.keyWidth) +
-            ((root._numKeys - 1) * row.spacing);
-
-        return Math.max(w, _minimumWidth);
-    }
 
     property double _minimumKeySize: 10
     property double keyHeight: 20
@@ -155,6 +137,20 @@ Item
         id: row
 
         anchors.centerIn: parent
+
+        width:
+        {
+            var w = (root._numKeys * root.keyWidth) +
+                ((root._numKeys - 1) * spacing);
+
+            var minW = (root._numKeys - 1) *
+                (spacing + root._minimumKeySize)
+
+            if(root.hoverEnabled)
+                minW += root.highlightSize;
+
+            return Math.max(w, minW);
+        }
 
         spacing: root.separateKeys ? 2 : 0
 
