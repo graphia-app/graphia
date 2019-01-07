@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <sstream>
+#include <limits>
 
 bool u::isNumeric(const std::string& string)
 {
@@ -30,6 +31,34 @@ bool u::isNumeric(const QString& string)
     string.toDouble(&success);
 
     return success;
+}
+
+double u::toNumber(const std::string& string)
+{
+    if(string.empty())
+        return false;
+
+    std::stringstream ss;
+    ss << string;
+
+    long double value;
+    ss >> value;
+
+    if(ss.eof())
+        return value;
+
+    return std::numeric_limits<double>::quiet_NaN();
+}
+
+double u::toNumber(const QString& string)
+{
+    bool success = false;
+    auto value = string.toDouble(&success);
+
+    if(success)
+        return value;
+
+    return std::numeric_limits<double>::quiet_NaN();
 }
 
 std::vector<QString> u::toQStringVector(const QStringList& stringList)

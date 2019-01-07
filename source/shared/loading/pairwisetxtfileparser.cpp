@@ -217,7 +217,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(u::isNumeric(thirdToken))
                 {
-                    float edgeWeight = std::stof(thirdToken);
+                    float edgeWeight = u::toNumber(thirdToken);
 
                     if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                         edgeWeight = 1.0f;
