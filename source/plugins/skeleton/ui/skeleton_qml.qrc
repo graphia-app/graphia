@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>qml/SkeletonPlugin.qml</file>
-    </qresource>
-</RCC>

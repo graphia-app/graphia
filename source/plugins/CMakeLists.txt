@@ -6,5 +6,4 @@ endif()
 
 add_subdirectory(correlation)
 add_subdirectory(generic)
-add_subdirectory(skeleton)
 add_subdirectory(websearch)
