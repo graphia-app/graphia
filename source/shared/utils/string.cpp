@@ -36,7 +36,7 @@ bool u::isNumeric(const QString& string)
 double u::toNumber(const std::string& string)
 {
     if(string.empty())
-        return false;
+        return std::numeric_limits<double>::quiet_NaN();
 
     std::stringstream ss;
     ss << string;
