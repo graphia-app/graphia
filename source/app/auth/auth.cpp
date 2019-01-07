@@ -554,9 +554,14 @@ void Auth::onReplyReceived()
 
 void Auth::onTimeout()
 {
-    _message = tr("Timed out waiting for a response from the authentication "
-                  "server. Please check your internet connection and try again.");
-    emit messageChanged();
+    // Ignore timeouts if our token hasn't yet expired
+    if(expired())
+    {
+        _message = tr("Timed out waiting for a response from the authentication "
+                      "server. Please check your internet connection and try again.");
+        emit messageChanged();
+    }
+
     emit busyChanged();
 
     _reply->abort();

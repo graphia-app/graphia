@@ -229,7 +229,7 @@ bool Application::tryToAuthenticateWithCachedCredentials()
     if(!u::pref("auth/rememberMe").toBool())
         return false;
 
-    if(!_auth.state() && _auth.expired())
+    if(!_auth.state())
         return _auth.sendRequestUsingCachedCredentials();
 
     return true;
