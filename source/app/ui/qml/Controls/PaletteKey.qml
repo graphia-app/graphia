@@ -10,7 +10,22 @@ Item
 {
     id: root
 
-    implicitWidth: row.width + root._padding
+    implicitWidth: root._width + root._padding
+
+    property double _width:
+    {
+        var w = (root._numKeys * root.keyWidth) +
+            ((root._numKeys - 1) * row.spacing);
+
+        var minW = (root._numKeys - 1) *
+            (row.spacing + root._minimumKeySize)
+
+        if(root.hoverEnabled)
+            minW += root.highlightSize;
+
+        return Math.max(w, minW);
+    }
+
     implicitHeight: row.implicitHeight + root._padding
 
     property double _borderRadius: 2
@@ -138,21 +153,14 @@ Item
 
         anchors.centerIn: parent
 
-        width:
-        {
-            var w = (root._numKeys * root.keyWidth) +
-                ((root._numKeys - 1) * spacing);
-
-            var minW = (root._numKeys - 1) *
-                (spacing + root._minimumKeySize)
-
-            if(root.hoverEnabled)
-                minW += root.highlightSize;
-
-            return Math.max(w, minW);
-        }
-
         spacing: root.separateKeys ? 2 : 0
+
+        // We set a fixed width here, otherwise the row's width is defined
+        // by its contents and can fluctuate very slightly when hovered,
+        // presumably due to floating point rounding/precision. This needs
+        // to be avoided because said fluctuation can cause infinite loops
+        // when the cursor sits on a boundary between elements.
+        width: root.width - root._padding
 
         Repeater
         {
