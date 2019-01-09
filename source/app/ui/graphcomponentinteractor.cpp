@@ -37,9 +37,9 @@ void GraphComponentInteractor::rightMouseDown()
 {
     GraphCommonInteractor::rightMouseDown();
 
-    if(clickedRenderer() != nullptr)
+    if(clickedComponentRenderer() != nullptr)
     {
-        clickedRenderer()->disableFocusTracking();
+        clickedComponentRenderer()->disableFocusTracking();
         emit userInteractionStarted();
     }
 }
@@ -48,12 +48,12 @@ void GraphComponentInteractor::rightMouseUp()
 {
     GraphCommonInteractor::rightMouseUp();
 
-    if(clickedRenderer() == nullptr)
+    if(clickedComponentRenderer() == nullptr)
         return;
 
     if(_graphRenderer->transition().active())
     {
-        clickedRenderer()->enableFocusTracking();
+        clickedComponentRenderer()->enableFocusTracking();
         return;
     }
 
@@ -62,36 +62,36 @@ void GraphComponentInteractor::rightMouseUp()
     if(mouseMoving())
     {
         _scene->startTransition();
-        clickedRenderer()->moveFocusToNodeClosestCameraVector();
+        clickedComponentRenderer()->moveFocusToNodeClosestCameraVector();
     }
 
-    clickedRenderer()->enableFocusTracking();
+    clickedComponentRenderer()->enableFocusTracking();
 }
 
 void GraphComponentInteractor::rightDrag()
 {
     GraphCommonInteractor::rightDrag();
 
-    if(clickedRenderer() != nullptr)
+    if(clickedComponentRenderer() != nullptr)
         _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
 }
 
 void GraphComponentInteractor::leftDoubleClick()
 {
-    if(clickedRenderer() == nullptr)
+    if(clickedComponentRenderer() == nullptr)
         return;
 
     if(!nearClickNodeId().isNull())
     {
-        if(nearClickNodeId() != clickedRenderer()->focusNodeId())
+        if(nearClickNodeId() != clickedComponentRenderer()->focusNodeId())
             _scene->moveFocusToNode(nearClickNodeId());
         else
             _scene->moveFocusToNode(nearClickNodeId(), GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS);
     }
-    else if(!clickedRenderer()->viewIsReset())
+    else if(!clickedComponentRenderer()->viewIsReset())
     {
         _scene->startTransition();
-        clickedRenderer()->resetView();
+        clickedComponentRenderer()->resetView();
     }
     else
         _graphRenderer->switchToOverviewMode();
@@ -101,15 +101,15 @@ void GraphComponentInteractor::wheelMove(float angle, float, float)
 {
     const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
 
-    rendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
+    componentRendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
 }
 
 void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
 {
-    rendererUnderCursor()->zoom(value, false);
+    componentRendererUnderCursor()->zoom(value, false);
 }
 
-GraphComponentRenderer* GraphComponentInteractor::rendererAtPosition(const QPoint&) const
+GraphComponentRenderer* GraphComponentInteractor::componentRendererAtPosition(const QPoint&) const
 {
     return _scene->componentRenderer();
 }

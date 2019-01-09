@@ -37,7 +37,7 @@ private:
     void trackpadZoomGesture(float value, float x, float y) override;
 
     ComponentId componentIdAtPosition(const QPoint& position) const;
-    GraphComponentRenderer* rendererAtPosition(const QPoint& position) const override;
+    GraphComponentRenderer* componentRendererAtPosition(const QPoint& position) const override;
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const override;
     NodeIdSet selectionForRect(const QRectF& rect) const override;
 };

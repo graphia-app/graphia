@@ -60,8 +60,8 @@ private:
 
     bool _mouseMoving = false;
 
-    GraphComponentRenderer* _clickedRenderer = nullptr;
-    GraphComponentRenderer* _rendererUnderCursor = nullptr;
+    GraphComponentRenderer* _clickedComponentRenderer = nullptr;
+    GraphComponentRenderer* _componentRendererUnderCursor = nullptr;
 
     void mouseDown(const QPoint &position);
     void mouseUp();
@@ -74,7 +74,7 @@ private:
 
     void nativeGestureEvent(QNativeGestureEvent* nativeEvent) override;
 
-    virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
+    virtual GraphComponentRenderer* componentRendererAtPosition(const QPoint& position) const = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;
     virtual NodeIdSet selectionForRect(const QRectF& rect) const = 0;
 
@@ -104,8 +104,8 @@ protected:
     NodeId clickedNodeId() const { return _clickedNodeId; }
     NodeId nearClickNodeId() const { return _nearClickNodeId; }
 
-    GraphComponentRenderer* clickedRenderer() const { return _clickedRenderer; }
-    GraphComponentRenderer* rendererUnderCursor() const { return _rendererUnderCursor; }
+    GraphComponentRenderer* clickedComponentRenderer() const { return _clickedComponentRenderer; }
+    GraphComponentRenderer* componentRendererUnderCursor() const { return _componentRendererUnderCursor; }
 
     NodeId nodeIdAtPosition(const QPoint& localPosition) const;
     NodeId nodeIdNearPosition(const QPoint& localPosition) const;

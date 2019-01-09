@@ -93,12 +93,12 @@ GraphCommonInteractor::GraphCommonInteractor(GraphModel* graphModel,
 
 void GraphCommonInteractor::mouseDown(const QPoint& position)
 {
-    _clickedRenderer = rendererAtPosition(position);
+    _clickedComponentRenderer = componentRendererAtPosition(position);
     _clickPosition = position;
 
     _cursorPosition = _prevCursorPosition = _clickPosition;
 
-    if(clickedRenderer() != nullptr)
+    if(clickedComponentRenderer() != nullptr)
     {
         _clickedNodeId = nodeIdAtPosition(localCursorPosition());
 
@@ -113,7 +113,7 @@ void GraphCommonInteractor::mouseUp()
 {
     _clickedNodeId.setToNull();
     _nearClickNodeId.setToNull();
-    _clickedRenderer = nullptr;
+    _clickedComponentRenderer = nullptr;
     _mouseMoving = false;
 }
 
@@ -167,7 +167,7 @@ void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
     if(_graphRenderer->transition().active())
         return;
 
-    _rendererUnderCursor = rendererAtPosition(mouseEvent->pos());
+    _componentRendererUnderCursor = componentRendererAtPosition(mouseEvent->pos());
     _cursorPosition = mouseEvent->pos();
     _modifiers = mouseEvent->modifiers();
 
@@ -318,7 +318,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
 void GraphCommonInteractor::leftDrag()
 {
-    auto renderer = clickedRenderer();
+    auto renderer = clickedComponentRenderer();
 
     if((modifiers() & Qt::ShiftModifier) != 0)
     {
@@ -390,14 +390,14 @@ QPoint GraphCommonInteractor::prevCursorPosition() const
 
 QPoint GraphCommonInteractor::localCursorPosition() const
 {
-    Q_ASSERT(clickedRenderer() != nullptr);
-    return componentLocalCursorPosition(clickedRenderer()->componentId(), _cursorPosition);
+    Q_ASSERT(clickedComponentRenderer() != nullptr);
+    return componentLocalCursorPosition(clickedComponentRenderer()->componentId(), _cursorPosition);
 }
 
 QPoint GraphCommonInteractor::localPrevCursorPosition() const
 {
-    Q_ASSERT(clickedRenderer() != nullptr);
-    return componentLocalCursorPosition(clickedRenderer()->componentId(), _prevCursorPosition);
+    Q_ASSERT(clickedComponentRenderer() != nullptr);
+    return componentLocalCursorPosition(clickedComponentRenderer()->componentId(), _prevCursorPosition);
 }
 
 Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
@@ -407,7 +407,7 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
 
 NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& localPosition) const
 {
-    auto renderer = clickedRenderer();
+    auto renderer = clickedComponentRenderer();
     if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 
@@ -421,7 +421,7 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
 {
     const int PICK_RADIUS = 40;
 
-    auto renderer = clickedRenderer();
+    auto renderer = clickedComponentRenderer();
     if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 
@@ -438,7 +438,7 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
     if(_graphRenderer->transition().active())
         return;
 
-    _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
+    _componentRendererUnderCursor = componentRendererAtPosition(wheelEvent->pos());
 
     if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
     {
@@ -497,7 +497,7 @@ void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
     if(_graphRenderer->transition().active())
         return;
 
-    _rendererUnderCursor = rendererAtPosition(nativeEvent->pos());
+    _componentRendererUnderCursor = componentRendererAtPosition(nativeEvent->pos());
 
     if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
         trackpadZoomGesture(nativeEvent->value(), nativeEvent->pos().x(), nativeEvent->pos().y());

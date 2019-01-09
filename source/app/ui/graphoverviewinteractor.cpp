@@ -86,7 +86,7 @@ ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& positio
     return {};
 }
 
-GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& position) const
+GraphComponentRenderer* GraphOverviewInteractor::componentRendererAtPosition(const QPoint& position) const
 {
     auto componentId = componentIdAtPosition(position);
 
