@@ -1107,7 +1107,7 @@ ApplicationWindow
     Action
     {
         id: aboutQtAction
-        text: qsTr("About Qt…")
+        text: Qt.platform.os === "osx" ? qsTr("Qt…") : qsTr("About Qt…")
         onTriggered: { application.aboutQt(); }
     }
 
