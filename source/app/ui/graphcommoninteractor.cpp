@@ -318,6 +318,8 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
 void GraphCommonInteractor::leftDrag()
 {
+    auto renderer = clickedRenderer();
+
     if((modifiers() & Qt::ShiftModifier) != 0)
     {
         if(!_frustumSelecting)
@@ -343,17 +345,16 @@ void GraphCommonInteractor::leftDrag()
 
         emit userInteractionFinished();
     }
-    else if(clickedRenderer() != nullptr)
+    else if(renderer != nullptr && renderer->componentIsValid())
     {
         _selecting = false;
 
         if(!_mouseMoving)
             emit userInteractionStarted();
 
-        Camera* camera = clickedRenderer()->camera();
+        Camera* camera = renderer->camera();
         QQuaternion rotation = mouseMoveToRotation(localPrevCursorPosition(),
-                                                   localCursorPosition(),
-                                                   clickedRenderer());
+            localCursorPosition(), renderer);
         camera->rotate(rotation);
     }
 }
@@ -407,7 +408,7 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
 NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& localPosition) const
 {
     auto renderer = clickedRenderer();
-    if(renderer == nullptr || renderer->componentId().isNull())
+    if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 
     auto ray = renderer->camera()->rayForViewportCoordinates(localPosition.x(), localPosition.y());
@@ -421,7 +422,7 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
     const int PICK_RADIUS = 40;
 
     auto renderer = clickedRenderer();
-    if(renderer == nullptr || renderer->componentId().isNull())
+    if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 
     auto frustum = renderer->camera()->conicalFrustumForViewportCoordinates(

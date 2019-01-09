@@ -193,6 +193,9 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
 
 void GraphComponentRenderer::updateFocusPosition()
 {
+    if(!componentIsValid())
+        return;
+
     auto component = _graphModel->graph().componentById(_componentId);
     Q_ASSERT(component != nullptr);
     _viewData._focusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
@@ -203,7 +206,7 @@ float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
 {
     // If we're frozen then it's probably because the component is going away, and if
     // this is the case then we won't be able to get at its nodeIds, so don't update
-    if(_frozen)
+    if(!componentIsValid())
         return -1.0f;
 
     QVector3D position;
@@ -470,7 +473,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
 void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
 {
-    if(_componentId.isNull())
+    if(!componentIsValid())
         return;
 
     _viewData._focusNodeId = nodeId;
@@ -486,7 +489,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
 
 void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
 {
-    if(_componentId.isNull())
+    if(!componentIsValid())
         return;
 
     _savedViewData._focusNodeId = nodeId;
@@ -501,7 +504,7 @@ void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
 
 void GraphComponentRenderer::resetView()
 {
-    if(_componentId.isNull())
+    if(!componentIsValid())
         return;
 
     _viewData._autoZooming = true;
@@ -511,7 +514,7 @@ void GraphComponentRenderer::resetView()
 
 void GraphComponentRenderer::moveFocusToCentreOfComponent()
 {
-    if(_componentId.isNull())
+    if(!componentIsValid())
         return;
 
     _viewData._focusNodeId.setToNull();
@@ -527,7 +530,7 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
 
 void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 {
-    if(_componentId.isNull())
+    if(!componentIsValid())
         return;
 
     Collision collision(*_graphModel, _componentId);
@@ -540,9 +543,6 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 void GraphComponentRenderer::moveFocusToPositionAndRadius(const QVector3D& position, float radius,
                                                           const QQuaternion& rotation)
 {
-    if(_componentId.isNull())
-        return;
-
     _viewData._focusNodeId.setToNull();
     _viewData._focusPosition = position;
     _entireComponentZoomDistance = zoomDistanceForRadius(radius);

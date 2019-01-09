@@ -97,6 +97,8 @@ public:
     void freeze();
     void thaw();
 
+    bool componentIsValid() const { return !componentId().isNull() && !_frozen; }
+
     bool transitionRequired();
     void computeTransition();
     void updateTransition(float f);
