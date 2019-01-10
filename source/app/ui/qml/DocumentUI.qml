@@ -1781,7 +1781,29 @@ Item
                 }
                 ToolButton
                 {
-                    iconName: "edit-find"
+                    iconName: findAction.iconName
+                }
+            }
+        }
+
+        Hubble
+        {
+            title: qsTr("Find By Attribute Value")
+            x: 10
+            y: !findPanel.hidden ? find.y + find.height + 10 : 10
+            RowLayout
+            {
+                Text
+                {
+                    Layout.preferredWidth: 400
+                    wrapMode: Text.WordWrap
+                    textFormat: Text.StyledText
+                    text: qsTr("If you clustered the graph using MCL, click on " +
+                        "<b>Find By Attribute Value</b> to examine individual clusters.<br>")
+                }
+                ToolButton
+                {
+                    iconName: findByAttributeAction.iconName
                 }
             }
         }
