@@ -7,6 +7,8 @@ import QtQuick.Dialogs 1.2
 
 import Qt.labs.platform 1.0 as Labs
 
+import SortFilterProxyModel 0.2
+
 import com.kajeka 1.0
 
 import "../../../shared/ui/qml/Constants.js" as Constants
@@ -117,6 +119,30 @@ Item
     property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
 
     property color contrastingColor: document.contrastingColor
+
+    SortFilterProxyModel
+    {
+        id: sharedValuesProxyModel
+        filters:
+        [
+            ValueFilter
+            {
+                roleName: "hasSharedValues"
+                value: true
+            }
+        ]
+    }
+
+    property int numAttributesWithSharedValues:
+    {
+        return sharedValuesProxyModel.count;
+    }
+
+    function _refreshNumAttributesWithSharedValues()
+    {
+        sharedValuesProxyModel.sourceModel =
+            document.availableAttributesModel(ElementType.Node);
+    }
 
     Preferences
     {
@@ -1515,8 +1541,11 @@ Item
 
         onLoadComplete:
         {
+            _refreshNumAttributesWithSharedValues();
             root.loadComplete(url, success);
         }
+
+        onGraphChanged: { _refreshNumAttributesWithSharedValues(); }
 
         onEnrichmentAnalysisComplete:
         {

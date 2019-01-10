@@ -785,7 +785,14 @@ ApplicationWindow
         iconName: "format-indent-more"
         text: qsTr("Find By Attribute Value")
         shortcut: "Ctrl+H"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled:
+        {
+            if(currentDocument)
+                return !currentDocument.busy && currentDocument.numAttributesWithSharedValues > 0;
+
+            return false;
+        }
+
         onTriggered:
         {
             if(currentDocument)
