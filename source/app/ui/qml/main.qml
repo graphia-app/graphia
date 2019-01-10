@@ -1581,6 +1581,7 @@ ApplicationWindow
             ToolBarSeparator {}
             ToolButton { action: deleteAction }
             ToolButton { action: findAction }
+            ToolButton { action: findByAttributeAction }
             ToolButton { action: undoAction }
             ToolButton { action: redoAction }
             ToolBarSeparator {}
