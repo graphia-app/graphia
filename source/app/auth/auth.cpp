@@ -557,7 +557,7 @@ void Auth::onTimeout()
     // Ignore timeouts if our token hasn't yet expired
     if(expired())
     {
-        _message = tr("Timed out waiting for a response from the authentication "
+        _message = tr("Timed out while waiting for a response from the authentication "
                       "server. Please check your internet connection and try again.");
         emit messageChanged();
     }

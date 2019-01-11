@@ -182,12 +182,12 @@ BaseParameterDialog
                 {
                     Text
                     {
-                        text: qsTr("The correlation plugin creates graphs based on how similar row profiles are in a dataset.<br>" +
+                        text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a numerical dataset.<br>" +
                                    "<br>" +
-                                   "If specified, the input data will be scaled and normalised and a Pearson Correlation will be performed. " +
                                    "The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">Pearson Correlation coefficient</a> " +
-                                   "is effectively a measure of similarity between rows of data. It is used to determine " +
-                                   "whether or not an edge is created between rows.<br>" +
+                                   "provides this similarity metric. " +
+                                   "If specified, the input data can be scaled and normalised, after which correlation scores are " +
+                                   "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +
                                    "<br>" +
                                    "The edges may be filtered using transforms once the graph has been created.")
                         wrapMode: Text.WordWrap
@@ -620,9 +620,9 @@ BaseParameterDialog
                             Text
                             {
                                 wrapMode: Text.WordWrap
-                                text: qsTr("The initial correlation threshold, below which edges in the graph are filtered. " +
-                                           "A lower value filters fewer edges, and results in a more complex graph. " +
-                                           "Its value can be changed later, after the graph has been created.")
+                                text: qsTr("The initial correlation threshold determines the size of the resultant graph. " +
+                                           "A lower value filters fewer edges, and results in a larger graph. " +
+                                           "This value can be changed later, after the graph has been created.")
                             }
                         }
                     }
@@ -719,7 +719,8 @@ BaseParameterDialog
                     Text
                     {
                         text: qsTr("Please select the required data manipulation. The manipulation " +
-                                   "will occur in the order it is displayed below.")
+                                   "will occur in the order it is displayed below. Resultant changes " +
+                                   "in the estimated graph size may be observed on the Correlation tab.")
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -1013,7 +1014,7 @@ BaseParameterDialog
                 Text
                 {
                     text: qsTr("Commonly used transforms can be automatically added to " +
-                               "the graph from here.")
+                               "the graph here.")
                     Layout.alignment: Qt.AlignLeft
                     wrapMode: Text.WordWrap
                 }
@@ -1059,8 +1060,9 @@ BaseParameterDialog
 
                             Text
                             {
-                                text: qsTr("Markov clustering algorithm simulates stochastic flow within the generated graph to identify " +
-                                           "distinct clusters. ");
+                                text: qsTr("The Markov Clustering Algorithm simulates stochastic " +
+                                           "flow within the generated graph to identify distinct " +
+                                           "clusters of potentially related data points.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
