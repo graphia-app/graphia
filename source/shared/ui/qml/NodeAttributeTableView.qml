@@ -309,6 +309,7 @@ Item
                 sourceModel: root._nodeAttributesTableModel
                 sortRoleName: root.sortRoleName
                 ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
+                sorters: StringSorter { numericMode: true }
 
                 filterRoleName: 'nodeSelected'; filterValue: true
 
