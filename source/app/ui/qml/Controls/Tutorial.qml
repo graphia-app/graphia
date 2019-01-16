@@ -13,6 +13,11 @@ Item
         return hubbles[visibleHubbleId];
     }
 
+    property bool _hasPreviousHubble:
+    {
+        return visibleHubbleId > 0;
+    }
+
     property bool _hasNextHubble:
     {
         return visibleHubbleId < hubbles.length - 1;
@@ -71,6 +76,38 @@ Item
         }
     }
 
+    function updateCurrentHubble()
+    {
+        currentHubble.displayPrevious = _hasPreviousHubble;
+        currentHubble.displayNext = _hasNextHubble;
+        currentHubble.displayClose = !_hasNextHubble;
+
+        if(currentHubble.displayPrevious)
+            currentHubble.previousClicked.connect(gotoPreviousHubble);
+
+        if(currentHubble.displayNext)
+            currentHubble.nextClicked.connect(gotoNextHubble);
+
+        if(currentHubble.displayClose)
+            currentHubble.closeClicked.connect(reset);
+
+        currentHubble.skipClicked.connect(reset);
+
+        currentHubble.opacity = 1.0;
+        currentHubble.visible = true;
+    }
+
+    function gotoPreviousHubble()
+    {
+        closeCurrentHubble();
+
+        if(_hasPreviousHubble)
+        {
+            visibleHubbleId--;
+            updateCurrentHubble();
+        }
+    }
+
     function gotoNextHubble()
     {
         closeCurrentHubble();
@@ -78,22 +115,7 @@ Item
         if(_hasNextHubble)
         {
             visibleHubbleId++;
-
-            if(_hasNextHubble)
-            {
-                currentHubble.displayNext = true;
-                currentHubble.nextClicked.connect(gotoNextHubble);
-                currentHubble.skipClicked.connect(reset);
-            }
-            else
-            {
-                currentHubble.displayNext = false;
-                currentHubble.displayClose = true;
-                currentHubble.closeClicked.connect(reset);
-            }
-
-            currentHubble.opacity = 1.0;
-            currentHubble.visible = true;
+            updateCurrentHubble();
         }
     }
 
@@ -101,6 +123,7 @@ Item
     {
         if(currentHubble !== null)
         {
+            currentHubble.previousClicked.disconnect(gotoPreviousHubble);
             currentHubble.nextClicked.disconnect(gotoNextHubble);
             currentHubble.skipClicked.disconnect(closeCurrentHubble);
             currentHubble.opacity = 0.0;

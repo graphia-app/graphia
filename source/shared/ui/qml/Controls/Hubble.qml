@@ -20,6 +20,7 @@ Item
     property int alignment: Qt.AlignLeft | Qt.AlignTop
     property int edges: Qt.LeftEdge | Qt.TopEdge
 
+    property bool displayPrevious: false
     property bool displayNext: false
     property bool displayClose: false
     property bool tooltipMode: false
@@ -28,6 +29,7 @@ Item
     height: backRectangle.height
     width: backRectangle.width
 
+    signal previousClicked()
     signal nextClicked()
     signal closeClicked()
     signal skipClicked()
@@ -114,11 +116,11 @@ Item
         {
             Layout.preferredWidth: containerLayout.width
 
-            visible: displayNext || displayClose
+            visible: displayPrevious || displayNext || displayClose
 
             Text
             {
-                visible: displayNext
+                visible: !displayClose
                 text: qsTr("Skip")
                 font.underline: true
                 MouseArea
@@ -133,15 +135,20 @@ Item
 
             Button
             {
+                visible: displayPrevious
+                text: qsTr("Previous")
+                onClicked: { previousClicked(); }
+            }
+
+            Button
+            {
                 visible: displayNext
-                id: nextButton
                 text: qsTr("Next")
                 onClicked: { nextClicked(); }
             }
 
             Button
             {
-                id: closeButton
                 visible: displayClose
                 text: qsTr("Close")
                 onClicked: { closeClicked(); }
