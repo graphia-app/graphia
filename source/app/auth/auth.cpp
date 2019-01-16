@@ -530,7 +530,7 @@ void Auth::onReplyReceived()
                 emit messageChanged();
             }
         }
-        else
+        else if(expired())
         {
             auto message = QStringLiteral("<b>NETWORK ERROR:</b> %1").arg(_reply->errorString());
             if(_message != message)
