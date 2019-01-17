@@ -1,4 +1,5 @@
 add_definitions(-DZLIB_DLL)
+add_definitions(-DZLIB_INTERNAL)
 
 list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/adler32.c
@@ -16,4 +17,13 @@ list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/trees.c
     ${CMAKE_CURRENT_LIST_DIR}/uncompr.c
     ${CMAKE_CURRENT_LIST_DIR}/zutil.c
+)
+
+# minizip (used by xlsxio)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/contrib)
+
+list(APPEND SHARED_THIRDPARTY_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/contrib/minizip/ioapi.c
+    ${CMAKE_CURRENT_LIST_DIR}/contrib/minizip/unzip.c
+    ${CMAKE_CURRENT_LIST_DIR}/contrib/minizip/zip.c
 )

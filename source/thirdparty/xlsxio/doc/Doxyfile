@@ -1,0 +1,14 @@
+OUTPUT_DIRECTORY       = doc
+INPUT                  =
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+FILE_PATTERNS          = README.md xlsxio*.h
+EXCLUDE                = lib/xlsxio_read_sharedstrings.h
+USE_MDFILE_AS_MAINPAGE = README.md
+RECURSIVE              = YES
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+GENERATE_MAN           = YES
+SORT_MEMBER_DOCS       = NO
+EXCLUDE_SYMBOLS        = DLL_EXPORT_XLSXIO

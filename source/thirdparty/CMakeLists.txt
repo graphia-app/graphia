@@ -9,6 +9,7 @@ set(CMAKE_AUTORCC ON)
 
 include(${CMAKE_CURRENT_LIST_DIR}/breakpad/breakpad.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cryptopp/cryptopp.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/expat/expat.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qcustomplot/qcustomplot.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/matio/matio.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/hdf5/hdf5.cmake)
@@ -16,6 +17,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/qt-qml-models/QtQmlModels.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication/qtsingleapplication.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/SortFilterProxyModel/SortFilterProxyModel.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/zlib/zlib.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/xlsxio/xlsxio.cmake)
 
 if(MSVC)
     # Need to put the shared library next to the binary, on Windows

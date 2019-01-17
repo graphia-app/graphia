@@ -62,6 +62,8 @@ appendLicenseFromFile Crypto++ ../../../thirdparty/cryptopp/License.txt
 appendLicenseFromUrl csv-parser \
   https://raw.githubusercontent.com/AriaFallah/csv-parser/master/LICENSE
 
+appendLicenseFromFile expat ../../../thirdparty/expat/COPYING
+
 appendLicenseFromUrl HDF5 https://support.hdfgroup.org/ftp/HDF5/releases/COPYING
 
 appendLicenseFromUrl json https://raw.githubusercontent.com/nlohmann/json/develop/LICENSE.MIT
@@ -79,6 +81,8 @@ appendLicenseFromHeader utfcpp ../../../thirdparty/utfcpp/utf8.h \
 
 appendLicenseFromHeader valgrind ../../../thirdparty/valgrind/valgrind.h \
   "^.*Copyright.*" ".*DAMAGE\.$" 3
+
+appendLicenseFromFile "XLSX I/O" ../../../thirdparty/xlsxio/LICENSE.txt
 
 appendLicenseFromHeader zlib ../../../thirdparty/zlib/zlib.h \
   "^.*Copyright.*" ".*distribution\.$" 2
