@@ -60,10 +60,9 @@ class TextDelimitedTabularDataParser : public IParser
 
 private:
     TabularData _tabularData;
-    const IParser* _parent = nullptr;
 
 public:
-    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) : _parent(parent)
+    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr)
     {
         if(parent != nullptr)
             setProgressFn([parent](int percent) { parent->setProgress(percent); });

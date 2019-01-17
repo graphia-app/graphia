@@ -11,6 +11,7 @@
 #include "shared/utils/threadpool.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/xlsxtabulardataparser.h"
 
 #include <QRect>
 
@@ -446,6 +447,16 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
                 return;
 
             _dataPtr = std::make_shared<TabularData>(std::move(tsvFileParser.tabularData()));
+        }
+        else if(fileType == QLatin1String("CorrelationXLSX"))
+        {
+            XlsxTabularDataParser xlsxFileParser;
+            xlsxFileParser.setProgressFn([this](int progress) { setProgress(progress); });
+
+            if(!xlsxFileParser.parse(fileUrl))
+                return;
+
+            _dataPtr = std::make_shared<TabularData>(std::move(xlsxFileParser.tabularData()));
         }
 
         setProgress(-1);

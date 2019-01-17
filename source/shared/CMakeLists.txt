@@ -40,6 +40,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/matfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/matrixfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.h
@@ -89,6 +90,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp

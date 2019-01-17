@@ -2,13 +2,18 @@
 
 #include "correlationplotitem.h"
 #include "graphsizeestimateplotitem.h"
+
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
 #include "shared/utils/random.h"
 #include "shared/utils/string.h"
+
 #include "shared/attributes/iattribute.h"
+
 #include "shared/ui/visualisations/ielementvisual.h"
+
+#include "shared/loading/xlsxtabulardataparser.h"
 
 #include <json_helper.h>
 
@@ -368,7 +373,14 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    if(urlTypeName == QLatin1String("CorrelationCSV") || urlTypeName == QLatin1String("CorrelationTSV"))
+    std::vector<QString> urlTypes =
+    {
+        QStringLiteral("CorrelationCSV"),
+        QStringLiteral("CorrelationTSV"),
+        QStringLiteral("CorrelationXLSX")
+    };
+
+    if(u::contains(urlTypes, urlTypeName))
         return std::make_unique<CorrelationFileParser>(this, urlTypeName, _tabularData, _dataRect);
 
     return nullptr;
@@ -551,6 +563,7 @@ CorrelationPlugin::CorrelationPlugin()
 {
     registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
+    registerUrlType(QStringLiteral("CorrelationXLSX"), QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
     qmlRegisterType<GraphSizeEstimatePlotItem>("com.kajeka", 1, 0, "GraphSizeEstimatePlot");
     qmlRegisterType<TabularDataParser>("com.kajeka", 1, 0, "TabularDataParser");
@@ -559,6 +572,9 @@ CorrelationPlugin::CorrelationPlugin()
 
 static QString contentIdentityOf(const QUrl& url)
 {
+    if(XlsxTabularDataParser::canLoad(url))
+        return QStringLiteral("CorrelationXLSX");
+
     QString identity;
 
     std::ifstream file(url.toLocalFile().toStdString());
