@@ -63,7 +63,9 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
     size_t rows = row >= _rows ? row + 1 : _rows;
     auto newSize = columns * rows;
 
-    if(rows > 1 && columns > _columns)
+    // If the column count is increasing, jiggle all the existing rows around,
+    // taking into account the new row width
+    if(_rows > 0 && rows > 1 && columns > _columns)
     {
         _data.resize(newSize);
 
