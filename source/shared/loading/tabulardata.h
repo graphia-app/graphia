@@ -59,6 +59,7 @@ class TextDelimitedTabularDataParser : public IParser
     static_assert(Delimiter != '\"', "Delimiter cannot be a quotemark");
 
 private:
+    size_t _rowLimit = 0;
     TabularData _tabularData;
 
 public:
@@ -98,6 +99,9 @@ public:
 
             rowIndex++;
             columnIndex = 0;
+
+            if(_rowLimit > 0 && rowIndex > _rowLimit)
+                break;
         }
 
         // Free up any over-allocation
@@ -105,6 +109,8 @@ public:
 
         return true;
     }
+
+    void setRowLimit(size_t rowLimit) { _rowLimit = rowLimit; }
 
     TabularData& tabularData() { return _tabularData; }
 
