@@ -193,21 +193,21 @@ static bool parseMatrixFromTabularData(const TabularData& tabularData,
     return true;
 }
 
-template<const char Delimiter>
-class TextDelimitedMatrixParser : public IParser
+template<typename TabularDataParser>
+class AdjacencyMatrixParser : public IParser
 {
 private:
     UserNodeData* _userNodeData;
     UserEdgeData* _userEdgeData;
 
 public:
-    TextDelimitedMatrixParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+    AdjacencyMatrixParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
     {}
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override
     {
-        TextDelimitedTabularDataParser<Delimiter> parser(this);
+        TabularDataParser parser(this);
 
         if(!parser.parse(url, graphModel))
             return false;
@@ -218,10 +218,10 @@ public:
 
     static bool canLoad(const QUrl& url)
     {
-        if(!TextDelimitedTabularDataParser<Delimiter>::canLoad(url))
+        if(!TabularDataParser::canLoad(url))
             return false;
 
-        TextDelimitedTabularDataParser<Delimiter> parser;
+        TabularDataParser parser;
         parser.setRowLimit(5);
         parser.parse(url);
         const auto tabularData = std::move(parser.tabularData());
@@ -230,8 +230,8 @@ public:
     }
 };
 
-using MatrixFileTSVParser = TextDelimitedMatrixParser<'\t'>;
-using MatrixFileSSVParser = TextDelimitedMatrixParser<';'>;
-using MatrixFileCSVParser = TextDelimitedMatrixParser<','>;
+using AdjacencyMatrixTSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<'\t'>>;
+using AdjacencyMatrixSSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<';'>>;
+using AdjacencyMatrixCSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<','>>;
 
 #endif // MATRIXFILEPARSER_H

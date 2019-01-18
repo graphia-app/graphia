@@ -47,13 +47,13 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<GraphMLParser>(&_userNodeData);
 
     if(urlTypeName == QLatin1String("MatrixCSV"))
-        return std::make_unique<MatrixFileCSVParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("MatrixSSV"))
-        return std::make_unique<MatrixFileSSVParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<AdjacencyMatrixSSVFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("MatrixTSV"))
-        return std::make_unique<MatrixFileTSVParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
@@ -189,11 +189,11 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             result.push_back(urlType);
         else if(urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url))
             result.push_back(urlType);
-        else if(urlType == QStringLiteral("MatrixCSV") && MatrixFileCSVParser::canLoad(url))
+        else if(urlType == QStringLiteral("MatrixCSV") && AdjacencyMatrixCSVFileParser::canLoad(url))
             result.push_back(urlType);
-        else if(urlType == QStringLiteral("MatrixSSV") && MatrixFileSSVParser::canLoad(url))
+        else if(urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url))
             result.push_back(urlType);
-        else if(urlType == QStringLiteral("MatrixTSV") && MatrixFileTSVParser::canLoad(url))
+        else if(urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url))
             result.push_back(urlType);
         else if(urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url))
             result.push_back(urlType);
