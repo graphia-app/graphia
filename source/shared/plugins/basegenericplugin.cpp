@@ -55,6 +55,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QLatin1String("MatrixTSV"))
         return std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData);
 
+    if(urlTypeName == QLatin1String("MatrixXLSX"))
+        return std::make_unique<AdjacencyMatrixXLSXFileParser>(&_userNodeData, &_userEdgeData);
+
     if(urlTypeName == QLatin1String("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
     
@@ -167,6 +170,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv", "matrix"});
+    registerUrlType(QStringLiteral("MatrixXLSX"), QObject::tr("Adjacency Matrix Excel File"), QObject::tr("Adjacency Matrix Excel Files"), {"xlsx", "matrix"});
     registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
     registerUrlType(QStringLiteral("MatFile"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
     registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
@@ -194,6 +198,8 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
         else if(urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url))
             result.push_back(urlType);
         else if(urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url))
+            result.push_back(urlType);
+        else if(urlType == QStringLiteral("MatrixXLSX") && AdjacencyMatrixXLSXFileParser::canLoad(url))
             result.push_back(urlType);
         else if(urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url))
             result.push_back(urlType);

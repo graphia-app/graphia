@@ -2,7 +2,9 @@
 #define MATRIXFILEPARSER_H
 
 #include "shared/loading/iparser.h"
+#include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/tabulardata.h"
+
 #include "shared/plugins/userelementdata.h"
 
 static bool isMatrix(const TabularData& tabularData)
@@ -233,5 +235,7 @@ public:
 using AdjacencyMatrixTSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<'\t'>>;
 using AdjacencyMatrixSSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<';'>>;
 using AdjacencyMatrixCSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<','>>;
+
+using AdjacencyMatrixXLSXFileParser = AdjacencyMatrixParser<XlsxTabularDataParser>;
 
 #endif // MATRIXFILEPARSER_H

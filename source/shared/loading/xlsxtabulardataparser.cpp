@@ -15,6 +15,11 @@ static int cellCallback(size_t row, size_t column, const XLSXIOCHAR* value, void
 
     auto* xlsxTabularDataParser = reinterpret_cast<XlsxTabularDataParser*>(cbData);
 
+    auto rowLimit = xlsxTabularDataParser->rowLimit();
+
+    if(rowLimit > 0 && (row - 1) > rowLimit)
+        return 1;
+
     if(xlsxTabularDataParser->cancelled())
         return 1;
 
