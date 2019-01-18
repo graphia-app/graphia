@@ -22,6 +22,8 @@
 #include <mutex>
 #include <atomic>
 
+class CorrelationPluginInstance;
+
 DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
                 Raw,
                 Log,
@@ -103,24 +105,18 @@ signals:
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVector<double> rawData MEMBER _data)
+    Q_PROPERTY(CorrelationPluginInstance* model MEMBER _pluginInstance WRITE setPluginInstance)
     Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition
         WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
-    Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
-    Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
-    Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
-    Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
         WRITE setVisibleColumnAnnotationNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
 
-    Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
-    Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
@@ -194,14 +190,10 @@ private:
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
 
-    size_t _columnCount = 0;
-    size_t _rowCount = 0;
+    CorrelationPluginInstance* _pluginInstance = nullptr;
+
     int _elideLabelWidth = 120;
-    QStringList _labelNames;
-    QStringList _graphNames;
-    QVector<double> _data;
     QVector<int> _selectedRows;
-    QVector<QColor> _rowColors;
     bool _showColumnNames = true;
     bool _showGridLines = true;
     bool _showLegend = false;
@@ -218,8 +210,6 @@ private:
     bool _showAllColumns = false;
 
     std::vector<size_t> _sortMap;
-
-    std::vector<ColumnAnnotation> _columnAnnotations;
 
     std::set<QString> _visibleColumnAnnotationNames;
     bool _showColumnAnnotations = true;
@@ -255,16 +245,14 @@ private:
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
+    void setPluginInstance(CorrelationPluginInstance* pluginInstance);
+
     void setSelectedRows(const QVector<int>& selectedRows);
-    void setRowColors(const QVector<QColor>& rowColors);
-    void setLabelNames(const QStringList& labelNames);
     void setElideLabelWidth(int elideLabelWidth);
-    void setColumnCount(size_t columnCount);
     void setShowColumnNames(bool showColumnNames);
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
-    void setColumnAnnotations(const QVariantList& columnAnnotations);
 
     void updateSortMap();
     void setColumnSortType(int columnSortType);

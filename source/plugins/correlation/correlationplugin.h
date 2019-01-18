@@ -10,6 +10,7 @@
 
 #include "loading/correlationfileparser.h"
 
+#include "columnannotation.h"
 #include "correlationedge.h"
 #include "correlationdatarow.h"
 #include "correlationnodeattributetablemodel.h"
@@ -33,16 +34,8 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
-    Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
-    Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
 
-    Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
-    Q_PROPERTY(QVector<QColor> nodeColors READ nodeColors NOTIFY nodeColorsChanged)
-
-    Q_PROPERTY(QVariantList columnAnnotations MEMBER _columnAnnotations NOTIFY columnAnnotationsChanged)
-
-    Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
-    Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
+    Q_PROPERTY(QStringList columnAnnotationNames READ columnAnnotationNames NOTIFY columnAnnotationNamesChanged)
 
     Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
@@ -55,7 +48,7 @@ private:
     size_t _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
-    QVariantList _columnAnnotations;
+    std::vector<ColumnAnnotation> _columnAnnotations;
 
     UserNodeData _userNodeData;
     UserData _userColumnData;
@@ -96,10 +89,8 @@ private:
     double scaleValue(double value);
 
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
-    QStringList columnNames();
-    QStringList rowNames();
+    QStringList columnAnnotationNames() const;
     QVector<double> rawData();
-    QVector<QColor> nodeColors();
 
     void buildColumnAnnotations();
 
@@ -128,6 +119,14 @@ public:
     QStringList defaultTransforms() const override;
     QStringList defaultVisualisations() const override;
 
+    size_t numColumns() const;
+    double dataAt(int row, int column) const;
+    QString rowName(int row) const;
+    QString columnName(int column) const;
+    QColor nodeColorForRow(int row) const;
+
+    const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
+
     QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;
 
@@ -136,18 +135,8 @@ private slots:
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
-    void rowCountChanged();
-    void columnCountChanged();
-
-    void rawDataChanged();
-    void nodeColorsChanged();
-
     void columnAnnotationNamesChanged();
-    void columnAnnotationsChanged();
-
-    void columnNamesChanged();
-    void rowNamesChanged();
-
+    void nodeColorsChanged();
     void highlightedRowsChanged();
 };
 

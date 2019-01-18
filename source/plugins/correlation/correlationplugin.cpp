@@ -286,6 +286,17 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     graphModel()->setNodeName(nodeId, nodeName);
 }
 
+QStringList CorrelationPluginInstance::columnAnnotationNames() const
+{
+    QStringList list;
+    list.reserve(static_cast<int>(_columnAnnotations.size()));
+
+    for(const auto& columnAnnotation : _columnAnnotations)
+        list.append(columnAnnotation.name());
+
+    return list;
+}
+
 void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
@@ -296,45 +307,6 @@ void CorrelationPluginInstance::onLoadSuccess()
 QVector<double> CorrelationPluginInstance::rawData()
 {
     return QVector<double>::fromStdVector(_data);
-}
-
-QVector<QColor> CorrelationPluginInstance::nodeColors()
-{
-    QVector<QColor> colors;
-    colors.reserve(static_cast<int>(_numRows));
-
-    for(size_t i = 0; i < _numRows; i++)
-    {
-        auto nodeId = _userNodeData.elementIdForRowIndex(i);
-        auto color = !nodeId.isNull() ? graphModel()->nodeVisual(nodeId).outerColor() : QColor{};
-
-        colors.append(color);
-    }
-
-    return colors;
-}
-
-QStringList CorrelationPluginInstance::columnNames()
-{
-    QStringList list;
-    list.reserve(static_cast<int>(_dataColumnNames.size()));
-
-    for(const auto& name : _dataColumnNames)
-        list.append(name);
-
-    return list;
-}
-
-QStringList CorrelationPluginInstance::rowNames()
-{
-    QStringList list;
-    list.reserve(static_cast<int>(_numRows));
-
-    const auto& [name, firstColumn] = *_userNodeData.begin();
-    for(size_t i = 0; i < _numRows; i++)
-        list.append(firstColumn.get(i));
-
-    return list;
 }
 
 void CorrelationPluginInstance::buildColumnAnnotations()
@@ -353,12 +325,10 @@ void CorrelationPluginInstance::buildColumnAnnotations()
         if(numUniqueValues * 2 > numValues)
             continue;
 
-        QVariantMap columnAnnotation;
-        columnAnnotation.insert(QStringLiteral("name"), name);
-        columnAnnotation.insert(QStringLiteral("values"), values.toStringList());
-
-        _columnAnnotations.append(columnAnnotation);
+        _columnAnnotations.emplace_back(name, values.begin(), values.end());
     }
+
+    emit columnAnnotationNamesChanged();
 }
 
 const CorrelationDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
@@ -435,6 +405,37 @@ QStringList CorrelationPluginInstance::defaultVisualisations() const
         return { R"("MCL Cluster" "Colour")" };
 
     return {};
+}
+
+size_t CorrelationPluginInstance::numColumns() const
+{
+    return _numColumns;
+}
+
+double CorrelationPluginInstance::dataAt(int row, int column) const
+{
+    return _data.at((row * _numColumns) + column);
+}
+
+QString CorrelationPluginInstance::rowName(int row) const
+{
+    const auto& [name, firstColumn] = *_userNodeData.begin();
+    return firstColumn.get(row);
+}
+
+QString CorrelationPluginInstance::columnName(int column) const
+{
+    return _dataColumnNames.at(static_cast<size_t>(column));
+}
+
+QColor CorrelationPluginInstance::nodeColorForRow(int row) const
+{
+    auto nodeId = _userNodeData.elementIdForRowIndex(row);
+
+    if(nodeId.isNull())
+        return {};
+
+    return graphModel()->nodeVisual(nodeId).outerColor();
 }
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
@@ -564,6 +565,8 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     registerUrlType(QStringLiteral("CorrelationXLSX"), QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
+
+    qmlRegisterType<CorrelationPluginInstance>("com.kajeka", 1, 0, "CorrelationPluginInstance");
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
     qmlRegisterType<GraphSizeEstimatePlotItem>("com.kajeka", 1, 0, "GraphSizeEstimatePlot");
     qmlRegisterType<TabularDataParser>("com.kajeka", 1, 0, "TabularDataParser");

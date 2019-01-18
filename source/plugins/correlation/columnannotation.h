@@ -15,7 +15,10 @@ private:
     std::set<QString> _uniqueValues;
 
 public:
+    using Iterator = std::vector<QString>::const_iterator;
+
     ColumnAnnotation(QString name, std::vector<QString> values);
+    ColumnAnnotation(QString name, const Iterator& begin, const Iterator& end);
 
     const QString& name() const { return _name; }
     const std::set<QString> uniqueValues() const { return _uniqueValues; }

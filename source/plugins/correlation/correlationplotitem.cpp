@@ -1,5 +1,7 @@
 #include "correlationplotitem.h"
 
+#include "correlationplugin.h"
+
 #include "qcpcolumnannotations.h"
 
 #include "shared/utils/scope_exit.h"
@@ -424,11 +426,11 @@ void CorrelationPlotItem::updateTooltip()
         {
             auto index = static_cast<size_t>(key);
 
-            if(index < _columnCount)
+            if(index < _pluginInstance->numColumns())
             {
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
                 _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                    .arg(plottableUnderCursor->name(), _labelNames.at(mappedCol))
+                    .arg(plottableUnderCursor->name(), _pluginInstance->columnName(mappedCol))
                     .arg(_itemTracer->position->value()));
             }
         }
@@ -517,14 +519,12 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
 
-    for(size_t col = 0; col < _columnCount; col++)
+    for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
     {
         double runningTotal = 0.0;
         for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + _sortMap[col];
-            runningTotal += _data.at(static_cast<int>(index));
-        }
+            runningTotal += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+
         yDataAvg.append(runningTotal / _selectedRows.length());
 
         max = std::max(max, yDataAvg.back());
@@ -567,7 +567,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
     graph->setName(tr("Mean average of selection"));
 
-    QVector<double> xData(static_cast<int>(_columnCount));
+    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
     // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
@@ -602,21 +602,18 @@ void CorrelationPlotItem::populateMedianLinePlot()
     graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
     graph->setName(tr("Median average of selection"));
 
-    QVector<double> xData(static_cast<int>(_columnCount));
+    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
     // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
     QVector<double> rowsEntries(_selectedRows.length());
-    QVector<double> yDataAvg(static_cast<int>(_columnCount));
+    QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numColumns()));
 
-    for(int col = 0; col < static_cast<int>(_columnCount); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         rowsEntries.clear();
         for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + _sortMap[col];
-            rowsEntries.push_back(_data[static_cast<int>(index)]);
-        }
+            rowsEntries.push_back(_pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])));
 
         if(!_selectedRows.empty())
         {
@@ -661,7 +658,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    QVector<double> xData(static_cast<int>(_columnCount));
+    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
     // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
@@ -718,15 +715,12 @@ void CorrelationPlotItem::populateIQRPlot()
     QVector<double> outliers;
 
     // Calculate IQRs, outliers and ranges
-    for(int col = 0; col < static_cast<int>(_columnCount); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         rowsEntries.clear();
         outliers.clear();
         for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + _sortMap[col];
-            rowsEntries.push_back(_data[static_cast<int>(index)]);
-        }
+            rowsEntries.push_back(_pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])));
 
         if(!_selectedRows.empty())
         {
@@ -826,17 +820,17 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
         devBottom->setSelectable(QCP::SelectionType::stNone);
         devTop->setSelectable(QCP::SelectionType::stNone);
 
-        auto topErr = QVector<double>(static_cast<int>(_columnCount));
-        auto bottomErr = QVector<double>(static_cast<int>(_columnCount));
+        auto topErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
+        auto bottomErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
 
-        for(int i = 0; i < static_cast<int>(_columnCount); i++)
+        for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
         {
             topErr[i] = _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
             bottomErr[i] = _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
         }
 
         // xData is just the column indices
-        QVector<double> xData(static_cast<int>(_columnCount));
+        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
         std::iota(std::begin(xData), std::end(xData), 0);
 
         devTop->setData(xData, topErr);
@@ -846,7 +840,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    for(int i = 0; i < static_cast<int>(_columnCount); i++)
+    for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
     {
         minY = std::min(minY, _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
         maxY = std::max(maxY, _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
@@ -855,31 +849,37 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
     setYAxisRange(minY, maxY);
 }
 
+void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
+{
+    _pluginInstance = pluginInstance;
+
+    connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged,
+        this, &CorrelationPlotItem::rebuildPlot);
+}
+
 void CorrelationPlotItem::populateStdDevPlot()
 {
     if(_selectedRows.isEmpty())
         return;
 
-    QVector<double> stdDevs(static_cast<int>(_columnCount));
-    QVector<double> means(static_cast<int>(_columnCount));
+    QVector<double> stdDevs(static_cast<int>(_pluginInstance->numColumns()));
+    QVector<double> means(static_cast<int>(_pluginInstance->numColumns()));
 
-    for(int col = 0; col < static_cast<int>(_columnCount); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + _sortMap[col];
-            means[col] += _data.at(static_cast<int>(index));
-        }
+            means[col] += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+
         means[col] /= _selectedRows.count();
 
         double stdDev = 0.0;
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + _sortMap[col];
-            stdDev += (_data.at(static_cast<int>(index)) - means.at(col)) *
-                (_data.at(static_cast<int>(index)) - means.at(col));
+            auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            stdDev += (value * value);
         }
-        stdDev /= _columnCount;
+
+        stdDev /= _pluginInstance->numColumns();
         stdDev = std::sqrt(stdDev);
         stdDevs[col] = stdDev;
     }
@@ -892,26 +892,24 @@ void CorrelationPlotItem::populateStdErrorPlot()
     if(_selectedRows.isEmpty())
         return;
 
-    QVector<double> stdErrs(static_cast<int>(_columnCount));
-    QVector<double> means(static_cast<int>(_columnCount));
+    QVector<double> stdErrs(static_cast<int>(_pluginInstance->numColumns()));
+    QVector<double> means(static_cast<int>(_pluginInstance->numColumns()));
 
-    for(int col = 0; col < static_cast<int>(_columnCount); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + _sortMap[col];
-            means[col] += _data.at(static_cast<int>(index));
-        }
+            means[col] += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+
         means[col] /= _selectedRows.count();
 
         double stdErr = 0.0;
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + _sortMap[col];
-            stdErr += (_data.at(static_cast<int>(index)) - means.at(col)) *
-                (_data.at(static_cast<int>(index)) - means.at(col));
+            auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            stdErr += (value * value);
         }
-        stdErr /= _columnCount;
+
+        stdErr /= _pluginInstance->numColumns();
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
         stdErrs[col] = stdErr;
     }
@@ -925,7 +923,7 @@ void CorrelationPlotItem::populateLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     QVector<double> yData; yData.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
+    QVector<double> xData; xData.reserve(static_cast<int>(_pluginInstance->numColumns()));
 
     // Plot each row individually
     for(auto row : qAsConst(_selectedRows))
@@ -940,31 +938,29 @@ void CorrelationPlotItem::populateLinePlot()
             graph->setLayer(_lineGraphLayer);
 
             double rowSum = 0.0;
-            for(size_t col = 0; col < _columnCount; col++)
-            {
-                auto index = (row * _columnCount) + _sortMap[col];
-                rowSum += _data.at(static_cast<int>(index));
-            }
-            double rowMean = rowSum / _columnCount;
+            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
+                rowSum += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+
+            double rowMean = rowSum / _pluginInstance->numColumns();
 
             double variance = 0.0;
-            for(size_t col = 0; col < _columnCount; col++)
+            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
             {
-                auto index = (row * _columnCount) + _sortMap[col];
-                variance += (_data.at(static_cast<int>(index)) - rowMean) *
-                        (_data.at(static_cast<int>(index)) - rowMean);
+                auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - rowMean;
+                variance += (value * value);
             }
-            variance /= _columnCount;
+
+            variance /= _pluginInstance->numColumns();
             double stdDev = std::sqrt(variance);
             double pareto = std::sqrt(stdDev);
 
             yData.clear();
             xData.clear();
 
-            for(size_t col = 0; col < _columnCount; col++)
+            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
             {
-                auto index = (row * _columnCount) + _sortMap[col];
-                auto value = _data.at(static_cast<int>(index));
+                auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+
                 switch(static_cast<PlotScaleType>(_plotScaleType))
                 {
                 case PlotScaleType::Log:
@@ -1017,8 +1013,8 @@ void CorrelationPlotItem::populateLinePlot()
         graph->setVisible(true);
         graph->setSelectable(QCP::SelectionType::stWhole);
 
-        graph->setPen(_rowColors.at(row));
-        graph->setName(_graphNames[row]);
+        graph->setPen(_pluginInstance->nodeColorForRow(row));
+        graph->setName(_pluginInstance->rowName(row));
     }
 
     setYAxisRange(minY, maxY);
@@ -1026,7 +1022,9 @@ void CorrelationPlotItem::populateLinePlot()
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 {
-    if(_columnAnnotations.empty())
+    const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+
+    if(columnAnnotations.empty())
         return xAxis;
 
     if(!_showColumnAnnotations)
@@ -1065,7 +1063,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     auto* qcpColumnAnnotations = new QCPColumnAnnotations(caXAxis, caYAxis);
 
-    for(const auto& columnAnnotation : _columnAnnotations)
+    for(const auto& columnAnnotation : columnAnnotations)
     {
         auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
         bool visible = selected || _columnAnnotationSelectionModeEnabled;
@@ -1209,16 +1207,18 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 
     if(_columnAnnotationSelectionModeEnabled && axisRect == _columnAnnotationsAxisRect)
     {
+        const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+
         auto rectHeight = axisRect->bottom() - axisRect->top();
         auto y = pos.y() - axisRect->top();
 
         if(y < rectHeight)
         {
-            auto index = (y * _columnAnnotations.size()) / (rectHeight);
+            auto index = (y * columnAnnotations.size()) / (rectHeight);
 
-            if(index < _columnAnnotations.size())
+            if(index < columnAnnotations.size())
             {
-                const auto& columnAnnotation = _columnAnnotations.at(index);
+                const auto& columnAnnotation = columnAnnotations.at(index);
                 const auto& name = columnAnnotation.name();
 
                 if(u::contains(_visibleColumnAnnotationNames, name))
@@ -1350,9 +1350,9 @@ void CorrelationPlotItem::rebuildPlot()
 
     xAxis->setLabel(_xAxisLabel);
 
-    for(size_t x = 0U; x < _columnCount; x++)
+    for(size_t x = 0U; x < _pluginInstance->numColumns(); x++)
     {
-        auto labelName = elideLabel(_labelNames.at(static_cast<int>(_sortMap[x])));
+        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
         categoryTicker->addTick(x, labelName);
     }
 
@@ -1383,7 +1383,7 @@ void CorrelationPlotItem::rebuildPlot()
 void CorrelationPlotItem::computeXAxisRange()
 {
     auto min = 0.0;
-    auto max = static_cast<double>(_columnCount - 1);
+    auto max = static_cast<double>(_pluginInstance->numColumns() - 1);
     auto maxVisibleColumns = columnAxisWidth() / minColumnWidth();
     auto numHiddenColumns = max - maxVisibleColumns;
 
@@ -1479,21 +1479,11 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
     emit plotOptionsChanged();
     rebuildPlot();
 }
+
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
     _selectedRows = selectedRows;
     rebuildPlot();
-}
-
-void CorrelationPlotItem::setRowColors(const QVector<QColor>& rowColors)
-{
-    _rowColors = rowColors;
-    rebuildPlot();
-}
-
-void CorrelationPlotItem::setLabelNames(const QStringList& labelNames)
-{
-    _labelNames = labelNames;
 }
 
 void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
@@ -1503,11 +1493,6 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
 
     if(changed && _showColumnNames)
         rebuildPlot();
-}
-
-void CorrelationPlotItem::setColumnCount(size_t columnCount)
-{
-    _columnCount = columnCount;
 }
 
 void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
@@ -1536,23 +1521,11 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
-void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotations)
-{
-    for(const auto& columnAnnotation : columnAnnotations)
-    {
-        auto columnAnnotaionMap = columnAnnotation.toMap();
-        auto name = columnAnnotaionMap[QStringLiteral("name")].toString();
-        auto values = u::toQStringVector(columnAnnotaionMap[QStringLiteral("values")].toStringList());
-
-        _columnAnnotations.emplace_back(name, values);
-    }
-}
-
 void CorrelationPlotItem::updateSortMap()
 {
     _sortMap.clear();
 
-    for(size_t i = 0U; i < _columnCount; i++)
+    for(size_t i = 0U; i < _pluginInstance->numColumns(); i++)
         _sortMap.push_back(i);
 
     QCollator collator;
@@ -1570,8 +1543,8 @@ void CorrelationPlotItem::updateSortMap()
         [this, &collator](size_t a, size_t b)
         {
             return collator.compare(
-                _labelNames.at(static_cast<int>(a)),
-                _labelNames.at(static_cast<int>(b))) < 0;
+                _pluginInstance->columnName(static_cast<int>(a)),
+                _pluginInstance->columnName(static_cast<int>(b))) < 0;
         });
 
         break;
@@ -1579,14 +1552,16 @@ void CorrelationPlotItem::updateSortMap()
 
     case PlotColumnSortType::ColumnAnnotation:
     {
-        if(_columnAnnotations.empty() || _columnSortAnnotation.isEmpty())
+        const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+
+        if(columnAnnotations.empty() || _columnSortAnnotation.isEmpty())
             return;
 
-        auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
+        auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
             [this](const auto& v) { return v.name() == _columnSortAnnotation; });
 
-        Q_ASSERT(it != _columnAnnotations.end());
-        if(it == _columnAnnotations.end())
+        Q_ASSERT(it != columnAnnotations.end());
+        if(it == columnAnnotations.end())
             return;
 
         const auto& columnAnnotation = *it;
@@ -1691,17 +1666,19 @@ void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
 size_t CorrelationPlotItem::numVisibleColumnAnnotations() const
 {
     if(_columnAnnotationSelectionModeEnabled)
-        return _columnAnnotations.size();
+        return _pluginInstance->columnAnnotations().size();
 
     return _visibleColumnAnnotationNames.size();
 }
 
 QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 {
+    const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+
     std::vector<size_t> visibleRowIndices;
 
     size_t index = 0;
-    for(const auto& columnAnnotation : _columnAnnotations)
+    for(const auto& columnAnnotation : columnAnnotations)
     {
         if(_columnAnnotationSelectionModeEnabled ||
             u::contains(_visibleColumnAnnotationNames, columnAnnotation.name()))
@@ -1712,14 +1689,17 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
         index++;
     }
 
-    const auto& columnAnnotation = _columnAnnotations.at(visibleRowIndices.at(y));
+    const auto& columnAnnotation = columnAnnotations.at(visibleRowIndices.at(y));
 
     return columnAnnotation.valueAt(static_cast<int>(_sortMap[x]));
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction() const
 {
-    auto f = (columnAxisWidth() / (minColumnWidth() * _columnCount));
+    if(_pluginInstance == nullptr)
+        return 1.0;
+
+    auto f = (columnAxisWidth() / (minColumnWidth() * _pluginInstance->numColumns()));
 
     return std::min(f, 1.0);
 }
@@ -1734,7 +1714,7 @@ const double minColumnPixelWidth = 1.0;
 
 bool CorrelationPlotItem::isWide() const
 {
-    return (_columnCount * minColumnPixelWidth) > columnAxisWidth();
+    return (_pluginInstance->numColumns() * minColumnPixelWidth) > columnAxisWidth();
 }
 
 double CorrelationPlotItem::minColumnWidth() const
@@ -1743,7 +1723,7 @@ double CorrelationPlotItem::minColumnWidth() const
         return labelHeight();
 
     if(_showAllColumns)
-        return columnAxisWidth() / _columnCount;
+        return columnAxisWidth() / _pluginInstance->numColumns();
 
     return minColumnPixelWidth;
 }
@@ -1760,7 +1740,7 @@ double CorrelationPlotItem::columnAxisWidth() const
 double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
 {
     if(allAttributes)
-        return _columnAnnotations.size() * labelHeight();
+        return _pluginInstance->columnAnnotations().size() * labelHeight();
 
     return _visibleColumnAnnotationNames.size() * labelHeight();
 }

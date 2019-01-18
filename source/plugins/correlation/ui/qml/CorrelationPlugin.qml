@@ -73,7 +73,7 @@ PluginContent
         iconName: "format-justify-right"
 
         enabled: plot.canShowColumnAnnotationSelection &&
-            plugin.model.columnAnnotations.length > 0
+            plugin.model.columnAnnotationNames.length > 0
 
         checkable: true
         checked: plot.columnAnnotationSelectionModeEnabled
@@ -378,7 +378,7 @@ PluginContent
             showAllColumnsMenu.action = toggleShowAllColumns;
             showAllColumnsMenu.visible = Qt.binding(function() { return plot.isWide; });
 
-            if(plugin.model.columnAnnotations.length > 0)
+            if(plugin.model.columnAnnotationNames.length > 0)
                 menu.addItem("").action = selectColumnAnnotationsAction;
 
             menu.addItem("").action = toggleGridLines;
@@ -465,9 +465,9 @@ PluginContent
     {
         var list = [];
 
-        plugin.model.columnAnnotations.forEach(function(columnAnnotation)
+        plugin.model.columnAnnotationNames.forEach(function(columnAnnotationName)
         {
-            list.push(columnAnnotation.name);
+            list.push(columnAnnotationName);
         });
 
         return list;
@@ -502,7 +502,7 @@ PluginContent
         ToolButton { action: toggleColumnNamesAction }
         ToolButton
         {
-            visible: plugin.model.columnAnnotations.length > 0
+            visible: plugin.model.columnAnnotationNames.length > 0
             action: selectColumnAnnotationsAction
         }
         Item { Layout.fillWidth: true }
@@ -569,15 +569,8 @@ PluginContent
 
                 width: { return Math.min(splitView.width, Math.max(parent._minimumWidth, parent.width)); }
 
-                rowCount: plugin.model.rowCount
-                columnCount: plugin.model.columnCount
-                rawData: plugin.model.rawData
-                columnNames: plugin.model.columnNames
-                rowColors: plugin.model.nodeColors
-                rowNames: plugin.model.rowNames
+                model: plugin.model
                 selectedRows: tableView.selectedRows
-
-                columnAnnotations: plugin.model.columnAnnotations
 
                 onPlotOptionsChanged: { root.saveRequired = true; }
                 onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
