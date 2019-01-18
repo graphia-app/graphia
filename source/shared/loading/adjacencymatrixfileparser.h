@@ -1,5 +1,5 @@
-#ifndef MATRIXFILEPARSER_H
-#define MATRIXFILEPARSER_H
+#ifndef ADJACENCYMATRIXFILEPARSER_H
+#define ADJACENCYMATRIXFILEPARSER_H
 
 #include "shared/loading/iparser.h"
 #include "shared/loading/xlsxtabulardataparser.h"
@@ -238,4 +238,4 @@ using AdjacencyMatrixCSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularD
 
 using AdjacencyMatrixXLSXFileParser = AdjacencyMatrixParser<XlsxTabularDataParser>;
 
-#endif // MATRIXFILEPARSER_H
+#endif // ADJACENCYMATRIXFILEPARSER_H

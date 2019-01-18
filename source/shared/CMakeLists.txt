@@ -39,7 +39,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/matfileparser.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/matrixfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.h

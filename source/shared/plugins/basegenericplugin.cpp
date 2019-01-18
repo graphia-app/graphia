@@ -4,7 +4,7 @@
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
-#include "shared/loading/matrixfileparser.h"
+#include "shared/loading/adjacencymatrixfileparser.h"
 #include "shared/loading/matfileparser.h"
 #include "shared/loading/jsongraphparser.h"
 
