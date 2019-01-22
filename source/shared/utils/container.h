@@ -175,6 +175,33 @@ namespace u
 
     template<typename T>
     reversing_wrapper<T> reverse(T&& container) { return {container}; }
+
+    template<typename T, template<typename, typename...> typename C, typename... Args>
+    std::vector<size_t> rankingOf(const C<T, Args...>& container)
+    {
+        std::vector<size_t> ranking(container.size());
+
+        std::iota(std::begin(ranking), std::end(ranking), 0);
+        std::sort(std::begin(ranking), std::end(ranking),
+        [&container](size_t a, size_t b)
+        {
+            return container[a] < container[b];
+        });
+
+        // Give duplicates the same rank
+        auto it = ranking.begin();
+        while((it = std::adjacent_find(it, ranking.end(),
+            [&](size_t a, size_t b)
+            {
+                return a != b && container[a] == container[b];
+            })) != ranking.end())
+        {
+            *std::next(it) = *it;
+        }
+
+        return ranking;
+    }
+
 } // namespace u
 
 #endif // CONTAINER_H
