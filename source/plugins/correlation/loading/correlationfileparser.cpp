@@ -8,9 +8,6 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
-#include "shared/utils/iterator_range.h"
-#include "shared/utils/threadpool.h"
-
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
