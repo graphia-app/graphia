@@ -35,9 +35,6 @@ void CorrelationDataRow::update()
     _minValue = std::numeric_limits<double>::max();
     _maxValue = std::numeric_limits<double>::lowest();
 
-    _sortedData = _data;
-    std::sort(_sortedData.begin(), _sortedData.end());
-
     bool allPositive = true;
 
     for(auto value : *this)

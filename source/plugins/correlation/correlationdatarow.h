@@ -33,9 +33,6 @@ public:
     ConstDataIterator cbegin() const { return _data.cbegin(); }
     ConstDataIterator cend() const { return _data.cend(); }
 
-    DataIterator sortedBegin() { return _sortedData.begin(); }
-    DataIterator sortedEnd() { return _sortedData.end(); }
-
     int computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }
@@ -58,7 +55,6 @@ public:
 
 private:
     std::vector<double> _data;
-    std::vector<double> _sortedData;
 
     size_t _numColumns = 0;
 
