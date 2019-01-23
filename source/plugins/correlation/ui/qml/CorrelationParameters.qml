@@ -515,10 +515,9 @@ BaseParameterDialog
                     {
                         text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
                                    "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
-                                   "All values below the minimum correlation value will also be discarded and will not be included in the generated graph.<br>" +
+                                   "All values below the minimum correlation threshold are also discarded and will not used in generating the graph.<br>" +
                                    "<br>" +
-                                   "By default a transform is created which will create edges for all values above the initial correlation threshold. " +
-                                   "Is is not possible to create edges using values below the minimum correlation value.")
+                                   "By default a transform is added which will remove edges for all values below the initial correlation threshold.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
