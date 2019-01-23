@@ -1,5 +1,6 @@
 #include "correlationplugin.h"
 
+#include "correlation.h"
 #include "correlationplotitem.h"
 #include "graphsizeestimateplotitem.h"
 
@@ -225,7 +226,8 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
 
 std::vector<CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(double minimumThreshold, IParser& parser)
 {
-    return CorrelationFileParser::pearsonCorrelation(_dataRows, minimumThreshold, &parser);
+    PearsonCorrelation pearsonCorrelation(_dataRows);
+    return pearsonCorrelation.process(minimumThreshold, &parser);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)

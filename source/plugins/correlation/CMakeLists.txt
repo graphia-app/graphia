@@ -11,6 +11,7 @@ set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/columnannotation.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlation.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationedge.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.h
