@@ -109,7 +109,8 @@ WindowIcon on
 !define MUI_WELCOMEFINISHPAGE_BITMAP "installers\windows\welcomepage.bmp"
 !define MUI_WELCOMEPAGE_TEXT \
 "Setup will guide you through the installation of ${PRODUCT_NAME}.$\r$\n$\r$\n\
-${PRODUCT_NAME} is a tool for the visualisation and analysis of graphs.$\r$\n$\r$\n\
+${PRODUCT_NAME} is a tool for the visualisation and analysis of graphs, \
+brought to you by Kajeka.$\r$\n$\r$\n\
 Click Next to continue."
 !insertmacro MUI_PAGE_WELCOME
 
