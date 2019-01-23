@@ -30,9 +30,6 @@ public:
     ConstDataIterator begin() const { return _data.begin(); }
     ConstDataIterator end() const { return _data.end(); }
 
-    ConstDataIterator cbegin() const { return _data.cbegin(); }
-    ConstDataIterator cend() const { return _data.cend(); }
-
     int computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }

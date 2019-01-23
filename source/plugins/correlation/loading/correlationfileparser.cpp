@@ -255,7 +255,7 @@ std::vector<CorrelationEdge> CorrelationFileParser::pearsonCorrelation(
     if(rows.empty())
         return {};
 
-    size_t numColumns = std::distance(rows.front().cbegin(), rows.front().cend());
+    size_t numColumns = std::distance(rows.front().begin(), rows.front().end());
 
     if(parser != nullptr)
         parser->setProgress(-1);
@@ -277,7 +277,7 @@ std::vector<CorrelationEdge> CorrelationFileParser::pearsonCorrelation(
 
         for(const auto& rowB : make_iterator_range(rowAIt + 1, rows.end()))
         {
-            double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
+            double productSum = std::inner_product(rowA.begin(), rowA.end(), rowB.begin(), 0.0);
             double numerator = (numColumns * productSum) - (rowA.sum() * rowB.sum());
             double denominator = rowA.variability() * rowB.variability();
 
