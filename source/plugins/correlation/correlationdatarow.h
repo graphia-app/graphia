@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits>
 #include <iterator>
+#include <memory>
 
 class CorrelationDataRow
 {
@@ -17,12 +18,24 @@ public:
     CorrelationDataRow() = default;
     CorrelationDataRow(const CorrelationDataRow&) = default;
 
-    CorrelationDataRow(const std::vector<double>& data,
-        size_t row, size_t numColumns,
-        NodeId nodeId, int computeCost = 0);
+    template<typename T>
+    CorrelationDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
+        NodeId nodeId, int computeCost = 0) :
+        _nodeId(nodeId), _cost(computeCost)
+    {
+        auto cbegin = data.cbegin() + (row * numColumns);
+        auto cend = cbegin + numColumns;
+        _data = {cbegin, cend};
+        _numColumns = std::distance(begin(), end());
 
-    CorrelationDataRow(const std::vector<double>& dataRow,
-        NodeId nodeId, int computeCost = 0);
+        update();
+    }
+
+    template<typename T>
+    CorrelationDataRow(const std::vector<T>& dataRow,
+        NodeId nodeId, int computeCost = 0) :
+        CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
+    {}
 
     DataIterator begin() { return _data.begin(); }
     DataIterator end() { return _data.end(); }
@@ -50,6 +63,8 @@ public:
 
     void update();
 
+    const CorrelationDataRow* ranking() const;
+
 private:
     std::vector<double> _data;
 
@@ -71,6 +86,8 @@ private:
 
     double _minValue = std::numeric_limits<double>::max();
     double _maxValue = std::numeric_limits<double>::lowest();
+
+    mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
 };
 
 #endif // CORRELATIONDATAROW_H

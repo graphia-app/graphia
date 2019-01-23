@@ -1,24 +1,11 @@
 #include "correlationdatarow.h"
 
+#include "shared/utils/container.h"
+
 #include <algorithm>
 #include <cmath>
 
-CorrelationDataRow::CorrelationDataRow(const std::vector<double>& data, size_t row,
-    size_t numColumns, NodeId nodeId, int computeCost) :
-    _nodeId(nodeId), _cost(computeCost)
-{
-    auto cbegin = data.cbegin() + (row * numColumns);
-    auto cend = cbegin + numColumns;
-    _data = {cbegin, cend};
-    _numColumns = std::distance(begin(), end());
 
-    update();
-}
-
-CorrelationDataRow::CorrelationDataRow(const std::vector<double>& dataRow,
-    NodeId nodeId, int computeCost) :
-    CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
-{}
 
 void CorrelationDataRow::update()
 {
@@ -62,4 +49,13 @@ void CorrelationDataRow::update()
     _variance = sum / _numColumns;
     _stddev = std::sqrt(_variance);
     _coefVar = (allPositive && _mean > 0.0) ? _stddev / _mean : std::nan("1");
+}
+
+const CorrelationDataRow* CorrelationDataRow::ranking() const
+{
+    // Generate ranking row data on demand
+    if(_rankingRow == nullptr)
+        _rankingRow = std::make_shared<CorrelationDataRow>(u::rankingOf(_data), _nodeId, _cost);
+
+    return _rankingRow.get();
 }

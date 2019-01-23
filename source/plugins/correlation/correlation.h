@@ -6,18 +6,18 @@
 
 #include "shared/loading/iparser.h"
 #include "shared/utils/threadpool.h"
-#include "shared/utils/iterator_range.h"
 
 #include <vector>
 
+template<bool UseRanking>
 class Correlation
 {
 public:
-    Correlation(const std::vector<CorrelationDataRow>& rows) :
+    explicit Correlation(const std::vector<CorrelationDataRow>& rows) :
         _rows(&rows)
     {}
 
-    std::vector<CorrelationEdge> process(double minimumThreshold, IParser* parser = nullptr)
+    std::vector<CorrelationEdge> process(double minimumThreshold, IParser* parser = nullptr) const
     {
         if(_rows->empty())
             return {};
@@ -36,25 +36,34 @@ public:
         auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(_rows->begin(), _rows->end(),
         [&](std::vector<CorrelationDataRow>::const_iterator rowAIt)
         {
-            const auto& rowA = *rowAIt;
+            const auto* rowA = &(*rowAIt);
+
+            if constexpr(UseRanking)
+                rowA = rowA->ranking();
+
             std::vector<CorrelationEdge> edges;
 
             if(parser != nullptr && parser->cancelled())
                 return edges;
 
-            for(const auto& rowB : make_iterator_range(rowAIt + 1, _rows->end()))
+            for(auto rowBIt = rowAIt + 1; rowBIt != _rows->end(); ++rowBIt)
             {
-                double productSum = std::inner_product(rowA.begin(), rowA.end(), rowB.begin(), 0.0);
-                double numerator = (numColumns * productSum) - (rowA.sum() * rowB.sum());
-                double denominator = rowA.variability() * rowB.variability();
+                const auto* rowB = &(*rowBIt);
+
+                if constexpr(UseRanking)
+                    rowB = rowB->ranking();
+
+                double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
+                double numerator = (numColumns * productSum) - (rowA->sum() * rowB->sum());
+                double denominator = rowA->variability() * rowB->variability();
 
                 double r = numerator / denominator;
 
                 if(std::isfinite(r) && r >= minimumThreshold)
-                    edges.push_back({rowA.nodeId(), rowB.nodeId(), r});
+                    edges.push_back({rowA->nodeId(), rowB->nodeId(), r});
             }
 
-            cost += rowA.computeCostHint();
+            cost += rowA->computeCostHint();
 
             if(parser != nullptr)
                 parser->setProgress((cost * 100) / totalCost);
@@ -79,6 +88,7 @@ private:
     const std::vector<CorrelationDataRow>* _rows = nullptr;
 };
 
-using PearsonCorrelation = Correlation;
+using PearsonCorrelation = Correlation<false>;
+using SpearmanRankCorrelation = Correlation<true>;
 
 #endif // CORRELATION_H
