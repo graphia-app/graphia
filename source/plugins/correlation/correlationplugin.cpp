@@ -405,7 +405,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     if(_clusteringType == ClusteringType::MCL)
     {
         //FIXME The default value for Granularity is defined in mcltransform.h, which is inaccessible to plugins
-        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = 2.0)"));
+        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = default)"));
     }
 
     return defaultTransforms;

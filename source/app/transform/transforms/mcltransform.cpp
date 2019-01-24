@@ -261,7 +261,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
 
 void MCLTransform::apply(TransformedGraph& target) const
 {
-    auto granularity = boost::get<double>(
+    auto granularity = std::get<double>(
                 config().parameterByName(QStringLiteral("Granularity"))->_value);
 
     if(_debugIteration)

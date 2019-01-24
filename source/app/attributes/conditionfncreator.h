@@ -13,7 +13,6 @@
 #include "transform/graphtransformconfigparser.h"
 #include "attribute.h"
 
-#include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 
 #include <algorithm>
@@ -44,7 +43,7 @@ private:
                 QString operator()(const QString& v) const  { return v; }
             };
 
-            return boost::apply_visitor(Visitor(), _terminalValue);
+            return std::visit(Visitor(), _terminalValue);
         }
 
         double toDouble() const
@@ -56,12 +55,12 @@ private:
                 double operator()(const QString& v) const  { return v.toDouble(); }
             };
 
-            return boost::apply_visitor(Visitor(), _terminalValue);
+            return std::visit(Visitor(), _terminalValue);
         }
 
         bool isSameTypeAs(const TerminalValueWrapper& other) const
         {
-            return _terminalValue.which() == other._terminalValue.which();
+            return _terminalValue.index() == other._terminalValue.index();
         }
 
         ValueType type() const
@@ -73,7 +72,7 @@ private:
                 ValueType operator()(const QString&) const  { return ValueType::String; }
             };
 
-            return boost::apply_visitor(Visitor(), _terminalValue);
+            return std::visit(Visitor(), _terminalValue);
         }
 
         auto operator*() const
@@ -237,9 +236,9 @@ private:
             {
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>,  boost::get<double>(*_rhs));
-                case ValueType::Int:    return comparisonFn(_lhs, &Attribute::valueOf<int, E>,     boost::get<int>(*_rhs));
-                case ValueType::String: return comparisonFn(_lhs, &Attribute::valueOf<QString, E>, boost::get<QString>(*_rhs));
+                case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>,  std::get<double>(*_rhs));
+                case ValueType::Int:    return comparisonFn(_lhs, &Attribute::valueOf<int, E>,     std::get<int>(*_rhs));
+                case ValueType::String: return comparisonFn(_lhs, &Attribute::valueOf<QString, E>, std::get<QString>(*_rhs));
                 default: return nullptr;
                 }
             }
@@ -296,8 +295,8 @@ private:
             {
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(_lhs, boost::get<double>(*_rhs));
-                case ValueType::Int:    return comparisonFn(_lhs, boost::get<int>(*_rhs));
+                case ValueType::Float:  return comparisonFn(_lhs, std::get<double>(*_rhs));
+                case ValueType::Int:    return comparisonFn(_lhs, std::get<int>(*_rhs));
                 default: return nullptr;
                 }
             }
@@ -451,7 +450,7 @@ private:
             return nullptr;
         }
 
-        using ResolvedTerminalValue = boost::variant<double, int, QString, Attribute>;
+        using ResolvedTerminalValue = std::variant<double, int, QString, Attribute>;
 
         ResolvedTerminalValue resolvedTerminalValue(const GraphTransformConfig::TerminalValue& terminalValue) const
         {
@@ -478,12 +477,12 @@ private:
                 }
             };
 
-            return boost::apply_visitor(Visitor(_graphModel), terminalValue);
+            return std::visit(Visitor(_graphModel), terminalValue);
         }
 
         Attribute attributeFromValue(const ResolvedTerminalValue& resolvedTerminalValue) const
         {
-            auto attribute = boost::get<Attribute>(&resolvedTerminalValue);
+            auto attribute = std::get_if<Attribute>(&resolvedTerminalValue);
 
             if(attribute != nullptr)
                 return *attribute;
@@ -511,12 +510,12 @@ private:
                 }
             };
 
-            return boost::apply_visitor(Visitor(_graphModel), resolvedTerminalValue);
+            return std::visit(Visitor(_graphModel), resolvedTerminalValue);
         }
 
         bool isUnknownAttribute(const ResolvedTerminalValue& resolvedTerminalValue) const
         {
-            const Attribute* attribute = boost::get<Attribute>(&resolvedTerminalValue);
+            const Attribute* attribute = std::get_if<Attribute>(&resolvedTerminalValue);
 
             return attribute != nullptr && !attribute->isValid();
         }
@@ -555,28 +554,28 @@ private:
             {
                 // Both sides are attributes
                 AttributesOpVistor<E> visitor(lhsAttribute, rhsAttribute);
-                return boost::apply_visitor(visitor, terminalCondition._op);
+                return std::visit(visitor, terminalCondition._op);
             }
 
             if(!lhsAttribute.isValid() && !rhsAttribute.isValid())
             {
                 // Neither side is an attribute
                 ValuesOpVistor<E> visitor(terminalCondition._lhs, terminalCondition._rhs);
-                return boost::apply_visitor(visitor, terminalCondition._op);
+                return std::visit(visitor, terminalCondition._op);
             }
 
             if(lhsAttribute.isValid())
             {
                 // Left hand side is an attribute
                 AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
-                return boost::apply_visitor(visitor, terminalCondition._op);
+                return std::visit(visitor, terminalCondition._op);
             }
 
             if(rhsAttribute.isValid())
             {
                 // Right hand side is an attribute
                 AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);
-                return boost::apply_visitor(visitor, terminalCondition._op);
+                return std::visit(visitor, terminalCondition._op);
             }
 
             return nullptr;
@@ -668,7 +667,7 @@ public:
     {
         GraphTransformConfig::TerminalOp terminalOp = op;
         AttributeValueOpVistor<NodeId> visitor(attribute, TerminalValueWrapper(value), false);
-        return boost::apply_visitor(visitor, terminalOp);
+        return std::visit(visitor, terminalOp);
     }
 
     template<typename Op, typename Value>
@@ -676,7 +675,7 @@ public:
     {
         GraphTransformConfig::TerminalOp terminalOp = op;
         AttributeValueOpVistor<EdgeId> visitor(attribute, TerminalValueWrapper(value), false);
-        return boost::apply_visitor(visitor, terminalOp);
+        return std::visit(visitor, terminalOp);
     }
 
     template<typename Op, typename Value>
@@ -684,7 +683,7 @@ public:
     {
         GraphTransformConfig::TerminalOp terminalOp = op;
         AttributeValueOpVistor<const IGraphComponent&> visitor(attribute, TerminalValueWrapper(value), false);
-        return boost::apply_visitor(visitor, terminalOp);
+        return std::visit(visitor, terminalOp);
     }
 
     template<typename E, typename Op, typename Value>

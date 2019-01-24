@@ -5,13 +5,11 @@
 #include <QVariantMap>
 
 #include <vector>
-
-#include <boost/variant.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
+#include <variant>
 
 struct VisualisationConfig
 {
-    using ParameterValue = boost::variant<double, QString>;
+    using ParameterValue = std::variant<double, QString>;
     struct Parameter
     {
         QString _name;

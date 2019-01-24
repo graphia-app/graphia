@@ -22,7 +22,7 @@ void KNNTransform::apply(TransformedGraph& target) const
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
-    auto k = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
+    auto k = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
 
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));

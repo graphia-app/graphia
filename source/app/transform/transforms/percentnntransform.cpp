@@ -20,8 +20,8 @@ void PercentNNTransform::apply(TransformedGraph& target) const
         return;
     }
 
-    auto percent = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Percent"))->_value));
-    auto minimum = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
+    auto percent = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Percent"))->_value));
+    auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 

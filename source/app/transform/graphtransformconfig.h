@@ -8,14 +8,15 @@
 #include <QVariantMap>
 
 #include <vector>
+#include <variant>
 
 #include <boost/variant.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
 
 struct GraphTransformConfig
 {
-    using TerminalValue = boost::variant<double, int, QString>;
-    using TerminalOp = boost::variant<ConditionFnOp::Equality, ConditionFnOp::Numerical, ConditionFnOp::String>;
+    using TerminalValue = std::variant<double, int, QString>;
+    using TerminalOp = std::variant<ConditionFnOp::Equality, ConditionFnOp::Numerical, ConditionFnOp::String>;
 
     struct TerminalCondition
     {
@@ -54,7 +55,7 @@ struct GraphTransformConfig
         QString opAsString() const;
     };
 
-    using ParameterValue = boost::variant<double, int, QString>;
+    using ParameterValue = std::variant<double, int, QString>;
     struct Parameter
     {
         QString _name;

@@ -30,7 +30,7 @@ QString GraphTransformConfig::TerminalCondition::opAsString() const
         QString operator()(ConditionFnOp::String v) const    { return GraphTransformConfigParser::opToString(v); }
     };
 
-    return boost::apply_visitor(Visitor(), _op);
+    return std::visit(Visitor(), _op);
 }
 
 QString GraphTransformConfig::UnaryCondition::opAsString() const
@@ -96,7 +96,7 @@ QString GraphTransformConfig::Parameter::valueAsString() const
         QString operator()(const QString& s) const { return s; }
     };
 
-    return boost::apply_visitor(Visitor(), _value);
+    return std::visit(Visitor(), _value);
 }
 
 bool GraphTransformConfig::hasCondition() const
@@ -125,7 +125,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
                 QString operator()(const QString& v) const  { return v; }
             };
 
-            return boost::apply_visitor(Visitor(), terminalValue);
+            return std::visit(Visitor(), terminalValue);
         }
 
         QVariantMap operator()(GraphTransformConfig::NoCondition) const { return {}; }
@@ -216,7 +216,7 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 
         QString attributeFromTerminalValue(const TerminalValue& terminalValue) const
         {
-            const QString* s = boost::get<QString>(&terminalValue);
+            const auto* s = std::get_if<QString>(&terminalValue);
             if(s != nullptr && GraphTransformConfigParser::isAttributeName(*s))
                 return GraphTransformConfigParser::attributeNameFor(*s);
 

@@ -31,7 +31,7 @@ QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
         }
     };
 
-    return boost::apply_visitor(Visitor(addQuotes), _value);
+    return std::visit(Visitor(addQuotes), _value);
 }
 
 QVariantMap VisualisationConfig::asVariantMap() const

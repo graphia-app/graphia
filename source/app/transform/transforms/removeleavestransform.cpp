@@ -43,7 +43,7 @@ void RemoveLeavesTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Leaf Removal"));
 
-    auto limit = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
+    auto limit = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
     removeLeaves(target, limit);
 }
 

@@ -15,6 +15,7 @@
 #include <QTextDocumentFragment>
 
 #include <fstream>
+#include <variant>
 
 // http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf
 
@@ -23,7 +24,7 @@ namespace SpiritGmlParser
 struct KeyValue;
 using List = std::vector<boost::recursive_wrapper<KeyValue>>;
 
-using Value = boost::variant<double, int, QString, List>;
+using Value = std::variant<double, int, QString, List>;
 struct KeyValue
 {
     QString _key;
@@ -111,7 +112,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
         }
     };
 
-    return boost::apply_visitor(Visitor(attribute._key), attribute._value);
+    return std::visit(Visitor(attribute._key), attribute._value);
 }
 
 bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
@@ -125,7 +126,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
         });
 
         if(keyValue != list.end())
-            return boost::get<int>(&keyValue->get()._value);
+            return std::get_if<int>(&keyValue->get()._value);
 
         return nullptr;
     };
@@ -152,7 +153,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
             if(keyValue._key == QStringLiteral("label"))
             {
                 // If there is a label attribute, use it as the node name
-                const auto* label = boost::get<QString>(&keyValue._value);
+                const auto* label = std::get_if<QString>(&keyValue._value);
                 if(label != nullptr)
                     nodeName = *label;
             }
@@ -213,7 +214,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
         if(key == QStringLiteral("graph"))
         {
-            const auto* graph = boost::get<List>(&keyValue.get()._value);
+            const auto* graph = std::get_if<List>(&keyValue.get()._value);
 
             if(graph == nullptr)
                 return false;
@@ -224,7 +225,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
                 parser.setProgress(static_cast<int>((i++ * 100) / graph->size()));
 
                 const auto& type = element.get()._key;
-                const auto* value = boost::get<List>(&element.get()._value);
+                const auto* value = std::get_if<List>(&element.get()._value);
 
                 if(value == nullptr)
                     continue;
