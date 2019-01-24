@@ -396,7 +396,10 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
         defaultTransforms.append(QStringLiteral(R"("k-NN" using $"Pearson Correlation Value" with "k" = 5 "Rank Order" = "Descending")"));
 
     if(_clusteringType == ClusteringType::MCL)
-        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = 2.2)"));
+    {
+        //FIXME The default value for Granularity is defined in mcltransform.h, which is inaccessible to plugins
+        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = 2.0)"));
+    }
 
     return defaultTransforms;
 }
