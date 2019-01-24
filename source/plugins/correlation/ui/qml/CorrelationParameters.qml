@@ -1267,6 +1267,7 @@ BaseParameterDialog
 
         parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
             initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
+            correlationType: CorrelationType.Pearson,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.None };
 

@@ -4,36 +4,57 @@
 #include "correlationdatarow.h"
 #include "correlationedge.h"
 
+#include "shared/utils/qmlenum.h"
 #include "shared/loading/iparser.h"
 #include "shared/utils/threadpool.h"
 
 #include <vector>
+#include <cmath>
 
-template<bool UseRanking>
+#include <QObject>
+#include <QString>
+
+DEFINE_QML_ENUM(
+    Q_GADGET, CorrelationType,
+    Pearson,
+    SpearmanRank);
+
 class Correlation
 {
 public:
-    explicit Correlation(const std::vector<CorrelationDataRow>& rows) :
-        _rows(&rows)
-    {}
+    virtual ~Correlation() = default;
 
-    std::vector<CorrelationEdge> process(double minimumThreshold, IParser* parser = nullptr) const
+    virtual std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
+        double minimumThreshold, IParser* parser = nullptr) const = 0;
+
+    virtual QString attributeName() const = 0;
+    virtual QString attributeDescription() const = 0;
+
+    static std::unique_ptr<Correlation> create(CorrelationType correlationType);
+};
+
+template<bool UseRanking>
+class CovarianceCorrelation : public Correlation
+{
+public:
+    std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
+        double minimumThreshold, IParser* parser = nullptr) const override
     {
-        if(_rows->empty())
+        if(rows.empty())
             return {};
 
-        size_t numColumns = std::distance(_rows->front().begin(), _rows->front().end());
+        size_t numColumns = std::distance(rows.front().begin(), rows.front().end());
 
         if(parser != nullptr)
             parser->setProgress(-1);
 
         uint64_t totalCost = 0;
-        for(const auto& row : *_rows)
+        for(const auto& row : rows)
             totalCost += row.computeCostHint();
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(_rows->begin(), _rows->end(),
+        auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
         [&](std::vector<CorrelationDataRow>::const_iterator rowAIt)
         {
             const auto* rowA = &(*rowAIt);
@@ -46,7 +67,7 @@ public:
             if(parser != nullptr && parser->cancelled())
                 return edges;
 
-            for(auto rowBIt = rowAIt + 1; rowBIt != _rows->end(); ++rowBIt)
+            for(auto rowBIt = rowAIt + 1; rowBIt != rows.end(); ++rowBIt)
             {
                 const auto* rowB = &(*rowBIt);
 
@@ -83,12 +104,38 @@ public:
 
         return edges;
     }
-
-private:
-    const std::vector<CorrelationDataRow>* _rows = nullptr;
 };
 
-using PearsonCorrelation = Correlation<false>;
-using SpearmanRankCorrelation = Correlation<true>;
+class PearsonCorrelation : public CovarianceCorrelation<false>
+{
+public:
+    QString attributeName() const override
+    {
+        return QObject::tr("Pearson Correlation Value");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
+            "Pearson Correlation Coefficient</a> is an indication of "
+            "the linear relationship between two variables.");
+    }
+};
+
+class SpearmanRankCorrelation : public CovarianceCorrelation<true>
+{
+public:
+    QString attributeName() const override
+    {
+        return QObject::tr("Spearman Rank Correlation Value");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr(R"(The <a href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">)"
+            "Spearman Rank Correlation Coefficient</a> is an indication of "
+            "the monotomic relationship between two variables.");
+    }
+};
 
 #endif // CORRELATION_H

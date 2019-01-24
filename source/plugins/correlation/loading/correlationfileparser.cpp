@@ -1,7 +1,6 @@
 #include "correlationfileparser.h"
 
 #include "correlationplugin.h"
-#include "correlation.h"
 #include "minmaxnormaliser.h"
 #include "quantilenormaliser.h"
 
@@ -286,13 +285,14 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
         return false;
 
     setProgress(-1);
-    _plugin->createAttributes();
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), *this);
+    graphModel->mutableGraph().setPhase(QObject::tr("Correlation"));
+    auto edges = _plugin->correlation(_plugin->minimumCorrelation(), *this);
 
     if(cancelled())
         return false;
+
+    _plugin->createAttributes();
 
     graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
     if(!_plugin->createEdges(edges, *this))
@@ -499,8 +499,9 @@ void TabularDataParser::estimateGraphSize()
         auto percentSq = percent * percent;
 
         auto dataRows = sampledDataRows(numSampleRows);
-        PearsonCorrelation pearsonCorrelation(dataRows);
-        auto sampleEdges = pearsonCorrelation.process(_minimumCorrelation);
+
+        auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+        auto sampleEdges = correlation->process(dataRows, _minimumCorrelation);
 
         if(sampleEdges.empty())
             return QVariantMap();

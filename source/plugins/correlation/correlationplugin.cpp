@@ -43,15 +43,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     else
         _nodeAttributeTableModel.initialise(document, &_userNodeData, &_dataColumnNames, &_data);
 
-
-    _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
-
-    graphModel->createAttribute(tr("Pearson Correlation Value"))
-            .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
-                               "Pearson Correlation Coefficient</a> is an indication of "
-                               "the linear relationship between two variables."));
+    _correlationValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
@@ -203,6 +195,12 @@ void CorrelationPluginInstance::createAttributes()
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as the standard deviation "
                                "divided by the mean."));
+
+    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+    graphModel()->createAttribute(correlation->attributeName())
+            .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(correlation->attributeDescription());
 }
 
 void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
@@ -224,10 +222,10 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
     emit highlightedRowsChanged();
 }
 
-std::vector<CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(double minimumThreshold, IParser& parser)
+std::vector<CorrelationEdge> CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
 {
-    PearsonCorrelation pearsonCorrelation(_dataRows);
-    return pearsonCorrelation.process(minimumThreshold, &parser);
+    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+    return correlation->process(_dataRows, minimumThreshold, &parser);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)
@@ -242,7 +240,7 @@ bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& 
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
-        _pearsonValues->set(edgeId, edge._r);
+        _correlationValues->set(edgeId, edge._r);
     }
 
     return true;
@@ -366,6 +364,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _initialCorrelationThreshold = value.toDouble();
     else if(name == QLatin1String("transpose"))
         _transpose = (value == QLatin1String("true"));
+    else if(name == QLatin1String("correlationType"))
+        _correlationType = static_cast<CorrelationType>(value.toInt());
     else if(name == QLatin1String("scaling"))
         _scalingType = static_cast<ScalingType>(value.toInt());
     else if(name == QLatin1String("normalise"))
@@ -386,14 +386,21 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
 
 QStringList CorrelationPluginInstance::defaultTransforms() const
 {
+    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+
     QStringList defaultTransforms =
     {
-        QString(R"("Remove Edges" where $"Pearson Correlation Value" < %1)").arg(_initialCorrelationThreshold),
+        QString(R"("Remove Edges" where $"%1" < %2)")
+            .arg(correlation->attributeName())
+            .arg(_initialCorrelationThreshold),
         R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
 
     if(_edgeReductionType == EdgeReductionType::KNN)
-        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"Pearson Correlation Value" with "k" = 5 "Rank Order" = "Descending")"));
+    {
+        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1" with "k" = 5 "Rank Order" = "Descending")")
+            .arg(correlation->attributeName()));
+    }
 
     if(_clusteringType == ClusteringType::MCL)
     {
@@ -456,11 +463,12 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     graph.setPhase(QObject::tr("Data"));
     jsonObject["data"] = jsonArrayFrom(_data, &progressable);
 
-    graph.setPhase(QObject::tr("Pearson Values"));
-    jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
+    graph.setPhase(QObject::tr("Correlation Values"));
+    jsonObject["correlationValues"] = jsonArrayFrom(*_correlationValues);
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
+    jsonObject["correlationType"] = static_cast<int>(_correlationType);
     jsonObject["scaling"] = static_cast<int>(_scalingType);
     jsonObject["normalisation"] = static_cast<int>(_normaliseType);
     jsonObject["missingDataType"] = static_cast<int>(_missingDataType);
@@ -472,7 +480,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
                                      IParser& parser)
 {
-    if(dataVersion != plugin()->dataVersion())
+    if(dataVersion > plugin()->dataVersion())
         return false;
 
     json jsonObject = parseJsonFrom(data, &parser);
@@ -531,20 +539,21 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     parser.setProgress(-1);
 
-    createAttributes();
+    const char* correlationValuesKey =
+        dataVersion >= 2 ? "correlationValues" : "pearsonValues";
 
-    if(!u::contains(jsonObject, "pearsonValues"))
+    if(!u::contains(jsonObject, correlationValuesKey))
         return false;
 
-    const auto& jsonPearsonValues = jsonObject["pearsonValues"];
-    graph.setPhase(QObject::tr("Pearson Values"));
+    const auto& jsonCorrelationValues = jsonObject[correlationValuesKey];
+    graph.setPhase(QObject::tr("Correlation Values"));
     i = 0;
-    for(const auto& pearsonValue : jsonPearsonValues)
+    for(const auto& correlationValue : jsonCorrelationValues)
     {
         if(graph.containsEdgeId(i))
-            _pearsonValues->set(i, pearsonValue);
+            _correlationValues->set(i, correlationValue);
 
-        parser.setProgress(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
     }
 
     parser.setProgress(-1);
@@ -561,6 +570,16 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _normaliseType = static_cast<NormaliseType>(jsonObject["normalisation"]);
     _missingDataType = static_cast<MissingDataType>(jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
+
+    if(dataVersion >= 2)
+    {
+        if(!u::contains(jsonObject, "correlationType"))
+            return false;
+
+        _correlationType = static_cast<CorrelationType>(jsonObject["correlationType"]);
+    }
+
+    createAttributes();
 
     return true;
 }

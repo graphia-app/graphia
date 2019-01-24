@@ -7,6 +7,7 @@
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/cancellable.h"
 
+#include "correlation.h"
 #include "correlationedge.h"
 #include "correlationdatarow.h"
 #include "datarecttablemodel.h"
@@ -43,10 +44,6 @@ DEFINE_QML_ENUM(Q_GADGET, ClusteringType,
 DEFINE_QML_ENUM(Q_GADGET, EdgeReductionType,
                 None,
                 KNN);
-
-DEFINE_QML_ENUM(Q_GADGET, CorrelationType,
-                Pearson,
-                Spearman);
 
 class CorrelationPluginInstance;
 
@@ -94,6 +91,7 @@ class TabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(bool complete MEMBER _complete NOTIFY completeChanged)
 
     Q_PROPERTY(double minimumCorrelation MEMBER _minimumCorrelation NOTIFY parameterChanged)
+    Q_PROPERTY(int correlationType MEMBER _correlationType NOTIFY parameterChanged)
     Q_PROPERTY(int scalingType MEMBER _scalingType NOTIFY parameterChanged)
     Q_PROPERTY(int normaliseType MEMBER _normaliseType NOTIFY parameterChanged)
     Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
@@ -115,6 +113,7 @@ private:
     bool _complete = false;
 
     double _minimumCorrelation = 0.0;
+    int _correlationType = static_cast<int>(CorrelationType::Pearson);
     int _scalingType = static_cast<int>(ScalingType::None);
     int _normaliseType = static_cast<int>(NormaliseType::None);
     int _missingDataType = static_cast<int>(MissingDataType::None);

@@ -59,12 +59,13 @@ private:
 
     std::vector<CorrelationDataRow> _dataRows;
 
-    std::unique_ptr<EdgeArray<double>> _pearsonValues;
+    std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
     double _initialCorrelationThreshold = 0.85;
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
+    CorrelationType _correlationType = CorrelationType::Pearson;
     ScalingType _scalingType = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
@@ -107,7 +108,7 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    std::vector<CorrelationEdge> pearsonCorrelation(double minimumThreshold, IParser& parser);
+    std::vector<CorrelationEdge> correlation(double minimumThreshold, IParser& parser);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
@@ -151,13 +152,13 @@ public:
     QString name() const override { return QStringLiteral("Correlation"); }
     QString description() const override
     {
-        return tr("Calculate pearson correlations between rows of data, and create "
-                  "a graph based on the resultant matrix.");
+        return tr("Creates a graph where nodes represent rows of data, "
+                  "and edges represent correlations between said rows.");
     }
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 1; }
+    int dataVersion() const override { return 2; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;
