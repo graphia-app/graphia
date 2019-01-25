@@ -87,16 +87,31 @@ bool GraphTransformConfig::parameterHasValue(const QString& name, const QString&
     return parameterByName(name)->valueAsString() == value;
 }
 
-QString GraphTransformConfig::Parameter::valueAsString() const
+QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const
 {
     struct Visitor
     {
-        QString operator()(double d) const { return QString::number(d); }
-        QString operator()(int i) const { return QString::number(i); }
-        QString operator()(const QString& s) const { return s; }
+        bool _addQuotes;
+
+        explicit Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
+
+        QString operator()(double d) const          { return QString::number(d, 'f'); }
+        QString operator()(int i) const             { return QString::number(i); }
+        QString operator()(const QString& s) const
+        {
+            if(_addQuotes)
+            {
+                QString escapedString = s;
+                escapedString.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+
+                return QStringLiteral(R"("%1")").arg(escapedString);
+            }
+
+            return s;
+        }
     };
 
-    return std::visit(Visitor(), _value);
+    return std::visit(Visitor(addQuotes), _value);
 }
 
 bool GraphTransformConfig::hasCondition() const
@@ -120,9 +135,9 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             struct Visitor
             {
-                QString operator()(const double& v) const   { return QString::number(v); }
-                QString operator()(const int& v) const      { return QString::number(v); }
-                QString operator()(const QString& v) const  { return v; }
+                QString operator()(const double& d) const   { return QString::number(d, 'f'); }
+                QString operator()(const int& i) const      { return QString::number(i); }
+                QString operator()(const QString& s) const  { return s; }
             };
 
             return std::visit(Visitor(), terminalValue);
@@ -167,6 +182,56 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
     return boost::apply_visitor(ConditionVisitor(), _condition);
 }
 
+QString GraphTransformConfig::conditionAsString() const
+{
+    struct ConditionVisitor
+    {
+        QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
+        {
+            struct Visitor
+            {
+                QString operator()(const double& d) const   { return QString::number(d, 'f'); }
+                QString operator()(const int& i) const      { return QString::number(i); }
+                QString operator()(const QString& s) const
+                {
+                    if(!s.isEmpty() && s[0] == '$')
+                        return QString("$\"%1\"").arg(s.midRef(1));
+
+                    return QString("\"%1\"").arg(s);
+                }
+            };
+
+            return std::visit(Visitor(), terminalValue);
+        }
+
+        QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
+        QString operator()(const TerminalCondition& terminalCondition) const
+        {
+            return QString("%1 %2 %3").arg(
+                terminalValueAsString(terminalCondition._lhs),
+                terminalCondition.opAsString(),
+                terminalValueAsString(terminalCondition._rhs));
+        }
+
+        QString operator()(const UnaryCondition& unaryCondition) const
+        {
+            return QString("%1 %2").arg(
+                terminalValueAsString(unaryCondition._lhs),
+                unaryCondition.opAsString());
+        }
+
+        QString operator()(const CompoundCondition& compoundCondition) const
+        {
+            auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
+            auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
+
+            return QString("%1 %2 %3").arg(lhs, compoundCondition.opAsString(), rhs);
+        }
+    };
+
+    return boost::apply_visitor(ConditionVisitor(), _condition);
+}
+
 QVariantMap GraphTransformConfig::asVariantMap() const
 {
     QVariantMap map;
@@ -199,6 +264,53 @@ QVariantMap GraphTransformConfig::asVariantMap() const
         map.insert(QStringLiteral("condition"), conditionAsVariantMap());
 
     return map;
+}
+
+QString GraphTransformConfig::asString() const
+{
+    QString s;
+
+    if(!_flags.empty())
+    {
+        s += QStringLiteral("[");
+        for(const auto& flag : _flags)
+        {
+            if(s[s.length() - 1] != '[')
+                s += QStringLiteral(", ");
+
+            s += flag;
+        }
+        s += QStringLiteral("] ");
+    }
+
+    s += QStringLiteral("\"%1\"").arg(_action);
+
+    if(!_attributes.empty())
+    {
+        s += QStringLiteral(" using ");
+
+        for(const auto& attribute : _attributes)
+            s += QStringLiteral("$\"%1\"").arg(attribute);
+    }
+
+    if(!_parameters.empty())
+    {
+        s += QStringLiteral(" with ");
+
+        for(const auto& parameter : _parameters)
+        {
+            s += QStringLiteral(" \"%1\" = %2").arg(parameter._name,
+                parameter.valueAsString(true));
+        }
+    }
+
+    if(hasCondition())
+    {
+        s += QStringLiteral(" where ");
+        s += conditionAsString();
+    }
+
+    return s;
 }
 
 std::vector<QString> GraphTransformConfig::referencedAttributeNames() const

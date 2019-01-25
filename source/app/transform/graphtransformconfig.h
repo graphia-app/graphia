@@ -62,7 +62,7 @@ struct GraphTransformConfig
         ParameterValue _value = 0;
 
         bool operator==(const Parameter& other) const;
-        QString valueAsString() const;
+        QString valueAsString(bool addQuotes = false) const;
     };
 
     std::vector<QString> _flags;
@@ -77,8 +77,12 @@ struct GraphTransformConfig
     bool parameterHasValue(const QString& name, const QString& value) const;
 
     bool hasCondition() const;
+
     QVariantMap conditionAsVariantMap() const;
+    QString conditionAsString() const;
+
     QVariantMap asVariantMap() const;
+    QString asString() const;
 
     std::vector<QString> referencedAttributeNames() const;
 
