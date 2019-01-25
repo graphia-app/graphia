@@ -398,15 +398,12 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
     if(_edgeReductionType == EdgeReductionType::KNN)
     {
-        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1" with "k" = 5 "Rank Order" = "Descending")")
+        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1")")
             .arg(correlation->attributeName()));
     }
 
     if(_clusteringType == ClusteringType::MCL)
-    {
-        //FIXME The default value for Granularity is defined in mcltransform.h, which is inaccessible to plugins
-        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = default)"));
-    }
+        defaultTransforms.append(QStringLiteral(R"("MCL Cluster")"));
 
     return defaultTransforms;
 }

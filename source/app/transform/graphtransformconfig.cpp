@@ -87,6 +87,18 @@ bool GraphTransformConfig::parameterHasValue(const QString& name, const QString&
     return parameterByName(name)->valueAsString() == value;
 }
 
+void GraphTransformConfig::setParameterValue(const QString& name,
+    const GraphTransformConfig::ParameterValue& value)
+{
+    auto it = std::find_if(_parameters.begin(), _parameters.end(),
+        [&name](const auto& parameter) { return name == parameter._name; });
+
+    if(it != _parameters.end())
+        it->_value = value;
+    else
+        _parameters.emplace_back(Parameter{name, value});
+}
+
 QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const
 {
     struct Visitor

@@ -107,6 +107,7 @@ public:
     virtual DefaultVisualisations defaultVisualisations() const { return {}; }
 
     virtual bool configIsValid(const GraphTransformConfig&) const { return true; }
+    void setMissingParametersToDefault(GraphTransformConfig& graphTransformConfig) const;
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 
     GraphModel* graphModel() const { return _graphModel; }

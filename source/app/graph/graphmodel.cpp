@@ -309,6 +309,27 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
     return false;
 }
 
+QStringList GraphModel::transformsWithMissingParametersSetToDefault(const QStringList& transforms) const
+{
+    QStringList transformsWithDefaults;
+
+    for(const auto& transform : transforms)
+    {
+        GraphTransformConfigParser graphTransformConfigParser;
+
+        if(!graphTransformConfigParser.parse(transform))
+            continue;
+
+        auto graphTransformConfig = graphTransformConfigParser.result();
+        const auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
+
+        factory->setMissingParametersToDefault(graphTransformConfig);
+        transformsWithDefaults.append(graphTransformConfig.asString());
+    }
+
+    return transformsWithDefaults;
+}
+
 void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
 {
     _->_transformedGraph.clearTransforms();
@@ -331,7 +352,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         if(!u::contains(_->_graphTransformFactories, action))
             continue;
 
-        auto& factory = _->_graphTransformFactories.at(action);
+        const auto& factory = _->_graphTransformFactories.at(action);
         auto graphTransform = factory->create(graphTransformConfig);
 
         Q_ASSERT(graphTransform != nullptr);

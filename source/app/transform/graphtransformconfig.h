@@ -75,6 +75,7 @@ struct GraphTransformConfig
     bool hasParameter(const QString& name) const;
     const Parameter* parameterByName(const QString& name) const;
     bool parameterHasValue(const QString& name, const QString& value) const;
+    void setParameterValue(const QString& name, const ParameterValue& value);
 
     bool hasCondition() const;
 

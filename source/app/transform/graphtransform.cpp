@@ -90,3 +90,35 @@ GraphTransformParameter GraphTransformFactory::parameter(const QString& paramete
 
     return {};
 }
+
+void GraphTransformFactory::setMissingParametersToDefault(GraphTransformConfig& graphTransformConfig) const
+{
+    for(const auto& parameter : parameters())
+    {
+        if(!graphTransformConfig.hasParameter(parameter.name()))
+        {
+            const auto& v = parameter.initialValue();
+            switch(v.type())
+            {
+            case QMetaType::Int:
+                graphTransformConfig.setParameterValue(parameter.name(), v.toInt());
+                break;
+
+            case QMetaType::Double:
+                graphTransformConfig.setParameterValue(parameter.name(), v.toDouble());
+                break;
+
+            case QMetaType::QString:
+                graphTransformConfig.setParameterValue(parameter.name(), v.toString());
+                break;
+
+            case QMetaType::QStringList:
+                graphTransformConfig.setParameterValue(parameter.name(), v.toStringList().first());
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+}

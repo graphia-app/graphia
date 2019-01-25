@@ -552,7 +552,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             auto completedLoader = dynamic_cast<Loader*>(completedParser);
             Q_ASSERT(completedLoader != nullptr);
 
-            _graphTransforms = completedLoader->transforms();
+            _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
+                completedLoader->transforms());
+
             _visualisations = completedLoader->visualisations();
             _bookmarks = completedLoader->bookmarks();
 
@@ -590,7 +592,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     {
         connect(_graphFileParserThread.get(), &ParserThread::success, [this]
         {
-            _graphTransforms = sortedTransforms(_pluginInstance->defaultTransforms());
+            _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
+                sortedTransforms(_pluginInstance->defaultTransforms()));
             _visualisations = _pluginInstance->defaultVisualisations();
 
             _graphModel->buildTransforms(_graphTransforms);
