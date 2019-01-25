@@ -22,7 +22,7 @@ QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
             if(_addQuotes)
             {
                 QString escapedString = s;
-                escapedString.replace(QLatin1String(R"(")"), QLatin1String(R"(\")"));
+                escapedString.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
 
                 return QStringLiteral(R"("%1")").arg(escapedString);
             }
@@ -61,22 +61,22 @@ QString VisualisationConfig::asString() const
 
     if(!_flags.empty())
     {
-        s += QLatin1String("[");
+        s += QStringLiteral("[");
         for(const auto& flag : _flags)
         {
             if(s[s.length() - 1] != '[')
-                s += QLatin1String(", ");
+                s += QStringLiteral(", ");
 
             s += flag;
         }
-        s += QLatin1String("] ");
+        s += QStringLiteral("] ");
     }
 
     s += QStringLiteral("\"%1\" \"%2\"").arg(_attributeName, _channelName);
 
     if(!_parameters.empty())
     {
-        s += QLatin1String(" with ");
+        s += QStringLiteral(" with ");
 
         for(const auto& parameter : _parameters)
             s += QStringLiteral(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
