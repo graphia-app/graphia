@@ -100,19 +100,19 @@ void GraphTransformFactory::setMissingParametersToDefault(GraphTransformConfig& 
             const auto& v = parameter.initialValue();
             switch(v.type())
             {
-            case QMetaType::Int:
+            case QVariant::Int:
                 graphTransformConfig.setParameterValue(parameter.name(), v.toInt());
                 break;
 
-            case QMetaType::Double:
+            case QVariant::Double:
                 graphTransformConfig.setParameterValue(parameter.name(), v.toDouble());
                 break;
 
-            case QMetaType::QString:
+            case QVariant::String:
                 graphTransformConfig.setParameterValue(parameter.name(), v.toString());
                 break;
 
-            case QMetaType::QStringList:
+            case QVariant::StringList:
                 graphTransformConfig.setParameterValue(parameter.name(), v.toStringList().first());
                 break;
 
