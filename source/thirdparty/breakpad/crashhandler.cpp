@@ -26,7 +26,7 @@
 
 #include <cwchar>
 
-static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t* dir)
+static void launch(const wchar_t* program, const wchar_t* options, const wchar_t* dmpFile, const wchar_t* dir)
 {
     static STARTUPINFO si = {0};
     static PROCESS_INFORMATION pi = {0};
@@ -34,7 +34,7 @@ static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t
 
     static wchar_t commandLine[1024] = {0};
     swprintf(commandLine, sizeof(commandLine) / sizeof(commandLine[0]),
-        L"%s %s %s", program, dmpFile, dir);
+        L"%s %s %s %s", program, options, dmpFile, dir);
 
     if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
                       CREATE_DEFAULT_ERROR_MODE,
@@ -44,7 +44,7 @@ static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t
     }
 }
 #else
-static void launch(const char* program, const char* dmpFile, const char* dir)
+static void launch(const char* program, const char* options, const char* dmpFile, const char* dir)
 {
     pid_t pid = fork();
 
@@ -55,7 +55,7 @@ static void launch(const char* program, const char* dmpFile, const char* dir)
         exit(1);
 
     case 0: // Child
-        execl(program, program, dmpFile, dir, static_cast<char*>(nullptr));
+        execl(program, program, options, dmpFile, dir, static_cast<char*>(nullptr));
 
         std::cerr << "execl() failed\n";
         exit(1);
@@ -114,6 +114,7 @@ static bool minidumpCallback(
     const auto* exe = exceptionHandler->crashReporterExecutableName();
 
     // static to avoid stack allocation
+    static platform_char options[1024] = {0};
     static platform_char path[1024] = {0};
     static platform_char dir[1024] = {0};
 
@@ -147,9 +148,9 @@ static bool minidumpCallback(
 #else
     std::cerr
 #endif
-            << "Starting " << exe << " " << path << " " << dir << std::endl;
+        << "Starting " << exe << " " << path << " " << dir << std::endl;
 
-    launch(exe, path, dir);
+    launch(exe, options, path, dir);
 
     // Do not pass on the exception
     return true;

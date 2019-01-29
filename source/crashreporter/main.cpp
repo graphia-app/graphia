@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QDirIterator>
+#include <QCommandLineParser>
 
 #include <iostream>
 #include <map>
@@ -148,7 +149,19 @@ int main(int argc, char *argv[])
     qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
     Preferences preferences;
 
-    if(QCoreApplication::arguments().size() < 2 || !QFileInfo::exists(QCoreApplication::arguments().at(1)))
+    QCommandLineParser p;
+
+    p.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    p.addHelpOption();
+    p.addOption({{"s", "submit"}, QObject::tr("Submit the crash report immediately.")});
+    p.addPositionalArgument(QStringLiteral("FILE"), QObject::tr("The crash report file."));
+    p.addPositionalArgument(QStringLiteral("ATTACHMENTS"),
+        QObject::tr("The attachments directory."), QStringLiteral("[ATTACHMENTS]"));
+
+    p.process(QApplication::arguments());
+    auto positional = p.positionalArguments();
+
+    if(positional.isEmpty() || !QFileInfo::exists(positional.at(0)))
     {
         QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
                               QObject::tr("This program is intended for automatically "
@@ -158,22 +171,32 @@ int main(int argc, char *argv[])
     }
 
     QString attachmentsDir;
-    if(QCoreApplication::arguments().size() == 3 && QFileInfo(QCoreApplication::arguments().at(2)).isDir())
-        attachmentsDir = QCoreApplication::arguments().at(2);
+    if(positional.size() >= 2 && QFileInfo(positional.at(1)).isDir())
+        attachmentsDir = positional.at(1);
 
-    QIcon mainIcon;
-    mainIcon.addFile(QStringLiteral(":/icon.svg"));
-    QApplication::setWindowIcon(mainIcon);
-
-    QQmlApplicationEngine engine;
+    int exitCode = 0;
     Report report;
-    engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    int exitCode = QCoreApplication::exec();
+    if(!p.isSet(QStringLiteral("submit")))
+    {
+        QIcon mainIcon;
+        mainIcon.addFile(QStringLiteral(":/icon.svg"));
+        QApplication::setWindowIcon(mainIcon);
+
+        QQmlApplicationEngine engine;
+        engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
+        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
+        exitCode = QCoreApplication::exec();
+    }
+    else
+    {
+        report._email = preferences.get(QStringLiteral("auth/emailAddress")).toString();
+        report._text = QObject::tr("Submitted directly with no user intervention.");
+    }
 
     if(exitCode != 127)
-        uploadReport(report._email, report._text, QCoreApplication::arguments().at(1), attachmentsDir);
+        uploadReport(report._email, report._text, positional.at(0), attachmentsDir);
 
     return exitCode;
 }
