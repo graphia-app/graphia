@@ -76,27 +76,45 @@ static bool minidumpCallback(
 #endif
 )
 {
+    // static to avoid stack allocation
+    static platform_char options[1024] = {0};
+    static platform_char path[1024] = {0};
+    static platform_char dir[1024] = {0};
+
 #if defined(Q_OS_WIN32)
     if(ex_info != nullptr && ex_info->ExceptionRecord != nullptr)
     {
-        // Occasionally we see exceptions that aren't really crashes at all
-        // Instead of handling and reporting these, we just pass them on
-        static const DWORD PASS_ON_EXCEPTIONS[] =
+        if(ex_info->ExceptionRecord->ExceptionCode ==
+            static_cast<DWORD>(MD_EXCEPTION_CODE_WIN_UNHANDLED_CPP_EXCEPTION))
         {
-            RPC_S_SERVER_UNAVAILABLE
-        };
+            // https://support.microsoft.com/en-gb/help/185294
+            // https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273/
+            //FIXME: figure out the exception details and add it as an attachment or otherwise
 
-        static const size_t NUM_PASS_ON_EXCEPTIONS = sizeof(PASS_ON_EXCEPTIONS) /
-            sizeof(PASS_ON_EXCEPTIONS[0]);
-
-        const auto thrownCode = HRESULT_CODE(ex_info->ExceptionRecord->ExceptionCode);
-        for(size_t i = 0; i < NUM_PASS_ON_EXCEPTIONS; i++)
+            // Silently submit the "crash" report
+            wcscat_s(options, L"-submit");
+        }
+        else
         {
-            const auto code = PASS_ON_EXCEPTIONS[i];
-            if(thrownCode == code)
+            // Occasionally we see exceptions that aren't really crashes at all
+            // Instead of handling and reporting these, we just pass them on
+            static const DWORD PASS_ON_EXCEPTIONS[] =
             {
-                std::cerr << "Caught HRESULT " << thrownCode << ", ignoring and passing on...\n";
-                return false;
+                RPC_S_SERVER_UNAVAILABLE
+            };
+
+            static const size_t NUM_PASS_ON_EXCEPTIONS = sizeof(PASS_ON_EXCEPTIONS) /
+                sizeof(PASS_ON_EXCEPTIONS[0]);
+
+            const auto thrownCode = HRESULT_CODE(ex_info->ExceptionRecord->ExceptionCode);
+            for(size_t i = 0; i < NUM_PASS_ON_EXCEPTIONS; i++)
+            {
+                const auto code = PASS_ON_EXCEPTIONS[i];
+                if(thrownCode == code)
+                {
+                    std::cerr << "Caught HRESULT " << thrownCode << ", ignoring and passing on...\n";
+                    return false;
+                }
             }
         }
     }
@@ -112,11 +130,6 @@ static bool minidumpCallback(
 
     CrashHandler* exceptionHandler = reinterpret_cast<CrashHandler*>(context);
     const auto* exe = exceptionHandler->crashReporterExecutableName();
-
-    // static to avoid stack allocation
-    static platform_char options[1024] = {0};
-    static platform_char path[1024] = {0};
-    static platform_char dir[1024] = {0};
 
     if(exceptionHandler->userHandler() != nullptr)
     {
