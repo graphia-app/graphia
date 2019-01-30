@@ -349,8 +349,10 @@ void Application::crash(int crashType)
     }
 
     case CrashType::CppException:
-        throw;
-        break;
+    {
+        struct TestException {};
+        throw TestException();
+    }
 
     case CrashType::FatalError:
         FATAL_ERROR(FatalErrorTest);
