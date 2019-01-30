@@ -1,0 +1,75 @@
+#ifndef EXCEPTIONRECORD_H
+#define EXCEPTIONRECORD_H
+
+#include <QtGlobal>
+
+#ifdef Q_OS_WIN
+
+#include <Windows.h>
+
+#include <typeinfo>
+#include <cstdint>
+
+// https://stackoverflow.com/questions/39113168
+static const char* exceptionRecordType(const EXCEPTION_RECORD* exr)
+{
+#pragma pack(push, 4)
+    struct _PMD
+    {
+        int mdisp;
+        int pdisp;
+        int vdisp;
+    };
+
+    struct CatchableType
+    {
+        int32_t properties;
+        int32_t pType;
+        _PMD    thisDisplacement;
+        int32_t sizeOrOffset;
+        int32_t copyFunction;
+    };
+
+    struct ThrowInfo
+    {
+        int32_t attributes;
+        int32_t pmfnUnwind;
+        int32_t pForwardCompat;
+        int32_t pCatchableTypeArray;
+    };
+
+    struct CatchableTypeArray
+    {
+        int nCatchableTypes;
+        CatchableType *arrayOfCatchableTypes[];
+    };
+#pragma pack (pop)
+
+
+    HMODULE module = (exr->NumberParameters >= 4) ?
+        reinterpret_cast<HMODULE>(exr->ExceptionInformation[3]) : nullptr;
+
+    if(exr->NumberParameters < 2)
+        return nullptr;
+
+    auto throwInfo = reinterpret_cast<const ThrowInfo*>(exr->ExceptionInformation[2]);
+
+    if(throwInfo == nullptr)
+        return nullptr;
+
+#define RVA_TO_VA(TYPE, ADDR) (reinterpret_cast<TYPE>( \
+    (uintptr_t)(module) + (uintptr_t)(ADDR)))
+
+    auto cArray = RVA_TO_VA(const CatchableTypeArray*, throwInfo->pCatchableTypeArray);
+    auto cType = RVA_TO_VA(const CatchableType*, cArray->arrayOfCatchableTypes[0]);
+
+    auto type = RVA_TO_VA(const std::type_info*, cType->pType);
+
+#undef RVA_TO_VA
+
+    return type->name();
+}
+
+#endif // Q_OS_WIN32
+
+#endif // EXCEPTIONRECORD_H
