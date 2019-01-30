@@ -153,7 +153,11 @@ int main(int argc, char *argv[])
 
     p.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     p.addHelpOption();
-    p.addOption({{"s", "submit"}, QObject::tr("Submit the crash report immediately.")});
+    p.addOptions(
+    {
+        {{"s", "submit"}, QObject::tr("Submit the crash report immediately.")},
+        {{"d", "description"}, QObject::tr("A description of the crash."), "description", QString()}
+    });
     p.addPositionalArgument(QStringLiteral("FILE"), QObject::tr("The crash report file."));
     p.addPositionalArgument(QStringLiteral("ATTACHMENTS"),
         QObject::tr("The attachments directory."), QStringLiteral("[ATTACHMENTS]"));
@@ -192,7 +196,7 @@ int main(int argc, char *argv[])
     else
     {
         report._email = preferences.get(QStringLiteral("auth/emailAddress")).toString();
-        report._text = QObject::tr("Submitted directly with no user intervention.");
+        report._text = p.value(QStringLiteral("description"));
     }
 
     if(exitCode != 127)
