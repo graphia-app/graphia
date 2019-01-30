@@ -59,7 +59,10 @@ if(MSVC)
     )
 endif()
 
-list(APPEND BREAKPAD_HEADERS ${CMAKE_CURRENT_LIST_DIR}/crashhandler.h)
+list(APPEND BREAKPAD_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/exceptionrecord.h
+    ${CMAKE_CURRENT_LIST_DIR}/crashhandler.h
+)
 list(APPEND BREAKPAD_SOURCES ${CMAKE_CURRENT_LIST_DIR}/crashhandler.cpp)
 
 if(UNITY_BUILD)
