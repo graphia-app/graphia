@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
 #include <breakpad/src/client/windows/handler/exception_handler.h>
 #else
 
@@ -67,7 +67,7 @@ static void launch(const char* program, const char* options, const char* dmpFile
 #endif
 
 static bool minidumpCallback(
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
     const wchar_t* dumpDir, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS* ex_info, MDRawAssertionInfo*, bool success
 #elif defined(Q_OS_LINUX)
     const google_breakpad::MinidumpDescriptor& md, void* context, bool success
@@ -81,7 +81,7 @@ static bool minidumpCallback(
     static platform_char path[1024] = {0};
     static platform_char dir[1024] = {0};
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
     if(ex_info != nullptr && ex_info->ExceptionRecord != nullptr)
     {
         if(ex_info->ExceptionRecord->ExceptionCode ==
@@ -137,14 +137,14 @@ static bool minidumpCallback(
         tempDir.setAutoRemove(false);
         exceptionHandler->userHandler()(tempDir.path());
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
         tempDir.path().toWCharArray(dir);
 #else
         strncpy(dir, tempDir.path().toUtf8(), sizeof(dir) - 1);
 #endif
     }
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
     swprintf(path, sizeof(path) / sizeof(path[0]),
         L"%s\\%s.dmp", dumpDir, minidumpId);
 #elif defined(Q_OS_LINUX)
@@ -173,7 +173,7 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
 {
     QString path = QDir::tempPath();
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN)
     if(IsDebuggerPresent())
     {
         std::cerr << "Invoked by debugger, not installing CrashHandler\n";
