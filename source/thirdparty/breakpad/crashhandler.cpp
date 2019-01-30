@@ -1,4 +1,5 @@
 #include "crashhandler.h"
+#include "exceptionrecord.h"
 
 #include "shared/utils/thread.h"
 
@@ -89,10 +90,28 @@ static bool minidumpCallback(
         {
             // https://support.microsoft.com/en-gb/help/185294
             // https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273/
-            //FIXME: figure out the exception details and add it as an attachment or otherwise
 
-            // Silently submit the "crash" report
-            wcscat_s(options, L"-submit");
+            auto exceptionTypeName = exceptionRecordType(ex_info->ExceptionRecord);
+            if(exceptionTypeName != nullptr)
+            {
+                wchar_t exceptionTypeName_wchar[1024];
+
+                auto error = mbstowcs_s(nullptr, exceptionTypeName_wchar,
+                    exceptionTypeName, strlen(exceptionTypeName));
+                if(error == 0)
+                {
+                    swprintf(options, sizeof(options) / sizeof(options[0]),
+                        L"-submit -description \"An uncaught exception was thrown of type '%s'.\"",
+                        exceptionTypeName_wchar);
+                }
+            }
+
+            if(options[0] == 0)
+            {
+                // If we weren't able to determine the exception type,
+                // we still want to silently submit
+                wcscat_s(options, L"-submit");
+            }
         }
         else
         {
