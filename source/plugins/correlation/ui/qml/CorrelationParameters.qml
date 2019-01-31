@@ -194,6 +194,7 @@ BaseParameterDialog
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
 
+                        PointingCursorOnHoverLink {}
                         onLinkActivated: Qt.openUrlExternally(link);
                     }
 
