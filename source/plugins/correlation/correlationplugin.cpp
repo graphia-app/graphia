@@ -173,7 +173,7 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).variance(); })
             .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )"
+            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/variance">Variance</a> )"
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value "
                                "and µ is the mean."));
@@ -181,7 +181,7 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
             .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)"
+            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/stddev">)"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
                                "and µ is the mean."));
@@ -190,7 +190,7 @@ void CorrelationPluginInstance::createAttributes()
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
             .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId).coefVar()); })
             .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation">)"
+            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/coef_variation">)"
                                "Coefficient of Variation</a> "
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as the standard deviation "

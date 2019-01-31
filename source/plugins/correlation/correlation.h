@@ -116,7 +116,7 @@ public:
 
     QString attributeDescription() const override
     {
-        return QObject::tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
+        return QObject::tr(R"(The <a href="https://kajeka.com/graphia/pearson">)"
             "Pearson Correlation Coefficient</a> is an indication of "
             "the linear relationship between two variables.");
     }
@@ -132,7 +132,7 @@ public:
 
     QString attributeDescription() const override
     {
-        return QObject::tr(R"(The <a href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">)"
+        return QObject::tr(R"(The <a href="https://kajeka.com/graphia/spearman">)"
             "Spearman Rank Correlation Coefficient</a> is an indication of "
             "the monotomic relationship between two variables.");
     }
