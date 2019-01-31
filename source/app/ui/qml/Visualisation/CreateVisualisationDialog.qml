@@ -83,6 +83,7 @@ Window
                 textFormat: Text.StyledText
                 wrapMode: Text.WordWrap
 
+                PointingCursorOnHoverLink {}
                 onLinkActivated: Qt.openUrlExternally(link);
 
                 function update()

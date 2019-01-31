@@ -9,6 +9,8 @@ import QtWebView 1.1
 import "../../../shared/ui/qml/Constants.js" as Constants
 import "../../../shared/ui/qml/Utils.js" as Utils
 
+import "Controls"
+
 Window
 {
     id: root
@@ -49,6 +51,7 @@ Window
                         "&nbsp;&nbsp;&nbsp;" +
                     qsTr("<a href=\"OSS\">Open Source Licenses</a>")
 
+                PointingCursorOnHoverLink {}
                 onLinkActivated:
                 {
                     licenseTextArea.text = Utils.readFile("qrc:///licensing/" + link + ".html");
@@ -74,6 +77,7 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                PointingCursorOnHoverLink {}
                 onLinkActivated: Qt.openUrlExternally(link);
             }
 

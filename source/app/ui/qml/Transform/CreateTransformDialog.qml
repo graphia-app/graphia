@@ -388,6 +388,8 @@ Window
                                                 textFormat: Text.StyledText
                                                 wrapMode: Text.Wrap
                                                 elide: Text.ElideRight
+
+                                                PointingCursorOnHoverLink {}
                                                 onLinkActivated: Qt.openUrlExternally(link);
                                             }
 
@@ -467,6 +469,8 @@ Window
                                                 textFormat: Text.StyledText
                                                 wrapMode: Text.Wrap
                                                 elide: Text.ElideRight
+
+                                                PointingCursorOnHoverLink {}
                                                 onLinkActivated: Qt.openUrlExternally(link);
                                             }
 
@@ -656,6 +660,7 @@ Window
                 textFormat: Text.StyledText
                 wrapMode: Text.WordWrap
 
+                PointingCursorOnHoverLink {}
                 onLinkActivated: Qt.openUrlExternally(link);
 
                 function update()
