@@ -184,7 +184,7 @@ BaseParameterDialog
                     {
                         text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a numerical dataset.<br>" +
                                    "<br>" +
-                                   "The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">Pearson Correlation coefficient</a> " +
+                                   "The <a href=\"https://kajeka.com/graphia/pearson\">Pearson Correlation coefficient</a> " +
                                    "provides this similarity metric. " +
                                    "If specified, the input data can be scaled and normalised, after which correlation scores are " +
                                    "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +

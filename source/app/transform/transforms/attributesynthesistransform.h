@@ -56,7 +56,7 @@ public:
             {
                 "Regular Expression",
                 ValueType::String,
-                QObject::tr(R"(A <a href="https://perldoc.perl.org/perlre.html">regular expression</a> that )"
+                QObject::tr(R"(A <a href="https://kajeka.com/graphia/regex">regular expression</a> that )"
                     "is matched against the source attribute values."),
                 "(^.*$)"
             },

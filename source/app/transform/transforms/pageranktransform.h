@@ -35,7 +35,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(Calculates a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> )"
+        return QObject::tr(R"(Calculates a <a href="https://kajeka.com/graphia/pagerank">PageRank</a> )"
             "centrality measurement for each node. This can be viewed as "
             "measure of a node's relative importance in the graph.");
     }

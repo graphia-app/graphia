@@ -22,7 +22,7 @@ public:
     QString description() const override
     {
         return QObject::tr("Find a "
-            R"(<a href="https://en.wikipedia.org/wiki/Spanning_tree">)"
+            R"(<a href="https://kajeka.com/graphia/spanning_tree">)"
             R"(spanning tree</a> for each component.)");
     }
 

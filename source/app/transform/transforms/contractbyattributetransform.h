@@ -28,7 +28,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://en.wikipedia.org/wiki/Edge_contraction">Contract edges</a> )"
+        return QObject::tr(R"(<a href="https://kajeka.com/graphia/contraction">Contract edges</a> )"
             "whose node's share the same attribute value.");
     }
 
