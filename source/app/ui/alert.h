@@ -10,10 +10,10 @@
 #include <utility>
 
 DEFINE_QML_ENUM(
-      Q_GADGET, AlertType,
-                None,
-                Warning,
-                Error);
+    Q_GADGET, AlertType,
+    None,
+    Warning,
+    Error);
 
 struct Alert
 {

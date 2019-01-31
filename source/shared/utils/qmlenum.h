@@ -77,13 +77,15 @@ constexpr bool static_strcmp(char const* a, char const* b)
 /*
 Example:
 
-DEFINE_QML_ENUM(Q_GADGET, Enumeration,
-     First,
-     Second,
-     Third)
+DEFINE_QML_ENUM(
+    Q_GADGET, Enumeration,
+    First,
+    Second,
+    Third)
 
 Note: the first parameter must be Q_GADGET, so that the build system knows
-to generate a moc_ file
+to generate a moc_ file, and because the scanner is a bit rubbish, Q_GADGET
+must be the first thing on a line
 */
 
 #endif // QMLENUM_H

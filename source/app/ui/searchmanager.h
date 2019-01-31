@@ -14,8 +14,9 @@
 class GraphModel;
 
 // What to select when found nodes changes
-DEFINE_QML_ENUM(Q_GADGET, FindSelectStyle,
-                None, First, All);
+DEFINE_QML_ENUM(
+    Q_GADGET, FindSelectStyle,
+    None, First, All);
 
 class SearchManager : public QObject
 {

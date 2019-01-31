@@ -18,32 +18,37 @@
 
 #include <memory>
 
-DEFINE_QML_ENUM(Q_GADGET, ScalingType,
-                None,
-                Log2,
-                Log10,
-                AntiLog2,
-                AntiLog10,
-                ArcSin);
+DEFINE_QML_ENUM(
+    Q_GADGET, ScalingType,
+    None,
+    Log2,
+    Log10,
+    AntiLog2,
+    AntiLog10,
+    ArcSin);
 
-DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
-                None,
-                MinMax,
-                Quantile);
+DEFINE_QML_ENUM(
+    Q_GADGET, NormaliseType,
+    None,
+    MinMax,
+    Quantile);
 
-DEFINE_QML_ENUM(Q_GADGET, MissingDataType,
-                None,
-                Constant,
-                ColumnAverage,
-                RowInterpolation);
+DEFINE_QML_ENUM(
+    Q_GADGET, MissingDataType,
+    None,
+    Constant,
+    ColumnAverage,
+    RowInterpolation);
 
-DEFINE_QML_ENUM(Q_GADGET, ClusteringType,
-                None,
-                MCL);
+DEFINE_QML_ENUM(
+    Q_GADGET, ClusteringType,
+    None,
+    MCL);
 
-DEFINE_QML_ENUM(Q_GADGET, EdgeReductionType,
-                None,
-                KNN);
+DEFINE_QML_ENUM(
+    Q_GADGET, EdgeReductionType,
+    None,
+    KNN);
 
 class CorrelationPluginInstance;
 

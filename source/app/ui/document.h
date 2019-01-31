@@ -40,8 +40,9 @@ class GraphModel;
 class SearchManager;
 class SelectionManager;
 
-DEFINE_QML_ENUM(Q_GADGET, LayoutPauseState,
-                Running, RunningFinished, Paused);
+DEFINE_QML_ENUM(
+    Q_GADGET, LayoutPauseState,
+    Running, RunningFinished, Paused);
 
 class Document : public QObject, public IDocument
 {

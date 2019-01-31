@@ -53,13 +53,16 @@ class GraphComponentInteractor;
 
 class ICommand;
 
-DEFINE_QML_ENUM(Q_GADGET, TextAlignment,
-                Right, Left, Centre,
-                Top, Bottom);
-DEFINE_QML_ENUM(Q_GADGET, TextState,
-                Off, Selected, All);
-DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
-                Cylinder, Arrow);
+DEFINE_QML_ENUM(
+    Q_GADGET, TextAlignment,
+    Right, Left, Centre,
+    Top, Bottom);
+DEFINE_QML_ENUM(
+    Q_GADGET, TextState,
+    Off, Selected, All);
+DEFINE_QML_ENUM(
+    Q_GADGET, EdgeVisualType,
+    Cylinder, Arrow);
 
 template<typename Target>
 void initialiseFromGraph(const Graph*, Target&); // NOLINT

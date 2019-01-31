@@ -24,34 +24,39 @@
 
 class CorrelationPluginInstance;
 
-DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
-                Raw,
-                Log,
-                MeanCentre,
-                UnitVariance,
-                Pareto);
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotScaleType,
+    Raw,
+    Log,
+    MeanCentre,
+    UnitVariance,
+    Pareto);
 
-DEFINE_QML_ENUM(Q_GADGET, PlotAveragingType,
-                Individual,
-                MeanLine,
-                MedianLine,
-                MeanHistogram,
-                IQRPlot);
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotAveragingType,
+    Individual,
+    MeanLine,
+    MedianLine,
+    MeanHistogram,
+    IQRPlot);
 
-DEFINE_QML_ENUM(Q_GADGET, PlotDispersionType,
-                None,
-                StdErr,
-                StdDev);
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotDispersionType,
+    None,
+    StdErr,
+    StdDev);
 
-DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
-                Bars,
-                Area,
-                StdDev);
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotDispersionVisualType,
+    Bars,
+    Area,
+    StdDev);
 
-DEFINE_QML_ENUM(Q_GADGET, PlotColumnSortType,
-                Natural,
-                ColumnName,
-                ColumnAnnotation);
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotColumnSortType,
+    Natural,
+    ColumnName,
+    ColumnAnnotation);
 
 enum class CorrelationPlotUpdateType
 {
