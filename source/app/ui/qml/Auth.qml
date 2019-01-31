@@ -6,6 +6,8 @@ import com.kajeka 1.0
 
 import "../../../shared/ui/qml/Constants.js" as Constants
 
+import "Controls"
+
 Rectangle
 {
     id: root
@@ -125,17 +127,35 @@ Rectangle
             Layout.minimumHeight: 64
             Layout.maximumWidth: 512
 
-            text: !root.busy ? root.message : ""
+            text:
+            {
+                if(!root.busy && root.message.length > 0)
+                    return root.message;
+
+                if(emailField.text.length === 0)
+                {
+                    return qsTr("Don't have an account? " +
+                        "<a href=\"https://kajeka.com/register\">Register Now.</a>");
+                }
+
+                return "";
+            }
 
             onTextChanged:
             {
-                // Changed text implies a problem, so refocus
-                root.refocus();
+                if(text.length > 0)
+                {
+                    // Changed text implies a problem, so refocus
+                    root.refocus();
+                }
             }
 
-            linkColor: "grey"
+            color: "white"
+            linkColor: "skyblue"
             textFormat: Text.StyledText
             wrapMode: Text.WordWrap
+
+            PointingCursorOnHoverLink {}
 
             onLinkActivated: Qt.openUrlExternally(link);
         }
