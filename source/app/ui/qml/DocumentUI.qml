@@ -114,7 +114,6 @@ Item
 
     property int numNodesSelected: document.numNodesSelected
     property var enrichmentTableModels: document.enrichmentTableModels
-    property var nodeAttributeGroupNames: document.nodeAttributeGroupNames
 
     property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
 

@@ -521,7 +521,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::nodeAttributeGroupNamesChanged);
     connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
 
     emit pluginInstanceChanged();
@@ -1183,25 +1182,6 @@ int Document::numNodesSelected() const
         return _selectionManager->numNodesSelected();
 
     return 0;
-}
-
-QStringList Document::nodeAttributeGroupNames()
-{
-    // Attribute Groups will return a list of attributes that are not
-    // floats.
-    QStringList list;
-    if(graphModel() != nullptr)
-    {
-        const auto& attributeNames = graphModel()->attributeNames(ElementType::Node);
-        list.reserve(static_cast<int>(attributeNames.size()));
-        for(const auto& name : attributeNames)
-        {
-            auto* attribute = graphModel()->attributeByName(name);
-            if(attribute->valueType() != ValueType::Float)
-                list.append(name);
-        }
-    }
-    return list;
 }
 
 int Document::numInvisibleNodesSelected() const

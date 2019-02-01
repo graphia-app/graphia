@@ -97,7 +97,6 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
-    Q_PROPERTY(QStringList nodeAttributeGroupNames READ nodeAttributeGroupNames NOTIFY nodeAttributeGroupNamesChanged)
 
     Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
 
@@ -272,8 +271,6 @@ private:
     int numNodesSelected() const;
     int numInvisibleNodesSelected() const;
 
-    QStringList nodeAttributeGroupNames();
-
     void initialiseLayoutSettingsModel();
 
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
@@ -340,7 +337,6 @@ signals:
     void enrichmentAnalysisComplete();
 
     void saveComplete(bool success, QUrl fileUrl, const QString& saverName);
-    void nodeAttributeGroupNamesChanged();
 
     void hasValidEdgeTextVisualisationChanged();
 
