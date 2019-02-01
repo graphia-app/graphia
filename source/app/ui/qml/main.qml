@@ -1535,7 +1535,6 @@ ApplicationWindow
     {
         id: enrichmentWizard
         documentUI: currentDocument
-        attributeGroups: currentDocument ? currentDocument.nodeAttributeGroupNames : []
         onAccepted:
         {
             if(currentDocument != null)
