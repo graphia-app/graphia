@@ -18,7 +18,7 @@ Wizard
 
     // Must be set before opening
     property var attributeGroups: null
-    property DocumentUI document: null
+    property DocumentUI documentUI: null
 
     property string selectedAttributeGroupA: ""
     property string selectedAttributeGroupB: ""
@@ -37,7 +37,7 @@ Wizard
     onVisibilityChanged:
     {
         reset();
-        proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
+        proxyModel.sourceModel = documentUI.availableAttributesModel(ElementType.Node);
     }
 
     Item
@@ -61,11 +61,11 @@ Wizard
                     // and the required variables are deduced after. If the variable is not
                     // used during this no-context stage it cannot be captured hence this
                     // seemingly pointless assignment
-                    var tempDoc = document;
+                    var tempDoc = documentUI;
                     if(tempDoc === null)
                         return false;
-                    var leftCount = document.attribute(modelLeft.display).sharedValues.length;
-                    var rightCount = document.attribute(modelRight.display).sharedValues.length;
+                    var leftCount = documentUI.attribute(modelLeft.display).sharedValues.length;
+                    var rightCount = documentUI.attribute(modelRight.display).sharedValues.length;
                     return leftCount < rightCount;
                 }
             }
@@ -191,8 +191,8 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: document !== null ? model.display + " (" +
-                                            document.attribute(model.display).sharedValues.length +
+                                text: documentUI !== null ? model.display + " (" +
+                                            documentUI.attribute(model.display).sharedValues.length +
                                             qsTr(" entries") + ")" : "";
                                 exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
@@ -255,8 +255,8 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: document !== null ? model.display + " (" +
-                                            document.attribute(model.display).sharedValues.length +
+                                text: documentUI !== null ? model.display + " (" +
+                                            documentUI.attribute(model.display).sharedValues.length +
                                             qsTr(" entries") + ")" : "";
                                 exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
