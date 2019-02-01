@@ -1482,6 +1482,26 @@ Item
                 savedFileSaver = saverName;
             }
         }
+
+        onAttributesChanged:
+        {
+            // If a new attribute has been created and advanced find or FBAV have
+            // not yet been used, set the new attribute as the default for both
+            if(addedNames.length > 0)
+            {
+                var lastAddedAttributeName = addedNames[addedNames.length - 1];
+                var lastAddedAttribute = document.attribute(lastAddedAttributeName);
+
+                if(find.lastAdvancedFindAttributeName.length === 0)
+                    find.lastAdvancedFindAttributeName = lastAddedAttributeName;
+
+                if(lastAddedAttribute.sharedValues.length > 0 &&
+                    find.lastFindByAttributeName.length === 0)
+                {
+                        find.lastFindByAttributeName = lastAddedAttributeName;
+                }
+            }
+        }
     }
 
     signal loadComplete(url fileUrl, bool success)

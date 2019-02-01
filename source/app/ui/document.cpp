@@ -521,7 +521,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
-    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged);
 
     emit pluginInstanceChanged();
 
@@ -773,6 +773,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
             _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
+
+    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::graphWillChange);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::graphChanged);
