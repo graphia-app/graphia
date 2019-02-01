@@ -456,6 +456,12 @@ Item
         document.gotoBookmark(name);
     }
 
+    function gotoAllBookmarks()
+    {
+        hideFind();
+        document.gotoAllBookmarks();
+    }
+
     Labs.FileDialog
     {
         id: exportNodePositionsFileDialog

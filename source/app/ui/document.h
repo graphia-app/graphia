@@ -451,6 +451,7 @@ public:
     Q_INVOKABLE void removeBookmarks(const QStringList& names);
     Q_INVOKABLE void renameBookmark(const QString& from, const QString& to);
     Q_INVOKABLE void gotoBookmark(const QString& name);
+    Q_INVOKABLE void gotoAllBookmarks();
 
     Q_INVOKABLE void dumpGraph();
 

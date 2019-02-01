@@ -969,6 +969,18 @@ ApplicationWindow
         }
     }
 
+    Action
+    {
+        id: activateAllBookmarksAction
+        text: qsTr("Activate All Bookmarks")
+        enabled: currentDocument ? !currentDocument.busy && currentDocument.bookmarks.length > 1 : false
+        onTriggered:
+        {
+            if(currentDocument !== null)
+                currentDocument.gotoAllBookmarks();
+        }
+    }
+
     ExclusiveGroup
     {
         id: nodeTextDisplay
@@ -1341,6 +1353,12 @@ ApplicationWindow
             MenuItem { action: addBookmarkAction }
             MenuItem { action: manageBookmarksAction }
             MenuSeparator { visible: currentDocument ? currentDocument.bookmarks.length > 0 : false }
+
+            MenuItem
+            {
+                action: activateAllBookmarksAction
+                visible: currentDocument ? currentDocument.bookmarks.length > 1 : false
+            }
 
             Instantiator
             {
