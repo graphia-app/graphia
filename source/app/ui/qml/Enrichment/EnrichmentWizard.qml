@@ -98,22 +98,25 @@ Wizard
                     Text
                     {
                         // Should expand this later
-                        text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis.<br>" +
+                        text:
+                        {
+                            var desc = qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis.<br>" +
                                    "<br>" +
                                    "Two attribute groups will be selected to test for enrichment." +
                                    "<br>" +
-                                   "The results will be presented in tabular form or using a heatmap.")
+                                   "The results will be presented in tabular form or using a heatmap.<br>");
+                            if(proxyModel.count < 2)
+                            {
+                                desc += qsTr("<br><font color=\"red\">This dataset does not have enough attribute groups to perform enrichment." +
+                                            " At least two groups are required</font>");
+                            }
+                            return desc;
+                        }
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
                     }
-                    Text
-                    {
-                        color: "red"
-                        text: qsTr("This dataset does not have enough attribute groups to perform enrichment." +
-                              " At least two groups are required")
-                        visible: proxyModel.count < 2
-                    }
+
                 }
 
                 Image
