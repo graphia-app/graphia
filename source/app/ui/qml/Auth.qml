@@ -206,6 +206,9 @@ Rectangle
 
     function refocus()
     {
+        if(!visible)
+            return;
+
         if(emailField.text.length === 0)
             emailField.forceActiveFocus();
         else
@@ -218,6 +221,11 @@ Rectangle
         {
             passwordField.text = "";
             refocus();
+        }
+        else
+        {
+            // If not visible, remove focus from any text fields
+            root.forceActiveFocus();
         }
     }
 }
