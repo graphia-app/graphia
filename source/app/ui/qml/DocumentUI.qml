@@ -393,28 +393,30 @@ Item
     {
         // js treats undefined as a valid argument instead of falling back to
         // C++ defaults
-        if(typeof(elementTypes) == "undefined")
+        if(typeof(elementTypes) === "undefined")
             return document.availableAttributeNames();
-        else if(typeof(valueTypes) == "undefined")
+        else if(typeof(valueTypes) === "undefined")
             return document.availableAttributeNames(elementTypes);
-        else if(typeof(skipFlags) == "undefined")
+        else if(typeof(skipFlags) === "undefined")
             return document.availableAttributeNames(elementTypes, valueTypes);
 
         return document.availableAttributeNames(elementTypes, valueTypes, skipFlags);
     }
+
     function availableAttributesModel(elementTypes, valueTypes, skipFlags)
     {
         // js treats undefined as a valid argument instead of falling back to
         // C++ defaults
-        if(typeof(elementTypes) == "undefined")
+        if(typeof(elementTypes) === "undefined")
             return document.availableAttributesModel();
-        else if(typeof(valueTypes) == "undefined")
+        else if(typeof(valueTypes) === "undefined")
             return document.availableAttributesModel(elementTypes);
-        else if(typeof(skipFlags) == "undefined")
+        else if(typeof(skipFlags) === "undefined")
             return document.availableAttributesModel(elementTypes, valueTypes);
 
         return document.availableAttributesModel(elementTypes, valueTypes, skipFlags);
     }
+
     function attribute(attributeName) { return document.attribute(attributeName); }
 
     function writeTableViewToFile(tableView, fileUrl, extension)
