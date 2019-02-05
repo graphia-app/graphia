@@ -517,7 +517,7 @@ Item
     {
         id: selectSourcesOfNodeAction
         text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: !busy && contextMenu.nodeWasClicked
+        enabled: !busy && contextMenu.nodeWasClicked && directed
         onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
     }
 
@@ -525,7 +525,7 @@ Item
     {
         id: selectTargetsOfNodeAction
         text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: !busy && contextMenu.nodeWasClicked
+        enabled: !busy && contextMenu.nodeWasClicked && directed
         onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
     }
 
@@ -596,8 +596,10 @@ Item
                     MenuItem { visible: selectTargetsOfNodeAction.enabled; action: selectTargetsOfNodeAction }
                     MenuItem { visible: selectNeighboursOfNodeAction.enabled; action: selectNeighboursOfNodeAction }
 
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectSourcesAction }
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectTargetsAction }
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                        selectSourcesAction.enabled; action: selectSourcesAction }
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                        selectTargetsAction.enabled; action: selectTargetsAction }
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectNeighboursAction }
 
                     MenuSeparator { visible: searchWebMenuItem.visible }

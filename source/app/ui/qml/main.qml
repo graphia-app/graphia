@@ -721,7 +721,7 @@ ApplicationWindow
     {
         id: selectSourcesAction
         text: qsTr("Select Sources of Selection")
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentDocument ? !currentDocument.busy && currentDocument.directed : false
         onTriggered: currentDocument && currentDocument.selectSources()
     }
 
@@ -729,7 +729,7 @@ ApplicationWindow
     {
         id: selectTargetsAction
         text: qsTr("Select Targets of Selection")
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentDocument ? !currentDocument.busy && currentDocument.directed : false
         onTriggered: currentDocument && currentDocument.selectTargets()
     }
 
@@ -1257,8 +1257,8 @@ ApplicationWindow
             MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
-            MenuItem { action: selectSourcesAction }
-            MenuItem { action: selectTargetsAction }
+            MenuItem { visible: selectSourcesAction.enabled; action: selectSourcesAction }
+            MenuItem { visible: selectTargetsAction.enabled; action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
             MenuItem { action: findAction }
