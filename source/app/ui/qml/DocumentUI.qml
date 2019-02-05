@@ -492,6 +492,16 @@ Item
         exportNodePositionsFileDialog.open();
     }
 
+    function searchWebForNode(nodeId)
+    {
+        var nodeName = document.nodeName(nodeId);
+        var url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
+            misc.webSearchEngineUrl.arg(nodeName) : "";
+
+        if(QmlUtils.urlIsValid(url))
+            Qt.openUrlExternally(url);
+    }
+
     CaptureScreenshot
     {
         id: captureScreenshot
@@ -613,15 +623,7 @@ Item
                         id: searchWebMenuItem
                         visible: contextMenu.nodeWasClicked
                         text: qsTr("Search Web for '") + contextMenu.clickedNodeName + qsTr("'")
-                        onTriggered:
-                        {
-                            var nodeName = document.nodeName(contextMenu.clickedNodeId);
-                            var url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
-                                misc.webSearchEngineUrl.arg(nodeName) : "";
-
-                            if(QmlUtils.urlIsValid(url))
-                                Qt.openUrlExternally(url);
-                        }
+                        onTriggered: { root.searchWebForNode(contextMenu.clickedNodeId); }
                     }
 
                     MenuSeparator { visible: changeBackgroundColourMenuItem.visible }

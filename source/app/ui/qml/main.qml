@@ -849,6 +849,26 @@ ApplicationWindow
 
     Action
     {
+        id: searchWebAction
+        text: qsTr("Search Web for Selected Node Name…")
+
+        property var _selectedNodeId:
+        {
+            if(currentDocument === null || currentDocument.numHeadNodesSelected !== 1)
+                return null;
+
+            return currentDocument.selectedHeadNodeIds[0];
+        }
+
+        enabled: currentDocument !== null && _selectedNodeId !== null
+        onTriggered:
+        {
+            currentDocument.searchWebForNode(_selectedNodeId);
+        }
+    }
+
+    Action
+    {
         id: pauseLayoutAction
         iconName:
         {
@@ -1342,8 +1362,9 @@ ApplicationWindow
         }
         Menu
         {
-            title: qsTr("&Analyses")
+            title: qsTr("T&ools")
             MenuItem { action: enrichmentAction }
+            MenuItem { action: searchWebAction }
         }
         Menu
         {
