@@ -766,6 +766,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
             _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numHeadNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
@@ -1185,6 +1186,26 @@ int Document::numNodesSelected() const
 {
     if(_selectionManager != nullptr)
         return _selectionManager->numNodesSelected();
+
+    return 0;
+}
+
+int Document::numHeadNodesSelected() const
+{
+    if(_selectionManager != nullptr)
+    {
+        auto selectedNodes = _selectionManager->selectedNodes();
+
+        for(auto it = selectedNodes.begin(); it != selectedNodes.end(); /*NO OP*/)
+        {
+            if(_graphModel->graph().typeOf(*it) == MultiElementType::Tail)
+                it = selectedNodes.erase(it);
+            else
+                ++it;
+        }
+
+        return static_cast<int>(selectedNodes.size());
+    }
 
     return 0;
 }

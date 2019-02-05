@@ -98,7 +98,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
-
+    Q_PROPERTY(int numHeadNodesSelected READ numHeadNodesSelected NOTIFY numHeadNodesSelectedChanged)
     Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
 
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
@@ -270,6 +270,7 @@ private:
     void setSaveRequired();
 
     int numNodesSelected() const;
+    int numHeadNodesSelected() const;
     int numInvisibleNodesSelected() const;
 
     void initialiseLayoutSettingsModel();
@@ -328,6 +329,7 @@ signals:
     void numNodesFoundChanged();
 
     void numNodesSelectedChanged();
+    void numHeadNodesSelectedChanged();
     void numInvisibleNodesSelectedChanged();
 
     void bookmarksChanged();

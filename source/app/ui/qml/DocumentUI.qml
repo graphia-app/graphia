@@ -113,6 +113,7 @@ Item
         (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
 
     property int numNodesSelected: document.numNodesSelected
+    property int numHeadNodesSelected: document.numHeadNodesSelected
     property var enrichmentTableModels: document.enrichmentTableModels
 
     property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
@@ -575,7 +576,12 @@ Item
                     property var clickedNodeId
                     property string clickedNodeName: elidedNodeName.elidedText
                     property bool nodeWasClicked: clickedNodeId !== undefined ? !clickedNodeId.isNull : false
-                    property bool clickedNodeIsSameAsSelection: { return numNodesSelected == 1 && nodeWasClicked && nodeIsSelected(clickedNodeId); }
+                    property bool clickedNodeIsSameAsSelection:
+                    {
+                        return numHeadNodesSelected === 1 &&
+                            nodeWasClicked &&
+                            nodeIsSelected(clickedNodeId);
+                    }
 
                     MenuItem { id: delete1; visible: deleteNodeAction.enabled; action: deleteNodeAction }
                     MenuItem { id: delete2; visible: deleteAction.enabled && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
