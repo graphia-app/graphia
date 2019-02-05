@@ -101,6 +101,9 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numHeadNodesSelected READ numHeadNodesSelected NOTIFY numHeadNodesSelectedChanged)
     Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
 
+    Q_PROPERTY(QVariantList selectedNodeIds READ selectedNodeIds NOTIFY selectedNodeIdsChanged)
+    Q_PROPERTY(QVariantList selectedHeadNodeIds READ selectedHeadNodeIds NOTIFY selectedHeadNodeIdsChanged)
+
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
 
     Q_PROPERTY(bool hasValidEdgeTextVisualisation READ hasValidEdgeTextVisualisation
@@ -273,6 +276,9 @@ private:
     int numHeadNodesSelected() const;
     int numInvisibleNodesSelected() const;
 
+    QVariantList selectedNodeIds() const;
+    QVariantList selectedHeadNodeIds() const;
+
     void initialiseLayoutSettingsModel();
 
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
@@ -331,6 +337,9 @@ signals:
     void numNodesSelectedChanged();
     void numHeadNodesSelectedChanged();
     void numInvisibleNodesSelectedChanged();
+
+    void selectedNodeIdsChanged();
+    void selectedHeadNodeIdsChanged();
 
     void bookmarksChanged();
 

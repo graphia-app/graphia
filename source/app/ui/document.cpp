@@ -768,6 +768,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numHeadNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::selectedNodeIdsChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::selectedHeadNodeIdsChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
@@ -1229,6 +1231,35 @@ int Document::numInvisibleNodesSelected() const
     }
 
     return 0;
+}
+
+QVariantList Document::selectedNodeIds() const
+{
+    QVariantList nodes;
+
+    if(_selectionManager != nullptr)
+    {
+        for(auto nodeId : _selectionManager->selectedNodes())
+            nodes.append(QVariant::fromValue<QmlNodeId>(nodeId));
+    }
+
+    return nodes;
+}
+
+QVariantList Document::selectedHeadNodeIds() const
+{
+    QVariantList nodes;
+
+    if(_selectionManager != nullptr)
+    {
+        for(auto nodeId : _selectionManager->selectedNodes())
+        {
+            if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
+                nodes.append(QVariant::fromValue<QmlNodeId>(nodeId));
+        }
+    }
+
+    return nodes;
 }
 
 void Document::selectFirstFound()

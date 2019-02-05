@@ -114,6 +114,9 @@ Item
 
     property int numNodesSelected: document.numNodesSelected
     property int numHeadNodesSelected: document.numHeadNodesSelected
+    property var selectedNodeIds: document.selectedNodeIds
+    property var selectedHeadNodeIds: document.selectedHeadNodeIds
+
     property var enrichmentTableModels: document.enrichmentTableModels
 
     property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
