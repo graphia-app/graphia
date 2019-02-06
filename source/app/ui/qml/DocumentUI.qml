@@ -392,6 +392,8 @@ Item
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.open(); }
+    function nodeName(nodeId) { return document.nodeName(nodeId); }
+
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {
         // js treats undefined as a valid argument instead of falling back to

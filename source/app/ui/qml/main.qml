@@ -847,10 +847,21 @@ ApplicationWindow
         }
     }
 
+    TextMetrics
+    {
+        id: elidedNodeName
+
+        elide: Text.ElideMiddle
+        elideWidth: 200
+        text: searchWebAction.enabled ?
+            currentDocument.nodeName(searchWebAction._selectedNodeId) : ""
+    }
+
     Action
     {
         id: searchWebAction
-        text: qsTr("Search Web for Selected Node Name…")
+        text: enabled ? qsTr("Search Web for '") + elidedNodeName.elidedText + qsTr("'…") :
+            qsTr("Search Web for Selected Node…")
 
         property var _selectedNodeId:
         {
