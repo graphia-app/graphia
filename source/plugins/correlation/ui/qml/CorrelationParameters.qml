@@ -96,6 +96,7 @@ BaseParameterDialog
         id: tabularDataParser
 
         minimumCorrelation: minimumCorrelationSpinBox.value
+        correlationType: { return algorithm.model.get(algorithm.currentIndex).value; }
         scalingType: { return scaling.model.get(scaling.currentIndex).value; }
         normaliseType: { return normalise.model.get(normalise.currentIndex).value; }
         missingDataType: { return missingDataType.model.get(missingDataType.currentIndex).value; }
@@ -184,7 +185,7 @@ BaseParameterDialog
                     {
                         text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a numerical dataset.<br>" +
                                    "<br>" +
-                                   "The <a href=\"https://kajeka.com/graphia/pearson\">Pearson Correlation coefficient</a> " +
+                                   "A <a href=\"https://kajeka.com/graphia/correlation_coef\">correlation coefficient</a> " +
                                    "provides this similarity metric. " +
                                    "If specified, the input data can be scaled and normalised, after which correlation scores are " +
                                    "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +
@@ -514,14 +515,81 @@ BaseParameterDialog
 
                     Text
                     {
-                        text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
-                                   "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
-                                   "All values below the minimum correlation threshold are also discarded and will not used in generating the graph.<br>" +
+                        text: qsTr("A value of 1.0 represents perfectly correlated rows whereas " +
+                                   "0.0 indicates no correlation. Negative correlation values are discarded. " +
+                                   "All values below the minimum correlation threshold are also discarded and " +
+                                   "will not used to create edges.<br>" +
                                    "<br>" +
-                                   "By default a transform is added which will remove edges for all values below the initial correlation threshold.")
+                                   "By default a transform is added which will remove edges for all values " +
+                                   "below the initial correlation threshold.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
+                    }
+
+                    RowLayout
+                    {
+                        Layout.fillWidth: true
+
+                        Text { text: qsTr("Algorithm:") }
+
+                        ComboBox
+                        {
+                            id: algorithm
+
+                            model: ListModel
+                            {
+                                ListElement { text: qsTr("Pearson");        value: CorrelationType.Pearson }
+                                ListElement { text: qsTr("Spearman Rank");  value: CorrelationType.SpearmanRank }
+                            }
+                            textRole: "text"
+
+                            onCurrentIndexChanged:
+                            {
+                                parameters.correlationType = model.get(currentIndex).value;
+                            }
+                        }
+
+                        HelpTooltip
+                        {
+                            title: qsTr("Correlation Algorithm")
+                            GridLayout
+                            {
+                                columns: 2
+                                Text
+                                {
+                                    text: qsTr("<b>Pearson:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("The Pearson correlation coefficient is a measure " +
+                                        "of the linear correlation between two variables.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("<b>Spearman Rank:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("Spearman's rank correlation coefficient is a " +
+                                        "nonparametric measure of the statistical dependence between " +
+                                        "the rankings of two variables. It assesses how well the " +
+                                        "relationship between two variables can be described using a " +
+                                        "monotonic function.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
                     }
 
                     RowLayout
@@ -1159,6 +1227,7 @@ BaseParameterDialog
                     text:
                     {
                         var summaryString = "";
+                        summaryString += qsTr("Correlation Metric: ") + algorithm.currentText + "<br>";
                         summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
                         summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
 
