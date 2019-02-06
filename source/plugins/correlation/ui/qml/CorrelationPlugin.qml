@@ -355,7 +355,7 @@ PluginContent
                 id: yAxisTextField
                 Layout.bottomMargin: 12
                 implicitWidth: 150
-                text: plot.xAxisLabel
+                text: plot.yAxisLabel
             }
         }
 
