@@ -297,7 +297,7 @@ ApplicationWindow
         id: plotContextMenu
         MenuItem
         {
-            text: qsTr("Save as Image...")
+            text: qsTr("Save as Image…")
             onTriggered: { heatmapSaveDialog.open(); }
         }
     }
@@ -312,7 +312,7 @@ ApplicationWindow
     {
         id: exportTableAction
         enabled: currentTableView != null && currentTableView.rowCount > 0;
-        text: qsTr("Export Table...")
+        text: qsTr("Export Table…")
         iconName: "document-save"
         onTriggered:
         {

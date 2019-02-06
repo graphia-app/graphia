@@ -1178,7 +1178,7 @@ void CorrelationPlotItem::configureLegend()
             moreText->setTextFlags(Qt::AlignLeft);
             moreText->setFont(legend->font());
             moreText->setTextColor(Qt::gray);
-            moreText->setText(QString(tr("...and %1 more"))
+            moreText->setText(QString(tr("…and %1 more"))
                 .arg(_selectedRows.size() - maxNumberOfElementsToDraw + 1));
             moreText->setVisible(true);
 

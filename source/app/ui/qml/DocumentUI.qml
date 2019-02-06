@@ -269,7 +269,7 @@ Item
 
         Labs.FileDialog
         {
-            title: qsTr("Save File...")
+            title: qsTr("Save File…")
             fileMode: Labs.FileDialog.SaveFile
             defaultSuffix: selectedNameFilter.extensions[0]
             nameFilters:
