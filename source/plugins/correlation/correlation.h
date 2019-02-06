@@ -33,12 +33,18 @@ public:
     static std::unique_ptr<Correlation> create(CorrelationType correlationType);
 };
 
-template<bool UseRanking>
+enum class RowType
+{
+    Raw,
+    Ranking
+};
+
+template<typename Algorithm, RowType rowType = RowType::Raw>
 class CovarianceCorrelation : public Correlation
 {
 public:
     std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
-        double minimumThreshold, IParser* parser = nullptr) const override
+        double minimumThreshold, IParser* parser = nullptr) const final
     {
         if(rows.empty())
             return {};
@@ -59,7 +65,7 @@ public:
         {
             const auto* rowA = &(*rowAIt);
 
-            if constexpr(UseRanking)
+            if constexpr(rowType == RowType::Ranking)
                 rowA = rowA->ranking();
 
             std::vector<CorrelationEdge> edges;
@@ -71,14 +77,10 @@ public:
             {
                 const auto* rowB = &(*rowBIt);
 
-                if constexpr(UseRanking)
+                if constexpr(rowType == RowType::Ranking)
                     rowB = rowB->ranking();
 
-                double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
-                double numerator = (numColumns * productSum) - (rowA->sum() * rowB->sum());
-                double denominator = rowA->variability() * rowB->variability();
-
-                double r = numerator / denominator;
+                double r = Algorithm::evaluate(numColumns, rowA, rowB);
 
                 if(std::isfinite(r) && r >= minimumThreshold)
                     edges.push_back({rowA->nodeId(), rowB->nodeId(), r});
@@ -100,13 +102,26 @@ public:
 
         std::vector<CorrelationEdge> edges;
         edges.reserve(std::distance(results.begin(), results.end()));
-        edges.insert(edges.end(), std::make_move_iterator(results.begin()), std::make_move_iterator(results.end()));
+        edges.insert(edges.end(), std::make_move_iterator(results.begin()),
+            std::make_move_iterator(results.end()));
 
         return edges;
     }
 };
 
-class PearsonCorrelation : public CovarianceCorrelation<false>
+struct PearsonAlgorithm
+{
+    static double evaluate(size_t numColumns, const CorrelationDataRow* rowA, const CorrelationDataRow* rowB)
+    {
+        double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
+        double numerator = (numColumns * productSum) - (rowA->sum() * rowB->sum());
+        double denominator = rowA->variability() * rowB->variability();
+
+        return numerator / denominator;
+    }
+};
+
+class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm>
 {
 public:
     QString attributeName() const override
@@ -122,7 +137,7 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<true>
+class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, RowType::Ranking>
 {
 public:
     QString attributeName() const override
