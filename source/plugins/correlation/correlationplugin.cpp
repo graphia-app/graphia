@@ -322,7 +322,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
         // number of values, skip it, since a large number of unique values
         // potentially causes performance problems, and it's probably not a
         // useful annotation in the first place
-        if(numUniqueValues * 2 > numValues)
+        if((numValues > 1000) && (numUniqueValues * 2 > numValues))
             continue;
 
         _columnAnnotations.emplace_back(name, values.begin(), values.end());
