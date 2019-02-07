@@ -19,13 +19,20 @@ DEFINE_QML_ENUM(
     Pearson,
     SpearmanRank);
 
+DEFINE_QML_ENUM(
+    Q_GADGET, CorrelationPolarity,
+    Positive,
+    Negative,
+    Both);
+
 class Correlation
 {
 public:
     virtual ~Correlation() = default;
 
     virtual std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
-        double minimumThreshold, IParser* parser = nullptr) const = 0;
+        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        IParser* parser = nullptr) const = 0;
 
     virtual QString attributeName() const = 0;
     virtual QString attributeDescription() const = 0;
@@ -44,7 +51,8 @@ class CovarianceCorrelation : public Correlation
 {
 public:
     std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
-        double minimumThreshold, IParser* parser = nullptr) const final
+        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        IParser* parser = nullptr) const final
     {
         if(rows.empty())
             return {};
@@ -82,7 +90,20 @@ public:
 
                 double r = Algorithm::evaluate(numColumns, rowA, rowB);
 
-                if(std::isfinite(r) && r >= minimumThreshold)
+                if(!std::isfinite(r))
+                    continue;
+
+                bool createEdge = false;
+
+                switch(polarity)
+                {
+                default:
+                case CorrelationPolarity::Positive: createEdge = (r >= minimumThreshold); break;
+                case CorrelationPolarity::Negative: createEdge = (r <= -minimumThreshold); break;
+                case CorrelationPolarity::Both:     createEdge = (std::abs(r) >= minimumThreshold); break;
+                }
+
+                if(createEdge)
                     edges.push_back({rowA->nodeId(), rowB->nodeId(), r});
             }
 

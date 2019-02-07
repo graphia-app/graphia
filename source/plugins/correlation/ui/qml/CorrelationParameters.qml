@@ -97,6 +97,7 @@ BaseParameterDialog
 
         minimumCorrelation: minimumCorrelationSpinBox.value
         correlationType: { return algorithm.model.get(algorithm.currentIndex).value; }
+        correlationPolarity: { return polarity.model.get(polarity.currentIndex).value; }
         scalingType: { return scaling.model.get(scaling.currentIndex).value; }
         normaliseType: { return normalise.model.get(normalise.currentIndex).value; }
         missingDataType: { return missingDataType.model.get(missingDataType.currentIndex).value; }
@@ -516,12 +517,13 @@ BaseParameterDialog
                     Text
                     {
                         text: qsTr("A value of 1.0 represents perfectly correlated rows whereas " +
-                                   "0.0 indicates no correlation. Negative correlation values are discarded. " +
-                                   "All values below the minimum correlation threshold are also discarded and " +
-                                   "will not used to create edges.<br>" +
+                                   "0.0 indicates no correlation. Should they be enabled, negative " +
+                                   "correlation values indicate an anti-correlation. " +
+                                   "All absolute values below the minimum correlation threshold are " +
+                                   "discarded and will not used to create edges.<br>" +
                                    "<br>" +
-                                   "By default a transform is added which will remove edges for all values " +
-                                   "below the initial correlation threshold.")
+                                   "By default a transform is added which will remove edges for all " +
+                                   "absolute values below the initial correlation threshold.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
@@ -588,6 +590,39 @@ BaseParameterDialog
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
+                            }
+                        }
+
+                        Text { text: qsTr("Polarity:") }
+
+                        ComboBox
+                        {
+                            id: polarity
+
+                            model: ListModel
+                            {
+                                ListElement { text: qsTr("Positive");   value: CorrelationPolarity.Positive }
+                                ListElement { text: qsTr("Negative");   value: CorrelationPolarity.Negative }
+                                ListElement { text: qsTr("Both");       value: CorrelationPolarity.Both }
+                            }
+                            textRole: "text"
+
+                            onCurrentIndexChanged:
+                            {
+                                parameters.correlationPolarity = model.get(currentIndex).value;
+                            }
+                        }
+
+                        HelpTooltip
+                        {
+                            title: qsTr("Polarity")
+                            Text
+                            {
+                                wrapMode: Text.WordWrap
+                                text: qsTr("By default only positive correlations are used to create " +
+                                           "the graph. In most cases this is the correct setting, " +
+                                           "but for some data sources it may make more sense to take " +
+                                           "account of the magnitude of the correlation.")
                             }
                         }
                     }
@@ -1338,6 +1373,7 @@ BaseParameterDialog
         parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
             initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
             correlationType: CorrelationType.Pearson,
+            correlationPolarity: CorrelationPolarity.Positive,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.None };
 

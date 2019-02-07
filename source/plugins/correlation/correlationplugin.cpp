@@ -197,10 +197,29 @@ void CorrelationPluginInstance::createAttributes()
                                "divided by the mean."));
 
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
-    graphModel()->createAttribute(correlation->attributeName())
+    _correlationAttributeName = correlation->attributeName();
+
+    graphModel()->createAttribute(_correlationAttributeName)
             .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(correlation->attributeDescription());
+
+    auto correlationPolarity = static_cast<CorrelationPolarity>(_correlationPolarity);
+    switch(correlationPolarity)
+    {
+    case CorrelationPolarity::Negative:
+    case CorrelationPolarity::Both:
+        _correlationAbsAttributeName = tr("Absolute ") + _correlationAttributeName;
+
+        graphModel()->createAttribute(_correlationAbsAttributeName)
+                .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
+                .setFlag(AttributeFlag::AutoRange)
+                .setDescription(correlation->attributeDescription());
+        break;
+
+    default:
+        break;
+    }
 }
 
 void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlightedRows)
@@ -225,7 +244,8 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
 std::vector<CorrelationEdge> CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
 {
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
-    return correlation->process(_dataRows, minimumThreshold, &parser);
+    return correlation->process(_dataRows, minimumThreshold,
+        static_cast<CorrelationPolarity>(_correlationPolarity), &parser);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)
@@ -366,6 +386,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _transpose = (value == QLatin1String("true"));
     else if(name == QLatin1String("correlationType"))
         _correlationType = static_cast<CorrelationType>(value.toInt());
+    else if(name == QLatin1String("correlationPolarity"))
+        _correlationPolarity = static_cast<CorrelationPolarity>(value.toInt());
     else if(name == QLatin1String("scaling"))
         _scalingType = static_cast<ScalingType>(value.toInt());
     else if(name == QLatin1String("normalise"))
@@ -386,20 +408,42 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
 
 QStringList CorrelationPluginInstance::defaultTransforms() const
 {
-    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
-
     QStringList defaultTransforms =
     {
-        QString(R"("Remove Edges" where $"%1" < %2)")
-            .arg(correlation->attributeName())
-            .arg(_initialCorrelationThreshold),
         R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
+
+    auto correlationPolarity = static_cast<CorrelationPolarity>(_correlationPolarity);
+    switch(correlationPolarity)
+    {
+    default:
+    case CorrelationPolarity::Positive:
+        defaultTransforms.append(
+            QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
+            .arg(_correlationAttributeName)
+            .arg(_initialCorrelationThreshold));
+        break;
+
+    case CorrelationPolarity::Negative:
+        defaultTransforms.append(
+            QStringLiteral(R"("Remove Edges" where $"%1" > %2)")
+            .arg(_correlationAttributeName)
+            .arg(-_initialCorrelationThreshold));
+        break;
+
+    case CorrelationPolarity::Both:
+        defaultTransforms.append(
+            QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
+            .arg(_correlationAbsAttributeName)
+            .arg(_initialCorrelationThreshold));
+        break;
+    }
 
     if(_edgeReductionType == EdgeReductionType::KNN)
     {
         defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1")")
-            .arg(correlation->attributeName()));
+            .arg(correlationPolarity == CorrelationPolarity::Positive ?
+            _correlationAttributeName : _correlationAbsAttributeName));
     }
 
     if(_clusteringType == ClusteringType::MCL)
@@ -466,6 +510,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
     jsonObject["correlationType"] = static_cast<int>(_correlationType);
+    jsonObject["correlationPolarity"] = static_cast<int>(_correlationPolarity);
     jsonObject["scaling"] = static_cast<int>(_scalingType);
     jsonObject["normalisation"] = static_cast<int>(_normaliseType);
     jsonObject["missingDataType"] = static_cast<int>(_missingDataType);
@@ -570,10 +615,11 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     if(dataVersion >= 2)
     {
-        if(!u::contains(jsonObject, "correlationType"))
+        if(!u::contains(jsonObject, "correlationType") || !u::contains(jsonObject, "correlationPolarity"))
             return false;
 
         _correlationType = static_cast<CorrelationType>(jsonObject["correlationType"]);
+        _correlationPolarity = static_cast<CorrelationPolarity>(jsonObject["correlationPolarity"]);
     }
 
     createAttributes();

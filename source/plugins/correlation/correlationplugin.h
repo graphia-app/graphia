@@ -66,12 +66,16 @@ private:
     TabularData _tabularData;
     QRect _dataRect;
     CorrelationType _correlationType = CorrelationType::Pearson;
+    CorrelationPolarity _correlationPolarity = CorrelationPolarity::Positive;
     ScalingType _scalingType = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
     double _missingDataReplacementValue = 0.0;
+
+    QString _correlationAttributeName;
+    QString _correlationAbsAttributeName;
 
     // The rows that are selected in the table view
     QVector<int> _highlightedRows;

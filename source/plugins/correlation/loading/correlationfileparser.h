@@ -97,6 +97,7 @@ class TabularDataParser : public QObject, public Cancellable
 
     Q_PROPERTY(double minimumCorrelation MEMBER _minimumCorrelation NOTIFY parameterChanged)
     Q_PROPERTY(int correlationType MEMBER _correlationType NOTIFY parameterChanged)
+    Q_PROPERTY(int correlationPolarity MEMBER _correlationPolarity NOTIFY parameterChanged)
     Q_PROPERTY(int scalingType MEMBER _scalingType NOTIFY parameterChanged)
     Q_PROPERTY(int normaliseType MEMBER _normaliseType NOTIFY parameterChanged)
     Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
@@ -119,6 +120,7 @@ private:
 
     double _minimumCorrelation = 0.0;
     int _correlationType = static_cast<int>(CorrelationType::Pearson);
+    int _correlationPolarity = static_cast<int>(CorrelationPolarity::Positive);
     int _scalingType = static_cast<int>(ScalingType::None);
     int _normaliseType = static_cast<int>(NormaliseType::None);
     int _missingDataType = static_cast<int>(MissingDataType::None);

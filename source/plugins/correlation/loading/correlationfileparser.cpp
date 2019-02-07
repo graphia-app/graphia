@@ -501,13 +501,14 @@ void TabularDataParser::estimateGraphSize()
         auto dataRows = sampledDataRows(numSampleRows);
 
         auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
-        auto sampleEdges = correlation->process(dataRows, _minimumCorrelation);
+        auto sampleEdges = correlation->process(dataRows, _minimumCorrelation,
+            static_cast<CorrelationPolarity>(_correlationPolarity));
 
         if(sampleEdges.empty())
             return QVariantMap();
 
         std::sort(sampleEdges.begin(), sampleEdges.end(),
-            [](const auto& a, const auto& b) { return a._r > b._r; });
+            [](const auto& a, const auto& b) { return std::abs(a._r) > std::abs(b._r); });
 
         const auto numEstimateSamples = 100;
         const auto sampleQuantum = (1.0 - _minimumCorrelation) / (numEstimateSamples - 1);
@@ -530,9 +531,9 @@ void TabularDataParser::estimateGraphSize()
             nonSingletonNodes.insert(sampleEdge._target);
             numSampledEdges++;
 
-            if(sampleEdge._r <= sampleCutoff)
+            if(std::abs(sampleEdge._r) <= sampleCutoff)
             {
-                keys.append(sampleEdge._r);
+                keys.append(std::abs(sampleEdge._r));
                 auto numNodes = (nonSingletonNodes.size() * 100) / percent;
                 auto numEdges = (numSampledEdges * 10000) / percentSq;
                 estimatedNumNodes.append(numNodes);
@@ -542,7 +543,7 @@ void TabularDataParser::estimateGraphSize()
             }
         }
 
-        keys.append(sampleEdges.back()._r);
+        keys.append(std::abs(sampleEdges.back()._r));
         auto numNodes = (nonSingletonNodes.size() * 100) / percent;
         auto numEdges = (numSampledEdges * 10000) / percentSq;
         estimatedNumNodes.append(numNodes);
