@@ -132,7 +132,7 @@ static QString stripZeroes(QString value)
         if(!value[i].isDigit())
             continue;
 
-        if(indexOfDecimal == 1)
+        if(indexOfDecimal == (i + 1))
             break;
 
         if(value[i] == '0')
@@ -164,27 +164,26 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
     double smallThreshold = std::pow(10, -minScientificFormattedStringDigitsThreshold);
     double largeThreshold = std::pow(10, maxScientificFormattedStringDigitsThreshold);
     auto exponentChar = QLocale::system().exponential();
+    auto absValue = std::abs(value);
 
     if(maxDecimalPlaces == 0)
     {
-        if(value <= 0.001)
+        if(absValue <= 0.001)
             maxDecimalPlaces = 5;
-        else if(value <= 0.01)
+        else if(absValue <= 0.01)
             maxDecimalPlaces = 4;
-        else if(value <= 1.0)
+        else if(absValue <= 1.0)
             maxDecimalPlaces = 3;
-        else if(value <= 100.0)
+        else if(absValue <= 100.0)
             maxDecimalPlaces = 2;
-        else if(value <= 1000.0)
+        else if(absValue <= 1000.0)
             maxDecimalPlaces = 1;
     }
 
     if(maxDecimalPlaces < minDecimalPlaces)
         maxDecimalPlaces = minDecimalPlaces;
 
-    if(std::isfinite(value) &&
-        ((value >= largeThreshold || value <= -largeThreshold) ||
-        (value < smallThreshold && value > -smallThreshold && value != 0.0)))
+    if(std::isfinite(value) && (absValue >= largeThreshold || (absValue < smallThreshold && value != 0.0)))
     {
         formattedString = QLocale::system().toString(value, 'e', 2);
         auto splitString = formattedString.split(exponentChar);
