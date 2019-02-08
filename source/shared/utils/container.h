@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <random>
 
 #include <QtGlobal>
 
@@ -150,10 +151,13 @@ namespace u
 
         auto sample = container;
 
+        std::default_random_engine dre;
+
         for(size_t i = 0; i < numSamples; i++)
         {
             int high = static_cast<int>(sample.size() - i) - 1;
-            std::swap(sample[i], sample[i + u::rand(0, high)]);
+            std::uniform_int_distribution uid(0, high);
+            std::swap(sample[i], sample[i + uid(dre)]);
         }
 
         sample.resize(numSamples);
