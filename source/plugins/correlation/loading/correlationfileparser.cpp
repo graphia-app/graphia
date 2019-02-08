@@ -510,8 +510,9 @@ void TabularDataParser::estimateGraphSize()
         std::sort(sampleEdges.begin(), sampleEdges.end(),
             [](const auto& a, const auto& b) { return std::abs(a._r) > std::abs(b._r); });
 
+        const auto smallestSampledCorrelation = sampleEdges.back()._r;
         const auto numEstimateSamples = 100;
-        const auto sampleQuantum = (1.0 - _minimumCorrelation) / (numEstimateSamples - 1);
+        const auto sampleQuantum = (1.0 - smallestSampledCorrelation) / (numEstimateSamples - 1);
         auto sampleCutoff = 1.0;
 
         QVector<double> keys;
