@@ -51,11 +51,12 @@ void CorrelationDataRow::update()
     _coefVar = (allPositive && _mean > 0.0) ? _stddev / _mean : std::nan("1");
 }
 
+void CorrelationDataRow::generateRanking() const
+{
+    _rankingRow = std::make_shared<CorrelationDataRow>(u::rankingOf(_data), _nodeId, _cost);
+}
+
 const CorrelationDataRow* CorrelationDataRow::ranking() const
 {
-    // Generate ranking row data on demand
-    if(_rankingRow == nullptr)
-        _rankingRow = std::make_shared<CorrelationDataRow>(u::rankingOf(_data), _nodeId, _cost);
-
     return _rankingRow.get();
 }

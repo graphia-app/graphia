@@ -64,7 +64,12 @@ public:
 
         uint64_t totalCost = 0;
         for(const auto& row : rows)
+        {
             totalCost += row.computeCostHint();
+
+            if constexpr(rowType == RowType::Ranking)
+                row.generateRanking();
+        }
 
         std::atomic<uint64_t> cost(0);
 

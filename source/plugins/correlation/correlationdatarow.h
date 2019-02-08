@@ -63,6 +63,7 @@ public:
 
     void update();
 
+    void generateRanking() const;
     const CorrelationDataRow* ranking() const;
 
 private:
