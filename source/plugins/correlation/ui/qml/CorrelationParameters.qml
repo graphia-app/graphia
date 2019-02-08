@@ -734,7 +734,7 @@ BaseParameterDialog
                     {
                         id: graphSizeEstimatePlot
 
-                        visible: tabularDataParser.graphSizeEstimate.keys !== undefined
+                        visible: tabularDataParser.graphSizeEstimate.keys !== undefined || _timedBusy
                         graphSizeEstimate: tabularDataParser.graphSizeEstimate
 
                         Layout.fillWidth: true
