@@ -400,7 +400,12 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
 #ifdef DISABLE_AUTH
         onReplyReceived();
 #else
+        _sslErrors.clear();
         _reply = _networkManager.post(request, multiPart);
+        connect(_reply, &QNetworkReply::sslErrors, [this](const QList<QSslError>& errors)
+        {
+            _sslErrors = errors;
+        });
         multiPart->setParent(_reply);
 #endif
     });
@@ -532,7 +537,23 @@ void Auth::onReplyReceived()
         }
         else if(expired())
         {
-            auto message = QStringLiteral("<b>NETWORK ERROR:</b> %1").arg(_reply->errorString());
+            auto message = tr("<b>NETWORK ERROR:</b> %1 (%2)")
+                .arg(_reply->errorString())
+                .arg(static_cast<int>(_reply->error()));
+
+            if(!_sslErrors.isEmpty())
+            {
+                QString sslCodes;
+                for(const auto& sslError: _sslErrors)
+                {
+                    if(!sslCodes.isEmpty())
+                        sslCodes += tr(", ");
+                    sslCodes += QString::number(static_cast<int>(sslError.error()));
+                }
+
+                message += tr(" [%s]").arg(sslCodes);
+            }
+
             if(_message != message)
             {
                 _message = message;
