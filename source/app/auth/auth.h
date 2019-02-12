@@ -108,6 +108,7 @@ private:
     bool _authenticated = false;
 
     QString _message;
+    QList<QSslError> _sslErrors;
 
     uint _issueTime = 0;
     uint _expiryTime = 0;
