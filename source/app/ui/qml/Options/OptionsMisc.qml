@@ -12,6 +12,7 @@ Item
 {
     Preferences
     {
+        id: misc
         section: "misc"
 
         property alias focusFoundNodes: focusFoundNodesCheckbox.checked
@@ -80,6 +81,12 @@ Item
                 {
                     textColor: QmlUtils.urlIsValid(webSearchEngineField.text) ? "black" : "red"
                 }
+            }
+
+            ToolButton
+            {
+                iconName: "view-refresh"
+                onClicked: { misc.reset("webSearchEngineUrl"); }
             }
         }
 
