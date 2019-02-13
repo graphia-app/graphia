@@ -892,6 +892,7 @@ void Document::selectSources()
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
+    Q_ASSERT(!selectedNodeIds.empty());
     NodeIdSet nodeIds = selectedNodeIds;
 
     for(auto nodeId : selectedNodeIds)
@@ -922,6 +923,7 @@ void Document::selectTargets()
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
+    Q_ASSERT(!selectedNodeIds.empty());
     NodeIdSet nodeIds = selectedNodeIds;
 
     for(auto nodeId : selectedNodeIds)
@@ -952,6 +954,7 @@ void Document::selectNeighbours()
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
+    Q_ASSERT(!selectedNodeIds.empty());
     NodeIdSet nodeIds = selectedNodeIds;
 
     for(auto nodeId : selectedNodeIds)

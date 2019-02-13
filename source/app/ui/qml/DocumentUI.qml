@@ -112,6 +112,7 @@ Item
     property bool saveRequired: document.loadComplete &&
         (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
 
+    property bool nodeSelectionEmpty: document.numNodesSelected === 0
     property int numNodesSelected: document.numNodesSelected
     property int numHeadNodesSelected: document.numHeadNodesSelected
     property var selectedNodeIds: document.selectedNodeIds
