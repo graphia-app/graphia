@@ -10,6 +10,9 @@
 void Preferences::define(const QString& key, const QVariant& defaultValue,
                          const QVariant& minimumValue, const QVariant& maximumValue)
 {
+    if(defaultValue.isValid() && _defaultValue[key] != defaultValue)
+        _defaultValue[key] = defaultValue;
+
     if(minimumValue.isValid() && _minimumValue[key] != minimumValue)
     {
         _minimumValue[key] = minimumValue;
@@ -73,6 +76,11 @@ void Preferences::set(const QString& key, QVariant value, bool notify)
         emit preferenceChanged(key, value);
 }
 
+void Preferences::reset(const QString& key)
+{
+    set(key, _defaultValue[key]);
+}
+
 bool Preferences::exists(const QString& key)
 {
     return _settings.contains(key);
@@ -108,6 +116,11 @@ void QmlPreferences::setSection(const QString& section)
 
         emit sectionChanged();
     }
+}
+
+void QmlPreferences::reset(const QString& key)
+{
+    S(Preferences)->reset(QStringLiteral("%1/%2").arg(_section, key));
 }
 
 void QmlPreferences::timerEvent(QTimerEvent* event)

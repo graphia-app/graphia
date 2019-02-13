@@ -17,6 +17,7 @@ class Preferences : public QObject, public Singleton<Preferences>
 
 private:
     QSettings _settings;
+    std::map<QString, QVariant> _defaultValue;
     std::map<QString, QVariant> _minimumValue;
     std::map<QString, QVariant> _maximumValue;
 
@@ -30,6 +31,7 @@ public:
     QVariant maximum(const QString& key) const;
 
     void set(const QString& key, QVariant value, bool notify = true);
+    void reset(const QString& key);
 
     bool exists(const QString& key);
 
@@ -51,6 +53,8 @@ public:
 
     QString section() const;
     void setSection(const QString& section);
+
+    Q_INVOKABLE void reset(const QString& key);
 
 private:
     bool _initialised = false;
@@ -96,6 +100,7 @@ namespace u
     template<typename... Args> QVariant minPref(Args&&... args) { return S(Preferences)->minimum(std::forward<Args>(args)...); }
     template<typename... Args> QVariant maxPref(Args&&... args) { return S(Preferences)->maximum(std::forward<Args>(args)...); }
     template<typename... Args> void setPref(Args&&... args)     { return S(Preferences)->set(std::forward<Args>(args)...); }
+    template<typename... Args> void resetPref(Args&&... args)   { return S(Preferences)->reset(std::forward<Args>(args)...); }
     template<typename... Args> bool prefExists(Args&&... args)  { return S(Preferences)->exists(std::forward<Args>(args)...); }
 } // namespace u
 
