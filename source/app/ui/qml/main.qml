@@ -721,7 +721,8 @@ ApplicationWindow
     {
         id: selectSourcesAction
         text: qsTr("Select Sources of Selection")
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentDocument ? !currentDocument.busy &&
+            !currentDocument.nodeSelectionEmpty : false
         onTriggered: currentDocument && currentDocument.selectSources()
     }
 
@@ -729,7 +730,8 @@ ApplicationWindow
     {
         id: selectTargetsAction
         text: qsTr("Select Targets of Selection")
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentDocument ? !currentDocument.busy &&
+            !currentDocument.nodeSelectionEmpty : false
         onTriggered: currentDocument && currentDocument.selectTargets()
     }
 
@@ -738,7 +740,8 @@ ApplicationWindow
         id: selectNeighboursAction
         text: qsTr("Select Neigh&bours of Selection")
         shortcut: "Ctrl+B"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentDocument ? !currentDocument.busy &&
+            !currentDocument.nodeSelectionEmpty : false
         onTriggered: currentDocument && currentDocument.selectNeighbours()
     }
 
