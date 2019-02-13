@@ -87,6 +87,12 @@ public:
         return _componentRenderers;
     }
 
+    const ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray>&
+    componentRenderers() const
+    {
+        return _componentRenderers;
+    }
+
     GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;
     Transition& transition() { return _transition; }
 
@@ -233,7 +239,7 @@ private:
 
     Mode bestFocusParameters(GraphQuickItem* graphQuickItem, NodeId& focusNodeId, float& radius) const;
 
-    QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) override;
+    QOpenGLFramebufferObject* createFramebufferObject(const QSize& size) override;
     void render() override;
     void synchronize(QQuickFramebufferObject* item) override;
 
