@@ -257,10 +257,12 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
         _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
 
-    for(ComponentId componentId : renderer.graphModel()->graph().componentIds())
+    for(auto& componentRendererRef : renderer.componentRenderers())
     {
-        _componentCameras.emplace_back(*renderer.componentRendererForId(componentId)->camera());
-        _componentViewports.emplace_back(renderer.componentRendererForId(componentId)->dimensions());
+        const GraphComponentRenderer* componentRenderer = componentRendererRef;
+
+        _componentCameras.emplace_back(*componentRenderer->camera());
+        _componentViewports.emplace_back(componentRenderer->dimensions());
     }
 
     // Just copy the SDF texture
