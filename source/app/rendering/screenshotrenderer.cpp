@@ -174,7 +174,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 {
     std::vector<GLfloat> componentData;
 
-    double scaleX = static_cast<double>(screenshotSize.width()) / viewportSize.width();
+    // We always scale to the Y axis
     double scaleY = static_cast<double>(screenshotSize.height()) / viewportSize.height();
 
     for(size_t componentIndex = 0; componentIndex < _componentCameras.size(); componentIndex++)
@@ -182,15 +182,21 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         Camera& componentCamera = _componentCameras.at(componentIndex);
         QRectF& componentViewport = _componentViewports.at(componentIndex);
 
+        // Scaling the X pos by Y scale will position components correctly relative to each other
+        // but the centers of viewportsize and screenshotsize will not align. We need to shift the
+        // components based on the change in the aspect ratio and widths.
+        double scaledXPos = (componentViewport.x() * scaleY);
+        double offsetXToCenter = (0.5 * (screenshotSize.width() - (viewportSize.width() * scaleY)));
+
         QRectF scaledDimensions;
-        scaledDimensions.setTopLeft({componentViewport.x() * scaleX, componentViewport.y() * scaleY});
-        scaledDimensions.setWidth(componentViewport.width() * scaleX);
+        scaledDimensions.setTopLeft({scaledXPos + offsetXToCenter, componentViewport.y() * scaleY});
+        scaledDimensions.setWidth(componentViewport.width() * scaleY);
         scaledDimensions.setHeight(componentViewport.height() * scaleY);
 
         float aspectRatio =
             static_cast<float>(scaledDimensions.width()) / static_cast<float>(scaledDimensions.height());
-        auto _fovy = 60.0f;
-        componentCamera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+        auto fovy = 60.0f;
+        componentCamera.setPerspectiveProjection(fovy, aspectRatio, 0.3f, 50000.0f);
         componentCamera.setViewportWidth(scaledDimensions.width());
         componentCamera.setViewportHeight(scaledDimensions.height());
 
