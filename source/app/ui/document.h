@@ -381,6 +381,7 @@ public:
     Q_INVOKABLE void selectTargetsOf(QmlNodeId nodeId);
     Q_INVOKABLE void selectNeighbours();
     Q_INVOKABLE void selectNeighboursOf(QmlNodeId nodeId);
+    Q_INVOKABLE void selectBySharedAttributeValue(const QString& attributeName);
     Q_INVOKABLE void invertSelection();
 
     Q_INVOKABLE void undo();

@@ -979,6 +979,48 @@ void Document::selectNeighboursOf(QmlNodeId nodeId)
     _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
 }
 
+void Document::selectBySharedAttributeValue(const QString& attributeName)
+{
+    if(busy() || _selectionManager == nullptr)
+        return;
+
+    auto selectedNodeIds = _selectionManager->selectedNodes();
+    Q_ASSERT(!selectedNodeIds.empty());
+
+    const auto* attribute = _graphModel->attributeByName(attributeName);
+    Q_ASSERT(attribute != nullptr);
+
+    std::set<QString> attributeValues;
+
+    for(auto nodeId : selectedNodeIds)
+        attributeValues.emplace(attribute->stringValueOf(nodeId));
+
+    QString term;
+    for(const auto& attributeValue : attributeValues)
+    {
+        if(!term.isEmpty())
+            term.append('|');
+
+        term.append(QRegularExpression::escape(attributeValue));
+    }
+
+    term = QStringLiteral("^(%1)$").arg(term);
+
+    auto conditionFn = CreateConditionFnFor::node(*attribute,
+        ConditionFnOp::String::MatchesRegex, term);
+
+    std::vector<NodeId> nodeIds;
+
+    for(auto nodeId : _graphModel->graph().nodeIds())
+    {
+        if(conditionFn(nodeId))
+            nodeIds.emplace_back(nodeId);
+    }
+
+    if(!nodeIds.empty())
+        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
 void Document::invertSelection()
 {
     if(busy() || _selectionManager == nullptr)

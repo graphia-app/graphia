@@ -142,6 +142,18 @@ Item
         return sharedValuesProxyModel.count;
     }
 
+    property var sharedValuesAttributeNames:
+    {
+        var attributeNames = [];
+
+        for(var i = 0; i < sharedValuesProxyModel.count; i++)
+            attributeNames.push(sharedValuesProxyModel.get(i, "display"));
+
+        return attributeNames;
+    }
+
+    property string _lastSharedValueAttributeName
+
     function _refreshNumAttributesWithSharedValues()
     {
         sharedValuesProxyModel.sourceModel =
@@ -384,6 +396,11 @@ Item
     function selectTargetsOf(nodeId) { document.selectTargetsOf(nodeId); }
     function selectNeighbours() { document.selectNeighbours(); }
     function selectNeighboursOf(nodeId) { document.selectNeighboursOf(nodeId); }
+    function selectBySharedAttributeValue(attributeName)
+    {
+        _lastSharedValueAttributeName = attributeName;
+        document.selectBySharedAttributeValue(attributeName);
+    }
     function undo() { document.undo(); }
     function redo() { document.redo(); }
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }

@@ -1245,7 +1245,7 @@ ApplicationWindow
             MenuItem { action: fileOpenInTabAction }
             Menu
             {
-                id: recentFileMenu;
+                id: recentFileMenu
                 title: qsTr("&Recent Files")
 
                 Instantiator
@@ -1294,6 +1294,26 @@ ApplicationWindow
             MenuItem { visible: selectSourcesAction.enabled; action: selectSourcesAction }
             MenuItem { visible: selectTargetsAction.enabled; action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
+            Menu
+            {
+                id: sharedValuesMenu
+                title: qsTr("Select By Shared Attribute Value")
+                enabled: currentDocument !== null && !currentDocument.nodeSelectionEmpty &&
+                    currentDocument.numAttributesWithSharedValues > 0
+
+                Instantiator
+                {
+                    id: sharedValuesInstantiator
+                    model: currentDocument !== null ? currentDocument.sharedValuesAttributeNames : []
+                    MenuItem
+                    {
+                        text: modelData
+                        onTriggered: { currentDocument.selectBySharedAttributeValue(text); }
+                    }
+                    onObjectAdded: sharedValuesMenu.insertItem(index, object)
+                    onObjectRemoved: sharedValuesMenu.removeItem(object)
+                }
+            }
             MenuSeparator {}
             MenuItem { action: findAction }
             MenuItem { action: advancedFindAction }
