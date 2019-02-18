@@ -15,10 +15,10 @@ Item
     property double _width:
     {
         var w = (root._numKeys * root.keyWidth) +
-            ((root._numKeys - 1) * row.spacing);
+            ((root._numKeys - 1) * root._spacing);
 
         var minW = (root._numKeys - 1) *
-            (row.spacing + root._minimumKeySize)
+            (root._spacing + root._minimumKeySize)
 
         if(root.hoverEnabled)
             minW += root.highlightSize;
@@ -34,6 +34,7 @@ Item
     property bool separateKeys: true
 
     property int _padding: hoverEnabled ? Constants.padding : 0
+    property int _spacing: separateKeys ? 2 : 0
 
     property int _numKeys:
     {
@@ -153,7 +154,7 @@ Item
 
         anchors.centerIn: parent
 
-        spacing: root.separateKeys ? 2 : 0
+        spacing: root._spacing
 
         // We set a fixed width here, otherwise the row's width is defined
         // by its contents and can fluctuate very slightly when hovered,
@@ -179,7 +180,7 @@ Item
                         return root.highlightSize;
 
                     var w = root.width - root._padding;
-                    w -= (root._numKeys - 1) * row.spacing;
+                    w -= (root._numKeys - 1) * root._spacing;
 
                     var d = root._numKeys;
 
@@ -290,8 +291,8 @@ Item
             return -1;
 
         var coord = mapToItem(row, mouseArea.mouseX, mouseArea.mouseY);
-        var w = row.width + row.spacing;
-        var f = (coord.x - (row.spacing * 0.5)) / w;
+        var w = row.width + root._spacing;
+        var f = (coord.x - (root._spacing * 0.5)) / w;
 
         var index = Math.floor(f * root._numKeys);
 
