@@ -343,6 +343,10 @@ ApplicationWindow
     {
         fileUrl = fileUrl.toString().trim();
 
+        // If the file name is empty, avoid doing anything with it
+        if(fileUrl.length === 0)
+            return;
+
         if(!QmlUtils.fileUrlExists(fileUrl))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
