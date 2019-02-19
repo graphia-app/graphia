@@ -14,7 +14,9 @@ mkdir -p ${BUILD_DIR}
 SAFE_XCODE_SELECT=$(which safe-xcode-select)
 if [ ! -z "${SAFE_XCODE_SELECT}" ]
 then
-  ${SAFE_XCODE_SELECT} /Applications/Xcode.app
+  # Use Xcode 9 install, to workaround Qt's current limitations
+  # with "Dark mode" on newer MacOS releases
+  ${SAFE_XCODE_SELECT} /Applications/Xcode.9.app
   echo "Switched Xcode version to:"
   xcodebuild -version
 fi
