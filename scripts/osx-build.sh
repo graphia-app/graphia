@@ -8,6 +8,17 @@ BUILD_DIR="build"
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
+# https://github.com/detroit-labs/safe-xcode-select
+# If this is installed, use it to select the default Xcode,
+# in case something else has changed it
+SAFE_XCODE_SELECT=$(which safe-xcode-select)
+if [ ! -z "${SAFE_XCODE_SELECT}" ]
+then
+  ${SAFE_XCODE_SELECT} /Applications/Xcode.app
+  echo "Switched Xcode version to:"
+  xcodebuild -version
+fi
+
 GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   source/thirdparty/breakpad/src/tools/mac/dump_syms/dump_syms.xcodeproj
 
