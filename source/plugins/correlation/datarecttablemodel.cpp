@@ -51,7 +51,7 @@ QHash<int, QByteArray> DataRectTableModel::roleNames() const
     // FIXME: Have to hard limit rolenames or else tableview will crash.
     // https://bugreports.qt.io/browse/QTBUG-70069
     for(int i = 0; i < std::min(MAX_COLUMNS, static_cast<int>(_data->numColumns())); ++i)
-        roleNames.insert(Qt::UserRole + i, QByteArray::number(i));
+        roleNames.insert(Qt::UserRole + i, QStringLiteral("column%1").arg(i).toUtf8());
 
     return roleNames;
 }

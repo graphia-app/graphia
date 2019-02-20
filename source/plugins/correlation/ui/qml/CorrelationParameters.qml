@@ -476,7 +476,7 @@ BaseParameterDialog
             for(var i = 0; i < tabularDataParser.model.columnCount(); i++)
             {
                 dataRectView.addColumn(columnComponent.createObject(dataRectView,
-                                                                    {"role": i}));
+                    {"role": "column" + i}));
 
                 // FIXME - TY QT TABLEVIEW 1.
                 // https://bugreports.qt.io/browse/QTBUG-70069
