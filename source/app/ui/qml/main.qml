@@ -360,16 +360,18 @@ ApplicationWindow
 
         if(fileTypes.length === 0)
         {
-            errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
+            errorOpeningFileMessageDialog.text = "";
 
             var failureReasons = application.failureReasons(fileUrl);
             if(failureReasons.length === 0)
             {
+                errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
                 errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded as its file type is unknown.");
             }
             else
             {
+                errorOpeningFileMessageDialog.title = qsTr("Failed To Load");
                 if(failureReasons.length > 0)
                     errorOpeningFileMessageDialog.text += failureReasons[0];
             }
