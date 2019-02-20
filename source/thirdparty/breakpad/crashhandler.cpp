@@ -82,6 +82,8 @@ static bool minidumpCallback(
     static platform_char path[1024] = {0};
     static platform_char dir[1024] = {0};
 
+    std::cerr << "Handling crash...\n";
+
 #if defined(Q_OS_WIN)
     if(ex_info != nullptr && ex_info->ExceptionRecord != nullptr)
     {
@@ -138,8 +140,6 @@ static bool minidumpCallback(
         }
     }
 #endif
-
-    std::cerr << "Handling crash...\n";
 
     if(!success)
     {

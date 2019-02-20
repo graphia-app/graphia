@@ -58,7 +58,8 @@ static const char* exceptionRecordType(const EXCEPTION_RECORD* exr)
         return nullptr;
 
 #define RVA_TO_VA(TYPE, ADDR) (reinterpret_cast<TYPE>( \
-    (uintptr_t)(module) + (uintptr_t)(ADDR)))
+    (uintptr_t)(module) + (uint32_t)(ADDR)))
+
 
     auto cArray = RVA_TO_VA(const CatchableTypeArray*, throwInfo->pCatchableTypeArray);
     auto cType = RVA_TO_VA(const CatchableType*, cArray->arrayOfCatchableTypes[0]);
