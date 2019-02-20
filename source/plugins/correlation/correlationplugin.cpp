@@ -696,6 +696,13 @@ QString CorrelationPlugin::failureReason(const QUrl& url) const
     auto extensionIdentity = urlTypes.first();
     auto contentIdentity = contentIdentityOf(url);
 
+    if(contentIdentity.isEmpty())
+    {
+        return tr("%1 has an extension that indicates it is a '%2', "
+            "however its content could not be determined.").arg(url.fileName(),
+            individualDescriptionForUrlTypeName(extensionIdentity));
+    }
+
     if(extensionIdentity != contentIdentity)
     {
         return tr("%1 has an extension that indicates it is a '%2', "
