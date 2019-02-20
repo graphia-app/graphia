@@ -36,6 +36,7 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 {
     if(role < Qt::UserRole)
         return {};
+
     size_t row = index.row();
     size_t column = (role - Qt::UserRole);
 

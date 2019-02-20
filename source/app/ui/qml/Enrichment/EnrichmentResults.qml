@@ -311,7 +311,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: currentTableView != null && currentTableView.rowCount > 0;
+        enabled: currentTableView && currentTableView.rowCount > 0;
         text: qsTr("Export Table…")
         iconName: "document-save"
         onTriggered:

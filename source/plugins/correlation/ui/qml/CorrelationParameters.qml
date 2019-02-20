@@ -314,7 +314,7 @@ BaseParameterDialog
                         {
                             if(running)
                                 dataRectView.enabled = false;
-                            else if (!dataFrameAnimationY.running && !dataFrameAnimationX.running)
+                            else if(!dataFrameAnimationY.running && !dataFrameAnimationX.running)
                                 dataRectView.enabled = true;
                         }
                     }
@@ -325,9 +325,9 @@ BaseParameterDialog
                         color: sysPalette.light
                         border.color: sysPalette.mid
                         border.width: 1
-                        anchors.bottom: parent.bottom
+                        anchors.bottom: parent ? parent.bottom : undefined
                         anchors.bottomMargin: 25
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
                         implicitWidth: messageText.width + 5
                         implicitHeight: messageText.height + 5
                         onVisibleChanged:
@@ -481,7 +481,7 @@ BaseParameterDialog
                 // FIXME - TY QT TABLEVIEW 1.
                 // https://bugreports.qt.io/browse/QTBUG-70069
                 // Cap the column count since a huge number of columns causes a large slowdown
-                if(i == tabularDataParser.model.MAX_COLUMNS - 1)
+                if(i === tabularDataParser.model.MAX_COLUMNS - 1)
                 {
                     // Add a blank
                     dataRectView.addColumn(columnComponent.createObject(dataRectView));
