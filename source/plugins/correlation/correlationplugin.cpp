@@ -562,10 +562,20 @@ static QString contentIdentityOf(const QUrl& url)
     QString identity;
 
     std::ifstream file(url.toLocalFile().toStdString());
-    std::string line;
 
-    if(file && u::getline(file, line))
+    if(!file)
+        return identity;
+
+    const int maxLines = 50;
+    int numLinesScanned = 0;
+
+    std::istream* is;
+    do
     {
+        std::string line;
+
+        is = &u::getline(file, line);
+
         size_t numCommas = 0;
         size_t numTabs = 0;
         bool inQuotes = false;
@@ -585,7 +595,11 @@ static QString contentIdentityOf(const QUrl& url)
             identity = QStringLiteral("CorrelationTSV");
         else if(numCommas > numTabs)
             identity = QStringLiteral("CorrelationCSV");
-    }
+
+        numLinesScanned++;
+    } while(identity.isEmpty() &&
+        !is->fail() && !is->eof() &&
+        numLinesScanned < maxLines);
 
     return identity;
 }
