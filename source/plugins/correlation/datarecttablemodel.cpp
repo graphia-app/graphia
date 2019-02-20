@@ -47,7 +47,11 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 
 QHash<int, QByteArray> DataRectTableModel::roleNames() const
 {
+    if(_data == nullptr)
+        return {};
+
     QHash<int, QByteArray> roleNames;
+
     // FIXME: Have to hard limit rolenames or else tableview will crash.
     // https://bugreports.qt.io/browse/QTBUG-70069
     for(int i = 0; i < std::min(MAX_COLUMNS, static_cast<int>(_data->numColumns())); ++i)
