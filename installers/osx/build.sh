@@ -48,7 +48,8 @@ macdeployqt ${PRODUCT_NAME}.app \
 
 # Need to sign again because macdeployqt won't sign the CrashReporter
 echo "Resigning..."
-codesign --verbose --sign "${SIGN_APPLE_KEYCHAIN_ID}" ${PRODUCT_NAME}.app
+codesign --verbose --deep --force --sign "${SIGN_APPLE_KEYCHAIN_ID}" ${PRODUCT_NAME}.app || exit $?
+echo "Verifying..."
 codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
 echo "OK"
 
