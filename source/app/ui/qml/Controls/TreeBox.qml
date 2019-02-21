@@ -79,6 +79,16 @@ Item
         onDoubleClicked:
         {
             root.doubleClicked(index);
+
+            // FIXME: There seems to be a bug in TreeView where if it is hidden in
+            // the middle of a click event, it gets into a strange state where the
+            // mouse button state gets stuck. Thereafter, if it is show again simply
+            // moving the mouse over the items in the list selects them. This is
+            // obviously undesirable and needs to be investigated fully, but for now
+            // toggling the visibility of the TreeView's MouseArea seems to stop it
+            // happening:
+            treeView.__mouseArea.visible = false;
+            treeView.__mouseArea.visible = true;
         }
     }
 
