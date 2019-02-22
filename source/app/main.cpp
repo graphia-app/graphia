@@ -2,6 +2,7 @@
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <QQmlApplicationEngine>
+#include <QQuickWindow>
 #include <QtGlobal>
 #include <QIcon>
 #include <QMessageBox>
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
+    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
     QIcon mainIcon;
