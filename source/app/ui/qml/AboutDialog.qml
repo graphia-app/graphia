@@ -32,6 +32,8 @@ Window
         {
             Layout.alignment: Qt.AlignTop
             source: "qrc:///icon/Icon128x128.png"
+
+            HiddenSwitch { onActivated: hiddenSwitchActivated(); }
         }
 
         ColumnLayout
@@ -89,5 +91,7 @@ Window
             }
         }
     }
+
+    signal hiddenSwitchActivated()
 }
 

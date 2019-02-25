@@ -67,8 +67,6 @@ Window
             source: pluginImageSource
             sourceSize.width: 96
             sourceSize.height: 96
-
-            HiddenSwitch { onActivated: hiddenSwitchActivated(); }
         }
 
         Text
@@ -88,7 +86,5 @@ Window
             onClicked: pluginsWindow.close()
         }
     }
-
-    signal hiddenSwitchActivated()
 }
 

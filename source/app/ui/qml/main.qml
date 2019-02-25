@@ -238,14 +238,18 @@ ApplicationWindow
     {
         id: aboutDialog
         application: application
+
+        onHiddenSwitchActivated:
+        {
+            console.log("Debug menu enabled");
+            mainWindow.debugMenuUnhidden = true;
+        }
     }
 
     AboutPluginsDialog
     {
         id: aboutpluginsDialog
         pluginDetails: application.pluginDetails
-
-        onHiddenSwitchActivated: { mainWindow.debugMenuUnhidden = true; }
     }
 
     Preferences
