@@ -199,7 +199,7 @@ SectionEnd
 
 ;Launch function
 Function Launch
-	ShellExecAsUser::ShellExecAsUser "" "$INSTDIR\${EXE}"
+	ShellExecAsUser::ShellExecAsUser "" "$INSTDIR\${EXE}" ""
 FunctionEnd
 
 Section "Uninstall"
