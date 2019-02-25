@@ -1087,6 +1087,26 @@ ApplicationWindow
         onTriggered: { application.reportScopeTimers(); }
     }
 
+    MessageDialog
+    {
+        id: commandLineArgumentsMessageDialog
+        icon: StandardIcon.Information
+        title: qsTr("Command Line Arguments")
+
+        text:
+        {
+            var text = "Arguments:\n\n";
+            return text + JSON.stringify(application.arguments, null, 4);
+        }
+    }
+
+    Action
+    {
+        id: showCommandLineArgumentsAction
+        text: qsTr("Show Command Line Arguments")
+        onTriggered: { commandLineArgumentsMessageDialog.open(); }
+    }
+
 
     Action
     {
@@ -1513,6 +1533,7 @@ ApplicationWindow
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
             MenuItem { action: reportScopeTimersAction }
+            MenuItem { action: showCommandLineArgumentsAction }
         }
         Menu
         {
