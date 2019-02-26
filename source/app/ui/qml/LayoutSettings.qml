@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
+import "Controls"
 import "../../../shared/ui/qml/Constants.js" as Constants
 
 Rectangle
@@ -50,7 +51,7 @@ Rectangle
             {
                 Label { font.bold: true; text: document.layoutDisplayName }
                 Item { Layout.fillWidth: true }
-                ToolButton { action: closeAction }
+                FloatingButton { action: closeAction }
             }
 
             Repeater

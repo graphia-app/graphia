@@ -67,7 +67,7 @@ Item
                 onClicked: { createVisualisationDialog.show(); }
             }
 
-            ToolButton
+            FloatingButton
             {
                 visible: list.count > 0
                 iconName: panel.hidden ? "go-top" : "go-bottom"

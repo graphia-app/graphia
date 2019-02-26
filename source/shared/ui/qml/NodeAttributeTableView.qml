@@ -608,7 +608,7 @@ Item
                             onClicked: { root.hideAllCalculatedColumns(); }
                         }
 
-                        ToolButton
+                        FloatingButton
                         {
                             text: qsTr("Done")
                             iconName: "emblem-unreadable"

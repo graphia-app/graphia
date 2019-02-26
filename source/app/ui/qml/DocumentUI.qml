@@ -721,7 +721,7 @@ Item
                 }
             }
 
-            ToolButton
+            FloatingButton
             {
                 property bool _visible: graph._inComponentMode
 
@@ -739,7 +739,7 @@ Item
                 onClicked: { gotoPrevComponent(); }
             }
 
-            ToolButton
+            FloatingButton
             {
                 property bool _visible: graph._inComponentMode
 
@@ -765,7 +765,7 @@ Item
                 anchors.bottom: graph.bottom
                 anchors.margins: 20
 
-                ToolButton
+                FloatingButton
                 {
                     iconName: "edit-undo"
                     text: qsTr("Overview Mode")

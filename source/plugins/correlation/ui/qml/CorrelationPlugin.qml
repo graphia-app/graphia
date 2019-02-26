@@ -634,7 +634,7 @@ PluginContent
                     visible: plot._timedBusy
                 }
 
-                ToolButton
+                FloatingButton
                 {
                     anchors.left: parent.left
                     anchors.top: parent.top

@@ -413,19 +413,19 @@ Rectangle
                     }
                 }
 
-                ToolButton { action: _previousAction }
-                ToolButton { action: _nextAction }
-                ToolButton
+                FloatingButton { action: _previousAction }
+                FloatingButton { action: _nextAction }
+                FloatingButton
                 {
                     visible: _type === Find.Simple || _type === Find.Advanced
                     action: selectAllAction
                 }
-                ToolButton
+                FloatingButton
                 {
                     visible: _type === Find.ByAttribute
                     action: selectOnlyAction
                 }
-                ToolButton { action: closeAction }
+                FloatingButton { action: closeAction }
             }
 
             RowLayout
@@ -486,9 +486,9 @@ Rectangle
                     }
                 }
 
-                ToolButton { action: matchCaseAction }
-                ToolButton { action: matchWholeWordsAction }
-                ToolButton { action: matchUsingRegexAction }
+                FloatingButton { action: matchCaseAction }
+                FloatingButton { action: matchWholeWordsAction }
+                FloatingButton { action: matchUsingRegexAction }
             }
         }
     }

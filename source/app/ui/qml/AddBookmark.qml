@@ -3,6 +3,8 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
+import "Controls"
+
 import "../../../shared/ui/qml/Constants.js" as Constants
 
 Rectangle
@@ -86,7 +88,7 @@ Rectangle
                 }
 
                 Button { action: doneAction }
-                ToolButton { action: closeAction }
+                FloatingButton { action: closeAction }
             }
         }
     }

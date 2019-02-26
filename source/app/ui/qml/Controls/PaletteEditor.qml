@@ -146,7 +146,7 @@ ColumnLayout
 
             Item { Layout.fillWidth: true }
 
-            ToolButton
+            FloatingButton
             {
                 tooltip: qsTr("Add New Colour")
                 iconName: "list-add"
@@ -230,7 +230,7 @@ ColumnLayout
                     }
                 }
 
-                ToolButton
+                FloatingButton
                 {
                     Layout.preferredWidth: root._removeButtonSize
                     Layout.preferredHeight: root._removeButtonSize
@@ -371,7 +371,7 @@ ColumnLayout
 
             Item { Layout.fillWidth: true }
 
-            ToolButton
+            FloatingButton
             {
                 tooltip: qsTr("Add New Colour")
                 iconName: "list-add"
@@ -509,7 +509,7 @@ ColumnLayout
                     }
                 }
 
-                ToolButton
+                FloatingButton
                 {
                     Layout.preferredWidth: root._removeButtonSize
                     Layout.preferredHeight: root._removeButtonSize

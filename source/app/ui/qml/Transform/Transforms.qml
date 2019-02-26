@@ -100,7 +100,7 @@ Item
                 onClicked: { createTransformDialog.show(); }
             }
 
-            ToolButton
+            FloatingButton
             {
                 visible: list.count > 0
                 iconName: panel.hidden ? "go-bottom" : "go-top"
