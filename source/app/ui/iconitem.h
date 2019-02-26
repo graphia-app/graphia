@@ -24,7 +24,7 @@ public:
 
 private:
     QString _iconName;
-    bool _on;
+    bool _on = false;
     QIcon _icon;
 
 signals:
