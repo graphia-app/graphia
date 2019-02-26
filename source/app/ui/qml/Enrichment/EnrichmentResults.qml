@@ -13,7 +13,7 @@ ApplicationWindow
     property var models
     property var currentHeatmap
     property var wizard
-    property var currentTableView
+    property var currentTableView: null
 
     title: qsTr("Enrichment Results")
     minimumHeight: 400
