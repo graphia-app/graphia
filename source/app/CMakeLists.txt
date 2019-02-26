@@ -123,6 +123,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/searchmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/selectionmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/enrichmentheatmapitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/iconitem.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.h
@@ -228,6 +229,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/searchmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/selectionmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/enrichmentheatmapitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/iconitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorvisualisationchannel.cpp
