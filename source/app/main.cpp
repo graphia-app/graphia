@@ -24,6 +24,7 @@
 #include "ui/visualisations/defaultpalettes.h"
 #include "ui/hovermousepassthrough.h"
 #include "ui/enrichmentheatmapitem.h"
+#include "ui/iconitem.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Application>                     (uri, maj, min, "Application");
     qmlRegisterType<Document>                        (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>                  (uri, maj, min, "Graph");
+    qmlRegisterType<IconItem>                        (uri, maj, min, "NamedIcon");
     qmlRegisterType<QmlPreferences>                  (uri, maj, min, "Preferences");
     qmlRegisterType<HoverMousePassthrough>           (uri, maj, min, "HoverMousePassthrough");
     qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");
