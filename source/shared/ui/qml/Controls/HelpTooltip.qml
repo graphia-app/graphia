@@ -4,9 +4,11 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.4
 
+import com.kajeka 1.0
+
 import "../"
 
-ToolButton
+NamedIcon
 {
     id: root
     default property var content
@@ -16,12 +18,10 @@ ToolButton
     readonly property int _padding: 20
     readonly property int _offset: 10
 
-    // If you use a custom element style you can't use iconName
-    // so iconSource must be used
-    iconSource: "qrc:/icons/Tango/16x16/apps/help-browser.png"
+    iconName: "help-browser"
 
-    width: 20
-    height: 20
+    width: 16
+    height: 16
 
     onContentChanged:
     {
@@ -30,11 +30,6 @@ ToolButton
         content.anchors.fill = parent;
         // Set to fill layout to allow for text wrapping
         content.Layout.fillWidth = true;
-    }
-
-    style: ButtonStyle
-    {
-        background: Rectangle {}
     }
 
     Timer
