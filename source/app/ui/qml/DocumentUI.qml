@@ -1,3 +1,4 @@
+import QtQml 2.8
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
@@ -396,10 +397,14 @@ Item
     function selectTargetsOf(nodeId) { document.selectTargetsOf(nodeId); }
     function selectNeighbours() { document.selectNeighbours(); }
     function selectNeighboursOf(nodeId) { document.selectNeighboursOf(nodeId); }
-    function selectBySharedAttributeValue(attributeName)
+    function selectBySharedAttributeValue(attributeName, nodeId)
     {
         _lastSharedValueAttributeName = attributeName;
-        document.selectBySharedAttributeValue(attributeName);
+
+        if(typeof(nodeId) !== "undefined")
+            document.selectBySharedAttributeValue(attributeName, nodeId);
+        else
+            document.selectBySharedAttributeValue(attributeName);
     }
     function undo() { document.undo(); }
     function redo() { document.redo(); }
@@ -630,12 +635,48 @@ Item
                     MenuItem { visible: selectSourcesOfNodeAction.enabled; action: selectSourcesOfNodeAction }
                     MenuItem { visible: selectTargetsOfNodeAction.enabled; action: selectTargetsOfNodeAction }
                     MenuItem { visible: selectNeighboursOfNodeAction.enabled; action: selectNeighboursOfNodeAction }
+                    Menu
+                    {
+                        id: sharedValuesOfNodeContextMenu
+                        visible: !busy && numAttributesWithSharedValues > 0 &&
+                            contextMenu.nodeWasClicked
+                        title: qsTr("Select Shared Values of '") + contextMenu.clickedNodeName + qsTr("'")
+                        Instantiator
+                        {
+                            model: sharedValuesAttributeNames
+                            MenuItem
+                            {
+                                text: modelData
+                                onTriggered: { selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
+                            }
+                            onObjectAdded: sharedValuesOfNodeContextMenu.insertItem(index, object)
+                            onObjectRemoved: sharedValuesOfNodeContextMenu.removeItem(object)
+                        }
+                    }
 
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectSourcesAction.enabled; action: selectSourcesAction }
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectTargetsAction.enabled; action: selectTargetsAction }
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectNeighboursAction }
+                    Menu
+                    {
+                        id: sharedValuesSelectionContextMenu
+                        visible: !busy && numAttributesWithSharedValues > 0 &&
+                            numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection
+                        title: qsTr('Select Shared Values of Selection')
+                        Instantiator
+                        {
+                            model: sharedValuesAttributeNames
+                            MenuItem
+                            {
+                                text: modelData
+                                onTriggered: { selectBySharedAttributeValue(text); }
+                            }
+                            onObjectAdded: sharedValuesSelectionContextMenu.insertItem(index, object)
+                            onObjectRemoved: sharedValuesSelectionContextMenu.removeItem(object)
+                        }
+                    }
 
                     MenuSeparator { visible: searchWebMenuItem.visible }
                     MenuItem

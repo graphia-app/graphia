@@ -979,20 +979,27 @@ void Document::selectNeighboursOf(QmlNodeId nodeId)
     _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
 }
 
-void Document::selectBySharedAttributeValue(const QString& attributeName)
+void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNodeId qmlNodeId)
 {
     if(busy() || _selectionManager == nullptr)
         return;
 
-    auto selectedNodeIds = _selectionManager->selectedNodes();
-    Q_ASSERT(!selectedNodeIds.empty());
+    NodeIdSet nodeIdSet;
+
+    if(!qmlNodeId.isNull())
+        nodeIdSet.emplace(qmlNodeId);
+    else
+        nodeIdSet = _selectionManager->selectedNodes();
+
+    if(nodeIdSet.empty())
+        return;
 
     const auto* attribute = _graphModel->attributeByName(attributeName);
     Q_ASSERT(attribute != nullptr);
 
     std::set<QString> attributeValues;
 
-    for(auto nodeId : selectedNodeIds)
+    for(auto nodeId : nodeIdSet)
         attributeValues.emplace(attribute->stringValueOf(nodeId));
 
     QString term;

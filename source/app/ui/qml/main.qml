@@ -1327,13 +1327,12 @@ ApplicationWindow
             Menu
             {
                 id: sharedValuesMenu
-                title: qsTr("Select By Shared Attribute Value")
+                title: qsTr("Select Shared Values of Selection")
                 enabled: currentDocument !== null && !currentDocument.nodeSelectionEmpty &&
                     currentDocument.numAttributesWithSharedValues > 0
 
                 Instantiator
                 {
-                    id: sharedValuesInstantiator
                     model: currentDocument !== null ? currentDocument.sharedValuesAttributeNames : []
                     MenuItem
                     {
