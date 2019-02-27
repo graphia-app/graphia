@@ -15,6 +15,8 @@ Button
 
     property string iconName
 
+    implicitHeight: 32
+
     style: ButtonStyle
     {
         background: Rectangle
@@ -46,8 +48,8 @@ Button
 
                 Layout.alignment: Qt.AlignVCenter
                 visible: valid
-                width: 24
-                height: 24
+                Layout.preferredWidth: height
+                Layout.preferredHeight: root.height - (padding.top + padding.bottom)
                 iconName: _iconName
             }
 
@@ -63,8 +65,8 @@ Button
                 // Empty placeholder that's shown if there is no
                 // valid icon or text available
                 visible: !icon.valid && _text.length === 0
-                width: 24
-                height: 24
+                Layout.preferredWidth: icon.width
+                Layout.preferredHeight: icon.height
             }
         }
     }
