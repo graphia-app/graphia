@@ -69,7 +69,7 @@ private:
     CorrelationPolarity _correlationPolarity = CorrelationPolarity::Positive;
     ScalingType _scalingType = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
-    MissingDataType _missingDataType = MissingDataType::None;
+    MissingDataType _missingDataType = MissingDataType::Constant;
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
     double _missingDataReplacementValue = 0.0;

@@ -843,7 +843,6 @@ BaseParameterDialog
                             Layout.alignment: Qt.AlignRight
                             model: ListModel
                             {
-                                ListElement { text: qsTr("None");               value: MissingDataType.None }
                                 ListElement { text: qsTr("Constant");           value: MissingDataType.Constant }
                                 ListElement { text: qsTr("Row Interpolate");    value: MissingDataType.RowInterpolation }
                                 ListElement { text: qsTr("Column Mean");        value: MissingDataType.ColumnAverage }
@@ -1382,7 +1381,7 @@ BaseParameterDialog
             correlationType: CorrelationType.Pearson,
             correlationPolarity: CorrelationPolarity.Positive,
             scaling: ScalingType.None, normalise: NormaliseType.None,
-            missingDataType: MissingDataType.None };
+            missingDataType: MissingDataType.Constant };
 
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;

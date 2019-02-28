@@ -35,7 +35,6 @@ DEFINE_QML_ENUM(
 
 DEFINE_QML_ENUM(
     Q_GADGET, MissingDataType,
-    None,
     Constant,
     ColumnAverage,
     RowInterpolation);
@@ -123,7 +122,7 @@ private:
     int _correlationPolarity = static_cast<int>(CorrelationPolarity::Positive);
     int _scalingType = static_cast<int>(ScalingType::None);
     int _normaliseType = static_cast<int>(NormaliseType::None);
-    int _missingDataType = static_cast<int>(MissingDataType::None);
+    int _missingDataType = static_cast<int>(MissingDataType::Constant);
     double _replacementValue = 0.0;
 
     void setProgress(int progress);
