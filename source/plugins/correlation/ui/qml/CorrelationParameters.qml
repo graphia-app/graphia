@@ -925,8 +925,8 @@ BaseParameterDialog
 
                         RowLayout
                         {
-                            Layout.columnSpan: 3
-                            Layout.alignment: Qt.AlignHCenter
+                            Layout.columnSpan: 2
+                            Layout.alignment: Qt.AlignRight
                             visible: missingDataType.currentText === qsTr("Constant")
 
                             Text
@@ -947,6 +947,13 @@ BaseParameterDialog
 
                                 text: "0.0"
                             }
+                        }
+
+                        Item
+                        {
+                            // Cell filler
+                            Layout.fillHeight: true
+                            visible: missingDataType.currentText === qsTr("Constant")
                         }
 
                         Text
