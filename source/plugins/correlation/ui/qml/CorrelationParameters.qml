@@ -550,6 +550,8 @@ BaseParameterDialog
                             {
                                 parameters.correlationType = model.get(currentIndex).value;
                             }
+
+                            property int value: { return model.get(currentIndex).value; }
                         }
 
                         HelpTooltip
@@ -611,6 +613,8 @@ BaseParameterDialog
                             {
                                 parameters.correlationPolarity = model.get(currentIndex).value;
                             }
+
+                            property int value: { return model.get(currentIndex).value; }
                         }
 
                         HelpTooltip
@@ -856,6 +860,8 @@ BaseParameterDialog
                             {
                                 parameters.missingDataType = model.get(currentIndex).value;
                             }
+
+                            property int value: { return model.get(currentIndex).value; }
                         }
 
                         HelpTooltip
@@ -986,6 +992,8 @@ BaseParameterDialog
                             {
                                 parameters.scaling = model.get(currentIndex).value;
                             }
+
+                            property int value: { return model.get(currentIndex).value; }
                         }
 
                         HelpTooltip
@@ -1065,6 +1073,8 @@ BaseParameterDialog
                             {
                                 parameters.normalise = model.get(currentIndex).value;
                             }
+
+                            property int value: { return model.get(currentIndex).value; }
                         }
 
                         HelpTooltip
@@ -1158,6 +1168,8 @@ BaseParameterDialog
                         {
                             parameters.clusteringType = model.get(currentIndex).value;
                         }
+
+                        property int value: { return model.get(currentIndex).value; }
                     }
 
                     HelpTooltip
@@ -1205,6 +1217,8 @@ BaseParameterDialog
                         {
                             parameters.edgeReductionType = model.get(currentIndex).value;
                         }
+
+                        property int value: { return model.get(currentIndex).value; }
                     }
 
                     HelpTooltip
@@ -1259,7 +1273,7 @@ BaseParameterDialog
 
                 Text
                 {
-                    text: qsTr("A graph will be created with the following parameters:")
+                    text: qsTr("A graph will be created using the following parameters:")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -1273,50 +1287,61 @@ BaseParameterDialog
 
                     text:
                     {
+                        var indentString = "&nbsp;&nbsp;&nbsp;";
                         var summaryString = "";
+
+                        if(transposeCheckBox.checked)
+                            summaryString += qsTr("Transposed<br>");
+
+                        summaryString += qsTr("Data Frame:") +
+                            qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
+                            qsTr(" Row: ") + tabularDataParser.dataRect.y +
+                            qsTr(" Width: ") + tabularDataParser.dataRect.width +
+                            qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]<br>";
+
                         summaryString += qsTr("Correlation Metric: ") + algorithm.currentText + "<br>";
+                        summaryString += qsTr("Correlation Polarity: ") + polarity.currentText + "<br>";
                         summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
                         summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
 
-                        if(!tabularDataParser.dataRect !== Qt.rect(0, 0, 0, 0))
-                        {
-                            summaryString += qsTr("Data Frame:") +
-                                qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
-                                qsTr(" Row: ") + tabularDataParser.dataRect.y +
-                                qsTr(" Width: ") + tabularDataParser.dataRect.width +
-                                qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]<br>";
-                        }
-                        else
-                        {
-                            summaryString += qsTr("Data Frame: Automatic<br>");
-                        }
+                        if(scaling.value !== ScalingType.None)
+                            summaryString += qsTr("Scaling: ") + scaling.currentText + "<br>";
 
-                        summaryString += qsTr("Data Transpose: ") + transposeCheckBox.checked + "<br>";
-                        summaryString += qsTr("Data Scaling: ") + scaling.currentText + "<br>";
-                        summaryString += qsTr("Data Normalise: ") + normalise.currentText + "<br>";
-                        summaryString += qsTr("Missing Data Replacement: ") + missingDataType.currentText + "<br>";
+                        if(normalise.value !== NormaliseType.None)
+                            summaryString += qsTr("Normalisation: ") + normalise.currentText + "<br>";
 
-                        if(missingDataType.model.get(missingDataType.currentIndex).value === MissingDataType.Constant)
-                            summaryString += qsTr("Replacement Constant: ") + replacementConstant.text + "<br>";
+                        if(tabularDataParser.hasMissingValues)
+                        {
+                            summaryString += qsTr("Imputation: ") + missingDataType.currentText;
+
+                            if(missingDataType.value === MissingDataType.Constant)
+                                summaryString += qsTr(" (") + replacementConstant.text + qsTr(")");
+
+                            summaryString += "<br>";
+                        }
 
                         var transformString = ""
-                        if(clustering.model.get(clustering.currentIndex).value !== ClusteringType.None)
-                            transformString += qsTr("Clustering (") + clustering.currentText + ")<br>";
+                        if(clustering.value !== ClusteringType.None)
+                        {
+                            transformString += indentString + qsTr("• Clustering (") +
+                                clustering.currentText + ")<br>";
+                        }
 
-                        if(edgeReduction.model.get(edgeReduction.currentIndex).value !== EdgeReductionType.None)
-                            transformString += qsTr("Edge Reduction (") + edgeReduction.currentText + ")<br>";
+                        if(edgeReduction.value !== EdgeReductionType.None)
+                        {
+                            transformString += indentString + qsTr("• Edge Reduction (") +
+                                edgeReduction.currentText + ")<br>";
+                        }
 
-                        if(!transformString)
-                            transformString = qsTr("None")
-
-                        summaryString += qsTr("Initial Transforms: ") + transformString;
+                        if(transformString.length > 0)
+                            summaryString += qsTr("Initial Transforms:<br>") + transformString;
 
                         var normalFont = "<font>";
                         var warningFont = "<font color=\"red\">";
 
                         if(tabularDataParser.graphSizeEstimate.keys !== undefined)
                         {
-                            summaryString += "<br><br>" + qsTr("Estimated Pre-Transform Graph Size: ");
+                            summaryString += "<br>" + qsTr("Estimated Pre-Transform Graph Size: ");
 
                             var warningThreshold = 5e6;
 
