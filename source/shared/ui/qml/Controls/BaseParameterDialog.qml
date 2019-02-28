@@ -13,6 +13,6 @@ Window
     property string pluginName: ""
     property bool inNewTab: false
 
-    title: pluginName + qsTr(" Plugin Parameters")
+    title: pluginName + qsTr(" Parameters")
     signal accepted();
 }
