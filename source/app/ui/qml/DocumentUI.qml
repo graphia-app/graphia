@@ -159,6 +159,9 @@ Item
     {
         sharedValuesProxyModel.sourceModel =
             document.availableAttributesModel(ElementType.Node);
+
+        if(!document.attributeExists(_lastSharedValueAttributeName))
+            _lastSharedValueAttributeName = "";
     }
 
     Preferences
@@ -391,14 +394,46 @@ Item
     function selectAllVisible() { document.selectAllVisible(); }
     function selectNone() { document.selectNone(); }
     function invertSelection() { document.invertSelection(); }
-    function selectSources() { document.selectSources(); }
-    function selectSourcesOf(nodeId) { document.selectSourcesOf(nodeId); }
-    function selectTargets() { document.selectTargets(); }
-    function selectTargetsOf(nodeId) { document.selectTargetsOf(nodeId); }
-    function selectNeighbours() { document.selectNeighbours(); }
-    function selectNeighboursOf(nodeId) { document.selectNeighboursOf(nodeId); }
+
+    function selectSources()
+    {
+        _lastSelectType = DocumentUI.LS_Sources;
+        document.selectSources();
+    }
+
+    function selectSourcesOf(nodeId)
+    {
+        _lastSelectType = DocumentUI.LS_Sources;
+        document.selectSourcesOf(nodeId);
+    }
+
+    function selectTargets()
+    {
+        _lastSelectType = DocumentUI.LS_Targets;
+        document.selectTargets();
+    }
+
+    function selectTargetsOf(nodeId)
+    {
+        _lastSelectType = DocumentUI.LS_Targets;
+        document.selectTargetsOf(nodeId);
+    }
+
+    function selectNeighbours()
+    {
+        _lastSelectType = DocumentUI.LS_Neighbours;
+        document.selectNeighbours();
+    }
+
+    function selectNeighboursOf(nodeId)
+    {
+        _lastSelectType = DocumentUI.LS_Neighbours;
+        document.selectNeighboursOf(nodeId);
+    }
+
     function selectBySharedAttributeValue(attributeName, nodeId)
     {
+        _lastSelectType = DocumentUI.LS_BySharedValue;
         _lastSharedValueAttributeName = attributeName;
 
         if(typeof(nodeId) !== "undefined")
@@ -406,6 +441,76 @@ Item
         else
             document.selectBySharedAttributeValue(attributeName);
     }
+
+    enum LastSelectType
+    {
+        LS_None,
+        LS_Neighbours,
+        LS_Sources,
+        LS_Targets,
+        LS_BySharedValue
+    }
+
+    property int _lastSelectType: DocumentUI.LS_None
+
+    property bool canRepeatLastSelection:
+    {
+        if(nodeSelectionEmpty)
+            return false;
+
+        if(root._lastSelectType === DocumentUI.LS_BySharedValue)
+            return _lastSharedValueAttributeName.length > 0;
+
+        return root._lastSelectType !== DocumentUI.LS_None;
+    }
+
+    property string repeatLastSelectionMenuText:
+    {
+        switch(root._lastSelectType)
+        {
+        default:
+        case DocumentUI.LS_None:
+            break;
+        case DocumentUI.LS_Neighbours:
+            return qsTr("Repeat Last Selection (Neighbours)");
+        case DocumentUI.LS_Sources:
+            return qsTr("Repeat Last Selection (Sources)");
+        case DocumentUI.LS_Targets:
+            return qsTr("Repeat Last Selection (Targets)");
+        case DocumentUI.LS_BySharedValue:
+            if(_lastSharedValueAttributeName.length > 0)
+            {
+                return qsTr("Repeat Last Selection (") +
+                    _lastSharedValueAttributeName + qsTr(" Value)");
+            }
+            break;
+        }
+
+        return qsTr("Repeat Last Selection");
+    }
+
+    function repeatLastSelection()
+    {
+        switch(root._lastSelectType)
+        {
+        default:
+        case DocumentUI.LS_None:
+            return;
+        case DocumentUI.LS_Neighbours:
+            selectNeighbours();
+            return;
+        case DocumentUI.LS_Sources:
+            selectSources();
+            return;
+        case DocumentUI.LS_Targets:
+            selectTargets();
+            return;
+        case DocumentUI.LS_BySharedValue:
+            selectBySharedAttributeValue(_lastSharedValueAttributeName);
+            return;
+        }
+    }
+
     function undo() { document.undo(); }
     function redo() { document.redo(); }
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
@@ -677,6 +782,7 @@ Item
                             onObjectRemoved: sharedValuesSelectionContextMenu.removeItem(object)
                         }
                     }
+                    MenuItem { visible: repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
 
                     MenuSeparator { visible: searchWebMenuItem.visible }
                     MenuItem

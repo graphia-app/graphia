@@ -757,6 +757,15 @@ ApplicationWindow
 
     Action
     {
+        id: repeatLastSelectionAction
+        text: currentDocument ? currentDocument.repeatLastSelectionMenuText : ""
+        shortcut: "Ctrl+R"
+        enabled: currentDocument && currentDocument.canRepeatLastSelection
+        onTriggered: currentDocument && currentDocument.repeatLastSelection()
+    }
+
+    Action
+    {
         id: invertSelectionAction
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
@@ -1343,6 +1352,7 @@ ApplicationWindow
                     onObjectRemoved: sharedValuesMenu.removeItem(object)
                 }
             }
+            MenuItem { action: repeatLastSelectionAction }
             MenuSeparator {}
             MenuItem { action: findAction }
             MenuItem { action: advancedFindAction }
