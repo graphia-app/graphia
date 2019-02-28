@@ -98,6 +98,23 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
     return dataRect;
 }
 
+static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect& dataRect)
+{
+    for(auto column = dataRect.left(); column <= dataRect.right(); column++)
+    {
+        for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
+        {
+            auto& value = tabularData.valueAt(
+                static_cast<size_t>(column), static_cast<size_t>(row));
+
+            if(value.isEmpty())
+                return true;
+        }
+    }
+
+    return false;
+}
+
 double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     double replacementValue, const TabularData& tabularData,
     size_t firstDataColumn, size_t firstDataRow,
@@ -328,6 +345,7 @@ TabularDataParser::TabularDataParser()
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataRectChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::hasMissingValuesChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, [this]
     {
         // An estimate was started while the data rectangle was being calculated
@@ -410,7 +428,10 @@ void TabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
     {
         Q_ASSERT(_dataPtr != nullptr);
         if(_dataPtr != nullptr)
+        {
             _dataRect = findLargestDataRect(*_dataPtr, column, row);
+            _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
+        }
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }

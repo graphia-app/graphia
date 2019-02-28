@@ -86,6 +86,7 @@ class TabularDataParser : public QObject, public Cancellable
     Q_OBJECT
 
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
+    Q_PROPERTY(bool hasMissingValues MEMBER _hasMissingValues NOTIFY hasMissingValuesChanged)
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
@@ -110,6 +111,7 @@ private:
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
     QFutureWatcher<void> _dataParserWatcher;
     QRect _dataRect;
+    bool _hasMissingValues = false;
     std::shared_ptr<TabularData> _dataPtr;
     DataRectTableModel _model;
     bool _transposed = false;
@@ -155,6 +157,7 @@ public:
 signals:
     void dataChanged();
     void dataRectChanged();
+    void hasMissingValuesChanged();
     void busyChanged();
     void fileUrlChanged();
     void fileTypeChanged();

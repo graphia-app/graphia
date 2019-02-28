@@ -831,8 +831,10 @@ BaseParameterDialog
                     GridLayout
                     {
                         columns: 3
+
                         Text
                         {
+                            visible: tabularDataParser.hasMissingValues
                             text: qsTr("Imputation:")
                             Layout.alignment: Qt.AlignLeft
                         }
@@ -840,6 +842,7 @@ BaseParameterDialog
                         ComboBox
                         {
                             id: missingDataType
+                            visible: tabularDataParser.hasMissingValues
                             Layout.alignment: Qt.AlignRight
                             model: ListModel
                             {
@@ -857,6 +860,7 @@ BaseParameterDialog
 
                         HelpTooltip
                         {
+                            visible: tabularDataParser.hasMissingValues
                             title: qsTr("Imputation")
                             GridLayout
                             {
@@ -926,7 +930,8 @@ BaseParameterDialog
                         {
                             Layout.columnSpan: 2
                             Layout.alignment: Qt.AlignRight
-                            visible: missingDataType.currentText === qsTr("Constant")
+                            visible: tabularDataParser.hasMissingValues &&
+                                missingDataType.currentText === qsTr("Constant")
 
                             Text
                             {
@@ -952,7 +957,8 @@ BaseParameterDialog
                         {
                             // Cell filler
                             Layout.fillHeight: true
-                            visible: missingDataType.currentText === qsTr("Constant")
+                            visible: tabularDataParser.hasMissingValues &&
+                                missingDataType.currentText === qsTr("Constant")
                         }
 
                         Text
