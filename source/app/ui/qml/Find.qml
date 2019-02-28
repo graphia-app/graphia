@@ -12,6 +12,13 @@ import "../../../shared/ui/qml/Constants.js" as Constants
 
 Rectangle
 {
+    enum FindType
+    {
+        Simple,
+        Advanced,
+        ByAttribute
+    }
+
     id: root
 
     property var document
@@ -556,12 +563,4 @@ Rectangle
 
     signal shown();
     signal hidden();
-
-    // At the bottom of the file to avoid (completely) screwing up QtCreator's (4.5.1) syntax highlighting
-    enum FindType
-    {
-        Simple,
-        Advanced,
-        ByAttribute
-    }
 }
