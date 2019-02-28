@@ -40,18 +40,19 @@ Item
         id: containerLayout
         Layout.fillWidth: true
         Layout.fillHeight: true
+        spacing: Constants.spacing
         anchors.fill: parent
         anchors.margins: Constants.margin
         RowLayout
         {
             anchors.margins: Constants.margin
             Layout.fillHeight: true
+            spacing: Constants.spacing
 
             Rectangle
             {
                 Layout.fillHeight: true
-                Layout.preferredWidth: width
-                width:
+                Layout.preferredWidth:
                 {
                     // Adjust width to match text contents
                     var maxWidth = 100;
@@ -121,7 +122,6 @@ Item
                 {
                     id: contentContainer
                     anchors.fill: parent
-                    anchors.margins: Constants.margin
                     clip: true
                     Item
                     {
@@ -134,10 +134,7 @@ Item
 
         RowLayout
         {
-            Rectangle
-            {
-                Layout.fillWidth: true
-            }
+            Item { Layout.fillWidth: true }
 
             Button
             {
