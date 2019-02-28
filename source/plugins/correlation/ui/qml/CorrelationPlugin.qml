@@ -423,7 +423,7 @@ PluginContent
             menu.addItem("").action = toggleIncludeYZero;
 
             menu.addSeparator();
-            var sortByMenu = menu.addMenu(qsTr("Sort By"));
+            var sortByMenu = menu.addMenu(qsTr("Sort Columns By"));
             root._availableplotColumnSortOptions.forEach(function(sortOption)
             {
                 var sortByMenuItem = sortByMenu.addItem(sortOption.text);
@@ -477,7 +477,7 @@ PluginContent
     {
         var options =
         [
-            {type: PlotColumnSortType.Natural, text: qsTr("Natural")},
+            {type: PlotColumnSortType.Natural, text: qsTr("Natural Order")},
             {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")}
         ];
 
