@@ -382,17 +382,14 @@ public:
         _._sharedValues = findSharedValuesForElements(elementIds, true);
     }
 
-    template<typename T, typename E, typename Fn>
-    auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
+    template<typename T, typename E>
+    auto findRangeforElements(const std::vector<E>& elementIds) const
     {
         std::tuple<T, T> minMax(std::numeric_limits<T>::max(),
                                 std::numeric_limits<T>::lowest());
 
         for(auto elementId : elementIds)
         {
-            if(skip(*this, elementId))
-                continue;
-
             auto v = valueOf<T>(elementId);
             std::get<0>(minMax) = std::min(v, std::get<0>(minMax));
             std::get<1>(minMax) = std::max(v, std::get<1>(minMax));
@@ -401,34 +398,22 @@ public:
         return minMax;
     }
 
-    template<typename T, typename E>
+    template<typename E>
     auto findRangeforElements(const std::vector<E>& elementIds) const
-    {
-        return findRangeforElements<T>(elementIds, [](const Attribute&, E){ return false; });
-    }
-
-    template<typename E, typename Fn>
-    auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
     {
         std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
                                           std::numeric_limits<double>::lowest());
 
         if(valueType() == ValueType::Float)
-            minMax = findRangeforElements<double>(elementIds, skip);
+            minMax = findRangeforElements<double>(elementIds);
         else if(valueType() == ValueType::Int)
         {
-            auto intMinMax = findRangeforElements<int>(elementIds, skip);
+            auto intMinMax = findRangeforElements<int>(elementIds);
             std::get<0>(minMax) = static_cast<double>(std::get<0>(intMinMax));
             std::get<1>(minMax) = static_cast<double>(std::get<1>(intMinMax));
         }
 
         return minMax;
-    }
-
-    template<typename E>
-    auto findRangeforElements(const std::vector<E>& elementIds) const
-    {
-        return findRangeforElements(elementIds, [](const Attribute&, E){ return false; });
     }
 
     template<typename T, typename E>

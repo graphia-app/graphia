@@ -125,12 +125,7 @@ public:
         case ValueType::Int:
         case ValueType::Float:
         {
-            auto [min, max] = attribute.findRangeforElements(*_elementIds,
-            [this](const Attribute& _attribute, ElementId elementId)
-            {
-                return _attribute.testFlag(AttributeFlag::IgnoreTails) &&
-                    _graph->typeOf(elementId) == MultiElementType::Tail;
-            });
+            auto [min, max] = attribute.findRangeforElements(*_elementIds);
 
             visualisationInfo.setMin(min);
             visualisationInfo.setMax(max);
@@ -145,12 +140,6 @@ public:
 
             for(auto elementId : *_elementIds)
             {
-                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
-                   _graph->typeOf(elementId) == MultiElementType::Tail)
-                {
-                    continue;
-                }
-
                 double value = attribute.numericValueOf(elementId);
 
                 if(channel.requiresNormalisedValue())
@@ -175,12 +164,6 @@ public:
         {
             for(auto elementId : *_elementIds)
             {
-                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
-                   _graph->typeOf(elementId) == MultiElementType::Tail)
-                {
-                    continue;
-                }
-
                 auto stringValue = attribute.stringValueOf(elementId);
                 apply(stringValue, channel, elementId, _numAppliedVisualisations);
             }

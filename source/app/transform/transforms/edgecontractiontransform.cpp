@@ -11,15 +11,6 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
-    auto attributeNames = config().referencedAttributeNames();
-
-    bool ignoreTails =
-    std::any_of(attributeNames.begin(), attributeNames.end(),
-    [this](const auto& attributeName)
-    {
-        return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-    });
-
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);
     if(conditionFn == nullptr)
     {
@@ -31,9 +22,6 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
 
     for(auto edgeId : target.edgeIds())
     {
-        if(ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
-            continue;
-
         if(conditionFn(edgeId))
             edgeIdsToContract.insert(edgeId);
     }

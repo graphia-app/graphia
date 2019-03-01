@@ -21,9 +21,6 @@ DEFINE_QML_ENUM(
     // Automatically set the range
     AutoRange               = 0x1,
 
-    // With multielements, don't process the tails in transforms
-    IgnoreTails             = 0x2,
-
     // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x4,
 

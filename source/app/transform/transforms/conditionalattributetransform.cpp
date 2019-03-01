@@ -29,14 +29,6 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
     }
 
     auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
-    auto attributeNames = config().referencedAttributeNames();
-
-    bool ignoreTails =
-    std::any_of(attributeNames.begin(), attributeNames.end(),
-    [this](const auto& attributeName)
-    {
-        return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-    });
 
     auto synthesise =
     [&](const auto& elementIds)
@@ -53,12 +45,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
         }
 
         for(auto elementId : elementIds)
-        {
-            if(ignoreTails && target.typeOf(elementId) == MultiElementType::Tail)
-                continue;
-
             newValues[elementId] = conditionFn(elementId) ? QObject::tr("True") : QObject::tr("False");
-        }
 
         auto& attribute = _graphModel->createAttribute(newAttributeName)
             .setDescription(QObject::tr("An attribute synthesised by the Boolean Attribute transform."));

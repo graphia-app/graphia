@@ -24,8 +24,6 @@ void PercentNNTransform::apply(TransformedGraph& target) const
     auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
-
-    bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 
     struct PercentNNRank
@@ -42,15 +40,6 @@ void PercentNNTransform::apply(TransformedGraph& target) const
     for(auto nodeId : target.nodeIds())
     {
         auto edgeIds = target.nodeById(nodeId).edgeIds();
-
-        if(ignoreTails)
-        {
-            edgeIds.erase(std::remove_if(edgeIds.begin(), edgeIds.end(),
-            [&target](auto edgeId)
-            {
-                return target.typeOf(edgeId) == MultiElementType::Tail;
-            }), edgeIds.end());
-        }
 
         auto k = std::max((edgeIds.size() * percent) / 100, minimum);
         auto kthPlus1 = edgeIds.begin() + std::min(k, edgeIds.size());
@@ -87,9 +76,6 @@ void PercentNNTransform::apply(TransformedGraph& target) const
     {
         if(removees.get(edgeId))
         {
-            if(ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
-                continue;
-
             target.mutableGraph().removeEdge(edgeId);
         }
         else

@@ -20,8 +20,6 @@ void SeparateByAttributeTransform::apply(TransformedGraph& target) const
     auto attributeName = config().attributeNames().front();
     auto attribute = _graphModel->attributeValueByName(attributeName);
 
-    bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
-
     GraphTransformConfig::TerminalCondition condition
     {
         QStringLiteral("$source.%1").arg(attributeName),
@@ -40,9 +38,6 @@ void SeparateByAttributeTransform::apply(TransformedGraph& target) const
 
     for(auto edgeId : target.edgeIds())
     {
-        if(ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
-            continue;
-
         if(conditionFn(edgeId))
             edgeIdsToRemove.insert(edgeId);
     }

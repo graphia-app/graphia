@@ -17,15 +17,6 @@ void FilterTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Filtering"));
 
-    auto attributeNames = config().referencedAttributeNames();
-
-    bool ignoreTails =
-    std::any_of(attributeNames.begin(), attributeNames.end(),
-    [this](const auto& attributeName)
-    {
-        return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-    });
-
     // The elements to be filtered are calculated first and then removed, because
     // removing elements during the filtering could affect the result of filter functions
 
@@ -44,9 +35,6 @@ void FilterTransform::apply(TransformedGraph& target) const
 
         for(auto nodeId : target.nodeIds())
         {
-            if(ignoreTails && target.typeOf(nodeId) == MultiElementType::Tail)
-                continue;
-
             if(u::exclusiveOr(conditionFn(nodeId), _invert))
                 removees.push_back(nodeId);
         }
@@ -74,9 +62,6 @@ void FilterTransform::apply(TransformedGraph& target) const
 
         for(auto edgeId : target.edgeIds())
         {
-            if(ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
-                continue;
-
             if(u::exclusiveOr(conditionFn(edgeId), _invert))
                 removees.push_back(edgeId);
         }
