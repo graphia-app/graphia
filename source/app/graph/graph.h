@@ -118,6 +118,7 @@ public:
 
         return mergedNodeIdSet;
     }
+    virtual int multiplicityOf(NodeId nodeId) const = 0;
 
     EdgeId firstEdgeId() const;
     bool containsEdgeId(EdgeId edgeId) const override;
@@ -136,6 +137,7 @@ public:
 
         return mergedEdgeIdSet;
     }
+    virtual int multiplicityOf(EdgeId edgeId) const = 0;
 
     virtual EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const = 0;
 

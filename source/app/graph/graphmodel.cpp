@@ -144,25 +144,13 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     }
 
     GraphModel::createAttribute(tr("Node Multiplicity"))
-        .setIntValueFn([this](NodeId nodeId)
-        {
-            if(_->_transformedGraph.typeOf(nodeId) != MultiElementType::Head)
-                return 1;
-
-            return _->_transformedGraph.mergedNodeIdsForNodeId(nodeId).size();
-        })
+        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.multiplicityOf(nodeId); })
         .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
     GraphModel::createAttribute(tr("Edge Multiplicity"))
-        .setIntValueFn([this](EdgeId edgeId)
-        {
-            if(_->_transformedGraph.typeOf(edgeId) != MultiElementType::Head)
-                return 1;
-
-            return _->_transformedGraph.mergedEdgeIdsForEdgeId(edgeId).size();
-        })
+        .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.multiplicityOf(edgeId); })
         .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));

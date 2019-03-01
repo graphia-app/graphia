@@ -44,6 +44,7 @@ public:
     bool containsNodeId(NodeId nodeId) const override { return _target.containsNodeId(nodeId); }
     MultiElementType typeOf(NodeId nodeId) const override { return _target.typeOf(nodeId); }
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const override { return _target.mergedNodeIdsForNodeId(nodeId); }
+    int multiplicityOf(NodeId nodeId) const override { return _target.multiplicityOf(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const override { return _target.edgeIds(); }
     int numEdges() const override { return _target.numEdges(); }
@@ -51,6 +52,7 @@ public:
     bool containsEdgeId(EdgeId edgeId) const override { return _target.containsEdgeId(edgeId); }
     MultiElementType typeOf(EdgeId edgeId) const override { return _target.typeOf(edgeId); }
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const override { return _target.mergedEdgeIdsForEdgeId(edgeId); }
+    int multiplicityOf(EdgeId edgeId) const override { return _target.multiplicityOf(edgeId); }
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const override { return _target.edgeIdsForNodeId(nodeId); }
 

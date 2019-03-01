@@ -45,12 +45,14 @@ private:
     {
         std::vector<bool>           _nodeIdsInUse;
         NodeIdDistinctSetCollection _mergedNodeIds;
+        std::vector<int>            _multiplicities;
         std::vector<Node>           _nodes;
 
         void resize(std::size_t size)
         {
             _nodeIdsInUse.resize(size);
             _mergedNodeIds.resize(size);
+            _multiplicities.resize(size);
             _nodes.resize(size);
         }
 
@@ -58,6 +60,7 @@ private:
         {
             _nodeIdsInUse.clear();
             _mergedNodeIds.clear();
+            _multiplicities.clear();
             _nodes.clear();
         }
     } _n;
@@ -69,6 +72,7 @@ private:
     {
         std::vector<bool>           _edgeIdsInUse;
         EdgeIdDistinctSetCollection _mergedEdgeIds;
+        std::vector<int>            _multiplicities;
         std::vector<Edge>           _edges;
 
         EdgeIdDistinctSetCollection _inEdgeIdsCollection;
@@ -80,6 +84,7 @@ private:
         {
             _edgeIdsInUse.resize(size);
             _mergedEdgeIds.resize(size);
+            _multiplicities.resize(size);
             _edges.resize(size);
             _inEdgeIdsCollection.resize(size);
             _outEdgeIdsCollection.resize(size);
@@ -89,6 +94,7 @@ private:
         {
             _edgeIdsInUse.clear();
             _mergedEdgeIds.clear();
+            _multiplicities.clear();
             _edges.clear();
             _inEdgeIdsCollection.clear();
             _outEdgeIdsCollection.clear();
@@ -116,6 +122,9 @@ private:
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
     EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
 
+    NodeId mergeNodes(const std::vector<NodeId>& nodeIds);
+    EdgeId mergeEdges(const std::vector<EdgeId>& edgeIds);
+
     MutableGraph& clone(const MutableGraph& other);
 
 public:
@@ -127,6 +136,7 @@ public:
     bool containsNodeId(NodeId nodeId) const override;
     MultiElementType typeOf(NodeId nodeId) const override;
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const override;
+    int multiplicityOf(NodeId nodeId) const override;
 
     NodeId addNode() override;
     NodeId addNode(NodeId nodeId) override;
@@ -139,6 +149,7 @@ public:
     bool containsEdgeId(EdgeId edgeId) const override;
     MultiElementType typeOf(EdgeId edgeId) const override;
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const override;
+    int multiplicityOf(EdgeId edgeId) const override;
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const override;
     EdgeIdDistinctSet inEdgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet outEdgeIdsForNodeId(NodeId nodeId) const;

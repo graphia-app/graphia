@@ -70,6 +70,11 @@ ConstNodeIdDistinctSet MutableGraph::mergedNodeIdsForNodeId(NodeId nodeId) const
     return {nodeId, &_n._mergedNodeIds};
 }
 
+int MutableGraph::multiplicityOf(NodeId nodeId) const
+{
+    return _n._multiplicities[static_cast<int>(nodeId)];
+}
+
 NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIds.empty())
@@ -96,11 +101,13 @@ const Node& MutableGraph::nodeBy(NodeId nodeId) const
 void MutableGraph::claimNodeId(NodeId nodeId)
 {
     _n._nodeIdsInUse[static_cast<int>(nodeId)] = true;
+    _n._multiplicities[static_cast<int>(nodeId)] = 1;
 }
 
 void MutableGraph::releaseNodeId(NodeId nodeId)
 {
     _n._nodeIdsInUse[static_cast<int>(nodeId)] = false;
+    _n._multiplicities[static_cast<int>(nodeId)] = 0;
 }
 
 Edge& MutableGraph::edgeBy(EdgeId edgeId)
@@ -116,11 +123,13 @@ const Edge& MutableGraph::edgeBy(EdgeId edgeId) const
 void MutableGraph::claimEdgeId(EdgeId edgeId)
 {
     _e._edgeIdsInUse[static_cast<int>(edgeId)] = true;
+    _e._multiplicities[static_cast<int>(edgeId)] = 1;
 }
 
 void MutableGraph::releaseEdgeId(EdgeId edgeId)
 {
     _e._edgeIdsInUse[static_cast<int>(edgeId)] = false;
+    _e._multiplicities[static_cast<int>(edgeId)] = 0;
 }
 
 void MutableGraph::reserveNodeId(NodeId nodeId)
@@ -182,7 +191,15 @@ void MutableGraph::removeNode(NodeId nodeId)
     for(auto edgeId : outEdgeIdsForNodeId(nodeId).copy())
         removeEdge(edgeId);
 
-    _n._mergedNodeIds.remove(NodeIdDistinctSetCollection::SetId(), nodeId);
+    auto setId = _n._mergedNodeIds.remove({}, nodeId);
+
+    if(!setId.isNull())
+    {
+        const auto& mergedNodeIds = mergedNodeIdsForNodeId(setId);
+        for(auto mergedNodeId : mergedNodeIds)
+            _n._multiplicities[static_cast<int>(mergedNodeId)] = mergedNodeIds.size();
+    }
+
     releaseNodeId(nodeId);
     _unusedNodeIds.push_back(nodeId);
 
@@ -220,6 +237,11 @@ MultiElementType MutableGraph::typeOf(EdgeId edgeId) const
 ConstEdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
 {
     return {edgeId, &_e._mergedEdgeIds};
+}
+
+int MutableGraph::multiplicityOf(EdgeId edgeId) const
+{
+    return _e._multiplicities[static_cast<int>(edgeId)];
 }
 
 EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
@@ -272,12 +294,52 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
 
 NodeId MutableGraph::mergeNodes(NodeId nodeIdA, NodeId nodeIdB)
 {
-    return _n._mergedNodeIds.add(nodeIdA, nodeIdB);
+    auto setId = _n._mergedNodeIds.add(nodeIdA, nodeIdB);
+
+    const auto& mergedNodeIds = mergedNodeIdsForNodeId(setId);
+    for(auto mergedNodeId : mergedNodeIds)
+        _n._multiplicities[static_cast<int>(mergedNodeId)] = mergedNodeIds.size();
+
+    return setId;
 }
 
 EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
 {
-    return _e._mergedEdgeIds.add(edgeIdA, edgeIdB);
+    auto setId = _e._mergedEdgeIds.add(edgeIdA, edgeIdB);
+
+    const auto& mergedEdgeIds = mergedEdgeIdsForEdgeId(setId);
+    for(auto mergedEdgeId : mergedEdgeIds)
+        _e._multiplicities[static_cast<int>(mergedEdgeId)] = mergedEdgeIds.size();
+
+    return setId;
+}
+
+NodeId MutableGraph::mergeNodes(const std::vector<NodeId>& nodeIds)
+{
+    auto setId = *std::min_element(nodeIds.begin(), nodeIds.end());
+
+    for(auto nodeId : nodeIds)
+        _n._mergedNodeIds.add(setId, nodeId);
+
+    const auto& mergedNodeIds = mergedNodeIdsForNodeId(setId);
+    for(auto mergedNodeId : mergedNodeIds)
+        _n._multiplicities[static_cast<int>(mergedNodeId)] = mergedNodeIds.size();
+
+    return setId;
+}
+
+EdgeId MutableGraph::mergeEdges(const std::vector<EdgeId>& edgeIds)
+{
+    auto setId = *std::min_element(edgeIds.begin(), edgeIds.end());
+
+    for(auto edgeId : edgeIds)
+        _e._mergedEdgeIds.add(setId, edgeId);
+
+    const auto& mergedEdgeIds = mergedEdgeIdsForEdgeId(setId);
+    for(auto mergedEdgeId : mergedEdgeIds)
+        _e._multiplicities[static_cast<int>(mergedEdgeId)] = mergedEdgeIds.size();
+
+    return setId;
 }
 
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
@@ -308,7 +370,11 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     if(!u::contains(_e._connections, undirectedEdge))
         _e._connections.emplace(undirectedEdge, EdgeIdDistinctSet(&_e._mergedEdgeIds));
 
-    _e._connections[undirectedEdge].add(edgeId);
+    auto& connection = _e._connections[undirectedEdge];
+    connection.add(edgeId);
+
+    for(auto mergedEdgeId : connection)
+        _e._multiplicities[static_cast<int>(mergedEdgeId)] = connection.size();
 
     emit edgeAdded(this, edgeId);
     _updateRequired = true;
@@ -339,7 +405,12 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     Q_ASSERT(!connection.empty());
     connection.remove(edgeId);
 
-    if(connection.empty())
+    if(!connection.empty())
+    {
+        for(auto mergedEdgeId : connection)
+            _e._multiplicities[static_cast<int>(mergedEdgeId)] = connection.size();
+    }
+    else
         _e._connections.erase(undirectedEdge);
 
     releaseEdgeId(edgeId);
@@ -421,15 +492,14 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
         if(component->numEdges() == 0)
             continue;
 
-        auto nodeId = *std::min_element(component->nodeIds().begin(),
-                                        component->nodeIds().end());
+        const auto& nodeIds = component->nodeIds();
+        auto nodeId = *std::min_element(nodeIds.begin(), nodeIds.end());
 
         moveEdgesTo(*this, nodeId,
-                    inEdgeIdsForNodeIds(component->nodeIds()).copy(),
-                    outEdgeIdsForNodeIds(component->nodeIds()).copy());
+            inEdgeIdsForNodeIds(nodeIds).copy(),
+            outEdgeIdsForNodeIds(nodeIds).copy());
 
-        for(auto nodeIdToMerge : component->nodeIds())
-            mergeNodes(nodeId, nodeIdToMerge);
+        mergeNodes(nodeIds);
     }
 
     _updateRequired = true;
