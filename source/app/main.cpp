@@ -71,8 +71,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
-#ifdef Q_OS_MACOS // NativeTextRendering generally looks better on MacOS
+#ifdef Q_OS_MACOS
+    // NativeTextRendering generally looks better on MacOS
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
