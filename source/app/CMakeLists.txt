@@ -269,6 +269,9 @@ if(APPLE)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/misc/MacOSXBundleInfo.plist.in)
 elseif(MSVC)
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
