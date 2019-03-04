@@ -745,7 +745,7 @@ static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, 
     shader.release();
 }
 
-void GraphRendererCore::renderToFramebuffer()
+void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 {
     glViewport(0, 0, _width, _height);
 
@@ -781,14 +781,21 @@ void GraphRendererCore::renderToFramebuffer()
 
     for(auto i : gpuGraphDataRenderOrder())
     {
-        render2DComposite(*this, _screenShader,
-            _gpuGraphData.at(i)._colorTexture,
-            _gpuGraphData.at(i).alpha());
+        if(type.test(GraphRendererCore::Type::Color))
+        {
+            render2DComposite(*this, _screenShader,
+                _gpuGraphData.at(i)._colorTexture,
+                _gpuGraphData.at(i).alpha());
+        }
 
-        // Always render the selection outline fully opaque
-        render2DComposite(*this, _selectionShader,
-            _gpuGraphData.at(i)._selectionTexture,
-            _gpuGraphData.at(i).componentAlpha());
+        if(type.test(GraphRendererCore::Type::Selection))
+        {
+            // Always render the selection outline fully opaque
+            // (i.e. the same as the component's alpha)
+            render2DComposite(*this, _selectionShader,
+                _gpuGraphData.at(i)._selectionTexture,
+                _gpuGraphData.at(i).componentAlpha());
+        }
     }
 
     _screenQuadDataBuffer.release();

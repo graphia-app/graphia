@@ -7,6 +7,8 @@
 #include "primitives/rectangle.h"
 #include "primitives/sphere.h"
 
+#include "shared/utils/flags.h"
+
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
@@ -170,7 +172,16 @@ protected:
     void renderText(GPUGraphData& gpuGraphData);
     void renderGraph();
     void render2D(QRect selectionRect = {});
-    void renderToFramebuffer();
+
+    enum class Type
+    {
+        None        = 0x0,
+        Color       = 0x1,
+        Selection   = 0x2,
+        All = Color | Selection
+    };
+
+    void renderToFramebuffer(Flags<Type> type = Type::All);
 
     virtual GLuint sdfTexture() const = 0;
 };
