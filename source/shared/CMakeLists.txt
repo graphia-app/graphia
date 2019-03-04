@@ -75,6 +75,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/scope_exit.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/semaphore.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/static_visitor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/thread.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.h
