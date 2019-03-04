@@ -267,6 +267,11 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
     {
         const GraphComponentRenderer* componentRenderer = componentRendererRef;
 
+        // Skip invisible components
+        if(!componentRenderer->visible())
+            continue;
+
+        // This order MUST match graphrenderer component order!
         _componentCameras.emplace_back(*componentRenderer->camera());
         _componentViewports.emplace_back(componentRenderer->dimensions());
     }
