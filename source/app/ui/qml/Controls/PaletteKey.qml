@@ -76,6 +76,7 @@ Item
 
         var colors = [];
         var i = 0;
+        var assignedValues = [];
 
         if(palette.autoColors !== undefined)
         {
@@ -85,7 +86,12 @@ Item
                 numKeys = stringValues.length;
 
             for(i = 0; i < numKeys; i++)
+            {
                 colors.push(palette.autoColors[i]);
+
+                if(i < stringValues.length)
+                    Utils.setAdd(assignedValues, stringValues[i]);
+            }
         }
 
         if(palette.fixedColors !== undefined)
@@ -94,18 +100,27 @@ Item
 
             for(var stringValue in palette.fixedColors)
             {
-                var color = palette.fixedColors[stringValue];
+                if(root.stringValues.indexOf(stringValue) === -1)
+                    continue;
 
-                var index = root.stringValues.indexOf(stringValue);
-                if(index < 0 || index >= colors.length)
+                var color = palette.fixedColors[stringValue];
+                var colorIndex = -1;
+
+                if(!Utils.setContains(assignedValues, stringValue))
                 {
-                    index = colors.length;
+                    colorIndex = colors.length;
                     colors.push(color);
                 }
                 else
-                    colors[index] = color;
+                {
+                    // stringValue has already been assigned, so replace
+                    // it with the specified fixed color
+                    colorIndex = stringValues.indexOf(stringValue);
+                    colors[colorIndex] = color;
+                }
 
-                fixedColors.push({"index": index, "stringValue": stringValue});
+                Utils.setAdd(assignedValues, stringValue);
+                fixedColors.push({"index": colorIndex, "stringValue": stringValue});
             }
 
             root._fixedColors = fixedColors;
