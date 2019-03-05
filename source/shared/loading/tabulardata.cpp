@@ -115,6 +115,22 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
 
 void TabularData::shrinkToFit()
 {
+    auto lastRowIsEmpty = [this]
+    {
+        size_t column = 0;
+        while(column < _columns && valueAt(column, _rows - 1).isEmpty())
+            column++;
+
+        return column >= _columns;
+    };
+
+    // Truncate any trailing empty rows
+    while(_rows > 0 && lastRowIsEmpty())
+    {
+        _data.resize(_data.size() - _columns);
+        _rows--;
+    }
+
     _data.shrink_to_fit();
 }
 
