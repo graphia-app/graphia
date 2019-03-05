@@ -75,8 +75,8 @@ QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, Progressable& p
 
     progressable.setProgress(-1);
 
-    jsonObject["userNodeData"] = _userNodeData.save(graph, progressable);
-    jsonObject["userEdgeData"] = _userEdgeData.save(graph, progressable);
+    jsonObject["userNodeData"] = _userNodeData.save(graph, graph.nodeIds(), progressable);
+    jsonObject["userEdgeData"] = _userEdgeData.save(graph, graph.edgeIds(), progressable);
 
     return QByteArray::fromStdString(jsonObject.dump());
 }
@@ -139,7 +139,7 @@ void BaseGenericPluginInstance::setHighlightedRows(const QVector<int>& highlight
     NodeIdSet highlightedNodeIds;
     for(auto row : highlightedRows)
     {
-        auto nodeId = _userNodeData.elementIdForRowIndex(static_cast<size_t>(row));
+        auto nodeId = _userNodeData.elementIdForIndex(static_cast<size_t>(row));
         highlightedNodeIds.insert(nodeId);
     }
 

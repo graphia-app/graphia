@@ -51,9 +51,12 @@ public:
     static BoundingSphere boundingSphere(const NodePositions& nodePositions,
                                          const std::vector<NodeId>& nodeIds);
 
-private:
-    using NodeArray<MeanPosition>::operator[];
-    using NodeArray<MeanPosition>::at;
+    const QVector3D& at(NodeId nodeId) const { return get(nodeId); }
+
+    // Delete base accessors that could be harmful
+    MeanPosition& operator[](NodeId nodeId) = delete;
+    const MeanPosition& operator[](NodeId nodeId) const = delete;
+    MeanPosition& at(NodeId nodeId) = delete;
 };
 
 using ExactNodePositions = NodeArray<QVector3D>;

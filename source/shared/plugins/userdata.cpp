@@ -81,19 +81,18 @@ QVariant UserData::value(size_t index, const QString& name) const
     return {};
 }
 
-json UserData::save(Progressable& progressable) const
+json UserData::save(Progressable& progressable, const std::vector<size_t>& indexes) const
 {
     json jsonObject;
-    int i = 0;
 
-    jsonObject["numValues"] = _numValues;
+    int i = 0;
 
     std::vector<std::map<std::string, json>> vectors;
     for(const auto& userDataVector : _userDataVectors)
     {
         std::map<std::string, json> vector;
         const auto& name = userDataVector.first.toStdString();
-        vector.emplace(name, userDataVector.second.save());
+        vector.emplace(name, userDataVector.second.save(indexes));
         vectors.emplace_back(vector);
         progressable.setProgress((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
