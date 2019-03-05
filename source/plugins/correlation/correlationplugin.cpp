@@ -2,6 +2,9 @@
 
 #include "correlationplotitem.h"
 #include "graphsizeestimateplotitem.h"
+
+#include "shared/graph/grapharray_json.h"
+
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
@@ -209,7 +212,7 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
     NodeIdSet highlightedNodeIds;
     for(auto row : highlightedRows)
     {
-        auto nodeId = _userNodeData.elementIdForRowIndex(static_cast<size_t>(row));
+        auto nodeId = _userNodeData.elementIdForIndex(static_cast<size_t>(row));
         highlightedNodeIds.insert(nodeId);
     }
 
@@ -275,7 +278,7 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     auto computeCost = static_cast<int>(_numRows - row + 1);
 
     _dataRows.emplace_back(_data, row, _numColumns, nodeId, computeCost);
-    _userNodeData.setElementIdForRowIndex(nodeId, row);
+    _userNodeData.setElementIdForIndex(nodeId, row);
 
     auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
@@ -300,7 +303,7 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
 
     for(size_t i = 0; i < _numRows; i++)
     {
-        auto nodeId = _userNodeData.elementIdForRowIndex(i);
+        auto nodeId = _userNodeData.elementIdForIndex(i);
         auto color = !nodeId.isNull() ? graphModel()->nodeVisual(nodeId).outerColor() : QColor{};
 
         colors.append(color);
@@ -358,7 +361,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
 
 const CorrelationDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
-    return _dataRows.at(_userNodeData.rowIndexFor(nodeId));
+    return _dataRows.at(_userNodeData.indexFor(nodeId));
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
@@ -431,7 +434,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 
     jsonObject["numColumns"] = static_cast<int>(_numColumns);
     jsonObject["numRows"] = static_cast<int>(_numRows);
-    jsonObject["userNodeData"] = _userNodeData.save(graph, progressable);
+    jsonObject["userNodeData"] = _userNodeData.save(graph, graph.nodeIds(), progressable);
     jsonObject["userColumnData"] =_userColumnData.save(progressable);
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
@@ -439,7 +442,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["data"] = jsonArrayFrom(_data, &progressable);
 
     graph.setPhase(QObject::tr("Pearson Values"));
-    jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
+    jsonObject["pearsonValues"] = u::graphArrayAsJson(*_pearsonValues, graph.edgeIds(), &progressable);
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
@@ -505,7 +508,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     for(size_t row = 0; row < _numRows; row++)
     {
-        auto nodeId = _userNodeData.elementIdForRowIndex(row);
+        auto nodeId = _userNodeData.elementIdForIndex(row);
         _dataRows.emplace_back(_data, row, _numColumns, nodeId);
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));
@@ -521,12 +524,26 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     const auto& jsonPearsonValues = jsonObject["pearsonValues"];
     graph.setPhase(QObject::tr("Pearson Values"));
     i = 0;
-    for(const auto& pearsonValue : jsonPearsonValues)
-    {
-        if(graph.containsEdgeId(i))
-            _pearsonValues->set(i, pearsonValue);
 
-        parser.setProgress(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
+    if(dataVersion >= 2)
+    {
+        u::forEachJsonGraphArray(jsonPearsonValues, [&](EdgeId edgeId, double correlationValue)
+        {
+            Q_ASSERT(graph.containsEdgeId(edgeId));
+            _pearsonValues->set(edgeId, correlationValue);
+
+            parser.setProgress(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
+        });
+    }
+    else
+    {
+        for(const auto& pearsonValue : jsonPearsonValues)
+        {
+            if(graph.containsEdgeId(i))
+                _pearsonValues->set(i, pearsonValue);
+
+            parser.setProgress(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
+        }
     }
 
     parser.setProgress(-1);

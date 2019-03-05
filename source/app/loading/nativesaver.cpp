@@ -1,6 +1,8 @@
 #include "nativesaver.h"
 #include "jsongraphsaver.h"
 
+#include "shared/graph/grapharray_json.h"
+
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/scope_exit.h"
@@ -81,46 +83,6 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     return true;
 }
 
-static json nodeNamesAsJson(IGraphModel& graphModel, Progressable& progressable)
-{
-    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
-    json names;
-
-    uint64_t i = 0;
-    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
-    for(NodeId nodeId : nodeIds)
-    {
-        names.emplace_back(graphModel.nodeName(nodeId));
-        progressable.setProgress(static_cast<int>((i++ * 100) / nodeIds.size()));
-    }
-
-    progressable.setProgress(-1);
-
-    return names;
-}
-
-static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
-                                Progressable& progressable)
-{
-    graph.setPhase(QObject::tr("Positions"));
-    json positions;
-
-    auto numNodePositions = std::distance(nodePositions.begin(), nodePositions.end());
-    uint64_t i = 0;
-    for(const auto& nodePosition : nodePositions)
-    {
-        auto v = nodePosition.newest();
-        json vector({v.x(), v.y(), v.z()});
-
-        positions.emplace_back(vector);
-        progressable.setProgress((i++ * 100) / numNodePositions);
-    }
-
-    progressable.setProgress(-1);
-
-    return positions;
-}
-
 static json bookmarksAsJson(const Document& document)
 {
     json jsonObject = json::object();
@@ -163,7 +125,7 @@ bool NativeSaver::save()
     Q_ASSERT(graphModel != nullptr);
 
     json header;
-    header["version"] = 3;
+    header["version"] = 4;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
     jsonArray.emplace_back(header);
@@ -175,13 +137,19 @@ bool NativeSaver::save()
     json content;
 
     content["graph"] = JSONGraphSaver::graphAsJson(graphModel->mutableGraph(), *this);
-    content["nodeNames"] = nodeNamesAsJson(*graphModel, *this);
+    content["nodeNames"] = u::graphArrayAsJson(graphModel->nodeNames(), graphModel->mutableGraph().nodeIds(), this);
 
     json layout;
 
     layout["algorithm"] = _document->layoutName();
     layout["settings"] = layoutSettingsAsJson(*_document);
-    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(), graphModel->nodePositions(), *this);
+
+    layout["positions"] = u::graphArrayAsJson(graphModel->nodePositions(), graphModel->mutableGraph().nodeIds(), this,
+    [](const auto& v)
+    {
+        return json({v.x(), v.y(), v.z()});
+    });
+
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 

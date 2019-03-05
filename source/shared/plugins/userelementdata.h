@@ -20,11 +20,11 @@ private:
     struct Index
     {
         bool _set = false;
-        size_t _row = 0;
+        size_t _value = 0;
     };
 
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
-    std::map<size_t, E> _rowToElementIdMap;
+    std::map<size_t, E> _indexToElementIdMap;
 
     void generateElementIdMapping(E elementId)
     {
@@ -35,7 +35,7 @@ private:
         }
 
         _indexes->set(elementId, {true, static_cast<size_t>(numValues())});
-        _rowToElementIdMap[numValues()] = elementId;
+        _indexToElementIdMap[numValues()] = elementId;
     }
 
 public:
@@ -44,36 +44,36 @@ public:
         _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
     }
 
-    void setElementIdForRowIndex(E elementId, size_t row)
+    void setElementIdForIndex(E elementId, size_t index)
     {
-        _indexes->set(elementId, {true, row});
-        _rowToElementIdMap[row] = elementId;
+        _indexes->set(elementId, {true, index});
+        _indexToElementIdMap[index] = elementId;
     }
 
-    E elementIdForRowIndex(size_t row) const
+    E elementIdForIndex(size_t index) const
     {
-        if(u::contains(_rowToElementIdMap, row))
-            return _rowToElementIdMap.at(row);
+        if(u::contains(_indexToElementIdMap, index))
+            return _indexToElementIdMap.at(index);
 
         // This can happen if the user has deleted some nodes then saved and reloaded
-        // In this case the ElementIds may no longer exist for the row in question
+        // In this case the ElementIds may no longer exist for the index in question
         return {};
     }
 
-    size_t rowIndexFor(E elementId) const
+    size_t indexFor(E elementId) const
     {
-        return _indexes->get(elementId)._row;
+        return _indexes->get(elementId)._value;
     }
 
     void setValueBy(E elementId, const QString& name, const QString& value)
     {
         generateElementIdMapping(elementId);
-        setValue(rowIndexFor(elementId), name, value);
+        setValue(indexFor(elementId), name, value);
     }
 
     QVariant valueBy(E elementId, const QString& name) const
     {
-        return value(rowIndexFor(elementId), name);
+        return value(indexFor(elementId), name);
     }
 
     void exposeAsAttributes(IGraphModel& graphModel)
@@ -131,18 +131,23 @@ public:
         }
     }
 
-    json save(const IMutableGraph&, Progressable& progressable) const
+    json save(const IMutableGraph&, const std::vector<E>& elementIds, Progressable& progressable) const
     {
-        json jsonObject = UserData::save(progressable);
+        std::vector<size_t> indexes;
+        json jsonIds = json::array();
 
-        json jsonIndexes = json::array();
-        for(auto index : *_indexes)
+        for(auto elementId : elementIds)
         {
+            auto index = _indexes->at(elementId);
             if(index._set)
-                jsonIndexes.emplace_back(index._row);
+            {
+                jsonIds.push_back(static_cast<int>(elementId));
+                indexes.push_back(index._value);
+            }
         }
 
-        jsonObject["indexes"] = jsonIndexes;
+        json jsonObject = UserData::save(progressable, indexes);
+        jsonObject["ids"] = jsonIds;
 
         return jsonObject;
     }
@@ -153,23 +158,24 @@ public:
             return false;
 
         _indexes->resetElements();
-        _rowToElementIdMap.clear();
+        _indexToElementIdMap.clear();
 
-        if(!u::contains(jsonObject, "indexes") || !jsonObject["indexes"].is_array())
-            return false;
-
-        const auto& indexes = jsonObject["indexes"];
-
-        E elementId(0);
-        for(const auto& index : indexes)
+        const char* idsKey = "ids";
+        if(!u::contains(jsonObject, idsKey) || !jsonObject[idsKey].is_array())
         {
-            if(u::contains(_rowToElementIdMap, index))
-            {
-                qWarning() << "userElementData uses an index more than once";
+            // version <= 3 files call it indexes, try that too
+            idsKey = "indexes";
+            if(!u::contains(jsonObject, idsKey) || !jsonObject[idsKey].is_array())
                 return false;
-            }
+        }
 
-            setElementIdForRowIndex(elementId++, index);
+        const auto& ids = jsonObject[idsKey];
+
+        size_t index = 0;
+        for(const auto& id : ids)
+        {
+            E elementId = id.get<int>();
+            setElementIdForIndex(elementId, index++);
         }
 
         return true;

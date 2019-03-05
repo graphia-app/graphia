@@ -55,7 +55,7 @@ QVariant NodeAttributeTableModel::dataValue(int row, int role) const
     auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
     if(attribute != nullptr && attribute->isValid())
     {
-        auto nodeId = _userNodeData->elementIdForRowIndex(row);
+        auto nodeId = _userNodeData->elementIdForIndex(row);
 
         if(!attribute->valueMissingOf(nodeId))
             return attribute->valueOf(nodeId);
@@ -104,7 +104,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 
     for(int row = 0; row < rowCount(); row++)
     {
-        NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
+        NodeId nodeId = _userNodeData->elementIdForIndex(row);
 
         if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
@@ -209,7 +209,7 @@ bool NodeAttributeTableModel::columnIsHiddenByDefault(const QString&) const
 
 void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
 {
-    auto nodeId = _userNodeData->elementIdForRowIndex(row);
+    auto nodeId = _userNodeData->elementIdForIndex(row);
     _document->moveFocusToNode(nodeId);
 }
 

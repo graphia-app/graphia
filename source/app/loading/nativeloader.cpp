@@ -5,6 +5,7 @@
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
+#include "shared/graph/grapharray_json.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
@@ -284,13 +285,24 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     if(u::contains(jsonBody, "nodeNames"))
     {
-        NodeId nodeId(0);
-        for(const auto& jsonNodeName : jsonBody["nodeNames"])
+        if(version >= 4)
         {
-            if(graphModel->mutableGraph().containsNodeId(nodeId))
-                graphModel->setNodeName(nodeId, jsonNodeName);
+            u::forEachJsonGraphArray(jsonBody["nodeNames"], [&](NodeId nodeId, const QString& nodeName)
+            {
+                Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
+                graphModel->setNodeName(nodeId, nodeName);
+            });
+        }
+        else
+        {
+            NodeId nodeId(0);
+            for(const auto& jsonNodeName : jsonBody["nodeNames"])
+            {
+                if(graphModel->mutableGraph().containsNodeId(nodeId))
+                    graphModel->setNodeName(nodeId, jsonNodeName);
 
-            ++nodeId;
+                ++nodeId;
+            }
         }
     }
 
@@ -377,20 +389,35 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
         {
             _nodePositions = std::make_unique<ExactNodePositions>(graphModel->mutableGraph());
 
-            NodeId nodeId(0);
-            for(const auto& jsonPosition : jsonLayout["positions"])
+            if(version >= 4)
             {
-                if(graphModel->mutableGraph().containsNodeId(nodeId))
+                u::forEachJsonGraphArray(jsonLayout["positions"], [&](NodeId nodeId, const json& position)
                 {
-                    const auto& jsonPositionArray = jsonPosition;
+                    Q_ASSERT(graphModel->mutableGraph().containsNodeId(nodeId));
 
                     _nodePositions->set(nodeId, QVector3D(
-                        jsonPositionArray.at(0),
-                        jsonPositionArray.at(1),
-                        jsonPositionArray.at(2)));
-                }
+                        position.at(0),
+                        position.at(1),
+                        position.at(2)));
+                });
+            }
+            else
+            {
+                NodeId nodeId(0);
+                for(const auto& jsonPosition : jsonLayout["positions"])
+                {
+                    if(graphModel->mutableGraph().containsNodeId(nodeId))
+                    {
+                        const auto& jsonPositionArray = jsonPosition;
 
-                ++nodeId;
+                        _nodePositions->set(nodeId, QVector3D(
+                            jsonPositionArray.at(0),
+                            jsonPositionArray.at(1),
+                            jsonPositionArray.at(2)));
+                    }
+
+                    ++nodeId;
+                }
             }
         }
 

@@ -54,7 +54,7 @@ QString UserDataVector::get(size_t index) const
     return _values.at(index);
 }
 
-json UserDataVector::save() const
+json UserDataVector::save(const std::vector<size_t>& indexes) const
 {
     json jsonObject;
 
@@ -79,7 +79,17 @@ json UserDataVector::save() const
         jsonObject["floatMax"] = _floatMax;
     }
 
-    jsonObject["values"] = _values;
+    if(!indexes.empty())
+    {
+        json jsonValues = json::array();
+
+        for(auto index : indexes)
+            jsonValues.push_back(_values.at(index));
+
+        jsonObject["values"] = jsonValues;
+    }
+    else
+        jsonObject["values"] = _values;
 
     return jsonObject;
 }
