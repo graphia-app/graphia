@@ -12,6 +12,7 @@
 using json = nlohmann::json;
 
 #include "shared/loading/iparser.h"
+#include "shared/utils/progressable.h"
 #include "shared/loading/progress_iterator.h"
 
 #include <QString>
