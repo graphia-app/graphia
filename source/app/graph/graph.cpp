@@ -224,6 +224,9 @@ NodeId Graph::nextNodeId() const
 
 NodeId Graph::lastNodeIdInUse() const
 {
+    if(nodeIds().empty())
+        return {};
+
     return nodeIds().back();
 }
 
@@ -234,6 +237,9 @@ EdgeId Graph::nextEdgeId() const
 
 EdgeId Graph::lastEdgeIdInUse() const
 {
+    if(edgeIds().empty())
+        return {};
+
     return edgeIds().back();
 }
 
