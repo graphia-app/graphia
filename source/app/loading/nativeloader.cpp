@@ -277,7 +277,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     const auto& jsonGraph = jsonBody["graph"];
 
-    if(!JsonGraphParser::parseGraphObject(jsonGraph, graphModel, *this))
+    if(!JsonGraphParser::parseGraphObject(jsonGraph, graphModel, *this, true))
         return false;
 
     setProgress(-1);
