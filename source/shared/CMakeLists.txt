@@ -21,6 +21,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/grapharray.h
+    ${CMAKE_CURRENT_LIST_DIR}/graph/grapharray_json.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igrapharrayclient.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igrapharray.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraphcomponent.h
