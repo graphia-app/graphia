@@ -1,23 +1,13 @@
 #include "jsongraphparser.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
 #include <QDataStream>
 #include <QFile>
 #include <QUrl>
-
-static QString jsonIdToQString(const json& idObject)
-{
-    if(idObject.is_number_integer())
-        return QString::number(idObject.get<int>());
-
-    if(idObject.is_string())
-        return QString::fromStdString(idObject.get<std::string>());
-
-    return {};
-}
 
 bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 {
@@ -59,12 +49,12 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
     if(!u::contains(jsonBody, "graph") || !jsonBody["graph"].is_object())
         return false;
 
-    return parseGraphObject(jsonBody["graph"], graphModel, *this, _userNodeData, _userEdgeData);
+    return parseGraphObject(jsonBody["graph"], graphModel, *this, false, _userNodeData, _userEdgeData);
 }
 
 bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel* graphModel,
-                                       Progressable& progressable, UserNodeData* userNodeData,
-                                       UserEdgeData* userEdgeData)
+                                       Progressable& progressable, bool useElementIdsLiterally,
+                                       UserNodeData* userNodeData, UserEdgeData* userEdgeData)
 {
     if(!u::contains(jsonGraphObject, "nodes") || !u::contains(jsonGraphObject, "edges"))
         return false;
@@ -76,21 +66,26 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
     graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
 
-    std::map<QString, NodeId> jsonIdToNodeId;
+    std::map<std::string, NodeId> stringNodeIdToNodeId;
     for(const auto& jsonNode : jsonNodes)
     {
+        if(!u::contains(jsonNode, "id") || !jsonNode["id"].is_string())
+            return false;
+
+        auto nodeIdString = jsonNode["id"].get<std::string>();
+
         NodeId nodeId;
-        QString nodeJsonId;
 
-        if(!u::contains(jsonNode, "id"))
-            continue;
+        if(useElementIdsLiterally && u::isNumeric(nodeIdString))
+        {
+            nodeId = std::stoi(nodeIdString);
+            graphModel->mutableGraph().reserveNodeId(nodeId);
+            nodeId = graphModel->mutableGraph().addNode(nodeId);
+        }
+        else
+            nodeId = graphModel->mutableGraph().addNode();
 
-        nodeJsonId = jsonIdToQString(jsonNode["id"]);
-        if(nodeJsonId.isEmpty())
-            continue;
-
-        nodeId = graphModel->mutableGraph().addNode();
-        jsonIdToNodeId[nodeJsonId] = nodeId;
+        stringNodeIdToNodeId[nodeIdString] = nodeId;
 
         if(u::contains(jsonNode, "label"))
         {
@@ -128,19 +123,33 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
     for(const auto& jsonEdge : jsonEdges)
     {
         if(!u::contains(jsonEdge, "source") || !u::contains(jsonEdge, "target"))
-            continue;
+            return false;
 
-        QString jsonSourceId = jsonIdToQString(jsonEdge["source"]);
-        if(jsonSourceId.isEmpty())
-            continue;
+        if(!jsonEdge["source"].is_string() || !jsonEdge["target"].is_string())
+            return false;
 
-        QString jsonTargetId = jsonIdToQString(jsonEdge["target"]);
-        if(jsonTargetId.isEmpty())
-            continue;
+        auto sourceIdString = jsonEdge["source"].get<std::string>();
+        auto targetIdString = jsonEdge["target"].get<std::string>();
 
-        NodeId sourceId = jsonIdToNodeId.at(jsonSourceId);
-        NodeId targetId = jsonIdToNodeId.at(jsonTargetId);
-        EdgeId edgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
+        if(!u::contains(stringNodeIdToNodeId, sourceIdString) ||
+            !u::contains(stringNodeIdToNodeId, targetIdString))
+        {
+            return false;
+        }
+
+        EdgeId edgeId;
+        NodeId sourceId = stringNodeIdToNodeId.at(sourceIdString);
+        NodeId targetId = stringNodeIdToNodeId.at(targetIdString);
+
+        if(useElementIdsLiterally && u::contains(jsonEdge, "id") && jsonEdge["id"].is_string())
+        {
+            edgeId = std::stoi(jsonEdge["id"].get<std::string>());
+
+            graphModel->mutableGraph().reserveEdgeId(edgeId);
+            edgeId = graphModel->mutableGraph().addEdge(edgeId, sourceId, targetId);
+        }
+        else
+            edgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
 
         if(u::contains(jsonEdge, "metadata") && userEdgeData != nullptr)
         {
