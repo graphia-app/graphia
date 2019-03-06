@@ -18,7 +18,8 @@ public:
     bool parse(const QUrl &url, IGraphModel *graphModel) override;
     static bool canLoad(const QUrl &) { return true; }
     static bool parseGraphObject(const json& jsonGraphObject, IGraphModel *graphModel,
-                                 Progressable& progressable, UserNodeData* userNodeData = nullptr,
+                                 Progressable& progressable, bool useElementIdsLiterally = false,
+                                 UserNodeData* userNodeData = nullptr,
                                  UserEdgeData* userEdgeData = nullptr);
 };
 
