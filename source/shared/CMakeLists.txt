@@ -58,6 +58,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/enumreflection.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/fixedsizestack.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/flags.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/function_traits.h

@@ -1668,8 +1668,17 @@ ApplicationWindow
 
                 if(!loadWasCancelled)
                 {
-                    errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
-                            qsTr(" could not be opened due to an error.");
+                    if(document.failureReason.length > 0)
+                    {
+                        errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+                            qsTr(" could not be opened:\n\n") + document.failureReason;
+                    }
+                    else
+                    {
+                        errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+                            qsTr(" could not be opened due to an unspecified error.");
+                    }
+
                     errorOpeningFileMessageDialog.open();
                 }
             }

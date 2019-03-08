@@ -661,6 +661,9 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     if(!success)
     {
+        setFailureReason(_graphFileParserThread->failureReason());
+        emit failureReasonChanged();
+
         // Give up now because the whole Document object will be
         // destroyed soon anyway
         return;

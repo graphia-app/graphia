@@ -31,7 +31,8 @@ private:
     QByteArray _pluginUiData;
 
 public:
-    static const int MaxHeaderSize = 1 << 12;
+    static const int Version;
+    static const int MaxHeaderSize;
 
     NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, QByteArray uiData,
                 QByteArray pluginUiData) :
@@ -50,7 +51,6 @@ public:
     QString extension() const override { return Application::nativeExtension(); }
     std::unique_ptr<ISaver> create(const QUrl& url, Document* document, const IPluginInstance* pluginInstance,
                                    const QByteArray& uiData, const QByteArray& pluginUiData) override;
-
 };
 
 #endif // SAVER_H

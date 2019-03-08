@@ -247,6 +247,13 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     auto version = header._version;
 
+    if(version > NativeSaver::Version)
+    {
+        setFailureReason(QObject::tr("Produced using a newer version of %1.")
+            .arg(Application::name()));
+        return false;
+    }
+
     QByteArray byteArray;
 
     if(!load(url.toLocalFile(), byteArray, -1, &graphModel->mutableGraph(), this))
@@ -448,8 +455,18 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
     else
         return false;
 
-    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel->mutableGraph(), *this))
+    if(header._pluginDataVersion > _pluginInstance->plugin()->dataVersion())
+    {
+        setFailureReason(QObject::tr("Produced using a newer version of the plugin '%1'.")
+            .arg(_pluginInstance->plugin()->name()));
         return false;
+    }
+
+    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel->mutableGraph(), *this))
+    {
+        setFailureReason(_pluginInstance->failureReason());
+        return false;
+    }
 
     const auto pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";
     if(u::contains(jsonBody, pluginUiDataKey))

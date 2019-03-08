@@ -4,6 +4,8 @@
 #include "shared/loading/iurltypes.h"
 #include "shared/loading/iparser.h"
 
+#include "shared/utils/failurereason.h"
+
 #include <QtPlugin>
 #include <QString>
 #include <QStringList>
@@ -17,7 +19,7 @@ class IParserThread;
 class IMutableGraph;
 class QUrl;
 
-class IPluginInstance
+class IPluginInstance : public FailureReason
 {
 public:
     virtual ~IPluginInstance() = default;
@@ -33,8 +35,9 @@ public:
 
     virtual QByteArray save(IMutableGraph& mutableGraph, Progressable& progressable) const = 0;
     virtual bool load(const QByteArray& data, int dataVersion,
-                      IMutableGraph& mutableGraph,
-                      IParser& parser) = 0;
+        IMutableGraph& mutableGraph, IParser& parser) = 0;
+
+    virtual const IPlugin* plugin() = 0;
 };
 
 class IPluginInstanceProvider

@@ -3,11 +3,13 @@
 
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
+#include "shared/utils/failurereason.h"
 
 class QUrl;
 class IGraphModel;
+class QString;
 
-class IParser : public Progressable, public Cancellable
+class IParser : public Progressable, public Cancellable, public FailureReason
 {
 public:
     ~IParser() override = default;

@@ -99,6 +99,8 @@ void ParserThread::run()
             // Also, we've already failed, so there is nothing else happening we should
             // be telling the user about
             graph.clearPhase();
+
+            setFailureReason(_parser->failureReason());
         }
 
         // Extra processing may occur after the actual parsing, so we emit this here

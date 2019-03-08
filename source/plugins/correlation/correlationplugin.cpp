@@ -457,9 +457,6 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
                                      IParser& parser)
 {
-    if(dataVersion != plugin()->dataVersion())
-        return false;
-
     json jsonObject = parseJsonFrom(data, &parser);
 
     if(parser.cancelled())

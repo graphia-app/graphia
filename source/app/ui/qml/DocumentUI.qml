@@ -69,6 +69,7 @@ Item
     property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
 
     property bool loading: !document.loadComplete
+    property string failureReason: document.failureReason
 
     property bool commandInProgress: document.commandInProgress && !commandTimer.running
     property int commandProgress: document.commandProgress

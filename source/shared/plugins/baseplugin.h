@@ -91,7 +91,7 @@ public:
 
     void setSaveRequired() const { emit saveRequired(); }
 
-    const IPlugin* plugin() { return _plugin; }
+    const IPlugin* plugin() override { return _plugin; }
     IDocument* document() { return _document; }
     const IDocument* document() const { return _document; }
     IGraphModel* graphModel() { return _graphModel; }

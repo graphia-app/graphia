@@ -13,6 +13,7 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/semaphore.h"
+#include "shared/utils/failurereason.h"
 #include "transform/availabletransformsmodel.h"
 #include "ui/findoptions.h"
 
@@ -43,7 +44,7 @@ class SelectionManager;
 DEFINE_QML_ENUM(Q_GADGET, LayoutPauseState,
                 Running, RunningFinished, Paused);
 
-class Document : public QObject, public IDocument
+class Document : public QObject, public IDocument, public FailureReason
 {
     Q_OBJECT
 
@@ -58,6 +59,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(bool loadComplete MEMBER _loadComplete NOTIFY loadComplete)
+    Q_PROPERTY(QString failureReason READ failureReason WRITE setFailureReason NOTIFY failureReasonChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool interacting READ interacting NOTIFY interactingChanged)
@@ -287,6 +289,7 @@ signals:
     void pluginQmlPathChanged(const QByteArray& pluginUiData, int pluginUiDataVersion);
 
     void loadComplete(const QUrl& url, bool success);
+    void failureReasonChanged();
 
     void titleChanged();
     void contrastingColorChanged();
