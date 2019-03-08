@@ -3,6 +3,7 @@
 
 #include "shared/loading/iparserthread.h"
 #include "shared/loading/iparser.h"
+#include "shared/utils/failurereason.h"
 
 #include <QObject>
 #include <QUrl>
@@ -11,7 +12,7 @@
 
 class GraphModel;
 
-class ParserThread : public QObject, public IParserThread
+class ParserThread : public QObject, public IParserThread, public FailureReason
 {
     Q_OBJECT
 private:

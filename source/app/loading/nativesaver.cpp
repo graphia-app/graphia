@@ -21,6 +21,9 @@
 
 #include <zlib.h>
 
+const int NativeSaver::Version = 4;
+const int NativeSaver::MaxHeaderSize = 1 << 12;
+
 static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
 {
     QFile file(filePath);
@@ -125,7 +128,7 @@ bool NativeSaver::save()
     Q_ASSERT(graphModel != nullptr);
 
     json header;
-    header["version"] = 4;
+    header["version"] = NativeSaver::Version;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
     jsonArray.emplace_back(header);

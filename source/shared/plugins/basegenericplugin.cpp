@@ -81,12 +81,9 @@ QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, Progressable& p
     return QByteArray::fromStdString(jsonObject.dump());
 }
 
-bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
+bool BaseGenericPluginInstance::load(const QByteArray& data, int /*dataVersion*/,
                                      IMutableGraph& graph, IParser& parser)
 {
-    if(dataVersion != plugin()->dataVersion())
-        return false;
-
     json jsonObject = parseJsonFrom(data, &parser);
 
     if(parser.cancelled())
