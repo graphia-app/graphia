@@ -56,6 +56,9 @@ static void launch(const char* program, const char* options, const char* dmpFile
         exit(1);
 
     case 0: // Child
+        if(!options || !*options)
+            execl(program, program, dmpFile, dir, static_cast<char*>(nullptr));
+
         execl(program, program, options, dmpFile, dir, static_cast<char*>(nullptr));
 
         std::cerr << "execl() failed\n";
