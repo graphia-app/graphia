@@ -4,7 +4,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/plugins/userelementdata.h"
 
-class GmlFileParser: public IParser
+class GmlFileParser : public IParser
 {
 private:
     UserNodeData* _userNodeData;
