@@ -69,6 +69,8 @@ ApplicationWindow
                 tooltip: qsTr("New Enrichment")
                 onClicked: wizard.show()
             }
+            ToolButton { action: exportTableAction }
+            ToolButton { action: saveImageAction }
         }
     }
 
@@ -295,10 +297,21 @@ ApplicationWindow
     Menu
     {
         id: plotContextMenu
-        MenuItem
+        MenuItem { action: saveImageAction }
+    }
+
+    Action
+    {
+        id: saveImageAction
+        enabled: tabView.visible
+        text: qsTr("Save As Image…")
+        iconName: "camera-photo"
+        onTriggered:
         {
-            text: qsTr("Save as Image…")
-            onTriggered: { heatmapSaveDialog.open(); }
+            heatmapSaveDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+                misc.fileSaveInitialFolder : "";
+
+            heatmapSaveDialog.open();
         }
     }
 
@@ -311,7 +324,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: currentTableView && currentTableView.rowCount > 0;
+        enabled: currentTableView && currentTableView.rowCount > 0
         text: qsTr("Export Table…")
         iconName: "document-save"
         onTriggered:
