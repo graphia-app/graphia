@@ -504,7 +504,25 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
     graph.setPhase(QObject::tr("Data"));
-    jsonObject["data"] = jsonArrayFrom(_data, &progressable);
+    jsonObject["data"] = [&]
+    {
+        json array;
+
+        uint64_t i = 0;
+        for(const auto& nodeId : graph.nodeIds())
+        {
+            const auto& dataRow = dataRowForNodeId(nodeId);
+
+            for(auto value : dataRow)
+                array.emplace_back(value);
+
+            progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
+        }
+
+        progressable.setProgress(-1);
+
+        return array;
+    }();
 
     graph.setPhase(QObject::tr("Correlation Values"));
     jsonObject["correlationValues"] = u::graphArrayAsJson(*_correlationValues, graph.edgeIds(), &progressable);
