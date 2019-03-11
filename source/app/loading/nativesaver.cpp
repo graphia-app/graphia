@@ -95,7 +95,7 @@ static json bookmarksAsJson(const Document& document)
     {
         json nodeIds;
         for(auto nodeId : document.nodeIdsForBookmark(bookmark))
-            nodeIds.emplace_back(static_cast<int>(nodeId));
+            nodeIds.emplace_back(nodeId);
 
         auto byteArray = bookmark.toUtf8();
         auto bookmarkName = byteArray.constData();

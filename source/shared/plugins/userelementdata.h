@@ -141,7 +141,7 @@ public:
             auto index = _indexes->at(elementId);
             if(index._set)
             {
-                jsonIds.push_back(static_cast<int>(elementId));
+                jsonIds.push_back(elementId);
                 indexes.push_back(index._value);
             }
         }

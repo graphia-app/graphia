@@ -12,6 +12,7 @@
 using json = nlohmann::json;
 
 #include "shared/loading/iparser.h"
+#include "shared/graph/elementid.h"
 #include "shared/utils/progressable.h"
 #include "shared/loading/progress_iterator.h"
 
@@ -27,6 +28,13 @@ inline void from_json(const json& j, QString& s)
 {
     s = QString::fromStdString(j.get<std::string>());
 }
+
+template<typename E>
+void to_json(json& j, ElementId<E> elementId)
+{
+    j = static_cast<int>(elementId);
+}
+
 
 template<typename C>
 json jsonArrayFrom(const C& container, Progressable* progressable = nullptr)

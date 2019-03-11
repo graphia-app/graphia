@@ -20,7 +20,7 @@ namespace u
         {
             json object;
 
-            object["id"] = static_cast<int>(elementId);
+            object["id"] = elementId;
 
             const auto& value = graphArray.at(elementId);
             object["value"] = elementToJson(value);
