@@ -389,7 +389,7 @@ Item
     function switchToOverviewMode() { document.switchToOverviewMode(); }
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
-    function screenshot() { captureScreenshot.open(); }
+    function screenshot() { captureScreenshot.show(); }
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {
         // js treats undefined as a valid argument instead of falling back to

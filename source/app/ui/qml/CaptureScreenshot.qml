@@ -9,14 +9,12 @@ import com.kajeka 1.0
 
 import "../../../shared/ui/qml/Constants.js" as Constants
 
-Dialog
+Window
 {
     id: root
     title: qsTr("Save As Image")
-    width: 600
-    height: 400
-
-    standardButtons: StandardButton.Cancel | StandardButton.Save
+    width: 800
+    height: 600
 
     // This is used to compare the aspect ratios of the screenshots
     property var graphView
@@ -43,17 +41,6 @@ Dialog
 
     SystemPalette { id: systemPalette }
 
-    onAccepted:
-    {
-        var path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
-            new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
-
-        var fileDialogObject = fileDialogComponent.createObject(root,
-            {"folder": screenshot.path, "currentFile": QmlUtils.urlForFileName(path)});
-
-        fileDialogObject.open();
-    }
-
     Timer
     {
         id: refreshTimer
@@ -67,6 +54,8 @@ Dialog
     ColumnLayout
     {
         anchors.fill: parent
+        anchors.margins: Constants.margin
+
         spacing: Constants.spacing
 
         RowLayout
@@ -394,6 +383,31 @@ Dialog
                 }
             }
         }
+        RowLayout
+        {
+            Item { Layout.fillWidth: true }
+
+            Button
+            {
+                text: qsTr("Cancel")
+                onClicked: { root.close(); }
+            }
+
+            Button
+            {
+                text: qsTr("Save…")
+                onClicked:
+                {
+                    var path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
+                        new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
+
+                    var fileDialogObject = fileDialogComponent.createObject(root,
+                        {"folder": screenshot.path, "currentFile": QmlUtils.urlForFileName(path)});
+
+                    fileDialogObject.open();
+                }
+            }
+        }
     }
 
     Component
@@ -413,6 +427,7 @@ Dialog
 
             onAccepted:
             {
+                root.close();
                 screenshot.path = folder.toString();
                 graphView.captureScreenshot(screenshotWidth, screenshotHeight, file, dpi, fill);
             }
