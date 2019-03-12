@@ -520,7 +520,7 @@ Item
     function switchToOverviewMode() { document.switchToOverviewMode(); }
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
-    function screenshot() { captureScreenshot.open(); }
+    function screenshot() { captureScreenshot.show(); }
     function nodeName(nodeId) { return document.nodeName(nodeId); }
 
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
