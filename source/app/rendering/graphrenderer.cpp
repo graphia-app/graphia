@@ -897,6 +897,13 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
 
     auto nodeIds = graphQuickItem->desiredFocusNodeIds();
 
+    // Tail nodes aren't visible, so they can't be focused
+    nodeIds.erase(std::remove_if(nodeIds.begin(), nodeIds.end(),
+    [this](auto nodeId)
+    {
+        return _graphModel->graph().typeOf(nodeId) == MultiElementType::Tail;
+    }), nodeIds.end());
+
     if(nodeIds.empty())
         return mode();
 
