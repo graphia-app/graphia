@@ -13,8 +13,13 @@ Window
 {
     id: root
     title: qsTr("Save As Image")
+    modality: Qt.ApplicationModal
+    flags: Qt.Window|Qt.Dialog
     width: 800
     height: 600
+
+    minimumWidth: 400
+    minimumHeight: 300
 
     // This is used to compare the aspect ratios of the screenshots
     property var graphView
