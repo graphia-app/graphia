@@ -24,29 +24,29 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         matrixIndexToNodeId[size - 1] = nodeId;
     }
 
-    NodeArray<float> maxDistances(target);
+    NodeArray<int> maxDistances(target);
 
     target.setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
     std::atomic_int progress(0);
     concurrent_for(nodeIds.begin(), nodeIds.end(),
-                   [this, &maxDistances, &progress, &target](const NodeId source)
+    [this, &maxDistances, &progress, &target](const NodeId source)
     {
         if(cancelled())
             return;
 
-        NodeArray<float> distance(target);
+        NodeArray<int> distance(target);
         NodeArray<bool> visited(target);
 
         auto comparator = [&distance](NodeId a, NodeId b){ return distance[a] > distance[b]; };
         std::priority_queue<NodeId, std::vector<NodeId>, decltype(comparator)> queue(comparator);
 
         for(auto nodeId : target.nodeIds())
-            distance[nodeId] = std::numeric_limits<float>::max();
+            distance[nodeId] = std::numeric_limits<int>::max();
 
         queue.push(source);
-        distance[source] = 0.0f;
+        distance[source] = 0;
 
         while(!queue.empty())
         {
@@ -74,10 +74,10 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
             }
         }
 
-        float maxDistance = 0.0f;
+        int maxDistance = 0;
         for(auto& nodeId : target.nodeIds())
         {
-            if(distance[nodeId] != std::numeric_limits<float>::max())
+            if(distance[nodeId] != std::numeric_limits<int>::max())
                 maxDistance = std::max(distance[nodeId], maxDistance);
         }
 
@@ -93,7 +93,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
 
     _graphModel->createAttribute(QObject::tr("Node Eccentricity"))
         .setDescription(QObject::tr("A node's eccentricity is the length of the shortest path to the furthest node."))
-        .setFloatValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; });
+        .setIntValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; });
 }
 
 std::unique_ptr<GraphTransform> EccentricityTransformFactory::create(const GraphTransformConfig&) const
