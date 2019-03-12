@@ -44,20 +44,35 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
         return false;
 
     if(jsonBody.is_null() || !jsonBody.is_object())
+    {
+        setFailureReason(QObject::tr("Body is empty, or not an object."));
         return false;
+    }
 
-    if(!u::contains(jsonBody, "graph") || !jsonBody["graph"].is_object())
+    const json* graph = nullptr;
+
+    if(u::contains(jsonBody, "graphs") && jsonBody["graphs"].is_array() && jsonBody["graphs"].size() > 0)
+        graph = &jsonBody["graphs"].at(0);
+    else if(u::contains(jsonBody, "graph") && jsonBody["graph"].is_object())
+        graph = &jsonBody["graph"];
+    else
+    {
+        setFailureReason(QObject::tr("Body doesn't contain a graph object."));
         return false;
+    }
 
-    return parseGraphObject(jsonBody["graph"], graphModel, *this, false, _userNodeData, _userEdgeData);
+    return parseGraphObject(*graph, graphModel, *this, false, _userNodeData, _userEdgeData);
 }
 
 bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel* graphModel,
-                                       Progressable& progressable, bool useElementIdsLiterally,
+                                       IParser& parser, bool useElementIdsLiterally,
                                        UserNodeData* userNodeData, UserEdgeData* userEdgeData)
 {
     if(!u::contains(jsonGraphObject, "nodes") || !u::contains(jsonGraphObject, "edges"))
+    {
+        parser.setFailureReason(QObject::tr("Graph doesn't contain nodes or edges arrays."));
         return false;
+    }
 
     const auto& jsonNodes = jsonGraphObject["nodes"];
     const auto& jsonEdges = jsonGraphObject["edges"];
@@ -70,7 +85,10 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
     for(const auto& jsonNode : jsonNodes)
     {
         if(!u::contains(jsonNode, "id") || !jsonNode["id"].is_string())
+        {
+            parser.setFailureReason(QObject::tr("Node has no ID."));
             return false;
+        }
 
         auto nodeIdString = jsonNode["id"].get<std::string>();
 
@@ -112,10 +130,10 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
             }
         }
 
-        progressable.setProgress(static_cast<int>((i++ * 100) / jsonNodes.size()));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonNodes.size()));
     }
 
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
 
     i = 0;
 
@@ -123,7 +141,10 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
     for(const auto& jsonEdge : jsonEdges)
     {
         if(!u::contains(jsonEdge, "source") || !u::contains(jsonEdge, "target"))
+        {
+            parser.setFailureReason(QObject::tr("Edge has no source or target."));
             return false;
+        }
 
         if(!jsonEdge["source"].is_string() || !jsonEdge["target"].is_string())
             return false;
@@ -171,9 +192,9 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
         }
 
-        progressable.setProgress(static_cast<int>((i++ * 100) / jsonEdges.size()));
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonEdges.size()));
     }
 
-    progressable.setProgress(-1);
+    parser.setProgress(-1);
     return true;
 }
