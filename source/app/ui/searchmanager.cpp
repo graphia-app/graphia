@@ -91,10 +91,12 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
-            // From a search results point of view, we only care about head nodes...
+            // We can't add tail nodes to the results since merge sets can only be found
+            // using head nodes... (cont.)
             if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
+            const auto& mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
             bool match = false;
 
             // Fall back on a node name search if there are no attributes provided
@@ -103,23 +105,24 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
             if(!match)
             {
-                for(const auto& conditionFn : conditionFns)
+                match = std::any_of(conditionFns.begin(), conditionFns.end(),
+                [&mergedNodeIds](const auto& conditionFn)
                 {
-                    // ...but we still match against the tails
-                    const auto& mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
-                    match = std::any_of(mergedNodeIds.begin(), mergedNodeIds.end(),
+                    // ...but we still match against the tails... (cont.)
+                    return std::any_of(mergedNodeIds.begin(), mergedNodeIds.end(),
                     [&conditionFn](auto mergedNodeId)
                     {
                        return conditionFn(mergedNodeId);
                     });
-
-                    if(match)
-                        break;
-                }
+                });
             }
 
             if(match)
-                foundNodeIds.emplace(nodeId);
+            {
+                // ...so that the entire merge set of the head is found, even if
+                // it's only a subset of the merge set that actually matched
+                foundNodeIds.insert(mergedNodeIds.begin(), mergedNodeIds.end());
+            }
         }
     }
 
