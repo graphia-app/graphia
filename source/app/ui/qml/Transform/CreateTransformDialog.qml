@@ -8,6 +8,7 @@ import ".."
 import "TransformConfig.js" as TransformConfig
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "../Visualisation/VisualisationUtils.js" as VisualisationUtils
 
 import "../Controls"
 
@@ -796,27 +797,13 @@ Window
 
         Object.keys(resolvedDefaultVisualisations).forEach(function(attributeName)
         {
+            var defaultVisualisation = resolvedDefaultVisualisations[attributeName];
             var channelName = visualisations.selectedVisualisation(attributeName);
 
             if(channelName.length > 0)
             {
-                var expression = "\"" + attributeName + "\" \"" + channelName + "\"";
-
-                var valueType = resolvedDefaultVisualisations[attributeName].valueType;
-                var parameters = document.visualisationDefaultParameters(
-                    valueType, channelName);
-
-                if(Object.keys(parameters).length !== 0)
-                    expression += " with";
-
-                for(var key in parameters)
-                {
-                    var parameter = parameters[key];
-                    parameter = Utils.sanitiseJson(parameter);
-                    parameter = Utils.escapeQuotes(parameter);
-
-                    expression += " " + key + " = \"" + parameter + "\"";
-                }
+                var expression = VisualisationUtils.expressionFor(
+                    document, defaultVisualisation, channelName);
 
                 defaultVisualisations.push(expression);
             }

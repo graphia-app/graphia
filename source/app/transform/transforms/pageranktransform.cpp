@@ -141,10 +141,11 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     }
 
     _graphModel->createAttribute(QObject::tr("Node PageRank"))
-            .setDescription(QObject::tr("A node's PageRank is a measure of relative importance in the graph."))
-            .floatRange().setMin(0.0f)
-            .floatRange().setMax(1.0f)
-            .setFloatValueFn([pageRankScores](NodeId nodeId) { return pageRankScores[nodeId]; });
+        .setDescription(QObject::tr("A node's PageRank is a measure of relative importance in the graph."))
+        .floatRange().setMin(0.0f)
+        .floatRange().setMax(1.0f)
+        .setFloatValueFn([pageRankScores](NodeId nodeId) { return pageRankScores[nodeId]; })
+        .setFlag(AttributeFlag::VisualiseByComponent);
 }
 
 std::unique_ptr<GraphTransform> PageRankTransformFactory::create(const GraphTransformConfig&) const

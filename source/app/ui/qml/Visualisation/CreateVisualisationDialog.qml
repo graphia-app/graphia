@@ -7,6 +7,7 @@ import com.kajeka 1.0
 import ".."
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "VisualisationUtils.js" as VisualisationUtils
 
 import "../Controls"
 
@@ -178,23 +179,8 @@ Window
 
         channelList.selectedValues.forEach(function(channelName)
         {
-            var expression = "\"" + attributeList.selectedValue + "\" \"" + channelName +"\"";
-
-            var attribute = document.attribute(attributeList.selectedValue);
-            var parameters = document.visualisationDefaultParameters(attribute.valueType,
-                                                                     channelName);
-
-            if(Object.keys(parameters).length !== 0)
-                expression += " with";
-
-            for(var key in parameters)
-            {
-                var parameter = parameters[key];
-                parameter = Utils.sanitiseJson(parameter);
-                parameter = Utils.escapeQuotes(parameter);
-
-                expression += " " + key + " = \"" + parameter + "\"";
-            }
+            var expression = VisualisationUtils.expressionFor(
+                document, document.attribute(attributeList.selectedValue), channelName);
 
             newVisualsiationExpressions.push(expression);
         });

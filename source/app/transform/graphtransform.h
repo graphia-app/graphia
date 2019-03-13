@@ -4,6 +4,9 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
+#include "shared/attributes/iattribute.h"
+
+#include "shared/utils/flags.h"
 #include "shared/utils/cancellable.h"
 
 #include "transforminfo.h"
@@ -79,6 +82,7 @@ struct DefaultVisualisation
     QString _attributeName;
 
     ValueType _attributeValueType;
+    Flags<AttributeFlag> _attributeFlags;
     QString _channel;
 };
 

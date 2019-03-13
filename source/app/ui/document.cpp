@@ -1663,6 +1663,8 @@ QVariantMap Document::transform(const QString& transformName) const
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
+            defaultVisualisationMap.insert(QStringLiteral("name"), defaultVisualisation._attributeName);
+            defaultVisualisationMap.insert(QStringLiteral("flags"), static_cast<int>(*defaultVisualisation._attributeFlags));
             defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation._attributeValueType));
             defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation._channel);
             defaultVisualisations.insert(defaultVisualisation._attributeName, defaultVisualisationMap);
@@ -1785,6 +1787,8 @@ QVariantMap Document::attribute(const QString& attributeName) const
     if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(attributeName);
+        map.insert(QStringLiteral("name"), parsedAttributeName._name);
+        map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
         map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
 

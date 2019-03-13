@@ -93,7 +93,8 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
 
     _graphModel->createAttribute(QObject::tr("Node Eccentricity"))
         .setDescription(QObject::tr("A node's eccentricity is the length of the shortest path to the furthest node."))
-        .setIntValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; });
+        .setIntValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; })
+        .setFlag(AttributeFlag::VisualiseByComponent);
 }
 
 std::unique_ptr<GraphTransform> EccentricityTransformFactory::create(const GraphTransformConfig&) const

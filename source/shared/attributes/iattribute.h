@@ -21,6 +21,9 @@ DEFINE_QML_ENUM(
     // Automatically set the range
     AutoRange               = 0x1,
 
+    // Visualise on a per-component basis, by default
+    VisualiseByComponent    = 0x2,
+
     // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x4,
 

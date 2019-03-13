@@ -57,7 +57,7 @@ public:
 
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"MCL Cluster", ValueType::String, QObject::tr("Colour")}};
+        return {{"MCL Cluster", ValueType::String, {}, QObject::tr("Colour")}};
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

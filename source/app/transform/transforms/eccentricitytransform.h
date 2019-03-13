@@ -36,7 +36,7 @@ public:
     }
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Node Eccentricity", ValueType::Float, QObject::tr("Colour")}};
+        return {{"Node Eccentricity", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}};
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
