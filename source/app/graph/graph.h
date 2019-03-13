@@ -112,6 +112,9 @@ public:
 
         for(auto nodeId : nodeIds)
         {
+            if(typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
             const auto mergedNodeIds = mergedNodeIdsForNodeId(nodeId);
             mergedNodeIdSet.insert(mergedNodeIds.begin(), mergedNodeIds.end());
         }
@@ -131,6 +134,9 @@ public:
 
         for(auto edgeId : edgeIds)
         {
+            if(typeOf(edgeId) == MultiElementType::Tail)
+                continue;
+
             const auto mergedEdgeIds = mergedEdgeIdsForEdgeId(edgeId);
             mergedEdgeIdSet.insert(mergedEdgeIds.begin(), mergedEdgeIds.end());
         }
