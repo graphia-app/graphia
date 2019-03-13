@@ -1936,9 +1936,9 @@ QStringList Document::availableVisualisationChannelNames(int valueType) const
                                         static_cast<ValueType>(valueType)) : QStringList();
 }
 
-QString Document::visualisationDescription(const QString& attributeName, const QString& channelName) const
+QStringList Document::visualisationDescription(const QString& attributeName, const QStringList& channelNames) const
 {
-    return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelName) : QString();
+    return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelNames) : QStringList();
 }
 
 bool Document::hasVisualisationInfo() const

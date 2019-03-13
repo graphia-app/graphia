@@ -44,6 +44,7 @@ Item
 
                 if(target.count > 0)
                 {
+                    var newSelectedValues = [];
                     target.forEach(function(rowIndex)
                     {
                         var value;
@@ -53,11 +54,17 @@ Item
                             value = root.model[rowIndex];
 
                         root.selectedValue = value;
-                        root.selectedValues.push(value);
+                        newSelectedValues.push(value);
                     });
+
+                    root.selectedValue = newSelectedValues[newSelectedValues.length - 1];
+                    root.selectedValues = newSelectedValues;
                 }
                 else
+                {
                     root.selectedValue = undefined;
+                    root.selectedValues = [];
+                }
             }
         }
     }

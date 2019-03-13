@@ -17,10 +17,10 @@ Window
     title: qsTr("Add Visualisation")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
-    width: 600
-    height: 250
-    minimumWidth: 600
-    minimumHeight: 250
+    width: 640
+    height: 350
+    minimumWidth: 640
+    minimumHeight: 350
 
     property var document
     property var visualisationExpressions: []
@@ -67,7 +67,7 @@ Window
 
                 allowMultipleSelection: true
 
-                onSelectedValueChanged:
+                onSelectedValuesChanged:
                 {
                     description.update();
                     updateVisualisationExpressions();
@@ -90,18 +90,26 @@ Window
                 {
                     text = "";
 
-                    if(attributeList.selectedValue !== undefined && attributeList.selectedValue.length > 0)
-                    {
-                        var attribute = document.attribute(attributeList.selectedValue);
-                        text += attribute.description;
+                    if(attributeList.selectedValue === undefined || attributeList.selectedValue.length === 0)
+                        return;
 
-                        if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)
-                        {
-                            var visualisationDescription = document.visualisationDescription(
-                                attributeList.selectedValue, channelList.selectedValue);
-                            text += "<br><br>" + visualisationDescription;
-                        }
-                    }
+                    var attribute = document.attribute(attributeList.selectedValue);
+
+                    if(attribute.description === undefined)
+                        return;
+
+                    text += attribute.description;
+
+                    if(channelList.selectedValues === undefined || channelList.selectedValues.length === 0)
+                        return;
+
+                    var visualisationDescriptions = document.visualisationDescription(
+                        attributeList.selectedValue, channelList.selectedValues);
+
+                    visualisationDescriptions.forEach(function(visualisationDescription)
+                    {
+                        text += "<br><br>" + visualisationDescription;
+                    });
                 }
             }
         }
@@ -113,7 +121,11 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: { return visualisationExpressions.every(document.visualisationIsValid); }
+                enabled:
+                {
+                    return visualisationExpressions.length > 0 &&
+                        visualisationExpressions.every(document.visualisationIsValid);
+                }
                 onClicked: { root.accept(); }
             }
 
@@ -162,7 +174,7 @@ Window
 
     function updateVisualisationExpressions()
     {
-        visualisationExpressions = [];
+        var newVisualsiationExpressions = [];
 
         channelList.selectedValues.forEach(function(channelName)
         {
@@ -184,8 +196,10 @@ Window
                 expression += " " + key + " = \"" + parameter + "\"";
             }
 
-            visualisationExpressions.push(expression);
+            newVisualsiationExpressions.push(expression);
         });
+
+        visualisationExpressions = newVisualsiationExpressions;
     }
 
     onAccepted:

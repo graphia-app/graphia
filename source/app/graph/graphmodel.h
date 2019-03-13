@@ -105,7 +105,7 @@ public:
     bool hasValidEdgeTextVisualisation() const;
 
     QStringList availableVisualisationChannelNames(ValueType valueType) const;
-    QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
+    QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;
     void clearVisualisationInfos();
     bool hasVisualisationInfo() const;
     const VisualisationInfo& visualisationInfoAtIndex(int index) const;
