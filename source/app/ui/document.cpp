@@ -1955,6 +1955,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(QStringLiteral("alertText"), "");
     map.insert(QStringLiteral("minimumNumericValue"), 0.0);
     map.insert(QStringLiteral("maximumNumericValue"), 1.0);
+    map.insert(QStringLiteral("hasNumericRange"), true);
     map.insert(QStringLiteral("stringValues"), stringValues);
 
     if(_graphModel == nullptr)
@@ -1964,6 +1965,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 
     map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.min());
     map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.max());
+    map.insert(QStringLiteral("hasNumericRange"), visualisationInfo.hasRange());
 
     const auto& stringValuesVector = visualisationInfo.stringValues();
     stringValues.reserve(static_cast<int>(stringValuesVector.size()));

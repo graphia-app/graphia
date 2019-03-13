@@ -30,6 +30,14 @@ public:
     void setMin(double min) { _min = min; }
     void setMax(double max) { _max = max; }
 
+    void resetRange()
+    {
+        _min = std::numeric_limits<double>::max();
+        _max = std::numeric_limits<double>::lowest();
+    }
+
+    bool hasRange() const { return _min <= _max; }
+
     void addStringValue(const QString& value) { _stringValues.emplace_back(value); }
     auto stringValues() const { return _stringValues; }
 };
