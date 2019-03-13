@@ -621,18 +621,28 @@ QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) 
     return stringList;
 }
 
-QString GraphModel::visualisationDescription(const QString& attributeName, const QString& channelName) const
+QStringList GraphModel::visualisationDescription(const QString& attributeName, const QStringList& channelNames) const
 {
-    if(!u::contains(_->_attributes, attributeName) || !u::contains(_->_visualisationChannels, channelName))
-        return {};
+    QStringList descriptions;
 
-    auto attribute = attributeValueByName(attributeName);
-    auto& channel = _->_visualisationChannels.at(channelName);
+    if(!u::contains(_->_attributes, attributeName))
+        return descriptions;
 
-    if(!channel->supports(attribute.valueType()))
-        return tr("This visualisation channel is not supported for the attribute type.");
+    for(const auto& channelName : channelNames)
+    {
+        if(!u::contains(_->_visualisationChannels, channelName))
+            return descriptions;
 
-    return channel->description(attribute.elementType(), attribute.valueType());
+        auto attribute = attributeValueByName(attributeName);
+        auto& channel = _->_visualisationChannels.at(channelName);
+
+        if(!channel->supports(attribute.valueType()))
+            descriptions.append(tr("This visualisation channel is not supported for the attribute type."));
+        else
+            descriptions.append(channel->description(attribute.elementType(), attribute.valueType()));
+    }
+
+    return descriptions;
 }
 
 void GraphModel::clearVisualisationInfos()
