@@ -116,6 +116,13 @@ Item
             maximum: root._visualisationInfo.maximumNumericValue !== undefined ?
                 root._visualisationInfo.maximumNumericValue : 0.0
 
+            showLabels:
+            {
+                return !root.isFlagSet("disabled") && !root._error &&
+                    root._visualisationInfo.hasNumericRange !== undefined &&
+                    root._visualisationInfo.hasNumericRange;
+            }
+
             onClicked:
             {
                 if(mouse.button === Qt.LeftButton)
@@ -206,6 +213,27 @@ Item
                     onCheckedChanged:
                     {
                         setFlag("invert", checked);
+                        updateExpression();
+                    }
+                }
+
+                MenuItem
+                {
+                    id: perComponentMenuItem
+
+                    text: qsTr("Apply Per Component")
+                    checkable: true
+                    enabled: alertIcon.type !== "error"
+
+                    visible:
+                    {
+                        var valueType = document.attribute(attribute).valueType;
+                        return valueType === ValueType.Float || valueType === ValueType.Int;
+                    }
+
+                    onCheckedChanged:
+                    {
+                        setFlag("component", checked);
                         updateExpression();
                     }
                 }
@@ -361,7 +389,7 @@ Item
         }
     }
 
-    function parseParameters(valid)
+    function parseParameters()
     {
         gradientKey.visible = false;
         paletteKey.visible = false;
@@ -376,7 +404,6 @@ Item
             case "gradient":
                 gradientKey.configuration = unescaped;
                 gradientKey.visible = true;
-                gradientKey.showLabels = !isFlagSet("disabled") && valid;
                 break;
 
             case "palette":
@@ -387,6 +414,7 @@ Item
         }
     }
 
+    property bool _error: false
     property int index: -1
     property string value
     onValueChanged:
@@ -400,19 +428,20 @@ Item
             channel = visualisationConfig.channel;
             parameters = visualisationConfig.parameters;
 
-            var error = false;
+            _error = false;
             if(document.hasVisualisationInfo() && index >= 0)
             {
                 root._visualisationInfo = document.visualisationInfoAtIndex(index);
                 setVisualisationInfo(root._visualisationInfo);
 
-                error = root._visualisationInfo.alertType === AlertType.Error;
+                _error = root._visualisationInfo.alertType === AlertType.Error;
             }
 
-            parseParameters(!error);
+            parseParameters();
 
-            enabledMenuItem.checked = !isFlagSet("disabled") && !error;
+            enabledMenuItem.checked = !isFlagSet("disabled") && !_error;
             invertMenuItem.checked = isFlagSet("invert");
+            perComponentMenuItem.checked = isFlagSet("component");
             sortByValueMenuItem.checked = !isFlagSet("assignByQuantity");
             sortBySharedValuesMenuItem.checked = isFlagSet("assignByQuantity");
             attributeList.currentIndex = attributeList.find(attribute);

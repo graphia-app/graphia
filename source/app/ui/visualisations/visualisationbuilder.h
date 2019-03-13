@@ -8,10 +8,12 @@
 #include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "shared/utils/utils.h"
+#include "shared/utils/container.h"
 #include "attributes/attribute.h"
 
 #include <vector>
 #include <array>
+#include <type_traits>
 
 #include <QCollator>
 #include <QtGlobal>
@@ -21,14 +23,12 @@ class VisualisationsBuilder
 {
 public:
     VisualisationsBuilder(const Graph& graph,
-                          const std::vector<ElementId>& elementIds,
-                          ElementIdArray<ElementId, ElementVisual>& visuals) :
-        _graph(&graph), _elementIds(&elementIds), _visuals(&visuals)
+        ElementIdArray<ElementId, ElementVisual>& visuals) :
+        _graph(&graph), _visuals(&visuals)
     {}
 
 private:
     const Graph* _graph;
-    const std::vector<ElementId>* _elementIds;
     ElementIdArray<ElementId, ElementVisual>* _visuals;
     int _numAppliedVisualisations = 0;
 
@@ -63,6 +63,24 @@ private:
         _applications[2].at(index)._array.set(elementId, oldVisual._text  != visual._text);
     }
 
+    template<typename G>
+    std::vector<ElementId> elementIds(const G* graph) const
+    {
+        if constexpr(std::is_same_v<ElementId, NodeId>)
+        {
+            return u::vectorFrom(_graph->mergedNodeIdsForNodeIds(graph->nodeIds()));
+        }
+        else if constexpr(std::is_same_v<ElementId, EdgeId>)
+        {
+            return u::vectorFrom(_graph->mergedEdgeIdsForEdgeIds(graph->edgeIds()));
+        }
+    }
+
+    std::vector<ElementId> elementIds() const
+    {
+        return elementIds(_graph);
+    }
+
 public:
     void findOverrideAlerts(VisualisationInfosMap& infos)
     {
@@ -77,7 +95,7 @@ public:
                     auto& jv = _applications.at(c).at(j);
                     int bothSet = 0, sourceSet = 0;
 
-                    for(auto elementId : *_elementIds)
+                    for(auto elementId : elementIds())
                     {
                         if(iv._array.get(elementId))
                         {
@@ -114,9 +132,9 @@ public:
         for(int c = 0; c < NumChannels; c++)
             _applications.at(c).emplace_back(index, *_graph);
 
-        if(_elementIds->empty())
+        if(elementIds().empty())
         {
-            visualisationInfo.addAlert(AlertType::Error, QObject::tr("No Elements To Visualise"));
+            visualisationInfo.addAlert(AlertType::Error, QObject::tr("No elements to visualise"));
             return;
         }
 
@@ -125,56 +143,90 @@ public:
         case ValueType::Int:
         case ValueType::Float:
         {
-            auto [min, max] = attribute.findRangeforElements(*_elementIds);
+            const bool invert = config.isFlagSet(QStringLiteral("invert"));
+            const bool perComponent = config.isFlagSet(QStringLiteral("component"));
 
-            visualisationInfo.setMin(min);
-            visualisationInfo.setMax(max);
+            int numApplications = 0;
 
-            if(channel.requiresRange() && min == max)
+            auto applyTo = [&](const auto& graph)
             {
-                visualisationInfo.addAlert(AlertType::Warning, QObject::tr("No Numeric Range To Map To"));
-                return;
-            }
+                auto [min, max] = attribute.findRangeforElements(elementIds(graph));
 
-            bool invert = config.isFlagSet(QStringLiteral("invert"));
-
-            for(auto elementId : *_elementIds)
-            {
-                double value = attribute.numericValueOf(elementId);
-
-                if(channel.requiresNormalisedValue())
+                if(channel.requiresRange() && min == max)
                 {
-                    value = u::normalise(min, max, value);
-
-                    if(invert)
-                        value = 1.0 - value;
-                }
-                else
-                {
-                    if(invert)
-                        value = ((max - min) - (value - min)) + min;
+                    visualisationInfo.addAlert(AlertType::Warning,
+                        QObject::tr("No numeric range in one or more components"));
+                    return;
                 }
 
-                apply(value, channel, elementId, _numAppliedVisualisations);
+                visualisationInfo.setMin(min);
+                visualisationInfo.setMax(max);
+
+                for(auto elementId : elementIds(graph))
+                {
+                    double value = attribute.numericValueOf(elementId);
+
+                    if(channel.requiresNormalisedValue())
+                    {
+                        value = u::normalise(min, max, value);
+
+                        if(invert)
+                            value = 1.0 - value;
+                    }
+                    else
+                    {
+                        if(invert)
+                            value = ((max - min) - (value - min)) + min;
+                    }
+
+                    apply(value, channel, elementId, _numAppliedVisualisations);
+                }
+
+                numApplications++;
+            };
+
+            if(perComponent)
+            {
+                for(auto componentId : _graph->componentIds())
+                {
+                    const auto* component = _graph->componentById(componentId);
+                    applyTo(component);
+                }
             }
+            else
+                applyTo(_graph);
+
+            if(numApplications > 0)
+            {
+                if(numApplications > 1)
+                {
+                    // If there have been multiple applications (because of multiple components),
+                    // there are several ranges involved, so just take the cowardly option and
+                    // say there is no range
+                    visualisationInfo.resetRange();
+                }
+
+                _numAppliedVisualisations++;
+            }
+
             break;
         }
 
         case ValueType::String:
         {
-            for(auto elementId : *_elementIds)
+            for(auto elementId : elementIds())
             {
                 auto stringValue = attribute.stringValueOf(elementId);
                 apply(stringValue, channel, elementId, _numAppliedVisualisations);
             }
+
+            _numAppliedVisualisations++;
             break;
         }
 
         default:
             break;
         }
-
-        _numAppliedVisualisations++;
     }
 };
 

@@ -492,8 +492,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
     _->_hasValidEdgeTextVisualisation = false;
 
-    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _->_mappedNodeVisuals);
-    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _->_mappedEdgeVisuals);
+    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), _->_mappedNodeVisuals);
+    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), _->_mappedEdgeVisuals);
 
     for(int index = 0; index < visualisations.size(); index++)
     {
@@ -537,7 +537,6 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
-
 
         if(attribute.elementType() == ElementType::Edge && channelName == QStringLiteral("Text"))
             _->_hasValidEdgeTextVisualisation = true;
