@@ -51,7 +51,7 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 
     const json* graph = nullptr;
 
-    if(u::contains(jsonBody, "graphs") && jsonBody["graphs"].is_array() && jsonBody["graphs"].size() > 0)
+    if(u::contains(jsonBody, "graphs") && jsonBody["graphs"].is_array() && !jsonBody["graphs"].empty())
         graph = &jsonBody["graphs"].at(0);
     else if(u::contains(jsonBody, "graph") && jsonBody["graph"].is_object())
         graph = &jsonBody["graph"];

@@ -67,13 +67,10 @@ private:
     std::vector<ElementId> elementIds(const G* graph) const
     {
         if constexpr(std::is_same_v<ElementId, NodeId>)
-        {
             return u::vectorFrom(_graph->mergedNodeIdsForNodeIds(graph->nodeIds()));
-        }
-        else if constexpr(std::is_same_v<ElementId, EdgeId>)
-        {
+
+        if constexpr(std::is_same_v<ElementId, EdgeId>)
             return u::vectorFrom(_graph->mergedEdgeIdsForEdgeIds(graph->edgeIds()));
-        }
     }
 
     std::vector<ElementId> elementIds() const
