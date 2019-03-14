@@ -78,6 +78,10 @@ public:
         size_t rowIndex = 0;
 
         std::ifstream file(url.toLocalFile().toStdString());
+
+        if(!file)
+            return false;
+
         auto fileSize = file.tellg();
         file.seekg(0, std::ios::end);
         fileSize = file.tellg() - fileSize;
@@ -126,6 +130,9 @@ public:
 
         std::vector<size_t> columnAppearances(POTENTIAL_DELIMITERS.length());
         std::ifstream file(url.toLocalFile().toStdString());
+
+        if(!file)
+            return false;
 
         // Find the appropriate delimiter from list
         for(size_t i = 0; i < POTENTIAL_DELIMITERS.length(); ++i)

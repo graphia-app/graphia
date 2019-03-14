@@ -272,6 +272,10 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     setProgress(-1);
 
     std::ifstream stream(localFile.toStdString());
+
+    if(!stream)
+        return false;
+
     stream.unsetf(std::ios::skipws);
 
     boost::spirit::istream_iterator istreamIt(stream);
