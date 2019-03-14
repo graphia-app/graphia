@@ -602,7 +602,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         dataVersion >= 3 ? "correlationValues" : "pearsonValues";
 
     if(!u::contains(jsonObject, correlationValuesKey))
+    {
+        setFailureReason(tr("Plugin data is missing '%1' key.").arg(correlationValuesKey));
         return false;
+    }
 
     const auto& jsonCorrelationValues = jsonObject[correlationValuesKey];
     graph.setPhase(QObject::tr("Correlation Values"));
