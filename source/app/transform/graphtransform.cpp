@@ -64,7 +64,7 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
         target.update();
         change = target.changeOccurred({});
         anyChange = anyChange || change;
-    } while(repeating() && change);
+    } while(repeating() && change && !cancelled());
 
     return anyChange;
 }
