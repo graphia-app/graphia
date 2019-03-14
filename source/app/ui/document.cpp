@@ -1816,6 +1816,12 @@ void Document::moveGraphTransform(int from, int to)
     if(_graphModel == nullptr)
         return;
 
+    if(from < 0 || from >= _graphTransforms.size())
+        return;
+
+    if(to < 0 || to >= _graphTransforms.size())
+        return;
+
     QStringList newGraphTransforms = _graphTransforms;
     newGraphTransforms.move(from, to);
 
@@ -1941,6 +1947,12 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
 void Document::moveVisualisation(int from, int to)
 {
     if(_graphModel == nullptr)
+        return;
+
+    if(from < 0 || from >= _graphTransforms.size())
+        return;
+
+    if(to < 0 || to >= _graphTransforms.size())
         return;
 
     QStringList newVisualisations = _visualisations;
