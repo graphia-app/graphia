@@ -16,6 +16,7 @@
 #include <QVariant>
 #include <QLocale>
 #include <QMessageBox>
+#include <QSysInfo>
 
 #include <QUrl>
 #include <QNetworkReply>
@@ -275,7 +276,10 @@ static std::string authRequest(const Auth::AesKey& aesKey, const QString& email,
         {"password", encryptedPassword},
         {"locale",   QLocale::system().name()},
         {"product",  PRODUCT_NAME},
-        {"version",  VERSION}
+        {"version",  VERSION},
+        {"os",       QString("%1 %2 %3 %4").arg(
+            QSysInfo::kernelType(), QSysInfo::kernelVersion(),
+            QSysInfo::productType(), QSysInfo::productVersion())}
     });
     auto encryptedPayload = aesEncryptString(payloadJsonString, aesKey);
 
