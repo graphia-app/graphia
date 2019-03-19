@@ -14,8 +14,11 @@
 
 bool GraphMLSaver::save()
 {
-    auto castGraphModel = dynamic_cast<GraphModel*>(_graphModel);
-    Q_ASSERT(castGraphModel != nullptr);
+    auto graphModel = dynamic_cast<GraphModel*>(_graphModel);
+
+    Q_ASSERT(graphModel != nullptr);
+    if(graphModel == nullptr)
+        return false;
 
     QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
@@ -112,7 +115,7 @@ bool GraphMLSaver::save()
         stream.writeCharacters(_graphModel->nodeName(nodeId).toHtmlEscaped());
         stream.writeEndElement();
 
-        const auto& pos = castGraphModel->nodePositions().get(nodeId);
+        const auto& pos = graphModel->nodePositions().get(nodeId);
         stream.writeStartElement(QStringLiteral("data"));
         stream.writeAttribute(QStringLiteral("key"), QStringLiteral("x"));
         stream.writeCharacters(QString::number(static_cast<double>(pos.x())));

@@ -549,7 +549,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         [this](IParser* completedParser)
         {
             auto completedLoader = dynamic_cast<Loader*>(completedParser);
+
             Q_ASSERT(completedLoader != nullptr);
+            if(completedLoader == nullptr)
+                return;
 
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
                 completedLoader->transforms());
@@ -1166,7 +1169,7 @@ void Document::resetFind()
 static bool shouldMoveFindFocus(bool inOverviewMode)
 {
     return u::pref("misc/focusFoundNodes").toBool() &&
-        ((inOverviewMode && u::pref("misc/focusFoundComponents").toBool()) || !inOverviewMode);
+        (!inOverviewMode || u::pref("misc/focusFoundComponents").toBool());
 }
 
 void Document::selectAndFocusNode(NodeId nodeId)

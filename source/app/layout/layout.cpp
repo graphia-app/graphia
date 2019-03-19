@@ -202,7 +202,7 @@ void LayoutThread::run()
         if(_stop)
             break;
 
-        if(!_stop && (_pause || allLayoutsFinished() || (!iterative() && _repeating)))
+        if(_pause || allLayoutsFinished() || (!iterative() && _repeating))
         {
             _paused = true;
             emit pausedChanged();

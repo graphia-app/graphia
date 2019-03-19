@@ -125,7 +125,10 @@ bool NativeSaver::save()
     json jsonArray;
 
     auto graphModel = dynamic_cast<GraphModel*>(_document->graphModel());
+
     Q_ASSERT(graphModel != nullptr);
+    if(graphModel == nullptr)
+        return false;
 
     json header;
     header["version"] = NativeSaver::Version;

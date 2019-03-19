@@ -102,37 +102,37 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
 
     auto& resultSet = _cache.front();
 
-    auto it = resultSet.begin();
-    for(auto& cachedResult : resultSet)
+    auto it = std::find_if(resultSet.begin(), resultSet.end(),
+    [&](const auto& cachedResult)
     {
-        if(cachedResult._config == config)
+        return cachedResult._config == config;
+    });
+
+    if(it != resultSet.end())
+    {
+        auto& cachedResult = *it;
+
+        // Apply the cached result
+        _graphModel->addAttributes(cachedResult._newAttributes);
+        if(cachedResult._graph != nullptr)
+            graph = *(cachedResult._graph);
+
+        result = std::move(cachedResult);
+
+        if(result._graph != nullptr)
         {
-            // Apply the cached result
-            _graphModel->addAttributes(cachedResult._newAttributes);
-            if(cachedResult._graph != nullptr)
-                graph = *(cachedResult._graph);
-
-            result = std::move(cachedResult);
-
-            if(result._graph != nullptr)
-            {
-                // If the graph was changed, remove the entire set...
-                _cache.erase(_cache.begin());
-            }
-            else
-            {
-                // ...otherwise just remove the specific result
-                resultSet.erase(it);
-
-                // If that was the last result, remove the set as well
-                if(resultSet.empty())
-                    _cache.erase(_cache.begin());
-            }
-
-            break;
+            // If the graph was changed, remove the entire set...
+            _cache.erase(_cache.begin());
         }
+        else
+        {
+            // ...otherwise just remove the specific result
+            resultSet.erase(it);
 
-        ++it;
+            // If that was the last result, remove the set as well
+            if(resultSet.empty())
+                _cache.erase(_cache.begin());
+        }
     }
 
     return result;

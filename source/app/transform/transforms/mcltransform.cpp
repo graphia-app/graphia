@@ -179,8 +179,10 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
             if(DEBUG)
                 qDebug() << "Post selection Remain" << remainCount << "mass" << rowPruneSum;
 
+            Q_ASSERT(remainCount < RECOVERY_COUNT);
+
             // Do Another recovery if needed
-            if(remainCount != nonzeros && rowPruneSum < targetMass && remainCount < RECOVERY_COUNT)
+            if(remainCount != nonzeros && rowPruneSum < targetMass)
             {
                 if(DEBUG)
                     qDebug() << "RECOVERY 2" << "MASS:" << rowPruneSum;

@@ -1069,10 +1069,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         bool visible = selected || _columnAnnotationSelectionModeEnabled;
 
         if(visible)
+        {
             qcpColumnAnnotations->setData(y, _sortMap, selected, &columnAnnotation);
 
-        if(visible)
-        {
             QString postfix;
 
             if(_columnAnnotationSelectionModeEnabled)

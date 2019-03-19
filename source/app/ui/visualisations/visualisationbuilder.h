@@ -71,6 +71,8 @@ private:
 
         if constexpr(std::is_same_v<ElementId, EdgeId>)
             return u::vectorFrom(_graph->mergedEdgeIdsForEdgeIds(graph->edgeIds()));
+
+        return {};
     }
 
     std::vector<ElementId> elementIds() const
@@ -85,11 +87,11 @@ public:
         {
             for(int i = 0; i < _numAppliedVisualisations - 1; i++)
             {
-                auto& iv = _applications.at(c).at(i);
+                const auto& iv = _applications.at(c).at(i);
 
                 for(int j = i + 1; j < _numAppliedVisualisations; j++)
                 {
-                    auto& jv = _applications.at(c).at(j);
+                    const auto& jv = _applications.at(c).at(j);
                     int bothSet = 0, sourceSet = 0;
 
                     for(auto elementId : elementIds())
