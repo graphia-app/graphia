@@ -5,6 +5,8 @@
 #include <QCoreApplication>
 #include <QTimer>
 
+#include <string>
+
 #ifndef APP_URI
 #define APP_URI "uri.missing"
 #endif
@@ -17,9 +19,8 @@
 
 constexpr bool static_strcmp(char const* a, char const* b)
 {
-    return (*a != 0 && *b != 0) ?
-                (*a == *b && static_strcmp(a + 1, b + 1)) : // NOLINT
-                (*a == 0 && *b == 0);
+    return std::char_traits<char>::length(a) == std::char_traits<char>::length(b) &&
+        std::char_traits<char>::compare(a, b, std::char_traits<char>::length(a)) == 0;
 }
 
 // Defining an enumeration that's usable in QML is awkward, so
