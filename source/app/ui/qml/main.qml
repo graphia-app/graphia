@@ -1246,6 +1246,13 @@ ApplicationWindow
 
     Action
     {
+        id: onlineHelpAction
+        text: qsTr("Online Help")
+        onTriggered: { Qt.openUrlExternally("https://kajeka.com/graphia/help"); }
+    }
+
+    Action
+    {
         // A do nothing action that we use when there
         // is no other valid action available
         id: nullAction
@@ -1547,9 +1554,8 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Help")
-            MenuItem { action: aboutPluginsAction }
-            MenuItem { action: aboutAction }
-            MenuItem { action: aboutQtAction }
+
+            MenuItem { action: onlineHelpAction }
 
             MenuItem
             {
@@ -1566,6 +1572,11 @@ ApplicationWindow
                     }
                 }
             }
+
+            MenuSeparator {}
+            MenuItem { action: aboutAction }
+            MenuItem { action: aboutPluginsAction }
+            MenuItem { action: aboutQtAction }
 
             MenuSeparator {}
             MenuItem { action: signOutAction }
