@@ -19,6 +19,7 @@ Item
         property alias disableHubbles: disableHubblesCheckbox.checked
         property alias webSearchEngineUrl: webSearchEngineField.text
         property alias maxUndoLevels: maxUndoSpinBox.value
+        property alias autoBackgroundUpdateCheck: autoBackgroundUpdateCheckCheckbox.checked
     }
 
     ColumnLayout
@@ -93,6 +94,12 @@ Item
                 minimumValue: 0
                 maximumValue: 50
             }
+        }
+
+        CheckBox
+        {
+            id: autoBackgroundUpdateCheckCheckbox
+            text: qsTr("Check For Updates Automatically")
         }
     }
 }

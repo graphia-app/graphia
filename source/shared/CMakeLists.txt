@@ -52,6 +52,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
+    ${CMAKE_CURRENT_LIST_DIR}/updates/updates.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/cancellable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/checksum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
@@ -99,6 +100,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
@@ -114,6 +116,7 @@ list(APPEND SHARED_SOURCES
 )
 
 list(APPEND RESOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/updates/update_keys.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/js.qrc
 )
@@ -126,10 +129,15 @@ list(APPEND SOURCES ${SHARED_SOURCES})
 
 add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
-find_package(Qt5 COMPONENTS Qml Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Qml Widgets Xml REQUIRED)
 target_link_libraries(shared
     Qt5::Qml
     Qt5::Widgets
+    Qt5::Xml
 )
 
-target_link_libraries(shared thirdparty_static)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(shared Threads::Threads)
+
+target_link_libraries(shared thirdparty thirdparty_static)

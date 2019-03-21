@@ -36,6 +36,8 @@
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
 
+#include "updates/updater.h"
+
 #include <qtsingleapplication/qtsingleapplication.h>
 #include <breakpad/crashhandler.h>
 
@@ -64,6 +66,8 @@ int start(int argc, char *argv[])
 
     SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
 
+    Application::setAppDir(QCoreApplication::applicationDirPath());
+
     if(app.isRunning())
     {
         if(app.sendMessage(QCoreApplication::arguments().join(QStringLiteral("\n"))))
@@ -82,6 +86,31 @@ int start(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    QCommandLineParser commandLineParser;
+
+    commandLineParser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    commandLineParser.addHelpOption();
+    commandLineParser.addOptions(
+    {
+        {{"u", "dontUpdate"}, QObject::tr("Don't update now, but remind later.")}
+    });
+
+    commandLineParser.process(QCoreApplication::arguments());
+
+    Q_INIT_RESOURCE(update_keys);
+
+    if(!commandLineParser.isSet(QStringLiteral("dontUpdate")) && Updater::updateAvailable())
+    {
+        QStringList restartArguments = QCoreApplication::arguments();
+        restartArguments[0] = resolvedExeName(restartArguments.at(0));
+
+        if(Updater::showUpdatePrompt(restartArguments))
+        {
+            // The updater will restart the application once finished, so quit now
+            return 0;
+        }
+    }
 
 #ifdef Q_OS_MACOS // NativeTextRendering generally looks better on MacOS
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
@@ -185,9 +214,12 @@ int start(int argc, char *argv[])
 
     preferences.define(QStringLiteral("misc/hasSeenTutorial"),                  false);
 
+    preferences.define(QStringLiteral("misc/autoBackgroundUpdateCheck"),        true);
+
     preferences.define(QStringLiteral("screenshot/width"),                      1920);
     preferences.define(QStringLiteral("screenshot/height"),                     1080);
-    preferences.define(QStringLiteral("screenshot/path"),                       QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
+    preferences.define(QStringLiteral("screenshot/path"),
+        QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
 
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));
@@ -259,9 +291,19 @@ int main(int argc, char *argv[])
     if(static_cast<ExitType>(exitCode) == ExitType::Restart)
     {
         auto exeName = resolvedExeName(argv[0]);
-        std::cerr << "Restarting " << exeName.toStdString() << "...\n";
-        if(!QProcess::startDetached(exeName, {}))
-            std::cerr << "  ...failed\n";
+
+        if(Updater::updateAvailable() && Updater::showUpdatePrompt({exeName}))
+        {
+            // If there is an update available, save a bit of time by
+            // skipping the restart and starting the updater directly
+            std::cerr << "Restarting to install update...\n";
+        }
+        else
+        {
+            std::cerr << "Restarting " << exeName.toStdString() << "...\n";
+            if(!QProcess::startDetached(exeName, {}))
+                std::cerr << "  ...failed\n";
+        }
     }
 
     return exitCode;

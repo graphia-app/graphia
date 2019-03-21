@@ -64,6 +64,9 @@
 		<file>Tango/16x16/actions/go-top.png</file>
 		<file>Tango/22x22/actions/go-top.png</file>
 		<file>Tango/32x32/actions/go-top.png</file>
+		<file>Tango/16x16/apps/help-browser.png</file>
+		<file>Tango/22x22/apps/help-browser.png</file>
+		<file>Tango/32x32/apps/help-browser.png</file>
 		<file>Tango/16x16/actions/list-add.png</file>
 		<file>Tango/22x22/actions/list-add.png</file>
 		<file>Tango/32x32/actions/list-add.png</file>
@@ -85,6 +88,9 @@
 		<file>Tango/16x16/actions/process-stop.png</file>
 		<file>Tango/22x22/actions/process-stop.png</file>
 		<file>Tango/32x32/actions/process-stop.png</file>
+		<file>Tango/16x16/status/software-update-available.png</file>
+		<file>Tango/22x22/status/software-update-available.png</file>
+		<file>Tango/32x32/status/software-update-available.png</file>
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
 		<file>Tango/32x32/actions/tab-new.png</file>
@@ -106,8 +112,5 @@
 		<file>Tango/16x16/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/22x22/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/32x32/mimetypes/x-office-spreadsheet.png</file>
-		<file>Tango/16x16/apps/help-browser.png</file>
-		<file>Tango/22x22/apps/help-browser.png</file>
-		<file>Tango/32x32/apps/help-browser.png</file>
 	</qresource>
 </RCC>

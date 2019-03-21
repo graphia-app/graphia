@@ -24,6 +24,7 @@ then
       -appimage -no-copy-copyright-files -no-strip \
       -executable=AppDir/usr/bin/CrashReporter \
       -executable=AppDir/usr/bin/MessageBox \
+      -executable=AppDir/usr/bin/Updater \
       -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so \
       || exit $?
   )

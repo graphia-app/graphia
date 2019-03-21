@@ -58,6 +58,14 @@ ApplicationWindow
 
     Application { id: application }
 
+    MessageDialog
+    {
+        id: noUpdatesMessageDialog
+        icon: StandardIcon.Information
+        title: qsTr("No Updates")
+        text: qsTr("There are no updates available at this time.")
+    }
+
     // Use Connections to avoid an M16 JS lint error
     Connections
     {
@@ -81,6 +89,29 @@ ApplicationWindow
         {
             if(!application.authenticating)
                 authUI.enabled = true;
+        }
+
+        onNoNewUpdateAvailable:
+        {
+            if(checkForUpdatesAction.active)
+            {
+                if(existing)
+                {
+                    // While there is no /new/ update, there is an existing update
+                    // available that the user has previously dismissed
+                    newUpdate.visible = true;
+                }
+                else
+                    noUpdatesMessageDialog.open();
+            }
+
+            checkForUpdatesAction.active = false;
+        }
+
+        onNewUpdateAvailable:
+        {
+            checkForUpdatesAction.active = false;
+            newUpdate.visible = true;
         }
     }
 
@@ -291,6 +322,7 @@ ApplicationWindow
         property var fileOpenInitialFolder
         property string recentFiles
         property bool hasSeenTutorial
+        property string update
     }
 
     Preferences
@@ -1206,6 +1238,23 @@ ApplicationWindow
 
     Action
     {
+        id: checkForUpdatesAction
+        enabled: !newUpdate.visible
+
+        text: qsTr("Check For Updates")
+
+        property bool active: false
+
+        onTriggered:
+        {
+            active = true;
+            application.checkForUpdates();
+            newUpdate.visible = false;
+        }
+    }
+
+    Action
+    {
         id: copyImageToClipboardAction
         text: qsTr("Copy Viewport To Clipboard")
         shortcut: "Ctrl+C"
@@ -1527,6 +1576,7 @@ ApplicationWindow
 
             MenuSeparator {}
             MenuItem { action: signOutAction }
+            MenuItem { action: checkForUpdatesAction }
         }
     }
 
@@ -1634,9 +1684,7 @@ ApplicationWindow
 
         RowLayout
         {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
+            anchors.fill: parent
 
             ToolButton { action: fileOpenAction }
             ToolButton { action: fileOpenInTabAction }
@@ -1657,6 +1705,31 @@ ApplicationWindow
             ToolBarSeparator {}
             ToolButton { action: resetViewAction }
             ToolButton { action: optionsAction }
+
+            Item { Layout.fillWidth: true }
+
+            // This is only displayed if the user is checking for updates manually
+            RowLayout
+            {
+                id: updateProgressIndicator
+                visible: checkForUpdatesAction.active
+
+                Text { text: qsTr("Downloading Update:") }
+                ProgressBar
+                {
+                    visible: parent.visible
+                    indeterminate: application.updateDownloadProgress < 0
+                    value: !indeterminate ? application.updateDownloadProgress / 100.0 : 0.0
+                }
+            }
+
+            NewUpdate
+            {
+                id: newUpdate
+                visible: false
+
+                onRestartClicked: { mainWindow.restart(); }
+            }
         }
     }
 
