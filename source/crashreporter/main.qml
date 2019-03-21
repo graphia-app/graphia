@@ -97,10 +97,10 @@ ApplicationWindow
             enabled: window.enabled
             text: qsTr("Send Report")
             Layout.columnSpan: 2
-            anchors.right: grid.right
+            Layout.alignment: Qt.AlignRight
             onClicked:
             {
-                if(email.text.length == 0 || email.acceptableInput)
+                if(email.text.length === 0 || email.acceptableInput)
                 {
                     window.enabled = false;
                     window.close();
