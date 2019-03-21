@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/update_keys">
+        <file>public_update_key.der</file>
+    </qresource>
+</RCC>

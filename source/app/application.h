@@ -2,6 +2,7 @@
 #define APPLICATION_H
 
 #include "auth/auth.h"
+#include "updates/updater.h"
 
 #include "shared/utils/qmlenum.h"
 
@@ -127,6 +128,8 @@ class Application : public QObject
     Q_PROPERTY(QString authenticationMessage READ authenticationMessage NOTIFY authenticationMessageChanged)
     Q_PROPERTY(bool authenticating READ authenticating NOTIFY authenticatingChanged)
 
+    Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
+
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
 
 public:
@@ -142,6 +145,8 @@ public:
     static QString copyright() { return QStringLiteral(COPYRIGHT).replace(QStringLiteral("(c)"), QStringLiteral(u"©")); }
 
     static QString nativeExtension() { return name().toLower(); }
+
+    static void setAppDir(const QString& appDir) { Application::_appDir = appDir; }
 
     static QStringList resourceDirectories();
     static QStringList arguments() { return QCoreApplication::arguments(); }
@@ -170,6 +175,8 @@ public:
     Q_INVOKABLE void authenticate(const QString& email, const QString& password);
     Q_INVOKABLE void signOut();
 
+    Q_INVOKABLE void checkForUpdates();
+
     Q_INVOKABLE void copyImageToClipboard(const QImage& image);
 
     Q_INVOKABLE QString resourceFile(const QString& relativePath) const;
@@ -193,12 +200,20 @@ signals:
     void authenticationMessageChanged();
     void authenticatingChanged();
 
+    void noNewUpdateAvailable(bool existing);
+    void newUpdateAvailable();
+    void updateDownloadProgressChanged();
+
 private:
     static const char* _uri;
     static const int _majorVersion = APP_MAJOR_VERSION;
     static const int _minorVersion = APP_MINOR_VERSION;
 
+    static QString _appDir;
+
     Auth _auth;
+
+    Updater _updater;
 
     UrlTypeDetailsModel _urlTypeDetails;
 
@@ -220,6 +235,8 @@ private:
     bool authenticated() const { return _auth.state(); }
     QString authenticationMessage() const { return _auth.message(); }
     bool authenticating() const { return _auth.busy(); }
+
+    int updateDownloadProgress() const { return _updater.progress(); }
 
     bool debugEnabled() const
     {

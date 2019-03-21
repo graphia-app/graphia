@@ -52,5 +52,6 @@
         <file>qml/Controls/FloatingButton.qml</file>
         <file>qml/Visualisation/VisualisationUtils.js</file>
         <file>qml/TextDialog.qml</file>
+        <file>qml/NewUpdate.qml</file>
     </qresource>
 </RCC>

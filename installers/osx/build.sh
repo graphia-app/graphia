@@ -14,6 +14,7 @@ cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 
 cp CrashReporter ${PRODUCT_NAME}.app/Contents/MacOS/
 cp MessageBox ${PRODUCT_NAME}.app/Contents/MacOS/
+cp Updater ${PRODUCT_NAME}.app/Contents/MacOS/
 
 mkdir -p ${PRODUCT_NAME}.app/Contents/Resources
 cp -r ../source/app/examples \
@@ -44,11 +45,13 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/MessageBox \
+  -executable=${PRODUCT_NAME}.app/Contents/MacOS/Updater \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
-# Need to sign again because macdeployqt won't sign the CrashReporter
+# Need to sign again because macdeployqt won't sign the additional executables
 echo "Resigning..."
-codesign --verbose --deep --force --sign "${SIGN_APPLE_KEYCHAIN_ID}" ${PRODUCT_NAME}.app || exit $?
+codesign --verbose --deep --force --sign "${SIGN_APPLE_KEYCHAIN_ID}" \
+  ${PRODUCT_NAME}.app || exit $?
 echo "Verifying..."
 codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
 echo "OK"

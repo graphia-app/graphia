@@ -21,20 +21,20 @@ set QML_DIRS=
 FOR /d /r %%i IN (*) DO @IF EXIST %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
 echo %QML_DIRS%
 
-windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
-	--no-opengl-sw --dir %INSTALLER_DIR% %INSTALLER_DIR%\%PRODUCT_NAME%.exe || EXIT /B 1
-windeployqt --no-angle --no-compiler-runtime --no-opengl-sw ^
-  --dir %INSTALLER_DIR% %INSTALLER_DIR%\thirdparty.dll
+set WINDEPLOYQT_ARGS=--no-angle --no-compiler-runtime --no-opengl-sw
 
-FOR %%i IN (%INSTALLER_DIR%\plugins\*.dll) DO windeployqt --no-angle --no-compiler-runtime ^
-	--no-opengl-sw --dir %INSTALLER_DIR% %%i
+windeployqt %QML_DIRS% %WINDEPLOYQT_ARGS% ^
+	--dir %INSTALLER_DIR% %INSTALLER_DIR%\%PRODUCT_NAME%.exe || EXIT /B 1
+windeployqt %WINDEPLOYQT_ARGS% --dir %INSTALLER_DIR% %INSTALLER_DIR%\thirdparty.dll
+
+FOR %%i IN (%INSTALLER_DIR%\plugins\*.dll) DO ^
+  windeployqt %WINDEPLOYQT_ARGS% --dir %INSTALLER_DIR% %%i
 
 set QML_DIR=source\crashreporter
 IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
-windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
-	--no-opengl-sw %INSTALLER_DIR%\CrashReporter.exe || EXIT /B 1
-windeployqt --no-angle --no-compiler-runtime ^
-	--no-opengl-sw %INSTALLER_DIR%\MessageBox.exe || EXIT /B 1
+windeployqt --qmldir %QML_DIR% %WINDEPLOYQT_ARGS% %INSTALLER_DIR%\CrashReporter.exe || EXIT /B 1
+
+windeployqt %WINDEPLOYQT_ARGS% %INSTALLER_DIR%\MessageBox.exe || EXIT /B 1
 
 xcopy "%CRTDIRECTORY%*.*" %INSTALLER_DIR% || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %INSTALLER_DIR% || EXIT /B 1
@@ -43,7 +43,28 @@ IF EXIST %WINDOWS_EXTRA_FILES%\NUL (
   xcopy "%WINDOWS_EXTRA_FILES%*.*" %INSTALLER_DIR% || EXIT /B 1
 )
 
-FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox) DO (
+set UPDATER_DIR=%INSTALLER_DIR%\Updater
+mkdir %UPDATER_DIR%
+copy %BUILD_DIR%\Updater.exe %UPDATER_DIR%\
+copy %BUILD_DIR%\thirdparty.dll %UPDATER_DIR%\
+
+set QML_DIR=source\updater
+IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
+windeployqt --qmldir %QML_DIR% %WINDEPLOYQT_ARGS% %UPDATER_DIR%\Updater.exe || EXIT /B 1
+windeployqt %WINDEPLOYQT_ARGS% --dir %UPDATER_DIR% %UPDATER_DIR%\thirdparty.dll
+
+xcopy "%CRTDIRECTORY%*.*" %UPDATER_DIR% || EXIT /B 1
+xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %UPDATER_DIR% || EXIT /B 1
+
+FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
+  SET "filename=%%i"
+  ECHO(!filename:%cd%\%UPDATER_DIR%\=!
+) >> %INSTALLER_DIR%\Updater.deps
+
+move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
+rmdir /s /q %UPDATER_DIR%
+
+FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox Updater) DO (
   signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
 	  /tr %SIGN_TSA% /td SHA256 %INSTALLER_DIR%\%%i.exe || EXIT /B 1
 )

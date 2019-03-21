@@ -29,6 +29,7 @@
 #include <chrono>
 
 const char* Application::_uri = APP_URI;
+QString Application::_appDir = QStringLiteral(".");
 
 Application::Application(QObject *parent) :
     QObject(parent),
@@ -38,12 +39,21 @@ Application::Application(QObject *parent) :
     connect(&_auth, &Auth::stateChanged, [this]
     {
         if(_auth.state())
+        {
+            _updater.enableAutoBackgroundCheck();
             loadPlugins();
+        }
+        else
+            _updater.disableAutoBackgroundCheck();
     });
 
     connect(&_auth, &Auth::stateChanged, this, &Application::authenticatedChanged);
     connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
     connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
+
+    connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
+    connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
+    connect(&_updater, &Updater::progressChanged, this, &Application::updateDownloadProgressChanged);
 
     registerSaverFactory(std::make_unique<NativeSaverFactory>());
     registerSaverFactory(std::make_unique<GraphMLSaverFactory>());
@@ -73,7 +83,7 @@ QStringList Application::resourceDirectories()
 {
     QStringList resourceDirs
     {
-        QCoreApplication::applicationDirPath(),
+        Application::_appDir,
         QStandardPaths::writableLocation(
             QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
     };
@@ -96,7 +106,7 @@ QStringList Application::resourceDirectories()
 
     resourceDirs.append(path);
 #elif defined(Q_OS_LINUX)
-    QDir usrDir(QCoreApplication::applicationDirPath());
+    QDir usrDir(Application::_appDir);
     usrDir.cdUp();
 
     resourceDirs.append(usrDir.absolutePath() + "/share/" + name());
@@ -244,6 +254,12 @@ void Application::signOut()
 {
     _auth.reset();
     unloadPlugins();
+}
+
+void Application::checkForUpdates()
+{
+    _updater.resetUpdateStatus();
+    _updater.startBackgroundUpdateCheck();
 }
 
 void Application::copyImageToClipboard(const QImage& image)
@@ -394,7 +410,7 @@ void Application::aboutQt() const
 QString Application::resolvedExe(const QString& exe)
 {
     QString fullyQualifiedExe(
-        QCoreApplication::applicationDirPath() +
+        Application::_appDir +
         QDir::separator() + exe);
 
 #ifdef Q_OS_WIN
@@ -411,7 +427,7 @@ QString Application::resolvedExe(const QString& exe)
 
 #ifdef Q_OS_MACOS
     // We might be debugging, in which case the exe might be outside the .app
-    QDir dotAppDir(QCoreApplication::applicationDirPath());
+    QDir dotAppDir(Application::_appDir);
     dotAppDir.cdUp();
     dotAppDir.cdUp();
     dotAppDir.cdUp();
@@ -429,13 +445,13 @@ void Application::loadPlugins()
 {
     std::vector<QString> pluginsDirs =
     {
-        QCoreApplication::applicationDirPath() + "/plugins",
+        Application::_appDir + "/plugins",
         QStandardPaths::writableLocation(
             QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
     };
 
 #if defined(Q_OS_MACOS)
-    QDir dotAppDir(QCoreApplication::applicationDirPath());
+    QDir dotAppDir(Application::_appDir);
 
     // Within the bundle itself
     dotAppDir.cdUp();
@@ -447,7 +463,7 @@ void Application::loadPlugins()
     pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
 #elif defined(Q_OS_LINUX)
     // Add the LSB location for the plugins
-    QDir usrDir(QCoreApplication::applicationDirPath());
+    QDir usrDir(Application::_appDir);
     usrDir.cdUp();
 
     pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib/" + name() + "/plugins");
