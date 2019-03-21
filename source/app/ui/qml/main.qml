@@ -116,9 +116,18 @@ ApplicationWindow
         if(_pendingArguments.length === 0)
             return;
 
-        // Pop
-        var argument = _pendingArguments[0];
-        _pendingArguments.shift();
+        var argument = "";
+        do
+        {
+            // Pop
+            argument = _pendingArguments[0];
+            _pendingArguments.shift();
+        }
+        while(argument[0] === "-" && _pendingArguments.length > 0);
+
+        // Ignore option style arguments
+        if(argument.length === 0 || argument[0] === "-")
+            return;
 
         var url = QmlUtils.urlForUserInput(argument);
         openFile(url, true);
