@@ -72,7 +72,7 @@ cppcheck -v --enable=all --xml \
   --inline-suppr \
   --library=scripts/cppcheck.cfg \
   ${INCLUDE_DIRS} ${DEFINES} \
-  ${CPP_FILES}
+  ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/cppcheck.log
 
 # clang-tidy
 if [ "${VERBOSE}" != 0 ]
@@ -82,9 +82,9 @@ then
   clang-tidy -dump-config
 fi
 
-parallel -n1 -P${NUM_CORES} -q \
+parallel -k -n1 -P${NUM_CORES} -q \
   clang-tidy -quiet -p ${BUILD_DIR} {} \
-  ::: ${CPP_FILES}
+  ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clang-tidy.log
 
 # clazy
 CHECKS="-checks=level1,\
@@ -132,11 +132,11 @@ then
   clazy-standalone --version
 fi
 
-parallel -n1 -P${NUM_CORES} \
+parallel -k -n1 -P${NUM_CORES} \
   clazy-standalone -p ${BUILD_DIR}/compile_commands.json \
   -header-filter="\"^((?!thirdparty).)*$\"" \
   ${CHECKS} {} \
-  ::: ${CPP_FILES}
+  ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clazy.log
 
 # qmllint
 qmllint --version
@@ -145,4 +145,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  xargs -n1 -P${NUM_CORES} qmllint
+  xargs -n1 -P${NUM_CORES} qmllint 2>&1 | tee ${BUILD_DIR}/qmllint.log
