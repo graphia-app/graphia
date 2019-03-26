@@ -30,7 +30,8 @@ mkdir -p ${BUILD_DIR}
   cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
     -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
-  cmake --build . --target install || exit $?
+  cmake --build . --target install 2>&1 | tee compiler.log
+  [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 
   # Clean intermediate build products
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
