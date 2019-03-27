@@ -30,10 +30,6 @@ public:
             "This is a measure of a node's position within the overall graph structure.");
     }
     ElementType elementType() const override { return ElementType::None; }
-    GraphTransformParameters parameters() const override
-    {
-        return {};
-    }
     DefaultVisualisations defaultVisualisations() const override
     {
         return {{"Node Eccentricity", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}};

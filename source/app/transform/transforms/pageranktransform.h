@@ -40,10 +40,6 @@ public:
             "measure of a node's relative importance in the graph.");
     }
     ElementType elementType() const override { return ElementType::None; }
-    GraphTransformParameters parameters() const override
-    {
-        return {};
-    }
     DefaultVisualisations defaultVisualisations() const override
     {
         return {{"Node PageRank", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}};
