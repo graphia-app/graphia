@@ -41,7 +41,6 @@ public:
     void undo() override;
 
     void cancel() override;
-
     bool cancellable() const override { return true; }
 };
 

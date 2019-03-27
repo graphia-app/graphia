@@ -18,6 +18,7 @@
 #include "transform/transforms/mcltransform.h"
 #include "transform/transforms/pageranktransform.h"
 #include "transform/transforms/eccentricitytransform.h"
+#include "transform/transforms/betweennesstransform.h"
 #include "transform/transforms/contractbyattributetransform.h"
 #include "transform/transforms/separatebyattributetransform.h"
 #include "transform/transforms/knntransform.h"
@@ -184,6 +185,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("MCL Cluster"),              std::make_unique<MCLTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("PageRank"),                 std::make_unique<PageRankTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Eccentricity"),             std::make_unique<EccentricityTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Betweenness"),              std::make_unique<BetweennessTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Separate By Attribute"),    std::make_unique<SeparateByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Boolean Node Attribute"),   std::make_unique<ConditionalAttributeTransformFactory>(this, ElementType::Node));
