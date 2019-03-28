@@ -138,6 +138,8 @@ public:
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const override;
     int multiplicityOf(NodeId nodeId) const override;
 
+    std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
+
     NodeId addNode() override;
     NodeId addNode(NodeId nodeId) override;
     NodeId addNode(const INode& node) override;

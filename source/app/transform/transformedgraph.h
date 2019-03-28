@@ -56,6 +56,8 @@ public:
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const override { return _target.edgeIdsForNodeId(nodeId); }
 
+    std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const override { return _target.edgeIdsBetween(nodeIdA, nodeIdB); }
+
     void setPhase(const QString& phase) const override { _source->setPhase(phase); }
     void clearPhase() const override { _source->clearPhase(); }
     QString phase() const override { return _source->phase(); }

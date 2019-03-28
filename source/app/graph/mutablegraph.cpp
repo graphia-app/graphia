@@ -75,6 +75,21 @@ int MutableGraph::multiplicityOf(NodeId nodeId) const
     return _n._multiplicities[static_cast<int>(nodeId)];
 }
 
+std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const
+{
+    std::vector<EdgeId> edgeIds;
+
+    auto undirectedEdge = UndirectedEdge(nodeIdA, nodeIdB);
+    if(u::contains(_e._connections, undirectedEdge))
+    {
+        const auto& edgeIdDistinctSet = _e._connections.at(undirectedEdge);
+        for(auto edgeId : edgeIdDistinctSet)
+            edgeIds.push_back(edgeId);
+    }
+
+    return edgeIds;
+}
+
 NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIds.empty())
