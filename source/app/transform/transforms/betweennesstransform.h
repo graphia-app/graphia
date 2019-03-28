@@ -25,16 +25,18 @@ public:
     {
         return QObject::tr(
             R"-(<a href="https://kajeka.com/graphia/betweenness">Betweenness Centrality</a> )-"
-            " is a measure of centrality in a graph based on shortest paths. For every pair of "
-            "nodes in a connected graph, there exists at least one shortest path between the "
-            "nodes such that the number of edges that the path passes through is minimised. "
+            " is a measure of centrality in a graph based on shortest paths between nodes. "
             "The betweenness centrality for each node is the number of these shortest paths "
             "that pass through the node.");
     }
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Node Betweenness", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}};
+        return
+        {
+            {"Node Betweenness", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")},
+            {"Edge Betweenness", ValueType::Float, {AttributeFlag::VisualiseByComponent}, QObject::tr("Colour")}
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
