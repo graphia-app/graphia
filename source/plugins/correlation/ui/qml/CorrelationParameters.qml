@@ -250,6 +250,7 @@ BaseParameterDialog
                         id: transposeCheckBox
 
                         text: qsTr("Transpose Dataset")
+                        enabled: !dataRectPage._busy
                         onCheckedChanged:
                         {
                             parameters.transpose = checked;
