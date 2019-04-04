@@ -243,3 +243,59 @@ QString u::formatNumberSIPostfix(double value)
 
     return QString::number(value);
 }
+
+bool u::isHex(const std::string& string)
+{
+    return isHex(QString::fromStdString(string));
+}
+
+bool u::isHex(const QString& string)
+{
+    return string.size() % 2 == 0 &&
+        QRegularExpression(QStringLiteral("^[a-fA-F0-9]+$")).match(string).hasMatch();
+}
+
+std::string u::hexToString(const std::string& string)
+{
+    std::string output;
+
+    if(isHex(string))
+    {
+        for(size_t i = 0; i < string.length(); i += 2)
+        {
+            auto byteString = string.substr(i, 2);
+            auto b = static_cast<char>(std::strtol(byteString.data(), nullptr, 16));
+            output.push_back(b);
+        }
+    }
+
+    return output;
+}
+
+QString u::hexToString(const QString& string)
+{
+    return QString::fromStdString(hexToString(string.toStdString()));
+}
+
+std::vector<std::byte> u::hexToBytes(const std::string& string)
+{
+    std::vector<std::byte> bytes;
+    bytes.reserve(string.length() / 2);
+
+    if(isHex(string))
+    {
+        for(size_t i = 0; i < string.length(); i += 2)
+        {
+            auto byteString = string.substr(i, 2);
+            auto b = static_cast<std::byte>(std::strtol(byteString.data(), nullptr, 16));
+            bytes.push_back(b);
+        }
+    }
+
+    return bytes;
+}
+
+std::vector<std::byte> u::hexToBytes(const QString& string)
+{
+    return hexToBytes(string.toStdString());
+}

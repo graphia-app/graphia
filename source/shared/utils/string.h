@@ -2,9 +2,13 @@
 #define STRING_H
 
 #include <QString>
+
 #include <string>
 #include <vector>
 #include <istream>
+#include <sstream>
+#include <iomanip>
+#include <cstddef>
 
 class QStringList;
 
@@ -25,5 +29,31 @@ namespace u
                                    int minScientificFormattedStringDigitsThreshold = 4,
                                    int maxScientificFormattedStringDigitsThreshold = 5);
     QString formatNumberSIPostfix(double value);
+
+    bool isHex(const std::string& string);
+    bool isHex(const QString& string);
+
+    std::string hexToString(const std::string& string);
+    QString hexToString(const QString& string);
+
+    std::vector<std::byte> hexToBytes(const std::string& string);
+    std::vector<std::byte> hexToBytes(const QString& string);
+
+    template<typename T>
+    std::string bytesToHex(const T& bytes)
+    {
+        std::ostringstream ss;
+
+        ss << std::hex << std::setfill('0');
+        for(int b : bytes)
+        {
+            if(b < 0)
+                b += 0x100;
+
+            ss << std::setw(2) << b;
+        }
+
+        return ss.str();
+    }
 } // namespace u
 #endif // STRING_H
