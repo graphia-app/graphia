@@ -55,6 +55,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/cancellable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/enumreflection.h
@@ -98,6 +99,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
@@ -128,3 +130,5 @@ target_link_libraries(shared
     Qt5::Qml
     Qt5::Widgets
 )
+
+target_link_libraries(shared thirdparty_static)
