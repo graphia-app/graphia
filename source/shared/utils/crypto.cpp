@@ -57,9 +57,10 @@ std::string u::aesEncryptString(const std::string& string, const u::AesKey& aesK
     return u::bytesToHex(outBytes);
 }
 
-static CryptoPP::RSA::PublicKey loadPublicKey(const std::string& publicKeyFileName)
+template<typename Key>
+Key loadKey(const std::string& fileName)
 {
-    QFile file(QString::fromStdString(publicKeyFileName));
+    QFile file(QString::fromStdString(fileName));
     if(!file.open(QIODevice::ReadOnly))
         return {};
 
@@ -69,10 +70,35 @@ static CryptoPP::RSA::PublicKey loadPublicKey(const std::string& publicKeyFileNa
     CryptoPP::ArraySource arraySource(reinterpret_cast<const CryptoPP::byte*>(byteArray.constData()), // NOLINT
         byteArray.size(), true);
 
-    CryptoPP::RSA::PublicKey publicKey;
-    publicKey.Load(arraySource);
+    Key key;
+    key.Load(arraySource);
 
-    return publicKey;
+    return key;
+}
+
+std::string u::rsaSignString(const std::string& string, const std::string& privateKeyFileName)
+{
+    auto privateKey = loadKey<CryptoPP::RSA::PrivateKey>(privateKeyFileName);
+
+    CryptoPP::AutoSeededRandomPool rng;
+    CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
+    std::string signature;
+
+    try
+    {
+        CryptoPP::StringSource ss(string, true,
+            new CryptoPP::SignerFilter(rng, signer,
+                new CryptoPP::StringSink(signature)
+           ) // SignerFilter
+        ); // StringSource
+        Q_UNUSED(ss);
+    }
+    catch(std::exception&)
+    {
+        return {};
+    }
+
+    return signature;
 }
 
 bool u::rsaVerifySignature(const std::string& string, const std::string& signature,
@@ -84,7 +110,7 @@ bool u::rsaVerifySignature(const std::string& string, const std::string& signatu
 bool u::rsaVerifySignature(const std::string& signaturePlusString,
     const std::string& publicKeyFileName, std::string* message)
 {
-    CryptoPP::RSA::PublicKey publicKey = loadPublicKey(publicKeyFileName);
+    auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
 
     CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
     std::string recoveredMessage;
@@ -114,7 +140,7 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
 
 std::string u::rsaEncryptString(const std::string& string, const std::string& publicKeyFileName)
 {
-    CryptoPP::RSA::PublicKey publicKey = loadPublicKey(publicKeyFileName);
+    auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
     CryptoPP::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
 
     CryptoPP::AutoSeededRandomPool rng;

@@ -27,6 +27,9 @@ namespace u
     std::string aesDecryptString(const std::string& string, const AesKey& aesKey);
     std::string aesEncryptString(const std::string& string, const AesKey& aesKey);
 
+    std::string rsaSignString(const std::string& string,
+        const std::string& privateKeyFileName);
+
     bool rsaVerifySignature(const std::string& string, const std::string& signature,
         const std::string& publicKeyFileName, std::string* message = nullptr);
     bool rsaVerifySignature(const std::string& signaturePlusString,
