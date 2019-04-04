@@ -95,7 +95,7 @@ static void uploadReport(const QString& email, const QString& text,
         multiPart->append(attachmentPart);
     }
 
-    QUrl url(QStringLiteral("http://crashreports.kajeka.com/"));
+    QUrl url(QStringLiteral("https://crashreports.kajeka.com/"));
     QNetworkRequest request(url);
 
     QNetworkAccessManager manager;
