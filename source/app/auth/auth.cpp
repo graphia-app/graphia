@@ -1,18 +1,12 @@
 #include "auth.h"
 
-#include <cryptopp/rsa.h>
-#include <cryptopp/osrng.h>
-#include <cryptopp/modes.h>
-
 #include "shared/utils/preferences.h"
+#include "shared/utils/string.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QString>
-#include <QFile>
-#include <QDebug>
-#include <QRegularExpression>
 #include <QVariant>
 #include <QLocale>
 #include <QMessageBox>
@@ -25,9 +19,7 @@
 #include <QHttpPart>
 
 #include <vector>
-#include <sstream>
 #include <string>
-#include <iomanip>
 
 #ifdef _DEBUG
 //#define DEBUG_AUTH
@@ -37,119 +29,12 @@
 #endif
 #endif
 
-namespace C = CryptoPP;
-
-static C::RSA::PublicKey loadPublicKey()
-{
-    QFile file(QStringLiteral(":/keys/public_auth_key.der"));
-    if(!file.open(QIODevice::ReadOnly))
-        return {};
-
-    auto byteArray = file.readAll();
-    file.close();
-
-    C::ArraySource arraySource(reinterpret_cast<const C::byte*>(byteArray.constData()), // NOLINT
-                               byteArray.size(), true);
-
-    C::RSA::PublicKey publicKey;
-    publicKey.Load(arraySource);
-
-    return publicKey;
-}
-
-static Auth::AesKey generateKey()
-{
-    Auth::AesKey key;
-
-    C::AutoSeededRandomPool rng;
-
-    rng.GenerateBlock(static_cast<C::byte*>(key._aes), sizeof(key._aes));
-    rng.GenerateBlock(static_cast<C::byte*>(key._iv), sizeof(key._iv));
-
-    return key;
-}
-
 static std::string jsonObjectAsString(std::initializer_list<QPair<QString, QJsonValue>> args)
 {
     return QJsonDocument(QJsonObject(args)).toJson(QJsonDocument::Compact).toStdString();
 }
 
-template<typename T>
-static std::string bytesToHex(const T& bytes)
-{
-    std::ostringstream ss;
-
-    ss << std::hex << std::setfill('0');
-    for(int b : bytes)
-    {
-        if(b < 0)
-            b += 0x100;
-
-        ss << std::setw(2) << b;
-    }
-
-    return ss.str();
-}
-
-static bool isHex(const std::string& string)
-{
-    return string.size() % 2 == 0 &&
-        QRegularExpression(QStringLiteral("^[a-fA-F0-9]+$")).match(QString::fromStdString(string)).hasMatch();
-}
-
-static std::vector<C::byte> hexToBytes(const std::string& string)
-{
-    std::vector<C::byte> bytes;
-    bytes.reserve(string.length() / 2);
-
-    if(isHex(string))
-    {
-        for(size_t i = 0; i < string.length(); i += 2)
-        {
-            auto byteString = string.substr(i, 2);
-            auto b = static_cast<C::byte>(std::strtol(byteString.data(), nullptr, 16));
-            bytes.push_back(b);
-        }
-    }
-
-    return bytes;
-}
-
-static std::string hexToString(const std::string& string)
-{
-    std::string output;
-
-    if(isHex(string))
-    {
-        for(size_t i = 0; i < string.length(); i += 2)
-        {
-            auto byteString = string.substr(i, 2);
-            auto b = static_cast<char>(std::strtol(byteString.data(), nullptr, 16));
-            output.push_back(b);
-        }
-    }
-
-    return output;
-}
-
-static std::string rsaEncryptString(const std::string& string, const C::RSA::PublicKey& publicKey)
-{
-    C::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
-
-    C::AutoSeededRandomPool rng;
-    std::vector<C::byte> cipher(rsaEncryptor.FixedCiphertextLength());
-
-    C::StringSource ss(string, true,
-        new C::PK_EncryptorFilter(rng, rsaEncryptor,
-            new C::ArraySink(cipher.data(), cipher.size())
-       ) // PK_EncryptorFilter
-    ); // StringSource
-    Q_UNUSED(ss);
-
-    return bytesToHex(cipher);
-}
-
-static std::string aesKeyAsJsonString(const Auth::AesKey& key)
+static std::string aesKeyAsJsonString(const u::AesKey& key)
 {
     auto keyBaseHex = QByteArray(reinterpret_cast<const char*>(key._aes), // NOLINT
                                  sizeof(key._aes)).toHex();
@@ -165,77 +50,7 @@ static std::string aesKeyAsJsonString(const Auth::AesKey& key)
     return keyJsonString;
 }
 
-static std::string rsaEncryptAesKey(const Auth::AesKey& key, const C::RSA::PublicKey& publicKey)
-{
-    return rsaEncryptString(aesKeyAsJsonString(key), publicKey);
-}
-
-static bool rsaVerifySignature(const std::string& string, const std::string& signature,
-                               const C::RSA::PublicKey& publicKey)
-{
-    C::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
-    std::string stringPlusSignature = (string + signature);
-
-    try
-    {
-        C::StringSource ss(stringPlusSignature, true,
-            new C::SignatureVerificationFilter(
-                rsaVerifier, nullptr,
-                C::SignatureVerificationFilter::THROW_EXCEPTION
-           ) // SignatureVerificationFilter
-        ); // StringSource
-        Q_UNUSED(ss);
-    }
-    catch(C::SignatureVerificationFilter::SignatureVerificationFailed&)
-    {
-        return false;
-    }
-
-    return true;
-}
-
-static bool rsaVerifyAesKey(const Auth::AesKey& key, const std::string& signature, const C::RSA::PublicKey& publicKey)
-{
-    return rsaVerifySignature(aesKeyAsJsonString(key), signature, publicKey);
-}
-
-static std::string aesDecryptBytes(const std::vector<C::byte>& bytes, const Auth::AesKey& aesKey)
-{
-    std::vector<C::byte> outBytes(bytes.size());
-
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const C::byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
-    decryption.ProcessData(outBytes.data(), bytes.data(), bytes.size());
-
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
-}
-
-static std::string aesDecryptString(const std::string& string, const Auth::AesKey& aesKey)
-{
-    std::vector<C::byte> outBytes(string.size());
-
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const C::byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
-    decryption.ProcessData(outBytes.data(), reinterpret_cast<const C::byte*>(string.data()), string.size()); // NOLINT
-
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
-}
-
-static std::string aesEncryptString(const std::string& string, const Auth::AesKey& aesKey)
-{
-    auto inBytes = reinterpret_cast<const C::byte*>(string.data()); // NOLINT
-    auto bytesSize = string.size();
-
-    std::vector<C::byte> outBytes(bytesSize);
-
-    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const C::byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
-    encryption.ProcessData(outBytes.data(), inBytes, bytesSize);
-
-    return bytesToHex(outBytes);
-}
-
-static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::string& authResponseJsonString)
+static QJsonObject decodeAuthResponse(const u::AesKey& aesKey, const std::string& authResponseJsonString)
 {
     QJsonParseError jsonError{};
     auto jsonDocument = QJsonDocument::fromJson(authResponseJsonString.data(), &jsonError);
@@ -245,15 +60,14 @@ static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::str
 
     auto jsonObject = jsonDocument.object();
     auto aesKeySignatureHex = jsonObject[QStringLiteral("signature")].toString().toStdString();
-    auto aesKeySignature = hexToString(aesKeySignatureHex);
+    auto aesKeySignature = u::hexToString(aesKeySignatureHex);
 
-    C::RSA::PublicKey publicKey = loadPublicKey();
-
-    bool sessionVerified = rsaVerifyAesKey(aesKey, aesKeySignature, publicKey);
+    bool sessionVerified = u::rsaVerifySignature(aesKeyAsJsonString(aesKey),
+        aesKeySignature, ":/keys/public_auth_key.der");
     if(!sessionVerified)
         return {};
 
-    auto encryptedPayload = hexToBytes(jsonObject[QStringLiteral("payload")].toString().toStdString());
+    auto encryptedPayload = u::hexToBytes(jsonObject[QStringLiteral("payload")].toString().toStdString());
 
     auto payload = aesDecryptBytes(encryptedPayload, aesKey);
 
@@ -266,10 +80,8 @@ static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::str
     return jsonObject;
 }
 
-static std::string authRequest(const Auth::AesKey& aesKey, const QString& email, const QString& encryptedPassword)
+static std::string authRequest(const u::AesKey& aesKey, const QString& email, const QString& encryptedPassword)
 {
-    C::RSA::PublicKey publicKey = loadPublicKey();
-
     auto payloadJsonString = jsonObjectAsString(
     {
         {"email",    email},
@@ -281,11 +93,13 @@ static std::string authRequest(const Auth::AesKey& aesKey, const QString& email,
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
             QSysInfo::productType(), QSysInfo::productVersion())}
     });
+
+    auto encryptedAesKey = u::rsaEncryptString(aesKeyAsJsonString(aesKey), ":/keys/public_auth_key.der");
     auto encryptedPayload = aesEncryptString(payloadJsonString, aesKey);
 
     auto authReqJsonString = jsonObjectAsString(
     {
-        {"key",     QString::fromStdString(rsaEncryptAesKey(aesKey, publicKey))},
+        {"key",     QString::fromStdString(encryptedAesKey)},
         {"payload", QString::fromStdString(encryptedPayload)}
     });
 
@@ -303,30 +117,16 @@ void Auth::parseAuthToken()
     if(authToken.isEmpty())
         return;
 
-    auto encrypted = hexToString(authToken.toStdString());
+    auto encrypted = u::hexToString(authToken.toStdString());
 
     std::string aesKeyAndEncryptedAuthToken;
-    try
-    {
-        C::RSA::PublicKey publicKey = loadPublicKey();
-        C::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
-        C::StringSource ss(encrypted, true,
-            new C::SignatureVerificationFilter(
-                rsaVerifier, new C::StringSink(aesKeyAndEncryptedAuthToken),
-                C::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
-                C::SignatureVerificationFilter::PUT_MESSAGE |
-                C::SignatureVerificationFilter::THROW_EXCEPTION
-           ) // SignatureVerificationFilter
-        ); // StringSource
-        Q_UNUSED(ss);
-    }
-    catch(C::SignatureVerificationFilter::SignatureVerificationFailed&)
+    if(!u::rsaVerifySignature(encrypted, ":/keys/public_auth_key.der", &aesKeyAndEncryptedAuthToken))
     {
         // If we get here, then someone is trying to manipulate the auth token
         return;
     }
 
-    Auth::AesKey aesKey(aesKeyAndEncryptedAuthToken.c_str());
+    u::AesKey aesKey(aesKeyAndEncryptedAuthToken.c_str());
 
     auto encryptedAuthToken = aesKeyAndEncryptedAuthToken.substr(sizeof(aesKey._aes) + sizeof(aesKey._iv));
     auto decryptedAuthToken = aesDecryptString(encryptedAuthToken, aesKey);
@@ -383,7 +183,7 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
     _timer.start(10000);
     emit busyChanged();
 
-    _aesKey = generateKey();
+    _aesKey = u::generateAesKey();
     auto authReqJsonString = authRequest(_aesKey, email, encryptedPassword);
 
     // Work around for QTBUG-31652 (PRNG takes time to initialise) to
@@ -417,8 +217,8 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
 
 void Auth::sendRequest(const QString& email, const QString& password)
 {
-    C::RSA::PublicKey publicKey = loadPublicKey();
-    _encryptedPassword = QString::fromStdString((rsaEncryptString(password.toStdString(), publicKey)));
+    _encryptedPassword = QString::fromStdString(
+        u::rsaEncryptString(password.toStdString(), ":/keys/public_auth_key.der"));
 
     sendRequestUsingEncryptedPassword(email, _encryptedPassword);
 }

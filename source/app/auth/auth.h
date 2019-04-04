@@ -1,6 +1,8 @@
 #ifndef AUTH_H
 #define AUTH_H
 
+#include "shared/utils/crypto.h"
+
 #include <QString>
 #include <QObject>
 #include <QTimer>
@@ -71,20 +73,7 @@ class Auth : public QObject
     Q_OBJECT
 
 public:
-    struct AesKey
-    {
-        AesKey() = default;
-        explicit AesKey(const char* bytes)
-        {
-            std::memcpy(_aes, &bytes[0],            sizeof(_aes));
-            std::memcpy(_iv,  &bytes[sizeof(_aes)], sizeof(_iv));
-        }
-
-        unsigned char _aes[16] = {0};
-        unsigned char _iv[16] = {0};
-    };
-
-    AesKey _aesKey;
+    u::AesKey _aesKey;
 
     Auth();
 
