@@ -273,7 +273,7 @@ Item
         Component
         {
             id: columnComponent
-            TableViewColumn { width: 200 }
+            TableViewColumn { width: 120 }
         }
 
         function _updateColumnVisibility()
