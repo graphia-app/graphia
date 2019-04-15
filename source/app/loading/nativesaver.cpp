@@ -169,7 +169,7 @@ bool NativeSaver::save()
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 
-    if(uiDataJson.is_object() || uiDataJson.is_array())
+    if(uiDataJson.is_discarded() || uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
 
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
@@ -181,14 +181,14 @@ bool NativeSaver::save()
 
     // If the plugin data is itself JSON, just whack it in
     // as is, but if it's not, hex encode it
-    if(pluginDataJson.is_object() || pluginDataJson.is_array())
+    if(!pluginDataJson.is_discarded() && (pluginDataJson.is_object() || pluginDataJson.is_array()))
         content["pluginData"] = pluginDataJson;
     else
         content["pluginData"] = QString(pluginData.toHex());
 
     auto pluginUiDataJson = json::parse(_pluginUiData.begin(), _pluginUiData.end(), nullptr, false);
 
-    if(pluginUiDataJson.is_object() || pluginUiDataJson.is_array())
+    if(!pluginUiDataJson.is_discarded() && (pluginUiDataJson.is_object() || pluginUiDataJson.is_array()))
         content["pluginUiData"] = pluginUiDataJson;
     else
         content["pluginUiData"] = QString(_pluginUiData.toHex());

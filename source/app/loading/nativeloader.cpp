@@ -213,7 +213,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     auto headerByteArray = headerString.toUtf8();
     json jsonHeader = json::parse(headerByteArray.begin(), headerByteArray.end(), nullptr, false);
 
-    if(jsonHeader.is_null() || !jsonHeader.is_object())
+    if(jsonHeader.is_discarded() || jsonHeader.is_null() || !jsonHeader.is_object())
         return false;
 
     if(!u::contains(jsonHeader, "version"))
