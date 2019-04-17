@@ -17,6 +17,7 @@ using json = nlohmann::json;
 #include "shared/loading/progress_iterator.h"
 
 #include <QString>
+#include <QUrl>
 #include <QByteArray>
 
 inline void to_json(json& j, const QString& s)
@@ -27,6 +28,11 @@ inline void to_json(json& j, const QString& s)
 inline void from_json(const json& j, QString& s)
 {
     s = QString::fromStdString(j.get<std::string>());
+}
+
+inline void from_json(const json& j, QUrl& url)
+{
+    url = QString::fromStdString(j.get<std::string>());
 }
 
 template<typename E>
