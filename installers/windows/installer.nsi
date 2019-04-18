@@ -156,6 +156,9 @@ Var STARTMENU_FOLDER
 Section "-Main Component"
 	SetOutPath "$INSTDIR"
 
+	; Clear out the target directory first
+	RMDir /r "$INSTDIR"
+
 	File /r "installer\*.*"
 
 	WriteRegStr SHCTX "Software\${PRODUCT_NAME}" "" $INSTDIR
