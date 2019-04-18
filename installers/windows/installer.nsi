@@ -176,29 +176,39 @@ SectionEnd
 ; File Associations
 SectionGroup /e "File associations"
 	Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
+		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}" "${PRODUCT_NAME} File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$INSTDIR\${EXE} $\"%1$\""
+		skipFileAssociation:
 	SectionEnd
 	Section "Graph Modelling Language file (.gml)"
+		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$INSTDIR\${EXE} $\"%1$\""
+		skipFileAssociation:
 	SectionEnd
 	Section "Graph Markup Language file (.graphml)"
+		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "graphml" "${PRODUCT_NAME}.graphml" "${PRODUCT_NAME} GraphML File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$INSTDIR\${EXE} $\"%1$\""
+		skipFileAssociation:
 	SectionEnd
 	Section "Biopax OWL file (.owl)"
+		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "owl" "${PRODUCT_NAME}.owl" "${PRODUCT_NAME} OWL File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$INSTDIR\${EXE} $\"%1$\""
+		skipFileAssociation:
 	SectionEnd
 SectionGroupEnd
 
 Section /o "Desktop shortcut"
+	IfSilent skipDesktopShortcut
 	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
+	skipDesktopShortcut:
 SectionEnd
 
 ;Launch function
