@@ -187,17 +187,36 @@ ApplicationWindow
         }
     }
 
+    property bool _restartOnExit: false
+
+    function restart()
+    {
+        _restartOnExit = true;
+        mainWindow.close();
+    }
+
     onClosing:
     {
         if(tabView.count > 0)
         {
-            // If any tabs are open, close the first one and cancel the window close...
-            tabView.closeTab(0, function()
+            // Capture _restartOnExit so that we can restore its value after a non-cancel exit
+            var closeTabFunction = function(restartOnExit)
             {
-                // ...then (recursively) resume closing if the user doesn't cancel
-                tabView.removeTab(0);
-                mainWindow.close();
-            });
+                return function()
+                {
+                    tabView.removeTab(0);
+                    _restartOnExit = restartOnExit;
+                    mainWindow.close();
+                };
+            }(_restartOnExit);
+
+            // Reset the value of _restartOnExit so that if the user cancels an exit, any
+            // subsequent future exit doesn't then also restart
+            _restartOnExit = false;
+
+            // If any tabs are open, close the first one and cancel the window close, followed
+            // by (recursive) calls to clostTabFunction, assuming the user doesn't cancel
+            tabView.closeTab(0, closeTabFunction);
 
             close.accepted = false;
             return;
@@ -212,6 +231,10 @@ ApplicationWindow
             windowPreferences.x = mainWindow.x;
             windowPreferences.y = mainWindow.y;
         }
+
+        Qt.exit(!_restartOnExit ?
+            ExitType.NormalExit :
+            ExitType.Restart);
     }
 
     MessageDialog
@@ -1040,6 +1063,32 @@ ApplicationWindow
         onTriggered: { application.reportScopeTimers(); }
     }
 
+    Action
+    {
+        id: restartAction
+        text: qsTr("Restart")
+        onTriggered: { mainWindow.restart(); }
+    }
+
+    MessageDialog
+    {
+        id: commandLineArgumentsMessageDialog
+        icon: StandardIcon.Information
+        title: qsTr("Command Line Arguments")
+
+        text:
+        {
+            var text = "Arguments:\n\n";
+            return text + JSON.stringify(application.arguments, null, 4);
+        }
+    }
+
+    Action
+    {
+        id: showCommandLineArgumentsAction
+        text: qsTr("Show Command Line Arguments")
+        onTriggered: { commandLineArgumentsMessageDialog.open(); }
+    }
 
     Action
     {
@@ -1446,6 +1495,8 @@ ApplicationWindow
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
             MenuItem { action: reportScopeTimersAction }
+            MenuItem { action: showCommandLineArgumentsAction }
+            MenuItem { action: restartAction }
         }
         Menu
         {

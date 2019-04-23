@@ -14,6 +14,8 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QCommandLineParser>
+#include <QProcess>
 
 #include <iostream>
 
@@ -38,7 +40,17 @@
 
 #include "watchdog.h"
 
-int main(int argc, char *argv[])
+static QString resolvedExeName(const QString& baseExeName)
+{
+#ifdef Q_OS_LINUX
+    if(qEnvironmentVariableIsSet("APPIMAGE"))
+        return qgetenv("APPIMAGE");
+#endif
+
+    return baseExeName;
+}
+
+int start(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 
@@ -195,6 +207,10 @@ int main(int argc, char *argv[])
             Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
     });
 
+    int qmlExitCode = 0;
+    QObject::connect(&engine, &QQmlApplicationEngine::exit,
+        [&qmlExitCode](int code) { qmlExitCode = code; });
+
     Watchdog watchDog;
 
     // Poke the watch dog every now and again so that it doesn't break/crash us
@@ -228,5 +244,23 @@ int main(int argc, char *argv[])
     });
 #endif
 
-    return QCoreApplication::exec();
+    auto exitCode = QCoreApplication::exec();
+    return qmlExitCode != 0 ? qmlExitCode : exitCode;
+}
+
+int main(int argc, char *argv[])
+{
+    // The "real" main is separate to limit the scope of QtSingleApplication,
+    // otherwise a restart causes the exiting instance to get activated
+    auto exitCode = start(argc, argv);
+
+    if(static_cast<ExitType>(exitCode) == ExitType::Restart)
+    {
+        auto exeName = resolvedExeName(argv[0]);
+        std::cerr << "Restarting " << exeName.toStdString() << "...\n";
+        if(!QProcess::startDetached(exeName, {}))
+            std::cerr << "  ...failed\n";
+    }
+
+    return exitCode;
 }
