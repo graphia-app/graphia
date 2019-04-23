@@ -290,7 +290,7 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
-    size_t column = (role - Qt::UserRole - 1);
+    size_t column = role - (Qt::UserRole + 1);
     if(column >= _data.size())
         return {};
 
