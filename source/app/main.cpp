@@ -14,6 +14,8 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QCommandLineParser>
+#include <QProcess>
 
 #include <iostream>
 
@@ -197,6 +199,13 @@ int main(int argc, char *argv[])
     {
         QMetaObject::invokeMethod(mainWindow, "processArguments",
             Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
+    });
+
+    QObject::connect(&engine, &QQmlApplicationEngine::exit, []
+    (int code)
+    {
+        if(static_cast<ExitType>(code) == ExitType::Restart)
+            QProcess::startDetached(QCoreApplication::arguments().at(0));
     });
 
     Watchdog watchDog;

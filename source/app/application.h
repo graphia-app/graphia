@@ -3,6 +3,8 @@
 
 #include "auth/auth.h"
 
+#include "shared/utils/qmlenum.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -32,6 +34,11 @@ class GraphModel;
 class IParser;
 class ISaverFactory;
 class IPlugin;
+
+DEFINE_QML_ENUM(
+    Q_GADGET, ExitType,
+    NormalExit = 0,
+    Restart = 127);
 
 struct LoadedPlugin
 {
