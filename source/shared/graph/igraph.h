@@ -11,6 +11,12 @@ class QString;
 class INode
 {
 public:
+    INode() = default;
+    INode(const INode&) = default;
+    INode(INode&&) = default;
+    INode& operator=(const INode&) = default;
+    INode& operator=(INode&&) = default;
+
     virtual ~INode() = default;
 
     virtual int degree() const = 0;
@@ -26,6 +32,12 @@ public:
 class IEdge
 {
 public:
+    IEdge() = default;
+    IEdge(const IEdge&) = default;
+    IEdge(IEdge&&) = default;
+    IEdge& operator=(const IEdge&) = default;
+    IEdge& operator=(IEdge&&) = default;
+
     virtual ~IEdge() = default;
 
     virtual NodeId sourceId() const = 0;

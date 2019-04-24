@@ -14,6 +14,12 @@ enum VisualFlags
 
 struct IElementVisual
 {
+    IElementVisual() = default;
+    IElementVisual(const IElementVisual&) = default;
+    IElementVisual(IElementVisual&&) = default;
+    IElementVisual& operator=(const IElementVisual&) = default;
+    IElementVisual& operator=(IElementVisual&&) = default;
+
     virtual ~IElementVisual() = default;
 
     virtual float size() const = 0;

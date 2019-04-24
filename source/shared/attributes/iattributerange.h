@@ -11,6 +11,12 @@ template<typename T>
 class IAttributeRange
 {
 public:
+    IAttributeRange() = default;
+    IAttributeRange(const IAttributeRange&) = default;
+    IAttributeRange(IAttributeRange&&) = default;
+    IAttributeRange& operator=(const IAttributeRange&) = default;
+    IAttributeRange& operator=(IAttributeRange&&) = default;
+
     virtual ~IAttributeRange() = default;
 
     virtual bool hasMin() const = 0;
