@@ -41,7 +41,7 @@
 
 #include "watchdog.h"
 
-int main(int argc, char *argv[])
+int start(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 
@@ -201,12 +201,9 @@ int main(int argc, char *argv[])
             Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
     });
 
-    QObject::connect(&engine, &QQmlApplicationEngine::exit, []
-    (int code)
-    {
-        if(static_cast<ExitType>(code) == ExitType::Restart)
-            QProcess::startDetached(QCoreApplication::arguments().at(0));
-    });
+    int qmlExitCode = 0;
+    QObject::connect(&engine, &QQmlApplicationEngine::exit,
+        [&qmlExitCode](int code) { qmlExitCode = code; });
 
     Watchdog watchDog;
 
@@ -241,5 +238,21 @@ int main(int argc, char *argv[])
     });
 #endif
 
-    return QCoreApplication::exec();
+    auto exitCode = QCoreApplication::exec();
+    return qmlExitCode != 0 ? qmlExitCode : exitCode;
+}
+
+int main(int argc, char *argv[])
+{
+    // The "real" main is separate to limit the scope of QtSingleApplication,
+    // otherwise a restart causes the exiting instance to get activated
+    auto exitCode = start(argc, argv);
+
+    if(static_cast<ExitType>(exitCode) == ExitType::Restart)
+    {
+        std::cerr << "Restarting " << argv[0] << "...\n";
+        QProcess::startDetached(argv[0]);
+    }
+
+    return exitCode;
 }
