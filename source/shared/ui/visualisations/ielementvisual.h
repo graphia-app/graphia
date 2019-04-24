@@ -16,9 +16,9 @@ struct IElementVisual
 {
     IElementVisual() = default;
     IElementVisual(const IElementVisual&) = default;
-    IElementVisual(IElementVisual&&) = default;
+    IElementVisual(IElementVisual&&) noexcept = default;
     IElementVisual& operator=(const IElementVisual&) = default;
-    IElementVisual& operator=(IElementVisual&&) = default;
+    IElementVisual& operator=(IElementVisual&&) noexcept = default;
 
     virtual ~IElementVisual() = default;
 

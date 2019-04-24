@@ -13,9 +13,9 @@ class IAttributeRange
 public:
     IAttributeRange() = default;
     IAttributeRange(const IAttributeRange&) = default;
-    IAttributeRange(IAttributeRange&&) = default;
+    IAttributeRange(IAttributeRange&&) noexcept = default;
     IAttributeRange& operator=(const IAttributeRange&) = default;
-    IAttributeRange& operator=(IAttributeRange&&) = default;
+    IAttributeRange& operator=(IAttributeRange&&) noexcept = default;
 
     virtual ~IAttributeRange() = default;
 

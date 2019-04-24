@@ -20,9 +20,9 @@ public:
     explicit operator int() const { return _value; }
 
     ElementId(const ElementId<T>& other) = default;
-    ElementId(ElementId<T>&& other) = default;
+    ElementId(ElementId<T>&& other) noexcept = default;
     ElementId& operator=(const ElementId<T>& other) = default;
-    ElementId& operator=(ElementId<T>&& other) = default;
+    ElementId& operator=(ElementId<T>&& other) noexcept = default;
 
     T& operator++() { ++_value; return static_cast<T&>(*this); }
     T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }

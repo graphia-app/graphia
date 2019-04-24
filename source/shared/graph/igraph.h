@@ -13,9 +13,9 @@ class INode
 public:
     INode() = default;
     INode(const INode&) = default;
-    INode(INode&&) = default;
+    INode(INode&&) noexcept = default;
     INode& operator=(const INode&) = default;
-    INode& operator=(INode&&) = default;
+    INode& operator=(INode&&) noexcept = default;
 
     virtual ~INode() = default;
 
@@ -34,9 +34,9 @@ class IEdge
 public:
     IEdge() = default;
     IEdge(const IEdge&) = default;
-    IEdge(IEdge&&) = default;
+    IEdge(IEdge&&) noexcept = default;
     IEdge& operator=(const IEdge&) = default;
-    IEdge& operator=(IEdge&&) = default;
+    IEdge& operator=(IEdge&&) noexcept = default;
 
     virtual ~IEdge() = default;
 
