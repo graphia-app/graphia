@@ -251,7 +251,8 @@ int main(int argc, char *argv[])
     if(static_cast<ExitType>(exitCode) == ExitType::Restart)
     {
         std::cerr << "Restarting " << argv[0] << "...\n";
-        QProcess::startDetached(argv[0]);
+        if(!QProcess::startDetached(argv[0], {}))
+            std::cerr << "  ...failed\n";
     }
 
     return exitCode;
