@@ -18,7 +18,7 @@ copy %BUILD_DIR%\CrashReporter.exe %INSTALLER_DIR%\
 copy %BUILD_DIR%\MessageBox.exe %INSTALLER_DIR%\
 
 set QML_DIRS=
-for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
+FOR /d /r %%i IN (*) DO @IF EXIST %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
 echo %QML_DIRS%
 
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
@@ -26,7 +26,7 @@ windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
 windeployqt --no-angle --no-compiler-runtime --no-opengl-sw ^
   --dir %INSTALLER_DIR% %INSTALLER_DIR%\thirdparty.dll
 
-for %%i in (%INSTALLER_DIR%\plugins\*.dll) do windeployqt --no-angle --no-compiler-runtime ^
+FOR %%i IN (%INSTALLER_DIR%\plugins\*.dll) DO windeployqt --no-angle --no-compiler-runtime ^
 	--no-opengl-sw --dir %INSTALLER_DIR% %%i
 
 set QML_DIR=source\crashreporter
