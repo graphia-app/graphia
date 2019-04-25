@@ -43,8 +43,10 @@ IF EXIST %WINDOWS_EXTRA_FILES%\NUL (
   xcopy "%WINDOWS_EXTRA_FILES%*.*" %INSTALLER_DIR% || EXIT /B 1
 )
 
-signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
-	/tr %SIGN_TSA% /td SHA256 %INSTALLER_DIR%\%PRODUCT_NAME%.exe || EXIT /B 1
+FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox) DO (
+  signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
+	  /tr %SIGN_TSA% /td SHA256 %INSTALLER_DIR%\%%i.exe || EXIT /B 1
+)
 
 set /a value=0
 set /a BUILD_SIZE=0
