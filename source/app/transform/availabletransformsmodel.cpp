@@ -8,10 +8,9 @@
 AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
                                                    QObject* parent) :
     QAbstractListModel(parent),
-    _graphModel(&graphModel)
-{
-    _transformNames = graphModel.availableTransformNames();
-}
+    _graphModel(&graphModel),
+    _transformNames(graphModel.availableTransformNames())
+{}
 
 QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) const
 {

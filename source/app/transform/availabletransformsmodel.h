@@ -13,14 +13,13 @@ class AvailableTransformsModel : public QAbstractListModel
     Q_OBJECT
 
 private:
-    QStringList _transformNames;
-
     enum Roles
     {
         TransformCategoryRole = Qt::UserRole + 1
     };
 
     const GraphModel* _graphModel = nullptr;
+    QStringList _transformNames;
 
 public:
     AvailableTransformsModel() = default;
