@@ -1,4 +1,5 @@
 [Desktop Entry]
+# This is the version of the .desktop file, not the application itself
 Version=1.0
 Type=Application
 Name=@PROJECT_NAME@
