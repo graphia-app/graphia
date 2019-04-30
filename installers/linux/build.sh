@@ -26,7 +26,22 @@ then
       -executable=AppDir/usr/bin/MessageBox \
       -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so \
       || exit $?
-  )
+
+    for APPIMAGE_FILENAME in $(find -iname "*.AppImage")
+    do
+      # Remove everything after the dash
+      SIMPLIFIED_FILENAME=$(echo ${APPIMAGE_FILENAME} | \
+        perl -pe 's/([^-]+)(?:-\w+)+(\.\w+)/$1$2/g')
+
+      echo "${APPIMAGE_FILENAME} -> ${SIMPLIFIED_FILENAME}"
+      mv ${APPIMAGE_FILENAME} ${SIMPLIFIED_FILENAME}
+    done
+
+    # tar up the AppImage in a file that includes the version in its name
+    tar cvfz ${PRODUCT_NAME}-${VERSION}.tar.gz *.AppImage || exit $?
+
+    rm *.AppImage
+  ) || exit $?
 else
   echo linuxdeployqt could not be found, please install \
     it from https://github.com/probonopd/linuxdeployqt
