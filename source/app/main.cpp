@@ -41,6 +41,16 @@
 
 #include "watchdog.h"
 
+static QString resolvedExeName(const QString& baseExeName)
+{
+#ifdef Q_OS_LINUX
+    if(qEnvironmentVariableIsSet("APPIMAGE"))
+        return qgetenv("APPIMAGE");
+#endif
+
+    return baseExeName;
+}
+
 int start(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
@@ -250,8 +260,9 @@ int main(int argc, char *argv[])
 
     if(static_cast<ExitType>(exitCode) == ExitType::Restart)
     {
-        std::cerr << "Restarting " << argv[0] << "...\n";
-        if(!QProcess::startDetached(argv[0], {}))
+        auto exeName = resolvedExeName(argv[0]);
+        std::cerr << "Restarting " << exeName.toStdString() << "...\n";
+        if(!QProcess::startDetached(exeName, {}))
             std::cerr << "  ...failed\n";
     }
 
