@@ -284,6 +284,26 @@ ApplicationWindow
         pluginDetails: application.pluginDetails
     }
 
+    TextDialog
+    {
+        id: environmentDialog
+        text:
+        {
+            var s = "";
+            var environment = application.environment;
+
+            for(var i = 0; i < environment.length; i++)
+            {
+                if(s.length !== 0)
+                    s += "\n";
+
+                s += environment[i];
+            }
+
+            return s;
+        }
+    }
+
     Preferences
     {
         id: windowPreferences
@@ -1155,6 +1175,12 @@ ApplicationWindow
         onTriggered: { commandLineArgumentsMessageDialog.open(); }
     }
 
+    Action
+    {
+        id: showEnvironmentAction
+        text: qsTr("Show Environment")
+        onTriggered: { environmentDialog.show(); }
+    }
 
     Action
     {
@@ -1590,6 +1616,7 @@ ApplicationWindow
             MenuItem { action: toggleGlyphmapSaveAction }
             MenuItem { action: reportScopeTimersAction }
             MenuItem { action: showCommandLineArgumentsAction }
+            MenuItem { action: showEnvironmentAction }
             MenuItem { action: restartAction }
         }
         Menu

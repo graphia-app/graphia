@@ -14,11 +14,11 @@
 #include <QAbstractListModel>
 #include <QPluginLoader>
 #include <QImage>
+#include <QCoreApplication>
+#include <QProcessEnvironment>
 
 #include <vector>
 #include <memory>
-
-#include <QCoreApplication>
 
 #ifndef APP_URI
 #define APP_URI "uri.missing"
@@ -117,6 +117,8 @@ class Application : public QObject
     Q_PROPERTY(QStringList resourceDirectories READ resourceDirectories CONSTANT)
     Q_PROPERTY(QStringList arguments READ arguments CONSTANT)
 
+    Q_PROPERTY(QStringList environment READ environment CONSTANT)
+
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
@@ -143,6 +145,8 @@ public:
 
     static QStringList resourceDirectories();
     static QStringList arguments() { return QCoreApplication::arguments(); }
+
+    static QStringList environment() { return QProcessEnvironment::systemEnvironment().toStringList(); }
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
