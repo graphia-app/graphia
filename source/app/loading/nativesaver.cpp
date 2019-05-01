@@ -169,7 +169,7 @@ bool NativeSaver::save()
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 
-    if(uiDataJson.is_discarded() || uiDataJson.is_object() || uiDataJson.is_array())
+    if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
 
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
