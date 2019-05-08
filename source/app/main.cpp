@@ -142,7 +142,7 @@ int start(int argc, char *argv[])
     {
         QString vendor = OpenGLFunctions::vendor();
         vendor.replace(QLatin1String(" "), QLatin1String("+"));
-        QString driversUrl = QStringLiteral(R"(http://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+        QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
 
         QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
             QObject::tr("The installed version of OpenGL is insufficient to run %1. "
