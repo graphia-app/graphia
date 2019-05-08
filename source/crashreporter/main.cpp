@@ -23,6 +23,65 @@
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
 
+#include <google_breakpad/processor/minidump.h>
+#include <google_breakpad/processor/process_state.h>
+#include <google_breakpad/processor/minidump_processor.h>
+#include <google_breakpad/processor/call_stack.h>
+#include <google_breakpad/processor/stack_frame.h>
+#include <processor/pathname_stripper.h>
+
+static QString crashedModule(const QString& dmpFile)
+{
+    using google_breakpad::Minidump;
+    using google_breakpad::MinidumpMemoryList;
+    using google_breakpad::MinidumpThreadList;
+    using google_breakpad::MinidumpProcessor;
+    using google_breakpad::ProcessState;
+    using google_breakpad::CallStack;
+    using google_breakpad::StackFrame;
+    using google_breakpad::PathnameStripper;
+
+    Minidump dump(dmpFile.toStdString());
+    if(!dump.Read())
+    {
+       std::cerr << "Minidump " << dmpFile.toStdString() << " could not be read\n";
+       return {};
+    }
+
+    MinidumpProcessor minidump_processor(nullptr, nullptr);
+    ProcessState process_state;
+    if(minidump_processor.Process(&dump, &process_state) != google_breakpad::PROCESS_OK)
+    {
+      std::cerr << "MinidumpProcessor::Process failed\n";
+      return {};
+    }
+
+    int requesting_thread = process_state.requesting_thread();
+    if(requesting_thread == -1 || !process_state.crashed())
+    {
+        std::cerr << "Process has not crashed\n";
+        return {};
+    }
+
+    const auto* stack = process_state.threads()->at(requesting_thread);
+    int frame_count = stack->frames()->size();
+    if(frame_count == 0)
+    {
+        std::cerr << "No stack frames\n";
+        return {};
+    }
+
+    const auto* frame = stack->frames()->at(0);
+    if(!frame->module)
+    {
+        std::cerr << "No module\n";
+        return {};
+    }
+
+    auto module = PathnameStripper::File(frame->module->code_file());
+    return QString::fromStdString(module);
+}
+
 static void uploadReport(const QString& email, const QString& text,
                          const QString& dmpFile, const QString& attachmentDir)
 {
@@ -188,7 +247,13 @@ int main(int argc, char *argv[])
         QApplication::setWindowIcon(mainIcon);
 
         QQmlApplicationEngine engine;
+
         engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
+        engine.rootContext()->setContextProperty(
+            QStringLiteral("glVendor"), OpenGLFunctions::vendor());
+        engine.rootContext()->setContextProperty(
+            QStringLiteral("crashedModule"), crashedModule(positional.at(0)));
+
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
         exitCode = QCoreApplication::exec();

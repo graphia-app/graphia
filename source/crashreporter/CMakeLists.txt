@@ -1,4 +1,5 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 
@@ -42,3 +43,13 @@ target_link_libraries(CrashReporter
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(CrashReporter ${OPENGL_gl_LIBRARY})
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(CrashReporter Threads::Threads)
+
+if(APPLE)
+    target_link_libraries(CrashReporter "-framework CoreFoundation")
+endif()
+
+target_link_libraries(CrashReporter thirdparty_static)

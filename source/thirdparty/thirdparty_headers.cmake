@@ -12,3 +12,4 @@ include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/breakpad/src)
 add_definitions(-DQCUSTOMPLOT_USE_OPENGL -DQCUSTOMPLOT_USE_LIBRARY)
 add_definitions(-DCRYPTOPP_DISABLE_ASM)
 add_definitions(-DBPLOG_MINIMUM_SEVERITY=SEVERITY_CRITICAL)
+add_definitions(-D__STDC_FORMAT_MACROS) # For breakpad_types.h
