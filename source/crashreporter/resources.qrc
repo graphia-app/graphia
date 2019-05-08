@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>../shared/ui/qml/Constants.js</file>
+        <file alias="PointingCursorOnHoverLink.qml">../app/ui/qml/Controls/PointingCursorOnHoverLink.qml</file>
         <file>PlaceholderTextArea.qml</file>
         <file>icon.svg</file>
     </qresource>

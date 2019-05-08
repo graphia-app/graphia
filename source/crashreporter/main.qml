@@ -36,6 +36,7 @@ ApplicationWindow
             sourceSize.width: 96
             sourceSize.height: 96
             Layout.margins: Constants.margin
+            Layout.alignment: Qt.AlignTop
             Layout.rowSpan: 2
 
             MouseArea
@@ -56,10 +57,35 @@ ApplicationWindow
         Text
         {
             id: info
-            text: qsTr("<b>Oops!</b> We're sorry, " + Qt.application.name + " has crashed. " +
-                       "Please use the form below to let us know what happened. " +
-                       "If we need more information, we may use your email address " +
-                       "to contact you. Thanks.")
+            text:
+            {
+                var apology = qsTr("<b>Oops!</b> We're sorry, ") + Qt.application.name +
+                   qsTr(" has crashed. Please use the form below to let us know what happened. " +
+                   "If we need more information, we may use your email address " +
+                   "to contact you. Thanks.");
+
+                var videoDriverCrash = "";
+
+                var re = /^(nvoglv|ig\d+icd|ati[og]).*/;
+                if(re.test(crashedModule))
+                {
+                    var vendorLink = "https://www.google.com/search?q=" + glVendor +
+                        "+video+driver+download&btnI";
+
+                    videoDriverCrash = qsTr("<font color=\"red\"><b>Please note:</b></font> this crash " +
+                        "occurred in your video drivers. While it is possible that ") + Qt.application.name +
+                        qsTr(" is still to blame, please also ensure your drivers are " +
+                        "<a href=\"") + vendorLink + qsTr("\">up to date</a>, if you have not already done so.");
+
+                    return apology + "<br><br>" + videoDriverCrash;
+                }
+
+                return apology;
+            }
+
+            PointingCursorOnHoverLink {}
+            onLinkActivated: Qt.openUrlExternally(link);
+
             wrapMode: Text.WordWrap
             Layout.margins: Constants.margin
             Layout.fillWidth: true
