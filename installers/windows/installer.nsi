@@ -64,22 +64,23 @@ RequestExecutionLevel highest
 			Abort
 		notRunning:
 
-		; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
-		; and whether SMPROGRAMS refers to all users or just the current user
-		UserInfo::GetAccountType
-		Pop $0
-		${If} $0 == "Admin"
-			; If we're an admin, default to installing to C:\Program Files
-			SetShellVarContext all
-			StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
-		${Else}
-			; If we're just a user, default to installing to ~\AppData\Local
-			SetShellVarContext current
-			StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
-		${EndIf}
-
 		${If} $INSTDIR == ""
 			; This only happens in the installer, because the uninstaller already knows INSTDIR
+
+			; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
+			; and whether SMPROGRAMS refers to all users or just the current user
+			UserInfo::GetAccountType
+			Pop $0
+			${If} $0 == "Admin"
+				; If we're an admin, default to installing to C:\Program Files
+				SetShellVarContext all
+				StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
+			${Else}
+				; If we're just a user, default to installing to ~\AppData\Local
+				SetShellVarContext current
+				StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
+			${EndIf}
+
 			ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
 
 			${If} $0 != ""
@@ -88,7 +89,18 @@ RequestExecutionLevel highest
 			${Else}
 				StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
 			${Endif}
-		${Endif}
+		${ElseIf} "${un}" == "un"
+			UserInfo::GetAccountType
+			Pop $0
+			${If} $0 == "Admin"
+				SetShellVarContext all
+			${Else}
+				SetShellVarContext current
+			${EndIf}
+		${Else}
+			; When INSTDIR is given on the command line, and we're not making the uninstaller
+			SetShellVarContext current
+		${EndIf}
 	FunctionEnd
 !macroend
 
@@ -159,6 +171,7 @@ Section "-Main Component"
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
+	IfFileExists "$INSTDIR\Uninstall.exe" +2 ; Don't make Uninstall.exe if it already exists
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN ${PRODUCT_NAME}
