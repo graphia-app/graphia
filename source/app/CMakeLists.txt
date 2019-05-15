@@ -264,6 +264,7 @@ list(APPEND SOURCES ${APP_SOURCES})
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER com.kajeka.${PROJECT_NAME})
+    set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
