@@ -440,9 +440,8 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
             auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
             auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
 
-            _graphRenderer->executeOnRendererThread([this, newComponentId,
-                                                    newGraphComponentRenderer,
-                                                    oldGraphComponentRenderer]
+            _graphRenderer->executeOnRendererThread(
+            [this, newComponentId, newGraphComponentRenderer, oldGraphComponentRenderer]
             {
                 // This occurs before GraphComponentRenderer::cleanup is called on oldGraphComponentRenderer
                 newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
@@ -455,18 +454,24 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
 
 void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
-    if(_componentId.isNull())
-        setComponentId(componentId, visible());
+    _graphRenderer->executeOnRendererThread([this, componentId]
+    {
+        if(_componentId.isNull())
+            setComponentId(componentId, visible());
+    }, QStringLiteral("GraphComponentScene::onComponentAdded"));
 }
 
 void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
-    if(componentId == _componentId && visible() && !hasMerged)
+    _graphRenderer->executeOnRendererThread([this, componentId, hasMerged]
     {
-        // Keep the component alive until any transitions have finished
-        _beingRemoved = true;
-        componentRenderer()->freeze();
-    }
+        if(componentId == _componentId && visible() && !hasMerged)
+        {
+            // Keep the component alive until any transitions have finished
+            _beingRemoved = true;
+            componentRenderer()->freeze();
+        }
+    }, QStringLiteral("GraphComponentScene::onComponentWillBeRemoved"));
 }
 
 void GraphComponentScene::onGraphWillChange(const Graph* graph)
