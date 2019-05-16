@@ -1589,7 +1589,7 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: qsTr("As this is your first time starting " + appName + ", we have opened an example graph.<br>" +
+                text: qsTr("As this is your first time starting ") + appName + qsTr(", we have opened an example graph.<br>" +
                       "The graph represents the <b>London Tube System and River Buses!</b>")
             }
         }
@@ -1668,8 +1668,8 @@ Item
                     Layout.preferredWidth: 400
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) " + appName +
-                          " opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
+                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) ") + appName +
+                          qsTr(" opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
                           "left component is the <b>London Tube map</b>, while the right component is the <b>London Riverbus " +
                           "Network</b>.<br><br>" +
                           "To focus on a particular component and hide others, <b>Double Click</b> it. " +
@@ -1678,7 +1678,7 @@ Item
                           "<b>Component Mode:</b> Double Click Component<br>" +
                           "<b>Overview Mode:</b> Double Click Background or Press Esc<br>" +
                           "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
-                          "<b>Select Node:</b> Left Click a Node<br>" +
+                          "<b>Select Node:</b> Click a Node<br>" +
                           "<b>Focus Node:</b> Double Click a Node")
                 }
             }
@@ -1840,8 +1840,8 @@ Item
                     Layout.preferredWidth: 600
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("This concludes our brief introduction of " + appName + " using the London transport network!<br>" +
-                          appName + " can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
+                    text: qsTr("This concludes our brief introduction of ") + appName + qsTr(" using the London transport network!<br>") +
+                          appName + qsTr(" can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
                           "Utilising Transforms and Visualisations is key to getting the most from your graph.")
                 }
             }
