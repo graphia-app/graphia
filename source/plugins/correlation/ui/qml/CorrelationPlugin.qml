@@ -489,23 +489,23 @@ PluginContent
         return options;
     }
 
-    toolStrip: RowLayout
+    toolStrip: ToolBar
     {
-        anchors.fill: parent
-
-        ToolButton { action: toggleUiOrientationAction }
-        ToolBarSeparator {}
-        ToolButton { action: resizeColumnsToContentsAction }
-        ToolButton { action: selectColumnsAction }
-        ToolButton { action: tableView.exportAction }
-        ToolBarSeparator {}
-        ToolButton { action: toggleColumnNamesAction }
-        ToolButton
+        RowLayout
         {
-            visible: plugin.model.columnAnnotationNames.length > 0
-            action: selectColumnAnnotationsAction
+            ToolButton { action: toggleUiOrientationAction }
+            ToolBarSeparator {}
+            ToolButton { action: resizeColumnsToContentsAction }
+            ToolButton { action: selectColumnsAction }
+            ToolButton { action: tableView.exportAction }
+            ToolBarSeparator {}
+            ToolButton { action: toggleColumnNamesAction }
+            ToolButton
+            {
+                visible: plugin.model.columnAnnotationNames.length > 0
+                action: selectColumnAnnotationsAction
+            }
         }
-        Item { Layout.fillWidth: true }
     }
 
     SplitView

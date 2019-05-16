@@ -1193,7 +1193,7 @@ Item
 
             Layout.fillWidth: true
 
-            StatusBar
+            ToolBar
             {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
@@ -1202,17 +1202,14 @@ Item
                 {
                     anchors.fill: parent
 
-                    Label
-                    {
-                        text: document.pluginName
-                    }
+                    Label { text: document.pluginName }
 
                     Item
                     {
                         id: pluginContainerToolStrip
                         enabled: !root.pluginMinimised
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: childrenRect.height
                     }
 
                     RowLayout
@@ -1644,6 +1641,14 @@ Item
                 {
                     console.log(document.pluginQmlPath + ": failed to create instance");
                     return;
+                }
+
+                if(plugin.content.toolStrip !== null)
+                {
+                    // If the plugin toolstrip is itself a ToolBar, we are actually interested
+                    // in its contentItem, otherwise we would be adding a ToolBar to a ToolBar
+                    if(plugin.content.toolStrip instanceof ToolBar)
+                        plugin.content.toolStrip = plugin.content.toolStrip.contentItem.layoutItem;
                 }
 
                 plugin.initialise();
