@@ -1843,14 +1843,24 @@ Item
                     Layout.preferredWidth: 500
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("A graph consists of <b>Nodes</b> and <b>Edges</b>. " +
+                    text:
+                    {
+                        var preamble = qsTr("A graph consists of <b>Nodes</b> and <b>Edges</b>. " +
                           "In this example, the nodes represent stops, and the edges represent a connection between two stops. " +
                           "<b>Edges</b> always have a direction, however direction can be ignored if desired. " +
                           "<b>Nodes</b> and <b>Edges</b> can also have additional information associated with them. " +
-                          "We refer to these as <b>Attributes</b>.<br><br>" +
-                          "<b>Rotate:</b> Left Click and Drag<br>" +
+                          "We refer to these as <b>Attributes</b>.<br><br>");
+
+                        var regularMouse = qsTr("<b>Rotate:</b> Left Click and Drag<br>" +
                           "<b>Zoom:</b> Mouse Scrollwheel<br>" +
-                          "<b>Pan:</b> Right Click and Drag")
+                          "<b>Pan:</b> Right Click and Drag");
+
+                        var macOsTrackpad = qsTr("<b>Rotate:</b> Three Finger Drag <b>or</b> Left Click and Drag<br>" +
+                          "<b>Zoom:</b> Pinch Gesture <b>or</b> Mouse Scrollwheel<br>" +
+                          "<b>Pan:</b> Two Finger Drag <b>or</b> Right Click and Drag");
+
+                        return preamble + (Qt.platform.os === "osx" ? macOsTrackpad : regularMouse);
+                    }
                 }
             }
         }
