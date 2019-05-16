@@ -43,13 +43,14 @@ PluginContent
         return false;
     }
 
-    toolStrip: RowLayout
+    toolStrip: ToolBar
     {
-        anchors.fill: parent
-        ToolButton { action: resizeColumnsToContentsAction }
-        ToolButton { action: selectColumnsAction }
-        ToolButton { action: tableView.exportAction }
-        Item { Layout.fillWidth: true }
+        RowLayout
+        {
+            ToolButton { action: resizeColumnsToContentsAction }
+            ToolButton { action: selectColumnsAction }
+            ToolButton { action: tableView.exportAction }
+        }
     }
 
     ColumnLayout
