@@ -545,113 +545,100 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        Column
+        CorrelationPlot
         {
+            id: plot
+
             Layout.fillWidth: true
             Layout.fillHeight: splitView.orientation !== Qt.Vertical
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? _minimumHeight : root.minimumHeight
-            Layout.minimumWidth: _minimumWidth
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? minimumHeight : root.minimumHeight
+            Layout.minimumWidth: 200
 
-            readonly property int _minimumWidth: 200
-            readonly property int _minimumHeight: 100
+            rowCount: plugin.model.rowCount
+            columnCount: plugin.model.columnCount
+            rawData: plugin.model.rawData
+            columnNames: plugin.model.columnNames
+            rowColors: plugin.model.nodeColors
+            rowNames: plugin.model.rowNames
+            selectedRows: tableView.selectedRows
 
-            CorrelationPlot
+            columnAnnotations: plugin.model.columnAnnotations
+
+            onPlotOptionsChanged: { root.saveRequired = true; }
+            onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
+            onColumnSortTypeChanged: { root.saveRequired = true; }
+            onColumnSortAnnotationChanged: { root.saveRequired = true; }
+
+            elideLabelWidth:
             {
-                id: plot
+                var newHeight = height * 0.25;
+                var quant = 20;
+                var quantised = Math.floor(newHeight / quant) * quant;
 
-                // When the SplitView orientation is changed, it makes various seemingly spurious dimensional
-                // changes to its children, so this is an attempt to effectively filter out the more wacky ones
-                height:
+                if(quantised < 40)
+                    quantised = 0;
+
+                return quantised;
+            }
+
+            property bool scrollBarRequired: visibleHorizontalFraction < 1.0
+
+            // On platforms where the scrollbar doesn't auto-hide or appear transparent,
+            // we need to provide a little room for it to be visible
+            xAxisPadding: Qt.platform.os !== "osx" && scrollBarRequired ? 15 : 0
+
+            horizontalScrollPosition:
+            {
+                return scrollView.flickableItem.contentX /
+                    (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
+            }
+
+            onRightClick: { plotContextMenu.popup(); }
+
+            property bool _timedBusy: false
+
+            Timer
+            {
+                id: busyIndicationTimer
+                interval: 250
+                repeat: false
+                onTriggered:
                 {
-                    var minimumHeight = Math.min(splitView.height, Math.max(parent._minimumHeight, parent.height));
-                    return minimumHeight - (scrollBarRequired ? scrollView.height : 0);
+                    if(plot.busy)
+                        plot._timedBusy = true;
                 }
+            }
 
-                width: { return Math.min(splitView.width, Math.max(parent._minimumWidth, parent.width)); }
-
-                rowCount: plugin.model.rowCount
-                columnCount: plugin.model.columnCount
-                rawData: plugin.model.rawData
-                columnNames: plugin.model.columnNames
-                rowColors: plugin.model.nodeColors
-                rowNames: plugin.model.rowNames
-                selectedRows: tableView.selectedRows
-
-                columnAnnotations: plugin.model.columnAnnotations
-
-                onPlotOptionsChanged: { root.saveRequired = true; }
-                onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
-                onColumnSortTypeChanged: { root.saveRequired = true; }
-                onColumnSortAnnotationChanged: { root.saveRequired = true; }
-
-                elideLabelWidth:
+            onBusyChanged:
+            {
+                if(!plot.busy)
                 {
-                    var newHeight = height * 0.25;
-                    var quant = 20;
-                    var quantised = Math.floor(newHeight / quant) * quant;
-
-                    if(quantised < 40)
-                        quantised = 0;
-
-                    return quantised;
+                    busyIndicationTimer.stop();
+                    plot._timedBusy = false;
                 }
+                else
+                    busyIndicationTimer.start();
 
-                property bool scrollBarRequired: visibleHorizontalFraction < 1.0
+            }
 
-                horizontalScrollPosition:
-                {
-                    return scrollView.flickableItem.contentX /
-                        (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
-                }
+            BusyIndicator
+            {
+                anchors.centerIn: parent
+                width: 64
+                height: 64
 
-                onRightClick: { plotContextMenu.popup(); }
+                visible: plot._timedBusy
+            }
 
-                property bool _timedBusy: false
+            ToolButton
+            {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: 4
+                visible: plot.columnAnnotationSelectionModeEnabled
+                iconName: "emblem-unreadable"
 
-                Timer
-                {
-                    id: busyIndicationTimer
-                    interval: 250
-                    repeat: false
-                    onTriggered:
-                    {
-                        if(plot.busy)
-                            plot._timedBusy = true;
-                    }
-                }
-
-                onBusyChanged:
-                {
-                    if(!plot.busy)
-                    {
-                        busyIndicationTimer.stop();
-                        plot._timedBusy = false;
-                    }
-                    else
-                        busyIndicationTimer.start();
-
-                }
-
-                BusyIndicator
-                {
-                    anchors.centerIn: parent
-                    width: 64
-                    height: 64
-
-                    visible: plot._timedBusy
-                }
-
-                ToolButton
-                {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.margins: 4
-                    visible: plot.columnAnnotationSelectionModeEnabled
-                    iconName: "emblem-unreadable"
-
-                    onClicked: { plot.columnAnnotationSelectionModeEnabled = false; }
-                }
-
+                onClicked: { plot.columnAnnotationSelectionModeEnabled = false; }
             }
 
             ScrollView
@@ -659,14 +646,14 @@ PluginContent
                 id: scrollView
                 visible: plot.scrollBarRequired
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                height: 15
-                width: plot.width
+                anchors.fill: parent
+
                 Item
                 {
-                    // This is a fake object to make native scrollbars appear
-                    // Prevent Qt opengl texture overflow (2^14 pixels)
+                    // This is a fake item to give the scrollbar the correct range
+                    // The maximum size is to prevent OpenGL texture overflow (2^14 pixels)
                     width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
-                    height: 1
+                    height: 0
                 }
             }
         }
