@@ -136,11 +136,14 @@ class CorrelationPlotItem : public QQuickPaintedItem
         WRITE setColumnSortAnnotation NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showAllColumns MEMBER _showAllColumns WRITE setShowAllColumns NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool isWide READ isWide NOTIFY isWideChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
+
+    Q_PROPERTY(int minimumHeight READ minimumHeight CONSTANT)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -213,6 +216,7 @@ private:
     QString _yAxisLabel;
     bool _includeYZero = false;
     bool _showAllColumns = false;
+    int _xAxisPadding = 0;
 
     std::vector<size_t> _sortMap;
 
@@ -250,6 +254,8 @@ private:
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
+    int minimumHeight() const { return 100; }
+
     void setPluginInstance(CorrelationPluginInstance* pluginInstance);
 
     void setSelectedRows(const QVector<int>& selectedRows);
@@ -258,6 +264,7 @@ private:
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
+    void setXAxisPadding(int padding);
 
     void updateSortMap();
     void setColumnSortType(int columnSortType);

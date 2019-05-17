@@ -220,8 +220,16 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     _worker->moveToThread(&_plotRenderThread);
     connect(&_plotRenderThread, &QThread::finished, _worker, &QObject::deleteLater);
 
-    connect(this, &QQuickPaintedItem::widthChanged, [this] { QMetaObject::invokeMethod(_worker, "setWidth", Q_ARG(int, width())); });
-    connect(this, &QQuickPaintedItem::heightChanged, [this] { QMetaObject::invokeMethod(_worker, "setHeight", Q_ARG(int, height())); });
+    connect(this, &QQuickPaintedItem::widthChanged, [this]
+    {
+        QMetaObject::invokeMethod(_worker, "setWidth", Q_ARG(int, width()));
+    });
+
+    connect(this, &QQuickPaintedItem::heightChanged, [this]
+    {
+        QMetaObject::invokeMethod(_worker, "setHeight",
+            Q_ARG(int, std::max(static_cast<int>(height()), minimumHeight())));
+    });
 
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
     connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
@@ -533,12 +541,10 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
     return yDataAvg;
 }
 
-inline const auto MinimumMainPlotHeight = 100;
-
 void CorrelationPlotItem::updateColumnAnnotationVisibility()
 {
     auto mainPlotHeight = height() - columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
-    bool showColumnAnnotations = mainPlotHeight >= MinimumMainPlotHeight;
+    bool showColumnAnnotations = mainPlotHeight >= minimumHeight();
 
     if(showColumnAnnotations != _showColumnAnnotations)
     {
@@ -555,7 +561,7 @@ void CorrelationPlotItem::updateColumnAnnotationVisibility()
 bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
 {
     auto mainPlotHeight = height() - columnAnnotaionsHeight(true);
-    return mainPlotHeight >= MinimumMainPlotHeight;
+    return mainPlotHeight >= minimumHeight();
 }
 
 void CorrelationPlotItem::populateMeanLinePlot()
@@ -1349,6 +1355,8 @@ void CorrelationPlotItem::rebuildPlot()
 
     xAxis->setLabel(_xAxisLabel);
 
+    xAxis->setPadding(_xAxisPadding);
+
     for(size_t x = 0U; x < _pluginInstance->numColumns(); x++)
     {
         auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
@@ -1518,6 +1526,15 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
     computeXAxisRange();
 
     updatePixmap(CorrelationPlotUpdateType::Render);
+}
+
+void CorrelationPlotItem::setXAxisPadding(int padding)
+{
+    bool changed = _xAxisPadding != padding;
+    _xAxisPadding = padding;
+
+    if(changed)
+        rebuildPlot();
 }
 
 void CorrelationPlotItem::updateSortMap()
