@@ -22,7 +22,10 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphWillChange, this, &GraphComponentScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeRemoved, this, &GraphComponentScene::onNodeRemoved, Qt::DirectConnection);
+
+    // Use nodeRemovedFromComponent instead of nodeRemoved, becuse it is emitted after
+    // componentWillBeRemoved; this is important for proper ordering of deferred rendering tasks
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeRemovedFromComponent, this, &GraphComponentScene::onNodeRemoved, Qt::DirectConnection);
 
     _defaultComponentId = _graphRenderer->graphModel()->graph().componentIdOfLargestComponent();
 }
@@ -537,7 +540,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
     }, QStringLiteral("GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)"));
 }
 
-void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)
+void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId, ComponentId)
 {
     if(visible() && componentRenderer()->focusNodeId() == nodeId)
     {
