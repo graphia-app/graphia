@@ -72,7 +72,7 @@ static QString crashedModule(const QString& dmpFile)
     }
 
     const auto* frame = stack->frames()->at(0);
-    if(!frame->module)
+    if(frame->module == nullptr)
     {
         std::cerr << "No module\n";
         return {};
