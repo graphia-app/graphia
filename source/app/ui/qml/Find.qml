@@ -102,7 +102,10 @@ Rectangle
     function _doFind()
     {
         if(!_visible)
+        {
+            document.resetFind();
             return;
+        }
 
         if(!_finding)
         {
