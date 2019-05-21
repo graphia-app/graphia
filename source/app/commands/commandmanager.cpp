@@ -30,28 +30,28 @@ CommandManager::~CommandManager()
 
 void CommandManager::execute(std::unique_ptr<ICommand> command)
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::executeOnce(std::unique_ptr<ICommand> command)
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::undo()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Undo);
     emit commandQueued();
 }
 
 void CommandManager::redo()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Redo);
     emit commandQueued();
 }
@@ -349,9 +349,22 @@ bool CommandManager::canRedoNoLocking() const
 
 bool CommandManager::commandsArePending() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
 
     return !_pendingCommands.empty();
+}
+
+CommandManager::PendingCommand CommandManager::nextPendingCommand()
+{
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+
+    if(_pendingCommands.empty())
+        return {};
+
+    auto pendingCommand = std::move(_pendingCommands.front());
+    _pendingCommands.pop_front();
+
+    return pendingCommand;
 }
 
 void CommandManager::onCommandCompleted(bool success, const QString& description, const QString&)
@@ -387,20 +400,19 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
 
 void CommandManager::update()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    if(_thread.joinable() || !commandsArePending())
+        return;
 
-    if(!_thread.joinable() && commandsArePending())
+    auto pendingCommand = nextPendingCommand();
+    if(pendingCommand._command == nullptr)
+        return;
+
+    switch(pendingCommand._action)
     {
-        auto pendingCommand = std::move(_pendingCommands.front());
-        _pendingCommands.pop_front();
-
-        switch(pendingCommand._action)
-        {
-        case CommandAction::Execute:      executeReal(std::move(pendingCommand._command), false); break;
-        case CommandAction::ExecuteOnce:  executeReal(std::move(pendingCommand._command), true); break;
-        case CommandAction::Undo:         undoReal(); break;
-        case CommandAction::Redo:         redoReal(); break;
-        default: break;
-        }
+    case CommandAction::Execute:      executeReal(std::move(pendingCommand._command), false); break;
+    case CommandAction::ExecuteOnce:  executeReal(std::move(pendingCommand._command), true); break;
+    case CommandAction::Undo:         undoReal(); break;
+    case CommandAction::Redo:         redoReal(); break;
+    default: break;
     }
 }

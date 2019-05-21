@@ -95,7 +95,6 @@ private:
     void undoReal();
     void redoReal();
 
-    bool commandsArePending() const;
     void clearCommandStackNoLocking();
 
     enum class CommandAction
@@ -121,9 +120,14 @@ private:
         explicit PendingCommand(CommandAction action) :
             _action(action), _command(nullptr) {}
 
+        PendingCommand() = default;
+
         CommandAction _action;
         std::unique_ptr<ICommand> _command;
     };
+
+    bool commandsArePending() const;
+    PendingCommand nextPendingCommand();
 
     std::deque<PendingCommand> _pendingCommands;
     std::deque<std::unique_ptr<ICommand>> _stack;
@@ -131,6 +135,7 @@ private:
 
     std::thread _thread;
     mutable std::recursive_mutex _mutex;
+    mutable std::recursive_mutex _queueMutex;
 
     std::atomic<bool> _busy;
     std::atomic<bool> _graphChanged;
