@@ -122,8 +122,8 @@ private:
 
         PendingCommand() = default;
 
-        CommandAction _action;
-        std::unique_ptr<ICommand> _command;
+        CommandAction _action = CommandAction::Execute;
+        std::unique_ptr<ICommand> _command = nullptr;
     };
 
     bool commandsArePending() const;
