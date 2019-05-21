@@ -1207,7 +1207,7 @@ Item
                     Item
                     {
                         id: pluginContainerToolStrip
-                        enabled: !root.pluginMinimised
+                        enabled: !root.pluginMinimised && !root.busy
                         Layout.fillWidth: true
                         Layout.preferredHeight: childrenRect.height
                     }
@@ -1276,7 +1276,7 @@ Item
         Layout.maximumHeight: minimised && !root.pluginPoppedOut ? 0 : Number.POSITIVE_INFINITY
 
         visible: loaded
-        enabled: !minimisingOrMinimised || root.pluginPoppedOut
+        enabled: (!minimisingOrMinimised || root.pluginPoppedOut) && !root.busy
 
         property real _lastUnminimisedHeight: 0
         onHeightChanged:
