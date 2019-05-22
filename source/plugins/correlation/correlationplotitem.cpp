@@ -232,6 +232,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     });
 
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
+    connect(this, &CorrelationPlotItem::enabledChanged, [this] { update(); });
     connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
 
     connect(&_customPlot, &QCustomPlot::afterReplot, [this]
@@ -266,12 +267,45 @@ void CorrelationPlotItem::paint(QPainter* painter)
     if(_pixmap.isNull())
         return;
 
-    painter->fillRect(0, 0, width(), height(), Qt::white);
-
     // Render the plot in the bottom left; that way when its container
     // is resized, it doesn't hop around vertically, as it would if
     // it had been rendered from the top left
-    painter->drawPixmap(0, height() - _pixmap.height(), _pixmap);
+    int yDest = height() - _pixmap.height();
+
+    if(!isEnabled())
+    {
+        // Create a desaturated version of the pixmap
+        auto image = _pixmap.toImage();
+        const auto bytes = image.depth() >> 3;
+
+        for(int y = 0; y < image.height(); y++)
+        {
+            auto scanLine = image.scanLine(y);
+            for(int x = 0; x < image.width(); x++)
+            {
+                auto pixel = reinterpret_cast<QRgb*>(scanLine + (x * bytes));
+                const int gray = qGray(*pixel);
+                const int alpha = qAlpha(*pixel);
+                *pixel = QColor(gray, gray, gray, alpha).rgba();
+            }
+        }
+
+        // The pixmap that QCustomPlot creates is a mixture of premultipled
+        // pixels and pixels with an alpha value, so to keep things simple
+        // we just use an alpha value in the destination buffer instead
+        painter->setCompositionMode(QPainter::CompositionMode_DestinationOver);
+
+        auto backgroundColor = QColor(Qt::white);
+        backgroundColor.setAlpha(127);
+
+        painter->fillRect(0, 0, width(), height(), backgroundColor);
+        painter->drawPixmap(0, yDest, QPixmap::fromImage(image));
+    }
+    else
+    {
+        painter->fillRect(0, 0, width(), height(), Qt::white);
+        painter->drawPixmap(0, yDest, _pixmap);
+    }
 }
 
 void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
