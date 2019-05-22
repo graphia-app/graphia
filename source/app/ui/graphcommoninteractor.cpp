@@ -236,7 +236,10 @@ void GraphCommonInteractor::leftMouseUp()
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
             if(!selection.empty())
-                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager, selection, false));
+            {
+                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager,
+                    selection, SelectNodesClear::None));
+            }
 
             _frustumSelectStart = QPoint();
             _frustumSelecting = false;
@@ -249,7 +252,8 @@ void GraphCommonInteractor::leftMouseUp()
             if(!_clickedNodeId.isNull())
             {
                 _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager, _clickedNodeId,
-                                                                   !multiSelect));
+                    !multiSelect ? SelectNodesClear::Selection :
+                                   SelectNodesClear::None));
             }
             else if(!_selectionManager->selectedNodes().empty() && !multiSelect)
             {
