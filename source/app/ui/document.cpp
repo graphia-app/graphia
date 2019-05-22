@@ -1541,7 +1541,10 @@ NodeId Document::incrementFoundIt()
         if(_foundItValid && std::next(foundIt) != _foundNodeIds.end())
             ++foundIt;
         else
+        {
             foundIt = _foundNodeIds.begin();
+            _foundItValid = true;
+        }
     }
     while(_graphModel->graph().typeOf(*foundIt) == MultiElementType::Tail);
 
@@ -1557,7 +1560,10 @@ NodeId Document::decrementFoundIt()
         if(_foundItValid && foundIt != _foundNodeIds.begin())
             --foundIt;
         else
+        {
             foundIt = std::prev(_foundNodeIds.end());
+            _foundItValid = true;
+        }
     }
     while(_graphModel->graph().typeOf(*foundIt) == MultiElementType::Tail);
 
