@@ -17,9 +17,7 @@ ParserThread::ParserThread(GraphModel& graphModel, QUrl url) :
 ParserThread::~ParserThread()
 {
     cancel();
-
-    if(_thread.joinable())
-        _thread.join();
+    wait();
 }
 
 void ParserThread::start(std::unique_ptr<IParser> parser)
@@ -40,6 +38,12 @@ void ParserThread::cancel()
 bool ParserThread::cancelled() const
 {
     return _parser != nullptr && _parser->cancelled();
+}
+
+void ParserThread::wait()
+{
+    if(_thread.joinable())
+        _thread.join();
 }
 
 void ParserThread::reset()
