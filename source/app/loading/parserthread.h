@@ -29,6 +29,8 @@ public:
     void cancel();
     bool cancelled() const;
 
+    void wait();
+
     void reset();
 
 private:

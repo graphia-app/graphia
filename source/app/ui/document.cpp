@@ -64,6 +64,10 @@ Document::Document(QObject* parent) :
 
 Document::~Document()
 {
+    // Stop any load that's in progress
+    _graphFileParserThread->cancel();
+    _graphFileParserThread->wait();
+
     // Wait for any executing commands to complete
     _commandManager.wait();
 
