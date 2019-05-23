@@ -1256,22 +1256,18 @@ int Document::numNodesSelected() const
 
 int Document::numHeadNodesSelected() const
 {
+    int numNodes = 0;
+
     if(_selectionManager != nullptr)
     {
-        auto selectedNodes = _selectionManager->selectedNodes();
-
-        for(auto it = selectedNodes.begin(); it != selectedNodes.end(); /*NO OP*/)
+        for(auto nodeId : _selectionManager->selectedNodes())
         {
-            if(_graphModel->graph().typeOf(*it) == MultiElementType::Tail)
-                it = selectedNodes.erase(it);
-            else
-                ++it;
+            if(_graphModel->graph().typeOf(nodeId) != MultiElementType::Tail)
+                numNodes++;
         }
-
-        return static_cast<int>(selectedNodes.size());
     }
 
-    return 0;
+    return numNodes;
 }
 
 int Document::numInvisibleNodesSelected() const
