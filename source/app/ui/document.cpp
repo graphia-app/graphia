@@ -1531,15 +1531,16 @@ void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
 NodeId Document::incrementFoundIt()
 {
     auto foundIt = _foundIt;
+    auto foundItValid = _foundItValid;
 
     do
     {
-        if(_foundItValid && std::next(foundIt) != _foundNodeIds.end())
+        if(foundItValid && std::next(foundIt) != _foundNodeIds.end())
             ++foundIt;
         else
         {
             foundIt = _foundNodeIds.begin();
-            _foundItValid = true;
+            foundItValid = true;
         }
     }
     while(_graphModel->graph().typeOf(*foundIt) == MultiElementType::Tail);
@@ -1550,15 +1551,16 @@ NodeId Document::incrementFoundIt()
 NodeId Document::decrementFoundIt()
 {
     auto foundIt = _foundIt;
+    auto foundItValid = _foundItValid;
 
     do
     {
-        if(_foundItValid && foundIt != _foundNodeIds.begin())
+        if(foundItValid && foundIt != _foundNodeIds.begin())
             --foundIt;
         else
         {
             foundIt = std::prev(_foundNodeIds.end());
-            _foundItValid = true;
+            foundItValid = true;
         }
     }
     while(_graphModel->graph().typeOf(*foundIt) == MultiElementType::Tail);
