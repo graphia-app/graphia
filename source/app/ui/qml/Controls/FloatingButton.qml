@@ -21,14 +21,16 @@ Button
     {
         background: Rectangle
         {
-            visible: control.hovered
+            visible: control.hovered || control.checked
             border.width: 1
             border.color: "#ababab"
             radius: 2
             gradient: Gradient
             {
-                GradientStop { position: 0; color: control.pressed ? "#dcdcdc" : "#fefefe" }
-                GradientStop { position: 1; color: control.pressed ? "#dcdcdc" : "#f8f8f8" }
+                GradientStop { position: 0; color: control.pressed || control.checked ?
+                    "#dcdcdc" : "#fefefe" }
+                GradientStop { position: 1; color: control.pressed || control.checked ?
+                    "#dcdcdc" : "#f8f8f8" }
             }
         }
 
