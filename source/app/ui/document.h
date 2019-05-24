@@ -102,6 +102,7 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
     Q_PROPERTY(int numHeadNodesSelected READ numHeadNodesSelected NOTIFY numHeadNodesSelectedChanged)
     Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
+    Q_PROPERTY(bool nodesMaskActive READ nodesMaskActive NOTIFY nodesMaskActiveChanged)
 
     Q_PROPERTY(QVariantList selectedNodeIds READ selectedNodeIds NOTIFY selectedNodeIdsChanged)
     Q_PROPERTY(QVariantList selectedHeadNodeIds READ selectedHeadNodeIds NOTIFY selectedHeadNodeIdsChanged)
@@ -264,6 +265,7 @@ private:
 
     int foundIndex() const;
     int numNodesFound() const;
+    bool nodesMaskActive() const;
     void setFoundIt(std::vector<NodeId>::const_iterator foundIt);
     NodeId incrementFoundIt();
     NodeId decrementFoundIt();
@@ -336,6 +338,7 @@ signals:
 
     void foundIndexChanged();
     void numNodesFoundChanged();
+    void nodesMaskActiveChanged();
 
     void numNodesSelectedChanged();
     void numHeadNodesSelectedChanged();
@@ -376,6 +379,7 @@ public:
     Q_INVOKABLE bool nodeIsSelected(QmlNodeId nodeId) const;
 
     Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
     Q_INVOKABLE void selectSources();

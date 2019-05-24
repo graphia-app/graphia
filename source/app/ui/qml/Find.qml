@@ -39,6 +39,11 @@ Rectangle
     property bool _finding: false
     property bool _pendingFind: false
 
+    // When there is an active search but the nodes mask is disabled, it means
+    // the user has done some kind of selection outside of the found nodes
+    property bool _interrupted: document.foundIndex < 0 &&
+        document.numNodesFound > 0 && !document.nodesMaskActive
+
     property string _findText:
     {
         if(_type === Find.ByAttribute)
@@ -151,7 +156,7 @@ Rectangle
     border.color: document.contrastingColor
     border.width: 1
     radius: 4
-    color: "white"
+    color: !root._interrupted ? "white" : "#f0f0f0"
 
     Action
     {
@@ -159,7 +164,7 @@ Rectangle
         text: qsTr("Select All")
         iconName: "weather-clear"
         enabled: document.numNodesFound > 0
-        onTriggered: { document.selectAll(); }
+        onTriggered: { document.selectAllFound(); }
     }
 
     Action
@@ -302,6 +307,7 @@ Rectangle
                     {
                         id: findField
                         width: 150
+                        font.strikeout: root._interrupted
 
                         onAccepted: { selectAllAction.trigger(); }
 

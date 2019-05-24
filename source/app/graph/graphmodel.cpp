@@ -100,6 +100,8 @@ private:
     NodeIdSet _selectedNodeIds;
     NodeIdSet _foundNodeIds;
     NodeIdSet _highlightedNodeIds;
+
+    bool _nodesMaskActive = false;
 };
 
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
@@ -906,9 +908,11 @@ void GraphModel::updateVisuals()
                 _->_edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
         }
 
-        auto nodeUnhighlighted =
-            (!_->_foundNodeIds.empty() && !u::contains(_->_foundNodeIds, nodeId)) ||
-            (!_->_highlightedNodeIds.empty() && nodeIsSelected && !u::contains(_->_highlightedNodeIds, nodeId));
+        auto isNotFound = !_->_foundNodeIds.empty() && !u::contains(_->_foundNodeIds, nodeId);
+        auto isNotHighlighted = !_->_highlightedNodeIds.empty() && nodeIsSelected &&
+            !u::contains(_->_highlightedNodeIds, nodeId);
+
+        auto nodeUnhighlighted = (isNotFound && _->_nodesMaskActive) || isNotHighlighted;
 
         _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Unhighlighted, nodeUnhighlighted);
 
@@ -958,6 +962,7 @@ void GraphModel::updateVisuals()
 void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
     _->_selectedNodeIds = selectionManager->selectedNodes();
+    _->_nodesMaskActive = selectionManager->nodesMaskActive();
     clearHighlightedNodes();
     updateVisuals();
 }

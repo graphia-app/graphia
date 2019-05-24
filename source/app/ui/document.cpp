@@ -780,6 +780,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::selectedNodeIdsChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::selectedHeadNodeIdsChanged);
+    connect(_selectionManager.get(), &SelectionManager::nodesMaskChanged, this, &Document::nodesMaskActiveChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
@@ -867,6 +868,15 @@ void Document::selectAll()
         });
 }
 
+void Document::selectAllFound()
+{
+    if(busy() || _selectionManager == nullptr)
+        return;
+
+    _selectionManager->setNodesMask(_searchManager->foundNodeIds(), true);
+    selectAll();
+}
+
 void Document::selectAllVisible()
 {
     if(busy() || _selectionManager == nullptr)
@@ -911,7 +921,8 @@ void Document::selectSources()
         nodeIds.insert(sources.begin(), sources.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectSourcesOf(QmlNodeId nodeId)
@@ -924,7 +935,8 @@ void Document::selectSourcesOf(QmlNodeId nodeId)
     auto sources = _graphModel->graph().sourcesOf(nodeId);
     nodeIds.insert(sources.begin(), sources.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectTargets()
@@ -942,7 +954,8 @@ void Document::selectTargets()
         nodeIds.insert(targets.begin(), targets.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectTargetsOf(QmlNodeId nodeId)
@@ -955,7 +968,8 @@ void Document::selectTargetsOf(QmlNodeId nodeId)
     auto targets = _graphModel->graph().targetsOf(nodeId);
     nodeIds.insert(targets.begin(), targets.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectNeighbours()
@@ -973,7 +987,8 @@ void Document::selectNeighbours()
         nodeIds.insert(neighbours.begin(), neighbours.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectNeighboursOf(QmlNodeId nodeId)
@@ -986,7 +1001,8 @@ void Document::selectNeighboursOf(QmlNodeId nodeId)
     auto neighbours = _graphModel->graph().neighboursOf(nodeId);
     nodeIds.insert(neighbours.begin(), neighbours.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
 void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNodeId qmlNodeId)
@@ -1035,7 +1051,10 @@ void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNod
     }
 
     if(!nodeIds.empty())
-        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    {
+        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+            nodeIds, SelectNodesClear::SelectionAndMask));
+    }
 }
 
 void Document::invertSelection()
@@ -1046,6 +1065,7 @@ void Document::invertSelection()
     _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
         [this](Command& command)
         {
+            _selectionManager->clearNodesMask();
             _selectionManager->invertNodeSelection();
             command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
         });
@@ -1327,11 +1347,13 @@ void Document::selectFirstFound()
 
 void Document::selectNextFound()
 {
+    _selectionManager->setNodesMask(_searchManager->foundNodeIds());
     selectAndFocusNode(incrementFoundIt());
 }
 
 void Document::selectPrevFound()
 {
+    _selectionManager->setNodesMask(_searchManager->foundNodeIds());
     selectAndFocusNode(decrementFoundIt());
 }
 
@@ -1371,7 +1393,8 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
     }
     else
     {
-        _foundItValid = false;
+        // The iterator is still valid, so don't invalidate
+        // it as we might want to come back to it later
         emit foundIndexChanged();
     }
 
@@ -1499,7 +1522,7 @@ void Document::executeDeferred()
 
 int Document::foundIndex() const
 {
-    if(!_foundNodeIds.empty() && _foundItValid)
+    if(!_foundNodeIds.empty() && _foundItValid && numHeadNodesSelected() == 1)
         return static_cast<int>(std::distance(_foundNodeIds.begin(), _foundIt));
 
     return -1;
@@ -1511,6 +1534,14 @@ int Document::numNodesFound() const
         return static_cast<int>(_searchManager->foundNodeIds().size());
 
     return 0;
+}
+
+bool Document::nodesMaskActive() const
+{
+    if(_selectionManager != nullptr)
+        return _selectionManager->nodesMaskActive();
+
+    return false;
 }
 
 void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)

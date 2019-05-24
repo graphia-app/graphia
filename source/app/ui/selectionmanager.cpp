@@ -258,6 +258,8 @@ void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, bool applyMask)
 
         deselectNodes(nodeIdsToDeselect);
     }
+
+    emit nodesMaskChanged();
 }
 
 void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask)

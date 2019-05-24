@@ -37,7 +37,8 @@ public:
 
     void setNodesMask(const NodeIdSet& nodeIds, bool applyMask = true);
     void setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask = true);
-    void clearNodesMask() { _nodeIdsMask.clear(); }
+    void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); }
+    bool nodesMaskActive() const { return !_nodeIdsMask.empty(); }
 
     int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }
     QString numNodesSelectedAsString() const;
@@ -71,6 +72,7 @@ private:
 
 signals:
     void selectionChanged(const SelectionManager* selectionManager) const;
+    void nodesMaskChanged() const;
 };
 
 #endif // SELECTIONMANAGER_H
