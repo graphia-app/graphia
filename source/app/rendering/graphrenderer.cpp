@@ -266,6 +266,9 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
                     continue;
 
+                if(showNodeText == TextState::Focused && componentRenderer->focusNodeId() != nodeId)
+                    continue;
+
                 createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
                     nodeVisual._size, nodePosition, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));

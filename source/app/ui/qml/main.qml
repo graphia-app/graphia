@@ -373,6 +373,7 @@ ApplicationWindow
             {
             default:
             case hideNodeTextAction:         return TextState.Off;
+            case showFocusedNodeTextAction:  return TextState.Focused;
             case showSelectedNodeTextAction: return TextState.Selected;
             case showAllNodeTextAction:      return TextState.All;
             }
@@ -1123,6 +1124,7 @@ ApplicationWindow
         id: nodeTextDisplay
 
         Action { id: hideNodeTextAction; text: qsTr("None"); checkable: true; }
+        Action { id: showFocusedNodeTextAction; text: qsTr("Focused"); checkable: true; }
         Action { id: showSelectedNodeTextAction; text: qsTr("Selected"); checkable: true; }
         Action { id: showAllNodeTextAction; text: qsTr("All"); checkable: true; }
 
@@ -1132,6 +1134,7 @@ ApplicationWindow
             {
             default:
             case TextState.Off:      nodeTextDisplay.current = hideNodeTextAction; break;
+            case TextState.Focused:  nodeTextDisplay.current = showFocusedNodeTextAction; break;
             case TextState.Selected: nodeTextDisplay.current = showSelectedNodeTextAction; break;
             case TextState.All:      nodeTextDisplay.current = showAllNodeTextAction; break;
             }
@@ -1516,6 +1519,7 @@ ApplicationWindow
             {
                 title: qsTr("Show Node Text")
                 MenuItem { action: hideNodeTextAction }
+                MenuItem { action: showFocusedNodeTextAction }
                 MenuItem { action: showSelectedNodeTextAction }
                 MenuItem { action: showAllNodeTextAction }
             }

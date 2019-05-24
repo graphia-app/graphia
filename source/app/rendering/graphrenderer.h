@@ -59,7 +59,7 @@ DEFINE_QML_ENUM(
     Top, Bottom);
 DEFINE_QML_ENUM(
     Q_GADGET, TextState,
-    Off, Selected, All);
+    Off, Selected, All, Focused);
 DEFINE_QML_ENUM(
     Q_GADGET, EdgeVisualType,
     Cylinder, Arrow);
