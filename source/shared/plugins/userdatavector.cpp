@@ -84,7 +84,12 @@ json UserDataVector::save(const std::vector<size_t>& indexes) const
         json jsonValues = json::array();
 
         for(auto index : indexes)
-            jsonValues.push_back(_values.at(index));
+        {
+            if(index < _values.size())
+                jsonValues.push_back(_values.at(index));
+            else
+                jsonValues.push_back(QString());
+        }
 
         jsonObject["values"] = jsonValues;
     }
