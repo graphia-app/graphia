@@ -7,6 +7,8 @@
 
 #include <atomic>
 #include <cassert>
+#include <memory>
+#include <vector>
 
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
@@ -43,5 +45,8 @@ public:
 private:
     std::atomic<int> _progress{-1};
 };
+
+using ICommandPtr = std::unique_ptr<ICommand>;
+using ICommandPtrsVector = std::vector<ICommandPtr>;
 
 #endif // ICOMMAND_H

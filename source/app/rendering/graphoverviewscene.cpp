@@ -592,7 +592,7 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
     if(visible() && (key == QLatin1String("visuals/minimumComponentRadius") ||
                      key == QLatin1String("visuals/defaultNodeSize")))
     {
-        _commandManager->executeOnce({tr("Component Layout")},
+        _commandManager->executeOnce(
         [this](Command&)
         {
             auto* graph = &_graphModel->graph();
@@ -606,6 +606,6 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
             {
                 this->startComponentLayoutTransition();
             }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
-        });
+        }, {tr("Component Layout")});
     }
 }

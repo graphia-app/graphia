@@ -623,11 +623,6 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     if(factory != nullptr)
     {
         _commandManager.executeOnce(
-            {
-                QString(tr("Save %1")).arg(fileUrl.fileName()),
-                QString(tr("Saving %1")).arg(fileUrl.fileName()),
-                QString(tr("Saved %1")).arg(fileUrl.fileName())
-            },
         [=](Command& command) mutable
         {
             auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
@@ -635,7 +630,8 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
             bool success = saver->save();
             emit saveComplete(success, fileUrl, saverName);
             return success;
-        });
+        },
+        tr("Saving %1").arg(fileUrl.fileName()));
 
         _saveRequired = false;
         emit saveRequiredChanged();
@@ -859,13 +855,13 @@ void Document::selectAll()
     if(busy() || _selectionManager == nullptr)
         return;
 
-    _commandManager.executeOnce({tr("Select All"), tr("Selecting All")},
-        [this](Command& command)
-        {
-            bool nodesSelected = _selectionManager->selectAllNodes();
-            command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-            return nodesSelected;
-        });
+    _commandManager.executeOnce(
+    [this](Command& command)
+    {
+        bool nodesSelected = _selectionManager->selectAllNodes();
+        command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+        return nodesSelected;
+    }, tr("Selecting All"));
 }
 
 void Document::selectAllFound()
@@ -901,8 +897,9 @@ void Document::selectNone()
 
     if(!_selectionManager->selectedNodes().empty())
     {
-        _commandManager.executeOnce({tr("Select None"), tr("Selecting None")},
-            [this](Command&) { return _selectionManager->clearNodeSelection(); });
+        _commandManager.executeOnce(
+            [this](Command&) { return _selectionManager->clearNodeSelection(); },
+            tr("Selecting None"));
     }
 }
 
@@ -1062,13 +1059,13 @@ void Document::invertSelection()
     if(busy() || _selectionManager == nullptr)
         return;
 
-    _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
-        [this](Command& command)
-        {
-            _selectionManager->clearNodesMask();
-            _selectionManager->invertNodeSelection();
-            command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-        });
+    _commandManager.executeOnce(
+    [this](Command& command)
+    {
+        _selectionManager->clearNodesMask();
+        _selectionManager->invertNodeSelection();
+        command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+    }, tr("Inverting Selection"));
 }
 
 void Document::undo()
@@ -1198,36 +1195,28 @@ static bool shouldMoveFindFocus(bool inOverviewMode)
 
 void Document::selectAndFocusNode(NodeId nodeId)
 {
-    std::vector<std::unique_ptr<ICommand>> commands;
-
-    commands.emplace_back(makeSelectNodeCommand(_selectionManager.get(), nodeId));
-    commands.emplace_back(std::make_unique<Command>(Command::CommandDescription(), [=](Command&)
+    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), nodeId),
+    [=](Command&)
     {
         executeOnMainThread([=]
         {
             if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
                 _graphQuickItem->moveFocusToNode(nodeId);
         });
-    }));
-
-    _commandManager.executeOnce(std::move(commands));
+    });
 }
 
 void Document::selectAndFocusNodes(const std::vector<NodeId>& nodeIds)
 {
-    std::vector<std::unique_ptr<ICommand>> commands;
-
-    commands.emplace_back(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
-    commands.emplace_back(std::make_unique<Command>(Command::CommandDescription(), [=](Command&)
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds),
+    [=](Command&)
     {
         executeOnMainThread([=]
         {
             if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
                 _graphQuickItem->moveFocusToNodes(nodeIds);
         });
-    }));
-
-    _commandManager.executeOnce(std::move(commands));
+    });
 }
 
 void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
@@ -2130,7 +2119,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     if(_graphModel == nullptr)
         return;
 
-    std::vector<std::unique_ptr<ICommand>> commands;
+    ICommandPtrsVector commands;
 
     auto uiGraphTransforms = graphTransformConfigurationsFromUI();
     int newGraphTransformIndex = -1;
@@ -2189,8 +2178,9 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
 
     if(commands.size() > 1)
     {
-        _commandManager.execute({tr("Apply Transforms and Visualisations"),
-            tr("Applying Transforms and Visualisations")}, std::move(commands));
+        _commandManager.execute(std::move(commands),
+            {tr("Apply Transforms and Visualisations"),
+            tr("Applying Transforms and Visualisations")});
     }
     else if(commands.size() == 1)
         _commandManager.execute(std::move(commands.front()));
@@ -2264,7 +2254,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
         return;
     }
 
-    _commandManager.executeOnce({tr("Export Table"), tr("Exporting Table")},
+    _commandManager.executeOnce(
     [=](Command&)
     {
         QFile file(localFileName);
@@ -2346,7 +2336,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
                 stream << rowString << "\r\n";
             }
         }
-    });
+    }, tr("Exporting Table"));
 }
 
 void Document::addBookmark(const QString& name)
@@ -2439,11 +2429,6 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
     auto* tableModel = new EnrichmentTableModel(this);
 
     commandManager()->executeOnce(
-        {
-            QString(tr("Enrichment Analysis")),
-            QString(tr("Enrichment Analysis")),
-            QString(tr("Enrichment Analysis Complete"))
-        },
     [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
     {
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
@@ -2456,7 +2441,7 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;
-    });
+    }, tr("Enrichment Analysis"));
 }
 
 void Document::saveNodePositionsToFile(const QUrl& fileUrl)
@@ -2471,11 +2456,6 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
     }
 
     commandManager()->executeOnce(
-        {
-            QString(tr("Export Node Positions")),
-            QString(tr("Exporting Node Positions")),
-            QString(tr("Exported Node Positions"))
-        },
     [this, localFileName](Command& command)
     {
         json positions;
@@ -2508,5 +2488,5 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
         }
 
         file.write(QByteArray::fromStdString(positions.dump()));
-    });
+    }, tr("Exporting Node Positions"));
 }

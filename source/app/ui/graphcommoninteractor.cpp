@@ -257,8 +257,9 @@ void GraphCommonInteractor::leftMouseUp()
             }
             else if(!_selectionManager->selectedNodes().empty() && !multiSelect)
             {
-                _commandManager->executeOnce({tr("Select None"), tr("Selecting None")},
-                    [this](Command&) { return _selectionManager->clearNodeSelection(); });
+                _commandManager->executeOnce(
+                    [this](Command&) { return _selectionManager->clearNodeSelection(); },
+                    tr("Selecting None"));
             }
         }
 

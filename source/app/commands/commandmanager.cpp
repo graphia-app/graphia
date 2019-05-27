@@ -28,14 +28,14 @@ CommandManager::~CommandManager()
     }
 }
 
-void CommandManager::execute(std::unique_ptr<ICommand> command)
+void CommandManager::execute(ICommandPtr command)
 {
     std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
     emit commandQueued();
 }
 
-void CommandManager::executeOnce(std::unique_ptr<ICommand> command)
+void CommandManager::executeOnce(ICommandPtr command)
 {
     std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
@@ -56,7 +56,7 @@ void CommandManager::redo()
     emit commandQueued();
 }
 
-void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irreversible)
+void CommandManager::executeReal(ICommandPtr command, bool irreversible)
 {
     if(_debug > 0)
         qDebug() << "Command started" << command->description();

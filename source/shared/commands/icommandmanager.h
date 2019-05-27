@@ -7,58 +7,92 @@
 
 #include <memory>
 #include <vector>
+#include <type_traits>
 
 class ICommandManager
 {
 public:
     virtual ~ICommandManager() = default;
 
-    virtual void execute(std::unique_ptr<ICommand> command) = 0;
-
-    void execute(const Command::CommandDescription& commandDescription,
-                 CommandFn&& executeFn, CommandFn&& undoFn)
+private:
+    template<typename T>
+    ICommandPtr makeCommand(T command)
     {
-        execute(std::make_unique<Command>(commandDescription, executeFn, undoFn));
+        if constexpr(std::is_convertible_v<T, ICommandPtr>)
+        {
+            // Already is a command
+            return command;
+        }
+        else
+            return std::make_unique<Command>(Command::CommandDescription(), command);
     }
 
-    void execute(const Command::CommandDescription& commandDescription,
-                 // cppcheck-suppress passedByValue
-                 std::vector<std::unique_ptr<ICommand>> commands)
+    void makeCommandsVector(ICommandPtrsVector&) {}
+
+    template<typename T, typename... Commands>
+    void makeCommandsVector(ICommandPtrsVector& commands, T&& command, Commands&&... args)
+    {
+        commands.emplace_back(makeCommand(std::forward<T>(command)));
+        makeCommandsVector(commands, std::forward<Commands>(args)...);
+    }
+
+    template<typename... Commands>
+    auto makeCompoundCommand(Commands&&... args)
+    {
+        ICommandPtrsVector commands;
+        makeCommandsVector(commands, std::forward<Commands>(args)...);
+        return std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands));
+    }
+
+    template<void(ICommandManager::*Fn)(ICommandPtr), typename T, typename... Commands>
+    void _execute(T&& command, Commands&&... commands)
+    {
+        if constexpr(sizeof...(commands) != 0)
+            (this->*Fn)(makeCompoundCommand(std::forward<T>(command), std::forward<Commands>(commands)...));
+        else
+            (this->*Fn)(makeCommand(std::forward<T>(command)));
+    }
+
+    template<typename... Args>
+    using EnableIfArgsAreAllCommands = typename std::enable_if_t<(... &&
+        (std::is_convertible_v<Args, ICommandPtr> || std::is_convertible_v<Args, CommandFn&&>))
+    >;
+
+public:
+    virtual void execute(ICommandPtr command) = 0;
+
+    // cppcheck-suppress passedByValue
+    void execute(ICommandPtrsVector commands, const Command::CommandDescription& commandDescription = {})
     {
         execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
-    // cppcheck-suppress passedByValue
-    void execute(std::vector<std::unique_ptr<ICommand>> commands)
+    template<typename... Commands, typename = EnableIfArgsAreAllCommands<Commands...>>
+    void execute(Commands&&... commands)
     {
-        execute(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
+        _execute<&ICommandManager::execute>(std::forward<Commands>(commands)...);
     }
 
     // Execute only once, i.e. so that it can't be undone
-    virtual void executeOnce(std::unique_ptr<ICommand> command) = 0;
+    virtual void executeOnce(ICommandPtr command) = 0;
 
-    void executeOnce(const Command::CommandDescription& commandDescription,
-                     CommandFn&& executeFn)
+    void executeOnce(CommandFn&& executeFn, const QString& commandDescription = {})
     {
-        executeOnce(std::make_unique<Command>(commandDescription, executeFn));
-    }
-
-    void executeOnce(const Command::CommandDescription& commandDescription,
-                     // cppcheck-suppress passedByValue
-                     std::vector<std::unique_ptr<ICommand>> commands)
-    {
-        executeOnce(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
+        executeOnce(std::make_unique<Command>(Command::CommandDescription{commandDescription,
+            commandDescription, commandDescription}, executeFn));
     }
 
     // cppcheck-suppress passedByValue
-    void executeOnce(std::vector<std::unique_ptr<ICommand>> commands)
+    void executeOnce(ICommandPtrsVector commands, const QString& commandDescription = {})
     {
-        executeOnce(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
+        executeOnce(std::make_unique<CompoundCommand>(Command::CommandDescription{commandDescription,
+            commandDescription, commandDescription}, std::move(commands)));
     }
 
-    void executeOnce(CommandFn&& executeFn)
+    template<typename... Commands, typename = EnableIfArgsAreAllCommands<Commands...>>
+    void executeOnce(Commands&&... commands)
     {
-        executeOnce(std::make_unique<Command>(Command::CommandDescription(), executeFn));
+        _execute<&ICommandManager::executeOnce>(std::forward<Commands>(commands)...);
     }
 };
 

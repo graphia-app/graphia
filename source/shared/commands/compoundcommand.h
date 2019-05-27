@@ -15,7 +15,7 @@ class CompoundCommand : public ICommand
 {
 public:
     CompoundCommand(const Command::CommandDescription& commandDescription,
-                    std::vector<std::unique_ptr<ICommand>>&& commands) :
+                    ICommandPtrsVector&& commands) :
         _description(commandDescription._description),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),
@@ -128,7 +128,7 @@ private:
     QString _verb;
     QString _pastParticiple;
 
-    std::vector<std::unique_ptr<ICommand>> _commands;
+    ICommandPtrsVector _commands;
 
     const ICommand* _executing = nullptr;
 };

@@ -33,9 +33,9 @@ public:
 
     void clear();
 
-    void execute(std::unique_ptr<ICommand> command) override;
+    void execute(ICommandPtr command) override;
     using ICommandManager::execute;
-    void executeOnce(std::unique_ptr<ICommand> command) override;
+    void executeOnce(ICommandPtr command) override;
     using ICommandManager::executeOnce;
 
     void undo();
@@ -91,7 +91,7 @@ private:
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;
 
-    void executeReal(std::unique_ptr<ICommand> command, bool irreversible);
+    void executeReal(ICommandPtr command, bool irreversible);
     void undoReal();
     void redoReal();
 
@@ -107,7 +107,7 @@ private:
 
     struct PendingCommand
     {
-        PendingCommand(CommandAction action, std::unique_ptr<ICommand> command) :
+        PendingCommand(CommandAction action, ICommandPtr command) :
             _action(action), _command(std::move(command))
         {
             if((action == CommandAction::Execute || action == CommandAction::ExecuteOnce) &&
@@ -123,14 +123,14 @@ private:
         PendingCommand() = default;
 
         CommandAction _action = CommandAction::Execute;
-        std::unique_ptr<ICommand> _command = nullptr;
+        ICommandPtr _command = nullptr;
     };
 
     bool commandsArePending() const;
     PendingCommand nextPendingCommand();
 
     std::deque<PendingCommand> _pendingCommands;
-    std::deque<std::unique_ptr<ICommand>> _stack;
+    std::deque<ICommandPtr> _stack;
     int _lastExecutedIndex = -1;
 
     std::thread _thread;
