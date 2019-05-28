@@ -8,13 +8,12 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/checksum.h"
+#include "shared/utils/doasyncthen.h"
 
 #include <QStringList>
 #include <QProcess>
 #include <QFile>
 #include <QDir>
-#include <QtConcurrent/QtConcurrent>
-#include <QFuture>
 #include <QTimer>
 #include <QSysInfo>
 #include <QTemporaryFile>
@@ -151,7 +150,7 @@ void Updater::startBackgroundUpdateCheck()
 
 void Updater::downloadUpdate(QNetworkReply* reply)
 {
-    QFuture<json> future = QtConcurrent::run([this, reply]
+    u::doAsync([this, reply]
     {
         auto updateString = reply->readAll();
         auto update = updateStringToJson(updateString);
@@ -179,13 +178,9 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         _updateString = updateString;
 
         return update;
-    });
-
-    auto* watcher = new QFutureWatcher<json>;
-    connect(watcher, &QFutureWatcher<json>::finished, [this, watcher, reply]
+    })
+    .then([this, reply](const json& update)
     {
-        const auto& update = watcher->result();
-
         if(!update.is_object())
         {
             _state = State::Idle;
@@ -221,14 +216,12 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         });
 
         reply->deleteLater();
-        watcher->deleteLater();
     });
-    watcher->setFuture(future);
 }
 
 void Updater::saveUpdate(QNetworkReply* reply)
 {
-    QFuture<bool> future = QtConcurrent::run([this, reply]
+    u::doAsync([this, reply]
     {
         _progress = -1;
         emit progressChanged();
@@ -267,13 +260,9 @@ void Updater::saveUpdate(QNetworkReply* reply)
         tempFile.setAutoRemove(false);
 
         return true;
-    });
-
-    auto* watcher = new QFutureWatcher<bool>;
-    connect(watcher, &QFutureWatcher<bool>::finished, [this, watcher, reply]
+    })
+    .then([this, reply](bool success)
     {
-        auto success = watcher->result();
-
         if(success)
         {
             storeUpdateJson(_updateString);
@@ -284,9 +273,7 @@ void Updater::saveUpdate(QNetworkReply* reply)
         _state = State::Idle;
 
         reply->deleteLater();
-        watcher->deleteLater();
     });
-    watcher->setFuture(future);
 }
 
 void Updater::cancelUpdateDownload()

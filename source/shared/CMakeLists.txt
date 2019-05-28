@@ -61,6 +61,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/doasyncthen.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/enumreflection.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/fixedsizestack.h

@@ -5,13 +5,10 @@
 #include "shared/utils/container.h"
 #include "shared/utils/checksum.h"
 #include "shared/utils/scope_exit.h"
+#include "shared/utils/doasyncthen.h"
 
 #include <QString>
 #include <QFile>
-
-#include <QtConcurrent/QtConcurrent>
-#include <QFuture>
-#include <QFutureWatcher>
 
 #include <iostream>
 
@@ -83,7 +80,7 @@ void Installer::start()
         emit busyChanged();
     }
 
-    QFuture<bool> future = QtConcurrent::run([this]
+    u::doAsync([this]
     {
         if(!u::contains(_details, "installerFileName") ||
             !u::contains(_details, "installerChecksum") ||
@@ -111,12 +108,10 @@ void Installer::start()
         }
 
         return true;
-    });
-
-    auto* watcher = new QFutureWatcher<bool>;
-    connect(watcher, &QFutureWatcher<bool>::finished, [this, watcher]
+    })
+    .then([this](bool success)
     {
-        if(watcher->result())
+        if(success)
         {
             QStringList arguments = _details["command"];
             arguments.replaceInStrings(QStringLiteral("EXISTING_INSTALL"), _existingInstallation);
@@ -126,10 +121,7 @@ void Installer::start()
         }
         else
             signalComplete();
-
-        watcher->deleteLater();
     });
-    watcher->setFuture(future);
 }
 
 void Installer::retry()

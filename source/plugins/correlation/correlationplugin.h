@@ -27,7 +27,6 @@
 #include <QVariantMap>
 #include <QColor>
 #include <QRect>
-#include <QFutureWatcher>
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
