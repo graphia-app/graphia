@@ -48,7 +48,7 @@ public:
     bool saturated() const { return _activeThreads >= static_cast<int>(_threads.size()); }
     bool idle() const { return _activeThreads == 0; }
 
-    template<typename Fn, typename... Args> using ReturnType = typename std::result_of_t<Fn(Args...)>;
+    template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
 
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute(Fn f, Args&&... args)
     {
@@ -333,7 +333,7 @@ private:
     // Fn may take a value/reference or an iterator; this template determines how to call it
     template<typename It, typename Fn> struct Invoker
     {
-        using ReturnType = std::result_of_t<Fn(ArgumentType<Fn>)>;
+        using ReturnType = std::invoke_result_t<Fn, ArgumentType<Fn>>;
 
         // Fn argument is an iterator
         template<typename T = ReturnType>
@@ -376,7 +376,7 @@ private:
     };
 
     template<typename It, typename Fn> using FnExecutor =
-        Executor<It, Fn, typename std::result_of_t<Fn(ArgumentType<Fn>)>>;
+        Executor<It, Fn, typename std::invoke_result_t<Fn, ArgumentType<Fn>>>;
 
     template<typename It>
     class CosterBase

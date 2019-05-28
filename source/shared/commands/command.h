@@ -16,7 +16,7 @@ public:
     template<typename Fn, typename ReturnType>
     using EnableIfFnReturnTypeIs = typename std::enable_if_t<
         std::is_same_v<
-            typename std::result_of_t<Fn(Command&)>,
+            std::invoke_result_t<Fn, Command&>,
             ReturnType
         > &&
         // Avoid enabling the universal move constructors if Fn is a CommandFn
