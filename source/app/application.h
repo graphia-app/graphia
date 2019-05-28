@@ -124,9 +124,9 @@ class Application : public QObject
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
-    Q_PROPERTY(bool authenticated READ authenticated NOTIFY authenticatedChanged)
-    Q_PROPERTY(QString authenticationMessage READ authenticationMessage NOTIFY authenticationMessageChanged)
-    Q_PROPERTY(bool authenticating READ authenticating NOTIFY authenticatingChanged)
+    Q_PROPERTY(bool authorised READ authorised NOTIFY authorisedChanged)
+    Q_PROPERTY(QString authMessage READ authMessage NOTIFY authMessageChanged)
+    Q_PROPERTY(bool authorising READ authorising NOTIFY authorisingChanged)
 
     Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
 
@@ -169,10 +169,10 @@ public:
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
 
-    // Returns false if we need to authenticate, but couldn't
-    Q_INVOKABLE bool tryToAuthenticateWithCachedCredentials();
+    // Returns false if we need to auth, but couldn't
+    Q_INVOKABLE bool tryToAuthWithCachedCredentials();
 
-    Q_INVOKABLE void authenticate(const QString& email, const QString& password);
+    Q_INVOKABLE void authorise(const QString& email, const QString& password);
     Q_INVOKABLE void signOut();
 
     Q_INVOKABLE void checkForUpdates();
@@ -196,9 +196,9 @@ signals:
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
-    void authenticatedChanged();
-    void authenticationMessageChanged();
-    void authenticatingChanged();
+    void authorisedChanged();
+    void authMessageChanged();
+    void authorisingChanged();
 
     void noNewUpdateAvailable(bool existing);
     void newUpdateAvailable();
@@ -232,9 +232,9 @@ private:
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
 
-    bool authenticated() const { return _auth.state(); }
-    QString authenticationMessage() const { return _auth.message(); }
-    bool authenticating() const { return _auth.busy(); }
+    bool authorised() const { return _auth.state(); }
+    QString authMessage() const { return _auth.message(); }
+    bool authorising() const { return _auth.busy(); }
 
     int updateDownloadProgress() const { return _updater.progress(); }
 

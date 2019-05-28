@@ -47,9 +47,9 @@ Application::Application(QObject *parent) :
             _updater.disableAutoBackgroundCheck();
     });
 
-    connect(&_auth, &Auth::stateChanged, this, &Application::authenticatedChanged);
-    connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
-    connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
+    connect(&_auth, &Auth::stateChanged, this, &Application::authorisedChanged);
+    connect(&_auth, &Auth::messageChanged, this, &Application::authMessageChanged);
+    connect(&_auth, &Auth::busyChanged, this, &Application::authorisingChanged);
 
     connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
     connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
@@ -234,7 +234,7 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
     return {};
 }
 
-bool Application::tryToAuthenticateWithCachedCredentials()
+bool Application::tryToAuthWithCachedCredentials()
 {
     if(!u::pref("auth/rememberMe").toBool())
         return false;
@@ -245,7 +245,7 @@ bool Application::tryToAuthenticateWithCachedCredentials()
     return true;
 }
 
-void Application::authenticate(const QString& email, const QString& password)
+void Application::authorise(const QString& email, const QString& password)
 {
     _auth.sendRequest(email, password);
 }

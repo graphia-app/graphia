@@ -15,7 +15,7 @@
 class QNetworkReply;
 
 /*
-Example authentication session
+Example authorisation session
 ==============================
 
 Client:
@@ -84,7 +84,7 @@ public:
 
     bool pluginAllowed(const QString& pluginName) const;
 
-    bool state() const { return _authenticated; }
+    bool state() const { return _authorised; }
     QString message() const { return _message; }
 
     bool busy() const { return _timer.isActive(); }
@@ -94,7 +94,7 @@ private:
     QNetworkAccessManager _networkManager;
     QNetworkReply* _reply = nullptr;
     QString _encryptedPassword;
-    bool _authenticated = false;
+    bool _authorised = false;
 
     QString _message;
     QList<QSslError> _sslErrors;

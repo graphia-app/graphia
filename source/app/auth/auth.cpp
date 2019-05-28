@@ -154,16 +154,16 @@ bool Auth::expired()
 
     auto now = static_cast<uint>(QDateTime::currentSecsSinceEpoch());
     auto approximatelyNow = now + 600; // Allow the system clock to be out by a little bit
-    bool authenticated = (approximatelyNow >= _issueTime) && (now < _expiryTime);
+    bool authorised = (approximatelyNow >= _issueTime) && (now < _expiryTime);
 
-    if(_authenticated != authenticated)
+    if(_authorised != authorised)
     {
-        _authenticated = authenticated;
+        _authorised = authorised;
         emit stateChanged();
     }
 
-    // If we're not authenticated now, the token has expired
-    return !_authenticated;
+    // If we haven't succeeded by now, the token has expired
+    return !_authorised;
 }
 
 Auth::Auth()
@@ -240,7 +240,7 @@ bool Auth::sendRequestUsingCachedCredentials()
 
 void Auth::reset()
 {
-    _authenticated = false;
+    _authorised = false;
     _message.clear();
     _issueTime = 0;
     _expiryTime = 0;
@@ -286,7 +286,7 @@ void Auth::onReplyReceived()
 #ifdef DISABLE_AUTH
         if(_reply == nullptr)
         {
-            _authenticated = true;
+            _authorised = true;
             emit stateChanged();
         }
         else
@@ -297,18 +297,18 @@ void Auth::onReplyReceived()
             std::string authResponse = _reply->readAll().toStdString();
             auto decodedRespose = decodeAuthResponse(_aesKey, authResponse);
 
-            bool authenticated = decodedRespose.contains(QStringLiteral("authenticated")) &&
+            bool authorised = decodedRespose.contains(QStringLiteral("authenticated")) &&
                 decodedRespose[QStringLiteral("authenticated")].toBool() &&
                 decodedRespose.contains(QStringLiteral("authToken"));
 
-            if(_authenticated != authenticated)
+            if(_authorised != authorised)
             {
-                _authenticated = authenticated;
+                _authorised = authorised;
 
                 u::setPref("auth/password", u::pref("auth/rememberMe").toBool() ?
                     _encryptedPassword : QLatin1String(""));
 
-                if(_authenticated)
+                if(_authorised)
                 {
                     u::setPref("auth/authToken", decodedRespose[QStringLiteral("authToken")].toString());
                     parseAuthToken();
@@ -382,7 +382,7 @@ void Auth::onTimeout()
     // Ignore timeouts if our token hasn't yet expired
     if(expired())
     {
-        _message = tr("Timed out while waiting for a response from the authentication "
+        _message = tr("Timed out while waiting for a response from the authorisation "
                       "server. Please check your internet connection and try again.");
         emit messageChanged();
     }

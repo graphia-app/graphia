@@ -54,7 +54,7 @@ ApplicationWindow
         return text;
     }
 
-    property bool _authenticatedAtLeastOnce: false
+    property bool _authorisedAtLeastOnce: false
 
     Application { id: application }
 
@@ -71,13 +71,13 @@ ApplicationWindow
     {
         target: application
 
-        onAuthenticatedChanged:
+        onAuthorisedChanged:
         {
-            if(application.authenticated)
+            if(application.authorised)
             {
-                if(!_authenticatedAtLeastOnce)
+                if(!_authorisedAtLeastOnce)
                 {
-                    _authenticatedAtLeastOnce = true;
+                    _authorisedAtLeastOnce = true;
                     processOnePendingArgument();
                 }
             }
@@ -85,9 +85,9 @@ ApplicationWindow
                 authUI.enabled = true;
         }
 
-        onAuthenticatingChanged:
+        onAuthorisingChanged:
         {
-            if(!application.authenticating)
+            if(!application.authorising)
                 authUI.enabled = true;
         }
 
@@ -119,16 +119,16 @@ ApplicationWindow
     {
         id: authUI
 
-        visible: !application.authenticated && enabled
+        visible: !application.authorised && enabled
         enabled: false
         anchors.fill: parent
 
-        message: application.authenticationMessage
-        busy: application.authenticating
+        message: application.authMessage
+        busy: application.authorising
 
         onSignIn:
         {
-            application.authenticate(email, password);
+            application.authorise(email, password);
         }
     }
 
@@ -206,9 +206,9 @@ ApplicationWindow
         // Arguments minus the executable
         _pendingArguments = Qt.application.arguments.slice(1);
 
-        if(!application.tryToAuthenticateWithCachedCredentials())
+        if(!application.tryToAuthWithCachedCredentials())
         {
-            // If we failed immediately, show the authentication UI
+            // If we failed immediately, show the auth UI
             authUI.enabled = true;
         }
 
@@ -221,7 +221,7 @@ ApplicationWindow
 
             if(QmlUtils.fileExists(exampleFile))
             {
-                // Add it to the pending arguments, in case we're in the middle of authenticating
+                // Add it to the pending arguments, in case we're in the middle of authorising
                 _pendingArguments.push(exampleFile);
             }
         }
@@ -1376,12 +1376,12 @@ ApplicationWindow
         id: nullAction
     }
 
-    // Hack to hide the menu bar when we're not authenticated
+    // Hack to hide the menu bar when we're not authorised
     Connections
     {
         target: application
 
-        onAuthenticatedChanged:
+        onAuthorisedChanged:
         {
             mainMenuBar.updateVisibility();
         }
@@ -1393,7 +1393,7 @@ ApplicationWindow
 
         function updateVisibility()
         {
-            if(application.authenticated)
+            if(application.authorised)
                 mainWindow.menuBar = mainMenuBar;
             else
             {
@@ -1805,7 +1805,7 @@ ApplicationWindow
     {
         id: mainToolBar
 
-        visible: application.authenticated
+        visible: application.authorised
 
         RowLayout
         {
@@ -1871,7 +1871,7 @@ ApplicationWindow
         {
             id: tabView
 
-            visible: application.authenticated
+            visible: application.authorised
 
             anchors.fill: parent
             tabsVisible: count > 1
@@ -2034,7 +2034,7 @@ ApplicationWindow
 
     statusBar: StatusBar
     {
-        visible: application.authenticated
+        visible: application.authorised
 
         RowLayout
         {
