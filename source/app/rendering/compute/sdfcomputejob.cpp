@@ -122,7 +122,7 @@ void SDFComputeJob::generateSDF()
     // Set render size to texture size only
     glViewport(0, 0, renderWidth, renderHeight);
     QMatrix4x4 m;
-    m.ortho(0, renderWidth, 0, renderHeight, -1.0f, 1.0f);
+    m.ortho(0, static_cast<float>(renderWidth), 0, static_cast<float>(renderHeight), -1.0f, 1.0f);
 
     // SDF FBO
     GLuint sdfFBO;

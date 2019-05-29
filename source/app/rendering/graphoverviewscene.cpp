@@ -129,17 +129,17 @@ void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, fl
 
 void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
-    float nx = x / _width;
-    float ny = y / _height;
+    float nx = x / static_cast<float>(_width);
+    float ny = y / static_cast<float>(_height);
 
-    float oldCentreX = (nx * _width) / _zoomFactor;
-    float oldCentreY = (ny * _height) / _zoomFactor;
+    float oldCentreX = (nx * static_cast<float>(_width)) / _zoomFactor;
+    float oldCentreY = (ny * static_cast<float>(_height)) / _zoomFactor;
 
     if(!setZoomFactor(_zoomFactor + (delta * _zoomFactor)))
         return;
 
-    float newCentreX = (nx * _width) / _zoomFactor;
-    float newCentreY = (ny * _height) / _zoomFactor;
+    float newCentreX = (nx * static_cast<float>(_width)) / _zoomFactor;
+    float newCentreY = (ny * static_cast<float>(_height)) / _zoomFactor;
 
     setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
               static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
@@ -190,20 +190,20 @@ void GraphOverviewScene::setOffset(float x, float y)
     float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
     float scaledBoundingHeight = _componentLayout->boundingHeight() * _zoomFactor;
 
-    float xDiff = (scaledBoundingWidth - _width) / _zoomFactor;
+    float xDiff = (scaledBoundingWidth - static_cast<float>(_width)) / _zoomFactor;
     float xMin = std::min(xDiff, 0.0f);
     float xMax = std::max(xDiff, 0.0f);
 
-    if(scaledBoundingWidth > _width)
+    if(scaledBoundingWidth > static_cast<float>(_width))
         x = std::clamp(x, xMin, xMax);
     else
         x = (xMin + xMax) * 0.5f;
 
-    float yDiff = (scaledBoundingHeight - _height) / _zoomFactor;
+    float yDiff = (scaledBoundingHeight - static_cast<float>(_height)) / _zoomFactor;
     float yMin = std::min(yDiff, 0.0f);
     float yMax = std::max(yDiff, 0.0f);
 
-    if(scaledBoundingHeight > _height)
+    if(scaledBoundingHeight > static_cast<float>(_height))
         y = std::clamp(y, yMin, yMax);
     else
         y = (yMin + yMax) * 0.5f;
@@ -219,8 +219,8 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 {
     Q_ASSERT(!focusComponentId.isNull());
 
-    float halfWidth = _width * 0.5f;
-    float halfHeight = _height * 0.5f;
+    float halfWidth = static_cast<float>(_width) * 0.5f;
+    float halfHeight = static_cast<float>(_height) * 0.5f;
     Circle focusComponentLayout(halfWidth, halfHeight, std::min(halfWidth, halfHeight));
 
     // If the component that has focus isn't in the overview scene's component list then it's
@@ -265,8 +265,8 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
             _componentAlpha[componentId] = 0.0f;
     }
 
-    float halfWidth = _width * 0.5f;
-    float halfHeight = _height * 0.5f;
+    float halfWidth = static_cast<float>(_width) * 0.5f;
+    float halfHeight = static_cast<float>(_height) * 0.5f;
     _zoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
                                                      std::min(halfWidth, halfHeight));
 

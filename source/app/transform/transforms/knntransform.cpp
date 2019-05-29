@@ -64,7 +64,7 @@ void KNNTransform::apply(TransformedGraph& target) const
             removees.set(*it, false);
         }
 
-        target.setProgress((progress++ * 100) / target.numNodes());
+        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numNodes()));
     }
 
     progress = 0;
@@ -84,10 +84,10 @@ void KNNTransform::apply(TransformedGraph& target) const
             else if(rank._target == 0)
                 rank._mean = rank._source;
             else
-                rank._mean = (rank._source + rank._target) * 0.5;
+                rank._mean = static_cast<double>(rank._source + rank._target) * 0.5;
         }
 
-        target.setProgress((progress++ * 100) / target.numEdges());
+        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numEdges()));
     }
 
     target.setProgress(-1);

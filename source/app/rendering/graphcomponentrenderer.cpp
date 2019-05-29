@@ -277,8 +277,10 @@ QMatrix4x4 GraphComponentRenderer::subViewportMatrix() const
 {
     QMatrix4x4 m;
 
-    float xTranslation = (static_cast<float>(_dimensions.x() * 2 + _dimensions.width()) / _viewportWidth) - 1.0f;
-    float yTranslation = (static_cast<float>(_dimensions.y() * 2 + _dimensions.height()) / _viewportHeight) - 1.0f;
+    float xTranslation = (static_cast<float>(_dimensions.x() * 2.0 + _dimensions.width()) /
+        static_cast<float>(_viewportWidth)) - 1.0f;
+    float yTranslation = (static_cast<float>(_dimensions.y() * 2.0 + _dimensions.height()) /
+        static_cast<float>(_viewportHeight)) - 1.0f;
     m.translate(xTranslation, -yTranslation);
 
     float xScale = static_cast<float>(_dimensions.width()) / _viewportWidth;

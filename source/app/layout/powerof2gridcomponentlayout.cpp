@@ -62,7 +62,7 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
             coords.pop();
         }
 
-        float radius = dividedSize * 0.5f;
+        float radius = static_cast<float>(dividedSize) * 0.5f;
         componentLayoutData[componentId].set(static_cast<float>(coord.x()) + radius,
                                              static_cast<float>(coord.y()) + radius, radius);
 

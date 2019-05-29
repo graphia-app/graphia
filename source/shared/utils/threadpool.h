@@ -37,7 +37,7 @@ private:
 
 public:
     explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
-               int numThreads = std::thread::hardware_concurrency());
+        unsigned int numThreads = std::thread::hardware_concurrency());
     virtual ~ThreadPool();
 
     ThreadPool(const ThreadPool&) = delete;

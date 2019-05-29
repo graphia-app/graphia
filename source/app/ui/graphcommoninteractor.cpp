@@ -271,9 +271,9 @@ void GraphCommonInteractor::leftMouseUp()
 // https://www.opengl.org/wiki/Object_Mouse_Trackball
 static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
 {
-    const int minDimension = std::min(width, height);
-    const float x = (2.0f * cursor.x() - width) / minDimension;
-    const float y = (height - 2.0f * cursor.y()) / minDimension;
+    const float minDimension = static_cast<float>(std::min(width, height));
+    const float x = static_cast<float>(2 * cursor.x() - width) / minDimension;
+    const float y = static_cast<float>(height - 2 * cursor.y()) / minDimension;
     const float d = std::sqrt(x * x + y * y);
     const float RADIUS = 0.9f; // Radius of trackball
     const float ROOT2 = std::sqrt(2.0f);
@@ -494,7 +494,11 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
         }
     }
     else
-        wheelMove(wheelEvent->angleDelta().y(), wheelEvent->x(), wheelEvent->y());
+    {
+        wheelMove(static_cast<float>(wheelEvent->angleDelta().y()),
+            static_cast<float>(wheelEvent->x()),
+            static_cast<float>(wheelEvent->y()));
+    }
 }
 
 void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
@@ -505,5 +509,9 @@ void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
     _componentRendererUnderCursor = componentRendererAtPosition(nativeEvent->pos());
 
     if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
-        trackpadZoomGesture(nativeEvent->value(), nativeEvent->pos().x(), nativeEvent->pos().y());
+    {
+        trackpadZoomGesture(static_cast<float>(nativeEvent->value()),
+            static_cast<float>(nativeEvent->pos().x()),
+            static_cast<float>(nativeEvent->pos().y()));
+    }
 }

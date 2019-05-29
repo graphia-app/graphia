@@ -56,7 +56,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
         auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
         bytePosition += numBytes;
-        progressable.setProgress((bytePosition * 100) / totalBytes);
+        progressable.setProgress((bytePosition * 100u) / totalBytes);
 
         zstream.avail_in = numBytes;
         zstream.next_in = static_cast<z_const Bytef*>(inBuffer.data());

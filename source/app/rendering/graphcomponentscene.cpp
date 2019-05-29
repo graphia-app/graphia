@@ -56,7 +56,8 @@ void GraphComponentScene::update(float t)
     {
         Q_ASSERT(componentRenderer()->initialised());
 
-        componentRenderer()->setDimensions(QRect(offset, 0, _width, _height));
+        componentRenderer()->setDimensions(
+            QRect(static_cast<int>(offset), 0, _width, _height));
 
         if(_transitionStyle == TransitionStyle::Fade ||
                 _transitionStyle == TransitionStyle::SlideLeft ||
@@ -74,7 +75,8 @@ void GraphComponentScene::update(float t)
     {
         Q_ASSERT(transitioningComponentRenderer()->initialised());
 
-        transitioningComponentRenderer()->setDimensions(QRect(outOffset, 0, _width, _height));
+        transitioningComponentRenderer()->setDimensions(
+            QRect(static_cast<int>(outOffset), 0, _width, _height));
 
         if(_transitionStyle == TransitionStyle::Fade ||
                 _transitionStyle == TransitionStyle::SlideLeft ||

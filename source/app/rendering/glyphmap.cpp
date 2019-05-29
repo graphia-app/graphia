@@ -181,7 +181,7 @@ void GlyphMap::renderImages(const QFont &font)
 
     // Render Glyphs
     float maxGlyphHeight = 0.0f;
-    float padding = std::max(QFontMetrics(font).height() * 0.1f, 1.0f);
+    float padding = std::max(static_cast<float>(QFontMetrics(font).height()) * 0.1f, 1.0f);
     float x = padding;
     float y = padding;
     int layer = 0;
@@ -193,14 +193,14 @@ void GlyphMap::renderImages(const QFont &font)
         auto glyph = glyphPair.first;
         auto path = rawFont.pathForGlyph(glyph);
         auto boundingRect = path.boundingRect();
-        float glyphWidth = boundingRect.x() + boundingRect.width();
+        float glyphWidth = static_cast<float>(boundingRect.x() + boundingRect.width());
         float glyphAscent = boundingRect.y();
         float glyphHeight = boundingRect.height();
         float right = x + glyphWidth + padding;
 
         maxGlyphHeight = std::max(glyphHeight, maxGlyphHeight);
 
-        if(right >= _textureSize)
+        if(right >= static_cast<float>(_textureSize))
         {
             // Move down onto a new row
             y += maxGlyphHeight + padding;
@@ -209,7 +209,7 @@ void GlyphMap::renderImages(const QFont &font)
 
             float bottom = y + maxGlyphHeight + padding;
 
-            if(bottom >= _textureSize)
+            if(bottom >= static_cast<float>(_textureSize))
             {
                 // Spill onto a new image
                 textPainter = nullptr;

@@ -45,7 +45,8 @@ void GraphOverviewInteractor::rightDrag()
         emit userInteractionStarted();
 
     auto delta = cursorPosition() - prevCursorPosition();
-    _scene->pan(delta.x(), delta.y());
+    _scene->pan(static_cast<float>(delta.x()),
+        static_cast<float>(delta.y()));
 }
 
 void GraphOverviewInteractor::leftDoubleClick()
@@ -77,7 +78,8 @@ ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& positio
     {
         auto radius = componentLayout[componentId].radius();
         auto separation = componentLayout[componentId].centre() - position;
-        float lengthSq = (separation.x() * separation.x()) + (separation.y() * separation.y());
+        auto lengthSq = static_cast<float>((separation.x() * separation.x()) +
+            (separation.y() * separation.y()));
 
         if(lengthSq < (radius * radius))
             return componentId;
@@ -101,7 +103,8 @@ QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& 
     auto& componentLayout = _scene->componentLayout();
     auto rect = componentLayout[componentId].boundingBox();
 
-    QPoint transformedPos(position.x() - rect.x(), position.y() - rect.y());
+    QPoint transformedPos(position.x() - static_cast<int>(rect.x()),
+        position.y() - static_cast<int>(rect.y()));
     return transformedPos;
 }
 

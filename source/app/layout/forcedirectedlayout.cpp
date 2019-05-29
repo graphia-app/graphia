@@ -14,13 +14,13 @@
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
 {
     float average = 0.0f;
-    int size = end - start;
-    float gaussSum = (size) * (size + 1) / 2.0f;
+    float size = static_cast<float>(end) - static_cast<float>(start);
+    float gaussSum = (size * (size + 1)) / 2.0f;
 
     for(int i = start; i < end; ++i)
         average += buffer.at(i) * ((i - start) + 1) / gaussSum;
 
-    return average / std::abs(start - end);
+    return average / std::abs(size);
 }
 
 static QVector3D normalized(const QVector3D& v)
@@ -113,7 +113,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         _displacements->at(nodeId)._repulsive -= barnesHutTree.evaluateKernel(positions(), nodeId,
         [SHORT_RANGE, LONG_RANGE](int mass, const QVector3D& difference, float distanceSq)
         {
-            return difference * (mass * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));
+            return difference * (static_cast<float>(mass) * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));
         });
     }, false);
 

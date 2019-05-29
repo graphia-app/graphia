@@ -48,7 +48,7 @@ void FastInitialLayout::executeReal(bool)
         {
             QVector3D up = QVector3D(forward.z(), -forward.x(), forward.y());
 
-            double dot = QVector3D::dotProduct(up, forward);
+            auto dot = QVector3D::dotProduct(up, forward);
             up -= (dot * forward);
             up.normalize();
 
@@ -130,7 +130,7 @@ void FastInitialLayout::executeReal(bool)
             }
         }
 
-        double phi = 0.0;
+        float phi = 0.0f;
         // i = 2 because we've theoretically already positioned the top and bottom
         int i = 2;
         for(;edgeIdIterator != edgeIds.end(); ++edgeIdIterator)
@@ -143,10 +143,10 @@ void FastInitialLayout::executeReal(bool)
 
             nodeQueue.push(childNodeId);
 
-            double h = -1.0 + 2.0 * (i - 1.0) / static_cast<double>(edgeIds.size() - 1 + edgeCountOffset);
-            double theta = std::acos(h);
-            phi = phi + 3.6 / (std::sqrt((static_cast<double>(edgeIds.size() + edgeCountOffset)) * (1.0 - h * h)));
-            phi = std::fmod(phi, 2.0 * static_cast<double>(Constants::Pi()));
+            auto h = -1.0f + 2.0f * (i - 1.0f) / static_cast<float>(edgeIds.size() - 1 + edgeCountOffset);
+            auto theta = std::acos(h);
+            phi = phi + 3.6f / (std::sqrt((static_cast<float>(edgeIds.size() + edgeCountOffset)) * (1.0f - h * h)));
+            phi = std::fmod(phi, 2.0f * static_cast<float>(Constants::Pi()));
 
             QVector3D offsetPosition(h, std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta));
 

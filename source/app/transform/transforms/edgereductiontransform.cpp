@@ -35,7 +35,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target) const
             removees.set(edgeIds[index], false);
         }
 
-        target.setProgress((progress++ * 100) / target.numNodes());
+        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numNodes()));
     }
 
     progress = 0;
@@ -45,7 +45,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target) const
         if(removees.get(edgeId))
             target.mutableGraph().removeEdge(edgeId);
 
-        target.setProgress((progress++ * 100) / target.numEdges());
+        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numEdges()));
     }
 
     target.setProgress(-1);

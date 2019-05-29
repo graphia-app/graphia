@@ -270,7 +270,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
     // Render the plot in the bottom left; that way when its container
     // is resized, it doesn't hop around vertically, as it would if
     // it had been rendered from the top left
-    int yDest = height() - _pixmap.height();
+    int yDest = static_cast<int>(height()) - _pixmap.height();
 
     if(!isEnabled())
     {
@@ -438,7 +438,8 @@ void CorrelationPlotItem::updateTooltip()
                         (static_cast<double>(point.x() * bottomSize) / axisRectUnderCursor->width());
 
                 auto x = static_cast<int>(xf);
-                int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
+                int y = static_cast<int>((point.y() * numVisibleColumnAnnotations()) /
+                    static_cast<double>(axisRectUnderCursor->height()));
 
                 auto text = columnAnnotationValueAt(x, y);
 

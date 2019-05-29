@@ -29,7 +29,7 @@ static void removeLeaves(TransformedGraph& target, size_t limit = 0)
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
-            target.setProgress((progress++ * 100) / target.numNodes());
+            target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numNodes()));
         }
         target.setProgress(-1);
 

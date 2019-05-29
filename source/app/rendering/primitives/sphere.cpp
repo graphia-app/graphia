@@ -29,27 +29,27 @@ void Sphere::create(QOpenGLShaderProgram& shader)
     _positionBuffer.create();
     _positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _positionBuffer.bind();
-    _positionBuffer.allocate(vertices.data(), static_cast<int>(vertices.size()) * sizeof(float));
+    _positionBuffer.allocate(vertices.data(), static_cast<int>(vertices.size() * sizeof(float)));
 
     _normalBuffer.create();
     _normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _normalBuffer.bind();
-    _normalBuffer.allocate(normals.data(), static_cast<int>(normals.size()) * sizeof(float));
+    _normalBuffer.allocate(normals.data(), static_cast<int>(normals.size() * sizeof(float)));
 
     _textureCoordBuffer.create();
     _textureCoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _textureCoordBuffer.bind();
-    _textureCoordBuffer.allocate(texCoords.data(), static_cast<int>(texCoords.size()) * sizeof(float));
+    _textureCoordBuffer.allocate(texCoords.data(), static_cast<int>(texCoords.size() * sizeof(float)));
 
     _tangentBuffer.create();
     _tangentBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _tangentBuffer.bind();
-    _tangentBuffer.allocate(tangents.data(), static_cast<int>(tangents.size()) * sizeof(float));
+    _tangentBuffer.allocate(tangents.data(), static_cast<int>(tangents.size() * sizeof(float)));
 
     _indexBuffer.create();
     _indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _indexBuffer.bind();
-    _indexBuffer.allocate(indices.data(), static_cast<int>(indices.size()) * sizeof(unsigned int));
+    _indexBuffer.allocate(indices.data(), static_cast<int>(indices.size() * sizeof(unsigned int)));
 
     if(!_vao.isCreated())
         _vao.create();

@@ -114,7 +114,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
         for(auto& attributeValueB : u::keysFor(attributeValueEntryCountBTotal))
         {
             EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NumResultColumns);
-            command.setProgress(progress * 100 / iterations);
+            command.setProgress(progress * 100U / iterations);
             progress++;
 
             n = graphModel->graph().numNodes();

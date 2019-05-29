@@ -2,10 +2,10 @@
 
 #include "thread.h"
 
-ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
+ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads) :
     _stop(false), _activeThreads(0)
 {
-    for(int i = 0; i < numThreads; i++)
+    for(unsigned int i = 0U; i < numThreads; i++)
     {
         _threads.emplace_back([threadNamePrefix, i, this]
             {

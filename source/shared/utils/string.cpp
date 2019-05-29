@@ -41,7 +41,7 @@ double u::toNumber(const std::string& string)
     std::stringstream ss;
     ss << string;
 
-    long double value;
+    double value;
     ss >> value;
 
     if(ss.eof())

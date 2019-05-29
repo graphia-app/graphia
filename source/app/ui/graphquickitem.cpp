@@ -360,8 +360,8 @@ int GraphQuickItem::numComponents() const
 void GraphQuickItem::updateVisibleComponentIndex()
 {
     const auto& componentIds = _graphModel->graph().componentIds();
-    _visibleComponentIndex = std::distance(componentIds.begin(),
-        std::find(componentIds.begin(), componentIds.end(), _focusedComponentId)) + 1;
+    _visibleComponentIndex = static_cast<int>(std::distance(componentIds.begin(),
+        std::find(componentIds.begin(), componentIds.end(), _focusedComponentId)) + 1);
 
     emit visibleComponentIndexChanged();
 }

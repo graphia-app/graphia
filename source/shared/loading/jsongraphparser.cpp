@@ -22,7 +22,7 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
     if(totalBytes == 0)
         return false;
 
-    int bytesRead = 0;
+    qint64 bytesRead = 0;
     QDataStream input(&file);
 
     do

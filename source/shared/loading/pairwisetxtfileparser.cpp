@@ -217,10 +217,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(u::isNumeric(thirdToken))
                 {
-                    float edgeWeight = u::toNumber(thirdToken);
+                    auto edgeWeight = u::toNumber(thirdToken);
 
                     if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
-                        edgeWeight = 1.0f;
+                        edgeWeight = 1.0;
 
                     _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
                 }

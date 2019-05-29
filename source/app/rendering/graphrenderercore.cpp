@@ -255,15 +255,15 @@ void GPUGraphData::clearDepthbuffer()
 void GPUGraphData::upload()
 {
     _nodeVBO.bind();
-    _nodeVBO.allocate(_nodeData.data(), static_cast<int>(_nodeData.size()) * sizeof(NodeData));
+    _nodeVBO.allocate(_nodeData.data(), static_cast<int>(_nodeData.size() * sizeof(NodeData)));
     _nodeVBO.release();
 
     _edgeVBO.bind();
-    _edgeVBO.allocate(_edgeData.data(), static_cast<int>(_edgeData.size()) * sizeof(EdgeData));
+    _edgeVBO.allocate(_edgeData.data(), static_cast<int>(_edgeData.size() * sizeof(EdgeData)));
     _edgeVBO.release();
 
     _textVBO.bind();
-    _textVBO.allocate(_glyphData.data(), static_cast<int>(_glyphData.size()) * sizeof(GlyphData));
+    _textVBO.allocate(_glyphData.data(), static_cast<int>(_glyphData.size() * sizeof(GlyphData)));
     _textVBO.release();
 }
 
@@ -688,7 +688,7 @@ void GraphRendererCore::render2D(QRect selectionRect)
     glViewport(0, 0, _width, _height);
 
     QMatrix4x4 m;
-    m.ortho(0.0f, _width, 0.0f, _height, -1.0f, 1.0f);
+    m.ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height), -1.0f, 1.0f);
 
     if(!selectionRect.isNull())
     {
@@ -719,7 +719,7 @@ void GraphRendererCore::render2D(QRect selectionRect)
         glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
         _selectionMarkerDataBuffer.bind();
-        _selectionMarkerDataBuffer.allocate(quadData.data(), static_cast<int>(quadData.size()) * sizeof(GLfloat));
+        _selectionMarkerDataBuffer.allocate(quadData.data(), static_cast<int>(quadData.size() * sizeof(GLfloat)));
 
         _selectionMarkerShader.bind();
         _selectionMarkerShader.setUniformValue("projectionMatrix", m);
@@ -761,7 +761,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
     glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
-    m.ortho(0, _width, 0, _height, -1.0f, 1.0f);
+    m.ortho(0, static_cast<float>(_width), 0, static_cast<float>(_height), -1.0f, 1.0f);
 
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     glEnable(GL_BLEND);

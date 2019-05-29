@@ -17,14 +17,14 @@ static QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSiz
 {
     QMatrix4x4 projOffset;
 
-    float xTranslation =
-        (static_cast<float>(scaledDimensions.x() * 2 + scaledDimensions.width()) / screenshotSize.width()) - 1.0f;
-    float yTranslation =
-        (static_cast<float>(scaledDimensions.y() * 2 + scaledDimensions.height()) / screenshotSize.height()) - 1.0f;
+    float xTranslation = (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) /
+        static_cast<float>(screenshotSize.width())) - 1.0f;
+    float yTranslation = (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) /
+        static_cast<float>(screenshotSize.height())) - 1.0f;
     projOffset.translate(xTranslation, -yTranslation);
 
-    float xScale = static_cast<float>(scaledDimensions.width()) / screenshotSize.width();
-    float yScale = static_cast<float>(scaledDimensions.height()) / screenshotSize.height();
+    float xScale = static_cast<float>(scaledDimensions.width()) / static_cast<float>(screenshotSize.width());
+    float yScale = static_cast<float>(scaledDimensions.height()) / static_cast<float>(screenshotSize.height());
     projOffset.scale(xScale, yScale);
 
     return projOffset;
@@ -83,7 +83,7 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width
     float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
     if(!fillSize)
-        screenshotSize.setHeight(static_cast<float>(width) / viewportAspectRatio);
+        screenshotSize.setHeight(static_cast<int>(static_cast<float>(width) / viewportAspectRatio));
 
     if(!resize(screenshotSize.width(), screenshotSize.height()))
     {
@@ -132,10 +132,10 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 
     if(!fillSize)
     {
-        screenshotSize.setHeight(static_cast<float>(width) / viewportAspectRatio);
+        screenshotSize.setHeight(static_cast<int>(static_cast<float>(width) / viewportAspectRatio));
         if(screenshotSize.height() > height)
         {
-            screenshotSize.setWidth(static_cast<float>(height) * viewportAspectRatio);
+            screenshotSize.setWidth(static_cast<int>(static_cast<float>(height) * viewportAspectRatio));
             screenshotSize.setHeight(height);
         }
     }
@@ -149,8 +149,8 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     // Need a pixmap to construct the full image
     auto fullScreenshot = QPixmap(screenshotSize.width(), screenshotSize.height());
 
-    auto tileXCount = std::ceil(static_cast<float>(screenshotSize.width()) / this->width());
-    auto tileYCount = std::ceil(static_cast<float>(screenshotSize.height()) / this->height());
+    auto tileXCount = std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(this->width()));
+    auto tileYCount = std::ceil(static_cast<float>(screenshotSize.height()) / static_cast<float>(this->height()));
     for(auto currentTileX = 0; currentTileX < tileXCount; currentTileX++)
     {
         for(auto currentTileY = 0; currentTileY < tileYCount; currentTileY++)
@@ -164,9 +164,9 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 
     auto image = fullScreenshot.toImage();
 
-    const double INCHES_PER_METER = 39.3700787;
-    image.setDotsPerMeterX(dpi * INCHES_PER_METER);
-    image.setDotsPerMeterY(dpi * INCHES_PER_METER);
+    const int DOTS_PER_METER = static_cast<int>(dpi * 39.3700787);
+    image.setDotsPerMeterX(DOTS_PER_METER);
+    image.setDotsPerMeterY(DOTS_PER_METER);
     emit screenshotComplete(image, path);
 }
 
@@ -225,11 +225,11 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             projMatrix = translation * componentCamera.projectionMatrix();
 
             // Per-Tile translation for high res screenshots
-            float tileWidthRatio = static_cast<float>(TILE_SIZE) / screenshotSize.width();
-            float tileHeightRatio = static_cast<float>(TILE_SIZE) / screenshotSize.height();
+            float tileWidthRatio = static_cast<float>(TILE_SIZE) / static_cast<float>(screenshotSize.width());
+            float tileHeightRatio = static_cast<float>(TILE_SIZE) / static_cast<float>(screenshotSize.height());
 
-            float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * currentTileX);
-            float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * currentTileY);
+            float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * static_cast<float>(currentTileX));
+            float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * static_cast<float>(currentTileY));
 
             QMatrix4x4 tileTranslation;
             tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);

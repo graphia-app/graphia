@@ -258,7 +258,8 @@ bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& 
         if(parser.cancelled())
             return false;
 
-        parser.setProgress(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
+        parser.setProgress(static_cast<int>(std::distance(edges.begin(), edgeIt)) * 100 /
+            static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
