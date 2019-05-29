@@ -238,25 +238,31 @@ void GlyphMap::renderImages(const QFont &font)
 
         if(u::pref("debug/saveGlyphMaps").toBool())
         {
+            auto xi = static_cast<int>(x);
+            auto yi = static_cast<int>(y);
+            auto wi = static_cast<int>(glyphWidth);
+            auto hi = static_cast<int>(glyphHeight);
+            auto ai = static_cast<int>(glyphAscent);
+
             textPainter->setPen(Qt::red);
-            textPainter->drawLine(x, y, x, y + glyphHeight);
-            textPainter->drawLine(x, y, x + glyphWidth, y);
+            textPainter->drawLine(xi,      yi,      xi,      yi + hi);
+            textPainter->drawLine(xi,      yi,      xi + wi, yi);
 
             textPainter->setPen(Qt::green);
-            textPainter->drawLine(x, y - glyphAscent, x + glyphWidth, y - glyphAscent);
+            textPainter->drawLine(xi,      yi - ai, xi + wi, yi - ai);
 
             textPainter->setPen(Qt::yellow);
-            textPainter->drawLine(x + glyphWidth, y, x + glyphWidth, y + glyphHeight);
-            textPainter->drawLine(x, y + glyphHeight, x + glyphWidth, y + glyphHeight);
+            textPainter->drawLine(xi + wi, yi,      xi + wi, yi + hi);
+            textPainter->drawLine(xi,      yi + hi, xi + wi, yi + hi);
         }
 
         auto& image = _images.back();
 
-        float u = static_cast<float>(x) / image.width();
-        float v = static_cast<float>(y + glyphHeight) / image.height();
-        float w = static_cast<float>(glyphWidth) / image.width();
-        float h = static_cast<float>(glyphHeight) / image.height();
-        float a = static_cast<float>(glyphAscent) / image.height();
+        float u = x / static_cast<float>(image.width());
+        float v = (y + glyphHeight) / static_cast<float>(image.height());
+        float w = glyphWidth / static_cast<float>(image.width());
+        float h = glyphHeight / static_cast<float>(image.height());
+        float a = glyphAscent / static_cast<float>(image.height());
 
         auto& textureGlyph = _results._glyphs[glyph];
         textureGlyph._layer = layer;
