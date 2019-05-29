@@ -44,7 +44,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
-            target.setProgress((progress++ * 100) / numRemovees);
+            target.setProgress(static_cast<int>((progress++ * 100) / numRemovees));
         }
         break;
     }
@@ -71,7 +71,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         for(auto edgeId : removees)
         {
             target.mutableGraph().removeEdge(edgeId);
-            target.setProgress((progress++ * 100) / numRemovees);
+            target.setProgress(static_cast<int>((progress++ * 100) / numRemovees));
         }
         break;
     }
@@ -103,7 +103,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
-            target.setProgress((progress++ * 100) / numRemovees);
+            target.setProgress(static_cast<int>((progress++ * 100) / numRemovees));
         }
         break;
     }

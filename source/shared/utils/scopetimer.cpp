@@ -61,8 +61,8 @@ void ScopeTimerManager::reportToQDebug() const
             stdDev = std::sqrt(stdDev);
 
             mean /= 1000000.0;
-            auto min = *minMax.first / 1000000.0;
-            auto max = *minMax.second / 1000000.0;
+            auto min = static_cast<double>(*minMax.first) / 1000000.0;
+            auto max = static_cast<double>(*minMax.second) / 1000000.0;
             stdDev /= 1000000.0;
 
             qDebug() << name << QStringLiteral("%1/%2/%3/%4 ms (mean/min/max/stddev)")

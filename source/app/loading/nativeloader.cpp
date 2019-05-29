@@ -77,7 +77,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         bytesRead += numBytes;
 
         if(loader != nullptr)
-            loader->setProgress((bytesRead * 100u) / totalBytes);
+            loader->setProgress(static_cast<int>((bytesRead * 100u) / totalBytes));
 
         zstream.avail_in = numBytes;
         if(zstream.avail_in == 0)
@@ -152,7 +152,7 @@ static bool load(const QString& filePath, QByteArray& byteArray,
         bytesRead += numBytes;
 
         if(loader != nullptr)
-            loader->setProgress((bytesRead * 100u) / totalBytes);
+            loader->setProgress(static_cast<int>((bytesRead * 100u) / totalBytes));
 
         // Check if we've read more than we've been asked to
         if(maxReadSize >= 0 && bytesRead >= maxReadSize)

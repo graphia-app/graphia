@@ -144,9 +144,11 @@ void FastInitialLayout::executeReal(bool)
 
             nodeQueue.push(childNodeId);
 
-            auto h = -1.0f + 2.0f * (i - 1.0f) / static_cast<float>(edgeIds.size() - 1 + edgeCountOffset);
+            auto h = -1.0f + 2.0f * (i - 1.0f) / static_cast<float>(
+                static_cast<int>(edgeIds.size()) - 1 + edgeCountOffset);
             auto theta = std::acos(h);
-            phi = phi + 3.6f / (std::sqrt((static_cast<float>(edgeIds.size() + edgeCountOffset)) * (1.0f - h * h)));
+            phi = phi + 3.6f / (std::sqrt((static_cast<float>(
+                static_cast<int>(edgeIds.size()) + edgeCountOffset)) * (1.0f - h * h)));
             phi = std::fmod(phi, 2.0f * static_cast<float>(Constants::Pi()));
 
             QVector3D offsetPosition(h, std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta));

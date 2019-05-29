@@ -318,7 +318,7 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
     _dimensions = dimensions;
 
-    float aspectRatio = _dimensions.width() / _dimensions.height();
+    float aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
     _fovy = 60.0f;
     _fovx = _fovy * aspectRatio;
 

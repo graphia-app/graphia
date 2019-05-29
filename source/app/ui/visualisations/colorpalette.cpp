@@ -128,13 +128,13 @@ QColor ColorPalette::get(const QString& value, int index) const
 
     if(!_colors.empty())
     {
-        auto colorIndex = index % _colors.size();
+        auto colorIndex = index % static_cast<int>(_colors.size());
         auto color = _colors.at(colorIndex);
         auto h = color.hue();
         auto s = color.saturation();
         auto v = color.value();
 
-        auto hueIndex = index / _colors.size();
+        auto hueIndex = index / static_cast<int>(_colors.size());
         if(hueIndex > 0)
         {
             if(_defaultColor.isValid())

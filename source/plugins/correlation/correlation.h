@@ -115,7 +115,7 @@ public:
             cost += rowA->computeCostHint();
 
             if(parser != nullptr)
-                parser->setProgress((cost * 100) / totalCost);
+                parser->setProgress(static_cast<int>((cost * 100) / totalCost));
 
             return edges;
         });

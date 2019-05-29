@@ -185,17 +185,8 @@ void SDFComputeJob::generateSDF()
     // Debug code to pull out the SDF texture
     if(u::pref("debug/saveGlyphMaps").toBool())
     {
-        auto imageSize = [](const QImage& image)
-        {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-            return image.sizeInBytes();
-#else
-            return image.byteCount();
-#endif
-        };
-
-        auto pixelCount = static_cast<int>((imageSize(_glyphMap->images().at(0)) / (scaleFactor * scaleFactor)) *
-                                           _glyphMap->images().size());
+        auto pixelCount = static_cast<int>((static_cast<int>(_glyphMap->images().at(0).sizeInBytes()) /
+            (scaleFactor * scaleFactor)) * _glyphMap->images().size());
         std::vector<uchar> pixels(pixelCount);
         glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
@@ -203,14 +194,16 @@ void SDFComputeJob::generateSDF()
         // Save each layer as its own image for debug
         for(int layer = 0; layer < numImages; ++layer)
         {
-            int offset = (imageSize(_glyphMap->images().at(0)) / (scaleFactor * scaleFactor)) * layer;
+            int offset = (static_cast<int>(_glyphMap->images().at(0).sizeInBytes()) /
+                (scaleFactor * scaleFactor)) * layer;
             QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
             sdfImage.save(QDir::currentPath() + "/SDF" + QString::number(layer) + ".png");
         }
 
         // Print Memory consumption
         int memoryConsumption = (renderWidth * renderHeight * 4) * numImages;
-        qDebug() << "SDF texture memory consumption MB:" << memoryConsumption / (1000.0f * 1000.0f);
+        qDebug() << "SDF texture memory consumption MB:" <<
+            static_cast<float>(memoryConsumption) / (1000.0f * 1000.0f);
     }
 
     glDeleteTextures(1, &glyphTexture);

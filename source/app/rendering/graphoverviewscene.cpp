@@ -169,8 +169,8 @@ float GraphOverviewScene::minZoomFactor() const
     if(_componentLayout->boundingWidth() <= 0.0f && _componentLayout->boundingHeight() <= 0.0f)
         return 1.0f;
 
-    float minWidthZoomFactor = _width / _componentLayout->boundingWidth();
-    float minHeightZoomFactor = _height / _componentLayout->boundingHeight();
+    float minWidthZoomFactor = static_cast<float>(_width) / _componentLayout->boundingWidth();
+    float minHeightZoomFactor = static_cast<float>(_height) / _componentLayout->boundingHeight();
 
     return std::min(minWidthZoomFactor, minHeightZoomFactor);
 }
