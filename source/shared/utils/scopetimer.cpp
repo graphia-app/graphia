@@ -49,7 +49,7 @@ void ScopeTimerManager::reportToQDebug() const
 
         if(samples.size() > 1)
         {
-            auto sum = std::accumulate(samples.begin(), samples.end(), 0ll);
+            auto sum = std::accumulate(samples.begin(), samples.end(), 0LL);
             double mean = static_cast<double>(sum) / samples.size();
             auto minMax = std::minmax_element(samples.begin(), samples.end());
 

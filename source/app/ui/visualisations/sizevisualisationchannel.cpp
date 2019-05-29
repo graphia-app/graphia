@@ -4,7 +4,7 @@
 
 void SizeVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
-    elementVisual._size = value;
+    elementVisual._size = static_cast<float>(value);
 }
 
 QString SizeVisualisationChannel::description(ElementType elementType, ValueType) const

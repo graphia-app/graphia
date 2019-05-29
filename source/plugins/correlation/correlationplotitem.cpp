@@ -830,6 +830,9 @@ void CorrelationPlotItem::populateIQRPlot()
 
 void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
 {
+    if(_meanPlot == nullptr)
+        return;
+
     auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
