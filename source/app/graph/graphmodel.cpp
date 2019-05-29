@@ -1012,7 +1012,7 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
     emit attributesChanged(u::toQStringList(addedAttributeNames), u::toQStringList(removedAttributeNames));
 }
 
-void GraphModel::onAttributeValuesChanged(QStringList attributeNames)
+void GraphModel::onAttributeValuesChanged(const QStringList& attributeNames)
 {
     for(const auto& attributeName : attributeNames)
         emit attributeValuesChanged(attributeName);

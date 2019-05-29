@@ -108,7 +108,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
     QVector3D coneTip(0.0f, _length * 0.5f, 0.0f);
 
     // Iterate over longitudes (slices)
-    for(auto slice = 0U; slice < _slices + 1; slice++)
+    for(size_t slice = 0U; slice < _slices + 1; slice++)
     {
         const float theta = static_cast<float>(slice) * dTheta;
         const float cosTheta = std::cos(theta);
@@ -258,7 +258,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     index = 0;
 
-    for(auto slice = 0U; slice < _slices; slice++)
+    for(size_t slice = 0U; slice < _slices; slice++)
     {
         auto baseIndex = slice * 4;
 

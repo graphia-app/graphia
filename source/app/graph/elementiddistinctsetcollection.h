@@ -412,7 +412,7 @@ public:
     {
     public:
         using iterator_base::iterator_base;
-        const typename iterator_base::reference operator*() const { return this->_p; }
+        typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }
@@ -569,7 +569,7 @@ public:
     {
     public:
         using iterator_base::iterator_base;
-        const typename iterator_base::reference operator*() const { return this->_p; }
+        typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }

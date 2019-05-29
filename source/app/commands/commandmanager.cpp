@@ -198,7 +198,7 @@ bool CommandManager::commandIsCancellable() const
     return false;
 }
 
-const std::vector<QString> CommandManager::undoableCommandDescriptions() const
+std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
@@ -213,7 +213,7 @@ const std::vector<QString> CommandManager::undoableCommandDescriptions() const
     return commandDescriptions;
 }
 
-const std::vector<QString> CommandManager::redoableCommandDescriptions() const
+std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;

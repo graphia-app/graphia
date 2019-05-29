@@ -244,7 +244,7 @@ void Camera::updateOrthogonalProjection()
     _viewProjectionMatrixDirty = true;
 }
 
-const Ray Camera::rayForViewportCoordinates(int x, int y) const
+Ray Camera::rayForViewportCoordinates(int x, int y) const
 {
     Line3D line = lineForViewportCoordinates(x, y);
 

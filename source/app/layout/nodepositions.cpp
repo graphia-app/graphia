@@ -7,7 +7,7 @@ const QVector3D& NodePositions::get(NodeId nodeId) const
     return elementFor(nodeId).newest();
 }
 
-const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
+QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
 {
     return elementFor(nodeId).mean(_smoothing) * _scale;
 }

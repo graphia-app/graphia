@@ -49,8 +49,8 @@ public:
     bool commandIsCancellable() const;
     bool commandIsCancelling() const { return _cancelling; }
 
-    const std::vector<QString> undoableCommandDescriptions() const;
-    const std::vector<QString> redoableCommandDescriptions() const;
+    std::vector<QString> undoableCommandDescriptions() const;
+    std::vector<QString> redoableCommandDescriptions() const;
 
     QString nextUndoAction() const;
     QString nextRedoAction() const;

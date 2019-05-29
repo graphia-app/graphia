@@ -16,7 +16,7 @@ namespace u
         bool _deleteWatcherOnDestruction = true;
 
     public:
-        _Then(QFutureWatcher<AsyncFnResult>* watcher) :
+        explicit _Then(QFutureWatcher<AsyncFnResult>* watcher) :
             _watcher(watcher)
         {}
 

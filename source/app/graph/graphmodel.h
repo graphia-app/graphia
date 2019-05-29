@@ -143,7 +143,7 @@ private slots:
     void onMutableGraphChanged(const Graph* graph);
     void onTransformedGraphWillChange(const Graph* graph);
     void onTransformedGraphChanged(const Graph* graph);
-    void onAttributeValuesChanged(QStringList attributeNames);
+    void onAttributeValuesChanged(const QStringList& attributeNames);
 
 signals:
     void visualsWillChange();

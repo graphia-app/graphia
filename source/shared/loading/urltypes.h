@@ -27,7 +27,7 @@ private:
 
         const QString& individualDescription() const { return _individualDescription; }
         const QString& collectiveDescription() const { return _collectiveDescription; }
-        const QStringList extensions() const { return _extensions; }
+        QStringList extensions() const { return _extensions; }
 
     private:
         QString _individualDescription;

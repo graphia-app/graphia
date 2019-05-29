@@ -29,7 +29,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target) const
 
         size_t numEdgesToRetain = std::max(minimum, (edgeIds.size() * percentage) / 100);
 
-        for(auto i = 0u; i < numEdgesToRetain; i++)
+        for(size_t i = 0u; i < numEdgesToRetain; i++)
         {
             auto index = distribution(generator);
             removees.set(edgeIds[index], false);

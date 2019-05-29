@@ -752,7 +752,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, [this](bool, QString, QString pastParticiple)
+    connect(&_commandManager, &CommandManager::commandCompleted,
+    [this](bool, const QString&, const QString& pastParticiple)
     {
         // Commands might set the phase and neglect to unset it
         _graphModel->mutableGraph().clearPhase();

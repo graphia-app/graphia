@@ -32,7 +32,7 @@ public:
     int smoothing() const { return _smoothing; }
 
     const QVector3D& get(NodeId nodeId) const;
-    const QVector3D getScaledAndSmoothed(NodeId nodeId) const;
+    QVector3D getScaledAndSmoothed(NodeId nodeId) const;
     void set(NodeId nodeId, const QVector3D& position);
     void setExact(NodeId nodeId, const QVector3D& position);
 

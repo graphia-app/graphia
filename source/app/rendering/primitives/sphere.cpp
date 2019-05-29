@@ -109,7 +109,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
 
     // Iterate over latitudes (rings)
     size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
-    for(auto lat = 0U; lat < _rings + 1; ++lat)
+    for(size_t lat = 0U; lat < _rings + 1; ++lat)
     {
         const float phi = Constants::Pi() / 2.0f - static_cast<float>(lat) * dPhi;
         const float cosPhi = std::cos(phi);
@@ -117,7 +117,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
         const float v = 1.0f - static_cast<float>(lat) * dv;
 
         // Iterate over longitudes (slices)
-        for(auto lon = 0U; lon < _slices + 1; ++lon)
+        for(size_t lon = 0U; lon < _slices + 1; ++lon)
         {
             const float theta = static_cast<float>(lon) * dTheta;
             const float cosTheta = std::cos(theta);
@@ -152,7 +152,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     // top cap
     {
         const auto nextRingStartIndex = _slices + 1;
-        for(auto j = 0U; j < _slices; ++j)
+        for(size_t j = 0U; j < _slices; ++j)
         {
             indices[index] = static_cast<unsigned int>(nextRingStartIndex + j);
             indices[index+1] = 0;
@@ -161,12 +161,12 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
         }
     }
 
-    for(auto i = 1U; i < (_rings - 1); ++i)
+    for(size_t i = 1U; i < (_rings - 1); ++i)
     {
         const auto ringStartIndex = i *(_slices + 1);
         const auto nextRingStartIndex = (i + 1) *(_slices + 1);
 
-        for(auto j = 0U; j < _slices; ++j)
+        for(size_t j = 0U; j < _slices; ++j)
         {
             // Split the quad into two triangles
             indices[index]   = static_cast<unsigned int>(ringStartIndex + j);
@@ -184,7 +184,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     {
         const auto ringStartIndex = (_rings - 1) *(_slices + 1);
         const auto nextRingStartIndex = (_rings) *(_slices + 1);
-        for(auto j = 0U; j < _slices; ++j)
+        for(size_t j = 0U; j < _slices; ++j)
         {
             indices[index] = static_cast<unsigned int>(ringStartIndex + j + 1);
             indices[index+1] = static_cast<unsigned int>(nextRingStartIndex);

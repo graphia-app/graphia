@@ -21,7 +21,7 @@ public:
     ColumnAnnotation(QString name, const Iterator& begin, const Iterator& end);
 
     const QString& name() const { return _name; }
-    const std::set<QString> uniqueValues() const { return _uniqueValues; }
+    std::set<QString> uniqueValues() const { return _uniqueValues; }
 
     const QString& valueAt(size_t index) const { return _values.at(index); }
 };

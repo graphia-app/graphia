@@ -67,7 +67,7 @@ public:
 
     ComponentId componentId() const { return _componentId; }
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
-    const std::vector<const IEdge*> edges() const { return _edges; }
+    std::vector<const IEdge*> edges() const { return _edges; }
 
     NodeId focusNodeId() const;
     bool focusNodeIsVisible() const;

@@ -60,7 +60,7 @@ public:
     QMatrix4x4 projectionMatrix() const;
     QMatrix4x4 viewProjectionMatrix() const;
 
-    const Ray rayForViewportCoordinates(int x, int y) const;
+    Ray rayForViewportCoordinates(int x, int y) const;
     Line3D lineForViewportCoordinates(int x, int y) const;
     Frustum frustumForViewportCoordinates(int x1, int y1, int x2, int y2) const;
     ConicalFrustum conicalFrustumForViewportCoordinates(int x, int y, int radius) const;
