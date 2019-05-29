@@ -2474,7 +2474,8 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
                 {"position", {v.x(), v.y(), v.z()}}
             });
 
-            command.setProgress((i++ * 100) / _graphModel->graph().numNodes());
+            command.setProgress(static_cast<int>((i++ * 100u) /
+                static_cast<uint64_t>(_graphModel->graph().numNodes())));
         }
 
         command.setProgress(-1);

@@ -38,13 +38,13 @@ void GraphComponentScene::update(float t)
     switch(_transitionStyle)
     {
     case TransitionStyle::SlideLeft:
-        offset = (1.0f - _transitionValue) * _width;
-        outOffset = offset - _width;
+        offset = (1.0f - _transitionValue) * static_cast<float>(_width);
+        outOffset = offset - static_cast<float>(_width);
         break;
 
     case TransitionStyle::SlideRight:
-        offset = -(1.0f - _transitionValue) * _width;
-        outOffset = offset + _width;
+        offset = -(1.0f - _transitionValue) * static_cast<float>(_width);
+        outOffset = offset + static_cast<float>(_width);
         break;
 
     default:

@@ -35,7 +35,7 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 
         bytesRead += numBytes;
 
-        setProgress((bytesRead * 100) / totalBytes);
+        setProgress(static_cast<int>((bytesRead * 100) / totalBytes));
     } while(!input.atEnd());
 
     auto jsonBody = parseJsonFrom(byteArray, this);

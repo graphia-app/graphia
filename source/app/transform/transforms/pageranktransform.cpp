@@ -80,7 +80,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
                 {
                     auto oppositeNodeId = target.edgeById(edgeId).oppositeId(nodeId);
                     prSum += pageRankVector[nodeToIndexMap[oppositeNodeId]] /
-                            target.nodeById(oppositeNodeId).degree();
+                        static_cast<float>(target.nodeById(oppositeNodeId).degree());
                 }
                  newPageRankVector[matrixId] = (prSum * PAGERANK_DAMPING) +
                          ((1.0f - PAGERANK_DAMPING) / componentNodeCount);

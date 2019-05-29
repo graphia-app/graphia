@@ -67,7 +67,8 @@ void PercentNNTransform::apply(TransformedGraph& target) const
             removees.set(*it, false);
         }
 
-        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numNodes()));
+        target.setProgress(static_cast<int>((progress++ * 100u) /
+            static_cast<uint64_t>(target.numNodes())));
     }
 
     progress = 0;
@@ -90,7 +91,8 @@ void PercentNNTransform::apply(TransformedGraph& target) const
                 rank._mean = static_cast<double>(rank._source + rank._target) * 0.5;
         }
 
-        target.setProgress((progress++ * 100u) / static_cast<uint64_t>(target.numEdges()));
+        target.setProgress(static_cast<int>((progress++ * 100u) /
+            static_cast<uint64_t>(target.numEdges())));
     }
 
     target.setProgress(-1);

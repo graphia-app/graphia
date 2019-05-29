@@ -11,6 +11,7 @@ void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4
                                      const QVector3D& parentNodePosition, NodeId childNodeId,
                                      NodeArray<QVector3D>& directionNodeVectors)
 {
+    const float SPHERE_RADIUS = 20.0f;
     offsetPosition = offsetPosition * SPHERE_RADIUS;
     offsetPosition = offsetPosition * orientationMatrix;
 

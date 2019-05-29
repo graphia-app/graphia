@@ -449,7 +449,7 @@ void GraphRenderer::resetTime()
 
 float GraphRenderer::secondsElapsed()
 {
-    float time = _time.elapsed() / 1000.0f;
+    float time = static_cast<float>(_time.elapsed()) / 1000.0f;
     float dTime = time - _lastTime;
     _lastTime = time;
 
