@@ -193,7 +193,7 @@ void GlyphMap::renderImages(const QFont &font)
         auto glyph = glyphPair.first;
         auto path = rawFont.pathForGlyph(glyph);
         auto boundingRect = path.boundingRect();
-        float glyphWidth = static_cast<float>(boundingRect.x() + boundingRect.width());
+        auto glyphWidth = static_cast<float>(boundingRect.x() + boundingRect.width());
         float glyphAscent = boundingRect.y();
         float glyphHeight = boundingRect.height();
         float right = x + glyphWidth + padding;

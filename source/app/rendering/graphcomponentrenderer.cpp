@@ -283,8 +283,8 @@ QMatrix4x4 GraphComponentRenderer::subViewportMatrix() const
         static_cast<float>(_viewportHeight)) - 1.0f;
     m.translate(xTranslation, -yTranslation);
 
-    float xScale = static_cast<float>(_dimensions.width()) / _viewportWidth;
-    float yScale = static_cast<float>(_dimensions.height()) / _viewportHeight;
+    float xScale = static_cast<float>(_dimensions.width()) / static_cast<float>(_viewportWidth);
+    float yScale = static_cast<float>(_dimensions.height()) / static_cast<float>(_viewportHeight);
     m.scale(xScale, yScale);
 
     return m;
@@ -318,7 +318,7 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
     _dimensions = dimensions;
 
-    float aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
+    auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
     _fovy = 60.0f;
     _fovx = _fovy * aspectRatio;
 

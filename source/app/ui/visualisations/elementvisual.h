@@ -5,7 +5,7 @@
 
 struct ElementVisual : IElementVisual
 {
-    float _size = -1.0f;
+    double _size = -1.0f;
     QColor _outerColor;
     QColor _innerColor;
     QString _text;

@@ -271,7 +271,7 @@ void GraphCommonInteractor::leftMouseUp()
 // https://www.opengl.org/wiki/Object_Mouse_Trackball
 static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
 {
-    const float minDimension = static_cast<float>(std::min(width, height));
+    const auto minDimension = static_cast<float>(std::min(width, height));
     const float x = static_cast<float>(2 * cursor.x() - width) / minDimension;
     const float y = static_cast<float>(height - 2 * cursor.y()) / minDimension;
     const float d = std::sqrt(x * x + y * y);

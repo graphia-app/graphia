@@ -18,7 +18,7 @@ public:
     auto& operator*() { return (*_it).*member; }
     auto operator->() { return &((*_it).*member); }
 
-protected:
+private:
     It _it;
 };
 
@@ -45,7 +45,7 @@ public:
     auto begin() const { return make_map_key_iterator(_c->begin()); }
     auto end() const   { return make_map_key_iterator(_c->end()); }
 
-protected:
+private:
     C* _c;
 };
 
@@ -60,7 +60,7 @@ public:
     auto begin() const { return make_map_value_iterator(_c->begin()); }
     auto end() const   { return make_map_value_iterator(_c->end()); }
 
-protected:
+private:
     C* _c;
 };
 

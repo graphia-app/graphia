@@ -73,8 +73,6 @@ class Auth : public QObject
     Q_OBJECT
 
 public:
-    u::AesKey _aesKey;
-
     Auth();
 
     bool expired();
@@ -90,6 +88,8 @@ public:
     bool busy() const { return _timer.isActive(); }
 
 private:
+    u::AesKey _aesKey;
+
     QTimer _timer;
     QNetworkAccessManager _networkManager;
     QNetworkReply* _reply = nullptr;
