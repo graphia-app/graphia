@@ -327,6 +327,7 @@ QString GraphTransformConfig::asString() const
 
 std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 {
+    // cppcheck-suppress unreadVariable
     auto names = _attributes;
 
     struct ConditionVisitor

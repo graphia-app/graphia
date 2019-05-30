@@ -15,6 +15,7 @@ BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max) :
 
 BoundingBox2D::BoundingBox2D(const std::vector<QVector2D>& points)
 {
+    // cppcheck-suppress useInitializationList
     _min = _max = points[0];
     for(auto& point : points)
         expandToInclude(point);
@@ -89,6 +90,7 @@ BoundingBox3D::BoundingBox3D(const QVector3D& min, const QVector3D& max) :
 
 BoundingBox3D::BoundingBox3D(const std::vector<QVector3D>& points)
 {
+    // cppcheck-suppress useInitializationList
     _min = _max = points[0];
     for(auto& point : points)
         expandToInclude(point);

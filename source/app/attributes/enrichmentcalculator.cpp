@@ -31,8 +31,6 @@ double EnrichmentCalculator::fishers(int a, int b, int c, int d)
     double ac = a + c;
     double bd = b + d;
 
-    double leftPval  = 0.0;
-    double rightPval = 0.0;
     double twoPval   = 0.0;
 
     // range of variation
@@ -42,16 +40,9 @@ double EnrichmentCalculator::fishers(int a, int b, int c, int d)
     // Fisher's exact test
     double crit = hyperGeometricProb(a, ab, cd, ac, bd);
 
-    leftPval = rightPval = twoPval = 0.0;
     for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
         double prob = hyperGeometricProb(x, ab, cd, ac, bd);
-
-        if(x <= a)
-            leftPval += prob;
-
-        if(x >= a)
-            rightPval += prob;
 
         if(prob <= crit)
             twoPval += prob;
@@ -79,19 +70,11 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
         ++attributeValueEntryCountBTotal[stringAttributeB];
     }
 
-    int n = 0;
-    int selectedInCategory = 0;
-    int r1 = 0;
-    double fexp = 0.0;
-    std::vector<double> stdevs(4);
-    double expectedNo = 0.0;
-    double expectedDev = 0.0;
-
     // Comparing
 
     uint64_t progress = 0;
-    auto iterations = static_cast<uint64_t>(attributeValueEntryCountBTotal.size()
-                                     * attributeValueEntryCountATotal.size());
+    auto iterations = static_cast<uint64_t>(attributeValueEntryCountBTotal.size() *
+        attributeValueEntryCountATotal.size());
 
     // Get all the nodeIds for each AttributeFor value
     // Maps of vectors uhoh.
@@ -112,21 +95,21 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
             command.setProgress(static_cast<int>(progress * 100U / iterations));
             progress++;
 
-            n = graphModel->graph().numNodes();
+            auto n = graphModel->graph().numNodes();
 
-            selectedInCategory = 0;
+            int selectedInCategory = 0;
             for(auto nodeId : selectedNodes)
             {
                 if(attributeB->stringValueOf(nodeId) == attributeValueB)
                     selectedInCategory++;
             }
 
-            r1 = attributeValueEntryCountBTotal[attributeValueB];
-            fexp = static_cast<double>(r1) / static_cast<double>(n);
-            stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
+            int r1 = attributeValueEntryCountBTotal[attributeValueB];
+            auto fexp = static_cast<double>(r1) / static_cast<double>(n);
+            auto stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-            expectedNo = (static_cast<double>(r1) / n) * selectedNodes.size();
-            expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
+            auto expectedNo = (static_cast<double>(r1) / n) * selectedNodes.size();
+            auto expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
             auto c1 = static_cast<int>(selectedNodes.size());

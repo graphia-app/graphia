@@ -86,6 +86,7 @@ void CorrelationPlotWorker::renderPixmap()
         emit busyChanged();
     }
 
+    // cppcheck-suppress unreadVariable
     auto atExit = std::experimental::make_scope_exit([this]
     {
         if(_busy)

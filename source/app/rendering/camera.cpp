@@ -26,6 +26,7 @@ Camera::Camera(const Camera& other) :
     _viewMatrixDirty(other._viewMatrixDirty),
     _viewProjectionMatrixDirty(other._viewProjectionMatrixDirty)
 {
+    // cppcheck-suppress useInitializationList
     _viewMatrix = other._viewMatrix;
 
     switch(_projectionType)

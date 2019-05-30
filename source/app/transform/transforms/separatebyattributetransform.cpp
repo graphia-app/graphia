@@ -18,7 +18,6 @@ void SeparateByAttributeTransform::apply(TransformedGraph& target) const
     }
 
     auto attributeName = config().attributeNames().front();
-    auto attribute = _graphModel->attributeValueByName(attributeName);
 
     GraphTransformConfig::TerminalCondition condition
     {
