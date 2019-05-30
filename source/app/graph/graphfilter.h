@@ -16,13 +16,11 @@ private:
     template<typename ElementId>
     static bool elementIdFiltered(const std::vector<ElementConditionFn<ElementId>>& filters, ElementId elementId)
     {
-        for(auto& filter : filters)
+        return std::any_of(filters.begin(), filters.end(),
+        [elementId](const auto& filter)
         {
-            if(filter(elementId))
-                return true;
-        }
-
-        return false;
+            return filter(elementId);
+        });
     }
 
 public:

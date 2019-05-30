@@ -13,6 +13,7 @@
 #include <unordered_set>
 #include <memory>
 #include <mutex>
+#include <algorithm>
 
 class GraphComponent;
 class ComponentManager;
@@ -166,8 +167,11 @@ public:
         std::vector<Edge> edges;
         edges.reserve(edgeIds.size());
 
-        for(auto edgeId : edgeIds)
-            edges.emplace_back(edgeById(edgeId));
+        std::transform(edgeIds.begin(), edgeIds.end(), std::back_inserter(edges),
+        [this](auto edgeId)
+        {
+            return Edge(edgeById(edgeId));
+        });
 
         return edges;
     }

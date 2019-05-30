@@ -232,8 +232,8 @@ void ComponentManager::update(const Graph* graph)
 
     _updatesRequired.clear();
 
-    for(auto componentId : componentIdsToBeAdded)
-        _componentIds.push_back(componentId);
+    std::copy(componentIdsToBeAdded.begin(), componentIdsToBeAdded.end(),
+        std::back_inserter(_componentIds));
 
     std::stable_sort(_componentIds.begin(), _componentIds.end(),
     [this](auto a, auto b)

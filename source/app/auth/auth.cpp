@@ -143,8 +143,11 @@ void Auth::parseAuthToken()
     {
         _allowedPluginRegexps.clear();
         auto value = autoTokenJson[QStringLiteral("allowedPlugins")].toArray();
-        for(const auto& v : value)
-            _allowedPluginRegexps.emplace_back(v.toString());
+        std::transform(value.begin(), value.end(), std::back_inserter(_allowedPluginRegexps),
+        [](const auto& v)
+        {
+            return QRegularExpression(v.toString());
+        });
     }
 }
 

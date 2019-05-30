@@ -75,11 +75,11 @@ namespace u
     {
         std::vector<T> result;
 
-        for(const auto& value : a)
+        std::copy_if(a.begin(), a.end(), std::back_inserter(result),
+        [&b](const auto& value)
         {
-            if(!contains(b, value))
-                result.emplace_back(value);
-        }
+            return !contains(b, value);
+        });
 
         return result;
     }
@@ -92,13 +92,11 @@ namespace u
         if(a.size() != b.size())
             return true;
 
-        for(const auto& value : a)
+        return std::any_of(a.begin(), a.end(),
+        [&b](const auto& value)
         {
-            if(!contains(b, value))
-                return true;
-        }
-
-        return false;
+            return !contains(b, value);
+        });
     }
 
     template<typename T,
@@ -116,11 +114,11 @@ namespace u
     {
         std::vector<T> result;
 
-        for(const auto& value : a)
+        std::copy_if(a.begin(), a.end(), std::back_inserter(result),
+        [&b](const auto& value)
         {
-            if(contains(b, value))
-                result.emplace_back(value);
-        }
+            return contains(b, value);
+        });
 
         return result;
     }
@@ -129,8 +127,8 @@ namespace u
     std::vector<T> keysFor(const C<T, Args...>& container)
     {
         std::vector<T> keys;
-        for(const auto& key : make_key_wrapper(container))
-            keys.emplace_back(key);
+        auto keyWrapper = make_key_wrapper(container);
+        std::copy(keyWrapper.begin(), keyWrapper.end(), std::back_inserter(keys));
         return keys;
     }
 
@@ -138,8 +136,8 @@ namespace u
     std::vector<T> valuesFor(const C<T, Args...>& container)
     {
         std::vector<T> values;
-        for(const auto& value : make_value_wrapper(container))
-            values.emplace_back(value);
+        auto valueWrapper = make_value_wrapper(container);
+        std::copy(valueWrapper.begin(), valueWrapper.end(), std::back_inserter(values));
         return values;
     }
 

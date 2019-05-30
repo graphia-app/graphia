@@ -66,11 +66,14 @@ Application::~Application() = default;
 
 IPlugin* Application::pluginForName(const QString& pluginName) const
 {
-    for(const auto& loadedPlugin : _loadedPlugins)
+    auto pluginIt = std::find_if(_loadedPlugins.begin(), _loadedPlugins.end(),
+    [&pluginName](const auto& loadedPlugin)
     {
-        if(loadedPlugin._instance->name().compare(pluginName) == 0)
-            return loadedPlugin._instance;
-    }
+        return loadedPlugin._instance->name().compare(pluginName) == 0;
+    });
+
+    if(pluginIt != _loadedPlugins.end())
+        return pluginIt->_instance;
 
     return nullptr;
 }
@@ -183,11 +186,15 @@ void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
 
 ISaverFactory* Application::saverFactoryByName(const QString& name)
 {
-    for(const auto& factory : _factories)
+    auto factoryIt = std::find_if(_factories.begin(), _factories.end(),
+    [&name](const auto& factory)
     {
-        if(factory->name() == name)
-            return factory.get();
-    }
+        return factory->name() == name;
+    });
+
+    if(factoryIt != _factories.end())
+        return factoryIt->get();
+
     return nullptr;
 }
 
