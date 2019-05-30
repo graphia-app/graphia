@@ -151,7 +151,8 @@ namespace u
 
         auto sample = container;
 
-        std::default_random_engine dre;
+        std::random_device rd;
+        std::default_random_engine dre(rd());
 
         for(size_t i = 0; i < numSamples; i++)
         {

@@ -8,9 +8,6 @@
 #include "shared/utils/container.h"
 #include "shared/attributes/iattribute.h"
 
-static std::mt19937 seededGenerator;
-static std::uniform_real_distribution<> distribution;
-
 static double combineLogs(double n, double r)
 {
     return std::lgamma(n + 1) - std::lgamma(r + 1) - std::lgamma(n - r + 1);
@@ -63,12 +60,10 @@ double EnrichmentCalculator::fishers(int a, int b, int c, int d)
     return twoPval;
 }
 
-EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(const QString& attributeAName, const QString& attributeBName,
-                                                       IGraphModel* graphModel, ICommand& command)
+EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
+    const QString& attributeAName, const QString& attributeBName,
+    IGraphModel* graphModel, ICommand& command)
 {
-    seededGenerator = std::mt19937(1337);
-    distribution = std::uniform_real_distribution<>(0.0f, 1.0f);
-
     // Count of attribute values within the attribute
     std::map<QString, int> attributeValueEntryCountATotal;
     std::map<QString, int> attributeValueEntryCountBTotal;
@@ -142,8 +137,11 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
             row[EnrichmentTableModel::Results::SelectionA] = attributeValueA;
             row[EnrichmentTableModel::Results::SelectionB] = attributeValueB;
-            row[EnrichmentTableModel::Results::Observed] = QString::number(selectedInCategory) + " / " + QString::number(selectedNodes.size());
-            row[EnrichmentTableModel::Results::ExpectedTrial] = QString::number(expectedNo, 'f', 2) + " ± " + QString::number(expectedDev) + " / " + QString::number(selectedNodes.size());
+            row[EnrichmentTableModel::Results::Observed] =
+                QString::number(selectedInCategory) + " / " + QString::number(selectedNodes.size());
+            row[EnrichmentTableModel::Results::ExpectedTrial] =
+                QString::number(expectedNo, 'f', 2) + " ± " +
+                QString::number(expectedDev) + " / " + QString::number(selectedNodes.size());
             row[EnrichmentTableModel::Results::OverRep] = QString::number(selectedInCategory / expectedNo, 'f', 2);
             row[EnrichmentTableModel::Results::Fishers] = f;
             row[EnrichmentTableModel::Results::AdjustedFishers] = f * u::keysFor(attributeValueEntryCountBTotal).size();
@@ -164,6 +162,10 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, doub
     double overRepresentationAvg = 0.0;
     double observationStdDev = 0.0;
     double overRepresentationStdDev = 0.0;
+
+    std::random_device rd;
+    auto seededGenerator = std::mt19937(rd());
+    auto distribution = std::uniform_real_distribution<>(0.0f, 1.0f);
 
     for(int i = 0; i < NUMBER_OF_TRIALS; i++)
     {

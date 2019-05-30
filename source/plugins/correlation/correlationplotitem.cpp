@@ -1128,7 +1128,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         }
     }
 
-    caYAxis->setTickPen(QPen(Qt::transparent));
+    caYAxis->setTickPen(QPen(Qt::transparent)); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
     caYAxis->setTicker(columnAnnotationTicker);
     caYAxis->setRange(0.0, numColumnAnnotations);
 

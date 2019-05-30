@@ -36,6 +36,4 @@ namespace u
     }
 } // namespace u
 
-#define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))
-
 #endif // UTILS_H
