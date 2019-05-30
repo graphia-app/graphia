@@ -566,7 +566,8 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
 
     for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
     {
-        double runningTotal = std::accumulate(_selectedRows.begin(), _selectedRows.end(), 0.0,
+        const auto& selectedRows = qAsConst(_selectedRows);
+        double runningTotal = std::accumulate(selectedRows.begin(), selectedRows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
             return partial + _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
@@ -657,7 +658,8 @@ void CorrelationPlotItem::populateMedianLinePlot()
     for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         rowsEntries.clear();
-        std::transform(_selectedRows.begin(), _selectedRows.end(), std::back_inserter(rowsEntries),
+        const auto& selectedRows = qAsConst(_selectedRows);
+        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
         [this, col](auto row)
         {
             return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
@@ -767,7 +769,8 @@ void CorrelationPlotItem::populateIQRPlot()
     {
         rowsEntries.clear();
         outliers.clear();
-        std::transform(_selectedRows.begin(), _selectedRows.end(), std::back_inserter(rowsEntries),
+        const auto& selectedRows = qAsConst(_selectedRows);
+        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
         [this, col](auto row)
         {
             return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));

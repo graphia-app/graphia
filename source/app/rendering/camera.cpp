@@ -23,12 +23,10 @@ Camera::Camera(const Camera& other) :
     _right(other._right),
     _bottom(other._bottom),
     _top(other._top),
+    _viewMatrix(other._viewMatrix),
     _viewMatrixDirty(other._viewMatrixDirty),
     _viewProjectionMatrixDirty(other._viewProjectionMatrixDirty)
 {
-    // cppcheck-suppress useInitializationList
-    _viewMatrix = other._viewMatrix;
-
     switch(_projectionType)
     {
     default:
