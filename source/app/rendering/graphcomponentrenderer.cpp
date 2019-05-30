@@ -110,8 +110,13 @@ void GraphComponentRenderer::synchronise()
     Q_ASSERT(component != nullptr);
 
     _nodeIds = component->nodeIds();
-    for(auto edgeId : component->edgeIds())
-        _edges.emplace_back(&_graphModel->graph().edgeById(edgeId));
+
+    const auto& edgeIds = component->edgeIds();
+    std::transform(edgeIds.begin(), edgeIds.end(), std::back_inserter(_edges),
+    [this](auto edgeId)
+    {
+        return &_graphModel->graph().edgeById(edgeId);
+    });
 }
 
 void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& other)

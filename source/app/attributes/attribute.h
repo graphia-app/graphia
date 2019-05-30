@@ -358,8 +358,11 @@ public:
 
         result.reserve(values.size());
 
-        for(auto& value : values)
-            result.push_back({value.first, value.second});
+        std::transform(values.begin(), values.end(), std::back_inserter(result),
+        [](const auto& value)
+        {
+            return SharedValue{value.first, value.second};
+        });
 
         // Sort in reverse order of how often the value occurs
         QCollator collator;

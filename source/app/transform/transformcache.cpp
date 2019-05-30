@@ -143,11 +143,15 @@ const MutableGraph* TransformCache::graph() const
     // Return the last graph in the cache
     for(const auto& resultSet : make_iterator_range(_cache.rbegin(), _cache.rend()))
     {
-        for(const auto& cachedResult : make_iterator_range(resultSet.rbegin(), resultSet.rend()))
+        const auto& cachedResults = make_iterator_range(resultSet.rbegin(), resultSet.rend());
+        auto it = std::find_if(cachedResults.begin(), cachedResults.end(),
+        [](const auto& cachedResult)
         {
-            if(cachedResult._graph != nullptr)
-                return cachedResult._graph.get();
-        }
+            return cachedResult._graph != nullptr;
+        });
+
+        if(it != cachedResults.end())
+            return it->_graph.get();
     }
 
     return nullptr;

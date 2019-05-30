@@ -513,9 +513,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         for(const auto& nodeId : graph.nodeIds())
         {
             const auto& dataRow = dataRowForNodeId(nodeId);
-
-            for(auto value : dataRow)
-                array.emplace_back(value);
+            std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
 
             progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
         }
@@ -571,8 +569,12 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(!u::contains(jsonObject, "dataColumnNames"))
         return false;
 
-    for(const auto& dataColumnName : jsonObject["dataColumnNames"])
-        _dataColumnNames.emplace_back(QString::fromStdString(dataColumnName));
+    const auto& dataColumnNames = jsonObject["dataColumnNames"];
+    std::transform(dataColumnNames.begin(), dataColumnNames.end(), std::back_inserter(_dataColumnNames),
+    [](const auto& dataColumnName)
+    {
+        return QString::fromStdString(dataColumnName);
+    });
 
     uint64_t i = 0;
 

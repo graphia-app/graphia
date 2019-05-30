@@ -94,8 +94,10 @@ static json bookmarksAsJson(const Document& document)
     for(const auto& bookmark : bookmarks)
     {
         json nodeIds;
-        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
-            nodeIds.emplace_back(nodeId);
+
+        auto bookmarkedNodeIds = document.nodeIdsForBookmark(bookmark);
+        std::copy(bookmarkedNodeIds.begin(), bookmarkedNodeIds.end(),
+            std::back_inserter(nodeIds));
 
         auto byteArray = bookmark.toUtf8();
         auto bookmarkName = byteArray.constData();

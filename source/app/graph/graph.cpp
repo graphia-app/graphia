@@ -30,10 +30,7 @@ static void registerQtTypes()
 std::vector<EdgeId> Node::inEdgeIds() const
 {
     std::vector<EdgeId> edgeIds;
-
-    for(EdgeId edgeId : _inEdgeIds)
-        edgeIds.emplace_back(edgeId);
-
+    std::copy(_inEdgeIds.begin(), _inEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }
 
@@ -41,22 +38,14 @@ std::vector<EdgeId> Node::outEdgeIds() const
 {
     std::vector<EdgeId> edgeIds;
 
-    for(EdgeId edgeId : _outEdgeIds)
-        edgeIds.emplace_back(edgeId);
-
     return edgeIds;
 }
 
 std::vector<EdgeId> Node::edgeIds() const
 {
     std::vector<EdgeId> edgeIds;
-
-    for(EdgeId edgeId : _inEdgeIds)
-        edgeIds.emplace_back(edgeId);
-
-    for(EdgeId edgeId : _outEdgeIds)
-        edgeIds.emplace_back(edgeId);
-
+    std::copy(_inEdgeIds.begin(), _inEdgeIds.end(), std::back_inserter(edgeIds));
+    std::copy(_outEdgeIds.begin(), _outEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }
 

@@ -65,10 +65,7 @@ std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
     std::vector<QString> v;
     v.reserve(stringList.size());
-
-    for(const auto& string : stringList)
-        v.emplace_back(string);
-
+    std::copy(stringList.begin(), stringList.end(), std::back_inserter(v));
     return v;
 }
 
@@ -234,6 +231,7 @@ QString u::formatNumberSIPostfix(double value)
     for(const auto& postfix : postfixes)
     {
         if(value >= postfix._threshold)
+        // cppcheck-suppress useStlAlgorithm
         {
             auto d = value / postfix._divider;
             auto s = QString::number(d, 'f', 1);

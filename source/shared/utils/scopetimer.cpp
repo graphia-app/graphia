@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 ScopeTimer::ScopeTimer(QString name, size_t numSamples) :
@@ -53,9 +54,11 @@ void ScopeTimerManager::reportToQDebug() const
             double mean = static_cast<double>(sum) / samples.size();
             auto minMax = std::minmax_element(samples.begin(), samples.end());
 
-            double stdDev = 0.0;
-            for(const auto& value : samples)
-                stdDev += ((value - mean) * (value - mean));
+            double stdDev = std::accumulate(samples.begin(), samples.end(), 0.0,
+            [mean](auto partial, auto value)
+            {
+                return partial + ((value - mean) * (value - mean));
+            });
 
             stdDev /= samples.size();
             stdDev = std::sqrt(stdDev);

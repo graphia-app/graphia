@@ -30,8 +30,11 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
         columnValues.reserve(dataRows.size());
 
         // Get column values
-        for(const auto& dataRow : dataRows)
-            columnValues.push_back(dataRow.valueAt(column));
+        std::transform(dataRows.begin(), dataRows.end(), std::back_inserter(columnValues),
+        [column](const auto& dataRow)
+        {
+            return dataRow.valueAt(column);
+        });
 
         // Sort
         auto sortedValues = columnValues;

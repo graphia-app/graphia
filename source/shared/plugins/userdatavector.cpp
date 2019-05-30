@@ -140,7 +140,10 @@ bool UserDataVector::load(const QString& name, const json& jsonObject)
 
     _values.clear();
     for(const auto& value : jsonObject["values"])
+    {
+        // cppcheck-suppress useStlAlgorithm
         _values.push_back(value);
+    }
 
     return true;
 }

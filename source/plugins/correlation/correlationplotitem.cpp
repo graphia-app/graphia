@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 
 CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     QCustomPlot& customPlot, QCPLayer& tooltipLayer) :
@@ -565,9 +566,11 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
 
     for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
     {
-        double runningTotal = 0.0;
-        for(auto row : qAsConst(_selectedRows))
-            runningTotal += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+        double runningTotal = std::accumulate(_selectedRows.begin(), _selectedRows.end(), 0.0,
+        [this, col](auto partial, auto row)
+        {
+            return partial + _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+        });
 
         yDataAvg.append(runningTotal / _selectedRows.length());
 
@@ -654,8 +657,11 @@ void CorrelationPlotItem::populateMedianLinePlot()
     for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
     {
         rowsEntries.clear();
-        for(auto row : qAsConst(_selectedRows))
-            rowsEntries.push_back(_pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])));
+        std::transform(_selectedRows.begin(), _selectedRows.end(), std::back_inserter(rowsEntries),
+        [this, col](auto row)
+        {
+            return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+        });
 
         if(!_selectedRows.empty())
         {
@@ -761,8 +767,11 @@ void CorrelationPlotItem::populateIQRPlot()
     {
         rowsEntries.clear();
         outliers.clear();
-        for(auto row : qAsConst(_selectedRows))
-            rowsEntries.push_back(_pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])));
+        std::transform(_selectedRows.begin(), _selectedRows.end(), std::back_inserter(rowsEntries),
+        [this, col](auto row)
+        {
+            return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+        });
 
         if(!_selectedRows.empty())
         {

@@ -1,6 +1,7 @@
 #include "nodepositions.h"
 
 #include <cmath>
+#include <numeric>
 
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
@@ -45,20 +46,24 @@ QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
 QVector3D NodePositions::centreOfMassScaledAndSmoothed(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
 {
     float reciprocal = 1.0f / nodeIds.size();
-    QVector3D centreOfMass = QVector3D();
 
-    for(auto nodeId : nodeIds)
-        centreOfMass += (nodePositions.getScaledAndSmoothed(nodeId) * reciprocal);
-
-    return centreOfMass;
+    return std::accumulate(nodeIds.begin(), nodeIds.end(), QVector3D(),
+    [&](const auto& centreOfMass, auto nodeId)
+    {
+        return centreOfMass + (nodePositions.getScaledAndSmoothed(nodeId) * reciprocal);
+    });
 }
 
 std::vector<QVector3D> NodePositions::positionsVector(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
 {
     std::vector<QVector3D> positionsVector;
     positionsVector.reserve(nodeIds.size());
-    for(NodeId nodeId : nodeIds)
-        positionsVector.push_back(nodePositions.get(nodeId));
+
+    std::transform(nodeIds.begin(), nodeIds.end(), std::back_inserter(positionsVector),
+    [&](auto nodeId)
+    {
+        return nodePositions.get(nodeId);
+    });
 
     return positionsVector;
 }
@@ -67,8 +72,12 @@ std::vector<QVector3D> NodePositions::positionsVectorScaled(const NodePositions&
 {
     std::vector<QVector3D> positionsVector;
     positionsVector.reserve(nodeIds.size());
-    for(NodeId nodeId : nodeIds)
-        positionsVector.push_back(nodePositions.getScaledAndSmoothed(nodeId));
+
+    std::transform(nodeIds.begin(), nodeIds.end(), std::back_inserter(positionsVector),
+    [&](auto nodeId)
+    {
+        return nodePositions.getScaledAndSmoothed(nodeId);
+    });
 
     return positionsVector;
 }

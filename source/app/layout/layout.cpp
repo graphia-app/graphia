@@ -137,13 +137,11 @@ bool LayoutThread::finished()
 
 bool LayoutThread::iterative()
 {
-    for(auto& layout : _layouts)
+    return std::any_of(_layouts.begin(), _layouts.end(),
+    [](const auto& layout)
     {
-        if(layout.second->iterative())
-            return true;
-    }
-
-    return false;
+       return layout.second->iterative();
+    });
 }
 
 void LayoutThread::uncancel()
@@ -160,13 +158,11 @@ void LayoutThread::unfinish()
 
 bool LayoutThread::allLayoutsFinished()
 {
-    for(auto& layout : _layouts)
+    return std::all_of(_layouts.begin(), _layouts.end(),
+    [](const auto& layout)
     {
-        if(!layoutIsFinished(*layout.second))
-            return false;
-    }
-
-    return true;
+       return layoutIsFinished(*layout.second);
+    });
 }
 
 bool LayoutThread::workToDo()

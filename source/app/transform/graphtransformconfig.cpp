@@ -311,6 +311,7 @@ QString GraphTransformConfig::asString() const
 
         for(const auto& parameter : _parameters)
         {
+            // cppcheck-suppress useStlAlgorithm
             s += QStringLiteral(" \"%1\" = %2").arg(parameter._name,
                 parameter.valueAsString(true));
         }

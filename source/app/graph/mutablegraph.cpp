@@ -83,8 +83,7 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
     if(u::contains(_e._connections, undirectedEdge))
     {
         const auto& edgeIdDistinctSet = _e._connections.at(undirectedEdge);
-        for(auto edgeId : edgeIdDistinctSet)
-            edgeIds.push_back(edgeId);
+        std::copy(edgeIdDistinctSet.begin(), edgeIdDistinctSet.end(), std::back_inserter(edgeIds));
     }
 
     return edgeIds;

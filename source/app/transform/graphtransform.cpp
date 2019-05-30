@@ -71,22 +71,30 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
 
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const
 {
-    for(const auto& attributeParameter : attributeParameters())
+    const auto& p = attributeParameters();
+    auto it = std::find_if(p.begin(), p.end(),
+    [&](const auto& attributeParameter)
     {
-        if(attributeParameter.name() == parameterName)
-            return attributeParameter;
-    }
+        return attributeParameter.name() == parameterName;
+    });
+
+    if(it != p.end())
+        return *it;
 
     return {};
 }
 
 GraphTransformParameter GraphTransformFactory::parameter(const QString& parameterName) const
 {
-    for(const auto& parameter : parameters())
+    const auto& p = parameters();
+    auto it = std::find_if(p.begin(), p.end(),
+    [&](const auto& parameter)
     {
-        if(parameter.name() == parameterName)
-            return parameter;
-    }
+        return parameter.name() == parameterName;
+    });
+
+    if(it != p.end())
+        return *it;
 
     return {};
 }

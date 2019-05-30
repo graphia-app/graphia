@@ -272,11 +272,14 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
     if(jsonArray.size() != 2)
         return false;
 
-    for(const auto& i : jsonArray)
+    auto allObjects = std::all_of(jsonArray.begin(), jsonArray.end(),
+    [](const auto& i)
     {
-        if(!i.is_object())
-            return false;
-    }
+       return i.is_object();
+    });
+
+    if(!allObjects)
+        return false;
 
     auto jsonBody = jsonArray.at(1);
 

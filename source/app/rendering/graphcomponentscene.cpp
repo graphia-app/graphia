@@ -437,24 +437,21 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
     if(!visible())
         return;
 
-    for(auto merger : componentMergeSet.mergers())
-    {
-        if(merger == _componentId)
-        {
-            auto newComponentId = componentMergeSet.newComponentId();
-            auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
-            auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
+    const auto& mergers = componentMergeSet.mergers();
+    if(std::find(mergers.begin(), mergers.end(), _componentId) == mergers.end())
+        return;
 
-            _graphRenderer->executeOnRendererThread(
-            [this, newComponentId, newGraphComponentRenderer, oldGraphComponentRenderer]
-            {
-                // This occurs before GraphComponentRenderer::cleanup is called on oldGraphComponentRenderer
-                newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
-                setComponentId(newComponentId);
-            }, QStringLiteral("GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)"));
-            break;
-        }
-    }
+    auto newComponentId = componentMergeSet.newComponentId();
+    auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
+    auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
+
+    _graphRenderer->executeOnRendererThread(
+    [this, newComponentId, newGraphComponentRenderer, oldGraphComponentRenderer]
+    {
+        // This occurs before GraphComponentRenderer::cleanup is called on oldGraphComponentRenderer
+        newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
+        setComponentId(newComponentId);
+    }, QStringLiteral("GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)"));
 }
 
 void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
