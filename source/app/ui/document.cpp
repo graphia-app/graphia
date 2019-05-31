@@ -47,6 +47,7 @@
 #include <QMessageBox>
 #include <QCollator>
 #include <QApplication>
+#include <QElapsedTimer>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -156,6 +157,26 @@ bool Document::graphChanging() const
 
 void Document::maybeEmitBusyChanged()
 {
+    if(qEnvironmentVariableIntValue("BUSY_STATE_DEBUG") != 0)
+    {
+        static QElapsedTimer timer;
+
+        if(busy())
+        {
+            if(!_previousBusy && (!timer.isValid() || timer.elapsed() > 250))
+                qDebug() << "----";
+
+            timer.restart();
+        }
+
+        qDebug().noquote() << QString("busy %1%2%3%4%5").arg(
+            (commandInProgress() ?                  "C" : "."),
+            (graphChanging() ?                      "G" : "."),
+            (_graphQuickItem->updating() ?          "U" : "."),
+            (_graphQuickItem->interacting() ?       "I" : "."),
+            (busy() != _previousBusy ? (busy() ?    " +" : " -") : "  "));
+    }
+
     if(busy() != _previousBusy)
     {
         _previousBusy = busy();
