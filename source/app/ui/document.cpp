@@ -740,15 +740,15 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
-    connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
-    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
+    connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
+    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::interactingChanged);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
     connect(_graphQuickItem, &GraphQuickItem::visibleComponentIndexChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
-    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
+    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
 
     connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
