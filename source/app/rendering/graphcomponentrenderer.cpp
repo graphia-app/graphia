@@ -605,7 +605,7 @@ QVector3D GraphComponentRenderer::focusPosition() const
 
 bool GraphComponentRenderer::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
 {
-    return focusNodeId() == nodeId && zoomDistanceForRadius(radius) == camera()->distance();
+    return focusNodeId() == nodeId && qFuzzyCompare(zoomDistanceForRadius(radius), camera()->distance());
 }
 
 bool GraphComponentRenderer::trackingCentreOfComponent() const
