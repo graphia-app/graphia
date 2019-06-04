@@ -404,9 +404,6 @@ void CommandManager::update()
         return;
 
     auto pendingCommand = nextPendingCommand();
-    if(pendingCommand._command == nullptr)
-        return;
-
     switch(pendingCommand._action)
     {
     case CommandAction::Execute:      executeReal(std::move(pendingCommand._command), false); break;
