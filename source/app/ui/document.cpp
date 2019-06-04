@@ -748,7 +748,13 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
     connect(_graphQuickItem, &GraphQuickItem::visibleComponentIndexChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
-    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
+    connect(&_commandManager, &CommandManager::started, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
+    connect(&_commandManager, &CommandManager::started, this, &Document::commandInProgressChanged);
+
+    connect(&_commandManager, &CommandManager::finished, _graphQuickItem, &GraphQuickItem::commandsFinished);
+
+    connect(&_commandManager, &CommandManager::finished, this, &Document::commandInProgressChanged);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
 
     connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
@@ -760,19 +766,18 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(this, &Document::busyChanged, this, &Document::onBusyChanged);
 
-    connect(&_commandManager, &CommandManager::commandWillExecute, _graphQuickItem, &GraphQuickItem::commandWillExecute);
-    connect(&_commandManager, &CommandManager::commandWillExecute, this, &Document::commandInProgressChanged);
+    connect(&_commandManager, &CommandManager::started, _graphQuickItem, &GraphQuickItem::commandsStarted);
 
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellableChanged, this, &Document::commandIsCancellableChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellingChanged, this, &Document::commandIsCancellingChanged);
 
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandCompleted);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canUndoChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::commandsFinished);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::canUndoChanged);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::nextUndoActionChanged);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::canRedoChanged);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::nextRedoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted,
     [this](bool, const QString&, const QString& pastParticiple)
     {
@@ -786,9 +791,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::nextRedoActionChanged);
-
-    connect(&_commandManager, &CommandManager::commandCompleted, _graphQuickItem, &GraphQuickItem::commandCompleted);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandInProgressChanged);
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,

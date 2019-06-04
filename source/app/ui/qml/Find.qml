@@ -513,7 +513,7 @@ Rectangle
     {
         target: document
 
-        onCommandCompleted:
+        onCommandsFinished:
         {
             _finding = false;
 

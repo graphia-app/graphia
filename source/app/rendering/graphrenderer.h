@@ -136,8 +136,8 @@ private slots:
 
 public slots:
     void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
-    void onCommandWillExecute();
-    void onCommandCompleted();
+    void onCommandsStarted();
+    void onCommandsFinished();
     void onLayoutChanged();
     void onPreferenceChanged(const QString& key, const QVariant& value);
     void onComponentAlphaChanged(ComponentId componentId);

@@ -323,7 +323,7 @@ signals:
     void layoutPauseStateChanged();
     void layoutDisplayNameChanged();
 
-    void commandCompleted();
+    void commandsFinished();
     void canUndoChanged();
     void nextUndoActionChanged();
     void canRedoChanged();

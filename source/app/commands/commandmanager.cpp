@@ -8,7 +8,6 @@
 #include <thread>
 
 CommandManager::CommandManager() :
-    _busy(false),
     _graphChanged(false)
 {
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
@@ -58,8 +57,16 @@ void CommandManager::redo()
 
 void CommandManager::executeReal(ICommandPtr command, bool irreversible)
 {
-    if(_debug > 0)
-        qDebug() << "Command started" << command->description();
+    if(_debug > 0 && !_busy)
+        qDebug() << "CommandManager started";
+
+    if(_debug > 1)
+    {
+        if(!command->description().isEmpty())
+            qDebug() << "Command started" << command->description();
+        else
+            qDebug() << "Command started";
+    }
 
     auto commandPtr = command.get();
     auto verb = command->verb();
@@ -375,7 +382,7 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
     if(_thread.joinable())
         _thread.join();
 
-    if(_debug > 0)
+    if(_debug > 1)
     {
         if(success)
         {
@@ -393,7 +400,11 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
     else
     {
         _busy = false;
-        emit busyChanged();
+        emit finished();
+
+        if(_debug > 0)
+            qDebug() << "CommandManager finished";
+
         emit commandIsCancellableChanged();
     }
 }

@@ -761,12 +761,12 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
     }
 }
 
-void GraphRenderer::onCommandWillExecute()
+void GraphRenderer::onCommandsStarted()
 {
     disableSceneUpdate();
 }
 
-void GraphRenderer::onCommandCompleted()
+void GraphRenderer::onCommandsFinished()
 {
     enableSceneUpdate();
     update();

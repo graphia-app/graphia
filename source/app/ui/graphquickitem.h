@@ -164,8 +164,8 @@ signals:
     void focusedComponentIdChanged() const;
     void visibleComponentIndexChanged() const;
 
-    void commandWillExecute() const;
-    void commandCompleted() const;
+    void commandsStarted() const;
+    void commandsFinished() const;
 
     void layoutChanged() const;
 

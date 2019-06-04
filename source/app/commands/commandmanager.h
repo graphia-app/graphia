@@ -25,8 +25,6 @@ class CommandManager : public QObject, public ICommandManager
     Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
     Q_PROPERTY(bool commandIsCancelling MEMBER _cancelling NOTIFY commandIsCancellingChanged)
 
-    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
-
 public:
     CommandManager();
     ~CommandManager() override;
@@ -69,18 +67,22 @@ private:
     {
         command->initialise();
 
-        _busy = true;
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
         emit commandProgressChanged();
         emit commandVerbChanged();
         emit commandIsCancellableChanged();
-        emit commandWillExecute(command);
-        emit busyChanged();
 
         _commandProgressTimerId = startTimer(200);
 
+        if(!_busy)
+        {
+            _busy = true;
+            emit started();
+        }
+
+        emit commandWillExecute(command);
         _thread = std::thread(std::forward<Fn>(fn));
     }
 
@@ -137,7 +139,7 @@ private:
     mutable std::recursive_mutex _mutex;
     mutable std::recursive_mutex _queueMutex;
 
-    std::atomic<bool> _busy;
+    bool _busy = false;
     std::atomic<bool> _graphChanged;
 
     mutable std::mutex _currentCommandMutex;
@@ -157,6 +159,8 @@ public slots:
     void onGraphChanged() { _graphChanged = true; }
 
 signals:
+    void started();
+
     void commandWillExecute(const ICommand* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
@@ -166,7 +170,7 @@ signals:
     void commandCompleted(bool success, const QString& description, const QString& pastParticiple) const;
     void commandStackCleared();
 
-    void busyChanged() const;
+    void finished();
 };
 
 #endif // COMMANDMANAGER_H
