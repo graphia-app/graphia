@@ -258,8 +258,12 @@ void GraphQuickItem::onRendererInitialised()
 
 void GraphQuickItem::onSynchronizeComplete()
 {
+    bool changed = _updating;
+
     _updating = false;
-    emit updatingChanged();
+
+    if(changed)
+        emit updatingChanged();
 }
 
 void GraphQuickItem::onFPSChanged(float fps)
@@ -383,7 +387,11 @@ void GraphQuickItem::updateVisibleComponentIndex()
 
 void GraphQuickItem::updateRenderer()
 {
+    bool changed = !_updating;
     _updating = true;
-    emit updatingChanged();
+
+    if(changed)
+        emit updatingChanged();
+
     update();
 }
