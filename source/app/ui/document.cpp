@@ -126,12 +126,8 @@ bool Document::commandInProgress() const
 bool Document::busy() const
 {
     return commandInProgress() || graphChanging() ||
-        _graphQuickItem->updating() || _graphQuickItem->interacting();
-}
-
-bool Document::interacting() const
-{
-    return _graphQuickItem->interacting();
+        _graphQuickItem->updating() || _graphQuickItem->transitioning() ||
+        _graphQuickItem->interacting();
 }
 
 bool Document::editable() const
@@ -169,11 +165,12 @@ void Document::maybeEmitBusyChanged()
             timer.restart();
         }
 
-        qDebug().noquote() << QString("busy %1%2%3%4%5").arg(
+        qDebug().noquote() << QString("busy %1%2%3%4%5%6").arg(
             (commandInProgress() ?                  "C" : "."),
             (graphChanging() ?                      "G" : "."),
             (_graphQuickItem->updating() ?          "U" : "."),
             (_graphQuickItem->interacting() ?       "I" : "."),
+            (_graphQuickItem->transitioning() ?     "T" : "."),
             (busy() != _previousBusy ? (busy() ?    " +" : " -") : "  "));
     }
 
@@ -742,7 +739,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
-    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::interactingChanged);
+    connect(_graphQuickItem, &GraphQuickItem::transitioningChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);

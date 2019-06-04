@@ -27,11 +27,10 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool initialised MEMBER _initialised NOTIFY initialisedChanged)
 
     Q_PROPERTY(bool interacting MEMBER _interacting NOTIFY interactingChanged)
+    Q_PROPERTY(bool transitioning MEMBER _transitioning NOTIFY transitioningChanged)
     Q_PROPERTY(bool viewIsReset MEMBER _viewIsReset NOTIFY viewIsResetChanged)
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
     Q_PROPERTY(bool inOverviewMode MEMBER _inOverviewMode NOTIFY inOverviewModeChanged)
-
-    Q_PROPERTY(bool updating MEMBER _updating NOTIFY updatingChanged)
 
     Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
     Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY graphChanged)
@@ -57,9 +56,11 @@ public:
     void resetView();
     bool viewResetPending();
 
-    bool updating() const;
-    bool interacting() const;
+    bool updating() const { return _updating; }
+    bool interacting() const { return _interacting; }
     void setInteracting(bool interacting) const;
+    bool transitioning() const { return _transitioning; }
+    void setTransitioning(bool transitioning) const;
     bool viewIsReset() const;
     bool inOverviewMode() const;
     bool canEnterOverviewMode() const;
@@ -113,6 +114,7 @@ private:
 
     bool _initialised = false;
     mutable bool _interacting = false;
+    mutable bool _transitioning = false;
     bool _viewIsReset = true;
     bool _canEnterOverviewMode = false;
     bool _inOverviewMode = true;
@@ -151,6 +153,8 @@ private slots:
     void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
+    void onTransitionStarted();
+    void onTransitionFinished();
     void onScreenshotComplete(const QImage& screenshot, const QString& path);
 
 signals:
@@ -158,6 +162,7 @@ signals:
 
     void updatingChanged() const;
     void interactingChanged() const;
+    void transitioningChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
     void inOverviewModeChanged() const;

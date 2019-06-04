@@ -282,6 +282,9 @@ signals:
     void userInteractionStarted() const;
     void userInteractionFinished() const;
 
+    void transitionStarted() const;
+    void transitionFinished() const;
+
     void taskAddedToExecutor() const;
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;

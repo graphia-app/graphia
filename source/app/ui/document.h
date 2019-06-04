@@ -63,7 +63,6 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(QString failureReason READ failureReason WRITE setFailureReason NOTIFY failureReasonChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
-    Q_PROPERTY(bool interacting READ interacting NOTIFY interactingChanged)
     Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
     Q_PROPERTY(bool directed READ directed NOTIFY directedChanged)
 
@@ -140,7 +139,6 @@ public:
 
     bool commandInProgress() const;
     bool busy() const;
-    bool interacting() const;
     bool editable() const;
     bool directed() const;
     bool graphChanging() const;
@@ -306,7 +304,6 @@ signals:
     void statusChanged();
 
     void busyChanged();
-    void interactingChanged();
     void editableChanged();
     void directedChanged();
 

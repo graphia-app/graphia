@@ -495,7 +495,7 @@ void GraphRenderer::rendererStartedTransition()
     {
         _transitionPotentiallyInProgress = true;
 
-        emit userInteractionStarted();
+        emit transitionStarted();
         resetTime();
     }
 }
@@ -506,7 +506,7 @@ void GraphRenderer::rendererFinishedTransition()
         return;
 
     _transitionPotentiallyInProgress = false;
-    emit userInteractionFinished();
+    emit transitionFinished();
 }
 
 void GraphRenderer::sceneFinishedTransition()

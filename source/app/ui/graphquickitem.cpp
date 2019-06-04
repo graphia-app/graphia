@@ -54,22 +54,21 @@ bool GraphQuickItem::viewResetPending()
     return b;
 }
 
-bool GraphQuickItem::updating() const
-{
-    return _updating;
-}
-
-bool GraphQuickItem::interacting() const
-{
-    return _interacting;
-}
-
 void GraphQuickItem::setInteracting(bool interacting) const
 {
     if(_interacting != interacting)
     {
         _interacting = interacting;
         emit interactingChanged();
+    }
+}
+
+void GraphQuickItem::setTransitioning(bool transitioning) const
+{
+    if(_transitioning != transitioning)
+    {
+        _transitioning = transitioning;
+        emit transitioningChanged();
     }
 }
 
@@ -207,6 +206,8 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
     connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::onUserInteractionStarted);
     connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::onUserInteractionFinished);
+    connect(graphRenderer, &GraphRenderer::transitionStarted, this, &GraphQuickItem::onTransitionStarted);
+    connect(graphRenderer, &GraphRenderer::transitionFinished, this, &GraphQuickItem::onTransitionFinished);
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
 
     connect(graphRenderer, &GraphRenderer::synchronizeComplete, this, &GraphQuickItem::onSynchronizeComplete);
@@ -275,6 +276,20 @@ void GraphQuickItem::onUserInteractionStarted()
 void GraphQuickItem::onUserInteractionFinished()
 {
     setInteracting(false);
+
+    // Force a call to GraphRenderer::synchronize so that any
+    // pending renderer state gets reflected in the QuickItem
+    update();
+}
+
+void GraphQuickItem::onTransitionStarted()
+{
+    setTransitioning(true);
+}
+
+void GraphQuickItem::onTransitionFinished()
+{
+    setTransitioning(false);
 
     // Force a call to GraphRenderer::synchronize so that any
     // pending renderer state gets reflected in the QuickItem
