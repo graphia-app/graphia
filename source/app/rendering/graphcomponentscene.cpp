@@ -226,7 +226,7 @@ void GraphComponentScene::performQueuedTransition()
 
 bool GraphComponentScene::componentTransitionActive() const
 {
-    return transitionActive() && !_transitioningComponentId.isNull();
+    return !_transitioningComponentId.isNull();
 }
 
 void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransition)
@@ -319,10 +319,15 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
     camera->translate(translation);
 }
 
+bool GraphComponentScene::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
+{
+    return componentRenderer()->focusedOnNodeAtRadius(nodeId, radius);
+}
+
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
 {
     // Do nothing if node already focused
-    if(componentRenderer()->focusedOnNodeAtRadius(nodeId, radius))
+    if(focusedOnNodeAtRadius(nodeId, radius))
         return;
 
     ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);

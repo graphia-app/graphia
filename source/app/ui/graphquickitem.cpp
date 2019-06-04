@@ -44,7 +44,7 @@ void GraphQuickItem::initialise(GraphModel* graphModel,
 void GraphQuickItem::resetView()
 {
     _viewResetPending = true;
-    updateRenderer();
+    update();
 }
 
 bool GraphQuickItem::viewResetPending()
@@ -127,19 +127,19 @@ void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
 void GraphQuickItem::captureScreenshot(int width, int height, const QString& path, int dpi, bool fillSize)
 {
     emit screenshotRequested(width, height, path, dpi, fillSize);
-    updateRenderer();
+    update();
 }
 
 void GraphQuickItem::requestPreview(int width, int height, bool fillSize)
 {
     emit previewRequested(width, height, fillSize);
-    updateRenderer();
+    update();
 }
 
 void GraphQuickItem::switchToOverviewMode(bool)
 {
     _overviewModeSwitchPending = true;
-    updateRenderer();
+    update();
 }
 
 bool GraphQuickItem::overviewModeSwitchPending()
@@ -152,13 +152,13 @@ bool GraphQuickItem::overviewModeSwitchPending()
 void GraphQuickItem::moveFocusToNode(NodeId nodeId)
 {
     _desiredFocusNodeIds = {nodeId};
-    updateRenderer();
+    update();
 }
 
 void GraphQuickItem::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
 {
     _desiredFocusNodeIds = nodeIds;
-    updateRenderer();
+    update();
 }
 
 std::vector<NodeId> GraphQuickItem::desiredFocusNodeIds()
@@ -171,7 +171,7 @@ std::vector<NodeId> GraphQuickItem::desiredFocusNodeIds()
 void GraphQuickItem::moveFocusToComponent(ComponentId componentId)
 {
     _desiredFocusComponentId = componentId;
-    updateRenderer();
+    update();
 }
 
 ComponentId GraphQuickItem::desiredFocusComponentId()

@@ -465,6 +465,9 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
 {
     if(mode() == Mode::Component)
     {
+        if(!_graphComponentScene->focusedOnNodeAtRadius(nodeId, radius))
+            rendererStartedTransition();
+
         executeOnRendererThread([this, nodeId, radius]
         {
             _graphComponentScene->moveFocusToNode(nodeId, radius);
@@ -486,7 +489,12 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
 void GraphRenderer::moveFocusToComponent(ComponentId componentId)
 {
     if(mode() == Mode::Component)
+    {
+        if(componentId != _graphComponentScene->componentId())
+            rendererStartedTransition();
+
         _graphComponentScene->setComponentId(componentId, true);
+    }
 }
 
 void GraphRenderer::rendererStartedTransition()
@@ -617,17 +625,22 @@ void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTrans
 
 void GraphRenderer::switchToOverviewMode(bool doTransition)
 {
+    // Refuse to switch to overview mode if there is nothing to display
+    if(_graphModel->graph().numComponents() <= 1)
+        return;
+
+    doTransition = doTransition && mode() != GraphRenderer::Mode::Overview &&
+        _graphComponentScene->componentRenderer() != nullptr;
+
+    if(doTransition)
+        rendererStartedTransition();
+
     executeOnRendererThread([this, doTransition]
     {
-        // Refuse to switch to overview mode if there is nothing to display
-        if(_graphModel->graph().numComponents() <= 1)
-            return;
-
         // So that we can return to the current view parameters later
         _graphComponentScene->saveViewData();
 
-        if(mode() != GraphRenderer::Mode::Overview && doTransition &&
-           _graphComponentScene->componentRenderer() != nullptr)
+        if(doTransition)
         {
             if(!_graphComponentScene->viewIsReset())
             {
@@ -651,11 +664,16 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
 
 void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId)
 {
+    doTransition = doTransition && mode() != GraphRenderer::Mode::Component;
+
+    if(doTransition)
+        rendererStartedTransition();
+
     executeOnRendererThread([this, componentId, nodeId, doTransition]
     {
         _graphComponentScene->setComponentId(componentId);
 
-        if(mode() != GraphRenderer::Mode::Component && doTransition)
+        if(doTransition)
         {
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
             [this, componentId, nodeId]

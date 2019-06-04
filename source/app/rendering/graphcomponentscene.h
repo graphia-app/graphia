@@ -47,6 +47,7 @@ public:
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
+    bool focusedOnNodeAtRadius(NodeId nodeId, float radius) const;
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
 
     GraphComponentRenderer* componentRenderer() const;
