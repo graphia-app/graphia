@@ -21,20 +21,26 @@ void BetweennessTransform::apply(TransformedGraph& target) const
     const auto& edegIds = target.edgeIds();
     std::atomic_int progress(0);
 
-    // Use a map of node/edge arrays keyed per thread, and accumulate
-    // the results when the algorithm completes, thus avoiding any locking
-    std::map<std::thread::id, NodeArray<double>> nodeBetweennessMap;
-    std::map<std::thread::id, EdgeArray<double>> edgeBetweennessMap;
+    struct BetweennessArrays
+    {
+        BetweennessArrays(TransformedGraph& graph) :
+            nodeBetweenness(graph, 0.0),
+            edgeBetweenness(graph, 0.0)
+        {}
+
+        NodeArray<double> nodeBetweenness;
+        EdgeArray<double> edgeBetweenness;
+    };
+
+    std::vector<BetweennessArrays> betweennessArrays(
+        std::thread::hardware_concurrency(), {target});
 
     concurrent_for(nodeIds.begin(), nodeIds.end(),
-    [&](const NodeId nodeId)
+    [&](const NodeId nodeId, size_t threadIndex)
     {
-        std::thread::id currentThreadId = std::this_thread::get_id();
-
-        auto& _nodeBetweenness = nodeBetweennessMap.try_emplace(
-            currentThreadId, NodeArray<double>{target, 0.0}).first->second;
-        auto& _edgeBetweenness = edgeBetweennessMap.try_emplace(
-            currentThreadId, EdgeArray<double>{target, 0.0}).first->second;
+        auto& arrays = betweennessArrays.at(threadIndex);
+        auto& _nodeBetweenness = arrays.nodeBetweenness;
+        auto& _edgeBetweenness = arrays.edgeBetweenness;
 
         // Brandes algorithm
         NodeArray<std::vector<NodeId>> predecessors(target);
@@ -100,7 +106,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
 
         if(cancelled())
             return;
-    }, true);
+    });
 
     target.setProgress(-1);
 
@@ -108,17 +114,14 @@ void BetweennessTransform::apply(TransformedGraph& target) const
         return;
 
     NodeArray<double> nodeBetweenness(target, 0.0);
-    for(const auto& [threadId, _nodeBetweenness] : nodeBetweennessMap)
+    EdgeArray<double> edgeBetweenness(target, 0.0);
+    for(const auto& arrays : betweennessArrays)
     {
         for(auto nodeId : nodeIds)
-            nodeBetweenness[nodeId] += _nodeBetweenness[nodeId];
-    }
+            nodeBetweenness[nodeId] += arrays.nodeBetweenness[nodeId];
 
-    EdgeArray<double> edgeBetweenness(target, 0.0);
-    for(const auto& [threadId, _edgeBetweenness] : edgeBetweennessMap)
-    {
         for(auto edgeId : edegIds)
-            edgeBetweenness[edgeId] += _edgeBetweenness[edgeId];
+            edgeBetweenness[edgeId] += arrays.edgeBetweenness[edgeId];
     }
 
     _graphModel->createAttribute(QObject::tr("Node Betweenness"))
