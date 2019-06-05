@@ -59,7 +59,7 @@ public:
 
     template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
 
-    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute(Fn f, Args&&... args)
+    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
     {
         if(_stop)
             return std::future<ReturnType<Fn, Args...>>();
@@ -337,7 +337,8 @@ private:
         end() { return iterator(this, true); }
     };
 
-    template<typename It, typename Fn> class Invoker
+    template<typename It, typename Fn>
+    class IteratorExecutor
     {
     private:
         size_t _index;
@@ -346,7 +347,7 @@ private:
         void setIndex(size_t index) { _index = index; }
 
     protected:
-        auto invoke(Fn& f, It& it) const
+        auto execute(Fn& f, It& it) const
         {
             // Fn argument is an iterator
             if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, It>)
@@ -369,7 +370,7 @@ private:
     };
 
     template<typename It, typename Fn, typename Result>
-    class Executor : public Invoker<It, Fn>
+    class ResultsExecutor : public IteratorExecutor<It, Fn>
     {
     public:
         using ResultsVectorOrVoid = std::vector<Result>;
@@ -380,14 +381,14 @@ private:
             values.reserve(std::distance(it, last));
 
             for(; it != last; ++it)
-                values.emplace_back(std::move(this->invoke(f, it)));
+                values.emplace_back(std::move(this->execute(f, it)));
 
             return values;
         }
     };
 
     template<typename It, typename Fn>
-    class Executor<It, Fn, void> : public Invoker<It, Fn>
+    class ResultsExecutor<It, Fn, void> : public IteratorExecutor<It, Fn>
     {
     public:
         using ResultsVectorOrVoid = void;
@@ -395,12 +396,12 @@ private:
         ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
         {
             for(; it != last; ++it)
-                this->invoke(f, it);
+                this->execute(f, it);
         }
     };
 
-    template<typename It, typename Fn> using FnExecutor =
-        Executor<It, Fn, typename function_traits<Fn>::result_type>;
+    template<typename It, typename Fn> using Executor =
+        ResultsExecutor<It, Fn, typename function_traits<Fn>::result_type>;
 
     template<typename It>
     using computeCostHint_t = decltype(std::declval<It>()->computeCostHint());
@@ -450,7 +451,7 @@ private:
 
 public:
     template<typename It, typename Fn> using Results =
-        ResultsType<typename FnExecutor<It, Fn>::ResultsVectorOrVoid>;
+        ResultsType<typename Executor<It, Fn>::ResultsVectorOrVoid>;
 
     template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn f, bool blocking = true)
     {
@@ -468,8 +469,8 @@ public:
         static_assert(function_traits<Fn>::arity == 1 || HasThreadIndexArgument<Fn>,
             "Fn's (optional) second index argument must be size_t");
 
-        FnExecutor<It, Fn> executor;
-        std::vector<std::future<typename FnExecutor<It, Fn>::ResultsVectorOrVoid>> futures;
+        Executor<It, Fn> executor;
+        std::vector<std::future<typename Executor<It, Fn>::ResultsVectorOrVoid>> futures;
         size_t threadIndex = 0;
 
         for(It it = first; it != last;)
@@ -485,7 +486,7 @@ public:
 
             Q_ASSERT(threadIndex < _threads.size());
 
-            futures.emplace_back(execute([executor, it, threadLast, f, threadIndex]() mutable
+            futures.emplace_back(makeFuture([executor, it, threadLast, f, threadIndex]() mutable
             {
                 executor.setIndex(threadIndex);
                 return executor(it, threadLast, f);
@@ -508,7 +509,7 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 
 template<typename Fn, typename... Args> auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPoolSingleton)->execute(std::forward<Fn>(f), args...);
+    return S(ThreadPoolSingleton)->makeFuture(std::forward<Fn>(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
