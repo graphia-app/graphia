@@ -25,6 +25,14 @@ template<typename It> static It incrementIterator(It it, It last, const int n)
     return it + std::min(n, static_cast<const int>(std::distance(it, last)));
 }
 
+template<typename Fn> using FirstArgumentType = typename function_traits<Fn>::template arg<0>::type;
+template<typename Fn> using LastArgumentType =
+    typename function_traits<Fn>::template arg<function_traits<Fn>::arity - 1>::type;
+
+template<typename Fn> inline constexpr bool HasThreadIndexArgument =
+    function_traits<Fn>::arity == 2 &&
+    std::is_same_v<LastArgumentType<Fn>, size_t>;
+
 class ThreadPool
 {
 private:
@@ -328,30 +336,44 @@ private:
         end() { return iterator(this, true); }
     };
 
-    template<typename Fn> using ArgumentType = typename function_traits<Fn>::template arg<0>::type;
-
-    // Fn may take a value/reference or an iterator; this template determines how to call it
-    template<typename It, typename Fn> struct Invoker
+    template<typename It, typename Fn> class Invoker
     {
-        using ReturnType = std::invoke_result_t<Fn, ArgumentType<Fn>>;
+    private:
+        size_t _index;
 
-        // Fn argument is an iterator
-        template<typename T = ReturnType>
-        static typename std::enable_if_t<std::is_convertible_v<ArgumentType<Fn>, It>, T>
-        invoke(Fn& f, It& it) { return f(it); }
+    public:
+        void setIndex(size_t index) { _index = index; }
 
-        // Fn argument is an value/reference
-        template<typename T = ReturnType>
-        static typename std::enable_if_t<std::is_convertible_v<ArgumentType<Fn>, typename It::value_type>, T>
-        invoke(Fn& f, It it) { return f(*it); }
+    protected:
+        auto invoke(Fn& f, It& it) const
+        {
+            // Fn argument is an iterator
+            if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, It>)
+            {
+                if constexpr(HasThreadIndexArgument<Fn>)
+                    return f(it, _index);
+                else
+                    return f(it);
+            }
+
+            // Fn argument is an value/reference
+            if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>)
+            {
+                if constexpr(HasThreadIndexArgument<Fn>)
+                    return f(*it, _index);
+                else
+                    return f(*it);
+            }
+        }
     };
 
     template<typename It, typename Fn, typename Result>
-    struct Executor : Invoker<It, Fn>
+    class Executor : public Invoker<It, Fn>
     {
+    public:
         using ResultsVectorOrVoid = std::vector<Result>;
 
-        ResultsVectorOrVoid operator()(It it, It last, Fn& f)
+        ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
         {
             ResultsVectorOrVoid values;
             values.reserve(std::distance(it, last));
@@ -364,8 +386,9 @@ private:
     };
 
     template<typename It, typename Fn>
-    struct Executor<It, Fn, void> : Invoker<It, Fn>
+    class Executor<It, Fn, void> : public Invoker<It, Fn>
     {
+    public:
         using ResultsVectorOrVoid = void;
 
         ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
@@ -376,7 +399,7 @@ private:
     };
 
     template<typename It, typename Fn> using FnExecutor =
-        Executor<It, Fn, typename std::invoke_result_t<Fn, ArgumentType<Fn>>>;
+        Executor<It, Fn, typename function_traits<Fn>::result_type>;
 
     template<typename It>
     class CosterBase
@@ -434,17 +457,21 @@ public:
     {
         Coster<It> coster(first, last);
 
-        const auto totalCost = coster.total();
+        const auto totalCost = coster.total(); Q_ASSERT(totalCost > 0);
         const auto numThreads = static_cast<int>(_threads.size());
         const auto costPerThread = totalCost / numThreads +
                 ((totalCost % numThreads) ? 1 : 0);
 
-        static_assert(std::is_convertible_v<ArgumentType<Fn>, It> ||
-                      std::is_convertible_v<ArgumentType<Fn>, typename It::value_type>,
-                      "Fn's argument must be an It or an It::value_type");
+        static_assert(std::is_convertible_v<FirstArgumentType<Fn>, It> ||
+            std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>,
+            "Fn's argument must be an It or an It::value_type");
+
+        static_assert(function_traits<Fn>::arity == 1 || HasThreadIndexArgument<Fn>,
+            "Fn's (optional) second index argument must be size_t");
 
         FnExecutor<It, Fn> executor;
         std::vector<std::future<typename FnExecutor<It, Fn>::ResultsVectorOrVoid>> futures;
+        size_t threadIndex = 0;
 
         for(It it = first; it != last;)
         {
@@ -457,12 +484,16 @@ public:
             }
             while(threadLast != last && cost < costPerThread);
 
-            futures.emplace_back(execute([executor, it, threadLast, f]() mutable
+            Q_ASSERT(threadIndex < _threads.size());
+
+            futures.emplace_back(execute([executor, it, threadLast, f, threadIndex]() mutable
             {
+                executor.setIndex(threadIndex);
                 return executor(it, threadLast, f);
             }));
 
             it = threadLast;
+            threadIndex++;
         }
 
         auto results = Results<It, Fn>(std::move(futures));

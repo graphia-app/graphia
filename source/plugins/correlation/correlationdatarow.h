@@ -20,7 +20,7 @@ public:
 
     template<typename T>
     CorrelationDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
-        NodeId nodeId, int computeCost = 0) :
+        NodeId nodeId, int computeCost = 1) :
         _nodeId(nodeId), _cost(computeCost)
     {
         auto cbegin = data.cbegin() + (row * numColumns);
@@ -33,7 +33,7 @@ public:
 
     template<typename T>
     CorrelationDataRow(const std::vector<T>& dataRow,
-        NodeId nodeId, int computeCost = 0) :
+        NodeId nodeId, int computeCost = 1) :
         CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
     {}
 
