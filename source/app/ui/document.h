@@ -239,7 +239,7 @@ private:
     QQmlVariantListModel _visualisationsModel;
     QStringList _visualisations;
 
-    bool _saveRequired = false;
+    std::atomic_bool _saveRequired{false};
 
     QByteArray _uiData;
 
