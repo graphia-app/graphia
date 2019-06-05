@@ -21,11 +21,6 @@
 #include <utility>
 #include <type_traits>
 
-template<typename It> static It incrementIterator(It it, It last, const int n)
-{
-    return it + std::min(n, static_cast<const int>(std::distance(it, last)));
-}
-
 class ThreadPool
 {
 private:
