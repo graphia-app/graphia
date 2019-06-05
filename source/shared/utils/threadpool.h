@@ -453,7 +453,14 @@ public:
     template<typename It, typename Fn> using Results =
         ResultsType<typename Executor<It, Fn>::ResultsVectorOrVoid>;
 
-    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn f, bool blocking = true)
+    enum ResultsPolicy
+    {
+        Blocking,
+        NonBlocking
+    };
+
+    template<typename It, typename Fn>
+    auto concurrent_for(It first, It last, Fn f, ResultsPolicy resultsPolicy = Blocking)
     {
         Coster<It> coster(first, last);
 
@@ -498,7 +505,7 @@ public:
 
         auto results = Results<It, Fn>(std::move(futures));
 
-        if(blocking)
+        if(resultsPolicy == Blocking)
             results.wait();
 
         return results;
@@ -507,14 +514,16 @@ public:
 
 class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingleton> {};
 
-template<typename Fn, typename... Args> auto execute_on_threadpool(Fn&& f, Args&&... args)
+template<typename Fn, typename... Args>
+auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
     return S(ThreadPoolSingleton)->makeFuture(std::forward<Fn>(f), args...);
 }
 
-template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
+template<typename It, typename Fn>
+auto concurrent_for(It first, It last, Fn&& f, ThreadPool::ResultsPolicy resultsPolicy = ThreadPool::Blocking)
 {
-    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::forward<Fn>(f), blocking);
+    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::forward<Fn>(f), resultsPolicy);
 }
 
 #endif // THREADPOOL_H

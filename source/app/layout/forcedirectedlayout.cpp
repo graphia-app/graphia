@@ -115,7 +115,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         {
             return difference * (static_cast<float>(mass) * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));
         });
-    }, false);
+    }, ThreadPool::NonBlocking);
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
@@ -134,7 +134,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             _displacements->at(edge.targetId())._attractive -= (force * difference);
             _displacements->at(edge.sourceId())._attractive += (force * difference);
         }
-    }, false);
+    }, ThreadPool::NonBlocking);
 
     repulsiveResults.wait();
     attractiveResults.wait();

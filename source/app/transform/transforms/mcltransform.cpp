@@ -434,7 +434,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
                 rowData, MCL_PRUNE_LIMIT, cancelledFn);
 
             target.setProgress(static_cast<int>((iteration++ * 100) / totalIterations));
-        }, true);
+        });
 
         target.setProgress(-1);
 

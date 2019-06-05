@@ -84,7 +84,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         maxDistances[source] = maxDistance;
         progress++;
         target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
-    }, true);
+    });
 
     target.setProgress(-1);
 
