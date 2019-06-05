@@ -26,14 +26,6 @@ template<typename It> static It incrementIterator(It it, It last, const int n)
     return it + std::min(n, static_cast<const int>(std::distance(it, last)));
 }
 
-template<typename Fn> using FirstArgumentType = typename function_traits<Fn>::template arg<0>::type;
-template<typename Fn> using LastArgumentType =
-    typename function_traits<Fn>::template arg<function_traits<Fn>::arity - 1>::type;
-
-template<typename Fn> inline constexpr bool HasThreadIndexArgument =
-    function_traits<Fn>::arity == 2 &&
-    std::is_same_v<LastArgumentType<Fn>, size_t>;
-
 class ThreadPool
 {
 private:
@@ -336,6 +328,15 @@ private:
         typename std::enable_if_t<!std::is_void_v<T>, iterator>
         end() { return iterator(this, true); }
     };
+
+    template<typename Fn> using FirstArgumentType =
+        typename function_traits<Fn>::template arg<0>::type;
+    template<typename Fn> using LastArgumentType =
+        typename function_traits<Fn>::template arg<function_traits<Fn>::arity - 1>::type;
+
+    template<typename Fn> static constexpr bool HasThreadIndexArgument =
+        function_traits<Fn>::arity == 2 &&
+        std::is_same_v<LastArgumentType<Fn>, size_t>;
 
     template<typename It, typename Fn>
     class IteratorExecutor
