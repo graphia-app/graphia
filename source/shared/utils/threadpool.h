@@ -4,6 +4,7 @@
 #include "singleton.h"
 #include "function_traits.h"
 #include "is_std_container.h"
+#include "is_detected.h"
 
 #include <QString>
 
@@ -402,51 +403,49 @@ private:
         Executor<It, Fn, typename function_traits<Fn>::result_type>;
 
     template<typename It>
-    class CosterBase
+    using computeCostHint_t = decltype(std::declval<It>()->computeCostHint());
+
+    template<typename It> static constexpr bool ItHasComputeCostHint =
+        std::experimental::is_detected_v<computeCostHint_t, It>;
+
+    template<typename It>
+    class Coster
     {
-    protected:
+    private:
         It _first;
         It _last;
 
     public:
-        CosterBase(It first, It last) :
-            _first(std::move(first)), _last(std::move(last))
+        Coster(It first, It last) :
+            _first(std::move(first)),
+            _last(std::move(last))
         {}
-    };
 
-    // When It::value_type::computeCostHint() doesn't exist, we get
-    // this implementation, which gives every element equal weight
-    template<typename It, typename Enable = void>
-    struct Coster : public CosterBase<It>
-    {
-        using CosterBase<It>::CosterBase;
-
-        int total() { return std::distance(this->_first, this->_last); }
-        int operator()(It) { return 1; }
-    };
-
-    // When It::value_type::computeCostHint() does exist, we get this
-    // implementation, that allows elements to hint how much computation
-    // it will cost and balance the thread/work allocation accordingly
-    template<typename It>
-    struct Coster<It,
-        std::enable_if_t<std::is_member_function_pointer_v<
-            decltype(&It::value_type::computeCostHint)>>> :
-        public CosterBase<It>
-    {
-        using CosterBase<It>::CosterBase;
-
+        // When It->computeCostHint() does exist, we us it to hint how much computation
+        // each element will cost, and balance the thread/work allocation accordingly
+        // When there is no hinting available, each element is given equal weight
         int total()
         {
-            int n = 0;
+            if constexpr(ItHasComputeCostHint<It>)
+            {
+                int n = 0;
 
-            for(auto it = this->_first; it != this->_last; ++it)
-                n += it->computeCostHint();
+                for(auto it = this->_first; it != this->_last; ++it)
+                    n += it->computeCostHint();
 
-            return n;
+                return n;
+            }
+            else
+                return std::distance(this->_first, this->_last);
         }
 
-        int operator()(It it) { return it->computeCostHint(); }
+        int operator()(It it)
+        {
+            if constexpr(ItHasComputeCostHint<It>)
+                return it->computeCostHint();
+            else
+                return 1;
+        }
     };
 
 public:
