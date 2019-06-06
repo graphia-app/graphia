@@ -1389,7 +1389,6 @@ void Document::onPluginSaveRequired()
 void Document::executeDeferred()
 {
     _deferredExecutor.execute();
-    _executed.notify();
 }
 
 int Document::foundIndex() const
@@ -1447,18 +1446,19 @@ NodeId Document::decrementFoundIt()
     return newFound;
 }
 
-void Document::executeOnMainThread(DeferredExecutor::TaskFn task,
-                                   const QString& description)
+size_t Document::executeOnMainThread(DeferredExecutor::TaskFn task,
+    const QString& description)
 {
-    _deferredExecutor.enqueue(std::move(task), description);
+    auto numTasksInQueue = _deferredExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
+    return numTasksInQueue;
 }
 
 void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                          const QString& description)
+    const QString& description)
 {
-    executeOnMainThread(std::move(task), description);
-    _executed.wait();
+    auto numTasksInQueue = executeOnMainThread(std::move(task), description);
+    _deferredExecutor.waitFor(numTasksInQueue);
 }
 
 AvailableTransformsModel* Document::availableTransforms() const

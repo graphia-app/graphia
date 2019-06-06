@@ -183,11 +183,11 @@ public:
     QStringList bookmarks() const;
     NodeIdSet nodeIdsForBookmark(const QString& name) const;
 
-    void executeOnMainThread(DeferredExecutor::TaskFn task,
-                             const QString& description = QStringLiteral("GenericTask"));
+    size_t executeOnMainThread(DeferredExecutor::TaskFn task,
+        const QString& description = QStringLiteral("GenericTask"));
 
     void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                    const QString& description = QStringLiteral("GenericTask"));
+        const QString& description = QStringLiteral("GenericTask"));
 
 private:
     Application* _application = nullptr;
@@ -217,7 +217,6 @@ private:
     QQmlVariantListModel _layoutSettingsModel;
 
     DeferredExecutor _deferredExecutor;
-    semaphore _executed;
 
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;

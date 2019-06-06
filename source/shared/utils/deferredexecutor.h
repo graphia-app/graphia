@@ -5,6 +5,9 @@
 #include <atomic>
 #include <deque>
 #include <functional>
+#include <thread>
+#include <condition_variable>
+#include <map>
 
 #include <QString>
 
@@ -23,14 +26,16 @@ private:
     mutable std::recursive_mutex _mutex;
     std::deque<Task> _tasks;
     int _debug;
-    std::atomic<bool> _executing;
     bool _paused = false;
+
+    std::condition_variable_any _waitCondition;
+    std::map<std::thread::id, size_t> _waitCount;
 
 public:
     DeferredExecutor();
     virtual ~DeferredExecutor();
 
-    void enqueue(TaskFn&& function, const QString& description = QString());
+    size_t enqueue(TaskFn&& function, const QString& description = QString());
 
     void execute();
     void executeOne();
@@ -40,6 +45,8 @@ public:
     void resume();
 
     bool hasTasks() const;
+
+    void waitFor(size_t numTasks);
 };
 
 #endif // DEFERREDEXECUTOR_H

@@ -1,12 +1,12 @@
 #include "deferredexecutor.h"
 
 #include "shared/utils/thread.h"
+#include "shared/utils/container.h"
 
 #include <QDebug>
 #include <QtGlobal>
 
-DeferredExecutor::DeferredExecutor() :
-    _executing(false)
+DeferredExecutor::DeferredExecutor()
 {
     _debug = qEnvironmentVariableIntValue("DEFERREDEXECUTOR_DEBUG");
 }
@@ -16,7 +16,7 @@ DeferredExecutor::~DeferredExecutor()
     cancel();
 }
 
-void DeferredExecutor::enqueue(TaskFn&& function, const QString& description)
+size_t DeferredExecutor::enqueue(TaskFn&& function, const QString& description)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -28,6 +28,8 @@ void DeferredExecutor::enqueue(TaskFn&& function, const QString& description)
         qDebug() << "enqueue(...) thread:" << u::currentThreadName() << description;
 
     _tasks.emplace_back(task);
+
+    return _tasks.size();
 }
 
 void DeferredExecutor::execute()
@@ -62,9 +64,21 @@ void DeferredExecutor::executeOne()
     if(_debug > 2)
         qDebug() << "Executing" << task._description;
 
-    _executing = true;
     task._function();
-    _executing = false;
+
+    // Decrement all the wait counts
+    for(auto it = _waitCount.begin(); it != _waitCount.end();)
+    {
+        if(it->second > 0)
+            it->second--;
+
+        if(it->second == 0)
+            it = _waitCount.erase(it);
+        else
+            ++it;
+    }
+
+    _waitCondition.notify_all();
 }
 
 void DeferredExecutor::cancel()
@@ -92,4 +106,32 @@ bool DeferredExecutor::hasTasks() const
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     return !_tasks.empty();
+}
+
+void DeferredExecutor::waitFor(size_t numTasks)
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    numTasks = std::min(_tasks.size(), numTasks);
+    auto threadId = std::this_thread::get_id();
+    _waitCount[threadId] = numTasks;
+
+    if(_debug > 1)
+    {
+        qDebug() << "waitFor(" << numTasks << ") thread:" <<
+            u::currentThreadName();
+    }
+
+    // Keep waiting until there are no remaining tasks
+    _waitCondition.wait(lock,
+    [this, threadId]
+    {
+        return !u::contains(_waitCount, threadId);
+    });
+
+    if(_debug > 1)
+    {
+        qDebug() << "waitFor complete thread:" <<
+            u::currentThreadName();
+    }
 }
