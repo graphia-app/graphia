@@ -337,7 +337,7 @@ private:
     class IteratorExecutor
     {
     private:
-        size_t _index;
+        size_t _index = 0;
 
     public:
         IteratorExecutor() = default;
