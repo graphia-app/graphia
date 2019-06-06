@@ -466,9 +466,6 @@ private slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
 
-    void onGraphChanged(const Graph*, bool);
-    void onMutableGraphChanged();
-
     void onPluginSaveRequired();
 
     void executeDeferred();

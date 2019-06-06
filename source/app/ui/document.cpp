@@ -810,12 +810,32 @@ void Document::onLoadComplete(const QUrl&, bool success)
             _commandManager.clearCommandStack();
     });
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged);
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
+    {
+        executeOnMainThreadAndWait([this]
+        {
+            // If the graph changes then so do our visualisations
+            setVisualisations(_visualisations);
+        }, QStringLiteral("Document graphChanged"));
+
+        setSaveRequired();
+    });
 
     connect(&_graphModel->graph(), &Graph::graphChanged, &_commandManager,
             &CommandManager::onGraphChanged, Qt::DirectConnection);
 
-    connect(&_graphModel->mutableGraph(), &Graph::graphChanged, this, &Document::onMutableGraphChanged);
+    connect(&_graphModel->mutableGraph(), &Graph::graphChanged,
+    [this]
+    {
+        executeOnMainThreadAndWait([this]
+        {
+            // This is only called in order to force the UI to refresh the transform
+            // controls, in case the attribute ranges have changed
+            setTransforms(_graphTransforms);
+        }, QStringLiteral("Document (mutable) graphChanged"));
+
+        setSaveRequired();
+    });
 
     _graphModel->initialiseAttributeRanges();
     _graphModel->initialiseUniqueAttributeValues();
@@ -1362,23 +1382,6 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         selectFirstFound();
     else
         updateFoundIndex(true);
-}
-
-void Document::onGraphChanged(const Graph*, bool)
-{
-    // If the graph changes then so do our visualisations
-    setVisualisations(_visualisations);
-
-    setSaveRequired();
-}
-
-void Document::onMutableGraphChanged()
-{
-    // This is only called in order to force the UI to refresh the transform
-    // controls, in case the attribute ranges have changed
-    setTransforms(_graphTransforms);
-
-    setSaveRequired();
 }
 
 void Document::onPluginSaveRequired()
