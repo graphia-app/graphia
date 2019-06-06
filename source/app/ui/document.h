@@ -12,7 +12,6 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/qmlenum.h"
-#include "shared/utils/semaphore.h"
 #include "shared/utils/failurereason.h"
 #include "transform/availabletransformsmodel.h"
 #include "ui/findoptions.h"
