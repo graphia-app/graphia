@@ -23,7 +23,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
 
     struct BetweennessArrays
     {
-        BetweennessArrays(TransformedGraph& graph) :
+        explicit BetweennessArrays(TransformedGraph& graph) :
             nodeBetweenness(graph, 0.0),
             edgeBetweenness(graph, 0.0)
         {}
@@ -33,7 +33,8 @@ void BetweennessTransform::apply(TransformedGraph& target) const
     };
 
     std::vector<BetweennessArrays> betweennessArrays(
-        std::thread::hardware_concurrency(), {target});
+        std::thread::hardware_concurrency(),
+        BetweennessArrays{target});
 
     concurrent_for(nodeIds.begin(), nodeIds.end(),
     [&](const NodeId nodeId, size_t threadIndex)

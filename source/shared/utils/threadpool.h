@@ -340,6 +340,8 @@ private:
         size_t _index;
 
     public:
+        IteratorExecutor() = default;
+
         void setIndex(size_t index) { _index = index; }
 
     protected:
@@ -438,6 +440,8 @@ private:
 
         int operator()(It it)
         {
+            Q_UNUSED(it);
+
             if constexpr(ItHasComputeCostHint<It>)
                 return it->computeCostHint();
             else
