@@ -135,7 +135,7 @@ bool Document::editable() const
     if(_graphModel == nullptr)
         return false;
 
-    return !busy() && _graphModel->editable();
+    return _graphModel->editable();
 }
 
 bool Document::directed() const

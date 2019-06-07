@@ -779,7 +779,9 @@ ApplicationWindow
         iconName: "edit-delete"
         text: qsTr("&Delete Selection")
         shortcut: "Del"
-        enabled: currentDocument ? currentDocument.canDeleteSelection : false
+        property bool visible: currentDocument ?
+            currentDocument.canDeleteSelection : false
+        enabled: currentDocument ? !currentDocument.busy && visible : false
         onTriggered: currentDocument.deleteSelectedNodes()
     }
 

@@ -655,7 +655,8 @@ Item
         id: deleteNodeAction
         iconName: "edit-delete"
         text: qsTr("&Delete '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: editable && contextMenu.nodeWasClicked
+        property bool visible: editable && contextMenu.nodeWasClicked
+        enabled: !busy && visible
         onTriggered: { deleteNode(contextMenu.clickedNodeId); }
     }
 
@@ -663,7 +664,8 @@ Item
     {
         id: selectSourcesOfNodeAction
         text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: !busy && contextMenu.nodeWasClicked && directed
+        property bool visible: directed && contextMenu.nodeWasClicked
+        enabled: !busy && visible
         onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
     }
 
@@ -671,7 +673,8 @@ Item
     {
         id: selectTargetsOfNodeAction
         text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: !busy && contextMenu.nodeWasClicked && directed
+        property bool visible: directed && contextMenu.nodeWasClicked
+        enabled: !busy && visible
         onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
     }
 
@@ -679,7 +682,8 @@ Item
     {
         id: selectNeighboursOfNodeAction
         text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: !busy && contextMenu.nodeWasClicked
+        property bool visible: contextMenu.nodeWasClicked
+        enabled: !busy && visible
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
     }
 
@@ -729,8 +733,8 @@ Item
                             nodeIsSelected(clickedNodeId);
                     }
 
-                    MenuItem { id: delete1; visible: deleteNodeAction.enabled; action: deleteNodeAction }
-                    MenuItem { id: delete2; visible: deleteAction.enabled && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
+                    MenuItem { id: delete1; visible: deleteNodeAction.visible; action: deleteNodeAction }
+                    MenuItem { id: delete2; visible: deleteAction.visible && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
                     MenuSeparator { visible: delete1.visible || delete2.visible }
 
                     MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllAction }
@@ -738,14 +742,14 @@ Item
                     MenuItem { visible: numNodesSelected > 0; action: selectNoneAction }
                     MenuItem { visible: numNodesSelected > 0; action: invertSelectionAction }
 
-                    MenuItem { visible: selectSourcesOfNodeAction.enabled; action: selectSourcesOfNodeAction }
-                    MenuItem { visible: selectTargetsOfNodeAction.enabled; action: selectTargetsOfNodeAction }
-                    MenuItem { visible: selectNeighboursOfNodeAction.enabled; action: selectNeighboursOfNodeAction }
+                    MenuItem { visible: selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
+                    MenuItem { visible: selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
+                    MenuItem { visible: selectNeighboursOfNodeAction.visible; action: selectNeighboursOfNodeAction }
                     Menu
                     {
                         id: sharedValuesOfNodeContextMenu
-                        visible: !busy && numAttributesWithSharedValues > 0 &&
-                            contextMenu.nodeWasClicked
+                        enabled: !busy && visible
+                        visible: numAttributesWithSharedValues > 0 && contextMenu.nodeWasClicked
                         title: qsTr("Select Shared Values of '") + contextMenu.clickedNodeName + qsTr("'")
                         Instantiator
                         {
@@ -768,8 +772,9 @@ Item
                     Menu
                     {
                         id: sharedValuesSelectionContextMenu
-                        visible: !busy && numAttributesWithSharedValues > 0 &&
-                            numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection
+                        enabled: !busy && visible
+                        visible: numAttributesWithSharedValues > 0 && numNodesSelected > 0 &&
+                            !contextMenu.clickedNodeIsSameAsSelection
                         title: qsTr('Select Shared Values of Selection')
                         Instantiator
                         {
@@ -813,12 +818,7 @@ Item
                     if(button === Qt.RightButton)
                     {
                         contextMenu.clickedNodeId = nodeId;
-
-                        // This is a work around to a bug where sometimes the context menu
-                        // appears in the top left of the window. It appears to be related
-                        // to changing the contents of the menu (by setting clickedNodeId)
-                        // immediately before displaying it.
-                        Qt.callLater(function() { contextMenu.popup(); });
+                        contextMenu.popup();
                     }
                 }
 
