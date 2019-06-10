@@ -17,6 +17,8 @@ class EnrichmentHeatmapItem : public QQuickPaintedItem
     Q_PROPERTY(double horizontalRangeSize READ horizontalRangeSize NOTIFY horizontalRangeSizeChanged)
     Q_PROPERTY(double verticalRangeSize READ verticalRangeSize NOTIFY verticalRangeSizeChanged)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
+    Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY scrollAmountChanged)
+    Q_PROPERTY(int yAxisPadding MEMBER _yAxisPadding WRITE setYAxisPadding NOTIFY scrollAmountChanged)
 
     Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched)
 
@@ -40,6 +42,8 @@ private:
     double _scrollYAmount = 0.0;
     int _elideLabelWidth = 120;
     const double _HEATMAP_OFFSET = 0.5;
+    int _xAxisPadding = 0;
+    int _yAxisPadding = 0;
 
     bool _showOnlyEnriched = false;
 
@@ -60,7 +64,8 @@ public:
     void setScrollXAmount(double scrollAmount);
     void setScrollYAmount(double scrollAmount);
     void setElideLabelWidth(int elideLabelWidth);
-
+    void setXAxisPadding(int padding);
+    void setYAxisPadding(int padding);
     void setShowOnlyEnriched(bool showOnlyEnriched);
 
     Q_INVOKABLE void buildPlot();

@@ -20,6 +20,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _colorScale->setType(QCPAxis::atBottom);
     _customPlot.plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
+    _colorScale->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft | QCP::MarginSide::msRight );
 
     _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
@@ -142,6 +143,7 @@ void EnrichmentHeatmapItem::buildPlot()
 
     _customPlot.xAxis->setTicker(xCategoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
+    _customPlot.yAxis2->setPadding(_yAxisPadding);
     _customPlot.yAxis2->setTicker(yCategoryTicker);
 
     std::set<QString> attributeValueSetA;
@@ -237,6 +239,7 @@ void EnrichmentHeatmapItem::buildPlot()
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
+    _colorScale->setMargins(QMargins(0, 0, 0, _xAxisPadding));
 }
 
 void EnrichmentHeatmapItem::updatePlotSize()
@@ -306,6 +309,30 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
     if(changed)
     {
         updatePlotSize();
+        buildPlot();
+        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
+void EnrichmentHeatmapItem::setXAxisPadding(int padding)
+{
+    bool changed = _xAxisPadding != padding;
+    _xAxisPadding = padding;
+
+    if(changed)
+    {
+        buildPlot();
+        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
+void EnrichmentHeatmapItem::setYAxisPadding(int padding)
+{
+    bool changed = _yAxisPadding != padding;
+    _yAxisPadding = padding;
+
+    if(changed)
+    {
         buildPlot();
         _customPlot.replot(QCustomPlot::rpQueuedReplot);
     }

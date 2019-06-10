@@ -221,6 +221,10 @@ ApplicationWindow
                                 model: qtObject
                                 elideLabelWidth: 100
                                 showOnlyEnriched: showOnlyEnrichedButton.checked
+                                property bool horizontalScrollBarRequired: (1.0 / heatmap.horizontalRangeSize) > 1.0
+                                property bool verticalScrollBarRequired: (1.0 / heatmap.verticalRangeSize) > 1.0
+                                xAxisPadding: Qt.platform.os !== "osx" && horizontalScrollBarRequired ? 20 : 0
+                                yAxisPadding: Qt.platform.os !== "osx" && verticalScrollBarRequired ? 20 : 0
 
                                 onPlotValueClicked:
                                 {
@@ -248,37 +252,33 @@ ApplicationWindow
                                     currentHeatmap = heatmap;
                                     plotContextMenu.popup();
                                 }
-                            }
-                            ScrollView
-                            {
-                                id: scrollViewVertical
-                                visible: true
-                                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                                Layout.fillHeight: true;
-                                implicitWidth: 15
-                                Rectangle
+                                ScrollView
                                 {
-                                    // This is a fake object to make native scrollbars appear
-                                    // Prevent Qt opengl texture overflow (2^14 pixels)
-                                    width: 1
-                                    height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
-                                    color: "transparent"
+                                    id: scrollViewVertical
+                                    visible: heatmap.verticalScrollBarRequired
+                                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                                    anchors.fill: parent
+                                    Item
+                                    {
+                                        // This is a fake item to make native scrollbars appear
+                                        // Prevent Qt opengl texture overflow (2^14 pixels)
+                                        width: 0
+                                        height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
+                                    }
                                 }
-                            }
-                            ScrollView
-                            {
-                                id: scrollViewHorizontal
-                                visible: true
-                                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                                implicitHeight: 15
-                                Layout.fillWidth: true
-                                Rectangle
+                                ScrollView
                                 {
-                                    // This is a fake object to make native scrollbars appear
-                                    // Prevent Qt opengl texture overflow (2^14 pixels)
-                                    width: Math.min(heatmap.width / heatmap.horizontalRangeSize, 16383)
-                                    height: 1
-                                    color: "transparent"
+                                    id: scrollViewHorizontal
+                                    visible: heatmap.horizontalScrollBarRequired
+                                    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                                    anchors.fill: parent
+                                    Item
+                                    {
+                                        // This is a fake item to make native scrollbars appear
+                                        // Prevent Qt opengl texture overflow (2^14 pixels)
+                                        width: Math.min(heatmap.width / heatmap.horizontalRangeSize, 16383)
+                                        height: 0
+                                    }
                                 }
                             }
                         }
