@@ -13,7 +13,7 @@ namespace u
     json graphArrayAsJson(const GraphArray& graphArray, const C& elementIds,
         Progressable* progressable, const ElementToJsonFn& elementToJson)
     {
-        json array;
+        json array = json::array();
 
         uint64_t i = 0;
         for(auto elementId : elementIds)
