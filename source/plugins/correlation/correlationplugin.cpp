@@ -594,7 +594,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     for(size_t row = 0; row < _numRows; row++)
     {
         auto nodeId = _userNodeData.elementIdForIndex(row);
-        _dataRows.emplace_back(_data, row, _numColumns, nodeId);
+
+        if(!nodeId.isNull())
+            _dataRows.emplace_back(_data, row, _numColumns, nodeId);
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));
     }
