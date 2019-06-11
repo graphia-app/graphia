@@ -256,8 +256,6 @@ ApplicationWindow
                                 {
                                     id: scrollView
                                     visible: heatmap.horizontalScrollBarRequired || heatmap.verticalScrollBarRequired
-                                    horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
-                                    verticalScrollBarPolicy: Qt.ScrollBarAsNeeded
                                     anchors.fill: parent
                                     Item
                                     {

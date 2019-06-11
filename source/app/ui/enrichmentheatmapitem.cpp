@@ -13,6 +13,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _customPlot.setOpenGl(true);
     _customPlot.addLayer(QStringLiteral("textLayer"));
+    _customPlot.plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
 
     _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
     _colorScale = new QCPColorScale(&_customPlot);
@@ -20,13 +21,22 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _colorScale->setType(QCPAxis::atBottom);
     _customPlot.plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
-    _colorScale->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft );
 
     _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
     _customPlot.yAxis2->setVisible(true);
     _customPlot.yAxis->setVisible(false);
+
+    auto colorScaleTicker = QSharedPointer<QCPAxisTickerText>::create();
+    _colorScale->axis()->setTicker(colorScaleTicker);
+  
+    colorScaleTicker->addTick(0, "0");
+    colorScaleTicker->addTick(0.01, "0.01");
+    colorScaleTicker->addTick(0.02, "0.02");
+    colorScaleTicker->addTick(0.03, "0.03");
+    colorScaleTicker->addTick(0.04, "0.04");
+    colorScaleTicker->addTick(0.05, "0.05");
 
     QCPColorGradient gradient;
     auto insignificantColor = QColor(Qt::gray);
@@ -143,8 +153,9 @@ void EnrichmentHeatmapItem::buildPlot()
 
     _customPlot.xAxis->setTicker(xCategoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
-    _customPlot.yAxis2->setPadding(_yAxisPadding);
     _customPlot.yAxis2->setTicker(yCategoryTicker);
+
+    _customPlot.plotLayout()->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
@@ -239,7 +250,6 @@ void EnrichmentHeatmapItem::buildPlot()
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
-    _colorScale->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
 }
 
 void EnrichmentHeatmapItem::updatePlotSize()
@@ -414,9 +424,10 @@ void EnrichmentHeatmapItem::showTooltip()
                            _hoverPoint.y());
 
     // If it falls out of bounds, clip to bounds and move label above marker
-    if(hoverLabelRightX > xBounds)
+    // yAxisPadding accounts for scrollbar spacing
+    if(hoverLabelRightX > xBounds - _yAxisPadding)
     {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0 - _xAxisPadding;
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0 - _yAxisPadding;
 
         // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
         if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
