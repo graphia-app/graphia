@@ -221,8 +221,8 @@ ApplicationWindow
                                 model: qtObject
                                 elideLabelWidth: 100
                                 showOnlyEnriched: showOnlyEnrichedButton.checked
-                                property bool horizontalScrollBarRequired: (1.0 / heatmap.horizontalRangeSize) > 1.0
-                                property bool verticalScrollBarRequired: (1.0 / heatmap.verticalRangeSize) > 1.0
+                                property bool horizontalScrollBarRequired: (heatmap.width / heatmap.horizontalRangeSize) > scrollView.viewport.width;
+                                property bool verticalScrollBarRequired: (heatmap.height / heatmap.verticalRangeSize) > scrollView.viewport.height;
                                 xAxisPadding: Qt.platform.os !== "osx" && horizontalScrollBarRequired ? 20 : 0
                                 yAxisPadding: Qt.platform.os !== "osx" && verticalScrollBarRequired ? 20 : 0
 
@@ -239,13 +239,13 @@ ApplicationWindow
 
                                 scrollXAmount:
                                 {
-                                    return scrollViewHorizontal.flickableItem.contentX /
-                                            (scrollViewHorizontal.flickableItem.contentWidth - scrollViewHorizontal.viewport.width);
+                                    return scrollView.flickableItem.contentX /
+                                            (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
                                 }
                                 scrollYAmount:
                                 {
-                                    return scrollViewVertical.flickableItem.contentY /
-                                            (scrollViewVertical.flickableItem.contentHeight - scrollViewVertical.viewport.height);
+                                    return scrollView.flickableItem.contentY /
+                                            (scrollView.flickableItem.contentHeight - scrollView.viewport.height);
                                 }
                                 onRightClick:
                                 {
@@ -254,30 +254,17 @@ ApplicationWindow
                                 }
                                 ScrollView
                                 {
-                                    id: scrollViewVertical
-                                    visible: heatmap.verticalScrollBarRequired
-                                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                                    anchors.fill: parent
-                                    Item
-                                    {
-                                        // This is a fake item to make native scrollbars appear
-                                        // Prevent Qt opengl texture overflow (2^14 pixels)
-                                        width: 0
-                                        height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
-                                    }
-                                }
-                                ScrollView
-                                {
-                                    id: scrollViewHorizontal
-                                    visible: heatmap.horizontalScrollBarRequired
-                                    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                                    id: scrollView
+                                    visible: heatmap.horizontalScrollBarRequired || heatmap.verticalScrollBarRequired
+                                    horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
+                                    verticalScrollBarPolicy: Qt.ScrollBarAsNeeded
                                     anchors.fill: parent
                                     Item
                                     {
                                         // This is a fake item to make native scrollbars appear
                                         // Prevent Qt opengl texture overflow (2^14 pixels)
                                         width: Math.min(heatmap.width / heatmap.horizontalRangeSize, 16383)
-                                        height: 0
+                                        height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
                                     }
                                 }
                             }

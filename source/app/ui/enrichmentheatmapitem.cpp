@@ -20,7 +20,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _colorScale->setType(QCPAxis::atBottom);
     _customPlot.plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
-    _colorScale->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft | QCP::MarginSide::msRight );
+    _colorScale->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft );
 
     _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
@@ -239,7 +239,7 @@ void EnrichmentHeatmapItem::buildPlot()
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
-    _colorScale->setMargins(QMargins(0, 0, 0, _xAxisPadding));
+    _colorScale->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
 }
 
 void EnrichmentHeatmapItem::updatePlotSize()
@@ -416,7 +416,7 @@ void EnrichmentHeatmapItem::showTooltip()
     // If it falls out of bounds, clip to bounds and move label above marker
     if(hoverLabelRightX > xBounds)
     {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0 - _xAxisPadding;
 
         // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
         if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
