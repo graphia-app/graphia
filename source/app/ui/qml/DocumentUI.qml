@@ -765,10 +765,11 @@ Item
                     }
 
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
-                        selectSourcesAction.enabled; action: selectSourcesAction }
+                        selectSourcesAction.visible; action: selectSourcesAction }
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
-                        selectTargetsAction.enabled; action: selectTargetsAction }
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectNeighboursAction }
+                        selectTargetsAction.visible; action: selectTargetsAction }
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                        selectNeighboursAction.visible; action: selectNeighboursAction }
                     Menu
                     {
                         id: sharedValuesSelectionContextMenu
