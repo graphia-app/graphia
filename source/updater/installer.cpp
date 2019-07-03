@@ -118,10 +118,21 @@ void Installer::start()
     {
         if(watcher->result())
         {
-            QStringList arguments = _details["command"];
-            arguments.replaceInStrings(QStringLiteral("EXISTING_INSTALL"), _existingInstallation);
-            arguments.replaceInStrings(QStringLiteral("INSTALLER_FILE"), _installerFileName);
+            QString command = _details["command"];
+            command.replace(QStringLiteral("EXISTING_INSTALL"), _existingInstallation)
+                .replace(QStringLiteral("INSTALLER_FILE"), _installerFileName);
 
+            QStringList arguments(
+#if defined(Q_OS_UNIX)
+                {"/bin/bash", "-c"}
+#elif defined(Q_OS_WIN)
+                {"cmd.exe", "/C"}
+#else
+#error Unhandled OS
+#endif
+            );
+
+            arguments.append(command);
             _process.start(arguments.at(0), arguments.mid(1));
         }
         else
