@@ -155,28 +155,30 @@ void Updater::downloadUpdate(QNetworkReply* reply)
     {
         auto updateString = reply->readAll();
         auto update = updateStringToJson(updateString);
-        if(!update.is_object())
+        if(!update.is_object() || !u::contains(update, "url") ||
+            !QUrl(update["url"]).isValid())
         {
             // Update isn't valid, for whatever reason
-            return json{};
+            update["error"] = QStringLiteral("invalid");
         }
-
-        QString status;
-        auto oldUpdate = latestUpdateJson(&status);
-
-        if(oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
-            oldUpdate["version"] == update["version"] &&
-            status != QStringLiteral("failed"))
+        else
         {
-            emit noNewUpdateAvailable(status.isEmpty());
+            QString status;
+            auto oldUpdate = latestUpdateJson(&status);
 
-            // We already have this update, and it was either successfully
-            // installed, the user has skipped it, or they haven't dealt
-            // with it yet
-            return json{};
+            if(oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
+                oldUpdate["version"] == update["version"] &&
+                status != QStringLiteral("failed"))
+            {
+                // We already have this update, and it was either successfully
+                // installed, the user has skipped it, or they haven't dealt
+                // with it yet
+                update["error"] = status.isEmpty() ?
+                    QStringLiteral("existing") : status;
+            }
+            else
+                _updateString = updateString;
         }
-
-        _updateString = updateString;
 
         return update;
     });
@@ -186,8 +188,11 @@ void Updater::downloadUpdate(QNetworkReply* reply)
     {
         const auto& update = watcher->result();
 
-        if(!update.is_object())
+        if(u::contains(update, "error"))
         {
+            QString error = update["error"];
+            emit noNewUpdateAvailable(error ==
+                QStringLiteral("existing"));
             _state = State::Idle;
             return;
         }
@@ -279,6 +284,8 @@ void Updater::saveUpdate(QNetworkReply* reply)
             storeUpdateJson(_updateString);
             emit updateDownloaded();
         }
+        else
+            emit noNewUpdateAvailable(false);
 
         _updateString.clear();
         _state = State::Idle;
@@ -299,22 +306,20 @@ void Updater::cancelUpdateDownload()
 
 void Updater::onReplyReceived(QNetworkReply* reply)
 {
+    if(_timeoutTimer.isActive())
+        _timeoutTimer.stop();
+
     if(reply->error() == QNetworkReply::NetworkError::NoError)
     {
         switch(_state)
         {
         case Updater::State::Update:
-            if(_timeoutTimer.isActive())
-                _timeoutTimer.stop();
-
             downloadUpdate(reply);
             break;
 
         case Updater::State::File:
-        {
             saveUpdate(reply);
             break;
-        }
 
         default:
             break;
@@ -324,6 +329,9 @@ void Updater::onReplyReceived(QNetworkReply* reply)
     {
         auto error = reply->errorString();
         std::cerr << "Error while retrieving update from server (" << error.toStdString() << ").\n";
+
+        _state = Updater::State::Idle;
+        emit noNewUpdateAvailable(false);
     }
 
     _reply = nullptr;
