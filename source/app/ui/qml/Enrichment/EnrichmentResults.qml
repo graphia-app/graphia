@@ -347,7 +347,9 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            wizard.document.writeTableViewToFile(tabView.tableViews[tabView.currentIndex], file, defaultSuffix);
+            wizard.documentUI.writeTableViewToFile(
+                tabView.tableViews[tabView.currentIndex],
+                file, defaultSuffix);
         }
     }
 
