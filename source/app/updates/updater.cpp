@@ -154,8 +154,15 @@ void Updater::downloadUpdate(QNetworkReply* reply)
     {
         auto updateString = reply->readAll();
         auto update = updateStringToJson(updateString);
-        if(!update.is_object() || !u::contains(update, "url") ||
-            !QUrl(update["url"]).isValid())
+
+        bool urlIsValid = false;
+        if(u::contains(update, "url"))
+        {
+            QUrl url = update["url"];
+            urlIsValid = url.isValid();
+        }
+
+        if(!update.is_object() || !urlIsValid)
         {
             // Update isn't valid, for whatever reason
             update["error"] = QStringLiteral("invalid");
