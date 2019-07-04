@@ -122,8 +122,6 @@ void Installer::start()
                 {"/bin/bash", "-c"}
 #elif defined(Q_OS_WIN)
                 {"cmd.exe", "/C"}
-#else
-#error Unhandled OS
 #endif
             );
 
