@@ -156,6 +156,12 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         auto updateString = reply->readAll();
         auto update = updateStringToJson(updateString);
 
+        if(update.is_null())
+        {
+            update["error"] = QStringLiteral("none");
+            return update;
+        }
+
         bool urlIsValid = false;
         if(u::contains(update, "url"))
         {
@@ -167,25 +173,24 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         {
             // Update isn't valid, for whatever reason
             update["error"] = QStringLiteral("invalid");
+            return update;
+        }
+
+        QString status;
+        auto oldUpdate = latestUpdateJson(&status);
+
+        if(oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
+            oldUpdate["version"] == update["version"] &&
+            status != QStringLiteral("failed"))
+        {
+            // We already have this update, and it was either successfully
+            // installed, the user has skipped it, or they haven't dealt
+            // with it yet
+            update["error"] = status.isEmpty() ?
+                QStringLiteral("existing") : status;
         }
         else
-        {
-            QString status;
-            auto oldUpdate = latestUpdateJson(&status);
-
-            if(oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
-                oldUpdate["version"] == update["version"] &&
-                status != QStringLiteral("failed"))
-            {
-                // We already have this update, and it was either successfully
-                // installed, the user has skipped it, or they haven't dealt
-                // with it yet
-                update["error"] = status.isEmpty() ?
-                    QStringLiteral("existing") : status;
-            }
-            else
-                _updateString = updateString;
-        }
+            _updateString = updateString;
 
         return update;
     });
