@@ -32,6 +32,7 @@ public:
     static bool updateAvailable();
     static bool showUpdatePrompt(const QStringList& arguments);
 
+    QString updateStatus() const;
     void resetUpdateStatus();
 
 public slots:

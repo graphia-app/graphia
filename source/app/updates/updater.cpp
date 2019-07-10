@@ -96,6 +96,13 @@ void Updater::disableAutoBackgroundCheck()
     cancelUpdateDownload();
 }
 
+QString Updater::updateStatus() const
+{
+    QString status;
+    latestUpdateJson(&status);
+    return status;
+}
+
 void Updater::resetUpdateStatus()
 {
     clearUpdateStatus();
