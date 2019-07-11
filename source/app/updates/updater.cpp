@@ -183,6 +183,13 @@ void Updater::downloadUpdate(QNetworkReply* reply)
             return update;
         }
 
+        if(update["version"] == VERSION)
+        {
+            // The update is the same version as what we're running
+            update["error"] = QStringLiteral("running");
+            return update;
+        }
+
         QString status;
         auto oldUpdate = latestUpdateJson(&status);
 
