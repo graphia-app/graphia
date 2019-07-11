@@ -30,6 +30,14 @@
 
 #include <json_helper.h>
 
+#ifdef _DEBUG
+//#define DEBUG_BACKGROUND_UPDATE
+
+#ifndef DEBUG_BACKGROUND_UPDATE
+#define DISABLE_BACKGROUND_UPDATE
+#endif
+#endif
+
 static QString tempUpdaterPath()
 {
     auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
@@ -80,11 +88,13 @@ void Updater::enableAutoBackgroundCheck()
     if(_backgroundCheckTimer.isActive())
         return;
 
+#ifndef DISABLE_BACKGROUND_UPDATE
     const int BACKGROUND_CHECK_INTERVAL = 60 * 60000;
     _backgroundCheckTimer.start(BACKGROUND_CHECK_INTERVAL);
 
     // Do a check right away, too
     startBackgroundUpdateCheck();
+#endif
 }
 
 void Updater::disableAutoBackgroundCheck()
@@ -92,8 +102,10 @@ void Updater::disableAutoBackgroundCheck()
     if(!_backgroundCheckTimer.isActive())
         return;
 
+#ifndef DISABLE_BACKGROUND_UPDATE
     _backgroundCheckTimer.stop();
     cancelUpdateDownload();
+#endif
 }
 
 QString Updater::updateStatus() const
