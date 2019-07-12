@@ -32,7 +32,7 @@ then
     do
       # Remove everything after the dash
       SIMPLIFIED_FILENAME=$(echo ${APPIMAGE_FILENAME} | \
-        perl -pe 's/([^-]+)(?:-\w+)+(\.\w+)/$1$2/g')
+        perl -pe 's/([^-]+)(?:[-\.\w]+)+(\.\w+)/$1$2/g')
 
       echo "${APPIMAGE_FILENAME} -> ${SIMPLIFIED_FILENAME}"
       mv ${APPIMAGE_FILENAME} ${SIMPLIFIED_FILENAME}
