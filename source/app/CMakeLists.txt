@@ -106,6 +106,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgereductiontransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/percentnntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.h
@@ -218,6 +219,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgereductiontransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/percentnntransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.cpp
