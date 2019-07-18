@@ -57,7 +57,8 @@ const INode& MutableGraph::nodeById(NodeId nodeId) const
 
 bool MutableGraph::containsNodeId(NodeId nodeId) const
 {
-    return _n._nodeIdsInUse[static_cast<int>(nodeId)];
+    return static_cast<int>(nodeId) < static_cast<int>(_n._nodeIdsInUse.size()) &&
+        _n._nodeIdsInUse[static_cast<int>(nodeId)];
 }
 
 MultiElementType MutableGraph::typeOf(NodeId nodeId) const
@@ -229,7 +230,8 @@ const IEdge& MutableGraph::edgeById(EdgeId edgeId) const
 
 bool MutableGraph::containsEdgeId(EdgeId edgeId) const
 {
-    return _e._edgeIdsInUse[static_cast<int>(edgeId)];
+    return static_cast<int>(edgeId) < static_cast<int>(_e._edgeIdsInUse.size()) &&
+        _e._edgeIdsInUse[static_cast<int>(edgeId)];
 }
 
 MultiElementType MutableGraph::typeOf(EdgeId edgeId) const
