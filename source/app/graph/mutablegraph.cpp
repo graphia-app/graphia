@@ -90,6 +90,18 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
     return edgeIds;
 }
 
+EdgeId MutableGraph::connected(NodeId nodeIdA, NodeId nodeIdB) const
+{
+    const auto& nodeA = nodeById(nodeIdA);
+    for(auto edgeId : nodeA.edgeIds())
+    {
+        if(edgeById(edgeId).oppositeId(nodeIdA) == nodeIdB)
+            return edgeId;
+    }
+
+    return {};
+}
+
 NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIds.empty())

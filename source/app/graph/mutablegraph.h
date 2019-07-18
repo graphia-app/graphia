@@ -136,6 +136,7 @@ public:
     int multiplicityOf(NodeId nodeId) const override;
 
     std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
+    EdgeId connected(NodeId nodeIdA, NodeId nodeIdB) const override;
 
     void reserveNodeId(NodeId nodeId) override;
 

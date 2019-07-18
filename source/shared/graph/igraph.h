@@ -76,6 +76,7 @@ public:
     virtual std::vector<NodeId> neighboursOf(NodeId nodeId) const = 0;
 
     virtual std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const = 0;
+    virtual EdgeId connected(NodeId nodeIdA, NodeId nodeIdB) const = 0;
 
     virtual void setPhase(const QString& phase) const = 0;
     virtual void clearPhase() const = 0;
