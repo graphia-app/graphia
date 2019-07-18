@@ -493,11 +493,13 @@ MutableGraph& MutableGraph::clone(const MutableGraph& other)
     _nodeIds       = other._nodeIds;
     _unusedNodeIds = other._unusedNodeIds;
     Graph::reserveNodeId(other.largestNodeId());
+    _n.resize(static_cast<int>(nextNodeId()));
 
     _e             = other._e;
     _edgeIds       = other._edgeIds;
     _unusedEdgeIds = other._unusedEdgeIds;
     Graph::reserveEdgeId(other.largestEdgeId());
+    _e.resize(static_cast<int>(nextEdgeId()));
 
     // Reset collection pointers to collections in this
     for(auto& node : _n._nodes)
