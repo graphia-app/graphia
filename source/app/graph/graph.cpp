@@ -37,7 +37,7 @@ std::vector<EdgeId> Node::inEdgeIds() const
 std::vector<EdgeId> Node::outEdgeIds() const
 {
     std::vector<EdgeId> edgeIds;
-
+    std::copy(_outEdgeIds.begin(), _outEdgeIds.end(), std::back_inserter(edgeIds));
     return edgeIds;
 }
 
