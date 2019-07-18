@@ -116,9 +116,6 @@ private:
     void claimEdgeId(EdgeId edgeId);
     void releaseEdgeId(EdgeId edgeId);
 
-    void reserveNodeId(NodeId nodeId) override;
-    void reserveEdgeId(EdgeId edgeId) override;
-
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
     EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
 
@@ -139,6 +136,8 @@ public:
     int multiplicityOf(NodeId nodeId) const override;
 
     std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
+
+    void reserveNodeId(NodeId nodeId) override;
 
     NodeId addNode() override;
     NodeId addNode(NodeId nodeId) override;
@@ -175,6 +174,8 @@ public:
 
         return set;
     }
+
+    void reserveEdgeId(EdgeId edgeId) override;
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId) override;
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) override;
