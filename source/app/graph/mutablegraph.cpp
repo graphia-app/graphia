@@ -49,7 +49,7 @@ int MutableGraph::numNodes() const
     return static_cast<int>(_nodeIds.size());
 }
 
-const INode& MutableGraph::nodeById(NodeId nodeId) const
+const Node& MutableGraph::nodeById(NodeId nodeId) const
 {
     Q_ASSERT(_n._nodeIdsInUse[static_cast<int>(nodeId)]);
     return _n._nodes[static_cast<int>(nodeId)];
@@ -93,9 +93,16 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
 EdgeId MutableGraph::connected(NodeId nodeIdA, NodeId nodeIdB) const
 {
     const auto& nodeA = nodeById(nodeIdA);
-    for(auto edgeId : nodeA.edgeIds())
+
+    for(auto edgeId : nodeA._inEdgeIds)
     {
-        if(edgeById(edgeId).oppositeId(nodeIdA) == nodeIdB)
+        if(edgeById(edgeId).sourceId() == nodeIdB)
+            return edgeId;
+    }
+
+    for(auto edgeId : nodeA._outEdgeIds)
+    {
+        if(edgeById(edgeId).targetId() == nodeIdB)
             return edgeId;
     }
 
@@ -234,7 +241,7 @@ int MutableGraph::numEdges() const
     return static_cast<int>(_edgeIds.size());
 }
 
-const IEdge& MutableGraph::edgeById(EdgeId edgeId) const
+const Edge& MutableGraph::edgeById(EdgeId edgeId) const
 {
     Q_ASSERT(containsEdgeId(edgeId));
     return _e._edges[static_cast<int>(edgeId)];

@@ -129,7 +129,7 @@ public:
 
     const std::vector<NodeId>& nodeIds() const override;
     int numNodes() const override;
-    const INode& nodeById(NodeId nodeId) const override;
+    const Node& nodeById(NodeId nodeId) const override;
     bool containsNodeId(NodeId nodeId) const override;
     MultiElementType typeOf(NodeId nodeId) const override;
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const override;
@@ -147,7 +147,7 @@ public:
 
     const std::vector<EdgeId>& edgeIds() const override;
     int numEdges() const override;
-    const IEdge& edgeById(EdgeId edgeId) const override;
+    const Edge& edgeById(EdgeId edgeId) const override;
     bool containsEdgeId(EdgeId edgeId) const override;
     MultiElementType typeOf(EdgeId edgeId) const override;
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const override;
