@@ -90,15 +90,9 @@ std::vector<EdgeId> MutableGraph::edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB)
     return edgeIds;
 }
 
-EdgeId MutableGraph::connected(NodeId nodeIdA, NodeId nodeIdB) const
+EdgeId MutableGraph::firstEdgeIdBetween(NodeId nodeIdA, NodeId nodeIdB) const
 {
     const auto& nodeA = nodeById(nodeIdA);
-
-    for(auto edgeId : nodeA._inEdgeIds)
-    {
-        if(edgeById(edgeId).sourceId() == nodeIdB)
-            return edgeId;
-    }
 
     for(auto edgeId : nodeA._outEdgeIds)
     {
@@ -106,7 +100,18 @@ EdgeId MutableGraph::connected(NodeId nodeIdA, NodeId nodeIdB) const
             return edgeId;
     }
 
+    for(auto edgeId : nodeA._inEdgeIds)
+    {
+        if(edgeById(edgeId).sourceId() == nodeIdB)
+            return edgeId;
+    }
+
     return {};
+}
+
+bool MutableGraph::edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const
+{
+    return !firstEdgeIdBetween(nodeIdA, nodeIdB).isNull();
 }
 
 NodeId MutableGraph::addNode()

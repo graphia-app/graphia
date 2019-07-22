@@ -136,7 +136,8 @@ public:
     int multiplicityOf(NodeId nodeId) const override;
 
     std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
-    EdgeId connected(NodeId nodeIdA, NodeId nodeIdB) const override;
+    EdgeId firstEdgeIdBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
+    bool edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const override;
 
     void reserveNodeId(NodeId nodeId) override;
 
