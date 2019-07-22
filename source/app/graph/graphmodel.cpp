@@ -311,6 +311,11 @@ QStringList GraphModel::transformsWithMissingParametersSetToDefault(const QStrin
             continue;
 
         auto graphTransformConfig = graphTransformConfigParser.result();
+
+        // This can happen if the file has transforms that the app doesn't
+        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
+            continue;
+
         const auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
 
         factory->setMissingParametersToDefault(graphTransformConfig);
