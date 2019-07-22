@@ -179,8 +179,10 @@ Window
 
         channelList.selectedValues.forEach(function(channelName)
         {
+            var attribute = document.attribute(attributeList.selectedValue);
             var expression = VisualisationUtils.expressionFor(
-                document, document.attribute(attributeList.selectedValue), channelName);
+                document, attribute.name, attribute.flags,
+                attribute.valueType, channelName);
 
             newVisualsiationExpressions.push(expression);
         });

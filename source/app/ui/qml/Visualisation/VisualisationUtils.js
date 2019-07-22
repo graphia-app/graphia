@@ -1,14 +1,14 @@
-function expressionFor(document, attribute, channelName)
+function expressionFor(document, name, flags, type, channelName)
 {
     var expression = "";
 
-    if(attribute.flags & AttributeFlag.VisualiseByComponent)
+    if(flags & AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
-    expression += "\"" + attribute.name + "\" \"" + channelName +"\"";
+    expression += "\"" + name + "\" \"" + channelName +"\"";
 
     var parameters = document.visualisationDefaultParameters(
-        attribute.valueType, channelName);
+        type, channelName);
 
     if(Object.keys(parameters).length !== 0)
     {

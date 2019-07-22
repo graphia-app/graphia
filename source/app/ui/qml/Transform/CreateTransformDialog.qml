@@ -803,7 +803,8 @@ Window
             if(channelName.length > 0)
             {
                 var expression = VisualisationUtils.expressionFor(
-                    document, defaultVisualisation, channelName);
+                    document, attributeName, defaultVisualisation.flags,
+                    defaultVisualisation.valueType, channelName);
 
                 defaultVisualisations.push(expression);
             }
