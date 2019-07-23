@@ -457,6 +457,8 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
     if(_clusteringType == ClusteringType::MCL)
         defaultTransforms.append(QStringLiteral(R"("MCL Cluster")"));
+    else if(_clusteringType == ClusteringType::Louvain)
+        defaultTransforms.append(QStringLiteral(R"("Louvain Cluster")"));
 
     return defaultTransforms;
 }
@@ -465,6 +467,8 @@ QStringList CorrelationPluginInstance::defaultVisualisations() const
 {
     if(_clusteringType == ClusteringType::MCL)
         return { R"("MCL Cluster" "Colour")" };
+    else if(_clusteringType == ClusteringType::Louvain)
+        return { R"("Louvain Cluster" "Colour")" };
 
     return {};
 }

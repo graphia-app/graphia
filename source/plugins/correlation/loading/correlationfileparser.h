@@ -45,6 +45,7 @@ DEFINE_QML_ENUM(
 DEFINE_QML_ENUM(
     Q_GADGET, ClusteringType,
     None,
+    Louvain,
     MCL);
 
 DEFINE_QML_ENUM(

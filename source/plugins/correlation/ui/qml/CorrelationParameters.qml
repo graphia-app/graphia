@@ -1208,8 +1208,9 @@ BaseParameterDialog
                         Layout.alignment: Qt.AlignRight
                         model: ListModel
                         {
-                            ListElement { text: qsTr("None");  value: ClusteringType.None }
-                            ListElement { text: qsTr("MCL");   value: ClusteringType.MCL }
+                            ListElement { text: qsTr("None");       value: ClusteringType.None }
+                            ListElement { text: qsTr("Louvain");    value: ClusteringType.Louvain }
+                            ListElement { text: qsTr("MCL");        value: ClusteringType.MCL }
                         }
                         textRole: "text"
 
@@ -1227,6 +1228,25 @@ BaseParameterDialog
                         GridLayout
                         {
                             columns: 2
+
+                            Text
+                            {
+                                text: qsTr("<b>Louvain:</b>")
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Louvain modularity is a method for finding clusters " +
+                                           "by measuring edge density from within communities to " +
+                                           "neighbouring communities. It is often a good choice " +
+                                           "when used in conjunction with an edge reduction " +
+                                           "transform.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
                             Text
                             {
                                 text: qsTr("<b>MCL:</b>")
