@@ -182,9 +182,11 @@ void TransformedGraph::rebuild()
 
             _graphModel->addAttributes(_cache.attributes());
         }
-
-        _cache = std::move(newCache);
-        _createdAttributeNames = std::move(newCreatedAttributeNames);
+        else
+        {
+            _cache = std::move(newCache);
+            _createdAttributeNames = std::move(newCreatedAttributeNames);
+        }
     });
 
     emit attributeValuesChanged(updatedAttributeNames);
