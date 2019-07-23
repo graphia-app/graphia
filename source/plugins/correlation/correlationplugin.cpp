@@ -448,6 +448,12 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
             .arg(correlationPolarity == CorrelationPolarity::Positive ?
             _correlationAttributeName : _correlationAbsAttributeName));
     }
+    else if(_edgeReductionType == EdgeReductionType::PercentNN)
+    {
+        defaultTransforms.append(QStringLiteral(R"("%-NN" using $"%1")")
+            .arg(correlationPolarity == CorrelationPolarity::Positive ?
+            _correlationAttributeName : _correlationAbsAttributeName));
+    }
 
     if(_clusteringType == ClusteringType::MCL)
         defaultTransforms.append(QStringLiteral(R"("MCL Cluster")"));

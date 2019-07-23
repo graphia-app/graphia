@@ -31,7 +31,7 @@ public:
         return QObject::tr("Reduce the number of edges in the graph using a variation of the "
             R"(<a href="https://kajeka.com/graphia/knn">)"
             R"(k-nearest neighbours</a> algorithm, but instead of choosing the top k edges, )"
-            "choose a percentage of the highest ranking edges instead.");
+            "choose a percentage of the highest ranking edges.");
     }
 
     GraphTransformAttributeParameters attributeParameters() const override

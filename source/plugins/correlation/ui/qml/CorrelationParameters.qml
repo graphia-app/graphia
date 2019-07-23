@@ -1209,8 +1209,9 @@ BaseParameterDialog
                         Layout.alignment: Qt.AlignRight
                         model: ListModel
                         {
-                            ListElement { text: qsTr("None");  value: EdgeReductionType.None }
+                            ListElement { text: qsTr("None");   value: EdgeReductionType.None }
                             ListElement { text: qsTr("k-NN");   value: EdgeReductionType.KNN }
+                            ListElement { text: qsTr("%-NN");   value: EdgeReductionType.PercentNN }
                         }
                         textRole: "text"
 
@@ -1248,6 +1249,22 @@ BaseParameterDialog
                                 {
                                     text: qsTr("k-nearest neighbours ranks node edges and only " +
                                         "keeps <i>k</i> number of edges per node.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("<b>%-NN:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("Like k-nearest neighbours, but instead of choosing " +
+                                        "the top <i>k</i> edges, choose a percentage of the highest " +
+                                        "ranking edges.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }

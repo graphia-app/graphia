@@ -47,7 +47,8 @@ DEFINE_QML_ENUM(
 DEFINE_QML_ENUM(
     Q_GADGET, EdgeReductionType,
     None,
-    KNN);
+    KNN,
+    PercentNN);
 
 class CorrelationPluginInstance;
 
