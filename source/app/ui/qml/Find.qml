@@ -285,6 +285,14 @@ Rectangle
         }
     }
 
+    // Sink all wheel events so that they don't get
+    // passed on to underlying controls
+    MouseArea
+    {
+        anchors.fill: row
+        onWheel: { /* NO-OP */ }
+    }
+
     RowLayout
     {
         id: row
