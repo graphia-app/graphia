@@ -3,9 +3,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.4
 
 // This is a gigantic hack that hijacks a Button's tooltip property in order
-// to provide generalised tooltips. It's only really suitable for inert items
-// as the button is still clickable and will not pass input events to the
-// underlying control.
+// to provide generalised tooltips
 Item
 {
     id: root
@@ -16,6 +14,7 @@ Item
 
     Button
     {
+        id: tooltipButton
         anchors.fill: parent
 
         tooltip: root.text
@@ -26,6 +25,18 @@ Item
             {
                 color: "transparent"
             }
+        }
+
+        // Pass any mouse events on to any underlying MouseAreas
+        Component.onCompleted:
+        {
+            tooltipButton.__behavior.propagateComposedEvents = true;
+        }
+
+        Connections
+        {
+            target: tooltipButton.__behavior
+            onPressed: { mouse.accepted = false; }
         }
     }
 }
