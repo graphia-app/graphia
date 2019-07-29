@@ -228,6 +228,10 @@ float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
     auto component = _graphModel->graph().componentById(_componentId);
     auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, component->nodeIds());
 
+    // Allow single node components to be zoomed out beyond their natural maximum
+    if(component->numNodes() == 1)
+        maxDistance *= 2.2f;
+
     return zoomDistanceForRadius(maxDistance);
 }
 
