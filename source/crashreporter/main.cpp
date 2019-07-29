@@ -71,7 +71,16 @@ static QString crashedModule(const QString& dmpFile)
         return {};
     }
 
-    const auto* frame = stack->frames()->at(0);
+    const StackFrame* frame = nullptr;
+    int frameIndex = 0;
+
+    do
+    {
+        frame = stack->frames()->at(frameIndex);
+        frameIndex++;
+    }
+    while(frame->module == nullptr && frameIndex < frameCount);
+
     if(frame->module == nullptr)
     {
         std::cerr << "No module\n";
@@ -79,6 +88,7 @@ static QString crashedModule(const QString& dmpFile)
     }
 
     auto module = PathnameStripper::File(frame->module->code_file());
+    std::cerr << "Crashed module: " << module << "\n";
     return QString::fromStdString(module);
 }
 
