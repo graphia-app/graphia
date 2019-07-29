@@ -48,24 +48,24 @@ static QString crashedModule(const QString& dmpFile)
        return {};
     }
 
-    MinidumpProcessor minidump_processor(nullptr, nullptr);
+    MinidumpProcessor minidumpProcessor(nullptr, nullptr);
     ProcessState process_state;
-    if(minidump_processor.Process(&dump, &process_state) != google_breakpad::PROCESS_OK)
+    if(minidumpProcessor.Process(&dump, &process_state) != google_breakpad::PROCESS_OK)
     {
       std::cerr << "MinidumpProcessor::Process failed\n";
       return {};
     }
 
-    int requesting_thread = process_state.requesting_thread();
-    if(requesting_thread == -1 || !process_state.crashed())
+    int requestingThread = process_state.requesting_thread();
+    if(requestingThread == -1 || !process_state.crashed())
     {
         std::cerr << "Process has not crashed\n";
         return {};
     }
 
-    const auto* stack = process_state.threads()->at(requesting_thread);
-    int frame_count = stack->frames()->size();
-    if(frame_count == 0)
+    const auto* stack = process_state.threads()->at(requestingThread);
+    int frameCount = stack->frames()->size();
+    if(frameCount == 0)
     {
         std::cerr << "No stack frames\n";
         return {};
