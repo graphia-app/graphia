@@ -344,3 +344,9 @@ function readFile(file)
 
     return allText;
 }
+
+// Escape a text value so it will match literally in a regex
+function regexEscape(text)
+{
+    return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
