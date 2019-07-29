@@ -1435,7 +1435,7 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
     }
 }
 
-void Document::selectByAttributeValue(const QString& attributeName, const QString& value)
+void Document::selectByAttributeValue(const QString& attributeName, const QString& term)
 {
     std::vector<NodeId> nodeIds;
 
@@ -1444,7 +1444,7 @@ void Document::selectByAttributeValue(const QString& attributeName, const QStrin
     {
         const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
 
-        auto conditionFn = CreateConditionFnFor::node(attribute, ConditionFnOp::Equality::Equal, value);
+        auto conditionFn = CreateConditionFnFor::node(attribute, ConditionFnOp::String::MatchesRegex, term);
         if(conditionFn != nullptr)
         {
             for(auto nodeId : _graphModel->graph().nodeIds())

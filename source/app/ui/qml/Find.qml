@@ -9,6 +9,7 @@ import com.kajeka 1.0
 
 import "Controls"
 import "../../../shared/ui/qml/Constants.js" as Constants
+import "../../../shared/ui/qml/Utils.js" as Utils
 
 Rectangle
 {
@@ -36,6 +37,10 @@ Rectangle
 
     property bool _visible: false
 
+    property var _attributeValues: []
+    property bool _selectMultipleMode:
+        _type === Find.ByAttribute && selectMultipleModeAction.checked
+
     property bool _finding: false
     property bool _pendingFind: false
 
@@ -47,7 +52,23 @@ Rectangle
     property string _findText:
     {
         if(_type === Find.ByAttribute)
-            return valueComboBox.currentText;
+        {
+            if(_selectMultipleMode)
+            {
+                var term = "";
+                _attributeValues.forEach(function(value)
+                {
+                    if(term.length !== 0)
+                        term += "|";
+
+                    term += Utils.regexEscape(value);
+                });
+
+                return "^(" + term + ")$";
+            }
+            else
+                return "^" + Utils.regexEscape(valueComboBox.currentText) + "$";
+        }
 
         return findField.text;
     }
@@ -78,7 +99,7 @@ Rectangle
             break;
 
         case Find.ByAttribute:
-            o = FindOptions.MatchExact;
+            o = FindOptions.MatchUsingRegex;
             break;
         }
 
@@ -126,7 +147,7 @@ Rectangle
             else if(_type === Find.ByAttribute && selectOnlyAction.checked)
             {
                 document.resetFind();
-                document.selectByAttributeValue(selectAttributeComboBox.currentText, valueComboBox.currentText);
+                document.selectByAttributeValue(selectAttributeComboBox.currentText, _findText);
             }
             else if(_findText.length > 0)
                 document.find(_findText, _options, _findAttributes, _findSelectStyle);
@@ -148,6 +169,7 @@ Rectangle
         property alias matchWholeWords: matchWholeWordsAction.checked
         property alias matchUsingRegex: matchUsingRegexAction.checked
         property alias findByAttribtueSelectOnly: selectOnlyAction.checked
+        property alias findByAttribtueSelectMultiple: selectMultipleModeAction.checked
     }
 
     width: row.width
@@ -221,6 +243,24 @@ Rectangle
         text: qsTr("Match Using Regex")
         iconName: "list-add"
         checkable: true
+    }
+
+    Action
+    {
+        id: selectMultipleModeAction
+        text: qsTr("Select Multiple")
+        iconName: "edit-copy"
+        checkable: true
+
+        onCheckedChanged:
+        {
+            if(checked && valueComboBox.currentText.length > 0)
+                _attributeValues = [valueComboBox.currentText];
+            else
+                _attributeValues = [];
+
+            _doFind();
+        }
     }
 
     Action
@@ -389,6 +429,7 @@ Rectangle
                                 lastFindByAttributeName = currentText;
 
                             valueComboBox.refresh();
+                            _attributeValues = [];
                         }
 
                         function refresh()
@@ -410,11 +451,14 @@ Rectangle
                         }
                     }
 
+                    FloatingButton { action: selectMultipleModeAction }
+
                     ComboBox
                     {
                         id: valueComboBox
-                        implicitWidth: 175
+                        Layout.preferredWidth: 175
 
+                        visible: !_selectMultipleMode
                         enabled: valueComboBox.count > 0
 
                         function refresh()
@@ -437,8 +481,8 @@ Rectangle
                     }
                 }
 
-                FloatingButton { action: _previousAction }
-                FloatingButton { action: _nextAction }
+                FloatingButton { action: _previousAction; visible: !_selectMultipleMode }
+                FloatingButton { action: _nextAction; visible: !_selectMultipleMode }
                 FloatingButton
                 {
                     visible: _type === Find.Simple || _type === Find.Advanced
@@ -450,6 +494,57 @@ Rectangle
                     action: selectOnlyAction
                 }
                 FloatingButton { action: closeAction }
+            }
+
+            ScrollView
+            {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 128
+
+                visible: _selectMultipleMode
+
+                frameVisible: true
+                clip: true
+
+                ListView
+                {
+                    anchors.leftMargin: Constants.padding
+                    anchors.fill: parent
+
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    model: valueComboBox.model
+                    delegate: Loader
+                    {
+                        sourceComponent: CheckBox
+                        {
+                            text: modelData
+
+                            function isChecked()
+                            {
+                                return Utils.setContains(_attributeValues, modelData);
+                            }
+
+                            checked: { return isChecked(); }
+
+                            onCheckedChanged:
+                            {
+                                // Unbind to prevent binding loop
+                                checked = checked;
+
+                                if(checked)
+                                    _attributeValues = Utils.setAdd(_attributeValues, modelData);
+                                else
+                                    _attributeValues = Utils.setRemove(_attributeValues, modelData);
+
+                                // Rebind so that the delegate doesn't hold the state
+                                checked = Qt.binding(isChecked);
+                            }
+
+                            ToolTip { text: modelData }
+                        }
+                    }
+                }
             }
 
             RowLayout

@@ -19,6 +19,9 @@
 		<file>Tango/16x16/actions/document-save-as.png</file>
 		<file>Tango/22x22/actions/document-save-as.png</file>
 		<file>Tango/32x32/actions/document-save-as.png</file>
+		<file>Tango/16x16/actions/edit-copy.png</file>
+		<file>Tango/22x22/actions/edit-copy.png</file>
+		<file>Tango/32x32/actions/edit-copy.png</file>
 		<file>Tango/16x16/actions/edit-delete.png</file>
 		<file>Tango/22x22/actions/edit-delete.png</file>
 		<file>Tango/32x32/actions/edit-delete.png</file>
