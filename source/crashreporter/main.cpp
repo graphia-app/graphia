@@ -73,21 +73,30 @@ static QString crashedModule(const QString& dmpFile)
 
     const StackFrame* frame = nullptr;
     int frameIndex = 0;
+    std::string module;
 
     do
     {
         frame = stack->frames()->at(frameIndex);
         frameIndex++;
-    }
-    while(frame->module == nullptr && frameIndex < frameCount);
 
-    if(frame->module == nullptr)
+        module = frame->module != nullptr ?
+            PathnameStripper::File(frame->module->code_file()) : "";
+
+        // Treat module names that look like pointers as empty
+        // It's unclear if this actually happens in practice, but
+        // it doesn't hurt to test for it
+        if(module.length() >= 2 && module[0] == '0' && module[1] == 'x')
+            module.clear();
+    }
+    while(module.empty() && frameIndex < frameCount);
+
+    if(module.empty())
     {
         std::cerr << "No module\n";
         return {};
     }
 
-    auto module = PathnameStripper::File(frame->module->code_file());
     std::cerr << "Crashed module: " << module << "\n";
     return QString::fromStdString(module);
 }
