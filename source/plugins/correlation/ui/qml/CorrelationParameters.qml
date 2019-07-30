@@ -1064,9 +1064,12 @@ BaseParameterDialog
                             Layout.alignment: Qt.AlignRight
                             model: ListModel
                             {
-                                ListElement { text: qsTr("None");       value: NormaliseType.None }
-                                ListElement { text: qsTr("MinMax");     value: NormaliseType.MinMax }
-                                ListElement { text: qsTr("Quantile");   value: NormaliseType.Quantile }
+                                ListElement { text: qsTr("None");               value: NormaliseType.None }
+                                ListElement { text: qsTr("Min/Max");            value: NormaliseType.MinMax }
+                                ListElement { text: qsTr("Mean");               value: NormaliseType.Mean }
+                                ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standarisation }
+                                ListElement { text: qsTr("Unit Scaling");       value: NormaliseType.UnitScaling }
+                                ListElement { text: qsTr("Quantile");           value: NormaliseType.Quantile }
                             }
                             textRole: "text"
 
@@ -1086,19 +1089,65 @@ BaseParameterDialog
                                 columns: 2
                                 Text
                                 {
-                                    text: qsTr("<b>MinMax:</b>")
+                                    text: qsTr("<b>Min/Max:</b>")
                                     textFormat: Text.StyledText
                                     Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+                                Text
+                                {
+                                    text: qsTr("Rescale the data so that its values " +
+                                               "lie within the [0, 1] range: " +
+                                               "(<i>x</i>-min(<i>x</i>))/(max(<i>x</i>)-min(<i>x</i>)). " +
+                                               "This is useful if the columns in the dataset " +
+                                               "have differing scales or units. " +
+                                               "Note: If all elements in a column have the same value " +
+                                               "this will rescale the values to 0.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
                                 }
 
                                 Text
                                 {
-                                    text: qsTr("Normalise the data so 1.0 is the maximum value " +
-                                               "of that column and 0.0 the minimum. " +
-                                               "This is useful if the columns in the dataset " +
-                                               "have differing scales or units. " +
+                                    text: qsTr("<b>Mean:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+                                Text
+                                {
+                                    text: qsTr("Similar to Min/Max scaling except the resultant " +
+                                               "values are centred around their column mean: " +
+                                               "(<i>x</i>-µ)/(max(<i>x</i>)-min(<i>x</i>))." +
                                                "Note: If all elements in a column have the same value " +
                                                "this will rescale the values to 0.0.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("<b>Standardisation:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+                                Text
+                                {
+                                    text: qsTr("Also known as Z-score normalisation, this method " +
+                                               "centres the value around the mean and scales by " +
+                                               "the standard deviation: (<i>x</i>-µ)/σ.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("<b>Unit Scaling:</b>")
+                                    textFormat: Text.StyledText
+                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                }
+                                Text
+                                {
+                                    text: qsTr("Values are divided by the euclidean length of " +
+                                               "the vector formed by the column of data: <i>x</i>/‖<i>x</i>‖.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -1109,7 +1158,6 @@ BaseParameterDialog
                                     textFormat: Text.StyledText
                                     Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                                 }
-
                                 Text
                                 {
                                     text: qsTr("Normalise the data so that the columns have equal distributions.");

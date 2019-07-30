@@ -1,7 +1,7 @@
 #include "correlationfileparser.h"
 
 #include "correlationplugin.h"
-#include "minmaxnormaliser.h"
+#include "featurescaling.h"
 #include "quantilenormaliser.h"
 
 #include "shared/graph/igraphmodel.h"
@@ -242,6 +242,24 @@ void CorrelationFileParser::normalise(NormaliseType normaliseType,
     case NormaliseType::MinMax:
     {
         MinMaxNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    case NormaliseType::Mean:
+    {
+        MeanNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    case NormaliseType::Standarisation:
+    {
+        StandardisationNormaliser normaliser;
+        normaliser.process(dataRows, parser);
+        break;
+    }
+    case NormaliseType::UnitScaling:
+    {
+        UnitScalingNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }

@@ -31,7 +31,10 @@ DEFINE_QML_ENUM(
     Q_GADGET, NormaliseType,
     None,
     MinMax,
-    Quantile);
+    Quantile,
+    Mean,
+    Standarisation,
+    UnitScaling);
 
 DEFINE_QML_ENUM(
     Q_GADGET, MissingDataType,
