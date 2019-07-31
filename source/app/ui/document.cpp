@@ -1458,7 +1458,10 @@ void Document::selectByAttributeValue(const QString& attributeName, const QStrin
     }
 
     if(nodeIds.empty())
+    {
+        _selectionManager->clearNodeSelection();
         return;
+    }
 
     selectAndFocusNodes(nodeIds);
 }
@@ -1483,7 +1486,8 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
     if(searchManager->foundNodeIds().empty())
     {
-        if(_foundItValid && searchManager->active())
+        bool nodesWereFound = _foundItValid || searchManager->selectStyle() == FindSelectStyle::All;
+        if(nodesWereFound && searchManager->active())
             _selectionManager->clearNodeSelection();
 
         _selectionManager->clearNodesMask();
