@@ -745,13 +745,13 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
     connect(_graphQuickItem, &GraphQuickItem::visibleComponentIndexChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
-    connect(&_commandManager, &CommandManager::started, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
+    connect(&_commandManager, &CommandManager::started, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
     connect(&_commandManager, &CommandManager::started, this, &Document::commandInProgressChanged);
 
     connect(&_commandManager, &CommandManager::finished, _graphQuickItem, &GraphQuickItem::commandsFinished);
 
     connect(&_commandManager, &CommandManager::finished, this, &Document::commandInProgressChanged);
-    connect(&_commandManager, &CommandManager::finished, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
+    connect(&_commandManager, &CommandManager::finished, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
 
     connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
