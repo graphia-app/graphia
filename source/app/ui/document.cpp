@@ -748,6 +748,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::started, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
     connect(&_commandManager, &CommandManager::started, this, &Document::commandInProgressChanged);
 
+    connect(&_commandManager, &CommandManager::started, _graphQuickItem, &GraphQuickItem::commandsStarted);
     connect(&_commandManager, &CommandManager::finished, _graphQuickItem, &GraphQuickItem::commandsFinished);
 
     connect(&_commandManager, &CommandManager::finished, this, &Document::commandInProgressChanged);
@@ -762,8 +763,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(this, &Document::busyChanged, this, &Document::canResetViewChanged);
 
     connect(this, &Document::busyChanged, this, &Document::onBusyChanged);
-
-    connect(&_commandManager, &CommandManager::started, _graphQuickItem, &GraphQuickItem::commandsStarted);
 
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
