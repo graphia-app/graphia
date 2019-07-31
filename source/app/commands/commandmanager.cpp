@@ -55,18 +55,23 @@ void CommandManager::redo()
     emit commandQueued();
 }
 
-void CommandManager::executeReal(ICommandPtr command, bool irreversible)
+static void commandStartDebug(int debug, bool busy, const QString& verb)
 {
-    if(_debug > 0 && !_busy)
+    if(debug > 0 && !busy)
         qDebug() << "CommandManager started";
 
-    if(_debug > 1)
+    if(debug > 1)
     {
-        if(!command->description().isEmpty())
-            qDebug() << "Command started" << command->description();
+        if(verb.isEmpty())
+            qDebug() << "Command started" << verb;
         else
             qDebug() << "Command started";
     }
+}
+
+void CommandManager::executeReal(ICommandPtr command, bool irreversible)
+{
+    commandStartDebug(_debug, _busy, command->description());
 
     auto commandPtr = command.get();
     auto verb = command->verb();
@@ -135,6 +140,8 @@ void CommandManager::undoReal()
                 QObject::tr("Undoing ") + command->description() :
                 QObject::tr("Undoing");
 
+    commandStartDebug(_debug, _busy, undoVerb);
+
     doCommand(command, undoVerb, [this, command]
     {
         std::unique_lock<std::recursive_mutex> lock(_mutex);
@@ -160,6 +167,8 @@ void CommandManager::redoReal()
     QString redoVerb = !command->description().isEmpty() ?
                 QObject::tr("Redoing ") + command->description() :
                 QObject::tr("Redoing");
+
+    commandStartDebug(_debug, _busy, redoVerb);
 
     doCommand(command, redoVerb, [this, command]
     {
