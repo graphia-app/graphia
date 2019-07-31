@@ -18,6 +18,9 @@
 
 #include <memory>
 
+// Note: the ordering of these enums is important from a save
+// file point of view; i.e. only append, don't reorder
+
 DEFINE_QML_ENUM(
     Q_GADGET, ScalingType,
     None,
@@ -41,6 +44,8 @@ DEFINE_QML_ENUM(
     Constant,
     ColumnAverage,
     RowInterpolation);
+
+// (...although not these ones:)
 
 DEFINE_QML_ENUM(
     Q_GADGET, ClusteringType,

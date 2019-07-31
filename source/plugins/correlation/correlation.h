@@ -14,6 +14,9 @@
 #include <QObject>
 #include <QString>
 
+// Note: the ordering of these enums is important from a save
+// file point of view; i.e. only append, don't reorder
+
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationType,
     Pearson,
