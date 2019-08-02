@@ -8,8 +8,6 @@ PluginContent
 {
     id: root
 
-    enabled: plugin.model.nodeAttributeTableModel.columnNames.length > 0
-
     anchors.fill: parent
 
     Action
@@ -17,7 +15,12 @@ PluginContent
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         iconName: "format-justify-fill"
-        onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
+        checkable: true
+        checked: tableView.autoColumnWidth
+        onToggled:
+        {
+            tableView.autoColumnWidth = checked;
+        }
     }
 
     Action
@@ -60,6 +63,7 @@ PluginContent
     ColumnLayout
     {
         anchors.fill: parent
+        spacing: 0
 
         NodeAttributeTableView
         {
@@ -82,8 +86,8 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
-                    tableView.selectedRows : [];
+                //plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
+                    //tableView.selectedRows : [];
             }
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }

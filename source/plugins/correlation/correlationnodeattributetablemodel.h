@@ -19,7 +19,6 @@ private:
     int _firstDataColumnRole = -1;
 
     QStringList columnNames() const override;
-    virtual QVariant dataValue(int row, const QString& attributeName) const override;
 
 public:
     void initialise(IDocument* document, UserNodeData* userNodeData,

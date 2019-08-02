@@ -21,19 +21,12 @@ class NodeAttributeTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(QStringList columnNames MEMBER _columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
 
 private:
     IDocument* _document = nullptr;
     const IGraph* _graph = nullptr;
     const UserNodeData* _userNodeData = nullptr;
-
-    enum Roles
-    {
-        NodeIdRole = Qt::UserRole + 1,
-        NodeSelectedRole,
-        FirstAttributeRole
-    };
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
@@ -48,7 +41,9 @@ private:
     Table _pendingData; // Update actually occurs here, before being copied to _data on the UI thread
     Table _data;
 
+    std::map<QString, int> columnNameToIndex;
     QStringList _columnNames;
+
     int _columnCount = 0;
 
 protected:
@@ -57,8 +52,9 @@ protected:
 
     int columnIndexForAttributeValue(QString attributeValue);
 private:
-    void onRoleAdded(int role);
-    void onRoleRemoved(int role);
+    void onColumnAdded(int columnIndex);
+    void onColumnRemoved(int columnIndex);
+    void updateColumnNames();
     void updateRole(const QString& attributeName);
     void updateColumn(int role, const QString& attributeName, Column& column);
     void update();
@@ -69,6 +65,13 @@ private slots:
     void onGraphChanged(const Graph*, bool);
 
 public:
+    enum Roles
+    {
+        NodeIdRole = Qt::UserRole + 1,
+        NodeSelectedRole,
+        FirstAttributeRole
+    };
+
     void initialise(IDocument* document, UserNodeData* userNodeData);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -86,6 +89,7 @@ public:
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE virtual bool rowVisible(size_t row) const;
+    Q_INVOKABLE virtual QString columnHeaders(size_t column) const;
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);

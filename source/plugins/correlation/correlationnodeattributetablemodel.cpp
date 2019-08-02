@@ -16,19 +16,14 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
     return list;
 }
 
-QVariant CorrelationNodeAttributeTableModel::dataValue(int row, const QString& attributeName) const
-{
-    return NodeAttributeTableModel::dataValue(row, attributeName);
-}
-
 void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
-                                                    std::vector<QString>* /*dataColumnNames*/,
-                                                    std::vector<double>* /*dataValues*/)
+                                                    std::vector<QString>* dataColumnNames,
+                                                    std::vector<double>* dataValues)
 {
     //FIXME: effectively disable the functionality this class provides for now, as it's causing
     // too many performance problems with TableView; revisit this when the new TableView is available
-    _dataColumnNames = nullptr;//dataColumnNames;
-    _dataValues = nullptr;//dataValues;
+    _dataColumnNames = dataColumnNames;//dataColumnNames;
+    _dataValues = dataValues;//dataValues;
 
     NodeAttributeTableModel::initialise(document, userNodeData);
 }

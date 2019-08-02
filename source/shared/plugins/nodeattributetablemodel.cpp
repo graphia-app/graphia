@@ -24,6 +24,8 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
 
     auto graphModel = _document->graphModel();
 
+    updateColumnNames();
+
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
     connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
             this, SLOT(onAttributesChanged(const QStringList&, const QStringList&)), Qt::DirectConnection);
@@ -85,24 +87,25 @@ QVariant NodeAttributeTableModel::dataValue(int row, const QString& attributeNam
     return {};
 }
 
-void NodeAttributeTableModel::onRoleAdded(int role)
+void NodeAttributeTableModel::onColumnAdded(int columnIndex)
 {
-    size_t index = role - (Qt::UserRole + 1);
-
-    if(index < _pendingData.size())
-        _pendingData.insert(_pendingData.begin() + index, {{}});
+    if(columnIndex < _pendingData.size())
+        _pendingData.insert(_pendingData.begin() + columnIndex, {{}});
     else
-        _pendingData.resize(index + 1);
+        _pendingData.resize(columnIndex + 1);
 
     //updateColumn(role, _pendingData.at(index));
 }
 
-void NodeAttributeTableModel::onRoleRemoved(int role)
+void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
 {
-    size_t index = role - (Qt::UserRole + 1);
+    Q_ASSERT(columnIndex < _pendingData.size());
+    _pendingData.erase(_pendingData.begin() + columnIndex);
+}
 
-    Q_ASSERT(index < _pendingData.size());
-    _pendingData.erase(_pendingData.begin() + index);
+void NodeAttributeTableModel::updateColumnNames()
+{
+    _columnNames = columnNames();
 }
 
 void NodeAttributeTableModel::updateRole(const QString& attributeName)
@@ -121,15 +124,16 @@ void NodeAttributeTableModel::updateRole(const QString& attributeName)
 
 void NodeAttributeTableModel::updateColumn(int role, const QString& attributeName, NodeAttributeTableModel::Column& column)
 {
-    column.resize(rowCount() + 1);
+    column.resize(rowCount());
 
-    for(int row = 0; row < rowCount() + 1; row++)
+    for(int row = 0; row < rowCount(); row++)
     {
-        NodeId nodeId = _userNodeData->elementIdForIndex(row - 1);
+        NodeId nodeId = _userNodeData->elementIdForIndex(row);
 
-        if(row == 0)
-            column[row] = attributeName;
-        else if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
+        //if(row == 0)
+            //column[row] = attributeName;
+
+        if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
             // The graph doesn't necessarily have a node for every row since
             // it may have been transformed, leaving empty rows
@@ -140,7 +144,7 @@ void NodeAttributeTableModel::updateColumn(int role, const QString& attributeNam
         else if(role == Roles::NodeSelectedRole)
             column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
         else
-            column[row] = dataValue(row - 1, attributeName);
+            column[row] = dataValue(row, attributeName);
     }
 }
 
@@ -192,6 +196,7 @@ void NodeAttributeTableModel::onUpdateComplete()
     beginResetModel();
     _data = _pendingData;
     endResetModel();
+    emit columnNamesChanged();
 }
 
 void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
@@ -247,6 +252,11 @@ bool NodeAttributeTableModel::rowVisible(size_t row) const
     return _nodeSelectedColumn[row].toBool();
 }
 
+QString NodeAttributeTableModel::columnHeaders(size_t column) const
+{
+    return columnNames().at(column);
+}
+
 void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
@@ -285,9 +295,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
     for(const auto& name : filteredRemoved)
     {
         auto columnIndex = _columnNames.indexOf(name);
-        int role = _roleNames.key(name.toUtf8());
-
-        onRoleRemoved(role);
+        onColumnRemoved(columnIndex);
         emit columnRemoved(columnIndex, name);
     }
 
@@ -300,9 +308,8 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
             continue;
 
         auto columnIndex = _columnNames.indexOf(name);
-        int role = _roleNames.key(name.toUtf8());
 
-        onRoleAdded(role);
+        onColumnAdded(columnIndex);
         emit columnAdded(columnIndex, name);
     }
 
@@ -334,17 +341,25 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
     size_t column = index.column();
-    if(column >= _data.size())
-        return {};
+    if(role == Qt::DisplayRole)
+    {
+        if(column >= _data.size())
+            return {};
 
-    const auto& dataColumn = _data.at(column);
+        const auto& dataColumn = _data.at(column);
 
-    size_t row = index.row();
-    if(row >= dataColumn.size())
-        return {};
+        size_t row = static_cast<size_t>(index.row());
+        if(row >= dataColumn.size())
+            return {};
 
-    auto cachedValue = dataColumn.at(row);
-    return cachedValue;
+        auto cachedValue = dataColumn.at(row);
+        return cachedValue;
+    }
+    else if (role == Roles::NodeSelectedRole){
+        size_t row = static_cast<size_t>(index.row());
+        return _nodeSelectedColumn[row];
+    }
+    return {};
 }
 
 void NodeAttributeTableModel::onSelectionChanged()

@@ -22,57 +22,12 @@ BaseParameterDialog
 
     modality: Qt.ApplicationModal
 
-    // Work around for QTBUG-58594
-    function resizeColumnsToContentsBugWorkaround(tableView)
-    {
-        for(var i = 0; i < tableView.columnCount; ++i)
-        {
-            var col = tableView.getColumn(i);
-            var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
-            if(col)
-            {
-                col.__index = i;
-                col.resizeToContents();
-                if(col.width < header.implicitWidth)
-                    col.width = header.implicitWidth;
-            }
-        }
-    }
-
     function isInsideRect(x, y, rect)
     {
         return  x >= rect.x &&
                 x < rect.x + rect.width &&
                 y >= rect.y &&
                 y < rect.y + rect.height;
-    }
-
-    function scrollToCell(tableView, x, y)
-    {
-        dataFrameAnimationX.to = Math.min(tableView.contentWidth,
-                                          (tableView.contentWidth / tableView.columns) * x);
-        // Pre-2017 ECMA doesn't have Math.clamp...
-        dataFrameAnimationX.to = Math.max(dataFrameAnimationX.to, 0);
-
-        var ref = dataRectView.childAt(dataFrameAnimationX.to, 1)
-        //for(var key in ref)
-            //console.log(key, ref[key]);
-
-        // Only animate if we need to
-        if(tableView.contentX !== dataFrameAnimationX.to)
-            dataFrameAnimationX.running = true;
-
-        if(tableView.contentY !== dataFrameAnimationY.to)
-            dataFrameAnimationY.running = true;
-    }
-
-    function scrollToDataRect()
-    {
-        if(listTabView.currentItem === dataRectPage)
-        {
-            Qt.callLater(scrollToCell, dataRectView,
-                         tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
-        }
     }
 
     TabularDataParser
@@ -90,14 +45,6 @@ BaseParameterDialog
         onDataRectChanged:
         {
             parameters.dataFrame = dataRect;
-            if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
-                    selectedCol >= 0 && selectedRow >= 0)
-            {
-                scrollToDataRect();
-
-                tooltipNonNumerical.visible = _clickedCell;
-                _clickedCell = false;
-            }
         }
 
         onDataLoaded:
@@ -144,7 +91,9 @@ BaseParameterDialog
         onListTabChanged:
         {
             if(currentItem == dataRectPage)
-                scrollToDataRect();
+            {
+                // TO-DO: Scroll to cell
+            }
         }
 
         ListTab
@@ -272,8 +221,7 @@ BaseParameterDialog
                         text: "Move Table to column"
                         onPressedChanged:
                         {
-                            console.log(tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
-                            scrollToCell(dataRectView, input.value, tabularDataParser.dataRect.y);
+                            //TO-DO: Scroll to Cell
                         }
                     }
                     SpinBox
@@ -295,15 +243,9 @@ BaseParameterDialog
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     model: tabularDataParser.model
-                    //selectionMode: SelectionMode.NoSelection
                     enabled: !dataRectPage._busy
                     columnSpacing: 1
                     rowSpacing: 1
-
-//                    columnWidthProvider: function(column)
-//                    {
-//                        return columnWidthCache[column];
-//                    }
 
                     PropertyAnimation
                     {
@@ -1024,7 +966,7 @@ BaseParameterDialog
                                 Text
                                 {
                                     text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
-                                               "you require a log transform but the dataset contains negative numbers or zeros.");
+                                        "you require a log transform but the dataset contains negative numbers or zeros.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -1296,7 +1238,7 @@ BaseParameterDialog
                                 Text
                                 {
                                     text: qsTr("k-nearest neighbours ranks node edges and only " +
-                                               "keeps <i>k</i> number of edges per node.");
+                                        "keeps <i>k</i> number of edges per node.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
@@ -1423,23 +1365,23 @@ BaseParameterDialog
                                 edgesFont = warningFont;
 
                             summaryString +=
-                                    nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
-                                    ", " +
-                                    edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
+                                nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
+                                ", " +
+                                edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)
                             {
                                 summaryString += "<br><br>" + warningFont +
-                                        qsTr("WARNING: This is a very large graph which has the potential " +
-                                             "to exhaust system resources and lead to instability " +
-                                             "or freezes. Increasing the Minimum Correlation Value will " +
-                                             "usually reduce the graph size.") + "</font>";
+                                    qsTr("WARNING: This is a very large graph which has the potential " +
+                                    "to exhaust system resources and lead to instability " +
+                                    "or freezes. Increasing the Minimum Correlation Value will " +
+                                    "usually reduce the graph size.") + "</font>";
                             }
                         }
                         else if(!tabularDataParser.graphSizeEstimateInProgress)
                         {
                             summaryString += "<br><br>" + warningFont +
-                                    qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
+                                qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
                         }
 
                         return summaryString;
