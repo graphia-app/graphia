@@ -258,7 +258,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     index = 0;
 
-    for(size_t slice = 0U; slice < _slices; slice++)
+    for(unsigned int slice = 0U; slice < _slices; slice++)
     {
         auto baseIndex = slice * 4;
 
