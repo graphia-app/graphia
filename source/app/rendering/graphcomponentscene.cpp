@@ -411,14 +411,15 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
         {
             ComponentId newComponentId;
 
-            if(!oldGraphComponentRenderer->trackingCentreOfComponent())
+            if(!oldGraphComponentRenderer->trackingCentreOfComponent() &&
+                _graphRenderer->graphModel()->graph().containsNodeId(
+                oldGraphComponentRenderer->focusNodeId()))
             {
                 newComponentId = _graphRenderer->graphModel()->graph().componentIdOfNode(
                     oldGraphComponentRenderer->focusNodeId());
             }
             else
                 newComponentId = largestSplitter;
-
 
             Q_ASSERT(!newComponentId.isNull());
 
