@@ -253,9 +253,9 @@ function Create(transformIndex, transform)
                             if(locked)
                             {
                                 if(parameterData.valueType === ValueType.String)
-                                    labelText += " \\\"" + operand + "\\\"";
+                                    labelText += "\\\"" + Utils.addSlashes(operand) + "\\\"";
                                 else
-                                    labelText += " " + QmlUtils.formatNumberScientific(operand);
+                                    labelText += QmlUtils.formatNumberScientific(operand);
                             }
                             else
                                 addLabel();
