@@ -90,6 +90,14 @@ function unescapeQuotes(text)
     return text;
 }
 
+function addSlashes(text)
+{
+    text = JSON.stringify(String(text));
+    text = text.substring(1, text.length - 1);
+
+    return text;
+}
+
 function sanitiseJson(text)
 {
     try
