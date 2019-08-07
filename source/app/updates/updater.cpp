@@ -204,15 +204,21 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         QString status;
         auto oldUpdate = latestUpdateJson(&status);
 
-        if(oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
-            oldUpdate["version"] == update["version"] &&
-            status != QStringLiteral("failed"))
+        bool alreadyHaveUpdate = oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
+            oldUpdate["version"] == update["version"];
+
+        // We've got an update marked as installed, but it doesn't match the running version
+        bool runningVersionDoesntMatchInstalledVersion = (status == QStringLiteral("installed")) &&
+            VERSION != oldUpdate["version"];
+
+        bool previousAttemptFailed = (status == QStringLiteral("failed"));
+
+        if(alreadyHaveUpdate && !previousAttemptFailed && !runningVersionDoesntMatchInstalledVersion)
         {
             // We already have this update, and it was either successfully
             // installed, the user has skipped it, or they haven't dealt
             // with it yet
-            update["error"] = status.isEmpty() ?
-                QStringLiteral("existing") : status;
+            update["error"] = status.isEmpty() ? QStringLiteral("existing") : status;
         }
         else
             _updateString = updateString;
