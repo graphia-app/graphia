@@ -1853,7 +1853,20 @@ QVariantMap Document::attribute(const QString& attributeName) const
     if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(attributeName);
-        map.insert(QStringLiteral("name"), parsedAttributeName._name);
+
+        map.insert(QStringLiteral("baseName"), parsedAttributeName._name);
+
+        const char* prefix = "";
+        switch(parsedAttributeName._type)
+        {
+        case Attribute::EdgeNodeType::Source: prefix = "source."; break;
+        case Attribute::EdgeNodeType::Target: prefix = "target."; break;
+        default: break;
+        }
+
+        map.insert(QStringLiteral("name"), QStringLiteral("%1%2")
+            .arg(prefix, parsedAttributeName._name));
+
         map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
         map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
