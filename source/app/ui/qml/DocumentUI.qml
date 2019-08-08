@@ -1693,7 +1693,7 @@ Item
                 if(lastAddedAttribute.sharedValues.length > 0 &&
                     find.lastFindByAttributeName.length === 0)
                 {
-                        find.lastFindByAttributeName = lastAddedAttributeName;
+                    find.lastFindByAttributeName = lastAddedAttributeName;
                 }
             }
         }
