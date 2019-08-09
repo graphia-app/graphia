@@ -20,6 +20,8 @@
 
 #include <json_helper.h>
 
+#include <map>
+
 CorrelationPluginInstance::CorrelationPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
@@ -154,6 +156,27 @@ void CorrelationPluginInstance::finishDataRows()
 
 void CorrelationPluginInstance::createAttributes()
 {
+    size_t columnIndex = 0;
+    std::map<QString, size_t> dataValueAttributeColumn;
+
+    for(const auto& dataColumnName : _dataColumnNames)
+        dataValueAttributeColumn[dataColumnName] = columnIndex++;
+
+    graphModel()->createAttribute(tr("Data Value"))
+            .setFloatValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
+            {
+                auto columnName = attribute.parameterValue();
+                if(columnName.isEmpty())
+                    return 0.0;
+
+                auto column = dataValueAttributeColumn.at(columnName);
+                return dataRowForNodeId(nodeId).valueAt(column);
+            })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
+                "a specific column in the correlated data."))
+            .setValidParameterValues(u::toQStringList(_dataColumnNames));
+
     graphModel()->createAttribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).mean(); })
             .setFlag(AttributeFlag::AutoRange)
