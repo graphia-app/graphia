@@ -163,71 +163,68 @@ void CorrelationPluginInstance::createAttributes()
         dataValueAttributeColumn[dataColumnName] = columnIndex++;
 
     graphModel()->createAttribute(tr("Data Value"))
-            .setFloatValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
-            {
-                auto columnName = attribute.parameterValue();
-                if(columnName.isEmpty())
-                    return 0.0;
+        .setFloatValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
+        {
+            auto columnName = attribute.parameterValue();
+            if(columnName.isEmpty())
+                return 0.0;
 
-                auto column = dataValueAttributeColumn.at(columnName);
-                return dataRowForNodeId(nodeId).valueAt(column);
-            })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
-                "a specific column in the correlated data."))
-            .setValidParameterValues(u::toQStringList(_dataColumnNames));
+            auto column = dataValueAttributeColumn.at(columnName);
+            return dataRowForNodeId(nodeId).valueAt(column);
+        })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
+            "a specific column in the correlated data."))
+        .setValidParameterValues(u::toQStringList(_dataColumnNames));
 
     graphModel()->createAttribute(tr("Mean Data Value"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).mean(); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr("The Mean Data Value is the mean of the values associated "
-                               "with the node."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).mean(); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr("The Mean Data Value is the mean of the values associated "
+            "with the node."));
 
     graphModel()->createAttribute(tr("Minimum Data Value"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).minValue(); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr("The Minimum Data Value is the minimum value associated "
-                               "with the node."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).minValue(); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr("The Minimum Data Value is the minimum value associated "
+            "with the node."));
 
     graphModel()->createAttribute(tr("Maximum Data Value"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).maxValue(); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr("The Maximum Data Value is the maximum value associated "
-                               "with the node."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).maxValue(); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr("The Maximum Data Value is the maximum value associated "
+            "with the node."));
 
     graphModel()->createAttribute(tr("Variance"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).variance(); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/variance">Variance</a> )"
-                               "is a measure of the spread of the values associated "
-                               "with the node. It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value "
-                               "and µ is the mean."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).variance(); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/variance">Variance</a> )"
+            "is a measure of the spread of the values associated with the node. It is "
+            "defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean."));
 
     graphModel()->createAttribute(tr("Standard Deviation"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/stddev">)"
-                               "Standard Deviation</a> is a measure of the spread of the values associated "
-                               "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
-                               "and µ is the mean."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/stddev">)"
+            "Standard Deviation</a> is a measure of the spread of the values associated "
+            "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
+            "and µ is the mean."));
 
     graphModel()->createAttribute(tr("Coefficient of Variation"))
-            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
-            .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId).coefVar()); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/coef_variation">)"
-                               "Coefficient of Variation</a> "
-                               "is a measure of the spread of the values associated "
-                               "with the node. It is defined as the standard deviation "
-                               "divided by the mean."));
+        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
+        .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId).coefVar()); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(tr(R"(The <a href="https://kajeka.com/graphia/coef_variation">)"
+            "Coefficient of Variation</a> is a measure of the spread of the values associated "
+            "with the node. It is defined as the standard deviation divided by the mean."));
 
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
     _correlationAttributeName = correlation->attributeName();
 
     graphModel()->createAttribute(_correlationAttributeName)
-            .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
-            .setFlag(AttributeFlag::AutoRange)
-            .setDescription(correlation->attributeDescription());
+        .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
+        .setFlag(AttributeFlag::AutoRange)
+        .setDescription(correlation->attributeDescription());
 
     auto correlationPolarity = static_cast<CorrelationPolarity>(_correlationPolarity);
     switch(correlationPolarity)
@@ -237,9 +234,9 @@ void CorrelationPluginInstance::createAttributes()
         _correlationAbsAttributeName = tr("Absolute ") + _correlationAttributeName;
 
         graphModel()->createAttribute(_correlationAbsAttributeName)
-                .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
-                .setFlag(AttributeFlag::AutoRange)
-                .setDescription(correlation->attributeDescription());
+            .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(correlation->attributeDescription());
         break;
 
     default:
