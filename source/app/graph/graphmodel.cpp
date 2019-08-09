@@ -748,7 +748,7 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
 
     if(attributeName._type != Attribute::EdgeNodeType::None)
     {
-        return Attribute::edgeNodesAttribute(_->_transformedGraph,
+        return Attribute::edgeNodesAttribute(_->_graph,
             attribute, attributeName._type);
     }
 
