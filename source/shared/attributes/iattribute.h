@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <vector>
+#include <variant>
 
 #include <QString>
 #include <QVariant>
@@ -40,7 +41,12 @@ class IAttribute
 public:
     virtual ~IAttribute() = default;
 
-    template<typename T, typename E> using ValueFn = std::function<T(E)>;
+    template<typename T, typename E>
+    using ValueFn = std::variant<
+        void*,
+        std::function<T(E)>,
+        std::function<T(E, const IAttribute&)>
+    >;
 
     virtual int intValueOf(NodeId nodeId) const = 0;
     virtual int intValueOf(EdgeId edgeId) const = 0;
@@ -119,6 +125,13 @@ public:
     virtual IAttribute& setDescription(const QString& description) = 0;
 
     virtual bool isValid() const = 0;
+
+    virtual QString parameterValue() const = 0;
+    virtual bool setParameterValue(const QString& value) = 0;
+
+    virtual bool hasParameter() const = 0;
+    virtual QStringList validParameterValues() const = 0;
+    virtual IAttribute& setValidParameterValues(const QStringList& values) = 0;
 };
 
 #endif // IATTRIBUTE_H

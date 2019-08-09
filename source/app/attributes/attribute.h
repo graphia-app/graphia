@@ -126,6 +126,9 @@ private:
         // Set if the attribute is derived from user data, i.e. not calculated
         bool userDefined = false;
 
+        int parameterIndex = -1;
+        QStringList validParameterValues;
+
         QString description;
     } _;
 
@@ -135,6 +138,39 @@ private:
 
     void clearValueFunctions();
     void clearMissingFunctions();
+
+    template<typename T, typename E>
+    bool valueFnIsSet(const ValueFn<T, E>& valueFn) const
+    {
+        return valueFn.index() != 0;
+    }
+
+    template<typename T, typename E>
+    T callValueFn(const ValueFn<T, E>& valueFn, E& elementId) const
+    {
+        struct Visitor
+        {
+            E _elementId;
+            const IAttribute* _attribute;
+
+            explicit Visitor(E elementId_, const IAttribute* attribute) :
+                _elementId(elementId_), _attribute(attribute) {}
+
+            T operator()(void*) const { Q_ASSERT(!"valueFn is null"); return {}; }
+
+            T operator()(const std::function<T(E)>& valueFn) const
+            {
+                return valueFn(_elementId);
+            }
+
+            T operator()(const std::function<T(E, const IAttribute&)>& valueFn) const
+            {
+                return valueFn(_elementId, *_attribute);
+            }
+        };
+
+        return std::visit(Visitor(elementId, this), valueFn);
+    }
 
     template<typename T> struct Helper {};
 
@@ -458,16 +494,24 @@ public:
 
     bool isValid() const override;
 
+    QString parameterValue() const override;
+    bool setParameterValue(const QString& value) override;
+
+    bool hasParameter() const override;
+    QStringList validParameterValues() const override;
+    IAttribute& setValidParameterValues(const QStringList& values) override;
+
     enum class EdgeNodeType { None, Source, Target };
     struct Name
     {
         EdgeNodeType _type;
         QString _name;
+        QString _parameter;
     };
 
-    static Name parseAttributeName(const QString& name);
-    static Attribute edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
-                                        EdgeNodeType edgeNodeType);
+    static Name parseAttributeName(QString name);
+    static Attribute edgeNodesAttribute(const IGraph& graph,
+        const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 };
 
 #endif // ATTRIBUTE_H

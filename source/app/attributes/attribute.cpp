@@ -1,6 +1,9 @@
 #include "attribute.h"
 
+#include "shared/utils/container.h"
+
 #include <QDebug>
+#include <QRegularExpression>
 
 void Attribute::clearValueFunctions()
 {
@@ -24,38 +27,41 @@ void Attribute::clearMissingFunctions()
     _.valueMissingComponentFn = nullptr;
 }
 
-int Attribute::valueOf(Helper<int>, NodeId nodeId) const { Q_ASSERT(_.intNodeIdFn != nullptr); return _.intNodeIdFn(nodeId); }
-int Attribute::valueOf(Helper<int>, EdgeId edgeId) const { Q_ASSERT(_.intEdgeIdFn != nullptr); return _.intEdgeIdFn(edgeId); }
-int Attribute::valueOf(Helper<int>, const IGraphComponent& component) const { Q_ASSERT(_.intComponentFn != nullptr); return _.intComponentFn(component); }
+int Attribute::valueOf(Helper<int>, NodeId nodeId) const { return callValueFn(_.intNodeIdFn, nodeId); }
+int Attribute::valueOf(Helper<int>, EdgeId edgeId) const { return callValueFn(_.intEdgeIdFn, edgeId); }
+int Attribute::valueOf(Helper<int>, const IGraphComponent& component) const
+{ return callValueFn<int, const IGraphComponent&>(_.intComponentFn, component); }
 
-double Attribute::valueOf(Helper<double>, NodeId nodeId) const { Q_ASSERT(_.floatNodeIdFn != nullptr); return _.floatNodeIdFn(nodeId); }
-double Attribute::valueOf(Helper<double>, EdgeId edgeId) const { Q_ASSERT(_.floatEdgeIdFn != nullptr); return _.floatEdgeIdFn(edgeId); }
-double Attribute::valueOf(Helper<double>, const IGraphComponent& component) const { Q_ASSERT(_.floatComponentFn != nullptr); return _.floatComponentFn(component); }
+double Attribute::valueOf(Helper<double>, NodeId nodeId) const { return callValueFn(_.floatNodeIdFn, nodeId); }
+double Attribute::valueOf(Helper<double>, EdgeId edgeId) const { return callValueFn(_.floatEdgeIdFn, edgeId); }
+double Attribute::valueOf(Helper<double>, const IGraphComponent& component) const
+{ return callValueFn<double, const IGraphComponent&>(_.floatComponentFn, component); }
 
-QString Attribute::valueOf(Helper<QString>, NodeId nodeId) const { Q_ASSERT(_.stringNodeIdFn != nullptr); return _.stringNodeIdFn(nodeId); }
-QString Attribute::valueOf(Helper<QString>, EdgeId edgeId) const { Q_ASSERT(_.stringEdgeIdFn != nullptr); return _.stringEdgeIdFn(edgeId); }
-QString Attribute::valueOf(Helper<QString>, const IGraphComponent& component) const { Q_ASSERT(_.stringComponentFn != nullptr); return _.stringComponentFn(component); }
+QString Attribute::valueOf(Helper<QString>, NodeId nodeId) const { return callValueFn(_.stringNodeIdFn, nodeId); }
+QString Attribute::valueOf(Helper<QString>, EdgeId edgeId) const { return callValueFn(_.stringEdgeIdFn, edgeId); }
+QString Attribute::valueOf(Helper<QString>, const IGraphComponent& component) const
+{ return callValueFn<QString, const IGraphComponent&>(_.stringComponentFn, component); }
 
 bool Attribute::valueMissingOf(NodeId nodeId) const
 {
-    if(_.valueMissingNodeIdFn != nullptr)
-        return _.valueMissingNodeIdFn(nodeId);
+    if(valueFnIsSet(_.valueMissingNodeIdFn))
+        return callValueFn(_.valueMissingNodeIdFn, nodeId);
 
     return false;
 }
 
 bool Attribute::valueMissingOf(EdgeId edgeId) const
 {
-    if(_.valueMissingEdgeIdFn != nullptr)
-        return _.valueMissingEdgeIdFn(edgeId);
+    if(valueFnIsSet(_.valueMissingEdgeIdFn))
+        return callValueFn(_.valueMissingEdgeIdFn, edgeId);
 
     return false;
 }
 
 bool Attribute::valueMissingOf(const IGraphComponent& component) const
 {
-    if(_.valueMissingComponentFn != nullptr)
-        return _.valueMissingComponentFn(component);
+    if(valueFnIsSet(_.valueMissingComponentFn))
+        return callValueFn<bool, const IGraphComponent&>(_.valueMissingComponentFn, component);
 
     return false;
 }
@@ -101,17 +107,17 @@ Attribute& Attribute::setValueMissingFn(ValueFn<bool, const IGraphComponent&> mi
 
 Attribute::Type Attribute::type() const
 {
-    if(_.intNodeIdFn != nullptr)         return Type::IntNode;
-    if(_.intEdgeIdFn != nullptr)         return Type::IntEdge;
-    if(_.intComponentFn != nullptr)      return Type::IntComponent;
+    if(valueFnIsSet(_.intNodeIdFn))         return Type::IntNode;
+    if(valueFnIsSet(_.intEdgeIdFn))         return Type::IntEdge;
+    if(valueFnIsSet(_.intComponentFn))      return Type::IntComponent;
 
-    if(_.floatNodeIdFn != nullptr)       return Type::FloatNode;
-    if(_.floatEdgeIdFn != nullptr)       return Type::FloatEdge;
-    if(_.floatComponentFn != nullptr)    return Type::FloatComponent;
+    if(valueFnIsSet(_.floatNodeIdFn))       return Type::FloatNode;
+    if(valueFnIsSet(_.floatEdgeIdFn))       return Type::FloatEdge;
+    if(valueFnIsSet(_.floatComponentFn))    return Type::FloatComponent;
 
-    if(_.stringNodeIdFn != nullptr)      return Type::StringNode;
-    if(_.stringEdgeIdFn != nullptr)      return Type::StringEdge;
-    if(_.stringComponentFn != nullptr)   return Type::StringComponent;
+    if(valueFnIsSet(_.stringNodeIdFn))      return Type::StringNode;
+    if(valueFnIsSet(_.stringEdgeIdFn))      return Type::StringEdge;
+    if(valueFnIsSet(_.stringComponentFn))   return Type::StringComponent;
 
     return Type::Unknown;
 }
@@ -125,9 +131,9 @@ bool Attribute::hasMissingValues() const
 {
     switch(elementType())
     {
-    case ElementType::Node:         return _.valueMissingNodeIdFn != nullptr;
-    case ElementType::Edge:         return _.valueMissingEdgeIdFn != nullptr;
-    case ElementType::Component:    return _.valueMissingComponentFn != nullptr;
+    case ElementType::Node:         return valueFnIsSet(_.valueMissingNodeIdFn);
+    case ElementType::Edge:         return valueFnIsSet(_.valueMissingEdgeIdFn);
+    case ElementType::Component:    return valueFnIsSet(_.valueMissingComponentFn);
     default:                        return false;
     }
 
@@ -177,6 +183,43 @@ ElementType Attribute::elementType() const
 bool Attribute::isValid() const
 {
     return type() != Type::Unknown;
+}
+
+QString Attribute::parameterValue() const
+{
+    int numValidValues = static_cast<int>(_.validParameterValues.size());
+
+    // Parameter not yet set
+    if(_.parameterIndex < 0 || _.parameterIndex >= numValidValues)
+        return {};
+
+    size_t valueIndex = static_cast<size_t>(_.parameterIndex);
+    return _.validParameterValues.at(valueIndex);
+}
+
+bool Attribute::setParameterValue(const QString& value)
+{
+    if(!u::contains(_.validParameterValues, value))
+        return false;
+
+    _.parameterIndex = u::indexOf(_.validParameterValues, value);
+    return true;
+}
+
+bool Attribute::hasParameter() const
+{
+    return !_.validParameterValues.empty();
+}
+
+QStringList Attribute::validParameterValues() const
+{
+    return _.validParameterValues;
+}
+
+IAttribute& Attribute::setValidParameterValues(const QStringList& values)
+{
+    _.validParameterValues = values;
+    return *this;
 }
 
 bool AttributeRange<int>::hasMin() const { return _attribute->_.intMin != std::numeric_limits<int>::max(); }
@@ -271,18 +314,41 @@ IAttribute& AttributeNumericRange::setMax(double max)
     return *_attribute;
 }
 
-Attribute::Name Attribute::parseAttributeName(const QString& name)
+Attribute::Name Attribute::parseAttributeName(QString name)
 {
     const QString sourceString = QStringLiteral("source.");
     const QString targetString = QStringLiteral("target.");
 
+    EdgeNodeType type = EdgeNodeType::None;
+
     if(name.startsWith(sourceString))
-        return {EdgeNodeType::Source, name.mid(sourceString.length())};
+    {
+        type = EdgeNodeType::Source;
+        name = name.mid(sourceString.length());
+    }
+    else if(name.startsWith(targetString))
+    {
+        type = EdgeNodeType::Target;
+        name = name.mid(targetString.length());
+    }
 
-    if(name.startsWith(targetString))
-        return {EdgeNodeType::Target, name.mid(targetString.length())};
+    QString parameter;
+    QRegularExpression re(QStringLiteral(R"(^\$?([^\.]*)(?:\.(.+))?$)"));
+    auto match = re.match(name);
 
-    return {Attribute::EdgeNodeType::None, name};
+    if(match.hasMatch())
+    {
+        name = match.captured(1);
+        name.replace("\"", "");
+        auto parameterString = match.captured(2);
+        if(!parameterString.isNull())
+        {
+            parameter = parameterString;
+            parameter.replace("\"", "");
+        }
+    }
+
+    return {type, name, parameter};
 }
 
 Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
