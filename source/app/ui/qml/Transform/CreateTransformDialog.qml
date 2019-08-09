@@ -335,7 +335,7 @@ Window
                                     if(valueRadioButton.checked)
                                         return valueParameter.value;
                                     else if(attributeRadioButton.checked)
-                                        return "$\"" + rhsAttributeList.selectedValue + "\"";
+                                        return "$" + rhsAttributeList.selectedValue;
 
                                     return "";
                                 }
@@ -751,7 +751,7 @@ Window
                 expression += " using";
 
                 for(var attributeName in attributeParameters._attributeNames)
-                    expression += " $\"" + attributeParameters._attributeNames[attributeName] + "\"";
+                    expression += " $" + attributeParameters._attributeNames[attributeName];
             }
 
             if(_numParameters > 0)
@@ -767,7 +767,7 @@ Window
 
             if(lhsAttributeList.selectedValue !== undefined)
             {
-                expression += " where $\"" + lhsAttributeList.selectedValue + "\"";
+                expression += " where $" + lhsAttributeList.selectedValue;
 
                 if(opList.selectedValue !== undefined)
                 {
@@ -802,9 +802,10 @@ Window
 
             if(channelName.length > 0)
             {
-                var expression = VisualisationUtils.expressionFor(
-                    document, attributeName, defaultVisualisation.flags,
-                    defaultVisualisation.valueType, channelName);
+                var expression = VisualisationUtils.expressionFor(document,
+                    VisualisationUtils.decorateAttributeName(attributeName),
+                    defaultVisualisation.flags, defaultVisualisation.valueType,
+                    channelName);
 
                 defaultVisualisations.push(expression);
             }

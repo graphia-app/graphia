@@ -143,18 +143,20 @@ function Create(transformIndex, transform)
         this.template += " using";
         appendToElements(this._elements, " using ");
 
-        var transformPrototype = document.transform(transform.action);
-
         for(var i = 0; i < transform.attributes.length; i++)
         {
             var attributeName = transform.attributes[i];
-            var attributeParameters = transformPrototype.attributeParameters[i];
+            var attribute = document.attribute(attributeName);
             this.template += " $%" + parameterIndex++;
+
+            if(attribute.hasParameter)
+                this.template += ".%" + parameterIndex++;
+
             appendToElements(this._elements,
                 {
                     attributeName: attributeName,
-                    elementType: attributeParameters.elementType,
-                    valueType: attributeParameters.valueType
+                    elementType: attribute.elementType,
+                    valueType: attribute.valueType
                 });
         }
     }
@@ -292,10 +294,12 @@ function Create(transformIndex, transform)
                     parameterData.initialValue = document.availableAttributeNames(
                         parameter.elementType, parameter.valueType);
 
+                    var attribute = document.attribute(parameter.attributeName);
+
                     // If the currently selected attribute isn't a valid selection
                     // we need to add it so that the error displayed to the
                     // user makes sense
-                    if(!document.attributeExists(parameter.attributeName))
+                    if(Object.keys(attribute).length === 0)
                         parameterData.initialValue.push(parameter.attributeName);
 
                     var unavailableAttributeNames =
@@ -309,13 +313,32 @@ function Create(transformIndex, transform)
                         return unavailableAttributeNames.indexOf(attributeName) < 0;
                     });
 
-                    parameterData.initialIndex = parameterData.initialValue.indexOf(parameter.attributeName);
+                    parameterData.initialIndex = parameterData.initialValue.indexOf(attribute.name);
 
                     var parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it
                         parameterData, onParameterChanged);
 
                     that.parameters.push(parameterObject);
+
+                    if(attribute.hasParameter)
+                    {
+                        var attributeParameterData = {};
+                        attributeParameterData.valueType = ValueType.StringList;
+
+                        attributeParameterData.initialValue = attribute.validParameterValues;
+                        attributeParameterData.initialIndex =
+                            attributeParameterData.initialValue.indexOf(attribute.parameterValue);
+
+                        if(attributeParameterData.initialIndex < 0)
+                            attributeParameterData.initialIndex = 0;
+
+                        var attributeParameterObject = createTransformParameter(document,
+                            locked ? null : parent, // If locked, still create the object, but don't display it
+                            attributeParameterData, onParameterChanged);
+
+                        that.parameters.push(attributeParameterObject);
+                    }
                 }
             }
         }

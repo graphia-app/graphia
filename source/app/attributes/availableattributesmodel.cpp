@@ -2,7 +2,9 @@
 
 #include "application.h"
 #include "graph/graphmodel.h"
+
 #include "shared/graph/elementtype.h"
+#include "shared/utils/container.h"
 
 AvailableAttributesModel::Item::Item(QVariant value) :
     _value(std::move(value))
@@ -59,8 +61,26 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     auto attributeList = graphModel.availableAttributeNames(elementTypes, valueTypes, skipFlags);
 
-    for(const auto& attribute : attributeList)
-        _root->addChild(new AvailableAttributesModel::Item(attribute));
+    auto addItem = [this, &graphModel](Item* parent, const QString& name)
+    {
+        auto attributeItem = new AvailableAttributesModel::Item(name);
+        parent->addChild(attributeItem);
+
+        const auto* attribute = graphModel.attributeByName(name);
+        if(attribute->hasParameter())
+        {
+            _attributeItemsWithParameters.push_back(attributeItem);
+
+            for(const auto& validValue : attribute->validParameterValues())
+            {
+                auto parameterItem = new AvailableAttributesModel::Item(validValue);
+                attributeItem->addChild(parameterItem);
+            }
+        }
+    };
+
+    for(const auto& attributeName : qAsConst(attributeList))
+        addItem(_root, attributeName);
 
     if(Flags<ElementType>(elementTypes).test(ElementType::Edge))
     {
@@ -73,10 +93,10 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
             _root->addChild(_sourceNode);
             _root->addChild(_targetNode);
 
-            for(const auto& attribute : qAsConst(attributeList))
+            for(const auto& attributeName : qAsConst(attributeList))
             {
-                _sourceNode->addChild(new AvailableAttributesModel::Item(attribute));
-                _targetNode->addChild(new AvailableAttributesModel::Item(attribute));
+                addItem(_sourceNode, attributeName);
+                addItem(_targetNode, attributeName);
             }
         }
     }
@@ -96,56 +116,56 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
     auto itemValue = item->value().toString();
 
-    if(role != Qt::DisplayRole)
+    if(role == Qt::DisplayRole)
+        return itemValue;
+
+    // Special case for source/target node items, which don't have sections
+    if(item->childCount() > 0)
+        return {};
+
+    auto attribute = _graphModel->attributeByName(itemValue);
+
+    if(attribute == nullptr || !attribute->isValid())
+        return {};
+
+    switch(role)
     {
-        // Special case for source/target node items, which don't have sections
-        if(item->childCount() > 0)
-            return {};
+    case Roles::ElementTypeRole:
+    {
+        auto asString = elementTypeAsString(attribute->elementType());
+        return asString;
+    }
+    case Roles::ValueTypeRole:
+    {
+        switch(attribute->valueType())
+        {
+        case ValueType::Int:
+        case ValueType::Float:
+            return tr("Numerical");
+        case ValueType::String:
+            return tr("Textual");
+        default: break;
+        }
 
-        auto attribute = _graphModel->attributeByName(itemValue);
-
-        if(attribute == nullptr || !attribute->isValid())
-            return {};
-
-        switch(role)
-        {
-        case Roles::ElementTypeRole:
-        {
-            auto asString = elementTypeAsString(attribute->elementType());
-            return asString;
-        }
-        case Roles::ValueTypeRole:
-        {
-            switch(attribute->valueType())
-            {
-            case ValueType::Int:
-            case ValueType::Float:
-                return tr("Numerical");
-            case ValueType::String:
-                return tr("Textual");
-            default: break;
-            }
-
-            return tr("Unknown Type");
-        }
-        case Roles::HasSharedValuesRole:
-        {
-            return !attribute->sharedValues().empty();
-        }
-        case Roles::SearchableRole:
-        {
-            return attribute->searchable();
-        }
-        case Roles::UserDefinedRole:
-        {
-            return attribute->userDefined() ? tr("User Defined") : tr("Calculated");
-        }
-        default:
-            return {};
-        }
+        return tr("Unknown Type");
+    }
+    case Roles::HasSharedValuesRole:
+    {
+        return !attribute->sharedValues().empty();
+    }
+    case Roles::SearchableRole:
+    {
+        return attribute->searchable();
+    }
+    case Roles::UserDefinedRole:
+    {
+        return attribute->userDefined() ? tr("User Defined") : tr("Calculated");
+    }
+    default:
+        return {};
     }
 
-    return itemValue;
+    return {};
 }
 
 Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
@@ -224,15 +244,19 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant AvailableAttributesModel::get(const QModelIndex& index) const
 {
     auto* parent = parentItem(index);
+    QString text = QStringLiteral("\"%1\"").arg(data(index, Qt::DisplayRole).toString());
 
-    QString preamble;
-
-    if(parent == _sourceNode)
-        preamble = QStringLiteral("source.");
+    if(u::contains(_attributeItemsWithParameters, parent))
+    {
+        QString parentText = get(index.parent()).toString();
+        text = QStringLiteral("%1.%2").arg(parentText, text);
+    }
+    else if(parent == _sourceNode)
+        text = QStringLiteral("source.%1").arg(text);
     else if(parent == _targetNode)
-        preamble = QStringLiteral("target.");
+        text = QStringLiteral("target.%1").arg(text);
 
-    return preamble + data(index, Qt::DisplayRole).toString();
+    return text;
 }
 
 QHash<int, QByteArray> AvailableAttributesModel::roleNames() const

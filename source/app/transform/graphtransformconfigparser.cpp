@@ -61,8 +61,11 @@ const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
+const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
+const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
+
 const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier)];
+const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier) >> -attributeParameter];
 
 struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
 {
@@ -139,7 +142,7 @@ const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "co
 const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
 const auto condition_def = (operand >> logical_op >> operand) | operand;
 
-const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier)];
+const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier) >> -attributeParameter];
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
@@ -157,7 +160,8 @@ const auto transform_def =
     -(x3::lit("with") >> +parameter) >>
     -(x3::lit("where") >> condition);
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, parameter, condition, terminalCondition, unaryCondition)
+BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
+    transform, parameter, condition, terminalCondition, unaryCondition)
 } // namespace SpiritGraphTranformConfigParser
 
 bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
@@ -295,12 +299,4 @@ bool GraphTransformConfigParser::opIsUnary(const QString& op)
 bool GraphTransformConfigParser::isAttributeName(const QString& variable)
 {
     return !variable.isEmpty() && variable[0] == '$';
-}
-
-QString GraphTransformConfigParser::attributeNameFor(const QString& variable)
-{
-    QString attributeName = variable;
-    attributeName.replace(QRegularExpression(QStringLiteral("^\\$")), QLatin1String(""));
-
-    return attributeName;
 }

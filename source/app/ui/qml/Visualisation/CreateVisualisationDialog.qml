@@ -180,8 +180,12 @@ Window
         channelList.selectedValues.forEach(function(channelName)
         {
             var attribute = document.attribute(attributeList.selectedValue);
+
+            var attributeName = VisualisationUtils.decorateAttributeName(attribute.name,
+                attribute.parameterValue);
+
             var expression = VisualisationUtils.expressionFor(
-                document, attribute.name, attribute.flags,
+                document, attributeName, attribute.flags,
                 attribute.valueType, channelName);
 
             newVisualsiationExpressions.push(expression);

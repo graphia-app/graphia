@@ -45,15 +45,20 @@ const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | quotedStr
 const auto identifierList = identifier % x3::lit(',');
 const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
 
+const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
+const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
+
+const x3::rule<class AttributeName, QString> attributeName = "attributeName";
+const auto attributeName_def = lexeme[(quotedString | identifier) >> -attributeParameter];
+
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
-const auto attributeName = quotedString | identifier;
 const auto channelName = quotedString | identifier;
 const auto visualisation_def =
     -flags >>
     attributeName >> channelName >>
     -(x3::lit("with") >> +parameter);
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation, parameter)
+BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName, visualisation, parameter)
 } // namespace SpiritVisualisationParser
 
 bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)

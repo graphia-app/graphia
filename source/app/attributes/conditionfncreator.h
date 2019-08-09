@@ -467,11 +467,7 @@ private:
                 ResolvedTerminalValue operator()(const QString& v) const
                 {
                     if(GraphTransformConfigParser::isAttributeName(v))
-                    {
-                        QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
-
-                        return _graphModel->attributeValueByName(attributeName);
-                    }
+                        return _graphModel->attributeValueByName(v);
 
                     return v;
                 }

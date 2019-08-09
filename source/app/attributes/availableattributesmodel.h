@@ -45,6 +45,8 @@ private:
     // cppcheck-suppress unsafeClassCanLeak
     Item* _targetNode = nullptr;
 
+    std::vector<Item*> _attributeItemsWithParameters;
+
     Item* parentItem(const QModelIndex& index) const;
 
     enum Roles

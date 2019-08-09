@@ -6,6 +6,7 @@ import com.kajeka 1.0
 import ".."
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "VisualisationUtils.js" as VisualisationUtils
 
 import "../Controls"
 
@@ -83,8 +84,30 @@ Item
 
             implicitWidth: 180
 
-            model: similarAttributes !== undefined ? similarAttributes : [attribute]
+            model:
+            {
+                if(similarAttributes !== undefined)
+                    return similarAttributes;
+
+                if(attributeName.length > 0)
+                    return [attributeName];
+
+                return [];
+            }
+
             enabled: enabledMenuItem.checked
+
+            onCurrentIndexChanged: { updateExpression(); }
+        }
+
+        ComboBox
+        {
+            id: attributeParameterList
+
+            implicitWidth: 180
+
+            enabled: enabledMenuItem.checked
+            visible: false
 
             onCurrentIndexChanged: { updateExpression(); }
         }
@@ -206,7 +229,7 @@ Item
                         if(!gradientKey.visible)
                             return false;
 
-                        var valueType = document.attribute(attribute).valueType;
+                        var valueType = document.attribute(attributeName).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
 
@@ -227,7 +250,7 @@ Item
 
                     visible:
                     {
-                        var valueType = document.attribute(attribute).valueType;
+                        var valueType = document.attribute(attributeName).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
 
@@ -243,7 +266,7 @@ Item
                     if(!paletteKey.visible)
                         return false;
 
-                    var valueType = document.attribute(attribute).valueType;
+                    var valueType = document.attribute(attributeName).valueType;
                     return valueType === ValueType.String;
                 }
 
@@ -337,9 +360,9 @@ Item
         return flags.indexOf(flag) >= 0;
     }
 
-    property string attribute
-    readonly property var similarAttributes: attribute.length > 0 ?
-        document.attributesSimilarTo(attribute) : []
+    property string attributeName
+    readonly property var similarAttributes: attributeName.length > 0 ?
+        document.attributesSimilarTo(attributeName) : []
 
     property string channel
     property var parameters
@@ -353,7 +376,20 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + "\"" + attributeList.currentText + "\" \"" + channel + "\"";
+        var attribute = document.attribute(attributeList.currentText);
+        var parameterValue = "";
+        if(attribute.hasParameter)
+        {
+            if(attributeParameterList.count === 0)
+                parameterValue = attribute.validParameterValues[0];
+            else
+                parameterValue = attributeParameterList.currentText;
+        }
+
+        var attributeName = VisualisationUtils.decorateAttributeName(
+            attributeList.currentText, parameterValue);
+
+        var newExpression = flagsString + attributeName + " \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";
@@ -424,7 +460,7 @@ Item
             var visualisationConfig = document.parseVisualisation(value);
 
             flags = visualisationConfig.flags;
-            attribute = visualisationConfig.attribute;
+            attributeName = visualisationConfig.attribute;
             channel = visualisationConfig.channel;
             parameters = visualisationConfig.parameters;
 
@@ -444,7 +480,25 @@ Item
             perComponentMenuItem.checked = isFlagSet("component");
             sortByValueMenuItem.checked = !isFlagSet("assignByQuantity");
             sortBySharedValuesMenuItem.checked = isFlagSet("assignByQuantity");
-            attributeList.currentIndex = attributeList.find(attribute);
+
+            var attribute = document.attribute(attributeName);
+            attributeList.currentIndex = attributeList.find(attribute.name);
+            if(attribute.hasParameter)
+            {
+                attributeParameterList.model = attribute.validParameterValues;
+                attributeParameterList.currentIndex =
+                    attributeParameterList.find(attribute.parameterValue);
+
+                if(attributeParameterList.currentIndex < 0 && attributeParameterList.count > 0)
+                    attributeParameterList.currentIndex = 0;
+
+                attributeParameterList.visible = true;
+            }
+            else
+            {
+                attributeParameterList.model = [];
+                attributeParameterList.visible = false;
+            }
 
             ready = true;
         }

@@ -1852,9 +1852,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
     if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
     {
-        const auto& attribute = _graphModel->attributeValueByName(attributeName);
-
-        map.insert(QStringLiteral("baseName"), parsedAttributeName._name);
+        auto attribute = _graphModel->attributeValueByName(attributeName);
 
         const char* prefix = "";
         switch(parsedAttributeName._type)
@@ -1866,6 +1864,18 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
         map.insert(QStringLiteral("name"), QStringLiteral("%1%2")
             .arg(prefix, parsedAttributeName._name));
+
+        bool hasParameter = attribute.hasParameter();
+        map.insert(QStringLiteral("hasParameter"), hasParameter);
+
+        if(hasParameter)
+        {
+            if(!parsedAttributeName._parameter.isEmpty())
+                GraphModel::calculateAttributeRange(&graphModel()->mutableGraph(), attribute);
+
+            map.insert(QStringLiteral("parameterValue"), parsedAttributeName._parameter);
+            map.insert(QStringLiteral("validParameterValues"), attribute.validParameterValues());
+        }
 
         map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));

@@ -206,8 +206,15 @@ QString GraphTransformConfig::conditionAsString() const
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
-                    if(!s.isEmpty() && s[0] == '$')
-                        return QString("$\"%1\"").arg(s.midRef(1));
+                    if(GraphTransformConfigParser::isAttributeName(s))
+                    {
+                        auto info = Attribute::parseAttributeName(s);
+
+                        if(!info._parameter.isEmpty())
+                            return QString("$\"%1\".\"%2\"").arg(info._name, info._parameter);
+
+                        return QString("$\"%1\"").arg(info._name);
+                    }
 
                     return QString("\"%1\"").arg(s);
                 }
@@ -344,7 +351,7 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
         {
             const auto* s = std::get_if<QString>(&terminalValue);
             if(s != nullptr && GraphTransformConfigParser::isAttributeName(*s))
-                return GraphTransformConfigParser::attributeNameFor(*s);
+                return s->mid(1); // Strip leading $
 
             return {};
         }

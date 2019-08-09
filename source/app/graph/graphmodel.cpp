@@ -766,6 +766,9 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
     if(_transformedGraphIsChanging && attribute.testFlag(AttributeFlag::DisableDuringTransfom))
         return {};
 
+    if(!attributeName._parameter.isEmpty())
+        attribute.setParameterValue(attributeName._parameter);
+
     if(attributeName._type != Attribute::EdgeNodeType::None)
     {
         return Attribute::edgeNodesAttribute(_->_graph,
@@ -779,15 +782,7 @@ static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
     for(auto& attribute : make_value_wrapper(attributes))
-    {
-        if(!attribute.testFlag(AttributeFlag::AutoRange))
-            continue;
-
-        if(attribute.elementType() == ElementType::Node)
-            attribute.autoSetRangeForElements(graph->nodeIds());
-        else if(attribute.elementType() == ElementType::Edge)
-            attribute.autoSetRangeForElements(graph->edgeIds());
-    }
+        GraphModel::calculateAttributeRange(graph, attribute);
 }
 
 void GraphModel::initialiseAttributeRanges()
@@ -822,6 +817,17 @@ bool GraphModel::attributeNameIsValid(const QString& attributeName)
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     return attributeNameRegex.match(attributeName).hasMatch();
+}
+
+void GraphModel::calculateAttributeRange(const IGraph* graph, Attribute& attribute)
+{
+    if(!attribute.testFlag(AttributeFlag::AutoRange))
+        return;
+
+    if(attribute.elementType() == ElementType::Node)
+        attribute.autoSetRangeForElements(graph->nodeIds());
+    else if(attribute.elementType() == ElementType::Edge)
+        attribute.autoSetRangeForElements(graph->edgeIds());
 }
 
 void GraphModel::clearHighlightedNodes()

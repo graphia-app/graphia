@@ -1,11 +1,20 @@
-function expressionFor(document, name, flags, type, channelName)
+function decorateAttributeName(name, parameter)
+{
+    name = name.replace(/([^\.]+\.)?(.*)/, "$1\"$2\"");
+    name += (parameter !== undefined && parameter.length > 0) ?
+        (".\"" + parameter + "\"") : "";
+
+    return name;
+}
+
+function expressionFor(document, attributeName, flags, type, channelName)
 {
     var expression = "";
 
     if(flags & AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
-    expression += "\"" + name + "\" \"" + channelName +"\"";
+    expression += attributeName + " \"" + channelName +"\"";
 
     var parameters = document.visualisationDefaultParameters(
         type, channelName);

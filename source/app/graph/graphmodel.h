@@ -130,6 +130,8 @@ public:
 
     static bool attributeNameIsValid(const QString& attributeName);
 
+    static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);
+
     void clearHighlightedNodes();
     void highlightNodes(const NodeIdSet& nodeIds);
 
