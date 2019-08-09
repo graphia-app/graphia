@@ -250,12 +250,14 @@ QString GraphModel::normalisedAttributeName(QString attribute) const
 }
 
 IMutableGraph& GraphModel::mutableGraphImpl() { return mutableGraph(); }
+const IMutableGraph& GraphModel::mutableGraphImpl() const { return mutableGraph(); }
 const IGraph& GraphModel::graphImpl() const { return graph(); }
 
 const IElementVisual& GraphModel::nodeVisualImpl(NodeId nodeId) const { return nodeVisual(nodeId); }
 const IElementVisual& GraphModel::edgeVisualImpl(EdgeId edgeId) const { return edgeVisual(edgeId); }
 
 MutableGraph& GraphModel::mutableGraph() { return _->_graph; }
+const MutableGraph& GraphModel::mutableGraph() const { return _->_graph; }
 const Graph& GraphModel::graph() const { return _->_transformedGraph; }
 
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }

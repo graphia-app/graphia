@@ -19,6 +19,7 @@ public:
 
 protected:
     virtual IMutableGraph& mutableGraphImpl() = 0;
+    virtual const IMutableGraph& mutableGraphImpl() const = 0;
     virtual const IGraph& graphImpl() const = 0;
 
     virtual const IElementVisual& nodeVisualImpl(NodeId nodeId) const = 0;
@@ -26,6 +27,7 @@ protected:
 
 public:
     IMutableGraph& mutableGraph() { return mutableGraphImpl(); }
+    const IMutableGraph& mutableGraph() const { return mutableGraphImpl(); }
     const IGraph& graph() const { return graphImpl(); }
 
     const IElementVisual& nodeVisual(NodeId nodeId) const { return nodeVisualImpl(nodeId); }

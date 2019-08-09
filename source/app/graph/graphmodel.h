@@ -56,6 +56,7 @@ private:
     QString normalisedAttributeName(QString attribute) const;
 
     IMutableGraph& mutableGraphImpl() override;
+    const IMutableGraph& mutableGraphImpl() const override;
     const IGraph& graphImpl() const override;
 
     const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
@@ -63,6 +64,7 @@ private:
 
 public:
     MutableGraph& mutableGraph();
+    const MutableGraph& mutableGraph() const;
     const Graph& graph() const;
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
