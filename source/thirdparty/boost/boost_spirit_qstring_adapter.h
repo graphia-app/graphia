@@ -2,6 +2,7 @@
 #define BOOST_SPIRIT_QSTRING_ADAPTER_H
 
 #include <boost/spirit/home/x3/support/traits/container_traits.hpp>
+#include <boost/iterator/iterator_adaptor.hpp>
 
 #include <QString>
 
@@ -39,5 +40,22 @@ struct is_empty_container<QString>
 };
 
 }}}}
+
+template<typename QStringIterator>
+class QStringSpiritUnicodeIteratorAdaptor : public boost::iterator_adaptor<
+    QStringSpiritUnicodeIteratorAdaptor<QStringIterator>,
+    QStringIterator, uint32_t, boost::forward_traversal_tag, uint32_t>
+{
+public:
+    using boost::iterator_adaptor<QStringSpiritUnicodeIteratorAdaptor<QStringIterator>,
+        QStringIterator, uint32_t, boost::forward_traversal_tag, uint32_t>::iterator_adaptor;
+
+private:
+    friend class boost::iterator_core_access;
+    uint32_t dereference() const { return static_cast<uint32_t>(this->base_reference()->unicode()); }
+};
+
+using QStringSpiritUnicodeIterator = QStringSpiritUnicodeIteratorAdaptor<QString::iterator>;
+using QStringSpiritUnicodeConstIterator = QStringSpiritUnicodeIteratorAdaptor<QString::const_iterator>;
 
 #endif // BOOST_SPIRIT_QSTRING_ADAPTER_H

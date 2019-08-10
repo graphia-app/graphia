@@ -1,5 +1,7 @@
 #include "graphtransformconfigparser.h"
 
+#define BOOST_SPIRIT_X3_UNICODE
+
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/boost_spirit_qstring_adapter.h>
@@ -45,14 +47,14 @@ BOOST_FUSION_ADAPT_STRUCT(
 namespace SpiritGraphTranformConfigParser
 {
 namespace x3 = boost::spirit::x3;
-namespace ascii = boost::spirit::x3::ascii;
+namespace unicode = boost::spirit::x3::unicode;
 
 using x3::lit;
 // Only parse strict doubles (i.e. not integers)
 x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
 using x3::int_;
 using x3::lexeme;
-using ascii::char_;
+using unicode::char_;
 
 const x3::rule<class QuotedString, QString> quotedString = "quotedString";
 const auto escapedQuote = x3::lit('\\') >> char_('"');
@@ -162,13 +164,12 @@ BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, paramete
 
 bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
 {
-    auto stdString = text.toStdString();
-    auto begin = stdString.begin();
-    auto end = stdString.end();
+    QStringSpiritUnicodeConstIterator begin(text.begin());
+    QStringSpiritUnicodeConstIterator end(text.end());
     _result = {};
     _success = SpiritGraphTranformConfigParser::x3::phrase_parse(begin, end,
                     SpiritGraphTranformConfigParser::transform,
-                    SpiritGraphTranformConfigParser::ascii::space, _result);
+                    SpiritGraphTranformConfigParser::unicode::space, _result);
 
     if(begin != end)
     {
