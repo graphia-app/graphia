@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include <QDebug>
+#include <QItemSelectionRange>
 
 class TableProxyModel : public QSortFilterProxyModel
 {
@@ -43,6 +44,7 @@ public:
 
     using QSortFilterProxyModel::mapToSource;
 
+    Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topLeft, int bottomRight);
 signals:
     void countChanged();
 

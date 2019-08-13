@@ -26,6 +26,11 @@ void TableProxyModel::setSubSelection(QModelIndexList subSelection)
     emit layoutChanged(persistentModelIndexList);
 }
 
+QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bottomRow)
+{
+    return QItemSelectionRange(index(topRow, 0), index(bottomRow, columnCount() - 1));
+}
+
 int TableProxyModel::mapToSource(int proxyRow) const
 {
     QModelIndex proxyIndex = index(proxyRow, 0);

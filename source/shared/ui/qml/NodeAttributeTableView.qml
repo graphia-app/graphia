@@ -34,16 +34,6 @@ Item
     property var hiddenColumns: []
     onHiddenColumnsChanged: { tableView._updateColumnVisibility(); }
 
-    property var selectedRows: []
-    function selectRow(row)
-    {
-        selectionModel.select(proxyModel.index(row, 0), ItemSelectionModel.Rows | ItemSelectionModel.Select)
-    }
-    function unselect(row)
-    {
-        selectionModel.select(proxyModel.index(row, 0), ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
-    }
-
     readonly property string sortRoleName:
     {
         if(_nodeAttributesTableModel.columnNames.length > 0 &&
@@ -214,6 +204,11 @@ Item
 
     MouseArea
     {
+        ItemSelectionModel
+        {
+            id: selectionModel
+            model: proxyModel
+        }
         property var previousRow: -1
         property var startRow: -1
         property var endRow: -1
@@ -225,16 +220,28 @@ Item
 
         onDoubleClicked:
         {
-            var child = tableView.childAt(mouseX, mouseY).childAt(
-                        mouseX + tableView.contentX,
-                        mouseY + tableView.contentY);
-            var mappedRow = proxyModel.mapToSource(child.modelRow);
+            var tableItem = tableView.getItem(mouseX, mouseY);
+            if(tableItem === false)
+                return;
+            var mappedRow = proxyModel.mapToSource(tableItem.modelRow);
             root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
         }
 
         onPressed:
         {
-            if(mouse.modifiers & Qt.ControlModifier)
+            var tableItem = tableView.getItem(mouseX, mouseY);
+            if(tableItem === false)
+                return;
+            startRow = tableItem.modelRow;
+
+            if(mouse.modifiers & Qt.ShiftModifier)
+            {
+                if(endRow != -1)
+                {
+                    selectRows(startRow, endRow);
+                }
+            }
+            else if(mouse.modifiers & Qt.ControlModifier)
             {
 
             }
@@ -242,11 +249,9 @@ Item
             {
                 selectionModel.clear();
             }
-            var child = tableView.childAt(mouseX, mouseY).childAt(
-                        mouseX + tableView.contentX,
-                        mouseY + tableView.contentY);
-            startRow = child.modelRow;
-            selectRow(startRow);
+
+            endRow = tableItem.modelRow;
+            selectRows(startRow, startRow);
             proxyModel.setSubSelection(selectionModel.selectedIndexes);
         }
         onReleased:
@@ -255,35 +260,45 @@ Item
         }
         onPositionChanged:
         {
-            if(mouse.buttons == 1 && mouseY > 0)
+            if(mouse.buttons == 1)
             {
-                var child = tableView.childAt(mouseX, mouseY).childAt(
-                            mouseX + tableView.contentX,
-                            mouseY + tableView.contentY);
-                if(child.modelRow !== previousRow)
+                var tableItem = tableView.getItem(mouseX, mouseY);
+                if(tableItem && tableItem.modelRow !== previousRow)
                 {
                     if(previousRow != -1)
-                    {
-                        let less = Math.min(startRow, previousRow);
-                        let max = Math.max(startRow, previousRow);
-                        for(let i = less; i < max + 1; i++)
-                            unselect(i);
-                    }
-                    let less = Math.min(startRow, child.modelRow);
-                    let max = Math.max(startRow, child.modelRow);
-                    for(let i = less; i < max + 1; i++)
-                        selectRow(i);
-                    previousRow = child.modelRow;
-                    proxyModel.setSubSelection(selectionModel.selectedIndexes);
+                        deselectRows(startRow, previousRow);
+
+                    selectRows(startRow, tableItem.modelRow);
+
+                    previousRow = tableItem.modelRow;
+                    endRow = tableItem.modelRow
                 }
             }
         }
+
+        function selectRows(inStartRow, inEndRow)
+        {
+            let less = Math.min(inStartRow, inEndRow);
+            let max = Math.max(inStartRow, inEndRow);
+
+            var range = proxyModel.buildRowSelectionRange(less, max);
+            selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
+
+            proxyModel.setSubSelection(selectionModel.selectedIndexes);
+        }
+
+        function deselectRows(inStartRow, inEndRow)
+        {
+            let less = Math.min(inStartRow, inEndRow);
+            let max = Math.max(inStartRow, inEndRow);
+
+            var range = proxyModel.buildRowSelectionRange(less, max);
+            selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
+
+            proxyModel.setSubSelection(selectionModel.selectedIndexes);
+        }
     }
-    ItemSelectionModel
-    {
-        id: selectionModel
-        model: proxyModel
-    }
+
     TableView
     {
         id: tableView
@@ -300,6 +315,26 @@ Item
                     color: sysPalette.dark
             }
         }
+
+        function getItem(mouseX, mouseY)
+        {
+            var tableViewContentContainsMouse = mouseY > columnsHeader.height && mouseY < tableView.height &&
+                    mouseX < tableView.width && mouseX < tableView.contentWidth
+                    && mouseY < tableView.contentHeight;
+
+            if(!tableViewContentContainsMouse)
+                return false;
+
+            var hoverItem = tableView.childAt(mouseX, mouseY);
+            if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar || hoverItem === verticalTableViewScrollBar))
+                return false;
+
+            var tableItem = hoverItem.childAt(
+                        mouseX + tableView.contentX,
+                        mouseY + tableView.contentY);
+            return tableItem;
+        }
+
         QQC2.ScrollBar.horizontal: QQC2.ScrollBar
         {
             id: horizontalTableViewScrollBar
