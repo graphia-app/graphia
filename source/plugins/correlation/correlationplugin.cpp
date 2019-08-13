@@ -177,6 +177,17 @@ void CorrelationPluginInstance::createAttributes()
             "a specific column in the correlated data."))
         .setValidParameterValues(u::toQStringList(_dataColumnNames));
 
+    graphModel()->createAttribute(tr("Strongest Data Column"))
+        .setStringValueFn([this](NodeId nodeId)
+        {
+            const auto& dataRow = dataRowForNodeId(nodeId);
+            return _dataColumnNames.at(dataRow.largestColumnIndex());
+        })
+        .setFlag(AttributeFlag::FindShared)
+        .setSearchable(true)
+        .setDescription(tr("The name of the data column which has the largest value for "
+            "the data row associated with the node."));
+
     graphModel()->createAttribute(tr("Mean Data Value"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).mean(); })
         .setFlag(AttributeFlag::AutoRange)
