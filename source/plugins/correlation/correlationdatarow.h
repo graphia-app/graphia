@@ -60,6 +60,7 @@ public:
 
     double minValue() const { return _minValue; }
     double maxValue() const { return _maxValue; }
+    size_t largestColumnIndex() const { return _largestColumnIndex; }
 
     void update();
 
@@ -87,6 +88,7 @@ private:
 
     double _minValue = std::numeric_limits<double>::max();
     double _maxValue = std::numeric_limits<double>::lowest();
+    size_t _largestColumnIndex = 0;
 
     mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
 };
