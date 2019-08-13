@@ -1116,7 +1116,7 @@ BaseParameterDialog
                                 {
                                     text: qsTr("Similar to Min/Max scaling except the resultant " +
                                                "values are centred around their column mean: " +
-                                               "(<i>x</i>-µ)/(max(<i>x</i>)-min(<i>x</i>))." +
+                                               "(<i>x</i>-µ)/(max(<i>x</i>)-min(<i>x</i>)). " +
                                                "Note: If all elements in a column have the same value " +
                                                "this will rescale the values to 0.0.");
                                     wrapMode: Text.WordWrap
