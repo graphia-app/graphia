@@ -15,11 +15,9 @@ PluginContent
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         iconName: "format-justify-fill"
-        checkable: true
-        checked: tableView.autoColumnWidth
-        onToggled:
+        onTriggered:
         {
-            tableView.autoColumnWidth = checked;
+            tableView.resizeColumnsToContents();
         }
     }
 

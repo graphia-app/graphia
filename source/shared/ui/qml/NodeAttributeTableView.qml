@@ -21,14 +21,20 @@ Item
 
     // External name
     property alias model: root._nodeAttributesTableModel
+    property var defaultColumnWidth: 120
 
     // Internal name
     property var _nodeAttributesTableModel
-    property var autoColumnWidth: false
-    onAutoColumnWidthChanged:
+    function resizeColumnsToContents()
     {
-        tableView.forceLayout();
-        tableView.forceLayout();
+        tableView.currentColumnWidths = tableView.columnWidths;
+        for(let i=0; i<tableView.columns; i++)
+        {
+            var storedWidth = tableView.currentColumnWidths[i];
+            var columnHeader = columnHeaderRepeater.itemAt(i);
+            columnHeader.width = Math.max(storedWidth, columnHeader.labelWidth)
+        }
+        tableView.forceLayoutSafe();
     }
 
     property var hiddenColumns: []
@@ -302,6 +308,8 @@ Item
     TableView
     {
         id: tableView
+        property var currentColumnWidths: []
+        property var columnWidths: []
         clip: true
         QQC2.ScrollBar.vertical: QQC2.ScrollBar
         {
@@ -314,6 +322,12 @@ Item
                     radius: width / 2
                     color: sysPalette.dark
             }
+        }
+
+        function forceLayoutSafe()
+        {
+            if(tableView.rows > 0)
+                tableView.forceLayout();
         }
 
         function getItem(mouseX, mouseY)
@@ -358,24 +372,30 @@ Item
 
         columnWidthProvider: function(col)
         {
-            return root.autoColumnWidth ? -1 : 120;
+            var delegateWidth = tableView.currentColumnWidths[col];
+            if(delegateWidth === undefined)
+                return defaultColumnWidth;
+            return Math.max(delegateWidth, columnHeaderRepeater.itemAt(col).labelWidth);
         }
 
-        Row {
+        Row
+        {
             id: columnsHeader
             y: tableView.contentY
             z: 2
-            Repeater {
+            Repeater
+            {
+                id: columnHeaderRepeater
                 model: tableView.columns > 0 ? tableView.columns : 1
-                QQC2.Label {
-                    width: tableView.columnWidthProvider(modelData)
-                    height: 35
+                QQC2.Label
+                {
+                    property var labelWidth: contentWidth + padding + padding;
+                    width: defaultColumnWidth
                     text: root._nodeAttributesTableModel.columnHeaders(modelData)
-                    color: '#aaaaaa'
-                    font.pixelSize: 15
-                    padding: 10
-                    verticalAlignment: Text.AlignVCenter
-                    background:  Rectangle { color: "#333333" }
+                    color: sysPalette.text
+                    font.pixelSize: 11
+                    padding: 2
+                    background:  Rectangle { color: "white" }
                 }
             }
         }
@@ -388,6 +408,23 @@ Item
             implicitHeight: Math.max(16, label.implicitHeight)
             implicitWidth: label.implicitWidth + 16
             clip: true
+
+            TableView.onReused:
+            {
+                updateColumnWidths()
+            }
+
+            Component.onCompleted: updateColumnWidths()
+
+            function updateColumnWidths()
+            {
+                var storedWidth = tableView.columnWidths[modelColumn];
+                if(storedWidth !== undefined)
+                    tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
+                else
+                    tableView.columnWidths[modelColumn] = implicitWidth;
+            }
+
 
             property var modelColumn: model.column
             property var modelRow: model.row
@@ -415,7 +452,7 @@ Item
                     {
                         return systemPalette.highlight;
                     }
-                    return model.row % 2 ? "white" : "lightgrey";
+                    return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
                 }
 
                 Text
@@ -443,6 +480,7 @@ Item
             {
                 proxyModel.invalidateFilter();
                 verticalTableViewScrollBar.position = 0;
+                tableView.columnWidths = new Array(tableView.columns).fill(0);
             }
         }
 

@@ -14,7 +14,7 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
     {
         return _subSelection.contains(index);
     }
-    return sourceModel()->data(index, role);
+    return QSortFilterProxyModel::data(index, role);
 }
 
 void TableProxyModel::setSubSelection(QModelIndexList subSelection)
