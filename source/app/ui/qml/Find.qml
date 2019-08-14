@@ -541,7 +541,7 @@ Rectangle
                                 checked = Qt.binding(isChecked);
                             }
 
-                            ToolTip { text: modelData }
+                            tooltip: modelData
                         }
                     }
                 }
