@@ -211,12 +211,12 @@ QString GraphTransformConfig::conditionAsString() const
                         auto info = Attribute::parseAttributeName(s);
 
                         if(!info._parameter.isEmpty())
-                            return QString("$\"%1\".\"%2\"").arg(info._name, info._parameter);
+                            return QString(R"($"%1"."%2")").arg(info._name, info._parameter);
 
-                        return QString("$\"%1\"").arg(info._name);
+                        return QString(R"($"%1")").arg(info._name);
                     }
 
-                    return QString("\"%1\"").arg(s);
+                    return QString(R"("%1")").arg(s);
                 }
             };
 

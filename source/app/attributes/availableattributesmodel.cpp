@@ -61,10 +61,10 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     auto attributeList = graphModel.availableAttributeNames(elementTypes, valueTypes, skipFlags);
 
-    auto addItem = [this, &graphModel](Item* parent, const QString& name)
+    auto addItem = [this, &graphModel](Item* parentItem, const QString& name)
     {
         auto attributeItem = new AvailableAttributesModel::Item(name);
-        parent->addChild(attributeItem);
+        parentItem->addChild(attributeItem);
 
         const auto* attribute = graphModel.attributeByName(name);
         if(attribute->hasParameter())

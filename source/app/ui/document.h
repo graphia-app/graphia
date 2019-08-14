@@ -407,7 +407,7 @@ public:
     Q_INVOKABLE void selectPrevFound();
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
-    Q_INVOKABLE void selectByAttributeValue(const QString& attributeName, const QString& value);
+    Q_INVOKABLE void selectByAttributeValue(const QString& attributeName, const QString& term);
 
     Q_INVOKABLE QString nodeName(QmlNodeId nodeId) const;
 

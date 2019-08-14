@@ -193,7 +193,7 @@ QString Attribute::parameterValue() const
     if(_.parameterIndex < 0 || _.parameterIndex >= numValidValues)
         return {};
 
-    size_t valueIndex = static_cast<size_t>(_.parameterIndex);
+    auto valueIndex = static_cast<size_t>(_.parameterIndex);
     return _.validParameterValues.at(valueIndex);
 }
 
