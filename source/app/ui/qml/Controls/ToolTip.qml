@@ -1,9 +1,10 @@
 import QtQuick 2.7
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls.Private 1.0
 
-// This is a gigantic hack that hijacks a Button's tooltip property in order
-// to provide generalised tooltips
+// This is a gigantic hack that delves into QtQuick.Controls.Private to
+// provide the ability to add passive tooltips to things that don't otherwise
+// have them (like Images). Note that this prevents the underlying Item's hover
+// functionality from working, so may break things in exciting ways.
 Item
 {
     id: root
@@ -12,31 +13,32 @@ Item
     property Item item: parent
     property string text
 
-    Button
+    MouseArea
     {
-        id: tooltipButton
+        id: mouseArea
+
         anchors.fill: parent
 
-        tooltip: root.text
+        // Pass any clicks through
+        propagateComposedEvents: true
+        onPressed: { mouse.accepted = false; }
 
-        style: ButtonStyle
-        {
-            background: Rectangle
-            {
-                color: "transparent"
-            }
-        }
+        hoverEnabled: true
 
-        // Pass any mouse events on to any underlying MouseAreas
-        Component.onCompleted:
-        {
-            tooltipButton.__behavior.propagateComposedEvents = true;
-        }
+        onExited: { Tooltip.hideText(); }
+        onCanceled: { Tooltip.hideText(); }
+    }
 
-        Connections
+    Timer
+    {
+        interval: 1000
+        running: mouseArea.containsMouse && !mouseArea.pressed &&
+            root.text.length > 0
+
+        onTriggered:
         {
-            target: tooltipButton.__behavior
-            onPressed: { mouse.accepted = false; }
+            Tooltip.showText(root, Qt.point(mouseArea.mouseX,
+                mouseArea.mouseY), root.text);
         }
     }
 }
