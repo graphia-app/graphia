@@ -584,6 +584,13 @@ void TabularDataParser::estimateGraphSize()
                 keys.append(sampleEdge._r);
                 auto numNodes = (nonSingletonNodes.size() * 100) / percent;
                 auto numEdges = (numSampledEdges * 10000) / percentSq;
+
+                // Cap the estimates at their theoretical maxima, in order
+                // to avoid confusing the user with an estimate that's larger
+                // than the source dataset
+                numNodes = std::min(numNodes, _dataPtr->numRows());
+                numEdges = std::min(numEdges, _dataPtr->numRows() * _dataPtr->numRows());
+
                 estimatedNumNodes.append(numNodes);
                 estimatedNumEdges.append(numEdges);
 
