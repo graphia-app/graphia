@@ -28,7 +28,7 @@ DEFINE_QML_ENUM(
     // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x4,
 
-    // Track the set of unique values held by the attribute
+    // Track the set of shared values held by the attribute
     FindShared              = 0x8,
 
     // Can't be used during transform
