@@ -22,6 +22,8 @@ Item
     // External name
     property alias model: root._nodeAttributesTableModel
     property var defaultColumnWidth: 120
+    property var selectedRows: []
+    property alias rowCount: tableView.rows
 
     // Internal name
     property var _nodeAttributesTableModel
@@ -207,6 +209,35 @@ Item
 
     SystemPalette { id: sysPalette }
 
+    function selectRows(inStartRow, inEndRow)
+    {
+        let less = Math.min(inStartRow, inEndRow);
+        let max = Math.max(inStartRow, inEndRow);
+
+        var range = proxyModel.buildRowSelectionRange(less, max);
+        selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
+
+        proxyModel.setSubSelection(selectionModel.selectedIndexes);
+        updateSelectedRowsArray();
+    }
+
+    function deselectRows(inStartRow, inEndRow)
+    {
+        let less = Math.min(inStartRow, inEndRow);
+        let max = Math.max(inStartRow, inEndRow);
+
+        var range = proxyModel.buildRowSelectionRange(less, max);
+        selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
+
+        proxyModel.setSubSelection(selectionModel.selectedIndexes);
+        updateSelectedRowsArray();
+    }
+
+    function updateSelectedRowsArray()
+    {
+        var selectedRows = selectionModel.selectedRows(0).map(index => index.row);
+        root.selectedRows = selectedRows;
+    }
 
     MouseArea
     {
@@ -281,28 +312,6 @@ Item
                 }
             }
         }
-
-        function selectRows(inStartRow, inEndRow)
-        {
-            let less = Math.min(inStartRow, inEndRow);
-            let max = Math.max(inStartRow, inEndRow);
-
-            var range = proxyModel.buildRowSelectionRange(less, max);
-            selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
-
-            proxyModel.setSubSelection(selectionModel.selectedIndexes);
-        }
-
-        function deselectRows(inStartRow, inEndRow)
-        {
-            let less = Math.min(inStartRow, inEndRow);
-            let max = Math.max(inStartRow, inEndRow);
-
-            var range = proxyModel.buildRowSelectionRange(less, max);
-            selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
-
-            proxyModel.setSubSelection(selectionModel.selectedIndexes);
-        }
     }
 
     TableView
@@ -334,7 +343,7 @@ Item
         {
             var tableViewContentContainsMouse = mouseY > columnsHeader.height && mouseY < tableView.height &&
                     mouseX < tableView.width && mouseX < tableView.contentWidth
-                    && mouseY < tableView.contentHeight;
+                    && mouseY < tableView.contentHeight + columnsHeader.height;
 
             if(!tableViewContentContainsMouse)
                 return false;
@@ -389,15 +398,32 @@ Item
                 model: tableView.columns > 0 ? tableView.columns : 1
                 QQC2.Label
                 {
+                    Rectangle
+                    {
+                        anchors.right: parent.right
+                        height: parent.height
+                        width: 1
+                        color: sysPalette.midlight
+                    }
+
                     property var labelWidth: contentWidth + padding + padding;
                     width: defaultColumnWidth
                     text: root._nodeAttributesTableModel.columnHeaders(modelData)
                     color: sysPalette.text
                     font.pixelSize: 11
-                    padding: 2
+                    padding: 4
                     background:  Rectangle { color: "white" }
                 }
             }
+        }
+        Rectangle
+        {
+            z: 1
+            x: 0
+            y: tableView.contentY
+            height: columnsHeader.height
+            width: parent.width
+            color: "white"
         }
 
         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
@@ -435,14 +461,6 @@ Item
             Rectangle
             {
 
-                Rectangle
-                {
-                    anchors.right: parent.right
-                    height: parent.height
-                    width: 1
-                    color: systemPalette.light
-                }
-
                 width: parent.width
                 anchors.centerIn: parent
                 height: parent.height
@@ -463,6 +481,8 @@ Item
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 10
+                    color: QmlUtils.contrastingColor(parent.color)
 
                     text:
                     {
@@ -479,6 +499,7 @@ Item
             onSelectionChanged:
             {
                 proxyModel.invalidateFilter();
+                selectRows(0, proxyModel.rowCount() - 1);
                 verticalTableViewScrollBar.position = 0;
                 tableView.columnWidths = new Array(tableView.columns).fill(0);
             }
