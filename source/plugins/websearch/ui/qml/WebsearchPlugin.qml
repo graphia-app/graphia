@@ -27,11 +27,11 @@ PluginContent
                 "https://www.google.co.uk/maps/search/%1",
                 "https://twitter.com/%1",
                 "https://www.reddit.com/search?q=%1",
-                "http://www.ncbi.nlm.nih.gov/gene/?term=%1",
+                "https://www.ncbi.nlm.nih.gov/gene/?term=%1",
                 "https://www.youtube.com/results?search_query=%1",
                 "https://uk.finance.yahoo.com/lookup;?s=%1",
                 "https://www.amazon.co.uk/s/ref=nb_sb_noss_2?field-keywords=%1",
-                "http://www.ebay.co.uk/sch/i.html?_nkw=%1"
+                "https://www.ebay.co.uk/sch/i.html?_nkw=%1"
             ]
             Layout.fillWidth: true
 
