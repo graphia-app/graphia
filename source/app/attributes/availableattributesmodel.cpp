@@ -155,7 +155,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     }
     case Roles::SearchableRole:
     {
-        return attribute->searchable();
+        return attribute->testFlag(AttributeFlag::Searchable);
     }
     case Roles::UserDefinedRole:
     {

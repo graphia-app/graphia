@@ -42,8 +42,11 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     {
         auto attribute = _graphModel->attributeValueByName(attributeName);
 
-        if(attribute.searchable() && attribute.elementType() == ElementType::Node)
+        if(attribute.testFlag(AttributeFlag::Searchable) &&
+            attribute.elementType() == ElementType::Node)
+        {
             attributes.emplace_back(attribute);
+        }
     }
 
     // None of the given attributes are searchable

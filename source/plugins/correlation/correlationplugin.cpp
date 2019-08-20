@@ -184,7 +184,7 @@ void CorrelationPluginInstance::createAttributes()
             return _dataColumnNames.at(dataRow.largestColumnIndex());
         })
         .setFlag(AttributeFlag::FindShared)
-        .setSearchable(true)
+        .setFlag(AttributeFlag::Searchable)
         .setDescription(tr("The name of the data column which has the largest value for "
             "the data row associated with the node."));
 

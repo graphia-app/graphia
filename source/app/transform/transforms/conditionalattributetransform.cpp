@@ -52,7 +52,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target) const
 
         attribute.setStringValueFn([newValues](E elementId) { return newValues[elementId]; })
             .setFlag(AttributeFlag::FindShared)
-            .setSearchable(true);
+            .setFlag(AttributeFlag::Searchable);
     };
 
     if(_elementType == ElementType::Node)

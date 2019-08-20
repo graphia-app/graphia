@@ -326,5 +326,5 @@ void LouvainTransform::apply(TransformedGraph& target) const
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
-        .setSearchable(true);
+        .setFlag(AttributeFlag::Searchable);
 }

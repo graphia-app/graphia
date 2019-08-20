@@ -619,7 +619,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
-        .setSearchable(true);
+        .setFlag(AttributeFlag::Searchable);
 }
 
 std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const

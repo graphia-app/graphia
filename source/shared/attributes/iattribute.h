@@ -32,7 +32,10 @@ DEFINE_QML_ENUM(
     FindShared              = 0x8,
 
     // Can't be used during transform
-    DisableDuringTransfom   = 0x10);
+    DisableDuringTransfom   = 0x10,
+
+    // Can be searched by the various find methods
+    Searchable              = 0x20);
 
 class IGraphComponent;
 
@@ -114,9 +117,6 @@ public:
     };
 
     virtual std::vector<SharedValue> sharedValues() const = 0;
-
-    virtual bool searchable() const = 0;
-    virtual IAttribute& setSearchable(bool searchable) = 0;
 
     virtual bool userDefined() const = 0;
     virtual IAttribute& setUserDefined(bool userDefined) = 0;

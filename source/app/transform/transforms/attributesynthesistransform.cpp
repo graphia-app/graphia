@@ -73,7 +73,7 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
         case TypeIdentity::Type::Unknown:
             attribute.setStringValueFn([newValues](E elementId) { return newValues[elementId]; })
                 .setFlag(AttributeFlag::FindShared)
-                .setSearchable(true);
+                .setFlag(AttributeFlag::Searchable);
             break;
 
         case TypeIdentity::Type::Int:

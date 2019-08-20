@@ -84,7 +84,7 @@ public:
             const auto& userDataVectorName = name;
 
             auto& attribute = graphModel.createAttribute(userDataVectorName)
-                    .setSearchable(true)
+                    .setFlag(AttributeFlag::Searchable)
                     .setUserDefined(true);
 
             switch(userDataVector.type())

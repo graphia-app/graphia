@@ -121,7 +121,6 @@ private:
         std::vector<SharedValue> _sharedValues;
 
         Flags<AttributeFlag> flags = AttributeFlag::None;
-        bool searchable = false;
 
         // Set if the attribute is derived from user data, i.e. not calculated
         bool userDefined = false;
@@ -482,9 +481,6 @@ public:
     Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
 
     std::vector<SharedValue> sharedValues() const override { return _._sharedValues; }
-
-    bool searchable() const override { return _.searchable; }
-    Attribute& setSearchable(bool searchable) override { _.searchable = searchable; return *this; }
 
     bool userDefined() const override { return _.userDefined; }
     IAttribute& setUserDefined(bool userDefined) override { _.userDefined = userDefined; return *this; }
