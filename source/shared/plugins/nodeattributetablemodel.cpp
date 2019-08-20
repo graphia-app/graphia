@@ -73,9 +73,8 @@ int NodeAttributeTableModel::columnIndexForAttributeValue(QString attributeValue
     return columnNames().indexOf(attributeValue);
 }
 
-QVariant NodeAttributeTableModel::dataValue(int row, const QString& attributeName) const
+QVariant NodeAttributeTableModel::dataValue(int row, const IAttribute* attribute) const
 {
-    auto* attribute = _document->graphModel()->attributeByName(attributeName);
     if(attribute != nullptr && attribute->isValid())
     {
         auto nodeId = _userNodeData->elementIdForIndex(row);
@@ -126,6 +125,7 @@ void NodeAttributeTableModel::updateColumn(int role, const QString& attributeNam
 {
     column.resize(rowCount());
 
+    const auto* attribute = _document->graphModel()->attributeByName(attributeName);
     for(int row = 0; row < rowCount(); row++)
     {
         NodeId nodeId = _userNodeData->elementIdForIndex(row);
@@ -144,7 +144,7 @@ void NodeAttributeTableModel::updateColumn(int role, const QString& attributeNam
         else if(role == Roles::NodeSelectedRole)
             column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
         else
-            column[row] = dataValue(row, attributeName);
+            column[row] = dataValue(row, attribute);
     }
 }
 

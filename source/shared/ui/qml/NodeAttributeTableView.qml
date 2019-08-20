@@ -158,14 +158,14 @@ Item
         Utils.cloneMenu(menu, contextMenu);
     }
 
-//    Label
-//    {
-//        text: qsTr("No Visible Columns")
-//        visible: tableView.numVisibleColumns <= 0
+    Label
+    {
+        text: qsTr("No Visible Columns")
+        visible: tableView.numVisibleColumns <= 0
 
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.verticalCenter: parent.verticalCenter
-//    }
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+    }
 
     Preferences
     {
@@ -317,9 +317,9 @@ Item
     TableView
     {
         id: tableView
+        clip: true
         property var currentColumnWidths: []
         property var columnWidths: []
-        clip: true
         QQC2.ScrollBar.vertical: QQC2.ScrollBar
         {
             z: 100
@@ -331,6 +331,11 @@ Item
                     radius: width / 2
                     color: sysPalette.dark
             }
+        }
+
+        QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+        {
+            id: horizontalTableViewScrollBar
         }
 
         function forceLayoutSafe()
@@ -358,10 +363,6 @@ Item
             return tableItem;
         }
 
-        QQC2.ScrollBar.horizontal: QQC2.ScrollBar
-        {
-            id: horizontalTableViewScrollBar
-        }
         model: TableProxyModel
         {
             id: proxyModel
@@ -398,6 +399,7 @@ Item
                 model: tableView.columns > 0 ? tableView.columns : 1
                 QQC2.Label
                 {
+                    property var labelWidth: contentWidth + padding + padding;
                     Rectangle
                     {
                         anchors.right: parent.right
@@ -405,14 +407,15 @@ Item
                         width: 1
                         color: sysPalette.midlight
                     }
-
-                    property var labelWidth: contentWidth + padding + padding;
+                    elide: Text.ElideRight
+                    maximumLineCount: 1
                     width: defaultColumnWidth
                     text: root._nodeAttributesTableModel.columnHeaders(modelData)
                     color: sysPalette.text
                     font.pixelSize: 11
                     padding: 4
                     background:  Rectangle { color: "white" }
+                    renderType: Text.NativeRendering
                 }
             }
         }
@@ -421,8 +424,8 @@ Item
             z: 1
             x: 0
             y: tableView.contentY
-            height: columnsHeader.height
-            width: parent.width
+            height: columnsHeader.implicitHeight
+            width: tableView.width
             color: "white"
         }
 
@@ -477,6 +480,7 @@ Item
                 {
                     id: label
                     objectName: "label"
+                    elide: Text.ElideRight
                     width: parent.width
                     anchors.left: parent.left
                     anchors.right: parent.right

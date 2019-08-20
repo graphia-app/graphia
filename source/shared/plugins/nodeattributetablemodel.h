@@ -48,7 +48,7 @@ private:
 
 protected:
     virtual QStringList columnNames() const;
-    virtual QVariant dataValue(int row, const QString& attributeName) const;
+    virtual QVariant dataValue(int row, const IAttribute* attributeName) const;
 
     int columnIndexForAttributeValue(QString attributeValue);
 private:
