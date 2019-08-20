@@ -303,7 +303,7 @@ Rectangle
         [
             ValueFilter
             {
-                enabled: _type === Find.Advanced
+                enabled: _type === Find.Advanced || _type === Find.ByAttribute
                 roleName: "searchable"
                 value: true
             },
