@@ -27,15 +27,44 @@ Item
 
     // Internal name
     property var _nodeAttributesTableModel
+
     function resizeColumnsToContents()
     {
-        tableView.currentColumnWidths = tableView.columnWidths;
+        // Resizing columns to contents is difficult with TableView2. The solution here
+        // is to connect the tableview delegates to a signal so they report their implicitWidths
+        // when the fetchColumnSizes signal is emitted. This will only fetch the sizes for the delegates
+        // currently on screen. We store previous widths calculated in the currentColumnWidths array
+        // and partially update them each time this function is called to best-guess offscreen columns
+        tableView.fetchColumnSizes();
+        if(tableView.columnWidths.length > 0)
+        {
+            // Update array
+            for(let i=0; i<tableView.columns; i++)
+            {
+                let newValue = tableView.columnWidths[i];
+                if(newValue !== undefined)
+                  tableView.currentColumnWidths[i] = newValue;
+            }
+
+            tableView.columnWidths = []
+        }
+        // We update the property target width here to stop the columns constantly
+        // adjusting due to the columnWidthProvider binding to tableView.width
+        tableView.targetTotalColumnWidth = tableView.width;
+
+        tableView.currentTotalColumnWidth = 0;
         for(let i=0; i<tableView.columns; i++)
         {
-            var storedWidth = tableView.currentColumnWidths[i];
-            var columnHeader = columnHeaderRepeater.itemAt(i);
-            columnHeader.width = Math.max(storedWidth, columnHeader.labelWidth)
+            var tempCalculatedWidth = tableView.calculateMinimumColumnWidth(i);
+            tableView.currentTotalColumnWidth += tempCalculatedWidth;
         }
+
+        for(let i=0; i<tableView.columns; i++)
+        {
+            var columnHeader = columnHeaderRepeater.itemAt(i);
+            columnHeader.width = tableView.columnWidthProvider(i);
+        }
+
         tableView.forceLayoutSafe();
     }
 
@@ -317,9 +346,18 @@ Item
     TableView
     {
         id: tableView
-        clip: true
         property var currentColumnWidths: []
+        property var currentTotalColumnWidth: 0
+        property var targetTotalColumnWidth: 0
         property var columnWidths: []
+        signal fetchColumnSizes;
+
+        clip: true
+        interactive: false
+        visible: true
+        anchors.fill: parent
+        topMargin: columnsHeader.implicitHeight
+
         QQC2.ScrollBar.vertical: QQC2.ScrollBar
         {
             z: 100
@@ -336,6 +374,26 @@ Item
         QQC2.ScrollBar.horizontal: QQC2.ScrollBar
         {
             id: horizontalTableViewScrollBar
+        }
+
+        model: TableProxyModel
+        {
+            id: proxyModel
+            sourceModel: root._nodeAttributesTableModel
+        }
+
+        columnWidthProvider: function(col)
+        {
+            var calculatedWidth = calculateMinimumColumnWidth(col);
+
+            // Scale columns to fill the width of the view if the totalMinimi
+            if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
+            {
+                let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
+                return scaledWidth;
+            }
+
+            return calculatedWidth;
         }
 
         function forceLayoutSafe()
@@ -363,29 +421,13 @@ Item
             return tableItem;
         }
 
-        model: TableProxyModel
-        {
-            id: proxyModel
-            sourceModel: root._nodeAttributesTableModel
-        }
-        interactive: false
-
-        visible: true
-        anchors.fill: parent
-
-        topMargin: columnsHeader.implicitHeight
-
-        rowHeightProvider: function(row)
-        {
-            return -1;
-        }
-
-        columnWidthProvider: function(col)
+        function calculateMinimumColumnWidth(col)
         {
             var delegateWidth = tableView.currentColumnWidths[col];
             if(delegateWidth === undefined)
-                return defaultColumnWidth;
-            return Math.max(delegateWidth, columnHeaderRepeater.itemAt(col).labelWidth);
+                return Math.max(defaultColumnWidth, columnHeaderRepeater.itemAt(col).labelWidth);
+            else
+                return Math.max(delegateWidth, columnHeaderRepeater.itemAt(col).labelWidth);
         }
 
         Row
@@ -407,9 +449,9 @@ Item
                         width: 1
                         color: sysPalette.midlight
                     }
-                    elide: Text.ElideRight
+                    //elide: Text.ElideRight
                     maximumLineCount: 1
-                    width: defaultColumnWidth
+                    width: Math.max(defaultColumnWidth, labelWidth);
                     text: root._nodeAttributesTableModel.columnHeaders(modelData)
                     color: sysPalette.text
                     font.pixelSize: 11
@@ -440,13 +482,23 @@ Item
 
             TableView.onReused:
             {
-                updateColumnWidths()
+                tableView.fetchColumnSizes.connect(updateColumnWidths)
             }
 
-            Component.onCompleted: updateColumnWidths()
+            TableView.onPooled:
+            {
+                tableView.fetchColumnSizes.disconnect(updateColumnWidths)
+            }
+
+            Component.onCompleted:
+            {
+                tableView.fetchColumnSizes.connect(updateColumnWidths)
+            }
 
             function updateColumnWidths()
             {
+                if(modelIndex === undefined)
+                    return;
                 var storedWidth = tableView.columnWidths[modelColumn];
                 if(storedWidth !== undefined)
                     tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
@@ -505,7 +557,6 @@ Item
                 proxyModel.invalidateFilter();
                 selectRows(0, proxyModel.rowCount() - 1);
                 verticalTableViewScrollBar.position = 0;
-                tableView.columnWidths = new Array(tableView.columns).fill(0);
             }
         }
 
@@ -514,6 +565,8 @@ Item
             tableView._resetSortFilterProxyModel();
 
             populateTableMenu(tableView._tableMenu);
+
+            root.resizeColumnsToContents();
         }
 
         //selectionMode: SelectionMode.ExtendedSelection
@@ -527,10 +580,10 @@ Item
         id: effectSource
         visible: columnSelectionMode
 
-        x: tableView.contentItem.x + 1
-        y: tableView.contentItem.y + 10 + 1
+        x: tableView.contentItem.x
+        y: tableView.contentItem.y
         width: tableView.contentItem.width
-        height: tableView.contentItem.height - 10
+        height: tableView.contentItem.height
 
         sourceItem: tableView
         sourceRect: Qt.rect(x, y, width, height)
@@ -549,7 +602,7 @@ Item
         clip: true
 
         anchors.fill: tableView
-        anchors.topMargin: 10 + 1
+        anchors.topMargin: columnsHeader.implicitHeight
 
         SlidingPanel
         {
