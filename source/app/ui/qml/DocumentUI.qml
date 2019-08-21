@@ -1192,6 +1192,7 @@ Item
             id: pluginContainer
             visible: plugin.loaded && !root.pluginPoppedOut
 
+            spacing: 0
             Layout.fillWidth: true
 
             ToolBar
