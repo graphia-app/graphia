@@ -47,9 +47,13 @@ PluginContent
     {
         RowLayout
         {
+            anchors.fill: parent
+
             ToolButton { action: resizeColumnsToContentsAction }
             ToolButton { action: selectColumnsAction }
             ToolButton { action: tableView.exportAction }
+
+            Item { Layout.fillWidth: true }
         }
     }
 

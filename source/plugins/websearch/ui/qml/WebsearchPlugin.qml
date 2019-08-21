@@ -13,8 +13,7 @@ PluginContent
 
     toolStrip: RowLayout
     {
-        anchors.left: parent ? parent.left : undefined
-        anchors.right: parent ? parent.right : undefined
+        anchors.fill: parent
 
         ComboBox
         {

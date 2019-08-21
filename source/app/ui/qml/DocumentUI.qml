@@ -1198,7 +1198,6 @@ Item
             ToolBar
             {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
 
                 RowLayout
                 {
@@ -1211,7 +1210,7 @@ Item
                         id: pluginContainerToolStrip
                         enabled: !root.pluginMinimised && !root.busy
                         Layout.fillWidth: true
-                        Layout.preferredHeight: childrenRect.height
+                        Layout.fillHeight: true
                     }
 
                     RowLayout
