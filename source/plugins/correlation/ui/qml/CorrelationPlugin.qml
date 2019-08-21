@@ -493,6 +493,8 @@ PluginContent
     {
         RowLayout
         {
+            anchors.fill: parent
+
             ToolButton { action: toggleUiOrientationAction }
             ToolBarSeparator {}
             ToolButton { action: resizeColumnsToContentsAction }
@@ -505,6 +507,8 @@ PluginContent
                 visible: plugin.model.columnAnnotations.length > 0
                 action: selectColumnAnnotationsAction
             }
+
+            Item { Layout.fillWidth: true }
         }
     }
 
