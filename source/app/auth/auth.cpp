@@ -3,6 +3,8 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/string.h"
 
+#include "../crashhandler.h"
+
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -367,6 +369,9 @@ void Auth::onReplyReceived()
                 emit messageChanged();
             }
         }
+
+        if(_reply != nullptr && _reply->errorString().startsWith("TLS"))
+            S(CrashHandler)->submitMinidump(_reply->errorString());
 
         emit busyChanged();
     }
