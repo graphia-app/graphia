@@ -27,25 +27,33 @@
 
 #include <cwchar>
 
-static void launch(const wchar_t* program, const wchar_t* options, const wchar_t* dmpFile, const wchar_t* dir)
+static void launch(const wchar_t* program, const wchar_t** options, const wchar_t* dmpFile, const wchar_t* dir)
 {
     static STARTUPINFO si = {0};
     static PROCESS_INFORMATION pi = {0};
     si.cb = sizeof(si);
 
     static wchar_t commandLine[1024] = {0};
-    swprintf(commandLine, sizeof(commandLine) / sizeof(commandLine[0]),
-        L"%s %s %s %s", program, options, dmpFile, dir);
+    wcscat_s(commandLine, program);
+    wcscat_s(commandLine, L" ");
+    while(*options)
+    {
+        wcscat_s(commandLine, *options);
+        wcscat_s(commandLine, L" ");
+        options++;
+    }
+    wcscat_s(commandLine, dmpFile);
+    wcscat_s(commandLine, L" ");
+    wcscat_s(commandLine, dir);
 
     if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
-                      CREATE_DEFAULT_ERROR_MODE,
-                      nullptr, nullptr, &si, &pi))
+        CREATE_DEFAULT_ERROR_MODE, nullptr, nullptr, &si, &pi))
     {
         std::cerr << "CreateProcess failed (" << GetLastError() << ")\n";
     }
 }
 #else
-static void launch(const char* program, const char* options, const char* dmpFile, const char* dir)
+static void launch(const char* program, const char** options, const char* dmpFile, const char* dir)
 {
     pid_t pid = fork();
 
@@ -56,13 +64,32 @@ static void launch(const char* program, const char* options, const char* dmpFile
         exit(1);
 
     case 0: // Child
-        if(!options || !*options)
-            execl(program, program, dmpFile, dir, static_cast<char*>(nullptr));
+    {
+        const platform_char* args[64] = {0};
+        int i = 0;
 
-        execl(program, program, options, dmpFile, dir, static_cast<char*>(nullptr));
+        auto addArg = [&](const auto* arg)
+        {
+            if(i < (sizeof(args) / sizeof(args[0])))
+                args[i++] = arg;
+        };
 
-        std::cerr << "execl() failed\n";
+        addArg(program);
+
+        while(*options)
+        {
+            addArg(*options);
+            options++;
+        }
+
+        addArg(dmpFile);
+        addArg(dir);
+
+        execv(program, const_cast<platform_char* const*>(args));
+
+        std::cerr << "execv() failed\n";
         exit(1);
+    }
 
     default: // Parent
         ;
@@ -81,9 +108,33 @@ static bool minidumpCallback(
 )
 {
     // static to avoid stack allocation
-    static platform_char options[1024] = {0};
     static platform_char path[1024] = {0};
     static platform_char dir[1024] = {0};
+
+    static platform_char options[1024] = {0};
+    static platform_char* optionsArray[32] = {0};
+
+    auto addOption = [&, p = &options[0], i = 0](const platform_char* option) mutable
+    {
+        const auto used = p - options;
+        const auto optionsSize = sizeof(options) / sizeof(options[0]);
+        const auto remaining = optionsSize - used;
+
+        if(used >= optionsSize)
+            return;
+
+        *p = '\0';
+
+#ifdef Q_OS_WIN
+        wcscat_s(p, remaining, option);
+        optionsArray[i++] = p;
+        p += wcslen(p) + 1;
+#else
+        strncat(p, option, remaining - 1);
+        optionsArray[i++] = p;
+        p += strlen(p) + 1;
+#endif
+    };
 
     std::cerr << "Handling crash...\n";
 
@@ -97,25 +148,20 @@ static bool minidumpCallback(
             // https://blogs.msdn.microsoft.com/oldnewthing/20100730-00/?p=13273/
 
             auto exceptionTypeName = exceptionRecordType(ex_info->ExceptionRecord);
-            if(exceptionTypeName != nullptr)
+            static wchar_t exceptionTypeName_wchar[1024];
+            if(exceptionTypeName != nullptr && mbstowcs_s(nullptr, exceptionTypeName_wchar,
+                exceptionTypeName, strlen(exceptionTypeName)) == 0)
             {
-                wchar_t exceptionTypeName_wchar[1024];
-
-                auto error = mbstowcs_s(nullptr, exceptionTypeName_wchar,
-                    exceptionTypeName, strlen(exceptionTypeName));
-                if(error == 0)
-                {
-                    swprintf(options, sizeof(options) / sizeof(options[0]),
-                        L"-submit -description \"An uncaught exception was thrown of type '%s'.\"",
-                        exceptionTypeName_wchar);
-                }
+                addOption(L"-submit");
+                addOption(L"-description");
+                addOption(QString("\"An uncaught exception was thrown of type '%1'.\"")
+                    .arg(exceptionTypeName_wchar).toStdWString().c_str());
             }
-
-            if(options[0] == 0)
+            else
             {
                 // If we weren't able to determine the exception type,
                 // we still want to silently submit
-                wcscat_s(options, L"-submit");
+                addOption(L"-submit");
             }
         }
         else
@@ -178,6 +224,19 @@ static bool minidumpCallback(
     strncat(path, ".dmp", sizeof(path) - 1);
 #endif
 
+    if(!exceptionHandler->reason().isEmpty())
+    {
+#ifdef Q_OS_WIN
+        addOption(L"-submit");
+        addOption(L"-description");
+        addOption(QString("\"%1\"").arg(exceptionHandler->reason()).toStdWString().c_str());
+#else
+        addOption("-submit");
+        addOption("-description");
+        addOption(exceptionHandler->reason().toStdString().c_str());
+#endif
+    }
+
 #ifdef Q_OS_WIN
     std::wcerr
 #else
@@ -185,7 +244,7 @@ static bool minidumpCallback(
 #endif
         << "Starting " << exe << " " << path << " " << dir << std::endl;
 
-    launch(exe, options, path, dir);
+    launch(exe, const_cast<const platform_char**>(&optionsArray[0]), path, dir);
 
     // Do not pass on the exception
     return true;
@@ -226,21 +285,19 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
     }
 
     strncpy(_crashReporterExecutableName,
-            static_cast<const char*>(crashReporterExecutableName.toLatin1()),
-            sizeof(_crashReporterExecutableName) - 1);
+        static_cast<const char*>(crashReporterExecutableName.toLatin1()),
+        sizeof(_crashReporterExecutableName) - 1);
 
 #if defined(Q_OS_LINUX)
 
     google_breakpad::MinidumpDescriptor md(path.toStdString());
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
-                md, nullptr,
-                minidumpCallback, this, true, -1);
+        md, nullptr, minidumpCallback, this, true, -1);
 
 #elif defined(Q_OS_MACOS)
 
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
-                path.toStdString(), nullptr,
-                minidumpCallback, this, true, nullptr);
+        path.toStdString(), nullptr, minidumpCallback, this, true, nullptr);
 
 #endif
 #endif
@@ -249,3 +306,13 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
 }
 
 CrashHandler::~CrashHandler() {}
+
+void CrashHandler::submitMinidump(const QString& reason)
+{
+    if(_handler == nullptr)
+        return;
+
+    _reason = reason;
+    _handler->WriteMinidump();
+    _reason.clear();
+}
