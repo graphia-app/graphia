@@ -176,40 +176,56 @@ static void uploadReport(const QString& email, const QString& text,
     QUrl url(QStringLiteral("https://crashreports.kajeka.com/"));
     QNetworkRequest request(url);
 
-    QNetworkAccessManager manager;
-    QNetworkReply* reply = manager.post(request, multiPart);
-    multiPart->setParent(reply);
-
-    QTimer timer;
-    timer.setSingleShot(true);
-
-    // Need a QEventLoop to drive upload
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    timer.start(60000);
-    loop.exec();
-
-    if(timer.isActive())
+    auto doUpload = [&]
     {
-        timer.stop();
+        QNetworkAccessManager manager;
+        QNetworkReply* reply = manager.post(request, multiPart);
 
-        if(reply->error() > 0)
+        QTimer timer;
+        timer.setSingleShot(true);
+
+        // Need a QEventLoop to drive upload
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        timer.start(60000);
+        loop.exec();
+
+        if(timer.isActive())
         {
-            QMessageBox::warning(nullptr, QApplication::applicationName(),
-                                 QObject::tr("There was an error while uploading the crash "
-                                             "report:\n%1").arg(reply->errorString()),
-                                 QMessageBox::Close);
+            timer.stop();
+
+            if(reply->error() > 0)
+            {
+                if(reply->error() == QNetworkReply::SslHandshakeFailedError)
+                    return QStringLiteral("TLS SslHandshakeFailedError");
+
+                return reply->errorString();
+            }
         }
-    }
-    else
+        else
+        {
+            QObject::disconnect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+            reply->abort();
+            return QObject::tr("Timeout");
+        }
+
+        return QString();
+    };
+
+    auto errorString = doUpload();
+    if(errorString.startsWith("TLS"))
     {
-        QObject::disconnect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-        reply->abort();
+        // https failed, so fallback to http
+        request.setUrl(QStringLiteral("http://crashreports.kajeka.com/"));
+        errorString = doUpload();
+    }
+
+    if(!errorString.isEmpty())
+    {
         QMessageBox::warning(nullptr, QApplication::applicationName(),
-                             QObject::tr("Timed out while uploading the crash report. "
-                                         "Please check your internet connection."),
-                             QMessageBox::Close);
+            QObject::tr("There was an error while uploading the crash report:\n%1")
+            .arg(errorString), QMessageBox::Close);
     }
 
     delete multiPart;
