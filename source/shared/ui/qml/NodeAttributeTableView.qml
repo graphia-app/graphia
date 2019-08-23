@@ -69,7 +69,6 @@ Item
     }
 
     property var hiddenColumns: []
-    onHiddenColumnsChanged: { tableView._updateColumnVisibility(); }
 
     readonly property string sortRoleName:
     {
@@ -85,14 +84,19 @@ Item
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
     {
+        let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
+
         if(columnSelectionMode)
         {
             _sortEnabled = false;
+            columnHeaderRepeater.model = indexArray;
             columnSelectionControls.show();
         }
         else
         {
             columnSelectionControls.hide();
+            columnHeaderRepeater.model = indexArray.filter(
+                        (value, index) => hiddenColumns.indexOf(value) === -1)
             _sortEnabled = true;
         }
 
@@ -118,12 +122,12 @@ Item
 
     signal visibleRowsChanged();
 
-    function setColumnVisibility(columnName, columnVisible)
+    function setColumnVisibility(sourceColumnIndex, columnVisible)
     {
         if(columnVisible)
-            hiddenColumns = Utils.setRemove(hiddenColumns, columnName);
+            hiddenColumns = Utils.setRemove(hiddenColumns, sourceColumnIndex);
         else
-            hiddenColumns = Utils.setAdd(hiddenColumns, columnName);
+            hiddenColumns = Utils.setAdd(hiddenColumns, sourceColumnIndex);
     }
 
     function showAllColumns()
@@ -134,10 +138,11 @@ Item
     function showAllCalculatedColumns()
     {
         var columns = hiddenColumns;
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        hiddenColumns = [];
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
         {
             if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
-                columns = Utils.setRemove(columns, columnName);
+                columns = Utils.setRemove(columns, index);
         });
 
         hiddenColumns = columns;
@@ -145,22 +150,18 @@ Item
 
     function hideAllColumns()
     {
-        var columns = [];
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
-        {
-            columns.push(columnName);
-        });
-
+        var columns = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
         hiddenColumns = columns;
     }
 
     function hideAllCalculatedColumns()
     {
         var columns = hiddenColumns;
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        hiddenColumns = [];
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
         {
             if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
-                columns = Utils.setAdd(columns, columnName);
+                columns = Utils.setAdd(columns, index);
         });
 
         hiddenColumns = columns;
@@ -190,7 +191,7 @@ Item
     Label
     {
         text: qsTr("No Visible Columns")
-        visible: tableView.numVisibleColumns <= 0
+        visible: tableView.columns <= 0
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
@@ -278,25 +279,28 @@ Item
         property var previousRow: -1
         property var startRow: -1
         property var endRow: -1
+        property var offsetMouseY: mouseY + anchors.topMargin
+        anchors.topMargin: columnsHeader.implicitHeight
         anchors.fill: parent
         anchors.rightMargin: verticalTableViewScrollBar.width
         anchors.bottomMargin: horizontalTableViewScrollBar.height
         z: 3
         hoverEnabled: true
+        visible: !columnSelectionMode
 
         onDoubleClicked:
         {
-            var tableItem = tableView.getItem(mouseX, mouseY);
-            if(tableItem === false)
+            var tableItem = tableView.getItem(mouseX, offsetMouseY);
+            if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                 return;
-            var mappedRow = proxyModel.mapToSource(tableItem.modelRow);
+            var mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
             root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
         }
 
         onPressed:
         {
-            var tableItem = tableView.getItem(mouseX, mouseY);
-            if(tableItem === false)
+            var tableItem = tableView.getItem(mouseX, offsetMouseY);
+            if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                 return;
             startRow = tableItem.modelRow;
 
@@ -328,7 +332,7 @@ Item
         {
             if(mouse.buttons == 1)
             {
-                var tableItem = tableView.getItem(mouseX, mouseY);
+                var tableItem = tableView.getItem(mouseX, offsetMouseY);
                 if(tableItem && tableItem.modelRow !== previousRow)
                 {
                     if(previousRow != -1)
@@ -357,6 +361,7 @@ Item
         visible: true
         anchors.fill: parent
         topMargin: columnsHeader.implicitHeight
+        onTopMarginChanged: tableView.forceLayoutSafe();
 
         QQC2.ScrollBar.vertical: QQC2.ScrollBar
         {
@@ -398,7 +403,7 @@ Item
 
         function forceLayoutSafe()
         {
-            if(tableView.rows > 0)
+            if(tableView.rows > 0 && tableView.columns > 0)
                 tableView.forceLayout();
         }
 
@@ -438,26 +443,60 @@ Item
             Repeater
             {
                 id: columnHeaderRepeater
-                model: tableView.columns > 0 ? tableView.columns : 1
-                QQC2.Label
+                model: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
+                Item
                 {
-                    property var labelWidth: contentWidth + padding + padding;
-                    Rectangle
+                    width: Math.max(defaultColumnWidth, labelWidth)
+                    height: headerLabel.height
+                    property var labelWidth: headerLabel.contentWidth + headerLabel.padding + headerLabel.padding;
+                    CheckBox
                     {
-                        anchors.right: parent.right
-                        height: parent.height
-                        width: 1
-                        color: sysPalette.midlight
+                        id: checkbox
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: columnSelectionMode
+                        text: root._nodeAttributesTableModel.columnNames[modelData]
+                        height: headerLabel.height
+
+                        function isChecked()
+                        {
+                            return !Utils.setContains(root.hiddenColumns, modelData);
+                        }
+                        checked: { return isChecked(); }
+                        onCheckedChanged: {
+                            // Unbind to prevent binding loop
+                            checked = checked;
+                            root.setColumnVisibility(modelData, checked);
+
+                            // Rebind so that the delegate doesn't hold the state
+                            checked = Qt.binding(isChecked);
+                        }
                     }
-                    //elide: Text.ElideRight
-                    maximumLineCount: 1
-                    width: Math.max(defaultColumnWidth, labelWidth);
-                    text: root._nodeAttributesTableModel.columnHeaders(modelData)
-                    color: sysPalette.text
-                    font.pixelSize: 11
-                    padding: 4
-                    background:  Rectangle { color: "white" }
-                    renderType: Text.NativeRendering
+                    QQC2.Label
+                    {
+                        id: headerLabel
+                        visible: !columnSelectionMode
+                        Rectangle
+                        {
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 1
+                            color: sysPalette.midlight
+                        }
+                        //elide: Text.ElideRight
+                        maximumLineCount: 1
+                        width: parent.width;
+                        text: root._nodeAttributesTableModel.columnNames[modelData]
+                        color: sysPalette.text
+                        font.pixelSize: 11
+                        padding: 4
+                        background:  Rectangle { color: "white" }
+                        renderType: Text.NativeRendering
+                    }
+                }
+                onItemAdded:
+                {
+                    tableView.forceLayoutSafe();
                 }
             }
         }
@@ -479,6 +518,10 @@ Item
             implicitHeight: Math.max(16, label.implicitHeight)
             implicitWidth: label.implicitWidth + 16
             clip: true
+
+            property var modelColumn: model.column
+            property var modelRow: model.row
+            property var modelIndex: model.index
 
             TableView.onReused:
             {
@@ -505,11 +548,6 @@ Item
                 else
                     tableView.columnWidths[modelColumn] = implicitWidth;
             }
-
-
-            property var modelColumn: model.column
-            property var modelRow: model.row
-            property var modelIndex: model.index
 
             SystemPalette { id: systemPalette }
 
@@ -542,11 +580,33 @@ Item
 
                     text:
                     {
+                        let columnName = root._nodeAttributesTableModel.columnHeaders(modelColumn);
+                        if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
+                            return QmlUtils.formatNumberScientific(model.display, 1);
                         return model.display;
                     }
                     renderType: Text.NativeRendering
                 }
             }
+        }
+
+        function _updateColumnVisibility()
+        {
+            if(root.columnSelectionMode)
+                proxyModel.hiddenColumns = [];
+            else
+                proxyModel.hiddenColumns = hiddenColumns;
+        }
+
+        //sortIndicatorVisible: true
+
+        function _resetSortFilterProxyModel()
+        {
+            // For reasons not fully understood, we seem to require the TableView's model to be
+            // recreated whenever it has a structural change, otherwise the view and the model
+            // get out of sync in exciting and unpredictable ways; hopefully we can get to the
+            // bottom of this when we transition to the new TableView component
+            //tableView.model = root._nodeAttributesTableModel;
         }
 
         Connections
@@ -580,10 +640,10 @@ Item
         id: effectSource
         visible: columnSelectionMode
 
-        x: tableView.contentItem.x
-        y: tableView.contentItem.y
-        width: tableView.contentItem.width
-        height: tableView.contentItem.height
+        x: tableView.x
+        y: tableView.y + tableView.topMargin
+        width: tableView.width
+        height: tableView.height
 
         sourceItem: tableView
         sourceRect: Qt.rect(x, y, width, height)

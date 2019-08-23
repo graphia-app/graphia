@@ -387,6 +387,7 @@ void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
     buildColumnAnnotations();
+    _nodeAttributeTableModel.updateColumnNames();
 }
 
 QVector<double> CorrelationPluginInstance::rawData()

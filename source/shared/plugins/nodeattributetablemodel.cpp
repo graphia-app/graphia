@@ -70,7 +70,7 @@ QStringList NodeAttributeTableModel::columnNames() const
 
 int NodeAttributeTableModel::columnIndexForAttributeValue(QString attributeValue)
 {
-    return columnNames().indexOf(attributeValue);
+    return _columnNames.indexOf(attributeValue);
 }
 
 QVariant NodeAttributeTableModel::dataValue(int row, const IAttribute* attribute) const
@@ -105,6 +105,8 @@ void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
 void NodeAttributeTableModel::updateColumnNames()
 {
     _columnNames = columnNames();
+    qDebug() << "Column Names Length" << _columnNames.length();
+    emit columnNamesChanged();
 }
 
 void NodeAttributeTableModel::updateRole(const QString& attributeName)
@@ -158,7 +160,7 @@ void NodeAttributeTableModel::update()
     updateColumn(Roles::NodeIdRole, "", _nodeIdColumn);
 
     int i = 0;
-    for(auto columnName : columnNames())
+    for(auto columnName : _columnNames)
     {
         _pendingData.emplace_back(i++);
         updateColumn(Qt::DisplayRole, columnName, _pendingData.back());
@@ -299,6 +301,8 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         emit columnRemoved(columnIndex, name);
     }
 
+    updateColumnNames();
+
     for(const auto& name : added)
     {
         auto attribute = _document->graphModel()->attributeByName(name);
@@ -312,6 +316,8 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         onColumnAdded(columnIndex);
         emit columnAdded(columnIndex, name);
     }
+
+    updateColumnNames();
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
@@ -335,7 +341,7 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return _userNodeData->numUserDataVectors();
+    return _columnNames.size();
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const

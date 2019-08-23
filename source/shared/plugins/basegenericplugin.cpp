@@ -149,6 +149,7 @@ void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
     _userEdgeData.exposeAsAttributes(*graphModel());
+    _nodeAttributeTableModel.updateColumnNames();
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)

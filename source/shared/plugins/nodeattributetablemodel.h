@@ -54,7 +54,6 @@ protected:
 private:
     void onColumnAdded(int columnIndex);
     void onColumnRemoved(int columnIndex);
-    void updateColumnNames();
     void updateRole(const QString& attributeName);
     void updateColumn(int role, const QString& attributeName, Column& column);
     void update();
@@ -90,6 +89,7 @@ public:
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE virtual bool rowVisible(size_t row) const;
     Q_INVOKABLE virtual QString columnHeaders(size_t column) const;
+    void updateColumnNames();
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);

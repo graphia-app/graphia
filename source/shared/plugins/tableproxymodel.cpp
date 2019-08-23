@@ -8,6 +8,12 @@ bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
                                NodeAttributeTableModel::Roles::NodeSelectedRole).toBool();
 }
 
+bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const
+{
+    return !_hiddenColumns.contains(sourceColumn);
+}
+
+
 QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 {
     if(role == SubSelectedRole)
@@ -31,11 +37,31 @@ QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bott
     return QItemSelectionRange(index(topRow, 0), index(bottomRow, columnCount() - 1));
 }
 
-int TableProxyModel::mapToSource(int proxyRow) const
+int TableProxyModel::mapToSourceRow(int proxyRow) const
 {
     QModelIndex proxyIndex = index(proxyRow, 0);
     QModelIndex sourceIndex = mapToSource(proxyIndex);
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
+}
+
+int TableProxyModel::mapToSourceColumn(int proxyColumn) const
+{
+    QModelIndex proxyIndex = index(0, proxyColumn);
+    if(rowCount() > 0)
+    {
+        QModelIndex sourceIndex = mapToSource(proxyIndex);
+        return sourceIndex.isValid() ? sourceIndex.column() : -1;
+    }
+    else
+    {
+       int indexShift = 0;
+       for(auto hiddenColumn : _hiddenColumns)
+       {
+           if(hiddenColumn < proxyColumn)
+               indexShift++;
+       }
+       return proxyColumn + indexShift;
+    }
 }
 
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
@@ -44,6 +70,12 @@ TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (paren
     connect(this, &QAbstractItemModel::rowsRemoved, this, &TableProxyModel::countChanged);
     connect(this, &QAbstractItemModel::modelReset, this, &TableProxyModel::countChanged);
     connect(this, &QAbstractItemModel::layoutChanged, this, &TableProxyModel::countChanged);
+}
+
+void TableProxyModel::setHiddenColumns(QList<int> hiddenColumns)
+{
+    _hiddenColumns = hiddenColumns;
+    invalidateFilter();
 }
 
 void TableProxyModel::invalidateFilter()
