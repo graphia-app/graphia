@@ -35,6 +35,7 @@ Item
         // when the fetchColumnSizes signal is emitted. This will only fetch the sizes for the delegates
         // currently on screen. We store previous widths calculated in the currentColumnWidths array
         // and partially update them each time this function is called to best-guess offscreen columns
+        tableView.userColumnWidths = [];
         tableView.fetchColumnSizes();
         if(tableView.columnWidths.length > 0)
         {
@@ -59,13 +60,17 @@ Item
             tableView.currentTotalColumnWidth += tempCalculatedWidth;
         }
 
-        for(let i=0; i<tableView.columns; i++)
+        resizeColumnHeaders();
+
+        tableView.forceLayoutSafe();
+    }
+    function resizeColumnHeaders()
+    {
+        for(let i=0; i<columnHeaderRepeater.count; i++)
         {
             var columnHeader = columnHeaderRepeater.itemAt(i);
             columnHeader.width = tableView.columnWidthProvider(i);
         }
-
-        tableView.forceLayoutSafe();
     }
 
     property var hiddenColumns: []
@@ -89,15 +94,17 @@ Item
         if(columnSelectionMode)
         {
             _sortEnabled = false;
-            columnHeaderRepeater.model = indexArray;
+            tableView.headerColumns = indexArray;
             columnSelectionControls.show();
         }
         else
         {
             columnSelectionControls.hide();
-            columnHeaderRepeater.model = indexArray.filter(
+            tableView.headerColumns = indexArray.filter(
                         (value, index) => hiddenColumns.indexOf(value) === -1)
             _sortEnabled = true;
+            resizeColumnHeaders();
+            tableView.forceLayoutSafe();
         }
 
         tableView._updateColumnVisibility();
@@ -350,10 +357,12 @@ Item
     TableView
     {
         id: tableView
+        property var userColumnWidths: []
         property var currentColumnWidths: []
         property var currentTotalColumnWidth: 0
         property var targetTotalColumnWidth: 0
         property var columnWidths: []
+        property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
         signal fetchColumnSizes;
 
         clip: true
@@ -389,13 +398,21 @@ Item
 
         columnWidthProvider: function(col)
         {
-            var calculatedWidth = calculateMinimumColumnWidth(col);
-
-            // Scale columns to fill the width of the view if the totalMinimi
-            if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
+            var calculatedWidth = 0;
+            var userWidth = userColumnWidths[headerColumns[col]];
+            // Use the user specified column width if available
+            if(userWidth !== undefined)
+                calculatedWidth = userWidth;
+            else
             {
-                let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
-                return scaledWidth;
+                calculatedWidth = calculateMinimumColumnWidth(col);
+
+                // Scale columns to fill the width of the view if the totalMinimimum is less than the view
+                if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
+                {
+                    let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
+                    return scaledWidth;
+                }
             }
 
             return calculatedWidth;
@@ -443,9 +460,10 @@ Item
             Repeater
             {
                 id: columnHeaderRepeater
-                model: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
+                model: tableView.headerColumns
                 Item
                 {
+                    id: headerItem
                     width: Math.max(defaultColumnWidth, labelWidth)
                     height: headerLabel.height
                     property var labelWidth: headerLabel.contentWidth + headerLabel.padding + headerLabel.padding;
@@ -476,12 +494,33 @@ Item
                     {
                         id: headerLabel
                         visible: !columnSelectionMode
+
                         Rectangle
                         {
                             anchors.right: parent.right
                             height: parent.height
                             width: 1
                             color: sysPalette.midlight
+                            MouseArea
+                            {
+                                property var tempWidth: 0
+                                cursorShape: Qt.SizeHorCursor
+                                width: 5
+                                height: parent.height
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                drag.target: parent
+                                drag.axis: Drag.XAxis
+
+                                onMouseXChanged:
+                                {
+                                    if(drag.active)
+                                    {
+                                        tableView.userColumnWidths[modelData] = Math.max(30, headerLabel.width + mouseX);
+                                        headerItem.width = tableView.userColumnWidths[modelData];
+                                        tableView.forceLayoutSafe();
+                                    }
+                                }
+                            }
                         }
                         //elide: Text.ElideRight
                         maximumLineCount: 1

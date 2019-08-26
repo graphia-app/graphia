@@ -44,26 +44,6 @@ int TableProxyModel::mapToSourceRow(int proxyRow) const
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
 }
 
-int TableProxyModel::mapToSourceColumn(int proxyColumn) const
-{
-    QModelIndex proxyIndex = index(0, proxyColumn);
-    if(rowCount() > 0)
-    {
-        QModelIndex sourceIndex = mapToSource(proxyIndex);
-        return sourceIndex.isValid() ? sourceIndex.column() : -1;
-    }
-    else
-    {
-       int indexShift = 0;
-       for(auto hiddenColumn : _hiddenColumns)
-       {
-           if(hiddenColumn < proxyColumn)
-               indexShift++;
-       }
-       return proxyColumn + indexShift;
-    }
-}
-
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
 {
     connect(this, &QAbstractItemModel::rowsInserted, this, &TableProxyModel::countChanged);
