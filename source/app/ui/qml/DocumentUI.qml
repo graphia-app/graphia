@@ -1282,7 +1282,7 @@ Item
         property real _lastUnminimisedHeight: 0
         onHeightChanged:
         {
-            if(!plugin.minimisingOrMinimised)
+            if(!plugin.minimisingOrMinimised || root.pluginPoppedOut)
                 _lastUnminimisedHeight = height;
         }
 
