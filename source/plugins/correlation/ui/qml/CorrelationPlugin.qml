@@ -86,16 +86,6 @@ PluginContent
 
     Action
     {
-        id: selectAllAction
-        text: qsTr("Select All")
-        iconName: "edit-select-all"
-        enabled: tableView.rowCount > 0
-
-        onTriggered: { tableView.selection.selectAll(); }
-    }
-
-    Action
-    {
         id: toggleGridLines
         text: qsTr("Grid Lines")
         checkable: true

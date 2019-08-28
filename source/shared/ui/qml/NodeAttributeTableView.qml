@@ -124,7 +124,6 @@ Item
         //tableView.sortIndicatorOrder = root.sortIndicatorOrder;
     }
 
-    //property alias selection: tableView.selection
     property alias viewport: tableView.childrenRect
 
     signal visibleRowsChanged();
@@ -189,10 +188,15 @@ Item
         menu.addItem("").action = selectColumnsAction;
         menu.addItem("").action = exportTableAction;
         menu.addSeparator();
-        menu.addItem("").action = selectAllAction;
+        menu.addItem("").action = selectAllTableAction;
 
         tableView._tableMenu = menu;
         Utils.cloneMenu(menu, contextMenu);
+    }
+
+    function selectAll()
+    {
+        selectRows(0, proxyModel.rowCount() - 1);
     }
 
     Label
@@ -223,7 +227,7 @@ Item
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            document.writeTableViewToFile(tableView, file, defaultSuffix);
+            document.writeTableView2ToFile(tableView, file, defaultSuffix);
         }
     }
 
@@ -232,7 +236,7 @@ Item
     Action
     {
         id: exportTableAction
-        enabled: tableView.rowCount > 0
+        enabled: tableView.rows > 0
         text: qsTr("Export…")
         iconName: "document-save"
         onTriggered:
@@ -242,6 +246,16 @@ Item
 
             exportTableDialog.open();
         }
+    }
+
+    Action
+    {
+        id: selectAllTableAction
+        text: qsTr("Select All")
+        iconName: "edit-select-all"
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.selectAll(); }
     }
 
     SystemPalette { id: sysPalette }
@@ -278,6 +292,7 @@ Item
 
     MouseArea
     {
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         ItemSelectionModel
         {
             id: selectionModel
@@ -302,6 +317,12 @@ Item
                 return;
             var mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
             root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
+        }
+
+        onClicked:
+        {
+            if(mouse.button == Qt.RightButton)
+                root.rightClick();
         }
 
         onPressed:
@@ -337,7 +358,7 @@ Item
         }
         onPositionChanged:
         {
-            if(mouse.buttons == 1)
+            if(mouse.buttons == Qt.LeftButton)
             {
                 var tableItem = tableView.getItem(mouseX, offsetMouseY);
                 if(tableItem && tableItem.modelRow !== previousRow)
@@ -416,6 +437,14 @@ Item
             }
 
             return calculatedWidth;
+        }
+
+        property var visibleColumnNames:
+        {
+            var columnNameList = [];
+            for(var i=0; i<tableView.headerColumns.length; i++)
+                columnNameList.push(root._nodeAttributesTableModel.columnNames[i])
+            return columnNameList;
         }
 
         function forceLayoutSafe()

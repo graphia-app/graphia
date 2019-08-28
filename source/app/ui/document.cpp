@@ -41,6 +41,7 @@
 #include "../crashhandler.h"
 
 #include <json_helper.h>
+#include <numeric>
 
 #include <QQmlProperty>
 #include <QMetaObject>
@@ -2293,6 +2294,105 @@ void Document::cancelCommand()
     }
     else
         _commandManager.cancel();
+}
+
+void Document::writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl, const QString& extension)
+{
+    auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columns")).toInt();
+    auto columnNames = QQmlProperty::read(tableView, QStringLiteral("visibleColumnNames")).toStringList();
+
+    QString localFileName = fileUrl.toLocalFile();
+    if(!QFile(localFileName).open(QIODevice::ReadWrite))
+    {
+        QMessageBox::critical(nullptr, tr("File Error"),
+            QString(tr("The file '%1' cannot be opened for writing. Please ensure "
+            "it is not open in another application and try again.")).arg(localFileName));
+        return;
+    }
+
+    _commandManager.executeOnce(
+    [=](Command&)
+    {
+        QFile file(localFileName);
+
+        if(!file.open(QIODevice::ReadWrite|QIODevice::Truncate))
+        {
+            // We should never get here normally, since this check has already been performed
+            qDebug() << "Can't open" << localFileName << "for writing.";
+            return;
+        }
+
+        auto csvEscapedString = [](const QString& string)
+        {
+            if(string.contains(QRegularExpression(QStringLiteral("[\",]"))))
+            {
+                QString escaped = string;
+
+                // Encode " as ""
+                escaped.replace(QLatin1String("\""), QLatin1String("\"\""));
+
+                return QStringLiteral("\"%1\"").arg(escaped);
+            }
+
+            return string;
+        };
+
+        auto tsvEscapedString = [](const QString& string)
+        {
+            QString escaped = string;
+
+            // "The IANA standard for TSV achieves simplicity
+            // by simply disallowing tabs within fields."
+            return escaped.replace(QStringLiteral("\t"), QString());
+        };
+
+        std::function<QString(const QString&)> escapedString = csvEscapedString;
+        QString separator = QStringLiteral(",");
+
+        if(extension == QStringLiteral("tsv"))
+        {
+            escapedString = tsvEscapedString;
+            separator = QStringLiteral("\t");
+        }
+
+        QString rowString;
+        for(const auto& columnName : columnNames)
+        {
+            if(!rowString.isEmpty())
+                rowString.append(separator);
+
+            rowString.append(escapedString(columnName));
+        }
+
+        QTextStream stream(&file);
+        stream << rowString << "\r\n";
+
+        auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rows")).toInt();
+        auto model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
+        if(model != nullptr)
+        {
+            for(int row = 0; row < rowCount; row++)
+            {
+                rowString.clear();
+                for(int column = 0; column < columnCount; column++)
+                {
+                    if(!rowString.isEmpty())
+                        rowString.append(separator);
+
+                    auto value = model->data(model->index(row, column));
+
+                    auto valueString = value.toString();
+
+                    if(value.type() == QVariant::String)
+                        rowString.append(escapedString(valueString));
+                    else
+                        rowString.append(valueString);
+                }
+
+                stream << rowString << "\r\n";
+            }
+        }
+    }, tr("Exporting Table"));
 }
 
 void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, const QString& extension)

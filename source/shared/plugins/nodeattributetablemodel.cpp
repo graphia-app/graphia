@@ -105,7 +105,6 @@ void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
 void NodeAttributeTableModel::updateColumnNames()
 {
     _columnNames = columnNames();
-    qDebug() << "Column Names Length" << _columnNames.length();
     emit columnNamesChanged();
 }
 
