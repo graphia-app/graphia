@@ -99,7 +99,9 @@ Item
     onPluginMinimisedChanged:
     {
         if(pluginMinimised)
-            plugin.minimisingOrMinimised = true;
+            pluginToolBarContainer.minimisingOrMinimised = true;
+
+        pluginToolBarContainer.transitioning = true;
     }
 
     property alias pluginMenu0: pluginMenu0
@@ -1187,17 +1189,95 @@ Item
             }
         }
 
-        ColumnLayout
+        Item
         {
-            id: pluginContainer
+            id: pluginToolBarContainer
             visible: plugin.loaded && !root.pluginPoppedOut
 
-            spacing: 0
             Layout.fillWidth: true
+
+            Layout.minimumHeight:
+            {
+                var minimumHeight = toolBar.height;
+
+                // If we set the minimumHeight to the actual value, while we're
+                // transitioning, it interferes with the transition, so don't
+                if(pluginToolBarContainer.transitioning)
+                    return minimumHeight;
+
+                if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
+                    minimumHeight += plugin.content.minimumHeight;
+
+                minimumHeight += defaultPluginContent.minimumHeight;
+
+                return minimumHeight;
+            }
+
+            Layout.maximumHeight: root.pluginMinimised && !root.pluginPoppedOut ?
+                toolBar.height : Number.POSITIVE_INFINITY;
+
+            property real _lastUnminimisedHeight: 0
+
+            onHeightChanged:
+            {
+                if(!pluginToolBarContainer.minimisingOrMinimised)
+                {
+                    _lastUnminimisedHeight = height;
+
+                    // This is a hack to avoid some jarring visuals. In summary, Layouts seem to
+                    // rely on first setting an item's dimensions past its minima/maxima, and then
+                    // correcting. With most controls this is completely fine, but with the
+                    // CorrelationPlot and WebView, this results in them being momentarily visible
+                    // at the pre-corrected dimensions. This is probably because these items are
+                    // rendered in threads, so there is a window where the uncorrected dimensions
+                    // are visible. Here we delay setting the height on the plugin by a frame,
+                    // so that it has had an event loop to update to the limits.
+                    Qt.callLater(function()
+                    {
+                        var newHeight = height;
+
+                        if(!root.pluginPoppedOut)
+                            newHeight -= toolBar.height;
+
+                        pluginContainer.height = newHeight;
+                    });
+                }
+            }
+
+            property bool minimisingOrMinimised: false
+            property bool transitioning: false
+
+            Behavior on height
+            {
+                // Only enable when actually transitioning or this will interfere
+                // when dragging the SplitView manually
+                enabled: !plugin.enabled && pluginToolBarContainer.transitioning
+
+                SequentialAnimation
+                {
+                    NumberAnimation { easing.type: Easing.InOutQuad }
+
+                    ScriptAction
+                    {
+                        script:
+                        {
+                            if(!root.pluginMinimised)
+                                pluginToolBarContainer.minimisingOrMinimised = false;
+
+                            pluginToolBarContainer.transitioning = false;
+                        }
+                    }
+                }
+            }
 
             ToolBar
             {
-                Layout.fillWidth: true
+                id: toolBar
+
+                // Stick it to the top
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
                 RowLayout
                 {
@@ -1215,12 +1295,24 @@ Item
 
                     RowLayout
                     {
-                        enabled: !plugin.minimisingOrMinimised || plugin.minimised
+                        enabled: !pluginToolBarContainer.transitioning
 
                         ToolButton { action: togglePluginMinimiseAction }
                         ToolButton { action: togglePluginWindowAction }
                     }
                 }
+            }
+
+            Item
+            {
+                id: pluginContainer
+
+                anchors.top: toolBar.bottom
+                // anchors.bottom is not bound, instead the height is set manually
+                // in the parent's onHeightChanged; see the hack explanation above
+
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
         }
 
@@ -1258,68 +1350,11 @@ Item
 
     Item
     {
-        Layout.fillHeight: enabled
-        Layout.fillWidth: true
-
         id: plugin
 
-        Layout.minimumHeight:
-        {
-            if(!enabled)
-                return 0;
+        enabled: !pluginToolBarContainer.minimisingOrMinimised || root.pluginPoppedOut
 
-            if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
-                return plugin.content.minimumHeight;
-
-            return defaultPluginContent.minimumHeight;
-        }
-
-        Layout.maximumHeight: minimised && !root.pluginPoppedOut ? 0 : Number.POSITIVE_INFINITY
-
-        visible: loaded
-        enabled: (!minimisingOrMinimised || root.pluginPoppedOut) && !root.busy
-
-        property real _lastUnminimisedHeight: 0
-        onHeightChanged:
-        {
-            if(!plugin.minimisingOrMinimised || root.pluginPoppedOut)
-                _lastUnminimisedHeight = height;
-        }
-
-        Layout.preferredHeight: root.pluginMinimised && !root.pluginPoppedOut ? 0 : _lastUnminimisedHeight
-
-        property bool minimisingOrMinimised: false
-        property bool minimised: false
-
-        Behavior on Layout.preferredHeight
-        {
-            enabled: !plugin.enabled
-
-            SequentialAnimation
-            {
-                ScriptAction
-                {
-                    script:
-                    {
-                        if(!root.pluginMinimised)
-                            plugin.minimised = false;
-                    }
-                }
-
-                NumberAnimation { easing.type: Easing.InOutQuad }
-
-                ScriptAction
-                {
-                    script:
-                    {
-                        if(!root.pluginMinimised)
-                            plugin.minimisingOrMinimised = false;
-                        else
-                            plugin.minimised = true;
-                    }
-                }
-            }
-        }
+        anchors.fill: parent
 
         property var model: document.plugin
         property var content
@@ -1486,7 +1521,7 @@ Item
                 plugin.content.toolStrip !== undefined
         }
 
-        RowLayout
+        Item
         {
             id: pluginWindowContent
             anchors.fill: parent
@@ -1533,6 +1568,9 @@ Item
     function toggleMinimise()
     {
         root.pluginMinimised = !root.pluginMinimised;
+
+        if(!root.pluginMinimised)
+            pluginToolBarContainer.height = pluginToolBarContainer._lastUnminimisedHeight;
     }
 
     function popOutPlugin()
@@ -1554,7 +1592,7 @@ Item
         if(plugin.content.toolStrip !== null && plugin.content.toolStrip !== undefined)
             plugin.content.toolStrip.parent = pluginContainerToolStrip;
 
-        pluginContainer.height = pluginSplitSize;
+        pluginToolBarContainer.height = pluginSplitSize;
 
         root.pluginPoppedOut = false;
     }
