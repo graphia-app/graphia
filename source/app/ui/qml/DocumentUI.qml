@@ -523,7 +523,7 @@ Item
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.show(); }
-    function nodeName(nodeId) { return document.nodeName(nodeId); }
+    function nodeName(nodeId) { return nodeId !== undefined ? document.nodeName(nodeId) : ""; }
 
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {
