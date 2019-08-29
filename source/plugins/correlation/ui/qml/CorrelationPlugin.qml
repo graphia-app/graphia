@@ -651,6 +651,7 @@ PluginContent
                 visible: plot.scrollBarRequired
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 anchors.fill: parent
+                frameVisible: true
 
                 Item
                 {
