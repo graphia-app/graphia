@@ -482,7 +482,8 @@ Item
             sortBySharedValuesMenuItem.checked = isFlagSet("assignByQuantity");
 
             var attribute = document.attribute(attributeName);
-            attributeList.currentIndex = attributeList.find(attribute.name);
+            attributeList.currentIndex = attributeList.find(
+                attribute.name !== undefined ? attribute.name : attributeName);
             if(attribute.hasParameter)
             {
                 attributeParameterList.model = attribute.validParameterValues;
