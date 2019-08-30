@@ -1019,8 +1019,8 @@ Item
 
                 if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
                     minimumHeight += plugin.content.minimumHeight;
-
-                minimumHeight += defaultPluginContent.minimumHeight;
+                else
+                    minimumHeight += defaultPluginContent.minimumHeight;
 
                 return minimumHeight;
             }
