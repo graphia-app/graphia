@@ -93,7 +93,7 @@ void NodeAttributeTableModel::onColumnAdded(int columnIndex)
     else
         _pendingData.resize(columnIndex + 1);
 
-    //updateColumn(role, _pendingData.at(index));
+    updateColumn(columnIndex, _columnNames.at(columnIndex), _pendingData.at(columnIndex));
 }
 
 void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
@@ -130,9 +130,6 @@ void NodeAttributeTableModel::updateColumn(int role, const QString& attributeNam
     for(int row = 0; row < rowCount(); row++)
     {
         NodeId nodeId = _userNodeData->elementIdForIndex(row);
-
-        //if(row == 0)
-            //column[row] = attributeName;
 
         if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
@@ -315,8 +312,6 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         onColumnAdded(columnIndex);
         emit columnAdded(columnIndex, name);
     }
-
-    updateColumnNames();
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }

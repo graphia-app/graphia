@@ -102,8 +102,6 @@ Item
             else
                 proxyModel.sortColumn = tableView.headerColumns.indexOf(_sourceSortColumn);
 
-            console.log("SourceColumn", _sourceSortColumn, "SetSortColumn", proxyModel.sortColumn)
-
             _sortEnabled = true;
             resizeColumnHeaders();
             tableView.forceLayoutSafe();
