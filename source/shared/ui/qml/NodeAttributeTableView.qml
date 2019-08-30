@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Private 1.0 // StyleItem
 import QtGraphicalEffects 1.0
 import QtQml.Models 2.13
+import QtQuick.Shapes 1.13
 
 import Qt.labs.platform 1.0 as Labs
 
@@ -24,6 +25,8 @@ Item
     property var defaultColumnWidth: 120
     property var selectedRows: []
     property alias rowCount: tableView.rows
+    property alias sortIndicatorColumn: proxyModel.sortColumn
+    property alias sortIndicatorOrder: proxyModel.sortOrder
 
     // Internal name
     property var _nodeAttributesTableModel
@@ -75,18 +78,8 @@ Item
 
     property var hiddenColumns: []
 
-    readonly property string sortRoleName:
-    {
-        if(_nodeAttributesTableModel.columnNames.length > 0 &&
-           _nodeAttributesTableModel.columnNames[sortIndicatorColumn] !== undefined)
-        {
-            return _nodeAttributesTableModel.columnNames[sortIndicatorColumn];
-        }
-
-        return "";
-    }
-
     property bool columnSelectionMode: false
+    property var _sourceSortColumn: -1
     onColumnSelectionModeChanged:
     {
         let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
@@ -94,6 +87,7 @@ Item
         if(columnSelectionMode)
         {
             _sortEnabled = false;
+            _sourceSortColumn = tableView.headerColumns[proxyModel.sortColumn];
             tableView.headerColumns = indexArray;
             columnSelectionControls.show();
         }
@@ -102,6 +96,14 @@ Item
             columnSelectionControls.hide();
             tableView.headerColumns = indexArray.filter(
                         (value, index) => hiddenColumns.indexOf(value) === -1)
+
+            if(tableView.headerColumns.indexOf(_sourceSortColumn) === -1)
+                proxyModel.sortColumn = -1;
+            else
+                proxyModel.sortColumn = tableView.headerColumns.indexOf(_sourceSortColumn);
+
+            console.log("SourceColumn", _sourceSortColumn, "SetSortColumn", proxyModel.sortColumn)
+
             _sortEnabled = true;
             resizeColumnHeaders();
             tableView.forceLayoutSafe();
@@ -111,18 +113,6 @@ Item
     }
 
     property bool _sortEnabled: true
-
-    property int sortIndicatorColumn
-    onSortIndicatorColumnChanged:
-    {
-        //tableView.sortIndicatorColumn = root.sortIndicatorColumn;
-    }
-
-    property int sortIndicatorOrder
-    onSortIndicatorOrderChanged:
-    {
-        //tableView.sortIndicatorOrder = root.sortIndicatorOrder;
-    }
 
     property alias viewport: tableView.childrenRect
 
@@ -495,7 +485,15 @@ Item
                     id: headerItem
                     width: Math.max(defaultColumnWidth, labelWidth)
                     height: headerLabel.height
-                    property var labelWidth: headerLabel.contentWidth + headerLabel.padding + headerLabel.padding;
+                    property var labelWidth: headerLabel.contentWidth + headerLabel.padding
+                                             + headerLabel.padding + sortIndicator.marginWidth
+                                             + sortIndicator.anchors.rightMargin;
+
+                    Rectangle
+                    {
+                        anchors.fill: parent
+                        color: headerMouseArea.containsMouse ? Qt.lighter(sysPalette.highlight, 1.99) : sysPalette.light
+                    }
                     CheckBox
                     {
                         id: checkbox
@@ -523,43 +521,86 @@ Item
                     {
                         id: headerLabel
                         visible: !columnSelectionMode
-
-                        Rectangle
-                        {
-                            anchors.right: parent.right
-                            height: parent.height
-                            width: 1
-                            color: sysPalette.midlight
-                            MouseArea
-                            {
-                                property var tempWidth: 0
-                                cursorShape: Qt.SizeHorCursor
-                                width: 5
-                                height: parent.height
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                drag.target: parent
-                                drag.axis: Drag.XAxis
-
-                                onMouseXChanged:
-                                {
-                                    if(drag.active)
-                                    {
-                                        tableView.userColumnWidths[modelData] = Math.max(30, headerLabel.width + mouseX);
-                                        headerItem.width = tableView.userColumnWidths[modelData];
-                                        tableView.forceLayoutSafe();
-                                    }
-                                }
-                            }
-                        }
+                        clip: true
                         //elide: Text.ElideRight
                         maximumLineCount: 1
-                        width: parent.width;
+                        width: parent.width - (sortIndicator.marginWidth);
                         text: root._nodeAttributesTableModel.columnNames[modelData]
                         color: sysPalette.text
                         font.pixelSize: 11
                         padding: 4
-                        background:  Rectangle { color: "white" }
                         renderType: Text.NativeRendering
+                    }
+                    Shape
+                    {
+                        id: sortIndicator
+                        property var marginWidth: width + anchors.rightMargin
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        anchors.rightMargin: 3
+                        antialiasing: false
+                        width: 7
+                        height: 4
+                        visible: proxyModel.sortColumn == index && !columnSelectionMode
+                        transform: Rotation
+                        {
+                            origin.x: sortIndicator.width * 0.5
+                            origin.y: sortIndicator.height * 0.5
+                            angle: proxyModel.sortOrder == Qt.DescendingOrder ? 0 : 180
+                        }
+
+                        ShapePath
+                        {
+                            miterLimit: 0
+                            strokeColor: sysPalette.mid
+                            fillColor: "transparent"
+                            strokeWidth: 2
+                            startY: sortIndicator.height - 1
+                            PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
+                            PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
+                        }
+                    }
+                    MouseArea
+                    {
+                        id: headerMouseArea
+                        enabled: !columnSelectionMode
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked:
+                        {
+                            if(proxyModel.sortColumn == index)
+                                proxyModel.sortOrder = proxyModel.sortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
+                            else
+                                proxyModel.sortColumn = index;
+                        }
+                    }
+
+                    Rectangle
+                    {
+                        anchors.right: parent.right
+                        height: parent.height
+                        width: 1
+                        color: sysPalette.midlight
+                        MouseArea
+                        {
+                            property var tempWidth: 0
+                            cursorShape: Qt.SizeHorCursor
+                            width: 5
+                            height: parent.height
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            drag.target: parent
+                            drag.axis: Drag.XAxis
+
+                            onMouseXChanged:
+                            {
+                                if(drag.active)
+                                {
+                                    tableView.userColumnWidths[modelData] = Math.max(30, headerItem.width + mouseX);
+                                    headerItem.width = tableView.userColumnWidths[modelData];
+                                    tableView.forceLayoutSafe();
+                                }
+                            }
+                        }
                     }
                 }
                 onItemAdded:
@@ -665,8 +706,6 @@ Item
             else
                 proxyModel.hiddenColumns = hiddenColumns;
         }
-
-        //sortIndicatorVisible: true
 
         function _resetSortFilterProxyModel()
         {

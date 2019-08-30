@@ -13,7 +13,6 @@ bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &s
     return !_hiddenColumns.contains(sourceColumn);
 }
 
-
 QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 {
     if(role == SubSelectedRole)
@@ -56,6 +55,20 @@ void TableProxyModel::setHiddenColumns(QList<int> hiddenColumns)
 {
     _hiddenColumns = hiddenColumns;
     invalidateFilter();
+}
+
+void TableProxyModel::setSortColumn(int sortColumn)
+{
+    _sortColumn = sortColumn;
+    this->sort(_sortColumn, _sortOrder);
+    emit sortColumnChanged(sortColumn);
+}
+
+void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
+{
+    _sortOrder = sortOrder;
+    this->sort(_sortColumn, _sortOrder);
+    emit sortOrderChanged(sortOrder);
 }
 
 void TableProxyModel::invalidateFilter()

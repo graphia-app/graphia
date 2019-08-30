@@ -12,11 +12,15 @@ class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(QList<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
+    Q_PROPERTY(int sortColumn MEMBER _sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
+    Q_PROPERTY(Qt::SortOrder sortOrder MEMBER _sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
 
 private:
     bool _showCalculatedColumns = false;
     QModelIndexList _subSelection;
     QList<int> _hiddenColumns;
+    int _sortColumn = -1;
+    Qt::SortOrder _sortOrder = Qt::DescendingOrder;
     enum Roles
     {
         SubSelectedRole = Qt::UserRole + 999
@@ -49,8 +53,12 @@ public:
 
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topLeft, int bottomRight);
     void setHiddenColumns(QList<int> hiddenColumns);
+    void setSortColumn(int sortColumn);
+    void setSortOrder(Qt::SortOrder sortColumn);
 signals:
     void countChanged();
+    void sortColumnChanged(int sortColumn);
+    void sortOrderChanged(int sortColumn);
 
     void filterRoleNameChanged();
     void filterPatternSyntaxChanged();
