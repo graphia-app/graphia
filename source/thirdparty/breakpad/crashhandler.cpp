@@ -154,8 +154,12 @@ static bool minidumpCallback(
             {
                 addOption(L"-submit");
                 addOption(L"-description");
-                addOption(QString("\"An uncaught exception was thrown of type '%1'.\"")
-                    .arg(exceptionTypeName_wchar).toStdWString().c_str());
+
+                static wchar_t description[1024] = {0};
+                wcscat_s(description, L"\"");
+                wcscat_s(description, exceptionTypeName_wchar);
+                wcscat_s(description, L"\"");
+                addOption(description);
             }
             else
             {
@@ -229,11 +233,20 @@ static bool minidumpCallback(
 #ifdef Q_OS_WIN
         addOption(L"-submit");
         addOption(L"-description");
-        addOption(QString("\"%1\"").arg(exceptionHandler->reason()).toStdWString().c_str());
+
+        const size_t reasonBufferSize = 1024;
+        static wchar_t reason[reasonBufferSize] = {0};
+        wcscat_s(reason, L"\"");
+        if(exceptionHandler->reason().length() < (reasonBufferSize - 3/*2 quotes, 1 nul*/))
+            exceptionHandler->reason().toWCharArray(&reason[1]);
+        wcscat_s(reason, L"\"");
+
+        addOption(reason);
 #else
         addOption("-submit");
         addOption("-description");
-        addOption(exceptionHandler->reason().toStdString().c_str());
+        auto reasonByteArray = exceptionHandler->reason().toUtf8();
+        addOption(reasonByteArray.data());
 #endif
     }
 
