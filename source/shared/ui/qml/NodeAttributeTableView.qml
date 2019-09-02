@@ -84,12 +84,13 @@ Item
     {
         let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
+        tableView._updateColumnVisibility();
         if(columnSelectionMode)
         {
-            _sortEnabled = false;
             _sourceSortColumn = tableView.headerColumns[proxyModel.sortColumn];
             tableView.headerColumns = indexArray;
             columnSelectionControls.show();
+            tableView.forceLayoutSafe();
         }
         else
         {
@@ -102,15 +103,10 @@ Item
             else
                 proxyModel.sortColumn = tableView.headerColumns.indexOf(_sourceSortColumn);
 
-            _sortEnabled = true;
             resizeColumnHeaders();
             tableView.forceLayoutSafe();
         }
-
-        tableView._updateColumnVisibility();
     }
-
-    property bool _sortEnabled: true
 
     property alias viewport: tableView.childrenRect
 
@@ -687,7 +683,13 @@ Item
 
                     text:
                     {
-                        let columnName = root._nodeAttributesTableModel.columnHeaders(modelColumn);
+                        let sourceColumn = tableView.headerColumns[modelColumn];
+
+                        // This can happen during column removal
+                        if(sourceColumn === undefined)
+                            return "";
+
+                        let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
                         if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
                             return QmlUtils.formatNumberScientific(model.display, 1);
                         return model.display;
