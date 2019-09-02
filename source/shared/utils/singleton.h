@@ -36,6 +36,6 @@ private:
 template<typename T> Singleton<T>* Singleton<T>::_singletonPtr = nullptr;
 
 // Allows access to a singleton via S(Class)->... instead of Class::instance()->...
-#define S(X) X::instance()
+#define S(X) X::instance() /* NOLINT cppcoreguidelines-macro-usage */
 
 #endif

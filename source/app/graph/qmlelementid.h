@@ -10,8 +10,8 @@
 #include <QMetaType>
 #include <QObject>
 
-#define QML_TYPE(Type) Qml ## Type
-#define QML_ELEMENTID(Type) \
+#define QML_TYPE(Type) Qml ## Type /* NOLINT cppcoreguidelines-macro-usage */
+#define QML_ELEMENTID(Type) /* NOLINT cppcoreguidelines-macro-usage */ \
     class QML_TYPE(Type) \
     { \
         Q_GADGET \

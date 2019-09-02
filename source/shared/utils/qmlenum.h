@@ -26,10 +26,10 @@ constexpr bool static_strcmp(char const* a, char const* b)
 // Defining an enumeration that's usable in QML is awkward, so
 // here is a macro to make it easier:
 
-#define _REFLECTOR(x) x ## _reflector
-#define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
+#define _REFLECTOR(x) x ## _reflector /* NOLINT cppcoreguidelines-macro-usage */
+#define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum /* NOLINT cppcoreguidelines-macro-usage */
 
-#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) \
+#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) /* NOLINT cppcoreguidelines-macro-usage */ \
     static_assert(static_strcmp(#_Q_GADGET, "Q_GADGET"), \
         "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
     class _REFLECTOR(ENUM_NAME) \

@@ -34,29 +34,29 @@ private:
 };
 
 #if defined(__GNUC__) || defined(__clang__)
-#define SCOPE_TIMER_FUNCTION QLatin1String(__PRETTY_FUNCTION__)
+#define SCOPE_TIMER_FUNCTION QLatin1String(__PRETTY_FUNCTION__) /* NOLINT cppcoreguidelines-macro-usage */
 #else
 #define SCOPE_TIMER_FUNCTION QLatin1String(__func__)
 #endif
 
 #ifdef BUILD_SOURCE_DIR
-#define SCOPE_TIMER_FILENAME QStringLiteral(__FILE__).replace( \
+#define SCOPE_TIMER_FILENAME QStringLiteral(__FILE__).replace( /* NOLINT cppcoreguidelines-macro-usage */ \
     QStringLiteral(BUILD_SOURCE_DIR), QString())
 #else
 #define SCOPE_TIMER_FILENAME QLatin1String(__FILE__)
 #endif
 
-#define SCOPE_TIMER_CONCAT2(a, b) a ## b
-#define SCOPE_TIMER_CONCAT(a, b) SCOPE_TIMER_CONCAT2(a, b)
-#define SCOPE_TIMER_INSTANCE_NAME SCOPE_TIMER_CONCAT(_scopeTimer, __COUNTER__)
-#define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__
-#define SCOPE_TIMER_MULTISAMPLES(samples) \
+#define SCOPE_TIMER_CONCAT2(a, b) a ## b /* NOLINT cppcoreguidelines-macro-usage */
+#define SCOPE_TIMER_CONCAT(a, b) SCOPE_TIMER_CONCAT2(a, b) /* NOLINT cppcoreguidelines-macro-usage */
+#define SCOPE_TIMER_INSTANCE_NAME SCOPE_TIMER_CONCAT(_scopeTimer, __COUNTER__) /* NOLINT cppcoreguidelines-macro-usage */
+#define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__ /* NOLINT cppcoreguidelines-macro-usage */
+#define SCOPE_TIMER_MULTISAMPLES(samples) /* NOLINT cppcoreguidelines-macro-usage */ \
     ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
         QStringLiteral("%1:%2 %3") \
             .arg(SCOPE_TIMER_FILENAME) \
             .arg(__LINE__) \
             .arg(SCOPE_TIMER_FUNCTION), samples);
-#define SCOPE_TIMER SCOPE_TIMER_MULTISAMPLES(1)
+#define SCOPE_TIMER SCOPE_TIMER_MULTISAMPLES(1) /* NOLINT cppcoreguidelines-macro-usage */
 
 class ScopeTimerManager : public Singleton<ScopeTimerManager>
 {
