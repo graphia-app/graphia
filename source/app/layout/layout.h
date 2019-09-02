@@ -52,7 +52,7 @@ private:
     virtual void executeReal(bool firstIteration) = 0;
 
 protected:
-    const LayoutSettings* _settings;
+    const LayoutSettings* _settings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
     NodePositions& positions() { return *_positions; }
 

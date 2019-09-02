@@ -57,15 +57,15 @@ template<typename TreeType> struct SubVolume
 template<typename TreeType, typename SubVolumeType = SubVolume<TreeType>> class BaseOctree
 {
 protected:
-    BoundingBox3D _boundingBox;
-    size_t _depthFirstTraversalStackSizeRequirement = 0;
-    std::array<SubVolumeType, 8> _subVolumes = {};
+    BoundingBox3D _boundingBox; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    size_t _depthFirstTraversalStackSizeRequirement = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    std::array<SubVolumeType, 8> _subVolumes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
-    std::array<const SubVolumeType*, 8> _nonEmptyLeaves = {};
-    int _numNonEmptyLeaves = 0;
+    std::array<const SubVolumeType*, 8> _nonEmptyLeaves = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    int _numNonEmptyLeaves = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
-    std::array<const SubVolumeType*, 8> _internalNodes = {};
-    int _numInternalNodes = 0;
+    std::array<const SubVolumeType*, 8> _internalNodes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    int _numInternalNodes = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
 private:
     unsigned int _maxNodesPerLeaf = 1;

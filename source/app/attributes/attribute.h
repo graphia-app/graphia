@@ -26,7 +26,7 @@ template<typename T> class AttributeRange
 class _AttributeRange
 {
 protected:
-    Attribute* _attribute = nullptr;
+    Attribute* _attribute = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
 public:
     void setAttribute(Attribute& attribute) { _attribute = &attribute; }

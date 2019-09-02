@@ -363,7 +363,7 @@ public:
         using difference_type = int;
 
     protected:
-        pointer _p;
+        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
     private:
         const ElementIdDistinctSet* _set = nullptr;
@@ -501,7 +501,7 @@ public:
         using difference_type = int;
 
     protected:
-        pointer _p;
+        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
     private:
         const ElementIdDistinctSets* _sets = nullptr;
