@@ -97,8 +97,8 @@ class GraphModel;
 class LayoutFactory
 {
 protected:
-    GraphModel* _graphModel = nullptr;
-    LayoutSettings _layoutSettings;
+    GraphModel* _graphModel = nullptr; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    LayoutSettings _layoutSettings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
 public:
     explicit LayoutFactory(GraphModel* graphModel) :
