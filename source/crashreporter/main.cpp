@@ -214,7 +214,7 @@ static void uploadReport(const QString& email, const QString& text,
     };
 
     auto errorString = doUpload();
-    if(errorString.startsWith("TLS"))
+    if(errorString.startsWith(QStringLiteral("TLS")))
     {
         // https failed, so fallback to http
         request.setUrl(QStringLiteral("http://crashreports.kajeka.com/"));
