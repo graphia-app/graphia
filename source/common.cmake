@@ -85,6 +85,7 @@ if(MSVC)
         /MAP /debug")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+        /permissive- \
         /Zc:rvalueCast /Zc:inline /Zc:strictStrings \
         /Zc:wchar_t /Zc:throwingNew")
 

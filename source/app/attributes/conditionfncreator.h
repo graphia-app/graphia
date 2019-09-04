@@ -75,7 +75,7 @@ private:
             return std::visit(Visitor(), _terminalValue);
         }
 
-        auto operator*() const
+        GraphTransformConfig::TerminalValue operator*() const
         {
             return _terminalValue;
         }

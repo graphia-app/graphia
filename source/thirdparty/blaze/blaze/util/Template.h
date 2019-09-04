@@ -69,7 +69,7 @@
    typedef AI::BLAZE_TEMPLATE rebind<double>::other  Other;  // No compilation errors
    \endcode
 */
-#if defined(_MSC_VER)
+#if 0 //defined(_MSC_VER) // with /permissive-, this is no longer necessary
 #  define BLAZE_TEMPLATE
 #else
 #  define BLAZE_TEMPLATE template
