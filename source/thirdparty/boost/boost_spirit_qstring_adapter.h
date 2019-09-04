@@ -47,8 +47,7 @@ class QStringSpiritUnicodeIteratorAdaptor : public boost::iterator_adaptor<
     QStringIterator, uint32_t, boost::forward_traversal_tag, uint32_t>
 {
 public:
-    using boost::iterator_adaptor<QStringSpiritUnicodeIteratorAdaptor<QStringIterator>,
-        QStringIterator, uint32_t, boost::forward_traversal_tag, uint32_t>::iterator_adaptor;
+    using QStringSpiritUnicodeIteratorAdaptor::iterator_adaptor_::iterator_adaptor_;
 
 private:
     friend class boost::iterator_core_access;
