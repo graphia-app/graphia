@@ -63,8 +63,8 @@ static QString crashedModule(const QString& dmpFile)
         return {};
     }
 
-    const auto* stack = process_state.threads()->at(requestingThread);
-    int frameCount = stack->frames()->size();
+    const auto* stack = process_state.threads()->at(static_cast<size_t>(requestingThread));
+    auto frameCount = stack->frames()->size();
     if(frameCount == 0)
     {
         std::cerr << "No stack frames\n";
@@ -72,7 +72,7 @@ static QString crashedModule(const QString& dmpFile)
     }
 
     const StackFrame* frame = nullptr;
-    int frameIndex = 0;
+    size_t frameIndex = 0;
     std::string module;
 
     do
