@@ -1,6 +1,6 @@
 set(CMAKE_CXX_STANDARD 17)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-D_DEBUG)
     add_definitions(-DQT_QML_DEBUG)
 endif()
