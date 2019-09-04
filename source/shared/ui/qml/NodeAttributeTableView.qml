@@ -47,7 +47,7 @@ Item
             {
                 let newValue = tableView.columnWidths[i];
                 if(newValue !== undefined)
-                  tableView.currentColumnWidths[i] = newValue;
+                    tableView.currentColumnWidths[i] = newValue;
             }
 
             tableView.columnWidths = []
@@ -106,6 +106,7 @@ Item
             resizeColumnHeaders();
             tableView.forceLayoutSafe();
         }
+        //proxyModel.columnOrder = tableHeaderModel.columnOrder();
     }
 
     property alias viewport: tableView.childrenRect
@@ -226,7 +227,7 @@ Item
         onTriggered:
         {
             exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                misc.fileSaveInitialFolder : "";
+                        misc.fileSaveInitialFolder : "";
 
             exportTableDialog.open();
         }
@@ -274,14 +275,15 @@ Item
         root.selectedRows = selectedRows;
     }
 
+    ItemSelectionModel
+    {
+        id: selectionModel
+        model: proxyModel
+    }
+
     MouseArea
     {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        ItemSelectionModel
-        {
-            id: selectionModel
-            model: proxyModel
-        }
         property var previousRow: -1
         property var startRow: -1
         property var endRow: -1
@@ -384,9 +386,9 @@ Item
             policy: Qt.ScrollBarAsNeeded
             contentItem: Rectangle
             {
-                    implicitWidth: 5
-                    radius: width / 2
-                    color: sysPalette.dark
+                implicitWidth: 5
+                radius: width / 2
+                color: sysPalette.dark
             }
         }
 
@@ -404,7 +406,7 @@ Item
         columnWidthProvider: function(col)
         {
             var calculatedWidth = 0;
-            var userWidth = userColumnWidths[headerColumns[col]];
+            var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
             // Use the user specified column width if available
             if(userWidth !== undefined)
                 calculatedWidth = userWidth;
@@ -465,23 +467,86 @@ Item
                 return Math.max(delegateWidth, columnHeaderRepeater.itemAt(col).labelWidth);
         }
 
-        Row
+        DelegateModel
         {
-            id: columnsHeader
-            y: tableView.contentY
-            z: 2
-            Repeater
+            id: tableHeaderModel
+            model: tableView.headerColumns
+
+            Connections
             {
-                id: columnHeaderRepeater
-                model: tableView.headerColumns
+                target: tableHeaderModel.items
+                onChanged:
+                {
+                    proxyModel.columnOrder = columnOrder();
+                }
+            }
+
+            function visualToSourceIndex(index)
+            {
+                var proxy = tableHeaderModel.items.get(index).model.modelData;
+                var source = tableView.headerColumns[proxy];
+                console.log("Visual", index, "Proxy", proxy, "Source", source);
+                return tableView.headerColumns[tableHeaderModel.items.get(index)];
+            }
+
+            function columnOrder()
+            {
+                let _columnOrder = [];
+                for(let i=0; i<tableHeaderModel.count; i++)
+                {
+                    var delegateModelObject = tableHeaderModel.items.get(i);
+                    _columnOrder.push(tableView.headerColumns.indexOf(delegateModelObject.model.modelData))
+                }
+                return _columnOrder;
+            }
+
+            delegate: DropArea
+            {
+                id: headerItem
+                width: Math.max(defaultColumnWidth, labelWidth)
+                Behavior on width
+                {
+                    enabled: !resizeHandleMouseArea.drag.active
+                    PropertyAnimation { easing.type: Easing.InOutQuad }
+                }
+                Behavior on x { PropertyAnimation { easing.type: Easing.InOutQuad } }
+                height: headerLabel.height
+                property var modelIndex: index
+                property var labelWidth: headerLabel.contentWidth + headerLabel.padding
+                                         + headerLabel.padding + sortIndicator.marginWidth
+                                         + sortIndicator.anchors.rightMargin;
+                property int visualIndex: DelegateModel.itemsIndex
+                Binding { target: headerContent; property: "visualIndex"; value: visualIndex }
+
+                onEntered:
+                {
+                    tableHeaderModel.items.move(drag.source.visualIndex, visualIndex)
+                }
+
                 Item
                 {
-                    id: headerItem
-                    width: Math.max(defaultColumnWidth, labelWidth)
-                    height: headerLabel.height
-                    property var labelWidth: headerLabel.contentWidth + headerLabel.padding
-                                             + headerLabel.padding + sortIndicator.marginWidth
-                                             + sortIndicator.anchors.rightMargin;
+                    id: headerContent
+                    opacity: Drag.active ? 0.5 : 1
+                    property int visualIndex: 0
+                    width: headerItem.width
+                    height: headerItem.height
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+
+                    states: [
+                        State {
+                            when: headerContent.Drag.active
+                            ParentChange {
+                                target: headerContent
+                                parent: columnHeaderRepeater
+                            }
+                            AnchorChanges {
+                                target: headerContent
+                                anchors.left: undefined
+                                anchors.top: undefined
+                            }
+                        }
+                    ]
 
                     Rectangle
                     {
@@ -554,12 +619,33 @@ Item
                             PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
                         }
                     }
+
+                    DragHandler
+                    {
+                        id: dragHandler
+                        yAxis.enabled: false
+                    }
+
+                    Drag.active: dragHandler.active
+                    Drag.source: headerContent
+                    Drag.hotSpot.x: headerContent.width * 0.5
+                    Drag.hotSpot.y: headerContent.height * 0.5
+                    property bool dragActive: Drag.active
+                    onDragActiveChanged:
+                    {
+                        if(!Drag.active)
+                        {
+                           proxyModel.columnOrder = tableHeaderModel.columnOrder();
+                        }
+                    }
+
                     MouseArea
                     {
                         id: headerMouseArea
                         enabled: !columnSelectionMode
                         anchors.fill: parent
                         hoverEnabled: true
+
                         onClicked:
                         {
                             if(proxyModel.sortColumn == index)
@@ -577,7 +663,7 @@ Item
                         color: sysPalette.midlight
                         MouseArea
                         {
-                            property var tempWidth: 0
+                            id: resizeHandleMouseArea
                             cursorShape: Qt.SizeHorCursor
                             width: 5
                             height: parent.height
@@ -597,6 +683,19 @@ Item
                         }
                     }
                 }
+            }
+        }
+
+        Row
+        {
+            id: columnsHeader
+            y: tableView.contentY
+            z: 2
+            Repeater
+            {
+                id: columnHeaderRepeater
+                model: tableHeaderModel
+
                 onItemAdded:
                 {
                     tableView.forceLayoutSafe();
@@ -620,6 +719,7 @@ Item
             // Based on Qt source for BaseTableView delegate
             implicitHeight: Math.max(16, label.implicitHeight)
             implicitWidth: label.implicitWidth + 16
+
             clip: true
 
             property var modelColumn: model.column
@@ -656,8 +756,8 @@ Item
 
             Rectangle
             {
-
                 width: parent.width
+
                 anchors.centerIn: parent
                 height: parent.height
                 color:
@@ -683,7 +783,7 @@ Item
 
                     text:
                     {
-                        let sourceColumn = tableView.headerColumns[modelColumn];
+                        let sourceColumn = proxyModel.mapToSourceColumn(modelColumn);
 
                         // This can happen during column removal
                         if(sourceColumn === undefined)
@@ -691,7 +791,9 @@ Item
 
                         let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
                         if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
+                        {
                             return QmlUtils.formatNumberScientific(model.display, 1);
+                        }
                         return model.display;
                     }
                     renderType: Text.NativeRendering

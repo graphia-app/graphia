@@ -12,6 +12,7 @@ class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(QList<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
+    Q_PROPERTY(QList<int> columnOrder MEMBER _columnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
     Q_PROPERTY(int sortColumn MEMBER _sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder MEMBER _sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
 
@@ -19,6 +20,7 @@ private:
     bool _showCalculatedColumns = false;
     QModelIndexList _subSelection;
     QList<int> _hiddenColumns;
+    QList<int> _columnOrder;
     int _sortColumn = -1;
     Qt::SortOrder _sortOrder = Qt::DescendingOrder;
     enum Roles
@@ -48,11 +50,13 @@ public:
     TableProxyModel(QObject* parent = nullptr);
     Q_INVOKABLE void setSubSelection(QModelIndexList subSelection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
+    Q_INVOKABLE int mapToSourceColumn(int proxyColumn) const;
 
     using QSortFilterProxyModel::mapToSource;
 
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topLeft, int bottomRight);
     void setHiddenColumns(QList<int> hiddenColumns);
+    void setColumnOrder(QList<int> columnOrder);
     void setSortColumn(int sortColumn);
     void setSortOrder(Qt::SortOrder sortColumn);
 signals:
@@ -69,6 +73,7 @@ signals:
     void ascendingSortOrderChanged();
 
     void showCalculatedColumnsChanged();
+    void columnOrderChanged();
 
 public slots:
     void invalidateFilter();

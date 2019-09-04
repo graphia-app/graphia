@@ -15,11 +15,15 @@ bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &s
 
 QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 {
+    auto mappedIndex = index;
+    if(_columnOrder.size() == columnCount())
+        mappedIndex = this->index(index.row(), _columnOrder.at(index.column()));
+
     if(role == SubSelectedRole)
     {
-        return _subSelection.contains(index);
+        return _subSelection.contains(mappedIndex);
     }
-    return QSortFilterProxyModel::data(index, role);
+    return QSortFilterProxyModel::data(mappedIndex, role);
 }
 
 void TableProxyModel::setSubSelection(QModelIndexList subSelection)
@@ -43,6 +47,16 @@ int TableProxyModel::mapToSourceRow(int proxyRow) const
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
 }
 
+int TableProxyModel::mapToSourceColumn(int proxyColumn) const
+{
+    int mappedIndex = proxyColumn;
+    if(_columnOrder.size() - 1 >= proxyColumn)
+        mappedIndex = _columnOrder.at(proxyColumn);
+    QModelIndex proxyIndex = index(0, mappedIndex);
+    QModelIndex sourceIndex = mapToSource(proxyIndex);
+    return sourceIndex.isValid() ? sourceIndex.column() : -1;
+}
+
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
 {
     connect(this, &QAbstractItemModel::rowsInserted, this, &TableProxyModel::countChanged);
@@ -55,6 +69,13 @@ void TableProxyModel::setHiddenColumns(QList<int> hiddenColumns)
 {
     _hiddenColumns = hiddenColumns;
     invalidateFilter();
+}
+
+void TableProxyModel::setColumnOrder(QList<int> columnOrder)
+{
+    _columnOrder = columnOrder;
+    emit columnOrderChanged();
+    emit layoutChanged();
 }
 
 void TableProxyModel::setSortColumn(int sortColumn)
