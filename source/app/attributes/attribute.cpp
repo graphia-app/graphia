@@ -320,6 +320,10 @@ Attribute::Name Attribute::parseAttributeName(QString name)
 
     EdgeNodeType type = EdgeNodeType::None;
 
+    // Strip off leading $, if present
+    if(name.startsWith('$'))
+        name.remove(0, 1);
+
     if(name.startsWith(sourceString))
     {
         type = EdgeNodeType::Source;
@@ -332,7 +336,7 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     }
 
     QString parameter;
-    QRegularExpression re(QStringLiteral(R"(^\$?([^\.]*)(?:\.(.+))?$)"));
+    QRegularExpression re(QStringLiteral(R"(^([^\.]*)(?:\.(.+))?$)"));
     auto match = re.match(name);
 
     if(match.hasMatch())
