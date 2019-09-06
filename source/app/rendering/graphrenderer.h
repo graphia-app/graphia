@@ -34,6 +34,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <array>
+#include <queue>
 
 class Graph;
 class GraphQuickItem;
@@ -165,6 +166,8 @@ private:
     ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray> _componentRenderers;
     bool _transitionPotentiallyInProgress = false;
     DeferredExecutor _preUpdateExecutor;
+
+    std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
     enum class Mode
     {
