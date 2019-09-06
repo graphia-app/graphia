@@ -26,8 +26,12 @@ function expressionFor(document, attributeName, flags, type, channelName)
         for(var key in parameters)
         {
             var parameter = parameters[key];
-            parameter = Utils.sanitiseJson(parameter);
-            parameter = Utils.escapeQuotes(parameter);
+
+            // Ideally we'd use Utils.sanitiseJson and Utils.escapeQuotes here,
+            // but after Qt 5.13 (I think!) referring to the contents of a .js
+            // file from another is proving unpredictably problematic
+            try { parameter = JSON.stringify(JSON.parse(parameter)); } catch(e) {}
+            parameter = parameter.replace(/\"/g, "\\\"");
 
             expression += " " + key + " = \"" + parameter + "\"";
         }
