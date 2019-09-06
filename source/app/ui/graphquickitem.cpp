@@ -219,20 +219,6 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     return graphRenderer;
 }
 
-bool GraphQuickItem::eventsPending() { return !_eventQueue.empty(); }
-
-std::unique_ptr<QEvent> GraphQuickItem::nextEvent()
-{
-    if(eventsPending())
-    {
-        auto e = std::move(_eventQueue.front());
-        _eventQueue.pop();
-        return e;
-    }
-
-    return {};
-}
-
 bool GraphQuickItem::event(QEvent* e)
 {
     switch(e->type())

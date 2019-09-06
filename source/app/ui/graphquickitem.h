@@ -78,8 +78,7 @@ public:
 
     Renderer* createRenderer() const override;
 
-    bool eventsPending();
-    std::unique_ptr<QEvent> nextEvent();
+    auto& events() { return _eventQueue; }
 
     float fps() const { return _fps; }
 
