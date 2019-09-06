@@ -43,6 +43,10 @@ QStringList NodeAttributeTableModel::columnNames() const
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
+        // We can't show parameterised attributes in the table
+        if(_document->graphModel()->attributeByName(attributeName)->hasParameter())
+            continue;
+
         if(!u::contains(list, attributeName))
             list.append(attributeName);
     }
@@ -255,8 +259,10 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     for(const auto& name : added)
     {
+        auto attribute = _document->graphModel()->attributeByName(name);
+
         // We only care about node attributes, obviously
-        if(_document->graphModel()->attributeByName(name)->elementType() != ElementType::Node)
+        if(attribute->elementType() != ElementType::Node || attribute->hasParameter())
             continue;
 
         auto columnIndex = _columnNames.indexOf(name);
