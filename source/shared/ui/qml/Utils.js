@@ -1,3 +1,6 @@
+.import QtQuick.Controls 1.5 as QtQuickControls
+.import com.kajeka 1.0 as Kajeka
+
 function watchPropertyChanges(object, handler)
 {
     for(var prop in object)
@@ -209,16 +212,16 @@ function cloneMenu(from, to)
 
         switch(fromItem.type)
         {
-        case MenuItemType.Item:
+        case QtQuickControls.MenuItemType.Item:
             toItem = to.addItem(fromItem.text);
             break;
 
-        case MenuItemType.Menu:
+        case QtQuickControls.MenuItemType.Menu:
             toItem = to.addMenu(fromItem.title);
             cloneMenu(fromItem, toItem);
             break;
 
-        case MenuItemType.Separator:
+        case QtQuickControls.MenuItemType.Separator:
             to.addSeparator();
             break;
         }
@@ -275,7 +278,7 @@ function cloneMenu(from, to)
     for(key in exclusiveGroups)
     {
         var fromExclusiveGroup = exclusiveGroups[key];
-        var toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.4; ExclusiveGroup {}', to);
+        var toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.5; ExclusiveGroup {}', to);
 
         fromExclusiveGroup.forEach(function(menuItem)
         {

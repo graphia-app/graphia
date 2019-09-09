@@ -1,3 +1,6 @@
+.import "../../../../shared/ui/qml/Utils.js" as Utils
+.import com.kajeka 1.0 as Kajeka
+
 function decorateAttributeName(name, parameter)
 {
     name = name.replace(/([^\.]+\.)?(.*)/, "$1\"$2\"");
@@ -11,7 +14,7 @@ function expressionFor(document, attributeName, flags, type, channelName)
 {
     var expression = "";
 
-    if(flags & AttributeFlag.VisualiseByComponent)
+    if(flags & Kajeka.AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
     expression += attributeName + " \"" + channelName +"\"";
@@ -26,12 +29,8 @@ function expressionFor(document, attributeName, flags, type, channelName)
         for(var key in parameters)
         {
             var parameter = parameters[key];
-
-            // Ideally we'd use Utils.sanitiseJson and Utils.escapeQuotes here,
-            // but after Qt 5.13 (I think!) referring to the contents of a .js
-            // file from another is proving unpredictably problematic
-            try { parameter = JSON.stringify(JSON.parse(parameter)); } catch(e) {}
-            parameter = parameter.replace(/\"/g, "\\\"");
+            parameter = Utils.sanitiseJson(parameter);
+            parameter = Utils.escapeQuotes(parameter);
 
             expression += " " + key + " = \"" + parameter + "\"";
         }
