@@ -2,13 +2,26 @@
 
 function htmlify
 {
-  echo "$1" | perl -pe 's/( {2,})/"&nbsp;" x length($1)/eg' | perl -pe 's/\n/<br>\n/g'
+  echo "$1" | \
+    perl -pe 's/( {2,})/"&nbsp;" x length($1)/eg' | \
+    perl -pe 's/\n/<br>\n/g'
 }
 
 function stripLeadingWhitespace
 {
   RE="s/^\s{$2}//"
   echo "$1" | perl -pe ${RE}
+}
+
+function appendOpenSSLLicense
+{
+  echo "<h3>OpenSSL</h3>" >> OSS.html
+  OPENSSL_LICENSE=$(curl -s \
+    https://www.openssl.org/source/license-openssl-ssleay.txt)
+  OPENSSL_LICENSE=$(echo "${OPENSSL_LICENSE}" | tail -n +9)
+  OPENSSL_LICENSE=$(echo "${OPENSSL_LICENSE}" | \
+      perl -pe 's/^((\/\* )|( \*[ \/]?)|([ \t]+))//')
+  htmlify "${OPENSSL_LICENSE}" >> OSS.html
 }
 
 function appendLicenseFromUrl
@@ -69,6 +82,8 @@ appendLicenseFromUrl HDF5 https://support.hdfgroup.org/ftp/HDF5/releases/COPYING
 appendLicenseFromUrl json https://raw.githubusercontent.com/nlohmann/json/develop/LICENSE.MIT
 
 appendLicenseFromUrl Matio https://raw.githubusercontent.com/tbeu/matio/master/COPYING
+
+appendOpenSSLLicense
 
 appendLicenseFromUrl SortFilterProxyModel \
   https://raw.githubusercontent.com/oKcerG/SortFilterProxyModel/master/LICENSE
