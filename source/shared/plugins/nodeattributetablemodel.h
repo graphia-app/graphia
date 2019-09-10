@@ -10,6 +10,7 @@
 #include <QHash>
 #include <QObject>
 
+#include <vector>
 #include <mutex>
 #include <deque>
 
@@ -36,6 +37,7 @@ private:
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
+    std::vector<int> _rolesRequiringUpdates;
 
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;
@@ -82,7 +84,7 @@ public:
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);
-    void onAttributeValuesChanged(const QString& name);
+    void onAttributeValuesChanged(const QStringList& attributeNames);
 
 signals:
     void columnNamesChanged();

@@ -125,7 +125,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
     connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
     connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
-        &GraphModel::onAttributeValuesChanged, Qt::DirectConnection);
+        &GraphModel::attributeValuesChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
@@ -1026,10 +1026,4 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
     auto addedAttributeNames = u::setDifference(u::keysFor(_->_attributes), _->_previousDynamicAttributeNames);
 
     emit attributesChanged(u::toQStringList(addedAttributeNames), u::toQStringList(removedAttributeNames));
-}
-
-void GraphModel::onAttributeValuesChanged(const QStringList& attributeNames)
-{
-    for(const auto& attributeName : attributeNames)
-        emit attributeValuesChanged(attributeName);
 }
