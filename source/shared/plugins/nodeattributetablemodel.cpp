@@ -25,8 +25,8 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
     connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
             this, SLOT(onAttributesChanged(const QStringList&, const QStringList&)), Qt::DirectConnection);
-    connect(modelQObject, SIGNAL(attributeValuesChanged(const QString&)),
-            this, SLOT(onAttributeValuesChanged(const QString&)), Qt::DirectConnection);
+    connect(modelQObject, SIGNAL(attributeValuesChanged(const QStringList&)),
+            this, SLOT(onAttributeValuesChanged(const QStringList&)), Qt::DirectConnection);
 
     auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
@@ -142,9 +142,14 @@ void NodeAttributeTableModel::onUpdateRoleComplete(int role)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
+    size_t index = role - (Qt::UserRole + 1);
+
+    Q_ASSERT(index < _data.size() && index < _pendingData.size());
+    if(index >= _data.size() || index >= _pendingData.size())
+        return;
+
     emit layoutAboutToBeChanged();
-    int column = role - (Qt::UserRole + 1);
-    _data.at(column) = _pendingData.at(column);
+    _data.at(index) = _pendingData.at(index);
 
     //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
     // for some reason it's not, even with https://codereview.qt-project.org/#/c/219278/
@@ -240,7 +245,20 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
     auto filteredRemoved = currentRoleNames.toSet().intersect(removed.toSet()).toList();
 
     if(added.isEmpty() && filteredRemoved.isEmpty())
+    {
+        // There is no structural change to the table, but some roles' values
+        // may have changed, so we need to update these individually
+        while(!_rolesRequiringUpdates.empty())
+        {
+            updateRole(_rolesRequiringUpdates.back());
+            _rolesRequiringUpdates.pop_back();
+        }
+
         return;
+    }
+
+    // Any roles requiring an update will be taken care of en-masse, in onUpdateComplete
+    _rolesRequiringUpdates.clear();
 
     for(const auto& name : filteredRemoved)
     {
@@ -269,12 +287,16 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::onAttributeValuesChanged(const QString& name)
+void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attributeNames)
 {
-    if(u::contains(_roleNames.values(), name.toUtf8()))
+    for(const auto& attributeName : attributeNames)
     {
-        int role = _roleNames.key(name.toUtf8());
-        updateRole(role);
+        if(!u::contains(_roleNames.values(), attributeName.toUtf8()))
+            continue;
+
+        int role = _roleNames.key(attributeName.toUtf8());
+        _rolesRequiringUpdates.push_back(role);
+
     }
 }
 

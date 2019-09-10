@@ -142,13 +142,12 @@ private slots:
     void onMutableGraphChanged(const Graph* graph);
     void onTransformedGraphWillChange(const Graph* graph);
     void onTransformedGraphChanged(const Graph* graph);
-    void onAttributeValuesChanged(QStringList attributeNames);
 
 signals:
     void visualsWillChange();
     void visualsChanged();
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames);
-    void attributeValuesChanged(const QString& name);
+    void attributeValuesChanged(const QStringList& attributeNames);
 };
 
 #endif // GRAPHMODEL_H
