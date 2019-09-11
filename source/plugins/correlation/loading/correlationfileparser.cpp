@@ -345,6 +345,11 @@ bool TabularDataParser::transposed() const
 
 void TabularDataParser::setTransposed(bool transposed)
 {
+    // If we manage to get here while the rect detection is still running,
+    // wait until it has finished before proceeding
+    if(_autoDetectDataRectangleWatcher.isRunning())
+        _autoDetectDataRectangleWatcher.waitForFinished();
+
     _model.setTransposed(transposed);
     emit transposedChanged();
 }
