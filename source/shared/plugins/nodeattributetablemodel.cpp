@@ -2,6 +2,8 @@
 
 #include "userelementdata.h"
 
+#include "../crashhandler.h"
+
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/igraph.h"
@@ -43,8 +45,18 @@ QStringList NodeAttributeTableModel::columnNames() const
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
+        auto attribute = _document->graphModel()->attributeByName(attributeName);
+
+        // If this happens, there is probably something weird about the name
+        Q_ASSERT(attribute != nullptr);
+        if(attribute == nullptr)
+        {
+            S(CrashHandler)->submitMinidump(QString("Attribute not found: %1").arg(attributeName));
+            continue;
+        }
+
         // We can't show parameterised attributes in the table
-        if(_document->graphModel()->attributeByName(attributeName)->hasParameter())
+        if(attribute->hasParameter())
             continue;
 
         if(!u::contains(list, attributeName))
