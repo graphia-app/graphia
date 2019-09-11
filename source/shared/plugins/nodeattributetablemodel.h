@@ -81,6 +81,7 @@ public:
     Q_INVOKABLE virtual bool columnIsHiddenByDefault(const QString& columnName) const;
     Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
+    Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);

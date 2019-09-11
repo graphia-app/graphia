@@ -135,29 +135,22 @@ ApplicationWindow
                             {
                                 id: proxyModel
                                 sourceModel: qtObject
-                                sorters: ExpressionSorter
-                                {
-                                    property var qmlUtils: QmlUtils
-                                    sortOrder: tableView.sortIndicatorOrder
-                                    expression:
+                                sorters:
+                                [
+                                    RoleSorter
                                     {
-                                        var column = tableView.getColumn(tableView.sortIndicatorColumn);
-
-                                        if (column === null)
-                                            return false;
-
-                                        var roleName = tableView.getColumn(tableView.sortIndicatorColumn).role;
-                                        if(typeof modelLeft[roleName] === "string")
-                                        {
-                                            var comparison = qmlUtils.localeCompareStrings(modelLeft[roleName], modelRight[roleName]);
-                                            return comparison < 0;
-                                        }
-                                        else
-                                        {
-                                            return modelLeft[roleName] < modelRight[roleName];
-                                        }
+                                        enabled: qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
+                                        sortOrder: tableView.sortIndicatorOrder
+                                    },
+                                    StringSorter
+                                    {
+                                        enabled: !qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
+                                        sortOrder: tableView.sortIndicatorOrder
+                                        numericMode: true
                                     }
-                                }
+                                ]
 
                                 filters: ExpressionFilter
                                 {

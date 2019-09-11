@@ -36,6 +36,7 @@ public:
 
     void setTableData(Table data);
     Q_INVOKABLE QString resultToString(EnrichmentTableModel::Results result);
+    Q_INVOKABLE bool resultIsNumerical(EnrichmentTableModel::Results result);
 
     json toJson();
 private:
