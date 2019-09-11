@@ -30,6 +30,10 @@ UserDataVector& UserData::add(QString name)
     if(name.isEmpty())
         name = QObject::tr("Unnamed");
 
+    // These may ultimately be used as attribute names, and
+    // dots aren't allowed there
+    name.replace('.', '_');
+
     if(!u::contains(_vectorNames, name))
     {
         _vectorNames.emplace_back(name);

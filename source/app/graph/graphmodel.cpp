@@ -230,6 +230,10 @@ void GraphModel::removeDynamicAttributes()
 
 QString GraphModel::normalisedAttributeName(QString attribute) const
 {
+    // Dots in attribute names are disallowed as they conflict with
+    // the dot syntax for parameterised attributes
+    attribute.replace('.', '_');
+
     while(u::contains(_->_attributes, attribute))
     {
         int number = 1;
