@@ -1,6 +1,9 @@
 #include "availableattributesmodel.h"
 
 #include "application.h"
+
+#include "../crashhandler.h"
+
 #include "graph/graphmodel.h"
 
 #include "shared/graph/elementtype.h"
@@ -67,6 +70,14 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
         parentItem->addChild(attributeItem);
 
         const auto* attribute = graphModel.attributeByName(name);
+
+        if(attribute == nullptr)
+        {
+            // Need to understand why this is happening here
+            S(CrashHandler)->submitMinidump(QString("Attribute not found: %1").arg(name));
+            return;
+        }
+
         if(attribute->hasParameter())
         {
             _attributeItemsWithParameters.push_back(attributeItem);
