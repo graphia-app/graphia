@@ -245,6 +245,17 @@ bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) c
     return false;
 }
 
+bool NodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
+{
+    const auto* graphModel = _document->graphModel();
+    const auto* attribute = graphModel->attributeByName(columnName);
+
+    if(attribute != nullptr && attribute->isValid())
+        return attribute->valueType() & ValueType::Numerical;
+
+    return false;
+}
+
 void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);

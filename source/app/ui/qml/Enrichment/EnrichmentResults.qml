@@ -137,7 +137,22 @@ ApplicationWindow
                             {
                                 id: proxyModel
                                 sourceModel: qtObject
-                                sorters: StringSorter { numericMode: true }
+                                sorters:
+                                [
+                                    RoleSorter
+                                    {
+                                        enabled: qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
+                                        sortOrder: tableView.sortIndicatorOrder
+                                    },
+                                    StringSorter
+                                    {
+                                        enabled: !qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
+                                        sortOrder: tableView.sortIndicatorOrder
+                                        numericMode: true
+                                    }
+                                ]
 
                                 filters: ExpressionFilter
                                 {

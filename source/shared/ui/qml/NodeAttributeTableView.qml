@@ -307,9 +307,22 @@ Item
             SortFilterProxyModel
             {
                 sourceModel: root._nodeAttributesTableModel
-                sortRoleName: root.sortRoleName
-                ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
-                sorters: StringSorter { numericMode: true }
+                sorters:
+                [
+                    RoleSorter
+                    {
+                        enabled: _nodeAttributesTableModel.columnIsNumerical(roleName)
+                        roleName: root.sortRoleName
+                        sortOrder: root.sortIndicatorOrder
+                    },
+                    StringSorter
+                    {
+                        enabled: !_nodeAttributesTableModel.columnIsNumerical(roleName)
+                        roleName: root.sortRoleName
+                        sortOrder: root.sortIndicatorOrder
+                        numericMode: true
+                    }
+                ]
 
                 filterRoleName: 'nodeSelected'; filterValue: true
 

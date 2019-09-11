@@ -112,3 +112,17 @@ QString EnrichmentTableModel::resultToString(Results result)
         return {};
     }
 }
+
+bool EnrichmentTableModel::resultIsNumerical(EnrichmentTableModel::Results result)
+{
+    if(_data.empty())
+        return false;
+
+    const auto& firstRow = _data.at(0);
+    if(result > firstRow.size())
+        return false;
+
+    auto variantType = firstRow.at(result).type();
+
+    return variantType == QVariant::Double || variantType == QVariant::Int;
+}
