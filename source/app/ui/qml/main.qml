@@ -388,6 +388,15 @@ ApplicationWindow
             case showAllEdgeTextAction:      return TextState.All;
             }
         }
+        property int projection:
+        {
+            switch(projection.current)
+            {
+            default:
+            case perspecitveProjectionAction:   return Projection.Perspective;
+            case orthographicProjectionAction:  return Projection.Orthographic;
+            }
+        }
         property alias showMultiElementIndicators: toggleMultiElementIndicatorsAction.checked
     }
 
@@ -1166,6 +1175,24 @@ ApplicationWindow
         }
     }
 
+    ExclusiveGroup
+    {
+        id: projection
+
+        Action { id: perspecitveProjectionAction; text: qsTr("Perspective"); checkable: true; }
+        Action { id: orthographicProjectionAction; text: qsTr("Orthographic"); checkable: true; }
+
+        Component.onCompleted:
+        {
+            switch(visuals.projection)
+            {
+            default:
+            case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
+            case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+            }
+        }
+    }
+
     Action
     {
         id: toggleMultiElementIndicatorsAction
@@ -1547,6 +1574,12 @@ ApplicationWindow
                 MenuItem { action: hideEdgeTextAction }
                 MenuItem { action: showSelectedEdgeTextAction }
                 MenuItem { action: showAllEdgeTextAction }
+            }
+            Menu
+            {
+                title: qsTr("Projection")
+                MenuItem { action: perspecitveProjectionAction }
+                MenuItem { action: orthographicProjectionAction }
             }
             MenuItem
             {

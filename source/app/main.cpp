@@ -193,6 +193,8 @@ int start(int argc, char *argv[])
     preferences.define(QStringLiteral("visuals/savedPalettes"),                 Defaults::PALETTE_PRESETS);
     preferences.define(QStringLiteral("visuals/defaultPalette"),                Defaults::PALETTE);
 
+    preferences.define(QStringLiteral("visuals/projection"),                    QVariant::fromValue(static_cast<int>(Projection::Perspective)));
+
     preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
     preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);
 

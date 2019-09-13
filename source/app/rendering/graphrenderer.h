@@ -64,6 +64,9 @@ DEFINE_QML_ENUM(
 DEFINE_QML_ENUM(
     Q_GADGET, EdgeVisualType,
     Cylinder, Arrow);
+DEFINE_QML_ENUM(
+    Q_GADGET, Projection,
+    Perspective, Orthographic, TwoDee);
 
 template<typename Target>
 void initialiseFromGraph(const Graph*, Target&); // NOLINT

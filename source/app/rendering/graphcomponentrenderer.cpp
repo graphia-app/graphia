@@ -19,6 +19,7 @@
 #include "ui/visualisations/elementvisual.h"
 
 #include "shared/graph/elementid_debug.h"
+#include "shared/utils/preferences.h"
 
 #include <QObject>
 #include <QKeyEvent>
@@ -28,6 +29,11 @@
 #include <cmath>
 #include <mutex>
 #include <algorithm>
+
+static Projection projection()
+{
+    return static_cast<Projection>(u::pref("visuals/projection").toInt());
+}
 
 // This value should be larger than the maximum node size
 const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 3.5f;
@@ -181,13 +187,18 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
 
 float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
 {
-    float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
+    if(projection() == Projection::Perspective)
+    {
+        float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
-    if(minHalfFov > 0.0f)
-        return std::max(radius / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
+        if(minHalfFov > 0.0f)
+            return std::max(radius / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
 
-    qDebug() << "WARNING: ComponentId" << _componentId << "GraphComponentRenderer fov not set";
-    return MINIMUM_ZOOM_DISTANCE;
+        qDebug() << "WARNING: ComponentId" << _componentId << "GraphComponentRenderer fov not set";
+        return MINIMUM_ZOOM_DISTANCE;
+    }
+    else
+        return std::max(radius, MINIMUM_ZOOM_DISTANCE);
 }
 
 void GraphComponentRenderer::updateFocusPosition()
@@ -325,8 +336,21 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
     _fovy = 60.0f;
     _fovx = _fovy * aspectRatio;
 
-    _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+    if(projection() == Projection::Perspective)
+    {
+        _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+    }
+    else
+    {
+        auto horizontal = _viewData._zoomDistance * aspectRatio;
+        auto vertical = _viewData._zoomDistance;
+
+        _viewData._camera.setOrthographicProjection(-horizontal, horizontal,
+            -vertical, vertical, 0.3f, 50000.0f);
+    }
+
     _viewData._camera.setViewport(_dimensions);
+
 }
 
 bool GraphComponentRenderer::transitionActive()
