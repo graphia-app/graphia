@@ -5421,9 +5421,11 @@ protected:
   QCustomPlot *mParentPlot;
   SpacingType mSpacingType;
   double mSpacing;
+  QList<const QCPBars*> mBaseBars;
   QList<QCPBars*> mBars;
   
   // non-virtual methods:
+  void updateBaseBars();
   void registerBars(QCPBars *bars);
   void unregisterBars(QCPBars *bars);
   
