@@ -35,8 +35,8 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 {
     BasePluginInstance::initialise(plugin, document, parserThread);
 
-    auto graphModel = document->graphModel();
-    _userNodeData.initialise(graphModel->mutableGraph());
+    _graphModel = document->graphModel();
+    _userNodeData.initialise(_graphModel->mutableGraph());
 
     if(_transpose)
     {
@@ -47,7 +47,11 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     else
         _nodeAttributeTableModel.initialise(document, &_userNodeData, &_dataColumnNames, &_data);
 
-    _correlationValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
+    _correlationValues = std::make_unique<EdgeArray<double>>(_graphModel->mutableGraph());
+
+    auto modelQObject = dynamic_cast<const QObject*>(_graphModel);
+    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
+            this, SIGNAL(sharedValuesAttributeNamesChanged()));
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
@@ -272,6 +276,21 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
     document()->highlightNodes(highlightedNodeIds);
 
     emit highlightedRowsChanged();
+}
+
+QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
+{
+    QStringList attributeNames;
+
+    for(const auto& attributeName : _graphModel->attributeNames())
+    {
+        const auto* attribute = _graphModel->attributeByName(attributeName);
+
+        if(!attribute->sharedValues().empty())
+            attributeNames.append(attributeName);
+    }
+
+    return attributeNames;
 }
 
 std::vector<CorrelationEdge> CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
@@ -534,6 +553,17 @@ QColor CorrelationPluginInstance::nodeColorForRow(int row) const
         return {};
 
     return graphModel()->nodeVisual(nodeId).outerColor();
+}
+
+QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, int row) const
+{
+    const auto* attribute = _graphModel->attributeByName(attributeName);
+    auto nodeId = _userNodeData.elementIdForIndex(row);
+
+    if(attribute == nullptr || nodeId.isNull())
+        return {};
+
+    return attribute->stringValueOf(nodeId);
 }
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const

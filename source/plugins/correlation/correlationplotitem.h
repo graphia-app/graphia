@@ -128,6 +128,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString plotAveragingAttributeName MEMBER _plotAveragingAttributeName
+        WRITE setPlotAveragingAttributeName NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
         WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
@@ -160,6 +162,7 @@ public:
     void setIncludeYZero(bool includeYZero);
     void setShowAllColumns(bool showAllColumns);
     void setPlotAveragingType(int plotAveragingType);
+    void setPlotAveragingAttributeName(const QString& attributeName);
     void setPlotDispersionVisualType(int plotDispersionVisualType);
 
 protected:
@@ -194,7 +197,7 @@ private:
     QCPAxisRect* _mainAxisRect = nullptr;
     QCPAxis* _mainXAxis = nullptr;
     QCPAxis* _mainYAxis = nullptr;
-    QCPAbstractPlottable* _meanPlot = nullptr;
+    QVector<QCPAbstractPlottable*> _meanPlots;
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
 
@@ -207,6 +210,7 @@ private:
     bool _showLegend = false;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
+    QString _plotAveragingAttributeName;
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
     int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     int _columnSortType = static_cast<int>(PlotColumnSortType::Natural);
@@ -281,7 +285,7 @@ private:
 
     void computeXAxisRange();
     void setYAxisRange(double min, double max);
-    QVector<double> meanAverageData(double& min, double& max);
+    QVector<double> meanAverageData(double& min, double& max, const QVector<int>& rows);
 
     void updateColumnAnnotationVisibility();
     bool canShowColumnAnnotationSelection() const;

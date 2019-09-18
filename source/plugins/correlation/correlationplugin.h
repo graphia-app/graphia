@@ -2,6 +2,7 @@
 #define CORRELATIONPLUGIN_H
 
 #include "shared/plugins/baseplugin.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
@@ -36,6 +37,9 @@ class CorrelationPluginInstance : public BasePluginInstance
 
     Q_PROPERTY(QStringList columnAnnotationNames READ columnAnnotationNames NOTIFY columnAnnotationNamesChanged)
 
+    Q_PROPERTY(QStringList sharedValuesAttributeNames READ sharedValuesAttributeNames
+        NOTIFY sharedValuesAttributeNamesChanged)
+
     Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
@@ -43,6 +47,8 @@ public:
     CorrelationPluginInstance();
 
 private:
+    IGraphModel* _graphModel = nullptr;
+
     size_t _numColumns = 0;
     size_t _numRows = 0;
 
@@ -102,6 +108,8 @@ private:
 
     void setHighlightedRows(const QVector<int>& highlightedRows);
 
+    QStringList sharedValuesAttributeNames() const;
+
 public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
@@ -131,6 +139,8 @@ public:
 
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
 
+    QString attributeValueFor(const QString& attributeName, int row) const;
+
     QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;
 
@@ -140,6 +150,7 @@ private slots:
 
 signals:
     void columnAnnotationNamesChanged();
+    void sharedValuesAttributeNamesChanged();
     void nodeColorsChanged();
     void highlightedRowsChanged();
 };
@@ -161,7 +172,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 3; }
+    int dataVersion() const override { return 4; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

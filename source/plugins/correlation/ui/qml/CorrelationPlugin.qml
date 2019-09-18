@@ -289,6 +289,11 @@ PluginContent
         id: sortByExclusiveGroup
     }
 
+    ExclusiveGroup
+    {
+        id: sharedValuesAttributeExclusiveGroup
+    }
+
     Action
     {
         id: savePlotImageAction
@@ -362,6 +367,20 @@ PluginContent
         onAccepted: plot.yAxisLabel = yAxisTextField.text;
     }
 
+    Connections
+    {
+        target: plugin.model
+        onSharedValuesAttributeNamesChanged:
+        {
+            if(!plugin.model.sharedValuesAttributeNames.includes(
+                plot.plotAveragingAttributeName))
+            {
+                // The averaging attribute doesn't exist any more, so unset it
+                plot.plotAveragingAttributeName = "";
+            }
+        }
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -406,6 +425,40 @@ PluginContent
             averagingMenu.addItem("").action = medianLineAverage;
             averagingMenu.addItem("").action = meanHistogramAverage;
             averagingMenu.addItem("").action = iqrAverage;
+
+            averagingMenu.addSeparator();
+
+            var sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
+            var allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
+            allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
+            allAttributesMenuItem.checkable = true;
+            allAttributesMenuItem.checked = Qt.binding(function()
+            {
+                return plot.plotAveragingAttributeName.length === 0;
+            });
+            allAttributesMenuItem.triggered.connect(function()
+            {
+                plot.plotAveragingAttributeName = "";
+            });
+
+            sharedValuesAttributesMenu.addSeparator();
+
+            plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+            {
+                var attributeMenuItem = sharedValuesAttributesMenu.addItem(attributeName);
+
+                attributeMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
+                attributeMenuItem.checkable = true;
+                attributeMenuItem.checked = Qt.binding(function()
+                {
+                    return attributeName === plot.plotAveragingAttributeName;
+                });
+
+                attributeMenuItem.triggered.connect(function()
+                {
+                    plot.plotAveragingAttributeName = attributeName;
+                });
+            });
 
             var dispersionMenu = menu.addMenu(qsTr("Dispersion"));
             dispersionMenu.addItem("").action = noDispersion;
@@ -699,6 +752,7 @@ PluginContent
 
             "plotScaling": plot.plotScaleType,
             "plotAveraging": plot.plotAveragingType,
+            "plotAveragingAttributeName": plot.plotAveragingAttributeName,
             "plotDispersion": plot.plotDispersionType,
             "plotDispersionVisual": plot.plotDispersionVisualType,
 
@@ -718,26 +772,27 @@ PluginContent
 
     function load(data, version)
     {
-        if(data.sideBySide !== undefined)               toggleUiOrientationAction.checked = data.sideBySide;
-        if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
-        if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
-        if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
+        if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
+        if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)                tableView.hiddenColumns = data.hiddenColumns;
 
-        if(data.showColumnNames !== undefined)          plot.showColumnNames = data.showColumnNames;
+        if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
 
-        if(data.plotScaling !== undefined)              plot.plotScaleType = data.plotScaling;
-        if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
-        if(data.plotDispersion !== undefined)           plot.plotDispersionType = data.plotDispersion;
-        if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
+        if(data.plotScaling !== undefined)                  plot.plotScaleType = data.plotScaling;
+        if(data.plotAveraging !== undefined)                plot.plotAveragingType = data.plotAveraging;
+        if(data.plotAveragingAttributeName !== undefined)   plot.plotAveragingAttributeName = data.plotAveragingAttributeName;
+        if(data.plotDispersion !== undefined)               plot.plotDispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)         plot.plotDispersionVisualType = data.plotDispersionVisual;
 
-        if(data.plotIncludeYZero !== undefined)         plot.includeYZero = data.plotIncludeYZero;
-        if(data.plotShowAllColumns !== undefined)       plot.showAllColumns = data.plotShowAllColumns;
+        if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotShowAllColumns !== undefined)           plot.showAllColumns = data.plotShowAllColumns;
 
-        if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
-        if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
+        if(data.plotLegend !== undefined)                   plot.showLegend = data.plotLegend;
+        if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
 
-        if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
-        if(data.plotColumnSortType !== undefined)       plot.columnSortType = data.plotColumnSortType;
-        if(data.plotColumnSortAnnotation !== undefined) plot.columnSortAnnotation = data.plotColumnSortAnnotation;
+        if(data.columnAnnotations !== undefined)            plot.visibleColumnAnnotationNames = data.columnAnnotations;
+        if(data.plotColumnSortType !== undefined)           plot.columnSortType = data.plotColumnSortType;
+        if(data.plotColumnSortAnnotation !== undefined)     plot.columnSortAnnotation = data.plotColumnSortAnnotation;
     }
 }

@@ -1771,6 +1771,7 @@ ApplicationWindow
     onCurrentDocumentChanged:
     {
         updatePluginMenus();
+
         if(currentDocument !== null)
             enrichmentResults.models = currentDocument.enrichmentTableModels;
     }
@@ -1804,6 +1805,9 @@ ApplicationWindow
             enrichmentResults.models = currentDocument.enrichmentTableModels;
         }
         onEnrichmentAnalysisComplete: { enrichmentResults.visible = true; }
+
+        // Plugin menus may reference attributes, so regenerate menus when these change
+        onSharedValuesAttributeNamesChanged: updatePluginMenus();
     }
 
     toolBar: ToolBar

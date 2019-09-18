@@ -556,18 +556,14 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
     routeWheelEvent(event);
 }
 
-QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
+QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, const QVector<int>& rows)
 {
-    min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::lowest();
-
     // Use Average Calculation
-    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
+    QVector<double> yDataAvg; yDataAvg.reserve(rows.size());
 
     for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
     {
-        const auto& selectedRows = qAsConst(_selectedRows);
-        double runningTotal = std::accumulate(selectedRows.begin(), selectedRows.end(), 0.0,
+        double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
             return partial + _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
@@ -578,6 +574,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
         max = std::max(max, yDataAvg.back());
         min = std::min(min, yDataAvg.back());
     }
+
     return yDataAvg;
 }
 
@@ -604,39 +601,82 @@ bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
     return mainPlotHeight >= minimumHeight();
 }
 
+static QColor colorForRows(const CorrelationPluginInstance* pluginInstance, const QVector<int>& rows)
+{
+    Q_ASSERT(!rows.isEmpty());
+
+    auto color = pluginInstance->nodeColorForRow(rows.at(0));
+
+    for(auto row : rows)
+    {
+        if(pluginInstance->nodeColorForRow(row) != color)
+        {
+            // The colours are not consistent, so just use black
+            color = Qt::black;
+            break;
+        }
+    }
+
+    return color;
+}
+
+template<typename Fn>
+void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
+    const QString& nameTemplate, const QString& attributeName,
+    const QVector<int>& selectedRows, Fn&& addPlotFn)
+{
+    QMap<QString, QVector<int>> map;
+    for(auto selectedRow : selectedRows)
+    {
+        const auto value = pluginInstance->attributeValueFor(attributeName, selectedRow);
+        map[value].append(selectedRow);
+    }
+
+    for(const auto& value : map.keys())
+    {
+        const auto& rows = map.value(value);
+        auto color = colorForRows(pluginInstance, rows);
+
+        addPlotFn(color, nameTemplate.arg(attributeName, value), rows);
+    }
+}
+
 void CorrelationPlotItem::populateMeanLinePlot()
 {
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    auto* graph = _customPlot.addGraph();
-    graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
-    graph->setName(tr("Mean average of selection"));
+    auto addMeanPlot =
+    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
+    {
+        auto* graph = _customPlot.addGraph();
+        graph->setPen(QPen(color, 2.0, Qt::DashLine));
+        graph->setName(name);
 
-    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
-    // xData is just the column indices
-    std::iota(std::begin(xData), std::end(xData), 0);
+        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        // xData is just the column indices
+        std::iota(std::begin(xData), std::end(xData), 0);
 
-    // Use Average Calculation and set min / max
-    QVector<double> yDataAvg = meanAverageData(minY, maxY);
+        // Use Average Calculation and set min / max
+        QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
 
-    graph->setData(xData, yDataAvg, true);
+        graph->setData(xData, yDataAvg, true);
 
-    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_tooltipLayer);
-    plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    plotModeTextElement->setFont(_defaultFont9Pt);
-    plotModeTextElement->setTextColor(Qt::gray);
-    plotModeTextElement->setText(
-        QString(tr("*Mean average plot of %1 rows"))
-                .arg(_selectedRows.length()));
-    plotModeTextElement->setVisible(true);
+        _meanPlots.append(graph);
+    };
 
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
+    if(!_plotAveragingAttributeName.isEmpty())
+    {
+        addPlotPerAttributeValue(_pluginInstance, tr("Mean average of %1: %2"),
+            _plotAveragingAttributeName, _selectedRows, addMeanPlot);
+    }
+    else
+    {
+        addMeanPlot(colorForRows(_pluginInstance, _selectedRows),
+            tr("Mean average of selection"), _selectedRows);
+    }
 
     setYAxisRange(minY, maxY);
-
-    _meanPlot = graph;
 }
 
 void CorrelationPlotItem::populateMedianLinePlot()
@@ -644,60 +684,62 @@ void CorrelationPlotItem::populateMedianLinePlot()
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    auto* graph = _customPlot.addGraph();
-    graph->setPen(QPen(Qt::black, 2.0, Qt::DashLine));
-    graph->setName(tr("Median average of selection"));
-
-    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
-    // xData is just the column indices
-    std::iota(std::begin(xData), std::end(xData), 0);
-
-    QVector<double> rowsEntries(_selectedRows.length());
-    QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numColumns()));
-
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
+    auto addMedianPlot =
+    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
     {
-        rowsEntries.clear();
-        const auto& selectedRows = qAsConst(_selectedRows);
-        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
-        [this, col](auto row)
+        auto* graph = _customPlot.addGraph();
+        graph->setPen(QPen(color, 2.0, Qt::DashLine));
+        graph->setName(name);
+
+        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        // xData is just the column indices
+        std::iota(std::begin(xData), std::end(xData), 0);
+
+        QVector<double> rowsEntries(_selectedRows.length());
+        QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numColumns()));
+
+        for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
         {
-            return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
-        });
+            rowsEntries.clear();
+            std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
+            [this, col](auto row)
+            {
+                return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+            });
 
-        if(!_selectedRows.empty())
-        {
-            std::sort(rowsEntries.begin(), rowsEntries.end());
-            double median = 0.0;
-            if(rowsEntries.length()  % 2 == 0)
-                median = (rowsEntries[rowsEntries.length() / 2 - 1] + rowsEntries[rowsEntries.length() / 2]) / 2.0;
-            else
-                median = rowsEntries[rowsEntries.length() / 2];
+            if(!_selectedRows.empty())
+            {
+                std::sort(rowsEntries.begin(), rowsEntries.end());
+                double median = 0.0;
+                if(rowsEntries.length()  % 2 == 0)
+                    median = (rowsEntries[rowsEntries.length() / 2 - 1] + rowsEntries[rowsEntries.length() / 2]) / 2.0;
+                else
+                    median = rowsEntries[rowsEntries.length() / 2];
 
-            yDataAvg[col] = median;
+                yDataAvg[col] = median;
 
-            maxY = std::max(maxY, yDataAvg[col]);
-            minY = std::min(minY, yDataAvg[col]);
+                maxY = std::max(maxY, yDataAvg[col]);
+                minY = std::min(minY, yDataAvg[col]);
+            }
         }
+
+        graph->setData(xData, yDataAvg, true);
+
+        _meanPlots.append(graph);
+    };
+
+    if(!_plotAveragingAttributeName.isEmpty())
+    {
+        addPlotPerAttributeValue(_pluginInstance, tr("Median average of %1: %2"),
+            _plotAveragingAttributeName, _selectedRows, addMedianPlot);
+    }
+    else
+    {
+        addMedianPlot(colorForRows(_pluginInstance, _selectedRows),
+            tr("Median average of selection"), _selectedRows);
     }
 
-    graph->setData(xData, yDataAvg, true);
-
-    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_tooltipLayer);
-    plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    plotModeTextElement->setFont(_defaultFont9Pt);
-    plotModeTextElement->setTextColor(Qt::gray);
-    plotModeTextElement->setText(
-        QString(tr("*Median average plot of %1 rows")
-                .arg(_selectedRows.length())));
-    plotModeTextElement->setVisible(true);
-
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
-
     setYAxisRange(minY, maxY);
-
-    _meanPlot = graph;
 }
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
@@ -708,32 +750,58 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
-    // xData is just the column indices
-    std::iota(std::begin(xData), std::end(xData), 0);
+    auto addMeanBars =
+    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
+    {
+        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        // xData is just the column indices
+        std::iota(std::begin(xData), std::end(xData), 0);
 
-    // Use Average Calculation and set min / max
-    QVector<double> yDataAvg = meanAverageData(minY, maxY);
+        // Use Average Calculation and set min / max
+        QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
 
-    auto* histogramBars = new QCPBars(_mainXAxis, _mainYAxis);
-    histogramBars->setName(tr("Mean histogram of selection"));
-    histogramBars->setData(xData, yDataAvg, true);
+        auto* histogramBars = new QCPBars(_mainXAxis, _mainYAxis);
+        histogramBars->setName(name);
+        histogramBars->setData(xData, yDataAvg, true);
+        histogramBars->setPen(QPen(color.darker(150)));
 
-    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_tooltipLayer);
-    plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    plotModeTextElement->setFont(_defaultFont9Pt);
-    plotModeTextElement->setTextColor(Qt::gray);
-    plotModeTextElement->setText(
-        QString(tr("*Mean histogram of %1 rows"))
-                .arg(_selectedRows.length()));
-    plotModeTextElement->setVisible(true);
+        auto innerColor = color.lighter(110);
 
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
+        // If the value is 0, i.e. the color is black, .lighter won't have
+        // had any effect, so just pick an arbitrary higher value
+        if(innerColor.value() == 0)
+            innerColor.setHsv(innerColor.hue(), innerColor.saturation(), 92);
+
+        histogramBars->setBrush(innerColor);
+
+        setYAxisRange(minY, maxY);
+
+        _meanPlots.append(histogramBars);
+    };
+
+    if(!_plotAveragingAttributeName.isEmpty())
+    {
+        addPlotPerAttributeValue(_pluginInstance, tr("Median histogram of %1: %2"),
+            _plotAveragingAttributeName, _selectedRows, addMeanBars);
+
+        auto barsGroup = new QCPBarsGroup(&_customPlot);
+        barsGroup->setSpacingType(QCPBarsGroup::stAbsolute);
+        barsGroup->setSpacing(1.0);
+
+        for(auto* plottable : _meanPlots)
+        {
+            auto bars = dynamic_cast<QCPBars*>(plottable);
+            bars->setWidth(bars->width() / _meanPlots.size());
+            barsGroup->append(bars);
+        }
+    }
+    else
+    {
+        addMeanBars(colorForRows(_pluginInstance, _selectedRows),
+            tr("Mean histogram of selection"), _selectedRows);
+    }
 
     setYAxisRange(minY, maxY);
-
-    _meanPlot = histogramBars;
 }
 
 static double medianOf(const QVector<double>& sortedData)
@@ -826,81 +894,72 @@ void CorrelationPlotItem::populateIQRPlot()
         }
     }
 
-    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_tooltipLayer);
-    plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    plotModeTextElement->setFont(_defaultFont9Pt);
-    plotModeTextElement->setTextColor(Qt::gray);
-    plotModeTextElement->setText(
-        QString(tr("*Median IQR box plots of %1 rows"))
-                .arg(_selectedRows.length()));
-    plotModeTextElement->setVisible(true);
-
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
-
     setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
 {
-    if(_meanPlot == nullptr)
+    if(_meanPlots.isEmpty())
         return;
-
-    auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
-    if(visualType == PlotDispersionVisualType::Bars)
-    {
-        auto* stdDevBars = new QCPErrorBars(_mainXAxis, _mainYAxis);
-        stdDevBars->setName(name);
-        stdDevBars->setSelectable(QCP::SelectionType::stNone);
-        stdDevBars->setAntialiased(false);
-        stdDevBars->setDataPlottable(_meanPlot);
-        stdDevBars->setData(stdDevs);
-    }
-    else if(visualType == PlotDispersionVisualType::Area)
-    {
-        auto* devTop = new QCPGraph(_mainXAxis, _mainYAxis);
-        auto* devBottom = new QCPGraph(_mainXAxis, _mainYAxis);
-        devTop->setName(QStringLiteral("%1 Top").arg(name));
-        devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
-
-        auto fillColour = _meanPlot->pen().color();
-        auto penColour = _meanPlot->pen().color().lighter(150);
-        fillColour.setAlpha(50);
-        penColour.setAlpha(120);
-
-        devTop->setChannelFillGraph(devBottom);
-        devTop->setBrush(QBrush(fillColour));
-        devTop->setPen(QPen(penColour));
-
-        devBottom->setPen(QPen(penColour));
-
-        devBottom->setSelectable(QCP::SelectionType::stNone);
-        devTop->setSelectable(QCP::SelectionType::stNone);
-
-        auto topErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
-        auto bottomErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
-
-        for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
-        {
-            topErr[i] = _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
-            bottomErr[i] = _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
-        }
-
-        // xData is just the column indices
-        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
-        std::iota(std::begin(xData), std::end(xData), 0);
-
-        devTop->setData(xData, topErr);
-        devBottom->setData(xData, bottomErr);
-    }
 
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
+    for(auto* meanPlot : _meanPlots)
     {
-        minY = std::min(minY, _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
-        maxY = std::max(maxY, _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
+        auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
+        if(visualType == PlotDispersionVisualType::Bars)
+        {
+            auto* stdDevBars = new QCPErrorBars(_mainXAxis, _mainYAxis);
+            stdDevBars->setName(name);
+            stdDevBars->setSelectable(QCP::SelectionType::stNone);
+            stdDevBars->setAntialiased(false);
+            stdDevBars->setDataPlottable(meanPlot);
+            stdDevBars->setData(stdDevs);
+        }
+        else if(visualType == PlotDispersionVisualType::Area)
+        {
+            auto* devTop = new QCPGraph(_mainXAxis, _mainYAxis);
+            auto* devBottom = new QCPGraph(_mainXAxis, _mainYAxis);
+            devTop->setName(QStringLiteral("%1 Top").arg(name));
+            devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
+
+            auto fillColour = meanPlot->pen().color();
+            auto penColour = meanPlot->pen().color().lighter(150);
+            fillColour.setAlpha(50);
+            penColour.setAlpha(120);
+
+            devTop->setChannelFillGraph(devBottom);
+            devTop->setBrush(QBrush(fillColour));
+            devTop->setPen(QPen(penColour));
+
+            devBottom->setPen(QPen(penColour));
+
+            devBottom->setSelectable(QCP::SelectionType::stNone);
+            devTop->setSelectable(QCP::SelectionType::stNone);
+
+            auto topErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
+            auto bottomErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
+
+            for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
+            {
+                topErr[i] = meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
+                bottomErr[i] = meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
+            }
+
+            // xData is just the column indices
+            QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+            std::iota(std::begin(xData), std::end(xData), 0);
+
+            devTop->setData(xData, topErr);
+            devBottom->setData(xData, bottomErr);
+        }
+
+        for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
+        {
+            minY = std::min(minY, meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
+            maxY = std::max(maxY, meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
+        }
     }
 
     setYAxisRange(minY, maxY);
@@ -1347,7 +1406,7 @@ void CorrelationPlotItem::rebuildPlot()
         _customPlot.removePlottable(plottable);
     }
 
-    _meanPlot = nullptr;
+    _meanPlots.clear();
     _columnAnnotationsAxisRect = nullptr;
 
     // Return the plot layout to its immediate post-construction state
@@ -1520,6 +1579,13 @@ void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
 {
     _plotAveragingType = plotAveragingType;
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
+void CorrelationPlotItem::setPlotAveragingAttributeName(const QString& attributeName)
+{
+    _plotAveragingAttributeName = attributeName;
     emit plotOptionsChanged();
     rebuildPlot();
 }
