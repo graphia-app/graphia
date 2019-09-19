@@ -210,6 +210,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     _itemTracer->setVisible(true);
     _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
     _itemTracer->setClipToAxisRect(false);
+    _customPlot.setSelectionTolerance(24);
 
     setFlag(QQuickItem::ItemHasContents, true);
 
@@ -371,6 +372,88 @@ void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
     routeMouseEvent(event);
 }
 
+QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& keyCoord)
+{
+    QCPAbstractPlottable* nearestPlottable = nullptr;
+
+    if(_hoverPoint.x() >= 0.0 && _hoverPoint.y() >= 0.0)
+    {
+        QVariant details;
+
+        const auto axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
+        auto minDistanceSq = std::numeric_limits<double>::max();
+
+        for(int index = 0; index < _customPlot.plottableCount(); index++)
+        {
+            auto* plottable = _customPlot.plottable(index);
+
+            if(!plottable->selectable())
+                continue;
+
+            const auto* plottablKeyAxisRect = plottable->keyAxis()->axisRect();
+            if(plottablKeyAxisRect != axisRectUnderCursor)
+                continue;
+
+            const auto rect = plottablKeyAxisRect->rect().intersected(
+                plottable->valueAxis()->axisRect()->rect());
+
+            if(!rect.contains(_hoverPoint.toPoint()))
+                continue;
+
+            auto graph = dynamic_cast<QCPGraph*>(plottable);
+            if(graph != nullptr)
+            {
+                double posKeyMin, posKeyMax, dummy;
+
+                QPointF tolerancePoint(_customPlot.selectionTolerance(),
+                    _customPlot.selectionTolerance());
+
+                plottable->pixelsToCoords(_hoverPoint - tolerancePoint, posKeyMin, dummy);
+                plottable->pixelsToCoords(_hoverPoint + tolerancePoint, posKeyMax, dummy);
+
+                if(posKeyMin > posKeyMax)
+                    std::swap(posKeyMin, posKeyMax);
+
+                QCPGraphDataContainer::const_iterator begin = graph->data()->findBegin(posKeyMin, true);
+                QCPGraphDataContainer::const_iterator end = graph->data()->findEnd(posKeyMax, true);
+
+                for(QCPGraphDataContainer::const_iterator it = begin; it != end; ++it)
+                {
+                    const auto distanceSq = QCPVector2D(plottable->coordsToPixels(
+                        it->key, it->value) - _hoverPoint).lengthSquared();
+
+                    if(distanceSq < minDistanceSq)
+                    {
+                        minDistanceSq = distanceSq;
+                        nearestPlottable = plottable;
+
+                        keyCoord = it - graph->data()->constBegin();
+                    }
+                }
+            }
+            else
+            {
+                const auto distanceSq = plottable->selectTest(_hoverPoint, false, &details);
+
+                if(distanceSq >= 0.0 && distanceSq < minDistanceSq)
+                {
+                    minDistanceSq = distanceSq;
+                    nearestPlottable = plottable;
+
+                    auto dataSelection = qvariant_cast<QCPDataSelection>(details);
+                    keyCoord = dataSelection.dataRange().begin();
+                }
+            }
+        }
+
+        double toleranceSq = _customPlot.selectionTolerance() * _customPlot.selectionTolerance();
+        if(minDistanceSq > toleranceSq)
+            return nullptr;
+    }
+
+    return nearestPlottable;
+}
+
 void CorrelationPlotItem::updateTooltip()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
@@ -386,18 +469,12 @@ void CorrelationPlotItem::updateTooltip()
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
     QCPAxisRect* axisRectUnderCursor = nullptr;
 
+    double xCoord = -1.0;
+
     if(_hoverPoint.x() >= 0.0 && _hoverPoint.y() >= 0.0)
     {
         axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
-        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
-
-        if(plottableUnderCursor != nullptr &&
-            plottableUnderCursor->keyAxis()->axisRect() != axisRectUnderCursor)
-        {
-            // The plottable under the cursor is not on the axisRect
-            // under the cursor (!?)
-            plottableUnderCursor = nullptr;
-        }
+        plottableUnderCursor = abstractPlottableUnderCursor(xCoord);
     }
 
     bool showTooltip = false;
@@ -406,24 +483,22 @@ void CorrelationPlotItem::updateTooltip()
 
     if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
     {
-        if(axisRectUnderCursor == _mainAxisRect)
+        if(axisRectUnderCursor == _mainAxisRect && plottableUnderCursor != nullptr)
         {
             if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
             {
                 _itemTracer->setGraph(graph);
-                _itemTracer->setGraphKey(_mainXAxis->pixelToCoord(_hoverPoint.x()));
+                _itemTracer->setGraphKey(xCoord);
                 showTooltip = true;
             }
             else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
             {
-                auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
                 _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
                 showTooltip = true;
             }
             else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
             {
                 // Only show simple tooltips for now, can extend this later...
-                auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
                 _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
                 showTooltip = true;
             }

@@ -306,6 +306,8 @@ private:
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 
+    QCPAbstractPlottable* abstractPlottableUnderCursor(double& keyCoord);
+
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);
     void updatePlotSize();
