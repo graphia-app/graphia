@@ -703,7 +703,11 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     for(auto selectedRow : selectedRows)
     {
         const auto value = pluginInstance->attributeValueFor(attributeName, selectedRow);
-        map[value].append(selectedRow);
+
+        if(!map.contains(value))
+            map.insert(value, {})->reserve(selectedRows.size());
+        else
+            map[value].append(selectedRow);
     }
 
     const auto keys = map.keys();
