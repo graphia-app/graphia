@@ -429,6 +429,11 @@ PluginContent
             averagingMenu.addSeparator();
 
             var sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
+            sharedValuesAttributesMenu.enabled = Qt.binding(function()
+            {
+                return plot.plotAveragingType !== PlotAveragingType.Individual &&
+                    plot.plotAveragingType !== PlotAveragingType.IQRPlot;
+            });
             var allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
             allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
             allAttributesMenuItem.checkable = true;
