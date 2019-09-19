@@ -677,7 +677,8 @@ bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
 
 static QColor colorForRows(const CorrelationPluginInstance* pluginInstance, const QVector<int>& rows)
 {
-    Q_ASSERT(!rows.isEmpty());
+    if(rows.isEmpty())
+        return {};
 
     auto color = pluginInstance->nodeColorForRow(rows.at(0));
 
