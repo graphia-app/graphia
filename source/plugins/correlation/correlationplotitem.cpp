@@ -387,7 +387,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
         {
             auto* plottable = _customPlot.plottable(index);
 
-            if(!plottable->selectable())
+            if(plottable->selectable() == QCP::SelectionType::stNone)
                 continue;
 
             const auto* plottablKeyAxisRect = plottable->keyAxis()->axisRect();
@@ -427,7 +427,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
                         minDistanceSq = distanceSq;
                         nearestPlottable = plottable;
 
-                        keyCoord = it - graph->data()->constBegin();
+                        keyCoord = std::distance(graph->data()->constBegin(), it);
                     }
                 }
             }
@@ -493,13 +493,13 @@ void CorrelationPlotItem::updateTooltip()
             }
             else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
             {
-                _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+                _itemTracer->position->setPixelPosition(bars->dataPixelPosition(static_cast<int>(xCoord)));
                 showTooltip = true;
             }
             else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
             {
                 // Only show simple tooltips for now, can extend this later...
-                _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+                _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(static_cast<int>(xCoord)));
                 showTooltip = true;
             }
         }
@@ -707,7 +707,8 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
         map[value].append(selectedRow);
     }
 
-    for(const auto& value : map.keys())
+    const auto keys = map.keys();
+    for(const auto& value : keys)
     {
         const auto& rows = map.value(value);
         auto color = colorForRows(pluginInstance, rows);
@@ -722,7 +723,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     auto addMeanPlot =
-    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
+    [this, &minY, &maxY](const QColor& color, const QString& name, const QVector<int>& rows)
     {
         auto* graph = _customPlot.addGraph();
         graph->setPen(QPen(color, 2.0, Qt::DashLine));
@@ -760,7 +761,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     auto addMedianPlot =
-    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
+    [this, &minY, &maxY](const QColor& color, const QString& name, const QVector<int>& rows)
     {
         auto* graph = _customPlot.addGraph();
         graph->setPen(QPen(color, 2.0, Qt::DashLine));
@@ -826,7 +827,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     auto addMeanBars =
-    [this, &minY, &maxY](QColor color, const QString& name, const QVector<int>& rows)
+    [this, &minY, &maxY](const QColor& color, const QString& name, const QVector<int>& rows)
     {
         QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
         // xData is just the column indices
@@ -863,7 +864,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         barsGroup->setSpacingType(QCPBarsGroup::stAbsolute);
         barsGroup->setSpacing(1.0);
 
-        for(auto* plottable : _meanPlots)
+        for(auto* plottable : qAsConst(_meanPlots))
         {
             auto bars = dynamic_cast<QCPBars*>(plottable);
             bars->setWidth(bars->width() / _meanPlots.size());
@@ -980,7 +981,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    for(auto* meanPlot : _meanPlots)
+    for(auto* meanPlot : qAsConst(_meanPlots))
     {
         auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
         if(visualType == PlotDispersionVisualType::Bars)
