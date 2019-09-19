@@ -11,8 +11,7 @@
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent)
 {
-    //FIXME commented until QTBUG-70148 is fixed
-    //setRenderTarget(RenderTarget::FramebufferObject);
+    setRenderTarget(RenderTarget::FramebufferObject);
 
     _customPlot.setOpenGl(true);
 
