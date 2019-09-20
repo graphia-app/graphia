@@ -386,6 +386,9 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
         {
             auto* plottable = _customPlot.plottable(index);
 
+            if(plottable == nullptr)
+                continue;
+
             if(plottable->selectable() == QCP::SelectionType::stNone)
                 continue;
 
@@ -704,7 +707,7 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     for(auto selectedRow : selectedRows)
     {
         const auto value = pluginInstance->attributeValueFor(attributeName, selectedRow);
-        map[value].append(selectedRow);
+        map[value].append(selectedRow); // clazy:exclude=reserve-candidates
     }
 
     const auto keys = map.keys();
