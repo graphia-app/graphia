@@ -2,12 +2,12 @@
 
 #include "shared/utils/preferences.h"
 #include "shared/utils/string.h"
+#include "shared/utils/container.h"
 
 #include "../crashhandler.h"
 
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
+#include "thirdparty/json/json_helper.h"
+
 #include <QString>
 #include <QVariant>
 #include <QLocale>
@@ -31,11 +31,6 @@
 #endif
 #endif
 
-static std::string jsonObjectAsString(std::initializer_list<QPair<QString, QJsonValue>> args)
-{
-    return QJsonDocument(QJsonObject(args)).toJson(QJsonDocument::Compact).toStdString();
-}
-
 static std::string aesKeyAsJsonString(const u::AesKey& key)
 {
     auto keyBaseHex = QByteArray(reinterpret_cast<const char*>(key._aes), // NOLINT
@@ -43,25 +38,22 @@ static std::string aesKeyAsJsonString(const u::AesKey& key)
     auto ivBaseHex = QByteArray(reinterpret_cast<const char*>(key._iv), // NOLINT
                                 sizeof(key._iv)).toHex();
 
-    auto keyJsonString = jsonObjectAsString(
+    json keyJsonString
     {
         {"aes", QString(keyBaseHex)},
         {"iv",  QString(ivBaseHex)}
-    });
+    };
 
-    return keyJsonString;
+    return keyJsonString.dump();
 }
 
-static QJsonObject decodeAuthResponse(const u::AesKey& aesKey, const std::string& authResponseJsonString)
+static json decodeAuthResponse(const u::AesKey& aesKey, const std::string& authResponseJsonString)
 {
-    QJsonParseError jsonError{};
-    auto jsonDocument = QJsonDocument::fromJson(authResponseJsonString.data(), &jsonError);
-
-    if(jsonError.error != QJsonParseError::ParseError::NoError)
+    auto jsonObject = json::parse(authResponseJsonString.begin(), authResponseJsonString.end(), nullptr, false);
+    if(jsonObject.is_discarded() || jsonObject.is_null() || !jsonObject.is_object())
         return {};
 
-    auto jsonObject = jsonDocument.object();
-    auto aesKeySignatureHex = jsonObject[QStringLiteral("signature")].toString().toStdString();
+    std::string aesKeySignatureHex = jsonObject["signature"];
     auto aesKeySignature = u::hexToString(aesKeySignatureHex);
 
     bool sessionVerified = u::rsaVerifySignature(aesKeyAsJsonString(aesKey),
@@ -69,22 +61,20 @@ static QJsonObject decodeAuthResponse(const u::AesKey& aesKey, const std::string
     if(!sessionVerified)
         return {};
 
-    auto encryptedPayload = u::hexToBytes(jsonObject[QStringLiteral("payload")].toString().toStdString());
+    auto encryptedPayload = u::hexToBytes(jsonObject["payload"].get<std::string>());
 
     auto payload = aesDecryptBytes(encryptedPayload, aesKey);
 
-    jsonDocument = QJsonDocument::fromJson(payload.data(), &jsonError);
-    if(jsonError.error != QJsonParseError::ParseError::NoError)
+    jsonObject = json::parse(payload.begin(), payload.end(), nullptr, false);
+    if(jsonObject.is_discarded() || jsonObject.is_null() || !jsonObject.is_object())
         return {};
-
-    jsonObject = jsonDocument.object();
 
     return jsonObject;
 }
 
 static std::string authRequest(const u::AesKey& aesKey, const QString& email, const QString& encryptedPassword)
 {
-    auto payloadJsonString = jsonObjectAsString(
+    json payloadJsonString =
     {
         {"email",    email},
         {"password", encryptedPassword},
@@ -94,18 +84,18 @@ static std::string authRequest(const u::AesKey& aesKey, const QString& email, co
         {"os",       QString("%1 %2 %3 %4").arg(
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
             QSysInfo::productType(), QSysInfo::productVersion())}
-    });
+    };
 
     auto encryptedAesKey = u::rsaEncryptString(aesKeyAsJsonString(aesKey), ":/keys/public_auth_key.der");
-    auto encryptedPayload = aesEncryptString(payloadJsonString, aesKey);
+    auto encryptedPayload = aesEncryptString(payloadJsonString.dump(), aesKey);
 
-    auto authReqJsonString = jsonObjectAsString(
+    json authReqJsonString
     {
         {"key",     QString::fromStdString(encryptedAesKey)},
         {"payload", QString::fromStdString(encryptedPayload)}
-    });
+    };
 
-    return authReqJsonString;
+    return authReqJsonString.dump();
 }
 
 void Auth::parseAuthToken()
@@ -133,22 +123,22 @@ void Auth::parseAuthToken()
     auto encryptedAuthToken = aesKeyAndEncryptedAuthToken.substr(sizeof(aesKey._aes) + sizeof(aesKey._iv));
     auto decryptedAuthToken = aesDecryptString(encryptedAuthToken, aesKey);
 
-    auto autoTokenJson = QJsonDocument::fromJson(decryptedAuthToken.data()).object();
+    auto autoTokenJson = json::parse(decryptedAuthToken.begin(), decryptedAuthToken.end(), nullptr, false);
 
-    if(autoTokenJson.contains(QStringLiteral("issueTime")))
-        _issueTime = autoTokenJson[QStringLiteral("issueTime")].toInt();
+    if(u::contains(autoTokenJson, "issueTime"))
+        _issueTime = autoTokenJson["issueTime"];
 
-    if(autoTokenJson.contains(QStringLiteral("expiryTime")))
-        _expiryTime = autoTokenJson[QStringLiteral("expiryTime")].toInt();
+    if(u::contains(autoTokenJson, "expiryTime"))
+        _expiryTime = autoTokenJson["expiryTime"];
 
-    if(autoTokenJson.contains(QStringLiteral("allowedPlugins")))
+    if(u::contains(autoTokenJson, "allowedPlugins"))
     {
         _allowedPluginRegexps.clear();
-        auto value = autoTokenJson[QStringLiteral("allowedPlugins")].toArray();
+        auto value = autoTokenJson["allowedPlugins"];
         std::transform(value.begin(), value.end(), std::back_inserter(_allowedPluginRegexps),
         [](const auto& v)
         {
-            return QRegularExpression(v.toString());
+            return QRegularExpression(QString::fromStdString(v));
         });
     }
 }
@@ -302,9 +292,9 @@ void Auth::onReplyReceived()
             std::string authResponse = _reply->readAll().toStdString();
             auto decodedRespose = decodeAuthResponse(_aesKey, authResponse);
 
-            bool authorised = decodedRespose.contains(QStringLiteral("authenticated")) &&
-                decodedRespose[QStringLiteral("authenticated")].toBool() &&
-                decodedRespose.contains(QStringLiteral("authToken"));
+            bool authorised = u::contains(decodedRespose, "authenticated") &&
+                decodedRespose["authenticated"].get<bool>() &&
+                u::contains(decodedRespose, "authToken");
 
             if(_authorised != authorised)
             {
@@ -315,7 +305,7 @@ void Auth::onReplyReceived()
 
                 if(_authorised)
                 {
-                    u::setPref("auth/authToken", decodedRespose[QStringLiteral("authToken")].toString());
+                    u::setPref("auth/authToken", QString::fromStdString(decodedRespose["authToken"]));
                     parseAuthToken();
 
                     auto issueTime = QDateTime::fromSecsSinceEpoch(_issueTime);
@@ -335,8 +325,8 @@ void Auth::onReplyReceived()
                 emit stateChanged();
             }
 
-            auto message = decodedRespose.contains(QStringLiteral("message")) ?
-                decodedRespose[QStringLiteral("message")].toString() : QLatin1String("");
+            auto message = u::contains(decodedRespose, "message") ?
+                QString::fromStdString(decodedRespose["message"]) : QLatin1String("");
 
             if(_message != message)
             {
