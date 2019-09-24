@@ -10,20 +10,30 @@ bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
 
 bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const
 {
-    return !_hiddenColumns.contains(sourceColumn);
+    return !u::contains(_hiddenColumns, sourceColumn);
 }
 
 QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 {
-    auto mappedIndex = index;
-    if(_columnOrder.size() == columnCount())
-        mappedIndex = this->index(index.row(), _columnOrder.at(index.column()));
-
     if(role == SubSelectedRole)
     {
-        return _subSelection.contains(mappedIndex);
+        return _subSelection.contains(index);
     }
-    return QSortFilterProxyModel::data(mappedIndex, role);
+
+    auto unorderedSourceIndex = mapToSource(index);
+
+    if(_mappedColumnOrder.size() == columnCount())
+    {
+        auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(), _mappedColumnOrder.at(index.column()));
+        return sourceModel()->data(mappedIndex, role);
+    }
+    else
+    {
+        auto sourceIndex = sourceModel()->index(unorderedSourceIndex.row(), unorderedSourceIndex.column());
+        if (index.isValid() && !sourceIndex.isValid())
+            return {};
+        return sourceModel()->data(sourceIndex, role);
+    }
 }
 
 void TableProxyModel::setSubSelection(QModelIndexList subSelection)
@@ -49,12 +59,14 @@ int TableProxyModel::mapToSourceRow(int proxyRow) const
 
 int TableProxyModel::mapToSourceColumn(int proxyColumn) const
 {
-    int mappedIndex = proxyColumn;
-    if(_columnOrder.size() - 1 >= proxyColumn)
-        mappedIndex = _columnOrder.at(proxyColumn);
-    QModelIndex proxyIndex = index(0, mappedIndex);
-    QModelIndex sourceIndex = mapToSource(proxyIndex);
-    return sourceIndex.isValid() ? sourceIndex.column() : -1;
+    if(proxyColumn >= columnCount())
+        return -1;
+
+    auto mappedProxyColumn = proxyColumn;
+    if(_mappedColumnOrder.size() > 0)
+        mappedProxyColumn = _mappedColumnOrder.at(proxyColumn);
+
+    return mappedProxyColumn;
 }
 
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
@@ -65,34 +77,60 @@ TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (paren
     connect(this, &QAbstractItemModel::layoutChanged, this, &TableProxyModel::countChanged);
 }
 
-void TableProxyModel::setHiddenColumns(QList<int> hiddenColumns)
+void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
 {
+    std::sort(hiddenColumns.begin(), hiddenColumns.end());
     _hiddenColumns = hiddenColumns;
     invalidateFilter();
+    recalculateOrderMapping();
 }
 
-void TableProxyModel::setColumnOrder(QList<int> columnOrder)
+void TableProxyModel::recalculateOrderMapping()
 {
-    _columnOrder = columnOrder;
+    if(_sourceColumnOrder.size() != sourceModel()->columnCount())
+    {
+        // If ordering doesn't match the sourcemodel size just destroy it
+        _sourceColumnOrder = std::vector<int>(sourceModel()->columnCount());
+        std::iota(_sourceColumnOrder.begin(), _sourceColumnOrder.end(), 0);
+    }
+
+    auto filteredOrder = u::setDifference(_sourceColumnOrder, _hiddenColumns);
+    _mappedColumnOrder = filteredOrder;
+
     emit columnOrderChanged();
     emit layoutChanged();
+}
+
+void TableProxyModel::setColumnOrder(std::vector<int> columnOrder)
+{
+    _sourceColumnOrder = columnOrder;
+
+    recalculateOrderMapping();
+    invalidateFilter();
 }
 
 void TableProxyModel::setSortColumn(int sortColumn)
 {
     _sortColumn = sortColumn;
-    this->sort(_sortColumn, _sortOrder);
+
+    auto mappedColumn = mapFromSource(sourceModel()->index(0, _sortColumn));
+
+    this->sort(mappedColumn.column(), _sortOrder);
     emit sortColumnChanged(sortColumn);
 }
 
 void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
 {
     _sortOrder = sortOrder;
-    this->sort(_sortColumn, _sortOrder);
+
+    auto mappedColumn = mapFromSource(sourceModel()->index(0, _sortColumn));
+
+    this->sort(mappedColumn.column(), _sortOrder);
     emit sortOrderChanged(sortOrder);
 }
 
 void TableProxyModel::invalidateFilter()
 {
     QSortFilterProxyModel::invalidateFilter();
+    recalculateOrderMapping();
 }

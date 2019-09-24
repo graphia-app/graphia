@@ -11,16 +11,17 @@
 class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
-    Q_PROPERTY(QList<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
-    Q_PROPERTY(QList<int> columnOrder MEMBER _columnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
+    Q_PROPERTY(std::vector<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
+    Q_PROPERTY(std::vector<int> columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
     Q_PROPERTY(int sortColumn MEMBER _sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder MEMBER _sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
 
 private:
     bool _showCalculatedColumns = false;
     QModelIndexList _subSelection;
-    QList<int> _hiddenColumns;
-    QList<int> _columnOrder;
+    std::vector<int> _hiddenColumns;
+    std::vector<int> _sourceColumnOrder;
+    std::vector<int> _mappedColumnOrder;
     int _sortColumn = -1;
     Qt::SortOrder _sortOrder = Qt::DescendingOrder;
     enum Roles
@@ -28,6 +29,7 @@ private:
         SubSelectedRole = Qt::UserRole + 999
     };
 
+    void recalculateOrderMapping();
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
@@ -55,8 +57,8 @@ public:
     using QSortFilterProxyModel::mapToSource;
 
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topLeft, int bottomRight);
-    void setHiddenColumns(QList<int> hiddenColumns);
-    void setColumnOrder(QList<int> columnOrder);
+    void setHiddenColumns(std::vector<int> hiddenColumns);
+    void setColumnOrder(std::vector<int> columnOrder);
     void setSortColumn(int sortColumn);
     void setSortOrder(Qt::SortOrder sortColumn);
 signals:

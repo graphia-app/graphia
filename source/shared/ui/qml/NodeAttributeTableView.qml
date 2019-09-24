@@ -1,7 +1,7 @@
 import QtQuick.Controls 1.5
 import QtQuick 2.12
 import QtQml 2.12
-import QtQuick.Controls 2.4 as QQC2
+import QtQuick.Controls 2.5 as QQC2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Private 1.0 // StyleItem
 import QtGraphicalEffects 1.0
@@ -50,6 +50,10 @@ Item
                     tableView.currentColumnWidths[i] = newValue;
             }
 
+            let tempArr = tableView.currentColumnWidths;
+            tableView.currentColumnWidths = [];
+            tableView.currentColumnWidths = tempArr;
+
             tableView.columnWidths = []
         }
         // We update the property target width here to stop the columns constantly
@@ -69,7 +73,7 @@ Item
     }
     function resizeColumnHeaders()
     {
-        for(let i=0; i<columnHeaderRepeater.count; i++)
+        for(let i=0; i<displayedGroup.count; i++)
         {
             var columnHeader = columnHeaderRepeater.itemAt(i);
             columnHeader.width = tableView.columnWidthProvider(i);
@@ -79,34 +83,28 @@ Item
     property var hiddenColumns: []
 
     property bool columnSelectionMode: false
-    property var _sourceSortColumn: -1
     onColumnSelectionModeChanged:
     {
         let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
-        tableView._updateColumnVisibility();
+
         if(columnSelectionMode)
         {
-            _sourceSortColumn = tableView.headerColumns[proxyModel.sortColumn];
-            tableView.headerColumns = indexArray;
             columnSelectionControls.show();
-            tableView.forceLayoutSafe();
+            headerDelegateModel.filterOnGroup = "items"
         }
         else
         {
             columnSelectionControls.hide();
-            tableView.headerColumns = indexArray.filter(
-                        (value, index) => hiddenColumns.indexOf(value) === -1)
 
-            if(tableView.headerColumns.indexOf(_sourceSortColumn) === -1)
-                proxyModel.sortColumn = -1;
-            else
-                proxyModel.sortColumn = tableView.headerColumns.indexOf(_sourceSortColumn);
-
-            resizeColumnHeaders();
-            tableView.forceLayoutSafe();
+            headerDelegateModel.filterOnGroup = "displayed"
         }
-        //proxyModel.columnOrder = tableHeaderModel.columnOrder();
+        tableView._updateColumnVisibility();
+        tableView.forceLayoutSafe();
+
+        resizeColumnHeaders();
+
+        //proxyModel.columnOrder = headerDelegateModel.columnOrder();
     }
 
     property alias viewport: tableView.childrenRect
@@ -307,12 +305,16 @@ Item
 
         onClicked:
         {
+            console.log("Table View clicked!");
             if(mouse.button == Qt.RightButton)
                 root.rightClick();
         }
 
         onPressed:
         {
+            if(tableView.rows === 0)
+                return;
+
             var tableItem = tableView.getItem(mouseX, offsetMouseY);
             if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                 return;
@@ -370,6 +372,7 @@ Item
         property var targetTotalColumnWidth: 0
         property var columnWidths: []
         property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
+        property var visibleColumns: headerColumns
         signal fetchColumnSizes;
 
         clip: true
@@ -407,6 +410,13 @@ Item
         {
             var calculatedWidth = 0;
             var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
+
+            /*
+            console.log("CWP", col, "UW", userWidth,
+                        "Map", proxyModel.mapToSourceColumn(col), "CMW", calculateMinimumColumnWidth(col),
+                        "HeaderText", columnHeaderRepeater.itemAt(col).labelText);
+                        */
+
             // Use the user specified column width if available
             if(userWidth !== undefined)
                 calculatedWidth = userWidth;
@@ -461,6 +471,11 @@ Item
         function calculateMinimumColumnWidth(col)
         {
             var delegateWidth = tableView.currentColumnWidths[col];
+            if(columnHeaderRepeater.itemAt(col) === null)
+            {
+                console.log("Null CMCW", columnHeaderRepeater.count, col);
+                return 120;
+            }
             if(delegateWidth === undefined)
                 return Math.max(defaultColumnWidth, columnHeaderRepeater.itemAt(col).labelWidth);
             else
@@ -469,36 +484,19 @@ Item
 
         DelegateModel
         {
-            id: tableHeaderModel
+            id: headerDelegateModel
             model: tableView.headerColumns
-
-            Connections
-            {
-                target: tableHeaderModel.items
-                onChanged:
+            filterOnGroup: "displayed"
+            groups:
+            [
+                DelegateModelGroup
                 {
-                    proxyModel.columnOrder = columnOrder();
+                    id: displayedGroup
+                    name: "displayed"
+                    includeByDefault: true
                 }
-            }
+            ]
 
-            function visualToSourceIndex(index)
-            {
-                var proxy = tableHeaderModel.items.get(index).model.modelData;
-                var source = tableView.headerColumns[proxy];
-                console.log("Visual", index, "Proxy", proxy, "Source", source);
-                return tableView.headerColumns[tableHeaderModel.items.get(index)];
-            }
-
-            function columnOrder()
-            {
-                let _columnOrder = [];
-                for(let i=0; i<tableHeaderModel.count; i++)
-                {
-                    var delegateModelObject = tableHeaderModel.items.get(i);
-                    _columnOrder.push(tableView.headerColumns.indexOf(delegateModelObject.model.modelData))
-                }
-                return _columnOrder;
-            }
 
             delegate: DropArea
             {
@@ -516,11 +514,26 @@ Item
                                          + headerLabel.padding + sortIndicator.marginWidth
                                          + sortIndicator.anchors.rightMargin;
                 property int visualIndex: DelegateModel.itemsIndex
+                property int displayedIndex: DelegateModel.displayedIndex
+                property var labelText: headerLabel.text
                 Binding { target: headerContent; property: "visualIndex"; value: visualIndex }
+                Binding { target: headerContent; property: "displayedIndex"; value: displayedIndex }
 
                 onEntered:
                 {
-                    tableHeaderModel.items.move(drag.source.visualIndex, visualIndex)
+                    let tempWidth = tableView.currentColumnWidths[displayedIndex];
+                    tableView.currentColumnWidths[displayedIndex] = tableView.currentColumnWidths[drag.source.displayedIndex];
+                    tableView.currentColumnWidths[drag.source.displayedIndex] = tempWidth;
+
+                    headerDelegateModel.items.move(drag.source.visualIndex, visualIndex)
+
+                    tableView.forceLayoutSafe();
+                }
+                Rectangle
+                {
+                    anchors.fill: parent
+                    visible: dragHandler.active
+                    color: Qt.lighter(sysPalette.highlight, 1.99)
                 }
 
                 Item
@@ -528,6 +541,8 @@ Item
                     id: headerContent
                     opacity: Drag.active ? 0.5 : 1
                     property int visualIndex: 0
+                    property int displayedIndex: 0
+                    property int sourceColumn: 0
                     width: headerItem.width
                     height: headerItem.height
                     anchors.left: parent.left
@@ -567,13 +582,15 @@ Item
                             return !Utils.setContains(root.hiddenColumns, modelData);
                         }
                         checked: { return isChecked(); }
-                        onCheckedChanged: {
+                        onCheckedChanged:
+                        {
                             // Unbind to prevent binding loop
                             checked = checked;
                             root.setColumnVisibility(modelData, checked);
 
                             // Rebind so that the delegate doesn't hold the state
                             checked = Qt.binding(isChecked);
+                            headerItem.DelegateModel.inDisplayed = checked
                         }
                     }
                     QQC2.Label
@@ -585,6 +602,8 @@ Item
                         maximumLineCount: 1
                         width: parent.width - (sortIndicator.marginWidth);
                         text: root._nodeAttributesTableModel.columnNames[modelData]
+                        //text: "Test";
+                        //text: modelData + " W: " + headerItem + " H:" + headerItem.width.toFixed(0) + " D:" //+ tableView.columnWidthProvider(headerItem.displayedIndex)
                         color: sysPalette.text
                         font.pixelSize: 11
                         padding: 4
@@ -600,7 +619,7 @@ Item
                         antialiasing: false
                         width: 7
                         height: 4
-                        visible: proxyModel.sortColumn == index && !columnSelectionMode
+                        visible: proxyModel.sortColumn == modelData && !columnSelectionMode
                         transform: Rotation
                         {
                             origin.x: sortIndicator.width * 0.5
@@ -633,9 +652,15 @@ Item
                     property bool dragActive: Drag.active
                     onDragActiveChanged:
                     {
-                        if(!Drag.active)
+                        if(!dragActive)
                         {
-                           proxyModel.columnOrder = tableHeaderModel.columnOrder();
+                            var columnOrder = [];
+                            for(let i=0; i<headerDelegateModel.items.count; i++)
+                            {
+                                var modelItem = headerDelegateModel.items.get(i);
+                                columnOrder.push(modelItem.model.modelData);
+                            }
+                            proxyModel.columnOrder = columnOrder;
                         }
                     }
 
@@ -643,15 +668,19 @@ Item
                     {
                         id: headerMouseArea
                         enabled: !columnSelectionMode
-                        anchors.fill: parent
+                        anchors.fill: headerContent
                         hoverEnabled: true
+                        acceptedButtons: Qt.LeftButton
 
                         onClicked:
                         {
-                            if(proxyModel.sortColumn == index)
+                            console.log("Clicked!", modelData);
+
+                            if(proxyModel.sortColumn == modelData)
                                 proxyModel.sortOrder = proxyModel.sortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
                             else
-                                proxyModel.sortColumn = index;
+                                proxyModel.sortColumn = modelData;
+
                         }
                     }
 
@@ -694,7 +723,7 @@ Item
             Repeater
             {
                 id: columnHeaderRepeater
-                model: tableHeaderModel
+                model: headerDelegateModel
 
                 onItemAdded:
                 {
@@ -786,14 +815,20 @@ Item
                         let sourceColumn = proxyModel.mapToSourceColumn(modelColumn);
 
                         // This can happen during column removal
-                        if(sourceColumn === undefined)
+                        if(sourceColumn === undefined || sourceColumn < 0)
+                        {
+                            console.log("Model Column Unable to map", modelRow, modelColumn);
                             return "";
+                        }
 
                         let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
+
                         if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
-                        {
                             return QmlUtils.formatNumberScientific(model.display, 1);
-                        }
+
+                        if(model.display === undefined)
+                            console.log("Model is undefined!", modelColumn, model.display)
+
                         return model.display;
                     }
                     renderType: Text.NativeRendering
@@ -804,9 +839,13 @@ Item
         function _updateColumnVisibility()
         {
             if(root.columnSelectionMode)
+            {
                 proxyModel.hiddenColumns = [];
+            }
             else
+            {
                 proxyModel.hiddenColumns = hiddenColumns;
+            }
         }
 
         function _resetSortFilterProxyModel()
