@@ -1,5 +1,4 @@
 #include "tableproxymodel.h"
-
 #include "nodeattributetablemodel.h"
 
 bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
@@ -16,9 +15,7 @@ bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &s
 QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 {
     if(role == SubSelectedRole)
-    {
-        return _subSelection.contains(index);
-    }
+        return _subSelectionRows.find(index.row()) != _subSelectionRows.end();
 
     auto unorderedSourceIndex = mapToSource(index);
 
@@ -36,13 +33,20 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void TableProxyModel::setSubSelection(QModelIndexList subSelection)
+void TableProxyModel::setSubSelection(QItemSelection subSelection, QItemSelection subDeSelection)
 {
     _subSelection = subSelection;
-    QList<QPersistentModelIndex> persistentModelIndexList;
-    for(auto modelIndex : subSelection)
-        persistentModelIndexList.push_back(modelIndex);
-    emit layoutChanged(persistentModelIndexList);
+
+    // Group selection by rows, no need to keep track of the indices for the model other than
+    // emitting signals.
+    _subSelectionRows.clear();
+    for(auto index : _subSelection.indexes())
+        _subSelectionRows.insert(index.row());
+
+    for(auto range : _subSelection)
+        emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
+    for(auto range : subDeSelection)
+        emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
 }
 
 QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bottomRow)

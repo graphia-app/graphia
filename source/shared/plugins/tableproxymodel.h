@@ -1,6 +1,8 @@
 #ifndef TABLEPROXYMODEL_H
 #define TABLEPROXYMODEL_H
 
+#include <unordered_set>
+
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
 #include <QCoreApplication>
@@ -18,7 +20,8 @@ class TableProxyModel : public QSortFilterProxyModel
 
 private:
     bool _showCalculatedColumns = false;
-    QModelIndexList _subSelection;
+    QItemSelection _subSelection;
+    std::unordered_set<int> _subSelectionRows;
     std::vector<int> _hiddenColumns;
     std::vector<int> _sourceColumnOrder;
     std::vector<int> _mappedColumnOrder;
@@ -50,7 +53,7 @@ public:
         return roleNames;
     }
     TableProxyModel(QObject* parent = nullptr);
-    Q_INVOKABLE void setSubSelection(QModelIndexList subSelection);
+    Q_INVOKABLE void setSubSelection(QItemSelection subSelection, QItemSelection subDeselection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
     Q_INVOKABLE int mapToSourceColumn(int proxyColumn) const;
 

@@ -251,8 +251,7 @@ Item
         var range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
 
-        proxyModel.setSubSelection(selectionModel.selectedIndexes);
-        updateSelectedRowsArray();
+        root.selectedRows = selectionModel.selectedRows(0).map(index => index.row);
     }
 
     function deselectRows(inStartRow, inEndRow)
@@ -263,20 +262,17 @@ Item
         var range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
 
-        proxyModel.setSubSelection(selectionModel.selectedIndexes);
-        updateSelectedRowsArray();
-    }
-
-    function updateSelectedRowsArray()
-    {
-        var selectedRows = selectionModel.selectedRows(0).map(index => index.row);
-        root.selectedRows = selectedRows;
+        root.selectedRows = selectionModel.selectedRows(0).map(index => index.row);
     }
 
     ItemSelectionModel
     {
         id: selectionModel
         model: proxyModel
+        onSelectionChanged:
+        {
+            proxyModel.setSubSelection(selected, deselected);
+        }
     }
 
     MouseArea
@@ -305,7 +301,6 @@ Item
 
         onClicked:
         {
-            console.log("Table View clicked!");
             if(mouse.button == Qt.RightButton)
                 root.rightClick();
         }
@@ -338,7 +333,6 @@ Item
 
             endRow = tableItem.modelRow;
             selectRows(startRow, startRow);
-            proxyModel.setSubSelection(selectionModel.selectedIndexes);
         }
         onReleased:
         {
@@ -674,8 +668,6 @@ Item
 
                         onClicked:
                         {
-                            console.log("Clicked!", modelData);
-
                             if(proxyModel.sortColumn == modelData)
                                 proxyModel.sortOrder = proxyModel.sortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
                             else
