@@ -251,7 +251,7 @@ Item
         var range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
 
-        root.selectedRows = selectionModel.selectedRows(0).map(index => index.row);
+        root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
     }
 
     function deselectRows(inStartRow, inEndRow)
@@ -262,7 +262,7 @@ Item
         var range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
 
-        root.selectedRows = selectionModel.selectedRows(0).map(index => index.row);
+        root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
     }
 
     ItemSelectionModel
