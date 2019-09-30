@@ -30,7 +30,7 @@ private:
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
-    std::vector<int> _rolesRequiringUpdates;
+    std::vector<QString> _columnsRequiringUpdates;
 
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;
@@ -41,7 +41,6 @@ private:
     Table _pendingData; // Update actually occurs here, before being copied to _data on the UI thread
     Table _data;
 
-    std::map<QString, int> columnNameToIndex;
     QStringList _columnNames;
 
     int _columnCount = 0;
@@ -54,12 +53,12 @@ protected:
 private:
     void onColumnAdded(int columnIndex);
     void onColumnRemoved(int columnIndex);
-    void updateRole(const QString& attributeName);
+    void updateAttribute(const QString& attributeName);
     void updateColumn(int role, const QString& attributeName, Column& column);
     void update();
 
 private slots:
-    void onUpdateRoleComplete(const QString& attributeName);
+    void onUpdateColumnComplete(const QString& attributeName);
     void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 

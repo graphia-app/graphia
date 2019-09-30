@@ -108,7 +108,7 @@ void NodeAttributeTableModel::updateColumnNames()
     emit columnNamesChanged();
 }
 
-void NodeAttributeTableModel::updateRole(const QString& attributeName)
+void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
@@ -119,7 +119,7 @@ void NodeAttributeTableModel::updateRole(const QString& attributeName)
 
     updateColumn(Qt::DisplayRole, attributeName, column);
 
-    QMetaObject::invokeMethod(this, "onUpdateRoleComplete", Q_ARG(QString, attributeName));
+    QMetaObject::invokeMethod(this, "onUpdateColumnComplete", Q_ARG(QString, attributeName));
 }
 
 void NodeAttributeTableModel::updateColumn(int role, const QString& attributeName, NodeAttributeTableModel::Column& column)
@@ -155,17 +155,16 @@ void NodeAttributeTableModel::update()
     updateColumn(Roles::NodeSelectedRole, "", _nodeSelectedColumn);
     updateColumn(Roles::NodeIdRole, "", _nodeIdColumn);
 
-    int i = 0;
     for(auto columnName : _columnNames)
     {
-        _pendingData.emplace_back(i++);
+        _pendingData.emplace_back(rowCount());
         updateColumn(Qt::DisplayRole, columnName, _pendingData.back());
     }
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::onUpdateRoleComplete(const QString& attributeName)
+void NodeAttributeTableModel::onUpdateColumnComplete(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
@@ -278,17 +277,19 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
     {
         // There is no structural change to the table, but some roles' values
         // may have changed, so we need to update these individually
-        while(!_rolesRequiringUpdates.empty())
+        while(!_columnsRequiringUpdates.empty())
         {
-            updateRole(_roleNames.value(_rolesRequiringUpdates.back()));
-            _rolesRequiringUpdates.pop_back();
+            auto attribute = _columnsRequiringUpdates.back();
+            size_t index = static_cast<size_t>(columnIndexForAttributeValue(attribute));
+            updateColumn(Qt::DisplayRole, attribute, _pendingData.at(index));
+            _columnsRequiringUpdates.pop_back();
         }
 
         return;
     }
 
     // Any roles requiring an update will be taken care of en-masse, in onUpdateComplete
-    _rolesRequiringUpdates.clear();
+    _columnsRequiringUpdates.clear();
 
     for(const auto& name : filteredRemoved)
     {
@@ -320,11 +321,8 @@ void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attrib
 {
     for(const auto& attributeName : attributeNames)
     {
-        if(!u::contains(_roleNames.values(), attributeName.toUtf8()))
-                    continue;
-
-        int role = _roleNames.key(attributeName.toUtf8());
-                    _rolesRequiringUpdates.push_back(role);
+        if(u::contains(_columnNames, attributeName))
+            _columnsRequiringUpdates.push_back(attributeName);
     }
 }
 
