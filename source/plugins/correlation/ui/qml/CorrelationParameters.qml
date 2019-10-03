@@ -1,5 +1,5 @@
 import QtQuick.Controls 1.5
-import QtQuick 2.12
+import QtQuick 2.13
 import QtQml 2.12
 import QtQuick.Controls 2.4 as QQC2
 import QtQuick.Layouts 1.3
@@ -45,10 +45,19 @@ BaseParameterDialog
         onDataRectChanged:
         {
             parameters.dataFrame = dataRect;
+
+            if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
+                selectedCol >= 0 && selectedRow >= 0)
+            {
+                dataRectView.scrollToDataRect();
+                tooltipNonNumerical.visible = _clickedCell;
+                _clickedCell = false;
+            }
         }
 
         onDataLoaded:
         {
+            tabularDataParser.autoDetectDataRectangle();
             parameters.data = tabularDataParser.data;
         }
     }
@@ -93,6 +102,13 @@ BaseParameterDialog
             if(currentItem == dataRectPage)
             {
                 // TO-DO: Scroll to cell
+                dataRectView.forceLayoutSafe();
+
+                // Precalculate table width to stop the scrollbar jumping
+                let calculatedWidth = 0;
+                for(let i=0; i<dataRectView.columns; i++)
+                    calculatedWidth += dataRectView.columnWidthProvider(i);
+                dataRectView.contentWidth = calculatedWidth;
             }
         }
 
@@ -214,196 +230,252 @@ BaseParameterDialog
                     font: messageText.font
                 }
 
-                RowLayout
+                Rectangle
                 {
-                    Button
-                    {
-                        text: "Move Table to column"
-                        onPressedChanged:
-                        {
-                            //TO-DO: Scroll to Cell
-                        }
-                    }
-                    SpinBox
-                    {
-                        id: input
-                        maximumValue: dataRectView.columns
-                        stepSize: 1
-                    }
-                }
-
-                TableView
-                {
-                    property var columnWidthCache: []
-                    property var visibleColumns: [];
-                    clip: true
-                    QQC2.ScrollBar.vertical: QQC2.ScrollBar { }
-                    QQC2.ScrollBar.horizontal: QQC2.ScrollBar { }
-                    id: dataRectView
-                    Layout.fillHeight: true
                     Layout.fillWidth: true
-                    model: tabularDataParser.model
-                    enabled: !dataRectPage._busy
-                    columnSpacing: 1
-                    rowSpacing: 1
+                    Layout.fillHeight: true
+                    border.width: 1
+                    border.color: sysPalette.dark
 
-                    PropertyAnimation
+                    TableView
                     {
-                        id: dataFrameAnimationX
-                        target: dataRectView
-                        easing.type: Easing.InOutQuad
-                        property: "contentX"
-                        to: 0
-                        duration: 750
-                        onRunningChanged:
-                        {
-                            if(running)
-                                dataRectView.enabled = false;
-                            else if (!dataFrameAnimationY.running && !dataFrameAnimationX.running)
-                                dataRectView.enabled = true;
-                        }
-                    }
+                        property var delegateHeight: 11
+                        id: dataRectView
 
-                    PropertyAnimation
-                    {
-                        id: dataFrameAnimationY
-                        target: dataRectView
-                        easing.type: Easing.InOutQuad
-                        property: "contentY"
-                        to: 0
-                        duration: 750
-                        onRunningChanged:
-                        {
-                            if(running)
-                                dataRectView.enabled = false;
-                            else if(!dataFrameAnimationY.running && !dataFrameAnimationX.running)
-                                dataRectView.enabled = true;
-                        }
-                    }
-
-                    Rectangle
-                    {
-                        id: tooltipNonNumerical
-                        color: sysPalette.light
-                        border.color: sysPalette.mid
-                        border.width: 1
-                        anchors.bottom: parent ? parent.bottom : undefined
-                        anchors.bottomMargin: 25
-                        anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
-                        implicitWidth: messageText.width + 5
-                        implicitHeight: messageText.height + 5
-                        onVisibleChanged:
-                        {
-                            if(visible)
-                                nonNumericalTimer.start();
-                        }
-                        visible: false
-
-                        Timer
-                        {
-                            id: nonNumericalTimer
-                            interval: 5000
-                            onTriggered: { tooltipNonNumerical.visible = false; }
-                        }
-
-                        Text
-                        {
-                            anchors.centerIn: parent
-                            id: messageText
-                            text: qsTr("Selected frame contains non-numerical data. " +
-                                       "Next availaible frame selected.");
-                        }
-                    }
-
-                    BusyIndicator
-                    {
-                        id: busyIndicator
-                        anchors.centerIn: parent
-                        running: dataRectPage._busy
-                    }
-
-                    SystemPalette
-                    {
-                        id: sysPalette
-                    }
-
-                    delegate: Item
-                    {
-                        // Based on Qt source for BaseTableView delegate
-                        implicitHeight: Math.max(16, label.implicitHeight)
-                        implicitWidth: label.implicitWidth + 16
                         clip: true
+                        QQC2.ScrollBar.vertical: QQC2.ScrollBar { }
+                        QQC2.ScrollBar.horizontal: QQC2.ScrollBar { }
+                        anchors.fill: parent
+                        anchors.margins: 1
+                        model: tabularDataParser.model
+                        enabled: !dataRectPage._busy
+                        topMargin: columnsHeader.implicitHeight
 
-                        property var modelColumn: model.column
-
-                        property var isInDataFrame:
+                        rowHeightProvider: function(row)
                         {
-                            return isInsideRect(model.column, model.row, tabularDataParser.dataRect);
+                            if(row === 0)
+                                return 0;
+
+                            return -1;
+                        }
+
+                        columnWidthProvider: function(col)
+                        {
+                            if(columnHeaderRepeater.count > 0)
+                                return columnHeaderRepeater.itemAt(col).width;
+                            else
+                                return -1;
+                        }
+
+                        Row
+                        {
+                            id: columnsHeader
+                            y: dataRectView.contentY
+                            z: 2
+                            Repeater
+                            {
+                                id: columnHeaderRepeater
+                                model: dataRectView.columns
+
+                                delegate: Item
+                                {
+                                    property var modelIndex: index
+                                    width: headerLabel.contentWidth + 10
+                                    height: headerLabel.height
+
+                                    id: headerDelegate
+                                    Rectangle
+                                    {
+                                        anchors.fill: parent
+                                        color: sysPalette.light
+                                    }
+                                    Label
+                                    {
+                                        id: headerLabel
+                                        clip: true
+                                        maximumLineCount: 1
+                                        width: parent.width
+                                        text:
+                                        {
+                                            let headerIndex = tabularDataParser.model.index(0, index);
+                                            return tabularDataParser.model.data(headerIndex);
+                                        }
+
+                                        color: sysPalette.text
+                                        font.pixelSize: 11
+                                        padding: 4
+                                        renderType: Text.NativeRendering
+                                    }
+                                    Rectangle
+                                    {
+                                        anchors.right: parent.right
+                                        height: parent.height
+                                        width: 1
+                                        color: sysPalette.midlight
+                                    }
+                                }
+                            }
                         }
 
                         Rectangle
                         {
-                            Rectangle
+                            id: tooltipNonNumerical
+                            z: 2
+                            x: dataRectView.contentX + ((dataRectView.width - implicitWidth) * 0.5)
+                            y: dataRectView.contentY + dataRectView.height - implicitHeight - 25
+                            color: sysPalette.light
+                            border.color: sysPalette.mid
+                            border.width: 1
+                            implicitWidth: messageText.width + 5
+                            implicitHeight: messageText.height + 5
+                            onVisibleChanged:
                             {
-                                anchors.right: parent.right
-                                height: parent.height
-                                width: 1
-                                color: isInDataFrame ? sysPalette.light : sysPalette.mid
+                                if(visible)
+                                    nonNumericalTimer.start();
                             }
+                            visible: false
 
-                            MouseArea
+                            Timer
                             {
-                                anchors.fill: parent
-                                onClicked:
-                                {
-                                    if(model.column === tabularDataParser.model.MAX_COLUMNS)
-                                        return;
-                                    tooltipNonNumerical.visible = false;
-                                    nonNumericalTimer.stop();
-                                    selectedCol = model.column;
-                                    selectedRow = model.row;
-                                    _clickedCell = true;
-                                    tabularDataParser.autoDetectDataRectangle(model.column, model.row);
-                                }
+                                id: nonNumericalTimer
+                                interval: 5000
+                                onTriggered: { tooltipNonNumerical.visible = false; }
                             }
-
-                            width: parent.width
-                            anchors.centerIn: parent
-                            height: parent.height
-                            color: isInDataFrame ? "lightblue" : "transparent"
 
                             Text
                             {
-                                id: label
-                                objectName: "label"
-                                width: parent.width
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-
-                                text:
-                                {
-                                    if(model.column >= tabularDataParser.model.MAX_COLUMNS)
-                                    {
-                                        if(model.row === 0)
-                                        {
-                                            return (tabularDataParser.model.columnCount() - tabularDataParser.model.MAX_COLUMNS) +
-                                                    qsTr(" more columns…");
-                                        }
-                                        else
-                                        {
-                                            return "…";
-                                        }
-                                    }
-
-                                    return modelData;
-                                }
-                                renderType: Text.NativeRendering
+                                anchors.centerIn: parent
+                                id: messageText
+                                text: qsTr("Selected frame contains non-numerical data. " +
+                                           "Next availaible frame selected.");
                             }
                         }
-                    }
-                }
 
+                        BusyIndicator
+                        {
+                            id: busyIndicator
+                            anchors.centerIn: parent
+                            running: dataRectPage._busy
+                        }
+
+                        SystemPalette
+                        {
+                            id: sysPalette
+                        }
+
+                        delegate: Item
+                        {
+                            // Based on Qt source for BaseTableView delegate
+                            implicitHeight: Math.max(16, label.implicitHeight)
+                            onImplicitHeightChanged:
+                            {
+                                dataRectView.delegateHeight = implicitHeight;
+                            }
+
+                            implicitWidth: label.implicitWidth + 16
+                            visible: model.row > 0
+
+                            clip: true
+
+                            property var modelColumn: model.column
+                            property var modelRow: model.row
+                            property var modelIndex: model.index
+
+                            SystemPalette { id: systemPalette }
+
+                            property var isInDataFrame:
+                            {
+                                return isInsideRect(model.column, model.row, tabularDataParser.dataRect);
+                            }
+
+                            Rectangle
+                            {
+                                width: parent.width
+
+
+                                anchors.centerIn: parent
+                                height: parent.height
+                                color:
+                                {
+                                    if(isInDataFrame)
+                                        return systemPalette.highlight;
+
+                                    return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
+                                }
+
+                                Text
+                                {
+                                    id: label
+                                    objectName: "label"
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: 10
+                                    color: QmlUtils.contrastingColor(parent.color)
+
+                                    text: modelData
+                                    renderType: Text.NativeRendering
+                                }
+
+                                MouseArea
+                                {
+                                    anchors.fill: parent
+                                    onClicked:
+                                    {
+                                        tooltipNonNumerical.visible = false;
+                                        nonNumericalTimer.stop();
+                                        selectedCol = model.column;
+                                        selectedRow = model.row;
+                                        _clickedCell = true;
+                                        tabularDataParser.autoDetectDataRectangle(model.column, model.row);
+                                    }
+                                }
+                            }
+                        }
+
+                        function forceLayoutSafe()
+                        {
+                            if(dataRectView.rows > 0 && dataRectView.columns > 0)
+                                dataRectView.forceLayout();
+                        }
+
+                        function scrollToDataRect()
+                        {
+                            var columnPosition = -topMargin;
+                            var rowPosition = 0;
+                            for(var i=0; i < tabularDataParser.dataRect.x - 1; i++)
+                                columnPosition += columnWidthProvider(i);
+                            rowPosition = delegateHeight * ((tabularDataParser.dataRect.y - 2) - 1);
+                            if(rowPosition < 0)
+                                rowPosition = -topMargin;
+                            scrollXAnimation.to = columnPosition;
+                            scrollXAnimation.running = true;
+                            scrollYAnimation.to = rowPosition;
+                            scrollYAnimation.running = true;
+                        }
+
+                        PropertyAnimation
+                        {
+                            id: scrollXAnimation
+                            target: dataRectView
+                            property: "contentX"
+                            duration: 750
+                            easing.type: Easing.OutQuad
+                        }
+
+                        PropertyAnimation
+                        {
+                            id: scrollYAnimation
+                            target: dataRectView
+                            property: "contentY"
+                            duration: 750
+                            easing.type: Easing.OutQuad
+                        }
+                    }
+
+                }
                 Connections
                 {
                     target: tabularDataParser.model
