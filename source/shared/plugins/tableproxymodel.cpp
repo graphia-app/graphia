@@ -19,18 +19,19 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 
     auto unorderedSourceIndex = mapToSource(index);
 
-    if(_mappedColumnOrder.size() == columnCount())
+    if(_mappedColumnOrder.size() == static_cast<size_t>(columnCount()))
     {
         auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(), _mappedColumnOrder.at(index.column()));
         return sourceModel()->data(mappedIndex, role);
     }
-    else
+
+    auto sourceIndex = sourceModel()->index(unorderedSourceIndex.row(), unorderedSourceIndex.column());
+    if (index.isValid() && !sourceIndex.isValid())
     {
-        auto sourceIndex = sourceModel()->index(unorderedSourceIndex.row(), unorderedSourceIndex.column());
-        if (index.isValid() && !sourceIndex.isValid())
-            return {};
-        return sourceModel()->data(sourceIndex, role);
+        qDebug() << "Invalid Source Index. Row: " << index.row() << "Col:" << index.column();
+        return {};
     }
+    return sourceModel()->data(sourceIndex, role);
 }
 
 void TableProxyModel::setSubSelection(QItemSelection subSelection, QItemSelection subDeSelection)
@@ -68,7 +69,7 @@ int TableProxyModel::mapToSourceColumn(int proxyColumn) const
 
     auto mappedProxyColumn = proxyColumn;
     if(_mappedColumnOrder.size() > 0)
-        mappedProxyColumn = _mappedColumnOrder.at(proxyColumn);
+        mappedProxyColumn = _mappedColumnOrder.at(static_cast<size_t>(proxyColumn));
 
     return mappedProxyColumn;
 }
@@ -91,10 +92,10 @@ void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
 
 void TableProxyModel::recalculateOrderMapping()
 {
-    if(_sourceColumnOrder.size() != sourceModel()->columnCount())
+    if(_sourceColumnOrder.size() != static_cast<size_t>(sourceModel()->columnCount()))
     {
         // If ordering doesn't match the sourcemodel size just destroy it
-        _sourceColumnOrder = std::vector<int>(sourceModel()->columnCount());
+        _sourceColumnOrder = std::vector<int>(static_cast<size_t>(sourceModel()->columnCount()));
         std::iota(_sourceColumnOrder.begin(), _sourceColumnOrder.end(), 0);
     }
 

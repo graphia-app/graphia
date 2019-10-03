@@ -105,6 +105,7 @@ void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
 void NodeAttributeTableModel::updateColumnNames()
 {
     _columnNames = columnNames();
+    _columnCount = _columnNames.size();
     emit columnNamesChanged();
 }
 
@@ -280,8 +281,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         while(!_columnsRequiringUpdates.empty())
         {
             auto attribute = _columnsRequiringUpdates.back();
-            size_t index = static_cast<size_t>(columnIndexForAttributeValue(attribute));
-            updateColumn(Qt::DisplayRole, attribute, _pendingData.at(index));
+            updateAttribute(attribute);
             _columnsRequiringUpdates.pop_back();
         }
 
@@ -333,7 +333,7 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return _columnNames.size();
+    return _columnCount;
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
@@ -353,9 +353,10 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
         auto cachedValue = dataColumn.at(row);
         return cachedValue;
     }
-    else if (role == Roles::NodeSelectedRole){
+    else if (role == Roles::NodeSelectedRole)
+    {
         size_t row = static_cast<size_t>(index.row());
-        return _nodeSelectedColumn[row];
+        return _nodeSelectedColumn.at(row);
     }
     return {};
 }

@@ -34,7 +34,7 @@ PluginContent
         id: resizeColumnsToContentsAction
         text: qsTr("Resize Columns To Fit Contents")
         iconName: "format-justify-fill"
-        onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
+        onTriggered: tableView.resizeColumnsToContents();
     }
 
     Action

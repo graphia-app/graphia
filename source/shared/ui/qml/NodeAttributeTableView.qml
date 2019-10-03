@@ -818,8 +818,12 @@ Item
                         if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
                             return QmlUtils.formatNumberScientific(model.display, 1);
 
+                        // AbstractItemModel required empty values to return empty variant
+                        // but TableView2 delgates cast them to undefined js objects.
+                        // It's difficult to tell if the model is corrupted or accessing
+                        // invalid data now as they both return undefined.
                         if(model.display === undefined)
-                            console.log("Model is undefined!", modelColumn, model.display)
+                            return "";
 
                         return model.display;
                     }

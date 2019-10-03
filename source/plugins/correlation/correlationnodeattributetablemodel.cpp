@@ -22,8 +22,8 @@ void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNod
 {
     //FIXME: effectively disable the functionality this class provides for now, as it's causing
     // too many performance problems with TableView; revisit this when the new TableView is available
-    _dataColumnNames = dataColumnNames;//dataColumnNames;
-    _dataValues = dataValues;//dataValues;
+    _dataColumnNames = nullptr;//dataColumnNames;
+    _dataValues = nullptr;//dataValues;
 
     NodeAttributeTableModel::initialise(document, userNodeData);
 }
