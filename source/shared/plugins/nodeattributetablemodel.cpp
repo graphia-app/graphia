@@ -51,7 +51,7 @@ QStringList NodeAttributeTableModel::columnNames() const
         Q_ASSERT(attribute != nullptr);
         if(attribute == nullptr)
         {
-            S(CrashHandler)->submitMinidump(QString("Attribute not found: %1").arg(attributeName));
+            S(CrashHandler)->submitMinidump(QStringLiteral("Attribute not found: %1").arg(attributeName));
             continue;
         }
 

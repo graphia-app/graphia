@@ -74,7 +74,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
         if(attribute == nullptr)
         {
             // Need to understand why this is happening here
-            S(CrashHandler)->submitMinidump(QString("Attribute not found: %1").arg(name));
+            S(CrashHandler)->submitMinidump(QStringLiteral("Attribute not found: %1").arg(name));
             return;
         }
 
