@@ -18,6 +18,8 @@
 
 #include "shared/loading/xlsxtabulardataparser.h"
 
+#include "../crashhandler.h"
+
 #include <json_helper.h>
 
 #include <map>
@@ -287,7 +289,14 @@ QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
     {
         const auto* attribute = _graphModel->attributeByName(attributeName);
 
-        if(!attribute->sharedValues().empty())
+        if(attribute == nullptr)
+        {
+            // Need to understand why this is happening here
+            S(CrashHandler)->submitMinidump(QString("Attribute not found: %1").arg(attributeName));
+            continue;
+        }
+
+        if(attribute != nullptr && !attribute->sharedValues().empty())
             attributeNames.append(attributeName);
     }
 
