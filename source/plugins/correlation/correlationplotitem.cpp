@@ -685,14 +685,16 @@ static QColor colorForRows(const CorrelationPluginInstance* pluginInstance, cons
 
     auto color = pluginInstance->nodeColorForRow(rows.at(0));
 
-    for(auto row : rows)
+    auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
+    [&](auto row)
     {
-        if(pluginInstance->nodeColorForRow(row) != color)
-        {
-            // The colours are not consistent, so just use black
-            color = Qt::black;
-            break;
-        }
+        return pluginInstance->nodeColorForRow(row) != color;
+    });
+
+    if(colorsInconsistent)
+    {
+        // The colours are not consistent, so just use black
+        color = Qt::black;
     }
 
     return color;
