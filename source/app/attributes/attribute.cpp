@@ -3,7 +3,6 @@
 #include "shared/utils/container.h"
 
 #include <QDebug>
-#include <QRegularExpression>
 
 void Attribute::clearValueFunctions()
 {
@@ -336,20 +335,15 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     }
 
     QString parameter;
-    QRegularExpression re(QStringLiteral(R"(^([^\.]*)(?:\.(.+))?$)"));
-    auto match = re.match(name);
-
-    if(match.hasMatch())
+    auto dotIndex = name.indexOf('.');
+    if(dotIndex >= 0)
     {
-        name = match.captured(1);
-        name.replace("\"", "");
-        auto parameterString = match.captured(2);
-        if(!parameterString.isNull())
-        {
-            parameter = parameterString;
-            parameter.replace("\"", "");
-        }
+        parameter = name.mid(dotIndex + 1);
+        name = name.mid(0, dotIndex);
     }
+
+    name.replace("\"", "");
+    parameter.replace("\"", "");
 
     return {type, name, parameter};
 }
