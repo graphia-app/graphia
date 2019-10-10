@@ -423,11 +423,11 @@ private:
         // When It->computeCostHint() does exist, we us it to hint how much computation
         // each element will cost, and balance the thread/work allocation accordingly
         // When there is no hinting available, each element is given equal weight
-        int total()
+        uint64_t total()
         {
             if constexpr(ItHasComputeCostHint<It>)
             {
-                int n = 0;
+                uint64_t n = 0;
 
                 for(auto it = this->_first; it != this->_last; ++it)
                     n += it->computeCostHint();
@@ -438,7 +438,7 @@ private:
                 return std::distance(this->_first, this->_last);
         }
 
-        int operator()(It it)
+        uint64_t operator()(It it)
         {
             Q_UNUSED(it);
 
@@ -483,7 +483,7 @@ public:
         for(It it = first; it != last;)
         {
             It threadLast = it;
-            int cost = 0;
+            uint64_t cost = 0;
             do
             {
                 cost += coster(threadLast);

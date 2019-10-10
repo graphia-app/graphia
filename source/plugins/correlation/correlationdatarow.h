@@ -20,7 +20,7 @@ public:
 
     template<typename T>
     CorrelationDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
-        NodeId nodeId, int computeCost = 1) :
+        NodeId nodeId, uint64_t computeCost = 1) :
         _nodeId(nodeId), _cost(computeCost)
     {
         auto cbegin = data.cbegin() + (row * numColumns);
@@ -33,7 +33,7 @@ public:
 
     template<typename T>
     CorrelationDataRow(const std::vector<T>& dataRow,
-        NodeId nodeId, int computeCost = 1) :
+        NodeId nodeId, uint64_t computeCost = 1) :
         CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
     {}
 
@@ -43,7 +43,7 @@ public:
     ConstDataIterator begin() const { return _data.begin(); }
     ConstDataIterator end() const { return _data.end(); }
 
-    int computeCostHint() const { return _cost; }
+    uint64_t computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }
     double valueAt(size_t column) const { return _data.at(column); }
@@ -74,7 +74,7 @@ private:
 
     NodeId _nodeId;
 
-    int _cost = 0;
+    uint64_t _cost = 0;
 
     double _sum = 0.0;
     double _sumSq = 0.0;

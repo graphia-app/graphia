@@ -360,7 +360,7 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     Q_ASSERT(row < _numRows);
 
     auto nodeId = graphModel()->mutableGraph().addNode();
-    auto computeCost = static_cast<int>(_numRows - row + 1);
+    auto computeCost = static_cast<uint64_t>(_numRows - row + 1);
 
     _dataRows.emplace_back(_data, row, _numColumns, nodeId, computeCost);
     _userNodeData.setElementIdForIndex(nodeId, row);
