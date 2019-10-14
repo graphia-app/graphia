@@ -74,8 +74,7 @@ public:
         TabularData& tabularData, QRect dataRect);
 
     static double imputeValue(MissingDataType missingDataType, double replacementValue,
-        const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                              size_t columnIndex, size_t rowIndex);
+        const TabularData& tabularData, const QRect& dataRect, size_t columnIndex, size_t rowIndex);
     static double scaleValue(ScalingType scalingType, double value);
     static void normalise(NormaliseType normaliseType,
         std::vector<CorrelationDataRow>& dataRows,

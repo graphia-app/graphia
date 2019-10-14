@@ -57,9 +57,9 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
-    size_t firstDataColumn, size_t firstDataRow, IParser& parser)
+    const QRect& dataRect, IParser& parser)
 {
-    if(firstDataColumn == 0 || firstDataRow == 0)
+    if(dataRect.x() == 0 || dataRect.y() == 0)
     {
         qDebug() << "tabularData has no row or column names!";
         return false;
@@ -68,6 +68,10 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     parser.setProgress(-1);
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
+    auto left = static_cast<size_t>(dataRect.x());
+    auto right = static_cast<size_t>(dataRect.x() + dataRect.width());
+    auto top = static_cast<size_t>(dataRect.y());
+    auto bottom = static_cast<size_t>(dataRect.y() + dataRect.height());
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
@@ -82,31 +86,32 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
             const auto& value = tabularData.valueAt(columnIndex, rowIndex);
 
-            size_t dataColumnIndex = columnIndex - firstDataColumn;
-            size_t dataRowIndex = rowIndex - firstDataRow;
-            bool isRowInDataRect = firstDataRow <= rowIndex;
-            bool isColumnInDataRect = firstDataColumn <= columnIndex;
+            size_t dataColumnIndex = columnIndex - dataRect.x();
+            size_t dataRowIndex = rowIndex - dataRect.y();
+            bool isColumnInDataRect = left <= columnIndex && columnIndex < right;
+            bool isRowInDataRect = top <= rowIndex && rowIndex < bottom;
+            bool isColumnAnnotation = rowIndex < top;
+            bool isRowAttribute = columnIndex < left;
 
             if((isColumnInDataRect && dataColumnIndex >= _numColumns) ||
                 (isRowInDataRect && dataRowIndex >= _numRows))
             {
                 qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
                                     "dataRect of dimensions (%3, %4)")
-                            .arg(dataColumnIndex)
-                            .arg(dataRowIndex)
-                            .arg(_numColumns)
-                            .arg(_numRows);
+                    .arg(dataColumnIndex).arg(dataRowIndex)
+                    .arg(_numColumns).arg(_numRows);
+
                 continue;
             }
 
             if(rowIndex == 0)
             {
-                if(!isColumnInDataRect)
-                    _userNodeData.add(value);
-                else
+                if(isColumnInDataRect)
                     setDataColumnName(dataColumnIndex, value);
+                else if(isRowAttribute)
+                    _userNodeData.add(value);
             }
-            else if(!isRowInDataRect)
+            else if(isColumnAnnotation)
             {
                 if(columnIndex == 0)
                     _userColumnData.add(value);
@@ -126,14 +131,14 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 else
                 {
                     transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
-                        tabularData, firstDataColumn, firstDataRow, columnIndex, rowIndex);
+                        tabularData, dataRect, columnIndex, rowIndex);
                 }
 
                 transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
 
                 setData(dataColumnIndex, dataRowIndex, transformedValue);
             }
-            else // Not in data rect, not first row, put in to the userNodeData
+            else if(isRowAttribute)
                 _userNodeData.setValue(dataRowIndex, tabularData.valueAt(columnIndex, 0), value);
         }
     }

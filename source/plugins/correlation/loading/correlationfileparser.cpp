@@ -117,10 +117,12 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
 
 double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     double replacementValue, const TabularData& tabularData,
-    size_t firstDataColumn, size_t firstDataRow,
-    size_t columnIndex, size_t rowIndex)
+    const QRect& dataRect, size_t columnIndex, size_t rowIndex)
 {
     double imputedValue = 0.0;
+
+    auto left = static_cast<size_t>(dataRect.x());
+    auto right = static_cast<size_t>(dataRect.x() + dataRect.width());
 
     switch(missingDataType)
     {
@@ -134,7 +136,7 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
         // Calculate column averages
         double averageValue = 0.0;
         size_t rowCount = 0;
-        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
+        for(size_t avgRowIndex = left; avgRowIndex < right; avgRowIndex++)
         {
             const auto& value = tabularData.valueAt(columnIndex, avgRowIndex);
             if(!value.isEmpty())
@@ -160,7 +162,7 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
         bool leftValueFound = false;
 
         // Find right value
-        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
+        for(size_t rightColumn = columnIndex; rightColumn < right; rightColumn++)
         {
             const auto& value = tabularData.valueAt(rightColumn, rowIndex);
             if(!value.isEmpty())
@@ -172,7 +174,7 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
             }
         }
         // Find left value
-        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
+        for(size_t leftColumn = columnIndex; leftColumn-- != left;)
         {
             const auto& value = tabularData.valueAt(leftColumn, rowIndex);
             if(!value.isEmpty())
@@ -301,7 +303,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     _plugin->setDimensions(_dataRect.width(), _dataRect.height());
 
     graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(_tabularData, _dataRect.left(), _dataRect.top(), *this))
+    if(!_plugin->loadUserData(_tabularData, _dataRect, *this))
         return false;
 
     // We don't need this any more, so free up any memory it's consuming
@@ -467,6 +469,9 @@ void TabularDataParser::clearData()
 
 std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSamples)
 {
+    if(_dataRect.isEmpty())
+        return {};
+
     std::vector<CorrelationDataRow> dataRows;
 
     Q_ASSERT(static_cast<size_t>(_dataRect.x() + _dataRect.width() - 1) < _dataPtr->numColumns());
@@ -487,8 +492,9 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
     {
         rowData.clear();
 
-        for(auto columnIndex = static_cast<size_t>(_dataRect.x());
-            columnIndex < _dataPtr->numColumns(); columnIndex++)
+        auto startColumn = static_cast<size_t>(_dataRect.x());
+        auto finishColumn = startColumn + _dataRect.width();
+        for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
         {
             const auto& value = _dataPtr->valueAt(columnIndex, rowIndex);
             double transformedValue = 0.0;
@@ -497,13 +503,18 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
             {
                 bool success = false;
                 transformedValue = value.toDouble(&success);
-                Q_ASSERT(success);
+
+                if(!success)
+                {
+                    qDebug() << QStringLiteral("WARNING: non-numeric value at (%1, %2): %3")
+                        .arg(columnIndex).arg(rowIndex).arg(value);
+                }
             }
             else
             {
                 transformedValue = CorrelationFileParser::imputeValue(
                     static_cast<MissingDataType>(_missingDataType), _replacementValue,
-                    *_dataPtr, _dataRect.x(), _dataRect.y(), columnIndex, rowIndex);
+                    *_dataPtr, _dataRect, columnIndex, rowIndex);
             }
 
             transformedValue = CorrelationFileParser::scaleValue(
