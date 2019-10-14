@@ -93,11 +93,6 @@ private:
 
     void finishDataRow(size_t row);
 
-    double imputeValue(const TabularData& tabularData,
-        size_t firstDataColumn, size_t firstDataRow,
-        size_t columnIndex, size_t rowIndex);
-    double scaleValue(double value);
-
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     QStringList columnAnnotationNames() const;
     QVector<double> rawData();
