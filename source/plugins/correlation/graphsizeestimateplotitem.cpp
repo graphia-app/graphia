@@ -83,13 +83,13 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
 
     index++;
 
-    int numNodes = 0;
-    int numEdges = 0;
+    size_t numNodes = 0;
+    size_t numEdges = 0;
 
     if(index < _keys.size())
     {
-        numNodes = static_cast<int>(_numNodes.at(index));
-        numEdges = static_cast<int>(_numEdges.at(index));
+        numNodes = static_cast<size_t>(_numNodes.at(index));
+        numEdges = static_cast<size_t>(_numEdges.at(index));
     }
 
     _customPlot.xAxis->setLabel(tr("Estimated Graph Size: %1 Nodes, %2 Edges")
