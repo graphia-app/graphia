@@ -121,8 +121,8 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
 {
     double imputedValue = 0.0;
 
-    auto left = static_cast<size_t>(dataRect.x());
-    auto right = static_cast<size_t>(dataRect.x() + dataRect.width());
+    size_t left = dataRect.x();
+    size_t right = dataRect.x() + dataRect.width();
 
     switch(missingDataType)
     {

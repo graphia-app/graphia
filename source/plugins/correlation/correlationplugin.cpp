@@ -68,10 +68,10 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     parser.setProgress(-1);
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
-    auto left = static_cast<size_t>(dataRect.x());
-    auto right = static_cast<size_t>(dataRect.x() + dataRect.width());
-    auto top = static_cast<size_t>(dataRect.y());
-    auto bottom = static_cast<size_t>(dataRect.y() + dataRect.height());
+    size_t left = dataRect.x();
+    size_t right = dataRect.x() + dataRect.width();
+    size_t top = dataRect.y();
+    size_t bottom = dataRect.y() + dataRect.height();
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
