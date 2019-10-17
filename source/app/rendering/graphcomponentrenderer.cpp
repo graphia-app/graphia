@@ -410,18 +410,13 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
     if(qFuzzyCompare(startZoomDistance, _targetZoomDistance))
         return;
 
-    if(visible())
+    if(visible() && doTransition)
     {
-        if(doTransition)
+        _zoomTransition.start(0.1f, Transition::Type::Linear,
+        [this, startZoomDistance](float f)
         {
-            _zoomTransition.start(0.1f, Transition::Type::Linear,
-            [this, startZoomDistance](float f)
-            {
-                _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
-            });
-        }
-        else
-            _viewData._zoomDistance = _targetZoomDistance;
+            _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
+        });
     }
     else
         _viewData._zoomDistance = _targetZoomDistance;
