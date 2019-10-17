@@ -45,6 +45,85 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
 
 static QRect findLargestDataRect(const TabularData& tabularData, size_t startColumn = 0, size_t startRow = 0)
 {
+    /*class Matrix
+    {
+    private:
+        size_t _width;
+        std::vector<size_t> _data;
+        size_t index(size_t x, size_t y) const { return x + (y * _width); }
+
+    public:
+        Matrix(size_t width, size_t height) : _width(width) { _data.resize(width * height, 0); }
+        size_t at(size_t x, size_t y) const { return _data.at(index(x, y)); }
+        void set(size_t x, size_t y, size_t value) { _data.at(index(x, y)) = value; }
+    };
+
+    Matrix h(tabularData.numColumns(), tabularData.numRows());
+
+    for(size_t row = startRow; row < tabularData.numRows(); row++)
+    {
+        for(size_t column = startColumn; column < tabularData.numColumns(); column++)
+        {
+            auto& value = tabularData.valueAt(column, row);
+            if(u::isNumeric(value) || value.isEmpty())
+            {
+                auto valueAbove = row > 0 ? h.at(column, row - 1) : 0;
+                h.set(column, row, 1 + valueAbove);
+            }
+        }
+    }
+
+    struct Info
+    {
+        size_t _column = 0;
+        size_t _height = 0;
+    };
+
+    std::stack<Info> s;
+    size_t maxArea = 0;
+    QRect dataRect;
+
+    auto pop = [&](size_t column, size_t row)
+    {
+        const auto& info = s.top();
+        auto width = (column - info._column);
+        auto area = width * info._height;
+        if(area > maxArea)
+        {
+            dataRect.setLeft(info._column);
+            dataRect.setTop(tabularData.numRows() - row);
+            dataRect.setWidth(width);
+            dataRect.setHeight(info._height);
+            maxArea = area;
+        }
+        s.pop();
+
+        return info._column;
+    };
+
+    for(size_t row = tabularData.numRows(); row-- > startRow;)
+    {
+        size_t column = startColumn;
+        for(; column < tabularData.numColumns(); column++)
+        {
+            auto height = h.at(column, row);
+            size_t start = column;
+
+            while(true)
+            {
+                if(s.empty() || height > s.top()._height)
+                    s.push({start, height});
+                else if(!s.empty() && height < s.top()._height)
+                    start = pop(column, row);
+                else
+                    break;
+            }
+        }
+
+        while(!s.empty())
+            pop(column, row);
+    }*/
+
     std::vector<int> heightHistogram(tabularData.numColumns());
 
     for(size_t column = startColumn; column < tabularData.numColumns(); column++)
