@@ -30,17 +30,19 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role) const override;
-    QVariant data(int row, const QString& role);
+    QVariant data(int row, EnrichmentTableModel::Results result) const;
     int rowFromAttributeSets(const QString& attributeA, const QString& attributeB);
-    QHash<int, QByteArray> roleNames() const override;
+    QHash<int, QByteArray> roleNames() const override { return _roleNames; }
 
     void setTableData(Table data);
     Q_INVOKABLE QString resultToString(EnrichmentTableModel::Results result);
     Q_INVOKABLE bool resultIsNumerical(EnrichmentTableModel::Results result);
 
     json toJson();
+
 private:
     Table _data;
+    QHash<int, QByteArray> _roleNames;
 };
 
 #endif // ENRICHMENTTABLEMODEL_H

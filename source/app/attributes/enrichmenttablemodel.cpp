@@ -4,6 +4,14 @@
 EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);
+
+    _roleNames[Qt::UserRole + Results::SelectionA] = "SelectionA";
+    _roleNames[Qt::UserRole + Results::SelectionB] = "SelectionB";
+    _roleNames[Qt::UserRole + Results::Observed] = "Observed";
+    _roleNames[Qt::UserRole + Results::ExpectedTrial] = "ExpectedTrial";
+    _roleNames[Qt::UserRole + Results::OverRep] = "OverRep";
+    _roleNames[Qt::UserRole + Results::Fishers] = "Fishers";
+    _roleNames[Qt::UserRole + Results::AdjustedFishers] = "AdjustedFishers";
 }
 
 int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
@@ -34,35 +42,22 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
     return value;
 }
 
-QVariant EnrichmentTableModel::data(int row, const QString& role)
+QVariant EnrichmentTableModel::data(int row, Results result) const
 {
-    return data(index(row, 0), roleNames().key(role.toUtf8()));
+    return data(index(row, 0), result + Qt::UserRole);
 }
 
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
 {
     for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
-        if(data(rowIndex, QStringLiteral("SelectionA")) == attributeA &&
-            data(rowIndex, QStringLiteral("SelectionB")) == attributeB)
+        if(data(rowIndex, Results::SelectionA) == attributeA &&
+            data(rowIndex, Results::SelectionB) == attributeB)
         {
             return rowIndex;
         }
     }
     return -1;
-}
-
-QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
-{
-    QHash<int, QByteArray> _roleNames;
-    _roleNames[Qt::UserRole + Results::SelectionA] = "SelectionA";
-    _roleNames[Qt::UserRole + Results::SelectionB] = "SelectionB";
-    _roleNames[Qt::UserRole + Results::Observed] = "Observed";
-    _roleNames[Qt::UserRole + Results::ExpectedTrial] = "ExpectedTrial";
-    _roleNames[Qt::UserRole + Results::OverRep] = "OverRep";
-    _roleNames[Qt::UserRole + Results::Fishers] = "Fishers";
-    _roleNames[Qt::UserRole + Results::AdjustedFishers] = "AdjustedFishers";
-    return _roleNames;
 }
 
 json EnrichmentTableModel::toJson()

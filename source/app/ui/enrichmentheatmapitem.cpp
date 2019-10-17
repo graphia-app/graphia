@@ -167,8 +167,8 @@ void EnrichmentHeatmapItem::buildPlot()
 
     for(int i = 0; i < _tableModel->rowCount(); ++i)
     {
-        attributeValueSetA.insert(_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionA)).toString());
-        attributeValueSetB.insert(_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString());
+        attributeValueSetA.insert(_tableModel->data(i, EnrichmentTableModel::Results::SelectionA).toString());
+        attributeValueSetB.insert(_tableModel->data(i, EnrichmentTableModel::Results::SelectionB).toString());
     }
 
     // Sensible sort strings using numbers
@@ -215,16 +215,16 @@ void EnrichmentHeatmapItem::buildPlot()
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell
-        auto xValue = fullLabelToXAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionA)).toString()];
-        auto yValue = fullLabelToYAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString()];
+        auto xValue = fullLabelToXAxis[_tableModel->data(i, EnrichmentTableModel::Results::SelectionA).toString()];
+        auto yValue = fullLabelToYAxis[_tableModel->data(i, EnrichmentTableModel::Results::SelectionB).toString()];
 
-        auto pValue = _tableModel->data(i, QStringLiteral("AdjustedFishers")).toDouble();
+        auto pValue = _tableModel->data(i, EnrichmentTableModel::Results::AdjustedFishers).toDouble();
 
         _colorMapKeyValueToTableIndex.emplace(std::make_pair(xValue, yValue), i);
 
         if(_showOnlyEnriched)
         {
-            auto overRep = _tableModel->data(i, QStringLiteral("OverRep")).toDouble();
+            auto overRep = _tableModel->data(i, EnrichmentTableModel::Results::OverRep).toDouble();
             if(overRep <= 1.0)
             {
                 // Set a value that will map to grey, so that the heatmap matches the table
@@ -406,7 +406,8 @@ void EnrichmentHeatmapItem::showTooltip()
 
     _hoverLabel->setVisible(true);
 
-    auto pValue = _tableModel->data(tableIndex, QStringLiteral("AdjustedFishers")).toDouble();
+    auto pValue = _tableModel->data(tableIndex,
+        EnrichmentTableModel::Results::AdjustedFishers).toDouble();
 
     _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberScientific(pValue)));
 
