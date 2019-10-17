@@ -27,6 +27,7 @@
 #include <iterator>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 enum class MultiElementType
 {
@@ -38,7 +39,8 @@ enum class MultiElementType
 template<typename C, typename T> class ElementIdDistinctSet;
 template<typename T> class ElementIdDistinctSets;
 
-template<typename T> class ElementIdDistinctSetCollection
+template<typename T, template<typename> typename Alloc = std::allocator>
+class ElementIdDistinctSetCollection
 {
     static_assert(std::is_base_of_v<ElementId<T>, T>, "T must be an ElementId");
 
@@ -70,7 +72,7 @@ private:
         bool hasNext(T elementId) const { return !_next.isNull() && !isTail(elementId); }
     };
 
-    using List = std::vector<ListNode>;
+    using List = std::vector<ListNode, Alloc<ListNode>>;
     List _list;
 
     const ListNode& listNodeFor(T elementId) const
@@ -311,9 +313,6 @@ public:
         return MultiElementType::Not;
     }
 };
-
-using NodeIdDistinctSetCollection = ElementIdDistinctSetCollection<NodeId>;
-using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
 template<typename C, typename T> class ElementIdDistinctSet
 {

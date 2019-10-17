@@ -59,69 +59,87 @@ public:
     ~MutableGraph() override;
 
 private:
-    struct
+    template<template<typename> typename Alloc>
+    struct Storage
     {
-        std::vector<bool>           _nodeIdsInUse;
-        NodeIdDistinctSetCollection _mergedNodeIds;
-        std::vector<int>            _multiplicities;
-        std::vector<Node>           _nodes;
-
-        void resize(std::size_t size)
+        struct
         {
-            _nodeIdsInUse.resize(size);
-            _mergedNodeIds.resize(size);
-            _multiplicities.resize(size);
-            _nodes.resize(size);
-        }
+            std::vector<bool, Alloc<bool>>                  _nodeIdsInUse;
+            ElementIdDistinctSetCollection<NodeId, Alloc>   _mergedNodeIds;
+            std::vector<int, Alloc<int>>                    _multiplicities;
+            std::vector<Node, Alloc<Node>>                  _nodes;
+
+            void resize(std::size_t size)
+            {
+                _nodeIdsInUse.resize(size);
+                _mergedNodeIds.resize(size);
+                _multiplicities.resize(size);
+                _nodes.resize(size);
+            }
+
+            void clear()
+            {
+                _nodeIdsInUse.clear();
+                _mergedNodeIds.clear();
+                _multiplicities.clear();
+                _nodes.clear();
+            }
+        } _n;
+
+        std::vector<NodeId, Alloc<NodeId>> _nodeIds;
+        std::deque<NodeId, Alloc<NodeId>> _unusedNodeIds;
+
+        struct
+        {
+            std::vector<bool, Alloc<bool>>                  _edgeIdsInUse;
+            ElementIdDistinctSetCollection<EdgeId, Alloc>   _mergedEdgeIds;
+            std::vector<int, Alloc<int>>                    _multiplicities;
+            std::vector<Edge, Alloc<Edge>>                  _edges;
+
+            ElementIdDistinctSetCollection<EdgeId, Alloc> _inEdgeIdsCollection;
+            ElementIdDistinctSetCollection<EdgeId, Alloc> _outEdgeIdsCollection;
+
+            std::map<UndirectedEdge, EdgeIdDistinctSet, std::less<UndirectedEdge>,
+                Alloc<std::pair<const UndirectedEdge, EdgeIdDistinctSet>>> _connections;
+
+            void resize(std::size_t size)
+            {
+                _edgeIdsInUse.resize(size);
+                _mergedEdgeIds.resize(size);
+                _multiplicities.resize(size);
+                _edges.resize(size);
+                _inEdgeIdsCollection.resize(size);
+                _outEdgeIdsCollection.resize(size);
+            }
+
+            void clear()
+            {
+                _edgeIdsInUse.clear();
+                _mergedEdgeIds.clear();
+                _multiplicities.clear();
+                _edges.clear();
+                _inEdgeIdsCollection.clear();
+                _outEdgeIdsCollection.clear();
+                _connections.clear();
+            }
+        } _e;
+
+        std::vector<EdgeId, Alloc<EdgeId>> _edgeIds;
+        std::deque<EdgeId, Alloc<EdgeId>> _unusedEdgeIds;
 
         void clear()
         {
-            _nodeIdsInUse.clear();
-            _mergedNodeIds.clear();
-            _multiplicities.clear();
-            _nodes.clear();
+            _n.clear();
+            _nodeIds.clear();
+            _unusedNodeIds.clear();
+
+            _e.clear();
+            _edgeIds.clear();
+            _unusedEdgeIds.clear();
         }
-    } _n;
+    };
 
-    std::vector<NodeId> _nodeIds;
-    std::deque<NodeId> _unusedNodeIds;
-
-    struct
-    {
-        std::vector<bool>           _edgeIdsInUse;
-        EdgeIdDistinctSetCollection _mergedEdgeIds;
-        std::vector<int>            _multiplicities;
-        std::vector<Edge>           _edges;
-
-        EdgeIdDistinctSetCollection _inEdgeIdsCollection;
-        EdgeIdDistinctSetCollection _outEdgeIdsCollection;
-
-        std::map<UndirectedEdge, EdgeIdDistinctSet> _connections;
-
-        void resize(std::size_t size)
-        {
-            _edgeIdsInUse.resize(size);
-            _mergedEdgeIds.resize(size);
-            _multiplicities.resize(size);
-            _edges.resize(size);
-            _inEdgeIdsCollection.resize(size);
-            _outEdgeIdsCollection.resize(size);
-        }
-
-        void clear()
-        {
-            _edgeIdsInUse.clear();
-            _mergedEdgeIds.clear();
-            _multiplicities.clear();
-            _edges.clear();
-            _inEdgeIdsCollection.clear();
-            _outEdgeIdsCollection.clear();
-            _connections.clear();
-        }
-    } _e;
-
-    std::vector<EdgeId> _edgeIds;
-    std::deque<EdgeId> _unusedEdgeIds;
+    Storage<std::allocator> _storage;
 
     bool _updateRequired = false;
 
