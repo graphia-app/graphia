@@ -749,7 +749,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
         graph->setData(xData, yDataAvg, true);
 
         _meanPlots.append(graph);
-        populateDispersion(graph, rows, yDataAvg);
+        populateDispersion(graph, minY, maxY, rows, yDataAvg);
     };
 
     if(!_plotAveragingAttributeName.isEmpty())
@@ -816,7 +816,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
         graph->setData(xData, yDataAvg, true);
 
         _meanPlots.append(graph);
-        populateDispersion(graph, rows, yDataAvg);
+        populateDispersion(graph, minY, maxY, rows, yDataAvg);
     };
 
     if(!_plotAveragingAttributeName.isEmpty())
@@ -868,7 +868,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         setYAxisRange(minY, maxY);
 
         _meanPlots.append(histogramBars);
-        populateDispersion(histogramBars, rows, yDataAvg);
+        populateDispersion(histogramBars, minY, maxY, rows, yDataAvg);
     };
 
     if(!_plotAveragingAttributeName.isEmpty())
@@ -991,11 +991,9 @@ void CorrelationPlotItem::populateIQRPlot()
 }
 
 void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
+    double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = QStringLiteral("Deviation"))
 {
-    double minY = std::numeric_limits<double>::max();
-    double maxY = std::numeric_limits<double>::lowest();
-
     auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
@@ -1049,11 +1047,10 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
         minY = std::min(minY, meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
         maxY = std::max(maxY, meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
     }
-
-    setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
+    double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
     QVector<double> stdDevs(static_cast<int>(_pluginInstance->numColumns()));
@@ -1072,10 +1069,11 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
         stdDevs[col] = stdDev;
     }
 
-    plotDispersion(meanPlot, stdDevs, QStringLiteral("Std Dev"));
+    plotDispersion(meanPlot, minY, maxY, stdDevs, QStringLiteral("Std Dev"));
 }
 
 void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
+    double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
     QVector<double> stdErrs(static_cast<int>(_pluginInstance->numColumns()));
@@ -1094,10 +1092,11 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
         stdErrs[col] = stdErr;
     }
 
-    plotDispersion(meanPlot, stdErrs, QStringLiteral("Std Err"));
+    plotDispersion(meanPlot, minY, maxY, stdErrs, QStringLiteral("Std Err"));
 }
 
 void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
+    double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
     auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
@@ -1107,9 +1106,9 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
         return;
 
     if(plotDispersionType == PlotDispersionType::StdDev)
-        populateStdDevPlot(meanPlot, rows, means);
+        populateStdDevPlot(meanPlot, minY, maxY, rows, means);
     else if(plotDispersionType == PlotDispersionType::StdErr)
-        populateStdErrorPlot(meanPlot, rows, means);
+        populateStdErrorPlot(meanPlot, minY, maxY, rows, means);
 }
 
 void CorrelationPlotItem::populateLinePlot()

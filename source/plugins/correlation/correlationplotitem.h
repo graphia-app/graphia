@@ -253,12 +253,16 @@ private:
     void populateMeanHistogramPlot();
     void populateIQRPlot();
     void plotDispersion(QCPAbstractPlottable* meanPlot,
+        double& minY, double& maxY,
         const QVector<double>& stdDevs, const QString& name);
     void populateStdDevPlot(QCPAbstractPlottable* meanPlot,
+        double& minY, double& maxY,
         const QVector<int>& rows, QVector<double>& means);
     void populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
+        double& minY, double& maxY,
         const QVector<int>& rows, QVector<double>& means);
     void populateDispersion(QCPAbstractPlottable* meanPlot,
+        double& minY, double& maxY,
         const QVector<int>& rows, QVector<double>& means);
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
