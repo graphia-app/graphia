@@ -252,9 +252,14 @@ private:
     void populateLinePlot();
     void populateMeanHistogramPlot();
     void populateIQRPlot();
-    void populateStdDevPlot();
-    void populateStdErrorPlot();
-    void plotDispersion(QVector<double> stdDevs, const QString& name);
+    void plotDispersion(QCPAbstractPlottable* meanPlot,
+        const QVector<double>& stdDevs, const QString& name);
+    void populateStdDevPlot(QCPAbstractPlottable* meanPlot,
+        const QVector<int>& rows, QVector<double>& means);
+    void populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
+        const QVector<int>& rows, QVector<double>& means);
+    void populateDispersion(QCPAbstractPlottable* meanPlot,
+        const QVector<int>& rows, QVector<double>& means);
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
