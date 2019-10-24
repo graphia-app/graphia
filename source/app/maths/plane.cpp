@@ -28,7 +28,7 @@ Plane::Side Plane::sideForPoint(const QVector3D& point) const
     float result =
             _normal.x() * point.x() +
             _normal.y() * point.y() +
-            _normal.z() * point.z() + distance();
+            _normal.z() * point.z() + _distance;
 
     if(result >= 0.0f)
         return Plane::Side::Front;
@@ -50,7 +50,13 @@ float Plane::distanceToPoint(const QVector3D& point) const
     float n =
             _normal.x() * point.x() +
             _normal.y() * point.y() +
-            _normal.z() * point.z() + distance();
+            _normal.z() * point.z() + _distance;
 
     return -n / _normal.length();
+}
+
+QVector3D Plane::project(const QVector3D& point) const
+{
+    auto dot = QVector3D::dotProduct(point, _normal);
+    return point - (dot + _distance) * _normal;
 }

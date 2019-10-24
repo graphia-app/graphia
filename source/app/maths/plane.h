@@ -33,6 +33,7 @@ public:
     Side sideForPoint(const QVector3D& point) const;
     QVector3D rayIntersection(const Ray& ray) const;
     float distanceToPoint(const QVector3D& point) const;
+    QVector3D project(const QVector3D& point) const;
 };
 
 #endif // PLANE_H
