@@ -57,7 +57,7 @@ Item
             tableView.columnWidths = []
         }
         // We update the property target width here to stop the columns constantly
-        // adjusting due to the columnWidthProvider binding to tableView.width
+        // adjusting due to the   binding to tableView.width
         tableView.targetTotalColumnWidth = tableView.width;
 
         tableView.currentTotalColumnWidth = 0;
@@ -357,59 +357,149 @@ Item
         }
     }
 
-    TableView
+    ColumnLayout
     {
-        id: tableView
-        property var userColumnWidths: []
-        property var currentColumnWidths: []
-        property var currentTotalColumnWidth: 0
-        property var targetTotalColumnWidth: 0
-        property var columnWidths: []
-        property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
-        property var visibleColumns: headerColumns
-        signal fetchColumnSizes;
-
-        clip: true
-        interactive: false
-        visible: true
         anchors.fill: parent
-        topMargin: columnsHeader.implicitHeight
-        onTopMarginChanged: tableView.forceLayoutSafe();
 
-        QQC2.ScrollBar.vertical: QQC2.ScrollBar
+        Item
         {
-            z: 100
-            id: verticalTableViewScrollBar
-            policy: Qt.ScrollBarAsNeeded
-            contentItem: Rectangle
+            Layout.fillWidth: true
+            height: 15
+            ScrollView
             {
-                implicitWidth: 5
-                radius: width / 2
-                color: sysPalette.dark
+                visible: columnSelectionMode
+                anchors.fill: parent
+                flickableItem.contentX: tableView.contentX
+                flickableItem.contentY: 0
+                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                Row
+                {
+                    id: columnsHeader
+                    z: 2
+                    Repeater
+                    {
+                        id: columnHeaderRepeater
+                        model: headerDelegateModel
+
+                        onItemAdded:
+                        {
+                            tableView.forceLayoutSafe();
+                        }
+                    }
+                }
+            }
+
+            TableView
+            {
+                id: headerView
+                model: tableView.model
+                width: parent.width
+                height: 15
+                visible: !columnSelectionMode
+                interactive: false
+                rowHeightProvider: function(row)
+                {
+                    return row > 0 ? 0 : -1;
+                }
+                columnWidthProvider: tableView.columnWidthProvider;
+                delegate: Item
+                {
+                    property var modelIndex: index
+                    implicitWidth: columnHeaderRepeater.itemAt(model.column).width
+                    implicitHeight: headerLabelView.height
+
+                    id: headerDelegate
+                    Rectangle
+                    {
+                        anchors.fill: parent
+                        color: sysPalette.light
+                    }
+                    Label
+                    {
+                        id: headerLabelView
+                        clip: true
+                        maximumLineCount: 1
+                        width: parent.width
+                        text:
+                        {
+                            let headerIndex = displayedGroup.get(model.column).model.modelData;
+                            return root._nodeAttributesTableModel.columnNames[headerIndex];
+                        }
+
+                        color: sysPalette.text
+                        font.pixelSize: 11
+                        padding: 4
+                        renderType: Text.NativeRendering
+                    }
+                    Rectangle
+                    {
+                        anchors.right: parent.right
+                        height: parent.height
+                        width: 1
+                        color: sysPalette.midlight
+                    }
+                }
             }
         }
 
-        QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+        TableView
         {
-            id: horizontalTableViewScrollBar
-        }
+            id: tableView
+            property var userColumnWidths: []
+            property var currentColumnWidths: []
+            property var currentTotalColumnWidth: 0
+            property var targetTotalColumnWidth: 0
+            property var columnWidths: []
+            property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
+            property var visibleColumns: headerColumns
+            signal fetchColumnSizes;
 
-        model: TableProxyModel
-        {
-            id: proxyModel
-            sourceModel: root._nodeAttributesTableModel
-        }
+            clip: true
+            interactive: false
+            visible: true
+            Layout.fillHeight: true
+            Layout.fillWidth: true
 
-        columnWidthProvider: function(col)
-        {
-            var calculatedWidth = 0;
-            var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
+            onContentXChanged:
+            {
+                headerView.contentX = contentX;
+            }
 
-            /*
-            console.log("CWP", col, "UW", userWidth,
-                        "Map", proxyModel.mapToSourceColumn(col), "CMW", calculateMinimumColumnWidth(col),
-                        "HeaderText", columnHeaderRepeater.itemAt(col).labelText);
-                        */
+            QQC2.ScrollBar.vertical: QQC2.ScrollBar
+            {
+                z: 100
+                id: verticalTableViewScrollBar
+                policy: Qt.ScrollBarAsNeeded
+                contentItem: Rectangle
+                {
+                    implicitWidth: 5
+                    radius: width / 2
+                    color: sysPalette.dark
+                }
+            }
+
+            QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+            {
+                id: horizontalTableViewScrollBar
+            }
+
+            model: TableProxyModel
+            {
+                id: proxyModel
+                sourceModel: root._nodeAttributesTableModel
+            }
+
+            columnWidthProvider: function(col)
+            {
+                var calculatedWidth = 0;
+                var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
+
+                /*
+                console.log("CWP", col, "UW", userWidth,
+                            "Map", proxyModel.mapToSourceColumn(col), "CMW", calculateMinimumColumnWidth(col),
+                            "HeaderText", columnHeaderRepeater.itemAt(col).labelText);
+       */
 
             // Use the user specified column width if available
             if(userWidth !== undefined)
@@ -440,7 +530,10 @@ Item
         function forceLayoutSafe()
         {
             if(tableView.rows > 0 && tableView.columns > 0)
+            {
                 tableView.forceLayout();
+                headerView.forceLayout();
+            }
         }
 
         function getItem(mouseX, mouseY)
@@ -490,7 +583,6 @@ Item
                     includeByDefault: true
                 }
             ]
-
 
             delegate: DropArea
             {
@@ -707,32 +799,6 @@ Item
             }
         }
 
-        Row
-        {
-            id: columnsHeader
-            y: tableView.contentY
-            z: 2
-            Repeater
-            {
-                id: columnHeaderRepeater
-                model: headerDelegateModel
-
-                onItemAdded:
-                {
-                    tableView.forceLayoutSafe();
-                }
-            }
-        }
-        Rectangle
-        {
-            z: 1
-            x: 0
-            y: tableView.contentY
-            height: columnsHeader.implicitHeight
-            width: tableView.width
-            color: "white"
-        }
-
         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
         // except for the text property
         delegate: Item
@@ -864,6 +930,86 @@ Item
             }
         }
 
+        Item
+        {
+            clip: true
+
+            anchors.fill: tableView
+            //anchors.topMargin: columnsHeader.implicitHeight
+
+            SlidingPanel
+            {
+                id: columnSelectionControls
+                visible: tableView.visible
+
+                alignment: Qt.AlignTop|Qt.AlignLeft
+
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: -Constants.margin
+                anchors.topMargin: -Constants.margin
+
+                initiallyOpen: false
+                disableItemWhenClosed: false
+
+                item: Rectangle
+                {
+                    width: row.width
+                    height: row.height
+
+                    border.color: "black"
+                    border.width: 1
+                    radius: 4
+                    color: "white"
+
+                    RowLayout
+                    {
+                        id: row
+
+                        // The RowLayout in a RowLayout is just a hack to get some padding
+                        RowLayout
+                        {
+                            Layout.topMargin: Constants.padding + Constants.margin - 2
+                            Layout.bottomMargin: Constants.padding
+                            Layout.leftMargin: Constants.padding + Constants.margin - 2
+                            Layout.rightMargin: Constants.padding
+
+                            Button
+                            {
+                                text: qsTr("Show All")
+                                onClicked: { root.showAllColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Hide All")
+                                onClicked: { root.hideAllColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Show Calculated")
+                                onClicked: { root.showAllCalculatedColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Hide Calculated")
+                                onClicked: { root.hideAllCalculatedColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Done")
+                                iconName: "emblem-unreadable"
+                                onClicked: { columnSelectionMode = false; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Component.onCompleted:
         {
             tableView._resetSortFilterProxyModel();
@@ -879,107 +1025,28 @@ Item
         property Menu _tableMenu
     }
 
-    ShaderEffectSource
-    {
-        id: effectSource
-        visible: columnSelectionMode
-
-        x: tableView.x
-        y: tableView.y + tableView.topMargin
-        width: tableView.width
-        height: tableView.height
-
-        sourceItem: tableView
-        sourceRect: Qt.rect(x, y, width, height)
     }
+//    ShaderEffectSource
+//    {
+//        id: effectSource
+//        visible: columnSelectionMode
 
-    FastBlur
-    {
-        visible: columnSelectionMode
-        anchors.fill: effectSource
-        source: effectSource
-        radius: 32
-    }
+//        x: tableView.x
+//        y: tableView.y + tableView.topMargin
+//        width: tableView.width
+//        height: tableView.height
 
-    Item
-    {
-        clip: true
+//        sourceItem: tableView
+//        sourceRect: Qt.rect(x, y, width, height)
+//    }
 
-        anchors.fill: tableView
-        anchors.topMargin: columnsHeader.implicitHeight
-
-        SlidingPanel
-        {
-            id: columnSelectionControls
-            visible: tableView.visible
-
-            alignment: Qt.AlignTop|Qt.AlignLeft
-
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: -Constants.margin
-            anchors.topMargin: -Constants.margin
-
-            initiallyOpen: false
-            disableItemWhenClosed: false
-
-            item: Rectangle
-            {
-                width: row.width
-                height: row.height
-
-                border.color: "black"
-                border.width: 1
-                radius: 4
-                color: "white"
-
-                RowLayout
-                {
-                    id: row
-
-                    // The RowLayout in a RowLayout is just a hack to get some padding
-                    RowLayout
-                    {
-                        Layout.topMargin: Constants.padding + Constants.margin - 2
-                        Layout.bottomMargin: Constants.padding
-                        Layout.leftMargin: Constants.padding + Constants.margin - 2
-                        Layout.rightMargin: Constants.padding
-
-                        Button
-                        {
-                            text: qsTr("Show All")
-                            onClicked: { root.showAllColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Hide All")
-                            onClicked: { root.hideAllColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Show Calculated")
-                            onClicked: { root.showAllCalculatedColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Hide Calculated")
-                            onClicked: { root.hideAllCalculatedColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Done")
-                            iconName: "emblem-unreadable"
-                            onClicked: { columnSelectionMode = false; }
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    FastBlur
+//    {
+//        visible: columnSelectionMode
+//        anchors.fill: effectSource
+//        source: effectSource
+//        radius: 32
+//    }
 
     Menu { id: contextMenu }
 
