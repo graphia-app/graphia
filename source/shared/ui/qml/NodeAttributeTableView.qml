@@ -357,6 +357,23 @@ Item
         }
     }
 
+    Row
+    {
+        id: columnsHeader
+        z: 2
+        visible: false
+        Repeater
+        {
+            id: columnHeaderRepeater
+            model: headerDelegateModel
+
+            onItemAdded:
+            {
+                tableView.forceLayoutSafe();
+            }
+        }
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -364,80 +381,245 @@ Item
         Item
         {
             Layout.fillWidth: true
-            height: 15
-            ScrollView
-            {
-                visible: columnSelectionMode
-                anchors.fill: parent
-                flickableItem.contentX: tableView.contentX
-                flickableItem.contentY: 0
-                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                Row
-                {
-                    id: columnsHeader
-                    z: 2
-                    Repeater
-                    {
-                        id: columnHeaderRepeater
-                        model: headerDelegateModel
-
-                        onItemAdded:
-                        {
-                            tableView.forceLayoutSafe();
-                        }
-                    }
-                }
-            }
+            height: 20
 
             TableView
             {
                 id: headerView
                 model: tableView.model
                 width: parent.width
-                height: 15
-                visible: !columnSelectionMode
+                height: 20
                 interactive: false
+                clip: true
                 rowHeightProvider: function(row)
                 {
                     return row > 0 ? 0 : -1;
                 }
                 columnWidthProvider: tableView.columnWidthProvider;
-                delegate: Item
-                {
-                    property var modelIndex: index
-                    implicitWidth: columnHeaderRepeater.itemAt(model.column).width
-                    implicitHeight: headerLabelView.height
+                property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
-                    id: headerDelegate
+                delegate: DropArea
+                {
+                    TableView.onReused:
+                    {
+                        sourceColumn = proxyModel.mapToSourceColumn(model.column);
+                    }
+
+                    id: headerItemView
+                    implicitWidth: Math.max(defaultColumnWidth, labelWidth)
+                    implicitHeight: headerLabelView.height
+                    property var modelIndex: index
+                    property var labelWidth: headerLabelView.contentWidth + headerLabelView.padding
+                                             + headerLabelView.padding + sortIndicatorView.marginWidth
+                                             + sortIndicatorView.anchors.rightMargin;
+                    property int visualIndex: sourceColumn
+                    property int displayedIndex: model.column
+                    property var labelText: headerLabelView.text
+                    Binding { target: headerContentView; property: "visualIndex"; value: visualIndex }
+                    Binding { target: headerContentView; property: "displayedIndex"; value: displayedIndex }
+                    property var sourceColumn: proxyModel.mapToSourceColumn(model.column);
+                    Connections
+                    {
+                        target: proxyModel
+                        onColumnOrderChanged:
+                        {
+                            sourceColumn = proxyModel.mapToSourceColumn(model.column);
+                        }
+                    }
+
+                    onEntered:
+                    {
+                        console.log("Entered");
+                        let tempWidth = tableView.currentColumnWidths[displayedIndex];
+                        tableView.currentColumnWidths[displayedIndex] = tableView.currentColumnWidths[drag.source.displayedIndex];
+                        tableView.currentColumnWidths[drag.source.displayedIndex] = tempWidth;
+
+                        array_move(headerView.columnOrder, drag.source.visualIndex, visualIndex);
+
+                        //headerDelegateModel.items.move(drag.source.visualIndex, visualIndex)
+
+                        tableView.forceLayoutSafe();
+                    }
                     Rectangle
                     {
                         anchors.fill: parent
-                        color: sysPalette.light
+                        visible: dragHandler.active
+                        color: Qt.lighter(sysPalette.highlight, 1.99)
                     }
-                    Label
+
+                    Item
                     {
-                        id: headerLabelView
-                        clip: true
-                        maximumLineCount: 1
-                        width: parent.width
-                        text:
+                        id: headerContentView
+                        opacity: Drag.active ? 0.5 : 1
+                        property int visualIndex: 0
+                        property int displayedIndex: 0
+                        property int sourceColumn: 0
+                        width: headerItemView.implicitWidth
+                        height: headerItemView.implicitHeight
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+
+                        states: [
+                            State {
+                                when: headerContentView.Drag.active
+                                ParentChange {
+                                    target: headerContentView
+                                    parent: headerView
+                                }
+                                AnchorChanges {
+                                    target: headerContentView
+                                    anchors.left: undefined
+                                    anchors.top: undefined
+                                }
+                            }
+                        ]
+
+                        Rectangle
                         {
-                            let headerIndex = displayedGroup.get(model.column).model.modelData;
-                            return root._nodeAttributesTableModel.columnNames[headerIndex];
+                            anchors.fill: parent
+                            color: headerMouseAreaView.containsMouse ? Qt.lighter(sysPalette.highlight, 1.99) : sysPalette.light
+                        }
+                        CheckBox
+                        {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: columnSelectionMode
+                            text:  {
+                                let headerIndex = proxyModel.mapToSourceColumn(model.column);
+                                return root._nodeAttributesTableModel.columnNames[headerIndex];
+                            }
+                            height: headerLabelView.height
+
+                            function isChecked()
+                            {
+                                return !Utils.setContains(root.hiddenColumns, headerItemView.sourceColumn);
+                            }
+                            checked: { return isChecked(); }
+                            onCheckedChanged:
+                            {
+                                // Unbind to prevent binding loop
+                                checked = checked;
+                                root.setColumnVisibility(headerItemView.sourceColumn, checked);
+
+                                // Rebind so that the delegate doesn't hold the state
+                                checked = Qt.binding(isChecked);
+                                //headerItem.DelegateModel.inDisplayed = checked
+                            }
+                        }
+                        QQC2.Label
+                        {
+                            id: headerLabelView
+                            visible: !columnSelectionMode
+                            clip: true
+                            //elide: Text.ElideRight
+                            maximumLineCount: 1
+                            width: parent.width - (sortIndicatorView.marginWidth);
+                            text:
+                            {
+                                let headerIndex = proxyModel.mapToSourceColumn(model.column);
+                                return root._nodeAttributesTableModel.columnNames[headerIndex];
+                            }
+                            //text: "Test";
+                            //text: modelData + " W: " + headerItem + " H:" + headerItem.width.toFixed(0) + " D:" //+ tableView.columnWidthProvider(headerItem.displayedIndex)
+                            color: sysPalette.text
+                            font.pixelSize: 11
+                            padding: 4
+                            renderType: Text.NativeRendering
+                        }
+                        Shape
+                        {
+                            id: sortIndicatorView
+                            anchors.verticalCenter: parent.verticalCenter
+                            property var marginWidth: width + anchors.rightMargin
+                            anchors.right: parent.right
+                            anchors.rightMargin: 3
+                            antialiasing: false
+                            width: 7
+                            height: 4
+                            visible: proxyModel.sortColumn == headerItemView.sourceColumn && !columnSelectionMode
+                            transform: Rotation
+                            {
+                                origin.x: sortIndicatorView.width * 0.5
+                                origin.y: sortIndicatorView.height * 0.5
+                                angle: proxyModel.sortOrder == Qt.DescendingOrder ? 0 : 180
+                            }
+
+                            ShapePath
+                            {
+                                miterLimit: 0
+                                strokeColor: sysPalette.mid
+                                fillColor: "transparent"
+                                strokeWidth: 2
+                                startY: sortIndicatorView.height - 1
+                                PathLine { x: Math.round((sortIndicatorView.width - 1) * 0.5); y: 0 }
+                                PathLine { x: sortIndicatorView.width - 1; y: sortIndicatorView.height - 1 }
+                            }
                         }
 
-                        color: sysPalette.text
-                        font.pixelSize: 11
-                        padding: 4
-                        renderType: Text.NativeRendering
-                    }
-                    Rectangle
-                    {
-                        anchors.right: parent.right
-                        height: parent.height
-                        width: 1
-                        color: sysPalette.midlight
+                        DragHandler
+                        {
+                            id: dragHandlerView
+                            yAxis.enabled: false
+                        }
+
+                        Drag.active: dragHandlerView.active
+                        Drag.source: headerContentView
+                        Drag.hotSpot.x: headerContentView.width * 0.5
+                        Drag.hotSpot.y: headerContentView.height * 0.5
+                        property bool dragActive: Drag.active
+                        onDragActiveChanged:
+                        {
+                            if(!dragActive)
+                            {
+                                proxyModel.columnOrder = headerView.columnOrder;
+                            }
+                        }
+
+                        MouseArea
+                        {
+                            id: headerMouseAreaView
+                            enabled: !columnSelectionMode
+                            anchors.fill: headerContentView
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton
+
+                            onClicked:
+                            {
+                                if(proxyModel.sortColumn == headerItemView.sourceColumn)
+                                    proxyModel.sortOrder = proxyModel.sortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
+                                else
+                                    proxyModel.sortColumn = headerItemView.sourceColumn;
+
+                            }
+                        }
+
+                        Rectangle
+                        {
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 1
+                            color: sysPalette.midlight
+                            MouseArea
+                            {
+                                id: resizeHandleMouseAreaView
+                                cursorShape: Qt.SizeHorCursor
+                                width: 5
+                                height: parent.height
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                drag.target: parent
+                                drag.axis: Drag.XAxis
+
+                                onMouseXChanged:
+                                {
+                                    if(drag.active)
+                                    {
+                                        let sourceColumn = proxyModel.mapToSourceColumn(model.column);
+                                        tableView.userColumnWidths[sourceColumn] = Math.max(30, headerItemView.width + mouseX);
+                                        headerItemView.width = tableView.userColumnWidths[sourceColumn];
+                                        tableView.forceLayoutSafe();
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -588,19 +770,13 @@ Item
             {
                 id: headerItem
                 width: Math.max(defaultColumnWidth, labelWidth)
-                Behavior on width
-                {
-                    enabled: !resizeHandleMouseArea.drag.active
-                    PropertyAnimation { easing.type: Easing.InOutQuad }
-                }
-                Behavior on x { PropertyAnimation { easing.type: Easing.InOutQuad } }
                 height: headerLabel.height
                 property var modelIndex: index
                 property var labelWidth: headerLabel.contentWidth + headerLabel.padding
                                          + headerLabel.padding + sortIndicator.marginWidth
                                          + sortIndicator.anchors.rightMargin;
                 property int visualIndex: DelegateModel.itemsIndex
-                property int displayedIndex: DelegateModel.displayedIndex
+                property int displayedIndex: model.column
                 property var labelText: headerLabel.text
                 Binding { target: headerContent; property: "visualIndex"; value: visualIndex }
                 Binding { target: headerContent; property: "displayedIndex"; value: displayedIndex }
@@ -740,13 +916,8 @@ Item
                     {
                         if(!dragActive)
                         {
-                            var columnOrder = [];
-                            for(let i=0; i<headerDelegateModel.items.count; i++)
-                            {
-                                var modelItem = headerDelegateModel.items.get(i);
-                                columnOrder.push(modelItem.model.modelData);
-                            }
-                            proxyModel.columnOrder = columnOrder;
+                            proxyModel.columnOrder = headerView.columnOrder;
+                            console.log(headerView.columnOrder);
                         }
                     }
 
@@ -815,7 +986,8 @@ Item
 
             TableView.onReused:
             {
-                tableView.fetchColumnSizes.connect(updateColumnWidths)
+                tableView.fetchColumnSizes.connect(updateColumnWidths);
+
             }
 
             TableView.onPooled:
@@ -1052,5 +1224,17 @@ Item
 
     signal rightClick();
     onRightClick: { contextMenu.popup(); }
+
+    function array_move(arr, old_index, new_index)
+    {
+        if (new_index >= arr.length) {
+            var k = new_index - arr.length + 1;
+            while (k--) {
+                arr.push(undefined);
+            }
+        }
+        arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+        return arr; // for testing
+    }
 
 }
