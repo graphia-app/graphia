@@ -897,7 +897,7 @@ void GraphRendererCore::prepareComponentDataTexture()
 
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
     glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _componentDataTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _componentDataTBO);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
     glBindTexture(GL_TEXTURE_BUFFER, 0);
 }

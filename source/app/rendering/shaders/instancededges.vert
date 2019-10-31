@@ -52,6 +52,28 @@ mat4 makeOrientationMatrix(vec3 up)
     return mat4(m);
 }
 
+int componentDataOffset()
+{
+    return component * 32;
+}
+
+mat4 mat4FromComponentData(int offset)
+{
+    mat4 m;
+    int index = componentDataOffset() + offset;
+
+    for(int j = 0; j < 4; j++)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            m[j][i] = texelFetch(componentData, index).r;
+            index++;
+        }
+    }
+
+    return m;
+}
+
 void main()
 {
     float edgeLength = distance(sourcePosition, targetPosition);
@@ -64,17 +86,8 @@ void main()
     scaledVertexNormal.xz /= size;
     scaledVertexNormal.y /= edgeLength;
 
-    int index = component * 8;
-
-    mat4 modelViewMatrix = mat4(texelFetch(componentData, index + 0),
-                                texelFetch(componentData, index + 1),
-                                texelFetch(componentData, index + 2),
-                                texelFetch(componentData, index + 3));
-
-    mat4 projectionMatrix = mat4(texelFetch(componentData, index + 4),
-                                 texelFetch(componentData, index + 5),
-                                 texelFetch(componentData, index + 6),
-                                 texelFetch(componentData, index + 7));
+    mat4 modelViewMatrix = mat4FromComponentData(0);
+    mat4 projectionMatrix = mat4FromComponentData(16);
 
     // Cylinder Edge
     if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
