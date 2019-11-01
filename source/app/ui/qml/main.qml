@@ -1575,18 +1575,15 @@ ApplicationWindow
                 MenuItem { action: showSelectedEdgeTextAction }
                 MenuItem { action: showAllEdgeTextAction }
             }
-            Menu
-            {
-                title: qsTr("Projection")
-                MenuItem { action: perspecitveProjectionAction }
-                MenuItem { action: orthographicProjectionAction }
-            }
             MenuItem
             {
                 action: toggleEdgeDirectionAction
                 visible: currentDocument && currentDocument.directed
             }
             MenuItem { action: toggleMultiElementIndicatorsAction }
+            MenuSeparator {}
+            MenuItem { action: perspecitveProjectionAction }
+            MenuItem { action: orthographicProjectionAction }
             MenuSeparator {}
             MenuItem { action: copyImageToClipboardAction }
         }

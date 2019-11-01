@@ -6,8 +6,8 @@ uniform int numberOfLights;
 
 struct LightInfo
 {
-    vec4 position;  // Light position in eye coords.
-    vec3 intensity; // A,D,S intensity
+    vec3 position;  // Light position in camera coords
+    vec4 color;
 };
 uniform LightInfo lights[MAX_LIGHTS];
 
@@ -19,14 +19,15 @@ struct MaterialInfo
     float shininess;    // Specular shininess factor
 };
 uniform MaterialInfo material;
-uniform vec2 screenDim;
 
-in vec2 uv;
 in vec3 position;
 in vec3 normal;
 in vec3 innerVColor;
 in vec3 outerVColor;
 in float vSelected;
+in vec3 vOutlineColor;
+in vec2 uv;
+in float lightOffset;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
@@ -41,6 +42,8 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
     for(int i = 0; i < minNumberOfLights; i++)
     {
         LightInfo light = lights[i];
+        light.position *= lightOffset;
+        light.position.z -= lightOffset;
 
         vec3 l = vec3(light.position) - pos;
 
@@ -59,7 +62,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
             specular = pow(max(dot(r, v), 0.0), material.shininess);
 
         // Combine the ambient, diffuse and specular contributions
-        result += light.intensity * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
+        result += light.color.rgb * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
     }
 
     return result;

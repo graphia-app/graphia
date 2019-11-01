@@ -59,11 +59,11 @@ public:
     QMatrix4x4 projectionMatrix() const;
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
-    void moveSavedFocusToNode(NodeId nodeId, float radius = -1.0f);
+    void moveSavedFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
-    void moveFocusToPositionAndRadius(const QVector3D& position, float radius,
-                                      const QQuaternion& rotation);
+    void moveFocusToNodes(const std::vector<NodeId>& nodeIds,
+        const QQuaternion& rotation);
 
     ComponentId componentId() const { return _componentId; }
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
@@ -125,10 +125,13 @@ private:
         float _zoomDistance = 1.0f;
         bool _autoZooming = true;
         NodeId _focusNodeId;
-        QVector3D _focusPosition;
+        QVector3D _componentCentre;
 
         Camera _transitionStart;
         Camera _transitionEnd;
+
+        float _orthoStartZoomDistance = -1.0f;
+        float _orthoEndZoomDistance = -1.0f;
     };
 
     ViewData _viewData;
@@ -159,16 +162,16 @@ private:
     QMatrix4x4 subViewportMatrix() const;
 
     void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f);
-    void centrePositionInViewport(const QVector3D& focus,
-                                  float zoomDistance = -1.0f,
-                                  // Odd constructor makes a null quaternion
-                                  QQuaternion rotation = QQuaternion(QVector4D()));
+    void centrePositionInViewport(const QVector3D& focus, float zoomDistance = -1.0f,
+        // Odd constructor makes a null quaternion
+        QQuaternion rotation = QQuaternion(QVector4D()));
 
     float _entireComponentZoomDistance = 0.0f;
     float zoomDistanceForRadius(float radius) const;
-    void updateFocusPosition();
-    float entireComponentZoomDistanceFor(NodeId nodeId);
-    void updateEntireComponentZoomDistance();
+    float entireComponentZoomDistanceFor(NodeId nodeId,
+        const std::vector<NodeId>* nodeIds = nullptr) const;
+
+    void update(const std::vector<NodeId>* nodeIds = nullptr);
 };
 
 #endif // GRAPHCOMPONENTRENDERER_H

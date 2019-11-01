@@ -23,6 +23,8 @@ out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
 out vec2 uv;
+out float lightScale;
+out float lightOffset;
 
 uniform samplerBuffer componentData;
 
@@ -54,7 +56,7 @@ mat4 makeOrientationMatrix(vec3 up)
 
 int componentDataOffset()
 {
-    return component * 32;
+    return component * 33;
 }
 
 mat4 mat4FromComponentData(int offset)
@@ -74,6 +76,12 @@ mat4 mat4FromComponentData(int offset)
     return m;
 }
 
+float floatFromComponentData(int offset)
+{
+    int index = componentDataOffset() + offset;
+    return texelFetch(componentData, index).r;
+}
+
 void main()
 {
     float edgeLength = distance(sourcePosition, targetPosition);
@@ -88,6 +96,7 @@ void main()
 
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);
+    lightOffset = floatFromComponentData(32);
 
     // Cylinder Edge
     if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))

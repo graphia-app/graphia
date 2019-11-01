@@ -388,23 +388,23 @@ GraphRendererCore::~GraphRendererCore()
     }
 }
 
-static void setShaderADSParameters(QOpenGLShaderProgram& program)
+static void setShaderLightingParameters(QOpenGLShaderProgram& program)
 {
     struct Light
     {
         Light() = default;
-        Light(const QVector4D& _position, const QVector3D& _intensity) :
-            position(_position), intensity(_intensity)
+        Light(const QVector3D& _position, const QColor& _color) :
+            position(_position), color(_color)
         {}
 
-        QVector4D position;
-        QVector3D intensity;
+        QVector3D position;
+        QColor color;
     };
 
     std::vector<Light> lights;
-    lights.emplace_back(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f));
-    lights.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f));
-    lights.emplace_back(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f));
+    lights.push_back({{-0.707f,  0.0f,    0.707f}, {100, 100, 100}});
+    lights.push_back({{ 0.0f,    0.0f,    1.0f  }, {150, 150, 150}});
+    lights.push_back({{ 0.707f, -0.707f,  0.0f  }, {100, 100, 100}});
 
     auto numberOfLights = static_cast<int>(lights.size());
 
@@ -415,8 +415,8 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
         QByteArray positionId = QStringLiteral("lights[%1].position").arg(i).toLatin1();
         program.setUniformValue(positionId.data(), lights[i].position);
 
-        QByteArray intensityId = QStringLiteral("lights[%1].intensity").arg(i).toLatin1();
-        program.setUniformValue(intensityId.data(), lights[i].intensity);
+        QByteArray colorId = QStringLiteral("lights[%1].color").arg(i).toLatin1();
+        program.setUniformValue(colorId.data(), lights[i].color);
     }
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
@@ -430,7 +430,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
         return;
 
     _nodesShader.bind();
-    setShaderADSParameters(_nodesShader);
+    setShaderLightingParameters(_nodesShader);
 
     gpuGraphData._nodeVBO.bind();
 
@@ -454,7 +454,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
         return;
 
     _edgesShader.bind();
-    setShaderADSParameters(_edgesShader);
+    setShaderLightingParameters(_edgesShader);
 
     gpuGraphData._edgeVBO.bind();
 

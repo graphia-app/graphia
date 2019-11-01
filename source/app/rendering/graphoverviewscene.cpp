@@ -421,19 +421,15 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
     {
         auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
         auto& mergedNodeIds = mergedComponent->nodeIds();
-        auto mergedFocusPosition = _graphModel->nodePositions().centreOfMass(mergedNodeIds);
 
         // Use the rotation of the new component
         auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
         QQuaternion rotation = renderer->camera()->rotation();
-        auto maxDistance = GraphComponentRenderer::maxNodeDistanceFromPoint(*_graphModel,
-                                                                            mergedFocusPosition,
-                                                                            mergedNodeIds);
 
         for(auto merger : componentMergeSet.mergers())
         {
             renderer = _graphRenderer->componentRendererForId(merger);
-            renderer->moveFocusToPositionAndRadius(mergedFocusPosition, maxDistance, rotation);
+            renderer->moveFocusToNodes(mergedNodeIds, rotation);
         }
     }
 }

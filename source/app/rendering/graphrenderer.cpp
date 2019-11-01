@@ -397,6 +397,9 @@ void GraphRenderer::updateComponentGPUData()
         // Projection
         for(int i = 0; i < 16; i++)
             componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
+
+        // Light centre offset (from camera)
+        componentData.push_back(componentRenderer->camera()->distance());
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
@@ -769,6 +772,18 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
     {
         _glyphMap->setFontName(value.toString());
         updateText();
+    }
+    else if(key == QLatin1String("visuals/projection"))
+    {
+        //FIXME temporary hack to avoid state getting messed up when projection changes
+        _layoutChanged = true;
+        for(auto& componentRendererRef : _componentRenderers)
+        {
+            GraphComponentRenderer* componentRenderer = componentRendererRef;
+
+            if(componentRenderer->initialised())
+                componentRenderer->update(0.0f);
+        }
     }
 }
 

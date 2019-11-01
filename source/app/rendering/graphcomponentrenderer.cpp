@@ -132,13 +132,27 @@ void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& oth
 
 void GraphComponentRenderer::restoreViewData()
 {
-    updateFocusPosition();
     _viewData._autoZooming = _savedViewData._autoZooming;
     _viewData._focusNodeId = _savedViewData._focusNodeId;
+
+    update();
+
+    auto startZoomDistance = _viewData._zoomDistance;
     zoomToDistance(_savedViewData._zoomDistance);
 
+    if(projection() != Projection::Perspective)
+    {
+        _viewData._orthoStartZoomDistance = startZoomDistance;
+        _viewData._orthoEndZoomDistance = _savedViewData._zoomDistance;
+    }
+    else
+    {
+        _viewData._orthoStartZoomDistance =
+            _viewData._orthoEndZoomDistance = -1.0f;
+    }
+
     if(_savedViewData._focusNodeId.isNull())
-        centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
+        centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance);
     else
         centreNodeInViewport(_savedViewData._focusNodeId, _viewData._zoomDistance);
 }
@@ -201,52 +215,43 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
         return std::max(radius, MINIMUM_ZOOM_DISTANCE);
 }
 
-void GraphComponentRenderer::updateFocusPosition()
+float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
+    const std::vector<NodeId>* nodeIds) const
 {
-    if(!componentIsValid())
-        return;
+    QVector3D position = !nodeId.isNull() ?
+        _graphModel->nodePositions().get(nodeId) :
+        _viewData._componentCentre;
 
-    auto component = _graphModel->graph().componentById(_componentId);
-    Q_ASSERT(component != nullptr);
-    _viewData._focusPosition = _graphModel->nodePositions().centreOfMass(component->nodeIds());
-}
+    if(nodeIds == nullptr && componentIsValid())
+        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
 
-float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
-{
-    // If we're frozen then it's probably because the component is going away, and if
-    // this is the case then we won't be able to get at its nodeIds, so don't update
-    if(!componentIsValid())
+    // If we don't have any nodeIds to work with (normally because the
+    // component is frozen) we can't go any futher
+    if(nodeIds == nullptr)
         return -1.0f;
 
-    QVector3D position;
-
-    if(!nodeId.isNull())
-    {
-        position = _graphModel->nodePositions().get(nodeId);
-    }
-    else
-    {
-        updateFocusPosition();
-        position = _viewData._focusPosition;
-    }
-
-    auto component = _graphModel->graph().componentById(_componentId);
-    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, component->nodeIds());
+    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, *nodeIds);
 
     // Allow single node components to be zoomed out beyond their natural maximum
-    if(component->numNodes() == 1)
+    if(nodeIds->size() == 1)
         maxDistance *= 2.2f;
 
     return zoomDistanceForRadius(maxDistance);
 }
 
-void GraphComponentRenderer::updateEntireComponentZoomDistance()
+void GraphComponentRenderer::update(const std::vector<NodeId>* nodeIds)
 {
-    auto distance = entireComponentZoomDistanceFor(_viewData._focusNodeId);
-    if(distance < 0.0f)
+    if(nodeIds == nullptr && componentIsValid())
+        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
+
+    if(nodeIds == nullptr)
         return;
 
-    _entireComponentZoomDistance = distance;
+    _viewData._componentCentre = _graphModel->nodePositions().centreOfMass(*nodeIds);
+
+    auto distance = entireComponentZoomDistanceFor(_viewData._focusNodeId, nodeIds);
+    if(distance >= 0.0f)
+        _entireComponentZoomDistance = distance;
 }
 
 void GraphComponentRenderer::update(float t)
@@ -261,7 +266,7 @@ void GraphComponentRenderer::update(float t)
         {
             if(_graphRenderer->layoutChanged())
             {
-                updateEntireComponentZoomDistance();
+                update();
             }
             else if(_moveFocusToCentreOfComponentLater)
             {
@@ -279,7 +284,7 @@ void GraphComponentRenderer::update(float t)
                 if(!_zoomTransition.active() && _viewData._autoZooming)
                     zoomToDistance(_entireComponentZoomDistance);
 
-                centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
+                centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance);
             }
             else
                 centreNodeInViewport(_viewData._focusNodeId, _viewData._zoomDistance);
@@ -442,26 +447,48 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 {
     if(zoomDistance < 0.0f)
     {
-        const QVector3D& oldPosition = _viewData._camera.position();
-        QVector3D newPosition;
-        Plane translationPlane(focus, _viewData._camera.viewVector());
-
-        if(translationPlane.sideForPoint(oldPosition) == Plane::Side::Back)
+        if(projection() == Projection::Perspective)
         {
-            // We're behind the translation plane, so move along it
-            QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
-                        Ray(oldPosition, _viewData._camera.viewVector()));
-            QVector3D translation = focus - cameraPlaneIntersection;
+            if(_viewData._autoZooming)
+                zoomDistance = _entireComponentZoomDistance;
+            else
+            {
+                // In the perspective case we need to calculate the zoom distance based on
+                // the current camera position and its target...
 
-            newPosition = oldPosition + translation;
+                const QVector3D& oldPosition = _viewData._camera.position();
+                QVector3D newPosition;
+                Plane translationPlane(focus, _viewData._camera.viewVector());
+
+                if(translationPlane.sideForPoint(oldPosition) == Plane::Side::Back)
+                {
+                    // We're behind the translation plane, so move along it
+                    QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
+                                Ray(oldPosition, _viewData._camera.viewVector()));
+                    QVector3D translation = focus - cameraPlaneIntersection;
+
+                    newPosition = oldPosition + translation;
+                }
+                else
+                {
+                    // We're in front of the translation plane, so move directly to the target
+                    newPosition = focus + (oldPosition - _viewData._camera.focus());
+                }
+
+                zoomDistance = newPosition.distanceToPoint(focus);
+            }
         }
         else
         {
-            // We're in front of the translation plane, so move directly to the target
-            newPosition = focus + (oldPosition - _viewData._camera.focus());
-        }
+            // ...but in the ortho case the camera is fixed, so we don't need to bother
+            zoomDistance = _viewData._zoomDistance;
 
-        zoomDistance = newPosition.distanceToPoint(focus);
+            if(_viewData._autoZooming || _entireComponentZoomDistance < zoomDistance)
+            {
+                _viewData._orthoStartZoomDistance = zoomDistance;
+                _viewData._orthoEndZoomDistance = _entireComponentZoomDistance;
+            }
+        }
     }
 
     zoomDistance = std::clamp(zoomDistance, MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance);
@@ -469,23 +496,31 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     if(!_zoomTransition.active())
         zoomToDistance(zoomDistance);
 
+    auto cameraDistance = projection() == Projection::Perspective ?
+        // In perspective, camera moves
+        zoomDistance :
+        // In ortho, camera is fixed in a non-intersecting position
+        _entireComponentZoomDistance * 3.0f;
+
     Q_ASSERT(_graphRenderer != nullptr);
 
     if(!_graphRenderer->transition().active() || !_viewData._camera.valid())
     {
-        _viewData._camera.setDistance(zoomDistance);
+        _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);
         if(!rotation.isNull())
             _viewData._camera.setRotation(rotation);
 
         _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
+        _viewData._orthoStartZoomDistance = _viewData._orthoEndZoomDistance =
+            _viewData._zoomDistance;
     }
     else
     {
         _viewData._transitionStart = _viewData._camera;
 
         _viewData._transitionEnd = _viewData._camera;
-        _viewData._transitionEnd.setDistance(zoomDistance);
+        _viewData._transitionEnd.setDistance(cameraDistance);
         _viewData._transitionEnd.setFocus(focus);
         if(!rotation.isNull())
             _viewData._transitionEnd.setRotation(rotation);
@@ -499,7 +534,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
 
     _viewData._focusNodeId = nodeId;
     _viewData._autoZooming = false;
-    updateEntireComponentZoomDistance();
+    update();
 
     float zoomDistance = -1.0f;
     if(radius >= 0.0f)
@@ -508,7 +543,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
     centreNodeInViewport(nodeId, zoomDistance);
 }
 
-void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
+void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId)
 {
     if(!componentIsValid())
         return;
@@ -517,10 +552,10 @@ void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
     _savedViewData._autoZooming = false;
 
     float zoomDistance = entireComponentZoomDistanceFor(_savedViewData._focusNodeId);
-    if(radius >= 0.0f)
-        zoomDistance = zoomDistanceForRadius(radius);
 
     _savedViewData._zoomDistance = _targetZoomDistance = zoomDistance;
+    _savedViewData._orthoStartZoomDistance =
+        _savedViewData._orthoEndZoomDistance = -1.0f;
 }
 
 void GraphComponentRenderer::resetView()
@@ -539,14 +574,9 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
         return;
 
     _viewData._focusNodeId.setToNull();
-    updateEntireComponentZoomDistance();
+    update();
 
-    if(_viewData._autoZooming)
-        zoomToDistance(_entireComponentZoomDistance);
-    else
-        _viewData._zoomDistance = -1.0f;
-
-    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
+    centrePositionInViewport(_viewData._componentCentre);
 }
 
 void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
@@ -561,15 +591,27 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
         moveFocusToNode(closestNodeId);
 }
 
-void GraphComponentRenderer::moveFocusToPositionAndRadius(const QVector3D& position, float radius,
-                                                          const QQuaternion& rotation)
+void GraphComponentRenderer::moveFocusToNodes(const std::vector<NodeId>& nodeIds,
+    const QQuaternion& rotation)
 {
+    auto zoomDistance = _viewData._zoomDistance;
+
     _viewData._focusNodeId.setToNull();
-    _viewData._focusPosition = position;
-    _entireComponentZoomDistance = zoomDistanceForRadius(radius);
+    update(&nodeIds);
     zoomToDistance(_entireComponentZoomDistance);
 
-    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, rotation);
+    if(projection() != Projection::Perspective)
+    {
+        _viewData._orthoStartZoomDistance = zoomDistance;
+        _viewData._orthoEndZoomDistance = _viewData._zoomDistance;
+    }
+    else
+    {
+        _viewData._orthoStartZoomDistance =
+            _viewData._orthoEndZoomDistance = -1.0f;
+    }
+
+    centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance, rotation);
 }
 
 bool GraphComponentRenderer::transitionRequired()
@@ -577,7 +619,9 @@ bool GraphComponentRenderer::transitionRequired()
     if(trackingCentreOfComponent() || !focusNodeIsVisible())
         return true;
 
-    updateEntireComponentZoomDistance();
+    //FIXME What's this doing here? Will it be executed on the correct thread?
+    // It's preventing transitionRequired being const
+    update();
 
     return _viewData._camera.distance() > _entireComponentZoomDistance;
 }
@@ -598,6 +642,12 @@ void GraphComponentRenderer::updateTransition(float f)
                                               _viewData._transitionEnd.focus(), f));
     _viewData._camera.setRotation(QQuaternion::slerp(_viewData._transitionStart.rotation(),
                                                      _viewData._transitionEnd.rotation(), f));
+
+    if(projection() != Projection::Perspective)
+    {
+        _viewData._zoomDistance = u::interpolate(_viewData._orthoStartZoomDistance,
+            _viewData._orthoEndZoomDistance, f);
+    }
 }
 
 NodeId GraphComponentRenderer::focusNodeId() const
@@ -613,7 +663,7 @@ bool GraphComponentRenderer::focusNodeIsVisible() const
 QVector3D GraphComponentRenderer::focusPosition() const
 {
     if(_viewData._focusNodeId.isNull())
-        return _viewData._focusPosition;
+        return _viewData._componentCentre;
 
     return _graphModel->nodePositions().get(_viewData._focusNodeId);
 }

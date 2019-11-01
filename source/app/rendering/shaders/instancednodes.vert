@@ -20,6 +20,7 @@ out vec3 normal;
 out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
+out float lightOffset;
 
 uniform samplerBuffer componentData;
 
@@ -40,7 +41,7 @@ mat4 makeOrientationMatrix(vec3 forward)
 
 int componentDataOffset()
 {
-    return component * 32;
+    return component * 33;
 }
 
 mat4 mat4FromComponentData(int offset)
@@ -60,10 +61,17 @@ mat4 mat4FromComponentData(int offset)
     return m;
 }
 
+float floatFromComponentData(int offset)
+{
+    int index = componentDataOffset() + offset;
+    return texelFetch(componentData, index).r;
+}
+
 void main()
 {
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);
+    lightOffset = floatFromComponentData(32);
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix)));
 
