@@ -393,8 +393,8 @@ static void setShaderLightingParameters(QOpenGLShaderProgram& program)
     struct Light
     {
         Light() = default;
-        Light(const QVector3D& _position, const QColor& _color) :
-            position(_position), color(_color)
+        Light(const QVector3D& _position, QColor _color) :
+            position(_position), color(std::move(_color))
         {}
 
         QVector3D position;

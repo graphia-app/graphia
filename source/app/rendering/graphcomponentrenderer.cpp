@@ -211,8 +211,8 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
         qDebug() << "WARNING: ComponentId" << _componentId << "GraphComponentRenderer fov not set";
         return MINIMUM_ZOOM_DISTANCE;
     }
-    else
-        return std::max(radius, MINIMUM_ZOOM_DISTANCE);
+
+    return std::max(radius, MINIMUM_ZOOM_DISTANCE);
 }
 
 float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
