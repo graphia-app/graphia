@@ -328,6 +328,9 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
             _visualisations.append(QString::fromStdString(visualisation));
     }
 
+    if(u::contains(jsonBody, "projection"))
+        _projection = jsonBody["projection"];
+
     if(u::contains(jsonBody, "bookmarks"))
     {
         const auto bookmarks = jsonBody["bookmarks"];

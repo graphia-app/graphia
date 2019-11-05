@@ -161,6 +161,8 @@ bool NativeSaver::save()
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
+    content["projection"] = _document->projection();
+
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());
 

@@ -601,6 +601,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
             _userLayoutPaused = completedLoader->layoutPaused();
 
+            setProjection(static_cast<int>(completedLoader->projection()));
+
             _uiData = completedLoader->uiData();
 
             _pluginUiData = completedLoader->pluginUiData();

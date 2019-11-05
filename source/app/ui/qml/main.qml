@@ -1805,21 +1805,24 @@ ApplicationWindow
         }
     }
 
+    function onDocumentShown(document)
+    {
+        enrichmentResults.models = document.enrichmentTableModels;
+
+        switch(document.projection())
+        {
+        default:
+        case Projection.Perspective:    projection.current = perspecitveProjectionAction;  break;
+        case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+        }
+    }
+
     onCurrentDocumentChanged:
     {
         updatePluginMenus();
 
         if(currentDocument !== null)
-        {
-            enrichmentResults.models = currentDocument.enrichmentTableModels;
-
-            switch(currentDocument.projection())
-            {
-            default:
-            case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
-            case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
-            }
-        }
+            onDocumentShown(currentDocument);
     }
 
     EnrichmentResults
@@ -2077,6 +2080,8 @@ ApplicationWindow
                                 startTutorial();
                                 misc.hasSeenTutorial = true;
                             }
+
+                            onDocumentShown(currentDocument);
                         }
                         else
                             tabView.onLoadFailure(tabView.findTabIndex(document), fileUrl);

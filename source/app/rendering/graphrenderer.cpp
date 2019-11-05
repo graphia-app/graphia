@@ -447,7 +447,9 @@ void GraphRenderer::setProjection(Projection projection)
     if(projection != _projection)
     {
         _projection = projection;
-        _scene->onProjectionChanged(projection);
+
+        if(_scene != nullptr)
+            _scene->onProjectionChanged(projection);
 
         //FIXME dirty temporary hack to avoid state getting messed up when projection changes
         _synchronousLayoutChanged = true;
