@@ -3,6 +3,7 @@
 
 #include "graph/qmlelementid.h"
 #include "rendering/compute/gpucomputethread.h"
+#include "rendering/projection.h"
 
 #include <QQuickFramebufferObject>
 #include <QTimer>
@@ -55,6 +56,9 @@ public:
 
     void resetView();
     bool viewResetPending();
+
+    Projection projection() const;
+    void setProjection(Projection projection);
 
     bool updating() const { return _updating; }
     bool interacting() const { return _interacting; }
@@ -112,6 +116,7 @@ private:
     ComponentId _desiredFocusComponentId;
 
     bool _initialised = false;
+    Projection _projection = Projection::Perspective;
     mutable bool _interacting = false;
     mutable bool _transitioning = false;
     bool _viewIsReset = true;

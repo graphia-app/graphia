@@ -388,15 +388,6 @@ ApplicationWindow
             case showAllEdgeTextAction:      return TextState.All;
             }
         }
-        property int projection:
-        {
-            switch(projection.current)
-            {
-            default:
-            case perspecitveProjectionAction:   return Projection.Perspective;
-            case orthographicProjectionAction:  return Projection.Orthographic;
-            }
-        }
         property alias showMultiElementIndicators: toggleMultiElementIndicatorsAction.checked
     }
 
@@ -1179,16 +1170,27 @@ ApplicationWindow
     {
         id: projection
 
-        Action { id: perspecitveProjectionAction; text: qsTr("Perspective"); checkable: true; }
-        Action { id: orthographicProjectionAction; text: qsTr("Orthographic"); checkable: true; }
-
-        Component.onCompleted:
+        Action
         {
-            switch(visuals.projection)
+            id: perspecitveProjectionAction
+            text: qsTr("Perspective")
+            checkable: true
+            onCheckedChanged:
             {
-            default:
-            case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
-            case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+                if(currentDocument !== null && checked)
+                    currentDocument.setProjection(Projection.Perspective);
+            }
+        }
+
+        Action
+        {
+            id: orthographicProjectionAction
+            text: qsTr("Orthographic")
+            checkable: true
+            onCheckedChanged:
+            {
+                if(currentDocument !== null && checked)
+                    currentDocument.setProjection(Projection.Orthographic);
             }
         }
     }
@@ -1808,7 +1810,16 @@ ApplicationWindow
         updatePluginMenus();
 
         if(currentDocument !== null)
+        {
             enrichmentResults.models = currentDocument.enrichmentTableModels;
+
+            switch(currentDocument.projection())
+            {
+            default:
+            case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
+            case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+            }
+        }
     }
 
     EnrichmentResults

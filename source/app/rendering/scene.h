@@ -1,6 +1,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "projection.h"
+
 #include <QObject>
 
 #include <memory>
@@ -28,6 +30,8 @@ public:
 
     virtual void resetView(bool doTransition = true) = 0;
     virtual bool viewIsReset() const = 0;
+
+    virtual void onProjectionChanged(Projection projection) = 0;
 
 protected:
     bool visible() const { return _visible; }

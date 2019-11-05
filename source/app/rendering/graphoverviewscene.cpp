@@ -606,3 +606,8 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
         }, {tr("Component Layout")});
     }
 }
+
+void GraphOverviewScene::onProjectionChanged(Projection projection)
+{
+    Q_UNUSED(projection);
+}

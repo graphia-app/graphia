@@ -171,7 +171,7 @@ private:
     float entireComponentZoomDistanceFor(NodeId nodeId,
         const std::vector<NodeId>* nodeIds = nullptr) const;
 
-    void update(const std::vector<NodeId>* nodeIds = nullptr);
+    void updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds = nullptr);
 };
 
 #endif // GRAPHCOMPONENTRENDERER_H

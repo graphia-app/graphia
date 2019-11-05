@@ -1168,6 +1168,16 @@ void Document::switchToOverviewMode(bool doTransition)
     _graphQuickItem->switchToOverviewMode(doTransition);
 }
 
+int Document::projection() const
+{
+    return static_cast<int>(_graphQuickItem->projection());
+}
+
+void Document::setProjection(int _projection)
+{
+    _graphQuickItem->setProjection(static_cast<Projection>(_projection));
+}
+
 void Document::gotoPrevComponent()
 {
     const auto& componentIds = _graphModel->graph().componentIds();

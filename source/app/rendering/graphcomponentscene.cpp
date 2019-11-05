@@ -563,3 +563,8 @@ void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId, ComponentId
         }, QStringLiteral("GraphWidget::onNodeRemoved"));
     }
 }
+
+void GraphComponentScene::onProjectionChanged(Projection projection)
+{
+    Q_UNUSED(projection);
+}

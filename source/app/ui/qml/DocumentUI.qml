@@ -525,6 +525,9 @@ Item
     function screenshot() { captureScreenshot.show(); }
     function nodeName(nodeId) { return nodeId !== undefined ? document.nodeName(nodeId) : ""; }
 
+    function projection() { return document.projection(); }
+    function setProjection(_projection) { document.setProjection(_projection); }
+
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {
         // js treats undefined as a valid argument instead of falling back to

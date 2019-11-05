@@ -437,6 +437,30 @@ void GraphRenderer::setMode(Mode mode)
     }
 }
 
+Projection GraphRenderer::projection() const
+{
+    return _projection;
+}
+
+void GraphRenderer::setProjection(Projection projection)
+{
+    if(projection != _projection)
+    {
+        _projection = projection;
+        _scene->onProjectionChanged(projection);
+
+        //FIXME dirty temporary hack to avoid state getting messed up when projection changes
+        _synchronousLayoutChanged = true;
+        for(auto& componentRendererRef : _componentRenderers)
+        {
+            GraphComponentRenderer* componentRenderer = componentRendererRef;
+
+            if(componentRenderer->initialised())
+                componentRenderer->update(0.0f);
+        }
+    }
+}
+
 void GraphRenderer::resetTime()
 {
     _time.start();
@@ -772,18 +796,6 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
     {
         _glyphMap->setFontName(value.toString());
         updateText();
-    }
-    else if(key == QLatin1String("visuals/projection"))
-    {
-        //FIXME temporary hack to avoid state getting messed up when projection changes
-        _layoutChanged = true;
-        for(auto& componentRendererRef : _componentRenderers)
-        {
-            GraphComponentRenderer* componentRenderer = componentRendererRef;
-
-            if(componentRenderer->initialised())
-                componentRenderer->update(0.0f);
-        }
     }
 }
 
@@ -1121,6 +1133,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
+
+    setProjection(graphQuickItem->projection());
 
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
     NodeId focusNodeId;

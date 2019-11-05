@@ -8,6 +8,7 @@
 #include "transition.h"
 #include "glyphmap.h"
 #include "doublebufferedtexture.h"
+#include "projection.h"
 
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
@@ -64,9 +65,6 @@ DEFINE_QML_ENUM(
 DEFINE_QML_ENUM(
     Q_GADGET, EdgeVisualType,
     Cylinder, Arrow);
-DEFINE_QML_ENUM(
-    Q_GADGET, Projection,
-    Perspective, Orthographic, TwoDee);
 
 template<typename Target>
 void initialiseFromGraph(const Graph*, Target&); // NOLINT
@@ -183,6 +181,8 @@ private:
 
     Mode _mode = Mode::Overview;
 
+    Projection _projection = Projection::Perspective;
+
     Scene* _scene = nullptr;
     GraphOverviewScene* _graphOverviewScene;
     GraphComponentScene* _graphComponentScene;
@@ -270,6 +270,9 @@ private:
 
     Mode mode() const;
     void setMode(Mode mode);
+
+    Projection projection() const;
+    void setProjection(Projection projection);
 
     void resetTime();
     float secondsElapsed();

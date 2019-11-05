@@ -83,6 +83,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/projection.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h

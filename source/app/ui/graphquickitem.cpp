@@ -54,6 +54,20 @@ bool GraphQuickItem::viewResetPending()
     return b;
 }
 
+Projection GraphQuickItem::projection() const
+{
+    return _projection;
+}
+
+void GraphQuickItem::setProjection(Projection projection)
+{
+    if(projection != _projection)
+    {
+        _projection = projection;
+        update();
+    }
+}
+
 void GraphQuickItem::setInteracting(bool interacting) const
 {
     if(_interacting != interacting)

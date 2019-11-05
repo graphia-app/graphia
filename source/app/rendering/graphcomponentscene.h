@@ -45,6 +45,8 @@ public:
     void resetView(bool doTransition) override;
     bool viewIsReset() const override;
 
+    void onProjectionChanged(Projection projection) override;
+
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
     bool focusedOnNodeAtRadius(NodeId nodeId, float radius) const;
