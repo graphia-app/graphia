@@ -885,7 +885,7 @@ void GraphRenderer::processEventQueue()
             {
                 if(_macOSTrackPadPanningState != MacOSTrackpadPanningState::Active)
                 {
-                    _macOSTrackPadPanStartPos = wheelEvent->pos();
+                    _macOSTrackPadPanStartPos = wheelEvent->pos() * _devicePixelRatio;
                     _interactor->mousePressEvent(_macOSTrackPadPanStartPos,
                         Qt::NoModifier, Qt::MouseButton::RightButton);
                 }
@@ -893,7 +893,7 @@ void GraphRenderer::processEventQueue()
                 _macOSTrackPadPanningState = MacOSTrackpadPanningState::Active;
 
                 _interactor->mouseMoveEvent(
-                    _macOSTrackPadPanStartPos + wheelEvent->pixelDelta(),
+                    _macOSTrackPadPanStartPos + (wheelEvent->pixelDelta() * _devicePixelRatio),
                     Qt::NoModifier, Qt::MouseButton::RightButton);
             }
             break;
@@ -901,7 +901,7 @@ void GraphRenderer::processEventQueue()
         case Qt::ScrollEnd:
             if(_macOSTrackPadPanningState == MacOSTrackpadPanningState::Active)
             {
-                _interactor->mouseReleaseEvent(wheelEvent->pos(),
+                _interactor->mouseReleaseEvent(wheelEvent->pos() * _devicePixelRatio,
                     Qt::NoModifier, Qt::MouseButton::RightButton);
             }
 
@@ -925,27 +925,46 @@ void GraphRenderer::processEventQueue()
         switch(e->type())
         {
         case QEvent::Type::MouseButtonPress:
-            _interactor->mousePressEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+            _interactor->mousePressEvent(mouseEvent->pos() * _devicePixelRatio,
+                mouseEvent->modifiers(), mouseEvent->button());
+
+            break;
 
         case QEvent::Type::MouseButtonRelease:
-            _interactor->mouseReleaseEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+            _interactor->mouseReleaseEvent(mouseEvent->pos() * _devicePixelRatio,
+                mouseEvent->modifiers(), mouseEvent->button());
+
+            break;
 
         case QEvent::Type::MouseMove:
-            _interactor->mouseMoveEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+            _interactor->mouseMoveEvent(mouseEvent->pos() * _devicePixelRatio,
+                mouseEvent->modifiers(), mouseEvent->button());
+
+            break;
 
         case QEvent::Type::MouseButtonDblClick:
-            _interactor->mouseDoubleClickEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+            _interactor->mouseDoubleClickEvent(mouseEvent->pos() * _devicePixelRatio,
+                mouseEvent->modifiers(), mouseEvent->button());
+
+            break;
 
         case QEvent::Type::Wheel:
             if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
+            {
                 handleMacOsSynthesisedScroll(wheelEvent);
-            else
-                _interactor->wheelEvent(wheelEvent->pos(), wheelEvent->angleDelta().y());
+                break;
+            }
+
+            _interactor->wheelEvent(wheelEvent->pos() * _devicePixelRatio,
+                wheelEvent->angleDelta().y());
 
             break;
 
         case QEvent::Type::NativeGesture:
-            _interactor->nativeGestureEvent(nativeEvent->gestureType(), nativeEvent->pos(), nativeEvent->value()); break;
+            _interactor->nativeGestureEvent(nativeEvent->gestureType(),
+                nativeEvent->pos() * _devicePixelRatio, nativeEvent->value());
+
+            break;
 
         default: break;
         }
@@ -1136,6 +1155,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
             resetOpenGLState = []{};
         });
     }
+
+    _devicePixelRatio = item->window()->devicePixelRatio();
 
     auto graphQuickItem = qobject_cast<GraphQuickItem*>(item);
 
