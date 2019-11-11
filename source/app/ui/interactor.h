@@ -4,11 +4,9 @@
 #include "graph/qmlelementid.h"
 
 #include <QObject>
+#include <Qt>
 
-class QMouseEvent;
-class QWheelEvent;
-class QNativeGestureEvent;
-class QKeyEvent;
+class QPoint;
 
 class Interactor : public QObject
 {
@@ -21,15 +19,12 @@ public:
 
     ~Interactor() override = default;
 
-    virtual void mousePressEvent(QMouseEvent*) = 0;
-    virtual void mouseReleaseEvent(QMouseEvent*) = 0;
-    virtual void mouseMoveEvent(QMouseEvent*) = 0;
-    virtual void mouseDoubleClickEvent(QMouseEvent*) = 0;
-    virtual void wheelEvent(QWheelEvent*) = 0;
-    virtual void nativeGestureEvent(QNativeGestureEvent*) = 0;
-
-    virtual void keyPressEvent(QKeyEvent*) {}
-    virtual void keyReleaseEvent(QKeyEvent*) {}
+    virtual void mousePressEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
+    virtual void mouseReleaseEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
+    virtual void mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
+    virtual void mouseDoubleClickEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
+    virtual void wheelEvent(const QPoint& pos, float angle) = 0;
+    virtual void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) = 0;
 
 signals:
     void userInteractionStarted() const;

@@ -864,6 +864,94 @@ bool GraphRenderer::viewIsReset() const
     return true;
 }
 
+void GraphRenderer::processEventQueue()
+{
+    auto handleMacOsSynthesisedScroll = [this](const QWheelEvent* wheelEvent)
+    {
+        // These wheel events are synthesised by Qt when Mac trackpad scroll
+        // gestures are performed, but they aren't really suitable for our
+        // panning user interface, so we use the synthesised event and then
+        // synthensise our own right mouse button drag events, which the
+        // interactor classes interpret as a drag
+
+        switch(wheelEvent->phase())
+        {
+        case Qt::ScrollBegin:
+            _macOSTrackPadPanningState = MacOSTrackpadPanningState::Initiated;
+            break;
+
+        case Qt::ScrollUpdate:
+            if(_macOSTrackPadPanningState != MacOSTrackpadPanningState::Inactive)
+            {
+                if(_macOSTrackPadPanningState != MacOSTrackpadPanningState::Active)
+                {
+                    _macOSTrackPadPanStartPos = wheelEvent->pos();
+                    _interactor->mousePressEvent(_macOSTrackPadPanStartPos,
+                        Qt::NoModifier, Qt::MouseButton::RightButton);
+                }
+
+                _macOSTrackPadPanningState = MacOSTrackpadPanningState::Active;
+
+                _interactor->mouseMoveEvent(
+                    _macOSTrackPadPanStartPos + wheelEvent->pixelDelta(),
+                    Qt::NoModifier, Qt::MouseButton::RightButton);
+            }
+            break;
+
+        case Qt::ScrollEnd:
+            if(_macOSTrackPadPanningState == MacOSTrackpadPanningState::Active)
+            {
+                _interactor->mouseReleaseEvent(wheelEvent->pos(),
+                    Qt::NoModifier, Qt::MouseButton::RightButton);
+            }
+
+            _macOSTrackPadPanningState = MacOSTrackpadPanningState::Inactive;
+            break;
+
+        default:
+            break;
+        }
+    };
+
+    while(!_eventQueue.empty())
+    {
+        auto e = std::move(_eventQueue.front());
+        _eventQueue.pop();
+
+        auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
+        auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
+        auto nativeEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
+
+        switch(e->type())
+        {
+        case QEvent::Type::MouseButtonPress:
+            _interactor->mousePressEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+
+        case QEvent::Type::MouseButtonRelease:
+            _interactor->mouseReleaseEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+
+        case QEvent::Type::MouseMove:
+            _interactor->mouseMoveEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+
+        case QEvent::Type::MouseButtonDblClick:
+            _interactor->mouseDoubleClickEvent(mouseEvent->pos(), mouseEvent->modifiers(), mouseEvent->button()); break;
+
+        case QEvent::Type::Wheel:
+            if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
+                handleMacOsSynthesisedScroll(wheelEvent);
+            else
+                _interactor->wheelEvent(wheelEvent->pos(), wheelEvent->angleDelta().y());
+
+            break;
+
+        case QEvent::Type::NativeGesture:
+            _interactor->nativeGestureEvent(nativeEvent->gestureType(), nativeEvent->pos(), nativeEvent->value()); break;
+
+        default: break;
+        }
+    }
+}
+
 void GraphRenderer::updateScene()
 {
     ifSceneUpdateEnabled([this]
@@ -882,26 +970,7 @@ void GraphRenderer::updateScene()
 
     ifSceneUpdateEnabled([this]
     {
-        while(!_eventQueue.empty())
-        {
-            auto e = std::move(_eventQueue.front());
-            _eventQueue.pop();
-
-            auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
-            auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
-            auto nativeGestureEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
-
-            switch(e->type())
-            {
-            case QEvent::Type::MouseButtonPress:    _interactor->mousePressEvent(mouseEvent);               break;
-            case QEvent::Type::MouseButtonRelease:  _interactor->mouseReleaseEvent(mouseEvent);             break;
-            case QEvent::Type::MouseMove:           _interactor->mouseMoveEvent(mouseEvent);                break;
-            case QEvent::Type::MouseButtonDblClick: _interactor->mouseDoubleClickEvent(mouseEvent);         break;
-            case QEvent::Type::Wheel:               _interactor->wheelEvent(wheelEvent);                    break;
-            case QEvent::Type::NativeGesture:       _interactor->nativeGestureEvent(nativeGestureEvent);    break;
-            default: break;
-            }
-        }
+        processEventQueue();
 
         // _synchronousLayoutChanged can only ever be (atomically) true in this scope
         _synchronousLayoutChanged = _layoutChanged.exchange(false);

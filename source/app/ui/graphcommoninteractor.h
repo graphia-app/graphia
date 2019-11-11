@@ -40,14 +40,6 @@ private:
     bool _rightMouseButtonHeld = false;
     bool _leftMouseButtonHeld = false;
 
-    enum class TrackpadPanningState
-    {
-        Inactive,
-        Initiated,
-        Active
-    }
-    _trackPadPanningState = {};
-
     Qt::KeyboardModifiers _modifiers;
 
     bool _selecting = false;
@@ -65,14 +57,14 @@ private:
 
     void mouseDown(const QPoint &position);
     void mouseUp();
-    void mousePressEvent(QMouseEvent* mouseEvent) final;
-    void mouseReleaseEvent(QMouseEvent* mouseEvent) final;
-    void mouseMoveEvent(QMouseEvent* mouseEvent) final;
-    void mouseDoubleClickEvent(QMouseEvent* mouseEvent) final;
+    void mousePressEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
+    void mouseReleaseEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
+    void mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
+    void mouseDoubleClickEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
 
-    void wheelEvent(QWheelEvent* wheelEvent) final;
+    void wheelEvent(const QPoint& pos, float angle) final;
 
-    void nativeGestureEvent(QNativeGestureEvent* nativeEvent) override;
+    void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) override;
 
     virtual GraphComponentRenderer* componentRendererAtPosition(const QPoint& position) const = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;

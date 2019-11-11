@@ -241,6 +241,17 @@ private:
     void updateGPUData(When when);
     void updateComponentGPUData();
 
+    enum class MacOSTrackpadPanningState
+    {
+        Inactive,
+        Initiated,
+        Active
+    }
+    _macOSTrackPadPanningState = {};
+    QPoint _macOSTrackPadPanStartPos;
+
+    void processEventQueue();
+
     void updateScene();
 
     Mode bestFocusParameters(GraphQuickItem* graphQuickItem, NodeId& focusNodeId, float& radius) const;
