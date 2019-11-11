@@ -434,7 +434,7 @@ Item
             TableView
             {
                 id: headerView
-                model: tableView.model
+                model: proxyModel.headerModel
                 width: parent.width
                 height: 20
                 interactive: false

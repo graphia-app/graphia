@@ -9,16 +9,20 @@
 #include <QTimer>
 #include <QDebug>
 #include <QItemSelectionRange>
+#include <QStandardItemModel>
 
 class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(QAbstractItemModel* headerModel READ headerModel CONSTANT)
     Q_PROPERTY(std::vector<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
     Q_PROPERTY(std::vector<int> columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
     Q_PROPERTY(int sortColumn MEMBER _sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder MEMBER _sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
 
 private:
+    QStandardItemModel _headerModel;
     bool _showCalculatedColumns = false;
     QItemSelection _subSelection;
     std::unordered_set<int> _subSelectionRows;
@@ -32,6 +36,10 @@ private:
         SubSelectedRole = Qt::UserRole + 999
     };
 
+    QAbstractItemModel* headerModel()
+    {
+        return &_headerModel;
+    }
     void recalculateOrderMapping();
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;

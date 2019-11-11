@@ -47,7 +47,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/iplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/headertablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.h
@@ -102,7 +101,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/headertablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp

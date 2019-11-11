@@ -76,6 +76,7 @@ int TableProxyModel::mapToSourceColumn(int proxyColumn) const
 
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
 {
+    connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::invalidateFilter);
     connect(this, &QAbstractItemModel::rowsInserted, this, &TableProxyModel::countChanged);
     connect(this, &QAbstractItemModel::rowsRemoved, this, &TableProxyModel::countChanged);
     connect(this, &QAbstractItemModel::modelReset, this, &TableProxyModel::countChanged);
@@ -101,6 +102,11 @@ void TableProxyModel::recalculateOrderMapping()
 
     auto filteredOrder = u::setDifference(_sourceColumnOrder, _hiddenColumns);
     _mappedColumnOrder = filteredOrder;
+
+    _headerModel.setRowCount(1);
+    _headerModel.setColumnCount(columnCount());
+    for(int i = 0; i < columnCount(); ++i)
+        _headerModel.setItem(0, i, new QStandardItem(i));
 
     emit columnOrderChanged();
     emit layoutChanged();
