@@ -117,12 +117,12 @@ void GraphCommonInteractor::mouseUp()
     _mouseMoving = false;
 }
 
-void GraphCommonInteractor::mousePressEvent(QMouseEvent* mouseEvent)
+void GraphCommonInteractor::mousePressEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button)
 {
-    mouseDown(mouseEvent->pos());
-    _modifiers = mouseEvent->modifiers();
+    mouseDown(pos);
+    _modifiers = modifiers;
 
-    switch(mouseEvent->button())
+    switch(button)
     {
     case Qt::LeftButton:
         _leftMouseButtonHeld = true;
@@ -138,12 +138,12 @@ void GraphCommonInteractor::mousePressEvent(QMouseEvent* mouseEvent)
     }
 }
 
-void GraphCommonInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
+void GraphCommonInteractor::mouseReleaseEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button)
 {
-    _cursorPosition = mouseEvent->pos();
-    _modifiers = mouseEvent->modifiers();
+    _cursorPosition = pos;
+    _modifiers = modifiers;
 
-    switch(mouseEvent->button())
+    switch(button)
     {
     case Qt::LeftButton:
         _leftMouseButtonHeld = false;
@@ -162,14 +162,14 @@ void GraphCommonInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         mouseUp();
 }
 
-void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
+void GraphCommonInteractor::mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton)
 {
     if(_graphRenderer->transition().active())
         return;
 
-    _componentRendererUnderCursor = componentRendererAtPosition(mouseEvent->pos());
-    _cursorPosition = mouseEvent->pos();
-    _modifiers = mouseEvent->modifiers();
+    _componentRendererUnderCursor = componentRendererAtPosition(pos);
+    _cursorPosition = pos;
+    _modifiers = modifiers;
 
     if(!_mouseMoving)
     {
@@ -190,14 +190,14 @@ void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         _mouseMoving = true;
 }
 
-void GraphCommonInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
+void GraphCommonInteractor::mouseDoubleClickEvent(const QPoint&, Qt::KeyboardModifiers modifiers, Qt::MouseButton button)
 {
     if(_mouseMoving)
         return;
 
-    _modifiers = mouseEvent->modifiers();
+    _modifiers = modifiers;
 
-    switch(mouseEvent->button())
+    switch(button)
     {
     case Qt::LeftButton:
         leftDoubleClick();
@@ -433,72 +433,29 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
                                            frustum, ray.origin());
 }
 
-void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
+void GraphCommonInteractor::wheelEvent(const QPoint& pos, float angle)
 {
     if(_graphRenderer->transition().active())
         return;
 
-    _componentRendererUnderCursor = componentRendererAtPosition(wheelEvent->pos());
+    _componentRendererUnderCursor = componentRendererAtPosition(pos);
 
-    if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
-    {
-        // These wheel events are synthesised by Qt when Mac trackpad scroll
-        // gestures are performed, but they aren't really suitable for our
-        // panning user interface, so we use the synthesised event and then
-        // synthensise our own right mouse button drag events, which the
-        // interactor classes interpret as a drag
-
-        switch(wheelEvent->phase())
-        {
-        case Qt::ScrollBegin:
-            _trackPadPanningState = TrackpadPanningState::Initiated;
-            break;
-
-        case Qt::ScrollUpdate:
-            if(_trackPadPanningState != TrackpadPanningState::Inactive)
-            {
-                if(_trackPadPanningState != TrackpadPanningState::Active)
-                {
-                    QMouseEvent fakeRightDown(QEvent::Type::MouseButtonPress, wheelEvent->pos(),
-                        Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
-                    mousePressEvent(&fakeRightDown);
-                }
-
-                _trackPadPanningState = TrackpadPanningState::Active;
-
-                QMouseEvent fakeMouseMove(QEvent::Type::MouseMove,
-                    cursorPosition() + wheelEvent->pixelDelta(),
-                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
-                mouseMoveEvent(&fakeMouseMove);
-            }
-            break;
-
-        case Qt::ScrollEnd:
-            if(_trackPadPanningState == TrackpadPanningState::Active)
-            {
-                QMouseEvent fakeRightUp(QEvent::Type::MouseButtonRelease, wheelEvent->pos(),
-                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
-                mouseReleaseEvent(&fakeRightUp);
-            }
-
-            _trackPadPanningState = TrackpadPanningState::Inactive;
-            break;
-
-        default:
-            break;
-        }
-    }
-    else
-        wheelMove(wheelEvent->angleDelta().y(), wheelEvent->x(), wheelEvent->y());
+    wheelMove(angle,
+        static_cast<float>(pos.x()),
+        static_cast<float>(pos.y()));
 }
 
-void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
+void GraphCommonInteractor::nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value)
 {
     if(_graphRenderer->transition().active())
         return;
 
-    _componentRendererUnderCursor = componentRendererAtPosition(nativeEvent->pos());
+    _componentRendererUnderCursor = componentRendererAtPosition(pos);
 
-    if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
-        trackpadZoomGesture(nativeEvent->value(), nativeEvent->pos().x(), nativeEvent->pos().y());
+    if(type == Qt::ZoomNativeGesture)
+    {
+        trackpadZoomGesture(value,
+            static_cast<float>(pos.x()),
+            static_cast<float>(pos.y()));
+    }
 }
