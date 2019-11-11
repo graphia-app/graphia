@@ -112,10 +112,6 @@ int start(int argc, char *argv[])
         }
     }
 
-#ifdef Q_OS_MACOS // NativeTextRendering generally looks better on MacOS
-    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
-#endif
-
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
     QIcon mainIcon;
