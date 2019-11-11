@@ -247,6 +247,9 @@ private:
     _macOSTrackPadPanningState = {};
     QPoint _macOSTrackPadPanStartPos;
 
+    // For high DPI displays (mostly MacOS "Retina" display)
+    qreal _devicePixelRatio = 1.0;
+
     void processEventQueue();
 
     void updateScene();
