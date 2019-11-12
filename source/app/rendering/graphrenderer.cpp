@@ -845,53 +845,6 @@ bool GraphRenderer::viewIsReset() const
 
 void GraphRenderer::processEventQueue()
 {
-    auto handleMacOsSynthesisedScroll = [this](const QWheelEvent* wheelEvent)
-    {
-        // These wheel events are synthesised by Qt when Mac trackpad scroll
-        // gestures are performed, but they aren't really suitable for our
-        // panning user interface, so we use the synthesised event and then
-        // synthensise our own right mouse button drag events, which the
-        // interactor classes interpret as a drag
-
-        switch(wheelEvent->phase())
-        {
-        case Qt::ScrollBegin:
-            _macOSTrackPadPanningState = MacOSTrackpadPanningState::Initiated;
-            break;
-
-        case Qt::ScrollUpdate:
-            if(_macOSTrackPadPanningState != MacOSTrackpadPanningState::Inactive)
-            {
-                if(_macOSTrackPadPanningState != MacOSTrackpadPanningState::Active)
-                {
-                    _macOSTrackPadPanStartPos = wheelEvent->pos() * _devicePixelRatio;
-                    _interactor->mousePressEvent(_macOSTrackPadPanStartPos,
-                        Qt::NoModifier, Qt::MouseButton::RightButton);
-                }
-
-                _macOSTrackPadPanningState = MacOSTrackpadPanningState::Active;
-
-                _interactor->mouseMoveEvent(
-                    _macOSTrackPadPanStartPos + (wheelEvent->pixelDelta() * _devicePixelRatio),
-                    Qt::NoModifier, Qt::MouseButton::RightButton);
-            }
-            break;
-
-        case Qt::ScrollEnd:
-            if(_macOSTrackPadPanningState == MacOSTrackpadPanningState::Active)
-            {
-                _interactor->mouseReleaseEvent(wheelEvent->pos() * _devicePixelRatio,
-                    Qt::NoModifier, Qt::MouseButton::RightButton);
-            }
-
-            _macOSTrackPadPanningState = MacOSTrackpadPanningState::Inactive;
-            break;
-
-        default:
-            break;
-        }
-    };
-
     while(!_eventQueue.empty())
     {
         auto e = std::move(_eventQueue.front());
@@ -928,12 +881,6 @@ void GraphRenderer::processEventQueue()
             break;
 
         case QEvent::Type::Wheel:
-            if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
-            {
-                handleMacOsSynthesisedScroll(wheelEvent);
-                break;
-            }
-
             _interactor->wheelEvent(wheelEvent->pos() * _devicePixelRatio,
                 wheelEvent->angleDelta().y());
 
