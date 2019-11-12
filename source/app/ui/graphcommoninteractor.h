@@ -62,7 +62,7 @@ private:
     void mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
     void mouseDoubleClickEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) final;
 
-    void wheelEvent(const QPoint& pos, float angle) final;
+    void wheelEvent(const QPoint& pos, int angle) final;
 
     void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) override;
 

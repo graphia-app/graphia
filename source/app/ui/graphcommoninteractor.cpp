@@ -433,7 +433,7 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
                                            frustum, ray.origin());
 }
 
-void GraphCommonInteractor::wheelEvent(const QPoint& pos, float angle)
+void GraphCommonInteractor::wheelEvent(const QPoint& pos, int angle)
 {
     if(_graphRenderer->transition().active())
         return;
