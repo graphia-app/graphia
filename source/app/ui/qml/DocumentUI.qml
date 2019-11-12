@@ -1901,7 +1901,7 @@ Item
 
                         var macOsTrackpad = qsTr("<b>Rotate:</b> Three Finger Drag <b>or</b> Left Click and Drag<br>" +
                           "<b>Zoom:</b> Pinch Gesture <b>or</b> Mouse Scrollwheel<br>" +
-                          "<b>Pan:</b> Two Finger Drag <b>or</b> Right Click and Drag");
+                          "<b>Pan:</b> Right Click and Drag");
 
                         return preamble + (Qt.platform.os === "osx" ? macOsTrackpad : regularMouse);
                     }

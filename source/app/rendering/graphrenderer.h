@@ -241,15 +241,6 @@ private:
     void updateGPUData(When when);
     void updateComponentGPUData();
 
-    enum class MacOSTrackpadPanningState
-    {
-        Inactive,
-        Initiated,
-        Active
-    }
-    _macOSTrackPadPanningState = {};
-    QPoint _macOSTrackPadPanStartPos;
-
     // For high DPI displays (mostly MacOS "Retina" display)
     qreal _devicePixelRatio = 1.0;
 
