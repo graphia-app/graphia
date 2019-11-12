@@ -5,6 +5,6 @@
 
 DEFINE_QML_ENUM(
    Q_GADGET, Projection,
-   Perspective, Orthographic, TwoDee);
+   Unset = -1, Perspective, Orthographic, TwoDee);
 
 #endif // PROJECTION_H

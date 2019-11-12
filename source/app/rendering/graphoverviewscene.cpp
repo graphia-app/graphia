@@ -452,6 +452,11 @@ void GraphOverviewScene::startZoomTransition(float duration)
                     interpolateCircle(_previousZoomedComponentLayoutData[componentId],
                                       targetZoomedComponentLayoutData[componentId], f);
         }
+    },
+    [this]
+    {
+        // When the zoom is complete, don't leave previous data out of date
+        _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     });
 }
 
@@ -607,7 +612,20 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
     }
 }
 
-void GraphOverviewScene::onProjectionChanged(Projection projection)
+void GraphOverviewScene::setProjection(Projection projection)
 {
-    Q_UNUSED(projection);
+    if(!visible())
+        return;
+
+    _graphRenderer->executeOnRendererThread([this, projection]
+    {
+        startTransition([]{}, 0.3f, projection == Projection::Perspective ?
+            Transition::Type::Power : Transition::Type::InversePower);
+
+        for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
+        {
+            componentRenderer->setProjection(projection);
+            componentRenderer->doProjectionTransition();
+        }
+    }, QStringLiteral("GraphOverviewScene::setProjection"));
 }

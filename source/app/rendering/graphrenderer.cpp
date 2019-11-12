@@ -417,10 +417,11 @@ void GraphRenderer::setScene(Scene* scene)
 
     _scene = scene;
 
+    _scene->setViewportSize(width(), height());
+
+    _scene->setProjection(_projection);
     _scene->setVisible(true);
     _scene->onShow();
-
-    _scene->setViewportSize(width(), height());
 }
 
 GraphRenderer::Mode GraphRenderer::mode() const
@@ -449,17 +450,7 @@ void GraphRenderer::setProjection(Projection projection)
         _projection = projection;
 
         if(_scene != nullptr)
-            _scene->onProjectionChanged(projection);
-
-        //FIXME dirty temporary hack to avoid state getting messed up when projection changes
-        _synchronousLayoutChanged = true;
-        for(auto& componentRendererRef : _componentRenderers)
-        {
-            GraphComponentRenderer* componentRenderer = componentRendererRef;
-
-            if(componentRenderer->initialised())
-                componentRenderer->update(0.0f);
-        }
+            _scene->setProjection(projection);
     }
 }
 

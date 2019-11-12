@@ -58,6 +58,7 @@ public:
 
     QMatrix4x4 viewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
+    void setProjectionMatrix(const QMatrix4x4& projectionMatrix);
     QMatrix4x4 viewProjectionMatrix() const;
 
     Ray rayForViewportCoordinates(int x, int y) const;

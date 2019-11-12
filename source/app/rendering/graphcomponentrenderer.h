@@ -3,6 +3,8 @@
 
 #include "camera.h"
 #include "transition.h"
+#include "projection.h"
+
 #include "maths/boundingbox.h"
 
 #include "shared/graph/igraph.h"
@@ -52,6 +54,9 @@ public:
     int width() const { return _dimensions.width(); }
     int height() const { return _dimensions.height(); }
 
+    Projection projection() const { return _projection; }
+    void setProjection(Projection projection) { _projection = projection; }
+
     float alpha() const { return _alpha; }
     void setAlpha(float alpha);
 
@@ -64,6 +69,7 @@ public:
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToNodes(const std::vector<NodeId>& nodeIds,
         const QQuaternion& rotation);
+    void doProjectionTransition();
 
     ComponentId componentId() const { return _componentId; }
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
@@ -104,8 +110,7 @@ public:
     void updateTransition(float f);
 
     static float maxNodeDistanceFromPoint(const GraphModel& graphModel,
-                                          const QVector3D& centre,
-                                          const std::vector<NodeId>& nodeIds);
+        const QVector3D& centre, const std::vector<NodeId>& nodeIds);
 
 private:
     GraphRenderer* _graphRenderer = nullptr;
@@ -129,9 +134,6 @@ private:
 
         Camera _transitionStart;
         Camera _transitionEnd;
-
-        float _orthoStartZoomDistance = -1.0f;
-        float _orthoEndZoomDistance = -1.0f;
     };
 
     ViewData _viewData;
@@ -139,6 +141,8 @@ private:
 
     int _viewportWidth = 0;
     int _viewportHeight = 0;
+
+    Projection _projection = Projection::Perspective;
 
     QRectF _dimensions;
 
@@ -156,20 +160,26 @@ private:
     float _fovx = 0.0f;
     float _fovy = 0.0f;
 
+    float _entireComponentZoomDistance = 0.0f;
+    float _orthoCameraDistance = 0.0f;
+
     GraphModel* _graphModel = nullptr;
     SelectionManager* _selectionManager = nullptr;
 
     QMatrix4x4 subViewportMatrix() const;
+    void updateCameraProjection(Camera& camera);
 
     void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f);
     void centrePositionInViewport(const QVector3D& focus, float zoomDistance = -1.0f,
         // Odd constructor makes a null quaternion
         QQuaternion rotation = QQuaternion(QVector4D()));
 
-    float _entireComponentZoomDistance = 0.0f;
-    float zoomDistanceForRadius(float radius) const;
-    float entireComponentZoomDistanceFor(NodeId nodeId,
+    float zoomDistanceForRadius(float radius, Projection projection = Projection::Unset) const;
+    float maxDistanceFor(NodeId nodeId,
         const std::vector<NodeId>* nodeIds = nullptr) const;
+    float entireComponentZoomDistanceFor(NodeId nodeId,
+        const std::vector<NodeId>* nodeIds = nullptr,
+        Projection projection = Projection::Unset) const;
 
     void updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds = nullptr);
 };

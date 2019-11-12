@@ -560,11 +560,45 @@ void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId, ComponentId
 
             startTransition();
             componentRenderer()->moveFocusToCentreOfComponent();
-        }, QStringLiteral("GraphWidget::onNodeRemoved"));
+        }, QStringLiteral("GraphComponentScene::onNodeRemoved"));
     }
 }
 
-void GraphComponentScene::onProjectionChanged(Projection projection)
+void GraphComponentScene::setProjection(Projection projection)
 {
-    Q_UNUSED(projection);
+    if(!visible())
+        return;
+
+    for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
+    {
+        bool isRendererForThisComponent = componentRenderer->componentId() == _componentId;
+
+        if(!isRendererForThisComponent)
+            componentRenderer->setProjection(projection);
+    }
+
+    auto startProjectionTransition = [this, projection]
+    {
+        _graphRenderer->executeOnRendererThread([this, projection]
+        {
+            startTransition([]{}, 0.3f, projection == Projection::Perspective ?
+                Transition::Type::Power : Transition::Type::InversePower);
+
+            componentRenderer()->setProjection(projection);
+            componentRenderer()->doProjectionTransition();
+        }, QStringLiteral("GraphComponentScene::setProjection"));
+    };
+
+    if(!viewIsReset())
+    {
+        startTransition([this, startProjectionTransition]
+        {
+            _graphRenderer->transition().willBeImmediatelyReused();
+            startProjectionTransition();
+        });
+
+        resetView(false);
+    }
+    else
+        startProjectionTransition();
 }

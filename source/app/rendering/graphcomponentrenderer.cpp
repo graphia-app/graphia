@@ -52,6 +52,7 @@ void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId comp
     _viewData = {};
     _targetZoomDistance = _viewData._zoomDistance;
     _moveFocusToCentreOfComponentLater = true;
+    _projection = graphRenderer->projection();
 
     synchronise();
 
@@ -131,20 +132,8 @@ void GraphComponentRenderer::restoreViewData()
     _viewData._focusNodeId = _savedViewData._focusNodeId;
 
     updateCentreAndZoomDistance();
-
-    auto startZoomDistance = _viewData._zoomDistance;
+    updateCameraProjection(_viewData._camera);
     zoomToDistance(_savedViewData._zoomDistance);
-
-    if(_graphRenderer->projection() != Projection::Perspective)
-    {
-        _viewData._orthoStartZoomDistance = startZoomDistance;
-        _viewData._orthoEndZoomDistance = _savedViewData._zoomDistance;
-    }
-    else
-    {
-        _viewData._orthoStartZoomDistance =
-            _viewData._orthoEndZoomDistance = -1.0f;
-    }
 
     if(_savedViewData._focusNodeId.isNull())
         centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance);
@@ -194,9 +183,12 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     return maxDistance;
 }
 
-float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
+float GraphComponentRenderer::zoomDistanceForRadius(float radius, Projection projection) const
 {
-    if(_graphRenderer->projection() == Projection::Perspective)
+    if(projection == Projection::Unset)
+        projection = _projection;
+
+    if(projection == Projection::Perspective)
     {
         float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
@@ -210,13 +202,9 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
     return std::max(radius, MINIMUM_ZOOM_DISTANCE);
 }
 
-float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
+float GraphComponentRenderer::maxDistanceFor(NodeId nodeId,
     const std::vector<NodeId>* nodeIds) const
 {
-    QVector3D position = !nodeId.isNull() ?
-        _graphModel->nodePositions().get(nodeId) :
-        _viewData._componentCentre;
-
     if(nodeIds == nullptr && componentIsValid())
         nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
 
@@ -225,13 +213,24 @@ float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
     if(nodeIds == nullptr)
         return -1.0f;
 
+    QVector3D position = !nodeId.isNull() ?
+        _graphModel->nodePositions().get(nodeId) :
+        _viewData._componentCentre;
+
     auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, *nodeIds);
 
-    // Allow single node components to be zoomed out beyond their natural maximum
+    // HACK: allow single node components to be zoomed out beyond their natural maximum
     if(nodeIds->size() == 1)
         maxDistance *= 2.2f;
 
-    return zoomDistanceForRadius(maxDistance);
+    return maxDistance;
+}
+
+float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
+    const std::vector<NodeId>* nodeIds, Projection projection) const
+{
+    auto maxDistance = maxDistanceFor(nodeId, nodeIds);
+    return zoomDistanceForRadius(maxDistance, projection);
 }
 
 void GraphComponentRenderer::updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds)
@@ -244,9 +243,12 @@ void GraphComponentRenderer::updateCentreAndZoomDistance(const std::vector<NodeI
 
     _viewData._componentCentre = _graphModel->nodePositions().centreOfMass(*nodeIds);
 
-    auto distance = entireComponentZoomDistanceFor(_viewData._focusNodeId, nodeIds);
-    if(distance >= 0.0f)
-        _entireComponentZoomDistance = distance;
+    auto maxDistance = maxDistanceFor(_viewData._focusNodeId, nodeIds);
+    if(maxDistance >= 0.0f)
+    {
+        _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
+        _orthoCameraDistance = zoomDistanceForRadius(maxDistance, Projection::Perspective);
+    }
 }
 
 void GraphComponentRenderer::update(float t)
@@ -304,6 +306,24 @@ QMatrix4x4 GraphComponentRenderer::subViewportMatrix() const
     return m;
 }
 
+void GraphComponentRenderer::updateCameraProjection(Camera& camera)
+{
+    auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
+
+    if(_projection == Projection::Perspective)
+    {
+        camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+    }
+    else
+    {
+        auto horizontal = _viewData._zoomDistance * aspectRatio;
+        auto vertical = _viewData._zoomDistance;
+
+        camera.setOrthographicProjection(-horizontal, horizontal,
+            -vertical, vertical, 0.3f, 50000.0f);
+    }
+}
+
 QMatrix4x4 GraphComponentRenderer::modelViewMatrix() const
 {
     return _viewData._camera.viewMatrix();
@@ -330,27 +350,16 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
 
 void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
+    if(dimensions == _dimensions)
+        return;
+
     _dimensions = dimensions;
 
     auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
     _fovy = 60.0f;
     _fovx = _fovy * aspectRatio;
 
-    if(_graphRenderer->projection() == Projection::Perspective)
-    {
-        _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
-    }
-    else
-    {
-        auto horizontal = _viewData._zoomDistance * aspectRatio;
-        auto vertical = _viewData._zoomDistance;
-
-        _viewData._camera.setOrthographicProjection(-horizontal, horizontal,
-            -vertical, vertical, 0.3f, 50000.0f);
-    }
-
     _viewData._camera.setViewport(_dimensions);
-
 }
 
 bool GraphComponentRenderer::transitionActive()
@@ -442,7 +451,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 {
     if(zoomDistance < 0.0f)
     {
-        if(_graphRenderer->projection() == Projection::Perspective)
+        if(_projection == Projection::Perspective)
         {
             if(_viewData._autoZooming)
                 zoomDistance = _entireComponentZoomDistance;
@@ -479,10 +488,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
             zoomDistance = _viewData._zoomDistance;
 
             if(_viewData._autoZooming || _entireComponentZoomDistance < zoomDistance)
-            {
-                _viewData._orthoStartZoomDistance = zoomDistance;
-                _viewData._orthoEndZoomDistance = _entireComponentZoomDistance;
-            }
+                zoomDistance = _entireComponentZoomDistance;
         }
     }
 
@@ -491,11 +497,11 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     if(!_zoomTransition.active())
         zoomToDistance(zoomDistance);
 
-    auto cameraDistance = _graphRenderer->projection() == Projection::Perspective ?
+    auto cameraDistance = _projection == Projection::Perspective ?
         // In perspective, camera moves
         zoomDistance :
         // In ortho, camera is fixed in a non-intersecting position
-        _entireComponentZoomDistance * 3.0f;
+        _orthoCameraDistance;
 
     Q_ASSERT(_graphRenderer != nullptr);
 
@@ -505,10 +511,9 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         _viewData._camera.setFocus(focus);
         if(!rotation.isNull())
             _viewData._camera.setRotation(rotation);
+        updateCameraProjection(_viewData._camera);
 
         _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
-        _viewData._orthoStartZoomDistance = _viewData._orthoEndZoomDistance =
-            _viewData._zoomDistance;
     }
     else
     {
@@ -519,6 +524,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         _viewData._transitionEnd.setFocus(focus);
         if(!rotation.isNull())
             _viewData._transitionEnd.setRotation(rotation);
+        updateCameraProjection(_viewData._transitionEnd);
     }
 }
 
@@ -549,8 +555,6 @@ void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId)
     float zoomDistance = entireComponentZoomDistanceFor(_savedViewData._focusNodeId);
 
     _savedViewData._zoomDistance = _targetZoomDistance = zoomDistance;
-    _savedViewData._orthoStartZoomDistance =
-        _savedViewData._orthoEndZoomDistance = -1.0f;
 }
 
 void GraphComponentRenderer::resetView()
@@ -589,24 +593,24 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 void GraphComponentRenderer::moveFocusToNodes(const std::vector<NodeId>& nodeIds,
     const QQuaternion& rotation)
 {
-    auto zoomDistance = _viewData._zoomDistance;
-
     _viewData._focusNodeId.setToNull();
     updateCentreAndZoomDistance(&nodeIds);
     zoomToDistance(_entireComponentZoomDistance);
 
-    if(_graphRenderer->projection() != Projection::Perspective)
-    {
-        _viewData._orthoStartZoomDistance = zoomDistance;
-        _viewData._orthoEndZoomDistance = _viewData._zoomDistance;
-    }
-    else
-    {
-        _viewData._orthoStartZoomDistance =
-            _viewData._orthoEndZoomDistance = -1.0f;
-    }
-
     centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance, rotation);
+}
+
+void GraphComponentRenderer::doProjectionTransition()
+{
+    if(!componentIsValid())
+        return;
+
+    updateCentreAndZoomDistance();
+
+    if(_viewData._focusNodeId.isNull())
+        centrePositionInViewport(_viewData._componentCentre);
+    else
+        centreNodeInViewport(_viewData._focusNodeId);
 }
 
 bool GraphComponentRenderer::transitionRequired()
@@ -629,20 +633,54 @@ void GraphComponentRenderer::computeTransition()
         moveFocusToNode(focusNodeId());
 }
 
+static QMatrix4x4 interpolateProjectionMatrices(const QMatrix4x4& a, const QMatrix4x4& b, float f)
+{
+    auto m = u::interpolate(a, b, f);
+
+    // If both matrices are affine they are (probably) ortho projections, and we're
+    // (probably) zooming, in which case we decompose the scaling and use it for
+    // the interpolation, rather than using the cells of the matrix directly
+    if(a.isAffine() && b.isAffine())
+    {
+        for(int column = 0; column < 2; column++)
+        {
+            for(int row = 0; row < 2; row++)
+            {
+                auto ai = a(row, column);
+                auto bi = b(row, column);
+
+                ai = ai != 0.0f ? 1.0f / ai : ai;
+                bi = bi != 0.0f ? 1.0f / bi : bi;
+                auto mi = u::interpolate(ai, bi, f);
+                m(row, column) = mi != 0.0f ? 1.0f / mi : mi;
+            }
+        }
+    }
+
+    return m;
+}
+
 void GraphComponentRenderer::updateTransition(float f)
 {
-    _viewData._camera.setDistance(u::interpolate(_viewData._transitionStart.distance(),
-                                                 _viewData._transitionEnd.distance(), f));
-    _viewData._camera.setFocus(u::interpolate(_viewData._transitionStart.focus(),
-                                              _viewData._transitionEnd.focus(), f));
-    _viewData._camera.setRotation(QQuaternion::slerp(_viewData._transitionStart.rotation(),
-                                                     _viewData._transitionEnd.rotation(), f));
+    _viewData._camera.setDistance(u::interpolate(
+        _viewData._transitionStart.distance(),
+        _viewData._transitionEnd.distance(),
+        f));
 
-    if(_graphRenderer->projection() != Projection::Perspective)
-    {
-        _viewData._zoomDistance = u::interpolate(_viewData._orthoStartZoomDistance,
-            _viewData._orthoEndZoomDistance, f);
-    }
+    _viewData._camera.setFocus(u::interpolate(
+        _viewData._transitionStart.focus(),
+        _viewData._transitionEnd.focus(),
+        f));
+
+    _viewData._camera.setRotation(QQuaternion::slerp(
+        _viewData._transitionStart.rotation(),
+        _viewData._transitionEnd.rotation(),
+        f));
+
+    _viewData._camera.setProjectionMatrix(interpolateProjectionMatrices(
+        _viewData._transitionStart.projectionMatrix(),
+        _viewData._transitionEnd.projectionMatrix(),
+        f));
 }
 
 NodeId GraphComponentRenderer::focusNodeId() const
@@ -665,7 +703,10 @@ QVector3D GraphComponentRenderer::focusPosition() const
 
 bool GraphComponentRenderer::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
 {
-    return focusNodeId() == nodeId && qFuzzyCompare(zoomDistanceForRadius(radius), camera()->distance());
+    bool zoomMatchesRadius = qFuzzyCompare(zoomDistanceForRadius(radius),
+        _projection == Projection::Perspective ? camera()->distance() : _viewData._zoomDistance);
+
+    return focusNodeId() == nodeId && zoomMatchesRadius;
 }
 
 bool GraphComponentRenderer::trackingCentreOfComponent() const

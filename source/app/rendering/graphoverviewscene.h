@@ -50,7 +50,7 @@ public:
     void resetView(bool doTransition) override;
     bool viewIsReset() const override;
 
-    void onProjectionChanged(Projection projection) override;
+    void setProjection(Projection projection) override;
 
     void pan(float dx, float dy);
 

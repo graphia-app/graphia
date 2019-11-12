@@ -184,6 +184,12 @@ QMatrix4x4 Camera::projectionMatrix() const
     return _projectionMatrix;
 }
 
+void Camera::setProjectionMatrix(const QMatrix4x4& projectionMatrix)
+{
+    _projectionMatrix = projectionMatrix;
+    _viewProjectionMatrixDirty = true;
+}
+
 QMatrix4x4 Camera::viewProjectionMatrix() const
 {
     if(_viewMatrixDirty || _viewProjectionMatrixDirty)
