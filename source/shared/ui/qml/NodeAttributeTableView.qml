@@ -258,87 +258,6 @@ Item
         }
     }
 
-    MouseArea
-    {
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        property var previousRow: -1
-        property var startRow: -1
-        property var endRow: -1
-        property var offsetMouseY: mouseY + anchors.topMargin
-        anchors.topMargin: headerView.height
-        anchors.fill: parent
-        anchors.rightMargin: verticalTableViewScrollBar.width
-        anchors.bottomMargin: horizontalTableViewScrollBar.height
-        z: 3
-        hoverEnabled: true
-        visible: !columnSelectionMode
-
-        onDoubleClicked:
-        {
-            var tableItem = tableView.getItem(mouseX, offsetMouseY);
-            if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
-                return;
-            var mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
-            root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
-        }
-
-        onClicked:
-        {
-            if(mouse.button == Qt.RightButton)
-                root.rightClick();
-        }
-
-        onPressed:
-        {
-            if(tableView.rows === 0)
-                return;
-
-            var tableItem = tableView.getItem(mouseX, offsetMouseY);
-            if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
-                return;
-            startRow = tableItem.modelRow;
-
-            if(mouse.modifiers & Qt.ShiftModifier)
-            {
-                if(endRow != -1)
-                {
-                    selectRows(startRow, endRow);
-                }
-            }
-            else if(mouse.modifiers & Qt.ControlModifier)
-            {
-
-            }
-            else
-            {
-                selectionModel.clear();
-            }
-
-            endRow = tableItem.modelRow;
-            selectRows(startRow, startRow);
-        }
-        onReleased:
-        {
-            previousRow = -1;
-        }
-        onPositionChanged:
-        {
-            if(mouse.buttons == Qt.LeftButton)
-            {
-                var tableItem = tableView.getItem(mouseX, offsetMouseY);
-                if(tableItem && tableItem.modelRow !== previousRow)
-                {
-                    if(previousRow != -1)
-                        deselectRows(startRow, previousRow);
-
-                    selectRows(startRow, tableItem.modelRow);
-
-                    previousRow = tableItem.modelRow;
-                    endRow = tableItem.modelRow
-                }
-            }
-        }
-    }
 
     Item
     {
@@ -346,7 +265,6 @@ Item
 
         anchors.fill: parent
         anchors.topMargin: headerView.height
-
         z: 10
 
         SlidingPanel
@@ -425,6 +343,7 @@ Item
     ColumnLayout
     {
         anchors.fill: parent
+        spacing: 0
 
         Item
         {
@@ -466,7 +385,6 @@ Item
 
                     implicitWidth: tableView.columnWidthProvider(model.column);
                     implicitHeight: headerLabel.height
-                    property var modelIndex: index
                     property var modelColumn: model.column
                     property var sourceColumn: proxyModel.mapToSourceColumn(model.column);
                     Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
@@ -677,305 +595,404 @@ Item
             }
         }
 
-        TableView
+        Item
         {
-            id: tableView
-            property var userColumnWidths: []
-            property var currentColumnWidths: []
-            property var currentTotalColumnWidth: 0
-            property var targetTotalColumnWidth: 0
-            property var columnWidths: []
-            property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
-            property var visibleColumns: headerColumns
-            signal fetchColumnSizes;
-
-            clip: true
-            interactive: false
-            visible: true
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            layer
+            TableView
             {
-                enabled: columnSelectionMode
-                effect: FastBlur
+                id: tableView
+                anchors.fill: parent
+
+                property var userColumnWidths: []
+                property var currentColumnWidths: []
+                property var currentTotalColumnWidth: 0
+                property var targetTotalColumnWidth: 0
+                property var columnWidths: []
+                property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
+                property var visibleColumns: headerColumns
+                signal fetchColumnSizes;
+
+                clip: true
+                interactive: false
+                visible: true
+
+                layer
                 {
-                    visible: columnSelectionMode
-                    radius: 32
-                }
-            }
-
-            onContentXChanged:
-            {
-                headerView.contentX = contentX;
-            }
-
-            QQC2.ScrollBar.vertical: QQC2.ScrollBar
-            {
-                z: 100
-                id: verticalTableViewScrollBar
-                policy: Qt.ScrollBarAsNeeded
-                contentItem: Rectangle
-                {
-                    implicitWidth: 5
-                    radius: width / 2
-                    color: sysPalette.dark
-                }
-            }
-
-            QQC2.ScrollBar.horizontal: QQC2.ScrollBar
-            {
-                id: horizontalTableViewScrollBar
-            }
-
-            model: TableProxyModel
-            {
-                id: proxyModel
-                sourceModel: root._nodeAttributesTableModel
-            }
-
-            columnWidthProvider: function(col)
-            {
-                var calculatedWidth = 0;
-                var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
-
-                // Use the user specified column width if available
-                if(userWidth !== undefined)
-                    calculatedWidth = userWidth;
-                else
-                {
-                    calculatedWidth = calculateMinimumColumnWidth(col);
-
-                    // Scale columns to fill the width of the view if the totalMinimimum is less than the view
-                    if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
+                    enabled: columnSelectionMode
+                    effect: FastBlur
                     {
-                        let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
-                        return scaledWidth;
+                        visible: columnSelectionMode
+                        radius: 32
                     }
                 }
 
-                return calculatedWidth;
-            }
-
-            property var visibleColumnNames:
-            {
-                var columnNameList = [];
-                for(var i=0; i<tableView.headerColumns.length; i++)
-                    columnNameList.push(root._nodeAttributesTableModel.columnNames[i])
-                return columnNameList;
-            }
-
-            function forceLayoutSafe()
-            {
-                if(tableView.rows > 0 && tableView.columns > 0)
+                Column
                 {
-                    tableView.forceLayout();
-                    headerView.forceLayout();
-                }
-            }
-
-            function getItem(mouseX, mouseY)
-            {
-                var tableViewContentContainsMouse = mouseY > 0 && mouseY < tableView.height &&
-                        mouseX < tableView.width && mouseX < tableView.contentWidth
-                        && mouseY < tableView.contentHeight;
-
-                if(!tableViewContentContainsMouse)
-                    return false;
-
-                var hoverItem = tableView.childAt(mouseX, mouseY);
-                if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar || hoverItem === verticalTableViewScrollBar))
-                    return false;
-
-                var tableItem = hoverItem.childAt(
-                            mouseX + tableView.contentX,
-                            mouseY + tableView.contentY);
-                return tableItem;
-            }
-
-            function calculateMinimumColumnWidth(col)
-            {
-                var delegateWidth = tableView.currentColumnWidths[col];
-                let headerActualWidth = headerFullWidth(col);
-                if(headerActualWidth < null)
-                {
-                    console.log("Null CMCW", columnHeaderRepeater.count, col);
-                    return defaultColumnWidth;
+                    width: tableView.width;
+                    Repeater
+                    {
+                        model: Math.round(tableView.height / 16) + 1;
+                        delegate: Rectangle
+                        {
+                            width: tableView.width;
+                            height: 16
+                            color: index % 2 ? sysPalette.window : sysPalette.alternateBase;
+                        }
+                    }
                 }
 
-                if(delegateWidth === undefined)
-                    return Math.max(defaultColumnWidth, headerActualWidth);
-                else
-                    return Math.max(delegateWidth, headerActualWidth);
-            }
-
-            function headerFullWidth(column)
-            {
-                let sourceColumn = proxyModel.mapToSourceColumn(column);
-                let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) + headerView.sortIndicatorWidth;
-                if(sourceColumn > -1)
+                onContentXChanged:
                 {
-                    let headerName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
-                    let width = headerMetrics.advanceWidth(headerName);
-                    width += sortIndicatorSpacing;
-                    return width;
-                }
-                return sortIndicatorSpacing;
-            }
-
-            FontMetrics
-            {
-                id: headerMetrics
-                font.pixelSize: 11
-            }
-
-            // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
-            // except for the text property
-            delegate: Item
-            {
-                // Based on Qt source for BaseTableView delegate
-                implicitHeight: Math.max(16, label.implicitHeight)
-                implicitWidth: label.implicitWidth + 16
-
-                clip: true
-
-                property var modelColumn: model.column
-                property var modelRow: model.row
-                property var modelIndex: model.index
-
-                TableView.onReused:
-                {
-                    tableView.fetchColumnSizes.connect(updateColumnWidths);
-
+                    headerView.contentX = contentX;
                 }
 
-                TableView.onPooled:
+                QQC2.ScrollBar.vertical: QQC2.ScrollBar
                 {
-                    tableView.fetchColumnSizes.disconnect(updateColumnWidths)
+                    z: 100
+                    id: verticalTableViewScrollBar
+                    policy: Qt.ScrollBarAsNeeded
+                    contentItem: Rectangle
+                    {
+                        implicitWidth: 5
+                        radius: width / 2
+                        color: sysPalette.dark
+                    }
+                }
+
+                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+                {
+                    id: horizontalTableViewScrollBar
+                }
+
+                model: TableProxyModel
+                {
+                    id: proxyModel
+                    sourceModel: root._nodeAttributesTableModel
+                }
+
+                columnWidthProvider: function(col)
+                {
+                    var calculatedWidth = 0;
+                    var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
+
+                    // Use the user specified column width if available
+                    if(userWidth !== undefined)
+                        calculatedWidth = userWidth;
+                    else
+                    {
+                        calculatedWidth = calculateMinimumColumnWidth(col);
+
+                        // Scale columns to fill the width of the view if the totalMinimimum is less than the view
+                        if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
+                        {
+                            let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
+                            return scaledWidth;
+                        }
+                    }
+
+                    return calculatedWidth;
+                }
+
+                property var visibleColumnNames:
+                {
+                    var columnNameList = [];
+                    for(var i=0; i<tableView.headerColumns.length; i++)
+                        columnNameList.push(root._nodeAttributesTableModel.columnNames[i])
+                    return columnNameList;
+                }
+
+                function forceLayoutSafe()
+                {
+                    if(tableView.rows > 0 && tableView.columns > 0)
+                    {
+                        tableView.forceLayout();
+                        headerView.forceLayout();
+                    }
+                }
+
+                function getItem(mouseX, mouseY)
+                {
+                    var tableViewContentContainsMouse = mouseY > 0 && mouseY < tableView.height &&
+                            mouseX < tableView.width && mouseX < tableView.contentWidth
+                            && mouseY < tableView.contentHeight;
+
+                    if(!tableViewContentContainsMouse)
+                        return false;
+
+                    var hoverItem = tableView.childAt(mouseX, mouseY);
+                    if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar || hoverItem === verticalTableViewScrollBar))
+                        return false;
+
+                    var tableItem = hoverItem.childAt(
+                                mouseX + tableView.contentX,
+                                mouseY + tableView.contentY);
+                    return tableItem;
+                }
+
+                function calculateMinimumColumnWidth(col)
+                {
+                    var delegateWidth = tableView.currentColumnWidths[col];
+                    let headerActualWidth = headerFullWidth(col);
+                    if(headerActualWidth < null)
+                    {
+                        console.log("Null CMCW", headerView.columns, col);
+                        return defaultColumnWidth;
+                    }
+
+                    if(delegateWidth === undefined)
+                        return Math.max(defaultColumnWidth, headerActualWidth);
+                    else
+                        return Math.max(delegateWidth, headerActualWidth);
+                }
+
+                function headerFullWidth(column)
+                {
+                    let sourceColumn = proxyModel.mapToSourceColumn(column);
+                    let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) + headerView.sortIndicatorWidth;
+                    if(sourceColumn > -1)
+                    {
+                        let headerName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
+                        let width = headerMetrics.advanceWidth(headerName);
+                        width += sortIndicatorSpacing;
+                        return width;
+                    }
+                    return sortIndicatorSpacing;
+                }
+
+                FontMetrics
+                {
+                    id: headerMetrics
+                    font.pixelSize: 11
+                }
+
+                // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
+                // except for the text property
+                delegate: Item
+                {
+                    // Based on Qt source for BaseTableView delegate
+                    implicitHeight: Math.max(16, label.implicitHeight)
+                    implicitWidth: label.implicitWidth + 16
+
+                    clip: true
+
+                    property var modelColumn: model.column
+                    property var modelRow: model.row
+
+                    TableView.onReused:
+                    {
+                        tableView.fetchColumnSizes.connect(updateColumnWidths);
+
+                    }
+
+                    TableView.onPooled:
+                    {
+                        tableView.fetchColumnSizes.disconnect(updateColumnWidths)
+                    }
+
+                    Component.onCompleted:
+                    {
+                        tableView.fetchColumnSizes.connect(updateColumnWidths)
+                    }
+
+                    function updateColumnWidths()
+                    {
+                        if(typeof model === 'undefined')
+                            return;
+                        var storedWidth = tableView.columnWidths[modelColumn];
+                        if(storedWidth !== undefined)
+                            tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
+                        else
+                            tableView.columnWidths[modelColumn] = implicitWidth;
+                    }
+
+                    SystemPalette { id: systemPalette }
+
+                    Rectangle
+                    {
+                        width: parent.width
+
+                        anchors.centerIn: parent
+                        height: parent.height
+                        color:
+                        {
+                            if(model.subSelected)
+                            {
+                                return systemPalette.highlight;
+                            }
+                            return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
+                        }
+
+                        Text
+                        {
+                            id: label
+                            objectName: "label"
+                            elide: Text.ElideRight
+                            width: parent.width
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 10
+                            color: QmlUtils.contrastingColor(parent.color)
+
+                            text:
+                            {
+                                let sourceColumn = proxyModel.mapToSourceColumn(modelColumn);
+
+                                // This can happen during column removal
+                                if(sourceColumn === undefined || sourceColumn < 0)
+                                {
+                                    console.log("Model Column Unable to map", modelRow, modelColumn);
+                                    return "";
+                                }
+
+                                let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
+
+                                if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
+                                    return QmlUtils.formatNumberScientific(model.display, 1);
+
+                                // AbstractItemModel required empty values to return empty variant
+                                // but TableView2 delgates cast them to undefined js objects.
+                                // It's difficult to tell if the model is corrupted or accessing
+                                // invalid data now as they both return undefined.
+                                if(model.display === undefined)
+                                    return "";
+
+                                return model.display;
+                            }
+                            renderType: Text.NativeRendering
+                        }
+                    }
+                }
+
+                function _updateColumnVisibility()
+                {
+                    if(root.columnSelectionMode)
+                    {
+                        proxyModel.hiddenColumns = [];
+                    }
+                    else
+                    {
+                        proxyModel.hiddenColumns = hiddenColumns;
+                    }
+                }
+
+                function _resetSortFilterProxyModel()
+                {
+                    // For reasons not fully understood, we seem to require the TableView's model to be
+                    // recreated whenever it has a structural change, otherwise the view and the model
+                    // get out of sync in exciting and unpredictable ways; hopefully we can get to the
+                    // bottom of this when we transition to the new TableView component
+                    //tableView.model = root._nodeAttributesTableModel;
+                }
+
+                Connections
+                {
+                    target: plugin.model.nodeAttributeTableModel
+                    onSelectionChanged:
+                    {
+                        proxyModel.invalidateFilter();
+                        selectRows(0, proxyModel.rowCount() - 1);
+                        verticalTableViewScrollBar.position = 0;
+                    }
                 }
 
                 Component.onCompleted:
                 {
-                    tableView.fetchColumnSizes.connect(updateColumnWidths)
+                    tableView._resetSortFilterProxyModel();
+
+                    populateTableMenu(tableView._tableMenu);
+
+                    root.resizeColumnsToContents();
                 }
 
-                function updateColumnWidths()
+                //selectionMode: SelectionMode.ExtendedSelection
+
+                // This is just a reference to the menu, so we can repopulate it later as necessary
+                property Menu _tableMenu
+            }
+
+            MouseArea
+            {
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                property var previousRow: -1
+                property var startRow: -1
+                property var endRow: -1
+                anchors.fill: parent
+                anchors.rightMargin: verticalTableViewScrollBar.width
+                anchors.bottomMargin: horizontalTableViewScrollBar.height
+                z: 3
+                hoverEnabled: true
+                visible: !columnSelectionMode
+
+                onDoubleClicked:
                 {
-                    if(modelIndex === undefined)
+                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
-                    var storedWidth = tableView.columnWidths[modelColumn];
-                    if(storedWidth !== undefined)
-                        tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
+                    var mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
+                    root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
+                }
+
+                onClicked:
+                {
+                    if(mouse.button == Qt.RightButton)
+                        root.rightClick();
+                }
+
+                onPressed:
+                {
+                    if(tableView.rows === 0)
+                        return;
+
+                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
+                        return;
+                    startRow = tableItem.modelRow;
+
+                    if(mouse.modifiers & Qt.ShiftModifier)
+                    {
+                        if(endRow != -1)
+                        {
+                            selectRows(startRow, endRow);
+                        }
+                    }
+                    else if(mouse.modifiers & Qt.ControlModifier)
+                    {
+
+                    }
                     else
-                        tableView.columnWidths[modelColumn] = implicitWidth;
-                }
-
-                SystemPalette { id: systemPalette }
-
-                Rectangle
-                {
-                    width: parent.width
-
-                    anchors.centerIn: parent
-                    height: parent.height
-                    color:
                     {
-                        if(model.subSelected)
-                        {
-                            return systemPalette.highlight;
-                        }
-                        return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
+                        selectionModel.clear();
                     }
 
-                    Text
+                    endRow = tableItem.modelRow;
+                    selectRows(startRow, startRow);
+                }
+                onReleased:
+                {
+                    previousRow = -1;
+                }
+                onPositionChanged:
+                {
+                    if(mouse.buttons == Qt.LeftButton)
                     {
-                        id: label
-                        objectName: "label"
-                        elide: Text.ElideRight
-                        width: parent.width
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 10
-                        color: QmlUtils.contrastingColor(parent.color)
-
-                        text:
+                        var tableItem = tableView.getItem(mouseX, mouseY);
+                        if(tableItem && tableItem.modelRow !== previousRow)
                         {
-                            let sourceColumn = proxyModel.mapToSourceColumn(modelColumn);
+                            if(previousRow != -1)
+                                deselectRows(startRow, previousRow);
 
-                            // This can happen during column removal
-                            if(sourceColumn === undefined || sourceColumn < 0)
-                            {
-                                console.log("Model Column Unable to map", modelRow, modelColumn);
-                                return "";
-                            }
+                            selectRows(startRow, tableItem.modelRow);
 
-                            let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
-
-                            if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
-                                return QmlUtils.formatNumberScientific(model.display, 1);
-
-                            // AbstractItemModel required empty values to return empty variant
-                            // but TableView2 delgates cast them to undefined js objects.
-                            // It's difficult to tell if the model is corrupted or accessing
-                            // invalid data now as they both return undefined.
-                            if(model.display === undefined)
-                                return "";
-
-                            return model.display;
+                            previousRow = tableItem.modelRow;
+                            endRow = tableItem.modelRow
                         }
-                        renderType: Text.NativeRendering
                     }
                 }
             }
-
-            function _updateColumnVisibility()
-            {
-                if(root.columnSelectionMode)
-                {
-                    proxyModel.hiddenColumns = [];
-                }
-                else
-                {
-                    proxyModel.hiddenColumns = hiddenColumns;
-                }
-            }
-
-            function _resetSortFilterProxyModel()
-            {
-                // For reasons not fully understood, we seem to require the TableView's model to be
-                // recreated whenever it has a structural change, otherwise the view and the model
-                // get out of sync in exciting and unpredictable ways; hopefully we can get to the
-                // bottom of this when we transition to the new TableView component
-                //tableView.model = root._nodeAttributesTableModel;
-            }
-
-            Connections
-            {
-                target: plugin.model.nodeAttributeTableModel
-                onSelectionChanged:
-                {
-                    proxyModel.invalidateFilter();
-                    selectRows(0, proxyModel.rowCount() - 1);
-                    verticalTableViewScrollBar.position = 0;
-                }
-            }
-
-            Component.onCompleted:
-            {
-                tableView._resetSortFilterProxyModel();
-
-                populateTableMenu(tableView._tableMenu);
-
-                root.resizeColumnsToContents();
-            }
-
-            //selectionMode: SelectionMode.ExtendedSelection
-
-            // This is just a reference to the menu, so we can repopulate it later as necessary
-            property Menu _tableMenu
         }
-
     }
 
     Menu { id: contextMenu }
