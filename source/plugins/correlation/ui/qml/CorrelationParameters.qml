@@ -289,6 +289,7 @@ BaseParameterDialog
 
                     ColumnLayout
                     {
+                        anchors.margins: 1
                         anchors.fill: parent
                         TableView
                         {
