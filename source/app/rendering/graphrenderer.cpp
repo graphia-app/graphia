@@ -377,6 +377,7 @@ void GraphRenderer::updateComponentGPUData()
     // just suck it up; need to get a profiler on it and see how long we're spending
     // here transfering the buffer, when there are lots of components
     std::vector<GLfloat> componentData;
+    bool elementSizeSet = false;
 
     for(auto& componentRendererRef : _componentRenderers)
     {
@@ -400,6 +401,12 @@ void GraphRenderer::updateComponentGPUData()
 
         // Light centre offset (from camera)
         componentData.push_back(componentRenderer->camera()->distance());
+
+        if(!elementSizeSet)
+        {
+            setComponentDataElementSize(static_cast<int>(componentData.size()));
+            elementSizeSet = true;
+        }
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());

@@ -141,6 +141,7 @@ private:
 
     GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
+    int _componentDataElementSize = 0;
 
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLBuffer _selectionMarkerDataBuffer;
@@ -169,6 +170,7 @@ protected:
     void uploadGPUGraphData();
 
     GLuint componentDataTBO() const { return _componentDataTBO; }
+    void setComponentDataElementSize(int componentDataElementSize);
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);

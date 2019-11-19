@@ -23,6 +23,7 @@ out float vSelected;
 out float lightOffset;
 
 uniform samplerBuffer componentData;
+uniform int componentDataElementSize;
 
 mat4 makeOrientationMatrix(vec3 forward)
 {
@@ -41,7 +42,7 @@ mat4 makeOrientationMatrix(vec3 forward)
 
 int componentDataOffset()
 {
-    return component * 33;
+    return component * componentDataElementSize;
 }
 
 mat4 mat4FromComponentData(int offset)

@@ -27,6 +27,7 @@ out float lightScale;
 out float lightOffset;
 
 uniform samplerBuffer componentData;
+uniform int componentDataElementSize;
 
 const float ARROW_HEAD_CUTOFF_Y = 0.24;
 const float MAX_ARROW_HEAD_LENGTH = 0.25;
@@ -56,7 +57,7 @@ mat4 makeOrientationMatrix(vec3 up)
 
 int componentDataOffset()
 {
-    return component * 33;
+    return component * componentDataElementSize;
 }
 
 mat4 mat4FromComponentData(int offset)

@@ -436,6 +436,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _nodesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
     _nodesShader.setUniformValue("componentData", 0);
 
     gpuGraphData._sphere.vertexArrayObject()->bind();
@@ -460,6 +461,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _edgesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
     _edgesShader.setUniformValue("componentData", 0);
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
@@ -580,6 +582,11 @@ void GraphRendererCore::uploadGPUGraphData()
         if(gpuGraphData.alpha() > 0.0f)
             gpuGraphData.upload();
     }
+}
+
+void GraphRendererCore::setComponentDataElementSize(int componentDataElementSize)
+{
+    _componentDataElementSize = componentDataElementSize;
 }
 
 bool GraphRendererCore::resize(int width, int height)
