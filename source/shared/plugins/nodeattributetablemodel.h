@@ -47,12 +47,12 @@ private:
 
 protected:
     virtual QStringList columnNames() const;
-    virtual QVariant dataValue(int row, const IAttribute* attributeName) const;
+    virtual QVariant dataValue(size_t row, const IAttribute* attributeName) const;
 
-    int columnIndexForAttributeValue(QString attributeValue);
+    int columnIndexForAttributeValue(const QString& attributeValue);
 private:
-    void onColumnAdded(int columnIndex);
-    void onColumnRemoved(int columnIndex);
+    void onColumnAdded(size_t columnIndex);
+    void onColumnRemoved(size_t columnIndex);
     void updateAttribute(const QString& attributeName);
     void updateColumn(int role, const QString& attributeName, Column& column);
     void update();
@@ -96,8 +96,8 @@ public slots:
 
 signals:
     void columnNamesChanged();
-    void columnAdded(int index, const QString& name);
-    void columnRemoved(int index, const QString& name);
+    void columnAdded(size_t index, const QString& name);
+    void columnRemoved(size_t index, const QString& name);
     void selectionChanged();
 };
 

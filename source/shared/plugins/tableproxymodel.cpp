@@ -9,6 +9,7 @@ bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceP
 
 bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const
 {
+    Q_UNUSED(sourceParent)
     return !u::contains(_hiddenColumns, sourceColumn);
 }
 
@@ -34,7 +35,7 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
     return sourceModel()->data(sourceIndex, role);
 }
 
-void TableProxyModel::setSubSelection(QItemSelection subSelection, QItemSelection subDeSelection)
+void TableProxyModel::setSubSelection(const QItemSelection& subSelection, const QItemSelection& subDeSelection)
 {
     _subSelection = subSelection;
 
@@ -44,9 +45,9 @@ void TableProxyModel::setSubSelection(QItemSelection subSelection, QItemSelectio
     for(auto index : _subSelection.indexes())
         _subSelectionRows.insert(index.row());
 
-    for(auto range : _subSelection)
+    for(const auto& range : _subSelection)
         emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
-    for(auto range : subDeSelection)
+    for(const auto& range : subDeSelection)
         emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
 }
 
@@ -68,7 +69,7 @@ int TableProxyModel::mapToSourceColumn(int proxyColumn) const
         return -1;
 
     auto mappedProxyColumn = proxyColumn;
-    if(_mappedColumnOrder.size() > 0)
+    if(_mappedColumnOrder.empty())
         mappedProxyColumn = _mappedColumnOrder.at(static_cast<size_t>(proxyColumn));
 
     return mappedProxyColumn;
@@ -112,7 +113,7 @@ void TableProxyModel::recalculateOrderMapping()
     emit layoutChanged();
 }
 
-void TableProxyModel::setColumnOrder(std::vector<int> columnOrder)
+void TableProxyModel::setColumnOrder(const std::vector<int>& columnOrder)
 {
     _sourceColumnOrder = columnOrder;
 

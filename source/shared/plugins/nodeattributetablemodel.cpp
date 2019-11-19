@@ -68,12 +68,12 @@ QStringList NodeAttributeTableModel::columnNames() const
     return list;
 }
 
-int NodeAttributeTableModel::columnIndexForAttributeValue(QString attributeValue)
+int NodeAttributeTableModel::columnIndexForAttributeValue(const QString &attributeValue)
 {
     return _columnNames.indexOf(attributeValue);
 }
 
-QVariant NodeAttributeTableModel::dataValue(int row, const IAttribute* attribute) const
+QVariant NodeAttributeTableModel::dataValue(size_t row, const IAttribute* attribute) const
 {
     if(attribute != nullptr && attribute->isValid())
     {
@@ -86,20 +86,24 @@ QVariant NodeAttributeTableModel::dataValue(int row, const IAttribute* attribute
     return {};
 }
 
-void NodeAttributeTableModel::onColumnAdded(int columnIndex)
+void NodeAttributeTableModel::onColumnAdded(size_t columnIndex)
 {
     if(columnIndex < _pendingData.size())
-        _pendingData.insert(_pendingData.begin() + columnIndex, {{}});
+        _pendingData.insert(_pendingData.begin() + static_cast<int>(columnIndex), {{}});
     else
         _pendingData.resize(columnIndex + 1);
 
-    updateColumn(columnIndex, _columnNames.at(columnIndex), _pendingData.at(columnIndex));
+    auto columnName = _columnNames.at(static_cast<int>(columnIndex));
+    auto pendingData = _pendingData.at(columnIndex);
+    updateColumn(static_cast<int>(columnIndex),
+                 columnName,
+                 pendingData);
 }
 
-void NodeAttributeTableModel::onColumnRemoved(int columnIndex)
+void NodeAttributeTableModel::onColumnRemoved(size_t columnIndex)
 {
     Q_ASSERT(columnIndex < _pendingData.size());
-    _pendingData.erase(_pendingData.begin() + columnIndex);
+    _pendingData.erase(_pendingData.begin() + static_cast<int>(columnIndex));
 }
 
 void NodeAttributeTableModel::updateColumnNames()
@@ -113,7 +117,7 @@ void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    size_t index = columnIndexForAttributeValue(attributeName);
+    size_t index = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
 
     Q_ASSERT(index < _pendingData.size());
     auto& column = _pendingData.at(index);
@@ -125,10 +129,10 @@ void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
 
 void NodeAttributeTableModel::updateColumn(int role, const QString& attributeName, NodeAttributeTableModel::Column& column)
 {
-    column.resize(rowCount());
+    column.resize(static_cast<size_t>(rowCount()));
 
     const auto* attribute = _document->graphModel()->attributeByName(attributeName);
-    for(int row = 0; row < rowCount(); row++)
+    for(size_t row = 0; row < static_cast<size_t>(rowCount()); row++)
     {
         NodeId nodeId = _userNodeData->elementIdForIndex(row);
 
@@ -156,7 +160,7 @@ void NodeAttributeTableModel::update()
     updateColumn(Roles::NodeSelectedRole, "", _nodeSelectedColumn);
     updateColumn(Roles::NodeIdRole, "", _nodeIdColumn);
 
-    for(auto columnName : _columnNames)
+    for(const auto& columnName : _columnNames)
     {
         _pendingData.emplace_back(rowCount());
         updateColumn(Qt::DisplayRole, columnName, _pendingData.back());
@@ -170,7 +174,7 @@ void NodeAttributeTableModel::onUpdateColumnComplete(const QString& attributeNam
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     emit layoutAboutToBeChanged();
-    int column = columnIndexForAttributeValue(attributeName);
+    auto column = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
     _data.at(column) = _pendingData.at(column);
 
     //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
@@ -252,7 +256,7 @@ bool NodeAttributeTableModel::rowVisible(size_t row) const
 
 QString NodeAttributeTableModel::columnHeaders(size_t column) const
 {
-    return columnNames().at(column);
+    return columnNames().at(static_cast<int>(column));
 }
 
 void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
@@ -293,7 +297,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     for(const auto& name : filteredRemoved)
     {
-        auto columnIndex = _columnNames.indexOf(name);
+        auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
         onColumnRemoved(columnIndex);
         emit columnRemoved(columnIndex, name);
     }
@@ -308,7 +312,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
         if(attribute->elementType() != ElementType::Node || attribute->hasParameter())
             continue;
 
-        auto columnIndex = _columnNames.indexOf(name);
+        auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
 
         onColumnAdded(columnIndex);
         emit columnAdded(columnIndex, name);
@@ -319,11 +323,11 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
 void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attributeNames)
 {
-    for(const auto& attributeName : attributeNames)
+    std::copy_if(attributeNames.begin(), attributeNames.end(), std::back_inserter(_columnsRequiringUpdates),
+    [&](const auto& attributeName)
     {
-        if(u::contains(_columnNames, attributeName))
-            _columnsRequiringUpdates.push_back(attributeName);
-    }
+        return u::contains(_columnNames, attributeName);
+    });
 }
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const
@@ -338,7 +342,7 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
-    size_t column = index.column();
+    auto column = static_cast<size_t>(index.column());
     if(role == Qt::DisplayRole)
     {
         if(column >= _data.size())
@@ -346,16 +350,16 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
         const auto& dataColumn = _data.at(column);
 
-        size_t row = static_cast<size_t>(index.row());
+        auto row = static_cast<size_t>(index.row());
         if(row >= dataColumn.size())
             return {};
 
         auto cachedValue = dataColumn.at(row);
         return cachedValue;
     }
-    else if (role == Roles::NodeSelectedRole)
+    if(role == Roles::NodeSelectedRole)
     {
-        size_t row = static_cast<size_t>(index.row());
+        auto row = static_cast<size_t>(index.row());
         return _nodeSelectedColumn.at(row);
     }
     return {};

@@ -20,6 +20,9 @@ void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNod
                                                     std::vector<QString>* dataColumnNames,
                                                     std::vector<double>* dataValues)
 {
+    Q_UNUSED(dataColumnNames)
+    Q_UNUSED(dataValues)
+
     //FIXME: effectively disable the functionality this class provides for now, as it's causing
     // too many performance problems with TableView; revisit this when the new TableView is available
     _dataColumnNames = nullptr;//dataColumnNames;

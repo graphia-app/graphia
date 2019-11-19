@@ -44,8 +44,10 @@ private:
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
+
 public:
     QVariant data(const QModelIndex &index, int role) const override;
+
     static void registerQmlType()
     {
         static bool initialised = false;
@@ -54,24 +56,26 @@ public:
         initialised = true;
         qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
     }
+
     QHash<int, QByteArray> roleNames() const override
     {
         auto roleNames = sourceModel()->roleNames();
         roleNames.insert(Roles::SubSelectedRole, "subSelected");
         return roleNames;
     }
-    TableProxyModel(QObject* parent = nullptr);
-    Q_INVOKABLE void setSubSelection(QItemSelection subSelection, QItemSelection subDeselection);
+
+    explicit TableProxyModel(QObject* parent = nullptr);
+    Q_INVOKABLE void setSubSelection(const QItemSelection& subSelection, const QItemSelection& subDeselection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
     Q_INVOKABLE int mapToSourceColumn(int proxyColumn) const;
+    Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
 
     using QSortFilterProxyModel::mapToSource;
 
-    Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topLeft, int bottomRight);
     void setHiddenColumns(std::vector<int> hiddenColumns);
-    void setColumnOrder(std::vector<int> columnOrder);
+    void setColumnOrder(const std::vector<int>& columnOrder);
     void setSortColumn(int sortColumn);
-    void setSortOrder(Qt::SortOrder sortColumn);
+    void setSortOrder(Qt::SortOrder sortOrder);
 signals:
     void countChanged();
     void sortColumnChanged(int sortColumn);
@@ -94,7 +98,7 @@ public slots:
 
 static void initialiser()
 {
-    if(!QCoreApplication::instance()->startingUp())
+    if(!QCoreApplication::startingUp())
     {
         QTimer::singleShot(0, [] { TableProxyModel::registerQmlType(); });
     }
