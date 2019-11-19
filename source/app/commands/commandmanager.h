@@ -76,14 +76,18 @@ private:
 
         _commandProgressTimerId = startTimer(200);
 
+        emit commandWillExecute(command);
+
+        // If the command thread is still active, we shouldn't be here
+        Q_ASSERT(!_thread.joinable());
+
+        _thread = std::thread(std::forward<Fn>(fn));
+
         if(!_busy)
         {
             _busy = true;
             emit started();
         }
-
-        emit commandWillExecute(command);
-        _thread = std::thread(std::forward<Fn>(fn));
     }
 
     void clearCurrentCommand();
