@@ -36,8 +36,8 @@ QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 {
     Q_UNUSED(role)
 
-    size_t row = static_cast<size_t>(index.row());
-    size_t column = static_cast<size_t>(index.column());
+    auto row = static_cast<size_t>(index.row());
+    auto column = static_cast<size_t>(index.column());
 
     if(row >= _data->numRows() || column >= _data->numColumns())
         return  {};

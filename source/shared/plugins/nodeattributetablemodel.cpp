@@ -117,7 +117,7 @@ void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    size_t index = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
+    auto index = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
 
     Q_ASSERT(index < _pendingData.size());
     auto& column = _pendingData.at(index);
