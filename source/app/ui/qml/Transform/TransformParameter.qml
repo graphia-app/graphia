@@ -94,13 +94,24 @@ GridLayout
             root.value = v;
         }
 
+        property bool ignoreEdits: false
+
         onValueChanged:
         {
             if(updateValueImmediately && !slider.pressed)
                 updateValue();
+
+            ignoreEdits = false;
         }
 
-        onEditingFinished: { updateValue(); }
+        onEditingFinished:
+        {
+            if(!ignoreEdits)
+            {
+                updateValue();
+                ignoreEdits = false;
+            }
+        }
     }
 
     Slider
@@ -115,7 +126,10 @@ GridLayout
         onValueChanged:
         {
             if(pressed)
+            {
                 spinBox.value = typedValue(value);
+                spinBox.ignoreEdits = true;
+            }
         }
 
         onPressedChanged:
