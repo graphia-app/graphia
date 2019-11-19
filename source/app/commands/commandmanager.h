@@ -76,8 +76,6 @@ private:
 
         _commandProgressTimerId = startTimer(200);
 
-        emit commandWillExecute(command);
-
         // If the command thread is still active, we shouldn't be here
         Q_ASSERT(!_thread.joinable());
 
@@ -165,7 +163,6 @@ public slots:
 signals:
     void started();
 
-    void commandWillExecute(const ICommand* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
     void commandIsCancellableChanged() const;
