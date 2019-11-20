@@ -28,6 +28,7 @@ in float vSelected;
 in vec3 vOutlineColor;
 in vec2 uv;
 in float lightOffset;
+in float lightScale;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
@@ -42,7 +43,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
     for(int i = 0; i < minNumberOfLights; i++)
     {
         LightInfo light = lights[i];
-        light.position *= lightOffset;
+        light.position *= lightScale;
         light.position.z -= lightOffset;
 
         vec3 l = vec3(light.position) - pos;

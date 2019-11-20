@@ -173,13 +173,14 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize, QSize viewportSize, int currentTileX, int currentTileY)
 {
     std::vector<GLfloat> componentData;
+    bool elementSizeSet = false;
 
     // We always scale to the Y axis
     double scaleY = static_cast<double>(screenshotSize.height()) / viewportSize.height();
 
-    for(size_t componentIndex = 0; componentIndex < _componentCameras.size(); componentIndex++)
+    for(const auto& componentCameraAndLighting : _componentCameraAndLightings)
     {
-        Camera componentCamera = _componentCameras.at(componentIndex);
+        Camera componentCamera = componentCameraAndLighting._camera;
         QRectF componentViewport = componentCamera.viewport();
 
         // Scaling the X pos by Y scale will position components correctly relative to each other
@@ -242,6 +243,18 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             for(int i = 0; i < 16; i++)
                 componentData.push_back(projectionMatrix.data()[i]);
         }
+
+        // Light centre offset (from camera)
+        componentData.push_back(componentCamera.distance());
+
+        // Light scale
+        componentData.push_back(componentCameraAndLighting._lightScale);
+
+        if(!elementSizeSet)
+        {
+            setComponentDataElementSize(static_cast<int>(componentData.size()));
+            elementSizeSet = true;
+        }
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
@@ -252,7 +265,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 
 bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 {
-    _componentCameras.clear();
+    _componentCameraAndLightings.clear();
 
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
         _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
@@ -266,7 +279,7 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
             continue;
 
         // This order MUST match graphrenderer component order!
-        _componentCameras.emplace_back(*componentRenderer->camera());
+        _componentCameraAndLightings.emplace_back(*componentRenderer->cameraAndLighting());
     }
 
     // Just copy the SDF texture

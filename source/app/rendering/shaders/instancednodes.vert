@@ -21,6 +21,7 @@ out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
 out float lightOffset;
+out float lightScale;
 
 uniform samplerBuffer componentData;
 uniform int componentDataElementSize;
@@ -73,6 +74,7 @@ void main()
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);
     lightOffset = floatFromComponentData(32);
+    lightScale = floatFromComponentData(33);
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix)));
 

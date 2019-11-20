@@ -23,8 +23,8 @@ out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
 out vec2 uv;
-out float lightScale;
 out float lightOffset;
+out float lightScale;
 
 uniform samplerBuffer componentData;
 uniform int componentDataElementSize;
@@ -98,6 +98,7 @@ void main()
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);
     lightOffset = floatFromComponentData(32);
+    lightScale = floatFromComponentData(33);
 
     // Cylinder Edge
     if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))

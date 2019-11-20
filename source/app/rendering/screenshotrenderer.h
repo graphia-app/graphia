@@ -4,6 +4,7 @@
 #include "graph/graphmodel.h"
 #include "graphrenderer.h"
 #include "graphrenderercore.h"
+#include "graphcomponentrenderer.h"
 
 #include <QObject>
 
@@ -30,7 +31,7 @@ private:
     GLuint _screenshotTex = 0;
     GLuint _sdfTexture = 0;
 
-    std::vector<Camera> _componentCameras;
+    std::vector<GraphComponentRenderer::CameraAndLighting> _componentCameraAndLightings;
 
     GLuint sdfTexture() const override;
 

@@ -132,7 +132,7 @@ void GraphComponentRenderer::restoreViewData()
     _viewData._focusNodeId = _savedViewData._focusNodeId;
 
     updateCentreAndZoomDistance();
-    updateCameraProjection(_viewData._camera);
+    updateCameraProjection(_viewData.camera());
     zoomToDistance(_savedViewData._zoomDistance);
 
     if(_savedViewData._focusNodeId.isNull())
@@ -326,12 +326,12 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
 
 QMatrix4x4 GraphComponentRenderer::modelViewMatrix() const
 {
-    return _viewData._camera.viewMatrix();
+    return _viewData.camera().viewMatrix();
 }
 
 QMatrix4x4 GraphComponentRenderer::projectionMatrix() const
 {
-    return subViewportMatrix() * _viewData._camera.projectionMatrix();
+    return subViewportMatrix() * _viewData.camera().projectionMatrix();
 }
 
 void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeight)
@@ -359,7 +359,7 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
     _fovy = 60.0f;
     _fovx = _fovy * aspectRatio;
 
-    _viewData._camera.setViewport(_dimensions);
+    _viewData.camera().setViewport(_dimensions);
 }
 
 bool GraphComponentRenderer::transitionActive()
@@ -460,15 +460,15 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
                 // In the perspective case we need to calculate the zoom distance based on
                 // the current camera position and its target...
 
-                const QVector3D& oldPosition = _viewData._camera.position();
+                const QVector3D& oldPosition = _viewData.camera().position();
                 QVector3D newPosition;
-                Plane translationPlane(focus, _viewData._camera.viewVector());
+                Plane translationPlane(focus, _viewData.camera().viewVector());
 
                 if(translationPlane.sideForPoint(oldPosition) == Plane::Side::Back)
                 {
                     // We're behind the translation plane, so move along it
                     QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
-                                Ray(oldPosition, _viewData._camera.viewVector()));
+                                Ray(oldPosition, _viewData.camera().viewVector()));
                     QVector3D translation = focus - cameraPlaneIntersection;
 
                     newPosition = oldPosition + translation;
@@ -476,7 +476,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
                 else
                 {
                     // We're in front of the translation plane, so move directly to the target
-                    newPosition = focus + (oldPosition - _viewData._camera.focus());
+                    newPosition = focus + (oldPosition - _viewData.camera().focus());
                 }
 
                 zoomDistance = newPosition.distanceToPoint(focus);
@@ -505,26 +505,33 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
     Q_ASSERT(_graphRenderer != nullptr);
 
-    if(!_graphRenderer->transition().active() || !_viewData._camera.valid())
+    if(!_graphRenderer->transition().active() || !_viewData.camera().valid())
     {
-        _viewData._camera.setDistance(cameraDistance);
-        _viewData._camera.setFocus(focus);
-        if(!rotation.isNull())
-            _viewData._camera.setRotation(rotation);
-        updateCameraProjection(_viewData._camera);
+        _viewData.camera().setDistance(cameraDistance);
+        _viewData.camera().setFocus(focus);
 
-        _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
+        if(!rotation.isNull())
+            _viewData.camera().setRotation(rotation);
+
+        updateCameraProjection(_viewData.camera());
+        _viewData._cameraAndLighting._lightScale = _orthoCameraDistance;
+
+        _viewData._transitionStart = _viewData._transitionEnd =
+            _viewData._cameraAndLighting;
     }
     else
     {
-        _viewData._transitionStart = _viewData._camera;
+        _viewData._transitionStart = _viewData._cameraAndLighting;
 
-        _viewData._transitionEnd = _viewData._camera;
-        _viewData._transitionEnd.setDistance(cameraDistance);
-        _viewData._transitionEnd.setFocus(focus);
+        _viewData._transitionEnd = _viewData._cameraAndLighting;
+        _viewData._transitionEnd._camera.setDistance(cameraDistance);
+        _viewData._transitionEnd._camera.setFocus(focus);
+
         if(!rotation.isNull())
-            _viewData._transitionEnd.setRotation(rotation);
-        updateCameraProjection(_viewData._transitionEnd);
+            _viewData._transitionEnd._camera.setRotation(rotation);
+
+        updateCameraProjection(_viewData._transitionEnd._camera);
+        _viewData._transitionEnd._lightScale = _orthoCameraDistance;
     }
 }
 
@@ -585,7 +592,7 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 
     Collision collision(*_graphModel, _componentId);
     //FIXME closestNodeToCylinder/Cone?
-    NodeId closestNodeId = collision.nodeClosestToLine(_viewData._camera.position(), _viewData._camera.viewVector());
+    NodeId closestNodeId = collision.nodeClosestToLine(_viewData.camera().position(), _viewData.camera().viewVector());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId);
 }
@@ -622,7 +629,7 @@ bool GraphComponentRenderer::transitionRequired()
     // It's preventing transitionRequired being const
     updateCentreAndZoomDistance();
 
-    return _viewData._camera.distance() > _entireComponentZoomDistance;
+    return _viewData.camera().distance() > _entireComponentZoomDistance;
 }
 
 void GraphComponentRenderer::computeTransition()
@@ -662,25 +669,30 @@ static QMatrix4x4 interpolateProjectionMatrices(const QMatrix4x4& a, const QMatr
 
 void GraphComponentRenderer::updateTransition(float f)
 {
-    _viewData._camera.setDistance(u::interpolate(
-        _viewData._transitionStart.distance(),
-        _viewData._transitionEnd.distance(),
+    _viewData.camera().setDistance(u::interpolate(
+        _viewData._transitionStart._camera.distance(),
+        _viewData._transitionEnd._camera.distance(),
         f));
 
-    _viewData._camera.setFocus(u::interpolate(
-        _viewData._transitionStart.focus(),
-        _viewData._transitionEnd.focus(),
+    _viewData.camera().setFocus(u::interpolate(
+        _viewData._transitionStart._camera.focus(),
+        _viewData._transitionEnd._camera.focus(),
         f));
 
-    _viewData._camera.setRotation(QQuaternion::slerp(
-        _viewData._transitionStart.rotation(),
-        _viewData._transitionEnd.rotation(),
+    _viewData.camera().setRotation(QQuaternion::slerp(
+        _viewData._transitionStart._camera.rotation(),
+        _viewData._transitionEnd._camera.rotation(),
         f));
 
-    _viewData._camera.setProjectionMatrix(interpolateProjectionMatrices(
-        _viewData._transitionStart.projectionMatrix(),
-        _viewData._transitionEnd.projectionMatrix(),
+    _viewData.camera().setProjectionMatrix(interpolateProjectionMatrices(
+        _viewData._transitionStart._camera.projectionMatrix(),
+        _viewData._transitionEnd._camera.projectionMatrix(),
         f));
+
+    _viewData._cameraAndLighting._lightScale = u::interpolate(
+        _viewData._transitionStart._lightScale,
+        _viewData._transitionEnd._lightScale,
+        f);
 }
 
 NodeId GraphComponentRenderer::focusNodeId() const

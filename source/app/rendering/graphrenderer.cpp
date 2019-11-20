@@ -402,6 +402,9 @@ void GraphRenderer::updateComponentGPUData()
         // Light centre offset (from camera)
         componentData.push_back(componentRenderer->camera()->distance());
 
+        // Light scale
+        componentData.push_back(componentRenderer->lightScale());
+
         if(!elementSizeSet)
         {
             setComponentDataElementSize(static_cast<int>(componentData.size()));

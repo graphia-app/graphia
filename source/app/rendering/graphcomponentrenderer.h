@@ -31,6 +31,12 @@ public:
     static const float MINIMUM_ZOOM_DISTANCE;
     static const float COMFORTABLE_ZOOM_RADIUS;
 
+    struct CameraAndLighting
+    {
+        Camera _camera;
+        float _lightScale = 0.0f;
+    };
+
     GraphComponentRenderer() = default;
 
     void initialise(GraphModel* graphModel, ComponentId componentId,
@@ -88,8 +94,12 @@ public:
     void resetView();
     bool viewIsReset() const { return _viewData.isReset(); }
 
-    Camera* camera() { return &_viewData._camera; }
-    const Camera* camera() const { return &_viewData._camera; }
+    Camera* camera() { return &_viewData.camera(); }
+    const Camera* camera() const { return &_viewData.camera(); }
+    float lightScale() const { return _viewData.lightScale(); }
+    CameraAndLighting* cameraAndLighting() { return &_viewData._cameraAndLighting; }
+    const CameraAndLighting* cameraAndLighting() const { return &_viewData._cameraAndLighting; }
+
     void zoom(float delta, bool doTransition);
     void zoomToDistance(float distance);
 
@@ -126,14 +136,19 @@ private:
     {
         bool isReset() const { return _focusNodeId.isNull() && _autoZooming; }
 
-        Camera _camera;
+        CameraAndLighting _cameraAndLighting;
+
+        Camera& camera() { return _cameraAndLighting._camera; }
+        const Camera& camera() const { return _cameraAndLighting._camera; }
+        float lightScale() const { return _cameraAndLighting._lightScale; }
+
         float _zoomDistance = 1.0f;
         bool _autoZooming = true;
         NodeId _focusNodeId;
         QVector3D _componentCentre;
 
-        Camera _transitionStart;
-        Camera _transitionEnd;
+        CameraAndLighting _transitionStart;
+        CameraAndLighting _transitionEnd;
     };
 
     ViewData _viewData;
