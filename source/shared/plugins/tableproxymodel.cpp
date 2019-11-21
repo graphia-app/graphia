@@ -69,7 +69,7 @@ int TableProxyModel::mapToSourceColumn(int proxyColumn) const
         return -1;
 
     auto mappedProxyColumn = proxyColumn;
-    if(_mappedColumnOrder.empty())
+    if(!_mappedColumnOrder.empty())
         mappedProxyColumn = _mappedColumnOrder.at(static_cast<size_t>(proxyColumn));
 
     return mappedProxyColumn;
@@ -104,10 +104,11 @@ void TableProxyModel::recalculateOrderMapping()
     auto filteredOrder = u::setDifference(_sourceColumnOrder, _hiddenColumns);
     _mappedColumnOrder = filteredOrder;
 
+    _headerModel.clear();
     _headerModel.setRowCount(1);
     _headerModel.setColumnCount(columnCount());
     for(int i = 0; i < columnCount(); ++i)
-        _headerModel.setItem(0, i, new QStandardItem(i));
+        _headerModel.setItem(0, i, new QStandardItem());
 
     emit columnOrderChanged();
     emit layoutChanged();
@@ -116,8 +117,6 @@ void TableProxyModel::recalculateOrderMapping()
 void TableProxyModel::setColumnOrder(const std::vector<int>& columnOrder)
 {
     _sourceColumnOrder = columnOrder;
-
-    recalculateOrderMapping();
     invalidateFilter();
 }
 
