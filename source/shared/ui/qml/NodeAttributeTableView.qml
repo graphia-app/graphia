@@ -254,7 +254,7 @@ Item
         model: proxyModel
         onSelectionChanged:
         {
-            proxyModel.setSubSelection(selected, deselected);
+            proxyModel.setSubSelection(selectionModel.selection, deselected);
         }
     }
 
@@ -783,7 +783,6 @@ Item
                     TableView.onReused:
                     {
                         tableView.fetchColumnSizes.connect(updateColumnWidths);
-
                     }
 
                     TableView.onPooled:
