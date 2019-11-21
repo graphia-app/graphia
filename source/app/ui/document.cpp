@@ -602,6 +602,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _userLayoutPaused = completedLoader->layoutPaused();
 
             setProjection(static_cast<int>(completedLoader->projection()));
+            setShading(static_cast<int>(completedLoader->shading()));
 
             _uiData = completedLoader->uiData();
 
@@ -1178,6 +1179,16 @@ int Document::projection() const
 void Document::setProjection(int _projection)
 {
     _graphQuickItem->setProjection(static_cast<Projection>(_projection));
+}
+
+int Document::shading() const
+{
+    return static_cast<int>(_graphQuickItem->shading());
+}
+
+void Document::setShading(int _shading)
+{
+    _graphQuickItem->setShading(static_cast<Shading>(_shading));
 }
 
 void Document::gotoPrevComponent()

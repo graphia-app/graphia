@@ -14,9 +14,10 @@ layout (location = 6) in vec3  outerColor; // The outside color of the node
 layout (location = 7) in vec3  innerColor; // The inside color of the node
 layout (location = 8) in float selected;
 
+flat out uint element;
 out vec3 position;
 out vec2 uv;
-out vec3 normal;
+out vec3 vNormal;
 out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
@@ -71,6 +72,8 @@ float floatFromComponentData(int offset)
 
 void main()
 {
+    element = uint(gl_InstanceID);
+
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);
     lightOffset = floatFromComponentData(32);
@@ -79,7 +82,7 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix)));
 
     position = (modelViewMatrix * vec4(nodePosition + (vertexPosition * size), 1.0)).xyz;
-    normal = normalMatrix * vertexNormal;
+    vNormal = normalMatrix * vertexNormal;
     outerVColor = outerColor;
     innerVColor = innerColor;
     vSelected = selected;
@@ -90,7 +93,7 @@ void main()
     // This keeps the node "facing" the camera
     vec3 eyeNodeCentre = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
     mat4 perspectiveOrientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCentre));
-    vec4 eyeNodeNormal = perspectiveOrientationMatrix * vec4(normal, 1.0);
+    vec4 eyeNodeNormal = perspectiveOrientationMatrix * vec4(vNormal, 1.0);
 
     // Project hemisphere normal to UVs
     uv = vec2(0.5 + asin(eyeNodeNormal.x) / PI, 0.5 + asin(eyeNodeNormal.y) / PI);

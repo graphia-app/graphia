@@ -68,6 +68,20 @@ void GraphQuickItem::setProjection(Projection projection)
     }
 }
 
+Shading GraphQuickItem::shading() const
+{
+    return _shading;
+}
+
+void GraphQuickItem::setShading(Shading shading)
+{
+    if(shading != _shading)
+    {
+        _shading = shading;
+        update();
+    }
+}
+
 void GraphQuickItem::setInteracting(bool interacting) const
 {
     if(_interacting != interacting)

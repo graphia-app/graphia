@@ -2,6 +2,7 @@
 #define GRAPHRENDERERCORE_H
 
 #include "openglfunctions.h"
+#include "shading.h"
 
 #include "primitives/arrow.h"
 #include "primitives/rectangle.h"
@@ -35,8 +36,9 @@ struct GPUGraphData : OpenGLFunctions
     void copyState(const GPUGraphData &gpuGraphData, QOpenGLShaderProgram &nodesShader, QOpenGLShaderProgram &edgesShader, QOpenGLShaderProgram &textShader);
 
     void reset();
-    void clearFramebuffer();
+    void clearFramebuffer(GLbitfield buffers = GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     void clearDepthbuffer();
+    void drawToFramebuffer();
 
     void upload();
 
@@ -111,6 +113,7 @@ struct GPUGraphData : OpenGLFunctions
 
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;
+    GLuint _elementTexture = 0;
     GLuint _selectionTexture = 0;
 };
 
@@ -135,6 +138,7 @@ private:
     QOpenGLShaderProgram _textShader;
 
     QOpenGLShaderProgram _screenShader;
+    QOpenGLShaderProgram _outlineShader;
     QOpenGLShaderProgram _selectionShader;
 
     GLuint _depthTexture = 0;
@@ -142,6 +146,8 @@ private:
     GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
     int _componentDataElementSize = 0;
+
+    Shading _shading = Shading::Smooth;
 
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLBuffer _selectionMarkerDataBuffer;
@@ -171,6 +177,9 @@ protected:
 
     GLuint componentDataTBO() const { return _componentDataTBO; }
     void setComponentDataElementSize(int componentDataElementSize);
+
+    Shading shading() const;
+    void setShading(Shading shading);
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);

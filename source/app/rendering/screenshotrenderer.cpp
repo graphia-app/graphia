@@ -282,6 +282,8 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
         _componentCameraAndLightings.emplace_back(*componentRenderer->cameraAndLighting());
     }
 
+    setShading(renderer.shading());
+
     // Just copy the SDF texture
     GLuint textureFBO = 0;
     glGenFramebuffers(1, &textureFBO);

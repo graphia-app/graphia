@@ -1138,6 +1138,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
         switchToOverviewMode();
 
     setProjection(graphQuickItem->projection());
+    setShading(graphQuickItem->shading());
 
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
     NodeId focusNodeId;

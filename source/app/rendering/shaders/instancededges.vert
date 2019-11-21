@@ -17,8 +17,9 @@ layout (location = 10) in vec3  outerColor; // The outside color of the edge
 layout (location = 11) in vec3  innerColor; // The inside color of the edge (used for multi edges)
 layout (location = 12) in float selected;
 
+flat out uint element;
 out vec3 position;
-out vec3 normal;
+out vec3 vNormal;
 out vec3 innerVColor;
 out vec3 outerVColor;
 out float vSelected;
@@ -85,6 +86,9 @@ float floatFromComponentData(int offset)
 
 void main()
 {
+    // Offset the index so that it doesn't overlap with the node indicies
+    element = uint(gl_InstanceID) + (1u << 31);
+
     float edgeLength = distance(sourcePosition, targetPosition);
     float realLength = edgeLength - (sourceSize + targetSize);
     vec3 midpoint = mix(sourcePosition, targetPosition, 0.5);
@@ -155,7 +159,7 @@ void main()
     }
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix * orientationMatrix)));
-    normal = normalMatrix * scaledVertexNormal;
+    vNormal = normalMatrix * scaledVertexNormal;
     innerVColor = innerColor;
     outerVColor = outerColor;
     vSelected = selected;

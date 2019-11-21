@@ -9,6 +9,7 @@
 #include "layout/layout.h"
 #include "layout/nodepositions.h"
 #include "rendering/projection.h"
+#include "rendering/shading.h"
 #include "attributes/enrichmenttablemodel.h"
 
 #include <QString>
@@ -39,6 +40,7 @@ private:
     bool _layoutPaused = false;
 
     Projection _projection = Projection::Perspective;
+    Shading _shading = Shading::Smooth;
 
 public:
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
@@ -60,6 +62,7 @@ public:
     bool layoutPaused() const { return _layoutPaused; }
 
     Projection projection() const { return _projection; }
+    Shading shading() const { return _shading; }
 
     static QString pluginNameFor(const QUrl& url);
     static bool canOpen(const QUrl& url);

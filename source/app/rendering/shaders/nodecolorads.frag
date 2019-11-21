@@ -20,8 +20,11 @@ struct MaterialInfo
 };
 uniform MaterialInfo material;
 
+uniform float flatness;
+
+flat in uint element;
 in vec3 position;
-in vec3 normal;
+in vec3 vNormal;
 in vec3 innerVColor;
 in vec3 outerVColor;
 in float vSelected;
@@ -31,7 +34,8 @@ in float lightOffset;
 in float lightScale;
 
 layout (location = 0) out vec4 outColor;
-layout (location = 1) out vec4 outSelection;
+layout (location = 1) out uint outElement;
+layout (location = 2) out vec4 outSelection;
 
 vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
 {
@@ -71,7 +75,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
 
 void main()
 {
-    // Hemisphere projection means the UV's are NOT linear
+    // Hemisphere projection means the UVs are NOT linear
 
     // Centre color of Node calculation
     // We want 0, 0 to be the centre for dot
@@ -80,7 +84,11 @@ void main()
     // Step threshold indicates the size of dot
     vec3 fragColor = mix(outerVColor, innerVColor, step(length(scaledUV), 0.2));
 
-    vec3 color = adsModel(position, normalize(normal), fragColor);
+    vec3 normal = normalize(vNormal);
+    vec3 color = (flatness * fragColor) +
+        ((1.0 - flatness) * adsModel(position, normal, fragColor));
+
     outColor = vec4(color, 1.0);
+    outElement = element;
     outSelection = vec4(vec3(vSelected), 1.0);
 }

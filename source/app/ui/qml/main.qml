@@ -1195,6 +1195,35 @@ ApplicationWindow
         }
     }
 
+    ExclusiveGroup
+    {
+        id: shading
+
+        Action
+        {
+            id: smoothShadingAction
+            text: qsTr("Smooth")
+            checkable: true
+            onCheckedChanged:
+            {
+                if(currentDocument !== null && checked)
+                    currentDocument.setShading(Shading.Smooth);
+            }
+        }
+
+        Action
+        {
+            id: flatShadingAction
+            text: qsTr("Flat")
+            checkable: true
+            onCheckedChanged:
+            {
+                if(currentDocument !== null && checked)
+                    currentDocument.setShading(Shading.Flat);
+            }
+        }
+    }
+
     Action
     {
         id: toggleMultiElementIndicatorsAction
@@ -1587,6 +1616,9 @@ ApplicationWindow
             MenuItem { action: perspecitveProjectionAction }
             MenuItem { action: orthographicProjectionAction }
             MenuSeparator {}
+            MenuItem { action: smoothShadingAction }
+            MenuItem { action: flatShadingAction }
+            MenuSeparator {}
             MenuItem { action: copyImageToClipboardAction }
         }
         Menu
@@ -1814,6 +1846,13 @@ ApplicationWindow
         default:
         case Projection.Perspective:    projection.current = perspecitveProjectionAction;  break;
         case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+        }
+
+        switch(document.shading())
+        {
+        default:
+        case Shading.Smooth:    shading.current = smoothShadingAction;  break;
+        case Shading.Flat:      shading.current = flatShadingAction; break;
         }
     }
 

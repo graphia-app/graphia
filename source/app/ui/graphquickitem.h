@@ -4,6 +4,7 @@
 #include "graph/qmlelementid.h"
 #include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
+#include "rendering/shading.h"
 
 #include <QQuickFramebufferObject>
 #include <QTimer>
@@ -59,6 +60,9 @@ public:
 
     Projection projection() const;
     void setProjection(Projection projection);
+
+    Shading shading() const;
+    void setShading(Shading shading);
 
     bool updating() const { return _updating; }
     bool interacting() const { return _interacting; }
@@ -117,6 +121,7 @@ private:
 
     bool _initialised = false;
     Projection _projection = Projection::Perspective;
+    Shading _shading = Shading::Smooth;
     mutable bool _interacting = false;
     mutable bool _transitioning = false;
     bool _viewIsReset = true;

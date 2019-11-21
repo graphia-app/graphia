@@ -10,6 +10,7 @@
 #include "loading/parserthread.h"
 #include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
+#include "rendering/shading.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/qmlenum.h"
@@ -401,6 +402,9 @@ public:
 
     Q_INVOKABLE int projection() const;
     Q_INVOKABLE void setProjection(int projection);
+
+    Q_INVOKABLE int shading() const;
+    Q_INVOKABLE void setShading(int shading);
 
     Q_INVOKABLE void gotoPrevComponent();
     Q_INVOKABLE void gotoNextComponent();

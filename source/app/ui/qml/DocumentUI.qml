@@ -528,6 +528,9 @@ Item
     function projection() { return document.projection(); }
     function setProjection(_projection) { document.setProjection(_projection); }
 
+    function shading() { return document.shading(); }
+    function setShading(_shading) { document.setShading(_shading); }
+
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {
         // js treats undefined as a valid argument instead of falling back to

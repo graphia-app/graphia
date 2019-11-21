@@ -9,6 +9,7 @@
 #include "glyphmap.h"
 #include "doublebufferedtexture.h"
 #include "projection.h"
+#include "shading.h"
 
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"

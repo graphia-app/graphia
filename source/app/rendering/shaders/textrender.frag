@@ -5,7 +5,8 @@ flat in int texLayer;
 in vec3 textColor;
 
 layout (location = 0) out vec4 outColor;
-layout (location = 1) out vec4 outSelection;
+layout (location = 1) out uint outElement;
+layout (location = 2) out vec4 outSelection;
 
 uniform sampler2DArray tex;
 
@@ -21,5 +22,6 @@ void main()
         discard;
 
     outColor = vec4(textColor.rgb, alpha);
+    outElement = 0xFFFFFFFFu; // The default clear color for the element buffer
     outSelection = vec4(0, 0, 0, 0);
 }

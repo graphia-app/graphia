@@ -3,6 +3,8 @@
 #include "shared/utils/preferences.h"
 #include "shadertools.h"
 
+#include "ui/document.h"
+
 #include <QColor>
 
 template<typename T>
@@ -56,6 +58,12 @@ GPUGraphData::~GPUGraphData()
     {
         glDeleteTextures(1, &_colorTexture);
         _colorTexture = 0;
+    }
+
+    if(_elementTexture != 0)
+    {
+        glDeleteTextures(1, &_elementTexture);
+        _elementTexture = 0;
     }
 
     if(_selectionTexture != 0)
@@ -200,14 +208,16 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
 
 bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples)
 {
-    setupTexture(this, _colorTexture,     width, height, GL_RGBA, numMultiSamples);
-    setupTexture(this, _selectionTexture, width, height, GL_RGBA, numMultiSamples);
+    setupTexture(this, _colorTexture,     width, height, GL_RGBA,  numMultiSamples);
+    setupTexture(this, _elementTexture,   width, height, GL_R32UI, numMultiSamples);
+    setupTexture(this, _selectionTexture, width, height, GL_RGBA,  numMultiSamples);
 
     if(_fbo == 0)
         glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _elementTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -229,15 +239,19 @@ void GPUGraphData::reset()
     _glyphData.clear();
 }
 
-void GPUGraphData::clearFramebuffer()
+void GPUGraphData::clearFramebuffer(GLbitfield buffers)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2};
     glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(buffers);
+
+    glDrawBuffer(GL_COLOR_ATTACHMENT1);
+    GLuint elementClearColor[] = {std::numeric_limits<GLuint>::max()};
+    glClearBufferuiv(GL_COLOR, 0, elementClearColor);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -246,10 +260,21 @@ void GPUGraphData::clearDepthbuffer()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GPUGraphData::drawToFramebuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, static_cast<GLenum*>(drawBuffers));
 }
 
 void GPUGraphData::upload()
@@ -327,6 +352,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     // Cause VBO to be recreated
     _fbo = 0;
     _colorTexture = 0;
+    _elementTexture = 0;
     _selectionTexture = 0;
 
     _edgeVBO.destroy();
@@ -350,6 +376,7 @@ GraphRendererCore::GraphRendererCore()
     _numMultiSamples = std::min(maxSamples, PREFERRED_NUM_MULTISAMPLES);
 
     ShaderTools::loadShaderProgram(_screenShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/screen.frag"));
+    ShaderTools::loadShaderProgram(_outlineShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/outline.frag"));
     ShaderTools::loadShaderProgram(_selectionShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/selection.frag"));
 
     ShaderTools::loadShaderProgram(_nodesShader, QStringLiteral(":/shaders/instancednodes.vert"), QStringLiteral(":/shaders/nodecolorads.frag"));
@@ -439,6 +466,8 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
     _nodesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
     _nodesShader.setUniformValue("componentData", 0);
 
+    _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
+
     gpuGraphData._sphere.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
@@ -463,6 +492,8 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
     _edgesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
     _edgesShader.setUniformValue("componentData", 0);
+
+    _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
@@ -589,6 +620,17 @@ void GraphRendererCore::setComponentDataElementSize(int componentDataElementSize
     _componentDataElementSize = componentDataElementSize;
 }
 
+Shading GraphRendererCore::shading() const
+{
+    return _shading;
+}
+
+void GraphRendererCore::setShading(Shading shading)
+{
+    if(shading != _shading)
+        _shading = shading;
+}
+
 bool GraphRendererCore::resize(int width, int height)
 {
     _width = width;
@@ -598,7 +640,7 @@ bool GraphRendererCore::resize(int width, int height)
 
     if(width > 0 && height > 0)
     {
-        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT, _numMultiSamples);
+        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT32, _numMultiSamples);
 
         if(!_gpuGraphData.empty())
         {
@@ -671,6 +713,7 @@ void GraphRendererCore::renderGraph()
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
     glDisable(GL_BLEND);
+    glDisable(GL_DITHER);
 
     if(hasSampleShading())
     {
@@ -697,13 +740,8 @@ void GraphRendererCore::renderGraph()
             glMinSampleShading(1.0f);
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
-
-        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-        glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
-
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        gpuGraphData.clearFramebuffer(GL_COLOR_BUFFER_BIT);
+        gpuGraphData.drawToFramebuffer();
 
         renderNodes(gpuGraphData);
         renderEdges(gpuGraphData);
@@ -757,7 +795,7 @@ void GraphRendererCore::render2D(QRect selectionRect)
         quadData.push_back(r.left());  quadData.push_back(r.bottom());
         quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
 
-        glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        glDrawBuffer(GL_COLOR_ATTACHMENT2);
 
         _selectionMarkerDataBuffer.bind();
         _selectionMarkerDataBuffer.allocate(quadData.data(), static_cast<int>(quadData.size() * sizeof(GLfloat)));
@@ -807,26 +845,44 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE);
     glEnable(GL_BLEND);
 
-    _screenShader.bind();
-    _screenShader.setUniformValue("projectionMatrix", m);
-    _screenShader.release();
+    for(auto* shader : {&_screenShader, &_outlineShader, &_selectionShader})
+    {
+        shader->bind();
+        shader->setUniformValue("projectionMatrix", m);
+        shader->setUniformValue("width", _width);
+        shader->setUniformValue("height", _height);
+        shader->release();
+    }
 
     _selectionShader.bind();
-    _selectionShader.setUniformValue("projectionMatrix", m);
     _selectionShader.setUniformValue("highlightColor",
         u::pref("visuals/highlightColor").value<QColor>());
     _selectionShader.release();
+
+    _outlineShader.bind();
+    _outlineShader.setUniformValue("outlineColor",
+        Document::contrastingColorForBackground());
+    _outlineShader.release();
 
     _screenQuadDataBuffer.bind();
     _screenQuadVAO.bind();
 
     for(auto i : gpuGraphDataRenderOrder())
     {
+        const auto& graphData = _gpuGraphData.at(i);
+
         if(type.test(GraphRendererCore::Type::Color))
         {
             render2DComposite(*this, _screenShader,
-                _gpuGraphData.at(i)._colorTexture,
-                _gpuGraphData.at(i).alpha());
+                graphData._colorTexture,
+                graphData.alpha());
+
+            if(_shading == Shading::Flat)
+            {
+                render2DComposite(*this, _outlineShader,
+                    graphData._elementTexture,
+                    graphData.alpha());
+            }
         }
 
         if(type.test(GraphRendererCore::Type::Selection))
@@ -834,8 +890,8 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
             // Always render the selection outline fully opaque
             // (i.e. the same as the component's alpha)
             render2DComposite(*this, _selectionShader,
-                _gpuGraphData.at(i)._selectionTexture,
-                _gpuGraphData.at(i).componentAlpha());
+                graphData._selectionTexture,
+                graphData.componentAlpha());
         }
     }
 
@@ -876,19 +932,15 @@ void GraphRendererCore::prepareQuad()
     _screenQuadDataBuffer.bind();
     _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
 
-    _screenShader.bind();
-    _screenShader.enableAttributeArray("position");
-    _screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-    _screenShader.setUniformValue("frameBufferTexture", 0);
-    _screenShader.setUniformValue("multisamples", _numMultiSamples);
-    _screenShader.release();
-
-    _selectionShader.bind();
-    _selectionShader.enableAttributeArray("position");
-    _selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-    _selectionShader.setUniformValue("frameBufferTexture", 0);
-    _selectionShader.setUniformValue("multisamples", _numMultiSamples);
-    _selectionShader.release();
+    for(auto* shader : {&_screenShader, &_outlineShader, &_selectionShader})
+    {
+        shader->bind();
+        shader->enableAttributeArray("position");
+        shader->setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+        shader->setUniformValue("frameBufferTexture", 0);
+        shader->setUniformValue("multisamples", _numMultiSamples);
+        shader->release();
+    }
 
     _screenQuadDataBuffer.release();
     _screenQuadVAO.release();

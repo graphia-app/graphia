@@ -15,5 +15,6 @@
         <file>shaders/sdf.frag</file>
         <file>shaders/nodecolorads.frag</file>
         <file>shaders/edgecolorads.frag</file>
+        <file>shaders/outline.frag</file>
     </qresource>
 </RCC>
