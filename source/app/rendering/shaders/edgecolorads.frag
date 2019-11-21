@@ -32,7 +32,7 @@ in float lightScale;
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
 
-vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
+vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
 {
     vec3 result = vec3(0.0);
     vec3 v = normalize(-pos);
@@ -76,7 +76,7 @@ void main()
 
     float stepMix = step(bounds, uv.y) * step(uv.y, 1.0 - bounds);
     vec3 fragColor = mix(innerVColor, outerVColor, 1.0 - stepMix);
-    vec3 color = adsModel(position, normalize(normal), vec4(fragColor, 1.0));
+    vec3 color = adsModel(position, normalize(normal), fragColor);
 
     outColor = vec4(color, 1.0);
     outSelection = vec4(vec3(vSelected), 1.0);

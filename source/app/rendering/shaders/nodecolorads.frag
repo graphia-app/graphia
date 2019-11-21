@@ -33,7 +33,7 @@ in float lightScale;
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
 
-vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
+vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
 {
     vec3 result = vec3(0.0);
     vec3 v = normalize(-pos);
@@ -78,7 +78,7 @@ void main()
     vec2 scaledUV = (uv.xy - 0.5) * 2.0;
 
     // Step threshold indicates the size of dot
-    vec4 fragColor = vec4(mix(outerVColor, innerVColor, step(length(scaledUV), 0.2)), 1.0);
+    vec3 fragColor = mix(outerVColor, innerVColor, step(length(scaledUV), 0.2));
 
     vec3 color = adsModel(position, normalize(normal), fragColor);
     outColor = vec4(color, 1.0);
