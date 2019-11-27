@@ -56,10 +56,6 @@ Item
 
             tableView.columnWidths = []
         }
-        // We update the property target width here to stop the columns constantly
-        // adjusting due to the   binding to tableView.width
-        tableView.targetTotalColumnWidth = tableView.width;
-
         tableView.currentTotalColumnWidth = 0;
         for(let i=0; i<tableView.columns; i++)
         {
@@ -369,6 +365,13 @@ Item
                 property var delegatePadding: 4
                 property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
+                Rectangle
+                {
+                    height: headerView.height
+                    width: headerView.width
+                    color: sysPalette.light
+                }
+
                 delegate: DropArea
                 {
                     id: headerItem
@@ -608,7 +611,6 @@ Item
                 property var userColumnWidths: []
                 property var currentColumnWidths: []
                 property var currentTotalColumnWidth: 0
-                property var targetTotalColumnWidth: 0
                 property var columnWidths: []
                 property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
                 property var visibleColumns: headerColumns
@@ -628,17 +630,29 @@ Item
                     }
                 }
 
-                Column
+                Canvas
                 {
-                    width: tableView.width;
-                    Repeater
+                    id: backgroundCanvas
+                    property var rowHeight: 16;
+                    width: tableView.width
+                    height: tableView.height + (rowHeight * 2)
+                    y: tableView.contentY - (tableView.contentY % (rowHeight * 2))
+                    onPaint:
                     {
-                        model: Math.round(tableView.height / 16) + 1;
-                        delegate: Rectangle
+                        var ctx = getContext("2d");
+                        for(let i = 0; i < Math.ceil(tableView.height / rowHeight) + 1; i++)
                         {
-                            width: tableView.width;
-                            height: 16
-                            color: index % 2 ? sysPalette.window : sysPalette.alternateBase;
+                            let yOffset = (i * rowHeight);
+                            ctx.fillStyle = i % 2 ? sysPalette.window : sysPalette.alternateBase;
+                            ctx.fillRect(0, yOffset, width, rowHeight);
+                        }
+                    }
+                    Connections
+                    {
+                        target: tableView
+                        onContentYChanged:
+                        {
+                            backgroundCanvas.requestPaint();
                         }
                     }
                 }
@@ -683,13 +697,6 @@ Item
                     else
                     {
                         calculatedWidth = calculateMinimumColumnWidth(col);
-
-                        // Scale columns to fill the width of the view if the totalMinimimum is less than the view
-                        if(tableView.currentTotalColumnWidth > 0 && targetTotalColumnWidth > 0 && tableView.currentTotalColumnWidth < targetTotalColumnWidth)
-                        {
-                            let scaledWidth = (calculatedWidth / tableView.currentTotalColumnWidth) * targetTotalColumnWidth;
-                            return scaledWidth;
-                        }
                     }
 
                     return calculatedWidth;
@@ -775,7 +782,7 @@ Item
                     implicitHeight: Math.max(16, label.implicitHeight)
                     implicitWidth: label.implicitWidth + 16
 
-                    clip: true
+                    clip: false
 
                     property var modelColumn: model.column
                     property var modelRow: model.row
@@ -807,6 +814,14 @@ Item
                     }
 
                     SystemPalette { id: systemPalette }
+
+                    Rectangle
+                    {
+                        width: tableView.width
+                        height: 16
+                        color: systemPalette.highlight;
+                        visible: model.column == (proxyModel.columnCount() - 1) && model.subSelected
+                    }
 
                     Rectangle
                     {
