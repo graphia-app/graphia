@@ -583,9 +583,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _bookmarks = completedLoader->bookmarks();
 
             _graphModel->buildTransforms(_graphTransforms);
+
+            if(completedParser->cancelled())
+                return;
+
             _graphModel->buildVisualisations(_visualisations);
 
-            //FIXME make use this when we can switch algorithms = completedLoader->layoutName();
+            //FIXME make use of this when we can switch algorithms = completedLoader->layoutName();
             _loadedLayoutSettings = completedLoader->layoutSettings();
 
             auto nodePositions = completedLoader->nodePositions();
@@ -2272,7 +2276,14 @@ void Document::resetLayoutSettingValue(const QString& name)
 void Document::cancelCommand()
 {
     if(!_loadComplete && _graphFileParserThread != nullptr)
+    {
         _graphFileParserThread->cancel();
+
+        // If the loader isn't complete, but has made it past the parsing stage proper,
+        // simply cancelling the parser won't cancel the (potentially long running)
+        // transform build stage, so we need to do that too
+        _graphModel->cancelTransformBuild();
+    }
     else
         _commandManager.cancel();
 }

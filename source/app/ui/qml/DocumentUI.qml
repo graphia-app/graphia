@@ -1811,7 +1811,9 @@ Item
 
         onLoadComplete:
         {
-            _refreshNumAttributesWithSharedValues();
+            if(success)
+                _refreshNumAttributesWithSharedValues();
+
             root.loadComplete(url, success);
         }
 

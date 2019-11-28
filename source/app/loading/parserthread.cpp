@@ -114,8 +114,12 @@ void ParserThread::run()
 
     if(result)
         emit success(_parser.get());
-    else if(_parser->cancelled())
+
+    if(_parser->cancelled())
+    {
+        result = false;
         emit cancelledChanged();
+    }
 
     emit complete(_url, result);
 }

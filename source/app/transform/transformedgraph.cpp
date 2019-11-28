@@ -181,6 +181,9 @@ void TransformedGraph::rebuild()
                 _graphModel->removeAttribute(attributeName);
 
             _graphModel->addAttributes(_cache.attributes());
+
+            _nodesState = _previousNodesState;
+            _edgesState = _previousEdgesState;
         }
         else
         {
@@ -194,6 +197,7 @@ void TransformedGraph::rebuild()
     enableComponentManagement();
 
     emit graphChanged(this, _changeSignalsEmitted);
+
     clearPhase();
 }
 
