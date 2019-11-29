@@ -344,14 +344,14 @@ Item
         Item
         {
             Layout.fillWidth: true
-            height: 20
+            height: headerMetrics.height + 6
 
             TableView
             {
                 id: headerView
                 model: proxyModel.headerModel
                 width: parent.width
-                height: 20
+                height: parent.height
                 interactive: false
                 clip: true
                 rowHeightProvider: function(row)
@@ -423,6 +423,7 @@ Item
                         height: headerItem.implicitHeight
                         anchors.left: parent.left
                         anchors.top: parent.top
+                        clip: true
 
                         states: [
                             State {
@@ -444,31 +445,40 @@ Item
                             anchors.fill: parent
                             color: headerMouseArea.containsMouse ? Qt.lighter(sysPalette.highlight, 1.99) : sysPalette.light
                         }
-                        CheckBox
+                        Item
                         {
-                            anchors.verticalCenter: parent.verticalCenter
-                            visible: columnSelectionMode
-                            text:  {
-                                let headerIndex = proxyModel.mapToSourceColumn(model.column);
-                                if(headerIndex < 0)
-                                    return "";
-                                return root._nodeAttributesTableModel.columnNames[headerIndex];
-                            }
-                            height: headerLabel.height
+                            anchors.fill: parent
+                            anchors.rightMargin: 5
+                            anchors.leftMargin: 5
 
-                            function isChecked()
+                            clip: true
+                            CheckBox
                             {
-                                return !Utils.setContains(root.hiddenColumns, headerItem.sourceColumn);
-                            }
-                            checked: { return isChecked(); }
-                            onCheckedChanged:
-                            {
-                                // Unbind to prevent binding loop
-                                checked = checked;
-                                root.setColumnVisibility(headerItem.sourceColumn, checked);
+                                anchors.verticalCenter: parent.verticalCenter
 
-                                // Rebind so that the delegate doesn't hold the state
-                                checked = Qt.binding(isChecked);
+                                visible: columnSelectionMode
+                                text:  {
+                                    let headerIndex = proxyModel.mapToSourceColumn(model.column);
+                                    if(headerIndex < 0)
+                                        return "";
+                                    return root._nodeAttributesTableModel.columnNames[headerIndex];
+                                }
+                                height: headerLabel.height
+
+                                function isChecked()
+                                {
+                                    return !Utils.setContains(root.hiddenColumns, headerItem.sourceColumn);
+                                }
+                                checked: { return isChecked(); }
+                                onCheckedChanged:
+                                {
+                                    // Unbind to prevent binding loop
+                                    checked = checked;
+                                    root.setColumnVisibility(headerItem.sourceColumn, checked);
+
+                                    // Rebind so that the delegate doesn't hold the state
+                                    checked = Qt.binding(isChecked);
+                                }
                             }
                         }
                         QQC2.Label
@@ -486,7 +496,6 @@ Item
                                 return root._nodeAttributesTableModel.columnNames[headerItem.sourceColumn];
                             }
                             color: sysPalette.text
-                            font.pixelSize: 11
                             padding: headerView.delegatePadding
                             renderType: Text.NativeRendering
                         }
@@ -633,7 +642,7 @@ Item
                 Canvas
                 {
                     id: backgroundCanvas
-                    property var rowHeight: 16;
+                    property var rowHeight: delegateMetrics.height
                     width: tableView.width
                     height: tableView.height + (rowHeight * 2)
                     y: tableView.contentY - (tableView.contentY % (rowHeight * 2))
@@ -770,8 +779,12 @@ Item
 
                 FontMetrics
                 {
+                    id: delegateMetrics
+                }
+
+                FontMetrics
+                {
                     id: headerMetrics
-                    font.pixelSize: 11
                 }
 
                 // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
@@ -779,7 +792,7 @@ Item
                 delegate: Item
                 {
                     // Based on Qt source for BaseTableView delegate
-                    implicitHeight: Math.max(16, label.implicitHeight)
+                    implicitHeight: delegateMetrics.height
                     implicitWidth: label.implicitWidth + 16
 
                     clip: false
@@ -818,7 +831,7 @@ Item
                     Rectangle
                     {
                         width: tableView.width
-                        height: 16
+                        height: parent.height
                         color: systemPalette.highlight;
                         visible: model.column == (proxyModel.columnCount() - 1) && model.subSelected
                     }
