@@ -359,8 +359,11 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
     }
     if(role == Roles::NodeSelectedRole)
     {
-        auto row = static_cast<size_t>(index.row());
-        return _nodeSelectedColumn.at(row);
+        if(!_nodeSelectedColumn.empty())
+        {
+            auto row = static_cast<size_t>(index.row());
+            return _nodeSelectedColumn.at(row);
+        }
     }
     return {};
 }

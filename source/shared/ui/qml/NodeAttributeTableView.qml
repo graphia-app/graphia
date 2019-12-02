@@ -645,6 +645,7 @@ Item
                     id: backgroundCanvas
                     width: tableView.width
                     height: tableView.height + (tableView.rowHeight * 2)
+                    x: tableView.contentX
                     y: tableView.contentY - (tableView.contentY % (tableView.rowHeight * 2))
                     onPaint:
                     {
@@ -675,13 +676,30 @@ Item
                 {
                     z: 100
                     id: verticalTableViewScrollBar
-                    policy: Qt.ScrollBarAsNeeded
+                    policy: QQC2.ScrollBar.AsNeeded
+                    contentItem: Rectangle
+                    {
+                        implicitWidth: 5
+                        radius: width / 2
+                        color: sysPalette.dark
+                    }
+                    minimumSize: 0.1
+                    visible: size != 1.0
                 }
 
                 QQC2.ScrollBar.horizontal: QQC2.ScrollBar
                 {
                     z: 100
                     id: horizontalTableViewScrollBar
+                    policy: QQC2.ScrollBar.AsNeeded
+                    contentItem: Rectangle
+                    {
+                        implicitHeight: 5
+                        radius: width / 2
+                        color: sysPalette.dark
+                    }
+                    minimumSize: 0.1
+                    visible: size != 1.0
                 }
 
                 model: TableProxyModel
