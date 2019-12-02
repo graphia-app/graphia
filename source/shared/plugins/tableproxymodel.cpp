@@ -20,9 +20,9 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 
     auto unorderedSourceIndex = mapToSource(index);
 
-    if(_mappedColumnOrder.size() == static_cast<size_t>(columnCount()))
+    if(_orderedProxyToSourceColumn.size() == static_cast<size_t>(columnCount()))
     {
-        auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(), _mappedColumnOrder.at(index.column()));
+        auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(), _orderedProxyToSourceColumn.at(index.column()));
         return sourceModel()->data(mappedIndex, role);
     }
 
@@ -63,14 +63,14 @@ int TableProxyModel::mapToSourceRow(int proxyRow) const
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
 }
 
-int TableProxyModel::mapToSourceColumn(int proxyColumn) const
+int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 {
     if(proxyColumn >= columnCount())
         return -1;
 
     auto mappedProxyColumn = proxyColumn;
-    if(!_mappedColumnOrder.empty())
-        mappedProxyColumn = _mappedColumnOrder.at(static_cast<size_t>(proxyColumn));
+    if(!_orderedProxyToSourceColumn.empty())
+        mappedProxyColumn = _orderedProxyToSourceColumn.at(static_cast<size_t>(proxyColumn));
 
     return mappedProxyColumn;
 }
@@ -89,10 +89,32 @@ void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
     std::sort(hiddenColumns.begin(), hiddenColumns.end());
     _hiddenColumns = hiddenColumns;
     invalidateFilter();
-    recalculateOrderMapping();
+    calculateOrderedProxySourceMapping();
 }
 
-void TableProxyModel::recalculateOrderMapping()
+void TableProxyModel::calculateUnorderedSourceProxyColumnMapping()
+{
+    auto sourceColumnCount = static_cast<size_t>(sourceModel()->columnCount());
+    std::vector<int> proxyToSourceColumns;
+    std::vector<int> sourceToProxyColumns(sourceColumnCount, -1);
+    proxyToSourceColumns.reserve(sourceColumnCount);
+    for (auto i = 0; i < static_cast<int>(sourceColumnCount); ++i)
+    {
+        if(filterAcceptsColumn(i, {}))
+            proxyToSourceColumns.push_back(i);
+    }
+
+    for (auto i = 0; i < columnCount(); ++i)
+    {
+        auto index = static_cast<size_t>(i);
+        auto source = static_cast<size_t>(proxyToSourceColumns.at(index));
+        sourceToProxyColumns[source] = i;
+    }
+
+    _unorderedSourceToProxyColumn = sourceToProxyColumns;
+}
+
+void TableProxyModel::calculateOrderedProxySourceMapping()
 {
     if(_sourceColumnOrder.size() != static_cast<size_t>(sourceModel()->columnCount()))
     {
@@ -102,7 +124,7 @@ void TableProxyModel::recalculateOrderMapping()
     }
 
     auto filteredOrder = u::setDifference(_sourceColumnOrder, _hiddenColumns);
-    _mappedColumnOrder = filteredOrder;
+    _orderedProxyToSourceColumn = filteredOrder;
 
     _headerModel.clear();
     _headerModel.setRowCount(1);
@@ -124,9 +146,8 @@ void TableProxyModel::setSortColumn(int sortColumn)
 {
     _sortColumn = sortColumn;
 
-    auto mappedColumn = mapFromSource(sourceModel()->index(0, _sortColumn));
-
-    this->sort(mappedColumn.column(), _sortOrder);
+    auto sourceSortColumn = static_cast<size_t>(_sortColumn);
+    this->sort(_unorderedSourceToProxyColumn.at(sourceSortColumn), _sortOrder);
     emit sortColumnChanged(sortColumn);
 }
 
@@ -134,14 +155,14 @@ void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
 {
     _sortOrder = sortOrder;
 
-    auto mappedColumn = mapFromSource(sourceModel()->index(0, _sortColumn));
-
-    this->sort(mappedColumn.column(), _sortOrder);
+    auto sourceSortColumn = static_cast<size_t>(_sortColumn);
+    this->sort(_unorderedSourceToProxyColumn.at(sourceSortColumn), _sortOrder);
     emit sortOrderChanged(sortOrder);
 }
 
 void TableProxyModel::invalidateFilter()
 {
     QSortFilterProxyModel::invalidateFilter();
-    recalculateOrderMapping();
+    calculateOrderedProxySourceMapping();
+    calculateUnorderedSourceProxyColumnMapping();
 }

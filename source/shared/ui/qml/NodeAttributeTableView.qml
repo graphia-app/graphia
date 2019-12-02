@@ -382,14 +382,14 @@ Item
 
                     function refreshState()
                     {
-                        sourceColumn = Qt.binding(function() { return proxyModel.mapToSourceColumn(model.column) } );
+                        sourceColumn = Qt.binding(function() { return proxyModel.mapOrderedToSourceColumn(model.column) } );
                         implicitWidth =  Qt.binding(function() { return tableView.columnWidthProvider(model.column); });
                     }
 
                     implicitWidth: tableView.columnWidthProvider(model.column);
                     implicitHeight: headerLabel.height
                     property var modelColumn: model.column
-                    property var sourceColumn: proxyModel.mapToSourceColumn(model.column);
+                    property var sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
                     Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: modelColumn }
                     Connections
@@ -403,7 +403,7 @@ Item
 
                     onEntered:
                     {
-                        drag.source.target = proxyModel.mapToSourceColumn(model.column);
+                        drag.source.target = proxyModel.mapOrderedToSourceColumn(model.column);
                         tableView.forceLayoutSafe();
                     }
                     Rectangle
@@ -458,7 +458,7 @@ Item
 
                                 visible: columnSelectionMode
                                 text:  {
-                                    let headerIndex = proxyModel.mapToSourceColumn(model.column);
+                                    let headerIndex = proxyModel.mapOrderedToSourceColumn(model.column);
                                     if(headerIndex < 0)
                                         return "";
                                     return root._nodeAttributesTableModel.columnNames[headerIndex];
@@ -594,7 +594,7 @@ Item
                                 {
                                     if(drag.active)
                                     {
-                                        let sourceColumn = proxyModel.mapToSourceColumn(model.column);
+                                        let sourceColumn = proxyModel.mapOrderedToSourceColumn(model.column);
                                         tableView.userColumnWidths[sourceColumn] = Math.max(30, headerItem.implicitWidth + mouseX);
                                         headerItem.refreshState();
                                         tableView.forceLayoutSafe();
@@ -624,6 +624,7 @@ Item
                 property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
                 property var visibleColumns: headerColumns
                 signal fetchColumnSizes;
+                property var rowHeight: delegateMetrics.height + 1
 
                 clip: true
                 interactive: false
@@ -642,18 +643,17 @@ Item
                 Canvas
                 {
                     id: backgroundCanvas
-                    property var rowHeight: delegateMetrics.height
                     width: tableView.width
-                    height: tableView.height + (rowHeight * 2)
-                    y: tableView.contentY - (tableView.contentY % (rowHeight * 2))
+                    height: tableView.height + (tableView.rowHeight * 2)
+                    y: tableView.contentY - (tableView.contentY % (tableView.rowHeight * 2))
                     onPaint:
                     {
                         var ctx = getContext("2d");
-                        for(let i = 0; i < Math.ceil(tableView.height / rowHeight) + 1; i++)
+                        for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
                         {
-                            let yOffset = (i * rowHeight);
+                            let yOffset = (i * tableView.rowHeight);
                             ctx.fillStyle = i % 2 ? sysPalette.window : sysPalette.alternateBase;
-                            ctx.fillRect(0, yOffset, width, rowHeight);
+                            ctx.fillRect(0, yOffset, width, tableView.rowHeight);
                         }
                     }
                     Connections
@@ -698,7 +698,7 @@ Item
                 columnWidthProvider: function(col)
                 {
                     var calculatedWidth = 0;
-                    var userWidth = userColumnWidths[proxyModel.mapToSourceColumn(col)];
+                    var userWidth = userColumnWidths[proxyModel.mapOrderedToSourceColumn(col)];
 
                     // Use the user specified column width if available
                     if(userWidth !== undefined)
@@ -765,7 +765,7 @@ Item
 
                 function headerFullWidth(column)
                 {
-                    let sourceColumn = proxyModel.mapToSourceColumn(column);
+                    let sourceColumn = proxyModel.mapOrderedToSourceColumn(column);
                     let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) + headerView.sortIndicatorWidth;
                     if(sourceColumn > -1)
                     {
@@ -792,7 +792,7 @@ Item
                 delegate: Item
                 {
                     // Based on Qt source for BaseTableView delegate
-                    implicitHeight: delegateMetrics.height
+                    implicitHeight: tableView.rowHeight
                     implicitWidth: label.implicitWidth + 16
 
                     clip: false
@@ -865,7 +865,7 @@ Item
 
                             text:
                             {
-                                let sourceColumn = proxyModel.mapToSourceColumn(modelColumn);
+                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(modelColumn);
 
                                 // This can happen during column removal
                                 if(sourceColumn === undefined || sourceColumn < 0)

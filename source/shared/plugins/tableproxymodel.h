@@ -11,6 +11,18 @@
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
 
+// As QSortFilterProxyModel cannot set column orders, we do it ourselves by translating columns
+// in the data() function. This has a number of consequences regarding proxy/source mappings.
+
+// Interface mapFromSource() and mapToSource() will NOT account for column ordering.
+// As such order mapping is maintained via orderedProxyToSourceColumn
+// This can be accessed via mapToOrderedSourceColumn()
+
+// The sort() function requires an UNORDERED column as translation is taken care of in the data()
+// function. Passing sort() an ordered column index will result in an incorrect translation.
+// Unordered mapped columns can be accessed via the _unorderedSourceToProxyColumn member
+// Sort column is stored as a SOURCE index to respect ordering and hidden columns.
+
 class TableProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
@@ -28,7 +40,8 @@ private:
     std::unordered_set<int> _subSelectionRows;
     std::vector<int> _hiddenColumns;
     std::vector<int> _sourceColumnOrder;
-    std::vector<int> _mappedColumnOrder;
+    std::vector<int> _orderedProxyToSourceColumn;
+    std::vector<int> _unorderedSourceToProxyColumn;
     int _sortColumn = -1;
     Qt::SortOrder _sortOrder = Qt::DescendingOrder;
     enum Roles
@@ -40,7 +53,8 @@ private:
     {
         return &_headerModel;
     }
-    void recalculateOrderMapping();
+    void calculateOrderedProxySourceMapping();
+    void calculateUnorderedSourceProxyColumnMapping();
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
@@ -67,7 +81,7 @@ public:
     explicit TableProxyModel(QObject* parent = nullptr);
     Q_INVOKABLE void setSubSelection(const QItemSelection& subSelection, const QItemSelection& subDeselection);
     Q_INVOKABLE int mapToSourceRow(int proxyRow) const;
-    Q_INVOKABLE int mapToSourceColumn(int proxyColumn) const;
+    Q_INVOKABLE int mapOrderedToSourceColumn(int proxyColumn) const;
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
 
     using QSortFilterProxyModel::mapToSource;
