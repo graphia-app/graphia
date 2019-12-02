@@ -627,7 +627,7 @@ Item
                 property var rowHeight: delegateMetrics.height + 1
 
                 clip: true
-                interactive: false
+                interactive: true
                 visible: true
 
                 layer
@@ -676,16 +676,11 @@ Item
                     z: 100
                     id: verticalTableViewScrollBar
                     policy: Qt.ScrollBarAsNeeded
-                    contentItem: Rectangle
-                    {
-                        implicitWidth: 5
-                        radius: width / 2
-                        color: sysPalette.dark
-                    }
                 }
 
                 QQC2.ScrollBar.horizontal: QQC2.ScrollBar
                 {
+                    z: 100
                     id: horizontalTableViewScrollBar
                 }
 
