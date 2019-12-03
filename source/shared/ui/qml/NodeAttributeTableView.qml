@@ -684,12 +684,14 @@ Item
                         color: sysPalette.dark
                     }
                     minimumSize: 0.1
-                    visible: size != 1.0
+                    visible: size != 1.0 && tableView.rows > 0
                 }
 
                 QQC2.ScrollBar.horizontal: QQC2.ScrollBar
                 {
+                    parent: horizontalScrollItem
                     z: 100
+                    anchors.fill: parent
                     id: horizontalTableViewScrollBar
                     policy: QQC2.ScrollBar.AsNeeded
                     contentItem: Rectangle
@@ -961,7 +963,6 @@ Item
                 property var endRow: -1
                 anchors.fill: parent
                 anchors.rightMargin: verticalTableViewScrollBar.width
-                anchors.bottomMargin: horizontalTableViewScrollBar.height
                 z: 3
                 hoverEnabled: true
                 visible: !columnSelectionMode
@@ -1032,6 +1033,14 @@ Item
                     }
                 }
             }
+        }
+
+        Item
+        {
+            id: horizontalScrollItem
+            height: 9
+            Layout.fillWidth: true
+            visible: horizontalTableViewScrollBar.size != 1.0
         }
     }
 

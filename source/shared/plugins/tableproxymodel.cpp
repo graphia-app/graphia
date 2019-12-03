@@ -78,10 +78,6 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
 {
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::invalidateFilter);
-    connect(this, &QAbstractItemModel::rowsInserted, this, &TableProxyModel::countChanged);
-    connect(this, &QAbstractItemModel::rowsRemoved, this, &TableProxyModel::countChanged);
-    connect(this, &QAbstractItemModel::modelReset, this, &TableProxyModel::countChanged);
-    connect(this, &QAbstractItemModel::layoutChanged, this, &TableProxyModel::countChanged);
 }
 
 void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)

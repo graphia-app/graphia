@@ -91,7 +91,6 @@ public:
     void setSortColumn(int sortColumn);
     void setSortOrder(Qt::SortOrder sortOrder);
 signals:
-    void countChanged();
     void sortColumnChanged(int sortColumn);
     void sortOrderChanged(int sortColumn);
 
