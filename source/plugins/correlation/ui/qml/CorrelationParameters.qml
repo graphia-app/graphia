@@ -167,12 +167,6 @@ BaseParameterDialog
             id: dataRectPage
             property bool _busy: tabularDataParser.busy || listTabView.animating
 
-            Component
-            {
-                id: columnComponent
-                TableViewColumn { width: 200 }
-            }
-
             ColumnLayout
             {
                 anchors.fill: parent
@@ -237,7 +231,7 @@ BaseParameterDialog
                     Repeater
                     {
                         id: sizer
-                        visible: false;
+                        visible: false
                         model: dataRectView.columns
                         delegate: Item
                         {
@@ -265,7 +259,6 @@ BaseParameterDialog
                                 }
 
                                 color: sysPalette.text
-                                font.pixelSize: 11
                                 padding: 4
                                 renderType: Text.NativeRendering
                             }
@@ -300,22 +293,27 @@ BaseParameterDialog
                             {
                                 return row > 1 ? 0 : -1;
                             }
-                            columnWidthProvider: dataRectView.columnWidthProvider;
+                            columnWidthProvider: dataRectView.columnWidthProvider
 
-                            height: 15
+                            height: headerFontMetrics.height + 4
                             Layout.fillWidth: true
                             interactive: false
+
+                            FontMetrics
+                            {
+                                id: headerFontMetrics
+                            }
 
                             delegate: Item
                             {
                                 property var modelIndex: index
                                 implicitWidth: headerLabel.contentWidth + 10
-                                implicitHeight: headerLabel.height
+                                implicitHeight: headerFontMetrics.height + 4
 
                                 id: headerDelegate
                                 Rectangle
                                 {
-                             anchors.fill: parent
+                                    anchors.fill: parent
                                     color: sysPalette.light
                                 }
                                 Label
@@ -331,7 +329,6 @@ BaseParameterDialog
                                     }
 
                                     color: sysPalette.text
-                                    font.pixelSize: 11
                                     padding: 4
                                     renderType: Text.NativeRendering
                                 }
@@ -345,11 +342,9 @@ BaseParameterDialog
                             }
                         }
 
-
                         TableView
                         {
-                            property var delegateHeight: 11
-                            property var headerDelegates: []
+                            property var delegateHeight: headerFontMetrics.height
                             id: dataRectView
 
                             clip: true
