@@ -100,17 +100,7 @@ BaseParameterDialog
         onListTabChanged:
         {
             if(currentItem == dataRectPage)
-            {
-                // TO-DO: Scroll to cell
                 dataRectView.forceLayoutSafe();
-
-                // Precalculate table width to stop the scrollbar jumping
-                let calculatedWidth = 0;
-                for(let i=0; i<dataRectView.columns; i++)
-                    calculatedWidth += dataRectView.columnWidthProvider(i);
-                console.log("Calculated Width", calculatedWidth);
-                //dataRectView.contentWidth = calculatedWidth;
-            }
         }
 
         ListTab
@@ -219,60 +209,6 @@ BaseParameterDialog
                     text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input.")
                 }
 
-                TextMetrics
-                {
-                    id: textMetrics
-                    font: messageText.font
-                }
-
-                Row
-                {
-                    visible: false
-                    Repeater
-                    {
-                        id: sizer
-                        visible: false
-                        model: dataRectView.columns
-                        delegate: Item
-                        {
-                            visible: false
-                            property var modelIndex: index
-                            implicitWidth: headerLabelSize.contentWidth + 10
-                            implicitHeight: headerLabelSize.height
-
-                            id: headerDelegateSizer
-                            Rectangle
-                            {
-                                anchors.fill: parent
-                                color: sysPalette.light
-                            }
-                            Label
-                            {
-                                id: headerLabelSize
-                                clip: true
-                                maximumLineCount: 1
-                                width: parent.width
-                                text:
-                                {
-                                    let headerIndex = tabularDataParser.model.index(0, index);
-                                    return tabularDataParser.model.data(headerIndex);
-                                }
-
-                                color: sysPalette.text
-                                padding: 4
-                                renderType: Text.NativeRendering
-                            }
-                            Rectangle
-                            {
-                                anchors.right: parent.right
-                                height: parent.height
-                                width: 1
-                                color: sysPalette.midlight
-                            }
-                        }
-                    }
-                }
-
                 Rectangle
                 {
                     Layout.fillWidth: true
@@ -286,18 +222,21 @@ BaseParameterDialog
                         anchors.fill: parent
                         TableView
                         {
+                            property var headerPadding: 4
                             id: columnHeaderView
-                            clip: true
+
                             model: dataRectView.model
+                            height: headerFontMetrics.height + columnHeaderView.headerPadding
+                            Layout.fillWidth: true
+                            interactive: false
+                            clip: true
+
                             rowHeightProvider: function(row)
                             {
                                 return row > 1 ? 0 : -1;
                             }
-                            columnWidthProvider: dataRectView.columnWidthProvider
 
-                            height: headerFontMetrics.height + 4
-                            Layout.fillWidth: true
-                            interactive: false
+                            columnWidthProvider: dataRectView.columnWidthProvider;
 
                             FontMetrics
                             {
@@ -308,7 +247,7 @@ BaseParameterDialog
                             {
                                 property var modelIndex: index
                                 implicitWidth: headerLabel.contentWidth + 10
-                                implicitHeight: headerFontMetrics.height + 4
+                                implicitHeight: headerFontMetrics.height + columnHeaderView.headerPadding
 
                                 id: headerDelegate
                                 Rectangle
@@ -329,7 +268,7 @@ BaseParameterDialog
                                     }
 
                                     color: sysPalette.text
-                                    padding: 4
+                                    padding: columnHeaderView.headerPadding
                                     renderType: Text.NativeRendering
                                 }
                                 Rectangle
@@ -370,10 +309,10 @@ BaseParameterDialog
 
                             columnWidthProvider: function(col)
                             {
-                                if(sizer.count > 0)
-                                    return sizer.itemAt(col).width;
-                                else
-                                    return -1;
+                                let headerIndex = tabularDataParser.model.index(0, col);
+                                let headerText = tabularDataParser.model.data(headerIndex);
+                                let width = headerFontMetrics.advanceWidth(headerText);
+                                return width + columnHeaderView.headerPadding + columnHeaderView.headerPadding;
                             }
 
                             Rectangle

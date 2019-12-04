@@ -352,6 +352,14 @@ void TabularDataParser::setTransposed(bool transposed)
     if(_autoDetectDataRectangleWatcher.isRunning())
         _autoDetectDataRectangleWatcher.waitForFinished();
 
+    if(this->transposed() != transposed)
+    {
+        auto transDataRect = _dataRect.transposed();
+        transDataRect.setX(_dataRect.y());
+        transDataRect.setY(_dataRect.x());
+        _dataRect = transDataRect;
+    }
+
     _model.setTransposed(transposed);
     emit transposedChanged();
 }

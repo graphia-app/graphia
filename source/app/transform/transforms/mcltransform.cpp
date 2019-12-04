@@ -568,8 +568,6 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
                         // There's overlap with both row and column cluster here
                         // we can preserve overlap in future but for now just
                         // ignore and leave the node in the rowCluster
-                        qDebug() << "OVERLAP" << columnCluster << rowCluster << k << it->index();
-                        qDebug() << static_cast<int>(indexToNodeMap.at(k)) << static_cast<int>(indexToNodeMap.at(it->index()));
                     }
                 }
                 else

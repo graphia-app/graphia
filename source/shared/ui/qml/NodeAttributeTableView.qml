@@ -86,8 +86,6 @@ Item
         tableView.forceLayoutSafe();
     }
 
-    property alias viewport: tableView.childrenRect
-
     signal visibleRowsChanged();
 
     function setColumnVisibility(sourceColumnIndex, columnVisible)
@@ -920,15 +918,6 @@ Item
                     }
                 }
 
-                function _resetSortFilterProxyModel()
-                {
-                    // For reasons not fully understood, we seem to require the TableView's model to be
-                    // recreated whenever it has a structural change, otherwise the view and the model
-                    // get out of sync in exciting and unpredictable ways; hopefully we can get to the
-                    // bottom of this when we transition to the new TableView component
-                    //tableView.model = root._nodeAttributesTableModel;
-                }
-
                 Connections
                 {
                     target: plugin.model.nodeAttributeTableModel
@@ -942,14 +931,10 @@ Item
 
                 Component.onCompleted:
                 {
-                    tableView._resetSortFilterProxyModel();
-
                     populateTableMenu(tableView._tableMenu);
 
                     root.resizeColumnsToContents();
                 }
-
-                //selectionMode: SelectionMode.ExtendedSelection
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary
                 property Menu _tableMenu
@@ -1000,9 +985,7 @@ Item
                         }
                     }
                     else if(mouse.modifiers & Qt.ControlModifier)
-                    {
-
-                    }
+                    {}
                     else
                     {
                         selectionModel.clear();
@@ -1060,5 +1043,4 @@ Item
         arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
         return arr; // for testing
     }
-
 }
