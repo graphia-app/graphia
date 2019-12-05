@@ -300,9 +300,11 @@ void GraphRenderer::updateGPUDataIfRequired()
 
                 const auto sourceRadiusSq = sourceNodeVisual._size * sourceNodeVisual._size;
                 const auto targetRadiusSq = targetNodeVisual._size * targetNodeVisual._size;
-                const auto term = edgeLengthSq + sourceRadiusSq - targetRadiusSq;
-                const auto intersectionLensRadiusSq = (edgeLengthSq * edgeLengthSq * sourceRadiusSq) -
-                    ((edgeLengthSq * term * term) / 4.0f);
+
+                const auto n = edgeLengthSq - sourceRadiusSq + targetRadiusSq;
+                const auto d = 4.0f * edgeLengthSq;
+                const auto intersectionLensRadiusSq = targetRadiusSq - ((n * n) / d);
+
                 const auto edgeRadiusSq = edgeVisual._size * edgeVisual._size;
 
                 if(edgeRadiusSq < intersectionLensRadiusSq)
