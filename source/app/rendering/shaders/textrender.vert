@@ -15,6 +15,7 @@ layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in vec3 color;
 
 uniform samplerBuffer componentData;
+uniform int componentDataElementSize;
 uniform sampler2DArray tex;
 uniform float textScale;
 
@@ -22,19 +23,32 @@ out vec2 texCoord;
 flat out int texLayer;
 out vec3 textColor;
 
+int componentDataOffset()
+{
+    return component * componentDataElementSize;
+}
+
+mat4 mat4FromComponentData(int offset)
+{
+    mat4 m;
+    int index = componentDataOffset() + offset;
+
+    for(int j = 0; j < 4; j++)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            m[j][i] = texelFetch(componentData, index).r;
+            index++;
+        }
+    }
+
+    return m;
+}
+
 void main()
 {
-   int index = component * 8;
-
-   mat4 modelViewMatrix = mat4(texelFetch(componentData, index + 0),
-                               texelFetch(componentData, index + 1),
-                               texelFetch(componentData, index + 2),
-                               texelFetch(componentData, index + 3));
-
-   mat4 projectionMatrix = mat4(texelFetch(componentData, index + 4),
-                                texelFetch(componentData, index + 5),
-                                texelFetch(componentData, index + 6),
-                                texelFetch(componentData, index + 7));
+   mat4 modelViewMatrix = mat4FromComponentData(0);
+   mat4 projectionMatrix = mat4FromComponentData(16);
 
   vec3 cameraUp =    normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
   vec3 cameraRight = normalize(vec3(modelViewMatrix[0].x, modelViewMatrix[1].x, modelViewMatrix[2].x));

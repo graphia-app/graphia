@@ -530,6 +530,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _textShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
     _textShader.setUniformValue("componentData", 1);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
