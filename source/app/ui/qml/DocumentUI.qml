@@ -1942,6 +1942,8 @@ Item
                           "<b>Overview Mode:</b> Double Click Background or Press Esc<br>" +
                           "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
                           "<b>Select Node:</b> Click a Node<br>" +
+                          "<b>Select Additional Nodes:</b> Hold Shift and Click a Node<br>" +
+                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes<br>" +
                           "<b>Focus Node:</b> Double Click a Node")
                 }
             }
