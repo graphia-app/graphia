@@ -29,7 +29,7 @@ vec4 multisampledValue(ivec2 coord)
 
 void main()
 {
-    // Sobol edge detection
+    // Sobel edge detection
     ivec2 coord = ivec2(vPosition);
     mat3 I;
     float cnv[2];
@@ -49,6 +49,7 @@ void main()
     }
 
     // Approximate gradient (save a square root)
+    // float outlineAlpha = sqrt(cnv[0] * cnv[0] + cnv[1] * cnv[1]);
     float outlineAlpha = abs(cnv[0]) + abs(cnv[1]);
     outlineAlpha *= 0.25;
 

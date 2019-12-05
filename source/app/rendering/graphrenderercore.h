@@ -89,9 +89,9 @@ struct GPUGraphData : OpenGLFunctions
     };
 
     // There are two alpha values so that we can split the alpha blended layers
-    // depending on their purpose. The rendering occurs in order based on _alpha1,
-    // going from opaque to transparent, then resorting to _alpha2 in the same order,
-    // when the values of _alpha1 match
+    // depending on their purpose. The rendering occurs in order based on _componentAlpha,
+    // going from opaque to transparent, then resorting to _unhighlightAlpha in the same order,
+    // when the values of _componentAlpha match
     float _componentAlpha = 0.0f;
     float _unhighlightAlpha = 0.0f;
 
@@ -160,7 +160,7 @@ protected:
 
     bool resize(int width, int height);
 
-    GPUGraphData* gpuGraphDataForAlpha(float alpha1, float alpha2);
+    GPUGraphData* gpuGraphDataForAlpha(float componentAlpha, float unhighlightAlpha);
     GPUGraphData* gpuGraphDataForOverlay(float alpha);
     void resetGPUGraphData();
     void uploadGPUGraphData();

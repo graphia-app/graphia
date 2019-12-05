@@ -298,9 +298,9 @@ bool GPUGraphData::unused() const
 }
 
 void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
-                                      QOpenGLShaderProgram& nodesShader,
-                                      QOpenGLShaderProgram& edgesShader,
-                                      QOpenGLShaderProgram& textShader)
+    QOpenGLShaderProgram& nodesShader,
+    QOpenGLShaderProgram& edgesShader,
+    QOpenGLShaderProgram& textShader)
 {
     _componentAlpha = gpuGraphData._componentAlpha;
     _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
@@ -489,22 +489,22 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     glDepthMask(GL_TRUE);
 }
 
-GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float alpha1, float alpha2)
+GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, float unhighlightAlpha)
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
         if(gpuGraphData.unused())
         {
-            gpuGraphData._componentAlpha = alpha1;
-            gpuGraphData._unhighlightAlpha = alpha2;
+            gpuGraphData._componentAlpha = componentAlpha;
+            gpuGraphData._unhighlightAlpha = unhighlightAlpha;
             return &gpuGraphData;
         }
 
-        if(gpuGraphData._componentAlpha == alpha1 && gpuGraphData._unhighlightAlpha == alpha2)
+        if(gpuGraphData._componentAlpha == componentAlpha && gpuGraphData._unhighlightAlpha == unhighlightAlpha)
             return &gpuGraphData;
     }
 
-    qWarning() << "Not enough gpuGraphData instances for" << alpha1 << alpha2;
+    qWarning() << "Not enough gpuGraphData instances for" << componentAlpha << unhighlightAlpha;
     for(auto& gpuGraphData : _gpuGraphData)
         qWarning() << "  " << gpuGraphData._componentAlpha << gpuGraphData._unhighlightAlpha;
 
