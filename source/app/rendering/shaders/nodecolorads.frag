@@ -43,7 +43,6 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
         LightInfo light = lights[i];
 
         vec3 l = vec3(light.position) - pos;
-        float d = length(l);
 
         // Calculate the vector from the light to the fragment
         vec3 s = normalize(l);
@@ -59,14 +58,8 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
         if(dot(s, n) > 0.0)
             specular = pow(max(dot(r, v), 0.0), material.shininess);
 
-        float kc = 1.0;
-        float kl = 0.0 * d;
-        float kq = 0.0002 * d * d;
-        float attenuation = 1.0 / (kc + kl + kq);
-        attenuation = clamp(attenuation, 0.7, 1.0);
-
         // Combine the ambient, diffuse and specular contributions
-        result += attenuation * light.intensity * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
+        result += light.intensity * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
     }
 
     return result;
