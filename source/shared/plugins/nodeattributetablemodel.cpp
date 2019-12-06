@@ -2,8 +2,6 @@
 
 #include "userelementdata.h"
 
-#include "../crashhandler.h"
-
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/igraph.h"
@@ -51,7 +49,7 @@ QStringList NodeAttributeTableModel::columnNames() const
         Q_ASSERT(attribute != nullptr);
         if(attribute == nullptr)
         {
-            S(CrashHandler)->submitMinidump(QStringLiteral("Attribute not found: %1").arg(attributeName));
+            _document->reportProblem(QStringLiteral("Attribute not found: %1").arg(attributeName));
             continue;
         }
 

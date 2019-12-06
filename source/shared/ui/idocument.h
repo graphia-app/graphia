@@ -57,6 +57,8 @@ public:
 
     virtual void clearHighlightedNodes() = 0;
     virtual void highlightNodes(const NodeIdSet& nodeIds) = 0;
+
+    virtual void reportProblem(const QString& description) const = 0;
 };
 
 #endif // IDOCUMENT_H

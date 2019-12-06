@@ -38,6 +38,8 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
+#include "../crashhandler.h"
+
 #include <json_helper.h>
 
 #include <QQmlProperty>
@@ -1288,6 +1290,11 @@ void Document::highlightNodes(const NodeIdSet& nodeIds)
 {
     if(_graphModel != nullptr)
         _graphModel->highlightNodes(nodeIds);
+}
+
+void Document::reportProblem(const QString& description) const
+{
+    S(CrashHandler)->submitMinidump(description);
 }
 
 void Document::setSaveRequired()

@@ -133,6 +133,8 @@ public: // IDocument
     void clearHighlightedNodes() override;
     void highlightNodes(const NodeIdSet& nodeIds) override;
 
+    void reportProblem(const QString& description) const override;
+
 public:
     static QColor contrastingColorForBackground();
 
