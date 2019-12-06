@@ -12,6 +12,7 @@ DEFINE_QML_ENUM(
                 Deadlock,
                 Hitch,
                 Win32Exception,
-                Win32ExceptionNonContinuable);
+                Win32ExceptionNonContinuable,
+                SilentSubmit);
 
 #endif // CRASHTYPE_H

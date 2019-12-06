@@ -1,5 +1,6 @@
 #include "application.h"
 #include "crashtype.h"
+#include "../crashhandler.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/fatalerror.h"
@@ -354,6 +355,11 @@ static void hitch()
     std::this_thread::sleep_for(35s);
 }
 
+static void silentCrashSubmit()
+{
+    S(CrashHandler)->submitMinidump(QStringLiteral("Silent Test Crash Submit"));
+}
+
 void Application::crash(int crashType)
 {
     std::cerr << "Application::crash() invoked!\n";
@@ -403,6 +409,10 @@ void Application::crash(int crashType)
                        EXCEPTION_NONCONTINUABLE : 0, NULL, NULL);
         break;
 #endif
+
+    case CrashType::SilentSubmit:
+        silentCrashSubmit();
+        break;
     }
 }
 

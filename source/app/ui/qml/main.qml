@@ -1668,6 +1668,11 @@ ApplicationWindow
                     text: qsTr("Windows Exception Non-Continuable");
                     onTriggered: application.crash(CrashType.Win32ExceptionNonContinuable);
                 }
+                MenuItem
+                {
+                    text: qsTr("Silent Submit");
+                    onTriggered: application.crash(CrashType.SilentSubmit);
+                }
             }
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
