@@ -66,7 +66,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
 void main()
 {
     // Only the UV y is set since that's all we're interested in
-    // Used to set the size of the center stripe
+    // Used to set the size of the centre stripe
     const float bounds = 0.375;
 
     float stepMix = step(bounds, uv.y) * step(uv.y, 1.0 - bounds);

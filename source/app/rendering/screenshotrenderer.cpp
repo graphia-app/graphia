@@ -183,13 +183,13 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         QRectF& componentViewport = _componentViewports.at(componentIndex);
 
         // Scaling the X pos by Y scale will position components correctly relative to each other
-        // but the centers of viewportsize and screenshotsize will not align. We need to shift the
+        // but the centres of viewportsize and screenshotsize will not align. We need to shift the
         // components based on the change in the aspect ratio and widths.
         double scaledXPos = (componentViewport.x() * scaleY);
-        double offsetXToCenter = (0.5 * (screenshotSize.width() - (viewportSize.width() * scaleY)));
+        double offsetXToCentre = (0.5 * (screenshotSize.width() - (viewportSize.width() * scaleY)));
 
         QRectF scaledDimensions;
-        scaledDimensions.setTopLeft({scaledXPos + offsetXToCenter, componentViewport.y() * scaleY});
+        scaledDimensions.setTopLeft({scaledXPos + offsetXToCentre, componentViewport.y() * scaleY});
         scaledDimensions.setWidth(componentViewport.width() * scaleY);
         scaledDimensions.setHeight(componentViewport.height() * scaleY);
 

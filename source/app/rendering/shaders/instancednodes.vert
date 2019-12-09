@@ -63,8 +63,8 @@ void main()
     // Map 2D UVs to node Hemisphere
     // Create orientation matrix based on vector from eyespace nodePosition
     // This keeps the node "facing" the camera
-    vec3 eyeNodeCenter = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
-    mat4 perspectiveOrientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCenter));
+    vec3 eyeNodeCentre = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
+    mat4 perspectiveOrientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCentre));
     vec4 eyeNodeNormal = perspectiveOrientationMatrix * vec4(normal, 1.0);
 
     // Project hemisphere normal to UVs

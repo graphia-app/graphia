@@ -69,8 +69,8 @@ void main()
 {
     // Hemisphere projection means the UV's are NOT linear
 
-    // Center color of Node calculation
-    // We want 0, 0 to be the center for dot
+    // Centre color of Node calculation
+    // We want 0, 0 to be the centre for dot
     vec2 scaledUV = (uv.xy - 0.5) * 2.0;
 
     // Step threshold indicates the size of dot

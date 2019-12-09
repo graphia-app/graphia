@@ -1,5 +1,5 @@
-#ifndef CENTERINGLAYOUT_H
-#define CENTERINGLAYOUT_H
+#ifndef CENTREINGLAYOUT_H
+#define CENTREINGLAYOUT_H
 
 #include "layout.h"
 
@@ -16,4 +16,4 @@ public:
 };
 
 
-#endif // CENTERINGLAYOUT_H
+#endif // CENTREINGLAYOUT_H
