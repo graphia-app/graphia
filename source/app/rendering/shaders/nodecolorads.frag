@@ -26,7 +26,7 @@ in vec3 position;
 in vec3 normal;
 in vec3 innerVColor;
 in vec3 outerVColor;
-in vec3 vOutlineColor;
+in float vSelected;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
@@ -78,5 +78,5 @@ void main()
 
     vec3 color = adsModel(position, normalize(normal), fragColor);
     outColor = vec4(color, 1.0);
-    outSelection = vec4(vOutlineColor, 1.0);
+    outSelection = vec4(vec3(vSelected), 1.0);
 }

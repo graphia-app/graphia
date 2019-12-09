@@ -12,14 +12,14 @@ layout (location = 4) in int   component; // The component index
 layout (location = 5) in float size; // The size of the node
 layout (location = 6) in vec3  outerColor; // The outside color of the node
 layout (location = 7) in vec3  innerColor; // The inside color of the node
-layout (location = 8) in vec3  outlineColor; // The outline color of the node
+layout (location = 8) in float selected;
 
 out vec3 position;
 out vec2 uv;
 out vec3 normal;
 out vec3 innerVColor;
 out vec3 outerVColor;
-out vec3 vOutlineColor;
+out float vSelected;
 
 uniform samplerBuffer componentData;
 
@@ -57,7 +57,7 @@ void main()
     normal = normalMatrix * vertexNormal;
     outerVColor = outerColor;
     innerVColor = innerColor;
-    vOutlineColor = outlineColor;
+    vSelected = selected;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 
     // Map 2D UVs to node Hemisphere

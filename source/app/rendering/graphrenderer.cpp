@@ -245,13 +245,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._innerColor[0] = nodeVisual._innerColor.redF();
             nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
             nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
-
-            QColor outlineColor = nodeVisual._state.test(VisualFlags::Selected) ?
-                Qt::white : Qt::black;
-
-            nodeData._outlineColor[0] = outlineColor.redF();
-            nodeData._outlineColor[1] = outlineColor.greenF();
-            nodeData._outlineColor[2] = outlineColor.blueF();
+            nodeData._selected = nodeVisual._state.test(VisualFlags::Selected) ? 1.0f : 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
                 nodeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);
@@ -329,10 +323,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._innerColor[0] = edgeVisual._innerColor.redF();
             edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
             edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
-
-            edgeData._outlineColor[0] = 0.0f;
-            edgeData._outlineColor[1] = 0.0f;
-            edgeData._outlineColor[2] = 0.0f;
+            edgeData._selected = 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
                 edgeVisual._state.test(VisualFlags::Unhighlighted) ? UnhighlightedAlpha : 1.0f);

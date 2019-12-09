@@ -60,7 +60,7 @@ struct GPUGraphData : OpenGLFunctions
         float _size = -1.0f;
         float _outerColor[3] = {0.0f, 0.0f, 0.0f};
         float _innerColor[3] = {0.0f, 0.0f, 0.0f};
-        float _outlineColor[3] = {0.0f, 0.0f, 0.0f};
+        float _selected = 0.0f;
     };
 
     struct EdgeData
@@ -74,7 +74,7 @@ struct GPUGraphData : OpenGLFunctions
         float _size = -1.0f;
         float _outerColor[3] = {0.0f, 0.0f, 0.0f};
         float _innerColor[3] = {0.0f, 0.0f, 0.0f};
-        float _outlineColor[3] = {0.0f, 0.0f, 0.0f};
+        float _selected = 0.0f;
     };
 
     struct GlyphData

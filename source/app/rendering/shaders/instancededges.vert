@@ -15,13 +15,13 @@ layout (location = 8) in int    component; // The component index
 layout (location = 9)  in float size; // The size of the edge
 layout (location = 10) in vec3  outerColor; // The outside color of the edge
 layout (location = 11) in vec3  innerColor; // The inside color of the edge (used for multi edges)
-layout (location = 12) in vec3  outlineColor; // The outline color of the node
+layout (location = 12) in float selected;
 
 out vec3 position;
 out vec3 normal;
 out vec3 innerVColor;
 out vec3 outerVColor;
-out vec3 vOutlineColor;
+out float vSelected;
 out vec2 uv;
 
 uniform samplerBuffer componentData;
@@ -134,6 +134,6 @@ void main()
     normal = normalMatrix * scaledVertexNormal;
     innerVColor = innerColor;
     outerVColor = outerColor;
-    vOutlineColor = outlineColor;
+    vSelected = selected;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 }

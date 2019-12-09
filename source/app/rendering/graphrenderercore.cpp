@@ -134,20 +134,20 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("size");
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
-    shader.enableAttributeArray("outlineColor");
+    shader.enableAttributeArray("selected");
     shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),     3,         sizeof(NodeData));
     glVertexAttribIPointer(shader.attributeLocation("component"),                          1, GL_INT, sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component))); // NOLINT
     shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),         1,         sizeof(NodeData));
     shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),   3,         sizeof(NodeData));
     shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),   3,         sizeof(NodeData));
-    shader.setAttributeBuffer("outlineColor", GL_FLOAT, offsetof(NodeData, _outlineColor), 3,         sizeof(NodeData));
+    shader.setAttributeBuffer("selected",     GL_FLOAT, offsetof(NodeData, _selected),     1,         sizeof(NodeData));
     glVertexAttribDivisor(shader.attributeLocation("nodePosition"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("component"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("size"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("innerColor"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("outerColor"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("outlineColor"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("component"),    1);
+    glVertexAttribDivisor(shader.attributeLocation("size"),         1);
+    glVertexAttribDivisor(shader.attributeLocation("innerColor"),   1);
+    glVertexAttribDivisor(shader.attributeLocation("outerColor"),   1);
+    glVertexAttribDivisor(shader.attributeLocation("selected"),     1);
     _nodeVBO.release();
 
     shader.release();
@@ -169,7 +169,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("size");
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
-    shader.enableAttributeArray("outlineColor");
+    shader.enableAttributeArray("selected");
     shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition),  3,         sizeof(EdgeData));
     shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition),  3,         sizeof(EdgeData));
     shader.setAttributeBuffer("sourceSize",     GL_FLOAT, offsetof(EdgeData, _sourceSize),      1,         sizeof(EdgeData));
@@ -181,7 +181,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),            1,         sizeof(EdgeData));
     shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,         sizeof(EdgeData));
     shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,         sizeof(EdgeData));
-    shader.setAttributeBuffer("outlineColor",   GL_FLOAT, offsetof(EdgeData, _outlineColor),    3,         sizeof(EdgeData));
+    shader.setAttributeBuffer("selected",       GL_FLOAT, offsetof(EdgeData, _selected),        1,         sizeof(EdgeData));
     glVertexAttribDivisor(shader.attributeLocation("sourcePosition"),   1);
     glVertexAttribDivisor(shader.attributeLocation("targetPosition"),   1);
     glVertexAttribDivisor(shader.attributeLocation("sourceSize"),       1);
@@ -191,7 +191,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(shader.attributeLocation("size"),             1);
     glVertexAttribDivisor(shader.attributeLocation("outerColor"),       1);
     glVertexAttribDivisor(shader.attributeLocation("innerColor"),       1);
-    glVertexAttribDivisor(shader.attributeLocation("outlineColor"),     1);
+    glVertexAttribDivisor(shader.attributeLocation("selected"),         1);
     _edgeVBO.release();
 
     shader.release();
