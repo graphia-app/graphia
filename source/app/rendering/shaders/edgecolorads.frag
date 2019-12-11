@@ -23,7 +23,7 @@ uniform MaterialInfo material;
 uniform float flatness;
 
 flat in uint element;
-in vec3 position;
+in vec3 vPosition;
 in vec3 vNormal;
 in vec3 innerVColor;
 in vec3 outerVColor;
@@ -82,7 +82,7 @@ void main()
     vec3 fragColor = mix(innerVColor, outerVColor, 1.0 - stepMix);
     vec3 normal = normalize(vNormal);
     vec3 color = (flatness * fragColor) +
-        ((1.0 - flatness) * adsModel(position, normal, fragColor));
+        ((1.0 - flatness) * adsModel(vPosition, normal, fragColor));
 
     outColor = vec4(color, 1.0);
     outElement = element;

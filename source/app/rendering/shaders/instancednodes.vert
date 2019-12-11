@@ -15,7 +15,7 @@ layout (location = 7) in vec3  innerColor; // The inside color of the node
 layout (location = 8) in float selected;
 
 flat out uint element;
-out vec3 position;
+out vec3 vPosition;
 out vec2 uv;
 out vec3 vNormal;
 out vec3 innerVColor;
@@ -81,19 +81,22 @@ void main()
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix)));
 
-    position = (modelViewMatrix * vec4(nodePosition + (vertexPosition * size), 1.0)).xyz;
     vNormal = normalMatrix * vertexNormal;
     outerVColor = outerColor;
     innerVColor = innerColor;
     vSelected = selected;
-    gl_Position = projectionMatrix * vec4(position, 1.0);
+
+    vec3 nodeVertexPosition = nodePosition + (vertexPosition * size);
+    vec3 nodeVertexPositionViewSpace = vPosition =
+        (modelViewMatrix * vec4(nodeVertexPosition, 1.0)).xyz;
+    gl_Position = projectionMatrix * vec4(nodeVertexPositionViewSpace, 1.0);
 
     // Map 2D UVs to node Hemisphere
     // Create orientation matrix based on vector from eyespace nodePosition
     // This keeps the node "facing" the camera
     vec3 eyeNodeCentre = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
-    mat4 perspectiveOrientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCentre));
-    vec4 eyeNodeNormal = perspectiveOrientationMatrix * vec4(vNormal, 1.0);
+    mat4 orientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCentre));
+    vec4 eyeNodeNormal = orientationMatrix * vec4(vNormal, 1.0);
 
     // Project hemisphere normal to UVs
     uv = vec2(0.5 + asin(eyeNodeNormal.x) / PI, 0.5 + asin(eyeNodeNormal.y) / PI);

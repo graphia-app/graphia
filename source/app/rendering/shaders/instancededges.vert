@@ -8,7 +8,7 @@ layout (location = 3) in vec3   sourcePosition; // The position of the source no
 layout (location = 4) in vec3   targetPosition; // The position of the target node
 layout (location = 5) in float  sourceSize; // The size of the source node
 layout (location = 6) in float  targetSize; // The size of the target node
-layout (location = 7) in int    edgeType; // The size of the target node
+layout (location = 7) in int    edgeType; // The type of the edge
 
 layout (location = 8) in int    component; // The component index
 
@@ -18,7 +18,7 @@ layout (location = 11) in vec3  innerColor; // The inside color of the edge (use
 layout (location = 12) in float selected;
 
 flat out uint element;
-out vec3 position;
+out vec3 vPosition;
 out vec3 vNormal;
 out vec3 innerVColor;
 out vec3 outerVColor;
@@ -90,7 +90,7 @@ void main()
     element = uint(gl_InstanceID) + (1u << 31);
 
     float edgeLength = distance(sourcePosition, targetPosition);
-    float realLength = edgeLength - (sourceSize + targetSize);
+    float edgeLengthMinusNodeRadii = edgeLength - (sourceSize + targetSize);
     vec3 midpoint = mix(sourcePosition, targetPosition, 0.5);
     mat4 orientationMatrix = makeOrientationMatrix(normalize(targetPosition - sourcePosition));
 
@@ -104,23 +104,23 @@ void main()
     lightOffset = floatFromComponentData(32);
     lightScale = floatFromComponentData(33);
 
+    vec3 edgeVertexPosition = vec3(0.0);
+
     // Cylinder Edge
     if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
     {
-        // Hide head vertices
-        position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        // These vertices form the cone of the arrow mesh, which we
+        // don't want to render at all, when in cylinder mode
     }
     else if(edgeType == 0 && vertexPosition.y > 0.0)
     {
         // Reposition the top of the cylinder to the target
         vec3 scaledVertexPosition = vertexPosition;
-        scaledVertexPosition.y = 0.5;
         scaledVertexPosition.xz *= size;
-        scaledVertexPosition.y *= edgeLength;
-        uv = vec2(0.0, (scaledVertexPosition.y / realLength) + 0.5);
+        scaledVertexPosition.y = (edgeLength * 0.5);
+        uv = vec2(0.0, (scaledVertexPosition.y / edgeLengthMinusNodeRadii) + 0.5);
 
-        position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
-        position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
+        edgeVertexPosition = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz + midpoint;
     }
     // Arrow Head Edge
     else if(edgeType == 1 && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
@@ -137,13 +137,12 @@ void main()
         if(abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)
             conePosition.y = -edgeLength * MAX_ARROW_HEAD_LENGTH;
 
-        uv = vec2(0.0, 1.0 + ((conePosition.y) / realLength));
+        uv = vec2(0.0, 1.0 + ((conePosition.y) / edgeLengthMinusNodeRadii));
 
         // Offset cone position to point at edge of node
         conePosition.y -= targetSize;
 
-        position = (orientationMatrix * vec4(conePosition, 1.0)).xyz;
-        position = (modelViewMatrix * vec4(targetPosition + position, 1.0)).xyz;
+        edgeVertexPosition = (orientationMatrix * vec4(conePosition, 1.0)).xyz + targetPosition;
     }
     else
     {
@@ -152,16 +151,18 @@ void main()
         scaledVertexPosition.xz *= size;
         scaledVertexPosition.y *= edgeLength;
 
-        uv = vec2(0.0, -sourceSize / realLength);
+        uv = vec2(0.0, -sourceSize / edgeLengthMinusNodeRadii);
 
-        position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
-        position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
+        edgeVertexPosition = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz + midpoint;
     }
+
+    vec3 edgeVertexPositionViewSpace = vPosition =
+        (modelViewMatrix * vec4(edgeVertexPosition, 1.0)).xyz;
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix * orientationMatrix)));
     vNormal = normalMatrix * scaledVertexNormal;
     innerVColor = innerColor;
     outerVColor = outerColor;
     vSelected = selected;
-    gl_Position = projectionMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * vec4(edgeVertexPositionViewSpace, 1.0);
 }
