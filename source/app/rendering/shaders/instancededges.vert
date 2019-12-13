@@ -26,6 +26,7 @@ out float vSelected;
 out vec2 uv;
 out float lightOffset;
 out float lightScale;
+out float projectionScale;
 
 uniform samplerBuffer componentData;
 uniform int componentDataElementSize;
@@ -82,6 +83,14 @@ float floatFromComponentData(int offset)
 {
     int index = componentDataOffset() + offset;
     return texelFetch(componentData, index).r;
+}
+
+float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
+{
+    vec4 a = p * vec4(position.x + extent, position.y, position.z, 1.0);
+    vec4 b = p * vec4(position.x - extent, position.y, position.z, 1.0);
+
+    return abs((a.x / a.w) - (b.x / b.w)) / 2.0;
 }
 
 void main()
@@ -165,4 +174,8 @@ void main()
     outerVColor = outerColor;
     vSelected = selected;
     gl_Position = projectionMatrix * vec4(edgeVertexPositionViewSpace, 1.0);
+
+    float normalisedPositionAlongEdge = vertexPosition.y + 0.5;
+    projectionScale = approxProjectionScaleFor(edgeVertexPositionViewSpace,
+        mix(sourceSize, targetSize, normalisedPositionAlongEdge), projectionMatrix);
 }

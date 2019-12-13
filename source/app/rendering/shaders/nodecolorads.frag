@@ -32,10 +32,11 @@ in vec3 vOutlineColor;
 in vec2 uv;
 in float lightOffset;
 in float lightScale;
+in float projectionScale;
 
-layout (location = 0) out vec4 outColor;
-layout (location = 1) out uint outElement;
-layout (location = 2) out vec4 outSelection;
+layout (location = 0) out vec4  outColor;
+layout (location = 1) out uvec2 outElement;
+layout (location = 2) out vec4  outSelection;
 
 vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
 {
@@ -89,6 +90,7 @@ void main()
         ((1.0 - flatness) * adsModel(vPosition, normal, fragColor));
 
     outColor = vec4(color, 1.0);
-    outElement = element;
+    outElement.r = element;
+    outElement.g = uint(projectionScale * 0xFFFFFFFFu);
     outSelection = vec4(vec3(vSelected), 1.0);
 }

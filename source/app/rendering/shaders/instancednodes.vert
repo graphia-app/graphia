@@ -23,6 +23,7 @@ out vec3 outerVColor;
 out float vSelected;
 out float lightOffset;
 out float lightScale;
+out float projectionScale;
 
 uniform samplerBuffer componentData;
 uniform int componentDataElementSize;
@@ -70,6 +71,14 @@ float floatFromComponentData(int offset)
     return texelFetch(componentData, index).r;
 }
 
+float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
+{
+    vec4 a = p * vec4(position.x + extent, position.y, position.z, 1.0);
+    vec4 b = p * vec4(position.x - extent, position.y, position.z, 1.0);
+
+    return abs((a.x / a.w) - (b.x / b.w)) / 2.0;
+}
+
 void main()
 {
     element = uint(gl_InstanceID);
@@ -100,4 +109,7 @@ void main()
 
     // Project hemisphere normal to UVs
     uv = vec2(0.5 + asin(eyeNodeNormal.x) / PI, 0.5 + asin(eyeNodeNormal.y) / PI);
+
+    projectionScale = approxProjectionScaleFor(nodeVertexPositionViewSpace,
+        size, projectionMatrix);
 }

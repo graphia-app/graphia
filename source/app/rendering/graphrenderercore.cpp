@@ -208,9 +208,9 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
 
 bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples)
 {
-    setupTexture(this, _colorTexture,     width, height, GL_RGBA,  numMultiSamples);
-    setupTexture(this, _elementTexture,   width, height, GL_R32UI, numMultiSamples);
-    setupTexture(this, _selectionTexture, width, height, GL_RGBA,  numMultiSamples);
+    setupTexture(this, _colorTexture,     width, height, GL_RGBA,   numMultiSamples);
+    setupTexture(this, _elementTexture,   width, height, GL_RG32UI, numMultiSamples);
+    setupTexture(this, _selectionTexture, width, height, GL_RGBA,   numMultiSamples);
 
     if(_fbo == 0)
         glGenFramebuffers(1, &_fbo);
@@ -250,7 +250,7 @@ void GPUGraphData::clearFramebuffer(GLbitfield buffers)
     glClear(buffers);
 
     glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    GLuint elementClearColor[] = {std::numeric_limits<GLuint>::max()};
+    GLuint elementClearColor[] = {std::numeric_limits<GLuint>::max(), 0u};
     glClearBufferuiv(GL_COLOR, 0, elementClearColor);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -815,10 +815,12 @@ void GraphRendererCore::render2D(QRect selectionRect)
     glEnable(GL_DEPTH_TEST);
 }
 
-static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, GLuint texture, float alpha)
+static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, GLuint texture,
+    float alpha, bool disableAlphaBlending = false)
 {
     shader.bind();
     shader.setUniformValue("alpha", alpha);
+    shader.setUniformValue("disableAlphaBlending", disableAlphaBlending);
     f.glActiveTexture(GL_TEXTURE0);
     f.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
     f.glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -874,9 +876,13 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
         if(type.test(GraphRendererCore::Type::Color))
         {
+            bool disableAlphaBlending =
+                _shading == Shading::Flat && !graphData._isOverlay;
+
             render2DComposite(*this, _screenShader,
                 graphData._colorTexture,
-                graphData.alpha());
+                graphData.alpha(),
+                disableAlphaBlending);
 
             if(_shading == Shading::Flat)
             {

@@ -7,6 +7,7 @@ layout (location = 0) out vec4 fragColor;
 uniform sampler2DMS frameBufferTexture;
 uniform int multisamples;
 uniform float alpha;
+uniform int disableAlphaBlending;
 
 vec4 multisampledValue(ivec2 coord)
 {
@@ -20,19 +21,20 @@ vec4 multisampledValue(ivec2 coord)
         if(texel.a > 0.0)
         {
             rgb += texel.rgb;
-            a += texel.a;
+            a += (texel.a / multisamples);
             numTexels++;
         }
     }
 
-    vec4 color = vec4(rgb / numTexels, a / multisamples);
-    color.a *= alpha;
+    if(disableAlphaBlending != 0 && numTexels > 0)
+        a = 1.0;
 
-    return color;
+    return vec4(rgb / numTexels, a);
 }
 
 void main()
 {
     ivec2 coord = ivec2(vPosition);
-    fragColor = multisampledValue(coord);
+    vec4 color = multisampledValue(coord);
+    fragColor = vec4(color.rgb, color.a * alpha);
 }
