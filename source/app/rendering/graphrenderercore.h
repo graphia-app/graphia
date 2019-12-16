@@ -95,7 +95,7 @@ struct GPUGraphData : OpenGLFunctions
     float _componentAlpha = 0.0f;
     float _unhighlightAlpha = 0.0f;
 
-    bool _alwaysDrawnLast = false;
+    bool _isOverlay = false;
 
     std::vector<NodeData> _nodeData;
     QOpenGLBuffer _nodeVBO;

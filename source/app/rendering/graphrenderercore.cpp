@@ -223,7 +223,7 @@ void GPUGraphData::reset()
 {
     _componentAlpha = 0.0f;
     _unhighlightAlpha = 0.0f;
-    _alwaysDrawnLast = false;
+    _isOverlay = false;
     _nodeData.clear();
     _edgeData.clear();
     _glyphData.clear();
@@ -304,7 +304,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
 {
     _componentAlpha = gpuGraphData._componentAlpha;
     _unhighlightAlpha = gpuGraphData._unhighlightAlpha;
-    _alwaysDrawnLast = gpuGraphData._alwaysDrawnLast;
+    _isOverlay = gpuGraphData._isOverlay;
     _nodeData = gpuGraphData._nodeData;
     _glyphData = gpuGraphData._glyphData;
     _edgeData = gpuGraphData._edgeData;
@@ -519,11 +519,11 @@ GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
         {
             gpuGraphData._componentAlpha = alpha;
             gpuGraphData._unhighlightAlpha = 1.0f;
-            gpuGraphData._alwaysDrawnLast = true;
+            gpuGraphData._isOverlay = true;
             return &gpuGraphData;
         }
 
-        if(gpuGraphData._alwaysDrawnLast)
+        if(gpuGraphData._isOverlay)
             return &gpuGraphData;
     }
 
@@ -531,7 +531,7 @@ GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
     for(auto& gpuGraphData : _gpuGraphData)
     {
         qWarning() << "  " << gpuGraphData._componentAlpha <<
-            gpuGraphData._unhighlightAlpha << gpuGraphData._alwaysDrawnLast;
+            gpuGraphData._unhighlightAlpha << gpuGraphData._isOverlay;
     }
 
     return nullptr;
@@ -609,8 +609,8 @@ std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
         const auto& ggda = _gpuGraphData.at(a);
         const auto& ggdb = _gpuGraphData.at(b);
 
-        if(ggda._alwaysDrawnLast != ggdb._alwaysDrawnLast)
-            return ggdb._alwaysDrawnLast;
+        if(ggda._isOverlay != ggdb._isOverlay)
+            return ggdb._isOverlay;
 
         if(ggda._componentAlpha == ggdb._componentAlpha)
             return ggda._unhighlightAlpha > ggdb._unhighlightAlpha;
