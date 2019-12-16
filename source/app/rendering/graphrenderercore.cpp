@@ -609,8 +609,8 @@ std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
         const auto& ggda = _gpuGraphData.at(a);
         const auto& ggdb = _gpuGraphData.at(b);
 
-        if(ggda._alwaysDrawnLast && !ggdb._alwaysDrawnLast)
-            return false;
+        if(ggda._alwaysDrawnLast != ggdb._alwaysDrawnLast)
+            return ggdb._alwaysDrawnLast;
 
         if(ggda._componentAlpha == ggdb._componentAlpha)
             return ggda._unhighlightAlpha > ggdb._unhighlightAlpha;
