@@ -220,7 +220,7 @@ void GraphRenderer::updateGPUDataIfRequired()
         if(!componentRenderer->visible())
             continue;
 
-        const float UnhighlightedAlpha = 0.15f;
+        const float UnhighlightedAlpha = 0.22f;
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
