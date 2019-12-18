@@ -96,6 +96,18 @@ float edgeStrengthAt(ivec2 coord)
 
             if(s != quantOfMSFor(coord + ivec2(i, j), 0))
                 numDiffPixels += 1.0;
+        }
+    }
+
+    if(numDiffPixels == 0.0)
+        discard;
+
+    for(int i = -1; i <= 1; i++)
+    {
+        for(int j = -1; j <= 1; j++)
+        {
+            if(i == 0 && j == 0)
+                continue;
 
             float p = float(meanOfNonZeroMSFor(coord + ivec2(i, j), 1));
 
