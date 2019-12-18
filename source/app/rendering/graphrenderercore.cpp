@@ -728,12 +728,11 @@ void GraphRendererCore::renderGraph()
         glEnable(GL_SAMPLE_SHADING_ARB);
     }
 
-    for(auto& gpuGraphData : _gpuGraphData)
-        gpuGraphData.clearFramebuffer();
-
     for(auto i : gpuGraphDataRenderOrder())
     {
         auto& gpuGraphData = _gpuGraphData.at(i);
+
+        gpuGraphData.clearFramebuffer();
 
         // Clear the depth buffer, but only when we're about to render graph elements
         // that are found, so that subsequent render passes of not highlighted elements
