@@ -52,6 +52,8 @@ struct GPUGraphData : OpenGLFunctions
     float unhighlightAlpha() const;
 
     bool unused() const;
+    bool empty() const;
+    bool invisible() const;
 
     struct NodeData
     {

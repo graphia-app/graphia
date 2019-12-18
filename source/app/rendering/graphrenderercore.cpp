@@ -297,6 +297,16 @@ bool GPUGraphData::unused() const
     return _componentAlpha == 0.0f && _unhighlightAlpha == 0.0f;
 }
 
+bool GPUGraphData::empty() const
+{
+    return _nodeData.empty() && _edgeData.empty() && _glyphData.empty();
+}
+
+bool GPUGraphData::invisible() const
+{
+    return alpha() <= 0.0f || empty();
+}
+
 void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
                                       QOpenGLShaderProgram& nodesShader,
                                       QOpenGLShaderProgram& edgesShader,
@@ -493,15 +503,18 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float alpha1, float alpha2
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
+        if(gpuGraphData._componentAlpha == alpha1 && gpuGraphData._unhighlightAlpha == alpha2)
+            return &gpuGraphData;
+    }
+
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
         if(gpuGraphData.unused())
         {
             gpuGraphData._componentAlpha = alpha1;
             gpuGraphData._unhighlightAlpha = alpha2;
             return &gpuGraphData;
         }
-
-        if(gpuGraphData._componentAlpha == alpha1 && gpuGraphData._unhighlightAlpha == alpha2)
-            return &gpuGraphData;
     }
 
     qWarning() << "Not enough gpuGraphData instances for" << alpha1 << alpha2;
@@ -515,6 +528,12 @@ GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
+        if(gpuGraphData._isOverlay)
+            return &gpuGraphData;
+    }
+
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
         if(gpuGraphData.unused())
         {
             gpuGraphData._componentAlpha = alpha;
@@ -522,9 +541,6 @@ GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
             gpuGraphData._isOverlay = true;
             return &gpuGraphData;
         }
-
-        if(gpuGraphData._isOverlay)
-            return &gpuGraphData;
     }
 
     qWarning() << "Not enough gpuGraphData instances for overlay" << alpha;
@@ -618,8 +634,12 @@ std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
         return ggda._componentAlpha > ggdb._componentAlpha;
     });
 
-    while(!renderOrder.empty() && _gpuGraphData.at(renderOrder.back()).alpha() <= 0.0f)
-        renderOrder.pop_back();
+    // Filter out any invisible layers
+    renderOrder.erase(std::remove_if(renderOrder.begin(), renderOrder.end(),
+    [this](int index)
+    {
+        return _gpuGraphData.at(index).invisible();
+    }), renderOrder.end());
 
     return renderOrder;
 }
