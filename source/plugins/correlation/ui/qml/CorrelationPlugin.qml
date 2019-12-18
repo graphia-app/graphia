@@ -723,15 +723,7 @@ PluginContent
 
     function initialise()
     {
-        var columns = [];
-
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
-        {
-            if(plugin.model.nodeAttributeTableModel.columnIsHiddenByDefault(columnName))
-                columns = Utils.setAdd(columns, columnName);
-        });
-
-        tableView.hiddenColumns = columns;
+        tableView.defaultColumnVisibility();
     }
 
     function save()

@@ -24,6 +24,9 @@ public:
     void initialise(IDocument* document, UserNodeData* userNodeData,
                     std::vector<QString>* dataColumnNames = nullptr,
                     std::vector<double>* dataValues = nullptr);
+    QVariant dataValue(size_t row, int attributeIndex) const override;
+
+    void updateColumnNames() override;
 
     bool columnIsCalculated(const QString& columnName) const override;
     bool columnIsHiddenByDefault(const QString& columnName) const override;

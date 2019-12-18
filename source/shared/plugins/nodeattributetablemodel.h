@@ -29,6 +29,7 @@ private:
     const UserNodeData* _userNodeData = nullptr;
 
     QHash<int, QByteArray> _roleNames;
+    std::vector<const IAttribute*> _attributes;
     std::recursive_mutex _updateMutex;
     std::vector<QString> _columnsRequiringUpdates;
 
@@ -47,14 +48,14 @@ private:
 
 protected:
     virtual QStringList columnNames() const;
-    virtual QVariant dataValue(size_t row, const IAttribute* attributeName) const;
+    virtual QVariant dataValue(size_t row, int attributeIndex) const;
 
     int columnIndexForAttributeValue(const QString& attributeValue);
 private:
     void onColumnAdded(size_t columnIndex);
     void onColumnRemoved(size_t columnIndex);
     void updateAttribute(const QString& attributeName);
-    void updateColumn(int role, const QString& attributeName, Column& column);
+    void updateColumn(int role, Column& column, int attributeIndex = -1);
     void update();
 
 private slots:
@@ -88,7 +89,7 @@ public:
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE virtual bool rowVisible(size_t row) const;
     Q_INVOKABLE virtual QString columnHeaders(size_t column) const;
-    void updateColumnNames();
+    virtual void updateColumnNames();
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);

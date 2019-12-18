@@ -31,6 +31,17 @@ Item
     // Internal name
     property var _nodeAttributesTableModel
 
+    function defaultColumnVisibility()
+    {
+        root._nodeAttributesTableModel.columnNames.forEach(function(columnName, index)
+        {
+            if(plugin.model.nodeAttributeTableModel.columnIsHiddenByDefault(columnName))
+                setColumnVisibil ity(index, false);
+        });
+
+        tableView._updateColumnVisibility();
+    }
+
     function resizeColumnsToContents()
     {
         // Resizing columns to contents is difficult with TableView2. The solution here

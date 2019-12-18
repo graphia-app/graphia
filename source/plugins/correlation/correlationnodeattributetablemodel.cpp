@@ -16,17 +16,40 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
     return list;
 }
 
+QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, int attributeIndex) const
+{
+    if(_dataColumnNames != nullptr && _dataValues != nullptr &&
+        _firstDataColumnRole > 0 && attributeIndex >= _firstDataColumnRole)
+    {
+        size_t column = static_cast<size_t>(attributeIndex) - _firstDataColumnRole;
+        size_t index = (row * _dataColumnNames->size()) + column;
+
+        Q_ASSERT(index < _dataValues->size());
+        return _dataValues->at(index);
+    }
+
+    return NodeAttributeTableModel::dataValue(row, attributeIndex);
+}
+
+void CorrelationNodeAttributeTableModel::updateColumnNames()
+{
+    NodeAttributeTableModel::updateColumnNames();
+
+    if(_dataColumnNames != nullptr && !_dataColumnNames->empty())
+    {
+        auto attributeCount = NodeAttributeTableModel::columnNames().size();
+        _firstDataColumnRole = attributeCount;
+    }
+}
+
 void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
                                                     std::vector<QString>* dataColumnNames,
                                                     std::vector<double>* dataValues)
 {
-    Q_UNUSED(dataColumnNames)
-    Q_UNUSED(dataValues)
-
     //FIXME: effectively disable the functionality this class provides for now, as it's causing
     // too many performance problems with TableView; revisit this when the new TableView is available
-    _dataColumnNames = nullptr;//dataColumnNames;
-    _dataValues = nullptr;//dataValues;
+    _dataColumnNames = dataColumnNames;
+    _dataValues = dataValues;
 
     NodeAttributeTableModel::initialise(document, userNodeData);
 }
