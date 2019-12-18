@@ -42,6 +42,7 @@ struct GPUGraphData : OpenGLFunctions
 
     int numNodes() const;
     int numEdges() const;
+    int numGlyphs() const;
 
     Primitive::Sphere _sphere;
     Primitive::Arrow _arrow;

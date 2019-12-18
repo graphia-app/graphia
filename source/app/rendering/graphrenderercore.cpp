@@ -277,6 +277,11 @@ int GPUGraphData::numEdges() const
     return static_cast<int>(_edgeData.size());
 }
 
+int GPUGraphData::numGlyphs() const
+{
+    return static_cast<int>(_glyphData.size());
+}
+
 float GPUGraphData::alpha() const
 {
     return _componentAlpha * _unhighlightAlpha;
@@ -421,6 +426,9 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
 void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 {
+    if(gpuGraphData.numNodes() == 0)
+        return;
+
     _nodesShader.bind();
     setShaderADSParameters(_nodesShader);
 
@@ -442,6 +450,9 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
 void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 {
+    if(gpuGraphData.numEdges() == 0)
+        return;
+
     _edgesShader.bind();
     setShaderADSParameters(_edgesShader);
 
@@ -463,6 +474,9 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
 void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 {
+    if(gpuGraphData.numGlyphs() == 0)
+        return;
+
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -487,7 +501,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._rectangle.glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, static_cast<int>(gpuGraphData._glyphData.size())) ;
+                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numGlyphs());
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);
