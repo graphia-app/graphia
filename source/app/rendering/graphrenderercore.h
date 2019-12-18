@@ -58,6 +58,8 @@ struct GPUGraphData : OpenGLFunctions
     bool empty() const;
     bool invisible() const;
 
+    bool hasGraphElements() const;
+
     struct NodeData
     {
         float _position[3] = {0.0f, 0.0f, 0.0f};
@@ -110,6 +112,8 @@ struct GPUGraphData : OpenGLFunctions
 
     std::vector<EdgeData> _edgeData;
     QOpenGLBuffer _edgeVBO;
+
+    bool _elementsSelected = false;
 
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;

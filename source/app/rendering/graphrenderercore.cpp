@@ -337,6 +337,11 @@ bool GPUGraphData::invisible() const
     return alpha() <= 0.0f || empty();
 }
 
+bool GPUGraphData::hasGraphElements() const
+{
+    return !_nodeData.empty() || !_edgeData.empty();
+}
+
 void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     QOpenGLShaderProgram& nodesShader,
     QOpenGLShaderProgram& edgesShader,
@@ -348,6 +353,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     _nodeData = gpuGraphData._nodeData;
     _glyphData = gpuGraphData._glyphData;
     _edgeData = gpuGraphData._edgeData;
+    _elementsSelected = gpuGraphData._elementsSelected;
 
     // Cause VBO to be recreated
     _fbo = 0;
@@ -884,7 +890,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
                 graphData.alpha(),
                 disableAlphaBlending);
 
-            if(_shading == Shading::Flat)
+            if(_shading == Shading::Flat && graphData.hasGraphElements())
             {
                 render2DComposite(*this, _outlineShader,
                     graphData._elementTexture,
@@ -892,7 +898,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
             }
         }
 
-        if(type.test(GraphRendererCore::Type::Selection))
+        if(type.test(GraphRendererCore::Type::Selection) && graphData._elementsSelected)
         {
             // Always render the selection outline fully opaque
             // (i.e. the same as the component's alpha)

@@ -254,6 +254,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             {
                 gpuGraphData->_nodeData.push_back(nodeData);
 
+                if(nodeData._selected != 0.0f)
+                    gpuGraphData->_elementsSelected = true;
+
                 if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
@@ -331,6 +334,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(gpuGraphData != nullptr)
             {
                 gpuGraphData->_edgeData.push_back(edgeData);
+
+                if(edgeData._selected != 0.0f)
+                    gpuGraphData->_elementsSelected = true;
 
                 if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
