@@ -122,6 +122,8 @@ public:
     static float maxNodeDistanceFromPoint(const GraphModel& graphModel,
         const QVector3D& centre, const std::vector<NodeId>& nodeIds);
 
+    static QMatrix4x4 subViewportMatrix(QRectF sub, QRect viewport);
+
 private:
     GraphRenderer* _graphRenderer = nullptr;
 
@@ -181,7 +183,6 @@ private:
     GraphModel* _graphModel = nullptr;
     SelectionManager* _selectionManager = nullptr;
 
-    QMatrix4x4 subViewportMatrix() const;
     void updateCameraProjection(Camera& camera);
 
     void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f);

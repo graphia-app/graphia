@@ -183,6 +183,28 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     return maxDistance;
 }
 
+QMatrix4x4 GraphComponentRenderer::subViewportMatrix(QRectF sub, QRect viewport)
+{
+    auto subCentre = sub.center();
+    auto viewportF = QRectF(viewport);
+
+    // The translation values effectively represent the centre of
+    // sub in terms of viewport, using NDC
+    auto xNormalised = (subCentre.x() - viewportF.x()) / viewportF.width();
+    auto yNormalised = (subCentre.y() - viewportF.y()) / viewportF.height();
+    auto xTranslation = (2.0f * xNormalised) - 1.0f;
+    auto yTranslation = (2.0f * yNormalised) - 1.0f;
+
+    QMatrix4x4 m;
+    m.translate(xTranslation, -yTranslation);
+
+    auto xScale = sub.width() / viewportF.width();
+    auto yScale = sub.height() / viewportF.height();
+    m.scale(xScale, yScale);
+
+    return m;
+}
+
 float GraphComponentRenderer::zoomDistanceForRadius(float radius, Projection projection) const
 {
     if(projection == Projection::Unset)
@@ -289,23 +311,6 @@ void GraphComponentRenderer::update(float t)
     }
 }
 
-QMatrix4x4 GraphComponentRenderer::subViewportMatrix() const
-{
-    QMatrix4x4 m;
-
-    float xTranslation = (static_cast<float>(_dimensions.x() * 2.0 + _dimensions.width()) /
-        static_cast<float>(_viewportWidth)) - 1.0f;
-    float yTranslation = (static_cast<float>(_dimensions.y() * 2.0 + _dimensions.height()) /
-        static_cast<float>(_viewportHeight)) - 1.0f;
-    m.translate(xTranslation, -yTranslation);
-
-    float xScale = static_cast<float>(_dimensions.width()) / static_cast<float>(_viewportWidth);
-    float yScale = static_cast<float>(_dimensions.height()) / static_cast<float>(_viewportHeight);
-    m.scale(xScale, yScale);
-
-    return m;
-}
-
 void GraphComponentRenderer::updateCameraProjection(Camera& camera)
 {
     auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
@@ -331,7 +336,8 @@ QMatrix4x4 GraphComponentRenderer::modelViewMatrix() const
 
 QMatrix4x4 GraphComponentRenderer::projectionMatrix() const
 {
-    return subViewportMatrix() * _viewData.camera().projectionMatrix();
+    return subViewportMatrix(_dimensions, {0, 0, _viewportWidth, _viewportHeight}) *
+        _viewData.camera().projectionMatrix();
 }
 
 void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeight)

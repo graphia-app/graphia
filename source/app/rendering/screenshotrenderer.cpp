@@ -13,23 +13,6 @@
 
 static const int TILE_SIZE = 1024;
 
-static QMatrix4x4 subViewportMatrix(QRectF scaledDimensions, QSize screenshotSize)
-{
-    QMatrix4x4 projOffset;
-
-    float xTranslation = (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) /
-        static_cast<float>(screenshotSize.width())) - 1.0f;
-    float yTranslation = (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) /
-        static_cast<float>(screenshotSize.height())) - 1.0f;
-    projOffset.translate(xTranslation, -yTranslation);
-
-    float xScale = static_cast<float>(scaledDimensions.width()) / static_cast<float>(screenshotSize.width());
-    float yScale = static_cast<float>(scaledDimensions.height()) / static_cast<float>(screenshotSize.height());
-    projOffset.scale(xScale, yScale);
-
-    return projOffset;
-}
-
 static QString fetchPreview(QSize screenshotSize)
 {
     int pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
@@ -205,7 +188,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         {
             // Calculate tile projection matrix
             QMatrix4x4 translation;
-            QMatrix4x4 projMatrix;
+            QMatrix4x4 projectionMatrix;
 
             float xTranslation =
                 (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) / TILE_SIZE) -
@@ -218,7 +201,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             float xScale = static_cast<float>(scaledDimensions.width()) / TILE_SIZE;
             float yScale = static_cast<float>(scaledDimensions.height()) / TILE_SIZE;
             translation.scale(xScale, yScale);
-            projMatrix = translation * componentCamera.projectionMatrix();
+            projectionMatrix = translation * componentCamera.projectionMatrix();
 
             // Per-Tile translation for high res screenshots
             float tileWidthRatio = static_cast<float>(TILE_SIZE) / static_cast<float>(screenshotSize.width());
@@ -230,14 +213,15 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             QMatrix4x4 tileTranslation;
             tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);
 
-            projMatrix = tileTranslation * projMatrix;
+            projectionMatrix = tileTranslation * projectionMatrix;
 
             for(int i = 0; i < 16; i++)
-                componentData.push_back(projMatrix.data()[i]);
+                componentData.push_back(projectionMatrix.data()[i]);
         }
         else
         {
-            auto projectionMatrix = subViewportMatrix(scaledDimensions, screenshotSize) * componentCamera.projectionMatrix();
+            auto projectionMatrix = GraphComponentRenderer::subViewportMatrix(scaledDimensions,
+                {{0, 0}, screenshotSize}) * componentCamera.projectionMatrix();
 
             // Normal projection
             for(int i = 0; i < 16; i++)
