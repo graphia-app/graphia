@@ -106,7 +106,6 @@ public:
     static float maxNodeDistanceFromPoint(const GraphModel& graphModel,
                                           const QVector3D& centre,
                                           const std::vector<NodeId>& nodeIds);
-    QRectF dimensions() const;
 
 private:
     GraphRenderer* _graphRenderer = nullptr;

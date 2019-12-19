@@ -31,7 +31,6 @@ private:
     GLuint _sdfTexture = 0;
 
     std::vector<Camera> _componentCameras;
-    std::vector<QRectF> _componentViewports;
 
     GLuint sdfTexture() const override;
 

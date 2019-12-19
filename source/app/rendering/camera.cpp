@@ -23,6 +23,7 @@ Camera::Camera(const Camera& other) :
     _right(other._right),
     _bottom(other._bottom),
     _top(other._top),
+    _viewport(other._viewport),
     _viewMatrix(other._viewMatrix),
     _viewMatrixDirty(other._viewMatrixDirty),
     _viewProjectionMatrixDirty(other._viewProjectionMatrixDirty)
@@ -56,11 +57,12 @@ Camera& Camera::operator=(const Camera& other)
     _right = other._right;
     _bottom = other._bottom;
     _top = other._top;
-    _viewMatrixDirty = other._viewMatrixDirty;
-    _viewProjectionMatrixDirty = other._viewProjectionMatrixDirty;
+    _viewport = other._viewport;
     _viewMatrix = other._viewMatrix;
     _projectionMatrix = other._projectionMatrix;
     _viewProjectionMatrix = other._viewProjectionMatrix;
+    _viewMatrixDirty = other._viewMatrixDirty;
+    _viewProjectionMatrixDirty = other._viewProjectionMatrixDirty;
 
     return *this;
 }
@@ -202,13 +204,13 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result) const
     if(!invertable)
         return false;
 
-    y = _viewportHeight - y;
+    auto invertedY = static_cast<float>(_viewport.height()) - static_cast<float>(y);
 
     QVector4D normalisedCoordinates;
     normalisedCoordinates.setX((static_cast<float>(x) /
-        static_cast<float>(_viewportWidth)) * 2.0f - 1.0f);
-    normalisedCoordinates.setY((static_cast<float>(y) /
-        static_cast<float>(_viewportHeight)) * 2.0f - 1.0f);
+        static_cast<float>(_viewport.width())) * 2.0f - 1.0f);
+    normalisedCoordinates.setY((static_cast<float>(invertedY) /
+        static_cast<float>(_viewport.height())) * 2.0f - 1.0f);
     normalisedCoordinates.setZ(2.0f * static_cast<float>(z) - 1.0f);
     normalisedCoordinates.setW(1.0f);
 

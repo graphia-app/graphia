@@ -53,8 +53,8 @@ public:
     void setPerspectiveProjection(float fieldOfView, float aspectRatio,
                                   float nearPlane, float farPlane);
 
-    void setViewportWidth(int viewportWidth) { _viewportWidth = viewportWidth; }
-    void setViewportHeight(int viewportHeight) { _viewportHeight = viewportHeight; }
+    QRectF viewport() const { return _viewport; }
+    void setViewport(const QRectF& viewport) { _viewport = viewport; }
 
     QMatrix4x4 viewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
@@ -88,8 +88,7 @@ private:
     float _bottom = -0.5f;
     float _top = 0.5f;
 
-    int _viewportWidth = 0;
-    int _viewportHeight = 0;
+    QRectF _viewport;
 
     mutable QMatrix4x4 _viewMatrix;
     mutable QMatrix4x4 _projectionMatrix;

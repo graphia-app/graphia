@@ -179,11 +179,6 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     return maxDistance;
 }
 
-QRectF GraphComponentRenderer::dimensions() const
-{
-    return _dimensions;
-}
-
 float GraphComponentRenderer::zoomDistanceForRadius(float radius) const
 {
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
@@ -332,8 +327,7 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
     _fovx = _fovy * aspectRatio;
 
     _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
-    _viewData._camera.setViewportWidth(_dimensions.width());
-    _viewData._camera.setViewportHeight(_dimensions.height());
+    _viewData._camera.setViewport(_dimensions);
 }
 
 bool GraphComponentRenderer::transitionActive()

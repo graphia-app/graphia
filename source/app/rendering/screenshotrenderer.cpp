@@ -179,8 +179,8 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 
     for(size_t componentIndex = 0; componentIndex < _componentCameras.size(); componentIndex++)
     {
-        Camera& componentCamera = _componentCameras.at(componentIndex);
-        QRectF& componentViewport = _componentViewports.at(componentIndex);
+        Camera componentCamera = _componentCameras.at(componentIndex);
+        QRectF componentViewport = componentCamera.viewport();
 
         // Scaling the X pos by Y scale will position components correctly relative to each other
         // but the centres of viewportsize and screenshotsize will not align. We need to shift the
@@ -193,12 +193,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         scaledDimensions.setWidth(componentViewport.width() * scaleY);
         scaledDimensions.setHeight(componentViewport.height() * scaleY);
 
-        float aspectRatio =
-            static_cast<float>(scaledDimensions.width()) / static_cast<float>(scaledDimensions.height());
-        auto fovy = 60.0f;
-        componentCamera.setPerspectiveProjection(fovy, aspectRatio, 0.3f, 50000.0f);
-        componentCamera.setViewportWidth(scaledDimensions.width());
-        componentCamera.setViewportHeight(scaledDimensions.height());
+        componentCamera.setViewport(scaledDimensions);
 
         // Model View
         for(int i = 0; i < 16; i++)
@@ -258,7 +253,6 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
 bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 {
     _componentCameras.clear();
-    _componentViewports.clear();
 
     for(size_t i = 0; i < renderer._gpuGraphData.size(); ++i)
         _gpuGraphData.at(i).copyState(renderer._gpuGraphData.at(i), _nodesShader, _edgesShader, _textShader);
@@ -273,7 +267,6 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
 
         // This order MUST match graphrenderer component order!
         _componentCameras.emplace_back(*componentRenderer->camera());
-        _componentViewports.emplace_back(componentRenderer->dimensions());
     }
 
     // Just copy the SDF texture
