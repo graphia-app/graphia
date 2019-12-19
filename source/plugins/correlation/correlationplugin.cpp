@@ -286,7 +286,7 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
 QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
 {
     QStringList attributeNames;
-    attributeNames.reserve(_graphModel->attributeNames().size());
+    attributeNames.reserve(static_cast<int>(_graphModel->attributeNames().size()));
 
     for(const auto& attributeName : _graphModel->attributeNames())
     {

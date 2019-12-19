@@ -36,7 +36,7 @@ Item
         root._nodeAttributesTableModel.columnNames.forEach(function(columnName, index)
         {
             if(plugin.model.nodeAttributeTableModel.columnIsHiddenByDefault(columnName))
-                setColumnVisibil ity(index, false);
+                setColumnVisibility(index, false);
         });
 
         tableView._updateColumnVisibility();
@@ -945,6 +945,7 @@ Item
                     populateTableMenu(tableView._tableMenu);
 
                     root.resizeColumnsToContents();
+                    tableView._updateColumnVisibility();
                 }
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary

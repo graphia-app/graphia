@@ -21,7 +21,7 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, int attribute
     if(_dataColumnNames != nullptr && _dataValues != nullptr &&
         _firstDataColumnRole > 0 && attributeIndex >= _firstDataColumnRole)
     {
-        size_t column = static_cast<size_t>(attributeIndex) - _firstDataColumnRole;
+        size_t column = static_cast<size_t>(attributeIndex) - static_cast<size_t>(_firstDataColumnRole);
         size_t index = (row * _dataColumnNames->size()) + column;
 
         Q_ASSERT(index < _dataValues->size());

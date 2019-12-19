@@ -75,7 +75,7 @@ int NodeAttributeTableModel::columnIndexForAttributeValue(const QString &attribu
 
 QVariant NodeAttributeTableModel::dataValue(size_t row, int attributeIndex) const
 {
-    Q_ASSERT(attributeIndex < _attributes.size());
+    Q_ASSERT(static_cast<size_t>(attributeIndex) < _attributes.size());
 
     auto attribute = _attributes.at(static_cast<size_t>(attributeIndex));
     if(attribute != nullptr && attribute->isValid())
