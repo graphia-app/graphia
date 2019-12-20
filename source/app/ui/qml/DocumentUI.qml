@@ -2,7 +2,7 @@ import QtQml 2.8
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.2
+import QtQuick.Window 2.13
 import QtQml.Models 2.2
 import QtQuick.Dialogs 1.2
 
@@ -1548,6 +1548,10 @@ Item
                 x = (pluginWindow.screen.width - width) * 0.5
                 y = (pluginWindow.screen.height - height) * 0.5
             }
+
+            //FIXME: For some reason, the runtime complains about versioning if
+            // this property is set statically; possibly that will work in 5.14?
+            pluginWindow.transientParent = null;
         }
     }
 
