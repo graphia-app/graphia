@@ -38,11 +38,10 @@ static QString fetchPreview(QSize screenshotSize)
 
 static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
 {
-    int pixelCount = TILE_SIZE * TILE_SIZE * 4;
-    std::vector<GLubyte> pixels(pixelCount);
-    glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    std::vector<GLubyte> pixelBytes(TILE_SIZE * TILE_SIZE * 4);
+    glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixelBytes.data());
 
-    QImage screenTile(pixels.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
+    QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
     QPainter painter(&fullScreenshot);
     painter.drawImage(tileX * TILE_SIZE, tileY * TILE_SIZE, screenTile.mirrored(false, true));

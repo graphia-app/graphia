@@ -825,7 +825,7 @@ static void render2DComposite(OpenGLFunctions& f, QOpenGLShaderProgram& shader, 
 {
     shader.bind();
     shader.setUniformValue("alpha", alpha);
-    shader.setUniformValue("disableAlphaBlending", disableAlphaBlending);
+    shader.setUniformValue("disableAlphaBlending", disableAlphaBlending ? 1 : 0);
     f.glActiveTexture(GL_TEXTURE0);
     f.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
     f.glDrawArrays(GL_TRIANGLES, 0, 6);

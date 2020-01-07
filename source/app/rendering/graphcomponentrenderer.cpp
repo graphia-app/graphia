@@ -190,8 +190,8 @@ QMatrix4x4 GraphComponentRenderer::subViewportMatrix(QRectF sub, QRect viewport)
 
     // The translation values effectively represent the centre of
     // sub in terms of viewport, using NDC
-    auto xNormalised = (subCentre.x() - viewportF.x()) / viewportF.width();
-    auto yNormalised = (subCentre.y() - viewportF.y()) / viewportF.height();
+    auto xNormalised = static_cast<float>((subCentre.x() - viewportF.x()) / viewportF.width());
+    auto yNormalised = static_cast<float>((subCentre.y() - viewportF.y()) / viewportF.height());
     auto xTranslation = (2.0f * xNormalised) - 1.0f;
     auto yTranslation = (2.0f * yNormalised) - 1.0f;
 
