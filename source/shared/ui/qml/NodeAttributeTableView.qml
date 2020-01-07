@@ -170,15 +170,6 @@ Item
         selectRows(0, proxyModel.rowCount() - 1);
     }
 
-    Label
-    {
-        text: qsTr("No Visible Columns")
-        visible: tableView.columns <= 0
-
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-    }
-
     Preferences
     {
         id: misc
@@ -368,6 +359,7 @@ Item
                     return row > 0 ? 0 : -1;
                 }
                 columnWidthProvider: tableView.columnWidthProvider;
+                visible: tableView.columns != 0
 
                 property var sortIndicatorWidth: 7
                 property var sortIndicatorMargin: 3
@@ -621,6 +613,16 @@ Item
             Layout.fillHeight: true
             Layout.fillWidth: true
 
+            Label
+            {
+                z: 10
+                text: qsTr("No Visible Columns")
+                visible: tableView.columns == 0
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
             TableView
             {
                 id: tableView
@@ -637,7 +639,7 @@ Item
 
                 clip: true
                 interactive: true
-                visible: true
+                visible: tableView.columns != 0
 
                 layer
                 {
