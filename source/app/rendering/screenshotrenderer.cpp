@@ -13,6 +13,13 @@
 
 static const int TILE_SIZE = 1024;
 
+// With some of the post-process fragment shaders, rendering at the edges may
+// cause artefacts. Normally this isn't much of a problem, but when tile rendering,
+// said artefacts show up at every tile boundary. The solution is to overscan the
+// tile slightly, but only use the centre pixels when composing the final image.
+static const int TILE_EXTRA = 2;
+static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
+
 static QString fetchPreview(QSize screenshotSize)
 {
     int pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
@@ -33,7 +40,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
 {
     int pixelCount = TILE_SIZE * TILE_SIZE * 4;
     std::vector<GLubyte> pixels(pixelCount);
-    glReadPixels(0, 0, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
     QImage screenTile(pixels.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
@@ -121,7 +128,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
         }
     }
 
-    if(!resize(TILE_SIZE, TILE_SIZE))
+    if(!resize(TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA))
     {
         qWarning() << "Attempting to render incomplete FBO";
         return;
@@ -173,7 +180,8 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             componentData.push_back(componentCamera.viewMatrix().data()[i]);
 
         auto viewport = (screenshotType == ScreenshotType::Tile) ?
-            QRect(tileX * TILE_SIZE, tileY * TILE_SIZE, TILE_SIZE, TILE_SIZE) :
+            QRect((tileX * TILE_SIZE) - TILE_EXTRA, (tileY * TILE_SIZE) - TILE_EXTRA,
+                TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA) :
             QRect({0, 0}, screenshotSize);
 
         // Projection
