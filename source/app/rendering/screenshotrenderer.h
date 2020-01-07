@@ -38,7 +38,8 @@ private:
     void render();
     bool copyState(const GraphRenderer& renderer);
     void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
-                                QSize viewportSize, int currentTileX=0, int currentTileY=0);
+        QSize viewportSize, int tileX = 0, int tileY = 0);
+
 signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;

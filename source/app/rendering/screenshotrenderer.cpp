@@ -29,7 +29,7 @@ static QString fetchPreview(QSize screenshotSize)
 }
 
 
-static void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int currentTileX, int currentTileY)
+static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
 {
     int pixelCount = TILE_SIZE * TILE_SIZE * 4;
     std::vector<GLubyte> pixels(pixelCount);
@@ -38,9 +38,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, QSize screenshotSize, int 
     QImage screenTile(pixels.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
     QPainter painter(&fullScreenshot);
-    painter.drawImage(currentTileX * TILE_SIZE,
-                      (screenshotSize.height() - TILE_SIZE) - (currentTileY * TILE_SIZE),
-                      screenTile.mirrored(false, true));
+    painter.drawImage(tileX * TILE_SIZE, tileY * TILE_SIZE, screenTile.mirrored(false, true));
 }
 
 ScreenshotRenderer::ScreenshotRenderer()
@@ -132,16 +130,17 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     // Need a pixmap to construct the full image
     auto fullScreenshot = QPixmap(screenshotSize.width(), screenshotSize.height());
 
-    auto tileXCount = std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(this->width()));
-    auto tileYCount = std::ceil(static_cast<float>(screenshotSize.height()) / static_cast<float>(this->height()));
-    for(auto currentTileX = 0; currentTileX < tileXCount; currentTileX++)
+    auto tileXCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(TILE_SIZE)));
+    auto tileYCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.height()) / static_cast<float>(TILE_SIZE)));
+    for(auto tileY = 0; tileY < tileYCount; tileY++)
     {
-        for(auto currentTileY = 0; currentTileY < tileYCount; currentTileY++)
+        for(auto tileX = 0; tileX < tileXCount; tileX++)
         {
-            updateComponentGPUData(ScreenshotType::Tile, screenshotSize, {renderer.width(), renderer.height()},
-                                   currentTileX, currentTileY);
+            updateComponentGPUData(ScreenshotType::Tile, screenshotSize,
+                {renderer.width(), renderer.height()}, tileX, tileY);
+
             render();
-            fetchAndDrawTile(fullScreenshot, screenshotSize, currentTileX, currentTileY);
+            fetchAndDrawTile(fullScreenshot, tileX, tileY);
         }
     }
 
@@ -153,80 +152,37 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
     emit screenshotComplete(image, path);
 }
 
-void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize, QSize viewportSize, int currentTileX, int currentTileY)
+void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
+    QSize viewportSize, int tileX, int tileY)
 {
     std::vector<GLfloat> componentData;
     bool elementSizeSet = false;
 
     // We always scale to the Y axis
-    double scaleY = static_cast<double>(screenshotSize.height()) / viewportSize.height();
+    double scale = static_cast<double>(screenshotSize.height()) / viewportSize.height();
 
     for(const auto& componentCameraAndLighting : _componentCameraAndLightings)
     {
-        Camera componentCamera = componentCameraAndLighting._camera;
-        QRectF componentViewport = componentCamera.viewport();
-
-        // Scaling the X pos by Y scale will position components correctly relative to each other
-        // but the centres of viewportsize and screenshotsize will not align. We need to shift the
-        // components based on the change in the aspect ratio and widths.
-        double scaledXPos = (componentViewport.x() * scaleY);
-        double offsetXToCentre = (0.5 * (screenshotSize.width() - (viewportSize.width() * scaleY)));
-
-        QRectF scaledDimensions;
-        scaledDimensions.setTopLeft({scaledXPos + offsetXToCentre, componentViewport.y() * scaleY});
-        scaledDimensions.setWidth(componentViewport.width() * scaleY);
-        scaledDimensions.setHeight(componentViewport.height() * scaleY);
-
-        componentCamera.setViewport(scaledDimensions);
+        const Camera& componentCamera = componentCameraAndLighting._camera;
+        QRectF componentViewport(
+            componentCamera.viewport().topLeft() * scale,
+            componentCamera.viewport().size() * scale);
 
         // Model View
         for(int i = 0; i < 16; i++)
             componentData.push_back(componentCamera.viewMatrix().data()[i]);
 
+        auto viewport = (screenshotType == ScreenshotType::Tile) ?
+            QRect(tileX * TILE_SIZE, tileY * TILE_SIZE, TILE_SIZE, TILE_SIZE) :
+            QRect({0, 0}, screenshotSize);
+
         // Projection
-        if(screenshotType == ScreenshotType::Tile)
-        {
-            // Calculate tile projection matrix
-            QMatrix4x4 translation;
-            QMatrix4x4 projectionMatrix;
+        auto projectionMatrix = GraphComponentRenderer::subViewportMatrix(componentViewport, viewport) *
+            componentCamera.projectionMatrix();
 
-            float xTranslation =
-                (static_cast<float>(scaledDimensions.x() * 2.0 + scaledDimensions.width()) / TILE_SIZE) -
-                (static_cast<float>(screenshotSize.width()) / TILE_SIZE);
-            float yTranslation =
-                (static_cast<float>(scaledDimensions.y() * 2.0 + scaledDimensions.height()) / TILE_SIZE) -
-                (static_cast<float>(screenshotSize.height()) / TILE_SIZE);
-            translation.translate(xTranslation, -yTranslation);
-
-            float xScale = static_cast<float>(scaledDimensions.width()) / TILE_SIZE;
-            float yScale = static_cast<float>(scaledDimensions.height()) / TILE_SIZE;
-            translation.scale(xScale, yScale);
-            projectionMatrix = translation * componentCamera.projectionMatrix();
-
-            // Per-Tile translation for high res screenshots
-            float tileWidthRatio = static_cast<float>(TILE_SIZE) / static_cast<float>(screenshotSize.width());
-            float tileHeightRatio = static_cast<float>(TILE_SIZE) / static_cast<float>(screenshotSize.height());
-
-            float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * static_cast<float>(currentTileX));
-            float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * static_cast<float>(currentTileY));
-
-            QMatrix4x4 tileTranslation;
-            tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);
-
-            projectionMatrix = tileTranslation * projectionMatrix;
-
-            for(int i = 0; i < 16; i++)
-                componentData.push_back(projectionMatrix.data()[i]);
-        }
-        else
-        {
-            auto projectionMatrix = GraphComponentRenderer::subViewportMatrix(scaledDimensions,
-                {{0, 0}, screenshotSize}) * componentCamera.projectionMatrix();
-
-            // Normal projection
-            for(int i = 0; i < 16; i++)
-                componentData.push_back(projectionMatrix.data()[i]);
-        }
+        // Normal projection
+        for(int i = 0; i < 16; i++)
+            componentData.push_back(projectionMatrix.data()[i]);
 
         // Light centre offset (from camera)
         componentData.push_back(componentCamera.distance());
