@@ -895,7 +895,7 @@ void GraphRenderer::processEventQueue()
             break;
 
         case QEvent::Type::Wheel:
-            _interactor->wheelEvent(wheelEvent->pos() * _devicePixelRatio,
+            _interactor->wheelEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
                 wheelEvent->angleDelta().y());
 
             break;

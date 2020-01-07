@@ -19,7 +19,7 @@
 #include "shared/utils/qmlenum.h"
 
 #include <QObject>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
@@ -211,7 +211,7 @@ private:
 
     QRect _selectionRect;
 
-    QTime _time;
+    QElapsedTimer _time;
     float _lastTime = 0.0f;
     int _sceneUpdateDisabled = 1;
     std::recursive_mutex _sceneUpdateMutex;

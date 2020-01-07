@@ -667,7 +667,7 @@ QCPPaintBufferPixmap::~QCPPaintBufferPixmap()
 QCPPainter *QCPPaintBufferPixmap::startPainting()
 {
   QCPPainter *result = new QCPPainter(&mBuffer);
-  result->setRenderHint(QPainter::HighQualityAntialiasing);
+  result->setRenderHint(QPainter::Antialiasing);
   return result;
 }
 
@@ -856,11 +856,11 @@ QCPPainter *QCPPaintBufferGlFbo::startPainting()
     return 0;
   }
   
-  if (QOpenGLContext::currentContext() != mGlContext.data())
-    mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+  if (QOpenGLContext::currentContext() != mGlContext.toStrongRef())
+    mGlContext.toStrongRef()->makeCurrent(mGlContext.toStrongRef()->surface());
   mGlFrameBuffer->bind();
-  QCPPainter *result = new QCPPainter(mGlPaintDevice.data());
-  result->setRenderHint(QPainter::HighQualityAntialiasing);
+  QCPPainter *result = new QCPPainter(mGlPaintDevice.toStrongRef().data());
+  result->setRenderHint(QPainter::Antialiasing);
   return result;
 }
 
@@ -903,11 +903,11 @@ void QCPPaintBufferGlFbo::clear(const QColor &color)
     return;
   }
   
-  if (QOpenGLContext::currentContext() != mGlContext.data())
-    mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+  if (QOpenGLContext::currentContext() != mGlContext.toStrongRef())
+    mGlContext.toStrongRef()->makeCurrent(mGlContext.toStrongRef()->surface());
   mGlFrameBuffer->bind();
-  mGlContext.data()->functions()->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
-  mGlContext.data()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  mGlContext.toStrongRef()->functions()->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+  mGlContext.toStrongRef()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   mGlFrameBuffer->release();
 }
 
@@ -935,15 +935,15 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
   }
   
   // create new fbo with appropriate size:
-  mGlContext.data()->makeCurrent(mGlContext.data()->surface());
+  mGlContext.toStrongRef()->makeCurrent(mGlContext.toStrongRef()->surface());
   QOpenGLFramebufferObjectFormat frameBufferFormat;
-  frameBufferFormat.setSamples(mGlContext.data()->format().samples());
+  frameBufferFormat.setSamples(mGlContext.toStrongRef()->format().samples());
   frameBufferFormat.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
   mGlFrameBuffer = new QOpenGLFramebufferObject(mSize*mDevicePixelRatio, frameBufferFormat);
-  if (mGlPaintDevice.data()->size() != mSize*mDevicePixelRatio)
-    mGlPaintDevice.data()->setSize(mSize*mDevicePixelRatio);
+  if (mGlPaintDevice.toStrongRef()->size() != mSize*mDevicePixelRatio)
+    mGlPaintDevice.toStrongRef()->setSize(mSize*mDevicePixelRatio);
 #ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
-  mGlPaintDevice.data()->setDevicePixelRatio(mDevicePixelRatio);
+  mGlPaintDevice.toStrongRef()->setDevicePixelRatio(mDevicePixelRatio);
 #endif
 }
 #endif // QCP_OPENGL_FBO
@@ -1105,7 +1105,7 @@ void QCPLayer::setMode(QCPLayer::LayerMode mode)
   {
     mMode = mode;
     if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
+      mPaintBuffer.toStrongRef()->setInvalidated();
   }
 }
 
@@ -1142,14 +1142,14 @@ void QCPLayer::drawToPaintBuffer()
 {
   if (!mPaintBuffer.isNull())
   {
-    if (QCPPainter *painter = mPaintBuffer.data()->startPainting())
+    if (QCPPainter *painter = mPaintBuffer.toStrongRef()->startPainting())
     {
       if (painter->isActive())
         draw(painter);
       else
         qDebug() << Q_FUNC_INFO << "paint buffer returned inactive painter";
       delete painter;
-      mPaintBuffer.data()->donePainting();
+      mPaintBuffer.toStrongRef()->donePainting();
     } else
       qDebug() << Q_FUNC_INFO << "paint buffer returned zero painter";
   } else
@@ -1175,9 +1175,9 @@ void QCPLayer::replot()
   {
     if (!mPaintBuffer.isNull())
     {
-      mPaintBuffer.data()->clear(Qt::transparent);
+      mPaintBuffer.toStrongRef()->clear(Qt::transparent);
       drawToPaintBuffer();
-      mPaintBuffer.data()->setInvalidated(false);
+      mPaintBuffer.toStrongRef()->setInvalidated(false);
       mParentPlot->update();
     } else
       qDebug() << Q_FUNC_INFO << "no valid paint buffer associated with this layer";
@@ -1204,7 +1204,7 @@ void QCPLayer::addChild(QCPLayerable *layerable, bool prepend)
     else
       mChildren.append(layerable);
     if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
+      mPaintBuffer.toStrongRef()->setInvalidated();
   } else
     qDebug() << Q_FUNC_INFO << "layerable is already child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -1223,7 +1223,7 @@ void QCPLayer::removeChild(QCPLayerable *layerable)
   if (mChildren.removeOne(layerable))
   {
     if (!mPaintBuffer.isNull())
-      mPaintBuffer.data()->setInvalidated();
+      mPaintBuffer.toStrongRef()->setInvalidated();
   } else
     qDebug() << Q_FUNC_INFO << "layerable is not child of this layer" << reinterpret_cast<quintptr>(layerable);
 }
@@ -8921,9 +8921,9 @@ void QCPAxis::wheelEvent(QWheelEvent *event)
     return;
   }
   
-  const double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
+  const double wheelSteps = (event->angleDelta() / 120.0).y(); // a single step delta is +/-120 usually
   const double factor = qPow(mAxisRect->rangeZoomFactor(orientation()), wheelSteps);
-  scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->pos().x() : event->pos().y()));
+  scaleRange(factor, pixelToCoord(orientation() == Qt::Horizontal ? event->position().x() : event->position().y()));
   mParentPlot->replot();
 }
 
@@ -14125,7 +14125,7 @@ bool QCustomPlot::removeLayer(QCPLayer *layer)
     setCurrentLayer(targetLayer);
   // invalidate the paint buffer that was responsible for this layer:
   if (!layer->mPaintBuffer.isNull())
-    layer->mPaintBuffer.data()->setInvalidated();
+    layer->mPaintBuffer.toStrongRef()->setInvalidated();
   // remove layer:
   delete layer;
   mLayers.removeOne(layer);
@@ -14162,9 +14162,9 @@ bool QCustomPlot::moveLayer(QCPLayer *layer, QCPLayer *otherLayer, QCustomPlot::
   
   // invalidate the paint buffers that are responsible for the layers:
   if (!layer->mPaintBuffer.isNull())
-    layer->mPaintBuffer.data()->setInvalidated();
+    layer->mPaintBuffer.toStrongRef()->setInvalidated();
   if (!otherLayer->mPaintBuffer.isNull())
-    otherLayer->mPaintBuffer.data()->setInvalidated();
+    otherLayer->mPaintBuffer.toStrongRef()->setInvalidated();
   
   updateLayerIndices();
   return true;
@@ -14723,7 +14723,8 @@ void QCustomPlot::paintEvent(QPaintEvent *event)
   QCPPainter painter(this);
   if (painter.isActive())
   {
-    painter.setRenderHint(QPainter::HighQualityAntialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
+
+    painter.setRenderHint(QPainter::Antialiasing); // to make Antialiasing look good if using the OpenGL graphicssystem
     if (mBackgroundBrush.style() != Qt::NoBrush)
       painter.fillRect(mViewport, mBackgroundBrush);
     drawBackground(&painter);
@@ -14943,7 +14944,7 @@ void QCustomPlot::wheelEvent(QWheelEvent *event)
 {
   emit mouseWheel(event);
   // forward event to layerable under cursor:
-  QList<QCPLayerable*> candidates = layerableListAt(event->pos(), false);
+  QList<QCPLayerable*> candidates = layerableListAt(event->position(), false);
   for (int i=0; i<candidates.size(); ++i)
   {
     event->accept(); // default impl of QCPLayerable's mouse events ignore the event, in that case propagate to next candidate in list
@@ -17899,14 +17900,14 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event)
     if (mRangeZoom != 0)
     {
       double factor;
-      double wheelSteps = event->delta()/120.0; // a single step delta is +/-120 usually
+      double wheelSteps = (event->angleDelta() / 120.0).y(); // a single step delta is +/-120 usually
       if (mRangeZoom.testFlag(Qt::Horizontal))
       {
         factor = qPow(mRangeZoomFactorHorz, wheelSteps);
         for (int i=0; i<mRangeZoomHorzAxis.size(); ++i)
         {
           if (!mRangeZoomHorzAxis.at(i).isNull())
-            mRangeZoomHorzAxis.at(i)->scaleRange(factor, mRangeZoomHorzAxis.at(i)->pixelToCoord(event->pos().x()));
+            mRangeZoomHorzAxis.at(i)->scaleRange(factor, mRangeZoomHorzAxis.at(i)->pixelToCoord(event->position().x()));
         }
       }
       if (mRangeZoom.testFlag(Qt::Vertical))
@@ -17915,7 +17916,7 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event)
         for (int i=0; i<mRangeZoomVertAxis.size(); ++i)
         {
           if (!mRangeZoomVertAxis.at(i).isNull())
-            mRangeZoomVertAxis.at(i)->scaleRange(factor, mRangeZoomVertAxis.at(i)->pixelToCoord(event->pos().y()));
+            mRangeZoomVertAxis.at(i)->scaleRange(factor, mRangeZoomVertAxis.at(i)->pixelToCoord(event->position().y()));
         }
       }
       mParentPlot->replot();
