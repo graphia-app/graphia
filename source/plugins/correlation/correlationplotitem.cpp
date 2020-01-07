@@ -299,9 +299,9 @@ void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
 
 void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
 {
-    auto* newEvent = new QWheelEvent(event->pos(), event->delta(),
-                                     event->buttons(), event->modifiers(),
-                                     event->orientation());
+    auto* newEvent = new QWheelEvent(event->position(), event->globalPosition(), event->pixelDelta(),
+                                     event->angleDelta(), event->buttons(), event->modifiers(), event->phase(),
+                                     event->inverted());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
