@@ -538,7 +538,7 @@ GPUGraphData* GraphRendererCore::gpuGraphDataForAlpha(float componentAlpha, floa
     return nullptr;
 }
 
-GPUGraphData*GraphRendererCore::gpuGraphDataForOverlay(float alpha)
+GPUGraphData* GraphRendererCore::gpuGraphDataForOverlay(float alpha)
 {
     for(auto& gpuGraphData : _gpuGraphData)
     {
