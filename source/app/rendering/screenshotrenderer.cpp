@@ -161,8 +161,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
     QSize viewportSize, int tileX, int tileY)
 {
-    std::vector<GLfloat> componentData;
-    bool elementSizeSet = false;
+    resetGPUComponentData();
 
     // We always scale to the Y axis
     double scale = static_cast<double>(screenshotSize.height()) / viewportSize.height();
@@ -174,40 +173,21 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
             componentCamera.viewport().topLeft() * scale,
             componentCamera.viewport().size() * scale);
 
-        // Model View
-        for(int i = 0; i < 16; i++)
-            componentData.push_back(componentCamera.viewMatrix().data()[i]);
-
         auto viewport = (screenshotType == ScreenshotType::Tile) ?
             QRect((tileX * TILE_SIZE) - TILE_EXTRA, (tileY * TILE_SIZE) - TILE_EXTRA,
                 TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA) :
             QRect({0, 0}, screenshotSize);
 
-        // Projection
         auto projectionMatrix = GraphComponentRenderer::subViewportMatrix(componentViewport, viewport) *
             componentCamera.projectionMatrix();
 
-        // Normal projection
-        for(int i = 0; i < 16; i++)
-            componentData.push_back(projectionMatrix.data()[i]);
-
-        // Light centre offset (from camera)
-        componentData.push_back(componentCamera.distance());
-
-        // Light scale
-        componentData.push_back(componentCameraAndLighting._lightScale);
-
-        if(!elementSizeSet)
-        {
-            setComponentDataElementSize(static_cast<int>(componentData.size()));
-            elementSizeSet = true;
-        }
+        appendGPUComponentData(componentCamera.viewMatrix(),
+            projectionMatrix,
+            componentCamera.distance(),
+            componentCameraAndLighting._lightScale);
     }
 
-    glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
-    glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(),
-                 GL_STATIC_DRAW);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    uploadGPUComponentData();
 }
 
 bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)

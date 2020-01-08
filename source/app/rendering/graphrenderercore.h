@@ -14,6 +14,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QRect>
+#include <QMatrix4x4>
 
 #include <array>
 #include <vector>
@@ -149,7 +150,8 @@ private:
 
     GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
-    int _componentDataElementSize = 0;
+    std::vector<GLfloat> _componentData;
+    size_t _componentDataElementSize = 0;
 
     Shading _shading = Shading::Smooth;
 
@@ -179,8 +181,11 @@ protected:
     void resetGPUGraphData();
     void uploadGPUGraphData();
 
-    GLuint componentDataTBO() const { return _componentDataTBO; }
-    void setComponentDataElementSize(int componentDataElementSize);
+    void resetGPUComponentData();
+    void appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
+        const QMatrix4x4& projectionMatrix,
+        float distance, float lightScale);
+    void uploadGPUComponentData();
 
     Shading shading() const;
     void setShading(Shading shading);

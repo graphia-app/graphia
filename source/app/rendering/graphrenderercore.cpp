@@ -469,7 +469,8 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _nodesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
+    _nodesShader.setUniformValue("componentDataElementSize",
+        static_cast<int>(_componentDataElementSize));
     _nodesShader.setUniformValue("componentData", 0);
 
     _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
@@ -496,7 +497,8 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _edgesShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
+    _edgesShader.setUniformValue("componentDataElementSize",
+        static_cast<int>(_componentDataElementSize));
     _edgesShader.setUniformValue("componentData", 0);
 
     _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
@@ -536,7 +538,8 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    _textShader.setUniformValue("componentDataElementSize", _componentDataElementSize);
+    _textShader.setUniformValue("componentDataElementSize",
+        static_cast<int>(_componentDataElementSize));
     _textShader.setUniformValue("componentData", 1);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
@@ -622,9 +625,37 @@ void GraphRendererCore::uploadGPUGraphData()
     }
 }
 
-void GraphRendererCore::setComponentDataElementSize(int componentDataElementSize)
+void GraphRendererCore::resetGPUComponentData()
 {
-    _componentDataElementSize = componentDataElementSize;
+    _componentData.clear();
+    _componentDataElementSize = 0;
+}
+
+void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
+    const QMatrix4x4& projectionMatrix, float distance, float lightScale)
+{
+    std::vector<double> componentDataElement;
+
+    for(int i = 0; i < 16; i++)
+        componentDataElement.push_back(modelViewMatrix.data()[i]);
+
+    for(int i = 0; i < 16; i++)
+        componentDataElement.push_back(projectionMatrix.data()[i]);
+
+    componentDataElement.push_back(distance);
+    componentDataElement.push_back(lightScale);
+
+    _componentData.insert(_componentData.end(), componentDataElement.begin(), componentDataElement.end());
+
+    Q_ASSERT(_componentDataElementSize == 0 || _componentDataElementSize == componentDataElement.size());
+    _componentDataElementSize = componentDataElement.size();
+}
+
+void GraphRendererCore::uploadGPUComponentData()
+{
+    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
+    glBufferData(GL_TEXTURE_BUFFER, _componentData.size() * sizeof(GLfloat), _componentData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 Shading GraphRendererCore::shading() const

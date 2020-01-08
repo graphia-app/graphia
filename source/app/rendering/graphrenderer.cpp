@@ -382,8 +382,7 @@ void GraphRenderer::updateComponentGPUData()
     // OTOH, it's probably not ever going to be masses of data, so maybe we should
     // just suck it up; need to get a profiler on it and see how long we're spending
     // here transfering the buffer, when there are lots of components
-    std::vector<GLfloat> componentData;
-    bool elementSizeSet = false;
+    resetGPUComponentData();
 
     for(auto& componentRendererRef : _componentRenderers)
     {
@@ -397,30 +396,13 @@ void GraphRenderer::updateComponentGPUData()
         if(!componentRenderer->visible())
             continue;
 
-        // Model View
-        for(int i = 0; i < 16; i++)
-            componentData.push_back(componentRenderer->modelViewMatrix().data()[i]);
-
-        // Projection
-        for(int i = 0; i < 16; i++)
-            componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
-
-        // Light centre offset (from camera)
-        componentData.push_back(componentRenderer->camera()->distance());
-
-        // Light scale
-        componentData.push_back(componentRenderer->lightScale());
-
-        if(!elementSizeSet)
-        {
-            setComponentDataElementSize(static_cast<int>(componentData.size()));
-            elementSizeSet = true;
-        }
+        appendGPUComponentData(componentRenderer->modelViewMatrix(),
+            componentRenderer->projectionMatrix(),
+            componentRenderer->camera()->distance(),
+            componentRenderer->lightScale());
     }
 
-    glBindBuffer(GL_TEXTURE_BUFFER, componentDataTBO());
-    glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    uploadGPUComponentData();
 }
 
 void GraphRenderer::setScene(Scene* scene)
