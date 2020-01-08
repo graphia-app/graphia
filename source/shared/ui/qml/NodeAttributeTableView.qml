@@ -97,8 +97,6 @@ Item
         tableView.forceLayoutSafe();
     }
 
-    signal visibleRowsChanged();
-
     function setColumnVisibility(sourceColumnIndex, columnVisible)
     {
         if(columnVisible)
@@ -615,7 +613,7 @@ Item
 
             Label
             {
-                z: 10
+                z: 3
                 text: qsTr("No Visible Columns")
                 visible: tableView.columns == 0
 
@@ -632,10 +630,9 @@ Item
                 property var currentColumnWidths: []
                 property var currentTotalColumnWidth: 0
                 property var columnWidths: []
-                property var headerColumns: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys())
-                property var visibleColumns: headerColumns
-                signal fetchColumnSizes;
                 property var rowHeight: delegateMetrics.height + 1
+
+                signal fetchColumnSizes;
 
                 clip: true
                 interactive: true
@@ -695,7 +692,7 @@ Item
                         color: sysPalette.dark
                     }
                     minimumSize: 0.1
-                    visible: size != 1.0 && tableView.rows > 0
+                    visible: size < 1.0 && tableView.rows > 0
                 }
 
                 QQC2.ScrollBar.horizontal: QQC2.ScrollBar
@@ -712,7 +709,7 @@ Item
                         color: sysPalette.dark
                     }
                     minimumSize: 0.1
-                    visible: size != 1.0
+                    visible: size < 1.0 && tableView.columns > 0
                 }
 
                 model: TableProxyModel
@@ -735,14 +732,6 @@ Item
                     }
 
                     return calculatedWidth;
-                }
-
-                property var visibleColumnNames:
-                {
-                    var columnNameList = [];
-                    for(var i=0; i<tableView.headerColumns.length; i++)
-                        columnNameList.push(root._nodeAttributesTableModel.columnNames[i])
-                    return columnNameList;
                 }
 
                 function forceLayoutSafe()
@@ -859,7 +848,7 @@ Item
                         width: tableView.width
                         height: parent.height
                         color: systemPalette.highlight;
-                        visible: model.column == (proxyModel.columnCount() - 1) && model.subSelected
+                        visible: (model.column === (proxyModel.columnCount() - 1)) && model.subSelected
                     }
 
                     Rectangle
@@ -962,7 +951,7 @@ Item
                 property var endRow: -1
                 anchors.fill: parent
                 anchors.rightMargin: verticalTableViewScrollBar.width
-                z: 3
+                z: 5
                 hoverEnabled: true
                 visible: !columnSelectionMode
 
@@ -989,21 +978,16 @@ Item
                     var tableItem = tableView.getItem(mouseX, mouseY);
                     if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
+
                     startRow = tableItem.modelRow;
 
                     if(mouse.modifiers & Qt.ShiftModifier)
                     {
                         if(endRow != -1)
-                        {
                             selectRows(startRow, endRow);
-                        }
                     }
-                    else if(mouse.modifiers & Qt.ControlModifier)
-                    {}
-                    else
-                    {
+                    else if(!(mouse.modifiers & Qt.ControlModifier))
                         selectionModel.clear();
-                    }
 
                     endRow = tableItem.modelRow;
                     selectRows(startRow, startRow);
@@ -1046,6 +1030,7 @@ Item
     signal rightClick();
     onRightClick: { contextMenu.popup(); }
 
+    // Helper function to move around elements within an array
     function array_move(arr, old_index, new_index)
     {
         if (new_index >= arr.length) {

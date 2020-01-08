@@ -577,14 +577,6 @@ PluginContent
 
             model: plugin.model.nodeAttributeTableModel
 
-            onVisibleRowsChanged:
-            {
-                selection.clear();
-
-                if(rowCount > 0)
-                    selection.selectAll();
-            }
-
             onSelectedRowsChanged:
             {
                 // If the tableView's selection is less than complete, highlight
