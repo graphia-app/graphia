@@ -119,18 +119,6 @@ void Camera::setRotation(const QQuaternion& rotation)
     }
 }
 
-void Camera::translate(const QVector3D& translation)
-{
-    _focus += translation;
-    _viewMatrixDirty = true;
-}
-
-void Camera::rotate(const QQuaternion& q)
-{
-    _rotation = q * _rotation;
-    _viewMatrixDirty = true;
-}
-
 Camera::ProjectionType Camera::projectionType() const
 {
     return _projectionType;

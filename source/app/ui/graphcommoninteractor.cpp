@@ -316,7 +316,8 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
     auto m = renderer->camera()->viewMatrix();
     m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
-    QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis * m, angle);
+    QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis * m, angle) *
+        renderer->camera()->rotation();
 
     return rotation;
 }
@@ -360,7 +361,7 @@ void GraphCommonInteractor::leftDrag()
         Camera* camera = renderer->camera();
         QQuaternion rotation = mouseMoveToRotation(localPrevCursorPosition(),
             localCursorPosition(), renderer);
-        camera->rotate(rotation);
+        camera->setRotation(rotation);
     }
 }
 

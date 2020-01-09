@@ -316,9 +316,9 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
                 camera->rayForViewportCoordinates(start.x(), start.y()));
     QVector3D curPoint = translationPlane.rayIntersection(
                 camera->rayForViewportCoordinates(end.x(), end.y()));
-    QVector3D translation = prevPoint - curPoint;
+    QVector3D newFocus = camera->focus() + (prevPoint - curPoint);
 
-    camera->translate(translation);
+    camera->setFocus(newFocus);
 }
 
 bool GraphComponentScene::focusedOnNodeAtRadius(NodeId nodeId, float radius) const

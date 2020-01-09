@@ -41,9 +41,6 @@ public:
     void setRotation(const QQuaternion& rotation);
     void setDistance(float distance);
 
-    void translate(const QVector3D& translation);
-    void rotate(const QQuaternion& q);
-
     ProjectionType projectionType() const;
 
     void setOrthographicProjection(float left, float right,
