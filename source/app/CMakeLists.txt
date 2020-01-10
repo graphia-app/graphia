@@ -61,7 +61,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/circle.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/conicalfrustum.h
-    ${CMAKE_CURRENT_LIST_DIR}/maths/constants.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/frustum.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/interpolation.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/line.h

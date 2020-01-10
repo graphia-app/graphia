@@ -4,7 +4,7 @@
 #include <QVector3D>
 
 #include "line.h"
-#include "constants.h"
+#include "shared/utils/constants.h"
 
 #include <vector>
 

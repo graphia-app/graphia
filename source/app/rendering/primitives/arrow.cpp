@@ -1,6 +1,6 @@
 #include "arrow.h"
 
-#include "maths/constants.h"
+#include "shared/utils/constants.h"
 
 #include <cmath>
 #include <QOpenGLShaderProgram>

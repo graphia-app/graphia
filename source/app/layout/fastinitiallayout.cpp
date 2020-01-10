@@ -1,6 +1,6 @@
 #include "fastinitiallayout.h"
 
-#include "maths/constants.h"
+#include "shared/utils/constants.h"
 
 #include <QMatrix4x4>
 #include <QVector4D>
