@@ -10,6 +10,8 @@
 #include "rendering/camera.h"
 #include "rendering/graphcomponentrenderer.h"
 
+#include "shared/utils/utils.h"
+
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
 
@@ -302,22 +304,58 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
     int w = renderer->width();
     int h = renderer->height();
 
-    QVector3D previous = virtualTrackballVector(w, h, prev);
-    QVector3D current = virtualTrackballVector(w, h, cur);
+    QQuaternion rotation;
 
-    QVector3D axis = QVector3D::crossProduct(previous, current).normalized();
+    if(renderer->projection() == Projection::TwoDee)
+    {
+        QPoint centre(w / 2, h / 2);
+        QVector2D previous(prev - centre);
+        QVector2D current(cur - centre);
 
-    float dot = QVector3D::dotProduct(previous, current);
-    float value = dot / (previous.length() * current.length());
-    value = std::clamp(value, -1.0f, 1.0f);
-    float radians = std::acos(value);
-    float angle = -qRadiansToDegrees(radians);
+        auto distanceFromCentre = current.length();
 
-    auto m = renderer->camera()->viewMatrix();
-    m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
+        float radians = std::atan2(previous.y(), previous.x()) -
+            std::atan2(current.y(), current.x());
+        radians = u::normaliseAngle(radians);
+        float angle = qRadiansToDegrees(radians);
 
-    QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis * m, angle) *
-        renderer->camera()->rotation();
+        // Close to the centre of rotation, taper down to a deadzone, thereby
+        // avoiding violent spins due to the vectors being very short
+        const float deadzoneScale = renderer->width() < 200.0f ? renderer->width() / 200.0f : 1.0f;
+        const float deadzoneDistance = 25.0f * deadzoneScale;
+        const float dampingDistance = deadzoneDistance * 2.0f;
+        if(distanceFromCentre < dampingDistance)
+        {
+            auto dampingFactor = distanceFromCentre >= deadzoneDistance ?
+                ((distanceFromCentre - deadzoneDistance) /
+                (dampingDistance - deadzoneDistance)) : 0.0f;
+
+            angle *= dampingFactor;
+        }
+
+        float currentAngle = renderer->camera()->rotation().toEulerAngles().z();
+
+        rotation = QQuaternion::fromAxisAndAngle({0.0f, 0.0f, 1.0f}, currentAngle - angle);
+    }
+    else
+    {
+        QVector3D previous = virtualTrackballVector(w, h, prev);
+        QVector3D current = virtualTrackballVector(w, h, cur);
+
+        QVector3D axis = QVector3D::crossProduct(current, previous).normalized();
+
+        float dot = QVector3D::dotProduct(previous, current);
+        float value = dot / (previous.length() * current.length());
+        value = std::clamp(value, -1.0f, 1.0f);
+        float radians = std::acos(value);
+        float angle = qRadiansToDegrees(radians);
+
+        auto m = renderer->camera()->viewMatrix();
+        m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
+
+        rotation = QQuaternion::fromAxisAndAngle(axis * m, angle) *
+            renderer->camera()->rotation();
+    }
 
     return rotation;
 }
