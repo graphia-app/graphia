@@ -17,6 +17,16 @@ int u::smallestPowerOf2GreaterThan(int x)
     return static_cast<int>(xu + 1);
 }
 
+float u::normaliseAngle(float radians)
+{
+    if(radians > Constants::Pi())
+        radians -= Constants::TwoPi();
+    else if(radians <= -Constants::Pi())
+        radians += Constants::TwoPi();
+
+    return radians;
+}
+
 static void initQtResources()
 {
     Q_INIT_RESOURCE(shared);

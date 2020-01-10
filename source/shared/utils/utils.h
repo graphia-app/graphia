@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "constants.h"
+
 #include <cmath>
 #include <QString>
 
@@ -34,6 +36,8 @@ namespace u
     {
         return !a != !b;
     }
+
+    float normaliseAngle(float radians);
 } // namespace u
 
 #endif // UTILS_H
