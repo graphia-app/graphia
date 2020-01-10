@@ -1178,7 +1178,10 @@ ApplicationWindow
             onCheckedChanged:
             {
                 if(currentDocument !== null && checked)
+                {
                     currentDocument.setProjection(Projection.Perspective);
+                    updateShadingMode(currentDocument);
+                }
             }
         }
 
@@ -1190,7 +1193,25 @@ ApplicationWindow
             onCheckedChanged:
             {
                 if(currentDocument !== null && checked)
+                {
                     currentDocument.setProjection(Projection.Orthographic);
+                    updateShadingMode(currentDocument);
+                }
+            }
+        }
+
+        Action
+        {
+            id: twoDeeProjectionAction
+            text: qsTr("2D")
+            checkable: true
+            onCheckedChanged:
+            {
+                if(currentDocument !== null && checked)
+                {
+                    currentDocument.setProjection(Projection.TwoDee);
+                    updateShadingMode(currentDocument);
+                }
             }
         }
     }
@@ -1202,7 +1223,7 @@ ApplicationWindow
         Action
         {
             id: smoothShadingAction
-            text: qsTr("Smooth")
+            text: qsTr("Smooth Shading")
             checkable: true
             onCheckedChanged:
             {
@@ -1214,7 +1235,7 @@ ApplicationWindow
         Action
         {
             id: flatShadingAction
-            text: qsTr("Flat")
+            text: qsTr("Flat Shading")
             checkable: true
             onCheckedChanged:
             {
@@ -1615,6 +1636,7 @@ ApplicationWindow
             MenuSeparator {}
             MenuItem { action: perspecitveProjectionAction }
             MenuItem { action: orthographicProjectionAction }
+            MenuItem { action: twoDeeProjectionAction }
             MenuSeparator {}
             MenuItem { action: smoothShadingAction }
             MenuItem { action: flatShadingAction }
@@ -1837,6 +1859,16 @@ ApplicationWindow
         }
     }
 
+    function updateShadingMode(document)
+    {
+        switch(document.shading())
+        {
+        default:
+        case Shading.Smooth:    shading.current = smoothShadingAction;  break;
+        case Shading.Flat:      shading.current = flatShadingAction; break;
+        }
+    }
+
     function onDocumentShown(document)
     {
         enrichmentResults.models = document.enrichmentTableModels;
@@ -1846,14 +1878,10 @@ ApplicationWindow
         default:
         case Projection.Perspective:    projection.current = perspecitveProjectionAction;  break;
         case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
+        case Projection.TwoDee:         projection.current = twoDeeProjectionAction; break;
         }
 
-        switch(document.shading())
-        {
-        default:
-        case Shading.Smooth:    shading.current = smoothShadingAction;  break;
-        case Shading.Flat:      shading.current = flatShadingAction; break;
-        }
+        updateShadingMode(document);
     }
 
     onCurrentDocumentChanged:

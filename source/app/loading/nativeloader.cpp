@@ -331,6 +331,9 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
     if(u::contains(jsonBody, "projection"))
         _projection = jsonBody["projection"];
 
+    if(u::contains(jsonBody, "2dshading"))
+        _shading = jsonBody["2dshading"];
+
     if(u::contains(jsonBody, "3dshading"))
         _shading = jsonBody["3dshading"];
 

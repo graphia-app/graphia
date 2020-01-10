@@ -61,8 +61,11 @@ public:
     Projection projection() const;
     void setProjection(Projection projection);
 
-    Shading shading() const;
-    void setShading(Shading shading);
+    Shading shading2D() const;
+    void setShading2D(Shading shading2D);
+
+    Shading shading3D() const;
+    void setShading3D(Shading shading3D);
 
     bool updating() const { return _updating; }
     bool interacting() const { return _interacting; }
@@ -121,7 +124,8 @@ private:
 
     bool _initialised = false;
     Projection _projection = Projection::Perspective;
-    Shading _shading = Shading::Smooth;
+    Shading _shading2D = Shading::Flat;
+    Shading _shading3D = Shading::Smooth;
     mutable bool _interacting = false;
     mutable bool _transitioning = false;
     bool _viewIsReset = true;

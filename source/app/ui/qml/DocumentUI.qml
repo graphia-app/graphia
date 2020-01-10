@@ -528,8 +528,18 @@ Item
     function projection() { return document.projection(); }
     function setProjection(_projection) { document.setProjection(_projection); }
 
-    function shading() { return document.shading(); }
-    function setShading(_shading) { document.setShading(_shading); }
+    function shading()
+    {
+        return projection() === Projection.TwoDee ? document.shading2D() : document.shading3D();
+    }
+
+    function setShading(_shading)
+    {
+        if(projection() === Projection.TwoDee)
+            document.setShading2D(_shading);
+        else
+            document.setShading3D(_shading);
+    }
 
     function availableAttributeNames(elementTypes, valueTypes, skipFlags)
     {

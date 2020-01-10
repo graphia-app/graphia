@@ -68,16 +68,30 @@ void GraphQuickItem::setProjection(Projection projection)
     }
 }
 
-Shading GraphQuickItem::shading() const
+Shading GraphQuickItem::shading2D() const
 {
-    return _shading;
+    return _shading2D;
 }
 
-void GraphQuickItem::setShading(Shading shading)
+void GraphQuickItem::setShading2D(Shading shading2D)
 {
-    if(shading != _shading)
+    if(shading2D != _shading2D)
     {
-        _shading = shading;
+        _shading2D = shading2D;
+        update();
+    }
+}
+
+Shading GraphQuickItem::shading3D() const
+{
+    return _shading3D;
+}
+
+void GraphQuickItem::setShading3D(Shading shading3D)
+{
+    if(shading3D != _shading3D)
+    {
+        _shading3D = shading3D;
         update();
     }
 }

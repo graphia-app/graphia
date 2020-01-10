@@ -162,7 +162,8 @@ bool NativeSaver::save()
     content["layout"] = layout;
 
     content["projection"] = _document->projection();
-    content["3dshading"] = _document->shading();
+    content["2dshading"] = _document->shading2D();
+    content["3dshading"] = _document->shading3D();
 
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());

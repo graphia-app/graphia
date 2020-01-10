@@ -403,8 +403,11 @@ public:
     Q_INVOKABLE int projection() const;
     Q_INVOKABLE void setProjection(int projection);
 
-    Q_INVOKABLE int shading() const;
-    Q_INVOKABLE void setShading(int shading);
+    Q_INVOKABLE int shading2D() const;
+    Q_INVOKABLE void setShading2D(int _shading2D);
+
+    Q_INVOKABLE int shading3D() const;
+    Q_INVOKABLE void setShading3D(int _shading3D);
 
     Q_INVOKABLE void gotoPrevComponent();
     Q_INVOKABLE void gotoNextComponent();
