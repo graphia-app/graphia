@@ -443,17 +443,16 @@ void GraphComponentRenderer::zoomToDistance(float distance)
     _viewData._zoomDistance = _targetZoomDistance = distance;
 }
 
-void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float zoomDistance)
+void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float zoomDistance, QQuaternion rotation)
 {
     if(nodeId.isNull())
         return;
 
-    centrePositionInViewport(_graphModel->nodePositions().get(nodeId), zoomDistance);
+    centrePositionInViewport(_graphModel->nodePositions().get(nodeId), zoomDistance, rotation);
 }
 
 void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
-                                                      float zoomDistance,
-                                                      QQuaternion rotation)
+    float zoomDistance, QQuaternion rotation)
 {
     if(zoomDistance < 0.0f)
     {
@@ -620,10 +619,20 @@ void GraphComponentRenderer::doProjectionTransition()
 
     updateCentreAndZoomDistance();
 
+    QQuaternion rotation = QQuaternion(QVector4D()); // null quaternion
+
+    if(_projection == Projection::TwoDee)
+    {
+        // When moving to 2D mode, rotate to look along the Z axis, so that
+        // there is no perceptible change when the layout is flattened
+        auto delta = QQuaternion::rotationTo(camera()->viewVector(), {0.0f, 0.0f, -1.0f});
+        rotation = delta * camera()->rotation();
+    }
+
     if(_viewData._focusNodeId.isNull())
-        centrePositionInViewport(_viewData._componentCentre);
+        centrePositionInViewport(_viewData._componentCentre, -1.0f, rotation);
     else
-        centreNodeInViewport(_viewData._focusNodeId);
+        centreNodeInViewport(_viewData._focusNodeId, -1.0f, rotation);
 }
 
 bool GraphComponentRenderer::transitionRequired()

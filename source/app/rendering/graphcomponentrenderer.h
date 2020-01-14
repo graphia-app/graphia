@@ -185,7 +185,9 @@ private:
 
     void updateCameraProjection(Camera& camera);
 
-    void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f);
+    void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f,
+        // Odd constructor makes a null quaternion
+        QQuaternion rotation = QQuaternion(QVector4D()));
     void centrePositionInViewport(const QVector3D& focus, float zoomDistance = -1.0f,
         // Odd constructor makes a null quaternion
         QQuaternion rotation = QQuaternion(QVector4D()));
