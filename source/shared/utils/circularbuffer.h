@@ -12,6 +12,13 @@ private:
     size_t _current = 0;
     size_t _next = 0;
 
+    size_t indexToPosition(size_t index) const
+    {
+        Q_ASSERT(_size > 0);
+        auto base = _current - _size + 1;
+        return (base + Size + index) % Size;
+    }
+
 public:
     void push_back(const T& t)
     {
@@ -34,9 +41,12 @@ public:
     // An index of size() - 1 will get the newest T
     const T& at(size_t index) const
     {
-        Q_ASSERT(_size > 0);
-        auto base = _current - _size + 1;
-        return _array.at((base + Size + index) % Size);
+        return _array.at(indexToPosition(index));
+    }
+
+    T& at(size_t index)
+    {
+        return _array.at(indexToPosition(index));
     }
 
     const T& newest() const
