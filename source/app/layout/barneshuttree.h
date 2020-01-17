@@ -51,8 +51,8 @@ public:
 
     void setTheta(float theta) { _theta = theta; }
 
-    template<typename Fn>
-    QVector3D evaluateKernel(const NodePositions& nodePositions, NodeId nodeId, const Fn& kernel) const
+    template<typename KernelFn>
+    QVector3D evaluateKernel(const NodePositions& nodePositions, NodeId nodeId, const KernelFn& kernel) const
     {
         const QVector3D& nodePosition = nodePositions.get(nodeId);
         QVector3D result;
