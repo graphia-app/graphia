@@ -14,12 +14,12 @@ private:
     std::vector<Layout*> _subLayouts;
 
 public:
-    SequenceLayout(const IGraphComponent& graphComponent, NodePositions& positions) :
+    SequenceLayout(const IGraphComponent& graphComponent, NodeLayoutPositions& positions) :
         Layout(graphComponent, positions)
     {}
 
     SequenceLayout(const IGraphComponent& graphComponent,
-                   NodePositions& positions,
+                   NodeLayoutPositions& positions,
                    std::vector<Layout*> subLayouts) :
         Layout(graphComponent, positions), _subLayouts(subLayouts)
     {}

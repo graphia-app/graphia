@@ -47,18 +47,18 @@ private:
     float _scaling;
     int _smoothing;
     const IGraphComponent* _graphComponent;
-    NodePositions* _positions;
+    NodeLayoutPositions* _positions;
 
     virtual void executeReal(bool firstIteration) = 0;
 
 protected:
     const LayoutSettings* _settings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
-    NodePositions& positions() { return *_positions; }
+    NodeLayoutPositions& positions() { return *_positions; }
 
 public:
     Layout(const IGraphComponent& graphComponent,
-           NodePositions& positions,
+           NodeLayoutPositions& positions,
            const LayoutSettings* settings = nullptr,
            Iterative iterative = Iterative::No,
            float scaling = 1.0f,
@@ -134,7 +134,7 @@ public:
 
     virtual QString name() const = 0;
     virtual QString displayName() const = 0;
-    virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) = 0;
+    virtual std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& results) = 0;
 };
 
 class LayoutThread : public QObject
@@ -159,7 +159,7 @@ private:
     std::map<ComponentId, std::unique_ptr<Layout>> _layouts;
     ComponentArray<bool> _executedAtLeastOnce;
 
-    NodePositions _intermediatePositions;
+    NodeLayoutPositions _nodeLayoutPositions;
 
     PerformanceCounter _performanceCounter;
 

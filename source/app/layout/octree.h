@@ -115,7 +115,7 @@ private:
             Q_ASSERT(subVolume._boundingBox.valid());
     }
 
-    void distributeNodesOverSubVolumes(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
+    void distributeNodesOverSubVolumes(const NodeLayoutPositions& nodePositions, const std::vector<NodeId>& nodeIds)
     {
         initialiseSubVolumes();
 
@@ -166,14 +166,14 @@ private:
 
     // The second parameter and superset of _subVolumes[x]._nodeIds are the
     // same, at the point when this is called
-    virtual void initialise(const NodePositions&, const std::vector<NodeId>&) {}
+    virtual void initialise(const NodeLayoutPositions&, const std::vector<NodeId>&) {}
 
 public:
     virtual ~BaseOctree() = default;
 
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }
 
-    void build(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions)
+    void build(const std::vector<NodeId>& nodeIds, const NodeLayoutPositions& nodePositions)
     {
         SCOPE_TIMER_MULTISAMPLES(50)
 
@@ -227,9 +227,9 @@ public:
         }
     }
 
-    void build(const IGraphComponent& graph, const NodePositions& nodePositions)
+    void build(const IGraphComponent& graph, const NodeLayoutPositions& nodePositions)
     {
-        _boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
+        _boundingBox = nodePositions.boundingBox(graph.nodeIds());
         Q_ASSERT(_boundingBox.valid());
         build(graph.nodeIds(), nodePositions);
     }

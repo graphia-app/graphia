@@ -304,7 +304,7 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
     QVector3D pointOnTranslationPlane;
 
     if(!clickedNodeId.isNull())
-        pointOnTranslationPlane = _graphRenderer->graphModel()->nodePositions().getScaledAndSmoothed(clickedNodeId);
+        pointOnTranslationPlane = _graphRenderer->graphModel()->nodePositions().get(clickedNodeId);
     else
         pointOnTranslationPlane = componentRenderer()->focusPosition();
 

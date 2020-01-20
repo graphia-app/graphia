@@ -12,7 +12,7 @@ private:
                       const QVector3D& parentNodePosition, NodeId childNodeId,
                       NodeArray<QVector3D>& directionNodeVectors);
 public:
-    FastInitialLayout(const IGraphComponent& graphComponent, NodePositions& positions)
+    FastInitialLayout(const IGraphComponent& graphComponent, NodeLayoutPositions& positions)
         : Layout(graphComponent, positions)
     {}
 

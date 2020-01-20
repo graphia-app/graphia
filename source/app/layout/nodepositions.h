@@ -4,54 +4,52 @@
 #include "shared/graph/grapharray.h"
 #include "shared/utils/circularbuffer.h"
 #include "maths/boundingsphere.h"
+#include "maths/boundingbox.h"
 
 #include <array>
 #include <mutex>
+#include <thread>
 
 #include <QVector3D>
 
 static const int MAX_SMOOTHING = 8;
 
 class MeanPosition : public CircularBuffer<QVector3D, MAX_SMOOTHING>
-{ public: MeanPosition() { push_back(QVector3D()); } };
+{ public: MeanPosition() { push_back({}); } };
 
 class NodePositions : public NodeArray<MeanPosition>
 {
 private:
-    std::recursive_mutex _mutex;
+    mutable std::recursive_mutex _mutex;
+    mutable std::thread::id _threadId;
+
     float _scale = 1.0f;
     int _smoothing = 1;
+
+protected:
+    const QVector3D& getUnsafe(NodeId nodeId) const;
 
 public:
     using NodeArray::NodeArray;
 
-    std::recursive_mutex& mutex() { return _mutex; }
+    void lock() const;
+    void unlock() const;
+    bool unlocked() const;
+
     void setScale(float scale) { _scale = scale; }
     float scale() const { return _scale; }
+
     void setSmoothing(int smoothing) { Q_ASSERT(smoothing <= MAX_SMOOTHING); _smoothing = smoothing; }
     int smoothing() const { return _smoothing; }
 
-    const QVector3D& get(NodeId nodeId) const;
-    QVector3D getScaledAndSmoothed(NodeId nodeId) const;
-    void set(NodeId nodeId, const QVector3D& position);
-    void setExact(NodeId nodeId, const QVector3D& position);
+    QVector3D get(NodeId nodeId) const;
 
     void update(const NodePositions& other);
 
-    static QVector3D centreOfMass(const NodePositions& nodePositions,
-                                  const std::vector<NodeId>& nodeIds);
-    static QVector3D centreOfMassScaledAndSmoothed(const NodePositions& nodePositions,
-                                                   const std::vector<NodeId>& nodeIds);
+    QVector3D centreOfMass(const std::vector<NodeId>& nodeIds) const;
 
-    static std::vector<QVector3D> positionsVector(const NodePositions& nodePositions,
-                                                  const std::vector<NodeId>& nodeIds);
-    static std::vector<QVector3D> positionsVectorScaled(const NodePositions& nodePositions,
-                                                        const std::vector<NodeId>& nodeIds);
-
-    static BoundingSphere boundingSphere(const NodePositions& nodePositions,
-                                         const std::vector<NodeId>& nodeIds);
-
-    const QVector3D& at(NodeId nodeId) const { return get(nodeId); }
+    // This is only here as NativeSaver requires its interface
+    const QVector3D& at(NodeId nodeId) const;
 
     // Delete base accessors that could be harmful
     MeanPosition& operator[](NodeId nodeId) = delete;
@@ -60,5 +58,28 @@ public:
 };
 
 using ExactNodePositions = NodeArray<QVector3D>;
+
+// This interface is exposed to the Layout algorithms only, giving
+// them a fast interface to getting and setting node positions,
+// without needing to lock
+class NodeLayoutPositions : public NodePositions
+{
+public:
+    using NodePositions::NodePositions;
+    using NodePositions::set;
+
+    // These accessors get and set the raw node positions, i.e. before
+    // they are scaled and/or smoothed
+    const QVector3D& get(NodeId nodeId) const;
+    void set(NodeId nodeId, const QVector3D& position);
+    void set(const std::vector<NodeId>& nodeIds, const ExactNodePositions& nodePositions);
+
+    QVector3D centreOfMass(const std::vector<NodeId>& nodeIds) const;
+    BoundingBox3D boundingBox(const std::vector<NodeId>& nodeIds) const;
+};
+
+// Ensure data members aren't added to NodeLayoutPositions, so that
+// NodePositions::update doesn't slice
+static_assert(sizeof(NodePositions) == sizeof(NodeLayoutPositions));
 
 #endif // NODEPOSITIONS_H

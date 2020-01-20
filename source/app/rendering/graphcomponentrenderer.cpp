@@ -168,7 +168,7 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     float maxDistance = std::numeric_limits<float>::lowest();
     for(auto nodeId : nodeIds)
     {
-        QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
+        QVector3D nodePosition = graphModel.nodePositions().get(nodeId);
         auto& nodeVisual = graphModel.nodeVisual(nodeId);
         float distance = (centre - nodePosition).length() + nodeVisual._size;
 
@@ -197,8 +197,7 @@ void GraphComponentRenderer::updateFocusPosition()
 
     auto component = _graphModel->graph().componentById(_componentId);
     Q_ASSERT(component != nullptr);
-    _viewData._focusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
-                                                                            component->nodeIds());
+    _viewData._focusPosition = _graphModel->nodePositions().centreOfMass(component->nodeIds());
 }
 
 float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
@@ -212,7 +211,7 @@ float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId)
 
     if(!nodeId.isNull())
     {
-        position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        position = _graphModel->nodePositions().get(nodeId);
     }
     else
     {
@@ -415,8 +414,7 @@ void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float zoomDista
     if(nodeId.isNull())
         return;
 
-    centrePositionInViewport(_graphModel->nodePositions().getScaledAndSmoothed(nodeId),
-                             zoomDistance);
+    centrePositionInViewport(_graphModel->nodePositions().get(nodeId), zoomDistance);
 }
 
 void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
@@ -598,7 +596,7 @@ QVector3D GraphComponentRenderer::focusPosition() const
     if(_viewData._focusNodeId.isNull())
         return _viewData._focusPosition;
 
-    return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
+    return _graphModel->nodePositions().get(_viewData._focusNodeId);
 }
 
 bool GraphComponentRenderer::focusedOnNodeAtRadius(NodeId nodeId, float radius) const

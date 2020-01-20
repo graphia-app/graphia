@@ -419,8 +419,7 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
     {
         auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
         auto& mergedNodeIds = mergedComponent->nodeIds();
-        auto mergedFocusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
-                                                                                mergedNodeIds);
+        auto mergedFocusPosition = _graphModel->nodePositions().centreOfMass(mergedNodeIds);
 
         // Use the rotation of the new component
         auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());

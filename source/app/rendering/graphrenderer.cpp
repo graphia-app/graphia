@@ -192,7 +192,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     _gpuDataRequiresUpdate = false;
 
-    std::unique_lock<std::recursive_mutex> nodePositionsLock(_graphModel->nodePositions().mutex());
+    std::unique_lock<NodePositions> nodePositionsLock(_graphModel->nodePositions());
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     int componentIndex = 0;
@@ -227,7 +227,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(_hiddenNodes.get(nodeId))
                 continue;
 
-            const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
+            const QVector3D nodePosition = nodePositions.get(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
             auto& nodeVisual = _graphModel->nodeVisual(nodeId);
@@ -1017,7 +1017,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     size_t i = 0;
     for(auto nodeId : nodeIds)
     {
-        auto nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        auto nodePosition = _graphModel->nodePositions().get(nodeId);
         points.at(i++) = nodePosition;
     }
 
@@ -1027,7 +1027,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     NodeId closestToCentreNodeId;
     for(auto nodeId : nodeIds)
     {
-        auto nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        auto nodePosition = _graphModel->nodePositions().get(nodeId);
         float distance = (centre - nodePosition).length();
 
         if(distance < minDistance)
@@ -1038,7 +1038,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     }
 
     radius = GraphComponentRenderer::maxNodeDistanceFromPoint(*_graphModel,
-        _graphModel->nodePositions().getScaledAndSmoothed(closestToCentreNodeId), nodeIds);
+        _graphModel->nodePositions().get(closestToCentreNodeId), nodeIds);
     focusNodeId = closestToCentreNodeId;
 
     return mode();

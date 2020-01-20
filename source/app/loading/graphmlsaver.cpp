@@ -94,6 +94,8 @@ bool GraphMLSaver::save()
         keyId++;
     }
 
+    std::unique_lock<NodePositions> lock(graphModel->nodePositions());
+
     _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {

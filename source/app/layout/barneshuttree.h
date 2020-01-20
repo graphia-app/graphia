@@ -44,7 +44,7 @@ private:
     int _mass = 0;
     QVector3D _centreOfMass;
 
-    void initialise(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds) override;
+    void initialise(const NodeLayoutPositions& nodePositions, const std::vector<NodeId>& nodeIds) override;
 
 public:
     BarnesHutTree();
@@ -52,7 +52,7 @@ public:
     void setTheta(float theta) { _theta = theta; }
 
     template<typename KernelFn>
-    QVector3D evaluateKernel(const NodePositions& nodePositions, NodeId nodeId, const KernelFn& kernel) const
+    QVector3D evaluateKernel(const NodeLayoutPositions& nodePositions, NodeId nodeId, const KernelFn& kernel) const
     {
         const QVector3D& nodePosition = nodePositions.get(nodeId);
         QVector3D result;

@@ -18,7 +18,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
     _executedAtLeastOnce(graphModel.graph()),
-    _intermediatePositions(graphModel.graph()),
+    _nodeLayoutPositions(graphModel.graph()),
     _performanceCounter(std::chrono::seconds(1))
 {
     _debug = qEnvironmentVariableIntValue("LAYOUT_DEBUG");
@@ -187,7 +187,7 @@ void LayoutThread::run()
             _executedAtLeastOnce.set(layout.first, true);
         }
 
-        _graphModel->nodePositions().update(_intermediatePositions);
+        _graphModel->nodePositions().update(_nodeLayoutPositions);
         _performanceCounter.tick();
         emit executed();
 
@@ -241,7 +241,7 @@ void LayoutThread::addComponent(ComponentId componentId)
     {
         std::unique_lock<std::mutex> lock(_mutex);
 
-        auto layout = _layoutFactory->create(componentId, _intermediatePositions);
+        auto layout = _layoutFactory->create(componentId, _nodeLayoutPositions);
 
         connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
         [this]
@@ -273,8 +273,7 @@ void LayoutThread::addAllComponents()
 
 void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositions)
 {
-    for(auto nodeId : _graphModel->graph().nodeIds())
-        _intermediatePositions.setExact(nodeId, nodePositions.at(nodeId));
+    _nodeLayoutPositions.set(_graphModel->graph().nodeIds(), nodePositions);
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);

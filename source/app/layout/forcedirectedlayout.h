@@ -64,7 +64,7 @@ private:
 public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
                         ForceDirectedDisplacements& displacements,
-                        NodePositions& positions,
+                        NodeLayoutPositions& positions,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes, 0.4f, 4),
         _displacements(&displacements)
@@ -86,7 +86,7 @@ public:
 
     QString name() const override { return QStringLiteral("ForceDirected"); }
     QString displayName() const override { return QObject::tr("Force Directed"); }
-    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) override;
+    std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& nodePositions) override;
 };
 
 #endif // FORCEDIRECTEDLAYOUT_H

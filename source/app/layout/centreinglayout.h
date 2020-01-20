@@ -8,7 +8,7 @@ class CentreingLayout : public Layout
     Q_OBJECT
 public:
     CentreingLayout(const IGraphComponent& graphComponent,
-                    NodePositions& positions) :
+                    NodeLayoutPositions& positions) :
         Layout(graphComponent, positions)
     {}
 
