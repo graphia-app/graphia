@@ -187,7 +187,23 @@ void LayoutThread::run()
             _executedAtLeastOnce.set(layout.first, true);
         }
 
-        _graphModel->nodePositions().update(_nodeLayoutPositions);
+        {
+            std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
+            _graphModel->nodePositions().update(_nodeLayoutPositions);
+
+
+            bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
+                std::any_of(_layouts.begin(), _layouts.end(),
+                [](const auto& layout)
+                {
+                    return layout.second->dimensionality() ==
+                        Layout::Dimensionality::ThreeDee;
+                });
+
+            if(requiresFlattening)
+                _graphModel->nodePositions().flatten();
+        }
+
         _performanceCounter.tick();
         emit executed();
 
@@ -277,6 +293,15 @@ void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositi
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);
+}
+
+void LayoutThread::setDimensionalityMode(Layout::Dimensionality dimensionalityMode)
+{
+    if(dimensionalityMode == _dimensionalityMode)
+        return;
+
+    _dimensionalityMode = dimensionalityMode;
+    _layoutPotentiallyRequired = true;
 }
 
 QString LayoutThread::layoutName() const

@@ -44,6 +44,8 @@ public:
 
     QVector3D get(NodeId nodeId) const;
 
+    void flatten();
+
     void update(const NodePositions& other);
 
     QVector3D centreOfMass(const std::vector<NodeId>& nodeIds) const;

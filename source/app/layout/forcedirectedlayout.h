@@ -66,7 +66,8 @@ public:
                         ForceDirectedDisplacements& displacements,
                         NodeLayoutPositions& positions,
                         const LayoutSettings* settings) :
-        Layout(graphComponent, positions, settings, Iterative::Yes, 0.4f, 4),
+        Layout(graphComponent, positions, settings, Iterative::Yes,
+            Dimensionality::ThreeDee, 0.4f, 4),
         _displacements(&displacements)
     {}
 

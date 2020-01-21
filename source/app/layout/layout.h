@@ -42,8 +42,16 @@ public:
         No
     };
 
+    enum class Dimensionality
+    {
+        ThreeDee        = 0x1,
+        TwoDee          = 0x2,
+        TwoOrThreeDee   = TwoDee | ThreeDee
+    };
+
 private:
     Iterative _iterative;
+    Dimensionality _dimensionality;
     float _scaling;
     int _smoothing;
     const IGraphComponent* _graphComponent;
@@ -61,9 +69,11 @@ public:
            NodeLayoutPositions& positions,
            const LayoutSettings* settings = nullptr,
            Iterative iterative = Iterative::No,
+           Dimensionality dimensionality = Dimensionality::TwoOrThreeDee,
            float scaling = 1.0f,
            int smoothing = 1) :
         _iterative(iterative),
+        _dimensionality(dimensionality),
         _scaling(scaling),
         _smoothing(smoothing),
         _graphComponent(&graphComponent),
@@ -87,6 +97,7 @@ public:
     virtual void unfinish() { Q_ASSERT(!"unfinish not implemented"); }
 
     virtual bool iterative() const { return _iterative == Iterative::Yes; }
+    virtual Dimensionality dimensionality() const { return _dimensionality; }
 
 signals:
     void progress(int percentage);
@@ -159,6 +170,9 @@ private:
     std::map<ComponentId, std::unique_ptr<Layout>> _layouts;
     ComponentArray<bool> _executedAtLeastOnce;
 
+    Layout::Dimensionality _dimensionalityMode =
+        Layout::Dimensionality::ThreeDee;
+
     NodeLayoutPositions _nodeLayoutPositions;
 
     PerformanceCounter _performanceCounter;
@@ -193,6 +207,8 @@ public:
     void addAllComponents();
 
     void setStartingNodePositions(const ExactNodePositions& nodePositions);
+
+    void setDimensionalityMode(Layout::Dimensionality dimensionalityMode);
 
     QString layoutName() const;
     QString layoutDisplayName() const;

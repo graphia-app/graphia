@@ -32,6 +32,21 @@ QVector3D NodePositions::get(NodeId nodeId) const
     return elementFor(nodeId).mean(_smoothing) * _scale;
 }
 
+void NodePositions::flatten()
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    generate([this](NodeId nodeId)
+    {
+        auto positions = elementFor(nodeId);
+
+        for(size_t i = 0; i < positions.size(); i++)
+            positions.at(i).setZ(0.0f);
+
+        return positions;
+    });
+}
+
 void NodePositions::update(const NodePositions& other)
 {
     std::unique_lock<const NodePositions> lock(*this);

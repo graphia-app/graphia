@@ -59,6 +59,23 @@ public:
                            [](Layout* layout) { return layout->iterative(); });
     }
 
+    Dimensionality dimensionality() const
+    {
+        if(std::any_of(_subLayouts.begin(), _subLayouts.end(),
+            [](Layout* layout) { return layout->dimensionality() == Dimensionality::TwoDee; }))
+        {
+            return Dimensionality::TwoDee;
+        }
+
+        if(std::any_of(_subLayouts.begin(), _subLayouts.end(),
+            [](Layout* layout) { return layout->dimensionality() == Dimensionality::TwoOrThreeDee; }))
+        {
+            return Dimensionality::TwoOrThreeDee;
+        }
+
+        return Dimensionality::ThreeDee;
+    }
+
     void executeReal(bool firstIteration)
     {
         for(auto subLayout : _subLayouts)

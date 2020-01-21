@@ -764,6 +764,22 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::finished, this, &Document::commandInProgressChanged);
     connect(&_commandManager, &CommandManager::finished, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
 
+    connect(this, &Document::busyChanged, [this]
+    {
+        if(busy())
+            return;
+
+        // Note that we get here when no longer busy, so that the switch to the
+        // appropriate layout happens after the projection transition has occurred
+        auto dimensionality = _graphQuickItem->projection() == Projection::TwoDee ?
+            Layout::Dimensionality::TwoDee :
+            Layout::Dimensionality::ThreeDee;
+
+        _layoutThread->setDimensionalityMode(dimensionality);
+        _layoutRequired = true;
+        updateLayoutState();
+    });
+
     connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
     connect(this, &Document::busyChanged, this, &Document::editableChanged);
