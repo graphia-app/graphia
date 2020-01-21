@@ -164,6 +164,16 @@ public:
         std::fill(_array.begin(), _array.end(), value);
     }
 
+    template<typename Generator>
+    void generate(Generator&& generator)
+    {
+        MaybeLock lock(_mutex);
+
+        for(size_t i = 0; i < _array.size(); i++)
+            _array[i] = generator(static_cast<int>(i));
+    }
+
+
     void resetElements()
     {
         MaybeLock lock(_mutex);
