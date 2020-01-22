@@ -76,10 +76,10 @@ public:
         return Dimensionality::ThreeDee;
     }
 
-    void execute(bool firstIteration)
+    void execute(bool firstIteration, Dimensionality dimensionality)
     {
         for(auto subLayout : _subLayouts)
-            subLayout->execute(firstIteration);
+            subLayout->execute(firstIteration, dimensionality);
     }
 };
 

@@ -1,6 +1,6 @@
 #include "centreinglayout.h"
 
-void CentreingLayout::execute(bool)
+void CentreingLayout::execute(bool, Dimensionality)
 {
     QVector3D centreOfMass = positions().centreOfMass(nodeIds());
 

@@ -74,7 +74,7 @@ public:
     bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
     void unfinish() override;
 
-    void execute(bool firstIteration) override;
+    void execute(bool firstIteration, Dimensionality dimensionality) override;
 };
 
 class ForceDirectedLayoutFactory : public LayoutFactory

@@ -12,7 +12,7 @@ public:
         Layout(graphComponent, positions)
     {}
 
-    void execute(bool) override;
+    void execute(bool, Dimensionality) override;
 };
 
 

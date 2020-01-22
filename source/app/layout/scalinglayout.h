@@ -17,7 +17,7 @@ public:
     void setScale(float scale) { _scale = scale; }
     float scale() { return _scale; }
 
-    void execute(bool) override;
+    void execute(bool, Dimensionality) override;
 };
 
 #endif // SCALINGLAYOUT_H

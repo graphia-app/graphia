@@ -183,7 +183,8 @@ void LayoutThread::run()
             if(layoutIsFinished(*layout.second))
                 continue;
 
-            layout.second->execute(!_executedAtLeastOnce.get(layout.first));
+            layout.second->execute(!_executedAtLeastOnce.get(layout.first),
+                _dimensionalityMode);
             _executedAtLeastOnce.set(layout.first, true);
         }
 
@@ -296,6 +297,8 @@ void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositi
 
 void LayoutThread::setDimensionalityMode(Layout::Dimensionality dimensionalityMode)
 {
+    Q_ASSERT(dimensionalityMode != Layout::Dimensionality::TwoOrThreeDee);
+
     if(dimensionalityMode == _dimensionalityMode)
         return;
 
