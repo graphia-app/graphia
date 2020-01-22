@@ -76,7 +76,7 @@ public:
         return Dimensionality::ThreeDee;
     }
 
-    void executeReal(bool firstIteration)
+    void execute(bool firstIteration)
     {
         for(auto subLayout : _subLayouts)
             subLayout->execute(firstIteration);

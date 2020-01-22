@@ -19,7 +19,7 @@ void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4
     positions().set(childNodeId, parentNodePosition + offsetPosition);
 }
 
-void FastInitialLayout::executeReal(bool)
+void FastInitialLayout::execute(bool)
 {
     auto& graph = graphComponent().graph();
     NodeArray<bool> visitedNodes(graph);

@@ -191,7 +191,6 @@ void LayoutThread::run()
             std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
             _graphModel->nodePositions().update(_nodeLayoutPositions);
 
-
             bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
                 std::any_of(_layouts.begin(), _layouts.end(),
                 [](const auto& layout)

@@ -84,7 +84,7 @@ static float repulse(const float distanceSq, const float shortRange, const float
         ((distanceSq * distanceSq * distanceSq) + 0.0001f);
 }
 
-void ForceDirectedLayout::executeReal(bool firstIteration)
+void ForceDirectedLayout::execute(bool firstIteration)
 {
     SCOPE_TIMER_MULTISAMPLES(50)
 

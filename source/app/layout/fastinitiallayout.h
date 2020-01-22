@@ -16,7 +16,7 @@ public:
         : Layout(graphComponent, positions)
     {}
 
-    void executeReal(bool) override;
+    void execute(bool) override;
 };
 
 #endif // FASTINITIALLAYOUT_H

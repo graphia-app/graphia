@@ -57,8 +57,6 @@ private:
     const IGraphComponent* _graphComponent;
     NodeLayoutPositions* _positions;
 
-    virtual void executeReal(bool firstIteration) = 0;
-
 protected:
     const LayoutSettings* _settings; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
@@ -88,7 +86,7 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _graphComponent->nodeIds(); }
     const std::vector<EdgeId>& edgeIds() const { return _graphComponent->edgeIds(); }
 
-    void execute(bool firstIteration) { executeReal(firstIteration); }
+    virtual void execute(bool firstIteration) = 0;
 
     // Indicates that the algorithm is doing no useful work
     virtual bool finished() const { return false; }
