@@ -79,6 +79,15 @@ QVector2D BoundingBox2D::centre() const
     return (_min + _max) / 2.0f;
 }
 
+bool BoundingBox2D::valid() const
+{
+    return
+        !std::isnan(_min.x()) && !std::isnan(_min.y()) &&
+        !std::isnan(_max.x()) && !std::isnan(_max.y()) &&
+        !std::isinf(_min.x()) && !std::isinf(_min.y()) &&
+        !std::isinf(_max.x()) && !std::isinf(_max.y());
+}
+
 BoundingBox3D::BoundingBox3D() :
     _min(), _max()
 {}
@@ -215,8 +224,8 @@ QVector3D BoundingBox3D::centre() const
 bool BoundingBox3D::valid() const
 {
     return
-            !std::isnan(_min.x()) && !std::isnan(_min.y()) && !std::isnan(_min.z()) &&
-            !std::isnan(_max.x()) && !std::isnan(_max.y()) && !std::isnan(_max.z()) &&
-            !std::isinf(_min.x()) && !std::isinf(_min.y()) && !std::isinf(_min.z()) &&
-            !std::isinf(_max.x()) && !std::isinf(_max.y()) && !std::isinf(_max.z());
+        !std::isnan(_min.x()) && !std::isnan(_min.y()) && !std::isnan(_min.z()) &&
+        !std::isnan(_max.x()) && !std::isnan(_max.y()) && !std::isnan(_max.z()) &&
+        !std::isinf(_min.x()) && !std::isinf(_min.y()) && !std::isinf(_min.z()) &&
+        !std::isinf(_max.x()) && !std::isinf(_max.y()) && !std::isinf(_max.z());
 }

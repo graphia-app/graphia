@@ -40,6 +40,8 @@ public:
 
     QVector2D centre() const;
 
+    bool valid() const;
+
     BoundingBox2D operator+(const QVector2D v) const { return {_min + v, _max + v}; }
     BoundingBox2D operator*(float s) const { return {_min * s, _max * s}; }
 };
