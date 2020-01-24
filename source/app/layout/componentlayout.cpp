@@ -5,6 +5,8 @@
 void ComponentLayout::execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
                               ComponentLayoutData& componentLayoutData)
 {
+    componentLayoutData.resetElements();
+
     executeReal(graph, componentIds, componentLayoutData);
 
     _boundingBox = QRectF();
