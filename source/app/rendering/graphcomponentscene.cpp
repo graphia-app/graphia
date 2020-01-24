@@ -435,6 +435,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
             auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
 
             newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
+            setViewportSize(_width, _height);
             setComponentId(newComponentId);
         }, QStringLiteral("GraphComponentScene::onComponentSplit (clone camera data, set component ID)"));
     }
