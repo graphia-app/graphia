@@ -43,11 +43,11 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/layout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/layoutsettings.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/nodepositions.h
-    ${CMAKE_CURRENT_LIST_DIR}/layout/octree.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
+    ${CMAKE_CURRENT_LIST_DIR}/layout/spatialtree.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
@@ -161,7 +161,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/graph.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/graphmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/mutablegraph.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/layout/barneshuttree.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/centreinglayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/circlepackcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/collision.cpp

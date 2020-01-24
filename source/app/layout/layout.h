@@ -7,6 +7,8 @@
 
 #include "shared/utils/performancecounter.h"
 #include "shared/utils/cancellable.h"
+#include "shared/utils/enumbitmask.h"
+
 #include "layoutsettings.h"
 
 #include <QVector2D>
@@ -100,6 +102,8 @@ public:
 signals:
     void progress(int percentage);
 };
+
+template<> constexpr bool EnableBitMaskOperators<Layout::Dimensionality> = true;
 
 class GraphModel;
 

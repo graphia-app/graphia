@@ -91,14 +91,46 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     if(firstIteration)
     {
         FastInitialLayout initialLayout(graphComponent(), positions());
-        initialLayout.execute(firstIteration);
+        initialLayout.execute(firstIteration, dimensionality);
 
         for(NodeId nodeId : nodeIds())
             _displacements->at(nodeId)._previous = {};
     }
 
-    BarnesHutTree barnesHutTree;
-    barnesHutTree.build(graphComponent(), positions());
+    std::unique_ptr<AbstractBarnesHutTree> barnesHutTree;
+
+    if(dimensionality == Dimensionality::ThreeDee)
+    {
+        if(_hasBeenFlattened)
+        {
+            // If we're in 3D mode but have previously been in 2D mode,
+            // then all of the nodes will have 0 for their Z coordinate,
+            // meaning there is no mathematical way for forces to be
+            // computed along the Z-axis, so to mitigate this we jiggle
+            // the Z coordinate up and down a small amount in order to
+            // force the nodes out of the XY-plane
+            float jiggle = 0.1f;
+            for(auto nodeId : graphComponent().nodeIds())
+            {
+                auto position = positions().get(nodeId);
+                position.setZ(jiggle);
+                positions().set(nodeId, position);
+
+                jiggle = -jiggle;
+            }
+
+            _hasBeenFlattened = false;
+        }
+
+        barnesHutTree = std::make_unique<BarnesHutTree3D>();
+    }
+    else if(dimensionality == Dimensionality::TwoDee)
+    {
+        _hasBeenFlattened = true;
+        barnesHutTree = std::make_unique<BarnesHutTree2D>();
+    }
+
+    barnesHutTree->build(graphComponent(), positions());
 
     const float SHORT_RANGE = _settings->value(QStringLiteral("ShortRangeRepulseTerm"));
     const float LONG_RANGE = 0.01f + _settings->value(QStringLiteral("LongRangeRepulseTerm"));
@@ -110,7 +142,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         if(cancelled())
             return;
 
-        _displacements->at(nodeId)._repulsive -= barnesHutTree.evaluateKernel(positions(), nodeId,
+        _displacements->at(nodeId)._repulsive -= barnesHutTree->evaluateKernel(positions(), nodeId,
         [SHORT_RANGE, LONG_RANGE](int mass, const QVector3D& difference, float distanceSq)
         {
             return difference * (static_cast<float>(mass) * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));

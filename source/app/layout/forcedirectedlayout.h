@@ -56,6 +56,8 @@ private:
     int _unstableIterationCount = 0;
     int _increasingStdDevIterationCount = 0;
 
+    bool _hasBeenFlattened = false;
+
     void fineTuneChangeDetection();
     void oscillateChangeDetection();
     void initialChangeDetection();
@@ -67,7 +69,7 @@ public:
                         NodeLayoutPositions& positions,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes,
-            Dimensionality::ThreeDee, 0.4f, 4),
+            Dimensionality::TwoOrThreeDee, 0.4f, 4),
         _displacements(&displacements)
     {}
 

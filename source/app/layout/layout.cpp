@@ -178,14 +178,20 @@ void LayoutThread::run()
     {
         u::setCurrentThreadName(QStringLiteral("Layout >"));
 
-        for(auto& layout : _layouts)
+        for(auto& [componentId, layout] : _layouts)
         {
-            if(layoutIsFinished(*layout.second))
+            if(layoutIsFinished(*layout))
                 continue;
 
-            layout.second->execute(!_executedAtLeastOnce.get(layout.first),
-                _dimensionalityMode);
-            _executedAtLeastOnce.set(layout.first, true);
+            if(_dimensionalityMode == Layout::Dimensionality::TwoDee &&
+               (layout->dimensionality() & _dimensionalityMode))
+            {
+                // If we're in 2D mode and the layout can handle it, flatten the positions
+                _nodeLayoutPositions.flatten();
+            }
+
+            layout->execute(!_executedAtLeastOnce.get(componentId), _dimensionalityMode);
+            _executedAtLeastOnce.set(componentId, true);
         }
 
         {

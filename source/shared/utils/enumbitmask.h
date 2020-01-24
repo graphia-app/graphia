@@ -1,6 +1,11 @@
 #ifndef ENUMBITMASK_H
 #define ENUMBITMASK_H
 
+// To enable bitwise operators for enum classes, include this file, then
+// specialise the templated bool as follows:
+//
+// template<> constexpr bool EnableBitMaskOperators<ExampleEnum> = true;
+
 #include <type_traits>
 
 template<typename Enum>

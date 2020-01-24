@@ -1,62 +1,97 @@
 #ifndef BARNESHUTTREE_H
 #define BARNESHUTTREE_H
 
-#include "octree.h"
+#include "spatialtree.h"
 #include "shared/utils/fixedsizestack.h"
 
 #include <QVector3D>
 
 #include <functional>
 
-class BarnesHutTree;
-struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq = 0.0f; };
+class AbstractBarnesHutTree : virtual public AbstractSpatialTree
+{
+public:
+    virtual QVector3D evaluateKernel(const NodeLayoutPositions& nodePositions, NodeId nodeId,
+        const std::function<QVector3D(int, const QVector3D&, float)>& kernel) const = 0;
+};
 
-class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
+template<size_t NumDimensions>
+class BarnesHutTree;
+
+template<size_t NumDimensions>
+struct BarnesHutSubVolume : SubVolume<BarnesHutTree<NumDimensions>, NumDimensions> { float _sSq = 0.0f; };
+
+template<size_t NumDimensions>
+class BarnesHutTree :
+    public SpatialTree<BarnesHutTree<NumDimensions>, NumDimensions, BarnesHutSubVolume<NumDimensions>>,
+    public AbstractBarnesHutTree
 {
 private:
     static constexpr float E = 0.0001f;
+    static constexpr float E2 = E * E;
 
     // Cycle through different epsilon vectors so that there is enough
     // variation that the forces don't get stuck in 2 or fewer dimensions
     mutable size_t _di = 0;
     QVector3D differenceEpsilon() const
     {
-        static std::array<QVector3D, 6> vs =
-        {{
-            {   E, 0.0f, 0.0f},
-            {0.0f,    E, 0.0f},
-            {0.0f, 0.0f,    E},
-            {  -E, 0.0f, 0.0f},
-            {0.0f,   -E, 0.0f},
-            {0.0f, 0.0f,   -E},
-        }};
+        if constexpr(NumDimensions == 3)
+        {
+            static std::array<QVector3D, 6> vs =
+            {{
+                {   E, 0.0f, 0.0f},
+                {0.0f,    E, 0.0f},
+                {0.0f, 0.0f,    E},
+                {  -E, 0.0f, 0.0f},
+                {0.0f,   -E, 0.0f},
+                {0.0f, 0.0f,   -E},
+            }};
 
-        _di = (_di + 1) % vs.size();
-        return vs.at(_di);
-    }
+            _di = (_di + 1) % vs.size();
+            return vs.at(_di);
+        }
+        else if constexpr(NumDimensions == 2)
+        {
+            static std::array<QVector3D, 4> vs =
+            {{
+                {   E, 0.0f, 0.0f},
+                {0.0f,    E, 0.0f},
+                {  -E, 0.0f, 0.0f},
+                {0.0f,   -E, 0.0f},
+            }};
 
-    float constexpr distanceSqEpsilon() const
-    {
-        return E * E;
+            _di = (_di + 1) % vs.size();
+            return vs.at(_di);
+        }
     }
 
     float _theta = 0.8f;
     int _mass = 0;
     QVector3D _centreOfMass;
 
-    void initialise(const NodeLayoutPositions& nodePositions, const std::vector<NodeId>& nodeIds) override;
+    void initialise(const NodeLayoutPositions& nodePositions, const std::vector<NodeId>& nodeIds) override
+    {
+        _mass = static_cast<int>(nodeIds.size());
+        _centreOfMass = nodePositions.centreOfMass(nodeIds);
+
+        for(auto& subVolume : this->_subVolumes)
+            subVolume._sSq = subVolume._boundingBox.maxLength() * subVolume._boundingBox.maxLength();
+    }
 
 public:
-    BarnesHutTree();
+    BarnesHutTree()
+    {
+        this->setMaxNodesPerLeaf(1);
+    }
 
     void setTheta(float theta) { _theta = theta; }
 
-    template<typename KernelFn>
-    QVector3D evaluateKernel(const NodeLayoutPositions& nodePositions, NodeId nodeId, const KernelFn& kernel) const
+    QVector3D evaluateKernel(const NodeLayoutPositions& nodePositions, NodeId nodeId,
+        const std::function<QVector3D(int, const QVector3D&, float)>& kernel) const override
     {
         const QVector3D& nodePosition = nodePositions.get(nodeId);
         QVector3D result;
-        FixedSizeStack<const BarnesHutTree*> stack(_depthFirstTraversalStackSizeRequirement);
+        FixedSizeStack<const BarnesHutTree*> stack(this->_depthFirstTraversalStackSizeRequirement);
 
         stack.push(this);
 
@@ -75,7 +110,7 @@ public:
                 if(distanceSq == 0.0f)
                 {
                     difference = differenceEpsilon();
-                    distanceSq = distanceSqEpsilon();
+                    distanceSq = E2;
                 }
 
                 const float sOverD = subVolume->_sSq / distanceSq;
@@ -100,7 +135,7 @@ public:
                     if(distanceSq == 0.0f)
                     {
                         difference = differenceEpsilon();
-                        distanceSq = distanceSqEpsilon();
+                        distanceSq = E2;
                     }
 
                     result += kernel(1, difference, distanceSq);
@@ -111,5 +146,8 @@ public:
         return result;
     }
 };
+
+using BarnesHutTree2D = BarnesHutTree<2>;
+using BarnesHutTree3D = BarnesHutTree<3>;
 
 #endif // BARNESHUTTREE_H
