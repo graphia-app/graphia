@@ -164,8 +164,10 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
     {
         Q_ASSERT(_graphRenderer->graphModel()->graph().containsComponentId(_componentId));
         _componentSize = _graphRenderer->graphModel()->graph().componentById(_componentId)->numNodes();
-        componentRenderer()->resetView();
     }
+
+    if(!_componentId.isNull() && !_transitioningComponentId.isNull())
+        componentRenderer()->resetView();
 
     if(doTransition)
     {
