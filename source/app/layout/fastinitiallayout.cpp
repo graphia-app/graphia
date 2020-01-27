@@ -19,7 +19,7 @@ void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4
     positions().set(childNodeId, parentNodePosition + offsetPosition);
 }
 
-void FastInitialLayout::execute(bool, Dimensionality /*FIXME*/)
+void FastInitialLayout::execute(bool, Dimensionality dimensionality)
 {
     auto& graph = graphComponent().graph();
     NodeArray<bool> visitedNodes(graph);
@@ -163,4 +163,7 @@ void FastInitialLayout::execute(bool, Dimensionality /*FIXME*/)
             i++;
         }
     }
+
+    if(dimensionality == Layout::Dimensionality::TwoDee)
+        positions().flatten();
 }
