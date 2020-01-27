@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include <functional>
+#include <limits>
 
 class Transition : public QObject
 {
@@ -23,7 +24,7 @@ public:
 private:
     Type _type = Type::None;
     float _duration = 0.0f;
-    float _elapsed = 0.0f;
+    float _elapsed = std::numeric_limits<float>::max();
     std::function<void(float)> _function;
     std::vector<std::function<void()>> _finishedFunctions;
     bool _finishing = false;
