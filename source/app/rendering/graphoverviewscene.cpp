@@ -66,26 +66,28 @@ void GraphOverviewScene::update(float t)
     }
 }
 
-void GraphOverviewScene::onShow()
+void GraphOverviewScene::setVisible(bool visible)
 {
     for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
-        renderer->setVisible(true);
+        renderer->setVisible(visible);
     }
 
     _graphRenderer->onVisibilityChanged();
 }
 
+void GraphOverviewScene::onShow()
+{
+    // Make previous and current match, in case we're being shown for the first time
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+
+    setVisible(true);
+}
+
 void GraphOverviewScene::onHide()
 {
-    for(auto componentId : _componentIds)
-    {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
-        renderer->setVisible(false);
-    }
-
-    _graphRenderer->onVisibilityChanged();
+    setVisible(false);
 }
 
 void GraphOverviewScene::resetView(bool doTransition)
@@ -543,7 +545,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
         bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
         float duration = !componentLayoutDataChanged ? 0.0f : u::pref("visuals/transitionTime").toFloat();
 
-        onShow();
+        setVisible(true); // Show new components
         setViewportSize(_width, _height);
 
         startTransition([this]

@@ -111,6 +111,8 @@ private:
     bool setZoomFactor(float zoomFactor);
     void setOffset(float x, float y);
 
+    void setVisible(bool visible);
+
     void startComponentLayoutTransition();
 
 private slots:
