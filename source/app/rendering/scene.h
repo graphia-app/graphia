@@ -20,6 +20,7 @@
 #define SCENE_H
 
 #include "projection.h"
+#include "shading.h"
 
 #include <QObject>
 
@@ -49,7 +50,7 @@ public:
     virtual void resetView(bool doTransition = true) = 0;
     virtual bool viewIsReset() const = 0;
 
-    virtual void setProjection(Projection projection) = 0;
+    virtual void setProjectionAndShading(Projection projection, Shading shading) = 0;
 
 protected:
     bool visible() const { return _visible; }

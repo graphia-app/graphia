@@ -367,6 +367,7 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     _glyphData = gpuGraphData._glyphData;
     _edgeData = gpuGraphData._edgeData;
     _elementsSelected = gpuGraphData._elementsSelected;
+    _shadingFlatness = gpuGraphData._shadingFlatness;
 
     // Cause VBO to be recreated
     _fbo = 0;
@@ -490,8 +491,6 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
         static_cast<int>(_componentDataElementSize));
     _nodesShader.setUniformValue("componentData", 0);
 
-    _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
-
     gpuGraphData._sphere.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
@@ -517,8 +516,6 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
     _edgesShader.setUniformValue("componentDataElementSize",
         static_cast<int>(_componentDataElementSize));
     _edgesShader.setUniformValue("componentData", 0);
-
-    _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
@@ -649,7 +646,8 @@ void GraphRendererCore::resetGPUComponentData()
 }
 
 void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
-    const QMatrix4x4& projectionMatrix, float distance, float lightScale)
+    const QMatrix4x4& projectionMatrix, float distance,
+    float lightScale, float shadingFlatness)
 {
     std::vector<double> componentDataElement;
     componentDataElement.reserve(34);
@@ -662,6 +660,7 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 
     componentDataElement.push_back(distance);
     componentDataElement.push_back(lightScale);
+    componentDataElement.push_back(shadingFlatness);
 
     _componentData.insert(_componentData.end(), componentDataElement.begin(), componentDataElement.end());
 
@@ -674,17 +673,6 @@ void GraphRendererCore::uploadGPUComponentData()
     glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
     glBufferData(GL_TEXTURE_BUFFER, _componentData.size() * sizeof(GLfloat), _componentData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
-}
-
-Shading GraphRendererCore::shading() const
-{
-    return _shading;
-}
-
-void GraphRendererCore::setShading(Shading shading)
-{
-    if(shading != _shading)
-        _shading = shading;
 }
 
 bool GraphRendererCore::resize(int width, int height)
@@ -931,15 +919,15 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
         if(type.test(GraphRendererCore::Type::Color))
         {
-            bool disableAlphaBlending =
-                _shading == Shading::Flat && !graphData._isOverlay;
+            bool flatShading = graphData._shadingFlatness != 0.0f;
+            bool disableAlphaBlending = flatShading && !graphData._isOverlay;
 
             render2DComposite(*this, _screenShader,
                 graphData._colorTexture,
                 graphData.alpha(),
                 disableAlphaBlending);
 
-            if(_shading == Shading::Flat && graphData.hasGraphElements())
+            if(flatShading && graphData.hasGraphElements())
             {
                 render2DComposite(*this, _outlineShader,
                     graphData._elementTexture,

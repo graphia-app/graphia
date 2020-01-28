@@ -204,6 +204,7 @@ private:
     Mode _mode = Mode::Overview;
 
     Projection _projection = Projection::Perspective;
+    Shading _shading = Shading::Smooth;
 
     Scene* _scene = nullptr;
     GraphOverviewScene* _graphOverviewScene;
@@ -294,7 +295,9 @@ private:
     void setMode(Mode mode);
 
     Projection projection() const;
-    void setProjection(Projection projection);
+    Shading shading() const;
+
+    void setProjectionAndShading(Projection projection, Shading shading);
 
     void resetTime();
     float secondsElapsed();

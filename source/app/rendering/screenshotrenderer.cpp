@@ -202,7 +202,8 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
         appendGPUComponentData(componentCamera.viewMatrix(),
             projectionMatrix,
             componentCamera.distance(),
-            componentCameraAndLighting._lightScale);
+            componentCameraAndLighting._lightScale,
+            componentCameraAndLighting._shadingFlatness);
     }
 
     uploadGPUComponentData();
@@ -226,8 +227,6 @@ bool ScreenshotRenderer::copyState(const GraphRenderer& renderer)
         // This order MUST match graphrenderer component order!
         _componentCameraAndLightings.emplace_back(*componentRenderer->cameraAndLighting());
     }
-
-    setShading(renderer.shading());
 
     // Just copy the SDF texture
     GLuint textureFBO = 0;

@@ -134,6 +134,8 @@ struct GPUGraphData : OpenGLFunctions
 
     bool _elementsSelected = false;
 
+    float _shadingFlatness = 0.0f;
+
     GLuint _fbo = 0;
     GLuint _colorTexture = 0;
     GLuint _elementTexture = 0;
@@ -171,8 +173,6 @@ private:
     std::vector<GLfloat> _componentData;
     size_t _componentDataElementSize = 0;
 
-    Shading _shading = Shading::Smooth;
-
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
@@ -202,11 +202,9 @@ protected:
     void resetGPUComponentData();
     void appendGPUComponentData(const QMatrix4x4& modelViewMatrix,
         const QMatrix4x4& projectionMatrix,
-        float distance, float lightScale);
+        float distance, float lightScale,
+        float shadingFlatness);
     void uploadGPUComponentData();
-
-    Shading shading() const;
-    void setShading(Shading shading);
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);

@@ -22,6 +22,7 @@
 #include "camera.h"
 #include "transition.h"
 #include "projection.h"
+#include "shading.h"
 
 #include "maths/boundingbox.h"
 
@@ -53,6 +54,7 @@ public:
     {
         Camera _camera;
         float _lightScale = 0.0f;
+        float _shadingFlatness = 0.0f;
     };
 
     GraphComponentRenderer() = default;
@@ -79,7 +81,9 @@ public:
     int height() const { return _dimensions.height(); }
 
     Projection projection() const { return _projection; }
-    void setProjection(Projection projection) { _projection = projection; }
+    Shading shading() const { return _shading; }
+
+    void setProjectionAndShading(Projection projection, Shading shading);
 
     float alpha() const { return _alpha; }
     void setAlpha(float alpha);
@@ -115,6 +119,7 @@ public:
     Camera* camera() { return &_viewData.camera(); }
     const Camera* camera() const { return &_viewData.camera(); }
     float lightScale() const { return _viewData.lightScale(); }
+    float shadingFlatness() const { return _viewData.shadingFlatness(); }
     CameraAndLighting* cameraAndLighting() { return &_viewData._cameraAndLighting; }
     const CameraAndLighting* cameraAndLighting() const { return &_viewData._cameraAndLighting; }
 
@@ -161,6 +166,7 @@ private:
         Camera& camera() { return _cameraAndLighting._camera; }
         const Camera& camera() const { return _cameraAndLighting._camera; }
         float lightScale() const { return _cameraAndLighting._lightScale; }
+        float shadingFlatness() const { return _cameraAndLighting._shadingFlatness; }
 
         float _zoomDistance = 1.0f;
         bool _autoZooming = true;
@@ -178,6 +184,7 @@ private:
     int _viewportHeight = 0;
 
     Projection _projection = Projection::Perspective;
+    Shading _shading = Shading::Smooth;
 
     QRectF _dimensions;
 

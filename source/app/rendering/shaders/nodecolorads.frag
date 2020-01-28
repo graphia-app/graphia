@@ -50,6 +50,7 @@ in vec3 vOutlineColor;
 in vec2 uv;
 in float lightOffset;
 in float lightScale;
+in float flatness;
 in float projectionScale;
 
 layout (location = 0) out vec4  outColor;

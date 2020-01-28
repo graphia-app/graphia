@@ -70,7 +70,7 @@ public:
     void resetView(bool doTransition) override;
     bool viewIsReset() const override;
 
-    void setProjection(Projection projection) override;
+    void setProjectionAndShading(Projection projection, Shading shading) override;
 
     void pan(float dx, float dy);
 

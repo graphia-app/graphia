@@ -71,6 +71,7 @@ void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId comp
     _targetZoomDistance = _viewData._zoomDistance;
     _moveFocusToCentreOfComponentLater = true;
     _projection = graphRenderer->projection();
+    _shading = graphRenderer->shading();
 
     synchronise();
 
@@ -406,6 +407,12 @@ bool GraphComponentRenderer::transitionActive()
     return _graphRenderer->transition().active() || _zoomTransition.active();
 }
 
+void GraphComponentRenderer::setProjectionAndShading(Projection projection, Shading shading)
+{
+    _projection = projection;
+    _shading = shading;
+}
+
 void GraphComponentRenderer::setAlpha(float alpha)
 {
     if(_alpha != alpha)
@@ -484,6 +491,11 @@ void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float zoomDista
     centrePositionInViewport(_graphModel->nodePositions().get(nodeId), zoomDistance, rotation);
 }
 
+static float shadingFlatnessFrom(Shading shading)
+{
+    return shading == Shading::Flat ? 1.0f : 0.0f;
+}
+
 void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     float zoomDistance, QQuaternion rotation)
 {
@@ -553,6 +565,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
         updateCameraProjection(_viewData.camera());
         _viewData._cameraAndLighting._lightScale = _orthoCameraDistance;
+        _viewData._cameraAndLighting._shadingFlatness = shadingFlatnessFrom(_shading);
 
         _viewData._transitionStart = _viewData._transitionEnd =
             _viewData._cameraAndLighting;
@@ -570,6 +583,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
         updateCameraProjection(_viewData._transitionEnd._camera);
         _viewData._transitionEnd._lightScale = _orthoCameraDistance;
+        _viewData._transitionEnd._shadingFlatness = shadingFlatnessFrom(_shading);
     }
 }
 
@@ -741,6 +755,13 @@ void GraphComponentRenderer::updateTransition(float f)
         _viewData._transitionStart._lightScale,
         _viewData._transitionEnd._lightScale,
         f);
+
+    _viewData._cameraAndLighting._shadingFlatness = u::interpolate(
+        _viewData._transitionStart._shadingFlatness,
+        _viewData._transitionEnd._shadingFlatness,
+        f);
+
+    qDebug() << _viewData._cameraAndLighting._shadingFlatness;
 }
 
 NodeId GraphComponentRenderer::focusNodeId() const

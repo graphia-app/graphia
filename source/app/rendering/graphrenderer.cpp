@@ -277,6 +277,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(nodeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;
 
+                gpuGraphData->_shadingFlatness = componentRenderer->shadingFlatness();
+
                 if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
@@ -358,6 +360,8 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(edgeData._selected != 0.0f)
                     gpuGraphData->_elementsSelected = true;
 
+                gpuGraphData->_shadingFlatness = componentRenderer->shadingFlatness();
+
                 if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::Unhighlighted))
                     continue;
 
@@ -419,7 +423,8 @@ void GraphRenderer::updateComponentGPUData()
         appendGPUComponentData(componentRenderer->modelViewMatrix(),
             componentRenderer->projectionMatrix(),
             componentRenderer->camera()->distance(),
-            componentRenderer->lightScale());
+            componentRenderer->lightScale(),
+            componentRenderer->shadingFlatness());
     }
 
     uploadGPUComponentData();
@@ -437,7 +442,7 @@ void GraphRenderer::setScene(Scene* scene)
 
     _scene->setViewportSize(width(), height());
 
-    _scene->setProjection(_projection);
+    _scene->setProjectionAndShading(_projection, _shading);
     _scene->setVisible(true);
     _scene->onShow();
 }
@@ -461,14 +466,20 @@ Projection GraphRenderer::projection() const
     return _projection;
 }
 
-void GraphRenderer::setProjection(Projection projection)
+Shading GraphRenderer::shading() const
 {
-    if(projection != _projection)
+    return _shading;
+}
+
+void GraphRenderer::setProjectionAndShading(Projection projection, Shading shading)
+{
+    if(projection != _projection || shading != _shading)
     {
         _projection = projection;
+        _shading = shading;
 
         if(_scene != nullptr)
-            _scene->setProjection(projection);
+            _scene->setProjectionAndShading(projection, shading);
     }
 }
 
@@ -1146,8 +1157,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
 
-    setProjection(graphQuickItem->projection());
-    setShading(graphQuickItem->projection() == Projection::TwoDee ?
+    setProjectionAndShading(graphQuickItem->projection(),
+        graphQuickItem->projection() == Projection::TwoDee ?
         graphQuickItem->shading2D() : graphQuickItem->shading3D());
 
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;

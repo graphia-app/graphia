@@ -634,19 +634,19 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
     }
 }
 
-void GraphOverviewScene::setProjection(Projection projection)
+void GraphOverviewScene::setProjectionAndShading(Projection projection, Shading shading)
 {
     if(!visible())
         return;
 
-    _graphRenderer->executeOnRendererThread([this, projection]
+    _graphRenderer->executeOnRendererThread([this, projection, shading]
     {
         startTransition(0.3f, projection == Projection::Perspective ?
             Transition::Type::Power : Transition::Type::InversePower);
 
         for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
         {
-            componentRenderer->setProjection(projection);
+            componentRenderer->setProjectionAndShading(projection, shading);
             componentRenderer->doProjectionTransition();
         }
     }, QStringLiteral("GraphOverviewScene::setProjection"));

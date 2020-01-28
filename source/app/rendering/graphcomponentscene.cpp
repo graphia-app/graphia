@@ -581,7 +581,7 @@ void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId, ComponentId
     }
 }
 
-void GraphComponentScene::setProjection(Projection projection)
+void GraphComponentScene::setProjectionAndShading(Projection projection, Shading shading)
 {
     if(!visible())
         return;
@@ -592,19 +592,19 @@ void GraphComponentScene::setProjection(Projection projection)
 
         if(!isRendererForThisComponent)
         {
-            componentRenderer->setProjection(projection);
+            componentRenderer->setProjectionAndShading(projection, shading);
             componentRenderer->doProjectionTransition();
         }
     }
 
-    auto startProjectionTransition = [this, projection]
+    auto startProjectionTransition = [this, projection, shading]
     {
-        _graphRenderer->executeOnRendererThread([this, projection]
+        _graphRenderer->executeOnRendererThread([this, projection, shading]
         {
             startTransition(0.3f, projection == Projection::Perspective ?
                 Transition::Type::Power : Transition::Type::InversePower);
 
-            componentRenderer()->setProjection(projection);
+            componentRenderer()->setProjectionAndShading(projection, shading);
             componentRenderer()->doProjectionTransition();
         }, QStringLiteral("GraphComponentScene::setProjection"));
     };

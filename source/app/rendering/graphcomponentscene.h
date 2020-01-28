@@ -63,7 +63,7 @@ public:
     void resetView(bool doTransition) override;
     bool viewIsReset() const override;
 
-    void setProjection(Projection projection) override;
+    void setProjectionAndShading(Projection projection, Shading shading) override;
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
