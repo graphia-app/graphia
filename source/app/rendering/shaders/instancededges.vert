@@ -46,7 +46,7 @@ out float lightOffset;
 out float lightScale;
 out float projectionScale;
 
-uniform samplerBuffer componentData;
+uniform sampler2D componentData;
 uniform int componentDataElementSize;
 
 const float ARROW_HEAD_CUTOFF_Y = 0.24;
@@ -89,7 +89,9 @@ mat4 mat4FromComponentData(int offset)
     {
         for(int i = 0; i < 4; i++)
         {
-            m[j][i] = texelFetch(componentData, index).r;
+            int xIndex = index % 4096;
+            int yIndex = index / 4096;
+            m[j][i] = texelFetch(componentData, ivec2(xIndex, yIndex), 0).r;
             index++;
         }
     }
@@ -99,8 +101,9 @@ mat4 mat4FromComponentData(int offset)
 
 float floatFromComponentData(int offset)
 {
-    int index = componentDataOffset() + offset;
-    return texelFetch(componentData, index).r;
+    int xIndex = (componentDataOffset() + offset) % 4096;
+    int yIndex = (componentDataOffset() + offset) / 4096;
+    return texelFetch(componentData, ivec2(xIndex, yIndex), 0).r;
 }
 
 float approxProjectionScaleFor(vec3 position, float extent, mat4 p)

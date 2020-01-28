@@ -419,12 +419,6 @@ GraphRendererCore::GraphRendererCore()
 
 GraphRendererCore::~GraphRendererCore()
 {
-    if(_componentDataTBO != 0)
-    {
-        glDeleteBuffers(1, &_componentDataTBO);
-        _componentDataTBO = 0;
-    }
-
     if(_componentDataTexture != 0)
     {
         glDeleteTextures(1, &_componentDataTexture);
@@ -485,9 +479,11 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
     gpuGraphData._nodeVBO.bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
     _nodesShader.setUniformValue("componentDataElementSize",
         static_cast<int>(_componentDataElementSize));
+
     _nodesShader.setUniformValue("componentData", 0);
 
     _nodesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
@@ -497,7 +493,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
     gpuGraphData._sphere.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
 }
@@ -513,9 +509,12 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
     gpuGraphData._edgeVBO.bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+
     _edgesShader.setUniformValue("componentDataElementSize",
         static_cast<int>(_componentDataElementSize));
+
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
+
     _edgesShader.setUniformValue("componentData", 0);
 
     _edgesShader.setUniformValue("flatness", shading() == Shading::Flat ? 1.0f : 0.0f);
@@ -525,7 +524,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numEdges());
     gpuGraphData._arrow.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     gpuGraphData._edgeVBO.release();
     _edgesShader.release();
 }
@@ -554,9 +553,11 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     _textShader.setUniformValue("textScale", u::pref("visuals/textSize").toFloat());
 
     glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+
+    glBindTexture(GL_TEXTURE_2D, _componentDataTexture);
     _textShader.setUniformValue("componentDataElementSize",
         static_cast<int>(_componentDataElementSize));
+
     _textShader.setUniformValue("componentData", 1);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
@@ -564,7 +565,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numGlyphs());
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     gpuGraphData._textVBO.release();
     _textShader.release();
@@ -671,9 +672,21 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 
 void GraphRendererCore::uploadGPUComponentData()
 {
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glBufferData(GL_TEXTURE_BUFFER, _componentData.size() * sizeof(GLfloat), _componentData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, componentDataTexture());
+    auto textureWidth = std::min(static_cast<int>(_componentData.size()), MAX_COMPONENT_TEXTURE_SIZE);
+    auto textureHeight = (static_cast<int>(_componentData.size()) / textureWidth);
+    if(static_cast<int>(_componentData.size()) % textureWidth > 0)
+        textureHeight++;
+
+    Q_ASSERT(textureHeight < MAX_COMPONENT_TEXTURE_SIZE);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, textureWidth, textureHeight, 0,
+                  GL_RED, GL_FLOAT, _componentData.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Shading GraphRendererCore::shading() const
@@ -1013,12 +1026,9 @@ void GraphRendererCore::prepareComponentDataTexture()
     if(_componentDataTexture == 0)
         glGenTextures(1, &_componentDataTexture);
 
-    if(_componentDataTBO == 0)
-        glGenBuffers(1, &_componentDataTBO);
-
-    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
-    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _componentDataTBO);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    //glBindTexture(GL_TEXTURE_2D, componentDataTexture());
+    //glBindBuffer(GL_TEXTURE_2D, _componentDataTBO);
+    //glTexBuffer(GL_TEXTURE_2D, GL_RGBA32F, _componentDataTBO);
+    //glBindBuffer(GL_TEXTURE_2D, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
 }

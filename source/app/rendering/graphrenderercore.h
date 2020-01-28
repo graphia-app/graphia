@@ -151,6 +151,7 @@ public:
 private:
     GLint _numMultiSamples = 0;
 
+    const GLint MAX_COMPONENT_TEXTURE_SIZE = 4096;
     int _width = 0;
     int _height = 0;
 
@@ -165,8 +166,6 @@ private:
     QOpenGLShaderProgram _selectionShader;
 
     GLuint _depthTexture = 0;
-
-    GLuint _componentDataTBO = 0;
     GLuint _componentDataTexture = 0;
     std::vector<GLfloat> _componentData;
     size_t _componentDataElementSize = 0;
@@ -207,6 +206,8 @@ protected:
 
     Shading shading() const;
     void setShading(Shading shading);
+
+    GLuint componentDataTexture() const { return _componentDataTexture; }
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);
