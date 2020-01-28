@@ -392,7 +392,7 @@ void CorrelationPluginInstance::onLoadSuccess()
 
 QVector<double> CorrelationPluginInstance::rawData()
 {
-    return QVector<double>::fromStdVector(_data);
+    return QVector<double>(_data.begin(), _data.end());
 }
 
 void CorrelationPluginInstance::buildColumnAnnotations()

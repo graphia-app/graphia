@@ -264,10 +264,14 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
     for(const auto& roleName : qAsConst(byteArrayRoleNames))
         currentRoleNames.append(roleName);
 
-    Q_ASSERT(added.isEmpty() || currentRoleNames.toSet().intersect(added.toSet()).isEmpty());
+    QSet<QString> currentRoleNamesSet(currentRoleNames.begin(), currentRoleNames.end());
+    QSet<QString> addedSet(added.begin(), added.end());
+    QSet<QString> removedSet(removed.begin(), removed.end());
+
+    Q_ASSERT(added.isEmpty() || currentRoleNamesSet.intersect(addedSet).isEmpty());
 
     // Ignore attribute names we aren't using (they may not be node attributes)
-    auto filteredRemoved = currentRoleNames.toSet().intersect(removed.toSet()).toList();
+    auto filteredRemoved = currentRoleNamesSet.intersect(removedSet).values();
 
     if(added.isEmpty() && filteredRemoved.isEmpty())
     {
