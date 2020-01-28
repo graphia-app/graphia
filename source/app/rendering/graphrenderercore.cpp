@@ -635,6 +635,7 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
     const QMatrix4x4& projectionMatrix, float distance, float lightScale)
 {
     std::vector<double> componentDataElement;
+    componentDataElement.reserve(34);
 
     for(int i = 0; i < 16; i++)
         componentDataElement.push_back(modelViewMatrix.data()[i]);

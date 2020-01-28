@@ -21,7 +21,7 @@ class Camera
 public:
     Camera();
     Camera(const Camera& other);
-    Camera& operator=(const Camera& other);
+    Camera& operator=(const Camera& other) = default;
 
     enum ProjectionType
     {

@@ -43,30 +43,6 @@ Camera::Camera(const Camera& other) :
     _viewProjectionMatrix = other._viewProjectionMatrix;
 }
 
-Camera& Camera::operator=(const Camera& other)
-{
-    _focus = other._focus;
-    _rotation = other._rotation;
-    _distance = other._distance;
-    _projectionType = other._projectionType;
-    _nearPlane = other._nearPlane;
-    _farPlane = other._farPlane;
-    _fieldOfView = other._fieldOfView;
-    _aspectRatio = other._aspectRatio;
-    _left = other._left;
-    _right = other._right;
-    _bottom = other._bottom;
-    _top = other._top;
-    _viewport = other._viewport;
-    _viewMatrix = other._viewMatrix;
-    _projectionMatrix = other._projectionMatrix;
-    _viewProjectionMatrix = other._viewProjectionMatrix;
-    _viewMatrixDirty = other._viewMatrixDirty;
-    _viewProjectionMatrixDirty = other._viewProjectionMatrixDirty;
-
-    return *this;
-}
-
 QVector3D Camera::viewVector() const
 {
     return -QVector3D(viewMatrix().row(2));

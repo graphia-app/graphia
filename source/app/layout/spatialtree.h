@@ -298,7 +298,7 @@ protected:
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }
 
 public:
-    void build(const IGraphComponent& graph, const NodeLayoutPositions& nodePositions)
+    void build(const IGraphComponent& graph, const NodeLayoutPositions& nodePositions) override
     {
         if constexpr(NumDimensions == 2)
         {

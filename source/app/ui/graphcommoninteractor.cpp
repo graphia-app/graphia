@@ -321,7 +321,8 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
         // Close to the centre of rotation, taper down to a deadzone, thereby
         // avoiding violent spins due to the vectors being very short
-        const float deadzoneScale = renderer->width() < 200.0f ? renderer->width() / 200.0f : 1.0f;
+        const auto wf = static_cast<float>(w);
+        const float deadzoneScale = wf < 200.0f ? wf / 200.0f : 1.0f;
         const float deadzoneDistance = 25.0f * deadzoneScale;
         const float dampingDistance = deadzoneDistance * 2.0f;
         if(distanceFromCentre < dampingDistance)
@@ -484,7 +485,7 @@ void GraphCommonInteractor::wheelEvent(const QPoint& pos, int angle)
 
     _componentRendererUnderCursor = componentRendererAtPosition(pos);
 
-    wheelMove(angle,
+    wheelMove(static_cast<float>(angle),
         static_cast<float>(pos.x()),
         static_cast<float>(pos.y()));
 }
