@@ -115,7 +115,7 @@ public:
 
     bool componentIsValid() const { return !componentId().isNull() && !_frozen; }
 
-    bool transitionRequired();
+    bool transitionRequired() const;
     void computeTransition();
     void updateTransition(float f);
 

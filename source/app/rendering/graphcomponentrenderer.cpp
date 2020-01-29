@@ -635,16 +635,16 @@ void GraphComponentRenderer::doProjectionTransition()
         centreNodeInViewport(_viewData._focusNodeId, -1.0f, rotation);
 }
 
-bool GraphComponentRenderer::transitionRequired()
+bool GraphComponentRenderer::transitionRequired() const
 {
     if(trackingCentreOfComponent() || !focusNodeIsVisible())
         return true;
 
-    //FIXME What's this doing here? Will it be executed on the correct thread?
-    // It's preventing transitionRequired being const
-    updateCentreAndZoomDistance();
+    Q_ASSERT(!_viewData._focusNodeId.isNull());
+    auto entireComponentZoomDistance =
+        entireComponentZoomDistanceFor(_viewData._focusNodeId);
 
-    return _viewData.camera().distance() > _entireComponentZoomDistance;
+    return _viewData.camera().distance() > entireComponentZoomDistance;
 }
 
 void GraphComponentRenderer::computeTransition()
