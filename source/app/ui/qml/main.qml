@@ -1864,7 +1864,7 @@ ApplicationWindow
         switch(document.shading())
         {
         default:
-        case Shading.Smooth:    shading.current = smoothShadingAction;  break;
+        case Shading.Smooth:    shading.current = smoothShadingAction; break;
         case Shading.Flat:      shading.current = flatShadingAction; break;
         }
     }
@@ -1876,7 +1876,7 @@ ApplicationWindow
         switch(document.projection())
         {
         default:
-        case Projection.Perspective:    projection.current = perspecitveProjectionAction;  break;
+        case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
         case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
         case Projection.TwoDee:         projection.current = twoDeeProjectionAction; break;
         }
