@@ -21,7 +21,7 @@
 
 #include <zlib.h>
 
-const int NativeSaver::Version = 4;
+const int NativeSaver::Version = 5;
 const int NativeSaver::MaxHeaderSize = 1 << 12;
 
 static bool compress(const QByteArray& byteArray, const QString& filePath, Progressable& progressable)
