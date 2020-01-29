@@ -619,7 +619,7 @@ void GraphComponentRenderer::doProjectionTransition()
 
     updateCentreAndZoomDistance();
 
-    QQuaternion rotation = QQuaternion(QVector4D()); // null quaternion
+    QQuaternion rotation = nullQuaternion();
 
     if(_projection == Projection::TwoDee)
     {

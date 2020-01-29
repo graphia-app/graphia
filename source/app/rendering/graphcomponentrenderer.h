@@ -183,14 +183,15 @@ private:
     GraphModel* _graphModel = nullptr;
     SelectionManager* _selectionManager = nullptr;
 
+    // QQuaternion doesn't have a constructor that creates a null QQuaternion (i.e. 0,0,0,0)
+    static QQuaternion nullQuaternion() { return QQuaternion(QVector4D()); }
+
     void updateCameraProjection(Camera& camera);
 
     void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f,
-        // Odd constructor makes a null quaternion
-        QQuaternion rotation = QQuaternion(QVector4D()));
+        QQuaternion rotation = nullQuaternion());
     void centrePositionInViewport(const QVector3D& focus, float zoomDistance = -1.0f,
-        // Odd constructor makes a null quaternion
-        QQuaternion rotation = QQuaternion(QVector4D()));
+        QQuaternion rotation = nullQuaternion());
 
     float zoomDistanceForRadius(float radius, Projection projection = Projection::Unset) const;
     float maxDistanceFor(NodeId nodeId,
