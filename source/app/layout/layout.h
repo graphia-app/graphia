@@ -210,6 +210,7 @@ public:
 
     void setStartingNodePositions(const ExactNodePositions& nodePositions);
 
+    Layout::Dimensionality dimensionalityMode();
     void setDimensionalityMode(Layout::Dimensionality dimensionalityMode);
 
     QString layoutName() const;

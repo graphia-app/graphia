@@ -247,6 +247,19 @@ std::vector<LayoutSetting>& Document::layoutSettings() const
     return _layoutThread->settings();
 }
 
+void Document::updateLayoutDimensionality()
+{
+    auto newDimensionality = _graphQuickItem->projection() == Projection::TwoDee ?
+        Layout::Dimensionality::TwoDee :
+        Layout::Dimensionality::ThreeDee;
+
+    if(newDimensionality != _layoutThread->dimensionalityMode())
+    {
+        _layoutThread->setDimensionalityMode(newDimensionality);
+        _layoutRequired = true;
+    }
+}
+
 void Document::updateLayoutState()
 {
     if(!busy() && !_userLayoutPaused && _layoutRequired)
@@ -715,6 +728,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
     for(const auto& layoutSetting : _loadedLayoutSettings)
         _layoutThread->setSettingValue(layoutSetting._name, layoutSetting._value);
 
+    updateLayoutDimensionality();
+
     if(_startingNodePositions != nullptr)
     {
         _layoutThread->setStartingNodePositions(*_startingNodePositions);
@@ -764,21 +779,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::finished, this, &Document::commandInProgressChanged);
     connect(&_commandManager, &CommandManager::finished, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
 
-    connect(this, &Document::busyChanged, [this]
-    {
-        if(busy())
-            return;
-
-        // Note that we get here when no longer busy, so that the switch to the
-        // appropriate layout happens after the projection transition has occurred
-        auto dimensionality = _graphQuickItem->projection() == Projection::TwoDee ?
-            Layout::Dimensionality::TwoDee :
-            Layout::Dimensionality::ThreeDee;
-
-        _layoutThread->setDimensionalityMode(dimensionality);
-        _layoutRequired = true;
-        updateLayoutState();
-    });
+    connect(this, &Document::busyChanged, [this] { if(!busy()) updateLayoutDimensionality(); });
 
     connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 

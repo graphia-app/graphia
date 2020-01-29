@@ -288,17 +288,20 @@ void LayoutThread::addAllComponents()
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
-
-    // The new components may need to be laid out so resume in case they do
-    resume();
 }
 
 void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositions)
 {
     _nodeLayoutPositions.set(_graphModel->graph().nodeIds(), nodePositions);
+    _graphModel->nodePositions().update(_nodeLayoutPositions);
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);
+}
+
+Layout::Dimensionality LayoutThread::dimensionalityMode()
+{
+    return _dimensionalityMode;
 }
 
 void LayoutThread::setDimensionalityMode(Layout::Dimensionality dimensionalityMode)
