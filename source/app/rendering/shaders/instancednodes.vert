@@ -100,11 +100,17 @@ void main()
         (modelViewMatrix * vec4(nodeVertexPosition, 1.0)).xyz;
     gl_Position = projectionMatrix * vec4(nodeVertexPositionViewSpace, 1.0);
 
+    // This value is 0.0 in the perspective case and 1.0 in ortho
+    // It doesn't change linearly, but it's probably better to
+    // use it to tween than switching over suddenly
+    float proj33 = projectionMatrix[3][3];
+
     // Map 2D UVs to node Hemisphere
-    // Create orientation matrix based on vector from eyespace nodePosition
+    // Create orientation matrix based on vector from view space nodePosition
     // This keeps the node "facing" the camera
-    vec3 eyeNodeCentre = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
-    mat4 orientationMatrix = makeOrientationMatrix(normalize(-eyeNodeCentre));
+    vec3 nodePositionViewSpace = (modelViewMatrix * vec4(nodePosition, 1.0)).xyz;
+    vec3 nodeToCameraDir = mix(normalize(-nodePositionViewSpace), vec3(0.0, 0.0, 1.0), proj33);
+    mat4 orientationMatrix = makeOrientationMatrix(nodeToCameraDir);
     vec4 eyeNodeNormal = orientationMatrix * vec4(vNormal, 1.0);
 
     // Project hemisphere normal to UVs
