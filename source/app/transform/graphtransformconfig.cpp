@@ -210,10 +210,18 @@ QString GraphTransformConfig::conditionAsString() const
                     {
                         auto info = Attribute::parseAttributeName(s);
 
-                        if(!info._parameter.isEmpty())
-                            return QString(R"($"%1"."%2")").arg(info._name, info._parameter);
+                        const char* prefix = "";
+                        switch(info._type)
+                        {
+                        case Attribute::EdgeNodeType::Source: prefix = "source."; break;
+                        case Attribute::EdgeNodeType::Target: prefix = "target."; break;
+                        default: break;
+                        }
 
-                        return QString(R"($"%1")").arg(info._name);
+                        if(!info._parameter.isEmpty())
+                            return QString(R"($"%1%2"."%3")").arg(prefix, info._name, info._parameter);
+
+                        return QString(R"($"%1%2")").arg(prefix, info._name);
                     }
 
                     return QString(R"("%1")").arg(s);
