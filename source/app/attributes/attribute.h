@@ -353,6 +353,19 @@ public:
     ValueType valueType() const override;
     ElementType elementType() const override;
 
+    template<typename E>
+    bool isOfElementType() const
+    {
+        if constexpr(std::is_same_v<E, NodeId>)
+            return elementType() == ElementType::Node;
+
+        if constexpr(std::is_same_v<E, EdgeId>)
+            return elementType() == ElementType::Edge;
+
+        if constexpr(std::is_same_v<E, const IGraphComponent&>)
+            return elementType() == ElementType::Component;
+    }
+
     template<typename T>
     AttributeRange<T> range()
     {

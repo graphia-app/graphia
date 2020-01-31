@@ -546,6 +546,12 @@ private:
             auto lhsAttribute = attributeFromValue(lhs);
             auto rhsAttribute = attributeFromValue(rhs);
 
+            if(lhsAttribute.isValid() && !lhsAttribute.template isOfElementType<E>())
+                return nullptr; // Type doesn't match what we're creating for
+
+            if(rhsAttribute.isValid() && !rhsAttribute.template isOfElementType<E>())
+                return nullptr; // Type doesn't match what we're creating for
+
             if(lhsAttribute.isValid() && rhsAttribute.isValid())
             {
                 // Both sides are attributes
@@ -589,6 +595,9 @@ private:
 
             if(!attribute.isValid())
                 return nullptr; // Not an attribute
+
+            if(!attribute.template isOfElementType<E>())
+                return nullptr; // Type doesn't match what we're creating for
 
             switch(unaryCondition._op)
             {
