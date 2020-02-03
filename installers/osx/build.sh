@@ -50,7 +50,7 @@ macdeployqt ${PRODUCT_NAME}.app \
 
 # Need to sign again because macdeployqt won't sign the additional executables
 echo "Resigning..."
-codesign --verbose --deep --force --sign "${SIGN_APPLE_KEYCHAIN_ID}" \
+codesign --verbose --deep --force --options runtime --sign "${SIGN_APPLE_KEYCHAIN_ID}" \
   ${PRODUCT_NAME}.app || exit $?
 echo "Verifying..."
 codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
