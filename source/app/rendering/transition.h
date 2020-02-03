@@ -31,9 +31,8 @@ private:
     bool _suppressSignals = false;
 
 public:
-    template<typename... Args> void start(float duration, Type type,
-                                          std::function<void(float)> function,
-                                          Args... finishedFunctions)
+    template<typename Fn>
+    Transition& start(float duration, Type type, Fn&& function)
     {
         Q_ASSERT(!_finishing);
 
@@ -44,8 +43,17 @@ public:
         _elapsed = 0.0f;
         _type = type;
         _function = std::move(function);
-        _finishedFunctions = {finishedFunctions...};
+        _finishedFunctions.clear();
         _suppressSignals = false;
+
+        return *this;
+    }
+
+    template<typename FinishedFn>
+    Transition& then(FinishedFn&& finishedFn)
+    {
+        _finishedFunctions.emplace_back(std::move(finishedFn));
+        return *this;
     }
 
     bool update(float dTime);

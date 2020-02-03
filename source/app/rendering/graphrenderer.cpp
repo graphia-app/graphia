@@ -655,7 +655,8 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         {
             if(!_graphComponentScene->viewIsReset())
             {
-                _graphComponentScene->startTransition([this]
+                _graphComponentScene->startTransition().then(
+                [this]
                 {
                     sceneFinishedTransition();
                     _transition.willBeImmediatelyReused();
@@ -686,7 +687,7 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
 
         if(doTransition)
         {
-            _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
+            _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId()).then(
             [this, componentId, nodeId]
             {
                 if(!nodeId.isNull())

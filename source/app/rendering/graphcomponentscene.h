@@ -55,8 +55,8 @@ public:
     GraphComponentRenderer* componentRenderer() const;
     GraphComponentRenderer* transitioningComponentRenderer() const;
 
-    void startTransition(std::function<void()> finishedFunction = []{}, float duration = 0.3f,
-                         Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    Transition& startTransition(float duration = 0.3f,
+        Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:
     GraphRenderer* _graphRenderer;

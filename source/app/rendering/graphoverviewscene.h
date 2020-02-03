@@ -63,14 +63,10 @@ public:
     void zoom(ZoomType zoomType, float x, float y, bool doTransition);
     void zoom(float delta, float x, float y, bool doTransition);
 
-    void startTransitionFromComponentMode(ComponentId focusComponentId,
-                                          std::function<void()> finishedFunction = []{},
-                                          float duration = 0.3f,
-                                          Transition::Type transitionType = Transition::Type::EaseInEaseOut);
-    void startTransitionToComponentMode(ComponentId focusComponentId,
-                                        std::function<void()> finishedFunction = []{},
-                                        float duration = 0.3f,
-                                        Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    Transition& startTransitionFromComponentMode(ComponentId focusComponentId,
+        float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    Transition& startTransitionToComponentMode(ComponentId focusComponentId,
+        float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:
     GraphRenderer* _graphRenderer = nullptr;
@@ -101,8 +97,8 @@ private:
 
     std::vector<ComponentId> _removedComponentIds;
     std::vector<ComponentMergeSet> _componentMergeSets;
-    void startTransition(std::function<void()> finishedFunction = []{}, float duration = 1.0f,
-                         Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    Transition& startTransition(float duration = 1.0f,
+        Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     void startZoomTransition(float duration = 0.3f);
 
     std::vector<ComponentId> _componentIds;

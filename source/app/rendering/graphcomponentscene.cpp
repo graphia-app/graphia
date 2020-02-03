@@ -176,7 +176,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         [this](float f)
         {
             _transitionValue = f;
-        },
+        }).then(
         [this]
         {
             _transitionValue = 0.0f;
@@ -193,7 +193,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
                 _graphRenderer->executeOnRendererThread([this]
                 {
                     _graphRenderer->transition().willBeImmediatelyReused();
-                    startTransition([this] { performQueuedTransition(); });
+                    startTransition().then([this] { performQueuedTransition(); });
                     restoreViewData();
                 }, QStringLiteral("GraphComponentScene::finishComponentTransition (restoreViewData)"));
             }
@@ -246,7 +246,8 @@ void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransit
         _transitioningComponentId = _componentId;
         if(!componentId.isNull() && !viewIsReset())
         {
-            startTransition([this, componentId]
+            startTransition().then(
+            [this, componentId]
             {
                 _graphRenderer->transition().willBeImmediatelyReused();
                 finishComponentTransitionOnRendererThread(componentId, true);
@@ -350,7 +351,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
     else if(!componentTransitionRequired && !componentTransitionActive())
     {
         _queuedTransitionNodeId.setToNull();
-        startTransition([this] { performQueuedTransition(); });
+        startTransition().then([this] { performQueuedTransition(); });
         componentRenderer()->moveFocusToNode(nodeId, radius);
     }
     else
@@ -371,15 +372,13 @@ GraphComponentRenderer* GraphComponentScene::transitioningComponentRenderer() co
     return _graphRenderer->componentRendererForId(_transitioningComponentId);
 }
 
-void GraphComponentScene::startTransition(std::function<void()> finishedFunction,
-                                          float duration, Transition::Type transitionType)
+Transition& GraphComponentScene::startTransition(float duration, Transition::Type transitionType)
 {
-    _graphRenderer->transition().start(duration, transitionType,
+    return _graphRenderer->transition().start(duration, transitionType,
     [this](float f)
     {
         componentRenderer()->updateTransition(f);
-    },
-    std::move(finishedFunction));
+    });
 }
 
 void GraphComponentScene::updateRendererVisibility()
@@ -534,7 +533,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
             if(!_beingRemoved && _numComponentsPriorToChange > 0 &&
                componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
-                startTransition(finishTransition);
+                startTransition().then(finishTransition);
                 componentRenderer()->computeTransition();
             }
             else
@@ -581,7 +580,7 @@ void GraphComponentScene::setProjection(Projection projection)
     {
         _graphRenderer->executeOnRendererThread([this, projection]
         {
-            startTransition([]{}, 0.3f, projection == Projection::Perspective ?
+            startTransition(0.3f, projection == Projection::Perspective ?
                 Transition::Type::Power : Transition::Type::InversePower);
 
             componentRenderer()->setProjection(projection);
@@ -591,7 +590,8 @@ void GraphComponentScene::setProjection(Projection projection)
 
     if(!viewIsReset())
     {
-        startTransition([this, startProjectionTransition]
+        startTransition().then(
+        [this, startProjectionTransition]
         {
             _graphRenderer->transition().willBeImmediatelyReused();
             startProjectionTransition();
