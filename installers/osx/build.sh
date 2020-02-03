@@ -122,5 +122,6 @@ then
   xcrun stapler staple "${PRODUCT_NAME}-${VERSION}.dmg" || exit $?
 else
   echo "Notarization failed!"
+  cat notarization.log
   exit 1
 fi
