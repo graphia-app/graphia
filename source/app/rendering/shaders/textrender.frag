@@ -20,6 +20,6 @@ void main()
     if(firstData.r < 0.5 - smoothing)
         discard;
 
-    outColor = vec4(textColor.rgb * alpha, alpha);
+    outColor = vec4(textColor.rgb, alpha);
     outSelection = vec4(0, 0, 0, 0);
 }
