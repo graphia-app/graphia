@@ -140,6 +140,9 @@ void TableProxyModel::setColumnOrder(const std::vector<int>& columnOrder)
 
 void TableProxyModel::setSortColumn(int sortColumn)
 {
+    if(sortColumn < 0)
+        return;
+
     _sortColumn = sortColumn;
 
     auto sourceSortColumn = static_cast<size_t>(_sortColumn);
@@ -150,6 +153,9 @@ void TableProxyModel::setSortColumn(int sortColumn)
 void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
 {
     _sortOrder = sortOrder;
+
+    if(_sortColumn < 0)
+        return;
 
     auto sourceSortColumn = static_cast<size_t>(_sortColumn);
     this->sort(_unorderedSourceToProxyColumn.at(sourceSortColumn), _sortOrder);
