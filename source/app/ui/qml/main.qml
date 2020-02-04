@@ -1981,6 +1981,7 @@ ApplicationWindow
                     }
                 }
 
+                tabView.currentIndex = index;
                 var tab = getTab(index).item;
                 tab.confirmSave(onCloseFunction);
             }
