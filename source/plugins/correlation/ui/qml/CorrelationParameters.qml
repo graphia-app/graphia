@@ -223,6 +223,7 @@ BaseParameterDialog
                         TableView
                         {
                             property var headerPadding: 4
+                            property var headerWidthPadding: 10
                             id: columnHeaderView
 
                             model: dataRectView.model
@@ -246,7 +247,7 @@ BaseParameterDialog
                             delegate: Item
                             {
                                 property var modelIndex: index
-                                implicitWidth: headerLabel.contentWidth + 10
+                                implicitWidth: headerLabel.contentWidth + columnHeaderView.headerWidthPadding
                                 implicitHeight: headerFontMetrics.height + columnHeaderView.headerPadding
 
                                 id: headerDelegate
@@ -390,7 +391,6 @@ BaseParameterDialog
                                 {
                                     width: parent.width
 
-
                                     anchors.centerIn: parent
                                     height: parent.height
                                     color:
@@ -433,6 +433,9 @@ BaseParameterDialog
                                 }
                             }
 
+                            // tableview.forceLayout() seems to CRASH on empty rows or columns.
+                            // It's a bug, been reported. This gives us some safety net.
+                            // https://bugreports.qt.io/browse/QTBUG-77459
                             function forceLayoutSafe()
                             {
                                 if(dataRectView.rows > 0 && dataRectView.columns > 0)

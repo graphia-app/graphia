@@ -464,7 +464,7 @@ public:
         const QString& extension = "csv");
 
     Q_INVOKABLE void writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl,
-                                          const QString& extension = "csv");
+        const QString& extension = "csv");
 
     Q_INVOKABLE void addBookmark(const QString& name);
     Q_INVOKABLE void removeBookmarks(const QStringList& names);

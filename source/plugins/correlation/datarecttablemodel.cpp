@@ -32,10 +32,8 @@ int DataRectTableModel::columnCount(const QModelIndex&) const
     return 0;
 }
 
-QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
+QVariant DataRectTableModel::data(const QModelIndex& index, int) const
 {
-    Q_UNUSED(role)
-
     auto row = static_cast<size_t>(index.row());
     auto column = static_cast<size_t>(index.column());
 

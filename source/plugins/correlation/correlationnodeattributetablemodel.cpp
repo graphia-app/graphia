@@ -31,6 +31,16 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, int attribute
     return NodeAttributeTableModel::dataValue(row, attributeIndex);
 }
 
+void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
+                                                    std::vector<QString>* dataColumnNames,
+                                                    std::vector<double>* dataValues)
+{
+    _dataColumnNames = dataColumnNames;
+    _dataValues = dataValues;
+
+    NodeAttributeTableModel::initialise(document, userNodeData);
+}
+
 void CorrelationNodeAttributeTableModel::updateColumnNames()
 {
     NodeAttributeTableModel::updateColumnNames();
@@ -40,18 +50,6 @@ void CorrelationNodeAttributeTableModel::updateColumnNames()
         auto attributeCount = NodeAttributeTableModel::columnNames().size();
         _firstDataColumnRole = attributeCount;
     }
-}
-
-void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
-                                                    std::vector<QString>* dataColumnNames,
-                                                    std::vector<double>* dataValues)
-{
-    //FIXME: effectively disable the functionality this class provides for now, as it's causing
-    // too many performance problems with TableView; revisit this when the new TableView is available
-    _dataColumnNames = dataColumnNames;
-    _dataValues = dataValues;
-
-    NodeAttributeTableModel::initialise(document, userNodeData);
 }
 
 bool CorrelationNodeAttributeTableModel::columnIsCalculated(const QString& columnName) const

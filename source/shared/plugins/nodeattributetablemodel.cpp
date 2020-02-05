@@ -70,7 +70,9 @@ QStringList NodeAttributeTableModel::columnNames() const
 
 int NodeAttributeTableModel::columnIndexForAttributeValue(const QString &attributeValue)
 {
-    return _columnNames.indexOf(attributeValue);
+    auto index = _columnNames.indexOf(attributeValue);
+    Q_ASSERT(index > -1);
+    return index;
 }
 
 QVariant NodeAttributeTableModel::dataValue(size_t row, int attributeIndex) const
@@ -268,11 +270,13 @@ bool NodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
 
 bool NodeAttributeTableModel::rowVisible(size_t row) const
 {
+    Q_ASSERT(row < _nodeSelectedColumn.size());
     return _nodeSelectedColumn[row].toBool();
 }
 
 QString NodeAttributeTableModel::columnHeaders(size_t column) const
 {
+    Q_ASSERT(column < static_cast<size_t>(columnNames().size()));
     return columnNames().at(static_cast<int>(column));
 }
 
@@ -280,20 +284,14 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    auto byteArrayRoleNames = _roleNames.values();
-    QStringList currentRoleNames;
-    currentRoleNames.reserve(_roleNames.size());
-    for(const auto& roleName : qAsConst(byteArrayRoleNames))
-        currentRoleNames.append(roleName);
+    QSet<QString> columnNamesUnique(_columnNames.begin(), _columnNames.end());
+    QSet<QString> addedUnique(added.begin(), added.end());
+    QSet<QString> removedUnique(removed.begin(), removed.end());
 
-    QSet<QString> currentRoleNamesSet(currentRoleNames.begin(), currentRoleNames.end());
-    QSet<QString> addedSet(added.begin(), added.end());
-    QSet<QString> removedSet(removed.begin(), removed.end());
+    Q_ASSERT(added.isEmpty() || columnNamesUnique.intersect(addedUnique).isEmpty());
 
-    Q_ASSERT(added.isEmpty() || currentRoleNamesSet.intersect(addedSet).isEmpty());
-
-    // Ignore attribute names we aren't using (they may not be node attributes)
-    auto filteredRemoved = currentRoleNamesSet.intersect(removedSet).values();
+    // Ignore attribute names we aren't using (they may ncolumnNamesUniqueot be node attributes)
+    auto filteredRemoved = columnNamesUnique.intersect(removedUnique).values();
 
     if(added.isEmpty() && filteredRemoved.isEmpty())
     {
@@ -374,13 +372,11 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
         auto cachedValue = dataColumn.at(row);
         return cachedValue;
     }
-    if(role == Roles::NodeSelectedRole)
+
+    if(role == Roles::NodeSelectedRole && !_nodeSelectedColumn.empty())
     {
-        if(!_nodeSelectedColumn.empty())
-        {
-            auto row = static_cast<size_t>(index.row());
-            return _nodeSelectedColumn.at(row);
-        }
+        auto row = static_cast<size_t>(index.row());
+        return _nodeSelectedColumn.at(row);
     }
     return {};
 }

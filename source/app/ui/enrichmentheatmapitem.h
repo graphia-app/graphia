@@ -19,7 +19,6 @@ class EnrichmentHeatmapItem : public QQuickPaintedItem
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY scrollAmountChanged)
     Q_PROPERTY(int yAxisPadding MEMBER _yAxisPadding WRITE setYAxisPadding NOTIFY scrollAmountChanged)
- 
     Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched)
 
 private:

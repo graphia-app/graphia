@@ -22,16 +22,14 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
 
     if(_orderedProxyToSourceColumn.size() == static_cast<size_t>(columnCount()))
     {
-        auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(), _orderedProxyToSourceColumn.at(index.column()));
+        auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(),
+                                                _orderedProxyToSourceColumn.at(index.column()));
         return sourceModel()->data(mappedIndex, role);
     }
 
     auto sourceIndex = sourceModel()->index(unorderedSourceIndex.row(), unorderedSourceIndex.column());
-    if (index.isValid() && !sourceIndex.isValid())
-    {
-        qDebug() << "Invalid Source Index. Row: " << index.row() << "Col:" << index.column();
-        return {};
-    }
+    Q_ASSERT(index.isValid() && sourceIndex.isValid());
+
     return sourceModel()->data(sourceIndex, role);
 }
 
@@ -75,7 +73,7 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
     return mappedProxyColumn;
 }
 
-TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel (parent)
+TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::invalidateFilter);
 }
@@ -94,13 +92,13 @@ void TableProxyModel::calculateUnorderedSourceProxyColumnMapping()
     std::vector<int> proxyToSourceColumns;
     std::vector<int> sourceToProxyColumns(sourceColumnCount, -1);
     proxyToSourceColumns.reserve(sourceColumnCount);
-    for (auto i = 0; i < static_cast<int>(sourceColumnCount); ++i)
+    for(auto i = 0; i < static_cast<int>(sourceColumnCount); ++i)
     {
         if(filterAcceptsColumn(i, {}))
             proxyToSourceColumns.push_back(i);
     }
 
-    for (auto i = 0; i < columnCount(); ++i)
+    for(auto i = 0; i < columnCount(); ++i)
     {
         auto index = static_cast<size_t>(i);
         auto source = static_cast<size_t>(proxyToSourceColumns.at(index));
@@ -125,6 +123,7 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
     _headerModel.clear();
     _headerModel.setRowCount(1);
     _headerModel.setColumnCount(columnCount());
+    // Headermodel takes ownership of the Items
     for(int i = 0; i < columnCount(); ++i)
         _headerModel.setItem(0, i, new QStandardItem());
 

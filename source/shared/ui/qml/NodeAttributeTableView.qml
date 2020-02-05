@@ -54,7 +54,7 @@ Item
         if(tableView.columnWidths.length > 0)
         {
             // Update array
-            for(let i=0; i<tableView.columns; i++)
+            for(let i = 0; i < tableView.columns; i++)
             {
                 let newValue = tableView.columnWidths[i];
                 if(newValue !== undefined)
@@ -68,7 +68,7 @@ Item
             tableView.columnWidths = []
         }
         tableView.currentTotalColumnWidth = 0;
-        for(let i=0; i<tableView.columns; i++)
+        for(let i = 0; i < tableView.columns; i++)
         {
             var tempCalculatedWidth = tableView.calculateMinimumColumnWidth(i);
             tableView.currentTotalColumnWidth += tempCalculatedWidth;
@@ -84,15 +84,10 @@ Item
     {
         let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
-
         if(columnSelectionMode)
-        {
             columnSelectionControls.show();
-        }
         else
-        {
             columnSelectionControls.hide();
-        }
         tableView._updateColumnVisibility();
         tableView.forceLayoutSafe();
     }
@@ -427,11 +422,13 @@ Item
                         states: [
                             State {
                                 when: headerContent.Drag.active
-                                ParentChange {
+                                ParentChange
+                                {
                                     target: headerContent
                                     parent: headerView
                                 }
-                                AnchorChanges {
+                                AnchorChanges
+                                {
                                     target: headerContent
                                     anchors.left: undefined
                                     anchors.top: undefined
@@ -442,7 +439,8 @@ Item
                         Rectangle
                         {
                             anchors.fill: parent
-                            color: headerMouseArea.containsMouse ? Qt.lighter(sysPalette.highlight, 1.99) : sysPalette.light
+                            color: headerMouseArea.containsMouse ?
+                                       Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
                         }
                         Item
                         {
@@ -456,7 +454,8 @@ Item
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 visible: columnSelectionMode
-                                text:  {
+                                text:
+                                {
                                     let headerIndex = proxyModel.mapOrderedToSourceColumn(model.column);
                                     if(headerIndex < 0)
                                         return "";
@@ -566,7 +565,8 @@ Item
                             onClicked:
                             {
                                 if(proxyModel.sortColumn == headerItem.sourceColumn)
-                                    proxyModel.sortOrder = proxyModel.sortOrder ? Qt.AscendingOrder : Qt.DescendingOrder;
+                                    proxyModel.sortOrder = proxyModel.sortOrder ?
+                                                Qt.AscendingOrder : Qt.DescendingOrder;
                                 else
                                     proxyModel.sortColumn = headerItem.sourceColumn;
 
@@ -594,7 +594,8 @@ Item
                                     if(drag.active)
                                     {
                                         let sourceColumn = proxyModel.mapOrderedToSourceColumn(model.column);
-                                        tableView.userColumnWidths[sourceColumn] = Math.max(30, headerItem.implicitWidth + mouseX);
+                                        let userWidth = Math.max(30, headerItem.implicitWidth + mouseX);
+                                        tableView.userColumnWidths[sourceColumn] = userWidth;
                                         headerItem.refreshState();
                                         tableView.forceLayoutSafe();
                                     }
@@ -753,8 +754,11 @@ Item
                         return false;
 
                     var hoverItem = tableView.childAt(mouseX, mouseY);
-                    if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar || hoverItem === verticalTableViewScrollBar))
+                    if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar ||
+                                              hoverItem === verticalTableViewScrollBar))
+                    {
                         return false;
+                    }
 
                     var tableItem = hoverItem.childAt(
                                 mouseX + tableView.contentX,
@@ -766,7 +770,7 @@ Item
                 {
                     var delegateWidth = tableView.currentColumnWidths[col];
                     let headerActualWidth = headerFullWidth(col);
-                    if(headerActualWidth < null)
+                    if(headerActualWidth === null)
                     {
                         console.log("Null CMCW", headerView.columns, col);
                         return defaultColumnWidth;
@@ -781,7 +785,8 @@ Item
                 function headerFullWidth(column)
                 {
                     let sourceColumn = proxyModel.mapOrderedToSourceColumn(column);
-                    let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) + headerView.sortIndicatorWidth;
+                    let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) +
+                        headerView.sortIndicatorWidth;
                     if(sourceColumn > -1)
                     {
                         let headerName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
@@ -860,9 +865,8 @@ Item
                         color:
                         {
                             if(model.subSelected)
-                            {
                                 return systemPalette.highlight;
-                            }
+
                             return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
                         }
 
@@ -911,13 +915,9 @@ Item
                 function _updateColumnVisibility()
                 {
                     if(root.columnSelectionMode)
-                    {
                         proxyModel.hiddenColumns = [];
-                    }
                     else
-                    {
                         proxyModel.hiddenColumns = hiddenColumns;
-                    }
                 }
 
                 Connections
@@ -998,19 +998,19 @@ Item
                 }
                 onPositionChanged:
                 {
-                    if(mouse.buttons == Qt.LeftButton)
+                    if(mouse.buttons !== Qt.LeftButton)
+                        return;
+
+                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    if(tableItem && tableItem.modelRow !== previousRow)
                     {
-                        var tableItem = tableView.getItem(mouseX, mouseY);
-                        if(tableItem && tableItem.modelRow !== previousRow)
-                        {
-                            if(previousRow != -1)
-                                deselectRows(startRow, previousRow);
+                        if(previousRow != -1)
+                            deselectRows(startRow, previousRow);
 
-                            selectRows(startRow, tableItem.modelRow);
+                        selectRows(startRow, tableItem.modelRow);
 
-                            previousRow = tableItem.modelRow;
-                            endRow = tableItem.modelRow
-                        }
+                        previousRow = tableItem.modelRow;
+                        endRow = tableItem.modelRow
                     }
                 }
             }
@@ -1030,14 +1030,13 @@ Item
     signal rightClick();
     onRightClick: { contextMenu.popup(); }
 
-    // Helper function to move around elements within an array
     function array_move(arr, old_index, new_index)
     {
-        if (new_index >= arr.length) {
+        if (new_index >= arr.length)
+        {
             var k = new_index - arr.length + 1;
-            while (k--) {
+            while(k--)
                 arr.push(undefined);
-            }
         }
         arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
         return arr; // for testing
