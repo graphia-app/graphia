@@ -325,14 +325,14 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
 
     // Keep the near clipping plane as far away as possible, and in
     // so doing maximise the available depth buffer resolution
-    const auto near = std::max(minCameraDistance - _maxDistanceFromFocus, 0.3f);
+    const auto nearClip = std::max(minCameraDistance - _maxDistanceFromFocus, 0.3f);
 
     //FIXME: ideally this should be calculated too, but it gets complicated with transitions etc.
-    const auto far = 50000.0f;
+    const auto farClip = 50000.0f;
 
     if(_projection == Projection::Perspective)
     {
-        camera.setPerspectiveProjection(_fovy, aspectRatio, near, far);
+        camera.setPerspectiveProjection(_fovy, aspectRatio, nearClip, farClip);
     }
     else
     {
@@ -340,7 +340,7 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
         auto vertical = _viewData._zoomDistance;
 
         camera.setOrthographicProjection(-horizontal, horizontal,
-            -vertical, vertical, near, far);
+            -vertical, vertical, nearClip, farClip);
     }
 }
 
