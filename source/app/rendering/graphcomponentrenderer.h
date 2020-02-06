@@ -179,6 +179,7 @@ private:
 
     float _entireComponentZoomDistance = 0.0f;
     float _orthoCameraDistance = 0.0f;
+    float _maxDistanceFromFocus = 0.0f;
 
     GraphModel* _graphModel = nullptr;
     SelectionManager* _selectionManager = nullptr;

@@ -270,6 +270,7 @@ void GraphComponentRenderer::updateCentreAndZoomDistance(const std::vector<NodeI
     {
         _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
         _orthoCameraDistance = zoomDistanceForRadius(maxDistance, Projection::Perspective);
+        _maxDistanceFromFocus = maxDistance;
     }
 }
 
@@ -315,9 +316,23 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
 {
     auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());
 
+    auto minCameraDistance = _viewData.camera().distance();
+
+    if(_zoomTransition.active())
+        minCameraDistance = std::min(minCameraDistance, _targetZoomDistance);
+    else if(_graphRenderer->transition().active())
+        minCameraDistance = std::min(minCameraDistance, _viewData._transitionEnd._camera.distance());
+
+    // Keep the near clipping plane as far away as possible, and in
+    // so doing maximise the available depth buffer resolution
+    const auto near = std::max(minCameraDistance - _maxDistanceFromFocus, 0.3f);
+
+    //FIXME: ideally this should be calculated too, but it gets complicated with transitions etc.
+    const auto far = 50000.0f;
+
     if(_projection == Projection::Perspective)
     {
-        camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+        camera.setPerspectiveProjection(_fovy, aspectRatio, near, far);
     }
     else
     {
@@ -325,7 +340,7 @@ void GraphComponentRenderer::updateCameraProjection(Camera& camera)
         auto vertical = _viewData._zoomDistance;
 
         camera.setOrthographicProjection(-horizontal, horizontal,
-            -vertical, vertical, 0.3f, 50000.0f);
+            -vertical, vertical, near, far);
     }
 }
 
