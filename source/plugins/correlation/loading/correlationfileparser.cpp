@@ -355,13 +355,14 @@ void TabularDataParser::setTransposed(bool transposed)
     if(this->transposed() != transposed)
     {
         auto transDataRect = _dataRect.transposed();
-        transDataRect.setX(_dataRect.y());
-        transDataRect.setY(_dataRect.x());
+        transDataRect.moveLeft(_dataRect.y());
+        transDataRect.moveTop(_dataRect.x());
         _dataRect = transDataRect;
     }
 
     _model.setTransposed(transposed);
     emit transposedChanged();
+    emit dataRectChanged();
 }
 
 void TabularDataParser::setProgress(int progress)
