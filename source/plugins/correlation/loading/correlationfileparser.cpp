@@ -352,6 +352,9 @@ void TabularDataParser::setTransposed(bool transposed)
     if(_autoDetectDataRectangleWatcher.isRunning())
         _autoDetectDataRectangleWatcher.waitForFinished();
 
+    if(_graphSizeEstimateFutureWatcher.isRunning())
+        _graphSizeEstimateFutureWatcher.waitForFinished();
+
     if(this->transposed() != transposed)
     {
         auto transDataRect = _dataRect.transposed();
