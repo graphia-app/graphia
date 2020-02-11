@@ -274,7 +274,7 @@ bool NodeAttributeTableModel::rowVisible(size_t row) const
     return _nodeSelectedColumn[row].toBool();
 }
 
-QString NodeAttributeTableModel::columnHeaders(size_t column) const
+QString NodeAttributeTableModel::columnNameFor(size_t column) const
 {
     Q_ASSERT(column < static_cast<size_t>(columnNames().size()));
     return columnNames().at(static_cast<int>(column));

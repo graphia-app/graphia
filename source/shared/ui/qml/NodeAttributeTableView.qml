@@ -728,9 +728,7 @@ Item
                     if(userWidth !== undefined)
                         calculatedWidth = userWidth;
                     else
-                    {
                         calculatedWidth = calculateMinimumColumnWidth(col);
-                    }
 
                     return calculatedWidth;
                 }
@@ -787,13 +785,15 @@ Item
                     let sourceColumn = proxyModel.mapOrderedToSourceColumn(column);
                     let sortIndicatorSpacing = ((headerView.delegatePadding + headerView.sortIndicatorMargin) * 2.0) +
                         headerView.sortIndicatorWidth;
+
                     if(sourceColumn > -1)
                     {
-                        let headerName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
+                        let headerName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
                         let width = headerMetrics.advanceWidth(headerName);
                         width += sortIndicatorSpacing;
                         return width;
                     }
+
                     return sortIndicatorSpacing;
                 }
 
@@ -893,7 +893,7 @@ Item
                                     return "";
                                 }
 
-                                let columnName = root._nodeAttributesTableModel.columnHeaders(sourceColumn);
+                                let columnName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
 
                                 if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);

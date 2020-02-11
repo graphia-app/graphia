@@ -88,7 +88,7 @@ public:
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE virtual bool rowVisible(size_t row) const;
-    Q_INVOKABLE virtual QString columnHeaders(size_t column) const;
+    Q_INVOKABLE virtual QString columnNameFor(size_t column) const;
     virtual void updateColumnNames();
 
 public slots:
