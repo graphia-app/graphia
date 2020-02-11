@@ -742,14 +742,12 @@ const Attribute* GraphModel::attributeByName(const QString& name) const
     auto attributeName = Attribute::parseAttributeName(name);
 
     if(!u::contains(_->_attributes, attributeName._name))
+    {
+        qDebug() << "WARNING: attribute unknown in attributeByName" << attributeName._name;
         return nullptr;
+    }
 
-    auto attribute = &_->_attributes.at(attributeName._name);
-
-    if(_transformedGraphIsChanging && attribute->testFlag(AttributeFlag::DisableDuringTransfom))
-        return nullptr;
-
-    return attribute;
+    return &_->_attributes.at(attributeName._name);
 }
 
 bool GraphModel::attributeExists(const QString& name) const
@@ -758,17 +756,31 @@ bool GraphModel::attributeExists(const QString& name) const
     return u::contains(_->_attributes, attributeName._name);
 }
 
+bool GraphModel::attributeIsValid(const QString& name) const
+{
+    if(!attributeExists(name))
+        return false;
+
+    auto attributeName = Attribute::parseAttributeName(name);
+    const auto* attribute = &_->_attributes.at(attributeName._name);
+
+    if(_transformedGraphIsChanging && attribute->testFlag(AttributeFlag::DisableDuringTransfom))
+        return false;
+
+    return true;
+}
+
 Attribute GraphModel::attributeValueByName(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
 
     if(!u::contains(_->_attributes, attributeName._name))
+    {
+        qDebug() << "WARNING: attribute unknown in attributeValueByName" << attributeName._name;
         return {};
+    }
 
     auto attribute = _->_attributes.at(attributeName._name);
-
-    if(_transformedGraphIsChanging && attribute.testFlag(AttributeFlag::DisableDuringTransfom))
-        return {};
 
     if(!attributeName._parameter.isEmpty())
         attribute.setParameterValue(attributeName._parameter);

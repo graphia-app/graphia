@@ -291,13 +291,7 @@ QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         const auto* attribute = _graphModel->attributeByName(attributeName);
-
-        if(attribute == nullptr)
-        {
-            // Need to understand why this is happening here
-            document()->reportProblem(QStringLiteral("Attribute not found: %1").arg(attributeName));
-            continue;
-        }
+        Q_ASSERT(attribute != nullptr);
 
         if(attribute != nullptr && !attribute->sharedValues().empty())
             attributeNames.append(attributeName);

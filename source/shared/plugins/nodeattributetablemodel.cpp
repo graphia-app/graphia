@@ -48,14 +48,7 @@ QStringList NodeAttributeTableModel::columnNames() const
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
         auto attribute = _document->graphModel()->attributeByName(attributeName);
-
-        // If this happens, there is probably something weird about the name
         Q_ASSERT(attribute != nullptr);
-        if(attribute == nullptr)
-        {
-            _document->reportProblem(QStringLiteral("Attribute not found: %1").arg(attributeName));
-            continue;
-        }
 
         // We can't show parameterised attributes in the table
         if(attribute->hasParameter())

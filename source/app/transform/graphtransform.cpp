@@ -30,7 +30,7 @@ static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
     std::any_of(attributeNames.begin(), attributeNames.end(),
     [&](const auto& attributeName)
     {
-        return !graphModel.attributeValueByName(attributeName).isValid();
+        return !graphModel.attributeIsValid(attributeName);
     });
 
     if(invalidAttributes)

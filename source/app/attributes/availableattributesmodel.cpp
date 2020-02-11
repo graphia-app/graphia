@@ -70,13 +70,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
         parentItem->addChild(attributeItem);
 
         const auto* attribute = graphModel.attributeByName(name);
-
-        if(attribute == nullptr)
-        {
-            // Need to understand why this is happening here
-            S(CrashHandler)->submitMinidump(QStringLiteral("Attribute not found: %1").arg(name));
-            return;
-        }
+        Q_ASSERT(attribute != nullptr);
 
         if(attribute->hasParameter())
         {
