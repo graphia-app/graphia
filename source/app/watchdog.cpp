@@ -122,7 +122,7 @@ void WatchdogWorker::startTimer()
 void WatchdogWorker::onWarningProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     // Check for a sane exit code and status in case our warning has been killed (by us)
-    if(exitCode >=0 && exitCode < QMessageBox::NRoles && exitStatus == QProcess::NormalExit)
+    if(exitCode >= 0 && exitCode < QMessageBox::NRoles && exitStatus == QProcess::NormalExit)
     {
         if(exitCode == QMessageBox::DestructiveRole)
         {
