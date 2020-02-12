@@ -754,7 +754,7 @@ PluginContent
         if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
         if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
-        if(data.hiddenColumns !== undefined)                tableView.hiddenColumns = data.hiddenColumns;
+        if(data.hiddenColumns !== undefined)                tableView.setHiddenColumns(data.hiddenColumns);
 
         if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
 

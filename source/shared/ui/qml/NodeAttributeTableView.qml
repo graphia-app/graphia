@@ -79,6 +79,12 @@ Item
 
     property var hiddenColumns: []
 
+    function setHiddenColumns(hiddenColumns)
+    {
+        root.hiddenColumns = hiddenColumns;
+        tableView._updateColumnVisibility();
+    }
+
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
     {
