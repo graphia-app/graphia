@@ -21,7 +21,7 @@ class NodeAttributeTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList columnNames MEMBER _columnNames NOTIFY columnNamesChanged)
 
 private:
     IDocument* _document = nullptr;

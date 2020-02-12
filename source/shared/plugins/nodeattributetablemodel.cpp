@@ -269,8 +269,8 @@ bool NodeAttributeTableModel::rowVisible(size_t row) const
 
 QString NodeAttributeTableModel::columnNameFor(size_t column) const
 {
-    Q_ASSERT(column < static_cast<size_t>(columnNames().size()));
-    return columnNames().at(static_cast<int>(column));
+    Q_ASSERT(column < static_cast<size_t>(_columnNames.size()));
+    return _columnNames.at(static_cast<int>(column));
 }
 
 void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
