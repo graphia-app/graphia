@@ -94,6 +94,10 @@ Item
             columnSelectionControls.show();
         else
             columnSelectionControls.hide();
+
+        // Reset the scroll position in case the new visible columns are no longer in view
+        horizontalTableViewScrollBar.position = 0;
+
         tableView._updateColumnVisibility();
         tableView.forceLayoutSafe();
     }
