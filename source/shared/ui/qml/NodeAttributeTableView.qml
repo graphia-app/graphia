@@ -506,12 +506,12 @@ Item
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
                             height: headerView.delegatePadding
-                            visible: proxyModel.sortColumn == headerItem.sourceColumn && !columnSelectionMode
+                            visible: proxyModel.sortColumn === headerItem.sourceColumn && !columnSelectionMode
                             transform: Rotation
                             {
                                 origin.x: sortIndicator.width * 0.5
                                 origin.y: sortIndicator.height * 0.5
-                                angle: proxyModel.sortOrder == Qt.DescendingOrder ? 0 : 180
+                                angle: proxyModel.sortOrder === Qt.DescendingOrder ? 0 : 180
                             }
 
                             ShapePath
@@ -564,12 +564,13 @@ Item
 
                             onClicked:
                             {
-                                if(proxyModel.sortColumn == headerItem.sourceColumn)
+                                if(proxyModel.sortColumn === headerItem.sourceColumn)
+                                {
                                     proxyModel.sortOrder = proxyModel.sortOrder ?
-                                                Qt.AscendingOrder : Qt.DescendingOrder;
+                                        Qt.AscendingOrder : Qt.DescendingOrder;
+                                }
                                 else
                                     proxyModel.sortColumn = headerItem.sourceColumn;
-
                             }
                         }
 
@@ -616,7 +617,7 @@ Item
             {
                 z: 3
                 text: qsTr("No Visible Columns")
-                visible: tableView.columns == 0
+                visible: tableView.columns === 0
 
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
@@ -966,7 +967,7 @@ Item
 
                 onClicked:
                 {
-                    if(mouse.button == Qt.RightButton)
+                    if(mouse.button === Qt.RightButton)
                         root.rightClick();
                 }
 
