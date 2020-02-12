@@ -37,15 +37,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
     _graphModel = document->graphModel();
     _userNodeData.initialise(_graphModel->mutableGraph());
-
-    if(_transpose)
-    {
-        // Don't include data columns in the table model when transposing as this is likely to
-        // result in a very large number of columns in the table model, which hurt performance
-        _nodeAttributeTableModel.initialise(document, &_userNodeData);
-    }
-    else
-        _nodeAttributeTableModel.initialise(document, &_userNodeData, &_dataColumnNames, &_data);
+    _nodeAttributeTableModel.initialise(document, &_userNodeData);
 
     _correlationValues = std::make_unique<EdgeArray<double>>(_graphModel->mutableGraph());
 
@@ -142,6 +134,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     }
 
     makeDataColumnNamesUnique();
+    setNodeAttributeTableModelDataColumns();
     parser.setProgress(-1);
 
     return true;
@@ -388,6 +381,16 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
 
     auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
+}
+
+void CorrelationPluginInstance::setNodeAttributeTableModelDataColumns()
+{
+    // Don't include data columns in the table model when transposing as this is likely to
+    // result in a very large number of columns in the table model, which hurt performance
+    if(_transpose)
+        return;
+
+    _nodeAttributeTableModel.addDataColumns(&_dataColumnNames, &_data);
 }
 
 QStringList CorrelationPluginInstance::columnAnnotationNames() const
@@ -766,6 +769,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     createAttributes();
     makeDataColumnNamesUnique();
+    setNodeAttributeTableModelDataColumns();
 
     return true;
 }

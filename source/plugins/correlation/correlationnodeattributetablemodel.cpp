@@ -16,45 +16,36 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
     return list;
 }
 
-QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, int attributeIndex) const
+QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, const QString& columnName) const
 {
-    if(_dataColumnNames != nullptr && _dataValues != nullptr &&
-        _firstDataColumnRole > 0 && attributeIndex >= _firstDataColumnRole)
+    if(!_dataColumnIndexes.empty() && u::contains(_dataColumnIndexes, columnName))
     {
-        size_t column = static_cast<size_t>(attributeIndex) - static_cast<size_t>(_firstDataColumnRole);
-        size_t index = (row * _dataColumnNames->size()) + column;
+        size_t column = _dataColumnIndexes.at(columnName);
+        size_t index = (row * _dataColumnIndexes.size()) + column;
 
         Q_ASSERT(index < _dataValues->size());
         return _dataValues->at(index);
     }
 
-    return NodeAttributeTableModel::dataValue(row, attributeIndex);
+    return NodeAttributeTableModel::dataValue(row, columnName);
 }
 
-void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
-                                                    std::vector<QString>* dataColumnNames,
-                                                    std::vector<double>* dataValues)
+void CorrelationNodeAttributeTableModel::addDataColumns(std::vector<QString>* dataColumnNames,
+    std::vector<double>* dataValues)
 {
     _dataColumnNames = dataColumnNames;
     _dataValues = dataValues;
 
-    NodeAttributeTableModel::initialise(document, userNodeData);
-}
+    for(size_t i = 0; i < _dataColumnNames->size(); i++)
+        _dataColumnIndexes.emplace(_dataColumnNames->at(i), i);
 
-void CorrelationNodeAttributeTableModel::updateColumnNames()
-{
-    NodeAttributeTableModel::updateColumnNames();
-
-    if(_dataColumnNames != nullptr && !_dataColumnNames->empty())
-    {
-        auto attributeCount = NodeAttributeTableModel::columnNames().size();
-        _firstDataColumnRole = attributeCount;
-    }
+    // Check that the data column names are unique
+    Q_ASSERT(_dataColumnNames->size() == _dataColumnIndexes.size());
 }
 
 bool CorrelationNodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
 {
-    if(_dataColumnNames != nullptr && u::contains(*_dataColumnNames, columnName))
+    if(u::contains(_dataColumnIndexes, columnName))
         return false;
 
     return NodeAttributeTableModel::columnIsCalculated(columnName);
@@ -62,7 +53,7 @@ bool CorrelationNodeAttributeTableModel::columnIsCalculated(const QString& colum
 
 bool CorrelationNodeAttributeTableModel::columnIsHiddenByDefault(const QString& columnName) const
 {
-    if(_dataColumnNames != nullptr && u::contains(*_dataColumnNames, columnName))
+    if(u::contains(_dataColumnIndexes, columnName))
         return true;
 
     return NodeAttributeTableModel::columnIsHiddenByDefault(columnName);
@@ -70,8 +61,8 @@ bool CorrelationNodeAttributeTableModel::columnIsHiddenByDefault(const QString& 
 
 bool CorrelationNodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) const
 {
-    if(_dataColumnNames != nullptr && u::contains(*_dataColumnNames, columnName))
-        return true;
+    if(u::contains(_dataColumnIndexes, columnName))
+        return true; // All data columns are floating point
 
     return NodeAttributeTableModel::columnIsFloatingPoint(columnName);
 }

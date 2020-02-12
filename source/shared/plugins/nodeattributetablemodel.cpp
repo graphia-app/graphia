@@ -61,18 +61,16 @@ QStringList NodeAttributeTableModel::columnNames() const
     return list;
 }
 
-int NodeAttributeTableModel::columnIndexForAttributeValue(const QString &attributeValue)
+int NodeAttributeTableModel::indexForColumnName(const QString &columnName)
 {
-    auto index = _columnNames.indexOf(attributeValue);
-    Q_ASSERT(index > -1);
+    auto index = _columnNames.indexOf(columnName);
+    Q_ASSERT(index >= 0);
     return index;
 }
 
-QVariant NodeAttributeTableModel::dataValue(size_t row, int attributeIndex) const
+QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnName) const
 {
-    Q_ASSERT(static_cast<size_t>(attributeIndex) < _attributes.size());
-
-    auto attribute = _attributes.at(static_cast<size_t>(attributeIndex));
+    const auto* attribute = _document->graphModel()->attributeByName(columnName);
     if(attribute != nullptr && attribute->isValid())
     {
         auto nodeId = _userNodeData->elementIdForIndex(row);
@@ -87,30 +85,20 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, int attributeIndex) cons
 void NodeAttributeTableModel::onColumnAdded(size_t columnIndex)
 {
     auto columnName = _columnNames.at(static_cast<int>(columnIndex));
-    auto* attribute = _document->graphModel()->attributeByName(columnName);
 
     if(columnIndex < _pendingData.size())
-    {
         _pendingData.insert(_pendingData.begin() + static_cast<int>(columnIndex), {{}});
-        _attributes.insert(_attributes.begin() + static_cast<int>(columnIndex), attribute);
-    }
     else
-    {
         _pendingData.resize(columnIndex + 1);
-        _attributes.push_back(attribute);
-    }
 
     auto pendingData = _pendingData.at(columnIndex);
-    updateColumn(Qt::DisplayRole,
-                 pendingData,
-                 static_cast<int>(columnIndex));
+    updateColumn(Qt::DisplayRole, pendingData, columnName);
 }
 
 void NodeAttributeTableModel::onColumnRemoved(size_t columnIndex)
 {
     Q_ASSERT(columnIndex < _pendingData.size());
     _pendingData.erase(_pendingData.begin() + static_cast<int>(columnIndex));
-    _attributes.erase(_attributes.begin() + static_cast<int>(columnIndex));
 }
 
 void NodeAttributeTableModel::updateColumnNames()
@@ -124,18 +112,18 @@ void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    auto index = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
+    auto index = static_cast<size_t>(indexForColumnName(attributeName));
 
     Q_ASSERT(index < _pendingData.size());
     auto& column = _pendingData.at(index);
-    auto attributeIndex = _columnNames.indexOf(attributeName);
 
-    updateColumn(Qt::DisplayRole, column, attributeIndex);
+    updateColumn(Qt::DisplayRole, column, attributeName);
 
     QMetaObject::invokeMethod(this, "onUpdateColumnComplete", Q_ARG(QString, attributeName));
 }
 
-void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column, int attributeIndex)
+void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column,
+    const QString& columnName)
 {
     column.resize(static_cast<size_t>(rowCount()));
 
@@ -154,7 +142,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
         else if(role == Roles::NodeSelectedRole)
             column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
         else
-            column[row] = dataValue(row, attributeIndex);
+            column[row] = dataValue(row, columnName);
     }
 }
 
@@ -163,30 +151,25 @@ void NodeAttributeTableModel::update()
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     _pendingData.clear();
-    _attributes.clear();
-
-    _attributes.reserve(static_cast<size_t>(_columnCount));
 
     updateColumn(Roles::NodeSelectedRole, _nodeSelectedColumn);
     updateColumn(Roles::NodeIdRole, _nodeIdColumn);
 
     for(const auto& columnName : _columnNames)
     {
-        auto* attribute = _document->graphModel()->attributeByName(columnName);
-        _attributes.push_back(attribute);
         _pendingData.emplace_back(rowCount());
-        updateColumn(Qt::DisplayRole, _pendingData.back(), static_cast<int>(_attributes.size() - 1));
+        updateColumn(Qt::DisplayRole, _pendingData.back(), columnName);
     }
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::onUpdateColumnComplete(const QString& attributeName)
+void NodeAttributeTableModel::onUpdateColumnComplete(const QString& columnName)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     emit layoutAboutToBeChanged();
-    auto column = static_cast<size_t>(columnIndexForAttributeValue(attributeName));
+    auto column = static_cast<size_t>(indexForColumnName(columnName));
     _data.at(column) = _pendingData.at(column);
 
     //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but

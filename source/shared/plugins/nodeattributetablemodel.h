@@ -29,7 +29,6 @@ private:
     const UserNodeData* _userNodeData = nullptr;
 
     QHash<int, QByteArray> _roleNames;
-    std::vector<const IAttribute*> _attributes;
     std::recursive_mutex _updateMutex;
     std::vector<QString> _columnsRequiringUpdates;
 
@@ -48,18 +47,19 @@ private:
 
 protected:
     virtual QStringList columnNames() const;
-    virtual QVariant dataValue(size_t row, int attributeIndex) const;
+    virtual QVariant dataValue(size_t row, const QString& columnName) const;
 
-    int columnIndexForAttributeValue(const QString& attributeValue);
+    int indexForColumnName(const QString& attributeName);
+
 private:
     void onColumnAdded(size_t columnIndex);
     void onColumnRemoved(size_t columnIndex);
     void updateAttribute(const QString& attributeName);
-    void updateColumn(int role, Column& column, int attributeIndex = -1);
+    void updateColumn(int role, Column& column, const QString& columnName = {});
     void update();
 
 private slots:
-    void onUpdateColumnComplete(const QString& attributeName);
+    void onUpdateColumnComplete(const QString& columnName);
     void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 
@@ -89,7 +89,8 @@ public:
     Q_INVOKABLE virtual bool columnIsNumerical(const QString& columnName) const;
     Q_INVOKABLE virtual bool rowVisible(size_t row) const;
     Q_INVOKABLE virtual QString columnNameFor(size_t column) const;
-    virtual void updateColumnNames();
+
+    void updateColumnNames();
 
 public slots:
     void onAttributesChanged(const QStringList& added, const QStringList& removed);

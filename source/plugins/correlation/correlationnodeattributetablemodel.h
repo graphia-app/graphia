@@ -7,26 +7,26 @@
 #include <QObject>
 
 #include <vector>
+#include <map>
 
 class CorrelationNodeAttributeTableModel : public NodeAttributeTableModel
 {
     Q_OBJECT
 
 private:
-    std::vector<QString>* _dataColumnNames =  nullptr;
+    std::vector<QString>* _dataColumnNames = nullptr;
     std::vector<double>* _dataValues = nullptr;
 
-    int _firstDataColumnRole = -1;
+    // For fast lookup in dataValue(...)
+    std::map<QString, size_t> _dataColumnIndexes;
 
     QStringList columnNames() const override;
 
 public:
-    void initialise(IDocument* document, UserNodeData* userNodeData,
-                    std::vector<QString>* dataColumnNames = nullptr,
-                    std::vector<double>* dataValues = nullptr);
-    QVariant dataValue(size_t row, int attributeIndex) const override;
+    void addDataColumns(std::vector<QString>* dataColumnNames = nullptr,
+        std::vector<double>* dataValues = nullptr);
 
-    void updateColumnNames() override;
+    QVariant dataValue(size_t row, const QString& columnName) const override;
 
     bool columnIsCalculated(const QString& columnName) const override;
     bool columnIsHiddenByDefault(const QString& columnName) const override;
