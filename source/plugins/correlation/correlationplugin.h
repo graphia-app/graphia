@@ -89,6 +89,8 @@ private:
                     const IParserThread* parserThread) override;
 
     void setDataColumnName(size_t column, const QString& name);
+    void makeDataColumnNamesUnique();
+
     void setData(size_t column, size_t row, double value);
 
     void finishDataRow(size_t row);

@@ -141,6 +141,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
         }
     }
 
+    makeDataColumnNamesUnique();
     parser.setProgress(-1);
 
     return true;
@@ -343,6 +344,29 @@ void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& 
 {
     Q_ASSERT(column < _numColumns);
     _dataColumnNames.at(column) = name;
+}
+
+void CorrelationPluginInstance::makeDataColumnNamesUnique()
+{
+    std::map<QString, std::vector<size_t>> dataColumnNameIndexes;
+
+    while(dataColumnNameIndexes.size() < _dataColumnNames.size())
+    {
+        for(const auto& [name, indexes] : dataColumnNameIndexes)
+        {
+            for(size_t i = 1; i < indexes.size(); i++)
+            {
+                auto clashingIndex = indexes.at(i);
+                auto newName = QStringLiteral("%1(%2)").arg(name).arg(i);
+                setDataColumnName(clashingIndex, newName);
+            }
+        }
+
+        dataColumnNameIndexes.clear();
+
+        for(size_t i = 0; i < _dataColumnNames.size(); i++)
+            dataColumnNameIndexes[_dataColumnNames.at(i)].push_back(i);
+    }
 }
 
 void CorrelationPluginInstance::setData(size_t column, size_t row, double value)
@@ -741,6 +765,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     }
 
     createAttributes();
+    makeDataColumnNamesUnique();
 
     return true;
 }
