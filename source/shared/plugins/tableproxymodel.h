@@ -109,15 +109,13 @@ public slots:
     void invalidateFilter();
 };
 
-/* This will only occur from a DLL, where we need to delay the \
-initialisation until later so we can guarantee it occurs \
-after any static initialisation */ \
+// This will only occur from a DLL, where we need to delay the
+// initialisation until later so we can guarantee it occurs
+// after any static initialisation
 static void initialiser()
 {
     if(!QCoreApplication::startingUp())
-    {
         QTimer::singleShot(0, [] { TableProxyModel::registerQmlType(); });
-    }
     else
         TableProxyModel::registerQmlType();
 }
