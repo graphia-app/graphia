@@ -1173,6 +1173,7 @@ ApplicationWindow
         Action
         {
             id: perspecitveProjectionAction
+            enabled: currentDocument ? !currentDocument.busy : false
             text: qsTr("Perspective")
             checkable: true
             onCheckedChanged:
@@ -1188,6 +1189,7 @@ ApplicationWindow
         Action
         {
             id: orthographicProjectionAction
+            enabled: currentDocument ? !currentDocument.busy : false
             text: qsTr("Orthographic")
             checkable: true
             onCheckedChanged:
@@ -1203,6 +1205,7 @@ ApplicationWindow
         Action
         {
             id: twoDeeProjectionAction
+            enabled: currentDocument ? !currentDocument.busy : false
             text: qsTr("2D")
             checkable: true
             onCheckedChanged:
@@ -1223,6 +1226,7 @@ ApplicationWindow
         Action
         {
             id: smoothShadingAction
+            enabled: currentDocument ? !currentDocument.busy : false
             text: qsTr("Smooth Shading")
             checkable: true
             onCheckedChanged:
@@ -1235,6 +1239,7 @@ ApplicationWindow
         Action
         {
             id: flatShadingAction
+            enabled: currentDocument ? !currentDocument.busy : false
             text: qsTr("Flat Shading")
             checkable: true
             onCheckedChanged:
