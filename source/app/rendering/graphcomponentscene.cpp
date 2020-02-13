@@ -573,7 +573,10 @@ void GraphComponentScene::setProjection(Projection projection)
         bool isRendererForThisComponent = componentRenderer->componentId() == _componentId;
 
         if(!isRendererForThisComponent)
+        {
             componentRenderer->setProjection(projection);
+            componentRenderer->doProjectionTransition();
+        }
     }
 
     auto startProjectionTransition = [this, projection]
