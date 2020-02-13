@@ -67,10 +67,12 @@ public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
                         ForceDirectedDisplacements& displacements,
                         NodeLayoutPositions& positions,
+                        Layout::Dimensionality dimensionalityMode,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes,
             Dimensionality::TwoOrThreeDee, 0.4f, 4),
-        _displacements(&displacements)
+        _displacements(&displacements),
+        _hasBeenFlattened(dimensionalityMode == Layout::Dimensionality::TwoDee)
     {}
 
     bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
@@ -89,7 +91,8 @@ public:
 
     QString name() const override { return QStringLiteral("ForceDirected"); }
     QString displayName() const override { return QObject::tr("Force Directed"); }
-    std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& nodePositions) override;
+    std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& nodePositions,
+        Layout::Dimensionality dimensionalityMode) override;
 };
 
 #endif // FORCEDIRECTEDLAYOUT_H

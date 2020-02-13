@@ -263,7 +263,8 @@ void LayoutThread::addComponent(ComponentId componentId)
     {
         std::unique_lock<std::mutex> lock(_mutex);
 
-        auto layout = _layoutFactory->create(componentId, _nodeLayoutPositions);
+        auto layout = _layoutFactory->create(componentId,
+            _nodeLayoutPositions, _dimensionalityMode);
 
         connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
         [this]

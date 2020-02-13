@@ -342,8 +342,10 @@ ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :
                                     0.0f, 20.0f, 10.0f);
 }
 
-std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId, NodeLayoutPositions& nodePositions)
+std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId,
+    NodeLayoutPositions& nodePositions, Layout::Dimensionality dimensionalityMode)
 {
     auto component = _graphModel->graph().componentById(componentId);
-    return std::make_unique<ForceDirectedLayout>(*component, _displacements, nodePositions, &_layoutSettings);
+    return std::make_unique<ForceDirectedLayout>(*component, _displacements,
+        nodePositions, dimensionalityMode, &_layoutSettings);
 }
