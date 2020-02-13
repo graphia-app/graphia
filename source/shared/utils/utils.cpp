@@ -19,9 +19,10 @@ int u::smallestPowerOf2GreaterThan(int x)
 
 float u::normaliseAngle(float radians)
 {
-    if(radians > Constants::Pi())
+    while(radians > Constants::Pi())
         radians -= Constants::TwoPi();
-    else if(radians <= -Constants::Pi())
+
+    while(radians <= -Constants::Pi())
         radians += Constants::TwoPi();
 
     return radians;
