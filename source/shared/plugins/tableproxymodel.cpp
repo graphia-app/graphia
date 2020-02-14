@@ -66,6 +66,9 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
     if(proxyColumn >= columnCount())
         return -1;
 
+    if(_orderedProxyToSourceColumn.size() != columnCount())
+        return -1;
+
     auto mappedProxyColumn = proxyColumn;
     if(!_orderedProxyToSourceColumn.empty())
         mappedProxyColumn = _orderedProxyToSourceColumn.at(static_cast<size_t>(proxyColumn));
@@ -75,7 +78,7 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
-    connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::invalidateFilter);
+    connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
 }
 
 void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
@@ -163,7 +166,18 @@ void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
 
 void TableProxyModel::invalidateFilter()
 {
+    QSortFilterProxyModel::invalidate();
     QSortFilterProxyModel::invalidateFilter();
+
     calculateOrderedProxySourceMapping();
     calculateUnorderedSourceProxyColumnMapping();
+}
+
+void TableProxyModel::updateSourceModelFilter()
+{
+    if(sourceModel() == nullptr)
+        return;
+
+    connect(sourceModel(), &QAbstractItemModel::modelReset, this, &TableProxyModel::invalidateFilter);
+    connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::invalidateFilter);
 }

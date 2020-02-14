@@ -55,6 +55,7 @@ private:
     }
     void calculateOrderedProxySourceMapping();
     void calculateUnorderedSourceProxyColumnMapping();
+    void updateSourceModelFilter();
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;

@@ -91,8 +91,8 @@ void NodeAttributeTableModel::onColumnAdded(size_t columnIndex)
     else
         _pendingData.resize(columnIndex + 1);
 
-    auto pendingData = _pendingData.at(columnIndex);
-    updateColumn(Qt::DisplayRole, pendingData, columnName);
+    auto& column = _pendingData.at(columnIndex);
+    updateColumn(Qt::DisplayRole, column, columnName);
 }
 
 void NodeAttributeTableModel::onColumnRemoved(size_t columnIndex)
