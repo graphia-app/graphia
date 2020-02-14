@@ -33,6 +33,8 @@ public:
             R"(k-nearest neighbours</a> algorithm.)");
     }
 
+    QString category() const override { return QObject::tr("Edge Reduction"); }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return

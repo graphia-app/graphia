@@ -31,6 +31,8 @@ public:
         return QObject::tr("Remove edges whose node's have different attribute values.");
     }
 
+    QString category() const override { return QObject::tr("Structural"); }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return

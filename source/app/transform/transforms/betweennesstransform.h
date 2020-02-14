@@ -29,6 +29,7 @@ public:
             "The betweenness centrality for each node is the number of these shortest paths "
             "that pass through the node.");
     }
+    QString category() const override { return QObject::tr("Metrics"); }
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {

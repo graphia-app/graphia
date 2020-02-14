@@ -42,6 +42,8 @@ public:
                 "finds discrete groups (clusters) of nodes based on a flow simulation model.");
     }
 
+    QString category() const override { return QObject::tr("Clustering"); }
+
     GraphTransformParameters parameters() const override
     {
         return

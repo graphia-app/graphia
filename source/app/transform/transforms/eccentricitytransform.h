@@ -29,6 +29,7 @@ public:
             "calculates the shortest path between every node and assigns the longest path length found for that node. "
             "This is a measure of a node's position within the overall graph structure.");
     }
+    QString category() const override { return QObject::tr("Metrics"); }
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {

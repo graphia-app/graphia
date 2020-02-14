@@ -37,7 +37,7 @@ public:
         return QObject::tr("Create an attribute whose value is the "
             "result of the specified condition.");
     }
-    GraphTransformCategory category() const override { return GraphTransformCategory::Attribute; }
+    QString category() const override { return QObject::tr("Attributes"); }
     ElementType elementType() const override { return _elementType; }
     bool requiresCondition() const override { return true; }
 

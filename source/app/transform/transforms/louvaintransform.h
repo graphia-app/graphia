@@ -30,6 +30,8 @@ public:
             "density from within communities to neighbouring communities.");
     }
 
+    QString category() const override { return QObject::tr("Clustering"); }
+
     GraphTransformParameters parameters() const override
     {
         return

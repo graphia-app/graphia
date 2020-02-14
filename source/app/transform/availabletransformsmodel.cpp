@@ -30,18 +30,10 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
         {
         case Roles::TransformCategoryRole:
         {
-            switch(transform->category())
-            {
-            default:
-            case GraphTransformCategory::Unknown:
-                return !transform->defaultVisualisations().empty() ?
-                    tr("Analyses") : tr("Transforms");
+            if(transform->category().isEmpty())
+                return tr("Uncategorised");
 
-            case GraphTransformCategory::Analysis:  return tr("Analyses");
-            case GraphTransformCategory::Attribute: return tr("Attributes");
-            case GraphTransformCategory::Filter:    return tr("Filters");
-            case GraphTransformCategory::Transform: return tr("Transforms");
-            }
+            return transform->category();
         }
         default:
             return {};

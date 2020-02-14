@@ -32,6 +32,7 @@ public:
                            "which match the specified condition while simultaneously "
                            "merging the pairs of nodes that they previously joined.");
     }
+    QString category() const override { return QObject::tr("Structural"); }
     ElementType elementType() const override { return ElementType::Edge; }
     bool requiresCondition() const override { return true; }
 

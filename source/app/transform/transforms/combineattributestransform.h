@@ -29,7 +29,7 @@ public:
             "two other attributes.");
     }
 
-    GraphTransformCategory category() const override { return GraphTransformCategory::Attribute; }
+    QString category() const override { return QObject::tr("Attributes"); }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

@@ -39,6 +39,7 @@ public:
             "centrality measurement for each node. This can be viewed as "
             "measure of a node's relative importance in the graph.");
     }
+    QString category() const override { return QObject::tr("Metrics"); }
     ElementType elementType() const override { return ElementType::None; }
     DefaultVisualisations defaultVisualisations() const override
     {

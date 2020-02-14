@@ -43,7 +43,7 @@ public:
                 .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"),
                      elementTypeAsString(_elementType).toLower());
     }
-    GraphTransformCategory category() const override { return GraphTransformCategory::Filter; }
+    QString category() const override { return QObject::tr("Filters"); }
     ElementType elementType() const override { return _elementType; }
     bool requiresCondition() const override { return true; }
 

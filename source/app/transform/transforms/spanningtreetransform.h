@@ -26,6 +26,8 @@ public:
             R"(spanning tree</a> for each component.)");
     }
 
+    QString category() const override { return QObject::tr("Structural") ; }
+
     GraphTransformParameters parameters() const override
     {
         return

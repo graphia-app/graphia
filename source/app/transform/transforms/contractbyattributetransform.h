@@ -32,7 +32,7 @@ public:
             "whose node's share the same attribute value.");
     }
 
-    GraphTransformCategory category() const override { return GraphTransformCategory::Transform; }
+    QString category() const override { return QObject::tr("Structural"); }
 
     GraphTransformAttributeParameters attributeParameters() const override
     {

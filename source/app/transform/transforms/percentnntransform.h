@@ -34,6 +34,8 @@ public:
             "choose a percentage of the highest ranking edges.");
     }
 
+    QString category() const override { return QObject::tr("Edge Reduction"); }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return
