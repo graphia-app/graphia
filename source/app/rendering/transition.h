@@ -42,7 +42,7 @@ public:
         _duration = duration;
         _elapsed = 0.0f;
         _type = type;
-        _function = std::move(function);
+        _function = std::forward<Fn>(function);
         _finishedFunctions.clear();
         _suppressSignals = false;
 
@@ -52,7 +52,7 @@ public:
     template<typename FinishedFn>
     Transition& then(FinishedFn&& finishedFn)
     {
-        _finishedFunctions.emplace_back(std::move(finishedFn));
+        _finishedFunctions.emplace_back(std::forward<FinishedFn>(finishedFn));
         return *this;
     }
 

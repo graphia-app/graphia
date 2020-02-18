@@ -66,7 +66,7 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
     if(proxyColumn >= columnCount())
         return -1;
 
-    if(_orderedProxyToSourceColumn.size() != columnCount())
+    if(static_cast<int>(_orderedProxyToSourceColumn.size()) != columnCount())
         return -1;
 
     auto mappedProxyColumn = proxyColumn;
