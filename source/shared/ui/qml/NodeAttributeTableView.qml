@@ -370,7 +370,9 @@ Item
                 property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
                 syncDirection: Qt.Horizontal
-                syncView: tableView
+                // For some reason syncing with an empty table will hide the header
+                // this hack prevents headers from hiding on an empty table
+                syncView: rowCount > 0 ? tableView : null
 
                 Rectangle
                 {
@@ -650,7 +652,7 @@ Item
                 signal fetchColumnSizes;
 
                 clip: true
-                interactive: true
+                interactive: false
                 visible: tableView.columns != 0
 
                 layer
@@ -719,7 +721,7 @@ Item
                         color: sysPalette.dark
                     }
                     minimumSize: 0.1
-                    visible: size < 1.0 && tableView.columns > 0
+                    visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
                 }
 
                 model: TableProxyModel
