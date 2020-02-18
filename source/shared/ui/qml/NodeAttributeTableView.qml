@@ -1,5 +1,5 @@
 import QtQuick.Controls 1.5
-import QtQuick 2.12
+import QtQuick 2.14
 import QtQml 2.12
 import QtQuick.Controls 2.5 as QQC2
 import QtQuick.Layouts 1.3
@@ -369,6 +369,9 @@ Item
                 property var delegatePadding: 4
                 property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
+                syncDirection: Qt.Horizontal
+                syncView: tableView
+
                 Rectangle
                 {
                     height: headerView.height
@@ -685,11 +688,6 @@ Item
                             backgroundCanvas.requestPaint();
                         }
                     }
-                }
-
-                onContentXChanged:
-                {
-                    headerView.contentX = contentX;
                 }
 
                 QQC2.ScrollBar.vertical: QQC2.ScrollBar
