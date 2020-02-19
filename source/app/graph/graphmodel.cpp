@@ -764,10 +764,10 @@ bool GraphModel::attributeIsValid(const QString& name) const
     auto attributeName = Attribute::parseAttributeName(name);
     const auto* attribute = &_->_attributes.at(attributeName._name);
 
-    if(_transformedGraphIsChanging && attribute->testFlag(AttributeFlag::DisableDuringTransfom))
-        return false;
+    bool attributeDisabled = _transformedGraphIsChanging &&
+        attribute->testFlag(AttributeFlag::DisableDuringTransfom);
 
-    return true;
+    return !attributeDisabled;
 }
 
 Attribute GraphModel::attributeValueByName(const QString& name) const

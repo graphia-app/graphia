@@ -61,7 +61,7 @@ QStringList NodeAttributeTableModel::columnNames() const
     return list;
 }
 
-int NodeAttributeTableModel::indexForColumnName(const QString &columnName)
+int NodeAttributeTableModel::indexForColumnName(const QString& columnName)
 {
     auto index = _columnNames.indexOf(columnName);
     Q_ASSERT(index >= 0);

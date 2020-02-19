@@ -49,7 +49,7 @@ protected:
     virtual QStringList columnNames() const;
     virtual QVariant dataValue(size_t row, const QString& columnName) const;
 
-    int indexForColumnName(const QString& attributeName);
+    int indexForColumnName(const QString& columnName);
 
 private:
     void onColumnAdded(size_t columnIndex);
