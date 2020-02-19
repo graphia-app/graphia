@@ -469,13 +469,7 @@ Item
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 visible: columnSelectionMode
-                                text:
-                                {
-                                    let headerIndex = proxyModel.mapOrderedToSourceColumn(model.column);
-                                    if(headerIndex < 0)
-                                        return "";
-                                    return root._nodeAttributesTableModel.columnNames[headerIndex];
-                                }
+                                text: headerLabel.text
                                 height: headerLabel.height
 
                                 function isChecked()
@@ -504,9 +498,12 @@ Item
                             width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth);
                             text:
                             {
-                                if(headerItem.sourceColumn < 0)
+                                let index = headerItem.sourceColumn;
+
+                                if(index < 0 || index >= root._nodeAttributesTableModel.columnNames.length)
                                     return "";
-                                return root._nodeAttributesTableModel.columnNames[headerItem.sourceColumn];
+
+                                return root._nodeAttributesTableModel.columnNames[index];
                             }
                             color: sysPalette.text
                             padding: headerView.delegatePadding
