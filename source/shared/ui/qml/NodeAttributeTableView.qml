@@ -364,15 +364,20 @@ Item
                 columnWidthProvider: tableView.columnWidthProvider;
                 visible: tableView.columns != 0
 
+                onOriginXChanged:
+                {
+                    // Weird things can happen when the origin shifts, for some reason when the origin
+                    // returns to 0 contentX can be left in a -ve position offsetting the content.
+                    // This corrects that behaviour.
+                    // (Reproduce by scrolling to far right, deselecting, selecting. Then scroll to far left slowly)
+                    // Then select another node...)
+                    contentX = originX + (horizontalTableViewScrollBar.position * contentWidth);
+                }
+
                 property var sortIndicatorWidth: 7
                 property var sortIndicatorMargin: 3
                 property var delegatePadding: 4
                 property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
-
-                syncDirection: Qt.Horizontal
-                // For some reason syncing with an empty table will hide the header
-                // this hack prevents headers from hiding on an empty table
-                syncView: rowCount > 0 ? tableView : null
 
                 Rectangle
                 {
@@ -640,6 +645,9 @@ Item
                 id: tableView
                 anchors.fill: parent
 
+                syncDirection: Qt.Horizontal
+                syncView: headerView
+
                 property var userColumnWidths: []
                 property var currentColumnWidths: []
                 property var currentTotalColumnWidth: 0
@@ -649,7 +657,6 @@ Item
                 signal fetchColumnSizes;
 
                 clip: true
-                interactive: false
                 visible: tableView.columns != 0
 
                 layer
