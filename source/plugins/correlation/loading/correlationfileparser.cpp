@@ -353,7 +353,10 @@ void TabularDataParser::setTransposed(bool transposed)
         _autoDetectDataRectangleWatcher.waitForFinished();
 
     if(_graphSizeEstimateFutureWatcher.isRunning())
+    {
+        _graphSizeEstimateCancellable.cancel();
         _graphSizeEstimateFutureWatcher.waitForFinished();
+    }
 
     if(this->transposed() != transposed)
     {
@@ -405,8 +408,13 @@ TabularDataParser::TabularDataParser()
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished, [this]
     {
-        _graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
-        emit graphSizeEstimateChanged();
+        const auto& graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
+
+        if(!graphSizeEstimate.empty())
+        {
+            _graphSizeEstimate = graphSizeEstimate;
+            emit graphSizeEstimateChanged();
+        }
 
         // Another estimate was queued while we were busy
         if(_graphSizeEstimateQueued)
@@ -508,6 +516,9 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
         auto finishColumn = startColumn + _dataRect.width();
         for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
         {
+            if(_graphSizeEstimateCancellable.cancelled())
+                return {};
+
             const auto& value = _dataPtr->valueAt(columnIndex, rowIndex);
             double transformedValue = 0.0;
 
@@ -556,6 +567,7 @@ void TabularDataParser::estimateGraphSize()
     }
 
     _graphSizeEstimateQueued = false;
+    _graphSizeEstimateCancellable.uncancel();
 
     QFuture<QVariantMap> future = QtConcurrent::run([this]
     {
@@ -570,9 +582,12 @@ void TabularDataParser::estimateGraphSize()
 
         auto dataRows = sampledDataRows(numSampleRows);
 
+        if(dataRows.empty())
+            return QVariantMap();
+
         auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
         auto sampleEdges = correlation->process(dataRows, _minimumCorrelation,
-            static_cast<CorrelationPolarity>(_correlationPolarity));
+            static_cast<CorrelationPolarity>(_correlationPolarity), &_graphSizeEstimateCancellable);
 
         if(sampleEdges.empty())
             return QVariantMap();

@@ -139,6 +139,8 @@ private:
     void setProgress(int progress);
 
     bool _graphSizeEstimateQueued = false;
+
+    Cancellable _graphSizeEstimateCancellable;
     QFutureWatcher<QVariantMap> _graphSizeEstimateFutureWatcher;
     QVariantMap _graphSizeEstimate;
 
