@@ -298,7 +298,7 @@ std::vector<CorrelationEdge> CorrelationPluginInstance::correlation(double minim
 {
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
     return correlation->process(_dataRows, minimumThreshold,
-        static_cast<CorrelationPolarity>(_correlationPolarity), &parser);
+        static_cast<CorrelationPolarity>(_correlationPolarity), &parser, &parser);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)

@@ -5,7 +5,8 @@
 #include "correlationedge.h"
 
 #include "shared/utils/qmlenum.h"
-#include "shared/loading/iparser.h"
+#include "shared/utils/progressable.h"
+#include "shared/utils/cancellable.h"
 #include "shared/utils/threadpool.h"
 
 #include <vector>
@@ -35,7 +36,7 @@ public:
 
     virtual std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
-        IParser* parser = nullptr) const = 0;
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     virtual QString attributeName() const = 0;
     virtual QString attributeDescription() const = 0;
@@ -55,15 +56,15 @@ class CovarianceCorrelation : public Correlation
 public:
     std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
-        IParser* parser = nullptr) const final
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(rows.empty())
             return {};
 
         size_t numColumns = std::distance(rows.front().begin(), rows.front().end());
 
-        if(parser != nullptr)
-            parser->setProgress(-1);
+        if(progressable != nullptr)
+            progressable->setProgress(-1);
 
         uint64_t totalCost = 0;
         for(const auto& row : rows)
@@ -86,7 +87,7 @@ public:
 
             std::vector<CorrelationEdge> edges;
 
-            if(parser != nullptr && parser->cancelled())
+            if(cancellable != nullptr && cancellable->cancelled())
                 return edges;
 
             for(auto rowBIt = rowAIt + 1; rowBIt != rows.end(); ++rowBIt)
@@ -117,16 +118,16 @@ public:
 
             cost += rowA->computeCostHint();
 
-            if(parser != nullptr)
-                parser->setProgress(static_cast<int>((cost * 100) / totalCost));
+            if(progressable != nullptr)
+                progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
 
             return edges;
         });
 
-        if(parser != nullptr)
+        if(progressable != nullptr)
         {
             // Returning the results might take time
-            parser->setProgress(-1);
+            progressable->setProgress(-1);
         }
 
         std::vector<CorrelationEdge> edges;
