@@ -363,6 +363,7 @@ Item
                 }
                 columnWidthProvider: tableView.columnWidthProvider;
                 visible: tableView.columns != 0
+                boundsBehavior: Flickable.StopAtBounds
 
                 onOriginXChanged:
                 {
@@ -372,6 +373,35 @@ Item
                     // (Reproduce by scrolling to far right, deselecting, selecting. Then scroll to far left slowly)
                     // Then select another node...)
                     contentX = originX + (horizontalTableViewScrollBar.position * contentWidth);
+                }
+
+                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+                {
+                    parent: horizontalScrollItem
+                    z: 100
+                    anchors.fill: parent
+                    id: horizontalTableViewScrollBar
+                    policy: QQC2.ScrollBar.AsNeeded
+                    contentItem: Rectangle
+                    {
+                        implicitHeight: 5
+                        radius: width / 2
+                        color: sysPalette.dark
+                    }
+                    onPositionChanged:
+                    {
+                        // Sometimes syncViews don't actually sync visibleAreas
+                        // however contentX and contentWidth are synced.
+                        // The only reliable way to position both views is using
+                        // the scrollbar position directly
+                        if(position + size > 1)
+                            position = 1 - size;
+                        if(position < 0)
+                            position = 0;
+                    }
+
+                    minimumSize: 0.1
+                    visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
                 }
 
                 property var sortIndicatorWidth: 7
@@ -658,6 +688,7 @@ Item
 
                 clip: true
                 visible: tableView.columns != 0
+                boundsBehavior: Flickable.StopAtBounds
 
                 layer
                 {
@@ -709,23 +740,6 @@ Item
                     }
                     minimumSize: 0.1
                     visible: size < 1.0 && tableView.rows > 0
-                }
-
-                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
-                {
-                    parent: horizontalScrollItem
-                    z: 100
-                    anchors.fill: parent
-                    id: horizontalTableViewScrollBar
-                    policy: QQC2.ScrollBar.AsNeeded
-                    contentItem: Rectangle
-                    {
-                        implicitHeight: 5
-                        radius: width / 2
-                        color: sysPalette.dark
-                    }
-                    minimumSize: 0.1
-                    visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
                 }
 
                 model: TableProxyModel
