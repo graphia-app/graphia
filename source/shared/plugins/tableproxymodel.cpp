@@ -183,12 +183,16 @@ void TableProxyModel::updateSourceModelFilter()
     connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::invalidateFilter);
 }
 
-bool TableProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
+bool TableProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
 {
-    auto left = sourceModel()->data(source_left, Qt::DisplayRole);
-    auto right = sourceModel()->data(source_right, Qt::DisplayRole);
-    if(left.type() == QMetaType::QString && right.type() == QMetaType::QString)
-        return _collator.compare(left.toString(), right.toString()) < 0;
+    const auto& left = sourceModel()->data(sourceLeft, Qt::DisplayRole);
+    const auto& right = sourceModel()->data(sourceRight, Qt::DisplayRole);
 
-    return QSortFilterProxyModel::lessThan(source_left, source_right);
+    if(static_cast<QMetaType::Type>(left.type()) == QMetaType::QString &&
+        static_cast<QMetaType::Type>(right.type()) == QMetaType::QString)
+    {
+        return _collator.compare(left.toString(), right.toString()) < 0;
+    }
+
+    return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
 }
