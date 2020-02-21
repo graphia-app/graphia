@@ -485,6 +485,7 @@ BaseParameterDialog
                     {
                         selectedCol = 0;
                         selectedRow = 0;
+                        _clickedCell = false;
                     }
                 }
             }
