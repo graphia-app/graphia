@@ -348,13 +348,6 @@ BaseParameterDialog
                                 }
                             }
 
-                            BusyIndicator
-                            {
-                                id: busyIndicator
-                                anchors.centerIn: parent
-                                running: dataRectPage._busy
-                            }
-
                             SystemPalette
                             {
                                 id: sysPalette
@@ -476,7 +469,14 @@ BaseParameterDialog
                         }
                     }
 
+                    BusyIndicator
+                    {
+                        id: busyIndicator
+                        anchors.centerIn: parent
+                        running: dataRectPage._busy
+                    }
                 }
+
                 Connections
                 {
                     target: tabularDataParser.model
