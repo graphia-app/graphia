@@ -516,7 +516,7 @@ BaseParameterDialog
                                    "0.0 indicates no correlation. Should they be enabled, negative " +
                                    "correlation values indicate an anti-correlation. " +
                                    "All absolute values below the minimum correlation threshold are " +
-                                   "discarded and will not used to create edges.<br>" +
+                                   "discarded and will not be used to create edges.<br>" +
                                    "<br>" +
                                    "By default a transform is added which will remove edges for all " +
                                    "absolute values below the initial correlation threshold.")
