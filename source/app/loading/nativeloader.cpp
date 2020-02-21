@@ -15,6 +15,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QDataStream>
+#include <QRegularExpression>
 
 #include <vector>
 
