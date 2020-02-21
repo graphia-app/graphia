@@ -1,5 +1,5 @@
 import QtQuick.Controls 1.5
-import QtQuick 2.13
+import QtQuick 2.14
 import QtQml 2.12
 import QtQuick.Controls 2.4 as QQC2
 import QtQuick.Layouts 1.3
@@ -286,6 +286,8 @@ BaseParameterDialog
                         {
                             property var delegateHeight: headerFontMetrics.height
                             id: dataRectView
+                            syncDirection: Qt.Horizontal
+                            syncView: columnHeaderView
 
                             clip: true
                             QQC2.ScrollBar.vertical: QQC2.ScrollBar { policy: QQC2.ScrollBar.AlwaysOn }
@@ -295,10 +297,6 @@ BaseParameterDialog
                             anchors.margins: 1
                             model: tabularDataParser.model
                             enabled: !dataRectPage._busy
-                            onContentXChanged:
-                            {
-                                columnHeaderView.contentX = contentX;
-                            }
 
                             rowHeightProvider: function(row)
                             {
