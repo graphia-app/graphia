@@ -16,7 +16,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/attributes/condtionfnops.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/auth/auth.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applyvisualisationscommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.h
@@ -151,7 +150,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/auth/auth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applyvisualisationscommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.cpp
@@ -248,7 +246,6 @@ list(APPEND APP_SOURCES
 )
 
 list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/auth/keys.qrc
     ${CMAKE_CURRENT_LIST_DIR}/icon/mainicon.qrc
     ${CMAKE_CURRENT_LIST_DIR}/icon-themes/icons.qrc
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shaders.qrc

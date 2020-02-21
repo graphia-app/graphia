@@ -19,7 +19,6 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "auth/auth.h"
 #include "updates/updater.h"
 
 #include "shared/utils/qmlenum.h"
@@ -142,10 +141,6 @@ class Application : public QObject
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
-    Q_PROPERTY(bool authorised READ authorised NOTIFY authorisedChanged)
-    Q_PROPERTY(QString authMessage READ authMessage NOTIFY authMessageChanged)
-    Q_PROPERTY(bool authorising READ authorising NOTIFY authorisingChanged)
-
     Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
 
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
@@ -187,12 +182,6 @@ public:
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
 
-    // Returns false if we need to auth, but couldn't
-    Q_INVOKABLE bool tryToAuthWithCachedCredentials();
-
-    Q_INVOKABLE void authorise(const QString& email, const QString& password);
-    Q_INVOKABLE void signOut();
-
     Q_INVOKABLE void checkForUpdates();
 
     Q_INVOKABLE void copyImageToClipboard(const QImage& image);
@@ -214,10 +203,6 @@ signals:
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
-    void authorisedChanged();
-    void authMessageChanged();
-    void authorisingChanged();
-
     void noNewUpdateAvailable(bool existing);
     void newUpdateAvailable();
     void updateDownloadProgressChanged();
@@ -228,8 +213,6 @@ private:
     static const int _minorVersion = APP_MINOR_VERSION;
 
     static QString _appDir;
-
-    Auth _auth;
 
     Updater _updater;
 
@@ -249,10 +232,6 @@ private:
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
-
-    bool authorised() const { return _auth.state(); }
-    QString authMessage() const { return _auth.message(); }
-    bool authorising() const { return _auth.busy(); }
 
     int updateDownloadProgress() const { return _updater.progress(); }
 

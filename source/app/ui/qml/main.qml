@@ -72,8 +72,6 @@ ApplicationWindow
         return text;
     }
 
-    property bool _authorisedAtLeastOnce: false
-
     Application { id: application }
 
     MessageDialog
@@ -88,26 +86,6 @@ ApplicationWindow
     Connections
     {
         target: application
-
-        onAuthorisedChanged:
-        {
-            if(application.authorised)
-            {
-                if(!_authorisedAtLeastOnce)
-                {
-                    _authorisedAtLeastOnce = true;
-                    processOnePendingArgument();
-                }
-            }
-            else
-                authUI.enabled = true;
-        }
-
-        onAuthorisingChanged:
-        {
-            if(!application.authorising)
-                authUI.enabled = true;
-        }
 
         onNoNewUpdateAvailable:
         {
@@ -130,23 +108,6 @@ ApplicationWindow
         {
             checkForUpdatesAction.active = false;
             newUpdate.visible = true;
-        }
-    }
-
-    Auth
-    {
-        id: authUI
-
-        visible: !application.authorised && enabled
-        enabled: false
-        anchors.fill: parent
-
-        message: application.authMessage
-        busy: application.authorising
-
-        onSignIn:
-        {
-            application.authorise(email, password);
         }
     }
 
@@ -224,13 +185,6 @@ ApplicationWindow
         // Arguments minus the executable
         _pendingArguments = Qt.application.arguments.slice(1);
 
-        if(!application.tryToAuthWithCachedCredentials())
-        {
-            // If we failed immediately, show the auth UI
-            authUI.enabled = true;
-        }
-
-        mainMenuBar.updateVisibility();
         mainWindow.visible = true;
 
         if(!misc.hasSeenTutorial)
@@ -238,11 +192,10 @@ ApplicationWindow
             var exampleFile = application.resourceFile("examples/Tutorial.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
-            {
-                // Add it to the pending arguments, in case we're in the middle of authorising
                 _pendingArguments.push(exampleFile);
-            }
         }
+
+        processOnePendingArgument();
     }
 
     property bool _restartOnExit: false
@@ -1412,34 +1365,6 @@ ApplicationWindow
 
     Action
     {
-        id: signOutAction
-        text: qsTr("&Sign Out")
-        onTriggered:
-        {
-            if(tabView.count === 0)
-            {
-                application.signOut();
-                return;
-            }
-
-            mainWindow.lastDocumentClosed.connect(function()
-            {
-                //FIXME if any file closes are cancelled, we shouldn't proceed
-                signOut();
-            });
-
-            closeAllTabsAction.trigger();
-        }
-
-        function signOut()
-        {
-            mainWindow.lastDocumentClosed.disconnect(signOut);
-            application.signOut();
-        }
-    }
-
-    Action
-    {
         id: checkForUpdatesAction
         enabled: !newUpdate.visible
 
@@ -1483,31 +1408,9 @@ ApplicationWindow
         id: nullAction
     }
 
-    // Hack to hide the menu bar when we're not authorised
-    Connections
-    {
-        target: application
-
-        onAuthorisedChanged:
-        {
-            mainMenuBar.updateVisibility();
-        }
-    }
-
     menuBar: MenuBar
     {
         id: mainMenuBar
-
-        function updateVisibility()
-        {
-            if(application.authorised)
-                mainWindow.menuBar = mainMenuBar;
-            else
-            {
-                mainWindow.menuBar = null;
-                __contentItem.parent = null;
-            }
-        }
 
         Menu
         {
@@ -1819,7 +1722,6 @@ ApplicationWindow
             MenuItem { action: aboutQtAction }
 
             MenuSeparator {}
-            MenuItem { action: signOutAction }
             MenuItem { action: checkForUpdatesAction }
         }
     }
@@ -1953,8 +1855,6 @@ ApplicationWindow
     {
         id: mainToolBar
 
-        visible: application.authorised
-
         RowLayout
         {
             anchors.fill: parent
@@ -2018,8 +1918,6 @@ ApplicationWindow
         TabView
         {
             id: tabView
-
-            visible: application.authorised
 
             anchors.fill: parent
             tabsVisible: count > 1
@@ -2185,8 +2083,6 @@ ApplicationWindow
 
     statusBar: StatusBar
     {
-        visible: application.authorised
-
         RowLayout
         {
             id: rowLayout

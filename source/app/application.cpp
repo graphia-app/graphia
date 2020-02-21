@@ -57,21 +57,6 @@ Application::Application(QObject *parent) :
     _urlTypeDetails(&_loadedPlugins),
     _pluginDetails(&_loadedPlugins)
 {
-    connect(&_auth, &Auth::stateChanged, [this]
-    {
-        if(_auth.state())
-        {
-            _updater.enableAutoBackgroundCheck();
-            loadPlugins();
-        }
-        else
-            _updater.disableAutoBackgroundCheck();
-    });
-
-    connect(&_auth, &Auth::stateChanged, this, &Application::authorisedChanged);
-    connect(&_auth, &Auth::messageChanged, this, &Application::authMessageChanged);
-    connect(&_auth, &Auth::busyChanged, this, &Application::authorisingChanged);
-
     connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
     connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
     connect(&_updater, &Updater::progressChanged, this, &Application::updateDownloadProgressChanged);
@@ -81,6 +66,9 @@ Application::Application(QObject *parent) :
     registerSaverFactory(std::make_unique<GMLSaverFactory>());
     registerSaverFactory(std::make_unique<PairwiseSaverFactory>());
     registerSaverFactory(std::make_unique<JSONGraphSaverFactory>());
+
+    _updater.enableAutoBackgroundCheck();
+    loadPlugins();
 }
 
 Application::~Application() = default;
@@ -141,13 +129,6 @@ QStringList Application::resourceDirectories()
 
 bool Application::canOpen(const QString& urlTypeName) const
 {
-    if(!_auth.state())
-    {
-        // We should never get here unless somebody is trying to
-        // crack the auth system (by messing with the QML?)
-        return false;
-    }
-
     if(urlTypeName == NativeFileType)
         return true;
 
@@ -260,28 +241,6 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
         return plugin->parametersQmlPath();
 
     return {};
-}
-
-bool Application::tryToAuthWithCachedCredentials()
-{
-    if(!u::pref("auth/rememberMe").toBool())
-        return false;
-
-    if(!_auth.state())
-        return _auth.sendRequestUsingCachedCredentials();
-
-    return true;
-}
-
-void Application::authorise(const QString& email, const QString& password)
-{
-    _auth.sendRequest(email, password);
-}
-
-void Application::signOut()
-{
-    _auth.reset();
-    unloadPlugins();
 }
 
 void Application::checkForUpdates()
@@ -559,12 +518,6 @@ void Application::loadPlugins()
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
                 if(iplugin != nullptr)
                 {
-                    if(!_auth.pluginAllowed(iplugin->name()))
-                    {
-                        pluginLoader->unload();
-                        continue;
-                    }
-
                     bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
                     [pluginName = iplugin->name()](const auto& loadedPlugin)
                     {

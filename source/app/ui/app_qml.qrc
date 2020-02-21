@@ -3,8 +3,6 @@
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>
-        <file>qml/auth-background.png</file>
-        <file>qml/Auth.qml</file>
         <file>qml/CaptureScreenshot.qml</file>
         <file>qml/Controls/AlertIcon.qml</file>
         <file>qml/Controls/AttributeListSortMenu.qml</file>
