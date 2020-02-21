@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
+#include <QCollator>
 
 // As QSortFilterProxyModel cannot set column orders, we do it ourselves by translating columns
 // in the data() function. This has a number of consequences regarding proxy/source mappings.
@@ -42,6 +43,7 @@ private:
     std::vector<int> _sourceColumnOrder;
     std::vector<int> _orderedProxyToSourceColumn;
     std::vector<int> _unorderedSourceToProxyColumn;
+    QCollator _collator;
     int _sortColumn = -1;
     Qt::SortOrder _sortOrder = Qt::DescendingOrder;
     enum Roles
@@ -59,7 +61,7 @@ private:
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
-
+    bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
 public:
     QVariant data(const QModelIndex &index, int role) const override;
 

@@ -79,6 +79,7 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
+    _collator.setNumericMode(true);
 }
 
 void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
@@ -180,4 +181,14 @@ void TableProxyModel::updateSourceModelFilter()
 
     connect(sourceModel(), &QAbstractItemModel::modelReset, this, &TableProxyModel::invalidateFilter);
     connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::invalidateFilter);
+}
+
+bool TableProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
+{
+    auto left = sourceModel()->data(source_left, Qt::DisplayRole);
+    auto right = sourceModel()->data(source_right, Qt::DisplayRole);
+    if(left.type() == QMetaType::QString && right.type() == QMetaType::QString)
+        return _collator.compare(left.toString(), right.toString()) < 0;
+
+    return QSortFilterProxyModel::lessThan(source_left, source_right);
 }
