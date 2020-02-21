@@ -765,10 +765,9 @@ Item
                 function forceLayoutSafe()
                 {
                     if(tableView.rows > 0 && tableView.columns > 0)
-                    {
                         tableView.forceLayout();
+                    if(headerView.rows > 0 && headerView.columns > 0)
                         headerView.forceLayout();
-                    }
                 }
 
                 function getItem(mouseX, mouseY)
