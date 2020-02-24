@@ -977,6 +977,7 @@ Item
                 property var previousRow: -1
                 property var startRow: -1
                 property var endRow: -1
+                property var deselectDrag: false
                 anchors.fill: parent
                 anchors.rightMargin: verticalTableViewScrollBar.width
                 z: 5
@@ -1018,11 +1019,26 @@ Item
                         selectionModel.clear();
 
                     endRow = tableItem.modelRow;
-                    selectRows(startRow, startRow);
+
+                    // Deselect with ctrl-click
+                    let modelIndex = proxyModel.index(startRow, 0);
+                    if((mouse.modifiers & Qt.ControlModifier) &&
+                            selectionModel.isSelected(modelIndex))
+                    {
+                        deselectRows(startRow, startRow);
+                        deselectDrag = true;
+                    }
+                    else
+                    {
+                        selectRows(startRow, startRow);
+                    }
+
+                    previousRow = startRow;
                 }
                 onReleased:
                 {
                     previousRow = -1;
+                    deselectDrag = false;
                 }
                 onPositionChanged:
                 {
@@ -1032,10 +1048,17 @@ Item
                     var tableItem = tableView.getItem(mouseX, mouseY);
                     if(tableItem && tableItem.modelRow !== previousRow)
                     {
-                        if(previousRow != -1)
-                            deselectRows(startRow, previousRow);
+                        if(deselectDrag)
+                        {
+                            deselectRows(startRow, tableItem.modelRow);
+                        }
+                        else
+                        {
+                            if(previousRow != -1)
+                                deselectRows(startRow, previousRow);
 
-                        selectRows(startRow, tableItem.modelRow);
+                            selectRows(startRow, tableItem.modelRow);
+                        }
 
                         previousRow = tableItem.modelRow;
                         endRow = tableItem.modelRow
