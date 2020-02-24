@@ -683,6 +683,16 @@ Item
                 property var currentTotalColumnWidth: 0
                 property var columnWidths: []
                 property var rowHeight: delegateMetrics.height + 1
+                property var visibleColumnNames: // Property is used for exporting column header
+                {
+                    let columnNames = [];
+                    for(let i = 0; i < tableView.columns; i++)
+                    {
+                        let sourceIndex = proxyModel.mapOrderedToSourceColumn(i);
+                        columnNames.push(root._nodeAttributesTableModel.columnNames[sourceIndex])
+                    }
+                    return columnNames;
+                }
 
                 signal fetchColumnSizes;
 
