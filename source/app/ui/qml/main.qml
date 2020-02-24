@@ -1473,7 +1473,7 @@ ApplicationWindow
         id: onlineHelpAction
         text: qsTr("Online Help")
         shortcut: "F1"
-        onTriggered: { Qt.openUrlExternally("https://kajeka.com/graphia/help"); }
+        onTriggered: { Qt.openUrlExternally("https://graphia-app.github.io/redirects/help"); }
     }
 
     Action

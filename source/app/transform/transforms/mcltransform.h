@@ -56,7 +56,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://kajeka.com/graphia/mcl">MCL - Markov Clustering</a> )"
+        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/mcl">MCL - Markov Clustering</a> )"
                 "finds discrete groups (clusters) of nodes based on a flow simulation model.");
     }
 

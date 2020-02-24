@@ -47,7 +47,7 @@ public:
     QString description() const override
     {
         return QObject::tr("Reduce the number of edges in the graph using a variation of the "
-            R"(<a href="https://kajeka.com/graphia/knn">)"
+            R"(<a href="https://graphia-app.github.io/redirects/knn">)"
             R"(k-nearest neighbours</a> algorithm, but instead of choosing the top k edges, )"
             "choose a percentage of the highest ranking edges.");
     }

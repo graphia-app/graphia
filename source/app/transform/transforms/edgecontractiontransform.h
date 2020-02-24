@@ -46,7 +46,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://kajeka.com/graphia/contraction">Remove edges</a> )"
+        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/contraction">Remove edges</a> )"
                            "which match the specified condition while simultaneously "
                            "merging the pairs of nodes that they previously joined.");
     }

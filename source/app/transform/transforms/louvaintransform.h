@@ -43,7 +43,7 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://kajeka.com/graphia/louvain">)"
+        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/louvain">)"
             "Louvain modularity</a> is a method for finding clusters by measuring edge "
             "density from within communities to neighbouring communities.");
     }

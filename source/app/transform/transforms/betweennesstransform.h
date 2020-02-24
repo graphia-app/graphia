@@ -42,7 +42,7 @@ public:
     QString description() const override
     {
         return QObject::tr(
-            R"-(<a href="https://kajeka.com/graphia/betweenness">Betweenness Centrality</a> )-"
+            R"-(<a href="https://graphia-app.github.io/redirects/betweenness">Betweenness Centrality</a> )-"
             " is a measure of centrality in a graph based on shortest paths between nodes. "
             "The betweenness centrality for each node is the number of these shortest paths "
             "that pass through the node.");

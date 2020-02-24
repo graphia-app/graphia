@@ -43,7 +43,7 @@ public:
     QString description() const override
     {
         return QObject::tr(
-            R"-(<a href="https://kajeka.com/graphia/eccentricity">Eccentricity</a> )-"
+            R"-(<a href="https://graphia.app/redirects/eccentricity">Eccentricity</a> )-"
             "calculates the shortest path between every node and assigns the longest path length found for that node. "
             "This is a measure of a node's position within the overall graph structure.");
     }
