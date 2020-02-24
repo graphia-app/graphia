@@ -67,8 +67,8 @@ uint quantOfMSFor(ivec2 coord, int channel)
 
     for(int i = 0; i < multisamples; i++)
     {
-        uint v = texelFetch(frameBufferTexture, coord, i)[channel];
-        uint diff = abs(mean - v);
+        uint v = uint(texelFetch(frameBufferTexture, coord, i)[channel]);
+        uint diff = v < mean ? mean - v : v - mean;
 
         if(diff < min)
         {
