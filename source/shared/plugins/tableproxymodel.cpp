@@ -167,11 +167,13 @@ void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
 
 void TableProxyModel::invalidateFilter()
 {
+    beginResetModel();
     QSortFilterProxyModel::invalidate();
     QSortFilterProxyModel::invalidateFilter();
 
     calculateOrderedProxySourceMapping();
     calculateUnorderedSourceProxyColumnMapping();
+    endResetModel();
 }
 
 void TableProxyModel::updateSourceModelFilter()
