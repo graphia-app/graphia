@@ -22,7 +22,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.2
 
-import com.kajeka 1.0
+import app.graphia 1.0
 import "../Controls"
 import "../"
 

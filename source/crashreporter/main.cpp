@@ -253,8 +253,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
+    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 

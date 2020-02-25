@@ -798,11 +798,11 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     registerUrlType(QStringLiteral("CorrelationXLSX"), QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
 
-    qmlRegisterType<CorrelationPluginInstance>("com.kajeka", 1, 0, "CorrelationPluginInstance");
-    qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
-    qmlRegisterType<GraphSizeEstimatePlotItem>("com.kajeka", 1, 0, "GraphSizeEstimatePlot");
-    qmlRegisterType<TabularDataParser>("com.kajeka", 1, 0, "TabularDataParser");
-    qmlRegisterType<DataRectTableModel>("com.kajeka", 1, 0, "DataRectTableModel");
+    qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
+    qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
+    qmlRegisterType<GraphSizeEstimatePlotItem>("app.graphia", 1, 0, "GraphSizeEstimatePlot");
+    qmlRegisterType<TabularDataParser>("app.graphia", 1, 0, "TabularDataParser");
+    qmlRegisterType<DataRectTableModel>("app.graphia", 1, 0, "DataRectTableModel");
 }
 
 static QString contentIdentityOf(const QUrl& url)

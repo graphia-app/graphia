@@ -23,7 +23,7 @@ import QtQuick.Controls.Styles 1.4
 
 import SortFilterProxyModel 0.2
 
-import com.kajeka 1.0
+import app.graphia 1.0
 
 import "Controls"
 import "../../../shared/ui/qml/Constants.js" as Constants

@@ -26,7 +26,7 @@ import QtQuick.Window 2.2
 
 import Qt.labs.platform 1.0 as Labs
 
-import com.kajeka 1.0
+import app.graphia 1.0
 import "../../../shared/ui/qml/Utils.js" as Utils
 
 import "Loading"

@@ -87,7 +87,7 @@ public:
     virtual QString qmlPath() const = 0;
 };
 
-#define IPluginIID "com.kajeka.IPlugin/" VERSION
+#define IPluginIID "app.graphia.IPlugin/" VERSION
 Q_DECLARE_INTERFACE(IPlugin, IPluginIID)
 
 #endif // IPLUGIN_H

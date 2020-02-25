@@ -71,8 +71,8 @@ QStringList showUpdater(int argc, char *argv[])
         QStringLiteral("\\1"));
     auto exe = unquotedArguments.at(0);
 
-    QApplication::setOrganizationName(QStringLiteral("Kajeka"));
-    QApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
+    QApplication::setOrganizationName(QStringLiteral("Graphia"));
+    QApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
 

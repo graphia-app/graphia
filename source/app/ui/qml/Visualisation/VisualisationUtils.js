@@ -18,7 +18,7 @@
  */
 
 .import "../../../../shared/ui/qml/Utils.js" as Utils
-.import com.kajeka 1.0 as Kajeka
+.import app.graphia 1.0 as Graphia
 
 function decorateAttributeName(name, parameter)
 {
@@ -33,7 +33,7 @@ function expressionFor(document, attributeName, flags, type, channelName)
 {
     var expression = "";
 
-    if(flags & Kajeka.AttributeFlag.VisualiseByComponent)
+    if(flags & Graphia.AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
     expression += attributeName + " \"" + channelName +"\"";

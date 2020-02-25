@@ -18,7 +18,6 @@
  */
 
 .import QtQuick.Controls 1.5 as QtQuickControls
-.import com.kajeka 1.0 as Kajeka
 
 function watchPropertyChanges(object, handler)
 {

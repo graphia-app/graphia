@@ -14,7 +14,7 @@ add_definitions(-DQT_DEPRECATED_WARNINGS)
 # disables all the APIs deprecated before Qt 6.0.0
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)
 
-add_definitions(-DAPP_URI="com.kajeka")
+add_definitions(-DAPP_URI="app.graphia")
 add_definitions(-DAPP_MINOR_VERSION=0)
 add_definitions(-DAPP_MAJOR_VERSION=1)
 

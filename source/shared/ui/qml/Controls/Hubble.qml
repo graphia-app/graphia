@@ -21,7 +21,7 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
-import com.kajeka 1.0
+import app.graphia 1.0
 import "../"
 
 Item
@@ -255,7 +255,7 @@ Item
                     // shim it with a HoverMousePassthrough item
                     if(_mouseCapture === undefined || _mouseCapture === null)
                     {
-                        _mouseCapture = Qt.createQmlObject("import QtQuick 2.0; import com.kajeka 1.0; " +
+                        _mouseCapture = Qt.createQmlObject("import QtQuick 2.0; import app.graphia 1.0; " +
                             "HoverMousePassthrough {}",
                             // root as parent is temporary, until it gets set for real below
                             root);

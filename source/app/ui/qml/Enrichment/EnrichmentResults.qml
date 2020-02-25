@@ -22,7 +22,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.3
 import SortFilterProxyModel 0.2
-import com.kajeka 1.0
+import app.graphia 1.0
 
 import Qt.labs.platform 1.0 as Labs
 

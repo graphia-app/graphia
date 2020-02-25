@@ -23,7 +23,7 @@ import QtQuick.Layouts 1.3
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
 
-import com.kajeka 1.0
+import app.graphia 1.0
 
 ColumnLayout
 {

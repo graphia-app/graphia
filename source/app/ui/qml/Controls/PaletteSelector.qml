@@ -22,7 +22,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
-import com.kajeka 1.0
+import app.graphia 1.0
 import ".."
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils

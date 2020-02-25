@@ -34,6 +34,7 @@
 #include <QTimer>
 #include <QCommandLineParser>
 #include <QProcess>
+#include <QSettings>
 
 #include <iostream>
 
@@ -100,8 +101,8 @@ int start(int argc, char *argv[])
             app.setActivationWindow(QApplication::focusWindow());
     });
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
+    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
@@ -131,6 +132,7 @@ int start(int argc, char *argv[])
     }
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
+    QSettings::setDefaultFormat(QSettings::Format::IniFormat);
 
     QIcon mainIcon;
     mainIcon.addFile(QStringLiteral(":/icon/Icon512x512.png"));
