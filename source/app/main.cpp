@@ -272,28 +272,6 @@ int start(int argc, char *argv[])
 
 #ifndef _DEBUG
     CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));
-    c.onCrash([](const QString& directory)
-    {
-        // Take screenshots of all the open windows
-        const auto windows = QGuiApplication::allWindows();
-        for(auto* window : windows)
-        {
-            if(!window->isVisible())
-                continue;
-
-            QString fileName = QDir(directory).filePath(
-                QStringLiteral("%1.png").arg(window->title().replace(QLatin1String(" "), QLatin1String("_"))));
-
-            std::cerr << "Writing " << fileName.toStdString() << "\n";
-
-            auto* screen = window->screen();
-            if(screen == nullptr)
-                continue;
-
-            auto pixmap = screen->grabWindow(window->winId());
-            pixmap.save(fileName, "PNG");
-        }
-    });
 #endif
 
     auto exitCode = QCoreApplication::exec();
