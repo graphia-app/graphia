@@ -18,17 +18,23 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# The HTML(ish) copy of the EULA is considered the master version, but the
-# Windows installer also needs to display it, which doesn't support HTML, hence
-# this hack-tastic script to produce something vaguely resembling an RTF file
+use HTML::TextToHTML;
+use HTML::FormatRTF;
+use File::Basename;
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+my $dirname = dirname(__FILE__);
 
-IN="${DIR}/EULA.html"
-OUT="${DIR}/EULA.rtf"
+my $txt_file = "$dirname/../../../../LICENSE";
+my $html_file = "$dirname/LICENSE.html";
 
-echo -e "{\\\\rtf\n" > ${OUT}
-cat ${IN} | sed -e 's/<b>/\\b /g' \
-  -e 's/<\/b>/\\b0/g' \
-  -e 's/<br>/ \\line/g' >> ${OUT}
-echo -e "}" >> ${OUT}
+my $conv = new HTML::TextToHTML();
+
+$conv->txt2html(infile=>[$txt_file], outfile=>$html_file,
+    title=>"License", mail=>1);
+
+my $rtf_file = "$dirname/LICENSE.rtf";
+open(RTF, ">$rtf_file")
+ or die "Can't write-open $rtf_file: $!\nAborting";
+
+print RTF HTML::FormatRTF->format_file("$html_file");
+close(RTF);

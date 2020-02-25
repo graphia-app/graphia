@@ -67,7 +67,7 @@ Window
                 text: application.name + qsTr(" version ") + application.version +
                     qsTr(" is a tool for the visualisation and analysis of graphs.<br><br>") +
                     application.copyright + qsTr("<br><br>") +
-                    qsTr("<a href=\"EULA\">End User License</a>") +
+                    qsTr("<a href=\"LICENSE\">License</a>") +
                         "&nbsp;&nbsp;&nbsp;" +
                     qsTr("<a href=\"OSS\">Open Source Licenses</a>")
 

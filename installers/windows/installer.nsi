@@ -126,7 +126,7 @@ brought to you by Kajeka.$\r$\n$\r$\n\
 Click Next to continue."
 !insertmacro MUI_PAGE_WELCOME
 
-!insertmacro MUI_PAGE_LICENSE "source\app\ui\licensing\EULA.rtf"
+!insertmacro MUI_PAGE_LICENSE "source\app\ui\licensing\LICENSE.rtf"
 
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
