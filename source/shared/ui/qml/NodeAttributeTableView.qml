@@ -795,6 +795,8 @@ Item
                     {
                         return false;
                     }
+                    if(hoverItem === null)
+                        return false;
 
                     var tableItem = hoverItem.childAt(
                                 mouseX + tableView.contentX,
@@ -1011,6 +1013,7 @@ Item
 
                 onPressed:
                 {
+                    forceActiveFocus();
                     if(tableView.rows === 0)
                         return;
 
@@ -1045,6 +1048,56 @@ Item
 
                     previousRow = startRow;
                 }
+
+                Keys.onDownPressed:
+                {
+                    if(endRow != -1 && (endRow + 1) < tableView.rows)
+                    {
+                        endRow++;
+                        arrowPress(event.modifiers);
+                    }
+                }
+                Keys.onUpPressed:
+                {
+                    if(endRow != -1 && (endRow - 1) >= 0)
+                    {
+                        endRow--;
+                        arrowPress(event.modifiers);
+                    }
+                }
+
+                function arrowPress(modifier)
+                {
+                    // Horrible hack to scroll the view
+                    let bottomTableItem = tableView.getItem(1, tableView.height - 1);
+                    let topTableItem = tableView.getItem(1, 1);
+                    let diff = 0;
+
+                    if(bottomTableItem)
+                        diff = Math.max(endRow - (bottomTableItem.modelRow - 1) , 0);
+                    if(topTableItem)
+                        diff += Math.min(endRow - (topTableItem.modelRow + 1), 0);
+                    tableView.contentY += diff * tableView.rowHeight;
+
+                    // Clamp scrollbar to prevent overscrolling
+                    // (scrollbar seems to be the only safe way)
+                    let scrollbarMax = 1.0 - verticalTableViewScrollBar.size;
+                    verticalTableViewScrollBar.position = Math.min(Math.max(verticalTableViewScrollBar.position, 0), scrollbarMax);
+
+                    selectionModel.clear();
+                    if(modifier & Qt.ShiftModifier)
+                    {
+                        if(startRow == -1)
+                            startRow = endRow;
+                        selectRows(startRow, endRow);
+                    }
+                    else
+                    {
+                        startRow = endRow;
+                        selectRows(endRow, endRow);
+                    }
+                }
+
                 onReleased:
                 {
                     previousRow = -1;
