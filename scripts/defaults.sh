@@ -18,4 +18,4 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-[ -z "${PRODUCT_NAME}" ] && PRODUCT_NAME="GraphTool"
+[ -z "${PRODUCT_NAME}" ] && PRODUCT_NAME="Graphia"

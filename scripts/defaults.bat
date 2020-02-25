@@ -15,4 +15,4 @@
 :: You should have received a copy of the GNU General Public License
 :: along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
-IF NOT DEFINED PRODUCT_NAME (SET PRODUCT_NAME="GraphTool")
+IF NOT DEFINED PRODUCT_NAME (SET PRODUCT_NAME="Graphia")
