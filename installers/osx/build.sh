@@ -86,7 +86,7 @@ rm -f ${PRODUCT_NAME}-${VERSION}.dmg && appdmg dmg.spec.json \
 # Apple notarization
 echo "Submitting notarization request..."
 NOTARIZE_REQUEST=$(xcrun altool --notarize-app \
-  --primary-bundle-id "com.kajeka.Graphia.dmg" \
+  --primary-bundle-id "app.Graphia.dmg" \
   --username "${APPLE_NOTARIZATION_USERNAME}" \
   --password "${APPLE_NOTARIZATION_PASSWORD}" \
   --asc-provider ${APPLE_NOTARIZATION_PROVIDER_SHORTNAME} \
