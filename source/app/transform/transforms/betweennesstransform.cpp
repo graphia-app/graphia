@@ -56,7 +56,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
         distance[nodeId] = 0;
         queue.push(nodeId);
 
-        while(!queue.empty())
+        while(!queue.empty() && !cancelled())
         {
             auto other = queue.front();
             queue.pop();
@@ -78,10 +78,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
             }
         }
 
-        if(cancelled())
-            return;
-
-        while(!stack.empty())
+        while(!stack.empty() && !cancelled())
         {
             auto other = stack.top();
             stack.pop();
