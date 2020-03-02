@@ -372,7 +372,7 @@ GraphRendererCore::GraphRendererCore()
 {
     resolveOpenGLFunctions();
 
-    GLint maxSamples;
+    GLint maxSamples = 0;
     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 
     // Despite the fact that (as far as can be made out) OpenGL specifies a minimum value

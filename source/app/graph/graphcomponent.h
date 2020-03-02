@@ -17,6 +17,9 @@ public:
 
     GraphComponent& operator=(const GraphComponent& other)
     {
+        if(&other == this)
+            return *this;
+
         _graph = other._graph;
         _nodeIds = other._nodeIds;
         _edgeIds = other._edgeIds;

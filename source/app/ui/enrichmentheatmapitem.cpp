@@ -391,7 +391,7 @@ double EnrichmentHeatmapItem::verticalRangeSize()
 
 void EnrichmentHeatmapItem::showTooltip()
 {
-    double key, value;
+    double key = 0.0, value = 0.0;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
 
     std::pair<int, int> colorMapIndexPair = {std::round(key), std::round(value)};

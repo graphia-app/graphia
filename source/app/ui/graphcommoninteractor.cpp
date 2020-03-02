@@ -281,7 +281,7 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
     const float ROOT2 = std::sqrt(2.0f);
     const float CUTOFF = ROOT2 / 2.0f;
 
-    float z;
+    float z = 0.0f;
 
     if(d < (RADIUS * CUTOFF))
     {

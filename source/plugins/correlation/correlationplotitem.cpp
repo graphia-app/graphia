@@ -407,7 +407,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
             auto graph = dynamic_cast<QCPGraph*>(plottable);
             if(graph != nullptr)
             {
-                double posKeyMin, posKeyMax, dummy;
+                double posKeyMin = 0.0, posKeyMax = 0.0, dummy = 0.0;
 
                 QPointF tolerancePoint(_customPlot.selectionTolerance(),
                     _customPlot.selectionTolerance());
@@ -968,14 +968,16 @@ void CorrelationPlotItem::populateIQRPlot()
                 // Find Maximum and minimum non-outliers
                 if(row < thirdQuartile + (iqr * 1.5))
                     maxValue = std::max(maxValue, row);
+
                 if(row > firstQuartile - (iqr * 1.5))
                     minValue = std::min(minValue, row);
 
                 // Find outliers
-                if(row > thirdQuartile + (iqr * 1.5))
+                if(row > thirdQuartile + (iqr * 1.5) ||
+                    row < firstQuartile - (iqr * 1.5))
+                {
                     outliers.push_back(row);
-                else if(row < firstQuartile - (iqr * 1.5))
-                    outliers.push_back(row);
+                }
 
                 maxY = std::max(maxY, row);
                 minY = std::min(minY, row);

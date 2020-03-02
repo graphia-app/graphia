@@ -79,6 +79,9 @@ public:
 
     GenericGraphArray& operator=(const GenericGraphArray& other)
     {
+        if(&other == this)
+            return *this;
+
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
         _defaultValue = other._defaultValue;

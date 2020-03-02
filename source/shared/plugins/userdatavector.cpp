@@ -106,9 +106,7 @@ bool UserDataVector::load(const QString& name, const json& jsonObject)
     if(!jsonObject["type"].is_string())
         return false;
 
-    if(jsonObject["type"] == "Unknown")
-        setType(Type::Unknown);
-    else if(jsonObject["type"] == "String")
+    if(jsonObject["type"] == "String")
         setType(Type::String);
     else if(jsonObject["type"] == "Int")
         setType(Type::Int);

@@ -8,13 +8,13 @@ bool MatFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     setProgress(-1);
 
-    mat_t* matFile;
+    mat_t* matFile = nullptr;
     matFile = Mat_Open(url.toLocalFile().toUtf8().data(), MAT_ACC_RDONLY);
 
     if(matFile == nullptr)
         return false;
 
-    matvar_t* matVar;
+    matvar_t* matVar = nullptr;
     matVar = Mat_VarReadNext(matFile);
     bool result = false;
 

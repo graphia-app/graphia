@@ -125,7 +125,7 @@ void SDFComputeJob::generateSDF()
     m.ortho(0, static_cast<float>(renderWidth), 0, static_cast<float>(renderHeight), -1.0f, 1.0f);
 
     // SDF FBO
-    GLuint sdfFBO;
+    GLuint sdfFBO = 0u;
     glGenFramebuffers(1, &sdfFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, sdfFBO);
 

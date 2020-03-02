@@ -72,7 +72,7 @@ void ParserThread::run()
             if(newPercentage >= 0)
             {
                 bool percentageIncreased = false;
-                int expected, desired;
+                int expected = 0, desired = 0;
 
                 do
                 {

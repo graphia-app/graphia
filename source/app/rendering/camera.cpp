@@ -169,7 +169,7 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result) const
 {
     QMatrix4x4 A = projectionMatrix() * viewMatrix();
 
-    bool invertable;
+    bool invertable = false;
     QMatrix4x4 m = A.inverted(&invertable);
     if(!invertable)
         return false;
@@ -237,7 +237,7 @@ Line3D Camera::lineForViewportCoordinates(int x, int y) const
 
 Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2) const
 {
-    int minX, maxX, minY, maxY;
+    int minX = 0, maxX = 0, minY = 0, maxY = 0;
 
     if(x1 < x2)
     {

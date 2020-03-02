@@ -82,7 +82,7 @@ json JSONGraphSaver::graphAsJson(const IGraph& graph, Progressable& progressable
 
     jsonObject["directed"] = true;
 
-    int i;
+    int i= 0;
 
     graph.setPhase(QObject::tr("Nodes"));
     i = 0;

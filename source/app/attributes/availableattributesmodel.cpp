@@ -194,7 +194,7 @@ QModelIndex AvailableAttributesModel::index(int row, int column, const QModelInd
     if(!hasIndex(row, column, parentIndex))
         return {};
 
-    AvailableAttributesModel::Item* parent;
+    AvailableAttributesModel::Item* parent = nullptr;
 
     if(!parentIndex.isValid())
         parent = _root;
@@ -229,7 +229,7 @@ QModelIndex AvailableAttributesModel::parent(const QModelIndex& index) const
 
 int AvailableAttributesModel::rowCount(const QModelIndex& parentIndex) const
 {
-    AvailableAttributesModel::Item* parent;
+    AvailableAttributesModel::Item* parent = nullptr;
     if(parentIndex.column() > 0)
         return 0;
 

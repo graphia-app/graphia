@@ -179,7 +179,8 @@ bool BoundingBox3D::containsLine(const Line3D& line) const
 // From "An Efficient and Robust Ray–Box Intersection Algorithm"
 bool BoundingBox3D::intersects(const Ray &ray, float t0, float t1) const
 {
-    float tmin, tmax, tymin, tymax, tzmin, tzmax;
+    float tmin = 0.0f, tmax = 0.0f, tymin = 0.0f,
+        tymax = 0.0f, tzmin = 0.0f, tzmax = 0.0f;
     const std::array<QVector3D, 2> bounds{{this->min(), this->max()}};
 
     tmin =  (bounds.at(    ray.sign().at(0)).x() - ray.origin().x()) * ray.invDir().x();

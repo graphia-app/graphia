@@ -802,7 +802,7 @@ static QString contentIdentityOf(const QUrl& url)
     const int maxLines = 50;
     int numLinesScanned = 0;
 
-    std::istream* is;
+    std::istream* is = nullptr;
     do
     {
         std::string line;

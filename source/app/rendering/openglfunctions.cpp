@@ -124,7 +124,7 @@ QString OpenGLFunctions::info()
     Functions<OpenGLFunctions> f(format);
 
     QString extensions;
-    GLint numExtensions;
+    GLint numExtensions = 0;
     f->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
     for(int i = 0; i < numExtensions; i++)
     {

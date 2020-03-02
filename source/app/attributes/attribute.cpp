@@ -143,19 +143,22 @@ ValueType Attribute::valueType() const
 {
     switch(type())
     {
-    case Type::IntNode:             return ValueType::Int;
-    case Type::IntEdge:             return ValueType::Int;
-    case Type::IntComponent:        return ValueType::Int;
+    case Type::IntNode:
+    case Type::IntEdge:
+    case Type::IntComponent:
+        return ValueType::Int;
 
-    case Type::FloatNode:           return ValueType::Float;
-    case Type::FloatEdge:           return ValueType::Float;
-    case Type::FloatComponent:      return ValueType::Float;
+    case Type::FloatNode:
+    case Type::FloatEdge:
+    case Type::FloatComponent:
+        return ValueType::Float;
 
-    case Type::StringNode:          return ValueType::String;
-    case Type::StringEdge:          return ValueType::String;
-    case Type::StringComponent:     return ValueType::String;
+    case Type::StringNode:
+    case Type::StringEdge:
+    case Type::StringComponent:
+        return ValueType::String;
 
-    default:                        return ValueType::Unknown;
+    default: return ValueType::Unknown;
     }
 }
 
@@ -163,19 +166,23 @@ ElementType Attribute::elementType() const
 {
     switch(type())
     {
-    case Type::IntNode:             return ElementType::Node;
-    case Type::FloatNode:           return ElementType::Node;
-    case Type::StringNode:          return ElementType::Node;
+    case Type::IntNode:
+    case Type::FloatNode:
+    case Type::StringNode:
+        return ElementType::Node;
 
-    case Type::IntEdge:             return ElementType::Edge;
-    case Type::FloatEdge:           return ElementType::Edge;
-    case Type::StringEdge:          return ElementType::Edge;
+    case Type::IntEdge:
+    case Type::FloatEdge:
+    case Type::StringEdge:
+        return ElementType::Edge;
 
-    case Type::IntComponent:        return ElementType::Component;
-    case Type::FloatComponent:      return ElementType::Component;
-    case Type::StringComponent:     return ElementType::Component;
+    case Type::IntComponent:
+    case Type::FloatComponent:
+    case Type::StringComponent:
+        return ElementType::Component;
 
-    default:                        return ElementType::None;
+    default:
+        return ElementType::None;
     }
 }
 

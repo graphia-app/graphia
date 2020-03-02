@@ -112,7 +112,7 @@ QColor ColorPalette::get(const QString& value, int index) const
 
                 if(!digits.isEmpty())
                 {
-                    bool success;
+                    bool success = false;
                     auto n = digits.toInt(&success);
 
                     if(success)
