@@ -6,6 +6,8 @@
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
+template<> constexpr bool EnableBitMaskOperators<Layout::Dimensionality> = true;
+
 static bool layoutIsFinished(const Layout& layout)
 {
     return layout.finished() || layout.graphComponent().numNodes() == 1;

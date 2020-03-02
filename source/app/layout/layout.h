@@ -103,8 +103,6 @@ signals:
     void progress(int percentage);
 };
 
-template<> constexpr bool EnableBitMaskOperators<Layout::Dimensionality> = true;
-
 class GraphModel;
 
 class LayoutFactory
