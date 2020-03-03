@@ -276,7 +276,7 @@ int MutableGraph::multiplicityOf(EdgeId edgeId) const
 EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
 {
     EdgeIdDistinctSets set;
-    auto& node = nodeBy(nodeId);
+    const auto& node = nodeBy(nodeId);
 
     set.add(node._inEdgeIds);
     set.add(node._outEdgeIds);
@@ -454,7 +454,7 @@ void MutableGraph::contractEdge(EdgeId edgeId)
 
     beginTransaction();
 
-    auto& edge = edgeById(edgeId);
+    const auto& edge = edgeById(edgeId);
     auto [nodeId, nodeIdToMerge] = std::minmax(edge.sourceId(), edge.targetId());
 
     removeEdge(edgeId);
@@ -486,7 +486,7 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
 
     for(auto componentId : componentManager.componentIds())
     {
-        auto component = componentManager.componentById(componentId);
+        const auto* component = componentManager.componentById(componentId);
 
         // Nothing to contract
         if(component->numEdges() == 0)

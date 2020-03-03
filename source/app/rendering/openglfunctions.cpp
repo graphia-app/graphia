@@ -7,7 +7,7 @@
 
 void OpenGLFunctions::resolveOpenGLFunctions()
 {
-    auto context = QOpenGLContext::currentContext();
+    const auto* context = QOpenGLContext::currentContext();
     Q_ASSERT(context != nullptr);
 
     if(!initializeOpenGLFunctions())

@@ -266,7 +266,7 @@ int start(int argc, char *argv[])
 
             std::cerr << "Writing " << fileName.toStdString() << "\n";
 
-            auto screen = window->screen();
+            auto* screen = window->screen();
             if(screen == nullptr)
                 continue;
 

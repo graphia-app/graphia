@@ -41,7 +41,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
     _correlationValues = std::make_unique<EdgeArray<double>>(_graphModel->mutableGraph());
 
-    auto modelQObject = dynamic_cast<const QObject*>(_graphModel);
+    const auto* modelQObject = dynamic_cast<const QObject*>(_graphModel);
     connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
             this, SIGNAL(sharedValuesAttributeNamesChanged()));
 }
@@ -312,7 +312,7 @@ bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& 
         parser.setProgress(static_cast<int>(std::distance(edges.begin(), edgeIt)) * 100 /
             static_cast<int>(edges.size()));
 
-        auto& edge = *edgeIt;
+        const auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
         _correlationValues->set(edgeId, edge._r);
     }

@@ -25,7 +25,7 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
 
     for(auto componentId : componentIds)
     {
-        auto component = graph.componentById(componentId);
+        const auto* component = graph.componentById(componentId);
         int divisor = maxNumNodes / component->numNodes();
         renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
     }

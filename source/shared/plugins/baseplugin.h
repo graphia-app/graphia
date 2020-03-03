@@ -42,7 +42,7 @@ public:
         _selectionManager = document->selectionManager();
         _commandManager = document->commandManager();
 
-        auto graphQObject = dynamic_cast<const QObject*>(&_graphModel->graph());
+        const auto* graphQObject = dynamic_cast<const QObject*>(&_graphModel->graph());
         Q_ASSERT(graphQObject != nullptr);
 
         connect(graphQObject, SIGNAL(graphWillChange(const Graph*)),
@@ -60,19 +60,19 @@ public:
         connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
                 this, SIGNAL(graphChanged()), Qt::DirectConnection);
 
-        auto selectionManagerQObject = dynamic_cast<const QObject*>(_selectionManager);
+        const auto* selectionManagerQObject = dynamic_cast<const QObject*>(_selectionManager);
         Q_ASSERT(selectionManagerQObject != nullptr);
 
         connect(selectionManagerQObject, SIGNAL(selectionChanged(const SelectionManager*)),
                 this, SLOT(onSelectionChanged(const SelectionManager*)), Qt::DirectConnection);
 
-        auto graphModelQObject = dynamic_cast<const QObject*>(_graphModel);
+        const auto* graphModelQObject = dynamic_cast<const QObject*>(_graphModel);
         Q_ASSERT(graphModelQObject != nullptr);
 
         connect(graphModelQObject, SIGNAL(visualsChanged()),
                 this, SLOT(onVisualsChanged()), Qt::DirectConnection);
 
-        auto parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
+        const auto* parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
         Q_ASSERT(parserThreadQObject != nullptr);
 
         connect(parserThreadQObject, SIGNAL(success(IParser*)),

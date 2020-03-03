@@ -195,7 +195,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     for(auto componentId : componentIds)
     {
-        auto component = graph.componentById(componentId);
+        const auto* component = graph.componentById(componentId);
         float size = (static_cast<float>(component->numNodes()) * 100.0f) /
             static_cast<float>(maxNumNodes);
         componentLayoutData[componentId].setRadius(size);

@@ -6,7 +6,7 @@
 
 float LayoutSettings::value(const QString& name) const
 {
-    auto* v = setting(name);
+    const auto* v = setting(name);
     if(v != nullptr)
         return v->value();
 
@@ -15,7 +15,7 @@ float LayoutSettings::value(const QString& name) const
 
 float LayoutSettings::normalisedValue(const QString& name) const
 {
-    auto* v = setting(name);
+    const auto* v = setting(name);
     if(v != nullptr)
         return v->normalisedValue();
 

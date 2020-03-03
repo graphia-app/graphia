@@ -100,7 +100,7 @@ static json bookmarksAsJson(const Document& document)
             std::back_inserter(nodeIds));
 
         auto byteArray = bookmark.toUtf8();
-        auto bookmarkName = byteArray.constData();
+        const auto* bookmarkName = byteArray.constData();
         jsonObject[bookmarkName] = nodeIds;
     }
 
@@ -115,7 +115,7 @@ static json layoutSettingsAsJson(const Document& document)
     for(const auto& setting : settings)
     {
         auto byteArray = setting.name().toUtf8();
-        auto settingName = byteArray.constData();
+        const auto* settingName = byteArray.constData();
         jsonObject[settingName] = setting.value();
     }
 
@@ -126,7 +126,7 @@ bool NativeSaver::save()
 {
     json jsonArray;
 
-    auto graphModel = dynamic_cast<GraphModel*>(_document->graphModel());
+    auto* graphModel = dynamic_cast<GraphModel*>(_document->graphModel());
 
     Q_ASSERT(graphModel != nullptr);
     if(graphModel == nullptr)
@@ -170,7 +170,7 @@ bool NativeSaver::save()
 
     content["bookmarks"] = bookmarksAsJson(*_document);
 
-    for(auto table : *_document->enrichmentTableModels())
+    for(auto* table : *_document->enrichmentTableModels())
         content["enrichmentTables"].push_back(table->toJson());
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);

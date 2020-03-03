@@ -108,7 +108,7 @@ void GraphComponentRenderer::synchronise()
     _nodeIds.clear();
     _edges.clear();
 
-    auto component = _graphModel->graph().componentById(_componentId);
+    const auto* component = _graphModel->graph().componentById(_componentId);
     Q_ASSERT(component != nullptr);
 
     _nodeIds = component->nodeIds();
@@ -173,7 +173,7 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     for(auto nodeId : nodeIds)
     {
         QVector3D nodePosition = graphModel.nodePositions().get(nodeId);
-        auto& nodeVisual = graphModel.nodeVisual(nodeId);
+        const auto& nodeVisual = graphModel.nodeVisual(nodeId);
         float distance = (centre - nodePosition).length() + nodeVisual._size;
 
         if(distance > maxDistance)

@@ -101,7 +101,7 @@ bool GMLSaver::save()
     _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
-        auto& edge = _graphModel->graph().edgeById(edgeId);
+        const auto& edge = _graphModel->graph().edgeById(edgeId);
 
         stream << indent(level) << "edge" << endl;
         stream << indent(level) << "[" << endl;

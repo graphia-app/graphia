@@ -515,7 +515,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
     for(int index = 0; index < visualisations.size(); index++)
     {
-        auto& visualisation = visualisations.at(index);
+        const auto& visualisation = visualisations.at(index);
 
         VisualisationConfigParser visualisationConfigParser;
 
@@ -967,7 +967,7 @@ void GraphModel::updateVisuals()
             _->_edgeVisuals[edgeId]._size = edgeSize;
 
         // Restrict edgeSize to be no larger than the source or target size
-        auto& edge = graph().edgeById(edgeId);
+        const auto& edge = graph().edgeById(edgeId);
         auto minEdgeNodesSize = std::min(_->_nodeVisuals[edge.sourceId()]._size,
                                          _->_nodeVisuals[edge.targetId()]._size);
         _->_edgeVisuals[edgeId]._size = std::min(_->_edgeVisuals[edgeId]._size, minEdgeNodesSize);

@@ -53,8 +53,8 @@ bool GraphMLHandler::endDocument()
     {
         for(const auto& idAttributePair : edgeAttr.second)
         {
-            auto& tempEdge = idAttributePair.first;
-            auto& attr = idAttributePair.second;
+            const auto& tempEdge = idAttributePair.first;
+            const auto& attr = idAttributePair.second;
 
             _edgeAttributes[edgeAttr.first][_edgeIdMap.at(tempEdge)] = attr;
         }
@@ -224,7 +224,7 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
         _activeAttributeKeys.pop();
     else if(localName == QLatin1String("data") && (!_activeNodes.empty() || !_activeTemporaryEdges.empty()))
     {
-        auto attribute = _activeAttributes.top();
+        const auto* attribute = _activeAttributes.top();
 
         if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
             _userNodeData->setValueBy(_activeNodes.top(), attribute->_name, attribute->_value.toString());

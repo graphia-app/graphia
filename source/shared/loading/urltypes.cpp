@@ -21,7 +21,7 @@ QStringList UrlTypes::identifyByExtension(const QUrl& url) const
     {
         QString extension = QFileInfo(url.toLocalFile()).suffix();
 
-        for(auto& urlType : _urlTypes)
+        for(const auto& urlType : _urlTypes)
         {
             for(auto& loadableExtension : urlType.second.extensions())
             {
@@ -38,7 +38,7 @@ QStringList UrlTypes::loadableUrlTypeNames() const
 {
     QStringList urlTypeNames;
     urlTypeNames.reserve(static_cast<int>(_urlTypes.size()));
-    for(auto& urlType : _urlTypes)
+    for(const auto& urlType : _urlTypes)
         urlTypeNames.append(urlType.first);
 
     return urlTypeNames;

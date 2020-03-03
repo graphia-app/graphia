@@ -62,8 +62,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
-        auto* attributeA = graphModel->attributeByName(attributeAName);
-        auto* attributeB = graphModel->attributeByName(attributeBName);
+        const auto* attributeA = graphModel->attributeByName(attributeAName);
+        const auto* attributeB = graphModel->attributeByName(attributeBName);
         const auto& stringAttributeA = attributeA->stringValueOf(nodeId);
         const auto& stringAttributeB = attributeB->stringValueOf(nodeId);
         ++attributeValueEntryCountATotal[stringAttributeA];
@@ -78,8 +78,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
     // Get all the nodeIds for each AttributeFor value
     // Maps of vectors uhoh.
-    auto* attributeA = graphModel->attributeByName(attributeAName);
-    auto* attributeB = graphModel->attributeByName(attributeBName);
+    const auto* attributeA = graphModel->attributeByName(attributeAName);
+    const auto* attributeB = graphModel->attributeByName(attributeBName);
 
     std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
     for(auto nodeId : graphModel->graph().nodeIds())

@@ -73,7 +73,7 @@ void CommandManager::executeReal(ICommandPtr command, bool irreversible)
 {
     commandStartDebug(_debug, _busy, command->description());
 
-    auto commandPtr = command.get();
+    auto* commandPtr = command.get();
     auto verb = command->verb();
     doCommand(commandPtr, verb, [this, command = std::move(command), irreversible]() mutable
     {
@@ -134,7 +134,7 @@ void CommandManager::undoReal()
     if(!canUndoNoLocking())
         return;
 
-    auto command = _stack.at(_lastExecutedIndex).get();
+    auto* command = _stack.at(_lastExecutedIndex).get();
 
     QString undoVerb = !command->description().isEmpty() ?
                 QObject::tr("Undoing ") + command->description() :
@@ -162,7 +162,7 @@ void CommandManager::redoReal()
     if(!canRedoNoLocking())
         return;
 
-    auto command = _stack.at(++_lastExecutedIndex).get();
+    auto* command = _stack.at(++_lastExecutedIndex).get();
 
     QString redoVerb = !command->description().isEmpty() ?
                 QObject::tr("Redoing ") + command->description() :
@@ -250,7 +250,7 @@ QString CommandManager::nextUndoAction() const
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
-        auto& command = _stack.at(_lastExecutedIndex);
+        const auto& command = _stack.at(_lastExecutedIndex);
         if(!command->description().isEmpty())
             return QObject::tr("Undo ") + command->description();
     }
@@ -264,7 +264,7 @@ QString CommandManager::nextRedoAction() const
 
     if(lock.owns_lock() && canRedoNoLocking())
     {
-        auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex) + 1);
+        const auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex) + 1);
         if(!command->description().isEmpty())
             return QObject::tr("Redo ") + command->description();
     }

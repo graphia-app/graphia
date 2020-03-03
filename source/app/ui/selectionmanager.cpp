@@ -46,7 +46,7 @@ NodeIdSet SelectionManager::selectedNodes() const
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
-    auto& nodeIds = _graphModel->graph().nodeIds();
+    const auto& nodeIds = _graphModel->graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodeIds.begin(), _selectedNodeIds.end());
 
@@ -274,7 +274,7 @@ QString SelectionManager::numNodesSelectedAsString() const
     if(selectionSize == 1)
     {
         auto nodeId = *selectedNodes().begin();
-        auto& nodeName = _graphModel->nodeNames()[nodeId];
+        const auto& nodeName = _graphModel->nodeNames()[nodeId];
 
         if(!nodeName.isEmpty())
             return QString(tr("Selected %1")).arg(nodeName);

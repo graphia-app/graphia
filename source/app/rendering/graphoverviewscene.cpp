@@ -70,7 +70,7 @@ void GraphOverviewScene::setVisible(bool visible)
 {
     for(auto componentId : _componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setVisible(visible);
     }
 
@@ -236,7 +236,7 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId foc
 
         // The renderer should have already been frozen by GraphComponentScene::onComponentWillBeRemoved,
         // but let's make sure
-        auto renderer = _graphRenderer->componentRendererForId(focusComponentId);
+        auto* renderer = _graphRenderer->componentRendererForId(focusComponentId);
         renderer->freeze();
     }
 
@@ -321,7 +321,7 @@ void GraphOverviewScene::setViewportSize(int width, int height)
 
     for(auto componentId : _componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setViewportSize(_width, _height);
         renderer->setDimensions(_zoomedComponentLayoutData[componentId].boundingBox());
     }
@@ -334,7 +334,7 @@ bool GraphOverviewScene::transitionActive() const
 
     for(auto componentId : _componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
 
         if(renderer->transitionActive())
             return true;
@@ -381,13 +381,13 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
 
         for(auto componentId : _removedComponentIds)
         {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
+            auto* renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->thaw();
         }
 
         for(const auto& componentMergeSet : _componentMergeSets)
         {
-            auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
+            auto* renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
             renderer->thaw();
         }
 
@@ -410,17 +410,17 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
     // Reset all components by default
     for(auto componentId : _componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->resetView();
     }
 
     for(const auto& componentMergeSet : _componentMergeSets)
     {
-        auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
-        auto& mergedNodeIds = mergedComponent->nodeIds();
+        const auto* mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
+        const auto& mergedNodeIds = mergedComponent->nodeIds();
 
         // Use the rotation of the new component
-        auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
+        auto* renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
         QQuaternion rotation = renderer->camera()->rotation();
 
         for(auto merger : componentMergeSet.mergers())
@@ -480,7 +480,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
     {
         _graphRenderer->executeOnRendererThread([this, componentId]
         {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
+            auto* renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->freeze();
 
             _removedComponentIds.emplace_back(componentId);
@@ -499,11 +499,11 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
         if(visible())
         {
             auto oldComponentId = componentSplitSet.oldComponentId();
-            auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
+            auto* oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
             for(auto splitter : componentSplitSet.splitters())
             {
-                auto renderer = _graphRenderer->componentRendererForId(splitter);
+                auto* renderer = _graphRenderer->componentRendererForId(splitter);
                 renderer->cloneViewDataFrom(*oldGraphComponentRenderer);
                 _previousZoomedComponentLayoutData[splitter] = _zoomedComponentLayoutData[oldComponentId];
                 _previousComponentAlpha[splitter] = _componentAlpha[oldComponentId];
@@ -523,7 +523,7 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
 
         for(auto merger : componentMergeSet.mergers())
         {
-            auto renderer = _graphRenderer->componentRendererForId(merger);
+            auto* renderer = _graphRenderer->componentRendererForId(merger);
             renderer->freeze();
 
             if(merger != componentMergeSet.newComponentId())
@@ -597,7 +597,7 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
         _commandManager->executeOnce(
         [this](Command&)
         {
-            auto* graph = &_graphModel->graph();
+            const auto* graph = &_graphModel->graph();
 
             _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 

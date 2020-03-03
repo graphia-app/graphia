@@ -234,7 +234,7 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
 
 QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
 {
-    auto plugin = pluginForName(pluginName);
+    auto* plugin = pluginForName(pluginName);
 
     if(plugin != nullptr)
         return plugin->parametersQmlPath();

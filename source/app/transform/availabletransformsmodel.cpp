@@ -21,7 +21,7 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
 
     if(role != Qt::DisplayRole)
     {
-        auto transform = _graphModel->transformFactory(transformName);
+        const auto* transform = _graphModel->transformFactory(transformName);
 
         if(transform == nullptr)
             return {};

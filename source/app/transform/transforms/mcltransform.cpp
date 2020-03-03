@@ -80,17 +80,17 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
 
     size_t minIndex = std::numeric_limits<size_t>::infinity();
     size_t maxIndex = 0UL;
-    const auto lend = mclMatrix.cend(columnId);
+    const auto* const lend = mclMatrix.cend(columnId);
 
     // Perform multiply and populate prune dependant data structures
-    for(auto lelem = mclMatrix.cbegin(columnId); lelem != lend; ++lelem)
+    for(const auto* lelem = mclMatrix.cbegin(columnId); lelem != lend; ++lelem)
     {
         if(cancelledFn())
             break;
 
         // For each column (left)
-        const auto rend = mclMatrix.cend(lelem->index());
-        for(auto relem = mclMatrix.cbegin(lelem->index()); relem != rend; ++relem)
+        const auto* const rend = mclMatrix.cend(lelem->index());
+        for(const auto* relem = mclMatrix.cbegin(lelem->index()); relem != rend; ++relem)
         {
             // For each column starting at left column index (right)
             float mult = lelem->value() * relem->value();
@@ -535,7 +535,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     std::vector<bool> clusterGroupAssigned(nodeCount, false);
     for(size_t k = 0; k < clusterMatrix.columns(); ++k)
     {
-        for(auto it = clusterMatrix.cbegin(k); it != clusterMatrix.cend(k); ++it )
+        for(const auto* it = clusterMatrix.cbegin(k); it != clusterMatrix.cend(k); ++it )
         {
             if(it->value() < MCL_PRUNE_LIMIT)
                 continue;

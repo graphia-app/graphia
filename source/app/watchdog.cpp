@@ -55,7 +55,7 @@ void WatchdogWorker::showWarning()
         QStringLiteral("-button") << QStringLiteral("Close and Report Bug:Destructive") <<
         QStringLiteral("-defaultButton") << QStringLiteral("Wait");
 
-    auto warningProcess = new QProcess(this);
+    auto* warningProcess = new QProcess(this);
 
     // Remove the warning if we recover in the mean time
     connect(this, &WatchdogWorker::reset, warningProcess, &QProcess::kill);

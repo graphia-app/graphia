@@ -31,7 +31,7 @@ bool JSONGraphSaver::save()
             const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
 
             auto byteArray = nodeAttributeName.toUtf8();
-            auto name = byteArray.constData();
+            const auto* name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
                 node["metadata"][name] = attribute->stringValueOf(nodeId);
@@ -55,7 +55,7 @@ bool JSONGraphSaver::save()
             const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
 
             auto byteArray = edgeAttributeName.toUtf8();
-            auto name = byteArray.constData();
+            const auto* name = byteArray.constData();
 
             if(attribute->valueType() == ValueType::String)
                 edge["metadata"][name] = attribute->stringValueOf(edgeId);

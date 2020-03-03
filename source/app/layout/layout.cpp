@@ -229,9 +229,9 @@ void LayoutThread::run()
 
             if(_debug != 0)
             {
-                auto* reason = _pause ?               "manually" :
-                               allLayoutsFinished() ? "because all layouts finished" :
-                               "";
+                const auto* reason = _pause ? "manually" :
+                    allLayoutsFinished() ? "because all layouts finished" :
+                    "";
                 qDebug() << "Layout paused" << reason;
             }
 

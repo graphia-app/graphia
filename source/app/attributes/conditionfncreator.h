@@ -478,7 +478,7 @@ private:
 
         Attribute attributeFromValue(const ResolvedTerminalValue& resolvedTerminalValue) const
         {
-            auto attribute = std::get_if<Attribute>(&resolvedTerminalValue);
+            const auto* attribute = std::get_if<Attribute>(&resolvedTerminalValue);
 
             if(attribute != nullptr)
                 return *attribute;

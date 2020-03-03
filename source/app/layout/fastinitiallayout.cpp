@@ -21,7 +21,7 @@ void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4
 
 void FastInitialLayout::execute(bool, Dimensionality dimensionality)
 {
-    auto& graph = graphComponent().graph();
+    const auto& graph = graphComponent().graph();
     NodeArray<bool> visitedNodes(graph);
     NodeArray<QVector3D> directionNodeVectors(graph);
 
@@ -68,7 +68,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
         // the first node as it would be in the parents position!
         if(edgeIdIterator != edgeIds.end() && parentNodeId == nodeIds().front())
         {
-            auto& edge = graph.edgeById(*edgeIdIterator);
+            const auto& edge = graph.edgeById(*edgeIdIterator);
             auto childNodeId = edge.oppositeId(parentNodeId);
 
             bool visited = visitedNodes.get(childNodeId);
@@ -95,7 +95,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
         // Second node (top)
         if(edgeIdIterator != edgeIds.end())
         {
-            auto& edge = graph.edgeById(*edgeIdIterator);
+            const auto& edge = graph.edgeById(*edgeIdIterator);
             auto childNodeId = edge.oppositeId(parentNodeId);
             bool visited = visitedNodes.get(childNodeId);
 
@@ -105,7 +105,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
                 ++edgeIdIterator;
                 if(edgeIdIterator != edgeIds.end())
                 {
-                    auto &newEdge = graph.edgeById(*edgeIdIterator);
+                    const auto &newEdge = graph.edgeById(*edgeIdIterator);
                     childNodeId = newEdge.oppositeId(parentNodeId);
                     visited = visitedNodes.get(childNodeId);
                 }
@@ -136,7 +136,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
         int i = 2;
         for(;edgeIdIterator != edgeIds.end(); ++edgeIdIterator)
         {
-            auto& edge = graph.edgeById(*edgeIdIterator);
+            const auto& edge = graph.edgeById(*edgeIdIterator);
             auto childNodeId = edge.oppositeId(parentNodeId);
 
             if(visitedNodes.get(childNodeId))

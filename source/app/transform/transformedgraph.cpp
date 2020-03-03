@@ -173,7 +173,7 @@ void TransformedGraph::rebuild()
             // We've been cancelled so rollback to our previous state
             _cache = std::move(oldCache);
             _createdAttributeNames = std::move(oldCreatedAttributeNames);
-            auto* cachedGraph = _cache.graph();
+            const auto* cachedGraph = _cache.graph();
             *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
 
             // Remove any attributes that were added before the cancel occurred

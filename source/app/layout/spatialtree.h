@@ -229,7 +229,7 @@ private:
                 std::vector<NewTree> newChildTrees;
                 for(int i = 0; i < subTree->_numInternalNodes; i++)
                 {
-                    auto subVolume = subTree->_internalNodes.at(i);
+                    const auto* subVolume = subTree->_internalNodes.at(i);
                     newChildTrees.emplace_back(subVolume->_subTree.get(),
                         std::move(subVolume->_nodeIds));
                 }
@@ -255,7 +255,7 @@ private:
 
             for(int i = 0; i < subTree->_numInternalNodes; i++)
             {
-                auto subVolume = subTree->_internalNodes.at(i);
+                const auto* subVolume = subTree->_internalNodes.at(i);
                 stack.push(subVolume->_subTree.get());
                 _depthFirstTraversalStackSizeRequirement =
                     std::max(_depthFirstTraversalStackSizeRequirement, stack.size());

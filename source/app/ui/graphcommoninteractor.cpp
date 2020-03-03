@@ -34,7 +34,9 @@ NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
 {
     NodeIdSet selection;
 
-    auto component = graphModel.graph().componentById(componentId);
+    const auto* component = graphModel.graph().componentById(componentId);
+    Q_ASSERT(component != nullptr);
+
     for(NodeId nodeId : component->nodeIds())
     {
         if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
@@ -363,7 +365,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
 void GraphCommonInteractor::leftDrag()
 {
-    auto renderer = clickedComponentRenderer();
+    auto* renderer = clickedComponentRenderer();
 
     if((modifiers() & Qt::ShiftModifier) != 0)
     {
@@ -452,7 +454,7 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
 
 NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& localPosition) const
 {
-    auto renderer = clickedComponentRenderer();
+    auto* renderer = clickedComponentRenderer();
     if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 
@@ -466,7 +468,7 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
 {
     const int PICK_RADIUS = 40;
 
-    auto renderer = clickedComponentRenderer();
+    auto* renderer = clickedComponentRenderer();
     if(renderer == nullptr || !renderer->componentIsValid())
         return {};
 

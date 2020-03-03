@@ -135,7 +135,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
     auto processNode = [&](const List& node)
     {
-        auto id = findIntValue(node, QStringLiteral("id"));
+        const auto* id = findIntValue(node, QStringLiteral("id"));
         if(id == nullptr)
             return false;
 
@@ -177,8 +177,8 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
     auto processEdge = [&](const List& edge)
     {
-        auto sourceId = findIntValue(edge, QStringLiteral("source"));
-        auto targetId = findIntValue(edge, QStringLiteral("target"));
+        const auto* sourceId = findIntValue(edge, QStringLiteral("source"));
+        const auto* targetId = findIntValue(edge, QStringLiteral("target"));
 
         if(sourceId == nullptr || targetId == nullptr)
             return false;

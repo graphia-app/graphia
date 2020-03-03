@@ -72,7 +72,7 @@ void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 
 ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& position) const
 {
-    auto& componentLayout = _scene->componentLayout();
+    const auto& componentLayout = _scene->componentLayout();
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
@@ -100,7 +100,7 @@ GraphComponentRenderer* GraphOverviewInteractor::componentRendererAtPosition(con
 
 QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const
 {
-    auto& componentLayout = _scene->componentLayout();
+    const auto& componentLayout = _scene->componentLayout();
     auto rect = componentLayout[componentId].boundingBox();
 
     QPoint transformedPos(position.x() - static_cast<int>(rect.x()),
@@ -112,7 +112,7 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
 {
     NodeIdSet selection;
 
-    auto& componentLayout = _scene->componentLayout();
+    const auto& componentLayout = _scene->componentLayout();
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
@@ -120,7 +120,7 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
 
         if(rect.intersects((layoutRect)))
         {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
+            const auto* renderer = _graphRenderer->componentRendererForId(componentId);
             auto subRect = rect.intersected(layoutRect).translated(-layoutRect.topLeft());
 
             auto frustum = renderer->camera()->frustumForViewportCoordinates(

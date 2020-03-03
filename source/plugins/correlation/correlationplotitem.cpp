@@ -284,10 +284,10 @@ void CorrelationPlotItem::paint(QPainter* painter)
 
         for(int y = 0; y < image.height(); y++)
         {
-            auto scanLine = image.scanLine(y);
+            auto* scanLine = image.scanLine(y);
             for(int x = 0; x < image.width(); x++)
             {
-                auto pixel = reinterpret_cast<QRgb*>(scanLine + (x * bytes));
+                auto* pixel = reinterpret_cast<QRgb*>(scanLine + (x * bytes));
                 const int gray = qGray(*pixel);
                 const int alpha = qAlpha(*pixel);
                 *pixel = QColor(gray, gray, gray, alpha).rgba();
@@ -381,7 +381,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
     {
         QVariant details;
 
-        const auto axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
+        const auto& axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
         auto minDistanceSq = std::numeric_limits<double>::max();
 
         for(int index = 0; index < _customPlot.plottableCount(); index++)
@@ -404,7 +404,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
             if(!rect.contains(_hoverPoint.toPoint()))
                 continue;
 
-            auto graph = dynamic_cast<QCPGraph*>(plottable);
+            const auto* graph = dynamic_cast<QCPGraph*>(plottable);
             if(graph != nullptr)
             {
                 double posKeyMin = 0.0, posKeyMax = 0.0, dummy = 0.0;
@@ -489,18 +489,18 @@ void CorrelationPlotItem::updateTooltip()
     {
         if(axisRectUnderCursor == _mainAxisRect && plottableUnderCursor != nullptr)
         {
-            if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
+            if(auto* graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
             {
                 _itemTracer->setGraph(graph);
                 _itemTracer->setGraphKey(xCoord);
                 showTooltip = true;
             }
-            else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
+            else if(auto* bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
             {
                 _itemTracer->position->setPixelPosition(bars->dataPixelPosition(static_cast<int>(xCoord)));
                 showTooltip = true;
             }
-            else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
+            else if(auto* boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
             {
                 // Only show simple tooltips for now, can extend this later...
                 _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(static_cast<int>(xCoord)));
@@ -512,7 +512,7 @@ void CorrelationPlotItem::updateTooltip()
             if(axisRectUnderCursor->rect().contains(_hoverPoint.toPoint()))
             {
                 auto point = _hoverPoint - axisRectUnderCursor->topLeft();
-                auto bottomAxis = axisRectUnderCursor->axis(QCPAxis::atBottom);
+                auto* bottomAxis = axisRectUnderCursor->axis(QCPAxis::atBottom);
                 const auto& bottomRange = bottomAxis->range();
                 auto bottomSize = bottomRange.size();
                 auto xf = bottomRange.lower + 0.5 +
@@ -876,13 +876,13 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         addPlotPerAttributeValue(_pluginInstance, tr("Median histogram of %1: %2"),
             _plotAveragingAttributeName, _selectedRows, addMeanBars);
 
-        auto barsGroup = new QCPBarsGroup(&_customPlot);
+        auto* barsGroup = new QCPBarsGroup(&_customPlot);
         barsGroup->setSpacingType(QCPBarsGroup::stAbsolute);
         barsGroup->setSpacing(1.0);
 
         for(auto* plottable : qAsConst(_meanPlots))
         {
-            auto bars = dynamic_cast<QCPBars*>(plottable);
+            auto* bars = dynamic_cast<QCPBars*>(plottable);
             bars->setWidth(bars->width() / _meanPlots.size());
             barsGroup->append(bars);
         }
@@ -1247,8 +1247,8 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     xAxis->setTickLabels(false);
 
-    auto caXAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
-    auto caYAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
+    auto* caXAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
+    auto* caYAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
 
     auto h = columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
     _columnAnnotationsAxisRect->setMinimumSize(0, h);

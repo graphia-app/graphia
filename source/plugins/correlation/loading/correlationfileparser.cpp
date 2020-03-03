@@ -30,7 +30,7 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
     {
         for(size_t row = tabularData.numRows(); row-- > startRow; )
         {
-            auto& value = tabularData.valueAt(column, row);
+            const auto& value = tabularData.valueAt(column, row);
             if(u::isNumeric(value) || value.isEmpty())
                 heightHistogram.at(column)++;
             else
@@ -104,7 +104,7 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
     {
         for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
         {
-            auto& value = tabularData.valueAt(
+            const auto& value = tabularData.valueAt(
                 static_cast<size_t>(column), static_cast<size_t>(row));
 
             if(value.isEmpty())

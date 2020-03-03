@@ -535,7 +535,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     // The plugin won't necessarily have the saveRequired signal or in fact be
     // a QObject at all, hence this convoluted and defensive runtime connection
-    auto pluginInstanceQObject = dynamic_cast<const QObject*>(_pluginInstance.get());
+    const auto* pluginInstanceQObject = dynamic_cast<const QObject*>(_pluginInstance.get());
     if(pluginInstanceQObject != nullptr)
     {
         auto signature = QMetaObject::normalizedSignature("saveRequired()");
@@ -586,7 +586,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         connect(_graphFileParserThread.get(), &ParserThread::success,
         [this](IParser* completedParser)
         {
-            auto completedLoader = dynamic_cast<Loader*>(completedParser);
+            auto* completedLoader = dynamic_cast<Loader*>(completedParser);
 
             Q_ASSERT(completedLoader != nullptr);
             if(completedLoader == nullptr)
@@ -608,7 +608,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             //FIXME make use of this when we can switch algorithms = completedLoader->layoutName();
             _loadedLayoutSettings = completedLoader->layoutSettings();
 
-            auto nodePositions = completedLoader->nodePositions();
+            const auto* nodePositions = completedLoader->nodePositions();
             if(nodePositions != nullptr)
                 _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
 
@@ -622,10 +622,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _pluginUiData = completedLoader->pluginUiData();
             _pluginUiDataVersion = completedLoader->pluginUiDataVersion();
 
-            auto& enrichmentTableModels = completedLoader->enrichmentTableModels();
+            const auto& enrichmentTableModels = completedLoader->enrichmentTableModels();
             executeOnMainThread([this, enrichmentTableModels]()
             {
-                for(auto& table: enrichmentTableModels)
+                for(const auto& table : enrichmentTableModels)
                 {
                     auto* tableModel = new EnrichmentTableModel(this);
                     _enrichmentTableModels.append(tableModel);
@@ -948,7 +948,7 @@ void Document::selectAllVisible()
     if(canEnterOverviewMode())
     {
         auto componentId = _graphQuickItem->focusedComponentId();
-        auto component = _graphModel->graph().componentById(componentId);
+        const auto* component = _graphModel->graph().componentById(componentId);
         const auto& nodeIds = component->nodeIds();
 
         _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
@@ -2418,7 +2418,7 @@ void Document::writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl, co
         stream << rowString << "\r\n";
 
         auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rows")).toInt();
-        auto model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
+        auto* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
         if(model != nullptr)
         {
             for(int row = 0; row < rowCount; row++)
@@ -2457,7 +2457,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
         QMetaObject::invokeMethod(tableView, "getColumn",
                 Q_RETURN_ARG(QVariant, columnVariant),
                 Q_ARG(QVariant, i));
-        auto tableViewColumn = qvariant_cast<QObject*>(columnVariant);
+        auto* tableViewColumn = qvariant_cast<QObject*>(columnVariant);
 
         if(tableViewColumn != nullptr && QQmlProperty::read(tableViewColumn, QStringLiteral("visible")).toBool())
             columnRoles.append(QQmlProperty::read(tableViewColumn, QStringLiteral("role")).toString());
@@ -2530,7 +2530,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
         stream << rowString << "\r\n";
 
         auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rowCount")).toInt();
-        auto model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
+        auto* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
         if(model != nullptr)
         {
             for(int row = 0; row < rowCount; row++)

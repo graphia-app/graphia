@@ -234,7 +234,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     // context available, and this is as good a place as any for that
     _gpuComputeThread->initialise();
 
-    auto graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
+    auto* graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
     connect(this, &GraphQuickItem::commandsStarted, graphRenderer, &GraphRenderer::onCommandsStarted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandsFinished, graphRenderer, &GraphRenderer::onCommandsFinished, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandsFinished, this, &GraphQuickItem::updateRenderer, Qt::DirectConnection);

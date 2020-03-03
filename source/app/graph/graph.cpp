@@ -65,10 +65,10 @@ Graph::Graph() :
 Graph::~Graph()
 {
     // Let the GraphArrays know that we're going away
-    for(auto nodeArray : _nodeArrays)
+    for(auto* nodeArray : _nodeArrays)
         nodeArray->invalidate();
 
-    for(auto edgeArray : _edgeArrays)
+    for(auto* edgeArray : _edgeArrays)
         edgeArray->invalidate();
 }
 
@@ -157,7 +157,7 @@ void Graph::dumpToQDebug(int detail) const
         {
             for(auto componentId : _componentManager->componentIds())
             {
-                auto component = _componentManager->componentById(componentId);
+                const auto* component = _componentManager->componentById(componentId);
                 qDebug() << "component" << componentId;
                 dumpGraphToQDebug(*this, *component, detail);
             }
@@ -242,7 +242,7 @@ void Graph::reserveNodeId(NodeId nodeId)
 
     _nextNodeId = nodeId + 1;
 
-    for(auto nodeArray : _nodeArrays)
+    for(auto* nodeArray : _nodeArrays)
         nodeArray->resize(static_cast<int>(_nextNodeId));
 }
 
@@ -253,7 +253,7 @@ void Graph::reserveEdgeId(EdgeId edgeId)
 
     _nextEdgeId = edgeId + 1;
 
-    for(auto edgeArray : _edgeArrays)
+    for(auto* edgeArray : _edgeArrays)
         edgeArray->resize(static_cast<int>(_nextEdgeId));
 }
 

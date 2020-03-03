@@ -97,7 +97,7 @@ void GraphComponentScene::setViewportSize(int width, int height)
     const auto& componentIds = _graphRenderer->graphModel()->graph().componentIds();
     for(auto componentId : componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setDimensions(QRect(0, 0, width, height));
         renderer->setViewportSize(width, height);
     }
@@ -413,7 +413,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
     {
         // Both of these things still exist after this returns
         auto largestSplitter = graph->componentIdOfLargestComponent(componentSplitSet.splitters());
-        auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
+        auto* oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
         _graphRenderer->executeOnRendererThread([this, largestSplitter, oldGraphComponentRenderer]
         {
@@ -431,7 +431,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
 
             Q_ASSERT(!newComponentId.isNull());
 
-            auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
+            auto* newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
 
             newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             setViewportSize(_width, _height);
@@ -450,8 +450,8 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
         return;
 
     auto newComponentId = componentMergeSet.newComponentId();
-    auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
-    auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
+    auto* newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
+    auto* oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
 
     _graphRenderer->executeOnRendererThread(
     [this, newComponentId, newGraphComponentRenderer, oldGraphComponentRenderer]

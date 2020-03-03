@@ -22,17 +22,17 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
     _userNodeData = userNodeData;
     _graph = &_document->graphModel()->graph();
 
-    auto graphModel = _document->graphModel();
+    const auto* graphModel = _document->graphModel();
 
     updateColumnNames();
 
-    auto modelQObject = dynamic_cast<const QObject*>(graphModel);
+    const auto* modelQObject = dynamic_cast<const QObject*>(graphModel);
     connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
             this, SLOT(onAttributesChanged(const QStringList&, const QStringList&)), Qt::DirectConnection);
     connect(modelQObject, SIGNAL(attributeValuesChanged(const QStringList&)),
             this, SLOT(onAttributeValuesChanged(const QStringList&)), Qt::DirectConnection);
 
-    auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
+    const auto* graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
             this, SLOT(onGraphChanged(const Graph*, bool)), Qt::DirectConnection);
 }
@@ -47,7 +47,7 @@ QStringList NodeAttributeTableModel::columnNames() const
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
-        auto attribute = _document->graphModel()->attributeByName(attributeName);
+        const auto* attribute = _document->graphModel()->attributeByName(attributeName);
         Q_ASSERT(attribute != nullptr);
 
         // We can't show parameterised attributes in the table
@@ -297,7 +297,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     for(const auto& name : added)
     {
-        auto attribute = _document->graphModel()->attributeByName(name);
+        const auto* attribute = _document->graphModel()->attributeByName(name);
 
         // We only care about node attributes, obviously
         if(attribute->elementType() != ElementType::Node || attribute->hasParameter())

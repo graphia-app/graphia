@@ -26,7 +26,7 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 {
     BasePluginInstance::initialise(plugin, document, parserThread);
 
-    auto graphModel = document->graphModel();
+    auto* graphModel = document->graphModel();
 
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(document, &_userNodeData);

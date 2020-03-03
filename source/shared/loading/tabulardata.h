@@ -89,7 +89,7 @@ public:
 
         auto parser = std::make_unique<aria::csv::CsvParser>(file);
         parser->delimiter(Delimiter);
-        for(auto& row : *parser)
+        for(const auto& row : *parser)
         {
             auto progress = file.eof() ? 100 :
                 static_cast<int>(parser->position() * 100 / fileSize);

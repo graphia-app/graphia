@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     {
         auto button = parseButton(buttonText);
 
-        auto pushButton = mb.addButton(button._text, button._role);
+        auto* pushButton = mb.addButton(button._text, button._role);
 
         if(defaultButtonText == buttonText)
             mb.setDefaultButton(pushButton);

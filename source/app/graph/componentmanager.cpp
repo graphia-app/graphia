@@ -36,7 +36,7 @@ ComponentManager::ComponentManager(Graph& graph,
 ComponentManager::~ComponentManager()
 {
     // Let the ComponentArrays know that we're going away
-    for(auto componentArray : _componentArrays)
+    for(auto* componentArray : _componentArrays)
         componentArray->invalidate();
 }
 

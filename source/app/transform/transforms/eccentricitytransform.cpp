@@ -17,7 +17,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     // Setup the contiguous ids
     std::map<NodeId, int> nodeIdToMatrixIndex;
     std::map<int, NodeId> matrixIndexToNodeId;
-    for(auto& nodeId : target.nodeIds())
+    for(auto nodeId : target.nodeIds())
     {
         auto size = static_cast<int>(nodeIdToMatrixIndex.size());
         nodeIdToMatrixIndex[nodeId] = size;
@@ -75,7 +75,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         }
 
         int maxDistance = 0;
-        for(auto& nodeId : target.nodeIds())
+        for(auto nodeId : target.nodeIds())
         {
             if(distance[nodeId] != std::numeric_limits<int>::max())
                 maxDistance = std::max(distance[nodeId], maxDistance);

@@ -24,7 +24,7 @@ static bool isMatrix(const TabularData& tabularData)
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            auto& value = tabularData.valueAt(columnIndex, rowIndex);
+            const auto& value = tabularData.valueAt(columnIndex, rowIndex);
 
             if(rowIndex == 0)
             {

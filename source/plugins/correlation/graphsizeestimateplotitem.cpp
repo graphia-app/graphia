@@ -104,8 +104,8 @@ void GraphSizeEstimatePlotItem::buildPlot()
     _customPlot.clearItems();
     _customPlot.clearPlottables();
 
-    auto nodesGraph = _customPlot.addGraph();
-    auto edgesGraph = _customPlot.addGraph();
+    auto* nodesGraph = _customPlot.addGraph();
+    auto* edgesGraph = _customPlot.addGraph();
 
     nodesGraph->setData(_keys, _numNodes, true);
     nodesGraph->setPen(QPen(Qt::red));

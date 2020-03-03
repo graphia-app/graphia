@@ -57,7 +57,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
 
-    auto graph = &_graphModel->graph();
+    const auto& graph = &_graphModel->graph();
 
     connect(graph, &Graph::nodeAdded, this, &GraphRenderer::onNodeAdded, Qt::DirectConnection);
     connect(graph, &Graph::edgeAdded, this, &GraphRenderer::onEdgeAdded, Qt::DirectConnection);
@@ -214,7 +214,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     if(!_graphModel->directed())
         edgeVisualType = EdgeVisualType::Cylinder;
 
-    for(auto& componentRendererRef : _componentRenderers)
+    for(const auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
         if(!componentRenderer->visible())
@@ -230,7 +230,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D nodePosition = nodePositions.get(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
-            auto& nodeVisual = _graphModel->nodeVisual(nodeId);
+            const auto& nodeVisual = _graphModel->nodeVisual(nodeId);
 
             // Create and add NodeData
             GPUGraphData::NodeData nodeData;
@@ -280,9 +280,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
 
-            auto& edgeVisual = _graphModel->edgeVisual(edge->id());
-            auto& sourceNodeVisual = _graphModel->nodeVisual(edge->sourceId());
-            auto& targetNodeVisual = _graphModel->nodeVisual(edge->targetId());
+            const auto& edgeVisual = _graphModel->edgeVisual(edge->id());
+            const auto& sourceNodeVisual = _graphModel->nodeVisual(edge->sourceId());
+            const auto& targetNodeVisual = _graphModel->nodeVisual(edge->targetId());
 
             auto nodeRadiusSumSq = sourceNodeVisual._size + targetNodeVisual._size;
             nodeRadiusSumSq *= nodeRadiusSumSq;
@@ -384,7 +384,7 @@ void GraphRenderer::updateComponentGPUData()
     // here transfering the buffer, when there are lots of components
     resetGPUComponentData();
 
-    for(auto& componentRendererRef : _componentRenderers)
+    for(const auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
         if(componentRenderer == nullptr)
@@ -589,7 +589,7 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
         // the renderers to be in their reset state
         for(auto componentId : _graphModel->graph().componentIds())
         {
-            auto renderer = componentRendererForId(componentId);
+            auto* renderer = componentRendererForId(componentId);
             renderer->resetView();
         }
 
@@ -761,7 +761,7 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
     Q_ASSERT(!componentId.isNull());
 
     // If the component is entirely new, we shouldn't be hiding any of it
-    auto* component = _graphModel->graph().componentById(componentId);
+    const auto* component = _graphModel->graph().componentById(componentId);
     for(NodeId nodeId : component->nodeIds())
         _hiddenNodes.set(nodeId, false);
     for(EdgeId edgeId : component->edgeIds())
@@ -883,9 +883,9 @@ void GraphRenderer::processEventQueue()
         auto e = std::move(_eventQueue.front());
         _eventQueue.pop();
 
-        auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
-        auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
-        auto nativeEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
+        auto* mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
+        auto* wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
+        auto* nativeEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
 
         switch(e->type())
         {
@@ -1118,7 +1118,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
     _devicePixelRatio = item->window()->devicePixelRatio();
 
-    auto graphQuickItem = qobject_cast<GraphQuickItem*>(item);
+    auto* graphQuickItem = qobject_cast<GraphQuickItem*>(item);
 
     if(graphQuickItem->viewResetPending())
         resetView();

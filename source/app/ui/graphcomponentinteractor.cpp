@@ -99,7 +99,7 @@ void GraphComponentInteractor::leftDoubleClick()
 
 void GraphComponentInteractor::wheelMove(float angle, float, float)
 {
-    auto renderer = componentRendererUnderCursor();
+    auto* renderer = componentRendererUnderCursor();
 
     if(renderer != nullptr)
     {
@@ -111,7 +111,7 @@ void GraphComponentInteractor::wheelMove(float angle, float, float)
 
 void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
 {
-    auto renderer = componentRendererUnderCursor();
+    auto* renderer = componentRendererUnderCursor();
 
     if(renderer != nullptr)
         renderer->zoom(value, false);

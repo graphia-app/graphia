@@ -90,7 +90,7 @@ void FilterTransform::apply(TransformedGraph& target) const
 
         for(auto componentId : componentManager.componentIds())
         {
-            auto component = componentManager.componentById(componentId);
+            const auto* component = componentManager.componentById(componentId);
             if(u::exclusiveOr(conditionFn(*component), _invert))
             {
                 auto nodeIds = target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds());

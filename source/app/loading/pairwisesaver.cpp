@@ -29,7 +29,7 @@ bool PairwiseSaver::save()
     _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
-        auto& edge = _graphModel->graph().edgeById(edgeId);
+        const auto& edge = _graphModel->graph().edgeById(edgeId);
         auto sourceName = escape(_graphModel->nodeName(edge.sourceId()));
         auto targetName = escape(_graphModel->nodeName(edge.targetId()));
 
@@ -42,7 +42,7 @@ bool PairwiseSaver::save()
         if(_graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
            _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() & ValueType::Numerical)
         {
-            auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
+            const auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
                    << QStringLiteral("\"%1\"").arg(targetName) << " " << attribute->floatValueOf(edgeId)
                    << endl;

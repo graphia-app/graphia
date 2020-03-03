@@ -46,7 +46,7 @@ static bool checkComponents(const Graph& graph)
 
     for(auto componentId : graph.componentIds())
     {
-        auto* component = graph.componentById(componentId);
+        const auto* component = graph.componentById(componentId);
         consistent = check(graph, *component, componentId);
     }
 

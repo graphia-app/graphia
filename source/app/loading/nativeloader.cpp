@@ -368,12 +368,12 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
             // If Data is empty then it's just an empty table
             if(u::contains(tableModel, "data"))
             {
-                for(auto& dataRow : tableModel["data"])
+                for(const auto& dataRow : tableModel["data"])
                 {
                     table.emplace_back();
                     auto& row = table.back();
                     row.reserve(dataRow.size());
-                    for(auto& value : dataRow)
+                    for(const auto& value : dataRow)
                     {
                         if(value.is_number())
                             row.emplace_back(value.get<std::double_t>());
@@ -481,7 +481,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
         return false;
     }
 
-    const auto pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";
+    const auto* pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";
     if(u::contains(jsonBody, pluginUiDataKey))
     {
         const auto& pluginUiDataJsonValue = jsonBody[pluginUiDataKey];

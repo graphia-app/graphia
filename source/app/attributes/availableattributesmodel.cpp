@@ -66,7 +66,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     auto addItem = [this, &graphModel](Item* parentItem, const QString& name)
     {
-        auto attributeItem = new AvailableAttributesModel::Item(name);
+        auto* attributeItem = new AvailableAttributesModel::Item(name);
         parentItem->addChild(attributeItem);
 
         const auto* attribute = graphModel.attributeByName(name);
@@ -78,7 +78,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
             for(const auto& validValue : attribute->validParameterValues())
             {
-                auto parameterItem = new AvailableAttributesModel::Item(validValue);
+                auto* parameterItem = new AvailableAttributesModel::Item(validValue);
                 attributeItem->addChild(parameterItem);
             }
         }
@@ -128,7 +128,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(item->childCount() > 0)
         return {};
 
-    auto attribute = _graphModel->attributeByName(itemValue);
+    const auto* attribute = _graphModel->attributeByName(itemValue);
 
     if(attribute == nullptr || !attribute->isValid())
         return {};
