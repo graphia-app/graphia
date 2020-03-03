@@ -79,7 +79,7 @@ public:
 
     GenericGraphArray& operator=(const GenericGraphArray& other)
     {
-        if(&other == this)
+        if(this == &other)
             return *this;
 
         Q_ASSERT(_graph == other._graph);
