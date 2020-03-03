@@ -47,7 +47,7 @@ private:
 
     std::vector<Item*> _attributeItemsWithParameters;
 
-    Item* parentItem(const QModelIndex& index) const;
+    static Item* parentItem(const QModelIndex& index);
 
     enum Roles
     {

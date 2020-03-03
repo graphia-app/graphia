@@ -15,7 +15,7 @@ public:
     {}
 
     void setScale(float scale) { _scale = scale; }
-    float scale() { return _scale; }
+    float scale() const { return _scale; }
 
     void execute(bool, Dimensionality) override;
 };

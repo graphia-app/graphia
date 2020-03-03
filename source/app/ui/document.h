@@ -494,7 +494,7 @@ private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);
 
-    void onBusyChanged();
+    void onBusyChanged() const;
 
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);

@@ -9,7 +9,7 @@ class GMLSaver : public ISaver
 private:
     const QUrl& _url;
     IGraphModel* _graphModel;
-    QString indent(int level) { return QStringLiteral("    ").repeated(level); }
+    static QString indent(int level) { return QStringLiteral("    ").repeated(level); }
 
 public:
     static QString name() { return QStringLiteral("GML"); }

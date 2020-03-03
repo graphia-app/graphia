@@ -43,9 +43,8 @@ void SDFComputeJob::prepareGlyphMapTextureLayer(int layer, GLuint& texture)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-void SDFComputeJob::prepareQuad(QOpenGLVertexArrayObject& screenQuadVAO,
-                                QOpenGLBuffer& screenQuadDataBuffer,
-                                QOpenGLShaderProgram& sdfShader)
+static void prepareQuad(QOpenGLVertexArrayObject& screenQuadVAO,
+    QOpenGLBuffer& screenQuadDataBuffer, QOpenGLShaderProgram& sdfShader)
 {
     screenQuadVAO.create();
     screenQuadVAO.bind();
@@ -63,7 +62,7 @@ void SDFComputeJob::prepareQuad(QOpenGLVertexArrayObject& screenQuadVAO,
     screenQuadVAO.release();
 }
 
-void SDFComputeJob::prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width, int height)
+static void prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width, int height)
 {
     auto w = static_cast<GLfloat>(width);
     auto h = static_cast<GLfloat>(height);

@@ -68,7 +68,7 @@ private:
     void componentComplete() override;
 
     QString preferenceNameByPropertyName(const QString& propertyName);
-    QMetaProperty propertyByName(const QString& propertyName);
+    QMetaProperty propertyByName(const QString& propertyName) const;
 
     QMetaProperty valuePropertyFrom(const QString& preferenceName);
     QMetaProperty minimumPropertyFrom(const QString& preferenceName);

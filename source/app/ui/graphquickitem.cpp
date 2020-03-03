@@ -300,7 +300,7 @@ void GraphQuickItem::onFPSChanged(float fps)
     emit fpsChanged();
 }
 
-void GraphQuickItem::onUserInteractionStarted()
+void GraphQuickItem::onUserInteractionStarted() const
 {
     setInteracting(true);
 }
@@ -314,7 +314,7 @@ void GraphQuickItem::onUserInteractionFinished()
     update();
 }
 
-void GraphQuickItem::onTransitionStarted()
+void GraphQuickItem::onTransitionStarted() const
 {
     setTransitioning(true);
 }

@@ -18,7 +18,7 @@ private:
     QOpenGLDebugLogger* _logger = nullptr;
 
 private slots:
-    void onMessageLogged(const QOpenGLDebugMessage& message);
+    void onMessageLogged(const QOpenGLDebugMessage& message) const;
 };
 
 #endif // OPENGLDEBUGLOGGER_H

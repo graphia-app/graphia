@@ -164,9 +164,9 @@ private slots:
     void onRendererInitialised();
     void onSynchronizeComplete();
     void onFPSChanged(float fps);
-    void onUserInteractionStarted();
+    void onUserInteractionStarted() const;
     void onUserInteractionFinished();
-    void onTransitionStarted();
+    void onTransitionStarted() const;
     void onTransitionFinished();
     void onScreenshotComplete(const QImage& screenshot, const QString& path);
 

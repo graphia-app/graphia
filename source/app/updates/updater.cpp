@@ -108,7 +108,7 @@ void Updater::disableAutoBackgroundCheck()
 #endif
 }
 
-QString Updater::updateStatus() const
+QString Updater::updateStatus()
 {
     QString status;
     latestUpdateJson(&status);

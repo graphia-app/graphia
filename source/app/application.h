@@ -238,7 +238,7 @@ private:
 
     int updateDownloadProgress() const { return _updater.progress(); }
 
-    bool debugEnabled() const
+    static bool debugEnabled()
     {
 #ifdef _DEBUG
         return true;

@@ -32,8 +32,8 @@ public:
     static bool updateAvailable();
     static bool showUpdatePrompt(const QStringList& arguments);
 
-    QString updateStatus() const;
-    void resetUpdateStatus();
+    static QString updateStatus();
+    static void resetUpdateStatus();
 
 public slots:
     void startBackgroundUpdateCheck();

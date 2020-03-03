@@ -89,7 +89,7 @@ void Arrow::create(QOpenGLShaderProgram& shader)
 
 void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                   std::vector<float>& texCoords, std::vector<float>& tangents,
-                                  std::vector<unsigned int>& indices)
+                                  std::vector<unsigned int>& indices) const
 {
     auto faces = _slices;
     auto numVerts  = ((_slices + 1) * 4) + 2;

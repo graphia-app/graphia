@@ -267,7 +267,7 @@ private:
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
-    int minimumHeight() const { return 100; }
+    static int minimumHeight() { return 100; }
 
     void setPluginInstance(CorrelationPluginInstance* pluginInstance);
 

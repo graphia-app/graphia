@@ -84,6 +84,7 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
     endResetModel();
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QString EnrichmentTableModel::resultToString(Results result)
 {
     switch(result)

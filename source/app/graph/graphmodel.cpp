@@ -476,7 +476,7 @@ std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndexOrLater(in
     return attributeNames;
 }
 
-bool GraphModel::opIsUnary(const QString& op) const
+bool GraphModel::opIsUnary(const QString& op)
 {
     return GraphTransformConfigParser::opIsUnary(op);
 }

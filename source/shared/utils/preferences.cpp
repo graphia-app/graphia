@@ -193,7 +193,7 @@ QString QmlPreferences::preferenceNameByPropertyName(const QString& propertyName
     return QStringLiteral("%1/%2").arg(_section, canoncicalPropertyName);
 }
 
-QMetaProperty QmlPreferences::propertyByName(const QString& propertyName)
+QMetaProperty QmlPreferences::propertyByName(const QString& propertyName) const
 {
     if(!propertyName.isEmpty())
     {

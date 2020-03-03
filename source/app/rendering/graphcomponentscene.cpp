@@ -262,7 +262,7 @@ void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransit
         finishComponentTransition(componentId, false);
 }
 
-void GraphComponentScene::saveViewData()
+void GraphComponentScene::saveViewData() const
 {
     if(componentRenderer() != nullptr)
         componentRenderer()->saveViewData();
@@ -276,7 +276,7 @@ bool GraphComponentScene::savedViewIsReset() const
     return componentRenderer()->savedViewIsReset();
 }
 
-void GraphComponentScene::restoreViewData()
+void GraphComponentScene::restoreViewData() const
 {
     if(componentRenderer() != nullptr)
         componentRenderer()->restoreViewData();

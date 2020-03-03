@@ -15,7 +15,7 @@ public:
     void toggle();
     void enable();
     void disable();
-    bool enabled() { return _enabled; }
+    bool enabled() const { return _enabled; }
 
 private:
     const Graph* _graph;

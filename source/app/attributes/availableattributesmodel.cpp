@@ -208,7 +208,7 @@ QModelIndex AvailableAttributesModel::index(int row, int column, const QModelInd
     return {};
 }
 
-AvailableAttributesModel::Item* AvailableAttributesModel::parentItem(const QModelIndex& index) const
+AvailableAttributesModel::Item* AvailableAttributesModel::parentItem(const QModelIndex& index)
 {
     if(!index.isValid())
         return nullptr;

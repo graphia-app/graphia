@@ -143,7 +143,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
 {
     struct ConditionVisitor
     {
-        QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
+        static QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue)
         {
             struct Visitor
             {
@@ -198,7 +198,7 @@ QString GraphTransformConfig::conditionAsString() const
 {
     struct ConditionVisitor
     {
-        QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
+        static QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue)
         {
             struct Visitor
             {
@@ -355,7 +355,7 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 
         void operator()(GraphTransformConfig::NoCondition) const {};
 
-        QString attributeFromTerminalValue(const TerminalValue& terminalValue) const
+        static QString attributeFromTerminalValue(const TerminalValue& terminalValue)
         {
             const auto* s = std::get_if<QString>(&terminalValue);
             if(s != nullptr && GraphTransformConfigParser::isAttributeName(*s))

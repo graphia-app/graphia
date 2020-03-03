@@ -903,7 +903,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
                 _graphModel->graph().numComponents()));
 }
 
-void Document::onBusyChanged()
+void Document::onBusyChanged() const
 {
     if(!busy())
         QApplication::alert(nullptr);
@@ -2026,6 +2026,7 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     return transformParameter(transformName, parameterName);
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QVariantMap Document::parseGraphTransform(const QString& transform) const
 {
     GraphTransformConfigParser p;
@@ -2154,6 +2155,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     return map;
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QVariantMap Document::parseVisualisation(const QString& visualisation) const
 {
     VisualisationConfigParser p;

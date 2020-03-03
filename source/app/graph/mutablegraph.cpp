@@ -556,6 +556,9 @@ MutableGraph& MutableGraph::clone(const MutableGraph& other)
 
 MutableGraph& MutableGraph::operator=(const MutableGraph& other)
 {
+    if(this == &other)
+        return *this;
+
     clone(other);
     return *this;
 }

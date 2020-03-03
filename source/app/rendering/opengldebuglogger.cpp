@@ -42,7 +42,7 @@ OpenGLDebugLogger::~OpenGLDebugLogger()
     }
 }
 
-void OpenGLDebugLogger::onMessageLogged(const QOpenGLDebugMessage& message)
+void OpenGLDebugLogger::onMessageLogged(const QOpenGLDebugMessage& message) const
 {
     if((message.severity() & _debugLevel) == 0)
         return;

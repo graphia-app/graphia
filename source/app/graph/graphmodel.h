@@ -100,7 +100,7 @@ public:
     std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
     std::vector<QString> createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
 
-    bool opIsUnary(const QString& op) const;
+    static bool opIsUnary(const QString& op);
 
     bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);

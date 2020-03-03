@@ -85,7 +85,7 @@ void Rectangle::create(QOpenGLShaderProgram &shader)
 
 void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                    std::vector<float>& texCoords, std::vector<float>& tangents,
-                                   std::vector<unsigned int>& indices)
+                                   std::vector<unsigned int>& indices) const
 {
     vertices.resize(3 * 4);
     normals.resize(3 * 4);

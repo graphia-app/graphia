@@ -272,11 +272,13 @@ void Application::checkForUpdates()
     _updater.startBackgroundUpdateCheck();
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::copyImageToClipboard(const QImage& image)
 {
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 QString Application::resourceFile(const QString& relativePath) const
 {
     for(const auto& resourceDirectory : resourceDirectories())
@@ -294,6 +296,7 @@ QString Application::resourceFile(const QString& relativePath) const
     return {};
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 bool Application::isResourceFile(const QString& path) const
 {
     QString canonicalPath = QFileInfo(path).canonicalPath();
@@ -309,6 +312,7 @@ bool Application::isResourceFile(const QString& path) const
     return false;
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 bool Application::isResourceFileUrl(const QUrl& url) const
 {
     return isResourceFile(url.toLocalFile());
@@ -360,6 +364,7 @@ static void silentCrashSubmit()
     S(CrashHandler)->submitMinidump(QStringLiteral("Silent Test Crash Submit"));
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::crash(int crashType)
 {
     std::cerr << "Application::crash() invoked!\n";
@@ -416,11 +421,13 @@ void Application::crash(int crashType)
     }
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::reportScopeTimers()
 {
     ScopeTimerManager::instance()->reportToQDebug();
 }
 
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::aboutQt() const
 {
     QMessageBox::aboutQt(nullptr);

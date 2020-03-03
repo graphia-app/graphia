@@ -304,6 +304,9 @@ public:
 
     EdgeArray& operator=(const EdgeArray& other)
     {
+        if(this == &other)
+            return *this;
+
         GenericGraphArray<EdgeId, Element, Locking>::operator=(other);
         return *this;
     }
@@ -368,6 +371,9 @@ public:
 
     ComponentArray& operator=(const ComponentArray& other)
     {
+        if(this == &other)
+            return *this;
+
         GenericGraphArray<ComponentId, Element, Locking>::operator=(other);
         return *this;
     }

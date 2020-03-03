@@ -38,9 +38,9 @@ public:
     int width() const { return _width; }
     int height() const { return _height; }
 
-    void saveViewData();
+    void saveViewData() const;
     bool savedViewIsReset() const;
-    void restoreViewData();
+    void restoreViewData() const;
 
     void resetView(bool doTransition) override;
     bool viewIsReset() const override;

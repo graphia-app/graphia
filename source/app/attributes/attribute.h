@@ -224,6 +224,9 @@ public:
 
     Attribute& operator=(const Attribute& other)
     {
+        if(this == &other)
+            return *this;
+
         _ = other._;
         _intRange = other._intRange;
         _floatRange = other._floatRange;
