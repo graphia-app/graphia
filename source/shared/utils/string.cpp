@@ -186,7 +186,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
         auto splitString = formattedString.split(exponentChar);
 
         const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
-        if(splitString.length() > 0)
+        if(splitString.length() > 1)
         {
             auto exponentValueString = stripZeroes(splitString[1]);
 
