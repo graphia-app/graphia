@@ -13,15 +13,8 @@ public:
     Rectangle();
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
-
     static GLsizei glIndexCount() { return 6; }
-
-public slots:
     void create(QOpenGLShaderProgram& shader);
-private:
-    void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
-                            std::vector<float>& texCoords, std::vector<float>& tangents,
-                            std::vector<unsigned int>& indices) const;
 
 private:
     QOpenGLBuffer _positionBuffer;

@@ -543,7 +543,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     _textShader.setUniformValue("componentData", 1);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._rectangle.glIndexCount(),
+    glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numGlyphs());
     gpuGraphData._rectangle.vertexArrayObject()->release();
 

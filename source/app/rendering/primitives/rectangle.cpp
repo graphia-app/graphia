@@ -12,6 +12,64 @@ Rectangle::Rectangle() :
 {
 }
 
+static void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
+    std::vector<float>& texCoords, std::vector<float>& tangents, std::vector<unsigned int>& indices)
+{
+    vertices.resize(3 * 4);
+    normals.resize(3 * 4);
+    tangents.resize(4 * 4);
+    texCoords.resize(2 * 4);
+    indices.resize(3 * 2);
+
+    std::array<float, 12> verts{{
+        1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+    }};
+
+    std::array<float, 3> norm{{
+        0.0f, 0.0f, 1.0f
+    }};
+
+    std::array<float, 4> tangs{{
+        1.0f, 0.0f, 0.0f, 1.0f
+    }};
+
+    // Copy Verts
+    vertices.assign(std::begin(verts), std::end(verts));
+    for(size_t i = 0; i < 4; ++i)
+    {
+        auto index = i*3;
+        vertices[index] = verts.at(index);
+        vertices[index+1] = verts.at(index+1);
+        vertices[index+2] = verts.at(index+2);
+
+        normals[index] = norm.at(0);
+        normals[index+1] = norm.at(1);
+        normals[index+2] = norm.at(2);
+
+        auto tindex = i*4;
+        tangents[tindex] = tangs.at(0);
+        tangents[tindex+1] = tangs.at(1);
+        tangents[tindex+2] = tangs.at(2);
+        tangents[tindex+3] = tangs.at(3);
+
+        auto texIndex = i*2;
+        texCoords[texIndex] = verts.at(i*3);
+        texCoords[texIndex+1] = verts.at((i*3)+1);
+    }
+
+    // Build two triangles
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+
+    indices[3] = 2;
+    indices[4] = 3;
+    indices[5] = 0;
+}
+
 void Rectangle::create(QOpenGLShaderProgram &shader)
 {
     std::vector<float> vertices;
@@ -83,62 +141,4 @@ void Rectangle::create(QOpenGLShaderProgram &shader)
     shader.release();
 }
 
-void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
-                                   std::vector<float>& texCoords, std::vector<float>& tangents,
-                                   std::vector<unsigned int>& indices) const
-{
-    vertices.resize(3 * 4);
-    normals.resize(3 * 4);
-    tangents.resize(4 * 4);
-    texCoords.resize(2 * 4);
-    indices.resize(3 * 2);
-
-    std::array<float, 12> verts{{
-        1.0f, 0.0f, 0.0f,
-        1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f,
-    }};
-
-    std::array<float, 3> norm{{
-        0.0f, 0.0f, 1.0f
-    }};
-
-    std::array<float, 4> tangs{{
-        1.0f, 0.0f, 0.0f, 1.0f
-    }};
-
-    // Copy Verts
-    vertices.assign(std::begin(verts), std::end(verts));
-    for(size_t i = 0; i < 4; ++i)
-    {
-        auto index = i*3;
-        vertices[index] = verts.at(index);
-        vertices[index+1] = verts.at(index+1);
-        vertices[index+2] = verts.at(index+2);
-
-        normals[index] = norm.at(0);
-        normals[index+1] = norm.at(1);
-        normals[index+2] = norm.at(2);
-
-        auto tindex = i*4;
-        tangents[tindex] = tangs.at(0);
-        tangents[tindex+1] = tangs.at(1);
-        tangents[tindex+2] = tangs.at(2);
-        tangents[tindex+3] = tangs.at(3);
-
-        auto texIndex = i*2;
-        texCoords[texIndex] = verts.at(i*3);
-        texCoords[texIndex+1] = verts.at((i*3)+1);
-    }
-
-    // Build two triangles
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
-
-    indices[3] = 2;
-    indices[4] = 3;
-    indices[5] = 0;
-}
 } // namespace Primitive

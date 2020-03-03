@@ -266,8 +266,8 @@ void Application::signOut()
 
 void Application::checkForUpdates()
 {
-    if(_updater.updateStatus() != QStringLiteral("installed"))
-        _updater.resetUpdateStatus();
+    if(Updater::updateStatus() != QStringLiteral("installed"))
+        Updater::resetUpdateStatus();
 
     _updater.startBackgroundUpdateCheck();
 }
