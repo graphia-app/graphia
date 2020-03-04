@@ -64,12 +64,13 @@ Window
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
 
-                text: application.name + qsTr(" version ") + application.version +
+                text: application.name +
                     qsTr(" is a tool for the visualisation and analysis of graphs.<br><br>") +
+                    qsTr("Version ") + application.version + qsTr(".<br>") +
                     application.copyright + qsTr("<br><br>") +
                     qsTr("<a href=\"LICENSE\">License</a>") +
                         "&nbsp;&nbsp;&nbsp;" +
-                    qsTr("<a href=\"OSS\">Open Source Licenses</a>")
+                    qsTr("<a href=\"OSS\">Third Party Licenses</a>")
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated:
