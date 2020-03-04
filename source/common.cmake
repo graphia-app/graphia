@@ -136,7 +136,7 @@ add_definitions(-DVERSION="${Version}")
 if (NOT "$ENV{PUBLISHER}" STREQUAL "")
     set(Publisher $ENV{PUBLISHER})
 else()
-    set(Publisher "Kajeka Limited")
+    set(Publisher "Graphia Technologies Ltd.")
 endif()
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
