@@ -128,7 +128,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(item->childCount() > 0)
         return {};
 
-    const auto* attribute = _graphModel->attributeByName(itemValue);
+    //FIXME build cache of names to attribute values here, or otherwise fix sort
+    // performance when there are lots of Data Values
+    auto attributeName = get(index).toString();
+    const auto* attribute = _graphModel->attributeByName(attributeName);
 
     if(attribute == nullptr || !attribute->isValid())
         return {};
@@ -249,7 +252,9 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant AvailableAttributesModel::get(const QModelIndex& index) const
 {
     auto* parent = parentItem(index);
-    QString text = QStringLiteral("\"%1\"").arg(data(index, Qt::DisplayRole).toString());
+    auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
+
+    QString text = QStringLiteral("\"%1\"").arg(item->value().toString());
 
     if(u::contains(_attributeItemsWithParameters, parent))
     {
