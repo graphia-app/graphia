@@ -29,6 +29,12 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QCollator>
+#include <QByteArray>
+#include <QTemporaryDir>
+#include <QFile>
+#include <QDir>
+#include <QByteArray>
+#include <QCryptographicHash>
 
 class QQmlEngine;
 class QJSEngine;
@@ -119,6 +125,76 @@ public:
     Q_INVOKABLE QColor colorForString(const QString& string)
     {
         return u::colorForString(string);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString base64EncodingOf(const QString& filename)
+    {
+        QFile file(filename);
+
+        if(!file.open(QIODevice::ReadOnly))
+            return {};
+
+        return file.readAll().toBase64();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString tempDirectory()
+    {
+        QTemporaryDir tempDir;
+        tempDir.setAutoRemove(false);
+
+        if(!tempDir.isValid())
+            return {};
+
+        return tempDir.path();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool cd(const QString& dirName)
+    {
+        return QDir::setCurrent(dirName);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool rmdir(const QString& dirName)
+    {
+        QDir dir(dirName);
+        return dir.removeRecursively();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool copy(const QString& from, const QString& to)
+    {
+        return QFile::copy(from, to);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString sha256(const QByteArray& data)
+    {
+        return QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QByteArray readFromFile(const QString& filename)
+    {
+        QFile file(filename);
+
+        if(!file.open(QIODevice::ReadOnly))
+            return {};
+
+        return file.readAll();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool writeToFile(const QString& filename, const QByteArray& data)
+    {
+        QFile file(filename);
+
+        if(!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+            return {};
+
+        return file.write(data) == data.size();
     }
 
 private:
