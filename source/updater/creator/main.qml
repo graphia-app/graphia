@@ -211,7 +211,7 @@ ApplicationWindow
             if(QmlUtils.copy(originalFilename, targetFilename))
             {
                 var currentTab = tabView.getTab(tabView.currentIndex).item;
-                currentTab.markdown.insert(currentTab.markdown.cursorPosition,
+                currentTab.markdownTextArea.insert(currentTab.markdownTextArea.cursorPosition,
                     "![" + basename + "](file:" + basename + ")");
             }
         }
@@ -250,9 +250,43 @@ ApplicationWindow
         catch(e)
         {
             console.log("Failed to load " + file + " " + e);
+            return false;
         }
 
-        //TODO
+        while(tabView.count > 0)
+            tabView.removeTab(0);
+
+        for(const update of root.updatesArray)
+        {
+            let tab = tabView.createTab();
+
+            tab.item.versionText = update.version;
+            tab.item.targetVersionRegexText = update.targetVersionRegex;
+            tab.item.markdownText = update.changeLog;
+
+            tab.item.resetOsControls();
+
+            for(const osName in update.payloads)
+            {
+                let item = tab.item.osControlsFor(osName);
+                item.osEnabledChecked = true;
+                item.urlText = update.payloads[osName].url;
+            }
+
+            for(const image in update.images)
+            {
+                let outFilename = root._workingDirectory + " " + image.filename;
+                let content = QmlUtils.byteArrayFromBase64String(image.content);
+
+                if(!QmlUtils.writeToFile(outFilename, content))
+                {
+                    console.log("Failed to write to " + outFilename);
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     property bool canSave:
@@ -391,6 +425,20 @@ ApplicationWindow
             Layout.fillWidth: true
             Layout.fillHeight: true
 
+            function createTab()
+            {
+                let tab = tabView.addTab("", tabComponent);
+                tabView.currentIndex = tabView.count - 1;
+
+                tab.title = Qt.binding(function()
+                {
+                    return tab.item.versionText.length > 0 ?
+                        tab.item.versionText : qsTr("New Upgrade");
+                });
+
+                return tab;
+            }
+
             Component
             {
                 id: tabComponent
@@ -399,8 +447,34 @@ ApplicationWindow
                 {
                     id: updateUI
 
-                    property string title: version.text
-                    property alias markdown: markdownChangelog
+                    property alias versionText: version.text
+                    property alias targetVersionRegexText: targetVersionRegex.text
+                    property alias markdownText: markdownChangelog.text
+
+                    property alias markdownTextArea: markdownChangelog
+
+                    function resetOsControls()
+                    {
+                        for(var i = 0; i < osControls.count; i++)
+                        {
+                            var item = osControls.itemAt(i);
+                            item.osEnabledChecked = false;
+                            item.urlText = "";
+                        }
+                    }
+
+                    function osControlsFor(name)
+                    {
+                        for(var i = 0; i < osControls.count; i++)
+                        {
+                            var item = osControls.itemAt(i);
+
+                            if(item.osName === name)
+                                return item;
+                        }
+
+                        return null;
+                    }
 
                     SplitView
                     {
@@ -459,6 +533,9 @@ ApplicationWindow
                                 delegate: RowLayout
                                 {
                                     property string osName: modelData.name
+                                    property alias osEnabledChecked: osEnabled.checked
+                                    property alias urlText: url.text
+                                    property alias urlTextField: url
 
                                     CheckBox
                                     {
@@ -470,6 +547,8 @@ ApplicationWindow
 
                                     TextField
                                     {
+                                        id: url
+
                                         Layout.fillWidth: true
 
                                         enabled: osEnabled.checked
@@ -508,13 +587,13 @@ ApplicationWindow
                         {
                             var item = osControls.itemAt(i);
 
-                            if(!item.children[0].checked)
+                            if(!item.osEnabledChecked)
                                 continue;
 
-                            if(item.children[1].length === 0)
+                            if(item.urlTextField.length === 0)
                                 return false;
 
-                            if(!item.children[1].acceptableInput)
+                            if(!item.urlTextField.acceptableInput)
                                 return false;
 
                             enabledOses.push(item.osName);
@@ -554,11 +633,11 @@ ApplicationWindow
                         {
                             let item = osControls.itemAt(i);
 
-                            if(!item.children[0].checked)
+                            if(!item.osEnabledChecked)
                                 continue;
 
                             let osName = item.osName;
-                            let url = item.children[1].text;
+                            let url = item.urlText;
                             let hostname = extractHostname(url);
                             let filename = url.split('/').pop().split('#')[0].split('?')[0];
 
@@ -601,17 +680,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Add Upgrade")
-                onClicked:
-                {
-                    let tab = tabView.addTab("", tabComponent);
-                    tabView.currentIndex = tabView.count - 1;
-
-                    tab.title = Qt.binding(function()
-                    {
-                        return tab.item.title.length > 0 ?
-                            tab.item.title : qsTr("New Upgrade");
-                    });
-                }
+                onClicked: { tabView.createTab(); }
             }
 
             Button

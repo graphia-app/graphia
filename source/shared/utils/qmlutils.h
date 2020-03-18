@@ -139,6 +139,12 @@ public:
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QByteArray byteArrayFromBase64String(const QString& base64String)
+    {
+        return QByteArray::fromBase64(base64String.toLatin1());
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString tempDirectory()
     {
         QTemporaryDir tempDir;
