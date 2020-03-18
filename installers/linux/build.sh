@@ -4,6 +4,8 @@ NUM_CORES=$(nproc --all)
 COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
 BUILD_DIR="build/${COMPILER}"
 
+. ${BUILD_DIR}/variables.sh
+
 QML_DIRS=$(find source -name "*.qml" | xargs -n1 realpath | \
   xargs -n1 dirname | sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
 

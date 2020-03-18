@@ -143,4 +143,6 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
 set(Copyright "\(c\) 2013-${CURRENT_YEAR} ${Publisher}")
 add_definitions(-DCOPYRIGHT="${Copyright}")
 
+string(TOLOWER "${PROJECT_NAME}" NativeExtension)
+
 include_directories(${CMAKE_CURRENT_LIST_DIR})

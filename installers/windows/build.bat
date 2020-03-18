@@ -3,6 +3,8 @@ setLocal EnableDelayedExpansion
 set BUILD_DIR=build
 set INSTALLER_DIR=installer
 
+call %BUILD_DIR%\variables.bat
+
 rmdir /s /q %INSTALLER_DIR%
 mkdir %INSTALLER_DIR%
 copy %BUILD_DIR%\%PRODUCT_NAME%.exe %INSTALLER_DIR%\

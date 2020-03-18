@@ -2,6 +2,8 @@
 
 BUILD_DIR=build
 
+. ${BUILD_DIR}/variables.sh
+
 # OSX doesn't have readlink, hence this hackery
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
