@@ -50,7 +50,7 @@ else
   DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-D) *.*?(?= -\D)' | \
     grep -vE "SOURCE_DIR.*" | sort | uniq | \
-    sed -e 's/=.*\"/="dummmyvalue"/g' |
+    sed -e 's/=.*\"/="dummyvalue"/g' |
     sed -e 's/\(.*\)/-D\1/')
 fi
 
