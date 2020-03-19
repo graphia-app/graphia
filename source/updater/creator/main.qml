@@ -273,9 +273,9 @@ ApplicationWindow
                 item.urlText = update.payloads[osName].url;
             }
 
-            for(const image in update.images)
+            for(const image of update.images)
             {
-                let outFilename = root._workingDirectory + " " + image.filename;
+                let outFilename = root._workingDirectory + "/" + image.filename;
                 let content = QmlUtils.byteArrayFromBase64String(image.content);
 
                 if(!QmlUtils.writeToFile(outFilename, content))
