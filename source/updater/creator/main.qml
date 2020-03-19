@@ -268,7 +268,6 @@ ApplicationWindow
 
             tab.item.versionText = update.version;
             tab.item.targetVersionRegexText = update.targetVersionRegex;
-            tab.item.markdownText = update.changeLog;
 
             tab.item.resetOsControls();
 
@@ -290,6 +289,8 @@ ApplicationWindow
                     return false;
                 }
             }
+
+            tab.item.markdownText = update.changeLog;
         }
 
         return true;
