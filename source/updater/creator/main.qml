@@ -176,6 +176,12 @@ ApplicationWindow
             root._removeWorkingDirectory = true;
             QmlUtils.cd(root._workingDirectory);
         }
+
+        if(Qt.application.arguments.length > 1 && QmlUtils.fileExists(Qt.application.arguments[1]))
+        {
+            root.lastUsedFilename = "file://" + Qt.application.arguments[1];
+            root.open(lastUsedFilename);
+        }
     }
 
     onClosing:
