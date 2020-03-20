@@ -58,7 +58,7 @@ ApplicationWindow
 
     function extractHostname(url)
     {
-        var hostname;
+        let hostname;
 
         if (url.indexOf("//") >= 0)
             hostname = url.split('/')[2];
@@ -75,7 +75,7 @@ ApplicationWindow
     {
         if(root._checksums[url] !== undefined && root._checksums[url].length > 0)
         {
-            onComplete(url, root._checksums[url]);
+            onComplete(root._checksums[url]);
             return;
         }
 
@@ -101,7 +101,7 @@ ApplicationWindow
                 {
                     // Success
                     root._checksums[url] = QmlUtils.sha256(xhr.response);
-                    onComplete(url, root._checksums[url]);
+                    onComplete(root._checksums[url]);
                 }
                 else
                 {
@@ -170,7 +170,7 @@ ApplicationWindow
         root.operatingSystems = JSON.parse(settings.operatingSystems);
         root.credentials = JSON.parse(settings.credentials);
 
-        var tempDir = QmlUtils.tempDirectory();
+        let tempDir = QmlUtils.tempDirectory();
         if(tempDir.length > 0)
         {
             root._workingDirectory = tempDir;
@@ -210,17 +210,17 @@ ApplicationWindow
 
         onAccepted:
         {
-            var basename = QmlUtils.baseFileNameForUrl(file);
+            let basename = QmlUtils.baseFileNameForUrl(file);
 
-            var originalFilename = QmlUtils.fileNameForUrl(file);
-            var targetFilename = root._workingDirectory + "/" + basename;
+            let originalFilename = QmlUtils.fileNameForUrl(file);
+            let targetFilename = root._workingDirectory + "/" + basename;
 
-            if(QmlUtils.copy(originalFilename, targetFilename))
-            {
-                var currentTab = tabView.getTab(tabView.currentIndex).item;
-                currentTab.markdownTextArea.insert(currentTab.markdownTextArea.cursorPosition,
-                    "![" + basename + "](file:" + basename + ")");
-            }
+            if(!QmlUtils.copy(originalFilename, targetFilename))
+                console.log("Copy to " + targetFilename + " failed. Already exists?");
+
+            let currentTab = tabView.getTab(tabView.currentIndex).item;
+            currentTab.markdownTextArea.insert(currentTab.markdownTextArea.cursorPosition,
+                "![" + basename + "](file:" + basename + ")");
         }
     }
 
@@ -279,7 +279,7 @@ ApplicationWindow
 
     function open(file)
     {
-        var fileContents = QmlUtils.readFromFile(QmlUtils.fileNameForUrl(file));
+        let fileContents = QmlUtils.readFromFile(QmlUtils.fileNameForUrl(file));
 
         try
         {
@@ -335,9 +335,9 @@ ApplicationWindow
         if(tabView.count === 0)
             return false;
 
-        for(var index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabView.count; index++)
         {
-            var updateUI = tabView.getTab(index).item;
+            let updateUI = tabView.getTab(index).item;
             if(updateUI === null || !updateUI.inputValid)
                 return false;
         }
@@ -354,8 +354,8 @@ ApplicationWindow
         }
 
         root.updatesArray = [];
-        var updatesRemaining = tabView.count;
-        var onComplete = function()
+        let updatesRemaining = tabView.count;
+        let onComplete = function()
         {
             let hexEncodedUpdates = QmlUtils.stringAsHexString(JSON.stringify(root.updatesArray));
             let updatesSignature =
@@ -374,9 +374,9 @@ ApplicationWindow
                 console.log("Failed to write " + fileUrl);
         };
 
-        for(var index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabView.count; index++)
         {
-            var updateUI = tabView.getTab(index).item;
+            let updateUI = tabView.getTab(index).item;
 
             updateUI.generateJSON(function(updateObject)
             {
@@ -506,9 +506,9 @@ ApplicationWindow
 
                     function resetOsControls()
                     {
-                        for(var i = 0; i < osControls.count; i++)
+                        for(let i = 0; i < osControls.count; i++)
                         {
-                            var item = osControls.itemAt(i);
+                            let item = osControls.itemAt(i);
                             item.osEnabledChecked = false;
                             item.urlText = "";
                         }
@@ -516,9 +516,9 @@ ApplicationWindow
 
                     function osControlsFor(name)
                     {
-                        for(var i = 0; i < osControls.count; i++)
+                        for(let i = 0; i < osControls.count; i++)
                         {
-                            var item = osControls.itemAt(i);
+                            let item = osControls.itemAt(i);
 
                             if(item.osName === name)
                                 return item;
@@ -632,11 +632,11 @@ ApplicationWindow
 
                     property bool inputValid:
                     {
-                        var enabledOses = [];
+                        let enabledOses = [];
 
-                        for(var i = 0; i < osControls.count; i++)
+                        for(let i = 0; i < osControls.count; i++)
                         {
-                            var item = osControls.itemAt(i);
+                            let item = osControls.itemAt(i);
 
                             if(!item.osEnabledChecked)
                                 continue;
@@ -666,7 +666,7 @@ ApplicationWindow
                         updateObject.changeLog = markdownChangelog.text;
                         updateObject.images = [];
 
-                        var mdImageRegex = /\!\[[^\]]*\]\(([^ \)]*)[^\)]*\)/g;
+                        let mdImageRegex = /\!\[[^\]]*\]\(([^ \)]*)[^\)]*\)/g;
 
                         let match;
                         while((match = mdImageRegex.exec(updateObject.changeLog)) !== null)
@@ -680,7 +680,7 @@ ApplicationWindow
 
                         updateObject.payloads = {};
 
-                        for(var i = 0; i < osControls.count; i++)
+                        for(let i = 0; i < osControls.count; i++)
                         {
                             let item = osControls.itemAt(i);
 
@@ -712,11 +712,20 @@ ApplicationWindow
                             updateObject.payloads[osName].installerFileName = filename;
                             updateObject.payloads[osName].installerChecksum = "";
                             updateObject.payloads[osName].command = foundOS.command;
+                        }
 
-                            calculateChecksum(url, function(osName) { return function(url, checksum)
+                        let remainingChecksums = Object.keys(updateObject.payloads).length;
+
+                        for(const osName in updateObject.payloads)
+                        {
+                            let url = updateObject.payloads[osName].url;
+                            calculateChecksum(url, function(osName) { return function(checksum)
                             {
                                 updateObject.payloads[osName].installerChecksum = checksum;
-                                onComplete(updateObject);
+
+                                remainingChecksums--;
+                                if(remainingChecksums === 0)
+                                    onComplete(updateObject);
                             }}(osName));
                         }
                     }
