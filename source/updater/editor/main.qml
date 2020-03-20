@@ -296,6 +296,11 @@ ApplicationWindow
         while(tabView.count > 0)
             tabView.removeTab(0);
 
+        root.updatesArray.sort(function(a, b)
+        {
+            return a.version - b.version;
+        });
+
         for(const update of root.updatesArray)
         {
             let tab = tabView.createTab();
