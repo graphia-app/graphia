@@ -23,6 +23,7 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 #include "shared/utils/color.h"
+#include "shared/utils/crypto.h"
 
 #include <QObject>
 #include <QUrl>
@@ -201,6 +202,39 @@ public:
             return {};
 
         return file.write(data) == data.size();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString bytesToHexString(const QByteArray& data)
+    {
+        return data.toHex();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString stringAsHexString(const QString& data)
+    {
+        return bytesToHexString(data.toUtf8());
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QByteArray hexStringAsBytes(const QString& data)
+    {
+        return QByteArray::fromHex(data.toUtf8());
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString hexStringAsString(const QString& data)
+    {
+        return hexStringAsBytes(data.toUtf8());
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString rsaSignatureForString(const QString& string, const QString& keyFilename)
+    {
+        auto signature = u::rsaSignString(string.toStdString(),
+            fileNameForUrl(keyFilename).toStdString());
+
+        return QString::fromStdString(u::bytesToHex(signature));
     }
 
 private:

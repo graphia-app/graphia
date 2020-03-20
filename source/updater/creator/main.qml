@@ -38,6 +38,7 @@ ApplicationWindow
 
         property string operatingSystems: ""
         property string credentials: ""
+        property string privateKeyFile: ""
     }
 
     property var operatingSystems: []
@@ -223,6 +224,18 @@ ApplicationWindow
         }
     }
 
+    Labs.FileDialog
+    {
+        id: keyFileDialog
+        fileMode: Labs.FileDialog.OpenFile
+        nameFilters: ["PEM files (*.pem)", "All files (*)"]
+
+        onAccepted:
+        {
+            settings.privateKeyFile = file;
+        }
+    }
+
     menuBar: MenuBar
     {
         id: mainMenuBar
@@ -243,6 +256,25 @@ ApplicationWindow
                 onTriggered: { root.close(); }
             }
         }
+
+        Menu
+        {
+            title: qsTr("&Settings")
+
+            MenuItem
+            {
+                text: settings.privateKeyFile.length > 0 ?
+                    (qsTr("Change Private Key (") +
+                        QmlUtils.fileNameForUrl(settings.privateKeyFile) +
+                        qsTr(")")) :
+                    qsTr("Select Private Key");
+
+                onTriggered:
+                {
+                    keyFileDialog.open();
+                }
+            }
+        }
     }
 
     function open(file)
@@ -251,7 +283,9 @@ ApplicationWindow
 
         try
         {
-            root.updatesArray = JSON.parse(fileContents);
+            let savedObject = JSON.parse(fileContents);
+            let jsonString = QmlUtils.hexStringAsString(savedObject.updates);
+            root.updatesArray = JSON.parse(jsonString);
         }
         catch(e)
         {
@@ -323,8 +357,18 @@ ApplicationWindow
         var updatesRemaining = tabView.count;
         var onComplete = function()
         {
+            let hexEncodedUpdates = QmlUtils.stringAsHexString(JSON.stringify(root.updatesArray));
+            let updatesSignature =
+                QmlUtils.rsaSignatureForString(hexEncodedUpdates, settings.privateKeyFile);
+
+            let saveObject =
+            {
+                updates: hexEncodedUpdates,
+                signature: updatesSignature
+            };
+
             let success = QmlUtils.writeToFile(QmlUtils.fileNameForUrl(fileUrl),
-                JSON.stringify(root.updatesArray));
+                JSON.stringify(saveObject));
 
             if(!success)
                 console.log("Failed to write " + fileUrl);

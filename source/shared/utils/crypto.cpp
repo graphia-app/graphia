@@ -75,6 +75,26 @@ std::string u::aesEncryptString(const std::string& string, const u::AesKey& aesK
     return u::bytesToHex(outBytes);
 }
 
+static QByteArray decodeFromPem(const QByteArray& source)
+{
+    QString text = QString::fromUtf8(source);
+
+    const auto* header = "-----BEGIN PRIVATE KEY-----";
+    const auto* footer = "-----END PRIVATE KEY-----";
+
+    // If it's not PEM, just return it
+    if(!text.contains(header) || !text.contains(footer))
+        return source;
+
+    // Get the raw base64 encoded string
+    text = text.remove(header);
+    text = text.remove(footer);
+    text = text.simplified();
+    text = text.remove(' ');
+
+    return QByteArray::fromBase64(text.toUtf8());
+}
+
 template<typename Key>
 Key loadKey(const std::string& fileName)
 {
@@ -84,6 +104,8 @@ Key loadKey(const std::string& fileName)
 
     auto byteArray = file.readAll();
     file.close();
+
+    byteArray = decodeFromPem(byteArray);
 
     CryptoPP::ArraySource arraySource(reinterpret_cast<const CryptoPP::byte*>(byteArray.constData()), // NOLINT
         byteArray.size(), true);
