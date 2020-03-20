@@ -23,6 +23,7 @@
 #include <QUrl>
 #include <QString>
 #include <QSettings>
+#include <QIcon>
 
 #include <json_helper.h>
 
@@ -38,6 +39,15 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType<QmlUtils>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION,
         "QmlUtils", &QmlUtils::qmlInstance);
+
+    QIcon mainIcon;
+    mainIcon.addFile(QStringLiteral(":/Icon512x512.png"));
+    mainIcon.addFile(QStringLiteral(":/Icon256x256.png"));
+    mainIcon.addFile(QStringLiteral(":/Icon128x128.png"));
+    mainIcon.addFile(QStringLiteral(":/Icon64x64.png"));
+    mainIcon.addFile(QStringLiteral(":/Icon32x32.png"));
+    mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
+    QApplication::setWindowIcon(mainIcon);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
