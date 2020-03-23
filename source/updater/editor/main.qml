@@ -47,7 +47,6 @@ ApplicationWindow
     property var updatesArray: []
 
     property string lastUsedFilename: ""
-    property bool busy: _numActiveChecksummings > 0
 
     MessageDialog
     {
@@ -68,14 +67,15 @@ ApplicationWindow
         return hostname.split(':')[0].split('?')[0];
     }
 
-    property var _checksums: ({})
-    property int _numActiveChecksummings: 0
+    property var checksums: ({})
+    property int numActiveChecksummings: 0
+    property bool busy: numActiveChecksummings > 0
 
     function calculateChecksum(url, onComplete)
     {
-        if(root._checksums[url] !== undefined && root._checksums[url].length > 0)
+        if(root.checksums[url] !== undefined && root.checksums[url].length > 0)
         {
-            onComplete(root._checksums[url]);
+            onComplete(root.checksums[url]);
             return;
         }
 
@@ -100,8 +100,8 @@ ApplicationWindow
                 if(status === 0 || (200 >= status && status < 400))
                 {
                     // Success
-                    root._checksums[url] = QmlUtils.sha256(xhr.response);
-                    onComplete(root._checksums[url]);
+                    root.checksums[url] = QmlUtils.sha256(xhr.response);
+                    onComplete(root.checksums[url]);
                 }
                 else
                 {
@@ -109,11 +109,11 @@ ApplicationWindow
                     validateErrorDialog.open();
                 }
 
-                root._numActiveChecksummings--;
+                root.numActiveChecksummings--;
             }
         };
 
-        root._numActiveChecksummings++;
+        root.numActiveChecksummings++;
         xhr.send();
     }
 
@@ -615,8 +615,8 @@ ApplicationWindow
 
                                         onTextChanged:
                                         {
-                                            if(root._checksums[text] !== undefined)
-                                                root._checksums[text] = "";
+                                            if(root.checksums[text] !== undefined)
+                                                root.checksums[text] = "";
                                         }
                                     }
                                 }
