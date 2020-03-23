@@ -483,6 +483,8 @@ ApplicationWindow
 
         onDiscard:
         {
+            root.saveRequired = false;
+
             if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
                 onSaveConfirmedFunction();
 
