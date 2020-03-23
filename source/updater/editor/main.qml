@@ -47,6 +47,7 @@ ApplicationWindow
     property var updatesArray: []
 
     property string lastUsedFilename: ""
+    property bool saveRequired: false
 
     MessageDialog
     {
@@ -210,6 +211,8 @@ ApplicationWindow
 
         onAccepted:
         {
+            root.saveRequired = true;
+
             let basename = QmlUtils.baseFileNameForUrl(file);
 
             let originalFilename = QmlUtils.fileNameForUrl(file);
@@ -232,6 +235,7 @@ ApplicationWindow
 
         onAccepted:
         {
+            root.saveRequired = true;
             settings.privateKeyFile = file;
         }
     }
@@ -332,11 +336,17 @@ ApplicationWindow
             tab.item.markdownText = update.changeLog;
         }
 
+        // Newly opened file doesn't need to be saved
+        root.saveRequired = false;
+
         return true;
     }
 
     property bool canSave:
     {
+        if(!root.saveRequired)
+            return false;
+
         if(tabView.count === 0)
             return false;
 
@@ -377,6 +387,8 @@ ApplicationWindow
 
             if(!success)
                 console.log("Failed to write " + fileUrl);
+
+            root.saveRequired = false;
         };
 
         for(let index = 0; index < tabView.count; index++)
@@ -483,6 +495,8 @@ ApplicationWindow
 
             function createTab()
             {
+                root.saveRequired = true;
+
                 let tab = tabView.addTab("", tabComponent);
                 tabView.currentIndex = tabView.count - 1;
 
@@ -555,10 +569,22 @@ ApplicationWindow
                                 columns: 2
 
                                 Label { text: qsTr("Version:") }
-                                TextField { id: version; Layout.fillWidth: true }
+                                TextField
+                                {
+                                    id: version
+                                    Layout.fillWidth: true
+
+                                    onTextChanged: { root.saveRequired = true; }
+                                }
 
                                 Label { text: qsTr("Target Regex:") }
-                                TextField { id: targetVersionRegex; Layout.fillWidth: true }
+                                TextField
+                                {
+                                    id: targetVersionRegex
+                                    Layout.fillWidth: true
+
+                                    onTextChanged: { root.saveRequired = true; }
+                                }
                             }
 
                             TextArea
@@ -567,6 +593,8 @@ ApplicationWindow
                                 Layout.fillHeight: true
 
                                 id: markdownChangelog
+
+                                onTextChanged: { root.saveRequired = true; }
                             }
 
                             RowLayout
@@ -599,6 +627,8 @@ ApplicationWindow
 
                                         text: modelData.name
                                         checked: true
+
+                                        onCheckedChanged: { root.saveRequired = true; }
                                     }
 
                                     TextField
@@ -617,6 +647,8 @@ ApplicationWindow
                                         {
                                             if(root.checksums[text] !== undefined)
                                                 root.checksums[text] = "";
+
+                                            root.saveRequired = true;
                                         }
                                     }
                                 }
