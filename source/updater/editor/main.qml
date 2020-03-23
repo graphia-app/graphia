@@ -188,6 +188,18 @@ ApplicationWindow
 
     onClosing:
     {
+        let closedImmediately = root.confirmSave(function()
+        {
+            // After save confirmed or rejected (not cancelled), resume closing
+            root.close();
+        });
+
+        if(!closedImmediately)
+        {
+            close.accepted = false;
+            return;
+        }
+
         if(root._removeWorkingDirectory)
             QmlUtils.rmdir(root._workingDirectory);
     }
@@ -360,11 +372,15 @@ ApplicationWindow
         return !root.busy
     }
 
-    function save(fileUrl)
+    function saveFile(fileUrl, onSaveComplete)
     {
         if(!canSave)
         {
             console.log("save() failed");
+
+            if(onSaveComplete !== undefined && onSaveComplete !== null)
+                onSaveComplete()
+
             return;
         }
 
@@ -389,6 +405,9 @@ ApplicationWindow
                 console.log("Failed to write " + fileUrl);
 
             root.saveRequired = false;
+
+            if(onSaveComplete !== undefined && onSaveComplete !== null)
+                onSaveComplete();
         };
 
         for(let index = 0; index < tabView.count; index++)
@@ -403,6 +422,19 @@ ApplicationWindow
                     onComplete();
             });
         }
+    }
+
+    function save(onSaveComplete)
+    {
+        if(root.lastUsedFilename.length > 0)
+        {
+            root.saveFile(root.lastUsedFilename, onSaveComplete);
+            return;
+        }
+
+        saveDialog.onComplete = onSaveComplete;
+        saveDialog.currentFile = root.lastUsedFilename;
+        saveDialog.open();
     }
 
     Labs.FileDialog
@@ -430,6 +462,47 @@ ApplicationWindow
         onTriggered: { openDialog.open(); }
     }
 
+    MessageDialog
+    {
+        id: saveConfirmDialog
+
+        property var onSaveConfirmedFunction
+
+        title: qsTr("File Changed")
+        text: qsTr("Do you want to save changes?")
+        icon: StandardIcon.Warning
+        standardButtons: StandardButton.Save | StandardButton.Discard | StandardButton.Cancel
+
+        onAccepted:
+        {
+            if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
+                root.save(onSaveConfirmedFunction);
+
+            onSaveConfirmedFunction = null;
+        }
+
+        onDiscard:
+        {
+            if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
+                onSaveConfirmedFunction();
+
+            onSaveConfirmedFunction = null;
+        }
+    }
+
+    function confirmSave(onSaveConfirmedFunction)
+    {
+        if(root.saveRequired)
+        {
+            saveConfirmDialog.onSaveConfirmedFunction = onSaveConfirmedFunction;
+            saveConfirmDialog.open();
+
+            return false;
+        }
+
+        return true;
+    }
+
     Labs.FileDialog
     {
         id: saveDialog
@@ -437,9 +510,11 @@ ApplicationWindow
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: "json"
 
+        property var onComplete
+
         onAccepted:
         {
-            root.save(file);
+            root.saveFile(file, saveDialog.onComplete);
             root.lastUsedFilename = file;
         }
     }
@@ -454,14 +529,7 @@ ApplicationWindow
 
         onTriggered:
         {
-            if(root.lastUsedFilename.length > 0)
-            {
-                root.save(root.lastUsedFilename);
-                return;
-            }
-
-            saveDialog.currentFile = root.lastUsedFilename;
-            saveDialog.open();
+            root.save();
         }
     }
 
@@ -474,8 +542,8 @@ ApplicationWindow
 
         onTriggered:
         {
-            saveDialog.currentFile = root.lastUsedFilename;
-            saveDialog.open();
+            root.lastUsedFilename = "";
+            root.save();
         }
     }
 
