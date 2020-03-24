@@ -33,7 +33,6 @@
 #include <QFile>
 #include <QDir>
 #include <QTimer>
-#include <QSysInfo>
 #include <QTemporaryFile>
 
 #include <QUrl>
@@ -147,41 +146,16 @@ void Updater::startBackgroundUpdateCheck()
     const int HTTP_TIMEOUT = 60000;
     _timeoutTimer.start(HTTP_TIMEOUT);
 
-    auto emailAddress = u::pref("auth/emailAddress").toString();
-
-    json requestJson =
-    {
-        {"currentVersion", VERSION},
-        {"os", {
-            {"kernel", QSysInfo::kernelType()},
-            {"kernelVersion", QSysInfo::kernelVersion()},
-            {"product", QSysInfo::productType()},
-            {"productVersion", QSysInfo::productVersion()}}
-        },
-        {"emailAddress", emailAddress}
-    };
-
-    std::string requestString = requestJson.dump();
-
     // Work around for QTBUG-31652 (PRNG takes time to initialise) to
     // effectively call QNetworkAccessManager::post asynchronously
-    QTimer::singleShot(0, [this, requestString]
+    QTimer::singleShot(0, [this]
     {
         QNetworkRequest request;
         request.setUrl(QUrl(u::pref("servers/updates").toString()));
 
-        auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-
-        QHttpPart part;
-        part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QVariant(R"(form-data; name="request")"));
-        part.setBody(requestString.data());
-        multiPart->append(part);
-
         _state = Updater::State::Update;
         Q_ASSERT(_reply == nullptr);
-        _reply = _networkManager.post(request, multiPart);
-        multiPart->setParent(_reply);
+        _reply = _networkManager.get(request);
     });
 }
 

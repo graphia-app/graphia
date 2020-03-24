@@ -30,8 +30,10 @@
 #include <QStringList>
 #include <QCollator>
 #include <QStandardPaths>
+#include <QSysInfo>
 
 #include <algorithm>
+#include <regex>
 
 QString updatesLocation()
 {
@@ -51,33 +53,86 @@ static QString updateFilePath()
 json updateStringToJson(const QString& updateString, QString* status)
 {
     auto updateStringStdString = updateString.toStdString();
-    auto payload = json::parse(updateStringStdString.begin(), updateStringStdString.end(),
+    auto updateObject = json::parse(updateStringStdString.begin(), updateStringStdString.end(),
         nullptr, false);
 
-    if(payload.is_discarded())
+    if(updateObject.is_discarded())
         return {};
 
-    if(!u::contains(payload, "update") || !u::contains(payload, "signature"))
+    if(!u::contains(updateObject, "updates") || !u::contains(updateObject, "signature"))
         return {};
 
-    auto hexString = payload["update"];
-    auto hexSignature = payload["signature"].get<std::string>();
+    auto hexString = updateObject["updates"];
+    auto hexSignature = updateObject["signature"].get<std::string>();
     auto signature = u::hexToString(hexSignature);
 
     if(!u::rsaVerifySignature(hexString, signature, ":/update_keys/public_update_key.der"))
         return {};
 
-    auto decodedUpdateString = u::hexToString(hexString.get<std::string>());
-    auto update = json::parse(decodedUpdateString.begin(), decodedUpdateString.end(), nullptr, false);
+    auto decodedUpdatesString = u::hexToString(hexString.get<std::string>());
+    auto updates = json::parse(decodedUpdatesString.begin(), decodedUpdatesString.end(), nullptr, false);
 
-    if(update.is_discarded())
+    if(updates.is_discarded())
         return {};
 
-    if(!u::contains(update, "url") || !u::contains(update, "installerFileName"))
-        return {};
+    // Remove updates that don't apply to the running version
+    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    [](const auto& update)
+    {
+        if(!u::contains(update, "targetVersionRegex"))
+            return true;
 
-    if(status != nullptr && u::contains(payload, "status"))
-        *status = QString::fromStdString(payload["status"]);
+        std::string targetVersionRegex = update["targetVersionRegex"];
+
+        return !std::regex_match(VERSION, std::regex{targetVersionRegex});
+    }), updates.end());
+
+    // Remove updates that don't have a payload for the running OS
+    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    [](const auto& update)
+    {
+        if(!u::contains(update, "payloads"))
+            return true;
+
+        const auto& payloads = update["payloads"];
+
+        return payloads.find(QSysInfo::kernelType().toStdString()) == payloads.end();
+    }), updates.end());
+
+    if(updates.empty())
+        return json{};
+
+    std::sort(updates.begin(), updates.end(),
+    [](const auto& a, const auto& b)
+    {
+        return a["version"] > b["version"];
+    });
+
+    json latestUpdate = updates.at(0);
+    json payload = *latestUpdate["payloads"].find(QSysInfo::kernelType().toStdString());
+
+    if(status != nullptr && u::contains(updateObject, "status"))
+        *status = QString::fromStdString(updateObject["status"]);
+
+    json update =
+    {
+        {"version",             latestUpdate["version"]},
+        {"url",                 payload["url"]},
+        {"installerFileName",   payload["installerFileName"]},
+        {"installerChecksum",   payload["installerChecksum"]},
+        {"command",             payload["command"]},
+        {"changeLog",           latestUpdate["changeLog"]},
+        {"images",              json::array()},
+    };
+
+    for(const auto& image : latestUpdate["images"])
+        update["images"].push_back(image);
+
+    if(u::contains(payload, "httpUserName") || u::contains(payload, "httpPassword"))
+    {
+        update["httpUserName"] = payload["httpUserName"];
+        update["httpPassword"] = payload["httpPassword"];
+    }
 
     return update;
 }

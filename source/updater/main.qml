@@ -81,14 +81,17 @@ ApplicationWindow
                 Layout.fillHeight: true
                 readOnly: true
 
-                textFormat: TextEdit.RichText
+                textFormat: TextEdit.MarkdownText
                 text:
                 {
-                    var prefix = "file:///" + imagesLocation + "/";
+                    var prefix = "file://" + imagesLocation + "/";
                     var adjustedChangeLog = changeLog;
 
-                    adjustedChangeLog = adjustedChangeLog.replace(/src *= *"/g, "src=\"" + prefix);
+                    adjustedChangeLog = adjustedChangeLog.replace(
+                        /(?:!\[(.*?)\]\(file:(.*?)\))/g,
+                        "![$1](" + prefix + "$2)");
 
+                    console.log(adjustedChangeLog);
                     return adjustedChangeLog;
                 }
             }
