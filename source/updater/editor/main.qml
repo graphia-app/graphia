@@ -708,10 +708,6 @@ ApplicationWindow
                                         Layout.fillWidth: true
 
                                         enabled: osEnabled.checked
-                                        validator: RegExpValidator
-                                        {
-                                            regExp: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/
-                                        }
 
                                         onTextChanged:
                                         {
@@ -751,7 +747,7 @@ ApplicationWindow
                             if(item.urlTextField.length === 0)
                                 return false;
 
-                            if(!item.urlTextField.acceptableInput)
+                            if(!QmlUtils.urlIsValid(item.urlTextField.text))
                                 return false;
 
                             enabledOses.push(item.osName);
