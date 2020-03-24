@@ -7,7 +7,7 @@
 
 namespace u
 {
-static QString redirectLink(const QString& shortName, QString linkText = {})
+static QString redirectLink(const char* shortName, QString linkText = {})
 {
     auto baseUrl = u::pref("servers/redirects").toString();
 
@@ -19,6 +19,6 @@ static QString redirectLink(const QString& shortName, QString linkText = {})
 
     return QString(R"(<a href="%1/%2">%3</a>)").arg(baseUrl, shortName, linkText);
 }
-}
+} // namespace u
 
 #endif // REDIRECTS_H

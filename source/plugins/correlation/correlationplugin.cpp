@@ -233,14 +233,14 @@ void CorrelationPluginInstance::createAttributes()
         .setFlag(AttributeFlag::AutoRange)
         .setDescription(tr("The %1 is a measure of the spread of the values associated with the node. "
             "It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean.")
-            .arg(u::redirectLink("variance", QObject::tr("Variance"))));
+            .arg(u::redirectLink("variance", tr("Variance"))));
 
     graphModel()->createAttribute(tr("Standard Deviation"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
         .setFlag(AttributeFlag::AutoRange)
         .setDescription(tr("The %1 is a measure of the spread of the values associated "
             "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
-            "and µ is the mean.").arg(u::redirectLink("stddev", QObject::tr("Standard Deviation"))));
+            "and µ is the mean.").arg(u::redirectLink("stddev", tr("Standard Deviation"))));
 
     graphModel()->createAttribute(tr("Coefficient of Variation"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
@@ -248,7 +248,7 @@ void CorrelationPluginInstance::createAttributes()
         .setFlag(AttributeFlag::AutoRange)
         .setDescription(tr("The %1 is a measure of the spread of the values associated "
             "with the node. It is defined as the standard deviation divided by the mean.")
-            .arg(u::redirectLink("coef_variation", QObject::tr("Coefficient of Variation"))));
+            .arg(u::redirectLink("coef_variation", tr("Coefficient of Variation"))));
 
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
     _correlationAttributeName = correlation->attributeName();

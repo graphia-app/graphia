@@ -248,7 +248,7 @@ public:
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText)
     {
-        return u::redirectLink(shortName, linkText);
+        return u::redirectLink(shortName.toLocal8Bit().data(), linkText);
     }
 
 private:
