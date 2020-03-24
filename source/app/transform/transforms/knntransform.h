@@ -22,6 +22,8 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
+#include "shared/utils/redirects.h"
+
 #include <vector>
 
 class KNNTransform : public GraphTransform
@@ -46,9 +48,8 @@ public:
 
     QString description() const override
     {
-        return QObject::tr("Reduce the number of edges in the graph using the "
-            R"(<a href="https://graphia-app.github.io/redirects/knn">)"
-            R"(k-nearest neighbours</a> algorithm.)");
+        return QObject::tr("Reduce the number of edges in the graph using the %1 algorithm.")
+            .arg(u::redirectLink("knn", QObject::tr("k-nearest neighbours")));
     }
 
     QString category() const override { return QObject::tr("Edge Reduction"); }

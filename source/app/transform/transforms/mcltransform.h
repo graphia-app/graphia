@@ -20,7 +20,9 @@
 #define MCLTRANSFORM_H
 
 #include "transform/graphtransform.h"
+
 #include "shared/utils/flags.h"
+#include "shared/utils/redirects.h"
 
 class MCLTransform : public GraphTransform
 {
@@ -56,8 +58,8 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/mcl">MCL - Markov Clustering</a> )"
-                "finds discrete groups (clusters) of nodes based on a flow simulation model.");
+        return QObject::tr("%1 finds discrete groups (clusters) of nodes based on a flow simulation model.")
+            .arg(u::redirectLink("mcl", QObject::tr("MCL - Markov Clustering")));
     }
 
     QString category() const override { return QObject::tr("Clustering"); }

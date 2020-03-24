@@ -24,6 +24,8 @@
 #include "shared/utils/string.h"
 #include "shared/utils/color.h"
 #include "shared/utils/crypto.h"
+#include "shared/utils/redirects.h"
+#include "shared/utils/preferences.h"
 
 #include <QObject>
 #include <QUrl>
@@ -235,6 +237,18 @@ public:
             fileNameForUrl(keyFilename).toStdString());
 
         return QString::fromStdString(u::bytesToHex(signature));
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString redirectUrl(const QString& shortName)
+    {
+        return QString("%1/%2").arg(u::pref("servers/redirects").toString(), shortName);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText)
+    {
+        return u::redirectLink(shortName, linkText);
     }
 
 private:

@@ -20,7 +20,9 @@
 #define PAGERANKTRANSFORM_H
 
 #include "transform/graphtransform.h"
+
 #include "shared/utils/flags.h"
+#include "shared/utils/redirects.h"
 
 class PageRankTransform : public GraphTransform
 {
@@ -53,9 +55,9 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(Calculates a <a href="https://graphia-app.github.io/redirects/pagerank">PageRank</a> )"
-            "centrality measurement for each node. This can be viewed as "
-            "measure of a node's relative importance in the graph.");
+        return QObject::tr("Calculate a %1 centrality measurement for each node. This can be viewed as "
+            "measure of a node's relative importance in the graph.")
+            .arg(u::redirectLink("pagerank", QObject::tr("PageRank")));
     }
     QString category() const override { return QObject::tr("Metrics"); }
     ElementType elementType() const override { return ElementType::None; }

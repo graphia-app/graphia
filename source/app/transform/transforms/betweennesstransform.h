@@ -20,7 +20,9 @@
 #define BETWEENNESSTRANSFORM_H
 
 #include "transform/graphtransform.h"
+
 #include "shared/utils/flags.h"
+#include "shared/utils/redirects.h"
 
 class BetweennessTransform : public GraphTransform
 {
@@ -42,10 +44,9 @@ public:
     QString description() const override
     {
         return QObject::tr(
-            R"-(<a href="https://graphia-app.github.io/redirects/betweenness">Betweenness Centrality</a> )-"
-            " is a measure of centrality in a graph based on shortest paths between nodes. "
+            "%1 is a measure of centrality in a graph based on shortest paths between nodes. "
             "The betweenness centrality for each node is the number of these shortest paths "
-            "that pass through the node.");
+            "that pass through the node.").arg(u::redirectLink("betweenness", QObject::tr("Betweenness Centrality")));
     }
     QString category() const override { return QObject::tr("Metrics"); }
     ElementType elementType() const override { return ElementType::None; }

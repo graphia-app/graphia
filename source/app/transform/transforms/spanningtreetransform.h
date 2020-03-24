@@ -22,6 +22,8 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
+#include "shared/utils/redirects.h"
+
 #include <vector>
 
 class SpanningTreeTransform : public GraphTransform
@@ -39,9 +41,8 @@ public:
 
     QString description() const override
     {
-        return QObject::tr("Find a "
-            R"(<a href="https://graphia-app.github.io/redirects/spanning_tree">)"
-            R"(spanning tree</a> for each component.)");
+        return QObject::tr("Find a %1 for each component.")
+            .arg(u::redirectLink("spanning_tree", QObject::tr("spanning tree")));
     }
 
     QString category() const override { return QObject::tr("Structural") ; }

@@ -20,7 +20,9 @@
 #define LOUVAINTRANSFORM_H
 
 #include "transform/graphtransform.h"
+
 #include "shared/utils/flags.h"
+#include "shared/utils/redirects.h"
 
 class LouvainTransform : public GraphTransform
 {
@@ -43,9 +45,9 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/louvain">)"
-            "Louvain modularity</a> is a method for finding clusters by measuring edge "
-            "density from within communities to neighbouring communities.");
+        return QObject::tr("%1 is a method for finding clusters by measuring edge "
+            "density from within communities to neighbouring communities.")
+            .arg(u::redirectLink("louvain", QObject::tr("Louvain Modularity")));
     }
 
     QString category() const override { return QObject::tr("Clustering"); }

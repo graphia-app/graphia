@@ -239,6 +239,11 @@ int start(int argc, char *argv[])
     preferences.define(QStringLiteral("screenshot/path"),
         QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
 
+    preferences.define(QStringLiteral("servers/redirects"),                     "https://redirects.graphia.app");
+    preferences.define(QStringLiteral("servers/updates"),                       "https://updates.graphia.app");
+    preferences.define(QStringLiteral("servers/crashreports"),                  "https://crashreports.graphia.app");
+    preferences.define(QStringLiteral("servers/tracking"),                      "https://tracking.graphia.app");
+
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));

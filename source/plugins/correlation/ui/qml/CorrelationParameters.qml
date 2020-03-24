@@ -143,7 +143,7 @@ BaseParameterDialog
                     {
                         text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a numerical dataset.<br>" +
                                    "<br>" +
-                                   "A <a href=\"https://graphia-app.github.io/redirects/correlation_coef\">correlation coefficient</a> " +
+                                   "A ") + QmlUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")) + qsTr(" " +
                                    "provides this similarity metric. " +
                                    "If specified, the input data can be scaled and normalised, after which correlation scores are " +
                                    "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +

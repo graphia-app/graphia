@@ -26,6 +26,7 @@
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 #include "shared/utils/threadpool.h"
+#include "shared/utils/redirects.h"
 
 #include <vector>
 #include <cmath>
@@ -179,9 +180,9 @@ public:
 
     QString attributeDescription() const override
     {
-        return QObject::tr(R"(The <a href="https://graphia-app.github.io/redirects/pearson">)"
-            "Pearson Correlation Coefficient</a> is an indication of "
-            "the linear relationship between two variables.");
+        return QObject::tr("The %1 is an indication of "
+            "the linear relationship between two variables.")
+            .arg(u::redirectLink("pearson", QObject::tr("Pearson Correlation Coefficient")));
     }
 };
 
@@ -195,9 +196,9 @@ public:
 
     QString attributeDescription() const override
     {
-        return QObject::tr(R"(The <a href="https://graphia-app.github.io/redirects/spearman">)"
-            "Spearman Rank Correlation Coefficient</a> is an indication of "
-            "the monotomic relationship between two variables.");
+        return QObject::tr("The %1 is an indication of "
+            "the monotomic relationship between two variables.")
+            .arg(u::redirectLink("spearman", QObject::tr("Spearman Rank Correlation Coefficient")));
     }
 };
 

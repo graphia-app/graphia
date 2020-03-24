@@ -168,7 +168,7 @@ void Updater::startBackgroundUpdateCheck()
     QTimer::singleShot(0, [this, requestString]
     {
         QNetworkRequest request;
-        request.setUrl(QUrl(QStringLiteral("https://updates.kajeka.com/")));
+        request.setUrl(QUrl(u::pref("servers/updates").toString()));
 
         auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 

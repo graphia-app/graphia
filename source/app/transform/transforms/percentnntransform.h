@@ -22,6 +22,8 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
+#include "shared/utils/redirects.h"
+
 #include <vector>
 
 class PercentNNTransform : public GraphTransform
@@ -46,10 +48,10 @@ public:
 
     QString description() const override
     {
-        return QObject::tr("Reduce the number of edges in the graph using a variation of the "
-            R"(<a href="https://graphia-app.github.io/redirects/knn">)"
-            R"(k-nearest neighbours</a> algorithm, but instead of choosing the top k edges, )"
-            "choose a percentage of the highest ranking edges.");
+        return QObject::tr("Reduce the number of edges in the graph using a variation of the %1 "
+            "algorithm, but instead of choosing the top k edges, "
+            "choose a percentage of the highest ranking edges.")
+            .arg(u::redirectLink("knn", QObject::tr("k-nearest neighbours")));
     }
 
     QString category() const override { return QObject::tr("Edge Reduction"); }

@@ -22,6 +22,8 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
+#include "shared/utils/redirects.h"
+
 #include <vector>
 
 class ContractByAttributeTransform : public GraphTransform
@@ -46,8 +48,8 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/contraction">Contract edges</a> )"
-            "whose node's share the same attribute value.");
+        return QObject::tr("%1 whose node's share the same attribute value.")
+            .arg(u::redirectLink("contraction", QObject::tr("Contract edges")));
     }
 
     QString category() const override { return QObject::tr("Structural"); }

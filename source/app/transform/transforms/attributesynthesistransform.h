@@ -21,6 +21,8 @@
 
 #include "transform/graphtransform.h"
 
+#include "shared/utils/redirects.h"
+
 class AttributeSynthesisTransform : public GraphTransform
 {
 public:
@@ -74,8 +76,8 @@ public:
             {
                 "Regular Expression",
                 ValueType::String,
-                QObject::tr(R"(A <a href="https://graphia-app.github.io/redirects/regex">regular expression</a> that )"
-                    "is matched against the source attribute values."),
+                QObject::tr("A %1 that is matched against the source attribute values.")
+                    .arg(u::redirectLink("regex", QObject::tr("regular expression"))),
                 "(^.*$)"
             },
             {

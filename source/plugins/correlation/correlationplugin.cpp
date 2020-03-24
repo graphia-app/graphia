@@ -29,6 +29,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/random.h"
 #include "shared/utils/string.h"
+#include "shared/utils/redirects.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -230,25 +231,24 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Variance"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).variance(); })
         .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr(R"(The <a href="https://graphia-app.github.io/redirects/variance">Variance</a> )"
-            "is a measure of the spread of the values associated with the node. It is "
-            "defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean."));
+        .setDescription(tr("The %1 is a measure of the spread of the values associated with the node. "
+            "It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean.")
+            .arg(u::redirectLink("variance", QObject::tr("Variance"))));
 
     graphModel()->createAttribute(tr("Standard Deviation"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
         .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr(R"(The <a href="https://graphia-app.github.io/redirects/stddev">)"
-            "Standard Deviation</a> is a measure of the spread of the values associated "
+        .setDescription(tr("The %1 is a measure of the spread of the values associated "
             "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
-            "and µ is the mean."));
+            "and µ is the mean.").arg(u::redirectLink("stddev", QObject::tr("Standard Deviation"))));
 
     graphModel()->createAttribute(tr("Coefficient of Variation"))
         .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
         .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId).coefVar()); })
         .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr(R"(The <a href="https://graphia-app.github.io/redirects/coef_variation">)"
-            "Coefficient of Variation</a> is a measure of the spread of the values associated "
-            "with the node. It is defined as the standard deviation divided by the mean."));
+        .setDescription(tr("The %1 is a measure of the spread of the values associated "
+            "with the node. It is defined as the standard deviation divided by the mean.")
+            .arg(u::redirectLink("coef_variation", QObject::tr("Coefficient of Variation"))));
 
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
     _correlationAttributeName = correlation->attributeName();

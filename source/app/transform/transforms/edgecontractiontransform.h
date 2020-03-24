@@ -22,6 +22,8 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
+#include "shared/utils/redirects.h"
+
 #include <vector>
 
 class EdgeContractionTransform : public GraphTransform
@@ -46,9 +48,9 @@ public:
 
     QString description() const override
     {
-        return QObject::tr(R"(<a href="https://graphia-app.github.io/redirects/contraction">Remove edges</a> )"
-                           "which match the specified condition while simultaneously "
-                           "merging the pairs of nodes that they previously joined.");
+        return QObject::tr("%1 which match the specified condition while simultaneously "
+            "merging the pairs of nodes that they previously joined.")
+            .arg(u::redirectLink("contraction", QObject::tr("Remove edges")));
     }
     QString category() const override { return QObject::tr("Structural"); }
     ElementType elementType() const override { return ElementType::Edge; }

@@ -191,7 +191,7 @@ static void uploadReport(const QString& email, const QString& text,
         multiPart->append(attachmentPart);
     }
 
-    QUrl url(QStringLiteral("https://crashreports.kajeka.com/"));
+    QUrl url(u::pref("servers/crashreports").toString());
     QNetworkRequest request(url);
 
     auto doUpload = [&]
@@ -235,7 +235,7 @@ static void uploadReport(const QString& email, const QString& text,
     if(errorString.startsWith(QStringLiteral("TLS")))
     {
         // https failed, so fallback to http
-        request.setUrl(QStringLiteral("http://crashreports.kajeka.com/"));
+        request.setUrl(u::pref("servers/crashreports").toString());
         errorString = doUpload();
     }
 
