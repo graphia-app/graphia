@@ -63,7 +63,7 @@ namespace u
         std::ostringstream ss;
 
         ss << std::hex << std::setfill('0');
-        for(auto b : bytes)
+        for(int b : bytes)
         {
             if(b < 0)
                 b += 0x100;
