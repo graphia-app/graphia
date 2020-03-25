@@ -58,7 +58,7 @@ ApplicationWindow
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            visible: !installer.busy && !installer.complete
+            visible: installer !== null && !installer.busy && !installer.complete
 
             Text
             {
@@ -128,7 +128,7 @@ ApplicationWindow
     // Update in progess
     ColumnLayout
     {
-        visible: installer.busy && !installer.complete
+        visible: installer !== null && installer.busy && !installer.complete
 
         anchors.centerIn: parent
         spacing: Constants.spacing * 3
@@ -152,7 +152,7 @@ ApplicationWindow
     // Update complete
     ColumnLayout
     {
-        visible: installer.complete
+        visible: installer !== null && installer.complete
 
         anchors.centerIn: parent
         spacing: Constants.spacing * 3
@@ -161,19 +161,20 @@ ApplicationWindow
         {
             Layout.alignment: Qt.AlignHCenter
 
-            text: installer.success ? qsTr("Update Complete!") : qsTr("Update Failed:")
+            text: (installer !== null && installer.success) ?
+                qsTr("Update Complete!") : qsTr("Update Failed:")
             font.pointSize: 16
             font.bold: true
         }
 
         TextArea
         {
-            visible: !installer.success
+            visible: installer !== null && !installer.success
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 400
             readOnly: true
 
-            text: installer.error
+            text: installer !== null && installer.error
             font.family: "monospace"
             font.pointSize: 8
         }
@@ -184,7 +185,7 @@ ApplicationWindow
 
             Button
             {
-                visible: !installer.success
+                visible: installer !== null && !installer.success
                 text: qsTr("Retry");
 
                 onClicked: { installer.retry(); }
