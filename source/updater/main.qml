@@ -91,7 +91,6 @@ ApplicationWindow
                         /(?:!\[(.*?)\]\(file:(.*?)\))/g,
                         "![$1](" + prefix + "$2)");
 
-                    console.log(adjustedChangeLog);
                     return adjustedChangeLog;
                 }
             }
