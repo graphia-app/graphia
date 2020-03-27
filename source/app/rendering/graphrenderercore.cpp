@@ -15,7 +15,6 @@ void setupTexture(T t, GLuint& texture, int width, int height, GLint format, int
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
     t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
         numMultiSamples, format, width, height, GL_FALSE);
-    t->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
