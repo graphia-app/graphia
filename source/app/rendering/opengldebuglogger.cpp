@@ -1,6 +1,7 @@
 #include "opengldebuglogger.h"
 
 #include <QOpenGLDebugLogger>
+#include <QOpenGLContext>
 #include <QDebug>
 
 OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
@@ -29,13 +30,19 @@ OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
         else
         {
             qDebug() << "Debugging requested but logger failed to initialize";
+
+            const auto* context = QOpenGLContext::currentContext();
+            Q_ASSERT(context != nullptr);
+
+            if(!context->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
+                qDebug() << "...GL_KHR_debug not available";
         }
     }
 }
 
 OpenGLDebugLogger::~OpenGLDebugLogger()
 {
-    if(_logger != nullptr)
+    if(_logger != nullptr && _logger->isLogging())
     {
         _logger->disableMessages();
         _logger->stopLogging();
