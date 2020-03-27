@@ -373,13 +373,19 @@ GraphRendererCore::GraphRendererCore()
     resolveOpenGLFunctions();
 
     GLint maxSamples = 0;
-    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 
-    // Despite the fact that (as far as can be made out) OpenGL specifies a minimum value
-    // of 4 for GL_MAX_SAMPLES, some implementations (notably VMWare's GL passthrough driver)
-    // actually manage less than this, so we need to check what it's actually capable of
-    const GLint PREFERRED_NUM_MULTISAMPLES = 4;
-    _numMultiSamples = std::min(maxSamples, PREFERRED_NUM_MULTISAMPLES);
+    // We need to use the minimum of GL_MAX_COLOR_TEXTURE_SAMPLES,
+    // GL_MAX_INTEGER_SAMPLES and GL_MAX_DEPTH_TEXTURE_SAMPLES for
+    // our sample count as we use the textures in an FBO, where the
+    // sample counts for each attachment must be the same
+
+    _numMultiSamples = 4; // Preferred number of samples
+    glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &maxSamples);
+    _numMultiSamples = std::min(maxSamples, _numMultiSamples);
+    glGetIntegerv(GL_MAX_INTEGER_SAMPLES, &maxSamples);
+    _numMultiSamples = std::min(maxSamples, _numMultiSamples);
+    glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &maxSamples);
+    _numMultiSamples = std::min(maxSamples, _numMultiSamples);
 
     ShaderTools::loadShaderProgram(_screenShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/screen.frag"));
     ShaderTools::loadShaderProgram(_outlineShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/outline.frag"));
