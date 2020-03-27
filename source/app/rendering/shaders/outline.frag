@@ -77,7 +77,7 @@ uint quantOfMSFor(ivec2 coord, int channel)
         }
     }
 
-    return texelFetch(frameBufferTexture, coord, qi).r;
+    return texelFetch(frameBufferTexture, coord, qi)[channel];
 }
 
 float edgeStrengthAt(ivec2 coord)
