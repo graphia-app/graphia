@@ -4,7 +4,7 @@ in vec2 vPosition;
 
 layout (location = 0) out vec4 fragColor;
 
-uniform usampler2DMS frameBufferTexture;
+uniform sampler2DMS frameBufferTexture;
 uniform int width;
 uniform int height;
 uniform int multisamples;
@@ -12,27 +12,22 @@ uniform vec4 outlineColor;
 uniform float alpha;
 
 // Find the mean of the available samples using a method that avoids integer overflow
-uint meanOfMSFor(ivec2 coord, int channel, uint s)
+float meanOfMSFor(ivec2 coord, int channel, uint s)
 {
     coord.x = clamp(coord.x, 0, width - 1);
     coord.y = clamp(coord.y, 0, height - 1);
 
-    uint sM1 = s - 1u;
-
-    uint quotientSum = 0u;
-    uint remainderSum = 0u;
+    float mean = 0.0;
     for(int i = 0; i < multisamples; i++)
     {
-        uint v = texelFetch(frameBufferTexture, coord, i)[channel];
-
-        quotientSum += (v / s);
-        remainderSum += (v % s);
+        float v = texelFetch(frameBufferTexture, coord, i)[channel];
+        mean += (v / s);
     }
 
-    return quotientSum + ((remainderSum + (s * sM1)) / s) - sM1;
+    return mean;
 }
 
-uint meanOfNonZeroMSFor(ivec2 coord, int channel)
+float meanOfNonZeroMSFor(ivec2 coord, int channel)
 {
     coord.x = clamp(coord.x, 0, width - 1);
     coord.y = clamp(coord.y, 0, height - 1);
@@ -40,35 +35,35 @@ uint meanOfNonZeroMSFor(ivec2 coord, int channel)
     uint numNonZeroSamples = 0u;
     for(int i = 0; i < multisamples; i++)
     {
-        uint v = texelFetch(frameBufferTexture, coord, i)[channel];
+        float v = texelFetch(frameBufferTexture, coord, i)[channel];
 
-        if(v > 0u)
+        if(v > 0.0)
             numNonZeroSamples++;
     }
 
     if(numNonZeroSamples == 0u)
-        return 0u;
+        return 0.0;
 
     return meanOfMSFor(coord, channel, numNonZeroSamples);
 }
 
-uint quantOfMSFor(ivec2 coord, int channel)
+float quantOfMSFor(ivec2 coord, int channel)
 {
     coord.x = clamp(coord.x, 0, width - 1);
     coord.y = clamp(coord.y, 0, height - 1);
 
-    uint mean = meanOfMSFor(coord, channel, uint(multisamples));
+    float mean = meanOfMSFor(coord, channel, uint(multisamples));
 
     // Find the sample value closest to the mean,
     // thereby quantising it, so that we can identify the
     // most representative sample from those available
-    uint min = 0xFFFFFFFFu;
+    float min = 1.0 / 0.0; //3.402823466e+38;
     int qi = 0;
 
     for(int i = 0; i < multisamples; i++)
     {
-        uint v = uint(texelFetch(frameBufferTexture, coord, i)[channel]);
-        uint diff = v < mean ? mean - v : v - mean;
+        float v = texelFetch(frameBufferTexture, coord, i)[channel];
+        float diff = v < mean ? mean - v : v - mean;
 
         if(diff < min)
         {
@@ -82,7 +77,7 @@ uint quantOfMSFor(ivec2 coord, int channel)
 
 float edgeStrengthAt(ivec2 coord)
 {
-    uint s = quantOfMSFor(coord, 0);
+    float s = quantOfMSFor(coord, 0);
 
     float numDiffPixels = 0.0;
     float projectionScale = 0.0;
@@ -115,8 +110,6 @@ float edgeStrengthAt(ivec2 coord)
                 projectionScale = p;
         }
     }
-
-    projectionScale /= float(0xFFFFFFFFu);
 
     const float MIN_PS = 0.001;
     const float MAX_PS = 0.015;

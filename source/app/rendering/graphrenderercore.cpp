@@ -208,7 +208,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
 bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture, GLint numMultiSamples)
 {
     setupTexture(this, _colorTexture,     width, height, GL_RGBA,   numMultiSamples);
-    setupTexture(this, _elementTexture,   width, height, GL_RG32UI, numMultiSamples);
+    setupTexture(this, _elementTexture,   width, height, GL_RG32F,  numMultiSamples);
     setupTexture(this, _selectionTexture, width, height, GL_RGBA,   numMultiSamples);
 
     if(_fbo == 0)
@@ -242,15 +242,11 @@ void GPUGraphData::clearFramebuffer(GLbitfield buffers)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, static_cast<GLenum*>(drawBuffers));
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(buffers);
-
-    glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    GLuint elementClearColor[] = {std::numeric_limits<GLuint>::max(), 0u};
-    glClearBufferuiv(GL_COLOR, 0, elementClearColor);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -374,14 +370,12 @@ GraphRendererCore::GraphRendererCore()
     GLint maxSamples = 0;
 
     // We need to use the minimum of GL_MAX_COLOR_TEXTURE_SAMPLES,
-    // GL_MAX_INTEGER_SAMPLES and GL_MAX_DEPTH_TEXTURE_SAMPLES for
-    // our sample count as we use the textures in an FBO, where the
-    // sample counts for each attachment must be the same
+    // and GL_MAX_DEPTH_TEXTURE_SAMPLES for our sample count as we
+    // use the textures in an FBO, where the sample counts for
+    // each attachment must be the same
 
     _numMultiSamples = 4; // Preferred number of samples
     glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &maxSamples);
-    _numMultiSamples = std::min(maxSamples, _numMultiSamples);
-    glGetIntegerv(GL_MAX_INTEGER_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);
     glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);

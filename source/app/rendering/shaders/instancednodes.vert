@@ -14,7 +14,7 @@ layout (location = 6) in vec3  outerColor; // The outside color of the node
 layout (location = 7) in vec3  innerColor; // The inside color of the node
 layout (location = 8) in float selected;
 
-flat out uint element;
+flat out float element;
 out vec3 vPosition;
 out vec2 uv;
 out vec3 vNormal;
@@ -81,7 +81,7 @@ float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
 
 void main()
 {
-    element = uint(gl_InstanceID);
+    element = float(gl_InstanceID + 1);
 
     mat4 modelViewMatrix = mat4FromComponentData(0);
     mat4 projectionMatrix = mat4FromComponentData(16);

@@ -17,7 +17,7 @@ layout (location = 10) in vec3  outerColor; // The outside color of the edge
 layout (location = 11) in vec3  innerColor; // The inside color of the edge (used for multi edges)
 layout (location = 12) in float selected;
 
-flat out uint element;
+flat out float element;
 out vec3 vPosition;
 out vec3 vNormal;
 out vec3 innerVColor;
@@ -95,8 +95,8 @@ float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
 
 void main()
 {
-    // Offset the index so that it doesn't overlap with the node indicies
-    element = uint(gl_InstanceID) + (1u << 31);
+    // Make the index negative so that it doesn't overlap with the node indicies
+    element = float(-(gl_InstanceID + 1));
 
     float edgeLength = distance(sourcePosition, targetPosition);
     float edgeLengthMinusNodeRadii = edgeLength - (sourceSize + targetSize);

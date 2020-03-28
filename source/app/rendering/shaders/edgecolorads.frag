@@ -22,7 +22,7 @@ uniform MaterialInfo material;
 
 uniform float flatness;
 
-flat in uint element;
+flat in float element;
 in vec3 vPosition;
 in vec3 vNormal;
 in vec3 innerVColor;
@@ -34,7 +34,7 @@ in float lightScale;
 in float projectionScale;
 
 layout (location = 0) out vec4  outColor;
-layout (location = 1) out uvec2 outElement;
+layout (location = 1) out vec2  outElement;
 layout (location = 2) out vec4  outSelection;
 
 vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec3 diffuseColor)
@@ -87,6 +87,6 @@ void main()
 
     outColor = vec4(color, 1.0);
     outElement.r = element;
-    outElement.g = uint(projectionScale * 0xFFFFFFFFu);
+    outElement.g = projectionScale;
     outSelection = vec4(vec3(vSelected), 1.0);
 }
