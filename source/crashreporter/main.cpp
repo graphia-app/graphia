@@ -235,7 +235,9 @@ static void uploadReport(const QString& email, const QString& text,
     if(errorString.startsWith(QStringLiteral("TLS")))
     {
         // https failed, so fallback to http
-        request.setUrl(u::pref("servers/crashreports").toString());
+        url.setScheme(QStringLiteral("http"));
+        request.setUrl(url);
+
         errorString = doUpload();
     }
 
