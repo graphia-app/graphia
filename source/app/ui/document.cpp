@@ -2351,7 +2351,10 @@ void Document::cancelCommand()
 void Document::writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl, const QString& extension)
 {
     auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columns")).toInt();
-    auto columnNames = QQmlProperty::read(tableView, QStringLiteral("visibleColumnNames")).toStringList();
+
+    QVariant columnNamesVariant;
+    QMetaObject::invokeMethod(tableView, "visibleColumnNames", Q_RETURN_ARG(QVariant, columnNamesVariant));
+    auto columnNames = columnNamesVariant.toStringList();
 
     QString localFileName = fileUrl.toLocalFile();
     if(!QFile(localFileName).open(QIODevice::ReadWrite))
