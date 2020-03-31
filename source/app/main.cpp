@@ -132,7 +132,6 @@ int start(int argc, char *argv[])
     }
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
-    QSettings::setDefaultFormat(QSettings::Format::IniFormat);
 
     QIcon mainIcon;
     mainIcon.addFile(QStringLiteral(":/icon/Icon512x512.png"));

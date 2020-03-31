@@ -26,6 +26,7 @@
 #include <QVariant>
 #include <QString>
 #include <QQmlParserStatus>
+#include <QCoreApplication>
 
 #include <map>
 
@@ -40,6 +41,11 @@ private:
     std::map<QString, QVariant> _maximumValue;
 
 public:
+    Preferences() :
+        _settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
+            QCoreApplication::organizationName(), QCoreApplication::applicationName())
+    {}
+
     void define(const QString& key, const QVariant& defaultValue = QVariant(),
                 const QVariant& minimumValue = QVariant(), const QVariant& maximumValue = QVariant());
 
