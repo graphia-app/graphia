@@ -259,7 +259,7 @@ static bool minidumpCallback(
 
     launch(exe, const_cast<const platform_char**>(&optionsArray[0]), path, dir);
 
-    std::cerr << "Succesfully handled crash\n";
+    std::cerr << "Successfully handled crash\n";
 
     // Do not pass on the exception
     return true;
