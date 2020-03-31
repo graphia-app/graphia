@@ -137,8 +137,6 @@ static void uploadReport(const QString& email, const QString& text,
         {"gl",      OpenGLFunctions::info()},
     };
 
-    QCryptographicHash checksum(QCryptographicHash::Algorithm::Md5);
-
     for(auto& field : fields)
     {
         QHttpPart part;
@@ -146,21 +144,12 @@ static void uploadReport(const QString& email, const QString& text,
                        QVariant(QStringLiteral(R"(form-data; name="%1")").arg(field.first)));
         part.setBody(field.second.toLatin1());
         multiPart->append(part);
-
-        checksum.addData(field.second.toLatin1());
     }
-
-    // Send a hash of the contents of the report as a (crude) means of filtering bots/crawlers/etc.
-    QHttpPart checksumPart;
-    checksumPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                           QVariant(QStringLiteral(R"(form-data; name="checksum")")));
-    checksumPart.setBody(checksum.result().toHex());
-    multiPart->append(checksumPart);
 
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                      QVariant(QStringLiteral(R"(form-data; name="dmp"; filename="%1")")
+                      QVariant(QStringLiteral(R"(form-data; name="upload_file_minidump"; filename="%1")")
                                .arg(QFileInfo(dmpFile).fileName())));
     auto* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
@@ -191,62 +180,89 @@ static void uploadReport(const QString& email, const QString& text,
         multiPart->append(attachmentPart);
     }
 
-    QUrl url(u::pref("servers/crashreports").toString());
-    QNetworkRequest request(url);
+    auto queryUrl = QUrl(u::pref("servers/crashreports").toString());
 
     auto doUpload = [&]
     {
+        std::vector<QMetaObject::Connection> connections;
         QNetworkAccessManager manager;
-        QNetworkReply* reply = manager.post(request, multiPart);
+        QEventLoop loop;
 
+        // Handle timeouts
         QTimer timer;
         timer.setSingleShot(true);
-
-        // Need a QEventLoop to drive upload
-        QEventLoop loop;
-        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
         QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
         timer.start(60000);
+
+        QNetworkReply* postReply = nullptr;
+
+        // Crash submission occurs in two stages; firstly we ask for a submission URL...
+        QNetworkReply* reply = manager.get(QNetworkRequest(queryUrl));
+        connections.emplace_back(QObject::connect(reply, &QNetworkReply::finished, [&]
+        {
+            if(reply->error() == QNetworkReply::NetworkError::NoError)
+            {
+                auto submissionUrl = QUrl(reply->readAll());
+
+                // ...and if we get one back, we use it to actually submit the crash report
+                postReply = manager.post(QNetworkRequest(submissionUrl), multiPart);
+                connections.emplace_back(QObject::connect(postReply, &QNetworkReply::finished,
+                    &loop, &QEventLoop::quit));
+            }
+        }));
+        // (this is so we can change the submission URL for deployed builds)
+
         loop.exec();
 
-        if(timer.isActive())
+        // The event loop has exited, perhaps due to timeout; in this case
+        // we don't want any pending replies so we disconnect them
+        for(auto& connection : connections)
+            QObject::disconnect(connection);
+
+        // Timer expired
+        if(!timer.isActive())
         {
-            timer.stop();
+            reply->abort();
 
-            if(reply->error() > 0)
-            {
-                if(reply->error() == QNetworkReply::SslHandshakeFailedError)
-                    return QStringLiteral("TLS SslHandshakeFailedError");
+            if(postReply != nullptr)
+                postReply->abort();
 
-                return reply->errorString();
-            }
+            return QObject::tr("Timeout. Please check your internet connection.");
         }
         else
-        {
-            QObject::disconnect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-            reply->abort();
-            return QObject::tr("Timeout");
-        }
+            timer.stop();
+
+        if(postReply == nullptr)
+            return QObject::tr("Could not retrieve submission URL from \"%1\"").arg(queryUrl.toString());
+
+        if(postReply->error() != QNetworkReply::NetworkError::NoError)
+            return postReply->errorString();
 
         return QString();
     };
 
-    auto errorString = doUpload();
-    if(errorString.startsWith(QStringLiteral("TLS")))
-    {
-        // https failed, so fallback to http
-        url.setScheme(QStringLiteral("http"));
-        request.setUrl(url);
+    bool retry = false;
 
-        errorString = doUpload();
-    }
-
-    if(!errorString.isEmpty())
+    do
     {
-        QMessageBox::warning(nullptr, QApplication::applicationName(),
-            QObject::tr("There was an error while uploading the crash report:\n%1")
-            .arg(errorString), QMessageBox::Close);
-    }
+        if(!queryUrl.isValid())
+        {
+            QMessageBox::warning(nullptr, QApplication::applicationName(),
+                QObject::tr("The query URL is invalid:\n\n\"%1\"")
+                .arg(queryUrl.toString()), QMessageBox::Close);
+
+            break;
+        }
+
+        auto errorString = doUpload();
+        if(!errorString.isEmpty())
+        {
+            auto clickedButton = QMessageBox::warning(nullptr, QApplication::applicationName(),
+                QObject::tr("There was an error while uploading the crash report:\n\n%1")
+                .arg(errorString), QMessageBox::Retry | QMessageBox::Close);
+            retry = (clickedButton == QMessageBox::Retry);
+        }
+    } while(retry);
 
     delete multiPart;
 }
