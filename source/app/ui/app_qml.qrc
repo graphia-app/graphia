@@ -39,6 +39,8 @@
         <file>qml/Options/OptionsAppearance.qml</file>
         <file>qml/Options/OptionsDialog.qml</file>
         <file>qml/Options/OptionsMisc.qml</file>
+        <file>qml/tracking-background.png</file>
+        <file>qml/Tracking.qml</file>
         <file>qml/Transform/CreateTransformDialog.qml</file>
         <file>qml/Transform/TransformConfig.js</file>
         <file>qml/Transform/TransformParameter.qml</file>

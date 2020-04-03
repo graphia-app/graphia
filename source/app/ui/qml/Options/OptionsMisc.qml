@@ -42,6 +42,33 @@ Item
         property alias autoBackgroundUpdateCheck: autoBackgroundUpdateCheckCheckbox.checked
     }
 
+    Preferences
+    {
+        id: tracking
+        section: "tracking"
+        property string emailAddress
+        property string permission
+    }
+
+    Component.onCompleted:
+    {
+        if(tracking.permission === "refused")
+        {
+            noTrackingRadioButton.checked = true;
+            emailField.text = "";
+        }
+        else if(tracking.permission === "given")
+        {
+            yesTrackingRadioButton.checked = true;
+            emailField.text = tracking.emailAddress;
+        }
+        else
+        {
+            anonTrackingRadioButton.checked = true;
+            emailField.text = "";
+        }
+    }
+
     ColumnLayout
     {
         anchors.top: parent.top
@@ -79,6 +106,77 @@ Item
         {
             id: disableHubblesCheckbox
             text: qsTr("Disable Extended Help Tooltips")
+        }
+
+        Label
+        {
+            font.bold: true
+            text: qsTr("Allow Tracking")
+        }
+
+        ExclusiveGroup { id: trackingGroup }
+        RowLayout
+        {
+            RadioButton
+            {
+                id: yesTrackingRadioButton
+                exclusiveGroup: trackingGroup
+                text: qsTr("Yes")
+
+                onCheckedChanged:
+                {
+                    if(checked)
+                        tracking.permission = "given";
+                }
+            }
+
+            TextField
+            {
+                id: emailField
+
+                Layout.preferredWidth: 250
+
+                enabled: yesTrackingRadioButton.checked
+
+                placeholderText: qsTr("Email Address")
+                validator: RegExpValidator
+                {
+                    // Check it's a valid email address
+                    regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
+                }
+
+                onTextChanged:
+                {
+                    if(acceptableInput)
+                        tracking.emailAddress = text;
+                }
+            }
+        }
+
+        RadioButton
+        {
+            id: anonTrackingRadioButton
+            exclusiveGroup: trackingGroup
+            text: qsTr("Yes, Anonymously")
+
+            onCheckedChanged:
+            {
+                if(checked)
+                    tracking.permission = "anonymous";
+            }
+        }
+
+        RadioButton
+        {
+            id: noTrackingRadioButton
+            exclusiveGroup: trackingGroup
+            text: qsTr("No")
+
+            onCheckedChanged:
+            {
+                if(checked)
+                    tracking.permission = "refused";
+            }
         }
 
         Label

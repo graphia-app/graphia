@@ -229,8 +229,8 @@ static void uploadReport(const QString& email, const QString& text,
 
             return QObject::tr("Timeout. Please check your internet connection.");
         }
-        else
-            timer.stop();
+
+        timer.stop();
 
         if(postReply == nullptr)
             return QObject::tr("Could not retrieve submission URL from \"%1\"").arg(queryUrl.toString());

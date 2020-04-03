@@ -196,6 +196,8 @@ public:
 
     Q_INVOKABLE void aboutQt() const;
 
+    Q_INVOKABLE void submitTrackingData() const;
+
     static QString resolvedExe(const QString& exe);
 
 signals:

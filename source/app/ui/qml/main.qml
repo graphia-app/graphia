@@ -111,6 +111,29 @@ ApplicationWindow
         }
     }
 
+    Tracking
+    {
+        id: tracking
+
+        anchors.fill: parent
+
+        visible: !validValues
+
+        onTrackingDataEntered: { submit(); }
+
+        function submit()
+        {
+            if(!validValues)
+                return;
+
+            application.submitTrackingData();
+
+            // Deal with any arguments now that
+            // we've collected a tracking identity
+            processOnePendingArgument();
+        }
+    }
+
     property var _pendingArguments: []
 
     // This is called with the arguments of a second instance of the app,
@@ -192,10 +215,14 @@ ApplicationWindow
             var exampleFile = application.resourceFile("examples/Tutorial.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
+            {
+                // Add it to the pending arguments, because it's highly
+                // likely we're currently showing the tracking UI
                 _pendingArguments.push(exampleFile);
+            }
         }
 
-        processOnePendingArgument();
+        tracking.submit();
     }
 
     property bool _restartOnExit: false
@@ -1412,6 +1439,22 @@ ApplicationWindow
     {
         id: mainMenuBar
 
+        property bool visible: !tracking.visible
+
+        onVisibleChanged: _updateVisibility();
+        Component.onCompleted: _updateVisibility();
+
+        function _updateVisibility()
+        {
+            if(!visible)
+            {
+                mainWindow.menuBar = null;
+                __contentItem.parent = null;
+            }
+            else
+                mainWindow.menuBar = mainMenuBar;
+        }
+
         Menu
         {
             title: qsTr("&File")
@@ -1855,6 +1898,8 @@ ApplicationWindow
     {
         id: mainToolBar
 
+        visible: !tracking.visible
+
         RowLayout
         {
             anchors.fill: parent
@@ -1918,6 +1963,8 @@ ApplicationWindow
         TabView
         {
             id: tabView
+
+            visible: !tracking.visible
 
             anchors.fill: parent
             tabsVisible: count > 1
@@ -2083,6 +2130,8 @@ ApplicationWindow
 
     statusBar: StatusBar
     {
+        visible: !tracking.visible
+
         RowLayout
         {
             id: rowLayout

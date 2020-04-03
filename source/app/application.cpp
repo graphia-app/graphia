@@ -19,6 +19,7 @@
 #include "application.h"
 #include "crashtype.h"
 #include "../crashhandler.h"
+#include "tracking.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/fatalerror.h"
@@ -410,6 +411,12 @@ void Application::reportScopeTimers()
 void Application::aboutQt() const
 {
     QMessageBox::aboutQt(nullptr);
+}
+
+// NOLINTNEXTLINE readability-convert-member-functions-to-static
+void Application::submitTrackingData() const
+{
+    Tracking::submit();
 }
 
 QString Application::resolvedExe(const QString& exe)
