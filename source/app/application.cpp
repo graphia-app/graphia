@@ -15,6 +15,8 @@
 #include "loading/nativesaver.h"
 #include "loading/nativeloader.h"
 
+#include <QString>
+#include <QStringList>
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageBox>
