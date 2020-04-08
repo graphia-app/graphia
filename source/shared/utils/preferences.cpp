@@ -2,7 +2,6 @@
 
 #include <QSettings>
 #include <QMetaProperty>
-#include <QTimerEvent>
 #include <QRegularExpression>
 
 #include "shared/utils/container.h"
@@ -94,11 +93,6 @@ QmlPreferences::QmlPreferences(QObject* parent) :
     connect(S(Preferences), &Preferences::maximumChanged, this, &QmlPreferences::onMaximumChanged);
 }
 
-QmlPreferences::~QmlPreferences()
-{
-    flush(false);
-}
-
 QString QmlPreferences::section() const
 {
     return _section;
@@ -108,7 +102,6 @@ void QmlPreferences::setSection(const QString& section)
 {
     if(_section != section)
     {
-        flush();
         _section = section;
 
         if(_initialised)
@@ -121,18 +114,6 @@ void QmlPreferences::setSection(const QString& section)
 void QmlPreferences::reset(const QString& key)
 {
     S(Preferences)->reset(QStringLiteral("%1/%2").arg(_section, key));
-}
-
-void QmlPreferences::timerEvent(QTimerEvent* event)
-{
-    if(event->timerId() == _timerId)
-    {
-        killTimer(_timerId);
-        _timerId = 0;
-        save();
-    }
-
-    QObject::timerEvent(event);
 }
 
 enum class PropertyType
@@ -280,23 +261,6 @@ void QmlPreferences::load()
     });
 }
 
-void QmlPreferences::save(bool notify)
-{
-    for(auto& pendingPreferenceChange : _pendingPreferenceChanges)
-    {
-        S(Preferences)->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
-                            pendingPreferenceChange.second, notify);
-    }
-
-    _pendingPreferenceChanges.clear();
-}
-
-void QmlPreferences::flush(bool notify)
-{
-    if(_initialised && !_pendingPreferenceChanges.empty())
-        save(notify);
-}
-
 void QmlPreferences::onPreferenceChanged(const QString& key, const QVariant& value)
 {
     setProperty(valuePropertyFrom(key), value);
@@ -326,13 +290,7 @@ void QmlPreferences::onPropertyChanged()
 
     if(changedProperty.isValid())
     {
-        _pendingPreferenceChanges[changedProperty.name()] = changedProperty.read(this);
-
-        if(_timerId != 0)
-            killTimer(_timerId);
-
-        // Delay actually setting the preference until a property hasn't changed for some time
-        // This prevents many rapid property changes causing redundant preference writes
-        _timerId = startTimer(250);
+        S(Preferences)->set(preferenceNameByPropertyName(changedProperty.name()),
+            changedProperty.read(this), true);
     }
 }

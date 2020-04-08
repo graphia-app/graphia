@@ -602,12 +602,15 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
             _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 
             _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
-            _nextComponentLayoutDataChanged = true;
 
-            _graphRenderer->executeOnRendererThread([this]
+            if(_nextComponentLayoutData != _componentLayoutData)
             {
-                this->startComponentLayoutTransition();
-            }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
+                _nextComponentLayoutDataChanged = true;
+                _graphRenderer->executeOnRendererThread([this]
+                {
+                    this->startComponentLayoutTransition();
+                }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
+            }
         }, {tr("Component Layout")});
     }
 }

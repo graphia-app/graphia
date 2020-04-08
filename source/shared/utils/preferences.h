@@ -49,7 +49,6 @@ class QmlPreferences : public QObject, public QQmlParserStatus
 
 public:
     explicit QmlPreferences(QObject* parent = nullptr);
-    ~QmlPreferences() override;
 
     QString section() const;
     void setSection(const QString& section);
@@ -59,10 +58,6 @@ public:
 private:
     bool _initialised = false;
     QString _section;
-    std::map<QString, QVariant> _pendingPreferenceChanges;
-    int _timerId = 0;
-
-    void timerEvent(QTimerEvent *) override;
 
     void classBegin() override {}
     void componentComplete() override;
@@ -77,8 +72,6 @@ private:
     void setProperty(QMetaProperty property, const QVariant& value);
 
     void load();
-    void save(bool notify = true);
-    void flush(bool notify = true);
 
     Q_DISABLE_COPY(QmlPreferences)
 

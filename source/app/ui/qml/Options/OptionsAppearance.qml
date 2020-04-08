@@ -22,11 +22,11 @@ Item
         property alias backgroundColor: backgroundColorPickButton.color
         property alias highlightColor: highlightColorPickButton.color
 
-        property alias defaultNodeSize: nodeSizeSlider.value
+        property double defaultNodeSize
         property alias defaultNodeSizeMinimumValue: nodeSizeSlider.minimumValue
         property alias defaultNodeSizeMaximumValue: nodeSizeSlider.maximumValue
 
-        property alias defaultEdgeSize: edgeSizeSlider.value
+        property double defaultEdgeSize
         property alias defaultEdgeSizeMinimumValue: edgeSizeSlider.minimumValue
         property alias defaultEdgeSizeMaximumValue: edgeSizeSlider.maximumValue
 
@@ -34,13 +34,50 @@ Item
         property alias transitionTimeMinimumValue : transitionTimeSlider.minimumValue
         property alias transitionTimeMaximumValue : transitionTimeSlider.maximumValue
 
-        property alias minimumComponentRadius: minimumComponentRadiusSlider.value
+        property double minimumComponentRadius
         property alias minimumComponentRadiusMinimumValue : minimumComponentRadiusSlider.minimumValue
         property alias minimumComponentRadiusMaximumValue : minimumComponentRadiusSlider.maximumValue
 
         property string textFont
         property var textSize
         property int textAlignment
+    }
+
+    Component.onCompleted:
+    {
+        nodeSizeSlider.value = visuals.defaultNodeSize;
+        edgeSizeSlider.value = visuals.defaultEdgeSize;
+        minimumComponentRadiusSlider.value = visuals.minimumComponentRadius;
+
+        delayedPreferences.enabled = true;
+    }
+
+    Timer
+    {
+        id: delayedPreferences
+
+        property bool enabled: false
+
+        interval: 250
+        repeat: false
+
+        function update()
+        {
+            if(!enabled)
+                return;
+
+            restart();
+        }
+
+        onTriggered:
+        {
+            if(!enabled)
+                return;
+
+            visuals.defaultNodeSize = nodeSizeSlider.value;
+            visuals.defaultEdgeSize = edgeSizeSlider.value;
+            visuals.minimumComponentRadius = minimumComponentRadiusSlider.value;
+        }
     }
 
     RowLayout
@@ -88,10 +125,10 @@ Item
             }
 
             Label { text: qsTr("Nodes") }
-            Slider { id: nodeSizeSlider }
+            Slider { id: nodeSizeSlider; onValueChanged: { delayedPreferences.update(); } }
 
             Label { text: qsTr("Edges") }
-            Slider { id: edgeSizeSlider }
+            Slider { id: edgeSizeSlider; onValueChanged: { delayedPreferences.update(); } }
 
             Label
             {
@@ -104,7 +141,7 @@ Item
             Slider { id: transitionTimeSlider }
 
             Label { text: qsTr("Minimum Component Radius") }
-            Slider { id: minimumComponentRadiusSlider }
+            Slider { id: minimumComponentRadiusSlider; onValueChanged: { delayedPreferences.update(); } }
         }
 
         GridLayout
