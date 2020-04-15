@@ -4,6 +4,8 @@ import com.kajeka 1.0
 
 Item
 {
+    property bool activated: false
+
     property int visibleHubbleId: -1
     property Item currentHubble:
     {
@@ -60,6 +62,7 @@ Item
         _tooltipHubbleOriginalDisableState = misc.disableHubbles;
         reset();
         misc.disableHubbles = true;
+        activated = true;
 
         gotoNextHubble();
     }

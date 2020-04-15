@@ -114,7 +114,8 @@ Item
     property var nextAction: find.nextAction
 
     property bool saveRequired: document.loadComplete &&
-        (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
+        (!hasBeenSaved || document.saveRequired || plugin.saveRequired) &&
+        !tutorial.activated // The tutorial file should never be saved
 
     property bool nodeSelectionEmpty: document.numNodesSelected === 0
     property int numNodesSelected: document.numNodesSelected
