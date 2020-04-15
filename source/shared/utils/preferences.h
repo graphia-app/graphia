@@ -41,10 +41,7 @@ private:
     std::map<QString, QVariant> _maximumValue;
 
 public:
-    Preferences() :
-        _settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
-            QCoreApplication::organizationName(), QCoreApplication::applicationName())
-    {}
+    Preferences();
 
     void define(const QString& key, const QVariant& defaultValue = QVariant(),
                 const QVariant& minimumValue = QVariant(), const QVariant& maximumValue = QVariant());
