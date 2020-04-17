@@ -202,7 +202,8 @@ static void uploadReport(const QString& email, const QString& text,
         {
             if(reply->error() == QNetworkReply::NetworkError::NoError)
             {
-                auto submissionUrl = QUrl(reply->readAll());
+                QString urlString = reply->readAll();
+                auto submissionUrl = QUrl(urlString.trimmed());
 
                 // ...and if we get one back, we use it to actually submit the crash report
                 postReply = manager.post(QNetworkRequest(submissionUrl), multiPart);
