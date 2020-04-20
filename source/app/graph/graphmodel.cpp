@@ -19,6 +19,8 @@
 #include "graphmodel.h"
 #include "componentmanager.h"
 
+#include "limitconstants.h"
+
 #include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
 
@@ -145,7 +147,8 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
         &GraphModel::attributeValuesChanged, Qt::DirectConnection);
 
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+        this, &GraphModel::onPreferenceChanged);
 
     GraphModel::createAttribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
@@ -910,11 +913,7 @@ void GraphModel::updateVisuals()
     auto edgeColor      = u::pref("visuals/defaultEdgeColor").value<QColor>();
     auto multiColor     = u::pref("visuals/multiElementColor").value<QColor>();
     auto nodeSize       = u::pref("visuals/defaultNodeSize").toFloat();
-    auto minNodeSize    = u::minPref("visuals/defaultNodeSize").toFloat();
-    auto maxNodeSize    = u::maxPref("visuals/defaultNodeSize").toFloat();
     auto edgeSize       = u::pref("visuals/defaultEdgeSize").toFloat();
-    auto minEdgeSize    = u::minPref("visuals/defaultEdgeSize").toFloat();
-    auto maxEdgeSize    = u::maxPref("visuals/defaultEdgeSize").toFloat();
     auto meIndicators   = u::pref("visuals/showMultiElementIndicators").toBool();
 
     // Clear all edge flags as we can't know what to
@@ -927,8 +926,9 @@ void GraphModel::updateVisuals()
         // Size
         if(_->_mappedNodeVisuals[nodeId]._size >= 0.0f)
         {
-            _->_nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize, nodeSize,
-                                         _->_mappedNodeVisuals[nodeId]._size);
+            _->_nodeVisuals[nodeId]._size = mappedSize(
+                LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(),
+                nodeSize, _->_mappedNodeVisuals[nodeId]._size);
         }
         else
             _->_nodeVisuals[nodeId]._size = nodeSize;
@@ -940,7 +940,7 @@ void GraphModel::updateVisuals()
             _->_nodeVisuals[nodeId]._outerColor = _->_mappedNodeVisuals[nodeId]._outerColor;
 
         _->_nodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
-                    _->_nodeVisuals[nodeId]._outerColor : multiColor;
+            _->_nodeVisuals[nodeId]._outerColor : multiColor;
 
         // Text
         if(!_->_mappedNodeVisuals[nodeId]._text.isEmpty())
@@ -978,8 +978,9 @@ void GraphModel::updateVisuals()
         // Size
         if(_->_mappedEdgeVisuals[edgeId]._size >= 0.0f)
         {
-            _->_edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize, edgeSize,
-                                         _->_mappedEdgeVisuals[edgeId]._size);
+            _->_edgeVisuals[edgeId]._size = mappedSize(
+                LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(),
+                edgeSize, _->_mappedEdgeVisuals[edgeId]._size);
         }
         else
             _->_edgeVisuals[edgeId]._size = edgeSize;
@@ -987,7 +988,7 @@ void GraphModel::updateVisuals()
         // Restrict edgeSize to be no larger than the source or target size
         const auto& edge = graph().edgeById(edgeId);
         auto minEdgeNodesSize = std::min(_->_nodeVisuals[edge.sourceId()]._size,
-                                         _->_nodeVisuals[edge.targetId()]._size);
+            _->_nodeVisuals[edge.targetId()]._size);
         _->_edgeVisuals[edgeId]._size = std::min(_->_edgeVisuals[edgeId]._size, minEdgeNodesSize);
 
         // Color

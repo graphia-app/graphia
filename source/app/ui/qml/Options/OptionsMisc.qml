@@ -199,12 +199,21 @@ Item
                 {
                     textColor: QmlUtils.urlIsValid(webSearchEngineField.text) ? "black" : "red"
                 }
+
+                property string _defaultValue: "https://www.google.com/#q=%1"
+                function reset() { text = _defaultValue; }
+
+                Component.onCompleted:
+                {
+                    if(text.length === 0)
+                        text = _defaultValue;
+                }
             }
 
             FloatingButton
             {
                 iconName: "view-refresh"
-                onClicked: { misc.reset("webSearchEngineUrl"); }
+                onClicked: { webSearchEngineField.reset(); }
             }
         }
 

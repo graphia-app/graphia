@@ -19,6 +19,8 @@
 #ifndef UPDATER_H
 #define UPDATER_H
 
+#include "shared/utils/preferences.h"
+
 #include <QObject>
 #include <QTimer>
 #include <QNetworkAccessManager>
@@ -74,6 +76,8 @@ private:
 
     QString _fileName;
     QString _checksum;
+
+    PreferencesWatcher _preferencesWatcher;
 
     void downloadUpdate(QNetworkReply* reply);
     void saveUpdate(QNetworkReply* reply);

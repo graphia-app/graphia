@@ -47,6 +47,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/spatialtree.h
+    ${CMAKE_CURRENT_LIST_DIR}/limitconstants.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h

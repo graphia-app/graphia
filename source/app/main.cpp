@@ -39,6 +39,7 @@
 #include <iostream>
 
 #include "application.h"
+#include "limitconstants.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/visualisations/defaultgradients.h"
@@ -174,6 +175,7 @@ int start(int argc, char *argv[])
     const int min = Application::minorVersion();
 
     qmlRegisterType<Application>                     (uri, maj, min, "Application");
+    qmlRegisterType<LimitConstants>                  (uri, maj, min, "LimitConstants");
     qmlRegisterType<Document>                        (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>                  (uri, maj, min, "Graph");
     qmlRegisterType<IconItem>                        (uri, maj, min, "NamedIcon");
@@ -188,60 +190,60 @@ int start(int argc, char *argv[])
     qRegisterMetaType<size_t>("size_t");
 
     ThreadPoolSingleton threadPool;
-    Preferences preferences;
     ScopeTimerManager scopeTimerManager;
 
-    preferences.define(QStringLiteral("visuals/defaultNodeColor"),              "#0000FF");
-    preferences.define(QStringLiteral("visuals/defaultEdgeColor"),              "#FFFFFF");
-    preferences.define(QStringLiteral("visuals/multiElementColor"),             "#FF0000");
-    preferences.define(QStringLiteral("visuals/backgroundColor"),               "#C0C0C0");
-    preferences.define(QStringLiteral("visuals/highlightColor"),                "#FFFFFF");
+    //FIXME: Eventually remove this
+    copyKajekaSettings();
 
-    preferences.define(QStringLiteral("visuals/defaultNodeSize"),               1.5, 0.1,  3.0);
-    preferences.define(QStringLiteral("visuals/defaultEdgeSize"),               0.5, 0.01, 2.0);
+    u::definePref(QStringLiteral("visuals/defaultNodeColor"),               "#0000FF");
+    u::definePref(QStringLiteral("visuals/defaultEdgeColor"),               "#FFFFFF");
+    u::definePref(QStringLiteral("visuals/multiElementColor"),              "#FF0000");
+    u::definePref(QStringLiteral("visuals/backgroundColor"),                "#C0C0C0");
+    u::definePref(QStringLiteral("visuals/highlightColor"),                 "#FFFFFF");
 
-    preferences.define(QStringLiteral("visuals/showNodeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define(QStringLiteral("visuals/showEdgeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define(QStringLiteral("visuals/textFont"),                      SharedTools::QtSingleApplication::font().family());
-    preferences.define(QStringLiteral("visuals/textSize"),                      24.0f);
-    preferences.define(QStringLiteral("visuals/edgeVisualType"),                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
-    preferences.define(QStringLiteral("visuals/textAlignment"),                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
-    preferences.define(QStringLiteral("visuals/showMultiElementIndicators"),    true);
-    preferences.define(QStringLiteral("visuals/savedGradients"),                Defaults::GRADIENT_PRESETS);
-    preferences.define(QStringLiteral("visuals/defaultGradient"),               Defaults::GRADIENT);
-    preferences.define(QStringLiteral("visuals/savedPalettes"),                 Defaults::PALETTE_PRESETS);
-    preferences.define(QStringLiteral("visuals/defaultPalette"),                Defaults::PALETTE);
+    u::definePref(QStringLiteral("visuals/defaultNodeSize"),                1.5);
+    u::definePref(QStringLiteral("visuals/defaultEdgeSize"),                0.5);
 
-    preferences.define(QStringLiteral("visuals/projection"),                    QVariant::fromValue(static_cast<int>(Projection::Perspective)));
+    u::definePref(QStringLiteral("visuals/showNodeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    u::definePref(QStringLiteral("visuals/showEdgeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    u::definePref(QStringLiteral("visuals/textFont"),                       SharedTools::QtSingleApplication::font().family());
+    u::definePref(QStringLiteral("visuals/textSize"),                       24.0f);
+    u::definePref(QStringLiteral("visuals/edgeVisualType"),                 QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
+    u::definePref(QStringLiteral("visuals/textAlignment"),                  QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
+    u::definePref(QStringLiteral("visuals/showMultiElementIndicators"),     true);
+    u::definePref(QStringLiteral("visuals/savedGradients"),                 Defaults::GRADIENT_PRESETS);
+    u::definePref(QStringLiteral("visuals/defaultGradient"),                Defaults::GRADIENT);
+    u::definePref(QStringLiteral("visuals/savedPalettes"),                  Defaults::PALETTE_PRESETS);
+    u::definePref(QStringLiteral("visuals/defaultPalette"),                 Defaults::PALETTE);
 
-    preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
-    preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);
+    u::definePref(QStringLiteral("visuals/projection"),                     QVariant::fromValue(static_cast<int>(Projection::Perspective)));
 
-    preferences.define(QStringLiteral("misc/maxUndoLevels"),                    25);
+    u::definePref(QStringLiteral("visuals/minimumComponentRadius"),         2.0);
+    u::definePref(QStringLiteral("visuals/transitionTime"),                 1.0);
 
-    preferences.define(QStringLiteral("misc/showGraphMetrics"),                 false);
-    preferences.define(QStringLiteral("misc/showLayoutSettings"),               false);
+    u::definePref(QStringLiteral("misc/maxUndoLevels"),                     25);
 
-    preferences.define(QStringLiteral("misc/focusFoundNodes"),                  true);
-    preferences.define(QStringLiteral("misc/focusFoundComponents"),             true);
+    u::definePref(QStringLiteral("misc/showGraphMetrics"),                  false);
+    u::definePref(QStringLiteral("misc/showLayoutSettings"),                false);
 
-    preferences.define(QStringLiteral("misc/disableHubbles"),                   false);
+    u::definePref(QStringLiteral("misc/focusFoundNodes"),                   true);
+    u::definePref(QStringLiteral("misc/focusFoundComponents"),              true);
 
-    preferences.define(QStringLiteral("misc/webSearchEngineUrl"),               "https://www.google.com/#q=%1");
+    u::definePref(QStringLiteral("misc/disableHubbles"),                    false);
 
-    preferences.define(QStringLiteral("misc/hasSeenTutorial"),                  false);
+    u::definePref(QStringLiteral("misc/hasSeenTutorial"),                   false);
 
-    preferences.define(QStringLiteral("misc/autoBackgroundUpdateCheck"),        true);
+    u::definePref(QStringLiteral("misc/autoBackgroundUpdateCheck"),         true);
 
-    preferences.define(QStringLiteral("screenshot/width"),                      1920);
-    preferences.define(QStringLiteral("screenshot/height"),                     1080);
-    preferences.define(QStringLiteral("screenshot/path"),
+    u::definePref(QStringLiteral("screenshot/width"),                       1920);
+    u::definePref(QStringLiteral("screenshot/height"),                      1080);
+    u::definePref(QStringLiteral("screenshot/path"),
         QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
 
-    preferences.define(QStringLiteral("servers/redirects"),                     "https://redirects.graphia.app");
-    preferences.define(QStringLiteral("servers/updates"),                       "https://updates.graphia.app");
-    preferences.define(QStringLiteral("servers/crashreports"),                  "https://crashreports.graphia.app");
-    preferences.define(QStringLiteral("servers/tracking"),                      "https://tracking.graphia.app");
+    u::definePref(QStringLiteral("servers/redirects"),                      "https://redirects.graphia.app");
+    u::definePref(QStringLiteral("servers/updates"),                        "https://updates.graphia.app");
+    u::definePref(QStringLiteral("servers/crashreports"),                   "https://crashreports.graphia.app");
+    u::definePref(QStringLiteral("servers/tracking"),                       "https://tracking.graphia.app");
 
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));

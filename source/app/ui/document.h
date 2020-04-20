@@ -31,6 +31,7 @@
 #include "rendering/shading.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/deferredexecutor.h"
+#include "shared/utils/preferences.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/failurereason.h"
 #include "transform/availabletransformsmodel.h"
@@ -217,6 +218,8 @@ public:
 private:
     Application* _application = nullptr;
     GraphQuickItem* _graphQuickItem = nullptr;
+
+    PreferencesWatcher _preferencesWatcher;
 
     QString _title;
     QString _status;

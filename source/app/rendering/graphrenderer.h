@@ -35,6 +35,7 @@
 #include "shared/utils/movablepointer.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
+#include "shared/utils/preferences.h"
 
 #include "shared/utils/qmlenum.h"
 
@@ -172,6 +173,8 @@ private:
     int _numComponents = 0;
 
     SelectionManager* _selectionManager = nullptr;
+
+    PreferencesWatcher _preferencesWatcher;
 
     GPUComputeThread* _gpuComputeThread = nullptr;
     std::unique_ptr<GlyphMap> _glyphMap;

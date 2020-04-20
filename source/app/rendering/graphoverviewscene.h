@@ -25,6 +25,8 @@
 #include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 
+#include "shared/utils/preferences.h"
+
 #include "layout/componentlayout.h"
 
 #include <vector>
@@ -90,6 +92,8 @@ private:
     GraphRenderer* _graphRenderer = nullptr;
     CommandManager* _commandManager = nullptr;
     GraphModel* _graphModel = nullptr;
+
+    PreferencesWatcher _preferencesWatcher;
 
     int _width = 0;
     int _height = 0;

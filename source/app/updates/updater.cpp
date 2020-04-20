@@ -79,7 +79,7 @@ Updater::Updater()
     QObject::connect(&_backgroundCheckTimer, &QTimer::timeout,
         this, &Updater::startBackgroundUpdateCheck);
 
-    connect(S(Preferences), &Preferences::preferenceChanged,
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &Updater::onPreferenceChanged);
 }
 

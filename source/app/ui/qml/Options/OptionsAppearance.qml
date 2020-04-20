@@ -29,6 +29,8 @@ import "../Controls"
 
 Item
 {
+    LimitConstants { id: limitConstants }
+
     Preferences
     {
         id: visuals;
@@ -41,20 +43,9 @@ Item
         property alias highlightColor: highlightColorPickButton.color
 
         property double defaultNodeSize
-        property alias defaultNodeSizeMinimumValue: nodeSizeSlider.minimumValue
-        property alias defaultNodeSizeMaximumValue: nodeSizeSlider.maximumValue
-
         property double defaultEdgeSize
-        property alias defaultEdgeSizeMinimumValue: edgeSizeSlider.minimumValue
-        property alias defaultEdgeSizeMaximumValue: edgeSizeSlider.maximumValue
-
         property alias transitionTime: transitionTimeSlider.value
-        property alias transitionTimeMinimumValue : transitionTimeSlider.minimumValue
-        property alias transitionTimeMaximumValue : transitionTimeSlider.maximumValue
-
         property double minimumComponentRadius
-        property alias minimumComponentRadiusMinimumValue : minimumComponentRadiusSlider.minimumValue
-        property alias minimumComponentRadiusMaximumValue : minimumComponentRadiusSlider.maximumValue
 
         property string textFont
         property var textSize
@@ -143,10 +134,24 @@ Item
             }
 
             Label { text: qsTr("Nodes") }
-            Slider { id: nodeSizeSlider; onValueChanged: { delayedPreferences.update(); } }
+            Slider
+            {
+                id: nodeSizeSlider
+                minimumValue: limitConstants.minimumNodeSize
+                maximumValue: limitConstants.maximumNodeSize
+
+                onValueChanged: { delayedPreferences.update(); }
+            }
 
             Label { text: qsTr("Edges") }
-            Slider { id: edgeSizeSlider; onValueChanged: { delayedPreferences.update(); } }
+            Slider
+            {
+                id: edgeSizeSlider
+                minimumValue: limitConstants.minimumEdgeSize
+                maximumValue: limitConstants.maximumEdgeSize
+
+                onValueChanged: { delayedPreferences.update(); }
+            }
 
             Label
             {
@@ -156,10 +161,22 @@ Item
             }
 
             Label { text: qsTr("Transition Time") }
-            Slider { id: transitionTimeSlider }
+            Slider
+            {
+                id: transitionTimeSlider
+                minimumValue: limitConstants.minimumTransitionTime
+                maximumValue: limitConstants.maximumTransitionTime
+            }
 
             Label { text: qsTr("Minimum Component Radius") }
-            Slider { id: minimumComponentRadiusSlider; onValueChanged: { delayedPreferences.update(); } }
+            Slider
+            {
+                id: minimumComponentRadiusSlider
+                minimumValue: limitConstants.minimumMinimumComponentRadius
+                maximumValue: limitConstants.maximumMinimumComponentRadius
+
+                onValueChanged: { delayedPreferences.update(); }
+            }
         }
 
         GridLayout

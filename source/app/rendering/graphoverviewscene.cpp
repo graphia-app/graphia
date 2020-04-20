@@ -67,7 +67,8 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
     connect(&_zoomTransition, &Transition::started, _graphRenderer, &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
     connect(&_zoomTransition, &Transition::finished, _graphRenderer, &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
 
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+        this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
 }
 
 void GraphOverviewScene::update(float t)

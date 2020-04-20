@@ -21,9 +21,11 @@
 
 #include "shared/graph/elementid_containers.h"
 #include "shared/graph/grapharray.h"
-#include "attributes/attribute.h"
-
 #include "shared/graph/igraphmodel.h"
+
+#include "shared/utils/preferences.h"
+
+#include "attributes/attribute.h"
 
 #include <QString>
 #include <QStringList>
@@ -69,6 +71,8 @@ private:
     std::atomic_bool _transformedGraphIsChanging;
     QString _name;
     IPlugin* _plugin;
+
+    PreferencesWatcher _preferencesWatcher;
 
     void removeDynamicAttributes();
     QString normalisedAttributeName(QString attribute) const;

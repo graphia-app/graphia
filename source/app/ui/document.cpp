@@ -566,7 +566,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         }
     }
 
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+        this, &Document::onPreferenceChanged, Qt::DirectConnection);
+
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
         _searchManager->refresh();

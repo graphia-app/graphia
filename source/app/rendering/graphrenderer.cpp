@@ -111,7 +111,9 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     else
         switchToOverviewMode(false);
 
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+        this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
+
     connect(_graphModel, &GraphModel::visualsWillChange, [this]
     {
         disableSceneUpdate();

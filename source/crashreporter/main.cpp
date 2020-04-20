@@ -180,7 +180,7 @@ static void uploadReport(const QString& email, const QString& text,
         multiPart->append(attachmentPart);
     }
 
-    auto queryUrl = QUrl(u::pref("servers/crashreports").toString());
+    auto queryUrl = QUrl(u::pref(QStringLiteral("servers/crashreports")).toString());
 
     auto doUpload = [&]
     {
@@ -278,7 +278,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
-    Preferences preferences;
 
     QCommandLineParser p;
 
@@ -332,7 +331,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        report._email = preferences.get(QStringLiteral("auth/emailAddress")).toString();
+        report._email = u::pref(QStringLiteral("auth/emailAddress")).toString();
         report._text = p.value(QStringLiteral("description"));
     }
 

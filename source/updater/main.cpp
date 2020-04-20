@@ -79,7 +79,6 @@ QStringList showUpdater(int argc, char *argv[])
     Q_INIT_RESOURCE(update_keys);
 
     qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
-    Preferences preferences;
 
     QString status;
     auto update = latestUpdateJson(&status);
