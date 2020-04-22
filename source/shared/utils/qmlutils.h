@@ -89,8 +89,28 @@ public:
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE bool urlIsValid(const QString& urlString) const
     {
+        QUrl url = QUrl(urlString, QUrl::ParsingMode::StrictMode);
+        auto validSchemes = {"http", "https", "ftp", "file"};
+
+        return url.isValid() && std::any_of(std::begin(validSchemes), std::end(validSchemes),
+        [&url](const auto& scheme)
+        {
+            return url.scheme() == scheme;
+        });
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool userUrlIsValid(const QString& urlString) const
+    {
         QUrl url = QUrl::fromUserInput(urlString);
         return url.isValid();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString urlFrom(const QString& userUrlString) const
+    {
+        QUrl url = QUrl::fromUserInput(userUrlString);
+        return url.toString();
     }
 
     // QML JS comparelocale doesn't include numeric implementation...

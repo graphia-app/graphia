@@ -666,8 +666,8 @@ Item
         var url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
             misc.webSearchEngineUrl.arg(nodeName) : "";
 
-        if(QmlUtils.urlIsValid(url))
-            Qt.openUrlExternally(url);
+        if(QmlUtils.userUrlIsValid(url))
+            Qt.openUrlExternally(QmlUtils.urlFrom(url));
     }
 
     CaptureScreenshot
