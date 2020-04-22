@@ -98,7 +98,7 @@ ApplicationWindow
             if(xhr.readyState === XMLHttpRequest.DONE)
             {
                 let status = xhr.status;
-                if(status === 0 || (200 >= status && status < 400))
+                if(status >= 200 && status < 400)
                 {
                     // Success
                     root.checksums[url] = QmlUtils.sha256(xhr.response);
@@ -106,7 +106,7 @@ ApplicationWindow
                 }
                 else
                 {
-                    validateErrorDialog.text = "HTTP " + status + " while validating " + url + ".";
+                    validateErrorDialog.text = "HTTP status " + status + " while validating " + url + ".";
                     validateErrorDialog.open();
                 }
 
