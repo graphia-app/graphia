@@ -140,7 +140,7 @@ QColor ColorPalette::get(const QString& value, int index) const
         }
 
         // Add the unicode values of each non-digit character to the total
-        for(const auto c : qAsConst(nonDigitValue))
+        for(const auto c : std::as_const(nonDigitValue))
         {
             // cppcheck-suppress useStlAlgorithm
             index += c.unicode();

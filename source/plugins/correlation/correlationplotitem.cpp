@@ -897,7 +897,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         barsGroup->setSpacingType(QCPBarsGroup::stAbsolute);
         barsGroup->setSpacing(1.0);
 
-        for(auto* plottable : qAsConst(_meanPlots))
+        for(auto* plottable : std::as_const(_meanPlots))
         {
             auto* bars = dynamic_cast<QCPBars*>(plottable);
             bars->setWidth(bars->width() / _meanPlots.size());
@@ -947,7 +947,7 @@ void CorrelationPlotItem::populateIQRPlot()
     {
         rowsEntries.clear();
         outliers.clear();
-        const auto& selectedRows = qAsConst(_selectedRows);
+        const auto& selectedRows = std::as_const(_selectedRows);
         std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
         [this, col](auto row)
         {
@@ -980,7 +980,7 @@ void CorrelationPlotItem::populateIQRPlot()
             double minValue = secondQuartile;
             double maxValue = secondQuartile;
 
-            for(auto row : qAsConst(rowsEntries))
+            for(auto row : std::as_const(rowsEntries))
             {
                 // Find Maximum and minimum non-outliers
                 if(row < thirdQuartile + (iqr * 1.5))
@@ -1139,7 +1139,7 @@ void CorrelationPlotItem::populateLinePlot()
     QVector<double> xData; xData.reserve(static_cast<int>(_pluginInstance->numColumns()));
 
     // Plot each row individually
-    for(auto row : qAsConst(_selectedRows))
+    for(auto row : std::as_const(_selectedRows))
     {
         QCPGraph* graph = nullptr;
         double rowMinY = std::numeric_limits<double>::max();
@@ -1448,7 +1448,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 
 void CorrelationPlotItem::invalidateLineGraphCache()
 {
-    for(auto v : qAsConst(_lineGraphCache))
+    for(auto v : std::as_const(_lineGraphCache))
         _customPlot.removeGraph(v._graph);
 
     _lineGraphCache.clear();
@@ -1482,7 +1482,7 @@ void CorrelationPlotItem::rebuildPlot()
 
     updateSortMap();
 
-    for(auto v : qAsConst(_lineGraphCache))
+    for(auto v : std::as_const(_lineGraphCache))
     {
         v._graph->setVisible(false);
 

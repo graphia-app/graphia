@@ -2262,7 +2262,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     {
         int index = 0;
 
-        for(const auto& newGraphTransform : qAsConst(newGraphTransforms))
+        for(const auto& newGraphTransform : std::as_const(newGraphTransforms))
         {
             if(!transformIsPinned(newGraphTransform))
             {

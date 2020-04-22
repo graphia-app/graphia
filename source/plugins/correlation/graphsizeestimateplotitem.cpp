@@ -59,7 +59,7 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
     if(threshold != _threshold)
     {
         if(!_keys.isEmpty())
-            threshold = std::clamp(threshold, qAsConst(_keys).first(), 1.0);
+            threshold = std::clamp(threshold, std::as_const(_keys).first(), 1.0);
 
         _threshold = threshold;
         emit thresholdChanged();
@@ -149,7 +149,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     _customPlot.yAxis->setNumberPrecision(0);
     _customPlot.yAxis->grid()->setSubGridVisible(true);
 
-    _customPlot.xAxis->setRange(qAsConst(_keys).first(),
+    _customPlot.xAxis->setRange(std::as_const(_keys).first(),
         // If the threshold is 1.0, stretch the X axis a little,
         // so that the marker is always visible
         qFuzzyCompare(_threshold, 1.0) ? 1.001 : 1.0);

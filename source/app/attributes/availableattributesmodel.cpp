@@ -102,7 +102,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
         }
     };
 
-    for(const auto& attributeName : qAsConst(attributeList))
+    for(const auto& attributeName : std::as_const(attributeList))
         addItem(_root, attributeName);
 
     if(Flags<ElementType>(elementTypes).test(ElementType::Edge))
@@ -116,7 +116,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
             _root->addChild(_sourceNode);
             _root->addChild(_targetNode);
 
-            for(const auto& attributeName : qAsConst(attributeList))
+            for(const auto& attributeName : std::as_const(attributeList))
             {
                 addItem(_sourceNode, attributeName);
                 addItem(_targetNode, attributeName);
