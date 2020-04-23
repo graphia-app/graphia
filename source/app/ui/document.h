@@ -31,7 +31,7 @@
 #include "rendering/shading.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/deferredexecutor.h"
-#include "shared/utils/preferences.h"
+#include "shared/utils/preferenceswatcher.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/failurereason.h"
 #include "transform/availabletransformsmodel.h"

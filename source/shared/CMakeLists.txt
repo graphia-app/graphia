@@ -77,6 +77,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/passkey.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/preferenceswatcher.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlpreferences.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/progressable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
@@ -115,6 +117,8 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/preferenceswatcher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp

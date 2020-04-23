@@ -50,6 +50,7 @@
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/qmlpreferences.h"
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/scopetimer.h"
 

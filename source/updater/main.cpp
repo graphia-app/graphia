@@ -20,6 +20,7 @@
 
 #include "shared/updates/updates.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/qmlpreferences.h"
 #include "shared/utils/container.h"
 
 #include <QApplication>

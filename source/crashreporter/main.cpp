@@ -40,6 +40,7 @@
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/qmlpreferences.h"
 
 #include <google_breakpad/processor/minidump.h>
 #include <google_breakpad/processor/process_state.h>

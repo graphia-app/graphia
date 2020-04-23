@@ -19,14 +19,12 @@
 #ifndef UPDATER_H
 #define UPDATER_H
 
-#include "shared/utils/preferences.h"
+#include "shared/utils/preferenceswatcher.h"
 
 #include <QObject>
 #include <QTimer>
 #include <QNetworkAccessManager>
 #include <QString>
-
-#include <json_helper.h>
 
 #include <atomic>
 

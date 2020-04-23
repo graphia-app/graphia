@@ -11,12 +11,16 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/report.h
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.h
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.h
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.h
 )
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.cpp
 )
 
 list(APPEND RESOURCES

@@ -25,7 +25,7 @@
 #include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 
-#include "shared/utils/preferences.h"
+#include "shared/utils/preferenceswatcher.h"
 
 #include "layout/componentlayout.h"
 

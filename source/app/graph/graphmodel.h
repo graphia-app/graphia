@@ -23,7 +23,7 @@
 #include "shared/graph/grapharray.h"
 #include "shared/graph/igraphmodel.h"
 
-#include "shared/utils/preferences.h"
+#include "shared/utils/preferenceswatcher.h"
 
 #include "attributes/attribute.h"
 

@@ -19,13 +19,9 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
-#include <QObject>
 #include <QVariant>
-#include <QString>
-#include <QQmlParserStatus>
 
-#include <mutex>
-#include <set>
+class QString;
 
 //FIXME: Eventually remove this
 void copyKajekaSettings();
@@ -37,69 +33,6 @@ namespace u
     void setPref(const QString& key, const QVariant& value);
     bool prefExists(const QString& key);
 } // namespace u
-
-class PreferencesWatcher : public QObject
-{
-    Q_OBJECT
-
-    friend void u::setPref(const QString& key, const QVariant& value);
-
-private:
-    static struct Watchers
-    {
-        std::recursive_mutex _mutex;
-        std::set<const PreferencesWatcher*> _set;
-    } _watchers;
-
-    static void setPref(const QString& key, const QVariant& value);
-
-public:
-    PreferencesWatcher();
-    ~PreferencesWatcher() override;
-
-signals:
-    void preferenceChanged(const QString& key, const QVariant& value) const;
-};
-
-class QmlPreferences : public QObject, public QQmlParserStatus
-{
-    Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString section READ section WRITE setSection NOTIFY sectionChanged)
-
-public:
-    explicit QmlPreferences(QObject* parent = nullptr);
-
-    QString section() const;
-    void setSection(const QString& section);
-
-private:
-    bool _initialised = false;
-    QString _section;
-    PreferencesWatcher _watcher;
-
-    void classBegin() override {}
-    void componentComplete() override;
-
-    QString preferenceNameByPropertyName(const QString& propertyName);
-    QMetaProperty propertyByName(const QString& propertyName) const;
-
-    QMetaProperty propertyFrom(const QString& preferenceName);
-
-    void setProperty(QMetaProperty property, const QVariant& value);
-
-    void load();
-
-    Q_DISABLE_COPY(QmlPreferences)
-
-private slots:
-    void onPreferenceChanged(const QString& key, const QVariant& value);
-
-    void onPropertyChanged();
-
-signals:
-    void sectionChanged();
-};
 
 #endif // PREFERENCES_H
 
