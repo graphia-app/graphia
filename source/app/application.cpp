@@ -416,7 +416,9 @@ void Application::aboutQt() const
 // NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::submitTrackingData() const
 {
+#ifndef _DEBUG
     Tracking::submit();
+#endif
 }
 
 QString Application::resolvedExe(const QString& exe)
