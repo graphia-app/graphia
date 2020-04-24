@@ -25,6 +25,8 @@
 
 #include <json_helper.h>
 
+class IGraph;
+
 class JSONGraphSaver : public ISaver
 {
 private:
@@ -34,7 +36,7 @@ public:
     static QString name() { return QStringLiteral("JSON Graph"); }
     static QString extension() { return QStringLiteral("json"); }
 
-    static json graphAsJson(const IGraph &graph, Progressable &progressable);
+    static json graphAsJson(const IGraph& graph, Progressable& progressable);
 
     JSONGraphSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
