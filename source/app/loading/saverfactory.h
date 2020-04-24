@@ -20,15 +20,24 @@
 #define SAVERFACTORY_H
 
 #include "isaver.h"
-#include "ui/document.h"
+
+#include <QString>
+
+class Document;
+class IGraphModel;
+
+// The entire point of this function is to avoid including document.h
+// Sometimes C++ really sucks
+IGraphModel* graphModelFor(Document* document);
 
 template<class SaverType>
 class SaverFactory : public ISaverFactory
 {
+public:
     std::unique_ptr<ISaver> create(const QUrl& url, Document* document, const IPluginInstance*,
                                    const QByteArray&, const QByteArray&) override
     {
-        return std::make_unique<SaverType>(url, document->graphModel());
+        return std::make_unique<SaverType>(url, graphModelFor(document));
     }
     QString name() const override { return SaverType::name(); }
     QString extension() const override { return SaverType::extension(); }

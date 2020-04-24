@@ -179,6 +179,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/saverfactory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingsphere.cpp
