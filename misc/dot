@@ -24,7 +24,6 @@ do
 
         if [[ ! -z "${NODE_NAME}" ]]
         then
-          echo "${NODE_NAME} is labelled ${LABEL_TO_FILTER}, filtering..."
           sed -i "/${NODE_NAME}/d" ${DOT_FILE}
         fi
       done
