@@ -156,7 +156,7 @@ ApplicationWindow
 
         Preferences
         {
-            section: "auth"
+            section: "tracking"
             property alias emailAddress: email.text
         }
     }

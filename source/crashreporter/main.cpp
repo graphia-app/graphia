@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        report._email = u::pref(QStringLiteral("auth/emailAddress")).toString();
+        report._email = u::pref(QStringLiteral("tracking/emailAddress")).toString();
         report._text = p.value(QStringLiteral("description"));
     }
 
