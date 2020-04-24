@@ -2104,7 +2104,6 @@ ApplicationWindow
                     {
                         if(success)
                         {
-                            addToRecentFiles(fileUrl);
                             processOnePendingArgument();
 
                             if(application.isResourceFileUrl(fileUrl) &&
@@ -2115,6 +2114,8 @@ ApplicationWindow
                                 startTutorial();
                                 misc.hasSeenTutorial = true;
                             }
+                            else
+                                addToRecentFiles(fileUrl);
 
                             onDocumentShown(currentDocument);
                         }
