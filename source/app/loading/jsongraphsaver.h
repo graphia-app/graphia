@@ -23,6 +23,8 @@
 
 #include <QString>
 
+#include <json_helper.h>
+
 class JSONGraphSaver : public ISaver
 {
 private:

@@ -22,8 +22,6 @@
 #include <QObject>
 #include <QAbstractTableModel>
 
-#include <json_helper.h>
-
 class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -55,8 +53,6 @@ public:
     void setTableData(Table data);
     Q_INVOKABLE QString resultToString(EnrichmentTableModel::Results result);
     Q_INVOKABLE bool resultIsNumerical(EnrichmentTableModel::Results result);
-
-    json toJson();
 
 private:
     Table _data;

@@ -78,23 +78,6 @@ int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const 
     return -1;
 }
 
-json EnrichmentTableModel::toJson()
-{
-    json object;
-    for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
-    {
-        for(int columnIndex = 0; columnIndex < static_cast<int>(_data[rowIndex].size()); ++columnIndex)
-        {
-            auto& variant = _data[rowIndex][columnIndex];
-            if(variant.type() == QVariant::String)
-                object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
-            else if(variant.type() == QVariant::Double || variant.type() == QVariant::Int)
-                object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toDouble());
-        }
-    }
-    return object;
-}
-
 void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
 {
     beginResetModel();

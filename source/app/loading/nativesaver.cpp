@@ -140,6 +140,26 @@ static json layoutSettingsAsJson(const Document& document)
     return jsonObject;
 }
 
+static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
+{
+    json jsonObject;
+
+    for(int row = 0; row < table.rowCount(); row++)
+    {
+        for(int column = 0; column < table.columnCount(); column++)
+        {
+            const auto& v = table.data(row, static_cast<EnrichmentTableModel::Results>(column));
+
+            if(v.type() == QVariant::String)
+                jsonObject["data"][row].push_back(v.toString().toStdString());
+            else if(v.type() == QVariant::Double || v.type() == QVariant::Int)
+                jsonObject["data"][row].push_back(v.toDouble());
+        }
+    }
+
+    return jsonObject;
+}
+
 bool NativeSaver::save()
 {
     json jsonArray;
@@ -188,8 +208,8 @@ bool NativeSaver::save()
 
     content["bookmarks"] = bookmarksAsJson(*_document);
 
-    for(auto* table : *_document->enrichmentTableModels())
-        content["enrichmentTables"].push_back(table->toJson());
+    for(const auto* table : *_document->enrichmentTableModels())
+        content["enrichmentTables"].push_back(enrichmentTableModelAsJson(*table));
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 
