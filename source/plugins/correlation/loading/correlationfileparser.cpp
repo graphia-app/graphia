@@ -28,6 +28,9 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
+#include "shared/utils/container.h"
+#include "shared/utils/container_randomsample.h"
+
 #include <QRect>
 
 #include <vector>

@@ -20,11 +20,10 @@
 #define CONTAINER_H
 
 #include "pair_iterator.h"
-#include "random.h"
 
 #include <algorithm>
 #include <vector>
-#include <random>
+#include <numeric>
 
 #include <QtGlobal>
 
@@ -157,29 +156,6 @@ namespace u
         auto valueWrapper = make_value_wrapper(container);
         std::copy(valueWrapper.begin(), valueWrapper.end(), std::back_inserter(values));
         return values;
-    }
-
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
-    {
-        if(numSamples > container.size())
-            return container;
-
-        auto sample = container;
-
-        std::random_device rd;
-        std::default_random_engine dre(rd());
-
-        for(size_t i = 0; i < numSamples; i++)
-        {
-            int high = static_cast<int>(sample.size() - i) - 1;
-            std::uniform_int_distribution uid(0, high);
-            std::swap(sample[i], sample[i + uid(dre)]);
-        }
-
-        sample.resize(numSamples);
-
-        return sample;
     }
 
     template<typename T, template<typename, typename...> typename C, typename... Args>
