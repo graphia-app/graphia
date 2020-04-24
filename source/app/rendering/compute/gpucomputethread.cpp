@@ -17,8 +17,13 @@
  */
 
 #include "gpucomputethread.h"
+#include "gpucomputejob.h"
 
 #include "shared/utils/thread.h"
+
+#include <QOffscreenSurface>
+#include <QSurfaceFormat>
+#include <QOpenGLContext>
 
 GPUComputeThread::GPUComputeThread() :
     _surface(std::make_unique<QOffscreenSurface>()),

@@ -19,19 +19,16 @@
 #ifndef GPUCOMPUTE_H
 #define GPUCOMPUTE_H
 
-#include "rendering/openglfunctions.h"
-#include "gpucomputejob.h"
-
-#include <QObject>
-#include <QOpenGLBuffer>
-#include <QOpenGLShaderProgram>
-#include <QOffscreenSurface>
-
 #include <thread>
 #include <deque>
 #include <mutex>
 #include <condition_variable>
 #include <type_traits>
+
+class GPUComputeJob;
+class QOpenGLContext;
+class QOffscreenSurface;
+class QSurfaceFormat;
 
 class GPUComputeThread
 {
