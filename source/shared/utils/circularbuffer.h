@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <array>
 
+#include <QtGlobal>
+
 template<typename T, size_t Size> class CircularBuffer
 {
 private:

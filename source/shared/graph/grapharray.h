@@ -25,8 +25,7 @@
 #include <vector>
 #include <mutex>
 #include <type_traits>
-
-#include <QDebug>
+#include <cassert>
 
 struct LockingGraphArray {};
 
@@ -59,13 +58,13 @@ protected:
 
     const Element& elementFor(Index index) const
     {
-        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
         return _array[static_cast<int>(index)];
     }
 
     Element& elementFor(Index index)
     {
-        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
         return _array[static_cast<int>(index)];
     }
 
@@ -100,7 +99,7 @@ public:
         if(this == &other)
             return *this;
 
-        Q_ASSERT(_graph == other._graph);
+        assert(_graph == other._graph);
         _array = other._array;
         _defaultValue = other._defaultValue;
 
@@ -109,7 +108,7 @@ public:
 
     GenericGraphArray& operator=(GenericGraphArray&& other) noexcept
     {
-        Q_ASSERT(_graph == other._graph);
+        assert(_graph == other._graph);
         _array = std::move(other._array);
         _defaultValue = std::move(other._defaultValue);
 
@@ -144,14 +143,14 @@ public:
     Element get(Index index) const
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
         return _array[static_cast<int>(index)];
     }
 
     void set(Index index, const Element& value)
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
         _array[static_cast<int>(index)] = value;
     }
 
@@ -199,17 +198,6 @@ public:
     {
         MaybeLock lock(_mutex);
         fill(_defaultValue);
-    }
-
-    void dumpToQDebug(int detail) const
-    {
-        qDebug() << "GraphArray size" << _array.size();
-
-        if(detail > 0)
-        {
-            for(Element e : _array)
-                qDebug() << e;
-        }
     }
 
 protected:
@@ -360,7 +348,7 @@ public:
     explicit ComponentArray(const IGraphArrayClient& graph) :
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
-        Q_ASSERT(graph.isComponentManaged());
+        assert(graph.isComponentManaged());
         this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
@@ -368,7 +356,7 @@ public:
     ComponentArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
-        Q_ASSERT(graph.isComponentManaged());
+        assert(graph.isComponentManaged());
         this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
@@ -376,14 +364,14 @@ public:
     ComponentArray(const ComponentArray& other) :
         GenericGraphArray<ComponentId, Element, Locking>(other)
     {
-        Q_ASSERT(this->_graph->isComponentManaged());
+        assert(this->_graph->isComponentManaged());
         this->_graph->insertComponentArray(this);
     }
 
     ComponentArray(ComponentArray&& other) noexcept :
         GenericGraphArray<ComponentId, Element, Locking>(std::move(other))
     {
-        Q_ASSERT(this->_graph->isComponentManaged());
+        assert(this->_graph->isComponentManaged());
         this->_graph->insertComponentArray(this);
     }
 

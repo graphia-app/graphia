@@ -24,6 +24,8 @@
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
+#include <QDebug>
+
 template<> constexpr bool EnableBitMaskOperators<Layout::Dimensionality> = true;
 
 static bool layoutIsFinished(const Layout& layout)

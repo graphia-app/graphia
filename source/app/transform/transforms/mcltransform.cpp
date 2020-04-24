@@ -24,6 +24,7 @@
 #include <blaze/Blaze.h>
 
 #include <QElapsedTimer>
+#include <QDebug>
 
 #include <map>
 #include <set>
