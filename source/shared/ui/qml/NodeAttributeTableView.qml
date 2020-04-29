@@ -966,6 +966,10 @@ Item
                                 if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);
 
+                                // Replace newlines with spaces
+                                if(typeof(model.display) === "string")
+                                    return model.display.replace(/[\r\n]+/g, " ");
+
                                 return model.display;
                             }
                             renderType: Text.NativeRendering
