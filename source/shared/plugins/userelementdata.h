@@ -108,27 +108,33 @@ public:
             switch(userDataVector.type())
             {
             case UserDataVector::Type::Float:
-                attribute.setFloatValueFn([this, userDataVectorName](E elementId)
-                        {
-                            return valueBy(elementId, userDataVectorName).toFloat();
-                        })
-                        .setFlag(AttributeFlag::AutoRange);
+                attribute.setFloatValueFn(
+                [this, userDataVectorName](E elementId)
+                {
+                    return valueBy(elementId, userDataVectorName).toFloat();
+                })
+                .setFlag(AttributeFlag::AutoRange);
                 break;
 
             case UserDataVector::Type::Int:
-                attribute.setIntValueFn([this, userDataVectorName](E elementId)
-                        {
-                            return valueBy(elementId, userDataVectorName).toInt();
-                        })
-                        .setFlag(AttributeFlag::AutoRange);
+                attribute.setIntValueFn(
+                [this, userDataVectorName](E elementId)
+                {
+                    return valueBy(elementId, userDataVectorName).toInt();
+                })
+                .setFlag(AttributeFlag::AutoRange);
                 break;
 
+            case UserDataVector::Type::Unknown:
+            // Treat the unknown type as strings; the usual reason for this
+            // happening is if the entire vector is empty
             case UserDataVector::Type::String:
-                attribute.setStringValueFn([this, userDataVectorName](E elementId)
-                        {
-                            return valueBy(elementId, userDataVectorName).toString();
-                        })
-                        .setFlag(AttributeFlag::FindShared);
+                attribute.setStringValueFn(
+                [this, userDataVectorName](E elementId)
+                {
+                    return valueBy(elementId, userDataVectorName).toString();
+                })
+                .setFlag(AttributeFlag::FindShared);
                 break;
 
             default: break;
