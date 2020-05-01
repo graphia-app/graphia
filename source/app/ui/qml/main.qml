@@ -846,7 +846,9 @@ ApplicationWindow
     Action
     {
         id: repeatLastSelectionAction
-        text: currentDocument ? currentDocument.repeatLastSelectionMenuText : ""
+        text: currentDocument ? currentDocument.repeatLastSelectionMenuText :
+            qsTr("Repeat Last Selection")
+
         shortcut: "Ctrl+R"
         enabled: currentDocument && currentDocument.canRepeatLastSelection
         onTriggered: currentDocument && currentDocument.repeatLastSelection()
