@@ -38,7 +38,7 @@ BASE_NAME="${ICON_FILE%.*}"
 
 for SIZE in 1024 512 256 128 64 48 32 16
 do
-  rsvg -w ${SIZE} -h ${SIZE} ${BASE_NAME}.svg ${BASE_NAME}${SIZE}x${SIZE}.png
+  inkscape -z -w ${SIZE} -h ${SIZE} ${BASE_NAME}.svg -e ${BASE_NAME}${SIZE}x${SIZE}.png
 done
 
 function iconFilesOfSize()
@@ -59,4 +59,5 @@ function iconFilesOfSize()
 }
 
 icotool -c $(iconFilesOfSize "256 128 64 48 32 16") -o ${SCRIPT_DIR}/${BASE_NAME}.ico
+icotool -c ${SCRIPT_DIR}/${BASE_NAME}16x16.png -o ${SCRIPT_DIR}/${BASE_NAME}-favicon.ico
 png2icns ${SCRIPT_DIR}/${BASE_NAME}.icns $(iconFilesOfSize "1024 512 256 128 32 16")
