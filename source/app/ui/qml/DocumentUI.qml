@@ -381,12 +381,25 @@ Item
 
         onAccepted:
         {
-            var proxyFn = function()
+            if(onSaveConfirmedFunction === null)
             {
-                document.saveComplete.disconnect(proxyFn);
-                onSaveConfirmedFunction();
-                onSaveConfirmedFunction = null;
-            };
+                // For some reason, onAccepted gets called twice, possibly due to QTBUG-35933?
+                // Anyway, on the second call onSaveConfirmedFunction will have been nulled,
+                // so we can hackily use it to detect the second call and ignore it
+                return;
+            }
+
+            // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
+            // we use it (though in theory that can't happen)
+            var proxyFn = function(fn)
+            {
+                return function()
+                {
+                    document.saveComplete.disconnect(proxyFn);
+                    fn();
+                };
+            }(onSaveConfirmedFunction);
+            onSaveConfirmedFunction = null;
 
             document.saveComplete.connect(proxyFn);
             saveFile();
