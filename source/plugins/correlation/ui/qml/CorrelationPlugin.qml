@@ -40,7 +40,7 @@ PluginContent
     {
         id: toggleUiOrientationAction
         text: qsTr("Display UI &Side By Side")
-        iconName: "list-add"
+        iconName: "view-refresh"
         checkable: true
         checked: true
 

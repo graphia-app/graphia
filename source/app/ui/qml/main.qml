@@ -894,7 +894,7 @@ ApplicationWindow
     Action
     {
         id: findByAttributeAction
-        iconName: "format-indent-more"
+        iconName: "edit-find-replace"
         text: qsTr("Find By Attribute Value")
         shortcut: "Ctrl+H"
         enabled:
