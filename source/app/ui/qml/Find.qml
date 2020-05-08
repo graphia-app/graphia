@@ -202,7 +202,7 @@ Rectangle
     {
         id: selectAllAction
         text: qsTr("Select All")
-        iconName: "weather-clear"
+        iconName: "edit-select-all"
         enabled: document.numNodesFound > 0
         onTriggered: { document.selectAllFound(); }
     }
