@@ -51,7 +51,7 @@ PluginContent
     {
         id: resizeColumnsToContentsAction
         text: qsTr("Resize Columns To Fit Contents")
-        iconName: "format-justify-fill"
+        iconName: "auto-column-resize"
         onTriggered: tableView.resizeColumnsToContents();
     }
 
@@ -74,7 +74,7 @@ PluginContent
     {
         id: selectColumnsAction
         text: qsTr("Select Visible Columns")
-        iconName: "computer"
+        iconName: "column-select"
         checkable: true
         checked: tableView.columnSelectionMode
 
@@ -88,7 +88,7 @@ PluginContent
     {
         id: selectColumnAnnotationsAction
         text: qsTr("Select Visible Column Annotations")
-        iconName: "format-justify-right"
+        iconName: "column-annotations"
 
         enabled: plot.canShowColumnAnnotationSelection &&
             plugin.model.columnAnnotationNames.length > 0

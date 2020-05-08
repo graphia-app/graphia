@@ -32,7 +32,7 @@ PluginContent
     {
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
-        iconName: "format-justify-fill"
+        iconName: "auto-column-resize"
         onTriggered:
         {
             tableView.resizeColumnsToContents();
@@ -43,7 +43,7 @@ PluginContent
     {
         id: selectColumnsAction
         text: qsTr("&Select Visible Columns")
-        iconName: "computer"
+        iconName: "column-select"
         checkable: true
         checked: tableView.columnSelectionMode
 

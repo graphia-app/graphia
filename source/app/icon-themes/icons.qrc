@@ -4,12 +4,18 @@
 		<file>Tango/16x16/categories/applications-system.png</file>
 		<file>Tango/22x22/categories/applications-system.png</file>
 		<file>Tango/32x32/categories/applications-system.png</file>
+		<file>Tango/16x16/graphia/auto-column-resize.png</file>
+		<file>Tango/22x22/graphia/auto-column-resize.png</file>
+		<file>Tango/32x32/graphia/auto-column-resize.png</file>
 		<file>Tango/16x16/devices/camera-photo.png</file>
 		<file>Tango/22x22/devices/camera-photo.png</file>
 		<file>Tango/32x32/devices/camera-photo.png</file>
-		<file>Tango/16x16/devices/computer.png</file>
-		<file>Tango/22x22/devices/computer.png</file>
-		<file>Tango/32x32/devices/computer.png</file>
+		<file>Tango/16x16/graphia/column-annotations.png</file>
+		<file>Tango/22x22/graphia/column-annotations.png</file>
+		<file>Tango/32x32/graphia/column-annotations.png</file>
+		<file>Tango/16x16/graphia/column-select.png</file>
+		<file>Tango/22x22/graphia/column-select.png</file>
+		<file>Tango/32x32/graphia/column-select.png</file>
 		<file>Tango/16x16/actions/document-open.png</file>
 		<file>Tango/22x22/actions/document-open.png</file>
 		<file>Tango/32x32/actions/document-open.png</file>
@@ -46,12 +52,6 @@
 		<file>Tango/16x16/mimetypes/font-x-generic.png</file>
 		<file>Tango/22x22/mimetypes/font-x-generic.png</file>
 		<file>Tango/32x32/mimetypes/font-x-generic.png</file>
-		<file>Tango/16x16/actions/format-justify-fill.png</file>
-		<file>Tango/22x22/actions/format-justify-fill.png</file>
-		<file>Tango/32x32/actions/format-justify-fill.png</file>
-		<file>Tango/16x16/actions/format-justify-right.png</file>
-		<file>Tango/22x22/actions/format-justify-right.png</file>
-		<file>Tango/32x32/actions/format-justify-right.png</file>
 		<file>Tango/16x16/actions/format-text-bold.png</file>
 		<file>Tango/22x22/actions/format-text-bold.png</file>
 		<file>Tango/32x32/actions/format-text-bold.png</file>
