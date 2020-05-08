@@ -2046,7 +2046,7 @@ Item
                     }
                     Text
                     {
-                        text: qsTr("An MCL transform with a colour<br>visualisation applied")
+                        text: qsTr("An clustering transform with a colour<br>visualisation applied")
                     }
                 }
                 Text
