@@ -50,10 +50,10 @@ Window
 
     title: qsTr("About Plugins")
     flags: Qt.Window|Qt.Dialog
-    width: 550
-    height: 300
-    minimumWidth: 550
-    minimumHeight: 300
+    width: 600
+    height: 400
+    minimumWidth: 600
+    minimumHeight: 400
 
     GridLayout
     {
