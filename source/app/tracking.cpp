@@ -98,7 +98,8 @@ static QString anonymousIdentity()
         // only really care about the sub-top level domain
         hostName = hostName.split('.').filter(QRegularExpression("^[a-zA-Z]+$")).join('.');
     }
-    else
+
+    if(hostInfo.error() != QHostInfo::NoError || hostName.isEmpty())
         hostName = ipAddress;
 
     auto homePath = QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
@@ -123,9 +124,10 @@ void Tracking::submit()
         if(permission == QStringLiteral("rejected"))
             return;
 
-        if(permission == QStringLiteral("anonymous"))
+        if(permission == QStringLiteral("anonymous") || identity.isEmpty())
         {
-            if(!u::prefExists("tracking/anonymousId"))
+            if(!u::prefExists("tracking/anonymousId") ||
+                u::pref("tracking/anonymousId").toString().isEmpty())
             {
                 identity = anonymousIdentity();
                 u::setPref("tracking/anonymousId", identity);
