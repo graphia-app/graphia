@@ -72,6 +72,8 @@ Updater::Updater()
     if(dir.exists())
         dir.removeRecursively();
 
+    _networkManager.setRedirectPolicy(QNetworkRequest::UserVerifiedRedirectPolicy);
+
     connect(&_networkManager, &QNetworkAccessManager::finished,
         this, &Updater::onReplyReceived);
 
@@ -248,6 +250,9 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         _state = Updater::State::File;
         Q_ASSERT(_reply == nullptr);
         _reply = _networkManager.get(request);
+
+        // github release URLs are redirected, so we need to follow any redirects
+        connect(_reply, &QNetworkReply::redirected, _reply, &QNetworkReply::redirectAllowed);
 
         connect(_reply, &QNetworkReply::downloadProgress, [this]
         (qint64 bytesReceived, qint64 bytesTotal)
