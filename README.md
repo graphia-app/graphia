@@ -1,8 +1,6 @@
 # [Graphia](https://graphia.app/)
 Graphia is a powerful open source visual analytics application developed to aid the interpretation of large and complex datasets.
 
-https://graphia.app/
-
 [User guide](https://graphia.app/userguide.html)
 
 ## **Features**
