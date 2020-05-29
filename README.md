@@ -53,3 +53,14 @@ We would like to thank those who have helped us develop Graphia:
 * [The Roslin Institute](https://www.roslin.ed.ac.uk/)
 * [The University of Edinburgh](https://www.ed.ac.uk/)
 * [BBSRC](https://bbsrc.ukri.org/)
+
+## Building ##
+
+Graphia uses the [CMake](https://cmake.org/) build system. A full build can be performed using the following command:
+```
+cmake -B build && cmake --build build --parallel
+```
+Note however that you will usually also need Qt 5 to be installed and indicate to CMake where it lives:
+```
+CMAKE_PREFIX_PATH=/example/path/to/Qt/5.14.2/gcc_64/ cmake -B build && cmake --build build --parallel
+```
