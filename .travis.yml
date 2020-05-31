@@ -1,0 +1,59 @@
+language: cpp
+matrix:
+  include:
+
+  - os: linux
+    dist: xenial
+
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - sourceline: "ppa:beineri/opt-qt-5.14.2-xenial"
+          - sourceline: "ppa:jonathonf/gcc-9.0"
+        packages:
+          - gcc-9
+          - g++-9
+          - qt514-meta-minimal
+          - qt514webengine
+          - qt514svg
+          - libgl-dev
+
+    script:
+      - export CC=gcc-9
+      - export CXX=g++-9
+      - source /opt/qt514/bin/qt514-env.sh
+      - cmake --version
+      - cmake .
+      - cmake --build .
+
+  - os: osx
+    osx_image: xcode11.5
+
+    before_install:
+      - brew update
+      - brew install qt5
+      - brew link --force qt
+
+    script:
+      - export PATH=/usr/local/opt/qt5/bin:$PATH
+      - cmake --version
+      - cmake .
+      - cmake --build .
+
+  - os: windows
+
+    before_install:
+      - curl -vLO http://download.qt-project.org/official_releases/qt/5.14/5.14.2/qt-opensource-windows-x86-5.14.2.exe
+      - echo "1.1.1.1 iapi.qt.io" > /c/Windows/System32/drivers/etc/hosts
+      - ipconfig //flushdns
+      - "./qt-opensource-windows-x86-5.14.2.exe --verbose --script misc/qt-installer-windows.qs"
+      - choco install visualstudio2019community
+      - choco install visualstudio2019-workload-nativedesktop
+
+    script:
+      - export PATH=$PATH:"/C/Qt/Qt5.14.2/5.14.2/msvc2017_64/bin:/C/Qt/Qt5.14.2/Tools/QtCreator/bin"
+      - export CRTDIRECTORY="$VcToolsRedistDir/x64/Microsoft.VC142.CRT/"
+      - cmake --version
+      - cmake .
+      - cmake --build .
