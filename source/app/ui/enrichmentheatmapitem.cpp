@@ -20,6 +20,7 @@
 
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
+#include "shared/utils/container.h"
 
 #include <set>
 #include <iterator>

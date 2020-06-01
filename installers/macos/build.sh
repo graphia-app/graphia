@@ -22,10 +22,10 @@ BUILD_DIR=build
 
 . ${BUILD_DIR}/variables.sh
 
-# OSX doesn't have readlink, hence this hackery
+# MacOS doesn't have readlink, hence this hackery
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
-security unlock-keychain -p ${SIGN_BUILD_USER_PASSWORD}
+security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
 
 cd ${BUILD_DIR}
 
@@ -66,11 +66,11 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/MessageBox \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/Updater \
-  -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
+  -codesign="${APPLE_SIGN_ID}"
 
 # Need to sign again because macdeployqt won't sign the additional executables
 echo "Resigning..."
-codesign --verbose --deep --force --options runtime --sign "${SIGN_APPLE_KEYCHAIN_ID}" \
+codesign --verbose --deep --force --options runtime --sign "${APPLE_SIGN_ID}" \
   ${PRODUCT_NAME}.app || exit $?
 echo "Verifying..."
 codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?

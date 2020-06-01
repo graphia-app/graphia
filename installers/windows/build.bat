@@ -15,6 +15,7 @@
 :: You should have received a copy of the GNU General Public License
 :: along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
+rem @echo off
 setLocal EnableDelayedExpansion
 
 set BUILD_DIR=build
@@ -59,10 +60,7 @@ windeployqt %WINDEPLOYQT_ARGS% %INSTALLER_DIR%\MessageBox.exe || EXIT /B 1
 echo ------ copying runtime + extras
 xcopy "%CRTDIRECTORY%*.*" %INSTALLER_DIR% || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %INSTALLER_DIR% || EXIT /B 1
-
-IF EXIST %WINDOWS_EXTRA_FILES%\NUL (
-  xcopy "%WINDOWS_EXTRA_FILES%*.*" %INSTALLER_DIR% || EXIT /B 1
-)
+xcopy "misc\windows-extras\*.*" %INSTALLER_DIR% || EXIT /B 1
 
 echo ------ copying Updater
 set UPDATER_DIR=%INSTALLER_DIR%\Updater
@@ -86,11 +84,13 @@ FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
 move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
 rmdir /s /q %UPDATER_DIR%
 
-set SIGNTOOL_ARGS=sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% /tr %SIGN_TSA% /td SHA256
+set SIGNTOOL_ARGS=sign /tr %WINDOWS_SIGN_TSA% /td SHA256 /sm
 
-echo ------ signing executables
-FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox Updater) DO (
-  signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\%%i.exe || EXIT /B 1
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
+  echo ------ signing executables
+  FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox Updater) DO (
+    signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\%%i.exe || EXIT /B 1
+  )
 )
 
 set /a value=0
@@ -115,9 +115,11 @@ set UNINSTALLER_INSTALL_DIR=%CD%\uninstaller
 echo ------ running uninstaller-installer
 %UNINSTALLER_INSTALLER% /S /D=%UNINSTALLER_INSTALL_DIR% || EXIT /B 1
 set UNSIGNED_UNINSTALLER_EXE=%UNINSTALLER_INSTALL_DIR%\Uninstall.exe
-echo ------ signing uninstaller
 copy %UNSIGNED_UNINSTALLER_EXE% %INSTALLER_DIR%\Uninstall.exe
-signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\Uninstall.exe || EXIT /B 1
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
+  echo ------ signing uninstaller
+  signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\Uninstall.exe || EXIT /B 1
+)
 echo ------ uninstalling uninstaller-installer
 %UNSIGNED_UNINSTALLER_EXE% /S
 del /F /Q %UNINSTALLER_INSTALLER%
@@ -126,6 +128,8 @@ echo ------ making final installer
 set INSTALLER_EXE=%INSTALLER_DIR%\%PRODUCT_NAME%-%VERSION%-installer.exe
 makensis %MAKENSIS_ARGS% "/XOutFile %INSTALLER_EXE%" ^
   installers\windows\installer.nsi || EXIT /B 1
-signtool %SIGNTOOL_ARGS% %INSTALLER_EXE% || EXIT /B 1
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
+  signtool %SIGNTOOL_ARGS% %INSTALLER_EXE% || EXIT /B 1
+)
 copy %INSTALLER_EXE% %BUILD_DIR%\
 rmdir /s /q %INSTALLER_DIR%

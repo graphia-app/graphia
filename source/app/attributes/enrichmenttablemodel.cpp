@@ -19,6 +19,8 @@
 #include "enrichmenttablemodel.h"
 #include "enrichmentcalculator.h"
 
+#include <QDebug>
+
 EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);

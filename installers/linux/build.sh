@@ -33,6 +33,16 @@ cp -r source/app/examples \
 
 # Make an AppImage
 LINUXDEPLOYQT=$(which linuxdeployqt)
+
+# Look in current directory if not installed in the system
+if [ -z ${LINUXDEPLOYQT} ]
+then
+  if [ -f "${PWD}/linuxdeployqt" ]
+  then
+    LINUXDEPLOYQT="${PWD}/linuxdeployqt"
+  fi
+fi
+
 if [ ! -z ${LINUXDEPLOYQT} ]
 then
   (
@@ -73,7 +83,7 @@ fi
 (
   mkdir -p breakpad-build
   cd breakpad-build
-  ../source/thirdparty/breakpad/configure
+  ../source/thirdparty/breakpad/configure CXXFLAGS="-Wno-deprecated"
   make -O -j${NUM_CORES}
 )
 
