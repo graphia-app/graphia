@@ -22,6 +22,12 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <random>
+#include <array>
+
+#include "shared/graph/igraphmodel.h"
+#include "shared/graph/igraph.h"
+#include "shared/commands/icommandmanager.h"
 
 #include "shared/utils/container.h"
 #include "shared/attributes/iattribute.h"
