@@ -48,6 +48,7 @@ mkdir -p ${BUILD_DIR}
   cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
     -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
+  cat variables.sh
   cmake --build . --target install 2>&1 | tee compiler.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 

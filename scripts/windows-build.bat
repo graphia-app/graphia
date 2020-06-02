@@ -15,6 +15,8 @@
 :: You should have received a copy of the GNU General Public License
 :: along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
+@echo off
+
 call scripts\defaults.bat
 
 set BUILD_DIR=build
@@ -23,7 +25,10 @@ mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
 cmake --version || EXIT /B 1
-cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja .. || EXIT /B 1
+cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja ^
+    -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" ^
+    .. || EXIT /B 1
+type variables.bat
 cmake --build . --target all || EXIT /B 1
 
 REM Clean intermediate build products

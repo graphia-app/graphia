@@ -46,7 +46,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.12 \
     -GNinja .. || exit $?
-  cmake --build . --target all || exit $?
+  cat variables.sh
   cmake --build . --target all 2>&1 | tee compiler.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 )
