@@ -84,9 +84,9 @@ FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
 move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
 rmdir /s /q %UPDATER_DIR%
 
-set SIGNTOOL_ARGS=sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% /tr %SIGN_TSA% /td SHA256
+set SIGNTOOL_ARGS=sign /tr %WINDOWS_SIGN_TSA% /td SHA256 /sm
 
-IF DEFINED SIGN_KEYSTORE_WINDOWS (
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
   echo ------ signing executables
   FOR %%i IN (%PRODUCT_NAME% CrashReporter MessageBox Updater) DO (
     signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\%%i.exe || EXIT /B 1
@@ -116,7 +116,7 @@ echo ------ running uninstaller-installer
 %UNINSTALLER_INSTALLER% /S /D=%UNINSTALLER_INSTALL_DIR% || EXIT /B 1
 set UNSIGNED_UNINSTALLER_EXE=%UNINSTALLER_INSTALL_DIR%\Uninstall.exe
 copy %UNSIGNED_UNINSTALLER_EXE% %INSTALLER_DIR%\Uninstall.exe
-IF DEFINED SIGN_KEYSTORE_WINDOWS (
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
   echo ------ signing uninstaller
   signtool %SIGNTOOL_ARGS% %INSTALLER_DIR%\Uninstall.exe || EXIT /B 1
 )
@@ -128,7 +128,7 @@ echo ------ making final installer
 set INSTALLER_EXE=%INSTALLER_DIR%\%PRODUCT_NAME%-%VERSION%-installer.exe
 makensis %MAKENSIS_ARGS% "/XOutFile %INSTALLER_EXE%" ^
   installers\windows\installer.nsi || EXIT /B 1
-IF DEFINED SIGN_KEYSTORE_WINDOWS (
+IF DEFINED WINDOWS_SIGN_KEYSTORE (
   signtool %SIGNTOOL_ARGS% %INSTALLER_EXE% || EXIT /B 1
 )
 copy %INSTALLER_EXE% %BUILD_DIR%\
