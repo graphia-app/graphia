@@ -65,3 +65,5 @@ deploy:
   - build/Graphia-*-installer.exe
   on:
     tags: true
+after_deploy:
+  - scripts/upload-symbols.sh
