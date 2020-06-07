@@ -32,17 +32,20 @@ if(UNIX)
     # work e.g. dynamic_cast to QObject from IGraph, under clang
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
-    # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
-    find_program(CCACHE_EXECUTABLE ccache)
-    mark_as_advanced(CCACHE_EXECUTABLE)
-    if(CCACHE_EXECUTABLE)
-        foreach(LANG C CXX)
-            if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
-                NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
-                message(STATUS "Enabling ccache for ${LANG}")
-                set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
-            endif()
-        endforeach()
+    # Disable ccache if building under travis, as it manages that
+    if(NOT DEFINED ENV{TRAVIS})
+        # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
+        find_program(CCACHE_EXECUTABLE ccache)
+        mark_as_advanced(CCACHE_EXECUTABLE)
+        if(CCACHE_EXECUTABLE)
+            foreach(LANG C CXX)
+                if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
+                    NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
+                    message(STATUS "Enabling ccache for ${LANG}")
+                    set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
+                endif()
+            endforeach()
+        endif()
     endif()
 endif()
 
