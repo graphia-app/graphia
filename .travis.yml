@@ -1,15 +1,10 @@
 language: cpp
-cache: ccache
 git:
   depth: false
 matrix:
   include:
   - os: linux
     dist: xenial
-    before_script:
-    - curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
-      -o linuxdeployqt
-    - chmod +x linuxdeployqt
     addons:
       apt:
         sources:
@@ -27,8 +22,39 @@ matrix:
         - qt514svg
         - libgl-dev
         - ninja-build
+    before_script:
+    - curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
+      -o linuxdeployqt
+    - chmod +x linuxdeployqt
     script:
     - misc/travis/linux.sh
+  - os: linux
+    dist: xenial
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - sourceline: ppa:beineri/opt-qt-5.14.2-xenial
+        - sourceline: deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-10 main
+          key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+        packages:
+        - clang-10
+        - libc++-10-dev
+        - libc++abi-10-dev
+        - qt514-meta-minimal
+        - qt514quickcontrols
+        - qt514quickcontrols2
+        - qt514graphicaleffects
+        - qt514webengine
+        - qt514svg
+        - libgl-dev
+        - ninja-build
+    before_script:
+    - curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
+      -o linuxdeployqt
+    - chmod +x linuxdeployqt
+    script:
+    - misc/travis/linux-clang.sh
   - os: osx
     osx_image: xcode11.5
     before_script:
