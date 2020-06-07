@@ -42,6 +42,8 @@ matrix:
         - clang-10
         - libc++-10-dev
         - libc++abi-10-dev
+        - libclang-10-dev
+        - llvm-10-dev
         - qt514-meta-minimal
         - qt514quickcontrols
         - qt514quickcontrols2
@@ -50,10 +52,17 @@ matrix:
         - qt514svg
         - libgl-dev
         - ninja-build
+        - jq
+        - parallel
+        - clang-tidy-10
+        - cppcheck
     before_script:
     - curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
       -o linuxdeployqt
     - chmod +x linuxdeployqt
+    - curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
+    - chmod +x clazy
+    - sudo mv clazy /usr/local/bin/
     script:
     - misc/travis/linux-clang.sh
   - os: osx

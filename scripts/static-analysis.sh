@@ -82,9 +82,29 @@ then
   echo ${DEFINES}
 fi
 
+if [ -z ${CPPCHECK} ]
+then
+  CPPCHECK="cppcheck"
+fi
+
+if [ -z ${CLANGTIDY} ]
+then
+  CLANGTIDY="clang-tidy"
+fi
+
+if [ -z ${CLAZY} ]
+then
+  CLAZY="clazy-standalone"
+fi
+
+if [ -z ${QMLLINT} ]
+then
+  QMLLINT="qmllint"
+fi
+
 # cppcheck
-cppcheck --version
-cppcheck -v --enable=all --xml \
+${CPPCHECK} --version
+${CPPCHECK} -v --enable=all --xml \
   --suppress=unusedFunction \
   --suppress=unusedPrivateFunction \
   --suppress=*:*/source/thirdparty/* \
@@ -97,12 +117,12 @@ cppcheck -v --enable=all --xml \
 if [ "${VERBOSE}" != 0 ]
 then
   echo "clang-tidy"
-  clang-tidy --version
-  clang-tidy -dump-config
+  ${CLANGTIDY} --version
+  ${CLANGTIDY} -dump-config
 fi
 
 parallel -k -n1 -P${NUM_CORES} -q \
-  clang-tidy -quiet -p ${BUILD_DIR} {} \
+  ${CLANGTIDY} -quiet -p ${BUILD_DIR} {} \
   ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clang-tidy.log
 
 # clazy
@@ -148,20 +168,20 @@ empty-qstringliteral"
 if [ "${VERBOSE}" != 0 ]
 then
   echo "clazy"
-  clazy-standalone --version
+  ${CLAZY} --version
 fi
 
 parallel -k -n1 -P${NUM_CORES} \
-  clazy-standalone -p ${BUILD_DIR}/compile_commands.json \
+  ${CLAZY} -p ${BUILD_DIR}/compile_commands.json \
   -header-filter="\"^((?!thirdparty).)*$\"" \
   ${CHECKS} {} \
   ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clazy.log
 
 # qmllint
-qmllint --version
+${QMLLINT} --version
 find source/app \
   source/shared \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  xargs -n1 -P${NUM_CORES} qmllint 2>&1 | tee ${BUILD_DIR}/qmllint.log
+  xargs -n1 -P${NUM_CORES} ${QMLLINT} 2>&1 | tee ${BUILD_DIR}/qmllint.log

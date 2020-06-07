@@ -24,3 +24,7 @@ export CXX=clang++-10
 
 scripts/linux-build.sh
 installers/linux/build.sh
+
+export CLANGTIDY="clang-tidy-10"
+export CLAZY="clazy --standalone"
+scripts/static-analysis.sh -v
