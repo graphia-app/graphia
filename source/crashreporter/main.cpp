@@ -238,7 +238,7 @@ static void uploadReport(const QString& email, const QString& text,
             return QObject::tr("Could not retrieve submission URL from \"%1\"").arg(queryUrl.toString());
 
         if(postReply->error() != QNetworkReply::NetworkError::NoError)
-            return postReply->errorString();
+            return QStringLiteral("%1 (%2)").arg(postReply->errorString()).arg(postReply->error());
 
         return QString();
     };
