@@ -82,7 +82,11 @@ QHash<int, QByteArray> AvailableTransformsModel::roleNames() const
 
 void registerAvailableTransformsModelType()
 {
-    qmlRegisterInterface<AvailableTransformsModel>("AvailableTransformsModel");
+    qmlRegisterInterface<AvailableTransformsModel>("AvailableTransformsModel"
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        , Application::majorVersion()
+#endif
+        );
 }
 
 Q_COREAPP_STARTUP_FUNCTION(registerAvailableTransformsModelType)

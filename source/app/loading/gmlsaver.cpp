@@ -73,7 +73,7 @@ bool GMLSaver::save()
     }
 
     QTextStream stream(&file);
-    stream << "graph" << endl << "[" << endl;
+    stream << "graph\n[\n";
     level++;
 
     auto attributes = [&](auto elementId, const std::vector<QString>& attributeNames)
@@ -85,7 +85,7 @@ bool GMLSaver::save()
             {
                 QString escapedValue = escape(attribute->stringValueOf(elementId));
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(escapedValue) << endl;
+                       << QStringLiteral("\"%1\"").arg(escapedValue) << "\n";
             }
             else if(attribute->valueType() & ValueType::Numerical)
             {
@@ -93,7 +93,7 @@ bool GMLSaver::save()
                 if(!std::isnan(value))
                 {
                     stream << indent(level) << alphanumAttributeNames[attributeName] << " "
-                           << value << endl;
+                           << value << "\n";
                 }
             }
         }
@@ -103,14 +103,13 @@ bool GMLSaver::save()
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
         QString nodeName = escape(_graphModel->nodeName(nodeId));
-        stream << indent(level) << "node" << endl;
-        stream << indent(level) << "[" << endl;
+        stream << indent(level) << "node\n[\n";
         level++;
-        stream << indent(level) << "id " << static_cast<int>(nodeId) << endl;
+        stream << indent(level) << "id " << static_cast<int>(nodeId) << "\n";
         QString labelString = QStringLiteral("\"%1\"").arg(nodeName);
-        stream << indent(level) << "label " << labelString << endl;
+        stream << indent(level) << "label " << labelString << "\n";
         attributes(nodeId, _graphModel->attributeNames(ElementType::Node));
-        stream << indent(--level) << "]" << endl; // node
+        stream << indent(--level) << "]\n"; // node
 
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / numElements));
@@ -121,19 +120,18 @@ bool GMLSaver::save()
     {
         const auto& edge = _graphModel->graph().edgeById(edgeId);
 
-        stream << indent(level) << "edge" << endl;
-        stream << indent(level) << "[" << endl;
+        stream << indent(level) << "edge\n[\n";
         level++;
-        stream << indent(level) << "source " << static_cast<int>(edge.sourceId()) << endl;
-        stream << indent(level) << "target " << static_cast<int>(edge.targetId()) << endl;
+        stream << indent(level) << "source " << static_cast<int>(edge.sourceId()) << "\n";
+        stream << indent(level) << "target " << static_cast<int>(edge.targetId()) << "\n";
         attributes(edgeId, _graphModel->attributeNames(ElementType::Edge));
-        stream << indent(--level) << "]" << endl; // edge
+        stream << indent(--level) << "]\n"; // edge
 
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
-    stream << indent(--level) << "]" << endl; // graph
+    stream << indent(--level) << "]\n"; // graph
 
     return true;
 }

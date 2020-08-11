@@ -1,4 +1,5 @@
 #include "filter.h"
+#include "variantlessthan.h"
 #include <QtQml>
 
 namespace qqsfpm {
@@ -498,10 +499,12 @@ void RangeFilter::setMaximumInclusive(bool maximumInclusive)
 bool RangeFilter::filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const
 {
     QVariant value = sourceData(sourceIndex, proxyModel);
-    bool lessThanMin = m_minimumValue.isValid() &&
-            m_minimumInclusive ? value < m_minimumValue : value <= m_minimumValue;
-    bool moreThanMax = m_maximumValue.isValid() &&
-            m_maximumInclusive ? value > m_maximumValue : value >= m_maximumValue;
+    bool lessThanMin = m_minimumValue.isValid() && isVariantLessThan(value, m_minimumValue);
+    if (!m_minimumInclusive)
+        lessThanMin = (lessThanMin || value == m_minimumValue);
+    bool moreThanMax = m_maximumValue.isValid() && isVariantLessThan(m_maximumValue, value);
+    if (!m_maximumInclusive)
+        moreThanMax = (moreThanMax || value == m_maximumValue);
     return !(lessThanMin || moreThanMax);
 }
 

@@ -1,4 +1,5 @@
 #include "sorter.h"
+#include "variantlessthan.h"
 #include <QtQml>
 
 namespace qqsfpm {
@@ -164,9 +165,9 @@ int RoleSorter::compare(const QModelIndex &sourceLeft, const QModelIndex& source
     QPair<QVariant, QVariant> pair = sourceData(sourceLeft, sourceRight, proxyModel);
     QVariant leftValue = pair.first;
     QVariant rightValue = pair.second;
-    if (leftValue < rightValue)
+    if (isVariantLessThan(leftValue, rightValue))
         return -1;
-    if (leftValue > rightValue)
+    if (isVariantLessThan(rightValue, leftValue))
         return 1;
     return 0;
 }
