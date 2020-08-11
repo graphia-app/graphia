@@ -487,8 +487,10 @@ Item
                         anchors.top: parent.top
                         clip: true
 
-                        states: [
-                            State {
+                        states:
+                        [
+                            State
+                            {
                                 when: headerContent.Drag.active
                                 ParentChange
                                 {
@@ -936,6 +938,8 @@ Item
                             id: label
                             objectName: "label"
                             elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                            textFormat: Text.PlainText
                             width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
