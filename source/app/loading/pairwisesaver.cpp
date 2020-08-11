@@ -63,12 +63,12 @@ bool PairwiseSaver::save()
             const auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
                    << QStringLiteral("\"%1\"").arg(targetName) << " " << attribute->floatValueOf(edgeId)
-                   << endl;
+                   << "\n";
         }
         else
         {
             stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
-                   << QStringLiteral("\"%1\"").arg(targetName) << endl;
+                   << QStringLiteral("\"%1\"").arg(targetName) << "\n";
         }
 
         runningCount++;

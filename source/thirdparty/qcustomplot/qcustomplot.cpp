@@ -4888,7 +4888,7 @@ Qt::Alignment QCPLayoutInset::insetAlignment(int index) const
   else
   {
     qDebug() << Q_FUNC_INFO << "Invalid element index:" << index;
-    return 0;
+    return Qt::AlignLeft;
   }
 }
 
@@ -6134,7 +6134,7 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate date)
 # if QT_VERSION < QT_VERSION_CHECK(4, 7, 0)
   return QDateTime(date).toTime_t();
 # else
-  return QDateTime(date).toMSecsSinceEpoch()/1000.0;
+  return date.startOfDay().toMSecsSinceEpoch()/1000.0;
 # endif
 }
 /* end of 'src/axis/axistickerdatetime.cpp' */
@@ -6617,7 +6617,11 @@ void QCPAxisTickerText::addTick(double position, QString label)
 */
 void QCPAxisTickerText::addTicks(const QMap<double, QString> &ticks)
 {
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
   mTicks.unite(ticks);
+#else
+  mTicks.insert(ticks);
+#endif
 }
 
 /*! \overload
@@ -15292,7 +15296,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event)
         {
           QCPDataSelection dataSel = plottableInterface->selectTestRect(rectF, true);
           if (!dataSel.isEmpty())
-            potentialSelections.insertMulti(dataSel.dataPointCount(), QPair<QCPAbstractPlottable*, QCPDataSelection>(plottable, dataSel));
+            potentialSelections.insert(dataSel.dataPointCount(), QPair<QCPAbstractPlottable*, QCPDataSelection>(plottable, dataSel));
         }
       }
       
@@ -19546,7 +19550,7 @@ void QCPColorScale::setRangeDrag(bool enabled)
   if (enabled)
     mAxisRect.data()->setRangeDrag(QCPAxis::orientation(mType));
   else
-    mAxisRect.data()->setRangeDrag(0);
+    mAxisRect.data()->setRangeDrag(static_cast<Qt::Orientation>(0));
 }
 
 /*!
@@ -19566,7 +19570,7 @@ void QCPColorScale::setRangeZoom(bool enabled)
   if (enabled)
     mAxisRect.data()->setRangeZoom(QCPAxis::orientation(mType));
   else
-    mAxisRect.data()->setRangeZoom(0);
+    mAxisRect.data()->setRangeZoom(static_cast<Qt::Orientation>(0));
 }
 
 /*!

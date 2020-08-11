@@ -197,7 +197,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
 {
     if(!index.isValid())
-        return 0; // NOLINT modernize-use-nullptr, huh?
+        return Qt::NoItemFlags;
 
     return QAbstractItemModel::flags(index);
 }
@@ -302,7 +302,11 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
 
 void registerAvailableAttributesModelType()
 {
-    qmlRegisterInterface<AvailableAttributesModel>("AvailableAttributesModel");
+    qmlRegisterInterface<AvailableAttributesModel>("AvailableAttributesModel"
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        , Application::majorVersion()
+#endif
+        );
 }
 
 Q_COREAPP_STARTUP_FUNCTION(registerAvailableAttributesModelType)

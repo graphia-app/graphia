@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QGuiApplication>
 #include <QDir>
+#include <QPainterPath>
 
 #include <memory>
 
