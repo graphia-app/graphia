@@ -1,4 +1,4 @@
-/* Copyright © 2013-2020 Graphia Technologies Ltd.
+﻿/* Copyright © 2013-2020 Graphia Technologies Ltd.
  *
  * This file is part of Graphia.
  *
@@ -19,323 +19,260 @@
 #include "graphmlparser.h"
 
 #include "shared/graph/igraphmodel.h"
+#include "shared/graph/elementid_debug.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/utils/container.h"
 
-#include <QtXml/QXmlInputSource>
+#include <QXmlStreamReader>
+#include <QFile>
 #include <QDebug>
 #include <QUrl>
 
-GraphMLHandler::GraphMLHandler(GraphMLParser& parser, IGraphModel& graphModel,
-                               UserNodeData* userNodeData, int lineCount) : _parser(&parser), _graphModel(&graphModel),
-                                 _lineCount(lineCount), _userNodeData(userNodeData)
-{}
+#include <stack>
+#include <map>
 
-bool GraphMLHandler::startDocument()
-{
-    return true;
-}
+// http://graphml.graphdrawing.org/primer/graphml-primer.html
 
-bool GraphMLHandler::endDocument()
-{
-    // Stacks should be empty
-    if(!_activeAttributes.empty() || !_activeAttributeKeys.empty() ||
-       !_activeNodes.empty() || !_activeTemporaryEdges.empty() ||
-       !_activeElements.empty())
-    {
-        _errorString = QStringLiteral("Not all GraphML Elements are terminated. Stack not empty");
-        return false;
-    }
-
-    // Finally populate graph with Edges from tempEdges
-    for(const auto& tempEdge : _temporaryEdges)
-    {
-        auto sourceNodeId = _nodeMap.find(tempEdge._source);
-        auto targetNodeId = _nodeMap.find(tempEdge._target);
-        if(sourceNodeId == _nodeMap.end())
-        {
-            _errorString = QStringLiteral("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
-            return false;
-        }
-        if(targetNodeId == _nodeMap.end())
-        {
-            _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
-            return false;
-        }
-        const EdgeId& edgeId = _graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
-        _edgeIdMap[tempEdge] = edgeId;
-    }
-
-    // Populate EdgeAttributes with new EdgeIds and attributes
-    for(const auto& edgeAttr : _tempEdgeAttributes)
-    {
-        for(const auto& idAttributePair : edgeAttr.second)
-        {
-            const auto& tempEdge = idAttributePair.first;
-            const auto& attr = idAttributePair.second;
-
-            _edgeAttributes[edgeAttr.first][_edgeIdMap.at(tempEdge)] = attr;
-        }
-    }
-
-    return true;
-}
-
-bool GraphMLHandler::startElement(const QString&, const QString& localName, const QString&, const QXmlAttributes& atts)
-{
-    // New Edge
-    if(localName == QLatin1String("edge"))
-    {
-        // Do not parse if nested nodes/edges
-        if(!_activeNodes.empty())
-        {
-            QString attributes = QLatin1String("");
-            for(int i = 0; i < atts.count(); ++i)
-                attributes += atts.localName(i) + " " + atts.value(i) + ", ";
-
-            _errorString = "Nested Nodes + Edges " + attributes
-                    + " Line: " + QString::number(_locator->lineNumber());
-            return false;
-        }
-
-        _temporaryEdges.push_back({atts.value("source"), atts.value("target")});
-        _activeTemporaryEdges.push(&_temporaryEdges.back());
-        // Check if id has already been used
-        if(u::contains(_temporaryEdgeMap, atts.value(QStringLiteral("id"))))
-        {
-            _errorString = "Edge ID already in use. Edge ID: " + atts.value(QStringLiteral("id"))
-                    + " Line: " + QString::number(_locator->lineNumber());
-            return false;
-        }
-        if(atts.value(QStringLiteral("id")).length() > 0)
-            _temporaryEdgeMap[atts.value(QStringLiteral("id"))] = _temporaryEdges.back();
-
-
-    }
-    // New Node
-    else if(localName == QLatin1String("node"))
-    {
-        // Do not parse if nested nodes/edges
-        if(!_activeTemporaryEdges.empty())
-        {
-            QString attributes = QLatin1String("");
-            for(int i = 0; i < atts.count(); ++i)
-                attributes += atts.localName(i) + " " + atts.value(i) + ", ";
-
-            _errorString = "Nested Nodes + Edges " + attributes
-                    + " Line: " + QString::number(_locator->lineNumber());
-            return false;
-        }
-
-        auto nodeId = _graphModel->mutableGraph().addNode();
-        _activeNodes.push(nodeId);
-        // Check if id has already been used
-        if(u::contains(_nodeMap, atts.value(QStringLiteral("id"))))
-        {
-            _errorString = "Node ID already in use. Node ID: " + atts.value(QStringLiteral("id"))
-                    + " Line: " + QString::number(_locator->lineNumber());
-            return false;
-        }
-        _nodeMap[atts.value(QStringLiteral("id"))] = _activeNodes.top();
-
-        if(_userNodeData != nullptr)
-        {
-            auto nodeName = atts.value(QStringLiteral("id"));
-            _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
-            _graphModel->setNodeName(nodeId, nodeName);
-        }
-    }
-    // New Attribute Type
-    else if(localName == QLatin1String("key"))
-    {
-        AttributeKey attributeKey;
-        attributeKey._name = atts.value(QStringLiteral("attr.name"));
-        attributeKey._type = atts.value(QStringLiteral("attr.type"));
-
-        auto key = std::make_pair(atts.value(QStringLiteral("id")), atts.value(QStringLiteral("for")));
-        // Check if id has already been used
-        if(u::contains(_attributeKeyMap, key))
-        {
-            _errorString = "Attribute Key ID already in use. Attribute Key ID: " + atts.value(QStringLiteral("id"))
-                    + " Line: " + QString::number(_locator->lineNumber());
-            return false;
-        }
-        _attributeKeyMap[key] = attributeKey;
-
-        _activeAttributeKeys.push(&_attributeKeyMap[key]);
-    }
-    // Data tags are likely attribute data
-    else if(localName == QLatin1String("data"))
-    {
-        if(!_activeNodes.empty())
-        {
-            if(!_activeTemporaryEdges.empty())
-            {
-                _errorString = "Nested Nodes + Edges. Edge: "
-                        + _activeTemporaryEdges.top()->_source + "," + _activeTemporaryEdges.top()->_target
-                        + " Line: " + QString::number(_locator->lineNumber());
-                return false;
-            }
-
-            auto pairKey = std::make_pair(atts.value(QStringLiteral("key")), "node");
-            if(u::contains(_attributeKeyMap, pairKey))
-            {
-                auto attributeKey = _attributeKeyMap.at(pairKey);
-                _nodeAttributes[attributeKey].emplace(_activeNodes.top(), attributeKey);
-                // Set Attribute as active for access later in characters
-                _activeAttributes.push(&_nodeAttributes[attributeKey][_activeNodes.top()]);
-            }
-            auto noForPairKey = std::make_pair(atts.value(QStringLiteral("key")), "");
-            if(u::contains(_attributeKeyMap, noForPairKey))
-            {
-                auto attributeKey = _attributeKeyMap.at(noForPairKey);
-                _nodeAttributes[attributeKey].emplace(_activeNodes.top(), attributeKey);
-                // Set Attribute as active for access later in characters
-                _activeAttributes.push(&_nodeAttributes[attributeKey][_activeNodes.top()]);
-            }
-        }
-        else if(!_activeTemporaryEdges.empty())
-        {
-            if(!_activeNodes.empty())
-            {
-                _errorString = "Nested Nodes + Edges. Line: " + QString::number(_locator->lineNumber());
-                return false;
-            }
-
-            auto pairKey = std::make_pair(atts.value(QStringLiteral("key")), "edge");
-            if(u::contains(_attributeKeyMap, pairKey))
-            {
-                auto attributeKey = _attributeKeyMap.at(pairKey);
-                _tempEdgeAttributes[attributeKey].emplace(*_activeTemporaryEdges.top(), attributeKey);
-                // Set Attribute as active for access later in characters
-                _activeAttributes.push(&_tempEdgeAttributes[attributeKey][*_activeTemporaryEdges.top()]);
-            }
-            auto noForPairKey = std::make_pair(atts.value(QStringLiteral("key")), "");
-            if(u::contains(_attributeKeyMap, noForPairKey))
-            {
-                auto attributeKey = _attributeKeyMap.at(noForPairKey);
-                _nodeAttributes[attributeKey].emplace(_activeNodes.top(), attributeKey);
-                // Set Attribute as active for access later in characters
-                _activeAttributes.push(&_nodeAttributes[attributeKey][_activeNodes.top()]);
-            }
-        }
-    }
-    _activeElements.push(localName);
-    return true;
-}
-
-bool GraphMLHandler::endElement(const QString &, const QString &localName, const QString &)
-{
-    if(_parser->cancelled())
-    {
-        _errorString = QObject::tr("User cancelled");
-        return false;
-    }
-
-    _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
-
-    if(localName == QLatin1String("node"))
-        _activeNodes.pop();
-    if(localName == QLatin1String("edge"))
-        _activeTemporaryEdges.pop();
-    else if(localName == QLatin1String("key"))
-        _activeAttributeKeys.pop();
-    else if(localName == QLatin1String("data") && (!_activeNodes.empty() || !_activeTemporaryEdges.empty()))
-    {
-        const auto* attribute = _activeAttributes.top();
-
-        if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
-            _userNodeData->setValueBy(_activeNodes.top(), attribute->_name, attribute->_value.toString());
-
-        _activeAttributes.pop();
-    }
-
-    _activeElements.pop();
-    return true;
-}
-
-bool GraphMLHandler::characters(const QString &ch)
-{
-    // Default tag for Attribute Keys
-    if(_activeElements.top() == QLatin1String("default") && !_activeAttributeKeys.empty())
-    {
-        _activeAttributeKeys.top()->_default = ch.trimmed();
-    }
-    // Data value for Attribute
-    else if(_activeElements.top() == QLatin1String("data") && !_activeAttributes.empty())
-    {
-        _activeAttributes.top()->_value = ch.trimmed();
-    }
-    return true;
-}
-
-void GraphMLHandler::setDocumentLocator(QXmlLocator* locator)
-{
-    _locator = locator;
-}
-
-QString GraphMLHandler::errorString() const
-{
-    return _errorString;
-}
-
-bool GraphMLHandler::warning(const QXmlParseException &)
-{
-    return true;
-}
-
-bool GraphMLHandler::error(const QXmlParseException &)
-{
-    return true;
-}
-
-bool GraphMLHandler::fatalError(const QXmlParseException &)
-{
-    return true;
-}
-
-GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
-    _userNodeData(userNodeData)
+GraphMLParser::GraphMLParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+    _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GraphMLParser::parse(const QUrl &url, IGraphModel* graphModel)
+bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     Q_ASSERT(graphModel != nullptr);
     if(graphModel == nullptr)
         return false;
 
     QFile file(url.toLocalFile());
-    int lineCount = 0;
-    if(file.open(QFile::ReadOnly))
+    auto fileSize = file.size();
+    if(!file.open(QFile::ReadOnly))
     {
-        while(!file.atEnd())
-        {
-            file.readLine();
-            lineCount++;
-        }
-        file.seek(0);
-    }
-    else
-    {
-        qDebug() << "Unable to Open File" + url.toLocalFile();
+        setFailureReason(QStringLiteral("Unable to Open File: %1").arg(url.toLocalFile()));
         return false;
     }
 
     setProgress(-1);
 
-    GraphMLHandler handler(*this, *graphModel, _userNodeData, lineCount);
-    auto *source = new QXmlInputSource(&file);
-    QXmlSimpleReader xmlReader;
-    xmlReader.setContentHandler(&handler);
-    xmlReader.setErrorHandler(&handler);
-    xmlReader.parse(source);
+    QXmlStreamReader xsr(&file);
+    std::stack<QString> stack;
+    std::map<QString, NodeId> nodes;
+    std::map<QString, QString> nodeAttributes;
+    std::map<QString, QString> edgeAttributes;
 
-    if(handler.errorString() != QLatin1String(""))
+    bool graphmlElementFound = false;
+    int graphNestLevel = 0;
+    NodeId activeNodeId;
+    EdgeId activeEdgeId;
+    QString activeKey;
+
+    auto processToken = [&](QXmlStreamReader::TokenType tokenType)
     {
-        qDebug() << handler.errorString();
+        if(!activeNodeId.isNull() && !activeEdgeId.isNull())
+        {
+            setFailureReason(QStringLiteral("Node and edge both active: %1 %2")
+                .arg(static_cast<int>(activeNodeId), static_cast<int>(activeEdgeId)));
+            return false;
+        }
+
+        switch(tokenType)
+        {
+        case QXmlStreamReader::StartElement:
+        {
+            const auto& elementName = xsr.name();
+            stack.push(elementName.toString());
+            const auto& attributes = xsr.attributes();
+
+            if(elementName == QStringLiteral("graphml"))
+                graphmlElementFound = true;
+            else if(elementName == QStringLiteral("graph"))
+            {
+                graphNestLevel++;
+
+                if(graphNestLevel > 1)
+                {
+                    //FIXME: we just skip everything when nested
+                    qDebug() << "WARNING: nested graphs not supported";
+                }
+            }
+
+            if(graphNestLevel != 1)
+                break;
+
+            if(elementName == QStringLiteral("key"))
+            {
+                if(!attributes.hasAttribute("attr.name"))
+                    break;
+
+                if(!attributes.hasAttribute("for"))
+                    break;
+
+                if(!attributes.hasAttribute("id"))
+                    break;
+
+                const auto& attributeName = attributes.value("attr.name");
+                const auto& keyId = attributes.value("id");
+
+                if(attributes.value("for") == QStringLiteral("node"))
+                    nodeAttributes.emplace(keyId.toString(), attributeName.toString());
+                else if(attributes.value("for") == QStringLiteral("edge"))
+                    edgeAttributes.emplace(keyId.toString(), attributeName.toString());
+            }
+            else if(elementName == QStringLiteral("node"))
+            {
+                if(!attributes.hasAttribute("id"))
+                {
+                    setFailureReason(QStringLiteral("Node has no id"));
+                    return false;
+                }
+
+                const auto& nodeName = attributes.value("id").toString();
+
+                if(u::contains(nodes, nodeName))
+                {
+                    setFailureReason(QStringLiteral("Duplicate node id: %1").arg(nodeName));
+                    return false;
+                }
+
+                activeNodeId = graphModel->mutableGraph().addNode();
+                nodes.emplace(nodeName, activeNodeId);
+
+                _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), nodeName);
+                graphModel->setNodeName(activeNodeId, nodeName);
+            }
+            else if(elementName == QStringLiteral("edge"))
+            {
+                if(!attributes.hasAttribute("source"))
+                {
+                    setFailureReason(QStringLiteral("Edge missing source"));
+                    return false;
+                }
+
+                if(!attributes.hasAttribute("target"))
+                {
+                    setFailureReason(QStringLiteral("Edge missing target"));
+                    return false;
+                }
+
+                const auto& sourceName = attributes.value("source").toString();
+                const auto& targetName = attributes.value("target").toString();
+
+                if(!u::contains(nodes, sourceName) || !u::contains(nodes, targetName))
+                {
+                    qDebug() << "WARNING: Edge has unknown source or target:" << sourceName << targetName;
+                    break;
+                }
+
+                auto sourceId = nodes.at(sourceName);
+                auto targetId = nodes.at(targetName);
+
+                activeEdgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
+
+                if(attributes.hasAttribute("id"))
+                {
+                    auto edgeName = attributes.value("id").toString();
+                    _userEdgeData->setValueBy(activeEdgeId, QObject::tr("Edge Name"), edgeName);
+                }
+            }
+            else if(elementName == QStringLiteral("data"))
+            {
+                if(!attributes.hasAttribute("key"))
+                    break;
+
+                activeKey = attributes.value("key").toString();
+            }
+
+            break;
+        }
+
+        case QXmlStreamReader::Characters:
+        {
+            if(graphNestLevel != 1)
+                break;
+
+            if(activeKey.isEmpty() || _userNodeData == nullptr)
+                break;
+
+            const auto& data = xsr.text().toString();
+
+            if(!activeNodeId.isNull() && u::contains(nodeAttributes, activeKey))
+                _userNodeData->setValueBy(activeNodeId, nodeAttributes.at(activeKey), data);
+            else if(!activeEdgeId.isNull() && u::contains(edgeAttributes, activeKey))
+                _userEdgeData->setValueBy(activeEdgeId, edgeAttributes.at(activeKey), data);
+
+            break;
+        }
+
+        case QXmlStreamReader::EndElement:
+        {
+            const auto& elementName = xsr.name();
+
+            if(stack.empty())
+            {
+                setFailureReason(QStringLiteral("Orphan end element: %1").arg(elementName));
+                return false;
+            }
+
+            const auto& top = stack.top();
+            if(top != xsr.name())
+            {
+                setFailureReason(QStringLiteral("Start and end element mismatch: %1 != %2")
+                    .arg(top, elementName));
+                return false;
+            }
+
+            stack.pop();
+
+            if(elementName == QStringLiteral("graph"))
+                graphNestLevel--;
+
+            if(graphNestLevel != 1)
+                break;
+
+            if(elementName == QStringLiteral("node") && !activeNodeId.isNull())
+                activeNodeId.setToNull();
+            else if(elementName == QStringLiteral("edge") && !activeEdgeId.isNull())
+                activeEdgeId.setToNull();
+            else if(elementName == QStringLiteral("data") && !activeKey.isEmpty())
+                activeKey.clear();
+
+            break;
+        }
+
+        default:
+            break;
+        }
+
+        return true;
+    };
+
+    bool success = true;
+    while(!xsr.atEnd() && success)
+    {
+        auto percent = static_cast<int>((file.pos() * 100) / fileSize);
+        setProgress(percent);
+        success = processToken(xsr.readNext());
+
+        if(cancelled())
+            return false;
+    }
+
+    setProgress(-1);
+
+    if(!success)
+        return false;
+
+    if(!graphmlElementFound)
+    {
+        setFailureReason(QStringLiteral("graphml header not found"));
+        return false;
+    }
+
+    if(xsr.hasError())
+    {
+        setFailureReason(QStringLiteral("XML parse error: %1").arg(xsr.errorString()));
         return false;
     }
 
