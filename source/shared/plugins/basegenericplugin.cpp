@@ -61,7 +61,7 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<PairwiseTxtFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("GraphML"))
-        return std::make_unique<GraphMLParser>(&_userNodeData);
+        return std::make_unique<GraphMLParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("MatrixCSV"))
         return std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData);
