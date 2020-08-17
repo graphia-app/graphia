@@ -18,13 +18,25 @@
 
 #include "biopaxfileparser.h"
 
+#include "shared/graph/igraphmodel.h"
+#include "shared/graph/imutablegraph.h"
+
+#include <QXmlStreamReader>
+#include <QFile>
+#include <QUrl>
+
+#include <stack>
+#include <map>
+
 // http://www.biopax.org/owldoc/Level3/
 // Effectively, Entity and all subclasses are Nodes.
 // The members and properties of entities define the edges
 
 // CamelCase is Class definitions, mixedCase is properties
 
-static bool isNodeElementName(const QString& name)
+namespace
+{
+bool isNodeElementName(const QString& name)
 {
     QStringList nodeElementNames =
     {
@@ -54,10 +66,11 @@ static bool isNodeElementName(const QString& name)
         "Transport",
         "TransportWithBiochemicalReaction"
     };
+
     return nodeElementNames.contains(name);
 }
 
-static bool isEdgeElementName(const QString& name)
+bool isEdgeElementName(const QString& name)
 {
     // Edges are participant object members subclasses
     // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
@@ -76,159 +89,9 @@ static bool isEdgeElementName(const QString& name)
         "template",
         "participant"
     };
+
     return edgeElementNames.contains(name);
 }
-
-BiopaxHandler::BiopaxHandler(BiopaxFileParser& parser, IGraphModel& graphModel, UserNodeData* userNodeData,
-                             int lineCount) :
-    _parser(&parser),
-    _graphModel(&graphModel), _lineCount(lineCount), _userNodeData(userNodeData)
-{}
-
-bool BiopaxHandler::startDocument()
-{
-    return true;
-}
-
-bool BiopaxHandler::endDocument()
-{
-    for(const auto& tempEdge : _temporaryEdges)
-    {
-        for(const auto& sourceNodeString : tempEdge._sources)
-        {
-            auto sourceNodeId = _nodeMap.find(sourceNodeString);
-            if(sourceNodeId == _nodeMap.end())
-            {
-                _errorString = QStringLiteral("Invalid Edge Source. Edge - Source:").arg(sourceNodeString);
-                return false;
-            }
-
-            for(const auto& targetNodeString : tempEdge._targets)
-            {
-                auto targetNodeId = _nodeMap.find(targetNodeString);
-                if(targetNodeId == _nodeMap.end())
-                {
-                    _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2")
-                                       .arg(sourceNodeString, targetNodeString);
-                    return false;
-                }
-
-                const EdgeId& edgeId =
-                    _graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
-                _edgeIdMap[tempEdge] = edgeId;
-            }
-        }
-    }
-    return true;
-}
-
-bool BiopaxHandler::startElement(const QString&, const QString& localName, const QString&,
-                                 const QXmlAttributes& atts)
-{
-    if(isEdgeElementName(localName))
-    {
-        _temporaryEdges.push_back({});
-        _activeTemporaryEdges.push(&_temporaryEdges.back());
-
-        if(!_activeNodes.empty())
-        {
-            auto targetString = atts.value(QStringLiteral("rdf:resource")).remove(QStringLiteral("#"));
-
-            _temporaryEdges.back()._sources.push_back(_nodeIdToNameMap[_activeNodes.top()]);
-            _temporaryEdges.back()._targets.push_back(targetString);
-
-            // Some members infer a target edge
-            if(localName == QStringLiteral("right") || localName == QStringLiteral("controlled"))
-            {
-                _temporaryEdges.back()._sources.push_back(targetString);
-                _temporaryEdges.back()._targets.push_back(_nodeIdToNameMap[_activeNodes.top()]);
-            }
-        }
-    }
-
-    if(isNodeElementName(localName) &&
-       (_activeElements.empty() || !isNodeElementName(_activeElements.top())))
-    {
-        auto nodeId = _graphModel->mutableGraph().addNode();
-        _nodeMap[atts.value(QStringLiteral("rdf:ID"))] = nodeId;
-        _nodeIdToNameMap[nodeId] = atts.value(QStringLiteral("rdf:ID"));
-        _activeNodes.push(nodeId);
-
-        if(_userNodeData != nullptr)
-        {
-            auto id = atts.value(QStringLiteral("rdf:ID"));
-            _userNodeData->setValueBy(nodeId, QObject::tr("ID"), id);
-            _userNodeData->setValueBy(nodeId, QObject::tr("Class"), localName);
-        }
-    }
-
-    _activeElements.push(localName);
-    return true;
-}
-
-bool BiopaxHandler::endElement(const QString&, const QString& localName, const QString&)
-{
-    if(_parser->cancelled())
-    {
-        _errorString = QObject::tr("User cancelled");
-        return false;
-    }
-
-    _parser->setProgress(_locator->lineNumber() * 100 / _lineCount );
-
-    if(isNodeElementName(localName))
-        _activeNodes.pop();
-
-    if(isEdgeElementName(localName))
-        _activeTemporaryEdges.pop();
-
-    _activeElements.pop();
-
-    return true;
-}
-
-bool BiopaxHandler::characters(const QString& ch)
-{
-    if(!_activeNodes.empty())
-    {
-        if(_activeElements.top() == QStringLiteral("displayName"))
-        {
-            _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Node Name"), ch);
-            _graphModel->setNodeName(_activeNodes.top(), ch);
-        }
-        else if(_activeElements.top() == QStringLiteral("comment"))
-        {
-            _userNodeData->setValueBy(_activeNodes.top(), QObject::tr("Comment"), ch);
-            _graphModel->setNodeName(_activeNodes.top(), ch);
-        }
-    }
-
-    return true;
-}
-
-void BiopaxHandler::setDocumentLocator(QXmlLocator* locator)
-{
-    _locator = locator;
-}
-
-QString BiopaxHandler::errorString() const
-{
-    return _errorString;
-}
-
-bool BiopaxHandler::warning(const QXmlParseException &)
-{
-    return true;
-}
-
-bool BiopaxHandler::error(const QXmlParseException &)
-{
-    return true;
-}
-
-bool BiopaxHandler::fatalError(const QXmlParseException &)
-{
-    return true;
 }
 
 BiopaxFileParser::BiopaxFileParser(UserNodeData* userNodeData) : _userNodeData(userNodeData)
@@ -237,6 +100,16 @@ BiopaxFileParser::BiopaxFileParser(UserNodeData* userNodeData) : _userNodeData(u
     userNodeData->add(QObject::tr("Node Name"));
 }
 
+struct TempEdge
+{
+    QStringList _sources;
+    QStringList _targets;
+    friend bool operator<(const TempEdge& l, const TempEdge& r)
+    {
+        return std::tie(l._sources, l._targets) < std::tie(r._sources, r._targets);
+    }
+};
+
 bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 {
     Q_ASSERT(graphModel != nullptr);
@@ -244,34 +117,204 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
         return false;
 
     QFile file(url.toLocalFile());
-    int lineCount = 0;
-    if(file.open(QFile::ReadOnly))
+    auto fileSize = file.size();
+    if(!file.open(QFile::ReadOnly))
     {
-        while(!file.atEnd())
-        {
-            file.readLine();
-            lineCount++;
-        }
-        file.seek(0);
-    }
-    else
-    {
-        qDebug() << "Unable to Open File" + url.toLocalFile();
+        setFailureReason(QStringLiteral("Unable to Open File: %1").arg(url.toLocalFile()));
         return false;
     }
 
     setProgress(-1);
 
-    BiopaxHandler handler(*this, *graphModel, _userNodeData, lineCount);
-    auto* source = new QXmlInputSource(&file);
-    QXmlSimpleReader xmlReader;
-    xmlReader.setContentHandler(&handler);
-    xmlReader.setErrorHandler(&handler);
-    xmlReader.parse(source);
+    QXmlStreamReader xsr(&file);
 
-    if(handler.errorString() != QLatin1String(""))
+    std::map<QString, NodeId> nodes;
+    std::stack<std::pair<NodeId, QString>> activeNodes;
+    std::stack<QString> activeElements;
+
+    std::vector<TempEdge> tempEdges;
+
+    auto processToken = [&](QXmlStreamReader::TokenType tokenType)
     {
-        qDebug() << handler.errorString();
+        NodeId activeNodeId;
+        QString activeNodeName;
+
+        if(!activeNodes.empty())
+        {
+            activeNodeId = activeNodes.top().first;
+            activeNodeName = activeNodes.top().second;
+        }
+
+        switch(tokenType)
+        {
+        case QXmlStreamReader::StartElement:
+        {
+            const auto& elementName = xsr.name().toString();
+            const auto& attributes = xsr.attributes();
+
+            if(isNodeElementName(elementName) && (activeElements.empty() ||
+                !isNodeElementName(activeElements.top())))
+            {
+                if(!attributes.hasAttribute(QStringLiteral("rdf:ID")))
+                {
+                    setFailureReason(QStringLiteral("Node element has no id"));
+                    return false;
+                }
+
+                auto rdfId = attributes.value(QStringLiteral("rdf:ID")).toString();
+
+                auto nodeId = graphModel->mutableGraph().addNode();
+                nodes.emplace(rdfId, nodeId);
+                activeNodes.emplace(nodeId, rdfId);
+
+                if(_userNodeData != nullptr)
+                {
+                    _userNodeData->setValueBy(nodeId, QObject::tr("ID"), rdfId);
+                    _userNodeData->setValueBy(nodeId, QObject::tr("Class"), elementName);
+                }
+            }
+            else if(isEdgeElementName(elementName))
+            {
+                if(!activeNodes.empty())
+                {
+                    if(!attributes.hasAttribute(QStringLiteral("rdf:resource")))
+                    {
+                        setFailureReason(QStringLiteral("Edge element has no resource"));
+                        return false;
+                    }
+
+                    auto rdfResource = attributes.value(QStringLiteral("rdf:resource"))
+                        .toString().remove(QStringLiteral("#"));
+
+                    auto& tempEdge = tempEdges.emplace_back();
+
+                    tempEdge._sources.push_back(activeNodeName);
+                    tempEdge._targets.push_back(rdfResource);
+
+                    if(elementName == QStringLiteral("right") || elementName == QStringLiteral("controlled"))
+                    {
+                        tempEdge._targets.push_back(rdfResource);
+                        tempEdge._sources.push_back(activeNodeName);
+                    }
+                }
+            }
+
+            activeElements.emplace(elementName);
+
+            break;
+        }
+
+        case QXmlStreamReader::Characters:
+        {
+            if(activeNodes.empty())
+                break;
+
+            const auto& data = xsr.text().toString();
+
+            if(activeElements.top() == QStringLiteral("displayName"))
+            {
+                _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), data);
+                graphModel->setNodeName(activeNodeId, data);
+            }
+            else if(activeElements.top() == QStringLiteral("comment"))
+                _userNodeData->setValueBy(activeNodeId, QObject::tr("Comment"), data);
+
+            break;
+        }
+
+        case QXmlStreamReader::EndElement:
+        {
+            const auto& elementName = xsr.name().toString();
+
+            if(activeElements.empty())
+            {
+                setFailureReason(QStringLiteral("Orphan end element: %1").arg(elementName));
+                return false;
+            }
+
+            const auto& top = activeElements.top();
+            if(top != xsr.name())
+            {
+                setFailureReason(QStringLiteral("Start and end element mismatch: %1 != %2").arg(top, elementName));
+                return false;
+            }
+
+            activeElements.pop();
+
+            if(isNodeElementName(elementName))
+            {
+                // If the node hasn't been assigned a name, just use its ID
+                if(graphModel->nodeName(activeNodeId).isEmpty())
+                {
+                    auto nodeIdString = _userNodeData->valueBy(activeNodeId, QObject::tr("ID")).toString();
+                    _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), nodeIdString);
+                    graphModel->setNodeName(activeNodeId, nodeIdString);
+                }
+
+                activeNodes.pop();
+            }
+
+            break;
+        }
+
+        case QXmlStreamReader::EndDocument:
+        {
+            for(const auto& tempEdge : tempEdges)
+            {
+                for(const auto& sourceNode : tempEdge._sources)
+                {
+                    auto sourceNodeId = nodes.find(sourceNode);
+                    if(sourceNodeId == nodes.end())
+                    {
+                        setFailureReason(QObject::tr("Invalid Edge Source: %1").arg(sourceNode));
+                        return false;
+                    }
+
+                    for(const auto& targetNode : tempEdge._targets)
+                    {
+                        auto targetNodeId = nodes.find(targetNode);
+                        if(targetNodeId == nodes.end())
+                        {
+                            setFailureReason(QObject::tr(
+                                "Invalid Edge Target. source node: %1, target node: %2")
+                                .arg(sourceNode, targetNode));
+                            return false;
+                        }
+
+                        graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
+                    }
+                }
+            }
+
+            break;
+        }
+
+        default:
+            break;
+        }
+
+        return true;
+    };
+
+    bool success = true;
+    while(!xsr.atEnd() && success)
+    {
+        auto percent = static_cast<int>((file.pos() * 100) / fileSize);
+        setProgress(percent);
+        success = processToken(xsr.readNext());
+
+        if(cancelled())
+            return false;
+    }
+
+    setProgress(-1);
+
+    if(!success)
+        return false;
+
+    if(xsr.hasError())
+    {
+        setFailureReason(QObject::tr("XML parse error: %1").arg(xsr.errorString()));
         return false;
     }
 
