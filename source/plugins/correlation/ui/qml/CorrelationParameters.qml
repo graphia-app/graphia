@@ -1526,7 +1526,7 @@ BaseParameterDialog
             if(root.fileUrl.length !== 0 && root.fileType.length !== 0)
                 tabularDataParser.parse(root.fileUrl, root.fileType);
             else
-                console.log("ERROR: fileUrl or fileType are empty");
+                console.log("ERROR: fileUrl or fileType is empty");
         }
     }
 }
