@@ -45,7 +45,7 @@ Item
     {
         target: gradientSelector
 
-        onConfigurationChanged:
+        function onConfigurationChanged()
         {
             if(gradientSelector.visualisationIndex !== index)
                 return;
@@ -60,7 +60,7 @@ Item
     {
         target: paletteSelector
 
-        onConfigurationChanged:
+        function onConfigurationChanged()
         {
             if(paletteSelector.visualisationIndex !== index)
                 return;

@@ -87,7 +87,7 @@ ApplicationWindow
     {
         target: application
 
-        onNoNewUpdateAvailable:
+        function onNoNewUpdateAvailable(existing)
         {
             if(checkForUpdatesAction.active)
             {
@@ -104,7 +104,7 @@ ApplicationWindow
             checkForUpdatesAction.active = false;
         }
 
-        onNewUpdateAvailable:
+        function onNewUpdateAvailable()
         {
             checkForUpdatesAction.active = false;
             newUpdate.visible = true;
@@ -1884,16 +1884,16 @@ ApplicationWindow
     Connections
     {
         target: currentDocument
-        onPluginLoadComplete: updatePluginMenus();
-        onPluginPoppedOutChanged: updatePluginMenus();
-        onEnrichmentTableModelsChanged:
+        function onPluginLoadComplete() { updatePluginMenus(); }
+        function onPluginPoppedOutChanged() { updatePluginMenus(); }
+        function onEnrichmentTableModelsChanged()
         {
             enrichmentResults.models = currentDocument.enrichmentTableModels;
         }
-        onEnrichmentAnalysisComplete: { enrichmentResults.visible = true; }
+        function onEnrichmentAnalysisComplete() { enrichmentResults.visible = true; }
 
         // Plugin menus may reference attributes, so regenerate menus when these change
-        onSharedValuesAttributeNamesChanged: updatePluginMenus();
+        function onSharedValuesAttributeNamesChanged() { updatePluginMenus(); }
     }
 
     toolBar: ToolBar

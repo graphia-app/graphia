@@ -56,7 +56,7 @@ Item
         {
             target: tableView.selection
 
-            onSelectionChanged:
+            function onSelectionChanged()
             {
                 root.selectedValues = [];
 

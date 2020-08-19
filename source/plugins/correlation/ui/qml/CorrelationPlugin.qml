@@ -378,7 +378,7 @@ PluginContent
     Connections
     {
         target: plugin.model
-        onSharedValuesAttributeNamesChanged:
+        function onSharedValuesAttributeNamesChanged()
         {
             if(!plugin.model.sharedValuesAttributeNames.includes(
                 plot.plotAveragingAttributeName))

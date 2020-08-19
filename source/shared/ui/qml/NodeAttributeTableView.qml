@@ -452,12 +452,14 @@ Item
                     implicitHeight: headerLabel.height
                     property var modelColumn: model.column
                     property var sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
+
                     Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: modelColumn }
+
                     Connections
                     {
                         target: proxyModel
-                        onColumnOrderChanged:
+                        function onColumnOrderChanged()
                         {
                             refreshState();
                         }
@@ -750,10 +752,11 @@ Item
                             ctx.fillRect(0, yOffset, width, tableView.rowHeight);
                         }
                     }
+
                     Connections
                     {
                         target: tableView
-                        onContentYChanged:
+                        function onContentYChanged()
                         {
                             backgroundCanvas.requestPaint();
                         }
@@ -992,7 +995,7 @@ Item
                 Connections
                 {
                     target: plugin.model.nodeAttributeTableModel
-                    onSelectionChanged:
+                    function onSelectionChanged()
                     {
                         proxyModel.invalidateFilter();
                         selectRows(0, proxyModel.rowCount() - 1);

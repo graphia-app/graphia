@@ -231,7 +231,7 @@ ApplicationWindow
                             Connections
                             {
                                 target: qtObject
-                                onDataChanged: resizeColumnsToContentsBugWorkaround()
+                                function onDataChanged() { resizeColumnsToContentsBugWorkaround(); }
                             }
 
                             Component.onCompleted: { tabView.tableViews.push(tableView); }
@@ -300,10 +300,11 @@ ApplicationWindow
                                 }
                             }
                         }
+
                         Connections
                         {
                             target: qtObject
-                            onModelReset: heatmap.buildPlot()
+                            function onModelReset() { heatmap.buildPlot(); }
                         }
                     }
                 }

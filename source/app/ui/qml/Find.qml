@@ -634,7 +634,7 @@ Rectangle
     {
         target: document
 
-        onCommandsFinished:
+        function onCommandsFinished()
         {
             _finding = false;
 
@@ -645,7 +645,7 @@ Rectangle
             }
         }
 
-        onGraphChanged:
+        function onGraphChanged(graph, changeOccurred)
         {
             refresh();
         }

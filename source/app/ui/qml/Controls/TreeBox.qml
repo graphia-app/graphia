@@ -78,7 +78,7 @@ Item
         Connections
         {
             target: treeView.selection
-            onSelectionChanged:
+            function onSelectionChanged()
             {
                 if(!root.model)
                     return;

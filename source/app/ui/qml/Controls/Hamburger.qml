@@ -40,8 +40,8 @@ Item
     {
         target: menu
 
-        onAboutToShow: menuDropped = true;
-        onAboutToHide: menuDropped = false;
+        function onAboutToShow() { menuDropped = true; }
+        function onAboutToHide() { menuDropped = false; }
     }
 
     Rectangle
