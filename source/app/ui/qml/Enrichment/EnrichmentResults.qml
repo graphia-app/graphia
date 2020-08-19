@@ -275,16 +275,19 @@ ApplicationWindow
                                     return scrollView.flickableItem.contentX /
                                             (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
                                 }
+
                                 scrollYAmount:
                                 {
                                     return scrollView.flickableItem.contentY /
                                             (scrollView.flickableItem.contentHeight - scrollView.viewport.height);
                                 }
+
                                 onRightClick:
                                 {
                                     currentHeatmap = heatmap;
                                     plotContextMenu.popup();
                                 }
+
                                 ScrollView
                                 {
                                     id: scrollView

@@ -470,12 +470,14 @@ Item
                         drag.source.target = proxyModel.mapOrderedToSourceColumn(model.column);
                         tableView.forceLayoutSafe();
                     }
+
                     Rectangle
                     {
                         anchors.fill: parent
                         visible: dragHandler.active
                         color: Qt.lighter(sysPalette.highlight, 1.99)
                     }
+
                     Item
                     {
                         id: headerContent
@@ -514,6 +516,7 @@ Item
                             color: headerMouseArea.containsMouse ?
                                        Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
                         }
+
                         Item
                         {
                             anchors.fill: parent
@@ -545,6 +548,7 @@ Item
                                 }
                             }
                         }
+
                         QQC2.Label
                         {
                             id: headerLabel
@@ -566,6 +570,7 @@ Item
                             padding: headerView.delegatePadding
                             renderType: Text.NativeRendering
                         }
+
                         Shape
                         {
                             id: sortIndicator
