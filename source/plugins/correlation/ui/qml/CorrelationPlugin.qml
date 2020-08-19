@@ -205,6 +205,7 @@ PluginContent
             checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Bars
             onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Bars; }
         }
+
         Action
         {
             id: graphDeviationVisual
@@ -331,6 +332,7 @@ PluginContent
         title: "X Axis Label"
 
         standardButtons: StandardButton.Ok | StandardButton.Cancel
+
         RowLayout
         {
             Text
@@ -356,6 +358,7 @@ PluginContent
         title: "Y Axis Label"
 
         standardButtons: StandardButton.Ok | StandardButton.Cancel
+
         RowLayout
         {
             Text
