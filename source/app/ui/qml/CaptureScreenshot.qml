@@ -286,7 +286,7 @@ Window
                                 aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
 
                             var pixelPrintSize = Math.round(printWidthSpin.value * dpiSpin.value * _MMTOINCH);
-                            if(pixelPrintSize != value)
+                            if(pixelPrintSize !== value)
                                 printWidthSpin.value = (value / dpiSpin.value) / _MMTOINCH;
 
                         }
@@ -311,7 +311,7 @@ Window
                                 aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
 
                             var pixelPrintSize = Math.round(printHeightSpin.value * dpiSpin.value * _MMTOINCH);
-                            if(pixelPrintSize != value)
+                            if(pixelPrintSize !== value)
                                 printHeightSpin.value = (value / dpiSpin.value) / _MMTOINCH;
                         }
                     }
