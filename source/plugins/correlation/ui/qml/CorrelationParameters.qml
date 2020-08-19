@@ -499,7 +499,7 @@ BaseParameterDialog
                 {
                     target: tabularDataParser.model
 
-                    onModelReset:
+                    function onModelReset()
                     {
                         selectedCol = 0;
                         selectedRow = 0;
@@ -782,7 +782,7 @@ BaseParameterDialog
                         {
                             target: tabularDataParser
 
-                            onGraphSizeEstimateInProgressChanged:
+                            function onGraphSizeEstimateInProgressChanged()
                             {
                                 if(!tabularDataParser.graphSizeEstimateInProgress)
                                 {

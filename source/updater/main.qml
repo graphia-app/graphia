@@ -202,7 +202,7 @@ ApplicationWindow
     Connections
     {
         target: installer
-        onCompleteChanged:
+        function onCompleteChanged()
         {
             if(installer.complete)
                 installer.setStatus(installer.success ? "installed" : "failed");

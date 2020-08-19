@@ -1850,7 +1850,7 @@ Item
     {
         target: document
 
-        onCommandInProgressChanged:
+        function onCommandInProgressChanged()
         {
             if(document.commandInProgress)
                 commandTimer.start();
@@ -1861,7 +1861,7 @@ Item
             }
         }
 
-        onLoadComplete:
+        function onLoadComplete(url, success)
         {
             if(success)
                 _refreshNumAttributesWithSharedValues();
@@ -1869,9 +1869,12 @@ Item
             root.loadComplete(url, success);
         }
 
-        onGraphChanged: { _refreshNumAttributesWithSharedValues(); }
+        function onGraphChanged(graph, changeOccurred)
+        {
+            _refreshNumAttributesWithSharedValues();
+        }
 
-        onEnrichmentAnalysisComplete:
+        function onEnrichmentAnalysisComplete()
         {
             enrichmentAnalysisComplete();
         }

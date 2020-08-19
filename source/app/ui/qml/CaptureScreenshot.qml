@@ -473,7 +473,7 @@ Window
             {
                 target: fileDialog.selectedNameFilter
 
-                onIndexChanged:
+                function onIndexChanged()
                 {
                     if(fileDialog.visible)
                         fileDialog.updateFileExtension();
@@ -518,12 +518,14 @@ Window
     Connections
     {
         target: graphView
-        onWidthChanged:
+
+        function onWidthChanged()
         {
             presetsListModel.update();
             loadPreset(presets.currentIndex);
         }
-        onHeightChanged:
+
+        function onHeightChanged()
         {
             presetsListModel.update();
             loadPreset(presets.currentIndex);
@@ -533,12 +535,14 @@ Window
     Connections
     {
         target: graphView
-        onPreviewComplete:
+
+        function onPreviewComplete(previewBase64)
         {
             preview.source = "data:image/png;base64," + previewBase64;
             preview.visible = true;
         }
-        onHeightChanged:
+
+        function onHeightChanged()
         {
             loadPreset(presets.currentIndex);
         }
