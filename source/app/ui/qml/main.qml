@@ -758,7 +758,11 @@ ApplicationWindow
         text: currentDocument ? currentDocument.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
         enabled: currentDocument ? currentDocument.canUndo : false
-        onTriggered: currentDocument && currentDocument.undo()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.undo();
+        }
     }
 
     Action
@@ -768,7 +772,11 @@ ApplicationWindow
         text: currentDocument ? currentDocument.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
         enabled: currentDocument ? currentDocument.canRedo : false
-        onTriggered: currentDocument && currentDocument.redo()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.redo();
+        }
     }
 
     Action
@@ -780,7 +788,7 @@ ApplicationWindow
         property bool visible: currentDocument ?
             currentDocument.canDeleteSelection : false
         enabled: currentDocument ? !currentDocument.busy && visible : false
-        onTriggered: currentDocument.deleteSelectedNodes()
+        onTriggered: { currentDocument.deleteSelectedNodes(); }
     }
 
     Action
@@ -790,7 +798,11 @@ ApplicationWindow
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
         enabled: currentDocument ? !currentDocument.busy : false
-        onTriggered: currentDocument && currentDocument.selectAll()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectAll();
+        }
     }
 
     Action
@@ -800,7 +812,11 @@ ApplicationWindow
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
         enabled: currentDocument ? !currentDocument.busy : false
-        onTriggered: currentDocument && currentDocument.selectAllVisible()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectAllVisible();
+        }
     }
 
     Action
@@ -809,7 +825,11 @@ ApplicationWindow
         text: qsTr("Select &None")
         shortcut: "Ctrl+N"
         enabled: currentDocument ? !currentDocument.busy : false
-        onTriggered: currentDocument && currentDocument.selectNone()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectNone();
+        }
     }
 
     Action
@@ -819,7 +839,11 @@ ApplicationWindow
         property bool visible: currentDocument ?
             currentDocument.directed && !currentDocument.nodeSelectionEmpty : false
         enabled: currentDocument ? !currentDocument.busy && visible : false
-        onTriggered: currentDocument && currentDocument.selectSources()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectSources();
+        }
     }
 
     Action
@@ -829,7 +853,11 @@ ApplicationWindow
         property bool visible: currentDocument ?
             currentDocument.directed && !currentDocument.nodeSelectionEmpty : false
         enabled: currentDocument ? !currentDocument.busy && visible : false
-        onTriggered: currentDocument && currentDocument.selectTargets()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectTargets();
+        }
     }
 
     Action
@@ -840,7 +868,11 @@ ApplicationWindow
         property bool visible: currentDocument ?
             !currentDocument.nodeSelectionEmpty : false
         enabled: currentDocument ? !currentDocument.busy && visible : false
-        onTriggered: currentDocument && currentDocument.selectNeighbours()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.selectNeighbours();
+        }
     }
 
     Action
@@ -851,7 +883,11 @@ ApplicationWindow
 
         shortcut: "Ctrl+R"
         enabled: currentDocument && currentDocument.canRepeatLastSelection
-        onTriggered: currentDocument && currentDocument.repeatLastSelection()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.repeatLastSelection();
+        }
     }
 
     Action
@@ -860,7 +896,11 @@ ApplicationWindow
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
         enabled: currentDocument ? !currentDocument.busy : false
-        onTriggered: currentDocument && currentDocument.invertSelection()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.invertSelection();
+        }
     }
 
     Action
@@ -918,7 +958,11 @@ ApplicationWindow
         text: qsTr("Goto &Previous Component")
         shortcut: "PgUp"
         enabled: currentDocument ? currentDocument.canChangeComponent : false
-        onTriggered: currentDocument && currentDocument.gotoPrevComponent()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.gotoPrevComponent();
+        }
     }
 
     Action
@@ -927,7 +971,11 @@ ApplicationWindow
         text: qsTr("Goto &Next Component")
         shortcut: "PgDown"
         enabled: currentDocument ? currentDocument.canChangeComponent : false
-        onTriggered: currentDocument && currentDocument.gotoNextComponent()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.gotoNextComponent();
+        }
     }
 
     Action
@@ -1010,7 +1058,11 @@ ApplicationWindow
                   qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
         enabled: currentDocument ? !currentDocument.busy : false
-        onTriggered: currentDocument && currentDocument.toggleLayout()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.toggleLayout();
+        }
     }
 
     Action
@@ -1048,7 +1100,11 @@ ApplicationWindow
         text: qsTr("&Overview Mode")
         shortcut: enabled && currentDocument && !currentDocument.findVisible ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
-        onTriggered: currentDocument && currentDocument.switchToOverviewMode()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.switchToOverviewMode();
+        }
     }
 
     Action
@@ -1058,7 +1114,11 @@ ApplicationWindow
         text: qsTr("&Reset View")
         shortcut: enabled && currentDocument && !currentDocument.findVisible && !overviewModeAction.enabled ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canResetView : false
-        onTriggered: currentDocument && currentDocument.resetView()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.resetView();
+        }
     }
 
     Action
@@ -1312,7 +1372,11 @@ ApplicationWindow
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
         enabled: currentDocument
-        onTriggered: currentDocument && currentDocument.screenshot()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.screenshot();
+        }
     }
 
     Action
@@ -1339,7 +1403,12 @@ ApplicationWindow
         text: currentDocument ? (currentDocument.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
             currentDocument.pluginName : ""
         enabled: currentDocument && currentDocument.hasPluginUI && !currentDocument.pluginPoppedOut
-        onTriggered: currentDocument && currentDocument.toggleMinimise()
+
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.toggleMinimise();
+        }
     }
 
     // The shortcut to minimise the plugin is sometimes Esc, but we also always want Ctrl+M to
@@ -1359,7 +1428,11 @@ ApplicationWindow
         checkable: true
         checked: currentDocument && currentDocument.pluginPoppedOut
         enabled: currentDocument && currentDocument.hasPluginUI
-        onTriggered: currentDocument && currentDocument.togglePop()
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.togglePop();
+        }
     }
 
     Action
@@ -1686,49 +1759,49 @@ ApplicationWindow
                 MenuItem
                 {
                     text: qsTr("Null Pointer Deference");
-                    onTriggered: application.crash(CrashType.NullPtrDereference);
+                    onTriggered: { application.crash(CrashType.NullPtrDereference); }
                 }
                 MenuItem
                 {
                     text: qsTr("C++ Exception");
-                    onTriggered: application.crash(CrashType.CppException);
+                    onTriggered: { application.crash(CrashType.CppException); }
                 }
                 MenuItem
                 {
                     text: qsTr("Fatal Error");
-                    onTriggered: application.crash(CrashType.FatalError);
+                    onTriggered: { application.crash(CrashType.FatalError); }
                 }
                 MenuItem
                 {
                     text: qsTr("Infinite Loop");
-                    onTriggered: application.crash(CrashType.InfiniteLoop);
+                    onTriggered: { application.crash(CrashType.InfiniteLoop); }
                 }
                 MenuItem
                 {
                     text: qsTr("Deadlock");
-                    onTriggered: application.crash(CrashType.Deadlock);
+                    onTriggered: { application.crash(CrashType.Deadlock); }
                 }
                 MenuItem
                 {
                     text: qsTr("Hitch");
-                    onTriggered: application.crash(CrashType.Hitch);
+                    onTriggered: { application.crash(CrashType.Hitch); }
                 }
                 MenuItem
                 {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception");
-                    onTriggered: application.crash(CrashType.Win32Exception);
+                    onTriggered: { application.crash(CrashType.Win32Exception); }
                 }
                 MenuItem
                 {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception Non-Continuable");
-                    onTriggered: application.crash(CrashType.Win32ExceptionNonContinuable);
+                    onTriggered: { application.crash(CrashType.Win32ExceptionNonContinuable); }
                 }
                 MenuItem
                 {
                     text: qsTr("Silent Submit");
-                    onTriggered: application.crash(CrashType.SilentSubmit);
+                    onTriggered: { application.crash(CrashType.SilentSubmit); }
                 }
             }
             MenuItem { action: dumpGraphAction }
