@@ -82,7 +82,7 @@ Dialog
 
                     for(var i = 0; i < fileTypeChooserDialog.fileTypes.length; i++)
                     {
-                        if(i != 0) s += "|";
+                        if(i !== 0) s += "|";
                         s += fileTypeChooserDialog.fileTypes[i];
                     }
 

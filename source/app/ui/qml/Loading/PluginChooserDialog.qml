@@ -84,7 +84,7 @@ Dialog
 
                     for(var i = 0; i < pluginChooserDialog.pluginNames.length; i++)
                     {
-                        if(i != 0) s += "|";
+                        if(i !== 0) s += "|";
                         s += pluginChooserDialog.pluginNames[i];
                     }
 
