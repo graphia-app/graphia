@@ -152,7 +152,7 @@ then
 fi
 
 parallel -k -n1 -P${NUM_CORES} \
-  clazy-standalone -p ${BUILD_DIR}/compile_commands.json \
+  ${CLAZY} --standalone -p ${BUILD_DIR}/compile_commands.json \
   -header-filter="\"^((?!thirdparty).)*$\"" \
   ${CHECKS} {} \
   ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clazy.log

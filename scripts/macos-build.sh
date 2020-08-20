@@ -74,11 +74,3 @@ for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
   makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
 done
-
-(
-  cd ${BUILD_DIR}
-
-  # Clean intermediate build products
-  grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
-    cut -d' ' -f2 | xargs -n1 ninja -t clean -r
-)

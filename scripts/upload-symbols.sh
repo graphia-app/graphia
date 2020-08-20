@@ -18,6 +18,12 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+if [ -z "${SYM_UPLOAD_URL}" ]
+then
+  echo "No symbol upload url supplied, skipping..."
+  exit 0
+fi
+
 BUILD_DIR="build"
 
 SYM_FILES=$(find ${BUILD_DIR} -iname "*.sym")

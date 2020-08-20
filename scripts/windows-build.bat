@@ -20,7 +20,7 @@
 call scripts\defaults.bat
 
 set BUILD_DIR=build
-rmdir /s /q %BUILD_DIR%
+IF EXIST %BUILD_DIR% rmdir /s /q %BUILD_DIR%
 mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
@@ -30,11 +30,6 @@ cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja ^
     .. || EXIT /B 1
 type variables.bat
 cmake --build . --target all || EXIT /B 1
-
-REM Clean intermediate build products
-FOR /f "tokens=2" %%R IN ('findstr "_COMPILER_ _STATIC_LIBRARY_" rules.ninja') DO (
-  ninja -t clean -r %%~R
-)
 
 cd ..
 
