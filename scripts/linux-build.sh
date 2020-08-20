@@ -51,8 +51,4 @@ mkdir -p ${BUILD_DIR}
   cat variables.sh
   cmake --build . --target install 2>&1 | tee compiler.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
-
-  # Clean intermediate build products
-  grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
-    cut -d' ' -f2 | xargs -n1 ninja -t clean -r
 )

@@ -18,6 +18,23 @@
 # along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+CERTIFICATE_P12_FILE=certificate.p12
+
+if [ -n "${APPLE_CERTIFICATE_P12_BASE64}" ]
+then
+  echo ${APPLE_CERTIFICATE_P12_BASE64} | base64 --decode > ${CERTIFICATE_P12_FILE}
+
+  security create-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+  security default-keychain -s build.keychain
+  security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+  security import ${CERTIFICATE_P12_FILE} -k build.keychain \
+      -P ${APPLE_CERTIFICATE_PASSWORD} -T /usr/bin/codesign
+  security set-key-partition-list -S apple-tool:,apple: -s -k ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+
+  rm -rf ${CERTIFICATE_P12_FILE}
+  SIGNING_ENABLED=true
+fi
+
 BUILD_DIR=build
 
 . ${BUILD_DIR}/variables.sh
@@ -25,7 +42,10 @@ BUILD_DIR=build
 # MacOS doesn't have readlink, hence this hackery
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
-security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+if [ -n "${SIGNING_ENABLED}" ]
+then
+  security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+fi
 
 cd ${BUILD_DIR}
 
@@ -68,13 +88,18 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/Updater \
   -codesign="${APPLE_SIGN_ID}"
 
-# Need to sign again because macdeployqt won't sign the additional executables
-echo "Resigning..."
-codesign --verbose --deep --force --options runtime --sign "${APPLE_SIGN_ID}" \
-  ${PRODUCT_NAME}.app || exit $?
-echo "Verifying..."
-codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
-echo "OK"
+macdeployqt ${PRODUCT_NAME}.app ${MACDEPLOYQT_ARGS}
+
+if [ -n "${SIGNING_ENABLED}" ]
+then
+  # Need to sign again because macdeployqt won't sign the additional executables
+  echo "Resigning..."
+  codesign --verbose --deep --force --options runtime --sign "${APPLE_SIGN_ID}" \
+    ${PRODUCT_NAME}.app || exit $?
+  echo "Verifying..."
+  codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
+  echo "OK"
+fi
 
 cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   -e "s/_PRODUCT_NAME_/${PRODUCT_NAME}/g" \
@@ -82,6 +107,12 @@ cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   dmg.spec.json
 rm -f ${PRODUCT_NAME}-${VERSION}.dmg && appdmg dmg.spec.json \
   ${PRODUCT_NAME}-${VERSION}.dmg
+
+if [ -z "${APPLE_NOTARIZATION_USERNAME}" ]
+then
+  echo "No notarization credentials supplied, skipping..."
+  exit 0
+fi
 
 # Apple notarization
 echo "Submitting notarization request..."

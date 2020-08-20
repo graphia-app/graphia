@@ -1,0 +1,181 @@
+name: Build
+on: [push]
+env:
+  QT_VERSION: 5.15.0
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-16.04
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - name: Compile
+      run: scripts/linux-build.sh
+      env:
+        CC: gcc-9
+        CXX: g++-9
+    - name: AppImage
+      run: |
+        curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage -o linuxdeployqt
+        chmod +x linuxdeployqt
+        sudo apt install -y libxcb-*
+        installers/linux/build.sh
+      env:
+        CC: gcc-9
+        CXX: g++-9
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Linux AppImage
+        path: build/gcc/Graphia-*.tar.gz
+    - name: Upload Symbols
+      run: scripts/upload-symbols.sh
+      shell: bash
+      env:
+        SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
+  windows:
+    name: Windows
+    runs-on: windows-2019
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: joncloud/makensis-action@v1.2
+      with:
+        just-include: true
+    - name: Compile
+      shell: cmd
+      run: call scripts\windows-build.bat
+    - name: NSIS Installer
+      shell: cmd
+      run: call installers\windows\build.bat
+      env:
+        CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT"
+        WINDOWS_SIGN_KEYSTORE_BASE64: ${{ secrets.WINDOWS_SIGN_KEYSTORE_BASE64 }}
+        WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
+        WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
+        WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Windows Installer
+        path: build/Graphia-*-installer.exe
+    - name: Upload Symbols
+      run: scripts/upload-symbols.sh
+      shell: bash
+      env:
+        SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
+  macos:
+    name: macOS
+    runs-on: macos-10.15
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12'
+    - name: Compile
+      run: scripts/macos-build.sh
+    - name: app and dmg
+      run: |
+        npm install -g appdmg
+        installers/macos/build.sh
+      env:
+        APPLE_CERTIFICATE_P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12_BASE64 }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+        APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
+        APPLE_NOTARIZATION_PROVIDER_SHORTNAME: ${{ secrets.APPLE_NOTARIZATION_PROVIDER_SHORTNAME }}
+        APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
+        APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macOS Disk Image
+        path: build/Graphia-*.dmg
+    - name: Upload Symbols
+      run: scripts/upload-symbols.sh
+      shell: bash
+      env:
+        SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-16.04
+    steps:
+    - name: Install Tools
+      run: |
+        sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        sudo apt install libc++-10-dev libc++1-10 libc++abi-10-dev libc++abi1-10
+        sudo apt install clang-tidy-10 cppcheck
+        curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
+        chmod +x clazy
+        sudo mv clazy /usr/local/bin/
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '5.15.0'
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - name: Compile
+      run: scripts/linux-build.sh
+      env:
+        CC: clang-10
+        CXX: clang++-10
+    - name: Analyse
+      run: scripts/static-analysis.sh -v
+      env:
+        CC: clang-10
+        CXX: clang++-10
+        CLANGTIDY: clang-tidy-10
+        CPPCHECK: cppcheck
+        CLAZY: clazy
+  release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs:
+      - linux
+      - windows
+      - macos
+      - static-analysis
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        path: release
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+    - name: Upload Binaries
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: release/*/*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true

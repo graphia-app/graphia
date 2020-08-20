@@ -125,17 +125,7 @@ elseif(GIT)
     execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
         OUTPUT_VARIABLE GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    if ("${GIT_BRANCH}" STREQUAL "HEAD")
-        # Detached HEAD state - travis likes to do this for some reason
-        execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} show -s --pretty=%D HEAD
-            OUTPUT_VARIABLE GIT_REFS OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-        # Find the active branch by selecting the last ref
-        string(REGEX MATCHALL "([^,]+, |[^,]+$)" GIT_REFS_LIST "${GIT_REFS}")
-        list(GET GIT_REFS_LIST -1 GIT_BRANCH)
-    endif()
-
-    if ("${GIT_BRANCH}" STREQUAL "master" OR "${GIT_COMMIT_COUNT}" EQUAL 0)
+    if("${GIT_COMMIT_COUNT}" EQUAL 0 OR "${GIT_BRANCH}" MATCHES "^master|HEAD$")
         set(Version "${GIT_DESCRIBE}")
     else()
         set(Version "${GIT_DESCRIBE}-${GIT_BRANCH}")
