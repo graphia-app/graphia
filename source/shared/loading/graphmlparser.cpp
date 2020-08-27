@@ -97,11 +97,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                     qDebug() << "WARNING: nested graphs not supported";
                 }
             }
-
-            if(graphNestLevel != 1)
-                break;
-
-            if(elementName == QStringLiteral("key"))
+            else if(elementName == QStringLiteral("key"))
             {
                 if(!attributes.hasAttribute("attr.name"))
                     break;
@@ -120,7 +116,11 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 else if(attributes.value("for") == QStringLiteral("edge"))
                     edgeAttributes.emplace(keyId.toString(), attributeName.toString());
             }
-            else if(elementName == QStringLiteral("node"))
+
+            if(graphNestLevel != 1)
+                break;
+
+            if(elementName == QStringLiteral("node"))
             {
                 if(!attributes.hasAttribute("id"))
                 {
