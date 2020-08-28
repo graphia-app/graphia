@@ -88,23 +88,29 @@ private:
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
+        _threadActive = true;
         emit commandProgressChanged();
         emit commandVerbChanged();
         emit commandIsCancellableChanged();
 
         _commandProgressTimerId = startTimer(200);
 
-        // If the command thread is still active, we shouldn't be here
+        // If the command thread is still joinable, we shouldn't be here
         Q_ASSERT(!_thread.joinable());
 
         if(!_busy)
         {
             _busy = true;
             emit started();
+
+            // The thread REALLY shouldn't be joinable yet
+            Q_ASSERT(!_thread.joinable());
         }
 
         _thread = std::thread(std::forward<Fn>(fn));
     }
+
+    void joinThread();
 
     void clearCurrentCommand();
 
@@ -156,6 +162,7 @@ private:
     int _lastExecutedIndex = -1;
 
     std::thread _thread;
+    bool _threadActive = false;
     mutable std::recursive_mutex _mutex;
     mutable std::recursive_mutex _queueMutex;
 

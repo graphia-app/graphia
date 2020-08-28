@@ -41,7 +41,7 @@ CommandManager::~CommandManager()
         if(_currentCommand != nullptr)
             _currentCommand->cancel();
 
-        _thread.join();
+        joinThread();
     }
 }
 
@@ -300,8 +300,7 @@ void CommandManager::clearCommandStack()
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     // If a command is still in progress, wait until it's finished
-    if(_thread.joinable())
-        _thread.join();
+    joinThread();
 
     clearCommandStackNoLocking();
 }
@@ -349,10 +348,18 @@ void CommandManager::wait()
 {
     do
     {
-        if(_thread.joinable())
-            _thread.join();
+        joinThread();
     }
     while(commandsArePending());
+}
+
+void CommandManager::joinThread()
+{
+    if(_thread.joinable())
+    {
+        _thread.join();
+        _threadActive = false;
+    }
 }
 
 void CommandManager::timerEvent(QTimerEvent*)
@@ -406,8 +413,7 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
     killTimer(_commandProgressTimerId);
     _commandProgressTimerId = -1;
 
-    if(_thread.joinable())
-        _thread.join();
+    joinThread();
 
     if(_debug > 1)
     {
@@ -438,7 +444,7 @@ void CommandManager::onCommandCompleted(bool success, const QString& description
 
 void CommandManager::update()
 {
-    if(_thread.joinable() || !commandsArePending())
+    if(_threadActive || !commandsArePending())
         return;
 
     auto pendingCommand = nextPendingCommand();
