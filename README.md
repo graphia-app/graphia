@@ -1,6 +1,6 @@
 # [Graphia](https://graphia.app/)
 
-[![Build Status](https://travis-ci.com/graphia-app/graphia.svg?branch=master)](https://travis-ci.com/graphia-app/graphia)
+[![Build Status](https://github.com/graphia-app/graphia/workflows/Build/badge.svg)](https://github.com/graphia-app/graphia/actions?query=workflow%3ABuild)
 
 Graphia is a powerful open source visual analytics application developed to aid the interpretation of large and complex datasets.
 
