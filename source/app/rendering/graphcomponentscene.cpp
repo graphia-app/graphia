@@ -257,7 +257,8 @@ void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransit
     if(!componentId.isNull() && componentId == _componentId)
         return;
 
-    saveViewData();
+    if(visible())
+        saveViewData();
 
     if(doTransition)
     {
