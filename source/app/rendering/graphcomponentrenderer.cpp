@@ -113,6 +113,8 @@ void GraphComponentRenderer::cleanup()
 
     _initialised = false;
     _visible = false;
+
+    _viewData = _savedViewData = {};
 }
 
 void GraphComponentRenderer::synchronise()
