@@ -54,9 +54,6 @@ jobs:
         fetch-depth: 0
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v2
-    - uses: joncloud/makensis-action@v1.2
-      with:
-        just-include: true
     - name: Compile
       shell: cmd
       run: call scripts\windows-build.bat
