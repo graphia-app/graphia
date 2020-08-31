@@ -5,6 +5,8 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     add_definitions(-DQT_QML_DEBUG)
 endif()
 
+set(OpenGL_GL_PREFERENCE "LEGACY")
+
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
