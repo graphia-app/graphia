@@ -251,6 +251,7 @@ void GPUGraphData::reset()
     _componentAlpha = 0.0f;
     _unhighlightAlpha = 0.0f;
     _isOverlay = false;
+    _elementsSelected = false;
     _nodeData.clear();
     _edgeData.clear();
     _glyphData.clear();
