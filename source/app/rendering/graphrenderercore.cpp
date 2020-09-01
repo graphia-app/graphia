@@ -866,6 +866,9 @@ void GraphRendererCore::render2D(QRect selectionRect)
 
         _selectionMarkerShader.release();
         _selectionMarkerDataBuffer.release();
+
+        // Force rendering of the selection layer
+        gpuGraphData._elementsSelected = true;
     }
 
     glEnable(GL_DEPTH_TEST);
