@@ -165,6 +165,14 @@ Item
         return sharedValuesProxyModel.count;
     }
 
+    onNumAttributesWithSharedValuesChanged:
+    {
+        // If (for whatever reason) we end up with no shared attribute values, and
+        // FBAV is showing, we need to hide it or the UI will end up in a weird state
+        if(root.findType === Find.ByAttribute && numAttributesWithSharedValues <= 0)
+            hideFind();
+    }
+
     property var sharedValuesAttributeNames:
     {
         var attributeNames = [];
