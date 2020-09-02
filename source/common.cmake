@@ -71,8 +71,8 @@ endif()
 if(MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 
-    # Enable warnings
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    # Enable some warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
 
     # MSVC is picky with UTF8 files recognition so force it on
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")

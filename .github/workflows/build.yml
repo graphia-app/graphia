@@ -16,6 +16,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - uses: timangus/cpp-problem-matcher@master
     - uses: seanmiddleditch/gha-setup-ninja@v2
     - name: Compile
       run: scripts/linux-build.sh
@@ -52,6 +53,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - uses: timangus/cpp-problem-matcher@master
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v2
     - name: Compile
@@ -87,6 +89,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - uses: timangus/cpp-problem-matcher@master
     - uses: seanmiddleditch/gha-setup-ninja@v2
     - uses: actions/setup-node@v1
       with:
@@ -134,6 +137,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - uses: timangus/cpp-problem-matcher@master
     - uses: seanmiddleditch/gha-setup-ninja@v2
     - name: Compile
       run: scripts/linux-build.sh
