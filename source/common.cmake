@@ -71,14 +71,23 @@ endif()
 if(MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 
+    # Enable warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+
     # MSVC is picky with UTF8 files recognition so force it on
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+
     # Disable large numbers of encoding warnings for boost with utf8 encoding on
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4828")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4996")
+    # Disable inherits via dominance
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
 
-    if(DEFINED ENV{JENKINS_HOME})
+    # Disable deprecated warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
+
+    # Only do VCAnalyze on CI
+    if(DEFINED ENV{CI})
         set(VC_ANALYZE_FLAGS "/analyze /analyze:ruleset \
             ${CMAKE_SOURCE_DIR}\\scripts\\VCAnalyze.ruleset")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${VC_ANALYZE_FLAGS}")
