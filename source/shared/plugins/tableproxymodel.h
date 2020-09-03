@@ -30,6 +30,9 @@
 #include <QStandardItemModel>
 #include <QCollator>
 
+#include <deque>
+#include <utility>
+
 // As QSortFilterProxyModel cannot set column orders, we do it ourselves by translating columns
 // in the data() function. This has a number of consequences regarding proxy/source mappings.
 
@@ -49,8 +52,8 @@ class TableProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(QAbstractItemModel* headerModel READ headerModel CONSTANT)
     Q_PROPERTY(std::vector<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
     Q_PROPERTY(std::vector<int> columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
-    Q_PROPERTY(int sortColumn MEMBER _sortColumn WRITE setSortColumn NOTIFY sortColumnChanged)
-    Q_PROPERTY(Qt::SortOrder sortOrder MEMBER _sortOrder WRITE setSortOrder NOTIFY sortOrderChanged)
+    Q_PROPERTY(int sortColumn READ sortColumn_ WRITE setSortColumn NOTIFY sortColumnChanged)
+    Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder_ WRITE setSortOrder NOTIFY sortOrderChanged)
 
 private:
     QStandardItemModel _headerModel;
@@ -61,25 +64,27 @@ private:
     std::vector<int> _sourceColumnOrder;
     std::vector<int> _orderedProxyToSourceColumn;
     std::vector<int> _unorderedSourceToProxyColumn;
+
     QCollator _collator;
-    int _sortColumn = -1;
-    Qt::SortOrder _sortOrder = Qt::DescendingOrder;
+    std::deque<std::pair<int, Qt::SortOrder>> _sortColumnAndOrders;
+
     enum Roles
     {
         SubSelectedRole = Qt::UserRole + 999
     };
 
-    QAbstractItemModel* headerModel()
-    {
-        return &_headerModel;
-    }
+    QAbstractItemModel* headerModel() { return &_headerModel; }
     void calculateOrderedProxySourceMapping();
     void calculateUnorderedSourceProxyColumnMapping();
     void updateSourceModelFilter();
+
+    void resort();
+
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
-    bool lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const override;
+    bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
+
 public:
     QVariant data(const QModelIndex &index, int role) const override;
 
@@ -109,8 +114,14 @@ public:
 
     void setHiddenColumns(std::vector<int> hiddenColumns);
     void setColumnOrder(const std::vector<int>& columnOrder);
-    void setSortColumn(int sortColumn);
-    void setSortOrder(Qt::SortOrder sortOrder);
+
+    // The underscores are to avoid clashes with QSortFilterProxyModel::sort[Column|Order]
+    int sortColumn_() const;
+    void setSortColumn(int newSortColumn);
+
+    Qt::SortOrder sortOrder_() const;
+    void setSortOrder(Qt::SortOrder newSortOrder);
+
 signals:
     void sortColumnChanged(int sortColumn);
     void sortOrderChanged(int sortColumn);
@@ -120,9 +131,6 @@ signals:
     void filterPatternChanged();
     void filterValueChanged();
 
-    void sortRoleNameChanged();
-    void ascendingSortOrderChanged();
-
     void showCalculatedColumnsChanged();
     void columnOrderChanged();
 
@@ -130,13 +138,15 @@ public slots:
     void invalidateFilter();
 };
 
-// This will only occur from a DLL, where we need to delay the
-// initialisation until later so we can guarantee it occurs
-// after any static initialisation
 static void initialiser()
 {
     if(!QCoreApplication::startingUp())
+    {
+        // This will only occur from a DLL, where we need to delay the
+        // initialisation until later so we can guarantee it occurs
+        // after any static initialisation
         QTimer::singleShot(0, [] { TableProxyModel::registerQmlType(); });
+    }
     else
         TableProxyModel::registerQmlType();
 }

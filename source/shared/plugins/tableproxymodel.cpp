@@ -159,28 +159,59 @@ void TableProxyModel::setColumnOrder(const std::vector<int>& columnOrder)
     invalidateFilter();
 }
 
-void TableProxyModel::setSortColumn(int sortColumn)
+int TableProxyModel::sortColumn_() const
 {
-    if(sortColumn < 0)
-        return;
+    if(_sortColumnAndOrders.empty())
+        return -1;
 
-    _sortColumn = sortColumn;
-
-    auto sourceSortColumn = static_cast<size_t>(_sortColumn);
-    this->sort(_unorderedSourceToProxyColumn.at(sourceSortColumn), _sortOrder);
-    emit sortColumnChanged(sortColumn);
+    return _sortColumnAndOrders.front().first;
 }
 
-void TableProxyModel::setSortOrder(Qt::SortOrder sortOrder)
+void TableProxyModel::setSortColumn(int newSortColumn)
 {
-    _sortOrder = sortOrder;
-
-    if(_sortColumn < 0)
+    if(newSortColumn < 0 || newSortColumn == sortColumn_())
         return;
 
-    auto sourceSortColumn = static_cast<size_t>(_sortColumn);
-    this->sort(_unorderedSourceToProxyColumn.at(sourceSortColumn), _sortOrder);
-    emit sortOrderChanged(sortOrder);
+    auto currentSortOrder = Qt::AscendingOrder;
+
+    auto existing = std::find_if(_sortColumnAndOrders.begin(), _sortColumnAndOrders.end(),
+    [newSortColumn](const auto& value)
+    {
+        return value.first == newSortColumn;
+    });
+
+    // If the column has been sorted on before, remove it so
+    // that adding it brings it to the front
+    if(existing != _sortColumnAndOrders.end())
+    {
+        currentSortOrder = existing->second;
+        _sortColumnAndOrders.erase(existing);
+    }
+
+    _sortColumnAndOrders.emplace_front(newSortColumn, currentSortOrder);
+
+    resort();
+    emit sortColumnChanged(newSortColumn);
+    emit sortOrderChanged(currentSortOrder);
+}
+
+Qt::SortOrder TableProxyModel::sortOrder_() const
+{
+    if(_sortColumnAndOrders.empty())
+        return Qt::DescendingOrder;
+
+    return _sortColumnAndOrders.front().second;
+}
+
+void TableProxyModel::setSortOrder(Qt::SortOrder newSortOrder)
+{
+    if(_sortColumnAndOrders.empty() || newSortOrder == sortOrder_())
+        return;
+
+    _sortColumnAndOrders.front().second = newSortOrder;
+
+    resort();
+    emit sortOrderChanged(newSortOrder);
 }
 
 void TableProxyModel::invalidateFilter()
@@ -203,16 +234,46 @@ void TableProxyModel::updateSourceModelFilter()
     connect(sourceModel(), &QAbstractItemModel::layoutChanged, this, &TableProxyModel::invalidateFilter);
 }
 
-bool TableProxyModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
+void TableProxyModel::resort()
 {
-    const auto& left = sourceModel()->data(sourceLeft, Qt::DisplayRole);
-    const auto& right = sourceModel()->data(sourceRight, Qt::DisplayRole);
+    invalidate();
 
-    if(static_cast<QMetaType::Type>(left.type()) == QMetaType::QString &&
-        static_cast<QMetaType::Type>(right.type()) == QMetaType::QString)
+    // The parameters to this don't really matter, because the actual ordering is determined
+    // by the implementation of lessThan, in combination with the contents of _sortColumnAndOrders
+    sort(0);
+}
+
+bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
+{
+    auto rowA = a.row();
+    auto rowB = b.row();
+
+    for(const auto& sortColumnAndOrder : _sortColumnAndOrders)
     {
-        return _collator.compare(left.toString(), right.toString()) < 0;
+        auto column = _unorderedSourceToProxyColumn.at(sortColumnAndOrder.first);
+        auto order = sortColumnAndOrder.second;
+
+        auto indexA = sourceModel()->index(rowA, column);
+        auto indexB = sourceModel()->index(rowB, column);
+
+        auto valueA = sourceModel()->data(indexA, Qt::DisplayRole);
+        auto valueB = sourceModel()->data(indexB, Qt::DisplayRole);
+
+        if(valueA == valueB)
+            continue;
+
+        if(static_cast<QMetaType::Type>(valueA.type()) == QMetaType::QString &&
+            static_cast<QMetaType::Type>(valueB.type()) == QMetaType::QString)
+        {
+            return order == Qt::DescendingOrder ?
+                _collator.compare(valueB.toString(), valueA.toString()) < 0 :
+                _collator.compare(valueA.toString(), valueB.toString()) < 0;
+        }
+
+        return order == Qt::DescendingOrder ?
+            QSortFilterProxyModel::lessThan(indexB, indexA) :
+            QSortFilterProxyModel::lessThan(indexA, indexB);
     }
 
-    return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
+    return false;
 }
