@@ -53,5 +53,6 @@
         <file>qml/Visualisation/VisualisationUtils.js</file>
         <file>qml/TextDialog.qml</file>
         <file>qml/NewUpdate.qml</file>
+        <file>qml/LayoutSetting.qml</file>
     </qresource>
 </RCC>

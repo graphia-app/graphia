@@ -76,48 +76,26 @@ Rectangle
             {
                 model: document.layoutSettings
 
-                RowLayout
+                LayoutSetting
                 {
-                    Label
+                    onValueChanged:
                     {
-                        id: label
-
-                        MouseArea
-                        {
-                            anchors.fill: parent
-
-                            onDoubleClicked:
-                            {
-                                document.resetLayoutSettingValue(modelData);
-                                var setting = document.layoutSetting(modelData);
-                                slider.value = setting.normalisedValue;
-                            }
-                        }
+                        root.document.setLayoutSettingNormalisedValue(modelData, value);
+                        root.valueChanged();
                     }
 
-                    Item { Layout.fillWidth: true }
-
-                    Slider
+                    onReset:
                     {
-                        id: slider
-                        minimumValue: 0.0
-                        maximumValue: 1.0
-
-                        onValueChanged:
-                        {
-                            if(pressed)
-                            {
-                                document.setLayoutSettingNormalisedValue(modelData, value);
-                                root.valueChanged();
-                            }
-                        }
+                        root.document.resetLayoutSettingValue(modelData);
+                        var setting = root.document.layoutSetting(modelData);
+                        value = setting.normalisedValue;
                     }
 
                     Component.onCompleted:
                     {
-                        var setting = document.layoutSetting(modelData);
-                        label.text = setting.displayName;
-                        slider.value = setting.normalisedValue;
+                        var setting = root.document.layoutSetting(modelData);
+                        name = setting.displayName;
+                        value = setting.normalisedValue;
                     }
                 }
             }
