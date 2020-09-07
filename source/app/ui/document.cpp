@@ -308,18 +308,28 @@ LayoutPauseState Document::layoutPauseState()
     return LayoutPauseState::Running;
 }
 
-void Document::toggleLayout()
+void Document::setUserLayoutPaused(bool userLayoutPaused)
 {
-    if(busy())
+    if(busy() || _userLayoutPaused == userLayoutPaused)
         return;
 
-    _userLayoutPaused = !_userLayoutPaused;
+    _userLayoutPaused = userLayoutPaused;
     _layoutRequired = true;
     emit layoutPauseStateChanged();
 
     updateLayoutState();
 
     setSaveRequired();
+}
+
+void Document::resumeLayout()
+{
+    setUserLayoutPaused(false);
+}
+
+void Document::toggleLayout()
+{
+    setUserLayoutPaused(!_userLayoutPaused);
 }
 
 bool Document::canUndo() const

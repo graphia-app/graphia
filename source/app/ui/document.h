@@ -395,6 +395,8 @@ public:
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 
+    Q_INVOKABLE void setUserLayoutPaused(bool userLayoutPaused);
+    Q_INVOKABLE void resumeLayout();
     Q_INVOKABLE void toggleLayout();
 
     Q_INVOKABLE bool nodeIsSelected(QmlNodeId nodeId) const;

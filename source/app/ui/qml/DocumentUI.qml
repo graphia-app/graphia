@@ -431,6 +431,7 @@ Item
             onSaveConfirmedFunction();
     }
 
+    function resumeLayout() { document.resumeLayout(); }
     function toggleLayout() { document.toggleLayout(); }
     function nodeIsSelected(nodeId) { return document.nodeIsSelected(nodeId); }
     function selectAll() { document.selectAll(); }
@@ -1204,12 +1205,7 @@ Item
                         onShown: { layoutSettingsPanel.show(); }
                         onHidden: { layoutSettingsPanel.hide(); }
 
-                        onValueChanged:
-                        {
-                            // If a layout setting changed and we're paused, unpause
-                            if(root.layoutPauseState === LayoutPauseState.Paused)
-                                root.toggleLayout();
-                        }
+                        onValueChanged: { root.resumeLayout(); }
                     }
                 }
             }
