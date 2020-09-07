@@ -777,7 +777,11 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
+
+    // Force a layout in the unlikely event that nothing else does
+    _layoutRequired = true;
     updateLayoutState();
+
     emit layoutDisplayNameChanged();
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
