@@ -26,7 +26,8 @@ jobs:
       run: |
         curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage -o linuxdeployqt
         chmod +x linuxdeployqt
-        sudo apt install -y libxcb-*
+        sudo apt-get update
+        sudo apt-get install -y libxcb-*
         installers/linux/build.sh
       env:
         CC: gcc-9
@@ -121,8 +122,9 @@ jobs:
     - name: Install Tools
       run: |
         sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        sudo apt install libc++-10-dev libc++1-10 libc++abi-10-dev libc++abi1-10
-        sudo apt install clang-tidy-10 cppcheck
+        audo apt-get update
+        sudo apt-get install libc++-10-dev libc++1-10 libc++abi-10-dev libc++abi1-10
+        sudo apt-get install clang-tidy-10 cppcheck
         curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
