@@ -122,7 +122,7 @@ jobs:
     - name: Install Tools
       run: |
         sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-        audo apt-get update
+        sudo apt-get update
         sudo apt-get install libc++-10-dev libc++1-10 libc++abi-10-dev libc++abi1-10
         sudo apt-get install clang-tidy-10 cppcheck
         curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
