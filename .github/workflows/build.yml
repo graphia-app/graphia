@@ -121,10 +121,11 @@ jobs:
     steps:
     - name: Install Tools
       run: |
-        sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh 11
         sudo apt-get update
-        sudo apt-get install libc++-10-dev libc++1-10 libc++abi-10-dev libc++abi1-10
-        sudo apt-get install clang-tidy-10 cppcheck
+        sudo apt-get install libc++-11-dev libc++1-11 libc++abi-11-dev libc++abi1-11
+        sudo apt-get install clang-tidy-11 cppcheck
         curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
@@ -140,14 +141,14 @@ jobs:
     - name: Compile
       run: scripts/linux-build.sh
       env:
-        CC: clang-10
-        CXX: clang++-10
+        CC: clang-11
+        CXX: clang++-11
     - name: Analyse
       run: scripts/static-analysis.sh -v
       env:
-        CC: clang-10
-        CXX: clang++-10
-        CLANGTIDY: clang-tidy-10
+        CC: clang-11
+        CXX: clang++-11
+        CLANGTIDY: clang-tidy-11
         CPPCHECK: cppcheck
         CLAZY: clazy
   release:
