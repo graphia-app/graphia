@@ -154,6 +154,7 @@ private:
 
     struct ViewData
     {
+        void reset() { *this = {}; }
         bool isReset() const { return _focusNodeId.isNull() && _autoZooming; }
 
         CameraAndLighting _cameraAndLighting;

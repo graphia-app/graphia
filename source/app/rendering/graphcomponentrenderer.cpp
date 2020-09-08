@@ -67,7 +67,7 @@ void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId comp
     _selectionManager = selectionManager;
     _graphRenderer = graphRenderer;
 
-    _viewData = {};
+    _viewData.reset();
     _targetZoomDistance = _viewData._zoomDistance;
     _moveFocusToCentreOfComponentLater = true;
     _projection = graphRenderer->projection();
@@ -114,7 +114,8 @@ void GraphComponentRenderer::cleanup()
     _initialised = false;
     _visible = false;
 
-    _viewData = _savedViewData = {};
+    _viewData.reset();
+    _savedViewData.reset();
 }
 
 void GraphComponentRenderer::synchronise()
@@ -132,6 +133,11 @@ void GraphComponentRenderer::synchronise()
     Q_ASSERT(component != nullptr);
 
     _nodeIds = component->nodeIds();
+
+    // If the saved focus node has gone away (e.g. it was merged with
+    // another node), then reset the view data
+    if(!_savedViewData.isReset() && !u::contains(_nodeIds, _savedViewData._focusNodeId))
+        _savedViewData.reset();
 
     const auto& edgeIds = component->edgeIds();
     std::transform(edgeIds.begin(), edgeIds.end(), std::back_inserter(_edges),
@@ -161,6 +167,8 @@ void GraphComponentRenderer::restoreViewData()
         centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance);
     else
         centreNodeInViewport(_savedViewData._focusNodeId, _viewData._zoomDistance);
+
+    _savedViewData.reset();
 }
 
 void GraphComponentRenderer::freeze()
