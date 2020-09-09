@@ -894,7 +894,7 @@ void GraphModel::enableVisualUpdates()
 static float mappedSize(float min, float max, float user, float mapped)
 {
     // The fraction of the mapped value that contributes to the final value
-    const float mappedRange = 0.5f;
+    const float mappedRange = 0.75f;
 
     auto normalised = u::normalise(min, max, user);
     auto out = (mapped * mappedRange) + (normalised * (1.0f - mappedRange));
