@@ -675,6 +675,8 @@ Item
                                         tableView.forceLayoutSafe();
                                     }
                                 }
+
+                                onDoubleClicked: { root.resizeColumnsToContents(); }
                             }
                         }
                     }
