@@ -257,7 +257,9 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         connect(_reply, &QNetworkReply::downloadProgress, [this]
         (qint64 bytesReceived, qint64 bytesTotal)
         {
-            _progress = static_cast<int>((bytesReceived * 100u) / bytesTotal);
+            if(bytesTotal > 0)
+                _progress = static_cast<int>((bytesReceived * 100u) / bytesTotal);
+
             emit progressChanged();
         });
 
