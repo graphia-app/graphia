@@ -44,7 +44,7 @@ public:
     virtual bool requiresNormalisedValue() const { return true; }
     virtual bool requiresRange() const { return true; }
 
-    virtual void findErrors(VisualisationInfo&) const {}
+    virtual void findErrors(ElementType, VisualisationInfo&) const {}
 
     virtual QString description(ElementType, ValueType) const { return {}; }
 

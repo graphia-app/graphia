@@ -564,7 +564,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         auto attribute = attributeValueByName(attributeName);
         auto& channel = _->_visualisationChannels.at(channelName);
 
-        channel->findErrors(info);
+        channel->findErrors(attribute.elementType(), info);
 
         if(!channel->supports(attribute.valueType()))
         {
