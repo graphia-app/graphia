@@ -20,6 +20,7 @@
 #define CORRELATIONDATAROW_H
 
 #include "shared/graph/elementid.h"
+#include "shared/utils/statistics.h"
 
 #include <vector>
 #include <limits>
@@ -69,16 +70,16 @@ public:
 
     NodeId nodeId() const { return _nodeId; }
 
-    double sum() const { return _sum; }
-    double variability() const { return _variability; }
-    double mean() const { return _mean; }
-    double variance() const { return _variance; }
-    double stddev() const { return _stddev; }
-    double coefVar() const { return _coefVar; }
+    double sum() const { return _statistics._sum; }
+    double variability() const { return _statistics._variability; }
+    double mean() const { return _statistics._mean; }
+    double variance() const { return _statistics._variance; }
+    double stddev() const { return _statistics._stddev; }
+    double coefVar() const { return _statistics._coefVar; }
 
-    double minValue() const { return _minValue; }
-    double maxValue() const { return _maxValue; }
-    size_t largestColumnIndex() const { return _largestColumnIndex; }
+    double minValue() const { return _statistics._min; }
+    double maxValue() const { return _statistics._max; }
+    size_t largestColumnIndex() const { return _statistics._largestIndex; }
 
     void update();
 
@@ -94,19 +95,7 @@ private:
 
     uint64_t _cost = 0;
 
-    double _sum = 0.0;
-    double _sumSq = 0.0;
-    double _sumAllSq = 0.0;
-    double _variability = 0.0;
-
-    double _mean = 0.0;
-    double _variance = 0.0;
-    double _stddev = 0.0;
-    double _coefVar = 0.0;
-
-    double _minValue = std::numeric_limits<double>::max();
-    double _maxValue = std::numeric_limits<double>::lowest();
-    size_t _largestColumnIndex = 0;
+    u::Statistics _statistics;
 
     mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
 };
