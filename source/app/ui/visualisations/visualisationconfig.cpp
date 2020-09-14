@@ -106,6 +106,17 @@ QString VisualisationConfig::asString() const
     return s;
 }
 
+QString VisualisationConfig::parameterValue(const QString& name) const
+{
+    for(const auto& parameter : _parameters)
+    {
+        if(parameter._name == name)
+            return parameter.valueAsString();
+    }
+
+    return {};
+}
+
 bool VisualisationConfig::operator==(const VisualisationConfig& other) const
 {
     return _attributeName == other._attributeName &&

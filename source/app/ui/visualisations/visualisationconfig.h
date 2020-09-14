@@ -45,6 +45,8 @@ struct VisualisationConfig
     QVariantMap asVariantMap() const;
     QString asString() const;
 
+    QString parameterValue(const QString& name) const;
+
     bool operator==(const VisualisationConfig& other) const;
     bool operator!=(const VisualisationConfig& other) const;
     bool isFlagSet(const QString& flag) const;
