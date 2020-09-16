@@ -208,7 +208,7 @@ void CorrelationPluginInstance::createAttributes()
         })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable)
-        .setDescription(tr("The name of the data column which has the largest value for "
+        .setDescription(tr("The name of the data column which has the largest absolute value for "
             "the data row associated with the node."));
 
     graphModel()->createAttribute(tr("Mean Data Value"))
