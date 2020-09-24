@@ -666,6 +666,18 @@ QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) 
     return stringList;
 }
 
+bool GraphModel::visualisationChannelAllowsMapping(const QString& channelName) const
+{
+    if(channelName.isEmpty())
+        return false;
+
+    Q_ASSERT(u::contains(_->_visualisationChannels, channelName));
+    if(!u::contains(_->_visualisationChannels, channelName))
+        return false;
+
+    return _->_visualisationChannels.at(channelName)->allowsMapping();
+}
+
 QStringList GraphModel::visualisationDescription(const QString& attributeName, const QStringList& channelNames) const
 {
     QStringList descriptions;

@@ -2132,6 +2132,11 @@ QStringList Document::availableVisualisationChannelNames(int valueType) const
                                         static_cast<ValueType>(valueType)) : QStringList();
 }
 
+bool Document::visualisationChannelAllowsMapping(const QString& channelName) const
+{
+    return _graphModel != nullptr ? _graphModel->visualisationChannelAllowsMapping(channelName) : false;
+}
+
 QStringList Document::visualisationDescription(const QString& attributeName, const QStringList& channelNames) const
 {
     return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelNames) : QStringList();

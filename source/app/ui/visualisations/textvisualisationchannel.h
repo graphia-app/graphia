@@ -32,6 +32,7 @@ public:
     bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
     bool requiresNormalisedValue() const override { return false; }
     bool requiresRange() const override { return false; }
+    bool allowsMapping() const override { return false; }
 
     void findErrors(ElementType elementType, VisualisationInfo& info) const override;
 

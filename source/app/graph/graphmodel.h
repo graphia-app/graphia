@@ -129,6 +129,8 @@ public:
     bool hasValidEdgeTextVisualisation() const;
 
     QStringList availableVisualisationChannelNames(ValueType valueType) const;
+    bool visualisationChannelAllowsMapping(const QString& channelName) const;
+
     QStringList visualisationDescription(const QString& attributeName, const QStringList& channelNames) const;
     void clearVisualisationInfos();
     bool hasVisualisationInfo() const;

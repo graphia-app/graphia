@@ -43,6 +43,7 @@ public:
     virtual bool supports(ValueType) const = 0;
     virtual bool requiresNormalisedValue() const { return true; }
     virtual bool requiresRange() const { return true; }
+    virtual bool allowsMapping() const { return true; }
 
     virtual void findErrors(ElementType, VisualisationInfo&) const {}
 
