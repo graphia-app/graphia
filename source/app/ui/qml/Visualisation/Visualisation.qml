@@ -284,8 +284,7 @@ Item
                     if(!paletteKey.visible)
                         return false;
 
-                    var valueType = document.attribute(attributeName).valueType;
-                    return valueType === ValueType.String;
+                    return root.attributeType === ValueType.String;
                 }
 
                 ExclusiveGroup { id: sortByExclusiveGroup }
@@ -381,6 +380,14 @@ Item
     property string attributeName
     readonly property var similarAttributes: attributeName.length > 0 ?
         document.attributesSimilarTo(attributeName) : []
+    property var attributeType:
+    {
+        var valueType = document.attribute(attributeName).valueType;
+        if(valueType === ValueType.Float || valueType === ValueType.Int)
+            return ValueType.Numerical;
+
+        return valueType;
+    }
 
     property string channel
     property var parameters
