@@ -43,6 +43,11 @@ struct Statistics
     double _variance = 0.0;
     double _stddev = 0.0;
     double _coefVar = 0.0;
+
+    double inverse(double value) const
+    {
+        return (_range - (value - _min)) + _min;
+    }
 };
 
 template<typename T, typename Fn,
