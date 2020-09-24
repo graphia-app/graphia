@@ -54,5 +54,6 @@
         <file>qml/TextDialog.qml</file>
         <file>qml/NewUpdate.qml</file>
         <file>qml/LayoutSetting.qml</file>
+        <file>qml/Controls/MappingSelector.qml</file>
     </qresource>
 </RCC>

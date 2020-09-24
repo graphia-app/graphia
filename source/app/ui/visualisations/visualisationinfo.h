@@ -21,6 +21,8 @@
 
 #include "ui/alert.h"
 
+#include "shared/utils/statistics.h"
+
 #include <vector>
 #include <limits>
 
@@ -30,9 +32,11 @@ class VisualisationInfo
 {
 private:
     std::vector<Alert> _alerts;
-    double _min = std::numeric_limits<double>::max();
-    double _max = std::numeric_limits<double>::lowest();
+    u::Statistics _statistics;
+    double _mappedMinimum = std::numeric_limits<double>::max();
+    double _mappedMaximum = std::numeric_limits<double>::lowest();
     std::vector<QString> _stringValues;
+    int _numApplications = 0;
 
 public:
     template<typename... Args>
@@ -43,21 +47,20 @@ public:
 
     auto alerts() const { return _alerts; }
 
-    auto min() const { return _min; }
-    auto max() const { return _max; }
-    void setMin(double min) { _min = min; }
-    void setMax(double max) { _max = max; }
+    const u::Statistics& statistics() const { return _statistics; }
+    void setStatistics(const u::Statistics& statistics) { _statistics = statistics; }
 
-    void resetRange()
-    {
-        _min = std::numeric_limits<double>::max();
-        _max = std::numeric_limits<double>::lowest();
-    }
+    void setMappedMinimum(double mappedMinimum) { _mappedMinimum = mappedMinimum; }
+    double mappedMinimum() const { return _mappedMinimum; }
 
-    bool hasRange() const { return _min <= _max; }
+    void setMappedMaximum(double mappedMaximum) { _mappedMaximum = mappedMaximum; }
+    double mappedMaximum() const { return _mappedMaximum; }
 
     void addStringValue(const QString& value) { _stringValues.emplace_back(value); }
     auto stringValues() const { return _stringValues; }
+
+    void setNumApplications(int numApplications) { _numApplications = numApplications; }
+    int numApplications() const { return _numApplications; }
 };
 
 using VisualisationInfosMap = std::map<int, VisualisationInfo>;

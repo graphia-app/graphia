@@ -22,6 +22,7 @@
 #include "visualisationchannel.h"
 #include "visualisationconfig.h"
 #include "visualisationinfo.h"
+#include "visualisationmapping.h"
 
 #include "graph/graph.h"
 #include "shared/graph/grapharray.h"
@@ -165,35 +166,30 @@ public:
 
             int numApplications = 0;
 
-            auto applyTo = [&](const auto& graph)
+            auto applyTo = [&](const auto& graph, const u::Statistics& statistics)
             {
-                auto [min, max] = attribute.findRangeforElements(elementIds(graph));
-
-                if(channel.requiresRange() && min == max)
+                if(channel.requiresRange() && statistics._range == 0.0)
                 {
                     visualisationInfo.addAlert(AlertType::Warning,
                         QObject::tr("No numeric range in one or more components"));
                     return;
                 }
 
-                visualisationInfo.setMin(min);
-                visualisationInfo.setMax(max);
+                VisualisationMapping mapping(statistics, config.parameterValue("mapping"));
+
+                visualisationInfo.setMappedMinimum(mapping.min());
+                visualisationInfo.setMappedMaximum(mapping.max());
 
                 for(auto elementId : elementIds(graph))
                 {
                     double value = attribute.numericValueOf(elementId);
 
-                    if(channel.requiresNormalisedValue())
+                    if(channel.allowsMapping())
                     {
-                        value = u::normalise(min, max, value);
+                        if(invert)
+                            value = statistics.inverse(value);
 
-                        if(invert)
-                            value = 1.0 - value;
-                    }
-                    else
-                    {
-                        if(invert)
-                            value = ((max - min) - (value - min)) + min;
+                        value = mapping.map(value);
                     }
 
                     apply(value, channel, elementId, _numAppliedVisualisations);
@@ -202,29 +198,25 @@ public:
                 numApplications++;
             };
 
+            auto statistics = attribute.findStatisticsforElements(elementIds(), true);
+
             if(perComponent)
             {
                 for(auto componentId : _graph->componentIds())
                 {
                     const auto* component = _graph->componentById(componentId);
-                    applyTo(component);
+                    auto componentStatistics = attribute.findStatisticsforElements(elementIds(component));
+                    applyTo(component, componentStatistics);
                 }
             }
             else
-                applyTo(_graph);
+                applyTo(_graph, statistics);
+
+            visualisationInfo.setStatistics(statistics);
+            visualisationInfo.setNumApplications(numApplications);
 
             if(numApplications > 0)
-            {
-                if(numApplications > 1)
-                {
-                    // If there have been multiple applications (because of multiple components),
-                    // there are several ranges involved, so just take the cowardly option and
-                    // say there is no range
-                    visualisationInfo.resetRange();
-                }
-
                 _numAppliedVisualisations++;
-            }
 
             break;
         }

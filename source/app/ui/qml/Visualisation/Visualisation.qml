@@ -70,6 +70,21 @@ Item
         }
     }
 
+    property var mappingSelector
+    Connections
+    {
+        target: mappingSelector
+
+        function onConfigurationChanged()
+        {
+            if(mappingSelector.visualisationIndex !== index)
+                return;
+
+            parameters["mapping"] = "\"" + Utils.escapeQuotes(mappingSelector.configuration) + "\"";
+            root.updateExpression();
+        }
+    }
+
     MouseArea
     {
         anchors.fill: row
@@ -157,11 +172,20 @@ Item
             maximum: root._visualisationInfo.maximumNumericValue !== undefined ?
                 root._visualisationInfo.maximumNumericValue : 0.0
 
+            mappedMinimum: root._visualisationInfo.mappedMinimumNumericValue !== undefined ?
+                root._visualisationInfo.mappedMinimumNumericValue : 0.0
+            mappedMaximum: root._visualisationInfo.mappedMaximumNumericValue !== undefined ?
+                root._visualisationInfo.mappedMaximumNumericValue : 0.0
+
             showLabels:
             {
                 return !root.isFlagSet("disabled") && !root._error &&
-                    root._visualisationInfo.hasNumericRange !== undefined &&
-                    root._visualisationInfo.hasNumericRange;
+                    (root._visualisationInfo.hasNumericRange !== undefined &&
+                    root._visualisationInfo.hasNumericRange) &&
+                    // If the visualisation has been applied to multiple components,
+                    // then there are multiple ranges; don't show any labels
+                    (root._visualisationInfo.numApplications !== undefined &&
+                    root._visualisationInfo.numApplications === 1);
             }
 
             onClicked:
@@ -232,6 +256,14 @@ Item
                     }
                 }
 
+                property bool _showMappingOptions:
+                {
+                    return document.visualisationChannelAllowsMapping(root.channel) &&
+                        root.attributeType === ValueType.Numerical;
+                }
+
+                MenuSeparator { visible: optionsMenu._showMappingOptions }
+
                 MenuItem
                 {
                     id: invertMenuItem
@@ -240,16 +272,7 @@ Item
                     checkable: true
                     enabled: alertIcon.type !== "error"
 
-                    visible:
-                    {
-                        // Inversion doesn't really make sense unless
-                        // we're dealing with a gradient
-                        if(!gradientKey.visible)
-                            return false;
-
-                        var valueType = document.attribute(attributeName).valueType;
-                        return valueType === ValueType.Float || valueType === ValueType.Int;
-                    }
+                    visible: optionsMenu._showMappingOptions
 
                     onCheckedChanged:
                     {
@@ -257,6 +280,91 @@ Item
                         updateExpression();
                     }
                 }
+
+                ExclusiveGroup { id: mappingExclusiveGroup }
+
+                function setupMappingMenuItems(mappingString)
+                {
+                    var mapping = JSON.parse(mappingString);
+
+                    if(mapping.exponent !== undefined && mapping.exponent !== 1.0)
+                        customMappingMenuItem.checked = true;
+                    else if(mapping.type !== undefined)
+                    {
+                        if(mapping.type === "minmax")
+                            minmaxMenuItem.checked = true;
+                        else if(mapping.type === "stddev")
+                            stddevMenuItem.checked = true;
+                    }
+                    else
+                        customMappingMenuItem.checked = true;
+                }
+
+                MenuItem
+                {
+                    id: minmaxMenuItem
+                    text: qsTr("Min/Max")
+
+                    // This is the default when there is no mapping
+                    checked: parameters.mapping === undefined
+
+                    checkable: true
+                    exclusiveGroup: mappingExclusiveGroup
+
+                    visible: optionsMenu._showMappingOptions
+
+                    onTriggered:
+                    {
+                        parameters["mapping"] = "\"{\\\"type\\\":\\\"minmax\\\",\\\"exponent\\\":1}\"";
+                        root.updateExpression();
+                    }
+                }
+
+                MenuItem
+                {
+                    id: stddevMenuItem
+                    text: qsTr("Standard Deviation")
+
+                    checkable: true
+                    exclusiveGroup: mappingExclusiveGroup
+
+                    visible: optionsMenu._showMappingOptions
+
+                    onTriggered:
+                    {
+                        parameters["mapping"] = "\"{\\\"type\\\":\\\"stddev\\\",\\\"exponent\\\":1}\"";
+                        root.updateExpression();
+                    }
+                }
+
+                MenuItem
+                {
+                    id: customMappingMenuItem
+
+                    text: qsTr("Custom Mapping…")
+
+                    checkable: true
+                    exclusiveGroup: mappingExclusiveGroup
+
+                    enabled: alertIcon.type !== "error"
+                    visible: optionsMenu._showMappingOptions
+
+                    onTriggered:
+                    {
+                        mappingSelector.visualisationIndex = index;
+                        mappingSelector.values = root._visualisationInfo.numericValues;
+                        mappingSelector.invert = isFlagSet("invert");
+
+                        if(parameters.mapping !== undefined)
+                            mappingSelector.configuration = Utils.unescapeQuotes(parameters["mapping"]);
+                        else
+                            mappingSelector.resetConfiguration();
+
+                        mappingSelector.show();
+                    }
+                }
+
+                MenuSeparator { visible: optionsMenu._showMappingOptions }
 
                 MenuItem
                 {
@@ -266,11 +374,7 @@ Item
                     checkable: true
                     enabled: alertIcon.type !== "error"
 
-                    visible:
-                    {
-                        var valueType = document.attribute(attributeName).valueType;
-                        return valueType === ValueType.Float || valueType === ValueType.Int;
-                    }
+                    visible: optionsMenu._showMappingOptions
 
                     onCheckedChanged:
                     {
@@ -470,6 +574,10 @@ Item
             case "palette":
                 paletteKey.configuration = unescaped;
                 paletteKey.visible = true;
+                break;
+
+            case "mapping":
+                optionsMenu.setupMappingMenuItems(unescaped);
                 break;
             }
         }

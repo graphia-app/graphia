@@ -44,6 +44,7 @@
 #include "ui/graphquickitem.h"
 #include "ui/visualisations/defaultgradients.h"
 #include "ui/visualisations/defaultpalettes.h"
+#include "ui/visualisations/visualisationmappingplotitem.h"
 #include "ui/hovermousepassthrough.h"
 #include "ui/enrichmentheatmapitem.h"
 #include "ui/iconitem.h"
@@ -183,6 +184,7 @@ int start(int argc, char *argv[])
     qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");
     qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
                                                       QStringLiteral("Exposed purely for results Enumerator"));
+    qmlRegisterType<VisualisationMappingPlotItem>    (uri, maj, min, "VisualisationMappingPlot");
 
     qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 

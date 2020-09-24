@@ -40,6 +40,9 @@ Item
     property double minimum
     property double maximum
 
+    property double mappedMinimum
+    property double mappedMaximum
+
     property int _decimalPoints: Utils.decimalPointsForRange(root.minimum, root.maximum)
 
     property color hoverColor
@@ -133,7 +136,13 @@ Item
             id: minimumLabel
 
             visible: root.showLabels
-            text: QmlUtils.formatNumberScientific(root.minimum)
+            text:
+            {
+                if(mappedMinimum > minimum)
+                    return "≤ " + QmlUtils.formatNumberScientific(root.mappedMinimum);
+
+                return QmlUtils.formatNumberScientific(root.minimum);
+            }
             color: root._contrastingColor
         }
 
@@ -169,7 +178,13 @@ Item
             id: maximumLabel
 
             visible: root.showLabels
-            text: QmlUtils.formatNumberScientific(root.maximum)
+            text:
+            {
+                if(mappedMaximum < maximum)
+                    return "≥ " + QmlUtils.formatNumberScientific(root.mappedMaximum);
+
+                return QmlUtils.formatNumberScientific(root.maximum);
+            }
             color: root._contrastingColor
         }
     }

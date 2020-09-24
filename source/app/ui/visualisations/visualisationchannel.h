@@ -36,12 +36,10 @@ class VisualisationChannel
 public:
     virtual ~VisualisationChannel() = default;
 
-    // Numerical value is normalised
     virtual void apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
 
     virtual bool supports(ValueType) const = 0;
-    virtual bool requiresNormalisedValue() const { return true; }
     virtual bool requiresRange() const { return true; }
     virtual bool allowsMapping() const { return true; }
 

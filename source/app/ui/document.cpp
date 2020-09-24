@@ -69,6 +69,8 @@
 #include <QCollator>
 #include <QApplication>
 #include <QElapsedTimer>
+#include <QVariantList>
+#include <QVector>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -2150,23 +2152,38 @@ bool Document::hasVisualisationInfo() const
 QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
+    QVariantList numericValues;
     QVariantList stringValues;
 
     map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
     map.insert(QStringLiteral("alertText"), "");
     map.insert(QStringLiteral("minimumNumericValue"), 0.0);
     map.insert(QStringLiteral("maximumNumericValue"), 1.0);
+    map.insert(QStringLiteral("mappedMinimumNumericValue"), 0.0);
+    map.insert(QStringLiteral("mappedMaximumNumericValue"), 1.0);
     map.insert(QStringLiteral("hasNumericRange"), true);
+    map.insert(QStringLiteral("numericValues"), numericValues);
     map.insert(QStringLiteral("stringValues"), stringValues);
+    map.insert(QStringLiteral("numApplications"), 1);
 
     if(_graphModel == nullptr)
         return map;
 
     const auto& visualisationInfo = _graphModel->visualisationInfoAtIndex(index);
 
-    map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.min());
-    map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.max());
-    map.insert(QStringLiteral("hasNumericRange"), visualisationInfo.hasRange());
+    map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.statistics()._min);
+    map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.statistics()._max);
+    map.insert(QStringLiteral("mappedMinimumNumericValue"), visualisationInfo.mappedMinimum());
+    map.insert(QStringLiteral("mappedMaximumNumericValue"), visualisationInfo.mappedMaximum());
+    map.insert(QStringLiteral("hasNumericRange"), visualisationInfo.statistics()._range > 0.0);
+    map.insert(QStringLiteral("numApplications"), visualisationInfo.numApplications());
+
+    const auto& numericValuesVector = visualisationInfo.statistics()._values;
+    numericValues.reserve(static_cast<int>(numericValuesVector.size()));
+    for(auto value : numericValuesVector)
+        numericValues.append(value);
+
+    map.insert(QStringLiteral("numericValues"), numericValues);
 
     const auto& stringValuesVector = visualisationInfo.stringValues();
     stringValues.reserve(static_cast<int>(stringValuesVector.size()));

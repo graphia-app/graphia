@@ -141,6 +141,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationinfo.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmappingplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/updates/updater.h
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.h
 )
@@ -245,6 +247,8 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationchannel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationconfigparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmapping.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/visualisationmappingplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updater.cpp
     ${CMAKE_CURRENT_LIST_DIR}/watchdog.cpp
 )

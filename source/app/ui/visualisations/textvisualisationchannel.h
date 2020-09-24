@@ -30,7 +30,6 @@ public:
     void apply(const QString& value, ElementVisual& elementVisual) const override;
 
     bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
-    bool requiresNormalisedValue() const override { return false; }
     bool requiresRange() const override { return false; }
     bool allowsMapping() const override { return false; }
 

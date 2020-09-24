@@ -48,6 +48,7 @@ Item
 
     GradientSelector { id: _gradientSelector }
     PaletteSelector { id: _paletteSelector }
+    MappingSelector { id: _mappingSelector }
 
     ColumnLayout
     {
@@ -120,6 +121,7 @@ Item
                         property var document: root.document
                         gradientSelector: _gradientSelector
                         paletteSelector: _paletteSelector
+                        mappingSelector: _mappingSelector
 
                         Component.onCompleted:
                         {
