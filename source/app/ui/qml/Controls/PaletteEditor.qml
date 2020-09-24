@@ -370,9 +370,10 @@ ColumnLayout
                         text: qsTr("This is a list of values that have a fixed assignment " +
                             "to a particular colour. The value may be selected from the menu, " +
                             "or manually entered. In either case, the supplied value will " +
-                            "always be shown using its respective colour. Zero or more " +
+                            "<b>always</b> be shown using its respective colour. Zero or more " +
                             "colours may be added, up to a maximum of ") +
                             root._maxFixedColors + qsTr(".")
+                        textFormat: Text.StyledText
                         wrapMode: Text.WordWrap
                     }
                 }
