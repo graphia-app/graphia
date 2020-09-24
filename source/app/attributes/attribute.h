@@ -24,6 +24,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/statistics.h"
 
 #include "shared/attributes/valuetype.h"
 
@@ -507,6 +508,17 @@ public:
             autoSetRangeForElements<double>(elementIds);
         else if(valueType() == ValueType::Int)
             autoSetRangeForElements<int>(elementIds);
+    }
+
+    template<typename E>
+    u::Statistics findStatisticsforElements(const std::vector<E>& elementIds,
+        bool storeValues = false) const
+    {
+        return u::findStatisticsFor(elementIds,
+        [this](const auto& elementId)
+        {
+            return floatValueOf(elementId);
+        }, storeValues);
     }
 
     AttributeFlag flags() const { return *_.flags; }
