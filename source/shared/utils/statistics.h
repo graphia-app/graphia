@@ -27,6 +27,8 @@ namespace u
 {
 struct Statistics
 {
+    std::vector<double> _values;
+
     double _min = std::numeric_limits<double>::max();
     double _max = std::numeric_limits<double>::lowest();
     double _range = 0.0;
@@ -45,7 +47,8 @@ struct Statistics
 
 template<typename T, typename Fn,
     template<typename, typename...> class C, typename... Args>
-Statistics findStatisticsFor(const C<T, Args...>& container, Fn&& fn)
+Statistics findStatisticsFor(const C<T, Args...>& container,
+    Fn&& fn, bool storeValues = false)
 {
     Statistics s;
 
@@ -54,10 +57,13 @@ Statistics findStatisticsFor(const C<T, Args...>& container, Fn&& fn)
     size_t column = 0u;
     double largestValue = 0.0;
 
+    std::vector<double> values;
+    values.reserve(std::distance(std::begin(container), std::end(container)));
     for(const auto& element : container)
-    {
-        double value = fn(element);
+        values.emplace_back(fn(element));
 
+    for(auto value : values)
+    {
         allPositive = allPositive && !std::signbit(value);
 
         s._sum += value;
@@ -80,9 +86,8 @@ Statistics findStatisticsFor(const C<T, Args...>& container, Fn&& fn)
     s._variability = std::sqrt((container.size() * s._sumSq) - s._sumAllSq);
 
     double sum = 0.0;
-    for(const auto& element : container)
+    for(auto value : values)
     {
-        double value = fn(element);
         double x = (value - s._mean);
         x *= x;
         sum += x;
@@ -92,14 +97,17 @@ Statistics findStatisticsFor(const C<T, Args...>& container, Fn&& fn)
     s._stddev = std::sqrt(s._variance);
     s._coefVar = (allPositive && s._mean > 0.0) ? s._stddev / s._mean : std::nan("1");
 
+    if(storeValues)
+        s._values = std::move(values);
+
     return s;
 }
 
 template<typename T,
     template<typename, typename...> class C, typename... Args>
-Statistics findStatisticsFor(const C<T, Args...>& container)
+Statistics findStatisticsFor(const C<T, Args...>& container, bool storeValues = false)
 {
-    return findStatisticsFor(container, [](const T& t) { return t; });
+    return findStatisticsFor(container, [](const T& t) { return t; }, storeValues);
 }
 
 } // namespace u
