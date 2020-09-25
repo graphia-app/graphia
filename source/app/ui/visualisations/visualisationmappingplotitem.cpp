@@ -21,26 +21,9 @@
 #include <cmath>
 
 VisualisationMappingPlotItem::VisualisationMappingPlotItem(QQuickItem* parent) :
-    QQuickPaintedItem(parent)
+    QCustomPlotQuickItem(parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
-
-    _customPlot.setOpenGl(true);
-
-    setAcceptedMouseButtons(Qt::AllButtons);
-    setAcceptHoverEvents(true);
-    setFlag(QQuickItem::ItemHasContents, true);
-
-    connect(this, &QQuickPaintedItem::widthChanged, this, &VisualisationMappingPlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &VisualisationMappingPlotItem::updatePlotSize);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &VisualisationMappingPlotItem::onReplot);
-
     buildPlot();
-}
-
-void VisualisationMappingPlotItem::paint(QPainter* painter)
-{
-    painter->drawPixmap(0, 0, _customPlot.toPixmap());
 }
 
 void VisualisationMappingPlotItem::setRangeToMinMax()
@@ -104,30 +87,16 @@ void VisualisationMappingPlotItem::setMaximum(double max)
     buildPlot();
 }
 
-void VisualisationMappingPlotItem::updatePlotSize()
-{
-    // QML does some spurious resizing, which can result in odd
-    // sizes that things get upset with
-    if(width() <= 0.0 || height() <= 0.0)
-        return;
-
-    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
-
-    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
-    // a resizeEvent, so its viewport never gets set, so we must do so manually
-    _customPlot.setViewport(_customPlot.geometry());
-}
-
 void VisualisationMappingPlotItem::buildPlot()
 {
-    _customPlot.clearItems();
-    _customPlot.clearPlottables();
-    _customPlot.plotLayout()->clear();
+    customPlot().clearItems();
+    customPlot().clearPlottables();
+    customPlot().plotLayout()->clear();
 
     auto* mainAxisLayout = new QCPLayoutGrid;
-    _customPlot.plotLayout()->addElement(0, 1, mainAxisLayout);
+    customPlot().plotLayout()->addElement(0, 1, mainAxisLayout);
 
-    auto* mainAxisRect = new QCPAxisRect(&_customPlot);
+    auto* mainAxisRect = new QCPAxisRect(&customPlot());
     mainAxisLayout->addElement(mainAxisRect);
     auto* mainXAxis = mainAxisRect->axis(QCPAxis::atBottom);
     auto* mainYAxis = mainAxisRect->axis(QCPAxis::atLeft);
@@ -179,9 +148,9 @@ void VisualisationMappingPlotItem::buildPlot()
     lowerLimit->setData({0.0, 1.0}, {_min, _min});
 
     auto* valuesAxisLayout = new QCPLayoutGrid;
-    _customPlot.plotLayout()->addElement(0, 0, valuesAxisLayout);
+    customPlot().plotLayout()->addElement(0, 0, valuesAxisLayout);
 
-    auto* valuesAxisRect = new QCPAxisRect(&_customPlot);
+    auto* valuesAxisRect = new QCPAxisRect(&customPlot());
     valuesAxisRect->setMinimumSize(10, 0);
     valuesAxisRect->setMaximumSize(10, 10000);
     valuesAxisLayout->addElement(valuesAxisRect);
@@ -213,7 +182,7 @@ void VisualisationMappingPlotItem::buildPlot()
     points->setLineStyle(QCPGraph::lsNone);
     points->setData(px, py);
 
-    QCPMarginGroup *marginGroup = new QCPMarginGroup(&_customPlot);
+    QCPMarginGroup *marginGroup = new QCPMarginGroup(&customPlot());
     mainAxisRect->setMarginGroup(QCP::msBottom, marginGroup);
     valuesAxisRect->setMarginGroup(QCP::msBottom, marginGroup);
 
@@ -223,7 +192,7 @@ void VisualisationMappingPlotItem::buildPlot()
         axis->grid()->setLayer("grid");
     }
 
-    _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    customPlot().replot(QCustomPlot::rpQueuedReplot);
 }
 
 void VisualisationMappingPlotItem::mousePressEvent(QMouseEvent* event)
@@ -231,7 +200,7 @@ void VisualisationMappingPlotItem::mousePressEvent(QMouseEvent* event)
     routeMouseEvent(event);
     if(event->button() == Qt::MouseButton::LeftButton)
     {
-        _clickPosition = _customPlot.yAxis->pixelToCoord(event->pos().y());
+        _clickPosition = customPlot().yAxis->pixelToCoord(event->pos().y());
         _clickMin = _min;
         _clickMax = _max;
         _dragType = dragTypeForEvent(event);
@@ -250,7 +219,7 @@ void VisualisationMappingPlotItem::mouseMoveEvent(QMouseEvent* event)
     routeMouseEvent(event);
     if(_dragType != DragType::None)
     {
-        auto position = _customPlot.yAxis->pixelToCoord(event->pos().y());
+        auto position = customPlot().yAxis->pixelToCoord(event->pos().y());
 
         switch(_dragType)
         {
@@ -289,16 +258,4 @@ void VisualisationMappingPlotItem::hoverMoveEvent(QHoverEvent* event)
         setCursor(Qt::SizeAllCursor);
     else
         setCursor({});
-}
-
-void VisualisationMappingPlotItem::routeMouseEvent(QMouseEvent* event)
-{
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-        event->button(), event->buttons(), event->modifiers());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
-void VisualisationMappingPlotItem::onReplot()
-{
-    update();
 }

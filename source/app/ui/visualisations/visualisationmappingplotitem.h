@@ -19,7 +19,7 @@
 #ifndef VISUALISATIONMAPPINGPLOTITEM_H
 #define VISUALISATIONMAPPINGPLOTITEM_H
 
-#include <qcustomplot.h>
+#include <qcustomplotquickitem.h>
 
 #include "shared/utils/statistics.h"
 
@@ -27,7 +27,7 @@
 #include <QQuickPaintedItem>
 #include <QVector>
 
-class VisualisationMappingPlotItem : public QQuickPaintedItem
+class VisualisationMappingPlotItem : public QCustomPlotQuickItem
 {
     Q_OBJECT
 
@@ -40,13 +40,10 @@ public:
 
     explicit VisualisationMappingPlotItem(QQuickItem* parent = nullptr);
 
-    void paint(QPainter* painter) override;
-
     Q_INVOKABLE void setRangeToMinMax();
     Q_INVOKABLE void setRangeToStddev();
 
 private:
-    QCustomPlot _customPlot;
     QVector<double> _values;
     u::Statistics _statistics;
 
@@ -60,8 +57,6 @@ private:
     void setExponent(double exponent);
     void setMinimum(double min);
     void setMaximum(double max);
-
-    void updatePlotSize();
 
     void buildPlot();
 
@@ -81,8 +76,8 @@ private:
     template<typename Event>
     DragType dragTypeForEvent(const Event* event) const
     {
-        auto minPixel = _customPlot.yAxis->coordToPixel(_min);
-        auto maxPixel = _customPlot.yAxis->coordToPixel(_max);
+        auto minPixel = customPlot().yAxis->coordToPixel(_min);
+        auto maxPixel = customPlot().yAxis->coordToPixel(_max);
 
         auto yPos = static_cast<double>(event->pos().y());
 
@@ -107,11 +102,6 @@ private:
     void mouseMoveEvent(QMouseEvent* event) override;
 
     void hoverMoveEvent(QHoverEvent* event) override;
-
-    void routeMouseEvent(QMouseEvent* event);
-
-private slots:
-    void onReplot();
 
 signals:
     void minimumChanged();

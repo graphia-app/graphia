@@ -25,26 +25,23 @@
 #include <set>
 #include <iterator>
 
-EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPaintedItem(parent)
+EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QCustomPlotQuickItem(parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
+    customPlot().addLayer(QStringLiteral("textLayer"));
+    customPlot().plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
 
-    _customPlot.setOpenGl(true);
-    _customPlot.addLayer(QStringLiteral("textLayer"));
-    _customPlot.plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
-
-    _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
-    _colorScale = new QCPColorScale(&_customPlot);
+    _colorMap = new QCPColorMap(customPlot().xAxis, customPlot().yAxis2);
+    _colorScale = new QCPColorScale(&customPlot());
     _colorScale->setLabel(tr("Adjusted Fishers P-Value"));
     _colorScale->setType(QCPAxis::atBottom);
-    _customPlot.plotLayout()->addElement(1, 0, _colorScale);
+    customPlot().plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
 
-    _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
+    _textLayer = customPlot().layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
-    _customPlot.yAxis2->setVisible(true);
-    _customPlot.yAxis->setVisible(false);
+    customPlot().yAxis2->setVisible(true);
+    customPlot().yAxis->setVisible(false);
 
     auto colorScaleTicker = QSharedPointer<QCPAxisTickerText>::create();
     _colorScale->axis()->setTicker(colorScaleTicker);
@@ -75,7 +72,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _defaultFont9Pt.setPointSize(9);
 
-    _hoverLabel = new QCPItemText(&_customPlot);
+    _hoverLabel = new QCPItemText(&customPlot());
     _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
     _hoverLabel->setLayer(_textLayer);
     _hoverLabel->setFont(defaultFont10Pt);
@@ -85,27 +82,11 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _hoverLabel->setClipToAxisRect(false);
     _hoverLabel->setVisible(false);
 
-    setAcceptedMouseButtons(Qt::AllButtons);
-    setAcceptHoverEvents(true);
-
-    setFlag(QQuickItem::ItemHasContents, true);
-
     connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::buildPlot);
     connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::horizontalRangeSizeChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::verticalRangeSizeChanged);
-    connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &EnrichmentHeatmapItem::onCustomReplot);
-}
-
-void EnrichmentHeatmapItem::paint(QPainter *painter)
-{
-    QPixmap picture(boundingRect().size().toSize());
-    QCPPainter qcpPainter(&picture);
-
-    _customPlot.toPainter(&qcpPainter);
-
-    painter->drawPixmap(QPoint(), picture);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::scaleXAxis);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::scaleYAxis);
 }
 
 void EnrichmentHeatmapItem::mousePressEvent(QMouseEvent* event)
@@ -113,8 +94,8 @@ void EnrichmentHeatmapItem::mousePressEvent(QMouseEvent* event)
     routeMouseEvent(event);
     if(event->button() == Qt::MouseButton::LeftButton)
     {
-        auto xCoord = static_cast<int>(std::round(_customPlot.xAxis->pixelToCoord(event->pos().x())));
-        auto yCoord = static_cast<int>(std::round(_customPlot.yAxis2->pixelToCoord(event->pos().y())));
+        auto xCoord = static_cast<int>(std::round(customPlot().xAxis->pixelToCoord(event->pos().x())));
+        auto yCoord = static_cast<int>(std::round(customPlot().yAxis2->pixelToCoord(event->pos().y())));
         emit plotValueClicked(_tableModel->rowFromAttributeSets(_xAxisToFullLabel[xCoord], _yAxisToFullLabel[yCoord]));
     }
 }
@@ -136,7 +117,7 @@ void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
 {
     _hoverPoint = event->posF();
 
-    auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
+    auto* currentPlottable = customPlot().plottableAt(event->posF(), true);
     if(_hoverPlottable != currentPlottable)
     {
         _hoverPlottable = currentPlottable;
@@ -153,14 +134,6 @@ void EnrichmentHeatmapItem::hoverLeaveEvent(QHoverEvent *event)
     Q_UNUSED(event);
 }
 
-void EnrichmentHeatmapItem::routeMouseEvent(QMouseEvent* event)
-{
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-                                     event->button(), event->buttons(),
-                                     event->modifiers());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
 void EnrichmentHeatmapItem::buildPlot()
 {
     if(_tableModel == nullptr)
@@ -169,11 +142,11 @@ void EnrichmentHeatmapItem::buildPlot()
     QSharedPointer<QCPAxisTickerText> xCategoryTicker(new QCPAxisTickerText);
     QSharedPointer<QCPAxisTickerText> yCategoryTicker(new QCPAxisTickerText);
 
-    _customPlot.xAxis->setTicker(xCategoryTicker);
-    _customPlot.xAxis->setTickLabelRotation(90);
-    _customPlot.yAxis2->setTicker(yCategoryTicker);
+    customPlot().xAxis->setTicker(xCategoryTicker);
+    customPlot().xAxis->setTickLabelRotation(90);
+    customPlot().yAxis2->setTicker(yCategoryTicker);
 
-    _customPlot.plotLayout()->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
+    customPlot().plotLayout()->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
@@ -270,24 +243,9 @@ void EnrichmentHeatmapItem::buildPlot()
     _colorScale->setDataRange(QCPRange(0, 0.06));
 }
 
-void EnrichmentHeatmapItem::updatePlotSize()
-{
-    if(width() <= 0.0 || height() <= 0.0)
-        return;
-
-    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
-
-    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
-    // a resizeEvent, so its viewport never gets set, so we must do so manually
-    _customPlot.setViewport(_customPlot.geometry());
-
-    scaleXAxis();
-    scaleYAxis();
-}
-
 double EnrichmentHeatmapItem::columnAxisWidth()
 {
-    const auto& margins = _customPlot.axisRect()->margins();
+    const auto& margins = customPlot().axisRect()->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
 
     return width() - axisWidth;
@@ -295,7 +253,7 @@ double EnrichmentHeatmapItem::columnAxisWidth()
 
 double EnrichmentHeatmapItem::columnAxisHeight()
 {
-    const auto& margins = _customPlot.axisRect()->margins();
+    const auto& margins = customPlot().axisRect()->margins();
     const unsigned int axisHeight = margins.top() + margins.bottom();
 
     return height() - axisHeight;
@@ -310,9 +268,9 @@ void EnrichmentHeatmapItem::scaleXAxis()
     double position = (_attributeACount - (visiblePlotWidth / textHeight)) * _scrollXAmount;
 
     if(position + (visiblePlotWidth / textHeight) <= maxX)
-        _customPlot.xAxis->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - _HEATMAP_OFFSET);
+        customPlot().xAxis->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - _HEATMAP_OFFSET);
     else
-        _customPlot.xAxis->setRange(-_HEATMAP_OFFSET, maxX - _HEATMAP_OFFSET);
+        customPlot().xAxis->setRange(-_HEATMAP_OFFSET, maxX - _HEATMAP_OFFSET);
 }
 
 void EnrichmentHeatmapItem::scaleYAxis()
@@ -324,9 +282,9 @@ void EnrichmentHeatmapItem::scaleYAxis()
     double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
 
     if((visiblePlotHeight / textHeight) <= maxY)
-        _customPlot.yAxis2->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - _HEATMAP_OFFSET);
+        customPlot().yAxis2->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - _HEATMAP_OFFSET);
     else
-        _customPlot.yAxis2->setRange(-_HEATMAP_OFFSET, maxY - _HEATMAP_OFFSET);
+        customPlot().yAxis2->setRange(-_HEATMAP_OFFSET, maxY - _HEATMAP_OFFSET);
 }
 
 void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
@@ -338,7 +296,7 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
     {
         updatePlotSize();
         buildPlot();
-        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -350,7 +308,7 @@ void EnrichmentHeatmapItem::setXAxisPadding(int padding)
     if(changed)
     {
         buildPlot();
-        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -362,7 +320,7 @@ void EnrichmentHeatmapItem::setYAxisPadding(int padding)
     if(changed)
     {
         buildPlot();
-        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -372,7 +330,7 @@ void EnrichmentHeatmapItem::setShowOnlyEnriched(bool showOnlyEnriched)
     {
         _showOnlyEnriched = showOnlyEnriched;
         buildPlot();
-        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -380,14 +338,14 @@ void EnrichmentHeatmapItem::setScrollXAmount(double scrollAmount)
 {
     _scrollXAmount = scrollAmount;
     scaleXAxis();
-    _customPlot.replot();
+    customPlot().replot();
 }
 
 void EnrichmentHeatmapItem::setScrollYAmount(double scrollAmount)
 {
     _scrollYAmount = scrollAmount;
     scaleYAxis();
-    _customPlot.replot();
+    customPlot().replot();
     update();
 }
 
@@ -463,11 +421,11 @@ void EnrichmentHeatmapItem::showTooltip()
 void EnrichmentHeatmapItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
     if(extensions.contains(QStringLiteral("png")))
-        _customPlot.savePng(url.toLocalFile());
+        customPlot().savePng(url.toLocalFile());
     else if(extensions.contains(QStringLiteral("pdf")))
-        _customPlot.savePdf(url.toLocalFile());
+        customPlot().savePdf(url.toLocalFile());
     else if(extensions.contains(QStringLiteral("jpg")))
-        _customPlot.saveJpg(url.toLocalFile());
+        customPlot().saveJpg(url.toLocalFile());
 
     QDesktopServices::openUrl(url);
 }
@@ -478,8 +436,4 @@ void EnrichmentHeatmapItem::hideTooltip()
     update();
 }
 
-void EnrichmentHeatmapItem::onCustomReplot()
-{
-    update();
-}
 

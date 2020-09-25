@@ -27,27 +27,8 @@
 #include <algorithm>
 
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
-    QQuickPaintedItem(parent)
-{
-    setRenderTarget(RenderTarget::FramebufferObject);
-
-    _customPlot.setOpenGl(true);
-
-    setAcceptedMouseButtons(Qt::AllButtons);
-    setFlag(QQuickItem::ItemHasContents, true);
-
-    connect(this, &QQuickPaintedItem::widthChanged, this, &GraphSizeEstimatePlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &GraphSizeEstimatePlotItem::updatePlotSize);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &GraphSizeEstimatePlotItem::onReplot);
-}
-
-void GraphSizeEstimatePlotItem::paint(QPainter* painter)
-{
-    if(_keys.isEmpty())
-        return;
-
-    painter->drawPixmap(0, 0, _customPlot.toPixmap());
-}
+    QCustomPlotQuickItem(parent)
+{}
 
 double GraphSizeEstimatePlotItem::threshold() const
 {
@@ -65,7 +46,7 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
         emit thresholdChanged();
 
         updateThresholdIndicator();
-        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -110,7 +91,7 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
         numEdges = static_cast<size_t>(_numEdges.at(index));
     }
 
-    _customPlot.xAxis->setLabel(tr("Estimated Graph Size: %1 Nodes, %2 Edges")
+    customPlot().xAxis->setLabel(tr("Estimated Graph Size: %1 Nodes, %2 Edges")
         .arg(u::formatNumberSIPostfix(numNodes), u::formatNumberSIPostfix(numEdges)));
 }
 
@@ -119,11 +100,11 @@ void GraphSizeEstimatePlotItem::buildPlot()
     if(_keys.isEmpty())
         return;
 
-    _customPlot.clearItems();
-    _customPlot.clearPlottables();
+    customPlot().clearItems();
+    customPlot().clearPlottables();
 
-    auto* nodesGraph = _customPlot.addGraph();
-    auto* edgesGraph = _customPlot.addGraph();
+    auto* nodesGraph = customPlot().addGraph();
+    auto* edgesGraph = customPlot().addGraph();
 
     nodesGraph->setData(_keys, _numNodes, true);
     nodesGraph->setPen(QPen(Qt::red));
@@ -132,7 +113,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     edgesGraph->setPen(QPen(Qt::blue));
     edgesGraph->setName(tr("Edges"));
 
-    _thresholdIndicator = new QCPItemStraightLine(&_customPlot);
+    _thresholdIndicator = new QCPItemStraightLine(&customPlot());
 
     QPen indicatorPen;
     indicatorPen.setStyle(Qt::DashLine);
@@ -140,41 +121,27 @@ void GraphSizeEstimatePlotItem::buildPlot()
 
     updateThresholdIndicator();
 
-    _customPlot.yAxis->setScaleType(QCPAxis::stLogarithmic);
+    customPlot().yAxis->setScaleType(QCPAxis::stLogarithmic);
     QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
     logTicker->setLogBase(10);
     logTicker->setSubTickCount(3);
-    _customPlot.yAxis->setTicker(logTicker);
-    _customPlot.yAxis->setNumberFormat(QStringLiteral("eb"));
-    _customPlot.yAxis->setNumberPrecision(0);
-    _customPlot.yAxis->grid()->setSubGridVisible(true);
+    customPlot().yAxis->setTicker(logTicker);
+    customPlot().yAxis->setNumberFormat(QStringLiteral("eb"));
+    customPlot().yAxis->setNumberPrecision(0);
+    customPlot().yAxis->grid()->setSubGridVisible(true);
 
-    _customPlot.xAxis->setRange(std::as_const(_keys).first(),
+    customPlot().xAxis->setRange(std::as_const(_keys).first(),
         // If the threshold is 1.0, stretch the X axis a little,
         // so that the marker is always visible
         qFuzzyCompare(_threshold, 1.0) ? 1.001 : 1.0);
 
-    _customPlot.yAxis->rescale();
+    customPlot().yAxis->rescale();
 
-    _customPlot.legend->setVisible(true);
-    _customPlot.legend->setBrush(QBrush(QColor(255, 255, 255, 127)));
-    _customPlot.axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignBottom);
+    customPlot().legend->setVisible(true);
+    customPlot().legend->setBrush(QBrush(QColor(255, 255, 255, 127)));
+    customPlot().axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignBottom);
 
-    _customPlot.replot(QCustomPlot::rpQueuedReplot);
-}
-
-void GraphSizeEstimatePlotItem::updatePlotSize()
-{
-    // QML does some spurious resizing, which can result in odd
-    // sizes that things get upset with
-    if(width() <= 0.0 || height() <= 0.0)
-        return;
-
-    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
-
-    // Since QCustomPlot is a QWidget, it is never technically visible, so never generates
-    // a resizeEvent, so its viewport never gets set, so we must do so manually
-    _customPlot.setViewport(_customPlot.geometry());
+    customPlot().replot(QCustomPlot::rpQueuedReplot);
 }
 
 void GraphSizeEstimatePlotItem::mousePressEvent(QMouseEvent* event)
@@ -183,7 +150,7 @@ void GraphSizeEstimatePlotItem::mousePressEvent(QMouseEvent* event)
     if(event->button() == Qt::MouseButton::LeftButton)
     {
         _dragging = true;
-        auto xValue = _customPlot.xAxis->pixelToCoord(event->pos().x());
+        auto xValue = customPlot().xAxis->pixelToCoord(event->pos().x());
         setThreshold(xValue);
     }
 }
@@ -200,20 +167,7 @@ void GraphSizeEstimatePlotItem::mouseMoveEvent(QMouseEvent* event)
     routeMouseEvent(event);
     if(_dragging)
     {
-        auto xValue = _customPlot.xAxis->pixelToCoord(event->pos().x());
+        auto xValue = customPlot().xAxis->pixelToCoord(event->pos().x());
         setThreshold(xValue);
     }
-}
-
-void GraphSizeEstimatePlotItem::routeMouseEvent(QMouseEvent* event)
-{
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-                                     event->button(), event->buttons(),
-                                     event->modifiers());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
-void GraphSizeEstimatePlotItem::onReplot()
-{
-    update();
 }

@@ -21,11 +21,11 @@
 
 #include "attributes/enrichmentcalculator.h"
 
-#include <qcustomplot.h>
+#include <qcustomplotquickitem.h>
 
 #include <QQuickPaintedItem>
 
-class EnrichmentHeatmapItem : public QQuickPaintedItem
+class EnrichmentHeatmapItem : public QCustomPlotQuickItem
 {
     Q_OBJECT
 
@@ -46,7 +46,6 @@ private:
     QCPItemText* _hoverLabel = nullptr;
     QCPAbstractPlottable* _hoverPlottable = nullptr;
     QPointF _hoverPoint;
-    QCustomPlot _customPlot;
     std::map<int, QString> _xAxisToFullLabel;
     std::map<int, QString> _yAxisToFullLabel;
     std::map<std::pair<int, int>, int> _colorMapKeyValueToTableIndex;
@@ -64,13 +63,6 @@ private:
 
     bool _showOnlyEnriched = false;
 
-public:
-    explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
-    void setData(EnrichmentTableModel::Table table);
-
-public:
-    void paint(QPainter *painter) override;
-    void updatePlotSize();
     double horizontalRangeSize();
     double verticalRangeSize();
     double columnAxisWidth();
@@ -84,16 +76,21 @@ public:
     void setXAxisPadding(int padding);
     void setYAxisPadding(int padding);
     void setShowOnlyEnriched(bool showOnlyEnriched);
+    void scaleAxes();
+
+public:
+    explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
+    void setData(EnrichmentTableModel::Table table);
 
     Q_INVOKABLE void buildPlot();
-    Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList &extensions);
+    Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList& extensions);
+
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void hoverMoveEvent(QHoverEvent* event) override;
     void hoverLeaveEvent(QHoverEvent* event) override;
-    void routeMouseEvent(QMouseEvent *event);
 
 signals:
     void rightClick();
@@ -104,7 +101,6 @@ signals:
     void plotValueClicked(int row);
 
 public slots:
-    void onCustomReplot();
     void showTooltip();
     void hideTooltip();
 };
