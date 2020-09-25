@@ -259,7 +259,7 @@ Item
                 property bool _showMappingOptions:
                 {
                     return document.visualisationChannelAllowsMapping(root.channel) &&
-                        root.attributeType === ValueType.Numerical;
+                        root.attributeValueType === ValueType.Numerical;
                 }
 
                 MenuSeparator { visible: optionsMenu._showMappingOptions }
@@ -388,7 +388,7 @@ Item
                     if(!paletteKey.visible)
                         return false;
 
-                    return root.attributeType === ValueType.String;
+                    return root.attributeValueType === ValueType.String;
                 }
 
                 ExclusiveGroup { id: sortByExclusiveGroup }
@@ -484,7 +484,8 @@ Item
     property string attributeName
     readonly property var similarAttributes: attributeName.length > 0 ?
         document.attributesSimilarTo(attributeName) : []
-    property var attributeType:
+
+    property var attributeValueType:
     {
         var valueType = document.attribute(attributeName).valueType;
         if(valueType === ValueType.Float || valueType === ValueType.Int)
