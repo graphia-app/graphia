@@ -145,13 +145,28 @@ Item
             onCurrentIndexChanged: { updateExpression(); }
         }
 
-        Label
+        NamedIcon
         {
-            id: channelLabel
-            visible: !gradientKey.visible && !paletteKey.visible
-            text: channel
+            visible: iconName.length > 0
             enabled: enabledMenuItem.checked
-            color: root.textColor
+            iconName:
+            {
+                if(channel.length === 0)
+                    return "";
+
+                if(channel === "Text")
+                    return "format-text-bold";
+
+                if(channel === "Size")
+                {
+                    if(attributeElementType === ElementType.Node)
+                        return "node-size";
+                    else if(attributeElementType === ElementType.Edge)
+                        return "edge-size";
+                }
+
+                return "";
+            }
         }
 
         GradientKey
