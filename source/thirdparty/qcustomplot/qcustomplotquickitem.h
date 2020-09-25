@@ -25,7 +25,7 @@
 
 class QMouseEvent;
 
-class Q_DECL_EXPORT QCustomPlotQuickItem : public QQuickPaintedItem
+class QCP_LIB_DECL QCustomPlotQuickItem : public QQuickPaintedItem
 {
     Q_OBJECT
 public:
