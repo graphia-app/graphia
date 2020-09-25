@@ -494,6 +494,11 @@ Item
         return valueType;
     }
 
+    property var attributeElementType:
+    {
+        return document.attribute(attributeName).elementType;
+    }
+
     property string channel
     property var parameters
 
