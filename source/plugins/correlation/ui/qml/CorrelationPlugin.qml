@@ -84,21 +84,40 @@ PluginContent
         }
     }
 
+    MessageDialog
+    {
+        id: tooManyAnnotationsDialog
+        visible: false
+        title: qsTr("Too Many Annotations")
+        text: qsTr("There is currently not enough physical space to display the " +
+            "column annotations. Please increase the vertical size of the plot and " +
+            "try again.")
+
+        icon: StandardIcon.Critical
+        standardButtons: StandardButton.Ok
+    }
+
     Action
     {
         id: selectColumnAnnotationsAction
         text: qsTr("Select Visible Column Annotations")
         iconName: "column-annotations"
 
-        enabled: plot.canShowColumnAnnotationSelection &&
-            plugin.model.columnAnnotationNames.length > 0
+        enabled: plugin.model.columnAnnotationNames.length > 0
 
         checkable: true
-        checked: plot.columnAnnotationSelectionModeEnabled
 
         onTriggered:
         {
+            if(!plot.canShowColumnAnnotationSelection)
+            {
+                tooManyAnnotationsDialog.open();
+                checked = false;
+                return;
+            }
+
             plot.columnAnnotationSelectionModeEnabled = !plot.columnAnnotationSelectionModeEnabled;
+            checked = plot.columnAnnotationSelectionModeEnabled;
         }
     }
 
@@ -696,7 +715,11 @@ PluginContent
                 visible: plot.columnAnnotationSelectionModeEnabled
                 iconName: "emblem-unreadable"
 
-                onClicked: { plot.columnAnnotationSelectionModeEnabled = false; }
+                onClicked:
+                {
+                    plot.columnAnnotationSelectionModeEnabled =
+                        selectColumnAnnotationsAction.checked = false;
+                }
             }
 
             ScrollView
