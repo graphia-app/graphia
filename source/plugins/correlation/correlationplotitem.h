@@ -30,6 +30,7 @@
 #include <QMap>
 #include <QStringList>
 #include <QVariantList>
+#include <QVariantMap>
 #include <QElapsedTimer>
 #include <QThread>
 #include <QPixmap>
@@ -151,9 +152,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
         WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int columnSortType MEMBER _columnSortType WRITE setColumnSortType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(QString columnSortAnnotation MEMBER _columnSortAnnotation
-        WRITE setColumnSortAnnotation NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QVector<QVariantMap> columnSortOrders MEMBER _columnSortOrders
+        WRITE setColumnSortOrders NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY plotOptionsChanged)
@@ -231,8 +231,7 @@ private:
     QString _plotAveragingAttributeName;
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
     int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
-    int _columnSortType = static_cast<int>(PlotColumnSortType::Natural);
-    QString _columnSortAnnotation;
+    QVector<QVariantMap> _columnSortOrders;
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
@@ -298,8 +297,7 @@ private:
     void setXAxisPadding(int padding);
 
     void updateSortMap();
-    void setColumnSortType(int columnSortType);
-    void setColumnSortAnnotation(const QString& columnSortAnnotation);
+    void setColumnSortOrders(const QVector<QVariantMap> columnSortOrders);
 
     QString elideLabel(const QString& label);
 

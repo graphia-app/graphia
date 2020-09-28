@@ -1759,79 +1759,81 @@ void CorrelationPlotItem::updateSortMap()
     QCollator collator;
     collator.setNumericMode(true);
 
-    switch(static_cast<PlotColumnSortType>(_columnSortType))
+    std::sort(_sortMap.begin(), _sortMap.end(),
+    [this, &collator](size_t a, size_t b)
     {
-    default:
-    case PlotColumnSortType::Natural:
-        return;
-
-    case PlotColumnSortType::ColumnName:
-    {
-        std::sort(_sortMap.begin(), _sortMap.end(),
-        [this, &collator](size_t a, size_t b)
+        for(const auto& columnSortOrder : _columnSortOrders)
         {
-            return collator.compare(
-                _pluginInstance->columnName(static_cast<int>(a)),
-                _pluginInstance->columnName(static_cast<int>(b))) < 0;
-        });
+            Q_ASSERT(u::containsAllOf(columnSortOrder, {"type", "text", "order"}));
 
-        break;
-    }
+            auto type = static_cast<PlotColumnSortType>(columnSortOrder["type"].toInt());
+            auto text = columnSortOrder["text"].toString();
+            auto order = static_cast<Qt::SortOrder>(columnSortOrder["order"].toInt());
 
-    case PlotColumnSortType::ColumnAnnotation:
-    {
-        const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+            switch(type)
+            {
+            default:
+            case PlotColumnSortType::Natural:
+                return order == Qt::AscendingOrder ?
+                    a < b : b < a;
 
-        if(columnAnnotations.empty() || _columnSortAnnotation.isEmpty())
-            return;
+            case PlotColumnSortType::ColumnName:
+            {
+                auto columnNameA = _pluginInstance->columnName(static_cast<int>(a));
+                auto columnNameB = _pluginInstance->columnName(static_cast<int>(b));
 
-        auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
-            [this](const auto& v) { return v.name() == _columnSortAnnotation; });
+                if(columnNameA == columnNameB)
+                    continue;
 
-        Q_ASSERT(it != columnAnnotations.end());
-        if(it == columnAnnotations.end())
-            return;
+                return order == Qt::AscendingOrder ?
+                    collator.compare(columnNameA, columnNameB) < 0 :
+                    collator.compare(columnNameB, columnNameA) < 0;
+            }
 
-        const auto& columnAnnotation = *it;
+            case PlotColumnSortType::ColumnAnnotation:
+            {
+                const auto& columnAnnotations = _pluginInstance->columnAnnotations();
 
-        std::sort(_sortMap.begin(), _sortMap.end(),
-        [&collator, &columnAnnotation](size_t a, size_t b)
-        {
-            return collator.compare(
-                columnAnnotation.valueAt(static_cast<int>(a)),
-                columnAnnotation.valueAt(static_cast<int>(b))) < 0;
-        });
+                if(columnAnnotations.empty() || text.isEmpty())
+                    continue;
 
-        break;
-    }
+                auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
+                    [&text](const auto& v) { return v.name() == text; });
 
-    }
+                Q_ASSERT(it != columnAnnotations.end());
+                if(it == columnAnnotations.end())
+                    continue;
+
+                const auto& columnAnnotation = *it;
+
+                auto annotationValueA = columnAnnotation.valueAt(static_cast<int>(a));
+                auto annotationValueB = columnAnnotation.valueAt(static_cast<int>(b));
+
+                if(annotationValueA == annotationValueB)
+                    continue;
+
+                return order == Qt::AscendingOrder ?
+                    collator.compare(annotationValueA, annotationValueB) < 0 :
+                    collator.compare(annotationValueB, annotationValueA) < 0;
+            }
+
+            }
+        }
+
+        // If all else fails, just use natural order
+        return a < b;
+    });
 }
 
-void CorrelationPlotItem::setColumnSortType(int columnSortType)
+void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap> columnSortOrders)
 {
-    if(_columnSortType != columnSortType)
+    if(_columnSortOrders != columnSortOrders)
     {
-        _columnSortType = columnSortType;
+        _columnSortOrders = columnSortOrders;
         emit plotOptionsChanged();
 
         invalidateLineGraphCache();
         rebuildPlot();
-    }
-}
-
-void CorrelationPlotItem::setColumnSortAnnotation(const QString& columnSortAnnotation)
-{
-    if(_columnSortAnnotation != columnSortAnnotation)
-    {
-        _columnSortAnnotation = columnSortAnnotation;
-        emit plotOptionsChanged();
-
-        if(static_cast<PlotColumnSortType>(_columnSortType) == PlotColumnSortType::ColumnAnnotation)
-        {
-            invalidateLineGraphCache();
-            rebuildPlot();
-        }
     }
 }
 

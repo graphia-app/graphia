@@ -520,22 +520,51 @@ PluginContent
                 sortByMenuItem.checkable = true;
                 sortByMenuItem.checked = Qt.binding(function()
                 {
-                    if(sortOption.type === plot.columnSortType &&
-                        sortOption.type === PlotColumnSortType.ColumnAnnotation)
+                    let columnSortType = PlotColumnSortType.Natural;
+                    let columnSortAnnotation = "";
+                    if(plot.columnSortOrders.length > 0)
                     {
-                        return sortOption.text === plot.columnSortAnnotation;
+                        columnSortType = plot.columnSortOrders[0].type;
+                        columnSortAnnotation = plot.columnSortOrders[0].text;
                     }
 
-                    return sortOption.type === plot.columnSortType;
+                    if(sortOption.type === columnSortType &&
+                        columnSortType === PlotColumnSortType.ColumnAnnotation)
+                    {
+                        return sortOption.text === columnSortAnnotation;
+                    }
+
+                    return sortOption.type === columnSortType;
                 });
 
                 sortByMenuItem.triggered.connect(function()
                 {
-                    plot.columnSortAnnotation =
-                        sortOption.type === PlotColumnSortType.ColumnAnnotation ?
-                        sortOption.text : "";
+                    let columnSortOrders = plot.columnSortOrders;
+                    let index = columnSortOrders.findIndex(element =>
+                        element.type === sortOption.type &&
+                        element.text === sortOption.text);
+                    let order = Qt.AscendingOrder;
 
-                    plot.columnSortType = sortOption.type;
+                    if(index >= 0)
+                    {
+                        order = columnSortOrders[index].order;
+
+                        if(index === 0)
+                        {
+                            // If the thing we're sorting is on the front
+                            // of the list already, flip the sort order
+                            order = order === Qt.AscendingOrder ?
+                                Qt.DescendingOrder : Qt.AscendingOrder;
+                        }
+
+                        columnSortOrders.splice(index, 1);
+                    }
+
+                    let newSortOrder = sortOption;
+                    newSortOrder.order = order;
+                    columnSortOrders.unshift(newSortOrder);
+
+                    plot.columnSortOrders = columnSortOrders;
                 });
             });
 
@@ -643,8 +672,7 @@ PluginContent
 
             onPlotOptionsChanged: { root.saveRequired = true; }
             onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
-            onColumnSortTypeChanged: { root.saveRequired = true; }
-            onColumnSortAnnotationChanged: { root.saveRequired = true; }
+            onColumnSortOrdersChanged: { root.saveRequired = true; }
 
             elideLabelWidth:
             {
@@ -786,8 +814,7 @@ PluginContent
             "plotGridLines": plot.showGridLines,
 
             "columnAnnotations": plot.visibleColumnAnnotationNames,
-            "plotColumnSortType": plot.columnSortType,
-            "plotColumnSortAnnotation": plot.columnSortAnnotation
+            "plotColumnSortOrders": plot.columnSortOrders
         };
 
         return data;
@@ -815,7 +842,20 @@ PluginContent
         if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
 
         if(data.columnAnnotations !== undefined)            plot.visibleColumnAnnotationNames = data.columnAnnotations;
-        if(data.plotColumnSortType !== undefined)           plot.columnSortType = data.plotColumnSortType;
-        if(data.plotColumnSortAnnotation !== undefined)     plot.columnSortAnnotation = data.plotColumnSortAnnotation;
+
+        if(data.plotColumnSortType !== undefined)
+        {
+            // Handle older file format
+            let columnSortOrder = {"order": Qt.AscendingOrder, "text": ""};
+            columnSortOrder.type = data.plotColumnSortType;
+
+            if(data.plotColumnSortAnnotation !== undefined)
+                columnSortOrder.text = data.plotColumnSortAnnotation;
+
+            plot.columnSortOrders.push(columnSortOrder);
+        }
+        else
+
+        if(data.plotColumnSortOrders !== undefined)         plot.columnSortOrders = data.plotColumnSortOrders;
     }
 }
