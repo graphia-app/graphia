@@ -183,3 +183,22 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+  prerelease:
+    name: Copy Pre-release
+    runs-on: ubuntu-latest
+    needs:
+      - linux
+      - windows
+      - macos
+      - static-analysis
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        path: release
+    - uses: horochx/deploy-via-scp@master
+      with:
+        host: ${{ secrets.PRERELEASE_HOST }}
+        user: ${{ secrets.PRERELEASE_USERNAME }}
+        key: ${{ secrets.PRERELEASE_KEY }}
+        local: "release/*"
+        remote: ${{ secrets.PRERELEASE_DIR }}
