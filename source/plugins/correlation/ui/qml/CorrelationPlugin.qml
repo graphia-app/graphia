@@ -539,32 +539,7 @@ PluginContent
 
                 sortByMenuItem.triggered.connect(function()
                 {
-                    let columnSortOrders = plot.columnSortOrders;
-                    let index = columnSortOrders.findIndex(element =>
-                        element.type === sortOption.type &&
-                        element.text === sortOption.text);
-                    let order = Qt.AscendingOrder;
-
-                    if(index >= 0)
-                    {
-                        order = columnSortOrders[index].order;
-
-                        if(index === 0)
-                        {
-                            // If the thing we're sorting is on the front
-                            // of the list already, flip the sort order
-                            order = order === Qt.AscendingOrder ?
-                                Qt.DescendingOrder : Qt.AscendingOrder;
-                        }
-
-                        columnSortOrders.splice(index, 1);
-                    }
-
-                    let newSortOrder = sortOption;
-                    newSortOrder.order = order;
-                    columnSortOrders.unshift(newSortOrder);
-
-                    plot.columnSortOrders = columnSortOrders;
+                    plot.sortBy(sortOption.type, sortOption.text);
                 });
             });
 

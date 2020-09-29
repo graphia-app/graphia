@@ -172,6 +172,7 @@ public:
     void paint(QPainter* painter) override;
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
+    Q_INVOKABLE void sortBy(int type, const QString& text = {});
 
     void setPlotScaleType(int plotScaleType);
     void setPlotDispersionType(int plotDispersionType);

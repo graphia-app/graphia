@@ -1285,13 +1285,28 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         {
             qcpColumnAnnotations->setData(y, _sortMap, selected, &columnAnnotation);
 
+            QString prefix;
             QString postfix;
 
+            if(!_columnSortOrders.empty())
+            {
+                const auto& columnSortOrder = _columnSortOrders.first();
+                auto type = static_cast<PlotColumnSortType>(columnSortOrder["type"].toInt());
+                auto text = columnSortOrder["text"].toString();
+                auto order = static_cast<Qt::SortOrder>(columnSortOrder["order"].toInt());
+
+                if(type == PlotColumnSortType::ColumnAnnotation && text == columnAnnotation.name())
+                {
+                    prefix += order == Qt::AscendingOrder ?
+                        QStringLiteral(u"▻ ") : QStringLiteral(u"◅ ");
+                }
+            }
+
             if(_columnAnnotationSelectionModeEnabled)
-                postfix = selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
+                postfix += selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
 
             double tickPosition = static_cast<double>(y) + 0.5;
-            columnAnnotationTicker->addTick(tickPosition, columnAnnotation.name() + postfix);
+            columnAnnotationTicker->addTick(tickPosition, prefix + columnAnnotation.name() + postfix);
 
             y--;
         }
@@ -1417,33 +1432,73 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 {
     auto* axisRect = _customPlot.axisRectAt(pos);
 
-    if(_columnAnnotationSelectionModeEnabled && axisRect == _columnAnnotationsAxisRect)
+    auto rectHeight = axisRect->bottom() - axisRect->top();
+    auto x = pos.x() - axisRect->left();
+    auto y = pos.y() - axisRect->top();
+
+    if(y >= rectHeight)
     {
-        const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-
-        auto rectHeight = axisRect->bottom() - axisRect->top();
-        auto y = pos.y() - axisRect->top();
-
-        if(y < rectHeight)
-        {
-            auto index = (y * columnAnnotations.size()) / (rectHeight);
-
-            if(index < columnAnnotations.size())
-            {
-                const auto& columnAnnotation = columnAnnotations.at(index);
-                const auto& name = columnAnnotation.name();
-
-                if(u::contains(_visibleColumnAnnotationNames, name))
-                    _visibleColumnAnnotationNames.erase(name);
-                else
-                    _visibleColumnAnnotationNames.insert(name);
-
-                emit plotOptionsChanged();
-
-                rebuildPlot();
-            }
-        }
+        // Click is below either/both axes
+        sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
+        return;
     }
+
+    if(axisRect != _columnAnnotationsAxisRect)
+    {
+        if(x < 0)
+        {
+            // Click is to the left of the main axis
+            sortBy(static_cast<int>(PlotColumnSortType::Natural));
+        }
+
+        return;
+    }
+
+    const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+    auto index = (y * numVisibleColumnAnnotations()) / (rectHeight);
+    if(index >= columnAnnotations.size())
+        return;
+
+    std::vector<QString> annotationNames;
+    std::transform(columnAnnotations.begin(), columnAnnotations.end(),
+        std::back_inserter(annotationNames), [](const auto& v) { return v.name(); });
+
+    if(!_columnAnnotationSelectionModeEnabled)
+    {
+        // Remove any annotations not currently visible, so
+        // that looking up by index works
+        std::remove_if(annotationNames.begin(), annotationNames.end(),
+        [this](const auto& v)
+        {
+            return !u::contains(_visibleColumnAnnotationNames, v);
+        });
+    }
+
+    const auto& name = annotationNames.at(index);
+
+    if(_columnAnnotationSelectionModeEnabled && x < 0)
+    {
+        // Click is on the annotation name itself (with checkbox)
+        if(u::contains(_visibleColumnAnnotationNames, name))
+            _visibleColumnAnnotationNames.erase(name);
+        else
+            _visibleColumnAnnotationNames.insert(name);
+    }
+    else if(_columnAnnotationSelectionModeEnabled &&
+        !u::contains(_visibleColumnAnnotationNames, name))
+    {
+        // Clicking anywhere else enables a column annotation
+        // when it's disabled...
+        _visibleColumnAnnotationNames.insert(name);
+    }
+    else
+    {
+        // ...or selects it as the sort annotation otherwise
+        sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
+    }
+
+    emit plotOptionsChanged();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::invalidateLineGraphCache()
@@ -1823,6 +1878,50 @@ void CorrelationPlotItem::updateSortMap()
         // If all else fails, just use natural order
         return a < b;
     });
+}
+
+void CorrelationPlotItem::sortBy(int type, const QString& text)
+{
+    auto order = Qt::AscendingOrder;
+
+    auto existing = std::find_if(_columnSortOrders.begin(), _columnSortOrders.end(),
+    [type, &text](const auto& value)
+    {
+        bool sameType = (value["type"].toInt() == type);
+        bool sameText = (value["text"].toString() == text);
+        bool typeIsColumnAnnotation =
+            (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
+
+        return sameType && (!typeIsColumnAnnotation || sameText);
+    });
+
+    // If the column has been sorted on before, remove it so
+    // that adding it brings it to the front
+    if(existing != _columnSortOrders.end())
+    {
+        order = static_cast<Qt::SortOrder>((*existing)["order"].toInt());
+
+        if(existing == _columnSortOrders.begin())
+        {
+            // If the thing we're sorting is on the front
+            // of the list already, flip the sort order
+            order = order == Qt::AscendingOrder ?
+                Qt::DescendingOrder : Qt::AscendingOrder;
+        }
+
+        _columnSortOrders.erase(existing);
+    }
+
+    QVariantMap newSortOrder;
+    newSortOrder["type"] = type;
+    newSortOrder["text"] = text;
+    newSortOrder["order"] = order;
+
+    _columnSortOrders.push_front(newSortOrder);
+
+    emit plotOptionsChanged();
+    invalidateLineGraphCache();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap> columnSortOrders)
