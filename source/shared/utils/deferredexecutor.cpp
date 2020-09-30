@@ -130,6 +130,20 @@ void DeferredExecutor::waitFor(size_t numTasks)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
+    if(_tasks.size() == 0 || numTasks == 0)
+    {
+        // If there are no tasks to wait for, we can just return
+        // This can happen when task(s) are executed and completed
+        // before the call to waitFor occurs
+        if(_debug > 2)
+        {
+            qDebug() << "waitFor(" << numTasks << ") called with" <<
+                _tasks.size() << "tasks queued thread:" << u::currentThreadName();
+        }
+
+        return;
+    }
+
     numTasks = std::min(_tasks.size(), numTasks);
     auto threadId = std::this_thread::get_id();
     _waitCount[threadId] = numTasks;
