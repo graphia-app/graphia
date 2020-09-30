@@ -78,8 +78,8 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
         }
         else if(typeString.compare("stddev", Qt::CaseInsensitive) == 0)
         {
-            _min = statistics._mean - (0.5 * statistics._stddev);
-            _max = statistics._mean + (0.5 * statistics._stddev);
+            _min = statistics._mean - statistics._stddev;
+            _max = statistics._mean + statistics._stddev;
         }
     }
 

@@ -37,8 +37,8 @@ void VisualisationMappingPlotItem::setRangeToMinMax()
 
 void VisualisationMappingPlotItem::setRangeToStddev()
 {
-    _min = _statistics._mean - (0.5 * _statistics._stddev);
-    _max = _statistics._mean + (0.5 * _statistics._stddev);
+    _min = _statistics._mean - _statistics._stddev;
+    _max = _statistics._mean + _statistics._stddev;
     emit minimumChanged();
     emit maximumChanged();
     buildPlot();
