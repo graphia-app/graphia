@@ -2057,7 +2057,7 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     }
 
     auto attributeObject = attribute(parameterName);
-    if(!attributeObject.isEmpty())
+    if(attributeObject["isValid"].toBool())
     {
         // It's an Attribute
         return attributeObject;
