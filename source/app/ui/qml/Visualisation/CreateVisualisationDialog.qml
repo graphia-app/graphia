@@ -221,6 +221,9 @@ Window
     onVisibleChanged:
     {
         if(visible)
+        {
             attributeList.model = document.availableAttributesModel(ElementType.Node|ElementType.Edge);
+            channelList.model = null;
+        }
     }
 }
