@@ -70,7 +70,16 @@ Window
                 onSelectedValueChanged:
                 {
                     var attribute = document.attribute(selectedValue);
-                    channelList.model = document.availableVisualisationChannelNames(attribute.valueType);
+
+                    if(attribute.isValid)
+                    {
+                        channelList.model = document.availableVisualisationChannelNames(
+                            attribute.valueType);
+                    }
+                    else
+                        channelList.model = null;
+
+
                     description.update();
                     updateVisualisationExpressions();
                 }
