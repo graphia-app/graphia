@@ -219,12 +219,13 @@ Window
 
                                 onSelectedValueChanged:
                                 {
-                                    if(selectedValue !== undefined)
+                                    let attribute = document.attribute(selectedValue);
+                                    if(attribute.isValid)
                                     {
-                                        opList.updateModel(document.attribute(selectedValue).ops);
+                                        opList.updateModel(attribute.ops);
 
-                                        var parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                                            lhsAttributeList.selectedValue);
+                                        let parameterData = document.findTransformParameter(
+                                            transformsList.selectedValue, lhsAttributeList.selectedValue);
                                         rhs.configure(parameterData);
                                     }
                                     else
@@ -297,6 +298,10 @@ Window
 
                                     checked: true
                                     exclusiveGroup: rhsGroup
+
+                                    // This effectively handles
+                                    // attributeRadioButton::onCheckedChanged too
+                                    onCheckedChanged: { updateTransformExpression(); }
                                 }
 
                                 TransformParameter
@@ -352,8 +357,14 @@ Window
                                 {
                                     if(valueRadioButton.checked)
                                         return valueParameter.value;
-                                    else if(attributeRadioButton.checked)
+
+                                    if(attributeRadioButton.checked)
+                                    {
+                                        if(!document.attribute(rhsAttributeList.selectedValue).isValid)
+                                            return "";
+
                                         return "$" + rhsAttributeList.selectedValue;
+                                    }
 
                                     return "";
                                 }
