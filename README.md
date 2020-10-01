@@ -55,6 +55,10 @@ We would like to thank those who have helped us develop Graphia:
 * [The University of Edinburgh](https://www.ed.ac.uk/)
 * [BBSRC](https://bbsrc.ukri.org/)
 
+## Pre-release Builds ##
+
+Pre-release builds are [available](https://graphia.dev/). Stability is not guaranteed, but any testing undertaken is greatly appreciated.
+
 ## Building ##
 
 Graphia uses the [CMake](https://cmake.org/) build system. A full build can be performed using the following command:
