@@ -318,7 +318,7 @@ function Create(transformIndex, transform)
                     // If the currently selected attribute isn't a valid selection
                     // we need to add it so that the error displayed to the
                     // user makes sense
-                    if(Object.keys(attribute).length === 0)
+                    if(!attribute.isValid)
                         parameterData.initialValue.push(parameter.attributeName);
 
                     var unavailableAttributeNames =

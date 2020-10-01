@@ -1972,8 +1972,11 @@ QVariantMap Document::attribute(const QString& attributeName) const
                 GraphModel::calculateAttributeRange(&graphModel()->mutableGraph(), attribute);
 
             map.insert(QStringLiteral("parameterValue"), parsedAttributeName._parameter);
+            map.insert(QStringLiteral("isValid"), !parsedAttributeName._parameter.isEmpty());
             map.insert(QStringLiteral("validParameterValues"), attribute.validParameterValues());
         }
+        else
+            map.insert(QStringLiteral("isValid"), true);
 
         map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
@@ -1997,6 +2000,8 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
         map.insert(QStringLiteral("sharedValues"), sharedValues);
     }
+    else
+        map.insert(QStringLiteral("isValid"), false);
 
     return map;
 }
