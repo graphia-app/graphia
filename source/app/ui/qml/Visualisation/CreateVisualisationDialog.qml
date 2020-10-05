@@ -44,6 +44,12 @@ Window
     property var document
     property var visualisationExpressions: []
 
+    property bool visualisationExpressionsValid:
+    {
+        return visualisationExpressions.length > 0 &&
+            visualisationExpressions.every(document.visualisationIsValid);
+    }
+
     Preferences
     {
         section: "misc"
@@ -149,11 +155,7 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled:
-                {
-                    return visualisationExpressions.length > 0 &&
-                        visualisationExpressions.every(document.visualisationIsValid);
-                }
+                enabled: root.visualisationExpressionsValid
                 onClicked: { root.accept(); }
             }
 
@@ -187,6 +189,9 @@ Window
 
     function accept()
     {
+        if(!root.visualisationExpressionsValid)
+            return;
+
         accepted();
         root.close();
     }
