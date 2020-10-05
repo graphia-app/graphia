@@ -1432,6 +1432,9 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 {
     auto* axisRect = _customPlot.axisRectAt(pos);
 
+    if(axisRect == nullptr)
+        return;
+
     auto rectHeight = axisRect->bottom() - axisRect->top();
     auto x = pos.x() - axisRect->left();
     auto y = pos.y() - axisRect->top();
