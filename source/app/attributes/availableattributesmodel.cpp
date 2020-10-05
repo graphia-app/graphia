@@ -27,8 +27,8 @@
 #include "shared/graph/elementtype.h"
 #include "shared/utils/container.h"
 
-AvailableAttributesModel::Item::Item(QVariant value) :
-    _value(std::move(value))
+AvailableAttributesModel::Item::Item(QString value, const Attribute* attribute) :
+    _value(std::move(value)), _attribute(attribute)
 {}
 
 AvailableAttributesModel::Item::~Item()
@@ -42,7 +42,7 @@ void AvailableAttributesModel::Item::addChild(AvailableAttributesModel::Item* ch
     child->_parent = this;
 }
 
-AvailableAttributesModel::Item*AvailableAttributesModel::Item::child(int row)
+AvailableAttributesModel::Item* AvailableAttributesModel::Item::child(int row) const
 {
     return _children.value(row);
 }
@@ -52,7 +52,7 @@ int AvailableAttributesModel::Item::childCount() const
     return _children.count();
 }
 
-QVariant AvailableAttributesModel::Item::value() const
+const QString& AvailableAttributesModel::Item::value() const
 {
     return _value;
 }
@@ -65,16 +65,19 @@ int AvailableAttributesModel::Item::row() const
     return 0;
 }
 
-AvailableAttributesModel::Item*AvailableAttributesModel::Item::parent()
+AvailableAttributesModel::Item*AvailableAttributesModel::Item::parent() const
 {
     return _parent;
 }
 
+const Attribute* AvailableAttributesModel::Item::attribute() const
+{
+    return _attribute;
+}
+
 AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
-                                                   QObject* parent,
-                                                   ElementType elementTypes,
-                                                   ValueType valueTypes,
-                                                   AttributeFlag skipFlags) :
+    QObject* parent, ElementType elementTypes,
+    ValueType valueTypes, AttributeFlag skipFlags) :
     QAbstractItemModel(parent),
     _graphModel(&graphModel)
 {
@@ -84,10 +87,11 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     auto addItem = [this, &graphModel](Item* parentItem, const QString& name)
     {
-        auto* attributeItem = new AvailableAttributesModel::Item(name);
+        const auto* attribute = graphModel.attributeByName(name);
+
+        auto* attributeItem = new AvailableAttributesModel::Item(name, attribute);
         parentItem->addChild(attributeItem);
 
-        const auto* attribute = graphModel.attributeByName(name);
         Q_ASSERT(attribute != nullptr);
 
         if(attribute->hasParameter())
@@ -96,7 +100,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
             for(const auto& validValue : attribute->validParameterValues())
             {
-                auto* parameterItem = new AvailableAttributesModel::Item(validValue);
+                auto* parameterItem = new AvailableAttributesModel::Item(validValue, attribute);
                 attributeItem->addChild(parameterItem);
             }
         }
@@ -137,7 +141,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
     auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
 
-    auto itemValue = item->value().toString();
+    const auto& itemValue = item->value();
 
     if(role == Qt::DisplayRole)
         return itemValue;
@@ -146,10 +150,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(item->childCount() > 0)
         return {};
 
-    //FIXME build cache of names to attribute values here, or otherwise fix sort
-    // performance when there are lots of Data Values
-    auto attributeName = get(index).toString();
-    const auto* attribute = _graphModel->attributeByName(attributeName);
+    const auto* attribute = item->attribute();
 
     if(attribute == nullptr || !attribute->isValid())
         return {};
@@ -267,16 +268,19 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
     return 1;
 }
 
-QVariant AvailableAttributesModel::get(const QModelIndex& index) const
+QString AvailableAttributesModel::get(const QModelIndex& index) const
 {
     auto* parent = parentItem(index);
     auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
 
-    QString text = QStringLiteral("\"%1\"").arg(item->value().toString());
+    if(item == nullptr)
+        return {};
+
+    QString text = QStringLiteral("\"%1\"").arg(item->value());
 
     if(u::contains(_attributeItemsWithParameters, parent))
     {
-        QString parentText = get(index.parent()).toString();
+        QString parentText = get(index.parent());
         text = QStringLiteral("%1.%2").arg(parentText, text);
     }
     else if(parent == _sourceNode)

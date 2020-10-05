@@ -28,6 +28,7 @@
 #include <QVariant>
 
 class GraphModel;
+class Attribute;
 
 class AvailableAttributesModel : public QAbstractItemModel
 {
@@ -37,22 +38,24 @@ private:
     class Item
     {
     private:
-        QVariant _value;
+        QString _value;
+        const Attribute* _attribute;
 
         QList<Item*> _children;
         Item* _parent = nullptr;
 
     public:
-        explicit Item(QVariant value);
+        explicit Item(QString value, const Attribute* attribute = nullptr);
         virtual ~Item();
 
         void addChild(Item* child);
 
-        Item* child(int row);
+        Item* child(int row) const;
         int childCount() const;
-        QVariant value() const;
+        const QString& value() const;
         int row() const;
-        Item* parent();
+        Item* parent() const;
+        const Attribute* attribute() const;
     };
 
     Item* _root = nullptr;
@@ -81,10 +84,8 @@ private:
 public:
     AvailableAttributesModel() = default;
     explicit AvailableAttributesModel(const GraphModel& graphModel,
-                             QObject* parent = nullptr,
-                             ElementType elementTypes = ElementType::All,
-                             ValueType valueTypes = ValueType::All,
-                             AttributeFlag skipFlags = AttributeFlag::None);
+        QObject* parent = nullptr, ElementType elementTypes = ElementType::All,
+        ValueType valueTypes = ValueType::All, AttributeFlag skipFlags = AttributeFlag::None);
     ~AvailableAttributesModel() override;
 
     QVariant data(const QModelIndex& index, int role) const override;
@@ -97,7 +98,7 @@ public:
     int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    Q_INVOKABLE QVariant get(const QModelIndex& index) const;
+    Q_INVOKABLE QString get(const QModelIndex& index) const;
 
     QHash<int, QByteArray> roleNames() const override;
 };
