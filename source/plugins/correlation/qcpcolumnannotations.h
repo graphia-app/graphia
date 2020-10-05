@@ -25,6 +25,7 @@
 
 #include <QColor>
 #include <QRect>
+#include <QString>
 
 #include <vector>
 #include <map>
@@ -49,6 +50,7 @@ private:
     };
 
     std::map<size_t, Row> _rows;
+    std::map<QString, int> _valueWidths;
 
     double _cellWidth = 0.0;
     double _cellHeight = 0.0;
@@ -70,9 +72,9 @@ protected:
     void drawLegendIcon(QCPPainter* painter, const QRectF &rect) const override;
 
 private:
+    int widthForValue(const QCPPainter* painter, const QString& value);
     void renderRect(QCPPainter* painter, size_t x, size_t y,
-        size_t w, const QString& value, bool selected,
-        std::map<QString, int> valueWidths);
+        size_t w, const QString& value, bool selected);
 };
 
 #endif // QCPCOLUMNANNOTATIONS_H

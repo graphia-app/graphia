@@ -19,6 +19,7 @@
 #include "qcpcolumnannotations.h"
 
 #include "shared/utils/color.h"
+#include "shared/utils/container.h"
 
 QCPColumnAnnotations::QCPColumnAnnotations(QCPAxis* keyAxis, QCPAxis* valueAxis) :
     QCPAbstractPlottable(keyAxis, valueAxis)
@@ -46,10 +47,22 @@ void QCPColumnAnnotations::setData(size_t y, std::vector<size_t> indices,
     bool selected, const ColumnAnnotation* columnAnnotation)
 {
     _rows.emplace(y, Row(std::move(indices), selected, columnAnnotation));
+
+}
+
+int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString& value)
+{
+    if(!u::contains(_valueWidths, value))
+    {
+        const auto& fontMetrics = painter->fontMetrics();
+        _valueWidths.emplace(value, fontMetrics.boundingRect(value).width());
+    }
+
+    return _valueWidths.at(value);
 }
 
 void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
-    size_t w, const QString& value, bool selected, std::map<QString, int> valueWidths)
+    size_t w, const QString& value, bool selected)
 {
     auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
     auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
@@ -80,7 +93,7 @@ void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
         rect.setLeft(rect.left() + textMargin);
         rect.setRight(rect.right() - textMargin);
 
-        if(static_cast<qreal>(valueWidths.at(value)) <= rect.width())
+        if(static_cast<qreal>(widthForValue(painter, value)) <= rect.width())
         {
             auto textColor = u::contrastingColor(color);
             painter->setPen(textColor);
@@ -111,20 +124,13 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
         auto currentValue = row._columnAnnotation->valueAt(row._indices.at(0));
 
-        std::map<QString, int> _valueWidths;
-        for(const auto& uniqueValue : row._columnAnnotation->uniqueValues())
-        {
-            const auto& fontMetrics = painter->fontMetrics();
-            _valueWidths.emplace(uniqueValue, fontMetrics.boundingRect(uniqueValue).width());
-        }
-
         for(auto index : row._indices)
         {
             const auto& value = row._columnAnnotation->valueAt(index);
 
             if(value != currentValue)
             {
-                renderRect(painter, left, y, width, currentValue, row._selected, _valueWidths);
+                renderRect(painter, left, y, width, currentValue, row._selected);
 
                 left = right;
                 currentValue = value;
@@ -134,7 +140,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
             width = right - left;
         }
 
-        renderRect(painter, left, y, width, currentValue, row._selected, _valueWidths);
+        renderRect(painter, left, y, width, currentValue, row._selected);
     }
 }
 
