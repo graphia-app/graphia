@@ -1817,22 +1817,51 @@ void CorrelationPlotItem::updateSortMap()
     QCollator collator;
     collator.setNumericMode(true);
 
-    std::sort(_sortMap.begin(), _sortMap.end(),
-    [this, &collator](size_t a, size_t b)
+    // Convert the javascript/QML object array into something
+    // efficient to access from inside the sort lambda function
+    struct ColumnSortOrder
     {
-        for(const auto& columnSortOrder : _columnSortOrders)
+        PlotColumnSortType _type = PlotColumnSortType::Natural;
+        Qt::SortOrder _order = Qt::AscendingOrder;
+        const ColumnAnnotation* _annotation = nullptr;
+    };
+
+    std::vector<ColumnSortOrder> columnSortOrders;
+    columnSortOrders.reserve(_columnSortOrders.size());
+
+    for(const auto& qmlColumnSortOrder : _columnSortOrders)
+    {
+        Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
+
+        ColumnSortOrder columnSortOrder;
+        columnSortOrder._type = static_cast<PlotColumnSortType>(qmlColumnSortOrder["type"].toInt());
+        columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder["order"].toInt());
+
+        if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
         {
-            Q_ASSERT(u::containsAllOf(columnSortOrder, {"type", "text", "order"}));
+            const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+            auto columnAnnotationName = qmlColumnSortOrder["text"].toString();
+            auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
+                [&columnAnnotationName](const auto& v) { return v.name() == columnAnnotationName; });
 
-            auto type = static_cast<PlotColumnSortType>(columnSortOrder["type"].toInt());
-            auto text = columnSortOrder["text"].toString();
-            auto order = static_cast<Qt::SortOrder>(columnSortOrder["order"].toInt());
+            Q_ASSERT(it != columnAnnotations.end());
+            if(it != columnAnnotations.end())
+                columnSortOrder._annotation = &(*it);
+        }
 
-            switch(type)
+        columnSortOrders.emplace_back(columnSortOrder);
+    }
+
+    std::sort(_sortMap.begin(), _sortMap.end(),
+    [this, &columnSortOrders, &collator](size_t a, size_t b)
+    {
+        for(const auto& columnSortOrder : columnSortOrders)
+        {
+            switch(columnSortOrder._type)
             {
             default:
             case PlotColumnSortType::Natural:
-                return order == Qt::AscendingOrder ?
+                return columnSortOrder._order == Qt::AscendingOrder ?
                     a < b : b < a;
 
             case PlotColumnSortType::ColumnName:
@@ -1843,34 +1872,20 @@ void CorrelationPlotItem::updateSortMap()
                 if(columnNameA == columnNameB)
                     continue;
 
-                return order == Qt::AscendingOrder ?
+                return columnSortOrder._order == Qt::AscendingOrder ?
                     collator.compare(columnNameA, columnNameB) < 0 :
                     collator.compare(columnNameB, columnNameA) < 0;
             }
 
             case PlotColumnSortType::ColumnAnnotation:
             {
-                const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-
-                if(columnAnnotations.empty() || text.isEmpty())
-                    continue;
-
-                auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
-                    [&text](const auto& v) { return v.name() == text; });
-
-                Q_ASSERT(it != columnAnnotations.end());
-                if(it == columnAnnotations.end())
-                    continue;
-
-                const auto& columnAnnotation = *it;
-
-                auto annotationValueA = columnAnnotation.valueAt(static_cast<int>(a));
-                auto annotationValueB = columnAnnotation.valueAt(static_cast<int>(b));
+                auto annotationValueA = columnSortOrder._annotation->valueAt(static_cast<int>(a));
+                auto annotationValueB = columnSortOrder._annotation->valueAt(static_cast<int>(b));
 
                 if(annotationValueA == annotationValueB)
                     continue;
 
-                return order == Qt::AscendingOrder ?
+                return columnSortOrder._order == Qt::AscendingOrder ?
                     collator.compare(annotationValueA, annotationValueB) < 0 :
                     collator.compare(annotationValueB, annotationValueA) < 0;
             }
