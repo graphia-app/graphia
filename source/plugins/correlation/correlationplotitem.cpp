@@ -339,7 +339,7 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
 
     // Updates were attempted during the render, so perform
     // them now, now that the render has finished
-    if(_rebuildRequired)
+    if(_rebuildRequired != RebuildRequired::None)
         rebuildPlot();
 
     if(_tooltipUpdateRequired)
@@ -1498,18 +1498,11 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
     {
         // ...or selects it as the sort annotation otherwise
         sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
+        return;
     }
 
     emit plotOptionsChanged();
     rebuildPlot();
-}
-
-void CorrelationPlotItem::invalidateLineGraphCache()
-{
-    for(auto v : std::as_const(_lineGraphCache))
-        _customPlot.removeGraph(v._graph);
-
-    _lineGraphCache.clear();
 }
 
 static void removeAllExcept(QCPLayoutGrid* layout, QCPLayoutElement* except)
@@ -1523,17 +1516,27 @@ static void removeAllExcept(QCPLayoutGrid* layout, QCPLayoutElement* except)
     layout->simplify();
 }
 
-void CorrelationPlotItem::rebuildPlot()
+void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(!lock.owns_lock())
     {
-        _rebuildRequired = true;
+        _rebuildRequired = invalidateCache == InvalidateCache::Yes ?
+            RebuildRequired::Full : RebuildRequired::Partial;
         return;
     }
 
-    _rebuildRequired = false;
+    if(_rebuildRequired == RebuildRequired::Full)
+    {
+        // Invalidate the line graph cache
+        for(auto v : std::as_const(_lineGraphCache))
+            _customPlot.removeGraph(v._graph);
+
+        _lineGraphCache.clear();
+    }
+
+    _rebuildRequired = RebuildRequired::None;
 
     QElapsedTimer buildTimer;
     buildTimer.start();
@@ -1717,8 +1720,7 @@ void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 {
     _plotScaleType = plotScaleType;
     emit plotOptionsChanged();
-    invalidateLineGraphCache();
-    rebuildPlot();
+    rebuildPlot(InvalidateCache::Yes);
 }
 
 void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
@@ -1754,7 +1756,7 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
     _pluginInstance = pluginInstance;
 
     connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged,
-        this, &CorrelationPlotItem::rebuildPlot);
+        this, [this] { rebuildPlot(); });
 }
 
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
@@ -1938,8 +1940,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     _columnSortOrders.push_front(newSortOrder);
 
     emit plotOptionsChanged();
-    invalidateLineGraphCache();
-    rebuildPlot();
+    rebuildPlot(InvalidateCache::Yes);
 }
 
 void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap> columnSortOrders)
@@ -1949,8 +1950,7 @@ void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap> columnS
         _columnSortOrders = columnSortOrders;
         emit plotOptionsChanged();
 
-        invalidateLineGraphCache();
-        rebuildPlot();
+        rebuildPlot(InvalidateCache::Yes);
     }
 }
 

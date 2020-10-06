@@ -196,12 +196,21 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
 
-    void rebuildPlot();
+    enum class InvalidateCache { No, Yes };
+
+    void rebuildPlot(InvalidateCache invalidateCache = InvalidateCache::No);
 
 private:
     bool _debug = false;
 
-    bool _rebuildRequired = false;
+    enum class RebuildRequired
+    {
+        None,
+        Partial,
+        Full
+    };
+
+    RebuildRequired _rebuildRequired = RebuildRequired::None;
     bool _tooltipUpdateRequired = false;
     QCPLayer* _tooltipLayer = nullptr;
     QPointF _hoverPoint{-1.0, -1.0};
@@ -327,8 +336,6 @@ private:
     void configureLegend();
 
     void onLeftClick(const QPoint& pos);
-
-    void invalidateLineGraphCache();
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 
