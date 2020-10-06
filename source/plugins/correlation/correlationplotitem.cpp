@@ -1430,7 +1430,7 @@ void CorrelationPlotItem::configureLegend()
 
 void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 {
-    auto* axisRect = _customPlot.axisRectAt(pos);
+    const auto* axisRect = _customPlot.axisRectAt(pos);
 
     if(axisRect == nullptr)
         return;
