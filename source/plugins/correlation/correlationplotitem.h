@@ -116,7 +116,7 @@ private:
     double _xAxisMin = 0.0;
     double _xAxisMax = 0.0;
 
-    bool _updateQueued = false;
+    std::atomic_bool _updateQueued = false;
     CorrelationPlotUpdateType _updateType = CorrelationPlotUpdateType::None;
 
     Q_INVOKABLE void renderPixmap();
