@@ -339,7 +339,7 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
 
     // Updates were attempted during the render, so perform
     // them now, now that the render has finished
-    if(_rebuildRequired != RebuildRequired::None)
+    if(_invalidateCache != InvalidateCache::No)
         rebuildPlot();
 
     if(_tooltipUpdateRequired)
@@ -1520,14 +1520,13 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
-    if(!lock.owns_lock())
-    {
-        _rebuildRequired = invalidateCache == InvalidateCache::Yes ?
-            RebuildRequired::Full : RebuildRequired::Partial;
-        return;
-    }
+    if(invalidateCache == InvalidateCache::Yes)
+        _invalidateCache = invalidateCache;
 
-    if(_rebuildRequired == RebuildRequired::Full)
+    if(!lock.owns_lock())
+        return;
+
+    if(_invalidateCache == InvalidateCache::Yes)
     {
         // Invalidate the line graph cache
         for(auto v : std::as_const(_lineGraphCache))
@@ -1536,7 +1535,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
         _lineGraphCache.clear();
     }
 
-    _rebuildRequired = RebuildRequired::None;
+    _invalidateCache = InvalidateCache::No;
 
     QElapsedTimer buildTimer;
     buildTimer.start();
