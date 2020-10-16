@@ -27,6 +27,11 @@ Item
     property var selectedValue
     property var model
 
+    property var currentIndex:
+    {
+        return sortFilterProxyModel.mapToSource(treeView.selection.currentIndex);
+    }
+
     property alias sortRoleName: sortFilterProxyModel.sortRoleName
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
@@ -108,6 +113,47 @@ Item
             treeView.__mouseArea.visible = false;
             treeView.__mouseArea.visible = true;
         }
+    }
+
+    function _mapIndexToRow(index)
+    {
+        // This hideous hack is the only obvious way to get from
+        // a QModelIndex to a row index that corresponds to an item
+        // in the TreeView
+        for(let i = 0; i < treeView.__listView.count; i++)
+        {
+            if(treeView.__model.mapRowToModelIndex(i) === index)
+                return i;
+        }
+
+        return -1;
+    }
+
+    function select(modelIndex)
+    {
+        // Do the selection
+        let index = sortFilterProxyModel.mapFromSource(modelIndex);
+        treeView.selection.setCurrentIndex(index, ItemSelectionModel.NoUpdate);
+        treeView.selection.select(index, ItemSelectionModel.ClearAndSelect);
+
+        // Ensure any containing tree branches are expanded
+        let parentIndex = index.parent;
+        while(parentIndex.valid)
+        {
+            if(!treeView.isExpanded(parentIndex))
+                treeView.expand(parentIndex);
+
+            parentIndex = parentIndex.parent;
+        }
+
+        // Scroll so that it's visible
+        let row = _mapIndexToRow(index);
+        treeView.__listView.positionViewAtIndex(row, ListView.Center);
+    }
+
+    function deselect()
+    {
+        treeView.selection.clearCurrentIndex();
     }
 
     signal doubleClicked(var index)
