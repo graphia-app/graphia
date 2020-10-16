@@ -27,6 +27,8 @@
 #include <QList>
 #include <QVariant>
 
+#include <set>
+
 class GraphModel;
 class Attribute;
 
@@ -66,7 +68,7 @@ private:
     // cppcheck-suppress unsafeClassCanLeak
     Item* _targetNode = nullptr;
 
-    std::vector<Item*> _attributeItemsWithParameters;
+    std::set<Item*> _attributeItemsWithParameters;
 
     static Item* parentItem(const QModelIndex& index);
 

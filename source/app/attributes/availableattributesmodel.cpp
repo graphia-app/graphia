@@ -96,7 +96,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
         if(attribute->hasParameter())
         {
-            _attributeItemsWithParameters.push_back(attributeItem);
+            _attributeItemsWithParameters.emplace(attributeItem);
 
             for(const auto& validValue : attribute->validParameterValues())
             {
