@@ -36,7 +36,7 @@ static void removeLeaves(TransformedGraph& target, size_t limit = 0)
     {
         for(auto nodeId : target.nodeIds())
         {
-            if(target.nodeById(nodeId).degree() == 1)
+            if(target.nodeById(nodeId).degree() <= 1)
                 removees.emplace_back(nodeId);
         }
 
