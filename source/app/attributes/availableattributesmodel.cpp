@@ -141,6 +141,9 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
     auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
 
+    if(role == Roles::HasChildrenRole)
+        return item->childCount() > 0;
+
     const auto& itemValue = item->value();
 
     if(role == Qt::DisplayRole)
@@ -300,6 +303,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
     names[Roles::HasSharedValuesRole] = "hasSharedValues";
     names[Roles::SearchableRole] = "searchable";
     names[Roles::UserDefinedRole] = "userDefined";
+    names[Roles::HasChildrenRole] = "hasChildren";
 
     return names;
 }
