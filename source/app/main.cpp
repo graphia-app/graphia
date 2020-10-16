@@ -54,6 +54,7 @@
 #include "shared/utils/qmlpreferences.h"
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/scopetimer.h"
+#include "shared/utils/modelcompleter.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
@@ -179,6 +180,7 @@ int start(int argc, char *argv[])
     qmlRegisterType<Document>                        (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>                  (uri, maj, min, "Graph");
     qmlRegisterType<IconItem>                        (uri, maj, min, "NamedIcon");
+    qmlRegisterType<ModelCompleter>                  (uri, maj, min, "ModelCompleter");
     qmlRegisterType<QmlPreferences>                  (uri, maj, min, "Preferences");
     qmlRegisterType<HoverMousePassthrough>           (uri, maj, min, "HoverMousePassthrough");
     qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");

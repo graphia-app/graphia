@@ -73,6 +73,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/function_traits.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/iterator_range.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/is_detected.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/movablepointer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/pair_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/passkey.h
@@ -117,6 +118,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferenceswatcher.cpp
