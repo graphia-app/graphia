@@ -752,6 +752,12 @@ Window
 
     function accept()
     {
+        if(!document.graphTransformIsValid(transformExpression))
+        {
+            console.log("CreateTransformDialog: trying to accept invalid expression");
+            return;
+        }
+
         accepted();
         root.close();
     }
