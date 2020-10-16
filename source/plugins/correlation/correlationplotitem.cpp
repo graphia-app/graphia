@@ -1688,73 +1688,103 @@ void CorrelationPlotItem::setYAxisRange(double min, double max)
 
 void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
 {
-    _plotDispersionVisualType = plotDispersionVisualType;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_plotDispersionVisualType != plotDispersionVisualType)
+    {
+        _plotDispersionVisualType = plotDispersionVisualType;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
 {
-    _yAxisLabel = plotYAxisLabel;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_yAxisLabel != plotYAxisLabel)
+    {
+        _yAxisLabel = plotYAxisLabel;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
 {
-    _includeYZero = includeYZero;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_includeYZero != includeYZero)
+    {
+        _includeYZero = includeYZero;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setShowAllColumns(bool showAllColumns)
 {
-    _showAllColumns = showAllColumns;
-    emit visibleHorizontalFractionChanged();
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_showAllColumns != showAllColumns)
+    {
+        _showAllColumns = showAllColumns;
+        emit visibleHorizontalFractionChanged();
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
 {
-    _xAxisLabel = plotXAxisLabel;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_xAxisLabel != plotXAxisLabel)
+    {
+        _xAxisLabel = plotXAxisLabel;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 {
-    _plotScaleType = plotScaleType;
-    emit plotOptionsChanged();
-    rebuildPlot(InvalidateCache::Yes);
+    if(_plotScaleType != plotScaleType)
+    {
+        _plotScaleType = plotScaleType;
+        emit plotOptionsChanged();
+        rebuildPlot(InvalidateCache::Yes);
+    }
 }
 
 void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
 {
-    _plotAveragingType = plotAveragingType;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_plotAveragingType != plotAveragingType)
+    {
+        _plotAveragingType = plotAveragingType;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setPlotAveragingAttributeName(const QString& attributeName)
 {
-    _plotAveragingAttributeName = attributeName;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_plotAveragingAttributeName != attributeName)
+    {
+        _plotAveragingAttributeName = attributeName;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
 {
-    _plotDispersionType = plotDispersionType;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_plotDispersionType != plotDispersionType)
+    {
+        _plotDispersionType = plotDispersionType;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setShowLegend(bool showLegend)
 {
-    _showLegend = showLegend;
-    emit plotOptionsChanged();
-    rebuildPlot();
+    if(_showLegend != showLegend)
+    {
+        _showLegend = showLegend;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
@@ -1794,8 +1824,11 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
 
 void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 {
-    _showGridLines = showGridLines;
-    rebuildPlot();
+    if(_showGridLines != showGridLines)
+    {
+        _showGridLines = showGridLines;
+        rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
@@ -1808,11 +1841,11 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
 
 void CorrelationPlotItem::setXAxisPadding(int padding)
 {
-    bool changed = _xAxisPadding != padding;
-    _xAxisPadding = padding;
-
-    if(changed)
+    if(_xAxisPadding != padding)
+    {
+        _xAxisPadding = padding;
         rebuildPlot();
+    }
 }
 
 void CorrelationPlotItem::updateSortMap()
