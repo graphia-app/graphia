@@ -203,7 +203,14 @@ protected:
 private:
     bool _debug = false;
 
-    InvalidateCache _invalidateCache = InvalidateCache::No;
+    enum class RebuildRequired
+    {
+        None,
+        Partial,
+        Full
+    };
+
+    RebuildRequired _rebuildRequired = RebuildRequired::None;
     bool _tooltipUpdateRequired = false;
     QCPLayer* _tooltipLayer = nullptr;
     QPointF _hoverPoint{-1.0, -1.0};
