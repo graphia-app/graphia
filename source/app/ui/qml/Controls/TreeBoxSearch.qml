@@ -30,6 +30,16 @@ TextField
 
     placeholderText: qsTr("Search")
 
+    onVisibleChanged:
+    {
+        text = "";
+
+        if(visible)
+            forceActiveFocus();
+        else
+            treeBox.forceActiveFocus();
+    }
+
     ModelCompleter
     {
         id: modelCompleter

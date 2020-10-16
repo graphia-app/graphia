@@ -59,6 +59,13 @@ Item
             Layout.fillWidth: true
 
             visible: false
+
+            onVisibleChanged:
+            {
+                if(!visible)
+                    treeView.forceActiveFocus();
+            }
+
             treeBox: root
             onAccepted: { visible = false; }
         }
@@ -134,6 +141,19 @@ Item
                 treeView.__mouseArea.visible = true;
             }
 
+            Keys.onPressed:
+            {
+                if(!root.showSearch)
+                    return;
+
+                if((event.key === Qt.Key_F && event.modifiers & Qt.ControlModifier) ||
+                    event.key === Qt.Key_Slash)
+                {
+                    event.accepted = true;
+                    root.toggleSearch();
+                }
+            }
+
             FloatingButton
             {
                 visible: root.showSearch && root.enabled
@@ -147,16 +167,17 @@ Item
                 iconName: "edit-find"
                 hoverOpacity: 0.7
 
-                onClicked:
-                {
-                    treeBoxSearch.visible = !treeBoxSearch.visible;
-                    treeBoxSearch.text = "";
-
-                    if(treeBoxSearch.visible)
-                        treeBoxSearch.forceActiveFocus();
-                }
+                onClicked: { root.toggleSearch(); }
             }
         }
+    }
+
+    function toggleSearch()
+    {
+        if(!root.showSearch)
+            return;
+
+        treeBoxSearch.visible = !treeBoxSearch.visible;
     }
 
     function _mapIndexToRow(index)
