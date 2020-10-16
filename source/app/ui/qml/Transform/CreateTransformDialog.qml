@@ -215,6 +215,7 @@ Window
                                 Layout.fillHeight: true
 
                                 showSections: sortRoleName !== "display"
+                                showSearch: true
                                 sortRoleName: "userDefined"
 
                                 onSelectedValueChanged:
@@ -331,6 +332,7 @@ Window
                                     Layout.fillHeight: true
 
                                     showSections: lhsAttributeList.showSections
+                                    showSearch: true
                                     sortRoleName: lhsAttributeList.sortRoleName
 
                                     enabled: attributeRadioButton.checked
@@ -435,6 +437,7 @@ Window
                                             Layout.preferredWidth: 250
 
                                             showSections: sortRoleName !== "display"
+                                            showSearch: true
                                             sortRoleName: "userDefined"
 
                                             onSelectedValueChanged:

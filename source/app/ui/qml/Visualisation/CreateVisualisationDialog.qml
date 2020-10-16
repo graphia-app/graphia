@@ -71,6 +71,7 @@ Window
                 Layout.fillHeight: true
 
                 showSections: sortRoleName !== "display"
+                showSearch: true
                 sortRoleName: "elementType"
 
                 onSelectedValueChanged:

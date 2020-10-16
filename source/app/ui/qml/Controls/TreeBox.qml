@@ -18,6 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 1.5
+import QtQuick.Layouts 1.3
 import QtQml.Models 2.2
 
 import SortFilterProxyModel 0.2
@@ -25,7 +26,7 @@ import SortFilterProxyModel 0.2
 Item
 {
     property var selectedValue
-    property var model
+    property var model: null
 
     property var currentIndex:
     {
@@ -37,6 +38,8 @@ Item
 
     property bool showSections: false
 
+    property bool showSearch: false
+
     onModelChanged: { selectedValue = undefined; }
 
     id: root
@@ -45,73 +48,114 @@ Item
     width: 200
     height: 100
 
-    TreeView
+    ColumnLayout
     {
-        id: treeView
-
         anchors.fill: root
-        model: SortFilterProxyModel
+
+        TreeBoxSearch
         {
-            id: sortFilterProxyModel
-            sourceModel: root.model !== undefined ? root.model : null
+            id: treeBoxSearch
+
+            Layout.fillWidth: true
+
+            visible: false
+            treeBox: root
+            onAccepted: { visible = false; }
         }
 
-        // Clear the selection when the model is changed
-        selection: ItemSelectionModel { model: treeView.model }
-        onModelChanged: { selection.clear(); }
-
-        TableViewColumn { role: "display" }
-
-        // Hide the header
-        headerDelegate: Item {}
-
-        alternatingRowColors: false
-
-        section.property: showSections && root.sortRoleName.length > 0 ? root.sortRoleName : ""
-        section.delegate: Component
+        TreeView
         {
-            Text
+            id: treeView
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            model: SortFilterProxyModel
             {
-                // "Hide" when the section text is empty
-                height: text.length > 0 ? implicitHeight : 0
-                text: section
-                font.italic: true
-                font.bold: true
+                id: sortFilterProxyModel
+                sourceModel: root.model !== undefined ? root.model : null
             }
-        }
 
-        Connections
-        {
-            target: treeView.selection
-            function onSelectionChanged()
+            // Clear the selection when the model is changed
+            selection: ItemSelectionModel { model: treeView.model }
+            onModelChanged: { selection.clear(); }
+
+            TableViewColumn { role: "display" }
+
+            // Hide the header
+            headerDelegate: Item {}
+
+            alternatingRowColors: false
+
+            section.property: showSections && root.sortRoleName.length > 0 ? root.sortRoleName : ""
+            section.delegate: Component
             {
-                if(!root.model)
-                    return;
-
-                var sourceIndex = treeView.model.mapToSource(target.currentIndex);
-
-                if(typeof root.model.get === 'function')
-                    root.selectedValue = root.model.get(sourceIndex);
-                else if(typeof root.model.data === 'function')
-                    root.selectedValue = root.model.data(sourceIndex);
-                else
-                    root.selectedValue = undefined;
+                Text
+                {
+                    // "Hide" when the section text is empty
+                    height: text.length > 0 ? implicitHeight : 0
+                    text: section
+                    font.italic: true
+                    font.bold: true
+                }
             }
-        }
 
-        onDoubleClicked:
-        {
-            root.doubleClicked(index);
+            Connections
+            {
+                target: treeView.selection
+                function onSelectionChanged()
+                {
+                    if(!root.model)
+                        return;
 
-            // FIXME: There seems to be a bug in TreeView where if it is hidden in
-            // the middle of a click event, it gets into a strange state where the
-            // mouse button state gets stuck. Thereafter, if it is shown again simply
-            // moving the mouse over the items in the list selects them. This is
-            // obviously undesirable and needs to be investigated fully, but for now
-            // toggling the visibility of the TreeView's MouseArea seems to stop it
-            // happening:
-            treeView.__mouseArea.visible = false;
-            treeView.__mouseArea.visible = true;
+                    var sourceIndex = treeView.model.mapToSource(target.currentIndex);
+
+                    if(typeof root.model.get === 'function')
+                        root.selectedValue = root.model.get(sourceIndex);
+                    else if(typeof root.model.data === 'function')
+                        root.selectedValue = root.model.data(sourceIndex);
+                    else
+                        root.selectedValue = undefined;
+                }
+            }
+
+            onDoubleClicked:
+            {
+                root.doubleClicked(index);
+
+                // FIXME: There seems to be a bug in TreeView where if it is hidden in
+                // the middle of a click event, it gets into a strange state where the
+                // mouse button state gets stuck. Thereafter, if it is shown again simply
+                // moving the mouse over the items in the list selects them. This is
+                // obviously undesirable and needs to be investigated fully, but for now
+                // toggling the visibility of the TreeView's MouseArea seems to stop it
+                // happening:
+                treeView.__mouseArea.visible = false;
+                treeView.__mouseArea.visible = true;
+            }
+
+            FloatingButton
+            {
+                visible: root.showSearch && root.enabled
+
+                anchors.rightMargin: treeView.__verticalScrollBar.visible ?
+                    treeView.__verticalScrollBar.width + 4 : 4
+                anchors.bottomMargin: 4
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+
+                iconName: "edit-find"
+                hoverOpacity: 0.7
+
+                onClicked:
+                {
+                    treeBoxSearch.visible = !treeBoxSearch.visible;
+                    treeBoxSearch.text = "";
+
+                    if(treeBoxSearch.visible)
+                        treeBoxSearch.forceActiveFocus();
+                }
+            }
         }
     }
 
