@@ -32,6 +32,7 @@ Button
     id: root
 
     property string iconName
+    property double hoverOpacity: 1.0
 
     implicitHeight: 32
 
@@ -65,6 +66,8 @@ Button
             NamedIcon
             {
                 id: icon
+
+                opacity: control.hovered ? 1.0 : root.hoverOpacity
 
                 Layout.alignment: Qt.AlignVCenter
                 visible: valid
