@@ -85,7 +85,7 @@ const x3::rule<class AttributeParameter, QString> attributeParameter = "attribut
 const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
 
 const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier) >> -attributeParameter];
+const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier) >> *attributeParameter];
 
 struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
 {

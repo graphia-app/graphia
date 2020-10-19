@@ -69,7 +69,7 @@ const x3::rule<class AttributeParameter, QString> attributeParameter = "attribut
 const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
 
 const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = lexeme[(quotedString | identifier) >> -attributeParameter];
+const auto attributeName_def = lexeme[(quotedString | identifier) >> *attributeParameter];
 
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
 const auto channelName = quotedString | identifier;
