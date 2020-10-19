@@ -26,6 +26,7 @@ import Qt.labs.platform 1.0 as Labs
 import app.graphia 1.0
 
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "../../../../shared/ui/qml/Constants.js" as Constants
 
 import "Controls"
 
@@ -665,7 +666,8 @@ PluginContent
 
             // On platforms where the scrollbar doesn't auto-hide or appear transparent,
             // we need to provide a little room for it to be visible
-            xAxisPadding: Qt.platform.os !== "osx" && scrollBarRequired ? 15 : 0
+            xAxisPadding: Qt.platform.os !== "osx" && scrollBarRequired ?
+                scrollView.__horizontalScrollBar.height + Constants.padding : 0
 
             horizontalScrollPosition:
             {
