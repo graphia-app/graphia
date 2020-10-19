@@ -55,6 +55,7 @@
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/modelcompleter.h"
+#include "shared/utils/debugger.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
@@ -91,7 +92,7 @@ int start(int argc, char *argv[])
 
     Application::setAppDir(QCoreApplication::applicationDirPath());
 
-    if(app.isRunning())
+    if(!u::isDebuggerPresent() && app.isRunning())
     {
         if(app.sendMessage(QCoreApplication::arguments().join(QStringLiteral("\n"))))
             return 0;
