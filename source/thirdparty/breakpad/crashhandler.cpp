@@ -2,6 +2,7 @@
 #include "exceptionrecord.h"
 
 #include "shared/utils/thread.h"
+#include "shared/utils/debugger.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -269,13 +270,13 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
 {
     QString path = QDir::tempPath();
 
-#if defined(Q_OS_WIN)
-    if(IsDebuggerPresent())
+    if(u::isDebuggerPresent())
     {
         std::cerr << "Invoked by debugger, not installing CrashHandler\n";
         return;
     }
 
+#if defined(Q_OS_WIN)
     int length = crashReporterExecutableName.toWCharArray(_crashReporterExecutableName);
     _crashReporterExecutableName[length] = 0;
     wchar_t tempPath[1024] = {0};
@@ -290,15 +291,6 @@ CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
                 minidumpCallback, this,
                 google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 #else
-    // Avoid using the CrashHandler if we're started by something that's probably an IDE
-    auto parentProcess = u::parentProcessName();
-    if(parentProcess.contains("qtcreator", Qt::CaseInsensitive))
-    {
-        std::cerr << "Invoked by " << parentProcess.toStdString() <<
-                     ", not installing CrashHandler\n";
-        return;
-    }
-
     strncpy(_crashReporterExecutableName,
         static_cast<const char*>(crashReporterExecutableName.toLatin1()),
         sizeof(_crashReporterExecutableName) - 1);
