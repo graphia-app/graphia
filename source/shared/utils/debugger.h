@@ -19,9 +19,42 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
+#include "shared/utils/thread.h"
+
+#include <QtGlobal>
+
+#include <vector>
+#include <algorithm>
+
+#if defined(Q_OS_WIN)
+#include <Windows.h>
+#endif
+
 namespace u
 {
-    bool isDebuggerPresent();
+inline bool isDebuggerPresent()
+{
+#if defined(Q_OS_WIN)
+    return static_cast<bool>(IsDebuggerPresent());
+#else
+    //FIXME on Linux we could probably use one of the solutions here:
+    // https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb
+
+    auto parentProcessName = u::parentProcessName();
+    if(!parentProcessName.isEmpty())
+    {
+        std::vector<QString> debuggers = {"qtcreator", "gdb"};
+
+        return std::any_of(debuggers.begin(), debuggers.end(),
+                           [&parentProcessName](const auto& debugger)
+        {
+            return parentProcessName.contains(debugger, Qt::CaseInsensitive);
+        });
+    }
+
+    return false;
+#endif
+}
 
 } // namespace u
 
