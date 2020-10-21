@@ -62,6 +62,8 @@ Item
 
             onVisibleChanged:
             {
+                searchButton.checked = visible;
+
                 if(!visible)
                     treeView.forceActiveFocus();
             }
@@ -170,6 +172,7 @@ Item
 
             FloatingButton
             {
+                id: searchButton
                 visible: root.showSearch && root.enabled
 
                 anchors.rightMargin: treeView.__verticalScrollBar.visible ?
@@ -180,6 +183,7 @@ Item
 
                 iconName: "edit-find"
                 hoverOpacity: 0.7
+                checkable: true
 
                 onClicked: { root.toggleSearch(); }
             }
