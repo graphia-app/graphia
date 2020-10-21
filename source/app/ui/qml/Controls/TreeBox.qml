@@ -128,17 +128,31 @@ Item
 
             onDoubleClicked:
             {
-                root.doubleClicked(index);
+                // FIXME: There seems to be a bug in TreeView(?) where if it is hidden in
+                // the middle of a click, the mouse release event never gets delivered to
+                // its MouseArea, and it gets into a state where the mouse button is
+                // considered held down. This results in moving the mouse over the list
+                // selecting the items, without any clicks. So instead we wait until the
+                // mouse button is released, and then trigger the doubleClicked signal.
 
-                // FIXME: There seems to be a bug in TreeView where if it is hidden in
-                // the middle of a click event, it gets into a strange state where the
-                // mouse button state gets stuck. Thereafter, if it is shown again simply
-                // moving the mouse over the items in the list selects them. This is
-                // obviously undesirable and needs to be investigated fully, but for now
-                // toggling the visibility of the TreeView's MouseArea seems to stop it
-                // happening:
-                treeView.__mouseArea.visible = false;
-                treeView.__mouseArea.visible = true;
+                doubleClickHack.index = index;
+            }
+
+            Connections
+            {
+                id: doubleClickHack
+                property var index: null
+
+                target: treeView.__mouseArea
+
+                function onPressedChanged()
+                {
+                    if(!treeView.__mouseArea.pressed && index !== null)
+                    {
+                        root.doubleClicked(index);
+                        index = null;
+                    }
+                }
             }
 
             Keys.onPressed:
