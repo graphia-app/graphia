@@ -1739,7 +1739,8 @@ AvailableTransformsModel* Document::availableTransforms() const
 }
 
 
-QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes, int _skipFlags) const
+QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes,
+    int _skipFlags, const QStringList& skipAttributeNames) const
 {
     if(_graphModel == nullptr)
         return {};
@@ -1748,7 +1749,8 @@ QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes
     auto valueTypes = static_cast<ValueType>(_valueTypes);
     auto skipFlags = static_cast<AttributeFlag>(_skipFlags);
 
-    auto attributeNames = _graphModel->availableAttributeNames(*elementTypeFlags, valueTypes, skipFlags);
+    auto attributeNames = _graphModel->availableAttributeNames(
+        *elementTypeFlags, valueTypes, skipFlags, skipAttributeNames);
 
     if(elementTypeFlags.test(ElementType::Edge))
     {
@@ -1762,15 +1764,15 @@ QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes
     return attributeNames;
 }
 
-AvailableAttributesModel* Document::availableAttributesModel(int elementTypes, int valueTypes, int skipFlags) const
+AvailableAttributesModel* Document::availableAttributesModel(int elementTypes, int valueTypes,
+    int skipFlags, const QStringList& skipAttributeNames) const
 {
     if(_graphModel != nullptr)
     {
         // The caller takes ownership and is responsible for deleting the model
         return new AvailableAttributesModel(*_graphModel, nullptr,
-                                            static_cast<ElementType>(elementTypes),
-                                            static_cast<ValueType>(valueTypes),
-                                            static_cast<AttributeFlag>(skipFlags));
+            static_cast<ElementType>(elementTypes), static_cast<ValueType>(valueTypes),
+            static_cast<AttributeFlag>(skipFlags), skipAttributeNames);
     }
 
     return nullptr;

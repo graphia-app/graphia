@@ -77,13 +77,15 @@ const Attribute* AvailableAttributesModel::Item::attribute() const
 
 AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     QObject* parent, ElementType elementTypes,
-    ValueType valueTypes, AttributeFlag skipFlags) :
+    ValueType valueTypes, AttributeFlag skipFlags,
+    const QStringList& skipAttributeNames) :
     QAbstractItemModel(parent),
     _graphModel(&graphModel)
 {
     _root = new AvailableAttributesModel::Item(tr("Attribute"));
 
-    auto attributeList = graphModel.availableAttributeNames(elementTypes, valueTypes, skipFlags);
+    auto attributeList = graphModel.availableAttributeNames(
+        elementTypes, valueTypes, skipFlags, skipAttributeNames);
 
     auto addItem = [this, &graphModel](Item* parentItem, const QString& name)
     {

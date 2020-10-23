@@ -88,7 +88,8 @@ public:
     AvailableAttributesModel() = default;
     explicit AvailableAttributesModel(const GraphModel& graphModel,
         QObject* parent = nullptr, ElementType elementTypes = ElementType::All,
-        ValueType valueTypes = ValueType::All, AttributeFlag skipFlags = AttributeFlag::None);
+        ValueType valueTypes = ValueType::All, AttributeFlag skipFlags = AttributeFlag::None,
+        const QStringList& skipAttributeNames = {});
     ~AvailableAttributesModel() override;
 
     QVariant data(const QModelIndex& index, int role) const override;
