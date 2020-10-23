@@ -40,8 +40,9 @@ private:
     class Item
     {
     private:
+        // Either the attribute name, or a parameter to the parent attribute
         QString _value;
-        const Attribute* _attribute;
+        const Attribute* _attribute = nullptr;
 
         QList<Item*> _children;
         Item* _parent = nullptr;
