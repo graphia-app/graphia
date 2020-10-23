@@ -299,6 +299,60 @@ QString AvailableAttributesModel::get(const QModelIndex& index, int depth) const
     return text;
 }
 
+QModelIndex AvailableAttributesModel::find(const QString& name) const
+{
+    auto attributeName = Attribute::parseAttributeName(name);
+
+    AvailableAttributesModel::Item* rootItem = nullptr;
+
+    switch(attributeName._type)
+    {
+    case Attribute::EdgeNodeType::Source: rootItem = _sourceNode; break;
+    case Attribute::EdgeNodeType::Target: rootItem = _targetNode; break;
+    default: break;
+    }
+
+    QModelIndex rootIndex;
+
+    if(rootItem != nullptr)
+    {
+        for(int row = 0; row < rowCount(); row++)
+        {
+            const auto& itemIndex = index(row, 0);
+            const auto* item = static_cast<AvailableAttributesModel::Item*>(
+                itemIndex.internalPointer());
+
+            if(item == rootItem)
+            {
+                rootIndex = itemIndex;
+                break;
+            }
+        }
+    }
+
+    auto indexMatching = [this](const QModelIndex& parentIndex, const QString& value)
+    {
+        for(int row = 0; row < rowCount(parentIndex); row++)
+        {
+            const auto& itemIndex = index(row, 0, parentIndex);
+            const auto* item = static_cast<AvailableAttributesModel::Item*>(
+                itemIndex.internalPointer());
+
+            if(item->value() == value)
+                return itemIndex;
+        }
+
+        return QModelIndex();
+    };
+
+    auto matchingIndex = indexMatching(rootIndex, attributeName._name);
+
+    if(!attributeName._parameter.isEmpty())
+        matchingIndex = indexMatching(matchingIndex, attributeName._parameter);
+
+    return matchingIndex;
+}
+
 QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
 {
     auto names = QAbstractItemModel::roleNames();

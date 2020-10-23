@@ -105,6 +105,8 @@ public:
 
     Q_INVOKABLE QString get(const QModelIndex& index, int depth = 0) const;
 
+    Q_INVOKABLE QModelIndex find(const QString& name) const;
+
     QHash<int, QByteArray> roleNames() const override;
 };
 
