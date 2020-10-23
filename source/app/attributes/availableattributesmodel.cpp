@@ -141,7 +141,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(!index.isValid())
         return {};
 
-    auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
+    auto* item = itemForIndex(index);
 
     if(role == Roles::HasChildrenRole)
         return item->childCount() > 0;
@@ -226,7 +226,7 @@ QModelIndex AvailableAttributesModel::index(int row, int column, const QModelInd
     if(!parentIndex.isValid())
         parent = _root;
     else
-        parent = static_cast<AvailableAttributesModel::Item*>(parentIndex.internalPointer());
+        parent = itemForIndex(parentIndex);
 
     auto* child = parent->child(row);
     if(child != nullptr)
@@ -240,8 +240,12 @@ AvailableAttributesModel::Item* AvailableAttributesModel::parentItem(const QMode
     if(!index.isValid())
         return nullptr;
 
-    auto* child = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
-    return child->parent();
+    return itemForIndex(index)->parent();
+}
+
+AvailableAttributesModel::Item* AvailableAttributesModel::itemForIndex(const QModelIndex& index)
+{
+    return static_cast<Item*>(index.internalPointer());
 }
 
 QModelIndex AvailableAttributesModel::parent(const QModelIndex& index) const
@@ -263,7 +267,7 @@ int AvailableAttributesModel::rowCount(const QModelIndex& parentIndex) const
     if(!parentIndex.isValid())
         parent = _root;
     else
-        parent = static_cast<AvailableAttributesModel::Item*>(parentIndex.internalPointer());
+        parent = itemForIndex(parentIndex);
 
     return parent->childCount();
 }
@@ -275,7 +279,7 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
 
 QString AvailableAttributesModel::get(const QModelIndex& index, int depth) const
 {
-    auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
+    auto* item = itemForIndex(index);
 
     if(item == nullptr)
         return {};
@@ -319,10 +323,8 @@ QModelIndex AvailableAttributesModel::find(const QString& name) const
         for(int row = 0; row < rowCount(); row++)
         {
             const auto& itemIndex = index(row, 0);
-            const auto* item = static_cast<AvailableAttributesModel::Item*>(
-                itemIndex.internalPointer());
 
-            if(item == rootItem)
+            if(itemForIndex(itemIndex) == rootItem)
             {
                 rootIndex = itemIndex;
                 break;
@@ -335,10 +337,8 @@ QModelIndex AvailableAttributesModel::find(const QString& name) const
         for(int row = 0; row < rowCount(parentIndex); row++)
         {
             const auto& itemIndex = index(row, 0, parentIndex);
-            const auto* item = static_cast<AvailableAttributesModel::Item*>(
-                itemIndex.internalPointer());
 
-            if(item->value() == value)
+            if(itemForIndex(itemIndex)->value() == value)
                 return itemIndex;
         }
 

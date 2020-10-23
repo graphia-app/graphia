@@ -72,6 +72,7 @@ private:
     std::set<Item*> _attributeItemsWithParameters;
 
     static Item* parentItem(const QModelIndex& index);
+    static Item* itemForIndex(const QModelIndex& index);
 
     enum Roles
     {
