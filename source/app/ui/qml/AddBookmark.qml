@@ -16,7 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
+import QtQuick 2.15
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
@@ -59,13 +59,19 @@ Rectangle
         id: closeAction
         text: qsTr("Cancel")
         iconName: "emblem-unreadable"
-        shortcut: _visible ? "Esc" : ""
 
         onTriggered:
         {
             _visible = false;
             hidden();
         }
+    }
+
+    Shortcut
+    {
+        enabled: _visible
+        sequence: "Esc"
+        onActivated: { closeAction.trigger(); }
     }
 
     RowLayout

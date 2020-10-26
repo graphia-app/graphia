@@ -17,7 +17,7 @@
  */
 
 import QtQml 2.8
-import QtQuick 2.7
+import QtQuick 2.15
 import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
@@ -1098,7 +1098,6 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: enabled && currentDocument && !currentDocument.panelVisible ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered:
         {
@@ -1112,7 +1111,6 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: enabled && currentDocument && !currentDocument.panelVisible && !overviewModeAction.enabled ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered:
         {
@@ -1396,9 +1394,7 @@ ApplicationWindow
     Action
     {
         id: togglePluginMinimiseAction
-        shortcut: enabled && !overviewModeAction.enabled && !resetViewAction.enabled &&
-            currentDocument && !currentDocument.panelVisible ?
-            "Esc" : "Ctrl+M"
+        shortcut: "Ctrl+M"
         iconName: currentDocument && currentDocument.pluginMinimised ? "go-top" : "go-bottom"
         text: currentDocument ? (currentDocument.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
             currentDocument.pluginName : ""
@@ -1411,13 +1407,19 @@ ApplicationWindow
         }
     }
 
-    // The shortcut to minimise the plugin is sometimes Esc, but we also always want Ctrl+M to
-    // work too, so this dummy action just passes through when Esc is the primary shortcut
-    Action
+    Shortcut
     {
-        id: minimiseActionShortcutHack
-        shortcut: togglePluginMinimiseAction.shortcut !== "Ctrl+M" ? "Ctrl+M" : ""
-        onTriggered: { togglePluginMinimiseAction.trigger(); }
+        enabled: currentDocument && !currentDocument.panelVisible
+        sequence: "Esc"
+        onActivated:
+        {
+            if(currentDocument.canEnterOverviewMode)
+                overviewModeAction.trigger();
+            else if(currentDocument.canResetView)
+                resetViewAction.trigger();
+            else if(currentDocument.hasPluginUI && !currentDocument.pluginPoppedOut)
+                togglePluginMinimiseAction.trigger();
+       }
     }
 
     Action
