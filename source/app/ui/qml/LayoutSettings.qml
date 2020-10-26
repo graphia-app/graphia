@@ -45,6 +45,7 @@ Rectangle
         id: closeAction
         text: qsTr("Close")
         iconName: "emblem-unreadable"
+        shortcut: _visible ? "Esc" : ""
 
         onTriggered:
         {

@@ -147,6 +147,9 @@ Item
 
     property color contrastingColor: document.contrastingColor
 
+    readonly property bool panelVisible: find.showing ||
+        addBookmark.showing || layoutSettings.showing
+
     SortFilterProxyModel
     {
         id: sharedValuesProxyModel
@@ -1673,7 +1676,6 @@ Item
         return false;
     }
 
-    readonly property bool findVisible: find.showing
     readonly property int findType: find.type
     function showFind(findType)
     {

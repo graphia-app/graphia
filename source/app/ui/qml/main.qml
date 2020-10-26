@@ -1098,7 +1098,7 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: enabled && currentDocument && !currentDocument.findVisible ? "Esc" : ""
+        shortcut: enabled && currentDocument && !currentDocument.panelVisible ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered:
         {
@@ -1112,7 +1112,7 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: enabled && currentDocument && !currentDocument.findVisible && !overviewModeAction.enabled ? "Esc" : ""
+        shortcut: enabled && currentDocument && !currentDocument.panelVisible && !overviewModeAction.enabled ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered:
         {
@@ -1397,7 +1397,7 @@ ApplicationWindow
     {
         id: togglePluginMinimiseAction
         shortcut: enabled && !overviewModeAction.enabled && !resetViewAction.enabled &&
-            currentDocument && !currentDocument.findVisible ?
+            currentDocument && !currentDocument.panelVisible ?
             "Esc" : "Ctrl+M"
         iconName: currentDocument && currentDocument.pluginMinimised ? "go-top" : "go-bottom"
         text: currentDocument ? (currentDocument.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
