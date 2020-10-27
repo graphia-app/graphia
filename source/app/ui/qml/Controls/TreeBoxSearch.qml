@@ -95,11 +95,8 @@ TextField
     onSelectionEndChanged:   { _disableCompletion(); }
     onCursorPositionChanged: { _disableCompletion(); }
 
-    onTextChanged:
+    function _autoComplete()
     {
-        if(_inSetTextByIndex)
-            return;
-
         if(_allowComplete && text.length > 0)
         {
             modelCompleter.startsWith = text;
@@ -113,6 +110,14 @@ TextField
                 root._select(candidate);
             }
         }
+    }
+
+    onTextChanged:
+    {
+        if(_inSetTextByIndex)
+            return;
+
+        _autoComplete();
     }
 
     // Prevent recursive calls to onTextChanged
@@ -157,6 +162,12 @@ TextField
 
     function _moveSelection(delta)
     {
+        if(modelCompleter.startsWith.length === 0)
+        {
+            _enableCompletion();
+            _autoComplete();
+        }
+
         if(modelCompleter.candidates.length < 2)
             return;
 
