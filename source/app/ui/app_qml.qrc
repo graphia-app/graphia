@@ -56,5 +56,6 @@
         <file>qml/LayoutSetting.qml</file>
         <file>qml/Controls/MappingSelector.qml</file>
         <file>qml/Controls/TreeBoxSearch.qml</file>
+        <file>qml/AttributeUtils.js</file>
     </qresource>
 </RCC>
