@@ -162,7 +162,7 @@ const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "co
 const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
 const auto condition_def = (operand >> logical_op >> operand) | operand;
 
-const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier) >> -attributeParameter];
+const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier) >> *attributeParameter];
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
