@@ -199,8 +199,8 @@ Item
                 anchors.rightMargin: treeView.__verticalScrollBar.visible ?
                     treeView.__verticalScrollBar.width + 4 : 4
                 anchors.bottomMargin: 4
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                anchors.right: parent !== undefined ? parent.right : undefined
+                anchors.bottom: parent !== undefined ? parent.bottom : undefined
 
                 iconName: "edit-find"
                 hoverOpacity: 0.7
@@ -235,6 +235,9 @@ Item
 
     function select(modelIndex)
     {
+        if(!modelIndex.valid)
+            return;
+
         // Do the selection
         let index = sortFilterProxyModel.mapFromSource(modelIndex);
         treeView.selection.setCurrentIndex(index, ItemSelectionModel.NoUpdate);
