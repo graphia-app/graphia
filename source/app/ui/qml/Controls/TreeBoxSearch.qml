@@ -32,18 +32,23 @@ TextField
 
     onVisibleChanged:
     {
+        // Not sure why/how this happens, but it does when
+        // moving between transforms
+        if(!root)
+            return;
+
         text = "";
 
         if(visible)
             forceActiveFocus();
-        else
+        else if(treeBox)
             treeBox.forceActiveFocus();
     }
 
     ModelCompleter
     {
         id: modelCompleter
-        model: treeBox.model ? treeBox.model : null
+        model: treeBox && treeBox.model ? treeBox.model : null
     }
 
     validator: RegExpValidator
