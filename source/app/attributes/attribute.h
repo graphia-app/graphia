@@ -552,6 +552,7 @@ public:
     };
 
     static Name parseAttributeName(QString name);
+    static QString enquoteAttributeName(const QString& name);
     static Attribute edgeNodesAttribute(const IGraph& graph,
         const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 };

@@ -373,6 +373,29 @@ Attribute::Name Attribute::parseAttributeName(QString name)
     return {type, name, parameter};
 }
 
+QString Attribute::enquoteAttributeName(const QString& name)
+{
+    const QString sourceString = QStringLiteral("source.");
+    const QString targetString = QStringLiteral("target.");
+    QString prefix;
+    QString postfix;
+
+    auto parsedAttributeName = parseAttributeName(name);
+
+    switch(parsedAttributeName._type)
+    {
+    case EdgeNodeType::Source: prefix = sourceString; break;
+    case EdgeNodeType::Target: prefix = targetString; break;
+    default: break;
+    }
+
+    if(!parsedAttributeName._parameter.isEmpty())
+        postfix = QStringLiteral(".\"%1\"").arg(parsedAttributeName._parameter);
+
+    return QStringLiteral("%1\"%2\"%3").arg(prefix,
+        parsedAttributeName._name, postfix);
+}
+
 Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
                                         Attribute::EdgeNodeType edgeNodeType)
 {
