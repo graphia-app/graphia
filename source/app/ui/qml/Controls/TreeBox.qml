@@ -163,14 +163,27 @@ Item
 
             Keys.onPressed:
             {
-                if(!root.showSearch)
-                    return;
-
-                if((event.key === Qt.Key_F && event.modifiers & Qt.ControlModifier) ||
-                    event.key === Qt.Key_Slash)
+                if(root.showSearch)
                 {
-                    event.accepted = true;
-                    root.toggleSearch();
+                    if((event.key === Qt.Key_F && event.modifiers & Qt.ControlModifier) ||
+                        event.key === Qt.Key_Slash)
+                    {
+                        event.accepted = true;
+                        root.toggleSearch();
+                    }
+                }
+
+
+                switch(event.key)
+                {
+                case Qt.Key_Enter:
+                case Qt.Key_Return:
+                    if(root.selectedValue !== undefined && root.selectedValue.length > 0)
+                    {
+                        event.accepted = true;
+                        root.accepted();
+                    }
+                    break;
                 }
             }
 
