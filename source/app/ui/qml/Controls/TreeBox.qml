@@ -40,6 +40,10 @@ Item
 
     property bool showSearch: false
 
+    //FIXME: 2 is fudge for frame/margins/something; need to account for it properly
+    readonly property double contentHeight: treeView.__listView.contentHeight + 2
+    readonly property double contentWidth: treeView.__listView.contentWidth + 2
+
     onModelChanged: { selectedValue = undefined; }
 
     id: root
