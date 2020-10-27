@@ -25,7 +25,7 @@ import SortFilterProxyModel 0.2
 
 Item
 {
-    property var selectedValue
+    property var selectedValue: undefined
     property var model: null
 
     property var currentIndex:
@@ -154,6 +154,9 @@ Item
                     {
                         root.doubleClicked(index);
                         index = null;
+
+                        if(root.selectedValue !== undefined && root.selectedValue.length > 0)
+                            root.accepted();
                     }
                 }
             }
@@ -239,6 +242,8 @@ Item
     {
         treeView.selection.clearCurrentIndex();
     }
+
+    signal accepted()
 
     signal clicked(var index)
     signal doubleClicked(var index)
