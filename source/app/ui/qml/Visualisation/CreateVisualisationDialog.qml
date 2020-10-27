@@ -214,11 +214,8 @@ Window
         {
             var attribute = document.attribute(attributeList.selectedValue);
 
-            var attributeName = VisualisationUtils.decorateAttributeName(attribute.name,
-                attribute.parameterValue);
-
             var expression = VisualisationUtils.expressionFor(
-                document, attributeName, attribute.flags,
+                document, attributeList.selectedValue, attribute.flags,
                 attribute.valueType, channelName);
 
             newVisualsiationExpressions.push(expression);

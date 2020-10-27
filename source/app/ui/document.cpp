@@ -1829,11 +1829,12 @@ QVariantMap Document::transform(const QString& transformName) const
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
-            defaultVisualisationMap.insert(QStringLiteral("name"), defaultVisualisation._attributeName);
+            auto attributeName = Attribute::enquoteAttributeName(defaultVisualisation._attributeName);
+            defaultVisualisationMap.insert(QStringLiteral("name"), attributeName);
             defaultVisualisationMap.insert(QStringLiteral("flags"), static_cast<int>(*defaultVisualisation._attributeFlags));
             defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation._attributeValueType));
             defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation._channel);
-            defaultVisualisations.insert(defaultVisualisation._attributeName, defaultVisualisationMap);
+            defaultVisualisations.insert(attributeName, defaultVisualisationMap);
         }
         map.insert(QStringLiteral("defaultVisualisations"), defaultVisualisations);
     }
@@ -2008,15 +2009,13 @@ QVariantMap Document::attribute(const QString& attributeName) const
     return map;
 }
 
-QStringList Document::attributesSimilarTo(const QString& attributeName) const
+AvailableAttributesModel* Document::attributesSimilarTo(const QString& attributeName, int skipFlags) const
 {
-    QStringList similarAttributes;
-
     if(attributeName.isEmpty())
-        return similarAttributes;
+        return nullptr;
 
     if(_graphModel == nullptr)
-        return similarAttributes;
+        return nullptr;
 
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
     if(u::contains(_graphModel->availableAttributeNames(), parsedAttributeName._name))
@@ -2030,16 +2029,11 @@ QStringList Document::attributesSimilarTo(const QString& attributeName) const
         if(valueTypeFlags.anyOf(ValueType::Int, ValueType::Float))
             valueTypeFlags.set(ValueType::Numerical);
 
-        similarAttributes = availableAttributeNames(static_cast<int>(attribute.elementType()),
-            static_cast<int>(*valueTypeFlags));
-    }
-    else
-    {
-        // The attribute in question doesn't exist, but it must be similar to itself, right?
-        similarAttributes.append(attributeName);
+        return availableAttributesModel(static_cast<int>(attribute.elementType()),
+            static_cast<int>(*valueTypeFlags), skipFlags);
     }
 
-    return similarAttributes;
+    return nullptr;
 }
 
 QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const

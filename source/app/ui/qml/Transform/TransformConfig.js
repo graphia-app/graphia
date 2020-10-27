@@ -17,6 +17,10 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+.import "../../../../shared/ui/qml/Utils.js" as Utils
+.import "../AttributeUtils.js" as AttributeUtils
+.import app.graphia 1.0 as Graphia
+
 function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
     var component = Qt.createComponent("TransformParameter.qml");
@@ -41,16 +45,14 @@ function createTransformParameter(document, parent, parameterData, onParameterCh
     return object;
 }
 
-function sanitiseAttribute(text)
+function addLabelTo(text, parent)
 {
-    // Remove the leading $, if present
-    text = text.replace(/^\$/, "");
-
-    // Replace edge node syntax with human readable text
-    text = text.replace(/^source\./, "Source ");
-    text = text.replace(/^target\./, "Target ");
-
-    return text;
+    text = text.trim();
+    Qt.createQmlObject("import QtQuick 2.7\n" +
+        "import QtQuick.Controls 1.5\n" +
+        "Label { text: \"" +
+        Utils.normaliseWhitespace(text) +
+        "\"; color: root.textColor }", parent);
 }
 
 function sanitiseOp(text)
@@ -168,9 +170,6 @@ function Create(transformIndex, transform)
             var attribute = document.attribute(attributeName);
             this.template += " $%" + parameterIndex++;
 
-            if(attribute.hasParameter)
-                this.template += ".%" + parameterIndex++;
-
             appendToElements(this._elements,
                 {
                     attributeName: attributeName,
@@ -217,13 +216,7 @@ function Create(transformIndex, transform)
 
         function addLabel()
         {
-            labelText = labelText.trim();
-            Qt.createQmlObject("import QtQuick 2.7\n" +
-                "import QtQuick.Controls 1.5\n" +
-                "Label { text: \"" +
-                Utils.normaliseWhitespace(labelText) +
-                "\"; color: root.textColor }", parent);
-
+            addLabelTo(labelText, parent);
             labelText = "";
         }
 
@@ -246,7 +239,7 @@ function Create(transformIndex, transform)
                     function addOperand(operand, opposite)
                     {
                         if(operand[0] === '$')
-                            labelText += sanitiseAttribute(operand);
+                            labelText += AttributeUtils.prettify(operand);
                         else
                         {
                             var parameterData = {};
@@ -259,24 +252,24 @@ function Create(transformIndex, transform)
                             else
                             {
                                 // We known nothing of the type, so just treat it as a string
-                                parameterData.valueType = ValueType.String;
+                                parameterData.valueType = Graphia.ValueType.String;
 
                                 parameterData.hasRange = false;
                                 parameterData.hasMinimumValue = false;
                                 parameterData.hasMaximumValue = false;
                             }
 
-                            if(parameterData.valueType === ValueType.StringList)
+                            if(parameterData.valueType === Graphia.ValueType.StringList)
                                 parameterData.initialIndex = parameterData.initialValue.indexOf(operand);
                             else
                                 parameterData.initialValue = operand;
 
                             if(locked)
                             {
-                                if(parameterData.valueType === ValueType.String)
+                                if(parameterData.valueType === Graphia.ValueType.String)
                                     labelText += "\\\"" + Utils.addSlashes(operand) + "\\\"";
                                 else
-                                    labelText += QmlUtils.formatNumberScientific(operand);
+                                    labelText += Graphia.QmlUtils.formatNumberScientific(operand);
                             }
                             else
                                 addLabel();
@@ -303,61 +296,30 @@ function Create(transformIndex, transform)
                     // The element is an attribute
 
                     if(locked)
-                        labelText += sanitiseAttribute(parameter.attributeName);
+                        labelText += AttributeUtils.prettify(parameter.attributeName);
 
                     addLabel();
 
                     var parameterData = {};
-                    parameterData.valueType = ValueType.StringList;
-
-                    parameterData.initialValue = document.availableAttributeNames(
-                        parameter.elementType, parameter.valueType);
-
-                    var attribute = document.attribute(parameter.attributeName);
-
-                    // If the currently selected attribute isn't a valid selection
-                    // we need to add it so that the error displayed to the
-                    // user makes sense
-                    if(!attribute.isValid)
-                        parameterData.initialValue.push(parameter.attributeName);
-
-                    var unavailableAttributeNames =
-                        document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
+                    parameterData.valueType = Graphia.ValueType.Attribute;
 
                     // Don't allow the user to choose attributes that don't exist at the point
                     // in time when the transform is executed
-                    parameterData.initialValue = parameterData.initialValue.filter(
-                    function(attributeName)
-                    {
-                        return unavailableAttributeNames.indexOf(attributeName) < 0;
-                    });
+                    var unavailableAttributeNames =
+                        document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
 
-                    parameterData.initialIndex = parameterData.initialValue.indexOf(attribute.name);
+                    parameterData.initialValue = document.availableAttributesModel(
+                        parameter.elementType, parameter.valueType,
+                        Graphia.AttributeFlag.DisableDuringTransfom,
+                        unavailableAttributeNames);
+
+                    parameterData.initialAttributeName = attributeName;
 
                     var parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it
                         parameterData, onParameterChanged);
 
                     that.parameters.push(parameterObject);
-
-                    if(attribute.hasParameter)
-                    {
-                        var attributeParameterData = {};
-                        attributeParameterData.valueType = ValueType.StringList;
-
-                        attributeParameterData.initialValue = attribute.validParameterValues;
-                        attributeParameterData.initialIndex =
-                            attributeParameterData.initialValue.indexOf(attribute.parameterValue);
-
-                        if(attributeParameterData.initialIndex < 0)
-                            attributeParameterData.initialIndex = 0;
-
-                        var attributeParameterObject = createTransformParameter(document,
-                            locked ? null : parent, // If locked, still create the object, but don't display it
-                            attributeParameterData, onParameterChanged);
-
-                        that.parameters.push(attributeParameterObject);
-                    }
                 }
             }
         }

@@ -24,6 +24,7 @@ import app.graphia 1.0
 import ".."
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "../AttributeUtils.js" as AttributeUtils
 import "VisualisationUtils.js" as VisualisationUtils
 
 import "../Controls"
@@ -111,38 +112,24 @@ Item
             visible: false
         }
 
-        ComboBox
+        TreeComboBox
         {
             id: attributeList
 
             implicitWidth: 180
+            model: root.similarAttributes
+            enabled: enabledMenuItem.checked
 
-            model:
+            onSelectedValueChanged: { root.updateExpression(); }
+
+            prettifyFunction: AttributeUtils.prettify
+
+            Preferences
             {
-                if(similarAttributes !== undefined)
-                    return similarAttributes;
-
-                if(attributeName.length > 0)
-                    return [attributeName];
-
-                return [];
+                section: "misc"
+                property alias visualisationAttributeSortOrder: attributeList.ascendingSortOrder
+                property alias visualisationAttributeSortBy: attributeList.sortRoleName
             }
-
-            enabled: enabledMenuItem.checked
-
-            onCurrentIndexChanged: { updateExpression(); }
-        }
-
-        ComboBox
-        {
-            id: attributeParameterList
-
-            implicitWidth: 180
-
-            enabled: enabledMenuItem.checked
-            visible: false
-
-            onCurrentIndexChanged: { updateExpression(); }
         }
 
         NamedIcon
@@ -497,8 +484,8 @@ Item
     }
 
     property string attributeName
-    readonly property var similarAttributes: attributeName.length > 0 ?
-        document.attributesSimilarTo(attributeName) : []
+    readonly property var similarAttributes:
+        document.attributesSimilarTo(attributeName)
 
     property var attributeValueType:
     {
@@ -526,20 +513,7 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var attribute = document.attribute(attributeList.currentText);
-        var parameterValue = "";
-        if(attribute.hasParameter)
-        {
-            if(attributeParameterList.count === 0)
-                parameterValue = attribute.validParameterValues[0];
-            else
-                parameterValue = attributeParameterList.currentText;
-        }
-
-        var attributeName = VisualisationUtils.decorateAttributeName(
-            attributeList.currentText, parameterValue);
-
-        var newExpression = flagsString + attributeName + " \"" + channel + "\"";
+        var newExpression = flagsString + attributeList.selectedValue + " \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";
@@ -635,25 +609,10 @@ Item
             sortByValueMenuItem.checked = !isFlagSet("assignByQuantity");
             sortBySharedValuesMenuItem.checked = isFlagSet("assignByQuantity");
 
-            var attribute = document.attribute(attributeName);
-            attributeList.currentIndex = attributeList.find(
-                attribute.name !== undefined ? attribute.name : attributeName);
-            if(attribute.hasParameter)
-            {
-                attributeParameterList.model = attribute.validParameterValues;
-                attributeParameterList.currentIndex =
-                    attributeParameterList.find(attribute.parameterValue);
-
-                if(attributeParameterList.currentIndex < 0 && attributeParameterList.count > 0)
-                    attributeParameterList.currentIndex = 0;
-
-                attributeParameterList.visible = true;
-            }
+            if(attributeList.model !== null)
+                attributeList.select(attributeList.model.find(attributeName));
             else
-            {
-                attributeParameterList.model = [];
-                attributeParameterList.visible = false;
-            }
+                attributeList.placeholderText = attributeName;
 
             ready = true;
         }

@@ -27,6 +27,7 @@ import "TransformConfig.js" as TransformConfig
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
 import "../Visualisation/VisualisationUtils.js" as VisualisationUtils
+import "../AttributeUtils.js" as AttributeUtils
 
 import "../Controls"
 
@@ -131,7 +132,7 @@ Window
                     updateTransformExpression();
                 }
 
-                onDoubleClicked:
+                onAccepted:
                 {
                     if(document.graphTransformIsValid(transformExpression))
                         root.accept();
@@ -613,7 +614,9 @@ Window
                                             Label
                                             {
                                                 font.italic: attributeName.length === 0
-                                                text: attributeName.length > 0 ? attributeName : qsTr("Invalid Attribute Name")
+                                                text: attributeName.length > 0 ?
+                                                    AttributeUtils.prettify(attributeName) :
+                                                    qsTr("Invalid Attribute Name")
                                             }
 
                                             ComboBox
@@ -648,14 +651,14 @@ Window
 
                             function resolvedAttributeName(attributeName)
                             {
+                                let noQuotesAttributeName = attributeName.replace(/"/g, "");
                                 if(_transform !== undefined &&
-                                    _transform.parameters.hasOwnProperty(attributeName) &&
-                                    _transform.parameters[attributeName].valueType === ValueType.String)
+                                    _transform.parameters.hasOwnProperty(noQuotesAttributeName) &&
+                                    _transform.parameters[noQuotesAttributeName].valueType === ValueType.String)
                                 {
                                     // If the attribute name matches a parameter name, the parameter
                                     // is (probably) the name of a new attribute, so use its value
-                                    var quotedAttributeName = parameters.valueOf(attributeName);
-                                    return quotedAttributeName.replace(/"/g, "");
+                                    return parameters.valueOf(noQuotesAttributeName);
                                 }
 
                                 return attributeName;
@@ -841,9 +844,8 @@ Window
             if(channelName.length > 0)
             {
                 var expression = VisualisationUtils.expressionFor(document,
-                    VisualisationUtils.decorateAttributeName(attributeName),
-                    defaultVisualisation.flags, defaultVisualisation.valueType,
-                    channelName);
+                    attributeName, defaultVisualisation.flags,
+                    defaultVisualisation.valueType, channelName);
 
                 defaultVisualisations.push(expression);
             }

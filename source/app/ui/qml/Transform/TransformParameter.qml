@@ -23,6 +23,9 @@ import app.graphia 1.0
 
 import ".."
 import "../../../../shared/ui/qml/Utils.js" as Utils
+import "../AttributeUtils.js" as AttributeUtils
+
+import "../Controls"
 
 GridLayout
 {
@@ -38,9 +41,10 @@ GridLayout
     // In configure(...) we test properties for undefined, which is the default
     // for variant, so give initialValue some other (arbitrary) value
     property variant initialValue: ({})
+    property int initialIndex
+    property string initialAttributeName
 
     property string value
-    property int initialIndex
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal
@@ -49,9 +53,22 @@ GridLayout
 
     property bool fillWidth: false
     property int _preferredWidth:
-        (root.direction === Qt.Horizontal &&
-         (valueType & (ValueType.StringList|ValueType.String)) === 0) ? // Always make the string types wide
-            90 : 160
+    {
+        if(root.direction === Qt.Vertical)
+            return 180;
+
+        // Always make the string types wide
+        switch(valueType)
+        {
+        case ValueType.StringList:
+        case ValueType.String:
+        case ValueType.Attribute:
+            return 180;
+        }
+
+        return 90;
+    }
+
     implicitWidth: !fillWidth ? _preferredWidth : 0.0
 
     function typedValue(n)
@@ -201,6 +218,26 @@ GridLayout
         onCurrentTextChanged: { updateValue(); }
     }
 
+    TreeComboBox
+    {
+        id: attributeList
+        Layout.fillWidth: root.fillWidth
+        Layout.preferredWidth: root._preferredWidth
+        visible: valueType === ValueType.Attribute
+        enabled: valueType !== ValueType.Unknown && currentIndex.valid
+
+        prettifyFunction: AttributeUtils.prettify
+
+        onSelectedValueChanged: { root.value = selectedValue ? selectedValue : ""; }
+
+        Preferences
+        {
+            section: "misc"
+            property alias transformAttributeSortOrder: attributeList.ascendingSortOrder
+            property alias transformAttributeSortBy: attributeList.sortRoleName
+        }
+    }
+
     function updateValue()
     {
         if(textField.visible)
@@ -282,6 +319,23 @@ GridLayout
             comboBox.currentIndex = initialIndex;
 
             value = "\"" + Utils.escapeQuotes(comboBox.currentText) + "\"";
+            break;
+
+        case ValueType.Attribute:
+            attributeList.model = initialValue;
+            let modelIndex = attributeList.model.find(initialAttributeName);
+
+            if(modelIndex.valid)
+            {
+                attributeList.select(modelIndex);
+                value = attributeList.selectedValue;
+            }
+            else
+            {
+                attributeList.placeholderText = initialAttributeName;
+                value = initialAttributeName;
+            }
+
             break;
         }
     }

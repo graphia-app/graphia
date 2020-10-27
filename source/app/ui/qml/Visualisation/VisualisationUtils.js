@@ -20,15 +20,6 @@
 .import "../../../../shared/ui/qml/Utils.js" as Utils
 .import app.graphia 1.0 as Graphia
 
-function decorateAttributeName(name, parameter)
-{
-    name = name.replace(/([^\.]+\.)?(.*)/, "$1\"$2\"");
-    name += (parameter !== undefined && parameter.length > 0) ?
-        (".\"" + parameter + "\"") : "";
-
-    return name;
-}
-
 function expressionFor(document, attributeName, flags, type, channelName)
 {
     var expression = "";

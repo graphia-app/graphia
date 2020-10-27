@@ -280,18 +280,37 @@ Item
     {
         if(!ready)
         {
-            if(document.hasTransformInfo() && index >= 0)
+            if(document.graphTransformIsValid(value))
             {
-                var transformInfo = document.transformInfoAtIndex(index);
-                setAlertIcon(transformInfo);
+                if(document.hasTransformInfo() && index >= 0)
+                {
+                    var transformInfo = document.transformInfoAtIndex(index);
+                    setAlertIcon(transformInfo);
+                }
+
+                let transformConfig = new TransformConfig.Create(index, document.parseGraphTransform(value));
+                flags = transformConfig.flags;
+                template = transformConfig.template;
+
+                transformConfig.toComponents(document, expression, isFlagSet("locked"), updateExpression);
+                _parameterComponents = transformConfig.parameters;
             }
+            else
+            {
+                setAlertIcon(
+                {
+                    "alertType": AlertType.Error,
+                    "alertText": qsTr("This transform expression is invalid\n" +
+                        "Please send a screenshot to the developers")
+                });
 
-            var transformConfig = new TransformConfig.Create(index, document.parseGraphTransform(value));
-            flags = transformConfig.flags;
-            template = transformConfig.template;
+                flags = [];
+                template = "";
+                _parameterComponents = [];
 
-            transformConfig.toComponents(document, expression, isFlagSet("locked"), updateExpression);
-            _parameterComponents = transformConfig.parameters;
+                TransformConfig.addLabelTo("Invalid Expression: " +
+                    Utils.addSlashes(value), expression);
+            }
 
             enabledMenuItem.checked = !isFlagSet("disabled");
             lockedMenuItem.checked = isFlagSet("locked");
