@@ -128,6 +128,7 @@ Item
                 }
             }
 
+            onClicked: { root.clicked(index); }
             onDoubleClicked:
             {
                 // FIXME: There seems to be a bug in TreeView(?) where if it is hidden in
@@ -239,6 +240,7 @@ Item
         treeView.selection.clearCurrentIndex();
     }
 
+    signal clicked(var index)
     signal doubleClicked(var index)
 }
 
