@@ -189,7 +189,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
             return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
         })
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
-        .setFlag(AttributeFlag::DisableDuringTransfom);
+        .setFlag(AttributeFlag::DisableDuringTransform);
 
     GraphModel::createAttribute(tr("Edge Component Identifier"))
         .setStringValueFn([this](EdgeId edgeId)
@@ -197,7 +197,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
             return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
         })
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
-        .setFlag(AttributeFlag::DisableDuringTransfom);
+        .setFlag(AttributeFlag::DisableDuringTransform);
 
     _->_graphTransformFactories.emplace(tr("Remove Nodes"),             std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
     _->_graphTransformFactories.emplace(tr("Remove Edges"),             std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
@@ -802,7 +802,7 @@ bool GraphModel::attributeIsValid(const QString& name) const
     const auto* attribute = &_->_attributes.at(attributeName._name);
 
     bool attributeDisabled = _transformedGraphIsChanging &&
-        attribute->testFlag(AttributeFlag::DisableDuringTransfom);
+        attribute->testFlag(AttributeFlag::DisableDuringTransform);
 
     return !attributeDisabled;
 }

@@ -50,7 +50,7 @@ DEFINE_QML_ENUM(
     FindShared              = 0x8,
 
     // Can't be used during transform
-    DisableDuringTransfom   = 0x10,
+    DisableDuringTransform  = 0x10,
 
     // Can be searched by the various find methods
     Searchable              = 0x20);

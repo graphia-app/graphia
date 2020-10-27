@@ -106,7 +106,7 @@ Window
                         root._transform = document.transform(selectedValue);
                         lhsAttributeList.model = document.availableAttributesModel(
                             root._transform.elementType, ValueType.All,
-                            AttributeFlag.DisableDuringTransfom);
+                            AttributeFlag.DisableDuringTransform);
                         valueRadioButton.checked = true;
                         rhsAttributeList.model = undefined;
 
@@ -350,7 +350,7 @@ Window
                                     {
                                         rhsAttributeList.model = document.availableAttributesModel(
                                             root._transform.elementType, parameterData.valueType,
-                                            AttributeFlag.DisableDuringTransfom);
+                                            AttributeFlag.DisableDuringTransform);
                                     }
                                     else
                                         rhsAttributeList.model = undefined;
@@ -456,7 +456,7 @@ Window
                                         {
                                             attributeParameterAttributeList.model = document.availableAttributesModel(
                                                 parameterData.elementType, parameterData.valueType,
-                                                AttributeFlag.DisableDuringTransfom);
+                                                AttributeFlag.DisableDuringTransform);
                                         }
                                     }
                                 }

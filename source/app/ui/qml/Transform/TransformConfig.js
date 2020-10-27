@@ -310,7 +310,7 @@ function Create(transformIndex, transform)
 
                     parameterData.initialValue = document.availableAttributesModel(
                         parameter.elementType, parameter.valueType,
-                        Graphia.AttributeFlag.DisableDuringTransfom,
+                        Graphia.AttributeFlag.DisableDuringTransform,
                         unavailableAttributeNames);
 
                     parameterData.initialAttributeName = attributeName;
