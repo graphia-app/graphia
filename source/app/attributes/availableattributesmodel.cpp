@@ -169,17 +169,21 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     }
     case Roles::ValueTypeRole:
     {
+        static const QString numericalTr = tr("Numerical");
+        static const QString textualTr = tr("Textual");
+        static const QString unknownTypeTr = tr("Numerical");
+
         switch(attribute->valueType())
         {
         case ValueType::Int:
         case ValueType::Float:
-            return tr("Numerical");
+            return numericalTr;
         case ValueType::String:
-            return tr("Textual");
+            return textualTr;
         default: break;
         }
 
-        return tr("Unknown Type");
+        return unknownTypeTr;
     }
     case Roles::HasSharedValuesRole:
     {
@@ -191,7 +195,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     }
     case Roles::UserDefinedRole:
     {
-        return attribute->userDefined() ? tr("User Defined") : tr("Calculated");
+        static const QString userDefinedTr = tr("User Defined");
+        static const QString calculatedTr = tr("Calculated");
+
+        return attribute->userDefined() ? userDefinedTr : calculatedTr;
     }
     default:
         return {};
