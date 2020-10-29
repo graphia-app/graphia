@@ -204,13 +204,15 @@ Item
                 }
             }
 
+            readonly property int _scrollBarWidth: __verticalScrollBar.visible ?
+                __verticalScrollBar.width : 0
+
             FloatingButton
             {
                 id: searchButton
                 visible: root.showSearch && root.enabled
 
-                anchors.rightMargin: treeView.__verticalScrollBar.visible ?
-                    treeView.__verticalScrollBar.width + 4 : 4
+                anchors.rightMargin: treeView._scrollBarWidth + 4
                 anchors.bottomMargin: 4
                 anchors.right: parent !== undefined ? parent.right : undefined
                 anchors.bottom: parent !== undefined ? parent.bottom : undefined
