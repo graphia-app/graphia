@@ -671,6 +671,37 @@ Item
                             {
                                 id: headerContextMenu
                                 MenuItem { action: copyTableColumnToClipboardAction }
+
+                                MenuSeparator {}
+
+                                ExclusiveGroup { id: headerSortGroup }
+                                MenuItem
+                                {
+                                    text: qsTr("Sort Ascending")
+                                    checkable: true
+                                    exclusiveGroup: headerSortGroup
+                                    checked: proxyModel.sortColumn === headerItem.sourceColumn &&
+                                        proxyModel.sortOrder === Qt.AscendingOrder
+                                    onTriggered:
+                                    {
+                                        proxyModel.sortColumn = headerItem.sourceColumn;
+                                        proxyModel.sortOrder = Qt.AscendingOrder;
+                                    }
+                                }
+
+                                MenuItem
+                                {
+                                    text: qsTr("Sort Descending")
+                                    checkable: true
+                                    exclusiveGroup: headerSortGroup
+                                    checked: proxyModel.sortColumn === headerItem.sourceColumn &&
+                                        proxyModel.sortOrder === Qt.DescendingOrder
+                                    onTriggered:
+                                    {
+                                        proxyModel.sortColumn = headerItem.sourceColumn;
+                                        proxyModel.sortOrder = Qt.DescendingOrder;
+                                    }
+                                }
                             }
                         }
 
