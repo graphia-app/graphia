@@ -26,6 +26,7 @@ import ".."
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "../../../../shared/ui/qml/Utils.js" as Utils
 import "VisualisationUtils.js" as VisualisationUtils
+import "../AttributeUtils.js" as AttributeUtils
 
 import "../Controls"
 
@@ -72,7 +73,9 @@ Window
 
                 showSections: sortRoleName !== "display"
                 showSearch: true
+                showParentGuide: true
                 sortRoleName: "elementType"
+                prettifyFunction: AttributeUtils.prettify
 
                 onSelectedValueChanged:
                 {

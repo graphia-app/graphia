@@ -217,7 +217,9 @@ Window
 
                                 showSections: sortRoleName !== "display"
                                 showSearch: true
+                                showParentGuide: true
                                 sortRoleName: "userDefined"
+                                prettifyFunction: AttributeUtils.prettify
 
                                 onSelectedValueChanged:
                                 {
@@ -334,7 +336,9 @@ Window
 
                                     showSections: lhsAttributeList.showSections
                                     showSearch: true
+                                    showParentGuide: true
                                     sortRoleName: lhsAttributeList.sortRoleName
+                                    prettifyFunction: AttributeUtils.prettify
 
                                     enabled: attributeRadioButton.checked
                                     onSelectedValueChanged: { updateTransformExpression(); }
@@ -439,7 +443,9 @@ Window
 
                                             showSections: sortRoleName !== "display"
                                             showSearch: true
+                                            showParentGuide: true
                                             sortRoleName: "userDefined"
+                                            prettifyFunction: AttributeUtils.prettify
 
                                             onSelectedValueChanged:
                                             {
