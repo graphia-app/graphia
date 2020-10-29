@@ -71,6 +71,7 @@
 #include <QElapsedTimer>
 #include <QVariantList>
 #include <QVector>
+#include <QClipboard>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -2617,6 +2618,36 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
             }
         }
     }, tr("Exporting Table"));
+}
+
+void Document::copyTableViewCopyToClipboard(QObject* tableView, int column)
+{
+    auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columns")).toInt();
+
+    if(column < 0 || column >= columnCount)
+    {
+        qDebug() << "Document::copyTableViewCopyToClipboard: requested column exceeds column count";
+        return;
+    }
+
+    auto* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
+    if(model == nullptr)
+    {
+        qDebug() << "Document::copyTableViewCopyToClipboard: null model";
+        return;
+    }
+
+    auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rows")).toInt();
+
+    QString text;
+
+    for(int row = 0; row < rowCount; row++)
+    {
+        auto value = model->data(model->index(row, column));
+        text.append(QStringLiteral("%1\n").arg(value.toString()));
+    }
+
+    QApplication::clipboard()->setText(text);
 }
 
 void Document::addBookmark(const QString& name)

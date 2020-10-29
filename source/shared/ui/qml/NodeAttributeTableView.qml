@@ -231,6 +231,19 @@ Item
         }
     }
 
+    property int lastClickedColumn
+    Action
+    {
+        id: copyTableColumnToClipboardAction
+        enabled: tableView.rows > 0
+        text: qsTr("Copy Column To Clipboard")
+        iconName: "document-save"
+        onTriggered:
+        {
+            document.copyTableViewCopyToClipboard(tableView, lastClickedColumn);
+        }
+    }
+
     Action
     {
         id: selectAllTableAction
@@ -634,17 +647,30 @@ Item
                             enabled: !columnSelectionMode
                             anchors.fill: headerContent
                             hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton
+                            acceptedButtons: Qt.LeftButton|Qt.RightButton
 
                             onClicked:
                             {
-                                if(proxyModel.sortColumn === headerItem.sourceColumn)
+                                root.lastClickedColumn = headerItem.modelColumn;
+
+                                if(mouse.button === Qt.LeftButton)
                                 {
-                                    proxyModel.sortOrder = proxyModel.sortOrder ?
-                                        Qt.AscendingOrder : Qt.DescendingOrder;
+                                    if(proxyModel.sortColumn === headerItem.sourceColumn)
+                                    {
+                                        proxyModel.sortOrder = proxyModel.sortOrder ?
+                                            Qt.AscendingOrder : Qt.DescendingOrder;
+                                    }
+                                    else
+                                        proxyModel.sortColumn = headerItem.sourceColumn;
                                 }
-                                else
-                                    proxyModel.sortColumn = headerItem.sourceColumn;
+                                else if(mouse.button === Qt.RightButton)
+                                    headerContextMenu.popup();
+                            }
+
+                            Menu
+                            {
+                                id: headerContextMenu
+                                MenuItem { action: copyTableColumnToClipboardAction }
                             }
                         }
 
