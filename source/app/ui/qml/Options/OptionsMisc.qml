@@ -200,7 +200,7 @@ Item
                     textColor: QmlUtils.userUrlIsValid(webSearchEngineField.text) ? "black" : "red"
                 }
 
-                property string _defaultValue: "https://www.google.com/#q=%1"
+                property string _defaultValue: "https://www.google.com/search?q=%1"
                 function reset() { text = _defaultValue; }
 
                 Component.onCompleted:
