@@ -40,7 +40,7 @@ Item
 
     // External name
     property alias model: root._nodeAttributesTableModel
-    property var defaultColumnWidth: 120
+    property int defaultColumnWidth: 120
     property var selectedRows: []
     property alias rowCount: tableView.rows
     property alias sortIndicatorColumn: proxyModel.sortColumn
@@ -422,9 +422,9 @@ Item
                     visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
                 }
 
-                property var sortIndicatorWidth: 7
-                property var sortIndicatorMargin: 3
-                property var delegatePadding: 4
+                property int sortIndicatorWidth: 7
+                property int sortIndicatorMargin: 3
+                property int delegatePadding: 4
                 property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
 
                 Rectangle
@@ -451,7 +451,7 @@ Item
                     implicitWidth: tableView.columnWidthProvider(model.column);
                     implicitHeight: headerLabel.height
                     property var modelColumn: model.column
-                    property var sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
+                    property int sourceColumn: proxyModel.mapOrderedToSourceColumn(model.column);
 
                     Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: modelColumn }
@@ -711,7 +711,7 @@ Item
                 property var currentColumnWidths: []
                 property var currentTotalColumnWidth: 0
                 property var columnWidths: []
-                property var rowHeight: delegateMetrics.height + 1
+                property int rowHeight: delegateMetrics.height + 1
 
                 function visibleColumnNames() // Called from C++ when exporting table
                 {
@@ -880,8 +880,6 @@ Item
                     id: headerMetrics
                 }
 
-                // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
-                // except for the text property
                 delegate: Item
                 {
                     // Based on Qt source for BaseTableView delegate
@@ -890,8 +888,8 @@ Item
 
                     clip: false
 
-                    property var modelColumn: model.column
-                    property var modelRow: model.row
+                    property int modelColumn: model.column
+                    property int modelRow: model.row
 
                     TableView.onReused:
                     {
@@ -943,6 +941,8 @@ Item
                             return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
                         }
 
+                        // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
+                        // except for the text property
                         Text
                         {
                             id: label
@@ -968,8 +968,6 @@ Item
                                     return "";
                                 }
 
-                                let columnName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
-
                                 // AbstractItemModel required empty values to return empty variant
                                 // but TableView2 delgates cast them to undefined js objects.
                                 // It's difficult to tell if the model is corrupted or accessing
@@ -977,6 +975,7 @@ Item
                                 if(model.display === undefined)
                                     return "";
 
+                                let columnName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
                                 if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);
 
@@ -1025,10 +1024,10 @@ Item
             MouseArea
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                property var previousRow: -1
-                property var startRow: -1
-                property var endRow: -1
-                property var deselectDrag: false
+                property int previousRow: -1
+                property int startRow: -1
+                property int endRow: -1
+                property bool deselectDrag: false
                 anchors.fill: parent
                 anchors.rightMargin: verticalTableViewScrollBar.width
                 z: 5
