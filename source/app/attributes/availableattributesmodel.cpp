@@ -212,7 +212,12 @@ Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
     if(!index.isValid())
         return Qt::NoItemFlags;
 
-    return QAbstractItemModel::flags(index);
+    auto flags = QAbstractItemModel::flags(index);
+
+    if(itemForIndex(index)->childCount() == 0)
+        flags.setFlag(Qt::ItemIsSelectable);
+
+    return flags;
 }
 
 QVariant AvailableAttributesModel::headerData(int /*section*/, Qt::Orientation orientation, int role) const
