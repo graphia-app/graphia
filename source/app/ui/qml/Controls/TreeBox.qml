@@ -55,6 +55,17 @@ Item
     onModelChanged: { selectedValue = undefined; }
 
     id: root
+    function textFor(index)
+    {
+        // AvailableAttributesModel has a 'get' function that
+        // returns more relevant results that QAbstractItemModel::data
+        if(typeof root.model.get === 'function')
+            return root.model.get(index);
+        else if(typeof root.model.data === 'function')
+            return root.model.data(index);
+
+        return undefined;
+    }
 
     // Just some semi-sensible defaults
     width: 200
@@ -98,7 +109,7 @@ Item
             }
 
             // Clear the selection when the model is changed
-            selection: ItemSelectionModel { model: treeView.model }
+            selection: ItemSelectionModel { model: sortFilterProxyModel }
             onModelChanged: { selection.clear(); }
 
             TableViewColumn { role: "display" }
@@ -129,14 +140,8 @@ Item
                     if(!root.model)
                         return;
 
-                    var sourceIndex = treeView.model.mapToSource(target.currentIndex);
-
-                    if(typeof root.model.get === 'function')
-                        root.selectedValue = root.model.get(sourceIndex);
-                    else if(typeof root.model.data === 'function')
-                        root.selectedValue = root.model.data(sourceIndex);
-                    else
-                        root.selectedValue = undefined;
+                    var sourceIndex = sortFilterProxyModel.mapToSource(target.currentIndex);
+                    root.selectedValue = root.textFor(sourceIndex);
                 }
             }
 
