@@ -289,14 +289,11 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
     return 1;
 }
 
-QString AvailableAttributesModel::get(const QModelIndex& index, int depth) const
+QString AvailableAttributesModel::get(const QModelIndex& index) const
 {
     auto* item = itemForIndex(index);
 
     if(item == nullptr)
-        return {};
-
-    if(item->childCount() > 0 && depth == 0)
         return {};
 
     QString text = QStringLiteral("\"%1\"").arg(item->value());
@@ -304,7 +301,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index, int depth) const
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))
     {
-        QString parentText = get(index.parent(), depth + 1);
+        QString parentText = get(index.parent());
         text = QStringLiteral("%1.%2").arg(parentText, text);
     }
     else if(parent == _sourceNode)

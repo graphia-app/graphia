@@ -222,7 +222,7 @@ Window
                                 onSelectedValueChanged:
                                 {
                                     let attribute = document.attribute(selectedValue);
-                                    if(attribute.isValid)
+                                    if(currentIndexIsSelectable && attribute.isValid)
                                     {
                                         opList.updateModel(attribute.ops);
 

@@ -48,7 +48,7 @@ Item
 
     function accept()
     {
-        popup._valueAccepted = (popupTreeBox.selectedValue.length > 0);
+        popup._valueAccepted = popupTreeBox.currentIndexIsSelectable;
         popup.close();
         popup._valueAccepted = false;
 

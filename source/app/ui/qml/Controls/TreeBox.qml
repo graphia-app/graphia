@@ -33,6 +33,14 @@ Item
         return sortFilterProxyModel.mapToSource(treeView.selection.currentIndex);
     }
 
+    property bool currentIndexIsSelectable:
+    {
+        if(model === null || !currentIndex.valid)
+            return false;
+
+        return model.flags(currentIndex) & Qt.ItemIsSelectable;
+    }
+
     property alias sortRoleName: sortFilterProxyModel.sortRoleName
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
@@ -159,7 +167,7 @@ Item
                         root.doubleClicked(index);
                         index = null;
 
-                        if(root.selectedValue !== undefined && root.selectedValue.length > 0)
+                        if(root.currentIndexIsSelectable)
                             root.accepted();
                     }
                 }
@@ -177,12 +185,11 @@ Item
                     }
                 }
 
-
                 switch(event.key)
                 {
                 case Qt.Key_Enter:
                 case Qt.Key_Return:
-                    if(root.selectedValue !== undefined && root.selectedValue.length > 0)
+                    if(root.currentIndexIsSelectable)
                     {
                         event.accepted = true;
                         root.accepted();

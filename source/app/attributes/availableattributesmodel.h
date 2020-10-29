@@ -104,7 +104,7 @@ public:
     int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    Q_INVOKABLE QString get(const QModelIndex& index, int depth = 0) const;
+    Q_INVOKABLE QString get(const QModelIndex& index) const;
 
     Q_INVOKABLE QModelIndex find(const QString& name) const;
 

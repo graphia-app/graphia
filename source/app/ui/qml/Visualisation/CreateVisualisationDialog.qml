@@ -78,14 +78,13 @@ Window
                 {
                     var attribute = document.attribute(selectedValue);
 
-                    if(attribute.isValid)
+                    if(currentIndexIsSelectable && attribute.isValid)
                     {
                         channelList.model = document.availableVisualisationChannelNames(
                             attribute.valueType);
                     }
                     else
                         channelList.model = null;
-
 
                     description.update();
                     updateVisualisationExpressions();
@@ -125,7 +124,7 @@ Window
                 {
                     text = "";
 
-                    if(attributeList.selectedValue === undefined || attributeList.selectedValue.length === 0)
+                    if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
                         return;
 
                     var attribute = document.attribute(attributeList.selectedValue);
