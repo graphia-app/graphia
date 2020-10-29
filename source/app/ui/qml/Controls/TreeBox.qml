@@ -25,6 +25,8 @@ import SortFilterProxyModel 0.2
 
 Item
 {
+    id: root
+
     property var selectedValue: undefined
     property var model: null
 
@@ -54,7 +56,6 @@ Item
 
     onModelChanged: { selectedValue = undefined; }
 
-    id: root
     function textFor(index)
     {
         // AvailableAttributesModel has a 'get' function that
