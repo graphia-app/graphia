@@ -49,6 +49,9 @@ Item
     property bool showSections: false
 
     property bool showSearch: false
+    property bool showParentGuide: false
+
+    property var prettifyFunction: function(value) { return value; }
 
     //FIXME: 2 is fudge for frame/margins/something; need to account for it properly
     readonly property double contentHeight: treeView.__listView.contentHeight + 2
@@ -223,8 +226,113 @@ Item
 
                 onClicked: { root.toggleSearch(); }
             }
+
+            Rectangle
+            {
+                id: parentGuide
+                visible: root.showParentGuide && root.enabled && opacity > 0.0
+
+                property string text: ""
+                property bool show: false
+
+                readonly property int _internalMargin: 4
+                readonly property int _margin: 6
+                readonly property int _idealWidth: parentGuideText.implicitWidth + (_internalMargin * 2)
+                readonly property int _maxWidth: (treeView.width - treeView._scrollBarWidth) - (_margin * 2)
+
+                width: Math.min(_idealWidth, _maxWidth)
+                height: parentGuideText.implicitHeight + (_internalMargin * 2)
+
+                anchors.margins: _margin
+                anchors.top: parent !== undefined ? parent.top : undefined
+                anchors.left: parent !== undefined ? parent.left : undefined
+
+                color: "white"
+                border.width: 1
+                border.color: "grey"
+                radius: 2
+
+                opacity: show ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 250 } }
+
+                Text
+                {
+                    id: parentGuideText
+                    anchors.fill: parent
+                    anchors.margins: parentGuide._internalMargin
+                    text: root.prettifyFunction(parent.text)
+                    elide: Text.ElideRight
+                    font.italic: true
+                }
+            }
+
+            function visibleIndices()
+            {
+                let indices = new Set();
+
+                // This is clearly not a very efficient way of finding visible items,
+                // but on the other hand it doesn't seem particularly slow either
+                for(let y = 0; y < flickableItem.height; y++)
+                {
+                    let index = treeView.indexAt(1, y);
+                    let sourceIndex = sortFilterProxyModel.mapToSource(index);
+
+                    if(!sourceIndex.valid)
+                        continue;
+
+                    indices.add(sourceIndex);
+                }
+
+                return indices;
+            }
+
+            // Do the guide update in the timer so that we don't
+            // do so on every pixel when scrolling
+            Timer
+            {
+                id: parentGuideTimer
+                interval: 100
+                repeat: false
+
+                onTriggered:
+                {
+                    if(!root.showParentGuide)
+                        return;
+
+                    if(root.currentIndex.valid && root.currentIndex.parent.valid)
+                    {
+                        let vi = visibleIndices();
+                        if(vi.has(root.currentIndex))
+                        {
+                            let parentIndex = root.currentIndex.parent;
+                            while(parentIndex.valid)
+                            {
+                                if(!vi.has(parentIndex))
+                                {
+                                    // At least one ancestor isn't visible
+                                    parentGuide.text = root.textFor(root.currentIndex.parent);
+                                    parentGuide.show = true;
+                                    return;
+                                }
+
+                                parentIndex = parentIndex.parent;
+                            }
+                        }
+                    }
+
+                    parentGuide.show = false;
+                }
+            }
+
+            Connections
+            {
+                target: treeView.flickableItem
+                function onContentYChanged() { parentGuideTimer.restart(); }
+            }
         }
     }
+
+    onCurrentIndexChanged: { parentGuideTimer.restart(); }
 
     function toggleSearch()
     {

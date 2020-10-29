@@ -41,10 +41,7 @@ Item
     implicitHeight: button.implicitHeight
 
     property string placeholderText: ""
-    property var prettifyFunction: function(value)
-    {
-        return value;
-    }
+    property var prettifyFunction: function(value) { return value; }
 
     function accept()
     {
@@ -135,6 +132,7 @@ Item
             id: popupTreeBox
             anchors.fill: parent
             model: root.model
+            prettifyFunction: root.prettifyFunction
 
             onAccepted: { root.accept(); }
         }
