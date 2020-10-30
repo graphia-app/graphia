@@ -237,11 +237,11 @@ Item
 
                 readonly property int _internalMargin: 4
                 readonly property int _margin: 6
-                readonly property int _idealWidth: parentGuideText.implicitWidth + (_internalMargin * 2)
+                readonly property int _idealWidth: parentGuideText.contentWidth + (_internalMargin * 2)
                 readonly property int _maxWidth: (treeView.width - treeView._scrollBarWidth) - (_margin * 2)
 
-                width: Math.min(_idealWidth, _maxWidth)
-                height: parentGuideText.implicitHeight + (_internalMargin * 2)
+                implicitWidth: Math.min(_idealWidth, _maxWidth)
+                implicitHeight: parentGuideText.implicitHeight + (_internalMargin * 2)
 
                 anchors.margins: _margin
                 anchors.top: parent !== undefined ? parent.top : undefined
@@ -258,7 +258,8 @@ Item
                 Text
                 {
                     id: parentGuideText
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.top: parent.top
                     anchors.margins: parentGuide._internalMargin
                     text: root.prettifyFunction(parent.text)
                     elide: Text.ElideRight
@@ -274,7 +275,7 @@ Item
                 // but on the other hand it doesn't seem particularly slow either
                 for(let y = 0; y < flickableItem.height; y++)
                 {
-                    let index = treeView.indexAt(1, y);
+                    let index = treeView.indexAt(flickableItem.width * 0.5, y);
                     let sourceIndex = sortFilterProxyModel.mapToSource(index);
 
                     if(!sourceIndex.valid)
@@ -301,7 +302,7 @@ Item
 
                     if(root.currentIndex.valid && root.currentIndex.parent.valid)
                     {
-                        let vi = visibleIndices();
+                        let vi = treeView.visibleIndices();
                         if(vi.has(root.currentIndex))
                         {
                             let parentIndex = root.currentIndex.parent;
