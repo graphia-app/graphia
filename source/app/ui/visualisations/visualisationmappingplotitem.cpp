@@ -89,6 +89,9 @@ void VisualisationMappingPlotItem::setMaximum(double max)
 
 void VisualisationMappingPlotItem::buildPlot()
 {
+    if(_values.isEmpty())
+        return;
+
     customPlot().clearItems();
     customPlot().clearPlottables();
     customPlot().plotLayout()->clear();
