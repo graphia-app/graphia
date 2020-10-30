@@ -111,7 +111,7 @@ Item
                         Rectangle
                         {
                             id: delegateRectangle
-                            color: index == currentIndex ? Qt.lighter(systemPalette.highlight, 1.7) : "#00000000"
+                            color: index === currentIndex ? systemPalette.highlight : "#00000000"
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)
@@ -119,8 +119,8 @@ Item
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
+                                color: index === currentIndex ? systemPalette.highlightedText : systemPalette.text
                                 text: listTabs[index].title
-                                z: 5
                             }
                             MouseArea
                             {
