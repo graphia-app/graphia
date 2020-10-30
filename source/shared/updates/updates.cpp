@@ -50,6 +50,8 @@ static QString updateFilePath()
     return QStringLiteral("%1/update.json").arg(updatesLocation());
 }
 
+#include <QDebug>
+
 json updateStringToJson(const QString& updateString, QString* status)
 {
     auto updateStringStdString = updateString.toStdString();
@@ -97,6 +99,13 @@ json updateStringToJson(const QString& updateString, QString* status)
         const auto& payloads = update["payloads"];
 
         return payloads.find(QSysInfo::kernelType().toStdString()) == payloads.end();
+    }), updates.end());
+
+    // Remove updates that are older than the running version
+    updates.erase(std::remove_if(updates.begin(), updates.end(),
+    [](const auto& update)
+    {
+        return update["version"] < VERSION;
     }), updates.end());
 
     if(updates.empty())
