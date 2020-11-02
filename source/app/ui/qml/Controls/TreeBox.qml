@@ -37,7 +37,7 @@ Item
 
     property bool currentIndexIsSelectable:
     {
-        if(model === null || !currentIndex.valid)
+        if(!model || !currentIndex.valid)
             return false;
 
         return model.flags(currentIndex) & Qt.ItemIsSelectable;
@@ -258,8 +258,8 @@ Item
                 Text
                 {
                     id: parentGuideText
-                    anchors.left: parent.left
-                    anchors.top: parent.top
+                    anchors.left: parent !== undefined ? parent.left : undefined
+                    anchors.top: parent !== undefined ? parent.top : undefined
                     anchors.margins: parentGuide._internalMargin
                     text: root.prettifyFunction(parent.text)
                     elide: Text.ElideRight
