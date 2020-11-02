@@ -168,10 +168,6 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent),
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
 {
-    //FIXME Setting this causes a crash in CorrelationPlotItem::paint,
-    // when the plugin is minimised
-    //setRenderTarget(RenderTarget::FramebufferObject);
-
     // Discard the defaults...
     _customPlot.plotLayout()->clear();
 

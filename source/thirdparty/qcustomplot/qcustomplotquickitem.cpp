@@ -23,8 +23,6 @@
 
 QCustomPlotQuickItem::QCustomPlotQuickItem(QQuickItem* parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
-
     _customPlot.setOpenGl(true);
 
     setAcceptedMouseButtons(Qt::AllButtons);
