@@ -287,6 +287,17 @@ Item
                 return indices;
             }
 
+            function indexIsInSet(index, set)
+            {
+                for(let value of set)
+                {
+                    if(value.row === index.row && value.parent === index.parent)
+                        return true;
+                }
+
+                return false;
+            }
+
             // Do the guide update in the timer so that we don't
             // do so on every pixel when scrolling
             Timer
@@ -303,12 +314,12 @@ Item
                     if(root.currentIndex.valid && root.currentIndex.parent.valid)
                     {
                         let vi = treeView.visibleIndices();
-                        if(vi.has(root.currentIndex))
+                        if(treeView.indexIsInSet(root.currentIndex, vi))
                         {
                             let parentIndex = root.currentIndex.parent;
                             while(parentIndex.valid)
                             {
-                                if(!vi.has(parentIndex))
+                                if(!treeView.indexIsInSet(parentIndex, vi))
                                 {
                                     // At least one ancestor isn't visible
                                     parentGuide.text = root.textFor(root.currentIndex.parent);
