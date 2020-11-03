@@ -401,9 +401,6 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
 
 void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
-    if(dimensions == _dimensions)
-        return;
-
     _dimensions = dimensions;
 
     auto aspectRatio = static_cast<float>(_dimensions.width() / _dimensions.height());

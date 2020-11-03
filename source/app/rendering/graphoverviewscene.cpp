@@ -571,7 +571,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
         [this]
         {
             // If a graph change has resulted in a single component, switch
-            // to component mode once the transition had completed
+            // to component mode once the transition has completed
             if(_graphModel->graph().numComponents() == 1)
             {
                 _graphRenderer->transition().willBeImmediatelyReused();
