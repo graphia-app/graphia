@@ -29,6 +29,7 @@ Item
 
     property var model: null
     property alias currentIndex: popupTreeBox.currentIndex
+    property alias currentIndexIsValid: popupTreeBox.currentIndexIsValid
 
     property alias sortRoleName: popupTreeBox.sortRoleName
     property alias ascendingSortOrder: popupTreeBox.ascendingSortOrder
@@ -68,7 +69,7 @@ Item
 
         property string text:
         {
-            if(root.model === null || !root.currentIndex.valid)
+            if(!root.model || !root.currentIndexIsValid)
                 return root.prettifyFunction(root.placeholderText);
 
             return root.prettifyFunction(root.selectedValue);
@@ -85,7 +86,7 @@ Item
                 popup.open();
                 parent.visible = false;
 
-                if(root.currentIndex.valid)
+                if(root.currentIndexIsValid)
                 {
                     treeboxSearch._select(root.currentIndex);
                     treeboxSearch.selectAll();

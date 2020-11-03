@@ -224,7 +224,7 @@ GridLayout
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: valueType === ValueType.Attribute
-        enabled: valueType !== ValueType.Unknown && currentIndex.valid
+        enabled: valueType !== ValueType.Unknown && currentIndexIsValid
 
         prettifyFunction: AttributeUtils.prettify
 

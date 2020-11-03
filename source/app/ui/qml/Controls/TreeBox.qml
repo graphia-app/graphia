@@ -32,12 +32,17 @@ Item
 
     property var currentIndex:
     {
+        if(!model)
+            return null;
+
         return sortFilterProxyModel.mapToSource(treeView.selection.currentIndex);
     }
 
+    property bool currentIndexIsValid: currentIndex && currentIndex.valid
+
     property bool currentIndexIsSelectable:
     {
-        if(!model || !currentIndex.valid)
+        if(!model || !currentIndexIsValid)
             return false;
 
         return model.flags(currentIndex) & Qt.ItemIsSelectable;
@@ -57,7 +62,11 @@ Item
     readonly property double contentHeight: treeView.__listView.contentHeight + 2
     readonly property double contentWidth: treeView.__listView.contentWidth + 2
 
-    onModelChanged: { selectedValue = undefined; }
+    onModelChanged:
+    {
+        selectedValue = undefined;
+        treeBoxSearch.visible = false;
+    }
 
     function textFor(index)
     {
@@ -311,7 +320,7 @@ Item
                     if(!root.showParentGuide)
                         return;
 
-                    if(root.currentIndex.valid && root.currentIndex.parent.valid)
+                    if(root.currentIndexIsValid && root.currentIndex.parent.valid)
                     {
                         let vi = treeView.visibleIndices();
                         if(treeView.indexIsInSet(root.currentIndex, vi))

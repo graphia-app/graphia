@@ -257,7 +257,10 @@ AvailableAttributesModel::Item* AvailableAttributesModel::parentItem(const QMode
 
 AvailableAttributesModel::Item* AvailableAttributesModel::itemForIndex(const QModelIndex& index)
 {
-    return static_cast<Item*>(index.internalPointer());
+    auto* item = static_cast<Item*>(index.internalPointer());
+    Q_ASSERT(item != nullptr);
+
+    return item;
 }
 
 QModelIndex AvailableAttributesModel::parent(const QModelIndex& index) const

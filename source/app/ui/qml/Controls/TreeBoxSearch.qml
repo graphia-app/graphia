@@ -155,10 +155,13 @@ TextField
 
         function onCurrentIndexChanged()
         {
-            if(modelCompleter.candidates.indexOf(treeBox.currentIndex) === -1)
+            if(!treeBox.currentIndexIsValid ||
+                modelCompleter.candidates.indexOf(treeBox.currentIndex) === -1)
+            {
                 _disableCompletion();
+            }
 
-            if(!treeBox.currentIndex.valid)
+            if(!treeBox.currentIndexIsValid)
                 return;
 
             root._setTextByIndex(treeBox.currentIndex);
