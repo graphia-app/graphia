@@ -91,8 +91,9 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
     const auto* attribute = _document->graphModel()->attributeByName(columnName);
     if(attribute != nullptr && attribute->isValid())
     {
-        auto nodeId = _userNodeData->elementIdForIndex(row);
+        Q_ASSERT(attribute->elementType() == ElementType::Node);
 
+        auto nodeId = _userNodeData->elementIdForIndex(row);
         if(!attribute->valueMissingOf(nodeId))
             return attribute->valueOf(nodeId);
     }
