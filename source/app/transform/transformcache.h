@@ -36,12 +36,14 @@ public:
         Result() = default;
 
         Result(const Result& other) :
+            _index(other._index),
             _config(other._config),
             _graph(other._graph ? std::make_unique<MutableGraph>(*other._graph) : nullptr),
             _newAttributes(other._newAttributes)
         {}
 
         Result(Result&& other) noexcept :
+            _index(other._index),
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
             _newAttributes(std::move(other._newAttributes))
@@ -49,6 +51,7 @@ public:
 
         Result& operator=(Result&& other) noexcept
         {
+            _index = other._index;
             _config = std::move(other._config);
             _graph = std::move(other._graph);
             _newAttributes = std::move(other._newAttributes);
@@ -64,6 +67,7 @@ public:
             return _config.referencedAttributeNames();
         }
 
+        int _index = -1;
         GraphTransformConfig _config;
         std::unique_ptr<MutableGraph> _graph;
         std::map<QString, Attribute> _newAttributes;
@@ -89,7 +93,7 @@ public:
     void clear() { _cache.clear(); }
     void add(Result&& result);
     void attributeAdded(const QString& attributeName);
-    Result apply(const GraphTransformConfig& config, TransformedGraph& graph);
+    Result apply(int index, const GraphTransformConfig& config, TransformedGraph& graph);
 
     const MutableGraph* graph() const;
     std::map<QString, Attribute> attributes() const;
