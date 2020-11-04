@@ -1469,11 +1469,11 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
     {
         // Remove any annotations not currently visible, so
         // that looking up by index works
-        std::remove_if(annotationNames.begin(), annotationNames.end(),
+        annotationNames.erase(std::remove_if(annotationNames.begin(), annotationNames.end(),
         [this](const auto& v)
         {
             return !u::contains(_visibleColumnAnnotationNames, v);
-        });
+        }));
     }
 
     const auto& name = annotationNames.at(index);
