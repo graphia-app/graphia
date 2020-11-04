@@ -107,7 +107,43 @@ private:
     NodeArray<QString> _nodeNames;
 
     std::map<QString, Attribute> _attributes;
-    std::vector<QString> _previousDynamicAttributeNames;
+
+    struct AttributeIdentity
+    {
+        QString _name;
+        ValueType _valueType;
+        ElementType _elementType;
+
+        AttributeIdentity(const QString& name,
+            ValueType valueType, ElementType elementType) :
+            _name(name), _valueType(valueType), _elementType(elementType)
+        {}
+
+        bool operator==(const AttributeIdentity& other) const
+        {
+            return _name == other._name &&
+                _valueType == other._valueType &&
+                _elementType == other._elementType;
+        }
+    };
+
+    std::vector<AttributeIdentity> _previousAttributeIdentities;
+
+    auto currentAttributeIdentities() const
+    {
+        std::vector<AttributeIdentity> attributeIdentities;
+
+        for(const auto& attribute : _attributes)
+        {
+            attributeIdentities.emplace_back(
+                attribute.first,
+                attribute.second.valueType(),
+                attribute.second.elementType());
+        }
+
+        return attributeIdentities;
+    }
+
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
@@ -1055,11 +1091,8 @@ void GraphModel::onMutableGraphChanged(const Graph* graph)
 
 void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
-    // Store previous dynamic attributes for comparison
-    _->_previousDynamicAttributeNames.clear();
-
-    for(auto& name : u::keysFor(_->_attributes))
-        _->_previousDynamicAttributeNames.emplace_back(name);
+    // Store previous attributes for comparison
+    _->_previousAttributeIdentities = _->currentAttributeIdentities();
 
     removeDynamicAttributes();
 
@@ -1072,9 +1105,21 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
 
     findSharedAttributeValues(graph, _->_attributes);
 
-    // Compare with previous Dynamic attributes
-    auto removedAttributeNames = u::setDifference(_->_previousDynamicAttributeNames, u::keysFor(_->_attributes));
-    auto addedAttributeNames = u::setDifference(u::keysFor(_->_attributes), _->_previousDynamicAttributeNames);
+    auto attributeIdentities = _->currentAttributeIdentities();
 
-    emit attributesChanged(u::toQStringList(addedAttributeNames), u::toQStringList(removedAttributeNames));
+    // Compare with previous attributes
+    auto removedAttributeIdentities = u::setDifference(_->_previousAttributeIdentities, attributeIdentities);
+    auto addedAttributeIdentities = u::setDifference(attributeIdentities, _->_previousAttributeIdentities);
+
+    QStringList removedAttributeNames;
+    QStringList addedAttributeNames;
+
+    auto identityToName = [](const auto& identity) { return identity._name; };
+
+    std::transform(removedAttributeIdentities.begin(), removedAttributeIdentities.end(),
+        std::back_inserter(removedAttributeNames), identityToName);
+    std::transform(addedAttributeIdentities.begin(), addedAttributeIdentities.end(),
+        std::back_inserter(addedAttributeNames), identityToName);
+
+    emit attributesChanged(addedAttributeNames, removedAttributeNames);
 }
