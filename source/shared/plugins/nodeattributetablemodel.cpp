@@ -284,7 +284,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     Q_ASSERT(added.isEmpty() || columnNamesUnique.intersect(addedUnique).isEmpty());
 
-    // Ignore attribute names we aren't using (they may ncolumnNamesUniqueot be node attributes)
+    // Ignore attribute names we aren't using (they may not be node attributes)
     auto filteredRemoved = columnNamesUnique.intersect(removedUnique).values();
 
     if(added.isEmpty() && filteredRemoved.isEmpty())
