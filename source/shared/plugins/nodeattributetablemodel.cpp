@@ -275,9 +275,21 @@ QString NodeAttributeTableModel::columnNameFor(size_t column) const
     return _columnNames.at(static_cast<int>(column));
 }
 
-void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
+void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+
+    auto removeIneligibleAttributes = [this](const auto& name)
+    {
+        const auto* attribute = _document->graphModel()->attributeByName(name);
+        return attribute->elementType() != ElementType::Node || attribute->hasParameter();
+    };
+
+    if(!added.isEmpty())
+        added.erase(std::remove_if(added.begin(), added.end(), removeIneligibleAttributes));
+
+    if(!removed.isEmpty())
+        removed.erase(std::remove_if(removed.begin(), removed.end(), removeIneligibleAttributes));
 
     QSet<QString> columnNamesUnique(_columnNames.begin(), _columnNames.end());
     QSet<QString> addedUnique(added.begin(), added.end());
@@ -285,7 +297,7 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     Q_ASSERT(added.isEmpty() || columnNamesUnique.intersect(addedUnique).isEmpty());
 
-    // Ignore attribute names we aren't using (they may not be node attributes)
+    // Ignore attribute names we aren't using in the table
     auto filteredRemoved = columnNamesUnique.intersect(removedUnique).values();
 
     if(added.isEmpty() && filteredRemoved.isEmpty())
@@ -316,12 +328,6 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 
     for(const auto& name : added)
     {
-        const auto* attribute = _document->graphModel()->attributeByName(name);
-
-        // We only care about node attributes, obviously
-        if(attribute->elementType() != ElementType::Node || attribute->hasParameter())
-            continue;
-
         auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
 
         onColumnAdded(columnIndex);

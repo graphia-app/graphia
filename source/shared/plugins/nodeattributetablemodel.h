@@ -111,7 +111,7 @@ public:
     void updateColumnNames();
 
 public slots:
-    void onAttributesChanged(const QStringList& added, const QStringList& removed);
+    void onAttributesChanged(QStringList added, QStringList removed);
     void onAttributeValuesChanged(const QStringList& attributeNames);
 
 signals:
