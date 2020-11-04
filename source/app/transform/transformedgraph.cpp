@@ -138,12 +138,12 @@ void TransformedGraph::rebuild()
 
         for(auto& transform : _transforms)
         {
-            setProgress(-1); // Indetermindate by default
+            setProgress(-1); // Indeterminate by default
 
             TransformCache::Result result;
             result._config = transform->config();
 
-            result = _cache.apply(result._config, *this);
+            result = _cache.apply(transform->index(), result._config, *this);
             if(result.isApplicable())
             {
                 newCreatedAttributeNames[transform->index()] = u::keysFor(result._newAttributes);
@@ -178,6 +178,8 @@ void TransformedGraph::rebuild()
                 _cache.attributeAdded(newAttributeName);
                 updatedAttributeNames.append(newAttributeName);
             }
+
+            result._index = transform->index();
 
             newCreatedAttributeNames[transform->index()] = newAttributeNames;
             newCache.add(std::move(result));

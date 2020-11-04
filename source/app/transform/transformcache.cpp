@@ -110,7 +110,7 @@ void TransformCache::attributeAdded(const QString& attributeName)
     }
 }
 
-TransformCache::Result TransformCache::apply(const GraphTransformConfig& config, TransformedGraph& graph)
+TransformCache::Result TransformCache::apply(int index, const GraphTransformConfig& config, TransformedGraph& graph)
 {
     TransformCache::Result result;
     result._config = config;
@@ -123,7 +123,7 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
     auto it = std::find_if(resultSet.begin(), resultSet.end(),
     [&](const auto& cachedResult)
     {
-        return cachedResult._config == config;
+        return cachedResult._index == index && cachedResult._config == config;
     });
 
     if(it != resultSet.end())
