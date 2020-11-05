@@ -286,10 +286,10 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     };
 
     if(!added.isEmpty())
-        added.erase(std::remove_if(added.begin(), added.end(), removeIneligibleAttributes));
+        added.erase(std::remove_if(added.begin(), added.end(), removeIneligibleAttributes), added.end());
 
     if(!removed.isEmpty())
-        removed.erase(std::remove_if(removed.begin(), removed.end(), removeIneligibleAttributes));
+        removed.erase(std::remove_if(removed.begin(), removed.end(), removeIneligibleAttributes), removed.end());
 
     QSet<QString> columnNamesUnique(_columnNames.begin(), _columnNames.end());
     QSet<QString> addedUnique(added.begin(), added.end());
