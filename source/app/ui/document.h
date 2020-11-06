@@ -416,6 +416,7 @@ public:
 
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
+    Q_INVOKABLE void rollback();
 
     Q_INVOKABLE void deleteNode(QmlNodeId nodeId);
     Q_INVOKABLE void deleteSelectedNodes();

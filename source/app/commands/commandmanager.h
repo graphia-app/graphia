@@ -57,6 +57,9 @@ public:
     void undo();
     void redo();
 
+    // A rollback is just an undo that can't be redone
+    void rollback();
+
     bool canUndo() const;
     bool canRedo() const;
 
@@ -120,7 +123,7 @@ private:
     bool canRedoNoLocking() const;
 
     void executeReal(ICommandPtr command, bool irreversible);
-    void undoReal();
+    void undoReal(bool rollback = false);
     void redoReal();
 
     void clearCommandStackNoLocking();
@@ -130,7 +133,8 @@ private:
         Execute,
         ExecuteOnce,
         Undo,
-        Redo
+        Redo,
+        Rollback
     };
 
     struct PendingCommand

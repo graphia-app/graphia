@@ -1188,6 +1188,14 @@ void Document::redo()
     _commandManager.redo();
 }
 
+void Document::rollback()
+{
+    if(busy())
+        return;
+
+    _commandManager.rollback();
+}
+
 void Document::deleteNode(QmlNodeId nodeId)
 {
     if(busy())

@@ -73,6 +73,13 @@ void CommandManager::redo()
     emit commandQueued();
 }
 
+void CommandManager::rollback()
+{
+    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    _pendingCommands.emplace_back(CommandAction::Rollback);
+    emit commandQueued();
+}
+
 static void commandStartDebug(int debug, bool busy, const QString& verb)
 {
     if(debug > 0 && !busy)
@@ -147,7 +154,7 @@ void CommandManager::executeReal(ICommandPtr command, bool irreversible)
     });
 }
 
-void CommandManager::undoReal()
+void CommandManager::undoReal(bool rollback)
 {
     if(!canUndoNoLocking())
         return;
@@ -158,20 +165,33 @@ void CommandManager::undoReal()
                 QObject::tr("Undoing ") + command->description() :
                 QObject::tr("Undoing");
 
+    if(rollback)
+    {
+        // Rollbacks are silent to the user
+        undoVerb.clear();
+    }
+
     commandStartDebug(_debug, _busy, undoVerb);
 
-    doCommand(command, undoVerb, [this, command]
+    doCommand(command, undoVerb, [this, command, rollback]
     {
         std::unique_lock<std::recursive_mutex> lock(_mutex);
 
         u::setCurrentThreadName("(u) " + command->description());
+        auto description = QObject::tr("Undo %1").arg(command->description());
 
         command->undo();
         _lastExecutedIndex--;
 
         clearCurrentCommand();
 
-        emit commandCompleted(true, command->description(), QString());
+        if(rollback)
+        {
+            // If rolling back, prevent redo
+            _stack.pop_back();
+        }
+
+        emit commandCompleted(true, description, {});
     });
 }
 
@@ -193,12 +213,13 @@ void CommandManager::redoReal()
         std::unique_lock<std::recursive_mutex> lock(_mutex);
 
         u::setCurrentThreadName("(r) " + command->description());
+        auto description = QObject::tr("Redo %1").arg(command->description());
 
         command->execute();
 
         clearCurrentCommand();
 
-        emit commandCompleted(true, command->description(), command->pastParticiple());
+        emit commandCompleted(true, description, command->pastParticiple());
     });
 }
 
@@ -454,6 +475,7 @@ void CommandManager::update()
     case CommandAction::ExecuteOnce:  executeReal(std::move(pendingCommand._command), true); break;
     case CommandAction::Undo:         undoReal(); break;
     case CommandAction::Redo:         redoReal(); break;
+    case CommandAction::Rollback:     undoReal(true); break;
     default: break;
     }
 }
