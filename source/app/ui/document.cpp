@@ -988,7 +988,8 @@ void Document::selectAllVisible()
         const auto* component = _graphModel->graph().componentById(componentId);
         const auto& nodeIds = component->nodeIds();
 
-        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+        _commandManager.execute(ExecutePolicy::Once,
+            makeSelectNodesCommand(_selectionManager.get(), nodeIds));
     }
     else
         selectAll();
@@ -1022,7 +1023,8 @@ void Document::selectSources()
         nodeIds.insert(sources.begin(), sources.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1036,7 +1038,8 @@ void Document::selectSourcesOf(QmlNodeId nodeId)
     auto sources = _graphModel->graph().sourcesOf(nodeId);
     nodeIds.insert(sources.begin(), sources.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1055,7 +1058,8 @@ void Document::selectTargets()
         nodeIds.insert(targets.begin(), targets.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1069,7 +1073,8 @@ void Document::selectTargetsOf(QmlNodeId nodeId)
     auto targets = _graphModel->graph().targetsOf(nodeId);
     nodeIds.insert(targets.begin(), targets.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1088,7 +1093,8 @@ void Document::selectNeighbours()
         nodeIds.insert(neighbours.begin(), neighbours.end());
     }
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1102,7 +1108,8 @@ void Document::selectNeighboursOf(QmlNodeId nodeId)
     auto neighbours = _graphModel->graph().neighboursOf(nodeId);
     nodeIds.insert(neighbours.begin(), neighbours.end());
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(),
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
@@ -1153,7 +1160,8 @@ void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNod
 
     if(!nodeIds.empty())
     {
-        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(),
+        _commandManager.execute(ExecutePolicy::Once,
+            makeSelectNodesCommand(_selectionManager.get(),
             nodeIds, SelectNodesClear::SelectionAndMask));
     }
 }
@@ -1201,7 +1209,8 @@ void Document::deleteNode(QmlNodeId nodeId)
     if(busy())
         return;
 
-    _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<DeleteNodesCommand>(_graphModel.get(),
         _selectionManager.get(), NodeIdSet{nodeId}));
 }
 
@@ -1213,7 +1222,8 @@ void Document::deleteSelectedNodes()
     if(_selectionManager->selectedNodes().empty())
         return;
 
-    _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<DeleteNodesCommand>(_graphModel.get(),
         _selectionManager.get(), _selectionManager->selectedNodes()));
 }
 
@@ -1337,28 +1347,30 @@ static bool shouldMoveFindFocus(bool inOverviewMode)
 
 void Document::selectAndFocusNode(NodeId nodeId)
 {
-    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), nodeId),
-    [=](Command&)
-    {
-        executeOnMainThread([=]
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodeCommand(_selectionManager.get(), nodeId),
+        [=](Command&)
         {
-            if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-                _graphQuickItem->moveFocusToNode(nodeId);
+            executeOnMainThread([=]
+            {
+                if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+                    _graphQuickItem->moveFocusToNode(nodeId);
+            });
         });
-    });
 }
 
 void Document::selectAndFocusNodes(const std::vector<NodeId>& nodeIds)
 {
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds),
-    [=](Command&)
-    {
-        executeOnMainThread([=]
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(), nodeIds),
+        [=](Command&)
         {
-            if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-                _graphQuickItem->moveFocusToNodes(nodeIds);
+            executeOnMainThread([=]
+            {
+                if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+                    _graphQuickItem->moveFocusToNodes(nodeIds);
+            });
         });
-    });
 }
 
 void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
@@ -2133,7 +2145,8 @@ void Document::moveGraphTransform(int from, int to)
     QStringList newGraphTransforms = _graphTransforms;
     newGraphTransforms.move(from, to);
 
-    _commandManager.execute(std::make_unique<ApplyTransformsCommand>(
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<ApplyTransformsCommand>(
         _graphModel.get(), _selectionManager.get(), this,
         _graphTransforms, newGraphTransforms));
 }
@@ -2289,7 +2302,8 @@ void Document::moveVisualisation(int from, int to)
     QStringList newVisualisations = _visualisations;
     newVisualisations.move(from, to);
 
-    _commandManager.execute(std::make_unique<ApplyVisualisationsCommand>(
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
         _visualisations, newVisualisations));
 }
@@ -2358,12 +2372,12 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
 
     if(commands.size() > 1)
     {
-        _commandManager.execute(std::move(commands),
+        _commandManager.execute(ExecutePolicy::Add, std::move(commands),
             {tr("Apply Transforms and Visualisations"),
             tr("Applying Transforms and Visualisations")});
     }
     else if(commands.size() == 1)
-        _commandManager.execute(std::move(commands.front()));
+        _commandManager.execute(ExecutePolicy::Add, std::move(commands.front()));
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

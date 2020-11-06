@@ -49,10 +49,8 @@ public:
 
     void clear();
 
-    void execute(ICommandPtr command) override;
+    void execute(ExecutePolicy policy, ICommandPtr command) override;
     using ICommandManager::execute;
-    void executeOnce(ICommandPtr command) override;
-    using ICommandManager::executeOnce;
 
     void undo();
     void redo();
@@ -122,27 +120,30 @@ private:
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;
 
-    void executeReal(ICommandPtr command, bool irreversible);
-    void undoReal(bool rollback = false);
-    void redoReal();
-
-    void clearCommandStackNoLocking();
-
     enum class CommandAction
     {
         Execute,
+        ExecuteReplace,
         ExecuteOnce,
         Undo,
         Redo,
         Rollback
     };
 
+    void executeReal(ICommandPtr command, CommandAction action);
+    void undoReal(bool rollback = false);
+    void redoReal();
+
+    void clearCommandStackNoLocking();
+
     struct PendingCommand
     {
         PendingCommand(CommandAction action, ICommandPtr command) :
             _action(action), _command(std::move(command))
         {
-            if((action == CommandAction::Execute || action == CommandAction::ExecuteOnce) &&
+            if((action == CommandAction::Execute ||
+                action == CommandAction::ExecuteReplace ||
+                action == CommandAction::ExecuteOnce) &&
                 _command == nullptr)
             {
                 FATAL_ERROR(NullPendingCommand);

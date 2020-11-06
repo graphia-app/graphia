@@ -27,6 +27,13 @@
 #include <vector>
 #include <type_traits>
 
+enum class ExecutePolicy
+{
+    Add,        // Add to the execution stack
+    Replace,    // Replace the top of the execution stack
+    Once        // Don't add to the execution stack
+};
+
 class ICommandManager
 {
 public:
@@ -62,55 +69,34 @@ private:
         return std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands));
     }
 
-    template<void(ICommandManager::*Fn)(ICommandPtr), typename T, typename... Commands>
-    void _execute(T&& command, Commands&&... commands)
-    {
-        if constexpr(sizeof...(commands) != 0)
-            (this->*Fn)(makeCompoundCommand(std::forward<T>(command), std::forward<Commands>(commands)...));
-        else
-            (this->*Fn)(makeCommand(std::forward<T>(command)));
-    }
-
     template<typename... Args>
     using EnableIfArgsAreAllCommands = typename std::enable_if_t<(... &&
         (std::is_convertible_v<Args, ICommandPtr> || std::is_convertible_v<Args, CommandFn&&>))
     >;
 
 public:
-    virtual void execute(ICommandPtr command) = 0;
+    virtual void execute(ExecutePolicy policy, ICommandPtr command) = 0;
 
     // cppcheck-suppress passedByValue
-    void execute(ICommandPtrsVector commands, const Command::CommandDescription& commandDescription = {})
+    void execute(ExecutePolicy policy, ICommandPtrsVector commands,
+        const Command::CommandDescription& commandDescription = {})
     {
-        execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
+        execute(policy, std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
-    template<typename... Commands, typename = EnableIfArgsAreAllCommands<Commands...>>
-    void execute(Commands&&... commands)
+    template<typename Command, typename... Commands, typename = EnableIfArgsAreAllCommands<Command, Commands...>>
+    void execute(ExecutePolicy policy, Command&& command, Commands&&... commands)
     {
-        _execute<&ICommandManager::execute>(std::forward<Commands>(commands)...);
+        if constexpr(sizeof...(commands) != 0)
+            execute(policy, makeCompoundCommand(std::forward<Command>(command), std::forward<Commands>(commands)...));
+        else
+            execute(policy, makeCommand(std::forward<Command>(command)));
     }
-
-    // Execute only once, i.e. so that it can't be undone
-    virtual void executeOnce(ICommandPtr command) = 0;
 
     void executeOnce(CommandFn&& executeFn, const QString& commandDescription = {})
     {
-        executeOnce(std::make_unique<Command>(Command::CommandDescription{commandDescription,
+        execute(ExecutePolicy::Once, std::make_unique<Command>(Command::CommandDescription{commandDescription,
             commandDescription, commandDescription}, executeFn));
-    }
-
-    // cppcheck-suppress passedByValue
-    void executeOnce(ICommandPtrsVector commands, const QString& commandDescription = {})
-    {
-        executeOnce(std::make_unique<CompoundCommand>(Command::CommandDescription{commandDescription,
-            commandDescription, commandDescription}, std::move(commands)));
-    }
-
-    template<typename... Commands, typename = EnableIfArgsAreAllCommands<Commands...>>
-    void executeOnce(Commands&&... commands)
-    {
-        _execute<&ICommandManager::executeOnce>(std::forward<Commands>(commands)...);
     }
 };
 

@@ -259,7 +259,8 @@ void GraphCommonInteractor::leftMouseUp()
 
             if(!selection.empty())
             {
-                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager,
+                _commandManager->execute(ExecutePolicy::Once,
+                    makeSelectNodesCommand(_selectionManager,
                     selection, SelectNodesClear::None));
             }
 
@@ -273,7 +274,8 @@ void GraphCommonInteractor::leftMouseUp()
 
             if(!_clickedNodeId.isNull())
             {
-                _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager, _clickedNodeId,
+                _commandManager->execute(ExecutePolicy::Once,
+                    makeSelectNodeCommand(_selectionManager, _clickedNodeId,
                     !multiSelect ? SelectNodesClear::Selection :
                                    SelectNodesClear::None));
             }

@@ -45,17 +45,20 @@ CommandManager::~CommandManager()
     }
 }
 
-void CommandManager::execute(ICommandPtr command)
+void CommandManager::execute(ExecutePolicy policy, ICommandPtr command)
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
-    _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
-    emit commandQueued();
-}
+    CommandAction action;
 
-void CommandManager::executeOnce(ICommandPtr command)
-{
+    switch(policy)
+    {
+    default:
+    case ExecutePolicy::Add:        action = CommandAction::Execute; break;
+    case ExecutePolicy::Replace:    action = CommandAction::ExecuteReplace; break;
+    case ExecutePolicy::Once:       action = CommandAction::ExecuteOnce; break;
+    }
+
     std::unique_lock<std::recursive_mutex> lock(_queueMutex);
-    _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
+    _pendingCommands.emplace_back(action, std::move(command));
     emit commandQueued();
 }
 
@@ -94,13 +97,17 @@ static void commandStartDebug(int debug, bool busy, const QString& verb)
     }
 }
 
-void CommandManager::executeReal(ICommandPtr command, bool irreversible)
+void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 {
+    Q_ASSERT(action == CommandAction::Execute ||
+        action == CommandAction::ExecuteReplace ||
+        action == CommandAction::ExecuteOnce);
+
     commandStartDebug(_debug, _busy, command->description());
 
     auto* commandPtr = command.get();
     auto verb = command->verb();
-    doCommand(commandPtr, verb, [this, command = std::move(command), irreversible]() mutable
+    doCommand(commandPtr, verb, [this, command = std::move(command), action]() mutable
     {
         std::unique_lock<std::recursive_mutex> lock(_mutex);
 
@@ -120,10 +127,13 @@ void CommandManager::executeReal(ICommandPtr command, bool irreversible)
             pastParticiple = command->pastParticiple();
             success = true;
 
-            if(!irreversible)
+            if(action != CommandAction::ExecuteOnce)
             {
                 // There are commands on the stack ahead of us; throw them away
                 while(canRedoNoLocking())
+                    _stack.pop_back();
+
+                if(!_stack.empty() && action == CommandAction::ExecuteReplace)
                     _stack.pop_back();
 
                 _stack.push_back(std::move(command));
@@ -471,11 +481,15 @@ void CommandManager::update()
     auto pendingCommand = nextPendingCommand();
     switch(pendingCommand._action)
     {
-    case CommandAction::Execute:      executeReal(std::move(pendingCommand._command), false); break;
-    case CommandAction::ExecuteOnce:  executeReal(std::move(pendingCommand._command), true); break;
-    case CommandAction::Undo:         undoReal(); break;
-    case CommandAction::Redo:         redoReal(); break;
-    case CommandAction::Rollback:     undoReal(true); break;
+    case CommandAction::Execute:
+    case CommandAction::ExecuteReplace:
+    case CommandAction::ExecuteOnce:
+        executeReal(std::move(pendingCommand._command), pendingCommand._action);
+        break;
+
+    case CommandAction::Undo:       undoReal(); break;
+    case CommandAction::Redo:       redoReal(); break;
+    case CommandAction::Rollback:   undoReal(true); break;
     default: break;
     }
 }
