@@ -2308,7 +2308,8 @@ void Document::moveVisualisation(int from, int to)
         _visualisations, newVisualisations));
 }
 
-void Document::update(QStringList newGraphTransforms, QStringList newVisualisations) // NOLINT
+void Document::update(QStringList newGraphTransforms,
+    QStringList newVisualisations, bool replaceLatestCommand)
 {
     if(_graphModel == nullptr)
         return;
@@ -2370,14 +2371,19 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     else
         setVisualisations(uiVisualisations);
 
+    ExecutePolicy policy = replaceLatestCommand ?
+        ExecutePolicy::Replace : ExecutePolicy::Add;
+
     if(commands.size() > 1)
     {
-        _commandManager.execute(ExecutePolicy::Add, std::move(commands),
-            {tr("Apply Transforms and Visualisations"),
-            tr("Applying Transforms and Visualisations")});
+        _commandManager.execute(policy, std::move(commands),
+            {
+                tr("Apply Transforms and Visualisations"),
+                tr("Applying Transforms and Visualisations")
+            });
     }
     else if(commands.size() == 1)
-        _commandManager.execute(ExecutePolicy::Add, std::move(commands.front()));
+        _commandManager.execute(policy, std::move(commands.front()));
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

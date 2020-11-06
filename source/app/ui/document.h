@@ -492,7 +492,8 @@ public:
 
     // Execute commands to apply transform and/or visualisation changes
     Q_INVOKABLE void update(QStringList newGraphTransforms = {},
-                            QStringList newVisualisations = {});
+        QStringList newVisualisations = {},
+        bool replaceLatestCommand = false);
 
     Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
     Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);
