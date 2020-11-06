@@ -84,8 +84,15 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
     }
 
     // Clamp the min and max to the values actually present in the sample
-    _min = std::max(_min, statistics._min);
-    _max = std::min(_max, statistics._max);
+    _min = std::clamp(_min, statistics._min, statistics._max);
+    _max = std::clamp(_max, statistics._min, statistics._max);
+
+    if(_min == _max)
+    {
+        // We can't map to no range, so just use the min and max of the sample
+        _min = statistics._min;
+        _max = statistics._max;
+    }
 
     if(u::contains(jsonDocument, "exponent"))
         _exponent = jsonDocument["exponent"].get<double>();

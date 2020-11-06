@@ -76,8 +76,14 @@ Window
         if(typeGroup.current === null)
             userDefinedRadioButton.checked = true;
 
-        mappingPlot.minimum = Math.max(mappingPlot.minimum, root._minimumValue);
-        mappingPlot.maximum = Math.min(mappingPlot.maximum, root._maximumValue);
+        mappingPlot.minimum = Utils.clamp(mappingPlot.minimum, root._minimumValue, root._maximumValue);
+        mappingPlot.maximum = Utils.clamp(mappingPlot.maximum, root._minimumValue, root._maximumValue);
+
+        if(mappingPlot.minimum === mappingPlot.maximum)
+        {
+            mappingPlot.minimum = root._minimumValue;
+            mappingPlot.maximum = root._maximumValue;
+        }
 
         if(mapping.exponent !== undefined)
             exponentSlider.value = Math.log2(mapping.exponent);
