@@ -279,17 +279,15 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    auto removeIneligibleAttributes = [this](const auto& name)
-    {
-        const auto* attribute = _document->graphModel()->attributeByName(name);
-        return attribute->elementType() != ElementType::Node || attribute->hasParameter();
-    };
-
     if(!added.isEmpty())
-        added.erase(std::remove_if(added.begin(), added.end(), removeIneligibleAttributes), added.end());
-
-    if(!removed.isEmpty())
-        removed.erase(std::remove_if(removed.begin(), removed.end(), removeIneligibleAttributes), removed.end());
+    {
+        added.erase(std::remove_if(added.begin(), added.end(),
+        [this](const auto& name)
+        {
+            const auto* attribute = _document->graphModel()->attributeByName(name);
+            return attribute->elementType() != ElementType::Node || attribute->hasParameter();
+        }), added.end());
+    }
 
     QSet<QString> columnNamesUnique(_columnNames.begin(), _columnNames.end());
     QSet<QString> addedUnique(added.begin(), added.end());
