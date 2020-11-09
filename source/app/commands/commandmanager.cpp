@@ -121,6 +121,9 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
         QString pastParticiple;
         bool success = false;
 
+        if(action == CommandAction::ExecuteReplace && lastExecutedCommand() != nullptr)
+            command->replaces(lastExecutedCommand());
+
         if(command->execute() && !command->cancelled())
         {
             description = command->description();
@@ -417,6 +420,14 @@ bool CommandManager::canUndoNoLocking() const
 bool CommandManager::canRedoNoLocking() const
 {
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
+}
+
+const ICommand* CommandManager::lastExecutedCommand() const
+{
+    if(_stack.empty() || _lastExecutedIndex < 0)
+        return nullptr;
+
+    return _stack.at(_lastExecutedIndex).get();
 }
 
 bool CommandManager::commandsArePending() const

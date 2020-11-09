@@ -119,6 +119,7 @@ private:
 
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;
+    const ICommand* lastExecutedCommand() const;
 
     enum class CommandAction
     {

@@ -58,6 +58,8 @@ public:
 
     bool execute() override;
     void undo() override;
+
+    void replaces(const ICommand* replacee) override;
 };
 
 #endif // APPLYVISUALISATIONSSCOMMAND_H

@@ -116,3 +116,12 @@ void ApplyVisualisationsCommand::undo()
 {
     apply(_previousVisualisations, patchedVisualisations());
 }
+
+void ApplyVisualisationsCommand::replaces(const ICommand* replacee)
+{
+    const auto* avcReplacee =
+        dynamic_cast<const ApplyVisualisationsCommand*>(replacee);
+    Q_ASSERT(avcReplacee != nullptr);
+
+    _previousVisualisations = avcReplacee->_previousVisualisations;
+}

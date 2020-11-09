@@ -72,7 +72,7 @@ private:
 };
 
 // For simple operations that don't warrant creating a full blown ICommand instance,
-// the Command class can be used, usually by the ICommandManager::execute* interface
+// the Command class can be used, usually by the ICommandManager::execute interface
 class Command : public ICommand
 {
 public:
