@@ -508,12 +508,7 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
     {
         // To focus on a node, we need to be in component mode
         auto componentId = _graphModel->graph().componentIdOfNode(nodeId);
-        auto* newComponentRenderer = componentRendererForId(componentId);
-        newComponentRenderer->moveFocusToNode(nodeId, radius);
-        newComponentRenderer->saveViewData();
-        newComponentRenderer->resetView();
-
-        switchToComponentMode(true, componentId);
+        switchToComponentMode(true, componentId, nodeId, radius);
     }
 }
 
