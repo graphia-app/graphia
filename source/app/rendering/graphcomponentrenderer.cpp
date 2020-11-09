@@ -601,7 +601,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
     centreNodeInViewport(nodeId, zoomDistance);
 }
 
-void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId)
+void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId, float radius)
 {
     if(!componentIsValid())
         return;
@@ -611,7 +611,11 @@ void GraphComponentRenderer::moveSavedFocusToNode(NodeId nodeId)
     _savedViewData._focusNodeId = nodeId;
     _savedViewData._autoZooming = false;
 
-    float zoomDistance = entireComponentZoomDistanceFor(_savedViewData._focusNodeId);
+    float zoomDistance = -1.0f;
+    if(radius >= 0.0f)
+        zoomDistance = zoomDistanceForRadius(radius);
+    else
+        zoomDistance = entireComponentZoomDistanceFor(_savedViewData._focusNodeId);
 
     _savedViewData._zoomDistance = _targetZoomDistance = zoomDistance;
 }
