@@ -88,7 +88,7 @@ public:
     QMatrix4x4 projectionMatrix() const;
 
     void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
-    void moveSavedFocusToNode(NodeId nodeId);
+    void moveSavedFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToNodes(const std::vector<NodeId>& nodeIds,
