@@ -93,10 +93,10 @@ Item
             if(mappingSelector.visualisationIndex !== index)
                 return;
 
-            if(!mappingSelector.applied)
-                optionsMenu.setupMappingMenuItems();
-            else
+            if(mappingSelector.applied)
                 document.rollback();
+            else
+                optionsMenu.setupMappingMenuItems();
         }
 
         function onApplyClicked(alreadyApplied)
