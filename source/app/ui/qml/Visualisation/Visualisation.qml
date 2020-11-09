@@ -76,13 +76,36 @@ Item
     {
         target: mappingSelector
 
-        function onConfigurationChanged()
+        function onAccepted()
+        {
+            if(mappingSelector.visualisationIndex !== index)
+                return;
+
+            if(mappingSelector.applied)
+                return;
+
+            parameters["mapping"] = "\"" + Utils.escapeQuotes(mappingSelector.configuration) + "\"";
+            root.updateExpression();
+        }
+
+        function onRejected()
+        {
+            if(mappingSelector.visualisationIndex !== index)
+                return;
+
+            if(!mappingSelector.applied)
+                optionsMenu.setupMappingMenuItems();
+            else
+                document.rollback();
+        }
+
+        function onApplyClicked(alreadyApplied)
         {
             if(mappingSelector.visualisationIndex !== index)
                 return;
 
             parameters["mapping"] = "\"" + Utils.escapeQuotes(mappingSelector.configuration) + "\"";
-            root.updateExpression();
+            root.updateExpression(alreadyApplied);
         }
     }
 
@@ -254,7 +277,7 @@ Item
                     onCheckedChanged:
                     {
                         setFlag("disabled", !checked);
-                        updateExpression();
+                        root.updateExpression();
                     }
                 }
 
@@ -279,15 +302,22 @@ Item
                     onCheckedChanged:
                     {
                         setFlag("invert", checked);
-                        updateExpression();
+                        root.updateExpression();
                     }
                 }
 
                 ExclusiveGroup { id: mappingExclusiveGroup }
 
-                function setupMappingMenuItems(mappingString)
+                function setupMappingMenuItems()
                 {
-                    var mapping = JSON.parse(mappingString);
+                    if(parameters.mapping === undefined)
+                    {
+                        minmaxMenuItem.checked = true;
+                        return;
+                    }
+
+                    let mappingString = Utils.unescapeQuotes(parameters["mapping"]);
+                    let mapping = JSON.parse(mappingString);
 
                     if(mapping.exponent !== undefined && mapping.exponent !== 1.0)
                         customMappingMenuItem.checked = true;
@@ -358,9 +388,9 @@ Item
                         mappingSelector.invert = isFlagSet("invert");
 
                         if(parameters.mapping !== undefined)
-                            mappingSelector.configuration = Utils.unescapeQuotes(parameters["mapping"]);
+                            mappingSelector.initialise(Utils.unescapeQuotes(parameters["mapping"]));
                         else
-                            mappingSelector.resetConfiguration();
+                            mappingSelector.reset();
 
                         mappingSelector.show();
                     }
@@ -381,7 +411,7 @@ Item
                     onCheckedChanged:
                     {
                         setFlag("component", checked);
-                        updateExpression();
+                        root.updateExpression();
                     }
                 }
 
@@ -423,7 +453,7 @@ Item
                     onCheckedChanged:
                     {
                         setFlag("assignByQuantity", checked);
-                        updateExpression();
+                        root.updateExpression();
                     }
                 }
 
@@ -452,7 +482,7 @@ Item
             return;
 
         setFlag("disabled", !isFlagSet("disabled"));
-        updateExpression();
+        root.updateExpression();
     }
 
     property var flags: []
@@ -504,7 +534,7 @@ Item
     property string channel
     property var parameters
 
-    function updateExpression()
+    function updateExpression(replaceLastCommand = false)
     {
         if(!ready)
             return;
@@ -522,7 +552,7 @@ Item
             newExpression += " " + key + " = " + parameters[key];
 
         value = newExpression;
-        document.update();
+        document.update([], [], replaceLastCommand);
     }
 
     property var _visualisationInfo: ({})
@@ -572,7 +602,7 @@ Item
                 break;
 
             case "mapping":
-                optionsMenu.setupMappingMenuItems(unescaped);
+                optionsMenu.setupMappingMenuItems();
                 break;
             }
         }

@@ -38,8 +38,7 @@ Window
     minimumWidth: 640
     minimumHeight: 400
 
-    property string configuration
-    property string _initialConfiguration
+    property bool applied: false
 
     // The window is shared between visualisations so
     // we need some way of knowing which one we're currently
@@ -52,12 +51,12 @@ Window
     property double _minimumValue: 0.0
     property double _maximumValue: 0.0
 
-    function setup()
+    function initialise(value)
     {
-        if(root.configuration.length === 0)
+        if(value.length === 0)
             return;
 
-        var mapping = JSON.parse(root.configuration);
+        var mapping = JSON.parse(value);
 
         if(mapping.min !== undefined && mapping.max !== undefined)
         {
@@ -94,7 +93,8 @@ Window
         _minimumValue = Math.min.apply(null, values);
         _maximumValue = Math.max.apply(null, values);
 
-        setup();
+        mappingPlot.minimum = Math.max(mappingPlot.minimum, root._minimumValue);
+        mappingPlot.maximum = Math.min(mappingPlot.maximum, root._maximumValue);
     }
 
     property double _exponent:
@@ -102,12 +102,7 @@ Window
         return Math.pow(2.0, exponentSlider.value);
     }
 
-    onConfigurationChanged:
-    {
-        setup();
-    }
-
-    function resetConfiguration()
+    function reset()
     {
         minmaxRadioButton.checked = true;
         mappingPlot.minimum = root._minimumValue;
@@ -115,7 +110,7 @@ Window
         exponentSlider.value = 0;
     }
 
-    property string _selectedConfiguration:
+    property string configuration:
     {
         let mapping = {};
 
@@ -136,12 +131,13 @@ Window
 
     signal accepted()
     signal rejected()
+    signal applyClicked(bool alreadyApplied)
 
     onVisibleChanged:
     {
         // When the window is first shown
         if(visible)
-            root._initialConfiguration = root.configuration;
+            root.applied = false;
     }
 
     ColumnLayout
@@ -285,8 +281,6 @@ Window
                 text: qsTr("OK")
                 onClicked:
                 {
-                    root.configuration = root._selectedConfiguration;
-
                     accepted();
                     root.close();
                 }
@@ -298,11 +292,19 @@ Window
                 text: qsTr("Cancel")
                 onClicked:
                 {
-                    if(root._initialConfiguration !== null && root._initialConfiguration !== "")
-                        root.configuration = root._initialConfiguration;
-
                     rejected();
                     root.close();
+                }
+            }
+
+            Button
+            {
+                Layout.alignment: Qt.AlignRight
+                text: qsTr("Apply")
+                onClicked:
+                {
+                    applyClicked(root.applied);
+                    root.applied = true;
                 }
             }
         }
