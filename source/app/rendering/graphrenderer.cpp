@@ -694,26 +694,26 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
     }, QStringLiteral("GraphRenderer::switchToOverviewMode"));
 }
 
-void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId)
+void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId, float radius)
 {
     doTransition = doTransition && mode() != GraphRenderer::Mode::Component;
 
     if(doTransition)
         rendererStartedTransition();
 
-    executeOnRendererThread([this, componentId, nodeId, doTransition]
+    executeOnRendererThread([this, componentId, nodeId, radius, doTransition]
     {
         _graphComponentScene->setComponentId(componentId);
 
         if(doTransition)
         {
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId()).then(
-            [this, componentId, nodeId]
+            [this, componentId, nodeId, radius]
             {
                 if(!nodeId.isNull())
                 {
                     Q_ASSERT(_graphModel->graph().componentIdOfNode(nodeId) == componentId);
-                    componentRendererForId(componentId)->moveSavedFocusToNode(nodeId);
+                    componentRendererForId(componentId)->moveSavedFocusToNode(nodeId, radius);
                 }
 
                 if(!_graphComponentScene->savedViewIsReset())

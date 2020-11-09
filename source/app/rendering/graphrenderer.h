@@ -133,7 +133,7 @@ public:
 
     void switchToOverviewMode(bool doTransition = true);
     void switchToComponentMode(bool doTransition = true,
-        ComponentId componentId = ComponentId(), NodeId nodeId = NodeId());
+        ComponentId componentId = {}, NodeId nodeId = {}, float radius = -1.0f);
     void rendererStartedTransition();
     void rendererFinishedTransition();
     void sceneFinishedTransition();
