@@ -32,8 +32,7 @@ Window
     id: root
 
     property string configuration
-    property string _selectedConfiguration
-    property string _initialConfiguration
+    property bool applied: false
 
     // The window is shared between visualisations so
     // we need some way of knowing which one we're currently
@@ -44,6 +43,7 @@ Window
 
     signal accepted()
     signal rejected()
+    signal applyClicked(bool alreadyApplied)
 
     title: qsTr("Edit Palette")
     modality: Qt.ApplicationModal
@@ -65,7 +65,7 @@ Window
         // When the window is first shown
         if(visible)
         {
-            root._initialConfiguration = root._selectedConfiguration = root.configuration;
+            root.applied = false;
             paletteEditor.setup(root.configuration);
         }
     }
@@ -170,8 +170,8 @@ Window
 
                                     onClicked:
                                     {
-                                        root._selectedConfiguration = paletteKey.configuration;
-                                        paletteEditor.setup(root._selectedConfiguration);
+                                        root.configuration = paletteKey.configuration;
+                                        paletteEditor.setup(paletteKey.configuration);
                                     }
                                 }
 
@@ -321,6 +321,11 @@ Window
 
                     onAutoColorAdded: { scrollToItem(item); }
                     onFixedColorAdded: { scrollToItem(item); }
+
+                    onConfigurationChanged:
+                    {
+                        root.configuration = paletteEditor.configuration;
+                    }
                 }
             }
         }
@@ -335,8 +340,6 @@ Window
                 text: qsTr("OK")
                 onClicked:
                 {
-                    root.configuration = paletteEditor.configuration;
-
                     accepted();
                     root.close();
                 }
@@ -348,13 +351,22 @@ Window
                 text: qsTr("Cancel")
                 onClicked:
                 {
-                    if(root._initialConfiguration !== null && root._initialConfiguration !== "")
-                        root.configuration = root._initialConfiguration;
-
                     rejected();
                     root.close();
                 }
             }
+
+            Button
+            {
+                Layout.alignment: Qt.AlignRight
+                text: qsTr("Apply")
+                onClicked:
+                {
+                    applyClicked(root.applied);
+                    root.applied = true;
+                }
+            }
+
         }
     }
 

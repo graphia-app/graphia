@@ -32,8 +32,7 @@ Window
     id: root
 
     property string configuration
-    property string _selectedConfiguration
-    property string _initialConfiguration
+    property bool applied: false
 
     // The window is shared between visualisations so
     // we need some way of knowing which one we're currently
@@ -42,6 +41,7 @@ Window
 
     signal accepted()
     signal rejected()
+    signal applyClicked(bool alreadyApplied)
 
     title: qsTr("Edit Gradient")
     modality: Qt.ApplicationModal
@@ -63,7 +63,7 @@ Window
         // When the window is first shown
         if(visible)
         {
-            root._initialConfiguration = root._selectedConfiguration = root.configuration;
+            root.applied = false;
             gradientEditor.setup(root.configuration);
         }
     }
@@ -168,7 +168,7 @@ Window
 
                                     onClicked:
                                     {
-                                        root._selectedConfiguration = gradientKey.configuration;
+                                        root.configuration = gradientKey.configuration;
                                         gradientEditor.setup(gradientKey.configuration);
                                     }
                                 }
@@ -322,6 +322,11 @@ Window
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+
+                    onConfigurationChanged:
+                    {
+                        root.configuration = gradientEditor.configuration;
+                    }
                 }
             }
         }
@@ -336,8 +341,6 @@ Window
                 text: qsTr("OK")
                 onClicked:
                 {
-                    root.configuration = gradientEditor.configuration;
-
                     accepted();
                     root.close();
                 }
@@ -349,11 +352,19 @@ Window
                 text: qsTr("Cancel")
                 onClicked:
                 {
-                    if(root._initialConfiguration !== null && root._initialConfiguration !== "")
-                        root.configuration = root._initialConfiguration;
-
                     rejected();
                     root.close();
+                }
+            }
+
+            Button
+            {
+                Layout.alignment: Qt.AlignRight
+                text: qsTr("Apply")
+                onClicked:
+                {
+                    applyClicked(root.applied);
+                    root.applied = true;
                 }
             }
         }

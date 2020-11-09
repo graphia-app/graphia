@@ -46,13 +46,34 @@ Item
     {
         target: gradientSelector
 
-        function onConfigurationChanged()
+        function onAccepted()
+        {
+            if(gradientSelector.visualisationIndex !== index)
+                return;
+
+            if(gradientSelector.applied)
+                return;
+
+            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientSelector.configuration) + "\"";
+            root.updateExpression();
+        }
+
+        function onRejected()
+        {
+            if(gradientSelector.visualisationIndex !== index)
+                return;
+
+            if(gradientSelector.applied)
+                document.rollback();
+        }
+
+        function onApplyClicked(alreadyApplied)
         {
             if(gradientSelector.visualisationIndex !== index)
                 return;
 
             parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientSelector.configuration) + "\"";
-            root.updateExpression();
+            root.updateExpression(alreadyApplied);
         }
     }
 
@@ -61,13 +82,34 @@ Item
     {
         target: paletteSelector
 
-        function onConfigurationChanged()
+        function onAccepted()
+        {
+            if(paletteSelector.visualisationIndex !== index)
+                return;
+
+            if(paletteSelector.applied)
+                return;
+
+            parameters["palette"] = "\"" + Utils.escapeQuotes(paletteSelector.configuration) + "\"";
+            root.updateExpression();
+        }
+
+        function onRejected()
+        {
+            if(paletteSelector.visualisationIndex !== index)
+                return;
+
+            if(paletteSelector.applied)
+                document.rollback();
+        }
+
+        function onApplyClicked(alreadyApplied)
         {
             if(paletteSelector.visualisationIndex !== index)
                 return;
 
             parameters["palette"] = "\"" + Utils.escapeQuotes(paletteSelector.configuration) + "\"";
-            root.updateExpression();
+            root.updateExpression(alreadyApplied);
         }
     }
 
