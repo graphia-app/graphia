@@ -399,6 +399,7 @@ Item
 
         // Scroll so that it's visible
         let row = _mapIndexToRow(index);
+        treeView.__listView.currentIndex = row;
         treeView.__listView.positionViewAtIndex(row, ListView.Center);
     }
 
@@ -406,6 +407,8 @@ Item
     {
         treeView.selection.clearCurrentIndex();
     }
+
+    Keys.forwardTo: [treeView.__mouseArea]
 
     signal accepted()
 
