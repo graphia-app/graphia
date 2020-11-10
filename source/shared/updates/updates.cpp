@@ -50,8 +50,6 @@ static QString updateFilePath()
     return QStringLiteral("%1/update.json").arg(updatesLocation());
 }
 
-#include <QDebug>
-
 json updateStringToJson(const QString& updateString, QString* status)
 {
     auto updateStringStdString = updateString.toStdString();
