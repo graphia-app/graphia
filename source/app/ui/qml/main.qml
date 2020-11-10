@@ -109,6 +109,11 @@ ApplicationWindow
             checkForUpdatesAction.active = false;
             newUpdate.visible = true;
         }
+
+        function onChangeLogStored()
+        {
+            changeLog.refresh();
+        }
     }
 
     Tracking
@@ -311,6 +316,15 @@ ApplicationWindow
     {
         id: aboutpluginsDialog
         pluginDetails: application.pluginDetails
+    }
+
+    ChangeLog { id: changeLog }
+    LatestChangesDialog
+    {
+        id: latestChangesDialog
+
+        text: changeLog.text
+        version: application.version
     }
 
     TextDialog
@@ -1486,6 +1500,20 @@ ApplicationWindow
 
     Action
     {
+        id: showLatestChangesAction
+        enabled: changeLog.available
+
+        text: qsTr("Latest Changes…")
+
+        onTriggered:
+        {
+            latestChangesDialog.raise();
+            latestChangesDialog.show();
+        }
+    }
+
+    Action
+    {
         id: copyImageToClipboardAction
         text: qsTr("Copy Viewport To Clipboard")
         shortcut: "Ctrl+C"
@@ -1843,6 +1871,7 @@ ApplicationWindow
 
             MenuSeparator {}
             MenuItem { action: checkForUpdatesAction }
+            MenuItem { action: showLatestChangesAction }
         }
     }
 
