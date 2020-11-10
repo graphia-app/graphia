@@ -221,6 +221,19 @@ void Updater::downloadUpdate(QNetworkReply* reply)
     })
     .then([this, reply](const json& update)
     {
+        if(update["version"] == VERSION)
+        {
+            // If the update matches the running version, store
+            // the changeLog so the user can view it later
+            json changeLog;
+
+            changeLog["text"] = update["changeLog"];
+            changeLog["images"] = update["images"];
+
+            storeChangeLogJson(QString::fromStdString(changeLog.dump()));
+            emit changeLogStored();
+        }
+
         if(u::contains(update, "error"))
         {
             QString error = update["error"];

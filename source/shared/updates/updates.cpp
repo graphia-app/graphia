@@ -200,3 +200,43 @@ bool clearUpdateStatus()
 {
     return storeUpdateStatus({});
 }
+
+static QString changeLogFilePath()
+{
+    return QStringLiteral("%1/changeLog.json").arg(updatesLocation());
+}
+
+bool storeChangeLogJson(const QString& changeLogString)
+{
+    QFile changeLogFile(changeLogFilePath());
+
+    if(!changeLogFile.open(QFile::WriteOnly | QFile::Text))
+        return false;
+
+    auto byteArray = changeLogString.toUtf8();
+    return changeLogFile.write(byteArray) == byteArray.size();
+}
+
+json changeLogJson()
+{
+    QFile changeLogFile(changeLogFilePath());
+
+    if(!changeLogFile.exists())
+        return {};
+
+    if(!changeLogFile.open(QFile::ReadOnly | QFile::Text))
+        return {};
+
+    auto changeLogFileContents = changeLogFile.readAll();
+
+    auto changeLogObject = json::parse(changeLogFileContents.begin(), changeLogFileContents.end(),
+        nullptr, false);
+
+    if(changeLogObject.is_discarded())
+        return {};
+
+    if(!u::contains(changeLogObject, "text") || !u::contains(changeLogObject, "images"))
+        return {};
+
+    return changeLogObject;
+}

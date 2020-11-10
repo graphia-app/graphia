@@ -90,6 +90,8 @@ signals:
     void noNewUpdateAvailable(bool existing);
     void updateDownloaded();
     void progressChanged();
+
+    void changeLogStored();
 };
 
 #endif // UPDATER_H

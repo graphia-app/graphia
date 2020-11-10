@@ -61,6 +61,7 @@ Application::Application(QObject *parent) :
     connect(&_updater, &Updater::noNewUpdateAvailable, this, &Application::noNewUpdateAvailable);
     connect(&_updater, &Updater::updateDownloaded, this, &Application::newUpdateAvailable);
     connect(&_updater, &Updater::progressChanged, this, &Application::updateDownloadProgressChanged);
+    connect(&_updater, &Updater::changeLogStored, this, &Application::changeLogStored);
 
     registerSaverFactory(std::make_unique<NativeSaverFactory>());
     registerSaverFactory(std::make_unique<GraphMLSaverFactory>());

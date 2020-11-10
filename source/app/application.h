@@ -209,6 +209,8 @@ signals:
     void newUpdateAvailable();
     void updateDownloadProgressChanged();
 
+    void changeLogStored();
+
 private:
     static const char* _uri;
     static const int _majorVersion = APP_MAJOR_VERSION;

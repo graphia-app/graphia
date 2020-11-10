@@ -25,10 +25,15 @@
 
 QString updatesLocation();
 json updateStringToJson(const QString& updateString, QString* status = nullptr);
+
 QString fullyQualifiedInstallerFileName(const json& update);
 json latestUpdateJson(QString* status = nullptr);
+
 bool storeUpdateJson(const QString& updateString);
 bool storeUpdateStatus(const QString& status);
 bool clearUpdateStatus();
+
+bool storeChangeLogJson(const QString& changeLogString);
+json changeLogJson();
 
 #endif // UPDATES_H
