@@ -60,6 +60,7 @@
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
 
+#include "updates/changelog.h"
 #include "updates/updater.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
@@ -188,6 +189,7 @@ int start(int argc, char *argv[])
     qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
                                                       QStringLiteral("Exposed purely for results Enumerator"));
     qmlRegisterType<VisualisationMappingPlotItem>    (uri, maj, min, "VisualisationMappingPlot");
+    qmlRegisterType<ChangeLog>                       (uri, maj, min, "ChangeLog");
 
     qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
