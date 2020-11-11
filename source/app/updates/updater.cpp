@@ -388,7 +388,13 @@ void Updater::onTimeout()
 bool Updater::updateAvailable()
 {
     QString status;
-    if(!latestUpdateJson(&status).is_object())
+
+    auto latestUpdate = latestUpdateJson(&status);
+    if(!latestUpdate.is_object())
+        return false;
+
+    // Don't allow update to the running version
+    if(latestUpdate["version"] == VERSION)
         return false;
 
     // Update has already been skipped or installed
