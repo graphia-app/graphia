@@ -221,7 +221,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
     })
     .then([this, reply](const json& update)
     {
-        if(update["version"] == VERSION)
+        if(u::contains(update, "version") && update["version"] == VERSION)
         {
             // If the update matches the running version, store
             // the changeLog so the user can view it later
