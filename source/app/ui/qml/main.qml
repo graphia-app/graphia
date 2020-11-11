@@ -2038,7 +2038,12 @@ ApplicationWindow
                 id: updateProgressIndicator
                 visible: checkForUpdatesAction.active
 
-                Text { text: qsTr("Downloading Update:") }
+                Text
+                {
+                    text: application.updateDownloadProgress >= 0 ?
+                        qsTr("Downloading Update:") : qsTr("Checking For Update:")
+                }
+
                 ProgressBar
                 {
                     visible: parent.visible
