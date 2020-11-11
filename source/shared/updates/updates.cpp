@@ -107,7 +107,7 @@ json updateStringToJson(const QString& updateString, QString* status)
     }), updates.end());
 
     if(updates.empty())
-        return json{};
+        return {};
 
     std::sort(updates.begin(), updates.end(),
     [](const auto& a, const auto& b)
