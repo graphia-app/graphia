@@ -31,6 +31,8 @@
 #include <QCollator>
 #include <QStandardPaths>
 #include <QSysInfo>
+#include <QDir>
+#include <QFileInfo>
 
 #include <algorithm>
 #include <regex>
@@ -172,7 +174,9 @@ json latestUpdateJson(QString* status)
 
 bool storeUpdateJson(const QString& updateString)
 {
-    QFile updateFile(updateFilePath());
+    auto fileName = updateFilePath();
+    QDir().mkpath(QFileInfo(fileName).absolutePath());
+    QFile updateFile(fileName);
 
     if(!updateFile.open(QFile::WriteOnly | QFile::Text))
         return false;
@@ -208,7 +212,9 @@ static QString changeLogFilePath()
 
 bool storeChangeLogJson(const QString& changeLogString)
 {
-    QFile changeLogFile(changeLogFilePath());
+    auto fileName = changeLogFilePath();
+    QDir().mkpath(QFileInfo(fileName).absolutePath());
+    QFile changeLogFile(fileName);
 
     if(!changeLogFile.open(QFile::WriteOnly | QFile::Text))
         return false;
