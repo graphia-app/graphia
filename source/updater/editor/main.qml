@@ -52,6 +52,17 @@ ApplicationWindow
     property string lastUsedFilename: ""
     property bool saveRequired: false
 
+    function setSaveRequired()
+    {
+        root.saveRequired = true;
+        status.text = "";
+    }
+
+    function resetSaveRequired()
+    {
+        root.saveRequired = false;
+    }
+
     MessageDialog
     {
         id: validateErrorDialog
@@ -226,7 +237,7 @@ ApplicationWindow
 
         onAccepted:
         {
-            root.saveRequired = true;
+            setSaveRequired();
             settings.defaultImageOpenFolder = imageFileDialog.folder;
 
             let basename = QmlUtils.baseFileNameForUrl(file);
@@ -251,7 +262,7 @@ ApplicationWindow
 
         onAccepted:
         {
-            root.saveRequired = true;
+            setSaveRequired();
             settings.privateKeyFile = file;
         }
     }
@@ -353,7 +364,7 @@ ApplicationWindow
         }
 
         // Newly opened file doesn't need to be saved
-        root.saveRequired = false;
+        resetSaveRequired();
 
         return true;
     }
@@ -406,9 +417,15 @@ ApplicationWindow
                 JSON.stringify(saveObject));
 
             if(!success)
+            {
                 console.log("Failed to write " + fileUrl);
-
-            root.saveRequired = false;
+                status.text = qsTr("Failed to save");
+            }
+            else
+            {
+                resetSaveRequired();
+                status.text = qsTr("Saved ") + QmlUtils.baseFileNameForUrl(fileUrl);
+            }
 
             if(onSaveComplete !== undefined && onSaveComplete !== null)
                 onSaveComplete();
@@ -494,7 +511,7 @@ ApplicationWindow
 
         onDiscard:
         {
-            root.saveRequired = false;
+            resetSaveRequired();
 
             if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
                 onSaveConfirmedFunction();
@@ -576,7 +593,7 @@ ApplicationWindow
 
             function createTab()
             {
-                root.saveRequired = true;
+                setSaveRequired();
 
                 let tab = tabView.addTab("", tabComponent);
                 tabView.currentIndex = tabView.count - 1;
@@ -655,7 +672,7 @@ ApplicationWindow
                                     id: version
                                     Layout.fillWidth: true
 
-                                    onTextChanged: { root.saveRequired = true; }
+                                    onTextChanged: { setSaveRequired(); }
                                 }
 
                                 Label { text: qsTr("Target Regex:") }
@@ -664,7 +681,7 @@ ApplicationWindow
                                     id: targetVersionRegex
                                     Layout.fillWidth: true
 
-                                    onTextChanged: { root.saveRequired = true; }
+                                    onTextChanged: { setSaveRequired(); }
                                 }
                             }
 
@@ -675,7 +692,7 @@ ApplicationWindow
 
                                 id: markdownChangelog
 
-                                onTextChanged: { root.saveRequired = true; }
+                                onTextChanged: { setSaveRequired(); }
                             }
 
                             RowLayout
@@ -715,7 +732,7 @@ ApplicationWindow
                                         text: modelData.name
                                         checked: true
 
-                                        onCheckedChanged: { root.saveRequired = true; }
+                                        onCheckedChanged: { setSaveRequired(); }
                                     }
 
                                     TextField
@@ -731,7 +748,7 @@ ApplicationWindow
                                             if(root.checksums[text] !== undefined)
                                                 root.checksums[text] = "";
 
-                                            root.saveRequired = true;
+                                            setSaveRequired();
                                         }
                                     }
                                 }
@@ -880,6 +897,12 @@ ApplicationWindow
             {
                 implicitHeight: saveButton.implicitHeight
                 visible: root.busy
+            }
+
+            Text
+            {
+                id: status
+                visible: !root.busy && text.length > 0
             }
 
             Button
