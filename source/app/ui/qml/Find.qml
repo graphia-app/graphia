@@ -391,6 +391,9 @@ Rectangle
                                 color: "transparent"
                             }
                         }
+
+                        Keys.onUpPressed: { _previousAction.trigger(); }
+                        Keys.onDownPressed: { _nextAction.trigger(); }
                     }
 
                     Item
