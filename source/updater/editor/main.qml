@@ -39,6 +39,9 @@ ApplicationWindow
         property string operatingSystems: ""
         property string credentials: ""
         property string privateKeyFile: ""
+
+        property string defaultOpenFolder
+        property string defaultImageOpenFolder
     }
 
     property var operatingSystems: []
@@ -224,6 +227,7 @@ ApplicationWindow
         onAccepted:
         {
             root.saveRequired = true;
+            settings.defaultImageOpenFolder = imageFileDialog.folder;
 
             let basename = QmlUtils.baseFileNameForUrl(file);
 
@@ -447,6 +451,7 @@ ApplicationWindow
         onAccepted:
         {
             root.open(file);
+            settings.defaultOpenFolder = openDialog.folder;
             root.lastUsedFilename = file;
         }
     }
@@ -459,7 +464,13 @@ ApplicationWindow
 
         enabled: !root.busy
 
-        onTriggered: { openDialog.open(); }
+        onTriggered:
+        {
+            if(settings.defaultOpenFolder !== undefined)
+                openDialog.folder = settings.defaultOpenFolder;
+
+            openDialog.open();
+        }
     }
 
     MessageDialog
@@ -674,7 +685,13 @@ ApplicationWindow
                                 Button
                                 {
                                     text: qsTr("Add Image")
-                                    onClicked: { imageFileDialog.open(); }
+                                    onClicked:
+                                    {
+                                        if(settings.defaultImageOpenFolder !== undefined)
+                                            imageFileDialog.folder = settings.defaultImageOpenFolder;
+
+                                        imageFileDialog.open();
+                                    }
                                 }
                             }
 
