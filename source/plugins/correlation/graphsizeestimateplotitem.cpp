@@ -29,8 +29,6 @@
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
-
     _customPlot.setOpenGl(true);
 
     setAcceptedMouseButtons(Qt::AllButtons);

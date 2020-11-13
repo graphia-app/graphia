@@ -27,8 +27,6 @@
 
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
-    setRenderTarget(RenderTarget::FramebufferObject);
-
     _customPlot.setOpenGl(true);
     _customPlot.addLayer(QStringLiteral("textLayer"));
     _customPlot.plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
