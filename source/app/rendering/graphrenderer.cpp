@@ -1026,7 +1026,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     if(componentIds.size() > 1)
     {
         // We want to focus on multiple nodes, but they span multiple components
-        if(mode() == Mode::Component)
+        if(mode() == Mode::Component && u::pref("misc/stayInComponentMode").toBool())
         {
             // Prune the nodeIds we consider for focus down to only those in the focused component
             auto focusedComponentId = _graphComponentScene->componentId();
@@ -1038,7 +1038,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
             }), nodeIds.end());
         }
         else
-            return mode();
+            return Mode::Overview;
     }
 
     // None of the nodes are in the currently focused component

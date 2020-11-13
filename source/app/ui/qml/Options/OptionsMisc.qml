@@ -36,6 +36,7 @@ Item
 
         property alias focusFoundNodes: focusFoundNodesCheckbox.checked
         property alias focusFoundComponents: focusFoundComponentsCheckbox.checked
+        property alias stayInComponentMode: stayInComponentModeCheckbox.checked
         property alias disableHubbles: disableHubblesCheckbox.checked
         property alias webSearchEngineUrl: webSearchEngineField.text
         property alias maxUndoLevels: maxUndoSpinBox.value
@@ -84,16 +85,30 @@ Item
             text: qsTr("Find")
         }
 
-        CheckBox
+        RowLayout
         {
-            id: focusFoundNodesCheckbox
-            text: qsTr("Focus Found Nodes")
-        }
+            spacing: Constants.spacing * 2
 
-        CheckBox
-        {
-            id: focusFoundComponentsCheckbox
-            text: qsTr("Switch To Component Mode When Finding")
+            CheckBox
+            {
+                id: focusFoundNodesCheckbox
+                text: qsTr("Focus Found Nodes")
+            }
+
+            CheckBox
+            {
+                id: focusFoundComponentsCheckbox
+                enabled: focusFoundNodesCheckbox.checked
+                text: qsTr("Switch Modes When Finding")
+            }
+
+            CheckBox
+            {
+                id: stayInComponentModeCheckbox
+                enabled: focusFoundNodesCheckbox.checked &&
+                    focusFoundComponentsCheckbox.checked
+                text: qsTr("…But Not From Component Mode")
+            }
         }
 
         Label

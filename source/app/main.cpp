@@ -234,6 +234,7 @@ int start(int argc, char *argv[])
 
     u::definePref(QStringLiteral("misc/focusFoundNodes"),                   true);
     u::definePref(QStringLiteral("misc/focusFoundComponents"),              true);
+    u::definePref(QStringLiteral("misc/stayInComponentMode"),               false);
 
     u::definePref(QStringLiteral("misc/disableHubbles"),                    false);
 
