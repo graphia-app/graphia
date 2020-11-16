@@ -104,6 +104,8 @@ private:
     bool _autoZooming = true;
     QPointF _offset;
 
+    std::atomic_bool _renderersRequireReset = false;
+
     ComponentArray<float, LockingGraphArray> _previousComponentAlpha;
     ComponentArray<float, LockingGraphArray> _componentAlpha;
 
@@ -142,6 +144,8 @@ private slots:
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
+
+    void onVisualsChanged();
 
     void onPreferenceChanged(const QString& key, const QVariant& value);
 };
