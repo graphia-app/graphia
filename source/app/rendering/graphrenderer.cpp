@@ -127,7 +127,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         {
             updateGPUData(When::Later);
             update(); // QQuickFramebufferObject::Renderer::update
-        }, QStringLiteral("GraphModel::visualsChanged"));
+        }, QStringLiteral("GraphRenderer::visualsChanged"));
 
         enableSceneUpdate();
     });
