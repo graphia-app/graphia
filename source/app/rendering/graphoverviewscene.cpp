@@ -287,8 +287,8 @@ Transition& GraphOverviewScene::startTransitionToComponentMode(ComponentId focus
 
     float halfWidth = static_cast<float>(_width) * 0.5f;
     float halfHeight = static_cast<float>(_height) * 0.5f;
-    _zoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
-                                                     std::min(halfWidth, halfHeight));
+    _zoomedComponentLayoutData[focusComponentId].set(
+        halfWidth, halfHeight, std::min(halfWidth, halfHeight));
 
     return startTransition(duration, transitionType);
 }
@@ -382,10 +382,13 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
     {
         auto interpolate = [&](const ComponentId componentId)
         {
-            _zoomedComponentLayoutData[componentId] = interpolateCircle(_previousZoomedComponentLayoutData[componentId],
-                                                                        targetComponentLayoutData[componentId], f);
-            _componentAlpha[componentId] = u::interpolate(_previousComponentAlpha[componentId],
-                                                          targetComponentAlpha[componentId], f);
+            _zoomedComponentLayoutData[componentId] = interpolateCircle(
+                _previousZoomedComponentLayoutData[componentId],
+                targetComponentLayoutData[componentId], f);
+
+            _componentAlpha[componentId] = u::interpolate(
+                _previousComponentAlpha[componentId],
+                targetComponentAlpha[componentId], f);
 
             _graphRenderer->componentRendererForId(componentId)->updateTransition(f);
         };
@@ -415,8 +418,8 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
         std::sort(_componentIds.begin(), _componentIds.end());
         std::sort(_removedComponentIds.begin(), _removedComponentIds.end());
         std::set_difference(_componentIds.begin(), _componentIds.end(),
-                            _removedComponentIds.begin(), _removedComponentIds.end(),
-                            std::inserter(postTransitionComponentIds, postTransitionComponentIds.begin()));
+            _removedComponentIds.begin(), _removedComponentIds.end(),
+            std::inserter(postTransitionComponentIds, postTransitionComponentIds.begin()));
 
         _componentIds = std::move(postTransitionComponentIds);
 
@@ -467,8 +470,8 @@ void GraphOverviewScene::startZoomTransition(float duration)
         for(auto componentId : _componentIds)
         {
             _zoomedComponentLayoutData[componentId] =
-                    interpolateCircle(_previousZoomedComponentLayoutData[componentId],
-                                      targetZoomedComponentLayoutData[componentId], f);
+                interpolateCircle(_previousZoomedComponentLayoutData[componentId],
+                targetZoomedComponentLayoutData[componentId], f);
         }
     }).then(
     [this]
@@ -603,8 +606,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
         // We still need to render any components that have been removed, while they
         // transition away
         _componentIds.insert(_componentIds.end(),
-                             _removedComponentIds.begin(),
-                             _removedComponentIds.end());
+            _removedComponentIds.begin(), _removedComponentIds.end());
     }, QStringLiteral("GraphOverviewScene::onGraphChanged"));
 }
 
