@@ -64,6 +64,8 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
 
+    connect(_graphModel, &GraphModel::visualsChanged, this, &GraphOverviewScene::onVisualsChanged, Qt::DirectConnection);
+
     connect(&_zoomTransition, &Transition::started, _graphRenderer, &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
     connect(&_zoomTransition, &Transition::finished, _graphRenderer, &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
 
@@ -74,6 +76,18 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
 void GraphOverviewScene::update(float t)
 {
     _zoomTransition.update(t);
+
+    // See ::onVisualsChanged
+    if(_renderersRequireReset)
+    {
+        for(auto componentId : _componentIds)
+        {
+            auto* renderer = _graphRenderer->componentRendererForId(componentId);
+            renderer->resetView();
+        }
+
+        _renderersRequireReset = false;
+    }
 
     for(auto componentId : _componentIds)
     {
@@ -549,6 +563,18 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
                 _removedComponentIds.emplace_back(merger);
         }
     }, QStringLiteral("GraphOverviewScene::onComponentsWillMerge (freeze renderers)"));
+}
+
+void GraphOverviewScene::onVisualsChanged()
+{
+    _graphRenderer->executeOnRendererThread([this]
+    {
+        // The camera distance for component renderers is calculated in
+        // part on the maximum size of the nodes in the component, so we
+        // must force it to be updated when the node sizes changes; this
+        // causes each renderer to be reset in ::update
+        _renderersRequireReset = true;
+    }, QStringLiteral("GraphOverviewScene::onVisualsChanged (reset renderers)"));
 }
 
 void GraphOverviewScene::onGraphWillChange(const Graph*)
