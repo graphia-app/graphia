@@ -17,7 +17,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - uses: timangus/cpp-problem-matcher@master
-    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
       env:
@@ -56,7 +56,7 @@ jobs:
         fetch-depth: 0
     - uses: timangus/cpp-problem-matcher@master
     - uses: ilammy/msvc-dev-cmd@v1
-    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       shell: cmd
       run: call scripts\windows-build.bat
@@ -91,7 +91,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - uses: timangus/cpp-problem-matcher@master
-    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v1
       with:
         node-version: '12'
@@ -141,7 +141,7 @@ jobs:
         ref: ${{ github.ref }}
         fetch-depth: 0
     - uses: timangus/cpp-problem-matcher@master
-    - uses: seanmiddleditch/gha-setup-ninja@v2
+    - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
       env:
