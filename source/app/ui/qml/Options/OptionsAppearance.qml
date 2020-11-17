@@ -91,24 +91,22 @@ Item
 
     RowLayout
     {
-        id: column
         anchors.fill: parent
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
         GridLayout
         {
-            Layout.alignment: Qt.AlignTop|Qt.AlignLeft
-
             columns: 2
             rowSpacing: Constants.spacing
             columnSpacing: Constants.spacing
 
             Label
             {
+                Layout.columnSpan: 2
+
                 font.bold: true
                 text: qsTr("Colours")
-                Layout.columnSpan: 2
             }
 
             Label { text: qsTr("Nodes") }
@@ -128,9 +126,11 @@ Item
 
             Label
             {
+                Layout.columnSpan: 2
+                Layout.topMargin: Constants.margin * 2
+
                 font.bold: true
                 text: qsTr("Sizes")
-                Layout.columnSpan: 2
             }
 
             Label { text: qsTr("Nodes") }
@@ -153,44 +153,21 @@ Item
                 onValueChanged: { delayedPreferences.update(); }
             }
 
-            Label
-            {
-                font.bold: true
-                text: qsTr("Miscellaneous")
-                Layout.columnSpan: 2
-            }
-
-            Label { text: qsTr("Transition Time") }
-            Slider
-            {
-                id: transitionTimeSlider
-                minimumValue: limitConstants.minimumTransitionTime
-                maximumValue: limitConstants.maximumTransitionTime
-            }
-
-            Label { text: qsTr("Minimum Component Radius") }
-            Slider
-            {
-                id: minimumComponentRadiusSlider
-                minimumValue: limitConstants.minimumMinimumComponentRadius
-                maximumValue: limitConstants.maximumMinimumComponentRadius
-
-                onValueChanged: { delayedPreferences.update(); }
-            }
+            Item { Layout.fillHeight: true }
         }
 
         GridLayout
         {
-            Layout.alignment: Qt.AlignTop|Qt.AlignLeft
-
             columns: 2
             rowSpacing: Constants.spacing
             columnSpacing: Constants.spacing
+
             Label
             {
+                Layout.columnSpan: 2
+
                 font.bold: true
                 text: qsTr("Text")
-                Layout.columnSpan: 2
             }
 
             Label { text: qsTr("Font") }
@@ -215,7 +192,38 @@ Item
                 currentIndex: visuals.textAlignment
                 onCurrentIndexChanged: visuals.textAlignment = currentIndex;
             }
+
+            Label
+            {
+                Layout.columnSpan: 2
+                Layout.topMargin: Constants.margin * 2
+
+                font.bold: true
+                text: qsTr("Miscellaneous")
+            }
+
+            Label { text: qsTr("Transition Time") }
+            Slider
+            {
+                id: transitionTimeSlider
+                minimumValue: limitConstants.minimumTransitionTime
+                maximumValue: limitConstants.maximumTransitionTime
+            }
+
+            Label { text: qsTr("Component Radius") }
+            Slider
+            {
+                id: minimumComponentRadiusSlider
+                minimumValue: limitConstants.minimumMinimumComponentRadius
+                maximumValue: limitConstants.maximumMinimumComponentRadius
+
+                onValueChanged: { delayedPreferences.update(); }
+            }
+
+            Item { Layout.fillHeight: true }
         }
+
+        Item { Layout.fillWidth: true }
     }
 
     FontDialog

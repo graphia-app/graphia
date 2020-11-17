@@ -70,24 +70,21 @@ Item
         }
     }
 
-    ColumnLayout
+    RowLayout
     {
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
+        anchors.fill: parent
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
-        Label
+        ColumnLayout
         {
-            font.bold: true
-            text: qsTr("Find")
-        }
+            spacing: Constants.spacing
 
-        RowLayout
-        {
-            spacing: Constants.spacing * 2
+            Label
+            {
+                font.bold: true
+                text: qsTr("Find")
+            }
 
             CheckBox
             {
@@ -105,149 +102,165 @@ Item
             CheckBox
             {
                 id: stayInComponentModeCheckbox
+
+                Layout.leftMargin: Constants.margin * 2
+
                 enabled: focusFoundNodesCheckbox.checked &&
                     focusFoundComponentsCheckbox.checked
                 text: qsTr("…But Not From Component Mode")
             }
-        }
 
-        Label
-        {
-            font.bold: true
-            text: qsTr("Help")
-        }
+            Label
+            {
+                Layout.topMargin: Constants.margin * 2
 
-        CheckBox
-        {
-            id: disableHubblesCheckbox
-            text: qsTr("Disable Extended Help Tooltips")
-        }
+                font.bold: true
+                text: qsTr("Help")
+            }
 
-        Label
-        {
-            font.bold: true
-            text: qsTr("Allow Tracking")
-        }
+            CheckBox
+            {
+                id: disableHubblesCheckbox
+                text: qsTr("Disable Extended Help Tooltips")
+            }
 
-        ExclusiveGroup { id: trackingGroup }
-        RowLayout
-        {
+            Label
+            {
+                Layout.topMargin: Constants.margin * 2
+
+                font.bold: true
+                text: qsTr("Allow Tracking")
+            }
+
+            ExclusiveGroup { id: trackingGroup }
+            RowLayout
+            {
+                RadioButton
+                {
+                    id: yesTrackingRadioButton
+                    exclusiveGroup: trackingGroup
+                    text: qsTr("Yes")
+
+                    onCheckedChanged:
+                    {
+                        if(checked)
+                            tracking.permission = "given";
+                    }
+                }
+
+                TextField
+                {
+                    id: emailField
+
+                    Layout.preferredWidth: 250
+
+                    enabled: yesTrackingRadioButton.checked
+
+                    placeholderText: qsTr("Email Address")
+                    validator: RegExpValidator
+                    {
+                        // Check it's a valid email address
+                        regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
+                    }
+
+                    onTextChanged:
+                    {
+                        if(acceptableInput)
+                            tracking.emailAddress = text;
+                    }
+                }
+            }
+
             RadioButton
             {
-                id: yesTrackingRadioButton
+                id: anonTrackingRadioButton
                 exclusiveGroup: trackingGroup
-                text: qsTr("Yes")
+                text: qsTr("Yes, Anonymously")
 
                 onCheckedChanged:
                 {
                     if(checked)
-                        tracking.permission = "given";
+                        tracking.permission = "anonymous";
                 }
             }
 
-            TextField
+            RadioButton
             {
-                id: emailField
+                id: noTrackingRadioButton
+                exclusiveGroup: trackingGroup
+                text: qsTr("No")
 
-                Layout.preferredWidth: 250
-
-                enabled: yesTrackingRadioButton.checked
-
-                placeholderText: qsTr("Email Address")
-                validator: RegExpValidator
+                onCheckedChanged:
                 {
-                    // Check it's a valid email address
-                    regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
-                }
-
-                onTextChanged:
-                {
-                    if(acceptableInput)
-                        tracking.emailAddress = text;
+                    if(checked)
+                        tracking.permission = "refused";
                 }
             }
+
+            Item { Layout.fillHeight: true }
         }
 
-        RadioButton
+        ColumnLayout
         {
-            id: anonTrackingRadioButton
-            exclusiveGroup: trackingGroup
-            text: qsTr("Yes, Anonymously")
+            spacing: Constants.spacing
 
-            onCheckedChanged:
+            Label
             {
-                if(checked)
-                    tracking.permission = "anonymous";
+                font.bold: true
+                text: qsTr("Other")
             }
-        }
 
-        RadioButton
-        {
-            id: noTrackingRadioButton
-            exclusiveGroup: trackingGroup
-            text: qsTr("No")
-
-            onCheckedChanged:
-            {
-                if(checked)
-                    tracking.permission = "refused";
-            }
-        }
-
-        Label
-        {
-            font.bold: true
-            text: qsTr("Other")
-        }
-
-        RowLayout
-        {
             Label { text: qsTr("Web Search URL:") }
 
-            TextField
+            RowLayout
             {
-                id: webSearchEngineField
-
-                implicitWidth: 320
-
-                style: TextFieldStyle
+                TextField
                 {
-                    textColor: QmlUtils.userUrlIsValid(webSearchEngineField.text) ? "black" : "red"
+                    id: webSearchEngineField
+
+                    Layout.fillWidth: true
+
+                    style: TextFieldStyle
+                    {
+                        textColor: QmlUtils.userUrlIsValid(webSearchEngineField.text) ? "black" : "red"
+                    }
+
+                    property string _defaultValue: "https://www.google.com/search?q=%1"
+                    function reset() { text = _defaultValue; }
+
+                    Component.onCompleted:
+                    {
+                        if(text.length === 0)
+                            text = _defaultValue;
+                    }
                 }
 
-                property string _defaultValue: "https://www.google.com/search?q=%1"
-                function reset() { text = _defaultValue; }
-
-                Component.onCompleted:
+                FloatingButton
                 {
-                    if(text.length === 0)
-                        text = _defaultValue;
+                    iconName: "view-refresh"
+                    onClicked: { webSearchEngineField.reset(); }
                 }
             }
 
-            FloatingButton
+            RowLayout
             {
-                iconName: "view-refresh"
-                onClicked: { webSearchEngineField.reset(); }
+                Label { text: qsTr("Maximum Undo Levels:") }
+
+                SpinBox
+                {
+                    id: maxUndoSpinBox
+                    minimumValue: 0
+                    maximumValue: 50
+                }
             }
-        }
 
-        RowLayout
-        {
-            Label { text: qsTr("Maximum Undo Levels:") }
-
-            SpinBox
+            CheckBox
             {
-                id: maxUndoSpinBox
-                minimumValue: 0
-                maximumValue: 50
+                id: autoBackgroundUpdateCheckCheckbox
+                text: qsTr("Check For Updates Automatically")
             }
-        }
 
-        CheckBox
-        {
-            id: autoBackgroundUpdateCheckCheckbox
-            text: qsTr("Check For Updates Automatically")
+            Item { Layout.fillHeight: true }
         }
     }
 }
