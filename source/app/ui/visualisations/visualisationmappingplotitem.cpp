@@ -18,10 +18,12 @@
 
 #include "visualisationmappingplotitem.h"
 
+#include "shared/rendering/multisamples.h"
+
 #include <cmath>
 
 VisualisationMappingPlotItem::VisualisationMappingPlotItem(QQuickItem* parent) :
-    QCustomPlotQuickItem(parent)
+    QCustomPlotQuickItem(multisamples(), parent)
 {
     buildPlot();
 }

@@ -31,8 +31,8 @@ Window
     title: qsTr("Options")
     flags: Qt.Window|Qt.Dialog
 
-    minimumWidth: 720
-    minimumHeight: 480
+    minimumWidth: 700
+    minimumHeight: 420
     maximumWidth: minimumWidth
     maximumHeight: minimumHeight
 

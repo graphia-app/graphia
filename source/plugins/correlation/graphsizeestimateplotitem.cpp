@@ -20,6 +20,7 @@
 
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
+#include "shared/rendering/multisamples.h"
 
 #include <QVariantMap>
 #include <QVector>
@@ -27,7 +28,7 @@
 #include <algorithm>
 
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
-    QCustomPlotQuickItem(parent)
+    QCustomPlotQuickItem(multisamples(), parent)
 {}
 
 double GraphSizeEstimatePlotItem::threshold() const

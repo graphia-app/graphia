@@ -227,6 +227,8 @@ int start(int argc, char *argv[])
     u::definePref(QStringLiteral("visuals/minimumComponentRadius"),         2.0);
     u::definePref(QStringLiteral("visuals/transitionTime"),                 1.0);
 
+    u::definePref(QStringLiteral("visuals/disableMultisampling"),           false);
+
     u::definePref(QStringLiteral("misc/maxUndoLevels"),                     25);
 
     u::definePref(QStringLiteral("misc/showGraphMetrics"),                  false);

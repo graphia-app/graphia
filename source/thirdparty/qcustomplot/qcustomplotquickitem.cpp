@@ -21,9 +21,10 @@
 #include <QMouseEvent>
 #include <QCoreApplication>
 
-QCustomPlotQuickItem::QCustomPlotQuickItem(QQuickItem* parent)
+QCustomPlotQuickItem::QCustomPlotQuickItem(int multisamples, QQuickItem* parent) :
+    QQuickPaintedItem(parent)
 {
-    _customPlot.setOpenGl(true);
+    _customPlot.setOpenGl(true, multisamples);
 
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);

@@ -16,36 +16,21 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QCUSTOMPLOTQUICKITEM_H
-#define QCUSTOMPLOTQUICKITEM_H
+#ifndef MULTISAMPLES_H
+#define MULTISAMPLES_H
 
-#include <qcustomplot.h>
+#include "shared/utils/preferences.h"
 
-#include <QQuickPaintedItem>
-
-class QMouseEvent;
-
-class QCP_LIB_DECL QCustomPlotQuickItem : public QQuickPaintedItem
+namespace
 {
-    Q_OBJECT
-public:
-    explicit QCustomPlotQuickItem(int multisamples = 4,
-        QQuickItem* parent = nullptr);
+int multisamples()
+{
+    if(u::pref("visuals/disableMultisampling").toBool())
+        return 1;
 
-    void paint(QPainter* painter) override;
+    // This is the place where the default number of multisamples is set
+    return 4;
+}
+}
 
-private:
-    QCustomPlot _customPlot;
-
-protected:
-    QCustomPlot& customPlot() { return _customPlot; }
-    const QCustomPlot& customPlot() const { return _customPlot; }
-
-    void updatePlotSize();
-    void routeMouseEvent(QMouseEvent* event);
-
-private slots:
-    void onReplot();
-};
-
-#endif // QCUSTOMPLOTQUICKITEM_H
+#endif // MULTISAMPLES_H

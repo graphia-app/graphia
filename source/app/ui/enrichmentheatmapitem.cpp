@@ -21,11 +21,13 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 #include "shared/utils/container.h"
+#include "shared/rendering/multisamples.h"
 
 #include <set>
 #include <iterator>
 
-EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QCustomPlotQuickItem(parent)
+EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
+    QCustomPlotQuickItem(multisamples(), parent)
 {
     customPlot().addLayer(QStringLiteral("textLayer"));
     customPlot().plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);

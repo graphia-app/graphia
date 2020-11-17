@@ -51,6 +51,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userelementdata.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/multisamples.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h

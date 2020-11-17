@@ -51,6 +51,13 @@ Item
         property string permission
     }
 
+    Preferences
+    {
+        id: visuals
+        section: "visuals"
+        property alias disableMultisampling: disableMultisamplingCheckbox.checked
+    }
+
     Component.onCompleted:
     {
         if(tracking.permission === "refused")
@@ -206,6 +213,26 @@ Item
 
             Label
             {
+                font.bold: true
+                text: qsTr("Performance")
+            }
+
+            CheckBox
+            {
+                id: disableMultisamplingCheckbox
+                text: qsTr("Disable Multisampling")
+            }
+
+            Label
+            {
+                font.italic: true
+                text: qsTr("(Note: this option will not apply to existing open files)")
+            }
+
+            Label
+            {
+                Layout.topMargin: Constants.margin * 2
+
                 font.bold: true
                 text: qsTr("Other")
             }
