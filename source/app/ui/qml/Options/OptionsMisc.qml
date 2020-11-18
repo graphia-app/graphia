@@ -220,13 +220,25 @@ Item
             CheckBox
             {
                 id: disableMultisamplingCheckbox
-                text: qsTr("Disable Multisampling")
+                text: qsTr("Disable Multisampling (Restart Required)")
             }
 
-            Label
+            Text
             {
-                font.italic: true
-                text: qsTr("(Note: this option will not apply to existing open files)")
+                Layout.preferredWidth: parent.width
+
+                visible: Qt.platform.os === "osx"
+
+                wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
+
+                text: qsTr("Particularly on older hardware, further performance may " +
+                    "be gained by running the application in Low Resolution: <a href=\"dummy\">Locate ") +
+                    application.name + qsTr(" in Finder</a> and choose <b>Get Info</b> from its context menu, " +
+                    "then select <b>Open In Low Resolution</b>. Restart ") + application.name + qsTr(".")
+
+                PointingCursorOnHoverLink {}
+                onLinkActivated: { QmlUtils.showAppInFileManager(); }
             }
 
             Label
