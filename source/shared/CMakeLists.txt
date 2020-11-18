@@ -90,6 +90,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/redirects.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/scope_exit.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_visitor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/statistics.h
@@ -127,6 +128,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/typeidentity.cpp
