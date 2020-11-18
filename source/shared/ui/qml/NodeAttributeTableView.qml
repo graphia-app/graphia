@@ -1064,6 +1064,25 @@ Item
                         selectRows(0, proxyModel.rowCount() - 1);
                         verticalTableViewScrollBar.position = 0;
                     }
+
+                    function onColumnAdded(index, name)
+                    {
+                        // When a column is added at a particular index, all subsequent column
+                        // indices in the model are incremented by 1, so our record of which
+                        // columns are hidden must be adjusted to match...
+                        root.hiddenColumns = root.hiddenColumns.map(v => v >= index ? v + 1 : v);
+                        tableView._updateColumnVisibility();
+                    }
+
+                    function onColumnRemoved(index, name)
+                    {
+                        // (index might not be in hiddenColumns, but setRemove will ignore it in that case)
+                        root.hiddenColumns = Utils.setRemove(root.hiddenColumns, index);
+
+                        // ...the opposite is the case when removing
+                        root.hiddenColumns = root.hiddenColumns.map(v => v >= index ? v - 1 : v);
+                        tableView._updateColumnVisibility();
+                    }
                 }
 
                 Component.onCompleted:
