@@ -288,6 +288,8 @@ Item
                 SpinBox
                 {
                     id: maxUndoSpinBox
+
+                    Layout.preferredWidth: 50
                     minimumValue: 0
                     maximumValue: 50
                 }
