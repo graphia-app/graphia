@@ -26,6 +26,8 @@
 #include "shared/utils/crypto.h"
 #include "shared/utils/redirects.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/apppathname.h"
+#include "shared/utils/showinfolder.h"
 
 #include <QObject>
 #include <QUrl>
@@ -269,6 +271,12 @@ public:
     Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText)
     {
         return u::redirectLink(shortName.toLocal8Bit().data(), linkText);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE void showAppInFileManager()
+    {
+        u::showInFolder(u::appPathName());
     }
 
 private:
