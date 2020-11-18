@@ -28,7 +28,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QFileInfo>
 #include <QStringList>
 #include <QUrl>
 #include <QDebug>

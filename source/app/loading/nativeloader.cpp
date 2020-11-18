@@ -31,7 +31,6 @@
 #include "shared/loading/jsongraphparser.h"
 
 #include <QString>
-#include <QFileInfo>
 #include <QDataStream>
 #include <QRegularExpression>
 
