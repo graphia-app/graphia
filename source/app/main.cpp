@@ -56,6 +56,7 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/modelcompleter.h"
 #include "shared/utils/debugger.h"
+#include "shared/utils/apppathname.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
@@ -295,6 +296,8 @@ int start(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    u::setAppPathName(argv[0]);
+
     // The "real" main is separate to limit the scope of QtSingleApplication,
     // otherwise a restart causes the exiting instance to get activated
     auto exitCode = start(argc, argv);
