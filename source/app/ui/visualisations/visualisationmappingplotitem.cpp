@@ -67,7 +67,11 @@ void VisualisationMappingPlotItem::setExponent(double exponent)
 
 void VisualisationMappingPlotItem::setMinimum(double min)
 {
-    _min = std::clamp(min, _statistics._min, _statistics._max);
+    if(!_statistics._values.empty())
+        _min = std::clamp(min, _statistics._min, _statistics._max);
+    else
+        _min = min;
+
     _min = std::min(_min, _max);
 
     if(_min == _max)
@@ -79,7 +83,11 @@ void VisualisationMappingPlotItem::setMinimum(double min)
 
 void VisualisationMappingPlotItem::setMaximum(double max)
 {
-    _max = std::clamp(max, _statistics._min, _statistics._max);
+    if(!_statistics._values.empty())
+        _max = std::clamp(max, _statistics._min, _statistics._max);
+    else
+        _max = max;
+
     _max = std::max(_max, _min);
 
     if(_max == _min)
