@@ -56,6 +56,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/cancellable.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/checksum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
@@ -118,6 +119,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
