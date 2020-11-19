@@ -22,23 +22,23 @@
 
 function expressionFor(document, attributeName, flags, type, channelName)
 {
-    var expression = "";
+    let expression = "";
 
     if(flags & Graphia.AttributeFlag.VisualiseByComponent)
         expression += "[component] ";
 
     expression += attributeName + " \"" + channelName +"\"";
 
-    var parameters = document.visualisationDefaultParameters(
+    let parameters = document.visualisationDefaultParameters(
         type, channelName);
 
     if(Object.keys(parameters).length !== 0)
     {
         expression += " with";
 
-        for(var key in parameters)
+        for(let key in parameters)
         {
-            var parameter = parameters[key];
+            let parameter = parameters[key];
             parameter = Utils.sanitiseJson(parameter);
             parameter = Utils.escapeQuotes(parameter);
 

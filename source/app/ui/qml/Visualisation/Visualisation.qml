@@ -561,7 +561,7 @@ Item
 
     property var attributeValueType:
     {
-        var valueType = document.attribute(attributeName).valueType;
+        let valueType = document.attribute(attributeName).valueType;
         if(valueType === ValueType.Float || valueType === ValueType.Int)
             return ValueType.Numerical;
 
@@ -581,16 +581,16 @@ Item
         if(!ready)
             return;
 
-        var flagsString = "";
+        let flagsString = "";
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + attributeList.selectedValue + " \"" + channel + "\"";
+        let newExpression = flagsString + attributeList.selectedValue + " \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with";
 
-        for(var key in parameters)
+        for(let key in parameters)
             newExpression += " " + key + " = " + parameters[key];
 
         value = newExpression;
@@ -626,10 +626,10 @@ Item
         gradientKey.visible = false;
         paletteKey.visible = false;
 
-        for(var key in parameters)
+        for(let key in parameters)
         {
-            var value = parameters[key];
-            var unescaped = Utils.unescapeQuotes(value);
+            let value = parameters[key];
+            let unescaped = Utils.unescapeQuotes(value);
 
             switch(key)
             {
@@ -657,7 +657,7 @@ Item
     {
         if(!ready)
         {
-            var visualisationConfig = document.parseVisualisation(value);
+            let visualisationConfig = document.parseVisualisation(value);
 
             flags = visualisationConfig.flags;
             attributeName = visualisationConfig.attribute;

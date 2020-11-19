@@ -73,11 +73,11 @@ Item
                 Layout.preferredWidth:
                 {
                     // Adjust width to match text contents
-                    var maxWidth = 100;
+                    let maxWidth = 100;
 
-                    for(var i = 0; i < listTabs.length; i++)
+                    for(let i = 0; i < listTabs.length; i++)
                     {
-                        var delegateItem = tabSelector.contentItem.children[i];
+                        let delegateItem = tabSelector.contentItem.children[i];
                         if(delegateItem === undefined)
                             continue;
 
@@ -241,7 +241,7 @@ Item
 
     function indexOf(item)
     {
-        for(var i = 0; i < listTabs.length; i++)
+        for(let i = 0; i < listTabs.length; i++)
         {
             if(listTabs[i] === item)
                 return i;
@@ -273,7 +273,7 @@ Item
 
     Component.onCompleted:
     {
-        for(var i = 0; i < listTabs.length; i++)
+        for(let i = 0; i < listTabs.length; i++)
         {
             listTabs[i].parent = content;
             listTabs[i].x = Qt.binding(function()

@@ -80,9 +80,9 @@ Dialog
                 filterRoleName: "name"
                 filterPattern:
                 {
-                    var s = "";
+                    let s = "";
 
-                    for(var i = 0; i < pluginChooserDialog.pluginNames.length; i++)
+                    for(let i = 0; i < pluginChooserDialog.pluginNames.length; i++)
                     {
                         if(i !== 0) s += "|";
                         s += pluginChooserDialog.pluginNames[i];
@@ -101,7 +101,7 @@ Dialog
 
             property var selectedPlugin:
             {
-                var mappedIndex = proxyModel.mapToSource(currentIndex);
+                let mappedIndex = proxyModel.mapToSource(currentIndex);
                 return pluginChooserDialog.model.nameAtIndex(mappedIndex);
             }
 

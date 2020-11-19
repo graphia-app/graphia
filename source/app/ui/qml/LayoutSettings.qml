@@ -94,13 +94,13 @@ Rectangle
                     onReset:
                     {
                         root.document.resetLayoutSettingValue(modelData);
-                        var setting = root.document.layoutSetting(modelData);
+                        let setting = root.document.layoutSetting(modelData);
                         value = setting.normalisedValue;
                     }
 
                     Component.onCompleted:
                     {
-                        var setting = root.document.layoutSetting(modelData);
+                        let setting = root.document.layoutSetting(modelData);
                         name = setting.displayName;
                         value = setting.normalisedValue;
                     }

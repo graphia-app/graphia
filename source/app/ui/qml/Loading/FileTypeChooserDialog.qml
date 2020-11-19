@@ -78,9 +78,9 @@ Dialog
                 filterRoleName: "name"
                 filterPattern:
                 {
-                    var s = "";
+                    let s = "";
 
-                    for(var i = 0; i < fileTypeChooserDialog.fileTypes.length; i++)
+                    for(let i = 0; i < fileTypeChooserDialog.fileTypes.length; i++)
                     {
                         if(i !== 0) s += "|";
                         s += fileTypeChooserDialog.fileTypes[i];
@@ -99,7 +99,7 @@ Dialog
 
             property var selectedFileType:
             {
-                var mappedIndex = proxyModel.mapToSource(currentIndex);
+                let mappedIndex = proxyModel.mapToSource(currentIndex);
                 return fileTypeChooserDialog.model.nameAtIndex(mappedIndex);
             }
 

@@ -64,7 +64,7 @@ Column
             // If the mouse is significantly moved after a click, initiate a drag
             onPositionChanged:
             {
-                var manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
+                let manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
 
                 if(manhattan > 3)
                     held = true;
@@ -83,21 +83,21 @@ Column
 
             function forwardEventToItem(event, eventType)
             {
-                var receivers = [];
+                let receivers = [];
 
                 function recurse(item)
                 {
                     if(typeof(item[eventType]) === "function")
                         receivers.push(item);
 
-                    for(var i = 0; i < item.children.length; i++)
+                    for(let i = 0; i < item.children.length; i++)
                     {
-                        var child = item.children[i];
+                        let child = item.children[i];
 
                         if(!child.visible || !child.enabled)
                             continue;
 
-                        var p = mapToItem(child, event.x, event.y);
+                        let p = mapToItem(child, event.x, event.y);
 
                         if(child.contains(p))
                             recurse(child);
@@ -108,7 +108,7 @@ Column
 
                 while(receivers.length > 0)
                 {
-                    var item = receivers[receivers.length - 1];
+                    let item = receivers[receivers.length - 1];
 
                     item[eventType](event);
                     if(event.accepted)
@@ -218,8 +218,8 @@ Column
 
                 onEntered:
                 {
-                    var sourcePinned = repeater.itemAt(drag.source.DelegateModel.itemsIndex).pinned;
-                    var targetPinned = repeater.itemAt(dragArea.DelegateModel.itemsIndex).pinned;
+                    let sourcePinned = repeater.itemAt(drag.source.DelegateModel.itemsIndex).pinned;
+                    let targetPinned = repeater.itemAt(dragArea.DelegateModel.itemsIndex).pinned;
 
                     // Must both be pinned or neither pinned
                     if(sourcePinned === targetPinned)

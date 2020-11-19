@@ -62,7 +62,7 @@ Item
 
     property string title:
     {
-        var text;
+        let text;
 
         if(hasBeenSaved)
         {
@@ -178,9 +178,9 @@ Item
 
     property var sharedValuesAttributeNames:
     {
-        var attributeNames = [];
+        let attributeNames = [];
 
-        for(var i = 0; i < sharedValuesProxyModel.count; i++)
+        for(let i = 0; i < sharedValuesProxyModel.count; i++)
             attributeNames.push(sharedValuesProxyModel.get(i, "display"));
 
         return attributeNames;
@@ -210,10 +210,10 @@ Item
     function hexToRgb(hex)
     {
         hex = hex.replace("#", "");
-        var bigint = parseInt(hex, 16);
-        var r = ((bigint >> 16) & 255) / 255.0;
-        var g = ((bigint >> 8) & 255) / 255.0;
-        var b = (bigint & 255) / 255.0;
+        let bigint = parseInt(hex, 16);
+        let r = ((bigint >> 16) & 255) / 255.0;
+        let g = ((bigint >> 8) & 255) / 255.0;
+        let b = (bigint & 255) / 255.0;
 
         return { r: r, b: b, g: g };
     }
@@ -225,23 +225,23 @@ Item
 
         a = hexToRgb(a);
 
-        var ab = 0.299 * a.r + 0.587 * a.g + 0.114 * a.b;
-        var bb = 0.299 * b +   0.587 * b +   0.114 * b;
+        let ab = 0.299 * a.r + 0.587 * a.g + 0.114 * a.b;
+        let bb = 0.299 * b +   0.587 * b +   0.114 * b;
 
         return ab - bb;
     }
 
     property var _lesserContrastingColors:
     {
-        var colors = [];
+        let colors = [];
 
         if(_brightBackground)
             colors = [0.0, 0.4, 0.8];
 
         colors = [1.0, 0.6, 0.3];
 
-        var color1Diff = colorDiff(visuals.backgroundColor, colors[1]);
-        var color2Diff = colorDiff(visuals.backgroundColor, colors[2]);
+        let color1Diff = colorDiff(visuals.backgroundColor, colors[1]);
+        let color2Diff = colorDiff(visuals.backgroundColor, colors[2]);
 
         // If either of the colors are very similar to the background color,
         // move it towards one of the others, depending on whether it's
@@ -290,7 +290,7 @@ Item
 
     function saveAsNamedFile(desiredFileUrl, saverName)
     {
-        var uiData =
+        let uiData =
         {
             lastAdvancedFindAttributeName: find.lastAdvancedFindAttributeName,
             lastFindByAttributeName: find.lastFindByAttributeName
@@ -298,7 +298,7 @@ Item
 
         uiData = JSON.stringify(uiData);
 
-        var pluginUiData = plugin.save();
+        let pluginUiData = plugin.save();
 
         if(typeof(pluginUiData) === "object")
             pluginUiData = JSON.stringify(pluginUiData);
@@ -324,9 +324,9 @@ Item
             defaultSuffix: selectedNameFilter.extensions[0]
             nameFilters:
             {
-                var filters = [];
-                var saverTypes = application.saverFileTypes();
-                for(var i = 0; i < saverTypes.length; i++)
+                let filters = [];
+                let saverTypes = application.saverFileTypes();
+                for(let i = 0; i < saverTypes.length; i++)
                     filters.push(saverTypes[i].name + " files (*." + saverTypes[i].extension + ")");
 
                 filters.push("All files (*)");
@@ -335,8 +335,8 @@ Item
 
             onAccepted:
             {
-                var saverName = "";
-                var saverTypes = application.saverFileTypes();
+                let saverName = "";
+                let saverTypes = application.saverFileTypes();
 
                 // If no saver is found fall back to default saver (All Files filter will do this)
                 if (selectedNameFilter.index < saverTypes.length)
@@ -352,7 +352,7 @@ Item
 
     function saveAsFile()
     {
-        var initialFileUrl;
+        let initialFileUrl;
 
         if(!hasBeenSaved)
         {
@@ -362,7 +362,7 @@ Item
         else
             initialFileUrl = savedFileUrl;
 
-        var fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
+        let fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
         {
             "currentFile": initialFileUrl,
             "folder": misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder: ""
@@ -402,7 +402,7 @@ Item
 
             // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
             // we use it (though in theory that can't happen)
-            var proxyFn = function(fn)
+            let proxyFn = function(fn)
             {
                 return function()
                 {
@@ -687,8 +687,8 @@ Item
 
     function searchWebForNode(nodeId)
     {
-        var nodeName = document.nodeName(nodeId);
-        var url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
+        let nodeName = document.nodeName(nodeId);
+        let url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
             misc.webSearchEngineUrl.arg(nodeName) : "";
 
         if(QmlUtils.userUrlIsValid(url))
@@ -1006,8 +1006,8 @@ Item
 
                         text:
                         {
-                            var nodeText = document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
-                            var numNodes = QmlUtils.formatNumberSIPostfix(document.numInvisibleNodesSelected);
+                            let nodeText = document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
+                            let numNodes = QmlUtils.formatNumberSIPostfix(document.numInvisibleNodesSelected);
                             return "<i>" + qsTr("(") + numNodes +
                                 qsTr(" selected ") + nodeText + qsTr(" not currently visible)") + "</i>";
                         }
@@ -1063,9 +1063,9 @@ Item
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
-                            var s = "";
-                            var numNodes = graph.numNodes;
-                            var numVisibleNodes = graph.numVisibleNodes;
+                            let s = "";
+                            let numNodes = graph.numNodes;
+                            let numVisibleNodes = graph.numVisibleNodes;
 
                             if(numNodes >= 0)
                             {
@@ -1090,9 +1090,9 @@ Item
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
-                            var s = "";
-                            var numEdges = graph.numEdges;
-                            var numVisibleEdges = graph.numVisibleEdges;
+                            let s = "";
+                            let numEdges = graph.numEdges;
+                            let numVisibleEdges = graph.numVisibleEdges;
 
                             if(numEdges >= 0)
                             {
@@ -1117,7 +1117,7 @@ Item
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
-                            var s = "";
+                            let s = "";
 
                             if(graph.numComponents >= 0)
                                 s += QmlUtils.formatNumberSIPostfix(graph.numComponents);
@@ -1253,7 +1253,7 @@ Item
 
             Layout.minimumHeight:
             {
-                var minimumHeight = toolBar.height;
+                let minimumHeight = toolBar.height;
 
                 // If we set the minimumHeight to the actual value, while we're
                 // transitioning, it interferes with the transition, so don't
@@ -1289,7 +1289,7 @@ Item
                     // so that it has had an event loop to update to the limits.
                     Qt.callLater(function()
                     {
-                        var newHeight = height;
+                        let newHeight = height;
 
                         if(!root.pluginPoppedOut)
                             newHeight -= toolBar.height;
@@ -1487,7 +1487,7 @@ Item
         // At least one enabled direct child
         property bool enabledChildren:
         {
-            for(var i = 0; i < children.length; i++)
+            for(let i = 0; i < children.length; i++)
             {
                 if(children[i].enabled)
                     return true;
@@ -1724,7 +1724,7 @@ Item
                 while(plugin.children.length > 0)
                     plugin.children[0].destroy();
 
-                var pluginComponent = Qt.createComponent(document.pluginQmlPath);
+                let pluginComponent = Qt.createComponent(document.pluginQmlPath);
 
                 if(pluginComponent.status !== Component.Ready)
                 {
@@ -1780,8 +1780,8 @@ Item
             // not yet been used, set the new attribute as the default for both
             if(addedNames.length > 0)
             {
-                var lastAddedAttributeName = addedNames[addedNames.length - 1];
-                var lastAddedAttribute = document.attribute(lastAddedAttributeName);
+                let lastAddedAttributeName = addedNames[addedNames.length - 1];
+                let lastAddedAttribute = document.attribute(lastAddedAttributeName);
 
                 if(find.lastAdvancedFindAttributeName.length === 0)
                     find.lastAdvancedFindAttributeName = lastAddedAttributeName;
@@ -1814,7 +1814,7 @@ Item
             return;
         }
 
-        var sample = {progress: commandProgress, seconds: new Date().getTime() / 1000.0};
+        let sample = {progress: commandProgress, seconds: new Date().getTime() / 1000.0};
         comandProgressSamples.push(sample);
 
         // Only keep this many samples
@@ -1828,11 +1828,11 @@ Item
             return;
         }
 
-        var earliestSample = comandProgressSamples[0];
-        var latestSample = comandProgressSamples[comandProgressSamples.length - 1];
-        var percentDelta = latestSample.progress - earliestSample.progress;
-        var timeDelta = latestSample.seconds - earliestSample.seconds;
-        var percentRemaining = 100.0 - commandProgress;
+        let earliestSample = comandProgressSamples[0];
+        let latestSample = comandProgressSamples[comandProgressSamples.length - 1];
+        let percentDelta = latestSample.progress - earliestSample.progress;
+        let timeDelta = latestSample.seconds - earliestSample.seconds;
+        let percentRemaining = 100.0 - commandProgress;
 
         commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
     }
@@ -1952,17 +1952,17 @@ Item
                     textFormat: Text.StyledText
                     text:
                     {
-                        var preamble = qsTr("A graph consists of <b>Nodes</b> and <b>Edges</b>. " +
+                        let preamble = qsTr("A graph consists of <b>Nodes</b> and <b>Edges</b>. " +
                           "In this example, the nodes represent stops, and the edges represent a connection between two stops. " +
                           "<b>Edges</b> always have a direction, however direction can be ignored if desired. " +
                           "<b>Nodes</b> and <b>Edges</b> can also have additional information associated with them. " +
                           "We refer to these as <b>Attributes</b>.<br><br>");
 
-                        var regularMouse = qsTr("<b>Rotate:</b> Left Click and Drag<br>" +
+                        let regularMouse = qsTr("<b>Rotate:</b> Left Click and Drag<br>" +
                           "<b>Zoom:</b> Mouse Scrollwheel<br>" +
                           "<b>Pan:</b> Right Click and Drag");
 
-                        var macOsTrackpad = qsTr("<b>Rotate:</b> Three Finger Drag <b>or</b> Left Click and Drag<br>" +
+                        let macOsTrackpad = qsTr("<b>Rotate:</b> Three Finger Drag <b>or</b> Left Click and Drag<br>" +
                           "<b>Zoom:</b> Pinch Gesture <b>or</b> Mouse Scrollwheel<br>" +
                           "<b>Pan:</b> Right Click and Drag");
 

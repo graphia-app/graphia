@@ -181,7 +181,7 @@ Item
 
     function replaceInParent(replacee, replacer)
     {
-        var parent = replacee.parent;
+        let parent = replacee.parent;
 
         if(parent === null || parent === undefined)
         {
@@ -189,10 +189,10 @@ Item
             return;
         }
 
-        var tail = [];
-        for(var index = 0; index < parent.children.length; index++)
+        let tail = [];
+        for(let index = 0; index < parent.children.length; index++)
         {
-            var child = parent.children[index];
+            let child = parent.children[index];
             if(child === replacee)
             {
                 // Make the replacee an orphan
@@ -304,7 +304,7 @@ Item
 
     function onHover()
     {
-        var hoverTarget = _mouseCapture !== null ? _mouseCapture : target;
+        let hoverTarget = _mouseCapture !== null ? _mouseCapture : target;
         if(hoverTarget.hovered)
         {
             hoverTimer.start();
@@ -320,7 +320,7 @@ Item
 
     function positionBubble()
     {
-        var point = {};
+        let point = {};
 
         if((alignment & Qt.AlignLeft) && (edges & Qt.LeftEdge))
             root.x = target.mapToItem(parent, 0.0, 0.0).x;

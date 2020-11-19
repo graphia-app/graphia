@@ -75,12 +75,12 @@ Item
         if(configuration === undefined || configuration.length === 0)
             return;
 
-        var stops = [];
+        let stops = [];
 
-        var object = JSON.parse(configuration);
-        for(var prop in object)
+        let object = JSON.parse(configuration);
+        for(let prop in object)
         {
-            var color = object[prop];
+            let color = object[prop];
 
             if(!root.enabled)
                 color = Utils.desaturate(color, 0.2);

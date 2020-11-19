@@ -424,7 +424,7 @@ PluginContent
             menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
 
-            var showAllColumnsMenu = menu.addItem("");
+            let showAllColumnsMenu = menu.addItem("");
             showAllColumnsMenu.action = toggleShowAllColumns;
             showAllColumnsMenu.visible = Qt.binding(function() { return plot.isWide; });
 
@@ -434,12 +434,12 @@ PluginContent
             menu.addItem("").action = toggleGridLines;
             menu.addItem("").action = togglePlotLegend;
 
-            var axisLabels = menu.addMenu(qsTr("Axis Labels"));
+            let axisLabels = menu.addMenu(qsTr("Axis Labels"));
             axisLabels.addItem("").action = setXAxisLabelAction;
             axisLabels.addItem("").action = setYAxisLabelAction;
             menu.addSeparator();
 
-            var scalingMenu = menu.addMenu(qsTr("Scaling"));
+            let scalingMenu = menu.addMenu(qsTr("Scaling"));
             scalingMenu.addItem("").action = rawScaling;
             scalingMenu.addItem("").action = logScaling;
             scalingMenu.addItem("").action = meanCentreScaling;
@@ -450,7 +450,7 @@ PluginContent
                 return plot.plotAveragingType === PlotAveragingType.Individual
             });
 
-            var averagingMenu = menu.addMenu(qsTr("Averaging"));
+            let averagingMenu = menu.addMenu(qsTr("Averaging"));
             averagingMenu.addItem("").action = individualLineAverage;
             averagingMenu.addItem("").action = meanLineAverage;
             averagingMenu.addItem("").action = medianLineAverage;
@@ -459,13 +459,13 @@ PluginContent
 
             averagingMenu.addSeparator();
 
-            var sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
+            let sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
             sharedValuesAttributesMenu.enabled = Qt.binding(function()
             {
                 return plot.plotAveragingType !== PlotAveragingType.Individual &&
                     plot.plotAveragingType !== PlotAveragingType.IQRPlot;
             });
-            var allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
+            let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
             allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
             allAttributesMenuItem.checkable = true;
             allAttributesMenuItem.checked = Qt.binding(function()
@@ -481,7 +481,7 @@ PluginContent
 
             plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
             {
-                var attributeMenuItem = sharedValuesAttributesMenu.addItem(attributeName);
+                let attributeMenuItem = sharedValuesAttributesMenu.addItem(attributeName);
 
                 attributeMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
                 attributeMenuItem.checkable = true;
@@ -496,7 +496,7 @@ PluginContent
                 });
             });
 
-            var dispersionMenu = menu.addMenu(qsTr("Dispersion"));
+            let dispersionMenu = menu.addMenu(qsTr("Dispersion"));
             dispersionMenu.addItem("").action = noDispersion;
             dispersionMenu.addItem("").action = stdDeviations;
             dispersionMenu.addItem("").action = stdErrorDeviations;
@@ -512,10 +512,10 @@ PluginContent
             menu.addItem("").action = toggleIncludeYZero;
 
             menu.addSeparator();
-            var sortByMenu = menu.addMenu(qsTr("Sort Columns By"));
+            let sortByMenu = menu.addMenu(qsTr("Sort Columns By"));
             root._availableplotColumnSortOptions.forEach(function(sortOption)
             {
-                var sortByMenuItem = sortByMenu.addItem(sortOption.text);
+                let sortByMenuItem = sortByMenu.addItem(sortOption.text);
 
                 sortByMenuItem.exclusiveGroup = sortByExclusiveGroup;
                 sortByMenuItem.checkable = true;
@@ -556,7 +556,7 @@ PluginContent
 
     property var _availableColumnAnnotationNames:
     {
-        var list = [];
+        let list = [];
 
         plugin.model.columnAnnotationNames.forEach(function(columnAnnotationName)
         {
@@ -568,7 +568,7 @@ PluginContent
 
     property var _availableplotColumnSortOptions:
     {
-        var options =
+        let options =
         [
             {type: PlotColumnSortType.Natural, text: qsTr("Natural Order")},
             {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")}
@@ -652,9 +652,9 @@ PluginContent
 
             elideLabelWidth:
             {
-                var newHeight = height * 0.25;
-                var quant = 20;
-                var quantised = Math.floor(newHeight / quant) * quant;
+                let newHeight = height * 0.25;
+                let quant = 20;
+                let quantised = Math.floor(newHeight / quant) * quant;
 
                 if(quantised < 40)
                     quantised = 0;
@@ -769,7 +769,7 @@ PluginContent
 
     function save()
     {
-        var data =
+        let data =
         {
             "sideBySide": toggleUiOrientationAction.checked,
             "sortColumn": tableView.sortIndicatorColumn,

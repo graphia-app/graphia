@@ -454,9 +454,9 @@ BaseParameterDialog
 
                             function scrollToDataRect()
                             {
-                                var columnPosition = -topMargin;
-                                var rowPosition = 0;
-                                for(var i=0; i < tabularDataParser.dataRect.x - 1; i++)
+                                let columnPosition = -topMargin;
+                                let rowPosition = 0;
+                                for(let i=0; i < tabularDataParser.dataRect.x - 1; i++)
                                     columnPosition += columnWidthProvider(i);
                                 rowPosition = delegateHeight * ((tabularDataParser.dataRect.y - 2) - 1);
                                 if(rowPosition < 0)
@@ -671,8 +671,8 @@ BaseParameterDialog
                                 // When the minimum value is increased beyond the initial
                                 // value, the latter can get (visually) lost against the extreme
                                 // left of the plot, so just punt it over a bit
-                                var range = maximumValue - value;
-                                var adjustedInitial = value + (range * 0.1);
+                                let range = maximumValue - value;
+                                let adjustedInitial = value + (range * 0.1);
 
                                 if(initialCorrelationSpinBox.value <= adjustedInitial)
                                     initialCorrelationSpinBox.value = adjustedInitial;
@@ -1387,8 +1387,8 @@ BaseParameterDialog
 
                     text:
                     {
-                        var indentString = "&nbsp;&nbsp;&nbsp;";
-                        var summaryString = "";
+                        let indentString = "&nbsp;&nbsp;&nbsp;";
+                        let summaryString = "";
 
                         if(transposeCheckBox.checked)
                             summaryString += qsTr("Transposed<br>");
@@ -1420,7 +1420,7 @@ BaseParameterDialog
                             summaryString += "<br>";
                         }
 
-                        var transformString = ""
+                        let transformString = ""
                         if(clustering.value !== ClusteringType.None)
                         {
                             transformString += indentString + qsTr("• Clustering (") +
@@ -1436,23 +1436,23 @@ BaseParameterDialog
                         if(transformString.length > 0)
                             summaryString += qsTr("Initial Transforms:<br>") + transformString;
 
-                        var normalFont = "<font>";
-                        var warningFont = "<font color=\"red\">";
+                        let normalFont = "<font>";
+                        let warningFont = "<font color=\"red\">";
 
                         if(tabularDataParser.graphSizeEstimate.keys !== undefined)
                         {
                             summaryString += "<br>" + qsTr("Estimated Pre-Transform Graph Size: ");
 
-                            var warningThreshold = 5e6;
+                            let warningThreshold = 5e6;
 
-                            var numNodes = tabularDataParser.graphSizeEstimate.numNodes[0];
-                            var numEdges = tabularDataParser.graphSizeEstimate.numEdges[0];
+                            let numNodes = tabularDataParser.graphSizeEstimate.numNodes[0];
+                            let numEdges = tabularDataParser.graphSizeEstimate.numEdges[0];
 
-                            var nodesFont = normalFont;
+                            let nodesFont = normalFont;
                             if(numNodes > warningThreshold)
                                 nodesFont = warningFont;
 
-                            var edgesFont = normalFont;
+                            let edgesFont = normalFont;
                             if(numEdges > warningThreshold)
                                 edgesFont = warningFont;
 
@@ -1503,8 +1503,8 @@ BaseParameterDialog
     Component.onCompleted: { initialise(); }
     function initialise()
     {
-        var DEFAULT_MINIMUM_CORRELATION = 0.7;
-        var DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
+        let DEFAULT_MINIMUM_CORRELATION = 0.7;
+        let DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
                 ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
 
         parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,

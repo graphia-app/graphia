@@ -207,7 +207,7 @@ ApplicationWindow
                                         if(styleData.value === undefined)
                                             return "";
 
-                                        var column = tableView.getColumn(styleData.column);
+                                        let column = tableView.getColumn(styleData.column);
 
                                         if(column !== null && !isNaN(styleData.value) && styleData.value !== "")
                                             return QmlUtils.formatNumberScientific(styleData.value, 1);
@@ -261,7 +261,7 @@ ApplicationWindow
 
                                 onPlotValueClicked:
                                 {
-                                    var convertedRow = proxyModel.mapFromSource(row);
+                                    let convertedRow = proxyModel.mapFromSource(row);
                                     if(convertedRow === -1)
                                         return;
                                     tableView.selection.clear();
@@ -401,14 +401,14 @@ ApplicationWindow
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround()
     {
-        for(var j = 0; j < tabView.tableViews.length; ++j)
+        for(let j = 0; j < tabView.tableViews.length; ++j)
         {
-            var inTableView = tabView.tableViews[j];
+            let inTableView = tabView.tableViews[j];
             inTableView.visible = true;
-            for(var i = 0; i < inTableView.columnCount; ++i)
+            for(let i = 0; i < inTableView.columnCount; ++i)
             {
-                var col = inTableView.getColumn(i);
-                var header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
+                let col = inTableView.getColumn(i);
+                let header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
                 if(col)
                 {
                     col.__index = i;

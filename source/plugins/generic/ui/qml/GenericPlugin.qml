@@ -107,7 +107,7 @@ PluginContent
 
     function save()
     {
-        var data =
+        let data =
         {
             "sortColumn": tableView.sortIndicatorColumn,
             "sortOrder": tableView.sortIndicatorOrder

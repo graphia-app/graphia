@@ -51,9 +51,9 @@ ApplicationWindow
 
     property bool _anyDocumentsBusy:
     {
-        for(var index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabView.count; index++)
         {
-            var document = tabView.getTab(index).item;
+            let document = tabView.getTab(index).item;
             if(document !== null && document.busy)
                 return true;
         }
@@ -63,7 +63,7 @@ ApplicationWindow
 
     title:
     {
-        var text = "";
+        let text = "";
         if(currentDocument !== null && currentDocument.title.length > 0)
             text += currentDocument.title + qsTr(" - ");
 
@@ -154,7 +154,7 @@ ApplicationWindow
         if(_pendingArguments.length === 0)
             return;
 
-        var argument = "";
+        let argument = "";
         do
         {
             // Pop
@@ -167,7 +167,7 @@ ApplicationWindow
         if(argument.length === 0 || argument[0] === "-")
             return;
 
-        var url = QmlUtils.urlForUserInput(argument);
+        let url = QmlUtils.urlForUserInput(argument);
         openFile(url, true);
     }
 
@@ -190,8 +190,8 @@ ApplicationWindow
 
             // Make sure that the window doesn't appear off screen
             // This is basically a workaround for QTBUG-58419
-            var rightEdge = mainWindow.x + mainWindow.width;
-            var bottomEdge = mainWindow.y + mainWindow.height;
+            let rightEdge = mainWindow.x + mainWindow.width;
+            let bottomEdge = mainWindow.y + mainWindow.height;
 
             if(mainWindow.x < 0)
                 mainWindow.x = 0;
@@ -217,7 +217,7 @@ ApplicationWindow
 
         if(!misc.hasSeenTutorial)
         {
-            var exampleFile = application.resourceFile("examples/Tutorial.graphia");
+            let exampleFile = application.resourceFile("examples/Tutorial.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
             {
@@ -243,7 +243,7 @@ ApplicationWindow
         if(tabView.count > 0)
         {
             // Capture _restartOnExit so that we can restore its value after a non-cancel exit
-            var closeTabFunction = function(restartOnExit)
+            let closeTabFunction = function(restartOnExit)
             {
                 return function()
                 {
@@ -332,10 +332,10 @@ ApplicationWindow
         id: environmentDialog
         text:
         {
-            var s = "";
-            var environment = application.environment;
+            let s = "";
+            let environment = application.environment;
 
-            for(var i = 0; i < environment.length; i++)
+            for(let i = 0; i < environment.length; i++)
             {
                 if(s.length !== 0)
                     s += "\n";
@@ -412,15 +412,15 @@ ApplicationWindow
 
     function addToRecentFiles(fileUrl)
     {
-        var fileUrlString = fileUrl.toString();
+        let fileUrlString = fileUrl.toString();
 
         if(mainWindow.recentFiles === undefined)
             mainWindow.recentFiles = [];
 
-        var localRecentFiles = mainWindow.recentFiles;
+        let localRecentFiles = mainWindow.recentFiles;
 
         // Remove any duplicates
-        for(var i = 0; i < localRecentFiles.length; i++)
+        for(let i = 0; i < localRecentFiles.length; i++)
         {
             if(localRecentFiles[i] === fileUrlString)
             {
@@ -432,7 +432,7 @@ ApplicationWindow
         // Add to the top
         localRecentFiles.unshift(fileUrlString);
 
-        var MAX_RECENT_FILES = 10;
+        let MAX_RECENT_FILES = 10;
         while(localRecentFiles.length > MAX_RECENT_FILES)
             localRecentFiles.pop();
 
@@ -457,13 +457,13 @@ ApplicationWindow
             return;
         }
 
-        var fileTypes = application.urlTypesOf(fileUrl);
+        let fileTypes = application.urlTypesOf(fileUrl);
 
         if(fileTypes.length === 0)
         {
             errorOpeningFileMessageDialog.text = "";
 
-            var failureReasons = application.failureReasons(fileUrl);
+            let failureReasons = application.failureReasons(fileUrl);
             if(failureReasons.length === 0)
             {
                 errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
@@ -511,9 +511,9 @@ ApplicationWindow
 
     function openFileOfType(fileUrl, fileType, inNewTab)
     {
-        var onSaveConfirmed = function()
+        let onSaveConfirmed = function()
         {
-            var pluginNames = application.pluginNames(fileType);
+            let pluginNames = application.pluginNames(fileType);
 
             if(pluginNames.length > 1)
             {
@@ -543,18 +543,18 @@ ApplicationWindow
 
     function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     {
-        var parametersQmlPath = application.parametersQmlPathForPlugin(pluginName);
+        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName);
 
         if(parametersQmlPath.length > 0)
         {
-            var component = Qt.createComponent(parametersQmlPath);
+            let component = Qt.createComponent(parametersQmlPath);
             if(component.status !== Component.Ready)
             {
                 console.log(component.errorString());
                 return;
             }
 
-            var contentObject = component.createObject(this);
+            let contentObject = component.createObject(this);
             if(contentObject === null)
             {
                 console.log(parametersQmlPath + ": failed to create instance");
@@ -604,7 +604,7 @@ ApplicationWindow
 
     function openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
     {
-        var openInCurrentTab = function()
+        let openInCurrentTab = function()
         {
             tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
         };
@@ -714,7 +714,7 @@ ApplicationWindow
                 {
                     // Capture the document by value so we can use it to work out
                     // which tab to close once the command is complete
-                    var closeTabFunction = function(document)
+                    let closeTabFunction = function(document)
                     {
                         return function()
                         {
@@ -1057,7 +1057,7 @@ ApplicationWindow
         id: pauseLayoutAction
         iconName:
         {
-            var layoutPauseState = currentDocument ? currentDocument.layoutPauseState : -1;
+            let layoutPauseState = currentDocument ? currentDocument.layoutPauseState : -1;
 
             switch(layoutPauseState)
             {
@@ -1359,7 +1359,7 @@ ApplicationWindow
 
         text:
         {
-            var text = "Arguments:\n\n";
+            let text = "Arguments:\n\n";
             return text + JSON.stringify(application.arguments, null, 4);
         }
     }
@@ -1853,12 +1853,12 @@ ApplicationWindow
                 text: qsTr("Show Tutorial…")
                 onTriggered:
                 {
-                    var exampleFileUrl = QmlUtils.urlForFileName(application.resourceFile(
+                    let exampleFileUrl = QmlUtils.urlForFileName(application.resourceFile(
                         "examples/Tutorial.graphia"));
 
                     if(QmlUtils.fileUrlExists(exampleFileUrl))
                     {
-                        var tutorialAlreadyOpen = tabView.findAndActivateTab(exampleFileUrl);
+                        let tutorialAlreadyOpen = tabView.findAndActivateTab(exampleFileUrl);
                         openFile(exampleFileUrl, !tutorialAlreadyOpen);
                     }
                 }
@@ -2089,7 +2089,7 @@ ApplicationWindow
 
             function insertTabAtIndex(index)
             {
-                var tab = insertTab(index, "", tabComponent);
+                let tab = insertTab(index, "", tabComponent);
                 tab.active = true;
                 tabView.currentIndex = index;
 
@@ -2101,7 +2101,7 @@ ApplicationWindow
 
             function createTab(onCreateFunction)
             {
-                var tab = insertTabAtIndex(tabView.count);
+                let tab = insertTabAtIndex(tabView.count);
 
                 if(typeof(onCreateFunction) !== "undefined")
                     onCreateFunction();
@@ -2111,7 +2111,7 @@ ApplicationWindow
 
             function replaceTab(onReplaceFunction)
             {
-                var oldIndex = tabView.currentIndex;
+                let oldIndex = tabView.currentIndex;
 
                 removeTab(oldIndex);
                 insertTabAtIndex(oldIndex);
@@ -2124,8 +2124,8 @@ ApplicationWindow
             // if the load has been attempted but it failed later
             function onLoadFailure(index, fileUrl)
             {
-                var document = getTab(index).item;
-                var loadWasCancelled = document.commandIsCancelling;
+                let document = getTab(index).item;
+                let loadWasCancelled = document.commandIsCancelling;
 
                 // Remove the tab that was created but won't be used
                 removeTab(index);
@@ -2149,7 +2149,7 @@ ApplicationWindow
 
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
             {
-                var document = currentDocument;
+                let document = currentDocument;
                 document.application = application;
                 if(!document.openFile(fileUrl, fileType, pluginName, parameters))
                     onLoadFailure(findTabIndex(document), fileUrl);
@@ -2172,15 +2172,15 @@ ApplicationWindow
                 }
 
                 tabView.currentIndex = index;
-                var tab = getTab(index).item;
+                let tab = getTab(index).item;
                 tab.confirmSave(onCloseFunction);
             }
 
             function findTabIndex(document)
             {
-                for(var index = 0; index < count; index++)
+                for(let index = 0; index < count; index++)
                 {
-                    var tab = getTab(index);
+                    let tab = getTab(index);
                     if(tab.item === document)
                         return index;
                 }
@@ -2190,9 +2190,9 @@ ApplicationWindow
 
             function findAndActivateTab(fileUrl)
             {
-                for(var index = 0; index < count; index++)
+                for(let index = 0; index < count; index++)
                 {
-                    var tab = getTab(index);
+                    let tab = getTab(index);
                     if(tab.item.fileUrl === fileUrl)
                     {
                         currentIndex = index;
@@ -2305,8 +2305,8 @@ ApplicationWindow
                     if(!currentDocument)
                         return "";
 
-                    var minutes = Math.floor(currentDocument.commandSecondsRemaining / 60);
-                    var seconds = String(currentDocument.commandSecondsRemaining % 60);
+                    let minutes = Math.floor(currentDocument.commandSecondsRemaining / 60);
+                    let seconds = String(currentDocument.commandSecondsRemaining % 60);
                     if(seconds.length < 2)
                         seconds = "0" + seconds;
 

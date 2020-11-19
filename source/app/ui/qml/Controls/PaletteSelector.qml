@@ -106,10 +106,10 @@ Window
 
                         function initialise()
                         {
-                            var savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = savedPalettesFromPreferences();
 
                             paletteListModel.clear();
-                            for(var i = 0; i < savedPalettes.length; i++)
+                            for(let i = 0; i < savedPalettes.length; i++)
                                 paletteListModel.append({"paletteConfiguration" : JSON.stringify(savedPalettes[i])});
                         }
 
@@ -118,7 +118,7 @@ Window
                             if(index < 0)
                                 return;
 
-                            var savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = savedPalettesFromPreferences();
                             savedPalettes.splice(index, 1);
                             visuals.savedPalettes = JSON.stringify(savedPalettes);
 
@@ -127,7 +127,7 @@ Window
 
                         function add(configuration)
                         {
-                            var savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = savedPalettesFromPreferences();
                             savedPalettes.unshift(JSON.parse(configuration));
                             visuals.savedPalettes = JSON.stringify(savedPalettes);
 
@@ -136,9 +136,9 @@ Window
 
                         property int selectedIndex:
                         {
-                            var savedPalettes = savedPalettesFromPreferences();
+                            let savedPalettes = savedPalettesFromPreferences();
 
-                            for(var i = 0; i < savedPalettes.length; i++)
+                            for(let i = 0; i < savedPalettes.length; i++)
                             {
                                 if(root.comparePalettes(paletteEditor.configuration, savedPalettes[i]))
                                     return i;
@@ -248,14 +248,14 @@ Window
                         standardButtons: StandardButton.Yes | StandardButton.No
                         onYes:
                         {
-                            var defaultDeleted = comparePalettes(visuals.defaultPalette,
+                            let defaultDeleted = comparePalettes(visuals.defaultPalette,
                                 paletteEditor.configuration);
 
                             palettePresets.remove(palettePresets.selectedIndex);
 
                             if(defaultDeleted)
                             {
-                                var savedPalettes = savedPalettesFromPreferences();
+                                let savedPalettes = savedPalettesFromPreferences();
                                 if(savedPalettes.length > 0)
                                     visuals.defaultPalette = JSON.stringify(savedPalettes[0]);
                             }
@@ -311,8 +311,8 @@ Window
 
                     function scrollToItem(item)
                     {
-                        var itemPosition = item.mapToItem(paletteEditorScrollview.contentItem, 0, 0);
-                        var newContentY = (itemPosition.y + item.height) -
+                        let itemPosition = item.mapToItem(paletteEditorScrollview.contentItem, 0, 0);
+                        let newContentY = (itemPosition.y + item.height) -
                             paletteEditorScrollview.viewport.height + Constants.margin;
 
                         if(newContentY > paletteEditorScrollview.flickableItem.contentY)
@@ -377,7 +377,7 @@ Window
 
     function savedPalettesFromPreferences()
     {
-        var savedPalettes;
+        let savedPalettes;
 
         try
         {
@@ -417,7 +417,7 @@ Window
         else if((paletteA.autoColors !== undefined) !== (paletteB.autoColors !== undefined))
             return false;
 
-        for(var i = 0; i < paletteA.autoColors.length; i++)
+        for(let i = 0; i < paletteA.autoColors.length; i++)
         {
             if(!Qt.colorEqual(paletteA.autoColors[i], paletteB.autoColors[i]))
                 return false;
@@ -425,16 +425,16 @@ Window
 
         if((paletteA.fixedColors !== undefined) && (paletteB.fixedColors !== undefined))
         {
-            var aValues = Object.getOwnPropertyNames(paletteA.fixedColors);
-            var bValues = Object.getOwnPropertyNames(paletteB.fixedColors);
+            let aValues = Object.getOwnPropertyNames(paletteA.fixedColors);
+            let bValues = Object.getOwnPropertyNames(paletteB.fixedColors);
 
             if(aValues.length !== bValues.length)
                 return false;
 
-            for(i = 0; i < aValues.length; i++)
+            for(let i = 0; i < aValues.length; i++)
             {
-                var aValue = aValues[i];
-                var bValue = bValues[i];
+                let aValue = aValues[i];
+                let bValue = bValues[i];
 
                 if(aValue !== bValue)
                     return false;

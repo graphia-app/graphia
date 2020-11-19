@@ -104,10 +104,10 @@ Window
 
                         function initialise()
                         {
-                            var savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = savedGradientsFromPreferences();
 
                             gradientListModel.clear();
-                            for(var i = 0; i < savedGradients.length; i++)
+                            for(let i = 0; i < savedGradients.length; i++)
                                 gradientListModel.append({"gradientConfiguration" : JSON.stringify(savedGradients[i])});
                         }
 
@@ -116,7 +116,7 @@ Window
                             if(index < 0)
                                 return;
 
-                            var savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = savedGradientsFromPreferences();
                             savedGradients.splice(index, 1);
                             visuals.savedGradients = JSON.stringify(savedGradients);
 
@@ -125,7 +125,7 @@ Window
 
                         function add(configuration)
                         {
-                            var savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = savedGradientsFromPreferences();
                             savedGradients.unshift(JSON.parse(configuration));
                             visuals.savedGradients = JSON.stringify(savedGradients);
 
@@ -134,9 +134,9 @@ Window
 
                         property int selectedIndex:
                         {
-                            var savedGradients = savedGradientsFromPreferences();
+                            let savedGradients = savedGradientsFromPreferences();
 
-                            for(var i = 0; i < savedGradients.length; i++)
+                            for(let i = 0; i < savedGradients.length; i++)
                             {
                                 if(root.compareGradients(gradientEditor.configuration, savedGradients[i]))
                                     return i;
@@ -246,14 +246,14 @@ Window
                         standardButtons: StandardButton.Yes | StandardButton.No
                         onYes:
                         {
-                            var defaultDeleted = compareGradients(visuals.defaultGradient,
+                            let defaultDeleted = compareGradients(visuals.defaultGradient,
                                 gradientEditor.configuration);
 
                             gradientPresets.remove(gradientPresets.selectedIndex);
 
                             if(defaultDeleted)
                             {
-                                var savedGradients = savedGradientsFromPreferences();
+                                let savedGradients = savedGradientsFromPreferences();
                                 if(savedGradients.length > 0)
                                     visuals.defaultGradient = JSON.stringify(savedGradients[0]);
                             }
@@ -377,7 +377,7 @@ Window
 
     function savedGradientsFromPreferences()
     {
-        var savedGradients;
+        let savedGradients;
 
         try
         {
@@ -412,16 +412,16 @@ Window
         if(typeof(gradientA) === "undefined" || typeof(gradientB) === "undefined")
             return false;
 
-        var aValues = Object.getOwnPropertyNames(gradientA);
-        var bValues = Object.getOwnPropertyNames(gradientB);
+        let aValues = Object.getOwnPropertyNames(gradientA);
+        let bValues = Object.getOwnPropertyNames(gradientB);
 
         if(aValues.length !== bValues.length)
             return false;
 
-        for(var i = 0; i < aValues.length; i++)
+        for(let i = 0; i < aValues.length; i++)
         {
-            var aValue = aValues[i];
-            var bValue = bValues[i];
+            let aValue = aValues[i];
+            let bValue = bValues[i];
 
             if(aValue !== bValue)
                 return false;

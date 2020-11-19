@@ -75,9 +75,9 @@ BaseParameterDialog
 
                 onPaint:
                 {
-                    var ctx = getContext("2d");
-                    var currentPipSize = pipSize + 2;
-                    var topPip = ((height - pipSize) * 0.5);
+                    let ctx = getContext("2d");
+                    let currentPipSize = pipSize + 2;
+                    let topPip = ((height - pipSize) * 0.5);
 
                     ctx.save();
                     ctx.clearRect(0, 0, width, height);
@@ -90,8 +90,8 @@ BaseParameterDialog
                     ctx.strokeStyle = systemPalette.dark;
 
                     // Draw lines between pips
-                    var pipNum = 0;
-                    for(pipNum = 1; pipNum < listPages.length; pipNum++)
+                    //let pipNum = 0;
+                    for(let pipNum = 1; pipNum < listPages.length; pipNum++)
                     {
                         ctx.beginPath();
                         ctx.moveTo(_padding + ((pipNum - 1) * spacing) + pipSize, topPip + (pipSize * 0.5));
@@ -100,13 +100,13 @@ BaseParameterDialog
                     }
 
                     // Draw pips
-                    for(pipNum = 0; pipNum < listPages.length; pipNum++)
+                    for(let pipNum = 0; pipNum < listPages.length; pipNum++)
                     {
                         ctx.strokeStyle = systemPalette.dark;
                         ctx.fillStyle = systemPalette.dark;
 
-                        var left = _padding + (pipNum * spacing);
-                        var top = topPip;
+                        let left = _padding + (pipNum * spacing);
+                        let top = topPip;
 
                         // Current Pip
                         if(pipNum == currentIndex)
@@ -200,7 +200,7 @@ BaseParameterDialog
 
     function indexOf(item)
     {
-        for(var i = 0; i < listPages.length; i++)
+        for(let i = 0; i < listPages.length; i++)
         {
             if(listPages[i] === item)
                 return i;
@@ -221,7 +221,7 @@ BaseParameterDialog
 
     Component.onCompleted:
     {
-        for(var i = 0; i < listPages.length; i++)
+        for(let i = 0; i < listPages.length; i++)
         {
             listPages[i].parent = content;
             listPages[i].x = Qt.binding(function() { return indexOf(this) * root.width; });

@@ -79,7 +79,7 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    var attribute = document.attribute(selectedValue);
+                    let attribute = document.attribute(selectedValue);
 
                     if(currentIndexIsSelectable && attribute.isValid)
                     {
@@ -130,7 +130,7 @@ Window
                     if(attributeList.selectedValue === undefined || !attributeList.currentIndexIsSelectable)
                         return;
 
-                    var attribute = document.attribute(attributeList.selectedValue);
+                    let attribute = document.attribute(attributeList.selectedValue);
 
                     if(attribute.description === undefined)
                         return;
@@ -140,7 +140,7 @@ Window
                     if(channelList.selectedValues === undefined || channelList.selectedValues.length === 0)
                         return;
 
-                    var visualisationDescriptions = document.visualisationDescription(
+                    let visualisationDescriptions = document.visualisationDescription(
                         attributeList.selectedValue, channelList.selectedValues);
 
                     visualisationDescriptions.forEach(function(visualisationDescription)
@@ -210,13 +210,13 @@ Window
 
     function updateVisualisationExpressions()
     {
-        var newVisualsiationExpressions = [];
+        let newVisualsiationExpressions = [];
 
         channelList.selectedValues.forEach(function(channelName)
         {
-            var attribute = document.attribute(attributeList.selectedValue);
+            let attribute = document.attribute(attributeList.selectedValue);
 
-            var expression = VisualisationUtils.expressionFor(
+            let expression = VisualisationUtils.expressionFor(
                 document, attributeList.selectedValue, attribute.flags,
                 attribute.valueType, channelName);
 

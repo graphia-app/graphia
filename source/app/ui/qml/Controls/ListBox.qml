@@ -62,10 +62,10 @@ Item
 
                 if(target.count > 0)
                 {
-                    var newSelectedValues = [];
+                    let newSelectedValues = [];
                     target.forEach(function(rowIndex)
                     {
-                        var value;
+                        let value;
                         if(typeof root.model.get === 'function')
                             value = root.model.get(rowIndex);
                         else

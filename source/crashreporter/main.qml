@@ -77,17 +77,17 @@ ApplicationWindow
             id: info
             text:
             {
-                var apology = qsTr("<b>Oops!</b> We're sorry, ") + Qt.application.name +
+                let apology = qsTr("<b>Oops!</b> We're sorry, ") + Qt.application.name +
                    qsTr(" has crashed. Please use the form below to let us know what happened. " +
                    "If we need more information, we may use your email address " +
                    "to contact you. Thanks.");
 
-                var videoDriverCrash = "";
+                let videoDriverCrash = "";
 
-                var re = /^(nvoglv|ig\d+icd|ati[og]).*/;
+                let re = /^(nvoglv|ig\d+icd|ati[og]).*/;
                 if(re.test(crashedModule))
                 {
-                    var vendorLink = "https://www.google.com/search?q=" + glVendor +
+                    let vendorLink = "https://www.google.com/search?q=" + glVendor +
                         "+video+driver+download&btnI";
 
                     videoDriverCrash = qsTr("<font color=\"red\"><b>Please note:</b></font> this crash " +

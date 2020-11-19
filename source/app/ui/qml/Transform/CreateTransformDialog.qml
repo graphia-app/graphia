@@ -194,7 +194,7 @@ Window
                             Layout.fillWidth: visible
                             Layout.minimumHeight:
                             {
-                                var conditionHeight = scrollView.viewport.height;
+                                let conditionHeight = scrollView.viewport.height;
 
                                 if(parameters.enabled || visualisations.enabled)
                                     conditionHeight *= 0.5;
@@ -264,11 +264,11 @@ Window
                                         return;
                                     }
 
-                                    var newModel = modelComponent.createObject();
+                                    let newModel = modelComponent.createObject();
 
-                                    for(var i = 0; i < ops.length; i++)
+                                    for(let i = 0; i < ops.length; i++)
                                     {
-                                        var item =
+                                        let item =
                                         {
                                             display: TransformConfig.sanitiseOp(ops[i]),
                                             value: ops[i],
@@ -528,7 +528,7 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            var transformParameter = TransformConfig.createTransformParameter(document,
+                                            let transformParameter = TransformConfig.createTransformParameter(document,
                                                 controlPlaceholder, parameterData, updateTransformExpression);
                                             transformParameter.updateValueImmediately = true;
                                             transformParameter.direction = Qt.Vertical;
@@ -540,7 +540,7 @@ Window
 
                             function updateValues()
                             {
-                                for(var parameterName in _values)
+                                for(let parameterName in _values)
                                     _values[parameterName].updateValue();
 
                                 visualisations.update();
@@ -551,7 +551,7 @@ Window
                                 if(_values === undefined)
                                     return "\"\"";
 
-                                var transformParameter = _values[parameterName];
+                                let transformParameter = _values[parameterName];
 
                                 if(transformParameter === undefined)
                                     return "\"\"";
@@ -575,9 +575,9 @@ Window
                             {
                                 visualisations._visualisations = {};
 
-                                for(var i = 0; i < visualisationsRepeater.count; i++)
+                                for(let i = 0; i < visualisationsRepeater.count; i++)
                                 {
-                                    var item = visualisationsRepeater.itemAt(i);
+                                    let item = visualisationsRepeater.itemAt(i);
                                     if(item === null)
                                     {
                                         // Not sure why this happens, but it
@@ -647,7 +647,7 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            var visualisationChannelNames = document.availableVisualisationChannelNames(visualisation.valueType);
+                                            let visualisationChannelNames = document.availableVisualisationChannelNames(visualisation.valueType);
                                             visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
                                             visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(visualisation.channelName);
                                         }
@@ -676,7 +676,7 @@ Window
                                     return "";
 
                                 attributeName = resolvedAttributeName(attributeName);
-                                var visualisationChannelName = _visualisations[attributeName];
+                                let visualisationChannelName = _visualisations[attributeName];
 
                                 if(visualisationChannelName === undefined)
                                     return "";
@@ -715,7 +715,7 @@ Window
 
                         if(lhsAttributeList.selectedValue !== undefined)
                         {
-                            var parameterData = document.findTransformParameter(transformsList.selectedValue,
+                            let parameterData = document.findTransformParameter(transformsList.selectedValue,
                                                                                 lhsAttributeList.selectedValue);
 
                             if(parameterData.description !== undefined)
@@ -787,7 +787,7 @@ Window
     {
         parameters.updateValues();
 
-        var expression = "";
+        let expression = "";
 
         if(transformsList.selectedValue !== undefined)
         {
@@ -797,7 +797,7 @@ Window
             {
                 expression += " using";
 
-                for(var attributeName in attributeParameters._attributeNames)
+                for(let attributeName in attributeParameters._attributeNames)
                     expression += " $" + attributeParameters._attributeNames[attributeName];
             }
 
@@ -805,9 +805,9 @@ Window
             {
                 expression += " with";
 
-                for(var index in _transform.parameterNames)
+                for(let index in _transform.parameterNames)
                 {
-                    var parameterName = _transform.parameterNames[index];
+                    let parameterName = _transform.parameterNames[index];
                     expression += " \"" + parameterName + "\" = " + parameters.valueOf(parameterName);
                 }
             }
@@ -819,7 +819,7 @@ Window
                 if(opList.selectedValue !== undefined)
                 {
                     expression += " " + opList.selectedValue.value;
-                    var rhsValue = rhs.value();
+                    let rhsValue = rhs.value();
 
                     if(!opList.selectedValue.unary && rhsValue.length > 0)
                         expression += " " + rhsValue;
@@ -834,22 +834,22 @@ Window
     {
         defaultVisualisations = [];
 
-        var resolvedDefaultVisualisations = {};
+        let resolvedDefaultVisualisations = {};
         Object.keys(_transform.defaultVisualisations).forEach(function(attributeName)
         {
-            var resolvedAttributeName = visualisations.resolvedAttributeName(attributeName);
+            let resolvedAttributeName = visualisations.resolvedAttributeName(attributeName);
             resolvedDefaultVisualisations[resolvedAttributeName] =
                 _transform.defaultVisualisations[attributeName];
         });
 
         Object.keys(resolvedDefaultVisualisations).forEach(function(attributeName)
         {
-            var defaultVisualisation = resolvedDefaultVisualisations[attributeName];
-            var channelName = visualisations.selectedVisualisation(attributeName);
+            let defaultVisualisation = resolvedDefaultVisualisations[attributeName];
+            let channelName = visualisations.selectedVisualisation(attributeName);
 
             if(channelName.length > 0)
             {
-                var expression = VisualisationUtils.expressionFor(document,
+                let expression = VisualisationUtils.expressionFor(document,
                     attributeName, defaultVisualisation.flags,
                     defaultVisualisation.valueType, channelName);
 

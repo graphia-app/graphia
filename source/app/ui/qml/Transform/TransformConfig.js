@@ -23,14 +23,14 @@
 
 function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
-    var component = Qt.createComponent("TransformParameter.qml");
+    let component = Qt.createComponent("TransformParameter.qml");
     if(component === null)
     {
         console.log("Failed to create parameterComponent");
         return null;
     }
 
-    var object = component.createObject(parent);
+    let object = component.createObject(parent);
     if(object === null)
     {
         console.log("Failed to create parameterObject");
@@ -57,7 +57,7 @@ function addLabelTo(text, parent)
 
 function sanitiseOp(text)
 {
-    var replacements =
+    let replacements =
     [
         "==",                       "=",
         "!=",                       "≠",
@@ -74,9 +74,9 @@ function sanitiseOp(text)
         "hasValue",                 "Has Value",
     ];
 
-    for(var i = 0; i < replacements.length; i += 2)
+    for(let i = 0; i < replacements.length; i += 2)
     {
-        var regexLiteral = replacements[i].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+        let regexLiteral = replacements[i].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
         text = text.replace(new RegExp("^" + regexLiteral + "$"), replacements[i + 1]);
     }
 
@@ -85,7 +85,7 @@ function sanitiseOp(text)
 
 function Create(transformIndex, transform)
 {
-    var parameterIndex = 1;
+    let parameterIndex = 1;
 
     this.action = transform.action;
     this.flags = transform.flags;
@@ -98,7 +98,7 @@ function Create(transformIndex, transform)
 
     function appendToElements(elements, value)
     {
-        var last = elements.length - 1;
+        let last = elements.length - 1;
         if(last >= 0 && typeof value === "string" && typeof elements[last] === typeof value)
             elements[last] += value;
         else
@@ -133,7 +133,7 @@ function Create(transformIndex, transform)
             return "%" + parameterIndex++;
         }
 
-        var template = "";
+        let template = "";
 
         if(typeof condition.lhs === "object")
             template += "(" + conditionToTemplate(condition.lhs) + ")";
@@ -164,10 +164,10 @@ function Create(transformIndex, transform)
         this.template += " using";
         appendToElements(this._elements, " using ");
 
-        for(var i = 0; i < transform.attributes.length; i++)
+        for(let i = 0; i < transform.attributes.length; i++)
         {
-            var attributeName = transform.attributes[i];
-            var attribute = document.attribute(attributeName);
+            let attributeName = transform.attributes[i];
+            let attribute = document.attribute(attributeName);
             this.template += " $%" + parameterIndex++;
 
             appendToElements(this._elements,
@@ -185,16 +185,16 @@ function Create(transformIndex, transform)
         this.template += " with";
         appendToElements(this._elements, " with ");
 
-        var firstParam = true;
+        let firstParam = true;
 
-        for(var index in transform.parameters)
+        for(let index in transform.parameters)
         {
             // Put whitespace between the parameters
             if(!firstParam)
                 appendToElements(this._elements, " ");
             firstParam = false;
 
-            var parameter = transform.parameters[index];
+            let parameter = transform.parameters[index];
             this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
             appendConditionToElements(this._elements, {lhs: "$" + parameter.name, op:"=", rhs: parameter.value});
         }
@@ -212,7 +212,7 @@ function Create(transformIndex, transform)
     this.toComponents =
     function(document, parent, locked, onParameterChanged)
     {
-        var labelText = "";
+        let labelText = "";
 
         function addLabel()
         {
@@ -222,15 +222,15 @@ function Create(transformIndex, transform)
 
         this.parameters = [];
 
-        for(var i = 0; i < this._elements.length; i++)
+        for(let i = 0; i < this._elements.length; i++)
         {
             if(typeof this._elements[i] === "string")
                 labelText += this._elements[i];
             else if(typeof this._elements[i] === 'object')
             {
-                var parameter = this._elements[i];
+                let parameter = this._elements[i];
 
-                var that = this;
+                let that = this;
 
                 if(parameter.lhs !== undefined)
                 {
@@ -242,11 +242,11 @@ function Create(transformIndex, transform)
                             labelText += AttributeUtils.prettify(operand);
                         else
                         {
-                            var parameterData = {};
+                            let parameterData = {};
 
                             if(opposite !== undefined && opposite.length > 0 && opposite[0] === '$')
                             {
-                                var parameterName = opposite.substring(1);
+                                let parameterName = opposite.substring(1);
                                 parameterData = document.findTransformParameter(that.action, parameterName);
                             }
                             else
@@ -274,7 +274,7 @@ function Create(transformIndex, transform)
                             else
                                 addLabel();
 
-                            var parameterObject = createTransformParameter(document,
+                            let parameterObject = createTransformParameter(document,
                                 locked ? null : parent, // If locked, still create the object, but don't display it
                                 parameterData, onParameterChanged);
 
@@ -300,12 +300,12 @@ function Create(transformIndex, transform)
 
                     addLabel();
 
-                    var parameterData = {};
+                    let parameterData = {};
                     parameterData.valueType = Graphia.ValueType.Attribute;
 
                     // Don't allow the user to choose attributes that don't exist at the point
                     // in time when the transform is executed
-                    var unavailableAttributeNames =
+                    let unavailableAttributeNames =
                         document.createdAttributeNamesAtTransformIndexOrLater(transformIndex);
 
                     parameterData.initialValue = document.availableAttributesModel(
@@ -313,9 +313,9 @@ function Create(transformIndex, transform)
                         Graphia.AttributeFlag.DisableDuringTransform,
                         unavailableAttributeNames);
 
-                    parameterData.initialAttributeName = attributeName;
+                    parameterData.initialAttributeName = parameter.attributeName;
 
-                    var parameterObject = createTransformParameter(document,
+                    let parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it
                         parameterData, onParameterChanged);
 

@@ -79,18 +79,18 @@ Wizard
                     // and the required variables are deduced after. If the variable is not
                     // used during this no-context stage it cannot be captured hence this
                     // seemingly pointless assignment
-                    var tempDoc = documentUI;
+                    let tempDoc = documentUI;
                     if(tempDoc === null)
                         return false;
-                    var leftCount = documentUI.attribute(modelLeft.display).sharedValues.length;
-                    var rightCount = documentUI.attribute(modelRight.display).sharedValues.length;
+                    let leftCount = documentUI.attribute(modelLeft.display).sharedValues.length;
+                    let rightCount = documentUI.attribute(modelRight.display).sharedValues.length;
                     return leftCount < rightCount;
                 }
             }
 
             function rowIndexForAttributeName(attributeName)
             {
-                for(var i = 0; i < rowCount(); i++)
+                for(let i = 0; i < rowCount(); i++)
                 {
                     if(data(index(i, 0)) === attributeName)
                         return i;
@@ -118,7 +118,7 @@ Wizard
                         // Should expand this later
                         text:
                         {
-                            var desc = qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis.<br>" +
+                            let desc = qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis.<br>" +
                                    "<br>" +
                                    "Two attribute groups will be selected to test for enrichment." +
                                    "<br>" +
@@ -196,9 +196,9 @@ Wizard
                                     selectedAttributeGroupA = current.attributeName;
 
                                     // Disable analysis on selected
-                                    for(var i = 0; i < attributeSelectBRepeater.count; i++)
+                                    for(let i = 0; i < attributeSelectBRepeater.count; i++)
                                     {
-                                        var radioBtn = attributeSelectBRepeater.itemAt(i);
+                                        let radioBtn = attributeSelectBRepeater.itemAt(i);
                                         radioBtn.enabled = radioBtn.attributeName !== current.attributeName;
                                     }
                                 }

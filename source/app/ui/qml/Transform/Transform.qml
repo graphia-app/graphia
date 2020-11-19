@@ -224,7 +224,7 @@ Item
         if(!ready)
             return;
 
-        var expandedTemplate = template;
+        let expandedTemplate = template;
 
         expandedTemplate = expandedTemplate.replace(/%(\d+)/g,
         function(match, index)
@@ -236,15 +236,15 @@ Item
                 return match;
             }
 
-            var parameterComponent = _parameterComponents[index - 1];
-            var value = parameterComponent.value;
+            let parameterComponent = _parameterComponents[index - 1];
+            let value = parameterComponent.value;
             return value !== undefined ? value : match;
         });
 
         // Unescape literal % in the original template
         expandedTemplate = expandedTemplate.replace(/%\!/g, "%");
 
-        var flagsString = "";
+        let flagsString = "";
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
@@ -284,7 +284,7 @@ Item
             {
                 if(document.hasTransformInfo() && index >= 0)
                 {
-                    var transformInfo = document.transformInfoAtIndex(index);
+                    let transformInfo = document.transformInfoAtIndex(index);
                     setAlertIcon(transformInfo);
                 }
 

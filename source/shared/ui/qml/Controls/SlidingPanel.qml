@@ -153,7 +153,7 @@ Item
         if(animate === undefined)
             animate = true;
 
-        var animation; var drop;
+        let animation; let drop;
         if(direction === Qt.Vertical)
         {
             animation = verticalAnimation;
@@ -185,7 +185,7 @@ Item
         if(animate === undefined)
             animate = true;
 
-        var animation; var drop;
+        let animation; let drop;
         if(direction === Qt.Vertical)
         {
             animation = verticalAnimation;

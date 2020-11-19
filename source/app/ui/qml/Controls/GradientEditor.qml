@@ -44,11 +44,11 @@ Item
 
     function setup(configuration)
     {
-        var gradient = JSON.parse(configuration);
+        let gradient = JSON.parse(configuration);
 
-        var markers = [];
+        let markers = [];
 
-        for(var value in gradient)
+        for(let value in gradient)
             markers.push({value: value, color: gradient[value]});
 
         markerRepeater.model = root._markers = markers;
@@ -56,9 +56,9 @@ Item
 
     function addMarker(value, color)
     {
-        var markers = root._markers;
+        let markers = root._markers;
 
-        var newMarker = {};
+        let newMarker = {};
         newMarker.value = value;
         newMarker.color = color.toString();
         markers.push(newMarker);
@@ -68,7 +68,7 @@ Item
 
     function removeMarker(index)
     {
-        var markers = root._markers;
+        let markers = root._markers;
         markers.splice(index, 1);
 
         markerRepeater.model = root._markers = markers;
@@ -76,7 +76,7 @@ Item
 
     function alterMarker(index, value, color)
     {
-        var markers = root._markers;
+        let markers = root._markers;
         markers.splice(index, 1);
 
         addMarker(value, color);
@@ -84,12 +84,12 @@ Item
 
     function invert()
     {
-        var markers = [];
+        let markers = [];
 
-        for(var i = 0; i < root._markers.length; i++)
+        for(let i = 0; i < root._markers.length; i++)
         {
-            var newValue = 1.0 - root._markers[i].value;
-            var oldColor = root._markers[i].color;
+            let newValue = 1.0 - root._markers[i].value;
+            let oldColor = root._markers[i].color;
             markers.push({value:newValue , color: oldColor});
         }
 
@@ -114,14 +114,14 @@ Item
 
             configuration:
             {
-                var o = {};
+                let o = {};
 
-                for(var i = 0; i < _markers.length; i++)
+                for(let i = 0; i < _markers.length; i++)
                 {
-                    var marker = _markers[i];
+                    let marker = _markers[i];
 
-                    var normalisedPos = marker.value;
-                    var color = marker.color;
+                    let normalisedPos = marker.value;
+                    let color = marker.color;
 
                     o[normalisedPos] = color;
                 }
@@ -177,17 +177,17 @@ Item
                 width: parent.width - picker._markerWidth
                 onClicked:
                 {
-                    var leftItem = null;
-                    var rightItem = null;
-                    var closestMarker = null;
-                    var snapValue = parseFloat(mouseX / width).toFixed(2);
-                    var findValue = picker.valueToMarkerPosition(snapValue);
-                    var diff = Number.MAX_VALUE;
+                    let leftItem = null;
+                    let rightItem = null;
+                    let closestMarker = null;
+                    let snapValue = parseFloat(mouseX / width).toFixed(2);
+                    let findValue = picker.valueToMarkerPosition(snapValue);
+                    let diff = Number.MAX_VALUE;
 
                     // Find suitable left + right marker (also find the closest marker)
-                    for(var i = 0; i < markerRepeater.count; i++)
+                    for(let i = 0; i < markerRepeater.count; i++)
                     {
-                        var modelObj = markerRepeater.itemAt(i);
+                        let modelObj = markerRepeater.itemAt(i);
                         if(modelObj.x < findValue)
                         {
                             if(leftItem === null || modelObj.x > leftItem.x)
@@ -213,13 +213,13 @@ Item
                     if(rightItem === null)
                         rightItem = closestMarker;
 
-                    var leftPos = picker.markerToValue(leftItem);
-                    var rightPos = picker.markerToValue(rightItem);
-                    var clickPos = parseFloat(snapValue);
-                    var blend = (clickPos - leftPos) / (rightPos - leftPos);
-                    var oneMinusBlend = 1.0 - blend;
+                    let leftPos = picker.markerToValue(leftItem);
+                    let rightPos = picker.markerToValue(rightItem);
+                    let clickPos = parseFloat(snapValue);
+                    let blend = (clickPos - leftPos) / (rightPos - leftPos);
+                    let oneMinusBlend = 1.0 - blend;
 
-                    var mixcolor = Qt.rgba((leftItem.color.r * oneMinusBlend) + (rightItem.color.r * blend),
+                    let mixcolor = Qt.rgba((leftItem.color.r * oneMinusBlend) + (rightItem.color.r * blend),
                                            (leftItem.color.g * oneMinusBlend) + (rightItem.color.g * blend),
                                            (leftItem.color.b * oneMinusBlend) + (rightItem.color.b * blend),
                                            1.0);
@@ -265,7 +265,7 @@ Item
 
                         onPaint:
                         {
-                            var ctx = getContext("2d");
+                            let ctx = getContext("2d");
                             ctx.save();
                             ctx.clearRect(0, 0, picker._markerWidth, height);
 

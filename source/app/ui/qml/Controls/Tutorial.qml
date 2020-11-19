@@ -89,7 +89,7 @@ Item
     {
         reset();
 
-        for(var i = 0; i < hubbles.length; i++)
+        for(let i = 0; i < hubbles.length; i++)
         {
             hubbles[i].parent = parent;
             hubbles[i].opacity = 0.0;

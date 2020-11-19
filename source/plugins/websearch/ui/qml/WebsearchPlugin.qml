@@ -92,7 +92,7 @@ PluginContent
 
     function save()
     {
-        var data =
+        let data =
         {
             "urlIndex": urlTemplate.currentIndex
         };

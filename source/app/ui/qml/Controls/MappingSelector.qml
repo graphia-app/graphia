@@ -56,7 +56,7 @@ Window
         if(value.length === 0)
             return;
 
-        var mapping = JSON.parse(value);
+        let mapping = JSON.parse(value);
 
         if(mapping.min !== undefined && mapping.max !== undefined)
         {

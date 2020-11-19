@@ -108,7 +108,7 @@ GridLayout
         {
             if(hasRange)
             {
-                var incrementSize = Utils.incrementForRange(root.minimumValue, root.maximumValue);
+                let incrementSize = Utils.incrementForRange(root.minimumValue, root.maximumValue);
 
                 if(valueType === ValueType.Int && incrementSize < 1.0)
                     return 1.0;
@@ -121,7 +121,7 @@ GridLayout
 
         function updateValue()
         {
-            var v = typedValue(value);
+            let v = typedValue(value);
 
             if(slider.visible)
                 slider.value = v;
@@ -248,7 +248,7 @@ GridLayout
 
     function configure(data)
     {
-        for(var property in data)
+        for(let property in data)
         {
             if(this[property] !== undefined)
                 this[property] = data[property];
@@ -279,7 +279,7 @@ GridLayout
 
             value = typedValue(value);
 
-            var floatValue = parseFloat(value);
+            let floatValue = parseFloat(value);
 
             if(!isNaN(floatValue))
             {

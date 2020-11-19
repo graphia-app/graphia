@@ -73,7 +73,7 @@ Rectangle
         {
             if(_selectMultipleMode)
             {
-                var term = "";
+                let term = "";
                 _attributeValues.forEach(function(value)
                 {
                     if(term.length !== 0)
@@ -95,7 +95,7 @@ Rectangle
 
     property int _options:
     {
-        var o = 0;
+        let o = 0;
 
         switch(_type)
         {
@@ -341,7 +341,7 @@ Rectangle
 
         function rowIndexForAttributeName(attributeName)
         {
-            for(var i = 0; i < rowCount(); i++)
+            for(let i = 0; i < rowCount(); i++)
             {
                 if(data(index(i, 0)) === attributeName)
                     return i;
@@ -413,7 +413,7 @@ Rectangle
                             visible: findField.length > 0
                             text:
                             {
-                                var index = document.foundIndex + 1;
+                                let index = document.foundIndex + 1;
 
                                 if(index > 0)
                                     return index + qsTr(" of ") + document.numNodesFound;
@@ -461,7 +461,7 @@ Rectangle
 
                         function refresh()
                         {
-                            var rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
+                            let rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
 
                             if(rowIndex >= 0)
                             {
@@ -491,12 +491,12 @@ Rectangle
                         function refresh()
                         {
                             // Try to keep the same value selected
-                            var preUpdateText = currentText;
+                            let preUpdateText = currentText;
 
-                            var attribute = document.attribute(selectAttributeComboBox.currentText);
+                            let attribute = document.attribute(selectAttributeComboBox.currentText);
                             model = attribute.sharedValues;
 
-                            var rowIndex = find(preUpdateText);
+                            let rowIndex = find(preUpdateText);
 
                             if(rowIndex >= 0)
                                 currentIndex = rowIndex;
@@ -612,7 +612,7 @@ Rectangle
 
                     function refresh()
                     {
-                        var rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+                        let rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
 
                         if(rowIndex >= 0)
                         {

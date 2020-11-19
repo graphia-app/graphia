@@ -88,7 +88,7 @@ Item
         tableView.currentTotalColumnWidth = 0;
         for(let i = 0; i < tableView.columns; i++)
         {
-            var tempCalculatedWidth = tableView.calculateMinimumColumnWidth(i);
+            let tempCalculatedWidth = tableView.calculateMinimumColumnWidth(i);
             tableView.currentTotalColumnWidth += tempCalculatedWidth;
         }
 
@@ -135,7 +135,7 @@ Item
 
     function showAllCalculatedColumns()
     {
-        var columns = hiddenColumns;
+        let columns = hiddenColumns;
         hiddenColumns = [];
         plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
         {
@@ -148,13 +148,13 @@ Item
 
     function hideAllColumns()
     {
-        var columns = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
+        let columns = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
         hiddenColumns = columns;
     }
 
     function hideAllCalculatedColumns()
     {
-        var columns = hiddenColumns;
+        let columns = hiddenColumns;
         hiddenColumns = [];
         plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
         {
@@ -261,7 +261,7 @@ Item
         let less = Math.min(inStartRow, inEndRow);
         let max = Math.max(inStartRow, inEndRow);
 
-        var range = proxyModel.buildRowSelectionRange(less, max);
+        let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
 
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
@@ -272,7 +272,7 @@ Item
         let less = Math.min(inStartRow, inEndRow);
         let max = Math.max(inStartRow, inEndRow);
 
-        var range = proxyModel.buildRowSelectionRange(less, max);
+        let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
 
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
@@ -808,7 +808,7 @@ Item
                     y: tableView.contentY - (tableView.contentY % (tableView.rowHeight * 2))
                     onPaint:
                     {
-                        var ctx = getContext("2d");
+                        let ctx = getContext("2d");
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
                         {
                             let yOffset = (i * tableView.rowHeight);
@@ -850,8 +850,8 @@ Item
 
                 columnWidthProvider: function(col)
                 {
-                    var calculatedWidth = 0;
-                    var userWidth = userColumnWidths[proxyModel.mapOrderedToSourceColumn(col)];
+                    let calculatedWidth = 0;
+                    let userWidth = userColumnWidths[proxyModel.mapOrderedToSourceColumn(col)];
 
                     // Use the user specified column width if available
                     if(userWidth !== undefined)
@@ -872,14 +872,14 @@ Item
 
                 function getItem(mouseX, mouseY)
                 {
-                    var tableViewContentContainsMouse = mouseY > 0 && mouseY < tableView.height &&
+                    let tableViewContentContainsMouse = mouseY > 0 && mouseY < tableView.height &&
                             mouseX < tableView.width && mouseX < tableView.contentWidth
                             && mouseY < tableView.contentHeight;
 
                     if(!tableViewContentContainsMouse)
                         return false;
 
-                    var hoverItem = tableView.childAt(mouseX, mouseY);
+                    let hoverItem = tableView.childAt(mouseX, mouseY);
                     if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar ||
                                               hoverItem === verticalTableViewScrollBar))
                     {
@@ -888,7 +888,7 @@ Item
                     if(hoverItem === null)
                         return false;
 
-                    var tableItem = hoverItem.childAt(
+                    let tableItem = hoverItem.childAt(
                                 mouseX + tableView.contentX,
                                 mouseY + tableView.contentY);
                     return tableItem;
@@ -896,7 +896,7 @@ Item
 
                 function calculateMinimumColumnWidth(col)
                 {
-                    var delegateWidth = tableView.currentColumnWidths[col];
+                    let delegateWidth = tableView.currentColumnWidths[col];
                     let headerActualWidth = headerFullWidth(col);
                     if(headerActualWidth === null)
                     {
@@ -967,7 +967,7 @@ Item
                     {
                         if(typeof model === 'undefined')
                             return;
-                        var storedWidth = tableView.columnWidths[modelColumn];
+                        let storedWidth = tableView.columnWidths[modelColumn];
                         if(storedWidth !== undefined)
                             tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
                         else
@@ -1112,10 +1112,10 @@ Item
 
                 onDoubleClicked:
                 {
-                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    let tableItem = tableView.getItem(mouseX, mouseY);
                     if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
-                    var mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
+                    let mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
                     root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
@@ -1131,7 +1131,7 @@ Item
                     if(tableView.rows === 0)
                         return;
 
-                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    let tableItem = tableView.getItem(mouseX, mouseY);
                     if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
 
@@ -1222,7 +1222,7 @@ Item
                     if(mouse.buttons !== Qt.LeftButton)
                         return;
 
-                    var tableItem = tableView.getItem(mouseX, mouseY);
+                    let tableItem = tableView.getItem(mouseX, mouseY);
                     if(tableItem && tableItem.modelRow !== previousRow)
                     {
                         if(deselectDrag)
@@ -1262,7 +1262,7 @@ Item
     {
         if (new_index >= arr.length)
         {
-            var k = new_index - arr.length + 1;
+            let k = new_index - arr.length + 1;
             while(k--)
                 arr.push(undefined);
         }

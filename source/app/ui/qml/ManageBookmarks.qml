@@ -61,7 +61,7 @@ Window
                 if(!__currentRowItem)
                     return null;
 
-                var item = __currentRowItem.rowItem; // FocusScope (id: rowitem)
+                let item = __currentRowItem.rowItem; // FocusScope (id: rowitem)
                 if(!item)
                     return null;
 
@@ -69,7 +69,7 @@ Window
                 if(!item)
                     return null;
 
-                var columnIndex = 0;
+                let columnIndex = 0;
                 item = item.children[columnIndex]; // Repeater.delegate (TableView.__itemDelegateLoader)
                 if(!item)
                     return null;
@@ -120,7 +120,7 @@ Window
 
                             if((mouse.modifiers & Qt.ShiftModifier) && tableView.currentRow !== -1)
                             {
-                                for(var i = tableView.currentRow; i < styleData.row; i++)
+                                for(let i = tableView.currentRow; i < styleData.row; i++)
                                     tableView.selection.select(i);
                             }
 
@@ -206,7 +206,7 @@ Window
                 enabled: tableView.selection.count > 0
                 onClicked:
                 {
-                    var names = [];
+                    let names = [];
                     tableView.selection.forEach(function(rowIndex)
                     {
                         names.push(document.bookmarks[rowIndex]);

@@ -32,10 +32,10 @@ Item
 
     property double _width:
     {
-        var w = (root._numKeys * root.keyWidth) +
+        let w = (root._numKeys * root.keyWidth) +
             ((root._numKeys - 1) * root._spacing);
 
-        var minW = (root._numKeys - 1) *
+        let minW = (root._numKeys - 1) *
             (root._spacing + root._minimumKeySize)
 
         if(root.hoverEnabled)
@@ -90,20 +90,19 @@ Item
         if(configuration === undefined || configuration.length === 0)
             return;
 
-        var palette = JSON.parse(configuration);
+        let palette = JSON.parse(configuration);
 
-        var colors = [];
-        var i = 0;
-        var assignedValues = [];
+        let colors = [];
+        let assignedValues = [];
 
         if(palette.autoColors !== undefined)
         {
-            var numKeys = palette.autoColors.length;
+            let numKeys = palette.autoColors.length;
 
             if(stringValues.length > 0 && stringValues.length < numKeys)
                 numKeys = stringValues.length;
 
-            for(i = 0; i < numKeys; i++)
+            for(let i = 0; i < numKeys; i++)
             {
                 colors.push(palette.autoColors[i]);
 
@@ -114,15 +113,15 @@ Item
 
         if(palette.fixedColors !== undefined)
         {
-            var fixedColors = [];
+            let fixedColors = [];
 
-            for(var stringValue in palette.fixedColors)
+            for(let stringValue in palette.fixedColors)
             {
                 if(root.stringValues.indexOf(stringValue) === -1)
                     continue;
 
-                var color = palette.fixedColors[stringValue];
-                var colorIndex = -1;
+                let color = palette.fixedColors[stringValue];
+                let colorIndex = -1;
 
                 if(!Utils.setContains(assignedValues, stringValue))
                 {
@@ -212,10 +211,10 @@ Item
                     if(_hovered)
                         return root.highlightSize;
 
-                    var w = root.width - root._padding;
+                    let w = root.width - root._padding;
                     w -= (root._numKeys - 1) * root._spacing;
 
-                    var d = root._numKeys;
+                    let d = root._numKeys;
 
                     if(!root._lastColorhovered && root._indexUnderCursor !== -1)
                     {
@@ -235,7 +234,7 @@ Item
 
                 property string stringValue:
                 {
-                    var fixedAssignment = root._fixedColors.find(function(element)
+                    let fixedAssignment = root._fixedColors.find(function(element)
                     {
                         return element.index === index;
                     });
@@ -251,7 +250,7 @@ Item
 
                 color:
                 {
-                    var color = modelData;
+                    let color = modelData;
 
                     if(!root.enabled)
                         color = Utils.desaturate(color, 0.2);
@@ -280,9 +279,9 @@ Item
 
                     onPaint:
                     {
-                        var ctx = getContext("2d");
+                        let ctx = getContext("2d");
 
-                        var stripeColor = QmlUtils.contrastingColor(key.color);
+                        let stripeColor = QmlUtils.contrastingColor(key.color);
 
                         ctx.beginPath();
                         ctx.strokeStyle = stripeColor;
@@ -323,11 +322,11 @@ Item
         if(!mouseArea.containsMouse || !mouseArea.hoverEnabled)
             return -1;
 
-        var coord = mapToItem(row, mouseArea.mouseX, mouseArea.mouseY);
-        var w = row.width + root._spacing;
-        var f = (coord.x - (root._spacing * 0.5)) / w;
+        let coord = mapToItem(row, mouseArea.mouseX, mouseArea.mouseY);
+        let w = row.width + root._spacing;
+        let f = (coord.x - (root._spacing * 0.5)) / w;
 
-        var index = Math.floor(f * root._numKeys);
+        let index = Math.floor(f * root._numKeys);
 
         if(index >= root._numKeys)
             return -1;

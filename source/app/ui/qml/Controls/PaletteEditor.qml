@@ -39,18 +39,18 @@ ColumnLayout
 
     function setup(configuration)
     {
-        var palette = JSON.parse(configuration);
+        let palette = JSON.parse(configuration);
 
         paletteAutoColorListRepeater.model = root._autoColors = [];
 
         if(palette.autoColors !== undefined)
         {
-            var numKeys = palette.autoColors.length;
+            let numKeys = palette.autoColors.length;
 
             if(root.stringValues.length > 0 && root.stringValues.length < numKeys)
                 numKeys = root.stringValues.length;
 
-            for(var key = 0; key < numKeys; key++)
+            for(let key = 0; key < numKeys; key++)
                 root._autoColors.push(palette.autoColors[key]);
         }
 
@@ -71,9 +71,9 @@ ColumnLayout
 
         if(palette.fixedColors !== undefined)
         {
-            for(var stringValue in palette.fixedColors)
+            for(let stringValue in palette.fixedColors)
             {
-                var o =
+                let o =
                 {
                     "stringValue": stringValue,
                     "color": palette.fixedColors[stringValue]
@@ -98,7 +98,7 @@ ColumnLayout
 
     property string configuration:
     {
-        var o = {};
+        let o = {};
 
         o.autoColors = root._autoColors;
 
@@ -107,12 +107,12 @@ ColumnLayout
 
         if(root._fixedColors.length > 0)
         {
-            var fixedColorsObject = {};
+            let fixedColorsObject = {};
 
-            for(var i = 0; i < root._fixedColors.length; i++)
+            for(let i = 0; i < root._fixedColors.length; i++)
             {
-                var stringValue = root._fixedColors[i].stringValue;
-                var color = root._fixedColors[i].color;
+                let stringValue = root._fixedColors[i].stringValue;
+                let color = root._fixedColors[i].color;
 
                 fixedColorsObject[stringValue] = color;
             }
@@ -173,15 +173,15 @@ ColumnLayout
 
                 onClicked:
                 {
-                    var colors = root._autoColors;
+                    let colors = root._autoColors;
 
-                    var newColor = root.stringValues.length > 0 ?
+                    let newColor = root.stringValues.length > 0 ?
                         QmlUtils.colorForString(root.stringValues[0]) : "red";
 
                     if(root._autoColors.length > 0)
                     {
                         // Generate a new colour based on the last existing one
-                        var lastColor = root._autoColors[root._autoColors.length - 1];
+                        let lastColor = root._autoColors[root._autoColors.length - 1];
                         newColor = Utils.generateColorFrom(lastColor);
                     }
 
@@ -222,9 +222,9 @@ ColumnLayout
                 {
                     visible:
                     {
-                        var v = root.stringValues[index];
+                        let v = root.stringValues[index];
 
-                        for(var i = 0; i < root._fixedColors.length; i++)
+                        for(let i = 0; i < root._fixedColors.length; i++)
                         {
                             if(root._fixedColors[i].stringValue === v)
                                 return true;
@@ -242,7 +242,7 @@ ColumnLayout
 
                     onColorChanged:
                     {
-                        var colors = root._autoColors;
+                        let colors = root._autoColors;
                         colors[index] = color;
                         root._autoColors = colors;
                     }
@@ -260,7 +260,7 @@ ColumnLayout
                     {
                         root.autoColorWillBeRemoved(paletteAutoColorListRepeater.itemAt(index));
 
-                        var colors = root._autoColors;
+                        let colors = root._autoColors;
                         colors.splice(index, 1);
                         root._autoColors = colors;
                         root.updateRadioButtons();
@@ -400,18 +400,18 @@ ColumnLayout
                 onClicked:
                 {
                     // Start with the first potentially unassigned value
-                    var index = Math.min(paletteAutoColorListRepeater.count, root.stringValues.length);
+                    let index = Math.min(paletteAutoColorListRepeater.count, root.stringValues.length);
 
                     if(index >= root.stringValues.length)
                         index = 0;
 
-                    var initialValue = "";
+                    let initialValue = "";
 
                     // Find values that have no existing assignments
                     while(index < root.stringValues.length)
                     {
-                        var value = root.stringValues[index];
-                        var stringValueAlreadyAssigned =
+                        let value = root.stringValues[index];
+                        let stringValueAlreadyAssigned =
                         root._fixedColors.find(function(fixedColor)
                         {
                             return fixedColor.stringValue === value;
@@ -432,14 +432,14 @@ ColumnLayout
                         initialValue = root.stringValues[0];
                     }
 
-                    var colors = root._fixedColors;
+                    let colors = root._fixedColors;
 
-                    var newColor = initialValue.length > 0 ?
+                    let newColor = initialValue.length > 0 ?
                         QmlUtils.colorForString(initialValue) : "red";
 
                     // Use either the latest fixed colour to generate a new one, or the
                     // latest auto colour if there isn't one
-                    var lastColor = "";
+                    let lastColor = "";
                     if(root._fixedColors.length > 0)
                         lastColor = root._fixedColors[root._fixedColors.length - 1].color;
                     else if(root._autoColors.length > 0)
@@ -448,7 +448,7 @@ ColumnLayout
                     if(lastColor.length > 0)
                         newColor = Utils.generateColorFrom(lastColor);
 
-                    var o =
+                    let o =
                     {
                         "stringValue": initialValue,
                         "color": newColor
@@ -488,21 +488,21 @@ ColumnLayout
 
                     onCurrentTextChanged:
                     {
-                        var colors = root._fixedColors;
+                        let colors = root._fixedColors;
                         colors[index].stringValue = currentText;
                         root._fixedColors = colors;
                     }
 
                     onEditTextChanged:
                     {
-                        var colors = root._fixedColors;
+                        let colors = root._fixedColors;
                         colors[index].stringValue = editText;
                         root._fixedColors = colors;
                     }
 
                     Component.onCompleted:
                     {
-                        var stringValueIndex = root.stringValues.indexOf(modelData.stringValue);
+                        let stringValueIndex = root.stringValues.indexOf(modelData.stringValue);
 
                         if(stringValueIndex < 0)
                         {
@@ -522,7 +522,7 @@ ColumnLayout
 
                     onColorChanged:
                     {
-                        var colors = root._fixedColors;
+                        let colors = root._fixedColors;
                         colors[index].color = color;
                         root._fixedColors = colors;
                     }
@@ -540,7 +540,7 @@ ColumnLayout
                     {
                         root.fixedColorWillBeRemoved(paletteFixedColorListRepeater.itemAt(index));
 
-                        var colors = root._fixedColors;
+                        let colors = root._fixedColors;
                         colors.splice(index, 1);
                         root._fixedColors = colors;
                         root.updateRadioButtons();

@@ -21,7 +21,7 @@
 
 function watchPropertyChanges(object, handler)
 {
-    for(var prop in object)
+    for(let prop in object)
     {
         if(prop.match(".*Changed$"))
             object[prop].connect(handler);
@@ -30,15 +30,15 @@ function watchPropertyChanges(object, handler)
 
 function objectsEquivalent(a, b)
 {
-    var aProps = Object.getOwnPropertyNames(a);
-    var bProps = Object.getOwnPropertyNames(b);
+    let aProps = Object.getOwnPropertyNames(a);
+    let bProps = Object.getOwnPropertyNames(b);
 
     if(aProps.length !== bProps.length)
         return false;
 
-    for(var i = 0; i < aProps.length; i++)
+    for(let i = 0; i < aProps.length; i++)
     {
-        var propName = aProps[i];
+        let propName = aProps[i];
 
         if(a[propName] !== b[propName])
             return false;
@@ -57,7 +57,7 @@ function isInt(value)
     if(isNaN(value))
         return false;
 
-    var x = parseFloat(value);
+    let x = parseFloat(value);
     return (x | 0) === x;
 }
 
@@ -83,11 +83,11 @@ function castToBool(value)
 
 function printStackTrace()
 {
-    var err = new Error();
-    var elements = err.stack.split("\n");
+    let err = new Error();
+    let elements = err.stack.split("\n");
     elements.splice(0, 1);
     elements = elements.map(function(e) { return "    " + e; });
-    var trace = "Stack trace:\n" + elements.join("\n");
+    let trace = "Stack trace:\n" + elements.join("\n");
     console.log(trace);
 }
 
@@ -106,7 +106,7 @@ function escapeQuotes(text)
 function unescapeQuotes(text)
 {
     // [\s\S] is like . except it matches \n
-    var re = /^\s*"([\s\S]*)"\s*$/;
+    let re = /^\s*"([\s\S]*)"\s*$/;
 
     // Strip off enclosing (non-escaped) quotes, if present
     if(text.match(re))
@@ -128,7 +128,7 @@ function sanitiseJson(text)
 {
     try
     {
-        var o = JSON.parse(text);
+        let o = JSON.parse(text);
         text = JSON.stringify(o);
     }
     catch(e)
@@ -162,7 +162,7 @@ function decimalPointsForRange(min, max)
 
 function incrementForRange(min, max)
 {
-    var range = max - min;
+    let range = max - min;
 
     if(range <= 0.001)
         return 0.00001;
@@ -184,7 +184,7 @@ function incrementForRange(min, max)
 
 function desaturate(colorString, factor)
 {
-    var c = Qt.darker(colorString, 1.0);
+    let c = Qt.darker(colorString, 1.0);
     return Qt.hsla(c.hslHue, c.hslSaturation * factor, c.hslLightness, c.a);
 }
 
@@ -193,8 +193,8 @@ function generateColorFrom(color)
     if(typeof(color) === "string")
         color = Qt.lighter(color, 1.0);
 
-    var goldenAngle = 137.5 / 360.0;
-    var hue = color.hsvHue;
+    let goldenAngle = 137.5 / 360.0;
+    let hue = color.hsvHue;
 
     if(hue >= 0.0)
     {
@@ -226,12 +226,12 @@ function cloneMenu(from, to)
     while(to.items.length > 0)
         to.removeItem(to.items[0]);
 
-    var exclusiveGroups = {};
+    let exclusiveGroups = {};
 
-    for(var index = 0; index < from.items.length; index++)
+    for(let index = 0; index < from.items.length; index++)
     {
-        var fromItem = from.items[index];
-        var toItem = null;
+        let fromItem = from.items[index];
+        let toItem = null;
 
         switch(fromItem.type)
         {
@@ -252,7 +252,7 @@ function cloneMenu(from, to)
         if(toItem === null)
             continue;
 
-        var properties = [// Note "action" is specifcally skipped because
+        let properties = [// Note "action" is specifcally skipped because
                           //   a) the properties it proxies are bound anyway
                           //   b) binding it will cause loops
                           "checkable", "checked", "enabled",
@@ -277,7 +277,7 @@ function cloneMenu(from, to)
         // in the target menu, later
         if(fromItem.exclusiveGroup !== undefined && fromItem.exclusiveGroup !== null)
         {
-            var key = fromItem.exclusiveGroup.toString();
+            let key = fromItem.exclusiveGroup.toString();
 
             if(exclusiveGroups[key] === undefined)
                 exclusiveGroups[key] = [];
@@ -298,10 +298,10 @@ function cloneMenu(from, to)
     }
 
     // Create new ExclusiveGroups which correspond to the source menu's ExclusiveGroups
-    for(key in exclusiveGroups)
+    for(let key in exclusiveGroups)
     {
-        var fromExclusiveGroup = exclusiveGroups[key];
-        var toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.5; ExclusiveGroup {}', to);
+        let fromExclusiveGroup = exclusiveGroups[key];
+        let toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.5; ExclusiveGroup {}', to);
 
         fromExclusiveGroup.forEach(function(menuItem)
         {
@@ -326,7 +326,7 @@ function setAdd(set, value)
         return;
     }
 
-    var found = setContains(set, value);
+    let found = setContains(set, value);
 
     if(!found)
         set.push(value);
@@ -342,7 +342,7 @@ function setRemove(set, value)
         return;
     }
 
-    var index = set.indexOf(value);
+    let index = set.indexOf(value);
 
     if(index > -1)
         set.splice(index, 1);
@@ -352,7 +352,7 @@ function setRemove(set, value)
 
 function setIntersection(a, b)
 {
-    var result = [];
+    let result = [];
 
     a.forEach(function(value)
     {
@@ -365,9 +365,9 @@ function setIntersection(a, b)
 
 function readFile(file)
 {
-    var allText = "";
+    let allText = "";
 
-    var rawFile = new XMLHttpRequest();
+    let rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, false);
     rawFile.onreadystatechange = function()
     {

@@ -39,7 +39,7 @@ MouseArea
 
             Component.onCompleted:
             {
-                var items =
+                let items =
                 [
                     {"Name":        "display"},
                     {"Category":    "category"}
@@ -47,10 +47,10 @@ MouseArea
 
                 items.forEach(function(item)
                 {
-                    var name = Object.keys(item)[0];
-                    var roleName = item[name];
+                    let name = Object.keys(item)[0];
+                    let roleName = item[name];
 
-                    var menuItem = sortRoleMenu.addItem(qsTr(name));
+                    let menuItem = sortRoleMenu.addItem(qsTr(name));
                     menuItem.checkable = true;
                     menuItem.exclusiveGroup = sortByExclusiveGroup;
                     menuItem.checked = Qt.binding(function()
@@ -73,7 +73,7 @@ MouseArea
 
             Component.onCompleted:
             {
-                var items =
+                let items =
                 [
                     {"Ascending":   true},
                     {"Descending":  false}
@@ -81,10 +81,10 @@ MouseArea
 
                 items.forEach(function(item)
                 {
-                    var name = Object.keys(item)[0];
-                    var ascendingSortOrder = item[name];
+                    let name = Object.keys(item)[0];
+                    let ascendingSortOrder = item[name];
 
-                    var menuItem = sortAscendingMenu.addItem(qsTr(name));
+                    let menuItem = sortAscendingMenu.addItem(qsTr(name));
                     menuItem.checkable = true;
                     menuItem.exclusiveGroup = sortOrderExclusiveGroup;
                     menuItem.checked = Qt.binding(function()

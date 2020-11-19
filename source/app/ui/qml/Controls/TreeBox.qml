@@ -153,7 +153,7 @@ Item
                     if(!root.model)
                         return;
 
-                    var sourceIndex = sortFilterProxyModel.mapToSource(target.currentIndex);
+                    let sourceIndex = sortFilterProxyModel.mapToSource(target.currentIndex);
                     root.selectedValue = root.textFor(sourceIndex);
                 }
             }

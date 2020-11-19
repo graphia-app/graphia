@@ -191,14 +191,14 @@ Window
                         width: parent.width
                         onPaint:
                         {
-                            var ctx = getContext("2d");
+                            let ctx = getContext("2d");
 
                             ctx.save();
                             ctx.clearRect(0, 0, width, height);
 
                             ctx.fillStyle = "white"
-                            var sizedWidth = Math.ceil(aspectRatio * canvas.height);
-                            var sizedHeight = canvas.height;
+                            let sizedWidth = Math.ceil(aspectRatio * canvas.height);
+                            let sizedHeight = canvas.height;
                             if(sizedWidth > canvas.width)
                             {
                                 sizedWidth = canvas.width;
@@ -240,14 +240,14 @@ Window
                         width: parent.width
                         onPaint:
                         {
-                            var ctx = getContext("2d");
+                            let ctx = getContext("2d");
 
                             ctx.save();
                             ctx.clearRect(0, 0, width, height);
 
                             ctx.strokeStyle = "black"
-                            var sizedWidth = Math.ceil(aspectRatio * canvas.height);
-                            var sizedHeight = canvas.height;
+                            let sizedWidth = Math.ceil(aspectRatio * canvas.height);
+                            let sizedHeight = canvas.height;
                             if(sizedWidth > canvas.width)
                             {
                                 sizedWidth = canvas.width;
@@ -285,10 +285,9 @@ Window
                             else
                                 aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
 
-                            var pixelPrintSize = Math.round(printWidthSpin.value * dpiSpin.value * _MMTOINCH);
+                            let pixelPrintSize = Math.round(printWidthSpin.value * dpiSpin.value * _MMTOINCH);
                             if(pixelPrintSize !== value)
                                 printWidthSpin.value = (value / dpiSpin.value) / _MMTOINCH;
-
                         }
                     }
 
@@ -310,7 +309,7 @@ Window
                             else
                                 aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
 
-                            var pixelPrintSize = Math.round(printHeightSpin.value * dpiSpin.value * _MMTOINCH);
+                            let pixelPrintSize = Math.round(printHeightSpin.value * dpiSpin.value * _MMTOINCH);
                             if(pixelPrintSize !== value)
                                 printHeightSpin.value = (value / dpiSpin.value) / _MMTOINCH;
                         }
@@ -339,7 +338,7 @@ Window
                         minimumValue: 1
                         onValueChanged:
                         {
-                            var lockAspectWasChecked = lockAspect.checked;
+                            let lockAspectWasChecked = lockAspect.checked;
                             lockAspect.checked = false;
                             pixelWidthSpin.value = printWidthSpin.value * _MMTOINCH * value;
                             pixelHeightSpin.value = printHeightSpin.value * _MMTOINCH * value;
@@ -356,8 +355,8 @@ Window
                         onValueChanged:
                         {
                             // Prevent binding loops + losing value precision
-                            var pixelPrintSize = Math.round((pixelWidthSpin.value / dpiSpin.value) / _MMTOINCH);
-                            if(pixelPrintSize != value)
+                            let pixelPrintSize = Math.round((pixelWidthSpin.value / dpiSpin.value) / _MMTOINCH);
+                            if(pixelPrintSize !== value)
                                 pixelWidthSpin.value = value * dpiSpin.value * _MMTOINCH;
                         }
                     }
@@ -371,8 +370,8 @@ Window
                         suffix: "mm"
                         onValueChanged:
                         {
-                            var pixelPrintSize = Math.round((pixelHeightSpin.value / dpiSpin.value) / _MMTOINCH);
-                            if(pixelPrintSize != value)
+                            let pixelPrintSize = Math.round((pixelHeightSpin.value / dpiSpin.value) / _MMTOINCH);
+                            if(pixelPrintSize !== value)
                                 pixelHeightSpin.value = value * dpiSpin.value * _MMTOINCH;
                         }
                     }
@@ -421,10 +420,10 @@ Window
                 text: qsTr("Save…")
                 onClicked:
                 {
-                    var path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
+                    let path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
                         new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
 
-                    var fileDialogObject = fileDialogComponent.createObject(root,
+                    let fileDialogObject = fileDialogComponent.createObject(root,
                         {"folder": screenshot.path, "currentFile": QmlUtils.urlForFileName(path)});
 
                     fileDialogObject.open();
@@ -552,27 +551,25 @@ Window
     {
         if(root.visible)
         {
-            var previewWidth = Math.ceil(aspectRatio * canvas.height);
-            var previewHeight = canvas.height;
-            if(previewWidth > canvas.width)
+            let w = Math.ceil(aspectRatio * canvas.height);
+            let h = canvas.height;
+            if(w > canvas.width)
             {
-                previewWidth = canvas.width;
-                previewHeight = Math.ceil(canvas.width / aspectRatio);
+                w = canvas.width;
+                h = Math.ceil(canvas.width / aspectRatio);
             }
-            graphView.requestPreview(previewWidth, previewHeight, fillSize.checked);
+            graphView.requestPreview(w, h, fillSize.checked);
         }
     }
 
     function previewWidth()
     {
-        var previewWidth = Math.min(previewHolder.height * aspectRatio, previewHolder.width);
-        return previewWidth;
+        return Math.min(previewHolder.height * aspectRatio, previewHolder.width);
     }
 
     function previewHeight()
     {
-        var previewHeight = Math.min(previewWidth() / aspectRatio, previewHolder.height);
-        return previewHeight;
+        return Math.min(previewWidth() / aspectRatio, previewHolder.height);
     }
 
     function loadPreset(currentIndex)
@@ -590,7 +587,7 @@ Window
         if(currentIndex < 0)
             return;
 
-        var preset = presetsListModel.get(currentIndex);
+        let preset = presetsListModel.get(currentIndex);
         if(preset !== undefined && preset.dpi > 0)
         {
             dpiSpin.value = preset.dpi;

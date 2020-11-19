@@ -84,8 +84,8 @@ ApplicationWindow
                 textFormat: TextEdit.MarkdownText
                 text:
                 {
-                    var prefix = "file:///" + imagesLocation + "/";
-                    var adjustedChangeLog = changeLog;
+                    let prefix = "file:///" + imagesLocation + "/";
+                    let adjustedChangeLog = changeLog;
 
                     adjustedChangeLog = adjustedChangeLog.replace(
                         /(?:!\[(.*?)\]\(file:(.*?)\))/g,
