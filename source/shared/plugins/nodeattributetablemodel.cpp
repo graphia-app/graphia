@@ -289,16 +289,16 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
         }), added.end());
     }
 
-    QSet<QString> columnNamesUnique(_columnNames.begin(), _columnNames.end());
-    QSet<QString> addedUnique(added.begin(), added.end());
-    QSet<QString> removedUnique(removed.begin(), removed.end());
+    QSet<QString> addedSet(added.begin(), added.end());
+    QSet<QString> removedSet(removed.begin(), removed.end());
 
-    Q_ASSERT(added.isEmpty() || columnNamesUnique.intersect(addedUnique).isEmpty());
+    // Either no attributes are being added, or the ones that are are not in the table already
+    Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_columnNames.begin(), _columnNames.end()}));
 
-    // Ignore attribute names we aren't using in the table
-    auto filteredRemoved = columnNamesUnique.intersect(removedUnique).values();
+    // Ignore attribute names that aren't in the table
+    removedSet.intersect({_columnNames.begin(), _columnNames.end()});
 
-    if(added.isEmpty() && filteredRemoved.isEmpty())
+    if(addedSet.isEmpty() && removedSet.isEmpty())
     {
         // There is no structural change to the table, but some roles' values
         // may have changed, so we need to update these individually
@@ -315,7 +315,7 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     // Any roles requiring an update will be taken care of en-masse, in onUpdateComplete
     _columnsRequiringUpdates.clear();
 
-    for(const auto& name : filteredRemoved)
+    for(const auto& name : removedSet)
     {
         auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
         onColumnRemoved(columnIndex);
@@ -324,10 +324,9 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
 
     updateColumnNames();
 
-    for(const auto& name : added)
+    for(const auto& name : addedSet)
     {
         auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
-
         onColumnAdded(columnIndex);
         emit columnAdded(columnIndex, name);
     }
