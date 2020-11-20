@@ -84,7 +84,7 @@ ApplicationWindow
 
                 var videoDriverCrash = "";
 
-                var re = /^(nvoglv|ig\d+icd|ati[og]).*/;
+                var re = /^(nvoglv|ig\d+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon).*/;
                 if(re.test(crashedModule))
                 {
                     var vendorLink = "https://www.google.com/search?q=" + glVendor +
