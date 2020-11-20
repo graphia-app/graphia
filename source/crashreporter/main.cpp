@@ -36,6 +36,8 @@
 
 #include <iostream>
 #include <map>
+#include <string>
+#include <regex>
 
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
@@ -94,6 +96,18 @@ static QString crashedModule(const QString& dmpFile)
     size_t frameIndex = 0;
     std::string module;
 
+    // Don't count standard libraries etc. when finding the crashed
+    // module; often a runtime failure will occur in abort/terminate
+    // or similar; this isn't useful information
+    std::vector<std::string> skipModules =
+    {
+        R"(^libc-[\d\.]+so$)",
+        R"(^libstdc\+\+\.so[\d\.]+$)",
+        R"(^libsystem_[^\.]+\.dylib$)",
+        R"(^libc\+\+abi\.dylib$)",
+        R"(^libobjc\.[^\.]+\.dylib$)",
+    };
+
     do
     {
         frame = stack->frames()->at(frameIndex);
@@ -106,6 +120,16 @@ static QString crashedModule(const QString& dmpFile)
         // It's unclear if this actually happens in practice, but
         // it doesn't hurt to test for it
         if(module.length() >= 2 && module[0] == '0' && module[1] == 'x')
+            module.clear();
+
+        std::smatch match;
+        bool skip = std::any_of(skipModules.begin(), skipModules.end(),
+        [&module, &match](const auto& skipModuleRe)
+        {
+            return std::regex_match(module, match, std::regex(skipModuleRe));
+        });
+
+        if(skip)
             module.clear();
     }
     while(module.empty() && frameIndex < frameCount);
