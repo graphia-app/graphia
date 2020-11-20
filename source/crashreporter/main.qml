@@ -122,7 +122,8 @@ ApplicationWindow
         {
             id: description
             enabled: window.enabled
-            placeholderText: qsTr("A detailed explanation of what you were doing immediately prior to the crash (optional)")
+            placeholderText: qsTr("A detailed explanation of what you were doing " +
+                "immediately prior to the crash\n\n(optional, but gratefully received)")
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.columnSpan: 2

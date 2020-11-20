@@ -23,6 +23,7 @@ find source/app \
   source/plugins \
   source/crashreporter \
   source/messagebox \
-  -regex ".*\.\(cpp\|h\|qml\|js\|json\|sh\|pl\|py\|c\|bat\|frag\|vert\)" \
+  source/updater \
+  -regex ".*\.\(cpp\|h\|qml\|js\|json\|sh\|pl\|py\|c\|bat\|frag\|vert\|html\|qrc\|theme\|txt\|in\)" \
   -not -iname "moc_*" -not -iname "qrc_*" | \
-  xargs cloc --by-file --xml --out=cloc.xml
+  xargs cloc --by-file --out=cloc.txt
