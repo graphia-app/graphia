@@ -39,6 +39,10 @@ jobs:
       with:
         name: Linux AppImage
         path: build/gcc/Graphia-*.tar.gz
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Linux Logs
+        path: build/gcc/*.log
     - name: Upload Symbols
       run: scripts/upload-symbols.sh
       shell: bash
@@ -76,6 +80,10 @@ jobs:
       with:
         name: Windows Installer
         path: build/Graphia-*-installer.exe
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Windows Logs
+        path: build/*.log
     - name: Upload Symbols
       run: scripts/upload-symbols.sh
       shell: bash
@@ -117,6 +125,10 @@ jobs:
       with:
         name: macOS Disk Image
         path: build/Graphia-*.dmg
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macOS Logs
+        path: build/*.log
     - name: Upload Symbols
       run: scripts/upload-symbols.sh
       shell: bash
@@ -160,6 +172,10 @@ jobs:
         CLANGTIDY: clang-tidy-11
         CPPCHECK: cppcheck
         CLAZY: clazy
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
   release:
     name: GitHub Release
     if: startsWith(github.ref, 'refs/tags/')
