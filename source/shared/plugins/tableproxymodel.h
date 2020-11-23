@@ -138,7 +138,7 @@ public slots:
     void invalidateFilter();
 };
 
-static void initialiser()
+static void tableProxyModelInitialiser()
 {
     if(!QCoreApplication::startingUp())
     {
@@ -151,6 +151,6 @@ static void initialiser()
         TableProxyModel::registerQmlType();
 }
 
-Q_COREAPP_STARTUP_FUNCTION(initialiser)
+Q_COREAPP_STARTUP_FUNCTION(tableProxyModelInitialiser)
 
 #endif // TABLEPROXYMODEL_H
