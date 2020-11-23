@@ -188,8 +188,6 @@ signals:
     void dataRectChanged();
     void hasMissingValuesChanged();
     void busyChanged();
-    void fileUrlChanged();
-    void fileTypeChanged();
     void dataLoaded();
     void transposedChanged();
     void progressChanged();
