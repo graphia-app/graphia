@@ -48,7 +48,7 @@ BaseParameterDialog
                 y < rect.y + rect.height;
     }
 
-    TabularDataParser
+    CorrelationTabularDataParser
     {
         id: tabularDataParser
 

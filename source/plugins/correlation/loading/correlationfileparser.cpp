@@ -361,12 +361,12 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     return true;
 }
 
-bool TabularDataParser::transposed() const
+bool CorrelationTabularDataParser::transposed() const
 {
     return _model.transposed();
 }
 
-void TabularDataParser::setTransposed(bool transposed)
+void CorrelationTabularDataParser::setTransposed(bool transposed)
 {
     // If we manage to get here while the rect detection is still running,
     // wait until it has finished before proceeding
@@ -392,7 +392,7 @@ void TabularDataParser::setTransposed(bool transposed)
     emit dataRectChanged();
 }
 
-void TabularDataParser::setProgress(int progress)
+void CorrelationTabularDataParser::setProgress(int progress)
 {
     if(progress != _progress)
     {
@@ -401,12 +401,12 @@ void TabularDataParser::setProgress(int progress)
     }
 }
 
-TabularDataParser::TabularDataParser()
+CorrelationTabularDataParser::CorrelationTabularDataParser()
 {
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataRectChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::hasMissingValuesChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataRectChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasMissingValuesChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, [this]
     {
         // An estimate was started while the data rectangle was being calculated
@@ -414,18 +414,18 @@ TabularDataParser::TabularDataParser()
             estimateGraphSize();
     });
 
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &TabularDataParser::busyChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::busyChanged);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::onDataLoaded);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &TabularDataParser::dataLoaded);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::onDataLoaded);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataLoaded);
 
-    connect(this, &TabularDataParser::dataRectChanged, this, [this] { estimateGraphSize(); });
-    connect(this, &TabularDataParser::parameterChanged, this, [this] { estimateGraphSize(); });
+    connect(this, &CorrelationTabularDataParser::dataRectChanged, this, [this] { estimateGraphSize(); });
+    connect(this, &CorrelationTabularDataParser::parameterChanged, this, [this] { estimateGraphSize(); });
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::started,
-        this, &TabularDataParser::graphSizeEstimateInProgressChanged);
+        this, &CorrelationTabularDataParser::graphSizeEstimateInProgressChanged);
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished,
-        this, &TabularDataParser::graphSizeEstimateInProgressChanged);
+        this, &CorrelationTabularDataParser::graphSizeEstimateInProgressChanged);
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished, [this]
     {
@@ -443,7 +443,7 @@ TabularDataParser::TabularDataParser()
     });
 }
 
-bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
+bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
 {
     QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
     {
@@ -488,7 +488,7 @@ bool TabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
     return true;
 }
 
-void TabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
+void CorrelationTabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
@@ -502,13 +502,13 @@ void TabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
-void TabularDataParser::clearData()
+void CorrelationTabularDataParser::clearData()
 {
     if(_dataPtr != nullptr)
         _dataPtr->reset();
 }
 
-std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSamples)
+std::vector<CorrelationDataRow> CorrelationTabularDataParser::sampledDataRows(size_t numSamples)
 {
     if(_dataRect.isEmpty())
         return {};
@@ -576,7 +576,7 @@ std::vector<CorrelationDataRow> TabularDataParser::sampledDataRows(size_t numSam
     return dataRows;
 }
 
-void TabularDataParser::estimateGraphSize()
+void CorrelationTabularDataParser::estimateGraphSize()
 {
     if(_dataPtr == nullptr)
         return;
@@ -677,12 +677,12 @@ void TabularDataParser::estimateGraphSize()
     _graphSizeEstimateFutureWatcher.setFuture(future);
 }
 
-QVariantMap TabularDataParser::graphSizeEstimate() const
+QVariantMap CorrelationTabularDataParser::graphSizeEstimate() const
 {
     return _graphSizeEstimate;
 }
 
-void TabularDataParser::onDataLoaded()
+void CorrelationTabularDataParser::onDataLoaded()
 {
     if(_dataPtr != nullptr)
         _model.setTabularData(*_dataPtr);
@@ -691,7 +691,7 @@ void TabularDataParser::onDataLoaded()
     emit completeChanged();
 }
 
-DataRectTableModel* TabularDataParser::tableModel()
+DataRectTableModel* CorrelationTabularDataParser::tableModel()
 {
     return &_model;
 }

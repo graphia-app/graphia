@@ -108,7 +108,7 @@ public:
 
 Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
 
-class TabularDataParser : public QObject, public Cancellable
+class CorrelationTabularDataParser : public QObject, public Cancellable
 {
     Q_OBJECT
 
@@ -165,7 +165,7 @@ private:
     std::vector<CorrelationDataRow> sampledDataRows(size_t numSamples);
 
 public:
-    TabularDataParser();
+    CorrelationTabularDataParser();
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
     Q_INVOKABLE void cancelParse() { cancel(); }
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
