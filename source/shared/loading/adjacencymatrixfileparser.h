@@ -250,9 +250,9 @@ public:
     }
 };
 
-using AdjacencyMatrixTSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<'\t'>>;
-using AdjacencyMatrixSSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<';'>>;
-using AdjacencyMatrixCSVFileParser = AdjacencyMatrixParser<TextDelimitedTabularDataParser<','>>;
+using AdjacencyMatrixTSVFileParser = AdjacencyMatrixParser<TsvFileParser>;
+using AdjacencyMatrixSSVFileParser = AdjacencyMatrixParser<SsvFileParser>;
+using AdjacencyMatrixCSVFileParser = AdjacencyMatrixParser<CsvFileParser>;
 
 using AdjacencyMatrixXLSXFileParser = AdjacencyMatrixParser<XlsxTabularDataParser>;
 
