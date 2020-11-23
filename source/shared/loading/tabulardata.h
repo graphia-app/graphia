@@ -210,5 +210,6 @@ public:
 
 using CsvFileParser = TextDelimitedTabularDataParser<','>;
 using TsvFileParser = TextDelimitedTabularDataParser<'\t'>;
+using SsvFileParser = TextDelimitedTabularDataParser<';'>;
 
 #endif // TABULARDATA_H
