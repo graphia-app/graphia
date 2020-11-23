@@ -801,7 +801,7 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
     qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
     qmlRegisterType<GraphSizeEstimatePlotItem>("app.graphia", 1, 0, "GraphSizeEstimatePlot");
-    qmlRegisterType<TabularDataParser>("app.graphia", 1, 0, "TabularDataParser");
+    qmlRegisterType<CorrelationTabularDataParser>("app.graphia", 1, 0, "CorrelationTabularDataParser");
     qmlRegisterType<DataRectTableModel>("app.graphia", 1, 0, "DataRectTableModel");
 }
 
