@@ -30,6 +30,7 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/container_randomsample.h"
+#include "shared/utils/scope_exit.h"
 
 #include <QRect>
 
@@ -459,6 +460,9 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
         auto parseUsing = [fileUrl, this](auto&& parser)
         {
+            _cancellableParser = &parser;
+            auto atExit = std::experimental::make_scope_exit([this] { _cancellableParser = nullptr; });
+
             // This should already have been tested for, but check anyway
             if(!parser.canLoad(fileUrl))
                 return;
@@ -483,6 +487,14 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
     _dataParserWatcher.setFuture(future);
     return true;
+}
+
+void CorrelationTabularDataParser::cancelParse()
+{
+    if(_cancellableParser != nullptr)
+        _cancellableParser.load()->cancel();
+
+    cancel();
 }
 
 void CorrelationTabularDataParser::autoDetectDataRectangle(size_t column, size_t row)

@@ -35,6 +35,7 @@
 #include <QtConcurrent/QtConcurrent>
 
 #include <memory>
+#include <atomic>
 
 // Note: the ordering of these enums is important from a save
 // file point of view; i.e. only append, don't reorder
@@ -144,6 +145,7 @@ private:
     bool _transposed = false;
 
     int _progress = -1;
+    std::atomic<Cancellable*> _cancellableParser = nullptr;
     bool _complete = false;
 
     double _minimumCorrelation = 0.0;
@@ -169,7 +171,7 @@ public:
     virtual ~CorrelationTabularDataParser();
 
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
-    Q_INVOKABLE void cancelParse() { cancel(); }
+    Q_INVOKABLE void cancelParse();
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
 
     Q_INVOKABLE void clearData();
