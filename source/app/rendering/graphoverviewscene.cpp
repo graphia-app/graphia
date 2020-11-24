@@ -612,7 +612,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 {
-    std::experimental::make_scope_exit([this] { _graphRenderer->resumeRendererThreadExecution(); });
+    auto atExit = std::experimental::make_scope_exit([this] { _graphRenderer->resumeRendererThreadExecution(); });
 
     if(!changed)
         return;
