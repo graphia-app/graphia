@@ -124,6 +124,9 @@ public:
 
             if(_rowLimit > 0 && rowIndex > _rowLimit)
                 break;
+
+            if(cancelled())
+                return false;
         }
 
         // Free up any over-allocation
