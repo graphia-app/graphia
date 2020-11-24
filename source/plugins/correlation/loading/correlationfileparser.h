@@ -166,6 +166,8 @@ private:
 
 public:
     CorrelationTabularDataParser();
+    virtual ~CorrelationTabularDataParser();
+
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
     Q_INVOKABLE void cancelParse() { cancel(); }
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);

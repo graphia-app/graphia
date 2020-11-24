@@ -443,6 +443,13 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
     });
 }
 
+CorrelationTabularDataParser::~CorrelationTabularDataParser()
+{
+    _graphSizeEstimateFutureWatcher.waitForFinished();
+    _autoDetectDataRectangleWatcher.waitForFinished();
+    _dataParserWatcher.waitForFinished();
+}
+
 bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
 {
     QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
