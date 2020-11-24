@@ -457,36 +457,26 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
         if(fileUrl.isEmpty() || fileType.isEmpty())
             return;
 
+        auto parseUsing = [fileUrl, this](auto&& parser)
+        {
+            // This should already have been tested for, but check anyway
+            if(!parser.canLoad(fileUrl))
+                return;
+
+            parser.setProgressFn([this](int progress) { setProgress(progress); });
+
+            if(!parser.parse(fileUrl))
+                return;
+
+            _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
+        };
+
         if(fileType == QLatin1String("CorrelationCSV"))
-        {
-            CsvFileParser csvFileParser;
-            csvFileParser.setProgressFn([this](int progress) { setProgress(progress); });
-
-            if(!csvFileParser.parse(fileUrl))
-                return;
-
-            _dataPtr = std::make_shared<TabularData>(std::move(csvFileParser.tabularData()));
-        }
+            parseUsing(CsvFileParser());
         else if(fileType == QLatin1String("CorrelationTSV"))
-        {
-            TsvFileParser tsvFileParser;
-            tsvFileParser.setProgressFn([this](int progress) { setProgress(progress); });
-
-            if(!tsvFileParser.parse(fileUrl))
-                return;
-
-            _dataPtr = std::make_shared<TabularData>(std::move(tsvFileParser.tabularData()));
-        }
+            parseUsing(TsvFileParser());
         else if(fileType == QLatin1String("CorrelationXLSX"))
-        {
-            XlsxTabularDataParser xlsxFileParser;
-            xlsxFileParser.setProgressFn([this](int progress) { setProgress(progress); });
-
-            if(!xlsxFileParser.parse(fileUrl))
-                return;
-
-            _dataPtr = std::make_shared<TabularData>(std::move(xlsxFileParser.tabularData()));
-        }
+            parseUsing(XlsxTabularDataParser());
 
         setProgress(-1);
     });
