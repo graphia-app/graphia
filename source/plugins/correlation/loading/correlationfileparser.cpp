@@ -418,7 +418,6 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::onDataLoaded);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataLoaded);
 
     connect(this, &CorrelationTabularDataParser::dataRectChanged, this, [this] { estimateGraphSize(); });
     connect(this, &CorrelationTabularDataParser::parameterChanged, this, [this] { estimateGraphSize(); });
@@ -499,14 +498,14 @@ void CorrelationTabularDataParser::cancelParse()
 
 void CorrelationTabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
 {
+    Q_ASSERT(_dataPtr != nullptr);
+    if(_dataPtr == nullptr)
+        return;
+
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        Q_ASSERT(_dataPtr != nullptr);
-        if(_dataPtr != nullptr)
-        {
-            _dataRect = findLargestDataRect(*_dataPtr, column, row);
-            _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
-        }
+        _dataRect = findLargestDataRect(*_dataPtr, column, row);
+        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
@@ -694,7 +693,15 @@ QVariantMap CorrelationTabularDataParser::graphSizeEstimate() const
 void CorrelationTabularDataParser::onDataLoaded()
 {
     if(_dataPtr != nullptr)
+    {
         _model.setTabularData(*_dataPtr);
+        emit dataLoaded();
+    }
+    else
+    {
+        _failed = true;
+        emit failedChanged();
+    }
 
     _complete = true;
     emit completeChanged();

@@ -122,6 +122,7 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
 
     Q_PROPERTY(int progress MEMBER _progress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY(bool complete MEMBER _complete NOTIFY completeChanged)
+    Q_PROPERTY(bool failed MEMBER _failed NOTIFY failedChanged)
 
     Q_PROPERTY(double minimumCorrelation MEMBER _minimumCorrelation NOTIFY parameterChanged)
     Q_PROPERTY(int correlationType MEMBER _correlationType NOTIFY parameterChanged)
@@ -147,6 +148,7 @@ private:
     int _progress = -1;
     std::atomic<Cancellable*> _cancellableParser = nullptr;
     bool _complete = false;
+    bool _failed = false;
 
     double _minimumCorrelation = 0.0;
     int _correlationType = static_cast<int>(CorrelationType::Pearson);
@@ -196,6 +198,7 @@ signals:
     void transposedChanged();
     void progressChanged();
     void completeChanged();
+    void failedChanged();
 
     void parameterChanged();
     void graphSizeEstimateChanged();
