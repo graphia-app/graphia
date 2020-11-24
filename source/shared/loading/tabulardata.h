@@ -141,73 +141,45 @@ public:
 
     static bool canLoad(const QUrl& url)
     {
-        // Scans a few lines and identifies the delimiter based on the consistency
-        // of the column count it produces on each row (within a delta tolerance)
-        // with each potential delimiter.
-        // Largest consistent column count within the tolerance delta wins
-        const std::string POTENTIAL_DELIMITERS = ",;\t ";
-        const int LINE_SCAN_COUNT = 5;
-        const int ALLOWED_COLUMN_COUNT_DELTA = 1;
-
-        std::vector<size_t> columnAppearances(POTENTIAL_DELIMITERS.length());
         std::ifstream file(url.toLocalFile().toStdString());
 
         if(!file)
             return false;
 
-        // Find the appropriate delimiter from list
-        for(size_t i = 0; i < POTENTIAL_DELIMITERS.length(); ++i)
+        auto testParser = aria::csv::CsvParser(file);
+        testParser.delimiter(Delimiter);
+
+        // Count the maximum and minimum number of columns in the first few rows
+        size_t linesToScan = 5;
+        size_t minColumns = std::numeric_limits<size_t>::max();
+        size_t maxColumns = std::numeric_limits<size_t>::min();
+        for(const auto& testRow : testParser)
         {
-            auto testDelimiter = POTENTIAL_DELIMITERS.at(i);
-            auto testParser = std::make_unique<aria::csv::CsvParser>(file);
-            testParser->delimiter(testDelimiter);
+            auto numColumns = testRow.size();
 
-            // Scan first few rows for matching columns
-            size_t rowIndex = 0;
-            size_t columnAppearancesMin = std::numeric_limits<size_t>::max();
-            for(const auto& testRow : *testParser)
-            {
-                if(rowIndex >= LINE_SCAN_COUNT)
-                    break;
+            minColumns = std::min(numColumns, minColumns);
+            maxColumns = std::max(numColumns, maxColumns);
 
-                columnAppearances.at(i) = std::max(testRow.size(), columnAppearances[i]);
-                columnAppearancesMin = std::min(testRow.size(), columnAppearancesMin);
-
-                if(columnAppearances.at(i) - columnAppearancesMin > ALLOWED_COLUMN_COUNT_DELTA)
-                {
-                    // Inconsistent column count so not a matrix
-                    columnAppearances.at(i) = 0;
-                    break;
-                }
-
-                rowIndex++;
-            }
-
-            file.clear();
-            file.seekg(0, std::ios::beg);
-        }
-        std::vector<char> likelyDelimiters;
-        size_t maxColumns = *std::max_element(columnAppearances.begin(), columnAppearances.end());
-        if(maxColumns > 0)
-        {
-            for(size_t i = 0; i < columnAppearances.size(); ++i)
-            {
-                if(columnAppearances.at(i) >= maxColumns)
-                    likelyDelimiters.push_back(POTENTIAL_DELIMITERS.at(i));
-            }
+            if(--linesToScan == 0)
+                break;
         }
 
-        // It is possible for more than one delimiter to give the same results
-        // however it is very unlikely. If it happens just use the first one we find.
-        if(!likelyDelimiters.empty())
-        {
-            char delimiter = likelyDelimiters[0];
+        if(minColumns > maxColumns)
+            return false;
 
-            if(Delimiter == delimiter)
-                return true;
-        }
+        // Where only a single column has been found, it's highly unlikely that
+        // this parser's delimiter is correct for the file in question
+        if(maxColumns < 2)
+            return false;
 
-        return false;
+        auto delta = maxColumns - minColumns;
+        const size_t maxAllowedColumnCountDelta = 3;
+
+        // If the column counts vary too much, refuse to load the file
+        if(delta > maxAllowedColumnCountDelta)
+            return false;
+
+        return true;
     }
 };
 
