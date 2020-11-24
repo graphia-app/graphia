@@ -141,7 +141,7 @@ private:
     QFutureWatcher<void> _dataParserWatcher;
     QRect _dataRect;
     bool _hasMissingValues = false;
-    std::shared_ptr<TabularData> _dataPtr;
+    std::shared_ptr<TabularData> _dataPtr = nullptr;
     DataRectTableModel _model;
     bool _transposed = false;
 
