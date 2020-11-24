@@ -82,10 +82,17 @@ BaseParameterDialog
 
     ColumnLayout
     {
-        anchors.centerIn: parent
-        visible: !tabularDataParser.complete
+        id: loadingInfo
 
-        Text { text: qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…" }
+        anchors.centerIn: parent
+        visible: !tabularDataParser.complete || tabularDataParser.failed
+
+        Text
+        {
+            text: tabularDataParser.failed ?
+                qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(fileUrl) + "." :
+                qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…"
+        }
 
         RowLayout
         {
@@ -93,16 +100,19 @@ BaseParameterDialog
 
             ProgressBar
             {
+                visible: !tabularDataParser.failed
                 value: tabularDataParser.progress >= 0.0 ? tabularDataParser.progress / 100.0 : 0.0
                 indeterminate: tabularDataParser.progress < 0.0
             }
 
             Button
             {
-                text: qsTr("Cancel")
+                text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
                 onClicked:
                 {
-                    tabularDataParser.cancelParse();
+                    if(!tabularDataParser.failed)
+                        tabularDataParser.cancelParse();
+
                     root.close();
                 }
             }
@@ -113,7 +123,7 @@ BaseParameterDialog
     {
         id: listTabView
         anchors.fill: parent
-        visible: tabularDataParser.complete
+        visible: !loadingInfo.visible
 
         onListTabChanged:
         {
