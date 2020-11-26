@@ -69,7 +69,7 @@ Item
 
         property string text:
         {
-            if(!root.model || !root.currentIndexIsValid)
+            if(!root.model || !root.currentIndexIsValid || !root.selectedValue)
                 return root.prettifyFunction(root.placeholderText);
 
             return root.prettifyFunction(root.selectedValue);
