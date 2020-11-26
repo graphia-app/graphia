@@ -86,5 +86,8 @@ Item
             }
         }
     }
+
+    function clear() { tableView.selection.clear(); }
+    function selectAll() { tableView.selection.selectAll(); }
 }
 
