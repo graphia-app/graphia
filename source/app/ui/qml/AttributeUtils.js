@@ -19,13 +19,16 @@
 
 function prettify(attributeName)
 {
-    // Remove the leading $, if present
-    attributeName = attributeName.replace(/^\$/, "");
+    if(attributeName)
+    {
+        // Remove the leading $, if present
+        attributeName = attributeName.replace(/^\$/, "");
 
-    attributeName = attributeName.replace(/"/g, "");
-    attributeName = attributeName.replace(/^source/, qsTr("Source"));
-    attributeName = attributeName.replace(/^target/, qsTr("Target"));
-    attributeName = attributeName.replace(/\./g, " › ");
+        attributeName = attributeName.replace(/"/g, "");
+        attributeName = attributeName.replace(/^source/, qsTr("Source"));
+        attributeName = attributeName.replace(/^target/, qsTr("Target"));
+        attributeName = attributeName.replace(/\./g, " › ");
+    }
 
     return attributeName;
 }
