@@ -70,25 +70,7 @@ Item
             Rectangle
             {
                 Layout.fillHeight: true
-                Layout.preferredWidth:
-                {
-                    // Adjust width to match text contents
-                    let maxWidth = 100;
-
-                    for(let i = 0; i < listTabs.length; i++)
-                    {
-                        let delegateItem = tabSelector.contentItem.children[i];
-                        if(delegateItem === undefined)
-                            continue;
-
-                        if(delegateItem.children.length === 0)
-                            continue;
-
-                        maxWidth = Math.max(delegateItem.children[0].children[0].contentWidth + 5,
-                                 maxWidth);
-                    }
-                    return maxWidth;
-                }
+                Layout.preferredWidth: tabSelector.maxChildWidth + (Constants.padding * 2)
 
                 border.width: 1
                 border.color: systemPalette.mid
@@ -103,6 +85,10 @@ Item
                     anchors.centerIn: parent
                     anchors.margins: 1
                     anchors.fill: parent
+                    clip: true
+
+                    property var _childWidths: []
+                    property var maxChildWidth: 0
 
                     delegate: Item
                     {
@@ -115,13 +101,30 @@ Item
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)
+
                             Text
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
                                 color: index === currentIndex ? systemPalette.highlightedText : systemPalette.text
                                 text: listTabs[index].title
+
+                                TextMetrics
+                                {
+                                    text: listTabs[index].title
+                                    onTextChanged:
+                                    {
+                                        tabSelector._childWidths[index] = width;
+
+                                        let w = 0;
+                                        for(let i = 0; i < tabSelector._childWidths.length; i++)
+                                            w = Math.max(w, tabSelector._childWidths[i]);
+
+                                        tabSelector.maxChildWidth = w;
+                                    }
+                                }
                             }
+
                             MouseArea
                             {
                                 anchors.fill: parent
