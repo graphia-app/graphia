@@ -1507,7 +1507,7 @@ BaseParameterDialog
             root.close();
         }
 
-        onCancel: { root.close(); }
+        onRejected: { root.close(); }
     }
 
     Component.onCompleted: { initialise(); }

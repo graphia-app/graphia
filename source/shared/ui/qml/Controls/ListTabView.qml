@@ -204,7 +204,7 @@ Item
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.cancel(); }
+                onClicked: { root.rejected(); }
             }
         }
     }
@@ -269,7 +269,7 @@ Item
     signal listTabChanged();
 
     signal accepted();
-    signal cancel();
+    signal rejected();
 
     Component.onCompleted:
     {
