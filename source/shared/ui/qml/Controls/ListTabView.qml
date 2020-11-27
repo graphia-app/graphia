@@ -36,7 +36,6 @@ Item
     property int currentIndex: 0
     property bool nextEnabled: true
     property bool finishEnabled: true
-    property bool summaryEnabled: true
     property alias animating: numberAnimation.running
     readonly property int _padding: 5
     property Item currentItem:
@@ -181,7 +180,7 @@ Item
 
                 text:
                 {
-                    if(summaryEnabled && !_onFinishPage)
+                    if(!_onFinishPage)
                         return qsTr("Confirm");
                     else
                         return qsTr("Finish");
@@ -189,7 +188,7 @@ Item
 
                 onClicked:
                 {
-                    if(summaryEnabled && currentIndex !== listTabs.length - 1)
+                    if(currentIndex !== (listTabs.length - 1))
                         goToTab(listTabs.length - 1);
                     else
                         root.accepted();
