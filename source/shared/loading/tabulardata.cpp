@@ -18,6 +18,8 @@
 
 #include "tabulardata.h"
 
+#include "shared/utils/progressable.h"
+
 TabularData::TabularData(TabularData&& other) noexcept :
     _data(std::move(other._data)),
     _columns(other._columns),
@@ -163,4 +165,33 @@ void TabularData::reset()
 const QString& TabularData::valueAt(size_t column, size_t row) const
 {
     return _data.at(index(column, row));
+}
+
+std::vector<TypeIdentity> TabularData::typeIdentities(Progressable* progressable) const
+{
+    std::vector<TypeIdentity> t;
+
+    t.resize(numColumns());
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    for(size_t columnIndex = 0; columnIndex < numColumns(); columnIndex++)
+    {
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((columnIndex * 100) / numColumns()));
+
+        auto& identity = t.at(columnIndex);
+
+        for(size_t rowIndex = 1; rowIndex < numRows(); rowIndex++)
+        {
+            const auto& value = valueAt(columnIndex, rowIndex);
+            identity.updateType(value);
+        }
+    }
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    return t;
 }

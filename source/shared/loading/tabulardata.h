@@ -23,6 +23,7 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
+#include "shared/utils/typeidentity.h"
 
 #include <csv/parser.hpp>
 
@@ -36,6 +37,8 @@
 #include <vector>
 #include <array>
 #include <cstring>
+
+class Progressable;
 
 class TabularData
 {
@@ -69,6 +72,8 @@ public:
 
     void shrinkToFit();
     void reset();
+
+    std::vector<TypeIdentity> typeIdentities(Progressable* progressable = nullptr) const;
 };
 
 template<const char Delimiter>
