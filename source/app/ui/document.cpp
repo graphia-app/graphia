@@ -2057,6 +2057,38 @@ AvailableAttributesModel* Document::attributesSimilarTo(const QString& attribute
     return nullptr;
 }
 
+QStringList Document::allAttributeValues(const QString& attributeName) const
+{
+    if(attributeName.isEmpty())
+        return {};
+
+    if(_graphModel == nullptr)
+        return {};
+
+    const auto* attribute = _graphModel->attributeByName(attributeName);
+    if(attribute == nullptr)
+        return {};
+
+    QStringList attributeValues;
+
+    if(attribute->elementType() == ElementType::Node)
+    {
+        attributeValues.reserve(_graphModel->mutableGraph().numNodes());
+
+        for(auto nodeId : _graphModel->mutableGraph().nodeIds())
+            attributeValues.append(attribute->stringValueOf(nodeId));
+    }
+    else if(attribute->elementType() == ElementType::Edge)
+    {
+        attributeValues.reserve(_graphModel->mutableGraph().numEdges());
+
+        for(auto edgeId : _graphModel->mutableGraph().edgeIds())
+            attributeValues.append(attribute->stringValueOf(edgeId));
+    }
+
+    return attributeValues;
+}
+
 QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const
 {
     return u::toQStringList(_graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex));

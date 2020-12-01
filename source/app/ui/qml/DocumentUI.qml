@@ -615,6 +615,8 @@ Item
 
     function attribute(attributeName) { return document.attribute(attributeName); }
 
+    function allAttributeValues(attributeName) { return document.allAttributeValues(attributeName); }
+
     function writeTableViewToFile(tableView, fileUrl, extension)
     {
         document.writeTableViewToFile(tableView, fileUrl, extension);
