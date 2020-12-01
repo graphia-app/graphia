@@ -476,7 +476,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     if(i != _componentIds.end())
         return *i;
 
-    qDebug() << "Can't find componentId of nodeId" << nodeId;
+    if(_debug) qDebug() << "Can't find componentId of nodeId" << nodeId;
     return {};
 }
 
