@@ -164,9 +164,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(role == Qt::DisplayRole)
         return itemValue;
 
-    // Special case for source/target node items, which don't have sections
-    if(item->childCount() > 0)
-        return {};
+    // Specifically when querying element type, report any descendent of the
+    // source or target node items as edge types; bit of a hack
+    if(role == Roles::ElementTypeRole && (item->hasAncestor(_sourceNode) || item->hasAncestor(_targetNode)))
+        return elementTypeAsString(ElementType::Edge);
 
     const auto* attribute = item->attribute();
 
