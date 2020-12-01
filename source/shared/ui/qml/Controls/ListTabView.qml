@@ -33,22 +33,23 @@ Item
 {
     id: root
     default property list<Item> listTabs
-    property int currentIndex: 0
+    property int _currentIndex: 0
+    readonly property int currentIndex: _currentIndex
     property bool nextEnabled: true
     property bool finishEnabled: true
     property alias animating: numberAnimation.running
     readonly property int _padding: 5
     property Item currentItem:
     {
-        return listTabs[currentIndex];
+        return listTabs[_currentIndex];
     }
 
     //FIXME Set these based on the content tabs
     //minimumWidth: 640
     //minimumHeight: 480
 
-    onWidthChanged: { content.x = currentIndex * -contentContainer.width }
-    onHeightChanged: { content.x = currentIndex * -contentContainer.width }
+    onWidthChanged: { content.x = _currentIndex * -contentContainer.width }
+    onHeightChanged: { content.x = _currentIndex * -contentContainer.width }
 
     SystemPalette { id: systemPalette }
 
@@ -96,7 +97,7 @@ Item
                         Rectangle
                         {
                             id: delegateRectangle
-                            color: index === currentIndex ? systemPalette.highlight : "#00000000"
+                            color: index === _currentIndex ? systemPalette.highlight : "#00000000"
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)
@@ -105,7 +106,7 @@ Item
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
-                                color: index === currentIndex ? systemPalette.highlightedText : systemPalette.text
+                                color: index === _currentIndex ? systemPalette.highlightedText : systemPalette.text
                                 text: listTabs[index].title
 
                                 TextMetrics
@@ -161,7 +162,7 @@ Item
                 id: previousButton
                 text: qsTr("Previous")
                 onClicked: { root.goToPrevious(); }
-                enabled: currentIndex > 0
+                enabled: _currentIndex > 0
             }
 
             Button
@@ -169,14 +170,14 @@ Item
                 id: nextButton
                 text: qsTr("Next")
                 onClicked: { root.goToNext(); }
-                enabled: (currentIndex < listTabs.length - 1) ? nextEnabled : false
+                enabled: (_currentIndex < listTabs.length - 1) ? nextEnabled : false
             }
 
             Button
             {
                 id: finishButton
 
-                property bool _onFinishPage: currentIndex === listTabs.length - 1
+                property bool _onFinishPage: _currentIndex === listTabs.length - 1
 
                 text:
                 {
@@ -188,7 +189,7 @@ Item
 
                 onClicked:
                 {
-                    if(currentIndex !== (listTabs.length - 1))
+                    if(_currentIndex !== (listTabs.length - 1))
                         goToTab(listTabs.length - 1);
                     else
                         root.accepted();
@@ -213,9 +214,9 @@ Item
 
     function goToNext()
     {
-        if(currentIndex < listTabs.length - 1)
+        if(_currentIndex < listTabs.length - 1)
         {
-            currentIndex++;
+            _currentIndex++;
             numberAnimation.running = false;
             numberAnimation.running = true;
         }
@@ -223,9 +224,9 @@ Item
 
     function goToPrevious()
     {
-        if(currentIndex > 0)
+        if(_currentIndex > 0)
         {
-            currentIndex--;
+            _currentIndex--;
             numberAnimation.running = false;
             numberAnimation.running = true;
         }
@@ -235,7 +236,7 @@ Item
     {
         if(index <= listTabs.length - 1 && index >= 0)
         {
-            currentIndex = index;
+            _currentIndex = index;
             numberAnimation.running = false;
             numberAnimation.running = true;
         }
@@ -257,7 +258,7 @@ Item
         id: numberAnimation
         target: content
         properties: "x"
-        to: currentIndex * -(contentContainer.width)
+        to: _currentIndex * -(contentContainer.width)
         easing.type: Easing.OutQuad
 
         onStarted: { root.animationStarted(); }
@@ -280,9 +281,9 @@ Item
             listTabs[i].parent = content;
             listTabs[i].x = Qt.binding(function()
             {
-                return (indexOf(this) * contentContainer.width + tabSelector.implicitWidth);
+                return indexOf(this) * contentContainer.width + tabSelector.implicitWidth;
             });
-            listTabs[i].width = Qt.binding(function() { return (contentContainer.width); });
+            listTabs[i].width = Qt.binding(function() { return contentContainer.width; });
             listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
         }
     }
