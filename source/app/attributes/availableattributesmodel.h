@@ -58,6 +58,7 @@ private:
         const QString& value() const;
         int row() const;
         Item* parent() const;
+        bool hasAncestor(Item* potentialAncestor) const;
         const Attribute* attribute() const;
     };
 

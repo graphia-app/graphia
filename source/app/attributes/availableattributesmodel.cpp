@@ -70,6 +70,20 @@ AvailableAttributesModel::Item*AvailableAttributesModel::Item::parent() const
     return _parent;
 }
 
+bool AvailableAttributesModel::Item::hasAncestor(AvailableAttributesModel::Item* potentialAncestor) const
+{
+    if(this == potentialAncestor)
+        return true;
+
+    if(_parent == nullptr)
+        return false;
+
+    if(_parent == potentialAncestor)
+        return true;
+
+    return _parent->hasAncestor(potentialAncestor);
+}
+
 const Attribute* AvailableAttributesModel::Item::attribute() const
 {
     return _attribute;
