@@ -28,6 +28,8 @@ Item
     property var selectedValue: undefined
 
     property var model: null
+    onModelChanged: { root.selectedValue = undefined; }
+
     property alias currentIndex: popupTreeBox.currentIndex
     property alias currentIndexIsValid: popupTreeBox.currentIndexIsValid
 
