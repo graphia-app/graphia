@@ -195,6 +195,7 @@ void CorrelationPluginInstance::createAttributes()
             return dataRowForNodeId(nodeId).valueAt(column);
         })
         .setFlag(AttributeFlag::AutoRange)
+        .setUserDefined(true)
         .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
             "a specific column in the correlated data."))
         .setValidParameterValues(u::toQStringList(_dataColumnNames));
