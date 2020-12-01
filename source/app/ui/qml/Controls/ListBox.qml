@@ -29,6 +29,20 @@ Item
 
     onModelChanged: { selectedValue = undefined; }
 
+    readonly property int count:
+    {
+        if(!model)
+            return 0;
+
+        if(model.length !== undefined)
+            return model.length;
+
+        if(model.count !== undefined)
+            return model.count;
+
+        return 0;
+    }
+
     property bool allowMultipleSelection: false
 
     // Just some semi-sensible defaults
@@ -88,6 +102,6 @@ Item
     }
 
     function clear() { tableView.selection.clear(); }
-    function selectAll() { tableView.selection.selectAll(); }
+    function selectAll() { if(root.count > 0) tableView.selection.selectAll(); }
 }
 
