@@ -25,6 +25,7 @@ Item
 
     property var selectedValue
     property var selectedValues: []
+    property var selectedIndices: []
     property var model
 
     onModelChanged: { selectedValue = undefined; }
@@ -76,10 +77,12 @@ Item
             function onSelectionChanged()
             {
                 root.selectedValues = [];
+                root.selectedIndices = [];
 
                 if(target.count > 0)
                 {
                     let newSelectedValues = [];
+                    let newSelectedIndices = [];
                     target.forEach(function(rowIndex)
                     {
                         let value;
@@ -92,15 +95,18 @@ Item
 
                         root.selectedValue = value;
                         newSelectedValues.push(value);
+                        newSelectedIndices.push(rowIndex);
                     });
 
                     root.selectedValue = newSelectedValues[newSelectedValues.length - 1];
                     root.selectedValues = newSelectedValues;
+                    root.selectedIndices = newSelectedIndices;
                 }
                 else
                 {
                     root.selectedValue = undefined;
                     root.selectedValues = [];
+                    root.selectedIndices = [];
                 }
             }
         }
