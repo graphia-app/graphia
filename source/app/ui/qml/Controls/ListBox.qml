@@ -40,6 +40,9 @@ Item
         if(model.count !== undefined)
             return model.count;
 
+        if(typeof model.rowCount === 'function')
+            return model.rowCount();
+
         return 0;
     }
 
@@ -82,6 +85,8 @@ Item
                         let value;
                         if(typeof root.model.get === 'function')
                             value = root.model.get(rowIndex);
+                        else if(typeof root.model.data === 'function')
+                            value = root.model.data(root.model.index(rowIndex, 0));
                         else
                             value = root.model[rowIndex];
 
