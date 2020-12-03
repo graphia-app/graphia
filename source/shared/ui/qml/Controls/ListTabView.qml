@@ -242,6 +242,12 @@ Item
         }
     }
 
+    function reset()
+    {
+        _currentIndex = 0;
+        content.x = 0;
+    }
+
     function indexOf(item)
     {
         for(let i = 0; i < listTabs.length; i++)
