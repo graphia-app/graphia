@@ -291,21 +291,7 @@ QString GraphModel::normalisedAttributeName(QString attribute) const
     // the dot syntax for parameterised attributes
     attribute.replace('.', '_');
 
-    while(u::contains(_->_attributes, attribute))
-    {
-        int number = 1;
-
-        // The attribute name is already used, so generate a new one
-        QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
-        auto match = re.match(attribute);
-        if(match.hasMatch())
-        {
-            attribute = match.captured(1);
-            number = match.captured(2).toInt() + 1;
-        }
-
-        attribute = QStringLiteral("%1(%2)").arg(attribute).arg(number);
-    }
+    attribute = u::findUniqueName(_->_attributes, attribute);
 
     return attribute;
 }

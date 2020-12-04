@@ -19,7 +19,10 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include "shared/utils/container.h"
+
 #include <QString>
+#include <QRegularExpression>
 
 #include <string>
 #include <vector>
@@ -73,5 +76,28 @@ namespace u
 
         return ss.str();
     }
+
+    template<typename C>
+    QString findUniqueName(const C& existingNames, QString newName)
+    {
+        while(u::contains(existingNames, newName))
+        {
+            int number = 1;
+
+            // The attribute name is already used, so generate a new one
+            QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
+            auto match = re.match(newName);
+            if(match.hasMatch())
+            {
+                newName = match.captured(1);
+                number = match.captured(2).toInt() + 1;
+            }
+
+            newName = QStringLiteral("%1(%2)").arg(newName).arg(number);
+        }
+
+        return newName;
+    }
+
 } // namespace u
 #endif // STRING_H
