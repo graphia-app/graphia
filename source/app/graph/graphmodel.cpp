@@ -771,9 +771,13 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     return attributeNames;
 }
 
-Attribute& GraphModel::createAttribute(QString name)
+Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
 {
     name = normalisedAttributeName(name);
+
+    if(assignedName != nullptr)
+        *assignedName = name;
+
     Attribute& attribute = _->_attributes[name];
 
     // If we're creating an attribute during the graph transform, it's

@@ -141,7 +141,7 @@ public:
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const override;
 
-    Attribute& createAttribute(QString name) override;
+    Attribute& createAttribute(QString name, QString* assignedName = nullptr) override;
 
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
