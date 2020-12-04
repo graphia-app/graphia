@@ -250,7 +250,7 @@ private:
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
 
-    // This is a mildly awkward hack to ensure than the numNodeFoundChanged signal
+    // This is a mildly awkward hack to ensure than the numNodesFoundChanged signal
     // gets emitted /after/ the foundIndexChanged signal so that the number of
     // found nodes text in the UI gets updated minimally
     bool _numNodesFoundChanged = false;
@@ -451,8 +451,7 @@ public:
 
     Q_INVOKABLE AvailableTransformsModel* availableTransforms() const;
     Q_INVOKABLE QVariantMap transform(const QString& transformName) const;
-    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
-                                                   const QString& parameterName) const;
+    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName, const QString& parameterName) const;
     Q_INVOKABLE bool hasTransformInfo() const;
     Q_INVOKABLE QVariantMap transformInfoAtIndex(int index) const;
 
@@ -485,8 +484,7 @@ public:
     Q_INVOKABLE QVariantMap visualisationInfoAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
-    Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType,
-                                                           const QString& channelName) const;
+    Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType, const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
     Q_INVOKABLE void removeVisualisation(int index);
     Q_INVOKABLE void moveVisualisation(int from, int to);
