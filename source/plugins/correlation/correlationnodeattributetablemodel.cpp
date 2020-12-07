@@ -20,16 +20,15 @@
 
 #include "shared/utils/container.h"
 
+#include <algorithm>
+
 QStringList CorrelationNodeAttributeTableModel::columnNames() const
 {
     auto list = NodeAttributeTableModel::columnNames();
 
-    if(_dataColumnNames != nullptr)
-    {
-        list.reserve(list.size() + static_cast<int>(_dataColumnNames->size()));
-        for(const auto& dataColumnName : *_dataColumnNames)
-            list.append(dataColumnName);
-    }
+    list.reserve(list.size() + static_cast<int>(_dataColumnNames.size()));
+    for(const auto& dataColumnName : _dataColumnNames)
+        list.append(dataColumnName);
 
     return list;
 }
@@ -48,17 +47,26 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, const QString
     return NodeAttributeTableModel::dataValue(row, columnName);
 }
 
-void CorrelationNodeAttributeTableModel::addDataColumns(std::vector<QString>* dataColumnNames,
+void CorrelationNodeAttributeTableModel::addDataColumns(const std::vector<QString>& dataColumnNames,
     std::vector<double>* dataValues)
 {
     _dataColumnNames = dataColumnNames;
+
+    // Since these columns are appearing in the attribute table, we need to assign them
+    // names that don't conflict with attribute names
+    std::transform(_dataColumnNames.begin(), _dataColumnNames.end(), _dataColumnNames.begin(),
+    [](const auto& columnName)
+    {
+        return QStringLiteral("Data Value › %1").arg(columnName);
+    });
+
     _dataValues = dataValues;
 
-    for(size_t i = 0; i < _dataColumnNames->size(); i++)
-        _dataColumnIndexes.emplace(_dataColumnNames->at(i), i);
+    for(size_t i = 0; i < _dataColumnNames.size(); i++)
+        _dataColumnIndexes.emplace(_dataColumnNames.at(i), i);
 
     // Check that the data column names are unique
-    Q_ASSERT(_dataColumnNames->size() == _dataColumnIndexes.size());
+    Q_ASSERT(_dataColumnNames.size() == _dataColumnIndexes.size());
 }
 
 bool CorrelationNodeAttributeTableModel::columnIsCalculated(const QString& columnName) const

@@ -409,7 +409,7 @@ void CorrelationPluginInstance::setNodeAttributeTableModelDataColumns()
     if(_transpose)
         return;
 
-    _nodeAttributeTableModel.addDataColumns(&_dataColumnNames, &_data);
+    _nodeAttributeTableModel.addDataColumns(_dataColumnNames, &_data);
 }
 
 QStringList CorrelationPluginInstance::columnAnnotationNames() const
