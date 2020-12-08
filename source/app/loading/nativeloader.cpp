@@ -253,8 +253,10 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     return true;
 }
 
-bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
+bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 {
+    auto* graphModel = dynamic_cast<GraphModel*>(igraphModel);
+
     Q_ASSERT(graphModel != nullptr);
     if(graphModel == nullptr)
         return false;

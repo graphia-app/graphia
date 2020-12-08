@@ -61,7 +61,7 @@ private:
     Shading _shading = Shading::Smooth;
 
 public:
-    bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    bool parse(const QUrl& url, IGraphModel* igraphModel) override;
     void setPluginInstance(IPluginInstance* pluginInstance);
 
     QStringList transforms() const { return _transforms; }
