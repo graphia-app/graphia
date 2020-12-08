@@ -126,7 +126,6 @@ ApplicationWindow
         TabView
         {
             id: tabView
-            property var tableViews: []
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: tabView.count > 0
@@ -137,7 +136,14 @@ ApplicationWindow
             Repeater
             {
                 model: root.models
-                onItemAdded: { Qt.callLater(resizeColumnsToContentsBugWorkaround); }
+                onItemAdded:
+                {
+                    Qt.callLater(function()
+                    {
+                        let tab = item;
+                        tab.item.childTableView.resizeColumnsToContents();
+                    });
+                }
 
                 Tab
                 {
@@ -154,7 +160,6 @@ ApplicationWindow
                         TableView
                         {
                             id: tableView
-                            visible: false
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 100
@@ -259,9 +264,6 @@ ApplicationWindow
                                 target: qtObject
                                 function onDataChanged() { resizeColumnsToContentsBugWorkaround(); }
                             }
-
-                            Component.onCompleted: { tabView.tableViews.push(tableView); }
-                            Component.onDestruction: { tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1); }
                         }
 
                         GridLayout
@@ -408,8 +410,7 @@ ApplicationWindow
         {
             misc.fileSaveInitialFolder = folder.toString();
             wizard.documentUI.writeTableViewToFile(
-                tabView.tableViews[tabView.currentIndex],
-                file, defaultSuffix);
+                root.currentTableView, file, defaultSuffix);
         }
     }
 
@@ -419,27 +420,5 @@ ApplicationWindow
         section: "misc"
 
         property var fileSaveInitialFolder
-    }
-
-    // Work around for QTBUG-58594
-    function resizeColumnsToContentsBugWorkaround()
-    {
-        for(let j = 0; j < tabView.tableViews.length; ++j)
-        {
-            let inTableView = tabView.tableViews[j];
-            inTableView.visible = true;
-            for(let i = 0; i < inTableView.columnCount; ++i)
-            {
-                let col = inTableView.getColumn(i);
-                let header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
-                if(col)
-                {
-                    col.__index = i;
-                    col.resizeToContents();
-                    if(col.width < header.implicitWidth)
-                        col.width = header.implicitWidth;
-                }
-            }
-        }
     }
 }
