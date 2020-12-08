@@ -28,10 +28,30 @@ import Qt.labs.platform 1.0 as Labs
 
 ApplicationWindow
 {
+    id: root
+
     property var models
-    property var currentHeatmap
     property var wizard
+
     property var currentTableView: null
+    property var currentHeatmap: null
+
+    function updateCurrent()
+    {
+        let tab = tabView.getTab(tabView.currentIndex);
+        if(!tab)
+            return;
+
+        let item = tabView.getTab(tabView.currentIndex).item;
+        if(!item)
+            return;
+
+        root.currentTableView = item.childTableView;
+        root.currentHeatmap = item.childHeatmap;
+
+    }
+
+    onModelsChanged: { root.updateCurrent(); }
 
     title: qsTr("Enrichment Results")
     minimumHeight: 400
@@ -46,7 +66,7 @@ ApplicationWindow
         standardButtons: StandardButton.Yes | StandardButton.Cancel
         onYes:
         {
-            models.remove(models.get(tabView.currentIndex));
+            root.models.remove(root.models.get(tabView.currentIndex));
         }
     }
 
@@ -110,11 +130,15 @@ ApplicationWindow
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: tabView.count > 0
-            onCountChanged: currentIndex = count - 1;
+
+            onCountChanged: { currentIndex = count - 1; }
+            onCurrentIndexChanged: { root.updateCurrent(); }
+
             Repeater
             {
-                model: models
-                onItemAdded: Qt.callLater(resizeColumnsToContentsBugWorkaround);
+                model: root.models
+                onItemAdded: { Qt.callLater(resizeColumnsToContentsBugWorkaround); }
+
                 Tab
                 {
                     id: tab
@@ -123,18 +147,24 @@ ApplicationWindow
                     SplitView
                     {
                         id: splitView
+
+                        property alias childTableView: tableView
+                        property alias childHeatmap: heatmap
+
                         TableView
                         {
+                            id: tableView
+                            visible: false
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.minimumWidth: 100
+
                             MouseArea
                             {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.RightButton
                                 propagateComposedEvents: true
-                                onClicked:
-                                {
-                                    currentTableView = tableView;
-                                    exportTableMenu.popup();
-                                }
+                                onClicked: { exportTableMenu.popup(); }
                             }
 
                             Text
@@ -144,17 +174,13 @@ ApplicationWindow
                                 visible: tableView.rowCount === 0
                             }
 
-                            id: tableView
-                            visible: false
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.minimumWidth: 100
                             sortIndicatorVisible: true
                             selectionMode: SelectionMode.SingleSelection
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
                                 sourceModel: qtObject
+
                                 sorters:
                                 [
                                     RoleSorter
@@ -235,14 +261,15 @@ ApplicationWindow
                             }
 
                             Component.onCompleted: { tabView.tableViews.push(tableView); }
-
                             Component.onDestruction: { tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1); }
                         }
+
                         GridLayout
                         {
                             columns: 2
                             Layout.fillHeight: true
                             visible: showHeatmapButton.checked
+
                             EnrichmentHeatmap
                             {
                                 id: heatmap
@@ -282,11 +309,7 @@ ApplicationWindow
                                             (scrollView.flickableItem.contentHeight - scrollView.viewport.height);
                                 }
 
-                                onRightClick:
-                                {
-                                    currentHeatmap = heatmap;
-                                    plotContextMenu.popup();
-                                }
+                                onRightClick: { plotContextMenu.popup(); }
 
                                 ScrollView
                                 {
@@ -325,7 +348,7 @@ ApplicationWindow
     Action
     {
         id: saveImageAction
-        enabled: tabView.visible
+        enabled: root.currentHeatmap
         text: qsTr("Save As Image…")
         iconName: "camera-photo"
         onTriggered:
@@ -346,7 +369,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: currentTableView && currentTableView.rowCount > 0
+        enabled: root.currentTableView && root.currentTableView.rowCount > 0
         text: qsTr("Export Table…")
         iconName: "document-save"
         onTriggered:
