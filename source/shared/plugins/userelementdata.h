@@ -29,6 +29,7 @@
 #include "shared/utils/progressable.h"
 
 #include <map>
+#include <set>
 #include <memory>
 
 template<typename E>
@@ -43,6 +44,7 @@ private:
 
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
+    std::set<QString> _exposedAsAttributes;
 
     void generateElementIdMapping(E elementId)
     {
@@ -94,16 +96,33 @@ public:
         return value(indexFor(elementId), name);
     }
 
-    void exposeAsAttributes(IGraphModel& graphModel)
+    void remove(const QString& name) override
     {
+        UserData::remove(name);
+        _exposedAsAttributes.erase(name);
+    }
+
+    std::vector<QString> exposeAsAttributes(IGraphModel& graphModel)
+    {
+        std::vector<QString> createdAttributeNames;
+
         for(const auto& [name, userDataVector] : *this)
         {
             // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
             const auto& userDataVectorName = name;
 
-            auto& attribute = graphModel.createAttribute(userDataVectorName)
-                    .setFlag(AttributeFlag::Searchable)
-                    .setUserDefined(true);
+            if(u::contains(_exposedAsAttributes, userDataVectorName))
+                continue;
+
+            _exposedAsAttributes.emplace(userDataVectorName);
+
+            QString attributeName;
+
+            auto& attribute = graphModel.createAttribute(userDataVectorName, &attributeName)
+                .setFlag(AttributeFlag::Searchable)
+                .setUserDefined(true);
+
+            createdAttributeNames.emplace_back(attributeName);
 
             switch(userDataVector.type())
             {
@@ -153,6 +172,8 @@ public:
 
             attribute.setDescription(QString(QObject::tr("%1 is a user defined attribute.")).arg(userDataVectorName));
         }
+
+        return createdAttributeNames;
     }
 
     json save(const IMutableGraph&, const std::vector<E>& elementIds, Progressable& progressable) const

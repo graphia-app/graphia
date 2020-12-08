@@ -41,6 +41,8 @@ private:
     int _numValues = 0;
 
 public:
+    virtual ~UserData() = default;
+
     QString firstUserDataVectorName() const;
 
     int numUserDataVectors() const;
@@ -57,7 +59,7 @@ public:
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 
-    void remove(const QString& name);
+    virtual void remove(const QString& name);
 
     json save(Progressable& progressable, const std::vector<size_t>& indexes = {}) const;
     bool load(const json& jsonObject, Progressable& progressable);
