@@ -54,8 +54,12 @@ class VisualisationInfo;
 
 class GraphTransformFactory;
 
+class AttributeChangesTracker;
+
 class GraphModel : public QObject, public IGraphModel
 {
+    friend class AttributeChangesTracker;
+
     Q_OBJECT
 public:
     GraphModel(QString name, IPlugin* plugin);
@@ -146,6 +150,8 @@ public:
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 
+    std::unique_ptr<AttributeChangesTracker> attributeChangesTracker();
+
     const Attribute* attributeByName(const QString& name) const override;
     bool attributeExists(const QString& name) const override;
     bool attributeIsValid(const QString& name) const;
@@ -179,6 +185,16 @@ signals:
     void visualsChanged();
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames);
     void attributeValuesChanged(const QStringList& attributeNames);
+};
+
+class AttributeChangesTracker
+{
+private:
+    GraphModel* _graphModel;
+
+public:
+    AttributeChangesTracker(GraphModel& graphModel);
+    ~AttributeChangesTracker();
 };
 
 #endif // GRAPHMODEL_H

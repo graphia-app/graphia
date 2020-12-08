@@ -80,6 +80,7 @@ using EdgeVisuals = EdgeArray<ElementVisual>;
 class GraphModelImpl
 {
     friend class GraphModel;
+    friend class AttributeChangesTracker;
 
 public:
     explicit GraphModelImpl(GraphModel& graphModel) :
@@ -159,6 +160,10 @@ private:
     NodeIdSet _highlightedNodeIds;
 
     bool _nodesMaskActive = false;
+
+    bool _trackAttributeChanges = false;
+    QStringList _trackedAddedAttributes;
+    QStringList _trackedRemovedAttributes;
 };
 
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
@@ -786,6 +791,9 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
     if(_transformedGraphIsChanging)
         attribute.setFlag(AttributeFlag::Dynamic);
 
+    if(_->_trackAttributeChanges)
+        _->_trackedAddedAttributes.append(name);
+
     return attribute;
 }
 
@@ -796,8 +804,18 @@ void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
 
 void GraphModel::removeAttribute(const QString& name)
 {
-    if(u::contains(_->_attributes, name))
-        _->_attributes.erase(name);
+    if(!u::contains(_->_attributes, name))
+        return;
+
+    _->_attributes.erase(name);
+
+    if(_->_trackAttributeChanges)
+        _->_trackedRemovedAttributes.append(name);
+}
+
+std::unique_ptr<AttributeChangesTracker> GraphModel::attributeChangesTracker()
+{
+    return std::make_unique<AttributeChangesTracker>(*this);
 }
 
 const Attribute* GraphModel::attributeByName(const QString& name) const
@@ -1112,4 +1130,27 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
         std::back_inserter(addedAttributeNames), identityToName);
 
     emit attributesChanged(addedAttributeNames, removedAttributeNames);
+}
+
+AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :
+    _graphModel(&graphModel)
+{
+    Q_ASSERT(!_graphModel->_->_trackAttributeChanges);
+
+    _graphModel->_->_trackAttributeChanges = true;
+    _graphModel->_->_trackedAddedAttributes.clear();
+    _graphModel->_->_trackedRemovedAttributes.clear();
+}
+
+AttributeChangesTracker::~AttributeChangesTracker()
+{
+    Q_ASSERT(_graphModel->_->_trackAttributeChanges);
+
+    emit _graphModel->attributesChanged(
+        _graphModel->_->_trackedAddedAttributes,
+        _graphModel->_->_trackedRemovedAttributes);
+
+    _graphModel->_->_trackedAddedAttributes.clear();
+    _graphModel->_->_trackedRemovedAttributes.clear();
+    _graphModel->_->_trackAttributeChanges = false;
 }
