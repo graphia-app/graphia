@@ -24,8 +24,8 @@
 #include "shared/graph/grapharray.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
-#include "shared/plugins/userdata.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userdata.h"
+#include "shared/loading/userelementdata.h"
 
 #include "loading/correlationfileparser.h"
 

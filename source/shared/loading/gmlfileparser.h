@@ -20,7 +20,7 @@
 #define GMLFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 class GmlFileParser : public IParser
 {

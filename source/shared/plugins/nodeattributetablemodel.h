@@ -21,7 +21,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/ui/idocument.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>

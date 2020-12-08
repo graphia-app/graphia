@@ -20,7 +20,7 @@
 #define JSONGRAPHPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 #include "json_helper.h"
 
 class JsonGraphParser : public IParser

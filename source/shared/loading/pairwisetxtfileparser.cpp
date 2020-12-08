@@ -22,7 +22,7 @@
 #include "shared/utils/string.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 #include <utfcpp/utf8.h>
 

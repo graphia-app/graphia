@@ -20,7 +20,7 @@
 #define MATFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 #include <matio.h>
 

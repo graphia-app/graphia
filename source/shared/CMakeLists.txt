@@ -43,14 +43,14 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userdata.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userdatavector.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userelementdata.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/baseplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/iplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/userelementdata.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/multisamples.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
@@ -113,11 +113,11 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userdata.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/userdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp

@@ -20,7 +20,7 @@
 #define PAIRWISETXTFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 class PairwiseTxtFileParser : public IParser
 {

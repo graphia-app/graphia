@@ -18,7 +18,7 @@
 
 #include "nodeattributetablemodel.h"
 
-#include "userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"

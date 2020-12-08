@@ -23,7 +23,7 @@
 #include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/tabulardata.h"
 
-#include "shared/plugins/userelementdata.h"
+#include "shared/loading/userelementdata.h"
 
 static bool isMatrix(const TabularData& tabularData)
 {
