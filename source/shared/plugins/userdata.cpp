@@ -103,6 +103,17 @@ QVariant UserData::value(size_t index, const QString& name) const
     return {};
 }
 
+void UserData::remove(const QString& name)
+{
+    _userDataVectors.erase(std::remove_if(_userDataVectors.begin(), _userDataVectors.end(),
+    [&name](const auto& pair)
+    {
+        return pair.first == name;
+    }), _userDataVectors.end());
+
+    u::removeByValue(_vectorNames, name);
+}
+
 json UserData::save(Progressable& progressable, const std::vector<size_t>& indexes) const
 {
     json jsonObject;

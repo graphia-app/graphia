@@ -48,6 +48,9 @@ public:
     UserDataVector(const UserDataVector&) = default;
     UserDataVector(UserDataVector&&) noexcept = default;
 
+    UserDataVector& operator=(const UserDataVector&) = default;
+    UserDataVector& operator=(UserDataVector&&) = default;
+
     explicit UserDataVector(QString name) :
         _name(std::move(name))
     {}
