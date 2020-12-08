@@ -336,6 +336,18 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         }
     }
 
+    if(u::contains(jsonBody, "userNodeData") && jsonBody["userNodeData"].is_object())
+    {
+        if(!graphModel->userNodeData().load(jsonBody["userNodeData"], *this))
+            return false;
+    }
+
+    if(u::contains(jsonBody, "userEdgeData") && jsonBody["userEdgeData"].is_object())
+    {
+        if(!graphModel->userEdgeData().load(jsonBody["userEdgeData"], *this))
+            return false;
+    }
+
     if(u::contains(jsonBody, "transforms"))
     {
         for(const auto& transform : jsonBody["transforms"])

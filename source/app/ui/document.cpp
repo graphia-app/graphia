@@ -27,6 +27,7 @@
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
 #include "shared/utils/string.h"
+#include "shared/loading/userelementdata.h"
 
 #include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
@@ -624,6 +625,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             Q_ASSERT(completedLoader != nullptr);
             if(completedLoader == nullptr)
                 return;
+
+            _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
+            _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
 
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
                 completedLoader->transforms());

@@ -70,6 +70,8 @@
 #include "shared/utils/flags.h"
 #include "shared/utils/string.h"
 
+#include "shared/loading/userelementdata.h"
+
 #include <QRegularExpression>
 
 #include <utility>
@@ -91,7 +93,10 @@ public:
         _mappedNodeVisuals(_graph),
         _mappedEdgeVisuals(_graph),
         _nodeNames(_graph)
-    {}
+    {
+        _userNodeData.initialise(_graph);
+        _userEdgeData.initialise(_graph);
+    }
 
 private:
     MutableGraph _graph;
@@ -106,6 +111,9 @@ private:
     VisualisationInfosMap _visualisationInfos;
 
     NodeArray<QString> _nodeNames;
+
+    UserNodeData _userNodeData;
+    UserEdgeData _userEdgeData;
 
     std::map<QString, Attribute> _attributes;
 
@@ -926,6 +934,9 @@ void GraphModel::calculateAttributeRange(const IGraph* graph, Attribute& attribu
     else if(attribute.elementType() == ElementType::Edge)
         attribute.autoSetRangeForElements(graph->edgeIds());
 }
+
+UserNodeData& GraphModel::userNodeData() { return _->_userNodeData; }
+UserEdgeData& GraphModel::userEdgeData() { return _->_userEdgeData; }
 
 void GraphModel::clearHighlightedNodes()
 {

@@ -25,6 +25,7 @@
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/string.h"
+#include "shared/loading/userelementdata.h"
 
 #include "graph/graphmodel.h"
 #include "graph/mutablegraph.h"
@@ -184,6 +185,11 @@ bool NativeSaver::save()
 
     content["graph"] = JSONGraphSaver::graphAsJson(graphModel->mutableGraph(), *this);
     content["nodeNames"] = u::graphArrayAsJson(graphModel->nodeNames(), graphModel->mutableGraph().nodeIds(), this);
+
+    content["userNodeData"] = graphModel->userNodeData().save(graphModel->mutableGraph(),
+        graphModel->mutableGraph().nodeIds(), *this);
+    content["userEdgeData"] = graphModel->userEdgeData().save(graphModel->mutableGraph(),
+        graphModel->mutableGraph().edgeIds(), *this);
 
     json layout;
 

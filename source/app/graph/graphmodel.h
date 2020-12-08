@@ -54,6 +54,10 @@ class VisualisationInfo;
 
 class GraphTransformFactory;
 
+template<typename> class UserElementData;
+using UserNodeData = UserElementData<NodeId>;
+using UserEdgeData = UserElementData<EdgeId>;
+
 class AttributeChangesTracker;
 
 class GraphModel : public QObject, public IGraphModel
@@ -163,6 +167,9 @@ public:
     static bool attributeNameIsValid(const QString& attributeName);
 
     static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);
+
+    UserNodeData& userNodeData();
+    UserEdgeData& userEdgeData();
 
     void clearHighlightedNodes();
     void highlightNodes(const NodeIdSet& nodeIds);
