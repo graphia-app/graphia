@@ -46,7 +46,9 @@ bool JSONGraphSaver::save()
         NodeId nodeId = std::stoi(node["id"].get<std::string>());
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
-            const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
+            const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
+            if(attribute->hasParameter())
+                continue;
 
             auto byteArray = nodeAttributeName.toUtf8();
             const auto* name = byteArray.constData();
@@ -70,7 +72,9 @@ bool JSONGraphSaver::save()
         EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
-            const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
+            const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
+            if(attribute->hasParameter())
+                continue;
 
             auto byteArray = edgeAttributeName.toUtf8();
             const auto* name = byteArray.constData();

@@ -86,6 +86,9 @@ bool GraphMLSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         const auto* attribute = _graphModel->attributeByName(attributeName);
+        if(attribute->hasParameter())
+            continue;
+
         stream.writeStartElement(QStringLiteral("key"));
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("d%1").arg(keyId));
         idToAttribute[QStringLiteral("d%1").arg(keyId)] = attributeName;
@@ -124,7 +127,10 @@ bool GraphMLSaver::save()
         stream.writeAttribute(QStringLiteral("id"), QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
-            const auto& attribute = _graphModel->attributeByName(nodeAttributeName);
+            const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
+            if(attribute->hasParameter())
+                continue;
+
             stream.writeStartElement(QStringLiteral("data"));
             stream.writeAttribute(QStringLiteral("key"), attributeToId.at(nodeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(nodeId).toHtmlEscaped());
@@ -168,7 +174,10 @@ bool GraphMLSaver::save()
                               QStringLiteral("n%1").arg(static_cast<int>(edge.targetId())));
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
-            const auto& attribute = _graphModel->attributeByName(edgeAttributeName);
+            const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
+            if(attribute->hasParameter())
+                continue;
+
             stream.writeStartElement(QStringLiteral("data"));
             stream.writeAttribute(QStringLiteral("key"), attributeToId.at(edgeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(edgeId).toHtmlEscaped());
