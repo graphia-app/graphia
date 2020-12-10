@@ -105,6 +105,8 @@ Item
         tableView._updateColumnVisibility();
     }
 
+    property alias columnOrder: proxyModel.columnOrder
+
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
     {

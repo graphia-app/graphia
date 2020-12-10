@@ -110,7 +110,9 @@ PluginContent
         let data =
         {
             "sortColumn": tableView.sortIndicatorColumn,
-            "sortOrder": tableView.sortIndicatorOrder
+            "sortOrder": tableView.sortIndicatorOrder,
+            "hiddenColumns": tableView.hiddenColumns,
+            "columnOrder": tableView.columnOrder
         };
 
         return data;
@@ -128,5 +130,7 @@ PluginContent
 
         if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)            tableView.setHiddenColumns(data.hiddenColumns);
+        if(data.columnOrder !== undefined)              tableView.columnOrder = data.columnOrder;
     }
 }
