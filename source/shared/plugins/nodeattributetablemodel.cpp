@@ -102,25 +102,6 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
     return {};
 }
 
-void NodeAttributeTableModel::onColumnAdded(size_t columnIndex)
-{
-    auto columnName = _columnNames.at(static_cast<int>(columnIndex));
-
-    if(columnIndex < _pendingData.size())
-        _pendingData.insert(_pendingData.begin() + static_cast<int>(columnIndex), {{}});
-    else
-        _pendingData.resize(columnIndex + 1);
-
-    auto& column = _pendingData.at(columnIndex);
-    updateColumn(Qt::DisplayRole, column, columnName);
-}
-
-void NodeAttributeTableModel::onColumnRemoved(size_t columnIndex)
-{
-    Q_ASSERT(columnIndex < _pendingData.size());
-    _pendingData.erase(_pendingData.begin() + static_cast<int>(columnIndex));
-}
-
 void NodeAttributeTableModel::updateColumnNames()
 {
     _columnNames = columnNames();
@@ -317,20 +298,35 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     // Any roles requiring an update will be taken care of en-masse, in onUpdateComplete
     _columnsRequiringUpdates.clear();
 
-    for(const auto& name : removedSet)
+    std::vector<size_t> removedIndices;
+    std::transform(removedSet.begin(), removedSet.end(), std::back_inserter(removedIndices),
+        [this](const auto& name) { return static_cast<size_t>(_columnNames.indexOf(name)); });
+    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<>());
+
+    for(size_t index : removedIndices)
     {
-        auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
-        onColumnRemoved(columnIndex);
-        emit columnRemoved(columnIndex, name);
+        Q_ASSERT(index < _pendingData.size());
+        _pendingData.erase(_pendingData.begin() + static_cast<int>(index));
     }
 
     updateColumnNames();
 
-    for(const auto& name : addedSet)
+    std::vector<size_t> addedIndices;
+    std::transform(addedSet.begin(), addedSet.end(), std::back_inserter(addedIndices),
+        [this](const auto& name) { return static_cast<size_t>(_columnNames.indexOf(name)); });
+    std::sort(addedIndices.begin(), addedIndices.end(), std::less<>());
+
+    for(size_t index : addedIndices)
     {
-        auto columnIndex = static_cast<size_t>(_columnNames.indexOf(name));
-        onColumnAdded(columnIndex);
-        emit columnAdded(columnIndex, name);
+        auto columnName = _columnNames.at(static_cast<int>(index));
+
+        if(index < _pendingData.size())
+            _pendingData.insert(_pendingData.begin() + static_cast<int>(index), {{}});
+        else
+            _pendingData.resize(index + 1);
+
+        auto& column = _pendingData.at(index);
+        updateColumn(Qt::DisplayRole, column, columnName);
     }
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");

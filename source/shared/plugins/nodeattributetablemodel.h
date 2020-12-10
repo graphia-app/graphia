@@ -70,8 +70,6 @@ protected:
     int indexForColumnName(const QString& columnName);
 
 private:
-    void onColumnAdded(size_t columnIndex);
-    void onColumnRemoved(size_t columnIndex);
     void updateAttribute(const QString& attributeName);
     void updateColumn(int role, Column& column, const QString& columnName = {});
     void update();
@@ -116,8 +114,6 @@ public slots:
 
 signals:
     void columnNamesChanged();
-    void columnAdded(size_t index, const QString& name);
-    void columnRemoved(size_t index, const QString& name);
     void selectionChanged();
 };
 
