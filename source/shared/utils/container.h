@@ -204,6 +204,13 @@ namespace u
         return ranking;
     }
 
+    template<typename T, template<typename, typename...> typename C, typename... Args>
+    bool hasUniqueValues(C<T, Args...> container)
+    {
+        std::sort(container.begin(), container.end());
+        return std::unique(container.begin(), container.end()) == container.end();
+    }
+
 } // namespace u
 
 #endif // CONTAINER_H
