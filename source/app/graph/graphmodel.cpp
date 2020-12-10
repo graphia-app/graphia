@@ -196,6 +196,8 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
         &GraphModel::attributeValuesChanged, Qt::DirectConnection);
 
+    connect(this, &GraphModel::attributesChanged, this, &GraphModel::updateSharedAttributeValues, Qt::DirectConnection);
+
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
 
@@ -895,24 +897,18 @@ void GraphModel::initialiseAttributeRanges()
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
 }
 
-static void findSharedAttributeValues(const Graph* graph,
-    std::map<QString, Attribute>& attributes)
+void GraphModel::updateSharedAttributeValues()
 {
-    for(auto& attribute : make_value_wrapper(attributes))
+    for(auto& attribute : make_value_wrapper(_->_attributes))
     {
         if(!attribute.testFlag(AttributeFlag::FindShared))
             continue;
 
         if(attribute.elementType() == ElementType::Node)
-            attribute.updateSharedValuesForElements(graph->nodeIds());
+            attribute.updateSharedValuesForElements(graph().nodeIds());
         else if(attribute.elementType() == ElementType::Edge)
-            attribute.updateSharedValuesForElements(graph->edgeIds());
+            attribute.updateSharedValuesForElements(graph().edgeIds());
     }
-}
-
-void GraphModel::initialiseUniqueAttributeValues()
-{
-    findSharedAttributeValues(&graph(), _->_attributes);
 }
 
 bool GraphModel::attributeNameIsValid(const QString& attributeName)
@@ -1118,11 +1114,9 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     _transformedGraphIsChanging = true;
 }
 
-void GraphModel::onTransformedGraphChanged(const Graph* graph)
+void GraphModel::onTransformedGraphChanged(const Graph*)
 {
     _transformedGraphIsChanging = false;
-
-    findSharedAttributeValues(graph, _->_attributes);
 
     auto attributeIdentities = _->currentAttributeIdentities();
 

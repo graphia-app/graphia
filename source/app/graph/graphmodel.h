@@ -162,7 +162,7 @@ public:
     Attribute attributeValueByName(const QString& name) const;
 
     void initialiseAttributeRanges();
-    void initialiseUniqueAttributeValues();
+    void updateSharedAttributeValues();
 
     static bool attributeNameIsValid(const QString& attributeName);
 
