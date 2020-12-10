@@ -90,8 +90,12 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
         const auto* attributeB = graphModel->attributeByName(attributeBName);
         const auto& stringAttributeA = attributeA->stringValueOf(nodeId);
         const auto& stringAttributeB = attributeB->stringValueOf(nodeId);
-        ++attributeValueEntryCountATotal[stringAttributeA];
-        ++attributeValueEntryCountBTotal[stringAttributeB];
+
+        if(!stringAttributeA.isEmpty())
+            ++attributeValueEntryCountATotal[stringAttributeA];
+
+        if(!stringAttributeB.isEmpty())
+            ++attributeValueEntryCountBTotal[stringAttributeB];
     }
 
     // Comparing
@@ -107,7 +111,12 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
     std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
     for(auto nodeId : graphModel->graph().nodeIds())
-        nodeIdsForAttributeValue[attributeA->stringValueOf(nodeId)].push_back(nodeId);
+    {
+        const auto& value = attributeA->stringValueOf(nodeId);
+
+        if(!value.isEmpty())
+            nodeIdsForAttributeValue[value].push_back(nodeId);
+    }
 
     for(auto& attributeValueA : u::keysFor(attributeValueEntryCountATotal))
     {
