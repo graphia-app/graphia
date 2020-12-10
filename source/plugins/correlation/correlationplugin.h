@@ -187,7 +187,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 5; }
+    int dataVersion() const override { return 6; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

@@ -28,6 +28,7 @@
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
 #include <QCollator>
+#include <QStringList>
 
 #include <deque>
 #include <utility>
@@ -49,23 +50,24 @@ class TableProxyModel : public QSortFilterProxyModel
     Q_OBJECT
 
     Q_PROPERTY(QAbstractItemModel* headerModel READ headerModel CONSTANT)
-    Q_PROPERTY(std::vector<int> hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
-    Q_PROPERTY(std::vector<int> columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
-    Q_PROPERTY(int sortColumn READ sortColumn_ WRITE setSortColumn NOTIFY sortColumnChanged)
+    Q_PROPERTY(QStringList columnNames MEMBER _columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList hiddenColumns MEMBER _hiddenColumns WRITE setHiddenColumns)
+    Q_PROPERTY(QStringList columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
+    Q_PROPERTY(QString sortColumn READ sortColumn_ WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder_ WRITE setSortOrder NOTIFY sortOrderChanged)
 
 private:
     QStandardItemModel _headerModel;
+    QStringList _columnNames;
     bool _showCalculatedColumns = false;
     QItemSelection _subSelection;
     std::unordered_set<int> _subSelectionRows;
-    std::vector<int> _hiddenColumns;
-    std::vector<int> _sourceColumnOrder;
+    QStringList _hiddenColumns;
+    QStringList _sourceColumnOrder;
     std::vector<int> _orderedProxyToSourceColumn;
-    std::vector<int> _unorderedSourceToProxyColumn;
 
     QCollator _collator;
-    std::deque<std::pair<int, Qt::SortOrder>> _sortColumnAndOrders;
+    std::deque<std::pair<QString, Qt::SortOrder>> _sortColumnAndOrders;
 
     enum Roles
     {
@@ -74,7 +76,6 @@ private:
 
     QAbstractItemModel* headerModel() { return &_headerModel; }
     void calculateOrderedProxySourceMapping();
-    void calculateUnorderedSourceProxyColumnMapping();
     void updateSourceModelFilter();
 
     void resort();
@@ -111,18 +112,20 @@ public:
 
     using QSortFilterProxyModel::mapToSource;
 
-    void setHiddenColumns(std::vector<int> hiddenColumns);
-    void setColumnOrder(const std::vector<int>& columnOrder);
+    void setHiddenColumns(const QStringList& hiddenColumns);
+    void setColumnOrder(const QStringList& columnOrder);
 
     // The underscores are to avoid clashes with QSortFilterProxyModel::sort[Column|Order]
-    int sortColumn_() const;
-    void setSortColumn(int newSortColumn);
+    QString sortColumn_() const;
+    void setSortColumn(const QString& newSortColumn);
 
     Qt::SortOrder sortOrder_() const;
     void setSortOrder(Qt::SortOrder newSortOrder);
 
 signals:
-    void sortColumnChanged(int sortColumn);
+    void columnNamesChanged();
+
+    void sortColumnChanged(const QString& sortColumn);
     void sortOrderChanged(Qt::SortOrder sortOrder);
 
     void filterRoleNameChanged();

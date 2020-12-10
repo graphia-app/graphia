@@ -118,6 +118,14 @@ PluginContent
 
     function load(data, version)
     {
+        if(version < 2)
+        {
+            if(data.sortColumn !== undefined && Number.isInteger(data.sortColumn) && data.sortColumn >= 0)
+                data.sortColumn = tableView.model.columnNameFor(data.sortColumn);
+            else
+                data.sortColumn = "";
+        }
+
         if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
     }

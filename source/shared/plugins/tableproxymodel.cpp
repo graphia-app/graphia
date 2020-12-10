@@ -30,8 +30,8 @@ bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceP
 
 bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex&) const
 {
-    Q_UNUSED(sourceParent)
-    return !u::contains(_hiddenColumns, sourceColumn);
+    auto columnName = _columnNames.at(sourceColumn);
+    return !u::contains(_hiddenColumns, columnName);
 }
 
 QVariant TableProxyModel::data(const QModelIndex& index, int role) const
@@ -103,47 +103,30 @@ TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent
     _collator.setNumericMode(true);
 }
 
-void TableProxyModel::setHiddenColumns(std::vector<int> hiddenColumns)
+void TableProxyModel::setHiddenColumns(const QStringList& hiddenColumns)
 {
-    std::sort(hiddenColumns.begin(), hiddenColumns.end());
     _hiddenColumns = hiddenColumns;
     invalidateFilter();
-    calculateOrderedProxySourceMapping();
-}
-
-void TableProxyModel::calculateUnorderedSourceProxyColumnMapping()
-{
-    auto sourceColumnCount = static_cast<size_t>(sourceModel()->columnCount());
-    std::vector<int> proxyToSourceColumns;
-    std::vector<int> sourceToProxyColumns(sourceColumnCount, -1);
-    proxyToSourceColumns.reserve(sourceColumnCount);
-    for(auto i = 0; i < static_cast<int>(sourceColumnCount); ++i)
-    {
-        if(filterAcceptsColumn(i, {}))
-            proxyToSourceColumns.push_back(i);
-    }
-
-    for(auto i = 0; i < columnCount(); ++i)
-    {
-        auto index = static_cast<size_t>(i);
-        auto source = static_cast<size_t>(proxyToSourceColumns.at(index));
-        sourceToProxyColumns[source] = i;
-    }
-
-    _unorderedSourceToProxyColumn = sourceToProxyColumns;
 }
 
 void TableProxyModel::calculateOrderedProxySourceMapping()
 {
-    if(_sourceColumnOrder.size() != static_cast<size_t>(sourceModel()->columnCount()))
+    if(_sourceColumnOrder.size() != sourceModel()->columnCount())
     {
         // If ordering doesn't match the sourcemodel size just destroy it
-        _sourceColumnOrder = std::vector<int>(static_cast<size_t>(sourceModel()->columnCount()));
-        std::iota(_sourceColumnOrder.begin(), _sourceColumnOrder.end(), 0);
+        _sourceColumnOrder = _columnNames;
     }
 
-    auto filteredOrder = u::setDifference(_sourceColumnOrder, _hiddenColumns);
-    _orderedProxyToSourceColumn = filteredOrder;
+    QStringList columnOrder;
+    std::copy_if(_sourceColumnOrder.begin(), _sourceColumnOrder.end(), std::back_inserter(columnOrder),
+    [this](const auto& value)
+    {
+        return !u::contains(_hiddenColumns, value);
+    });
+
+    _orderedProxyToSourceColumn.clear();
+    for(const auto& columnName : columnOrder)
+        _orderedProxyToSourceColumn.emplace_back(_columnNames.indexOf(columnName));
 
     _headerModel.clear();
     _headerModel.setRowCount(1);
@@ -156,23 +139,23 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
     emit layoutChanged();
 }
 
-void TableProxyModel::setColumnOrder(const std::vector<int>& columnOrder)
+void TableProxyModel::setColumnOrder(const QStringList& columnOrder)
 {
     _sourceColumnOrder = columnOrder;
     invalidateFilter();
 }
 
-int TableProxyModel::sortColumn_() const
+QString TableProxyModel::sortColumn_() const
 {
     if(_sortColumnAndOrders.empty())
-        return -1;
+        return {};
 
     return _sortColumnAndOrders.front().first;
 }
 
-void TableProxyModel::setSortColumn(int newSortColumn)
+void TableProxyModel::setSortColumn(const QString& newSortColumn)
 {
-    if(newSortColumn < 0 || newSortColumn == sortColumn_())
+    if(newSortColumn.isEmpty() || newSortColumn == sortColumn_())
         return;
 
     auto currentSortOrder = Qt::AscendingOrder;
@@ -220,11 +203,18 @@ void TableProxyModel::setSortOrder(Qt::SortOrder newSortOrder)
 void TableProxyModel::invalidateFilter()
 {
     beginResetModel();
+
+    // Remove any sorting criteria that might not exist any more
+    _sortColumnAndOrders.erase(std::remove_if(_sortColumnAndOrders.begin(), _sortColumnAndOrders.end(),
+    [this](const auto sortColumnAndOrder)
+    {
+        return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
+    }), _sortColumnAndOrders.end());
+
     QSortFilterProxyModel::invalidate();
     QSortFilterProxyModel::invalidateFilter();
 
     calculateOrderedProxySourceMapping();
-    calculateUnorderedSourceProxyColumnMapping();
     endResetModel();
 }
 
@@ -253,7 +243,12 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
 
     for(const auto& sortColumnAndOrder : _sortColumnAndOrders)
     {
-        auto column = _unorderedSourceToProxyColumn.at(sortColumnAndOrder.first);
+        auto column = _columnNames.indexOf(sortColumnAndOrder.first);
+
+        Q_ASSERT(column >= 0);
+        if(column < 0)
+            continue;
+
         auto order = sortColumnAndOrder.second;
 
         auto indexA = sourceModel()->index(rowA, column);

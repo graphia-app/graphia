@@ -51,10 +51,10 @@ Item
 
     function defaultColumnVisibility()
     {
-        root._nodeAttributesTableModel.columnNames.forEach(function(columnName, index)
+        root._nodeAttributesTableModel.columnNames.forEach(function(columnName)
         {
             if(plugin.model.nodeAttributeTableModel.columnIsHiddenByDefault(columnName))
-                setColumnVisibility(index, false);
+                setColumnVisibility(columnName, false);
         });
 
         tableView._updateColumnVisibility();
@@ -96,9 +96,11 @@ Item
     }
 
     property var hiddenColumns: []
-
     function setHiddenColumns(hiddenColumns)
     {
+        // Filter out any columns that don't exist in the table
+        hiddenColumns = hiddenColumns.filter(v => root._nodeAttributesTableModel.columnNames.includes(v));
+
         root.hiddenColumns = hiddenColumns;
         tableView._updateColumnVisibility();
     }
@@ -120,12 +122,12 @@ Item
         tableView.forceLayoutSafe();
     }
 
-    function setColumnVisibility(sourceColumnIndex, columnVisible)
+    function setColumnVisibility(columnName, columnVisible)
     {
         if(columnVisible)
-            hiddenColumns = Utils.setRemove(hiddenColumns, sourceColumnIndex);
+            hiddenColumns = Utils.setRemove(hiddenColumns, columnName);
         else
-            hiddenColumns = Utils.setAdd(hiddenColumns, sourceColumnIndex);
+            hiddenColumns = Utils.setAdd(hiddenColumns, columnName);
     }
 
     function showAllColumns()
@@ -137,10 +139,10 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
         {
             if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
-                columns = Utils.setRemove(columns, index);
+                columns = Utils.setRemove(columns, columnName);
         });
 
         hiddenColumns = columns;
@@ -148,7 +150,7 @@ Item
 
     function hideAllColumns()
     {
-        let columns = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
+        let columns = Array.from(_nodeAttributesTableModel.columnNames);
         hiddenColumns = columns;
     }
 
@@ -156,10 +158,10 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName, index)
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
         {
             if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
-                columns = Utils.setAdd(columns, index);
+                columns = Utils.setAdd(columns, columnName);
         });
 
         hiddenColumns = columns;
@@ -438,7 +440,7 @@ Item
                 property int sortIndicatorWidth: 7
                 property int sortIndicatorMargin: 3
                 property int delegatePadding: 4
-                property var columnOrder: Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
+                property var columnOrder: Array.from(_nodeAttributesTableModel.columnNames);
 
                 Rectangle
                 {
@@ -468,6 +470,16 @@ Item
 
                     Binding { target: headerContent; property: "sourceColumn"; value: sourceColumn }
                     Binding { target: headerContent; property: "modelColumn"; value: modelColumn }
+
+                    property string text:
+                    {
+                        let index = headerItem.sourceColumn;
+
+                        if(index < 0 || index >= root._nodeAttributesTableModel.columnNames.length)
+                            return "";
+
+                        return root._nodeAttributesTableModel.columnNames[index];
+                    }
 
                     Connections
                     {
@@ -547,14 +559,15 @@ Item
 
                                 function isChecked()
                                 {
-                                    return !Utils.setContains(root.hiddenColumns, headerItem.sourceColumn);
+                                    return !Utils.setContains(root.hiddenColumns, headerItem.text);
                                 }
+
                                 checked: { return isChecked(); }
                                 onCheckedChanged:
                                 {
                                     // Unbind to prevent binding loop
                                     checked = checked;
-                                    root.setColumnVisibility(headerItem.sourceColumn, checked);
+                                    root.setColumnVisibility(headerItem.text, checked);
 
                                     // Rebind so that the delegate doesn't hold the state
                                     checked = Qt.binding(isChecked);
@@ -570,15 +583,7 @@ Item
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth);
-                            text:
-                            {
-                                let index = headerItem.sourceColumn;
-
-                                if(index < 0 || index >= root._nodeAttributesTableModel.columnNames.length)
-                                    return "";
-
-                                return root._nodeAttributesTableModel.columnNames[index];
-                            }
+                            text: headerItem.text
                             color: sysPalette.text
                             padding: headerView.delegatePadding
                             renderType: Text.NativeRendering
@@ -593,7 +598,7 @@ Item
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
                             height: headerView.delegatePadding
-                            visible: proxyModel.sortColumn === headerItem.sourceColumn && !columnSelectionMode
+                            visible: proxyModel.sortColumn === headerItem.text && !columnSelectionMode
                             transform: Rotation
                             {
                                 origin.x: sortIndicator.width * 0.5
@@ -630,8 +635,10 @@ Item
                             {
                                 if(headerContent.target > -1)
                                 {
-                                    let currentIndex = headerView.columnOrder.indexOf(sourceColumn);
-                                    let targetIndex = headerView.columnOrder.indexOf(headerContent.target);
+                                    let currentIndex = headerView.columnOrder.indexOf(
+                                        root._nodeAttributesTableModel.columnNameFor(sourceColumn));
+                                    let targetIndex = headerView.columnOrder.indexOf(
+                                        root._nodeAttributesTableModel.columnNameFor(headerContent.target));
                                     array_move(headerView.columnOrder, currentIndex, targetIndex);
                                     headerContent.target = -1;
                                 }
@@ -655,13 +662,13 @@ Item
 
                                 if(mouse.button === Qt.LeftButton)
                                 {
-                                    if(proxyModel.sortColumn === headerItem.sourceColumn)
+                                    if(proxyModel.sortColumn === headerItem.text)
                                     {
                                         proxyModel.sortOrder = proxyModel.sortOrder ?
                                             Qt.AscendingOrder : Qt.DescendingOrder;
                                     }
                                     else
-                                        proxyModel.sortColumn = headerItem.sourceColumn;
+                                        proxyModel.sortColumn = headerItem.text;
                                 }
                                 else if(mouse.button === Qt.RightButton)
                                     headerContextMenu.popup();
@@ -680,11 +687,11 @@ Item
                                     text: qsTr("Sort Ascending")
                                     checkable: true
                                     exclusiveGroup: headerSortGroup
-                                    checked: proxyModel.sortColumn === headerItem.sourceColumn &&
+                                    checked: proxyModel.sortColumn === headerItem.text &&
                                         proxyModel.sortOrder === Qt.AscendingOrder
                                     onTriggered:
                                     {
-                                        proxyModel.sortColumn = headerItem.sourceColumn;
+                                        proxyModel.sortColumn = headerItem.text;
                                         proxyModel.sortOrder = Qt.AscendingOrder;
                                     }
                                 }
@@ -694,11 +701,11 @@ Item
                                     text: qsTr("Sort Descending")
                                     checkable: true
                                     exclusiveGroup: headerSortGroup
-                                    checked: proxyModel.sortColumn === headerItem.sourceColumn &&
+                                    checked: proxyModel.sortColumn === headerItem.text &&
                                         proxyModel.sortOrder === Qt.DescendingOrder
                                     onTriggered:
                                     {
-                                        proxyModel.sortColumn = headerItem.sourceColumn;
+                                        proxyModel.sortColumn = headerItem.text;
                                         proxyModel.sortOrder = Qt.DescendingOrder;
                                     }
                                 }
@@ -845,6 +852,7 @@ Item
                 model: TableProxyModel
                 {
                     id: proxyModel
+                    columnNames: root._nodeAttributesTableModel.columnNames
                     sourceModel: root._nodeAttributesTableModel
                 }
 

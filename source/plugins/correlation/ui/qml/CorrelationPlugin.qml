@@ -799,6 +799,17 @@ PluginContent
 
     function load(data, version)
     {
+        if(version < 6)
+        {
+            if(data.sortColumn !== undefined && Number.isInteger(data.sortColumn) && data.sortColumn >= 0)
+                data.sortColumn = tableView.model.columnNameFor(data.sortColumn);
+            else
+                data.sortColumn = "";
+
+            if(data.hiddenColumns !== undefined)
+                data.hiddenColumns = data.hiddenColumns.map(c => tableView.model.columnNameFor(c));
+        }
+
         if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
         if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
