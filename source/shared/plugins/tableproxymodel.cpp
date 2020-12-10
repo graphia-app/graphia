@@ -17,21 +17,24 @@
  */
 
 #include "tableproxymodel.h"
+
 #include "nodeattributetablemodel.h"
 
-bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+#include <QDebug>
+
+bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
 {
     return sourceModel()->data(sourceModel()->index(sourceRow, 0, sourceParent),
-                               NodeAttributeTableModel::Roles::NodeSelectedRole).toBool();
+        NodeAttributeTableModel::Roles::NodeSelectedRole).toBool();
 }
 
-bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const
+bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex&) const
 {
     Q_UNUSED(sourceParent)
     return !u::contains(_hiddenColumns, sourceColumn);
 }
 
-QVariant TableProxyModel::data(const QModelIndex &index, int role) const
+QVariant TableProxyModel::data(const QModelIndex& index, int role) const
 {
     if(role == SubSelectedRole)
         return _subSelectionRows.find(index.row()) != _subSelectionRows.end();
@@ -41,7 +44,7 @@ QVariant TableProxyModel::data(const QModelIndex &index, int role) const
     if(_orderedProxyToSourceColumn.size() == static_cast<size_t>(columnCount()))
     {
         auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(),
-                                                _orderedProxyToSourceColumn.at(index.column()));
+            _orderedProxyToSourceColumn.at(index.column()));
         return sourceModel()->data(mappedIndex, role);
     }
 
@@ -94,7 +97,7 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
     return mappedProxyColumn;
 }
 
-TableProxyModel::TableProxyModel(QObject *parent) : QSortFilterProxyModel(parent)
+TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
     _collator.setNumericMode(true);

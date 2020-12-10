@@ -25,7 +25,6 @@
 #include <QQmlEngine>
 #include <QCoreApplication>
 #include <QTimer>
-#include <QDebug>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
 #include <QCollator>
@@ -81,12 +80,12 @@ private:
     void resort();
 
 protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    bool filterAcceptsColumn(int sourceColumn, const QModelIndex& sourceParent) const override;
     bool lessThan(const QModelIndex& a, const QModelIndex& b) const override;
 
 public:
-    QVariant data(const QModelIndex &index, int role) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     static void registerQmlType()
     {
