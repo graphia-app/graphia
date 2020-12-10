@@ -113,7 +113,7 @@ public:
     void setSortOrder(Qt::SortOrder sortOrder);
 signals:
     void sortColumnChanged(int sortColumn);
-    void sortOrderChanged(int sortColumn);
+    void sortOrderChanged(Qt::SortOrder sortOrder);
 
     void filterRoleNameChanged();
     void filterPatternSyntaxChanged();
