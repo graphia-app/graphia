@@ -27,6 +27,7 @@
 #include "shared/attributes/valuetype.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 
 #include <QtGlobal>
 
@@ -124,6 +125,7 @@ void NodeAttributeTableModel::updateColumnNames()
 {
     _columnNames = columnNames();
     _columnCount = _columnNames.size();
+    Q_ASSERT(u::hasUniqueValues(u::toQStringVector(_columnNames)));
     emit columnNamesChanged();
 }
 
