@@ -284,10 +284,7 @@ Item
     {
         id: selectionModel
         model: proxyModel
-        onSelectionChanged:
-        {
-            proxyModel.setSubSelection(selectionModel.selection, deselected);
-        }
+        onSelectionChanged: { proxyModel.setSubSelection(selectionModel.selection, deselected); }
     }
 
 
