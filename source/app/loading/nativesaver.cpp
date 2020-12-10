@@ -171,6 +171,8 @@ bool NativeSaver::save()
     if(graphModel == nullptr)
         return false;
 
+    auto& graph = graphModel->mutableGraph();
+
     json header;
     header["version"] = NativeSaver::Version;
     header["pluginName"] = graphModel->pluginName();
@@ -183,20 +185,18 @@ bool NativeSaver::save()
 
     json content;
 
-    content["graph"] = JSONGraphSaver::graphAsJson(graphModel->mutableGraph(), *this);
-    content["nodeNames"] = u::graphArrayAsJson(graphModel->nodeNames(), graphModel->mutableGraph().nodeIds(), this);
+    content["graph"] = JSONGraphSaver::graphAsJson(graph, *this);
+    content["nodeNames"] = u::graphArrayAsJson(graphModel->nodeNames(), graph.nodeIds(), this);
 
-    content["userNodeData"] = graphModel->userNodeData().save(graphModel->mutableGraph(),
-        graphModel->mutableGraph().nodeIds(), *this);
-    content["userEdgeData"] = graphModel->userEdgeData().save(graphModel->mutableGraph(),
-        graphModel->mutableGraph().edgeIds(), *this);
+    content["userNodeData"] = graphModel->userNodeData().save(graph, graph.nodeIds(), *this);
+    content["userEdgeData"] = graphModel->userEdgeData().save(graph, graph.edgeIds(), *this);
 
     json layout;
 
     layout["algorithm"] = _document->layoutName();
     layout["settings"] = layoutSettingsAsJson(*_document);
 
-    layout["positions"] = u::graphArrayAsJson(graphModel->nodePositions(), graphModel->mutableGraph().nodeIds(), this,
+    layout["positions"] = u::graphArrayAsJson(graphModel->nodePositions(), graph.nodeIds(), this,
     [](const auto& v)
     {
         return json({v.x(), v.y(), v.z()});
@@ -222,8 +222,8 @@ bool NativeSaver::save()
     if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
 
-    graphModel->mutableGraph().setPhase(graphModel->pluginName());
-    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), *this);
+    graph.setPhase(graphModel->pluginName());
+    auto pluginData = _pluginInstance->save(graph, *this);
 
     setProgress(-1);
 
@@ -245,7 +245,7 @@ bool NativeSaver::save()
 
     jsonArray.emplace_back(content);
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
+    graph.setPhase(QObject::tr("Compressing"));
     return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), *this);
 }
 
