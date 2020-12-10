@@ -41,9 +41,10 @@
 #include "layout/layout.h"
 #include "layout/collision.h"
 
-#include "commands/deletenodescommand.h"
 #include "commands/applytransformscommand.h"
 #include "commands/applyvisualisationscommand.h"
+#include "commands/deletenodescommand.h"
+#include "commands/importattributescommand.h"
 #include "commands/selectnodescommand.h"
 
 #include "transform/graphtransform.h"
@@ -2865,4 +2866,15 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 
         file.write(QByteArray::fromStdString(positions.dump()));
     }, tr("Exporting Node Positions"));
+}
+
+void Document::importAttributesFromTable(const QString& keyAttributeName,
+    TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices)
+{
+    if(busy())
+        return;
+
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<ImportAttributesCommand>(_graphModel.get(),
+        keyAttributeName, data, keyColumnIndex, importColumnIndices));
 }

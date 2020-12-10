@@ -697,6 +697,11 @@ Item
             Qt.openUrlExternally(QmlUtils.urlFrom(url));
     }
 
+    function importAttributesFromTable(keyAttributeName, data, keyColumn, importColumns)
+    {
+        document.importAttributesFromTable(keyAttributeName, data, keyColumn, importColumns);
+    }
+
     CaptureScreenshot
     {
         id: captureScreenshot

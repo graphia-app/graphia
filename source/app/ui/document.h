@@ -60,6 +60,7 @@ class GraphQuickItem;
 class GraphModel;
 class SearchManager;
 class SelectionManager;
+class TabularData;
 
 DEFINE_QML_ENUM(
     Q_GADGET, LayoutPauseState,
@@ -520,6 +521,9 @@ public:
     Q_INVOKABLE void performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB);
 
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
+
+    Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,
+        TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices);
 
 private slots:
     void onLoadProgress(int percentage);
