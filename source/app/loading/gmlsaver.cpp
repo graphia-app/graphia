@@ -80,7 +80,10 @@ bool GMLSaver::save()
     {
         for(const auto& attributeName : attributeNames)
         {
-            const auto& attribute = _graphModel->attributeByName(attributeName);
+            const auto* attribute = _graphModel->attributeByName(attributeName);
+            if(attribute->hasParameter())
+                continue;
+
             if(attribute->valueType() == ValueType::String)
             {
                 QString escapedValue = escape(attribute->stringValueOf(elementId));
