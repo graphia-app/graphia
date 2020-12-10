@@ -38,22 +38,18 @@ Item
 {
     id: root
 
-    // External name
-    property alias model: root._nodeAttributesTableModel
+    property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
     property alias rowCount: tableView.rows
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
 
-    // Internal name
-    property var _nodeAttributesTableModel
-
     function defaultColumnVisibility()
     {
-        root._nodeAttributesTableModel.columnNames.forEach(function(columnName)
+        root.model.columnNames.forEach(function(columnName)
         {
-            if(plugin.model.nodeAttributeTableModel.columnIsHiddenByDefault(columnName))
+            if(root.model.columnIsHiddenByDefault(columnName))
                 setColumnVisibility(columnName, false);
         });
 
@@ -99,7 +95,7 @@ Item
     function setHiddenColumns(hiddenColumns)
     {
         // Filter out any columns that don't exist in the table
-        hiddenColumns = hiddenColumns.filter(v => root._nodeAttributesTableModel.columnNames.includes(v));
+        hiddenColumns = hiddenColumns.filter(v => root.model.columnNames.includes(v));
 
         root.hiddenColumns = hiddenColumns;
         tableView._updateColumnVisibility();
@@ -110,7 +106,7 @@ Item
     property bool columnSelectionMode: false
     onColumnSelectionModeChanged:
     {
-        let indexArray = Array.from(new Array(_nodeAttributesTableModel.columnNames.length).keys());
+        let indexArray = Array.from(new Array(root.model.columnNames.length).keys());
 
         if(columnSelectionMode)
             columnSelectionControls.show();
@@ -141,9 +137,9 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        root.model.columnNames.forEach(function(columnName)
         {
-            if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
+            if(root.model.columnIsCalculated(columnName))
                 columns = Utils.setRemove(columns, columnName);
         });
 
@@ -152,7 +148,7 @@ Item
 
     function hideAllColumns()
     {
-        let columns = Array.from(_nodeAttributesTableModel.columnNames);
+        let columns = Array.from(root.model.columnNames);
         hiddenColumns = columns;
     }
 
@@ -160,9 +156,9 @@ Item
     {
         let columns = hiddenColumns;
         hiddenColumns = [];
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        root.model.columnNames.forEach(function(columnName)
         {
-            if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
+            if(root.model.columnIsCalculated(columnName))
                 columns = Utils.setAdd(columns, columnName);
         });
 
@@ -439,7 +435,7 @@ Item
                 property int sortIndicatorWidth: 7
                 property int sortIndicatorMargin: 3
                 property int delegatePadding: 4
-                property var columnOrder: Array.from(_nodeAttributesTableModel.columnNames);
+                property var columnOrder: Array.from(root.model.columnNames);
 
                 Rectangle
                 {
@@ -474,10 +470,10 @@ Item
                     {
                         let index = headerItem.sourceColumn;
 
-                        if(index < 0 || index >= root._nodeAttributesTableModel.columnNames.length)
+                        if(index < 0 || index >= root.model.columnNames.length)
                             return "";
 
-                        return root._nodeAttributesTableModel.columnNames[index];
+                        return root.model.columnNames[index];
                     }
 
                     Connections
@@ -635,9 +631,9 @@ Item
                                 if(headerContent.target > -1)
                                 {
                                     let currentIndex = headerView.columnOrder.indexOf(
-                                        root._nodeAttributesTableModel.columnNameFor(sourceColumn));
+                                        root.model.columnNameFor(sourceColumn));
                                     let targetIndex = headerView.columnOrder.indexOf(
-                                        root._nodeAttributesTableModel.columnNameFor(headerContent.target));
+                                        root.model.columnNameFor(headerContent.target));
                                     array_move(headerView.columnOrder, currentIndex, targetIndex);
                                     headerContent.target = -1;
                                 }
@@ -783,7 +779,7 @@ Item
                     for(let i = 0; i < tableView.columns; i++)
                     {
                         let sourceIndex = proxyModel.mapOrderedToSourceColumn(i);
-                        columnNames.push(root._nodeAttributesTableModel.columnNames[sourceIndex])
+                        columnNames.push(root.model.columnNames[sourceIndex])
                     }
 
                     return columnNames;
@@ -851,8 +847,8 @@ Item
                 model: TableProxyModel
                 {
                     id: proxyModel
-                    columnNames: root._nodeAttributesTableModel.columnNames
-                    sourceModel: root._nodeAttributesTableModel
+                    columnNames: root.model.columnNames
+                    sourceModel: root.model
                 }
 
                 columnWidthProvider: function(col)
@@ -925,7 +921,7 @@ Item
 
                     if(sourceColumn > -1)
                     {
-                        let headerName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
+                        let headerName = root.model.columnNameFor(sourceColumn);
                         let width = headerMetrics.advanceWidth(headerName);
                         width += sortIndicatorSpacing;
                         return width;
@@ -1039,8 +1035,8 @@ Item
                                 if(model.display === undefined)
                                     return "";
 
-                                let columnName = root._nodeAttributesTableModel.columnNameFor(sourceColumn);
-                                if(_nodeAttributesTableModel.columnIsFloatingPoint(columnName))
+                                let columnName = root.model.columnNameFor(sourceColumn);
+                                if(root.model.columnIsFloatingPoint(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);
 
                                 // Replace newlines with spaces
@@ -1064,7 +1060,7 @@ Item
 
                 Connections
                 {
-                    target: plugin.model.nodeAttributeTableModel
+                    target: root.model
                     function onSelectionChanged()
                     {
                         proxyModel.invalidateFilter();
@@ -1104,7 +1100,7 @@ Item
                     if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
                     let mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
-                    root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
+                    root.model.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
                 onClicked:
