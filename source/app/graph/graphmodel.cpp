@@ -201,40 +201,40 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
 
-    GraphModel::createAttribute(tr("Node Degree"))
+    createAttribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
     if(directed())
     {
-        GraphModel::createAttribute(tr("Node In Degree"))
+        createAttribute(tr("Node In Degree"))
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's in degree is its number of inbound edges."));
 
-        GraphModel::createAttribute(tr("Node Out Degree"))
+        createAttribute(tr("Node Out Degree"))
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's out degree is its number of outbound edges."));
     }
 
-    GraphModel::createAttribute(tr("Node Multiplicity"))
+    createAttribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.multiplicityOf(nodeId); })
         .intRange().setMin(0)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
-    GraphModel::createAttribute(tr("Edge Multiplicity"))
+    createAttribute(tr("Edge Multiplicity"))
         .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.multiplicityOf(edgeId); })
         .intRange().setMin(0)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
-    GraphModel::createAttribute(tr("Component Size"))
+    createAttribute(tr("Component Size"))
         .setIntValueFn([](const IGraphComponent& component) { return component.numNodes(); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
-    GraphModel::createAttribute(tr("Node Component Identifier"))
+    createAttribute(tr("Node Component Identifier"))
         .setStringValueFn([this](NodeId nodeId)
         {
             return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
@@ -242,7 +242,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
-    GraphModel::createAttribute(tr("Edge Component Identifier"))
+    createAttribute(tr("Edge Component Identifier"))
         .setStringValueFn([this](EdgeId edgeId)
         {
             return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
