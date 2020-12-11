@@ -343,6 +343,9 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
 
 bool GraphComponentScene::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
 {
+    if(_componentId.isNull())
+        return false;
+
     return componentRenderer()->focusedOnNodeAtRadius(nodeId, radius);
 }
 
