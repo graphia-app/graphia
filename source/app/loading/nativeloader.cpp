@@ -280,6 +280,8 @@ bool Loader::parse(const QUrl& url, IGraphModel* graphModel)
 
     setProgress(-1);
 
+    graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+
     auto jsonArray = parseJsonFrom(byteArray, this);
 
     if(cancelled())
