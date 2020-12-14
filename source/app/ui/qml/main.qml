@@ -2310,7 +2310,8 @@ ApplicationWindow
                 id: progressBar
                 value: currentDocument && currentDocument.commandProgress >= 0.0 ? currentDocument.commandProgress / 100.0 : 0.0
                 visible: currentDocument ? currentDocument.commandInProgress : false
-                indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 : false
+                indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 ||
+                    currentDocument.commandProgress === 100.0 : false
             }
 
             Label
