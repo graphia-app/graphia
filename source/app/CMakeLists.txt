@@ -51,6 +51,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/limitconstants.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.h
@@ -180,6 +181,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
