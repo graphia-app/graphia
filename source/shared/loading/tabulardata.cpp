@@ -20,6 +20,9 @@
 
 #include "shared/utils/progressable.h"
 
+#include <set>
+#include <algorithm>
+
 TabularData::TabularData(TabularData&& other) noexcept :
     _data(std::move(other._data)),
     _columns(other._columns),
@@ -201,4 +204,26 @@ std::vector<TypeIdentity> TabularData::typeIdentities(Progressable* progressable
         progressable->setProgress(-1);
 
     return t;
+}
+
+int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const
+{
+    std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
+
+    if(typeIdentity(columnIndex).type() != TypeIdentity::Type::String)
+        return 0;
+
+    std::set<QString> columnValues;
+    std::set<QString> intersection;
+
+    for(size_t row = 1; row < numRows(); row++)
+        columnValues.insert(valueAt(columnIndex, row));
+
+    std::set_intersection(referenceSet.begin(), referenceSet.end(),
+        columnValues.begin(), columnValues.end(),
+        std::inserter(intersection, intersection.begin()));
+
+    int percent = (intersection.size() * 100) / referenceValues.size();
+
+    return percent;
 }

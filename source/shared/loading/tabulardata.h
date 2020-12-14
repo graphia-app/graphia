@@ -29,6 +29,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 #include <fstream>
@@ -75,6 +76,8 @@ public:
 
     TypeIdentity typeIdentity(size_t columnIndex) const;
     std::vector<TypeIdentity> typeIdentities(Progressable* progressable = nullptr) const;
+
+    int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
 };
 
 template<const char Delimiter>
