@@ -162,6 +162,19 @@ void TabularData::reset()
     _transposed = false;
 }
 
+TypeIdentity TabularData::typeIdentity(size_t columnIndex) const
+{
+    TypeIdentity identity;
+
+    for(size_t rowIndex = 1; rowIndex < numRows(); rowIndex++)
+    {
+        const auto& value = valueAt(columnIndex, rowIndex);
+        identity.updateType(value);
+    }
+
+    return identity;
+}
+
 const QString& TabularData::valueAt(size_t column, size_t row) const
 {
     return _data.at(index(column, row));
@@ -181,13 +194,7 @@ std::vector<TypeIdentity> TabularData::typeIdentities(Progressable* progressable
         if(progressable != nullptr)
             progressable->setProgress(static_cast<int>((columnIndex * 100) / numColumns()));
 
-        auto& identity = t.at(columnIndex);
-
-        for(size_t rowIndex = 1; rowIndex < numRows(); rowIndex++)
-        {
-            const auto& value = valueAt(columnIndex, rowIndex);
-            identity.updateType(value);
-        }
+        t.at(columnIndex) = typeIdentity(columnIndex);
     }
 
     if(progressable != nullptr)

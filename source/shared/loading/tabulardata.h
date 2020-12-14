@@ -73,6 +73,7 @@ public:
     void shrinkToFit();
     void reset();
 
+    TypeIdentity typeIdentity(size_t columnIndex) const;
     std::vector<TypeIdentity> typeIdentities(Progressable* progressable = nullptr) const;
 };
 
