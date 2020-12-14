@@ -80,6 +80,8 @@ Item
 
     readonly property string appName: application !== null ? application.name : ""
 
+    property alias internalDocument: document
+
     property string status: document.status
 
     property bool busy: document.busy
