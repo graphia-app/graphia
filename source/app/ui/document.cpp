@@ -595,6 +595,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged);
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired);
 
     emit pluginInstanceChanged();
 
