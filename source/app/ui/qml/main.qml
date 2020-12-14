@@ -1052,6 +1052,45 @@ ApplicationWindow
         }
     }
 
+    ImportAttributesDialog
+    {
+        id: importAttributesDialog
+        document: currentDocument ? currentDocument.internalDocument : null
+    }
+
+    Labs.FileDialog
+    {
+        id: importAttributesFileOpenDialog
+        nameFilters:
+        [
+            "All Files (*.csv *.tsv *.ssv *.xlsx)",
+            "CSV Files (*.csv)",
+            "TSV Files (*.tsv)",
+            "SSV Files (*.ssv)",
+            "Excel Files (*.xlsx)"
+        ]
+
+        onAccepted:
+        {
+            misc.fileOpenInitialFolder = folder.toString();
+            importAttributesDialog.open(file);
+        }
+    }
+
+    Action
+    {
+        id: importAttributesAction
+        text: qsTr("Import Attributes From Table…")
+        enabled: currentDocument !== null && !currentDocument.loading
+        onTriggered:
+        {
+            if(misc.fileOpenInitialFolder !== undefined)
+                importAttributesFileOpenDialog.folder = misc.fileOpenInitialFolder;
+
+            importAttributesFileOpenDialog.open();
+        }
+    }
+
     Action
     {
         id: pauseLayoutAction
@@ -1729,6 +1768,7 @@ ApplicationWindow
             title: qsTr("T&ools")
             MenuItem { action: enrichmentAction }
             MenuItem { action: searchWebAction }
+            MenuItem { action: importAttributesAction }
         }
         Menu
         {

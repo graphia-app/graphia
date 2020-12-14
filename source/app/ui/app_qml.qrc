@@ -59,5 +59,6 @@
         <file>qml/Controls/TreeComboBox.qml</file>
         <file>qml/AttributeUtils.js</file>
         <file>qml/LatestChangesDialog.qml</file>
+        <file>qml/Loading/ImportAttributesDialog.qml</file>
     </qresource>
 </RCC>
