@@ -21,5 +21,6 @@ import QtQuick 2.0
 Item
 {
     property string title: ""
+    property bool active: false
     clip: true
 }

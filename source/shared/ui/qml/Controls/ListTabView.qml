@@ -212,6 +212,17 @@ Item
         }
     }
 
+    function _updateActiveTab()
+    {
+        for(let index = 0; index < listTabs.length; index++)
+            listTabs[index].active = (index === _currentIndex);
+    }
+
+    on_CurrentIndexChanged:
+    {
+        _updateActiveTab();
+    }
+
     function goToNext()
     {
         if(_currentIndex < listTabs.length - 1)
@@ -292,5 +303,7 @@ Item
             listTabs[i].width = Qt.binding(function() { return contentContainer.width; });
             listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
         }
+
+        _updateActiveTab();
     }
 }
