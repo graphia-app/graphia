@@ -64,19 +64,27 @@ bool ImportAttributesCommand::execute()
 
         std::map<size_t, ElementId> map;
 
-        for(size_t row = 1; row < _data.numRows(); row++)
+        int elementIdsProcessed = 0;
+
+        for(auto elementId : elementIds)
         {
-            auto keyColumnValue = _data.valueAt(_keyColumnIndex, row);
+            auto attributeValue = keyAttribute->stringValueOf(elementId);
 
-            auto it = std::find_if(elementIds.begin(), elementIds.end(),
-            [&keyColumnValue, &keyAttribute](auto elementId)
+            for(size_t row = 1; row < _data.numRows(); row++)
             {
-                return keyAttribute->stringValueOf(elementId) == keyColumnValue;
-            });
+                auto keyColumnValue = _data.valueAt(_keyColumnIndex, row);
 
-            if(it != elementIds.end())
-                map[row] = *it;
+                if(attributeValue == keyColumnValue)
+                {
+                    map[row] = elementId;
+                    break;
+                }
+            }
+
+            setProgress((++elementIdsProcessed * 100) / elementIds.size());
         }
+
+        setProgress(-1);
 
         Q_ASSERT(!map.empty());
         if(map.empty())
