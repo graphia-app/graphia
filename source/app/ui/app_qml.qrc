@@ -27,7 +27,7 @@
         <file>qml/Controls/Tutorial.qml</file>
         <file>qml/Controls/warning.png</file>
         <file>qml/DebugRectangle.qml</file>
-        <file>qml/DocumentUI.qml</file>
+        <file>qml/TabUI.qml</file>
         <file>qml/Enrichment/EnrichmentResults.qml</file>
         <file>qml/Enrichment/EnrichmentWizard.qml</file>
         <file>qml/Find.qml</file>

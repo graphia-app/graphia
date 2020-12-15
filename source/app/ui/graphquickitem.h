@@ -86,6 +86,7 @@ public:
     void setShading3D(Shading shading3D);
 
     bool updating() const { return _updating; }
+    bool initialised() const { return _initialised; }
     bool interacting() const { return _interacting; }
     void setInteracting(bool interacting) const;
     bool transitioning() const { return _transitioning; }

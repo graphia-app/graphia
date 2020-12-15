@@ -80,39 +80,8 @@ Item
 
     readonly property string appName: application !== null ? application.name : ""
 
-    property alias internalDocument: document
+    property alias document: _document
 
-    property string status: document.status
-
-    property bool busy: document.busy || !graph.initialised
-    property bool editable: document.editable
-    property bool directed: document.directed
-    property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
-
-    property bool loading: !document.loadComplete
-    property string failureReason: document.failureReason
-
-    property bool commandInProgress: document.commandInProgress && !commandTimer.running
-    property int commandProgress: document.commandProgress
-    property string commandVerb: document.commandVerb
-    property bool commandIsCancellable: commandInProgress && document.commandIsCancellable
-    property bool commandIsCancelling: document.commandIsCancelling
-
-    property int layoutPauseState: document.layoutPauseState
-
-    property bool canUndo : document.canUndo
-    property string nextUndoAction: document.nextUndoAction
-    property bool canRedo: document.canRedo
-    property string nextRedoAction: document.nextRedoAction
-
-    property bool canResetView: document.canResetView
-    property bool canEnterOverviewMode: document.canEnterOverviewMode
-    property bool canChangeComponent: !busy && graph.numComponents > 1
-
-    property var bookmarks: document.bookmarks
-
-    property string pluginName: document.pluginName
-    property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
     property bool pluginMinimised: false
 
@@ -133,21 +102,9 @@ Item
     property var previousAction: find.previousAction
     property var nextAction: find.nextAction
 
-    property bool saveRequired: document.loadComplete &&
-        (!hasBeenSaved || document.saveRequired || plugin.saveRequired) &&
+    property bool saveRequired: _document.loadComplete &&
+        (!hasBeenSaved || _document.saveRequired || plugin.saveRequired) &&
         !tutorial.activated // The tutorial file should never be saved
-
-    property bool nodeSelectionEmpty: document.numNodesSelected === 0
-    property int numNodesSelected: document.numNodesSelected
-    property int numHeadNodesSelected: document.numHeadNodesSelected
-    property var selectedNodeIds: document.selectedNodeIds
-    property var selectedHeadNodeIds: document.selectedHeadNodeIds
-
-    property var enrichmentTableModels: document.enrichmentTableModels
-
-    property bool hasValidEdgeTextVisualisation: document.hasValidEdgeTextVisualisation
-
-    property color contrastingColor: document.contrastingColor
 
     readonly property bool panelVisible: find.showing ||
         addBookmark.showing || layoutSettings.showing
@@ -193,9 +150,9 @@ Item
     function _refreshNumAttributesWithSharedValues()
     {
         sharedValuesProxyModel.sourceModel =
-            document.availableAttributesModel(ElementType.Node);
+            _document.availableAttributesModel(ElementType.Node);
 
-        if(!document.attributeExists(_lastSharedValueAttributeName))
+        if(!_document.attributeExists(_lastSharedValueAttributeName))
             _lastSharedValueAttributeName = "";
     }
 
@@ -206,8 +163,8 @@ Item
         property string backgroundColor
     }
 
-    property bool _darkBackground: { return Qt.colorEqual(contrastingColor, "white"); }
-    property bool _brightBackground: { return Qt.colorEqual(contrastingColor, "black"); }
+    property bool _darkBackground: { return Qt.colorEqual(_document.contrastingColor, "white"); }
+    property bool _brightBackground: { return Qt.colorEqual(_document.contrastingColor, "black"); }
 
     function hexToRgb(hex)
     {
@@ -275,7 +232,7 @@ Item
 
     function openFile(fileUrl, fileType, pluginName, parameters)
     {
-        if(!document.openFile(fileUrl, fileType, pluginName, parameters))
+        if(!_document.openFile(fileUrl, fileType, pluginName, parameters))
             return false;
 
         this.fileUrl = fileUrl;
@@ -305,7 +262,7 @@ Item
         if(typeof(pluginUiData) === "object")
             pluginUiData = JSON.stringify(pluginUiData);
 
-        document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
+        _document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
         mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
@@ -408,13 +365,13 @@ Item
             {
                 return function()
                 {
-                    document.saveComplete.disconnect(proxyFn);
+                    _document.saveComplete.disconnect(proxyFn);
                     fn();
                 };
             }(onSaveConfirmedFunction);
             onSaveConfirmedFunction = null;
 
-            document.saveComplete.connect(proxyFn);
+            _document.saveComplete.connect(proxyFn);
             saveFile();
         }
 
@@ -436,59 +393,51 @@ Item
             onSaveConfirmedFunction();
     }
 
-    function resumeLayout() { document.resumeLayout(); }
-    function toggleLayout() { document.toggleLayout(); }
-    function nodeIsSelected(nodeId) { return document.nodeIsSelected(nodeId); }
-    function selectAll() { document.selectAll(); }
-    function selectAllVisible() { document.selectAllVisible(); }
-    function selectNone() { document.selectNone(); }
-    function invertSelection() { document.invertSelection(); }
-
     function selectSources()
     {
-        _lastSelectType = DocumentUI.LS_Sources;
-        document.selectSources();
+        _lastSelectType = TabUI.LS_Sources;
+        _document.selectSources();
     }
 
     function selectSourcesOf(nodeId)
     {
-        _lastSelectType = DocumentUI.LS_Sources;
-        document.selectSourcesOf(nodeId);
+        _lastSelectType = TabUI.LS_Sources;
+        _document.selectSourcesOf(nodeId);
     }
 
     function selectTargets()
     {
-        _lastSelectType = DocumentUI.LS_Targets;
-        document.selectTargets();
+        _lastSelectType = TabUI.LS_Targets;
+        _document.selectTargets();
     }
 
     function selectTargetsOf(nodeId)
     {
-        _lastSelectType = DocumentUI.LS_Targets;
-        document.selectTargetsOf(nodeId);
+        _lastSelectType = TabUI.LS_Targets;
+        _document.selectTargetsOf(nodeId);
     }
 
     function selectNeighbours()
     {
-        _lastSelectType = DocumentUI.LS_Neighbours;
-        document.selectNeighbours();
+        _lastSelectType = TabUI.LS_Neighbours;
+        _document.selectNeighbours();
     }
 
     function selectNeighboursOf(nodeId)
     {
-        _lastSelectType = DocumentUI.LS_Neighbours;
-        document.selectNeighboursOf(nodeId);
+        _lastSelectType = TabUI.LS_Neighbours;
+        _document.selectNeighboursOf(nodeId);
     }
 
     function selectBySharedAttributeValue(attributeName, nodeId)
     {
-        _lastSelectType = DocumentUI.LS_BySharedValue;
+        _lastSelectType = TabUI.LS_BySharedValue;
         _lastSharedValueAttributeName = attributeName;
 
         if(typeof(nodeId) !== "undefined")
-            document.selectBySharedAttributeValue(attributeName, nodeId);
+            _document.selectBySharedAttributeValue(attributeName, nodeId);
         else
-            document.selectBySharedAttributeValue(attributeName);
+            _document.selectBySharedAttributeValue(attributeName);
     }
 
     enum LastSelectType
@@ -500,17 +449,17 @@ Item
         LS_BySharedValue
     }
 
-    property int _lastSelectType: DocumentUI.LS_None
+    property int _lastSelectType: TabUI.LS_None
 
     property bool canRepeatLastSelection:
     {
-        if(nodeSelectionEmpty)
+        if(_document.nodeSelectionEmpty)
             return false;
 
-        if(root._lastSelectType === DocumentUI.LS_BySharedValue)
+        if(root._lastSelectType === TabUI.LS_BySharedValue)
             return _lastSharedValueAttributeName.length > 0;
 
-        return root._lastSelectType !== DocumentUI.LS_None;
+        return root._lastSelectType !== TabUI.LS_None;
     }
 
     property string repeatLastSelectionMenuText:
@@ -518,15 +467,15 @@ Item
         switch(root._lastSelectType)
         {
         default:
-        case DocumentUI.LS_None:
+        case TabUI.LS_None:
             break;
-        case DocumentUI.LS_Neighbours:
+        case TabUI.LS_Neighbours:
             return qsTr("Repeat Last Selection (Neighbours)");
-        case DocumentUI.LS_Sources:
+        case TabUI.LS_Sources:
             return qsTr("Repeat Last Selection (Sources)");
-        case DocumentUI.LS_Targets:
+        case TabUI.LS_Targets:
             return qsTr("Repeat Last Selection (Targets)");
-        case DocumentUI.LS_BySharedValue:
+        case TabUI.LS_BySharedValue:
             if(_lastSharedValueAttributeName.length > 0)
             {
                 return qsTr("Repeat Last Selection (") +
@@ -543,105 +492,31 @@ Item
         switch(root._lastSelectType)
         {
         default:
-        case DocumentUI.LS_None:
+        case TabUI.LS_None:
             return;
-        case DocumentUI.LS_Neighbours:
+        case TabUI.LS_Neighbours:
             selectNeighbours();
             return;
-        case DocumentUI.LS_Sources:
+        case TabUI.LS_Sources:
             selectSources();
             return;
-        case DocumentUI.LS_Targets:
+        case TabUI.LS_Targets:
             selectTargets();
             return;
-        case DocumentUI.LS_BySharedValue:
+        case TabUI.LS_BySharedValue:
             selectBySharedAttributeValue(_lastSharedValueAttributeName);
             return;
         }
     }
 
-    function undo() { document.undo(); }
-    function redo() { document.redo(); }
-    function deleteSelectedNodes() { document.deleteSelectedNodes(); }
-    function deleteNode(nodeId) { document.deleteNode(nodeId); }
-    function resetView() { document.resetView(); }
-    function switchToOverviewMode() { document.switchToOverviewMode(); }
-    function gotoNextComponent() { document.gotoNextComponent(); }
-    function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.show(); }
-    function nodeName(nodeId) { return nodeId !== undefined ? document.nodeName(nodeId) : ""; }
-
-    function projection() { return document.projection(); }
-    function setProjection(_projection) { document.setProjection(_projection); }
-
-    function shading()
-    {
-        return projection() === Projection.TwoDee ? document.shading2D() : document.shading3D();
-    }
-
-    function setShading(_shading)
-    {
-        if(projection() === Projection.TwoDee)
-            document.setShading2D(_shading);
-        else
-            document.setShading3D(_shading);
-    }
-
-    function availableAttributeNames(elementTypes, valueTypes, skipFlags)
-    {
-        // js treats undefined as a valid argument instead of falling back to
-        // C++ defaults
-        if(typeof(elementTypes) === "undefined")
-            return document.availableAttributeNames();
-        else if(typeof(valueTypes) === "undefined")
-            return document.availableAttributeNames(elementTypes);
-        else if(typeof(skipFlags) === "undefined")
-            return document.availableAttributeNames(elementTypes, valueTypes);
-
-        return document.availableAttributeNames(elementTypes, valueTypes, skipFlags);
-    }
-
-    function availableAttributesModel(elementTypes, valueTypes, skipFlags)
-    {
-        // js treats undefined as a valid argument instead of falling back to
-        // C++ defaults
-        if(typeof(elementTypes) === "undefined")
-            return document.availableAttributesModel();
-        else if(typeof(valueTypes) === "undefined")
-            return document.availableAttributesModel(elementTypes);
-        else if(typeof(skipFlags) === "undefined")
-            return document.availableAttributesModel(elementTypes, valueTypes);
-
-        return document.availableAttributesModel(elementTypes, valueTypes, skipFlags);
-    }
-
-    function attribute(attributeName) { return document.attribute(attributeName); }
-
-    function allAttributeValues(attributeName) { return document.allAttributeValues(attributeName); }
-
-    function writeTableViewToFile(tableView, fileUrl, extension)
-    {
-        document.writeTableViewToFile(tableView, fileUrl, extension);
-    }
-
-    function cancelCommand() { document.cancelCommand(); }
-
-    function dumpGraph() { document.dumpGraph(); }
-    function performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB)
-    {
-        document.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
-    }
-    function attributeValues(attributeName)
-    {
-        return document.attributeValues(attributeName);
-    }
 
     function copyImageToClipboard()
     {
         graph.grabToImage(function(result)
         {
             application.copyImageToClipboard(result.image);
-            document.status = qsTr("Copied Viewport To Clipboard");
+            _document.status = qsTr("Copied Viewport To Clipboard");
         });
     }
 
@@ -650,19 +525,16 @@ Item
         addBookmark.show();
     }
 
-    function removeBookmarks(names) { document.removeBookmarks(names); }
-    function renameBookmark(from, to) { document.renameBookmark(from, to); }
-
     function gotoBookmark(name)
     {
         hideFind();
-        document.gotoBookmark(name);
+        _document.gotoBookmark(name);
     }
 
     function gotoAllBookmarks()
     {
         hideFind();
-        document.gotoAllBookmarks();
+        _document.gotoAllBookmarks();
     }
 
     Labs.FileDialog
@@ -677,7 +549,7 @@ Item
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            document.saveNodePositionsToFile(file);
+            _document.saveNodePositionsToFile(file);
         }
     }
 
@@ -691,17 +563,12 @@ Item
 
     function searchWebForNode(nodeId)
     {
-        let nodeName = document.nodeName(nodeId);
+        let nodeName = _document.nodeName(nodeId);
         let url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
             misc.webSearchEngineUrl.arg(nodeName) : "";
 
         if(QmlUtils.userUrlIsValid(url))
             Qt.openUrlExternally(QmlUtils.urlFrom(url));
-    }
-
-    function importAttributesFromTable(keyAttributeName, data, keyColumn, importColumns)
-    {
-        document.importAttributesFromTable(keyAttributeName, data, keyColumn, importColumns);
     }
 
     CaptureScreenshot
@@ -726,17 +593,17 @@ Item
         id: deleteNodeAction
         iconName: "edit-delete"
         text: qsTr("&Delete '") + contextMenu.clickedNodeName + qsTr("'")
-        property bool visible: editable && contextMenu.nodeWasClicked
-        enabled: !busy && visible
-        onTriggered: { deleteNode(contextMenu.clickedNodeId); }
+        property bool visible: _document.editable && contextMenu.nodeWasClicked
+        enabled: !_document.busy && visible
+        onTriggered: { _document.deleteNode(contextMenu.clickedNodeId); }
     }
 
     Action
     {
         id: selectSourcesOfNodeAction
         text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
-        property bool visible: directed && contextMenu.nodeWasClicked
-        enabled: !busy && visible
+        property bool visible: _document.directed && contextMenu.nodeWasClicked
+        enabled: !_document.busy && visible
         onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
     }
 
@@ -744,8 +611,8 @@ Item
     {
         id: selectTargetsOfNodeAction
         text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
-        property bool visible: directed && contextMenu.nodeWasClicked
-        enabled: !busy && visible
+        property bool visible: _document.directed && contextMenu.nodeWasClicked
+        enabled: !_document.busy && visible
         onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
     }
 
@@ -754,7 +621,7 @@ Item
         id: selectNeighboursOfNodeAction
         text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
         property bool visible: contextMenu.nodeWasClicked
-        enabled: !busy && visible
+        enabled: !_document.busy && visible
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
     }
 
@@ -776,7 +643,7 @@ Item
             {
                 id: graph
                 anchors.fill: parent
-                enabled: !document.graphChanging
+                enabled: !_document.graphChanging
 
                 property bool _inComponentMode: !inOverviewMode && numComponents > 1
 
@@ -791,7 +658,7 @@ Item
                         elide: Text.ElideMiddle
                         elideWidth: 150
                         text: contextMenu.clickedNodeId !== undefined ?
-                            document.nodeName(contextMenu.clickedNodeId) : ""
+                            _document.nodeName(contextMenu.clickedNodeId) : ""
                     }
 
                     property var clickedNodeId
@@ -799,19 +666,19 @@ Item
                     property bool nodeWasClicked: clickedNodeId !== undefined ? !clickedNodeId.isNull : false
                     property bool clickedNodeIsSameAsSelection:
                     {
-                        return numHeadNodesSelected === 1 &&
+                        return _document.numHeadNodesSelected === 1 &&
                             nodeWasClicked &&
-                            nodeIsSelected(clickedNodeId);
+                            _document.nodeIsSelected(clickedNodeId);
                     }
 
                     MenuItem { id: delete1; visible: deleteNodeAction.visible; action: deleteNodeAction }
                     MenuItem { id: delete2; visible: deleteAction.visible && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
                     MenuSeparator { visible: delete1.visible || delete2.visible }
 
-                    MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllAction }
-                    MenuItem { visible: numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
-                    MenuItem { visible: numNodesSelected > 0; action: selectNoneAction }
-                    MenuItem { visible: numNodesSelected > 0; action: invertSelectionAction }
+                    MenuItem { visible: _document.numNodesSelected < graph.numNodes; action: selectAllAction }
+                    MenuItem { visible: _document.numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
+                    MenuItem { visible: !_document.nodeSelectionEmpty; action: selectNoneAction }
+                    MenuItem { visible: !_document.nodeSelectionEmpty; action: invertSelectionAction }
 
                     MenuItem { visible: selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
                     MenuItem { visible: selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
@@ -819,7 +686,7 @@ Item
                     Menu
                     {
                         id: sharedValuesOfNodeContextMenu
-                        enabled: !busy && visible
+                        enabled: !_document.busy && visible
                         visible: numAttributesWithSharedValues > 0 && contextMenu.nodeWasClicked
                         title: qsTr("Select Shared Values of '") + contextMenu.clickedNodeName + qsTr("'")
                         Instantiator
@@ -835,17 +702,17 @@ Item
                         }
                     }
 
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectSourcesAction.visible; action: selectSourcesAction }
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectTargetsAction.visible; action: selectTargetsAction }
-                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection &&
+                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectNeighboursAction.visible; action: selectNeighboursAction }
                     Menu
                     {
                         id: sharedValuesSelectionContextMenu
-                        enabled: !busy && visible
-                        visible: numAttributesWithSharedValues > 0 && numNodesSelected > 0 &&
+                        enabled: !_document.busy && visible
+                        visible: numAttributesWithSharedValues > 0 && !_document.nodeSelectionEmpty &&
                             !contextMenu.clickedNodeIsSameAsSelection
                         title: qsTr('Select Shared Values of Selection')
                         Instantiator
@@ -899,7 +766,7 @@ Item
                     id: emptyGraphLabel
                     text: qsTr("Empty Graph")
                     font.pixelSize: 48
-                    color: root.contrastingColor
+                    color: _document.contrastingColor
                     opacity: 0.0
 
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -956,7 +823,7 @@ Item
                 iconName: "go-previous"
                 tooltip: qsTr("Goto Previous Component");
 
-                onClicked: { gotoPrevComponent(); }
+                onClicked: { _document.gotoPrevComponent(); }
             }
 
             FloatingButton
@@ -974,7 +841,7 @@ Item
                 iconName: "go-next"
                 tooltip: qsTr("Goto Next Component");
 
-                onClicked: { gotoNextComponent(); }
+                onClicked: { _document.gotoNextComponent(); }
             }
 
             RowLayout
@@ -990,7 +857,7 @@ Item
                     iconName: "edit-undo"
                     text: qsTr("Overview Mode")
                     tooltip: qsTr("Return to Overview Mode")
-                    onClicked: { switchToOverviewMode(); }
+                    onClicked: { _document.switchToOverviewMode(); }
                 }
 
                 ColumnLayout
@@ -1005,23 +872,23 @@ Item
                                 qsTr(" of ") + graph.numComponents;
                         }
 
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                     }
 
                     Text
                     {
                         Layout.alignment: Qt.AlignHCenter
-                        visible: document.numInvisibleNodesSelected > 0
+                        visible: _document.numInvisibleNodesSelected > 0
 
                         text:
                         {
-                            let nodeText = document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
-                            let numNodes = QmlUtils.formatNumberSIPostfix(document.numInvisibleNodesSelected);
+                            let nodeText = _document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
+                            let numNodes = QmlUtils.formatNumberSIPostfix(_document.numInvisibleNodesSelected);
                             return "<i>" + qsTr("(") + numNodes +
                                 qsTr(" selected ") + nodeText + qsTr(" not currently visible)") + "</i>";
                         }
 
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
 
                         textFormat: Text.StyledText
                     }
@@ -1036,10 +903,10 @@ Item
 
                 visible: toggleFpsMeterAction.checked
 
-                color: root.contrastingColor
+                color: _document.contrastingColor
 
                 horizontalAlignment: Text.AlignLeft
-                text: document.fps.toFixed(1) + qsTr(" fps")
+                text: _document.fps.toFixed(1) + qsTr(" fps")
             }
 
             Column
@@ -1060,13 +927,13 @@ Item
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         text: qsTr("Nodes:")
                     }
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
@@ -1087,13 +954,13 @@ Item
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         text: qsTr("Edges:")
                     }
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
@@ -1114,13 +981,13 @@ Item
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         text: qsTr("Components:")
                     }
 
                     Label
                     {
-                        color: root.contrastingColor
+                        color: _document.contrastingColor
                         Layout.alignment: Qt.AlignRight
                         text:
                         {
@@ -1162,7 +1029,7 @@ Item
                     {
                         id: find
 
-                        document: document
+                        document: _document
 
                         onShown: { findPanel.show(); }
                         onHidden: { findPanel.hide(); }
@@ -1186,7 +1053,7 @@ Item
                     {
                         id: addBookmark
 
-                        document: document
+                        document: _document
 
                         onShown: { bookmarkPanel.show(); }
                         onHidden: { bookmarkPanel.hide(); }
@@ -1210,12 +1077,12 @@ Item
                     {
                         id: layoutSettings
 
-                        document: document
+                        document: _document
 
                         onShown: { layoutSettingsPanel.show(); }
                         onHidden: { layoutSettingsPanel.hide(); }
 
-                        onValueChanged: { root.resumeLayout(); }
+                        onValueChanged: { _document.resumeLayout(); }
                     }
                 }
             }
@@ -1224,32 +1091,32 @@ Item
             {
                 id: transforms
                 visible: plugin.loaded
-                enabled: !busy
+                enabled: !_document.busy
 
                 anchors.right: parent.right
                 anchors.top: parent.top
 
-                enabledTextColor: root.contrastingColor
+                enabledTextColor: _document.contrastingColor
                 disabledTextColor: root.lessContrastingColor
                 heldColor: root.leastContrastingColor
 
-                document: document
+                document: _document
             }
 
             Visualisations
             {
                 id: visualisations
                 visible: plugin.loaded
-                enabled: !busy
+                enabled: !_document.busy
 
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
-                enabledTextColor: root.contrastingColor
+                enabledTextColor: _document.contrastingColor
                 disabledTextColor: root.lessContrastingColor
                 heldColor: root.leastContrastingColor
 
-                document: document
+                document: _document
             }
         }
 
@@ -1347,12 +1214,12 @@ Item
                 {
                     anchors.fill: parent
 
-                    Label { text: document.pluginName }
+                    Label { text: _document.pluginName }
 
                     Item
                     {
                         id: pluginContainerToolStrip
-                        enabled: !root.pluginMinimised && !root.busy
+                        enabled: !root.pluginMinimised && !_document.busy
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                     }
@@ -1420,7 +1287,7 @@ Item
 
         anchors.fill: parent
 
-        property var model: document.plugin
+        property var model: _document.plugin
         property var content
         property bool loaded: false
 
@@ -1558,8 +1425,8 @@ Item
         height: 600
         minimumWidth: 480
         minimumHeight: 480
-        title: application && document.pluginName.length > 0 ?
-                   document.pluginName + " - " + appName : "";
+        title: application && _document.pluginName.length > 0 ?
+                   _document.pluginName + " - " + appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
@@ -1571,11 +1438,11 @@ Item
 
         menuBar: MenuBar
         {
-            Menu { id: pluginMenu0; visible: false; enabled: !busy }
-            Menu { id: pluginMenu1; visible: false; enabled: !busy }
-            Menu { id: pluginMenu2; visible: false; enabled: !busy }
-            Menu { id: pluginMenu3; visible: false; enabled: !busy }
-            Menu { id: pluginMenu4; visible: false; enabled: !busy }
+            Menu { id: pluginMenu0; visible: false; enabled: !_document.busy }
+            Menu { id: pluginMenu1; visible: false; enabled: !_document.busy }
+            Menu { id: pluginMenu2; visible: false; enabled: !_document.busy }
+            Menu { id: pluginMenu3; visible: false; enabled: !_document.busy }
+            Menu { id: pluginMenu4; visible: false; enabled: !_document.busy }
         }
 
         toolBar: ToolBar
@@ -1583,7 +1450,7 @@ Item
             id: pluginWindowToolStrip
             visible: plugin.content !== undefined && plugin.content.toolStrip !== null &&
                 plugin.content.toolStrip !== undefined
-            enabled: !busy
+            enabled: !_document.busy
         }
 
         Item
@@ -1711,9 +1578,28 @@ Item
 
     Document
     {
-        id: document
+        id: _document
         application: root.application
         graph: graph
+
+        property bool nodeSelectionEmpty: numNodesSelected === 0
+        property bool canDeleteSelection: editable && !nodeSelectionEmpty
+        property bool significantCommandInProgress: commandInProgress && !commandTimer.running
+        property bool canChangeComponent: !busy && graph.numComponents > 1
+        property bool hasPluginUI: pluginQmlPath.length > 0
+
+        function shading()
+        {
+            return projection() === Projection.TwoDee ? shading2D() : shading3D();
+        }
+
+        function setShading(_shading)
+        {
+            if(projection() === Projection.TwoDee)
+                setShading2D(_shading);
+            else
+                setShading3D(_shading);
+        }
 
         onUiDataChanged:
         {
@@ -1728,13 +1614,13 @@ Item
 
         onPluginQmlPathChanged:
         {
-            if(document.pluginQmlPath.length > 0)
+            if(_document.pluginQmlPath.length > 0)
             {
                 // Destroy anything already there
                 while(plugin.children.length > 0)
                     plugin.children[0].destroy();
 
-                let pluginComponent = Qt.createComponent(document.pluginQmlPath);
+                let pluginComponent = Qt.createComponent(_document.pluginQmlPath);
 
                 if(pluginComponent.status !== Component.Ready)
                 {
@@ -1746,7 +1632,7 @@ Item
 
                 if(plugin.content === null)
                 {
-                    console.log(document.pluginQmlPath + ": failed to create instance");
+                    console.log(_document.pluginQmlPath + ": failed to create instance");
                     return;
                 }
 
@@ -1791,7 +1677,7 @@ Item
             if(addedNames.length > 0)
             {
                 let lastAddedAttributeName = addedNames[addedNames.length - 1];
-                let lastAddedAttribute = document.attribute(lastAddedAttributeName);
+                let lastAddedAttribute = attribute(lastAddedAttributeName);
 
                 if(find.lastAdvancedFindAttributeName.length === 0)
                     find.lastAdvancedFindAttributeName = lastAddedAttributeName;
@@ -1803,49 +1689,75 @@ Item
                 }
             }
         }
+
+        onLoadComplete:
+        {
+            if(success)
+                _refreshNumAttributesWithSharedValues();
+
+            root.loadComplete(url, success);
+        }
+
+        onGraphChanged: { root._refreshNumAttributesWithSharedValues(); }
+
+        onEnrichmentAnalysisComplete: { root.enrichmentAnalysisComplete(); }
+
+        property var _comandProgressSamples: []
+        property int commandSecondsRemaining
+
+        onCommandProgressChanged:
+        {
+            // Reset the sample buffer if the command progress is less than the latest sample (i.e. new command)
+            if(_comandProgressSamples.length > 0 && commandProgress <
+                _comandProgressSamples[_comandProgressSamples.length - 1].progress)
+            {
+                _comandProgressSamples.length = 0;
+            }
+
+            if(commandProgress < 0)
+            {
+                commandSecondsRemaining = 0;
+                return;
+            }
+
+            let sample = {progress: commandProgress, seconds: new Date().getTime() / 1000.0};
+            _comandProgressSamples.push(sample);
+
+            // Only keep this many samples
+            while(_comandProgressSamples.length > 10)
+                _comandProgressSamples.shift();
+
+            // Require a few samples before making the calculation
+            if(_comandProgressSamples.length < 5)
+            {
+                commandSecondsRemaining = 0;
+                return;
+            }
+
+            let earliestSample = _comandProgressSamples[0];
+            let latestSample = _comandProgressSamples[_comandProgressSamples.length - 1];
+            let percentDelta = latestSample.progress - earliestSample.progress;
+            let timeDelta = latestSample.seconds - earliestSample.seconds;
+            let percentRemaining = 100.0 - commandProgress;
+
+            commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
+        }
+
+        onCommandInProgressChanged:
+        {
+            if(commandInProgress)
+                commandTimer.start();
+            else
+            {
+                commandTimer.stop();
+                root.commandComplete();
+            }
+        }
     }
 
     signal loadComplete(url fileUrl, bool success)
     signal pluginLoadComplete()
     signal enrichmentAnalysisComplete()
-
-    property var comandProgressSamples: []
-    property int commandSecondsRemaining
-
-    onCommandProgressChanged:
-    {
-        // Reset the sample buffer if the command progress is less than the latest sample (i.e. new command)
-        if(comandProgressSamples.length > 0 && commandProgress < comandProgressSamples[comandProgressSamples.length - 1].progress)
-            comandProgressSamples.length = 0;
-
-        if(commandProgress < 0)
-        {
-            commandSecondsRemaining = 0;
-            return;
-        }
-
-        let sample = {progress: commandProgress, seconds: new Date().getTime() / 1000.0};
-        comandProgressSamples.push(sample);
-
-        // Only keep this many samples
-        while(comandProgressSamples.length > 10)
-            comandProgressSamples.shift();
-
-        // Require a few samples before making the calculation
-        if(comandProgressSamples.length < 5)
-        {
-            commandSecondsRemaining = 0;
-            return;
-        }
-
-        let earliestSample = comandProgressSamples[0];
-        let latestSample = comandProgressSamples[comandProgressSamples.length - 1];
-        let percentDelta = latestSample.progress - earliestSample.progress;
-        let timeDelta = latestSample.seconds - earliestSample.seconds;
-        let percentRemaining = 100.0 - commandProgress;
-
-        commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
-    }
 
     signal commandStarted();
     signal commandComplete();
@@ -1858,41 +1770,7 @@ Item
         onTriggered:
         {
             stop();
-            commandStarted();
-        }
-    }
-
-    Connections
-    {
-        target: document
-
-        function onCommandInProgressChanged()
-        {
-            if(document.commandInProgress)
-                commandTimer.start();
-            else
-            {
-                commandTimer.stop();
-                commandComplete();
-            }
-        }
-
-        function onLoadComplete(url, success)
-        {
-            if(success)
-                _refreshNumAttributesWithSharedValues();
-
-            root.loadComplete(url, success);
-        }
-
-        function onGraphChanged(graph, changeOccurred)
-        {
-            _refreshNumAttributesWithSharedValues();
-        }
-
-        function onEnrichmentAnalysisComplete()
-        {
-            enrichmentAnalysisComplete();
+            root.commandStarted();
         }
     }
 

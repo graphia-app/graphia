@@ -275,7 +275,7 @@ private:
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
-    bool _previousBusy = false;
+    bool _previousBusy = true;
 
     std::map<QString, NodeIdSet> _bookmarks;
 

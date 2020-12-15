@@ -151,6 +151,9 @@ bool Document::commandInProgress() const
 
 bool Document::busy() const
 {
+    if(!_graphQuickItem->initialised())
+        return true;
+
     return commandInProgress() || graphChanging() ||
         _graphQuickItem->updating() || _graphQuickItem->transitioning() ||
         _graphQuickItem->interacting();
@@ -791,7 +794,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit directedChanged();
     emit commandVerbChanged(); // Stop showing loading message
 
-    // Load DocumentUI saved data
+    // Load UI saved data
     if(_uiData.size() > 0)
         emit uiDataChanged(_uiData);
 
@@ -812,6 +815,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
+    connect(_graphQuickItem, &GraphQuickItem::initialisedChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);
     connect(_graphQuickItem, &GraphQuickItem::transitioningChanged, this, &Document::maybeEmitBusyChanged, Qt::QueuedConnection);

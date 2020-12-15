@@ -176,7 +176,7 @@ Window
                 }
             }
 
-            model: currentDocument !== null ? currentDocument.bookmarks : null
+            model: document !== null ? document.bookmarks : null
 
             signal rowRenamed(string from, string to)
 
