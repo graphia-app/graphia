@@ -35,6 +35,7 @@ Item
     default property list<Item> listTabs
     property int _currentIndex: 0
     readonly property int currentIndex: _currentIndex
+    property bool controlsEnabled: true
     property bool nextEnabled: true
     property bool finishEnabled: true
     property alias animating: numberAnimation.running
@@ -79,6 +80,7 @@ Item
                 ListView
                 {
                     id: tabSelector
+                    enabled: root.controlsEnabled
                     model: listTabs.length
                     z: 100
                     boundsBehavior: Flickable.StopAtBounds
@@ -162,7 +164,7 @@ Item
                 id: previousButton
                 text: qsTr("Previous")
                 onClicked: { root.goToPrevious(); }
-                enabled: _currentIndex > 0
+                enabled: _currentIndex > 0 && root.controlsEnabled
             }
 
             Button
@@ -170,7 +172,8 @@ Item
                 id: nextButton
                 text: qsTr("Next")
                 onClicked: { root.goToNext(); }
-                enabled: (_currentIndex < listTabs.length - 1) ? nextEnabled : false
+                enabled: (_currentIndex < listTabs.length - 1) ?
+                    root.nextEnabled && root.controlsEnabled : false
             }
 
             Button
@@ -197,6 +200,9 @@ Item
 
                 enabled:
                 {
+                    if(!root.controlsEnabled)
+                        return false;
+
                     if(_onFinishPage)
                         return finishEnabled;
 
@@ -207,6 +213,7 @@ Item
             Button
             {
                 text: qsTr("Cancel")
+                enabled: root.controlsEnabled
                 onClicked: { root.rejected(); }
             }
         }
