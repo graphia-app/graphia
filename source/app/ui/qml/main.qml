@@ -656,7 +656,7 @@ ApplicationWindow
         iconName: "document-save"
         text: qsTr("&Save")
         shortcut: "Ctrl+S"
-        enabled: currentDocument
+        enabled: currentDocument && !currentDocument.busy
         onTriggered:
         {
             if(currentDocument === null)
@@ -671,7 +671,7 @@ ApplicationWindow
         id: fileSaveAsAction
         iconName: "document-save-as"
         text: qsTr("&Save As…")
-        enabled: currentDocument
+        enabled: currentDocument && !currentDocument.busy
         onTriggered:
         {
             if(currentDocument === null)
@@ -981,6 +981,7 @@ ApplicationWindow
     Action
     {
         id: optionsAction
+        enabled: !mainWindow._anyDocumentsBusy
         iconName: "applications-system"
         text: qsTr("&Options…")
         onTriggered:
@@ -994,7 +995,7 @@ ApplicationWindow
     {
         id: enrichmentAction
         text: qsTr("Enrichment…")
-        enabled: currentDocument !== null && !currentDocument.loading
+        enabled: currentDocument !== null && !currentDocument.busy
         onTriggered:
         {
             if(currentDocument !== null)
@@ -1071,7 +1072,7 @@ ApplicationWindow
         iconName: "applications-system"
         text: Qt.platform.os === "osx" ? qsTr("Layout Settings…") : qsTr("Settings…")
         shortcut: "Ctrl+L"
-        enabled: currentDocument
+        enabled: currentDocument && !currentDocument.busy
 
         onTriggered:
         {
@@ -1084,7 +1085,7 @@ ApplicationWindow
     {
         id: exportNodePositionsAction
         text: qsTr("Export To File…")
-        enabled: currentDocument
+        enabled: currentDocument && !currentDocument.busy
 
         onTriggered:
         {
@@ -1371,7 +1372,7 @@ ApplicationWindow
         id: saveImageAction
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
-        enabled: currentDocument
+        enabled: currentDocument && !currentDocument.busy
         onTriggered:
         {
             if(currentDocument)
@@ -1427,7 +1428,7 @@ ApplicationWindow
         text: currentDocument ? qsTr("Display ") + currentDocument.pluginName + qsTr(" In Separate &Window") : ""
         checkable: true
         checked: currentDocument && currentDocument.pluginPoppedOut
-        enabled: currentDocument && currentDocument.hasPluginUI
+        enabled: currentDocument && currentDocument.hasPluginUI && !mainWindow._anyDocumentsBusy
         onTriggered:
         {
             if(currentDocument)
@@ -1744,11 +1745,11 @@ ApplicationWindow
                 onObjectRemoved: bookmarksMenu.removeItem(object)
             }
         }
-        Menu { id: pluginMenu0; visible: false }
-        Menu { id: pluginMenu1; visible: false }
-        Menu { id: pluginMenu2; visible: false }
-        Menu { id: pluginMenu3; visible: false }
-        Menu { id: pluginMenu4; visible: false }
+        Menu { id: pluginMenu0; visible: false; enabled: currentDocument && !currentDocument.busy }
+        Menu { id: pluginMenu1; visible: false; enabled: currentDocument && !currentDocument.busy }
+        Menu { id: pluginMenu2; visible: false; enabled: currentDocument && !currentDocument.busy }
+        Menu { id: pluginMenu3; visible: false; enabled: currentDocument && !currentDocument.busy }
+        Menu { id: pluginMenu4; visible: false; enabled: currentDocument && !currentDocument.busy }
         Menu
         {
             title: qsTr("&Debug")

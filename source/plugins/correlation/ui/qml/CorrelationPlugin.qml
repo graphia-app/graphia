@@ -651,7 +651,11 @@ PluginContent
                     (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
             }
 
-            onRightClick: { plotContextMenu.popup(); }
+            onRightClick:
+            {
+                if(plotContextMenu.enabled)
+                    plotContextMenu.popup();
+            }
 
             property bool _timedBusy: false
 

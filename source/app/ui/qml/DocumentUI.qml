@@ -1563,11 +1563,11 @@ Item
 
         menuBar: MenuBar
         {
-            Menu { id: pluginMenu0; visible: false }
-            Menu { id: pluginMenu1; visible: false }
-            Menu { id: pluginMenu2; visible: false }
-            Menu { id: pluginMenu3; visible: false }
-            Menu { id: pluginMenu4; visible: false }
+            Menu { id: pluginMenu0; visible: false; enabled: !document.busy }
+            Menu { id: pluginMenu1; visible: false; enabled: !document.busy }
+            Menu { id: pluginMenu2; visible: false; enabled: !document.busy }
+            Menu { id: pluginMenu3; visible: false; enabled: !document.busy }
+            Menu { id: pluginMenu4; visible: false; enabled: !document.busy }
         }
 
         toolBar: ToolBar
@@ -1575,6 +1575,7 @@ Item
             id: pluginWindowToolStrip
             visible: plugin.content !== undefined && plugin.content.toolStrip !== null &&
                 plugin.content.toolStrip !== undefined
+            enabled: !document.busy
         }
 
         Item
