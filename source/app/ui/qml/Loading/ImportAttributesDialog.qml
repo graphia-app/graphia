@@ -20,6 +20,7 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import QtGraphicalEffects 1.0
 import app.graphia 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
@@ -153,11 +154,7 @@ Window
             }
         }
 
-        onBusyChanged:
-        {
-            _performedAtLeastOnce = true;
-            root.contentItem.enabled = !busy;
-        }
+        onBusyChanged: { _performedAtLeastOnce = true; }
     }
 
     ListTabView
@@ -166,6 +163,17 @@ Window
         anchors.fill: parent
         visible: !loadingInfo.visible
         finishEnabled: root._validParameters
+        controlsEnabled: !importAttributesKeyDetection.busy
+
+        layer
+        {
+            enabled: importAttributesKeyDetection.busy
+            effect: FastBlur
+            {
+                visible: importAttributesKeyDetection.busy
+                radius: 32
+            }
+        }
 
         ListTab
         {
@@ -224,6 +232,7 @@ Window
                 RowLayout
                 {
                     Layout.topMargin: Constants.spacing
+                    enabled: !importAttributesKeyDetection.busy
 
                     TreeComboBox
                     {
@@ -290,6 +299,8 @@ Window
 
                 RowLayout
                 {
+                    enabled: !importAttributesKeyDetection.busy
+
                     Layout.alignment: Qt.AlignHCenter
                     Layout.topMargin: Constants.spacing * 2
 
@@ -299,13 +310,6 @@ Window
 
                         text: qsTr("Auto Detect")
                         onClicked: { importAttributesKeyDetection.start(); }
-                    }
-
-                    BusyIndicator
-                    {
-                        implicitWidth: height
-                        implicitHeight: autoDetectButton.height
-                        visible: importAttributesKeyDetection.busy
                     }
 
                     Text
@@ -372,6 +376,8 @@ Window
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
+                    enabled: !importAttributesKeyDetection.busy
+
                     RowLayout
                     {
                         Layout.fillWidth: true
@@ -425,14 +431,6 @@ Window
                         }
                     }
                 }
-            }
-
-            BusyIndicator
-            {
-                anchors.centerIn: parent
-                width: 128
-                height: 128
-                visible: importAttributesKeyDetection.busy
             }
         }
 
@@ -505,14 +503,6 @@ Window
                     }
                 }
             }
-
-            BusyIndicator
-            {
-                anchors.centerIn: parent
-                width: 128
-                height: 128
-                visible: importAttributesKeyDetection.busy
-            }
         }
 
         onAccepted:
@@ -543,6 +533,36 @@ Window
         }
 
         onRejected: { root.rejected(); }
+    }
+
+    ColumnLayout
+    {
+        anchors.centerIn: parent
+        visible: importAttributesKeyDetection.busy
+
+        Text
+        {
+            Layout.alignment: Qt.AlignHCenter
+            text: qsTr("Detecting Keys")
+        }
+
+        BusyIndicator
+        {
+            Layout.alignment: Qt.AlignHCenter
+            width: 256
+            height: 256
+        }
+
+        Button
+        {
+            id: cancelButton
+            Layout.alignment: Qt.AlignHCenter
+
+            text: qsTr("Cancel")
+
+            enabled: importAttributesKeyDetection.busy
+            onClicked: { importAttributesKeyDetection.cancel(); }
+        }
     }
 
     onAccepted: { root.close(); }
