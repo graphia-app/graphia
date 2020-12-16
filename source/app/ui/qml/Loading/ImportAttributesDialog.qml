@@ -51,6 +51,8 @@ Window
         loadingInfo.fileUrl = fileUrl;
         tabularDataParser.parse(fileUrl);
         listTabView.reset();
+
+        importAttributesKeyDetection._performedAtLeastOnce = false;
         importAttributesKeyDetection.reset();
 
         root.show();
@@ -133,6 +135,8 @@ Window
         tabularData: tabularDataParser.data
         document: root.document
 
+        property bool _performedAtLeastOnce: false
+
         onResultChanged:
         {
             if(result.attributeName === undefined || result.column === undefined)
@@ -149,7 +153,11 @@ Window
             }
         }
 
-        onBusyChanged: { root.contentItem.enabled = !busy; }
+        onBusyChanged:
+        {
+            _performedAtLeastOnce = true;
+            root.contentItem.enabled = !busy;
+        }
     }
 
     ListTabView
@@ -327,7 +335,7 @@ Window
 
             onActiveChanged:
             {
-                if(active && !keyAttributeList.selectedValue)
+                if(active && !keyAttributeList.selectedValue && !importAttributesKeyDetection._performedAtLeastOnce)
                     importAttributesKeyDetection.start();
             }
 
@@ -434,7 +442,7 @@ Window
 
             onActiveChanged:
             {
-                if(active && !keyAttributeList.selectedValue)
+                if(active && !keyAttributeList.selectedValue && !importAttributesKeyDetection._performedAtLeastOnce)
                     importAttributesKeyDetection.start();
             }
 
