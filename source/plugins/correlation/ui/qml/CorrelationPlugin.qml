@@ -558,6 +558,8 @@ PluginContent
         return options;
     }
 
+    SystemPalette { id: systemPalette }
+
     toolStrip: ToolBar
     {
         RowLayout
@@ -588,6 +590,27 @@ PluginContent
         orientation: toggleUiOrientationAction.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
+
+        handleDelegate: Rectangle
+        {
+            width: 8
+            height: 8
+
+            color: systemPalette.window
+
+            Rectangle
+            {
+                anchors.centerIn: parent
+
+                readonly property int maxDimension: 48
+                readonly property int minDimension: 4
+
+                width: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
+                height: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
+                radius: minDimension * 0.5
+                color: systemPalette.midlight
+            }
+        }
 
         NodeAttributeTableView
         {
