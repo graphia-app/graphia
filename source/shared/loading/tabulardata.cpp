@@ -210,9 +210,6 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
 {
     std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
 
-    if(typeIdentity(columnIndex).type() != TypeIdentity::Type::String)
-        return 0;
-
     std::set<QString> columnValues;
     std::set<QString> intersection;
 

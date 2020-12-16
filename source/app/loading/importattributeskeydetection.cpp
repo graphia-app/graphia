@@ -45,8 +45,13 @@ void ImportAttributesKeyDetection::start()
         auto attributeNames = _document->availableAttributeNames(
             static_cast<int>(ElementType::All), static_cast<int>(ValueType::String));
 
+        auto typeIdentities = _tabularData->typeIdentities();
+
         for(size_t columnIndex = 0; columnIndex < _tabularData->numColumns(); columnIndex++)
         {
+            if(typeIdentities.at(columnIndex).type() != TypeIdentity::Type::String)
+                continue;
+
             for(const auto& attributeName: attributeNames)
             {
                 auto values = _document->allAttributeValues(attributeName);
