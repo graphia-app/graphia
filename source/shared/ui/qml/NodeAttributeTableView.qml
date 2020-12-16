@@ -1240,7 +1240,11 @@ Item
     Menu { id: contextMenu }
 
     signal rightClick();
-    onRightClick: { contextMenu.popup(); }
+    onRightClick:
+    {
+        if(contextMenu.enabled)
+            contextMenu.popup();
+    }
 
     function array_move(arr, old_index, new_index)
     {

@@ -226,6 +226,11 @@ function cloneMenu(from, to)
     while(to.items.length > 0)
         to.removeItem(to.items[0]);
 
+    to.enabled = Qt.binding(function(from)
+    {
+        return function() { return from.enabled; };
+    }(from));
+
     let exclusiveGroups = {};
 
     for(let index = 0; index < from.items.length; index++)
