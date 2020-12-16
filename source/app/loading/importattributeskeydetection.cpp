@@ -36,6 +36,8 @@ ImportAttributesKeyDetection::~ImportAttributesKeyDetection()
 
 void ImportAttributesKeyDetection::start()
 {
+    uncancel();
+
     QFuture<void> future = QtConcurrent::run([this]
     {
         QString bestAttributeName;
@@ -73,18 +75,22 @@ void ImportAttributesKeyDetection::start()
                 }
 
                 // Can't improve on 100%!
-                if(bestPercent >= 100)
+                if(bestPercent >= 100 || cancelled())
                     break;
             }
 
-            if(bestPercent >= 100)
+            if(bestPercent >= 100 || cancelled())
                 break;
         }
 
         _result.clear();
-        _result.insert(QStringLiteral("attributeName"), bestAttributeName);
-        _result.insert(QStringLiteral("column"), static_cast<int>(bestColumnIndex));
-        _result.insert(QStringLiteral("percent"), bestPercent);
+
+        if(!cancelled())
+        {
+            _result.insert(QStringLiteral("attributeName"), bestAttributeName);
+            _result.insert(QStringLiteral("column"), static_cast<int>(bestColumnIndex));
+            _result.insert(QStringLiteral("percent"), bestPercent);
+        }
 
         emit resultChanged();
     });

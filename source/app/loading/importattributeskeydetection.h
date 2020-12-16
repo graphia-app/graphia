@@ -20,6 +20,7 @@
 #define IMPORTATTRIBUTESKEYDETECTION_H
 
 #include "shared/loading/tabulardata.h"
+#include "shared/utils/cancellable.h"
 
 #include <QObject>
 #include <QCoreApplication>
@@ -29,7 +30,7 @@
 
 class Document;
 
-class ImportAttributesKeyDetection : public QObject
+class ImportAttributesKeyDetection : public QObject, public Cancellable
 {
     Q_OBJECT
 
@@ -52,6 +53,7 @@ public:
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void reset();
+    Q_INVOKABLE void cancel() override { Cancellable::cancel(); }
 
     bool busy() const { return _watcher.isRunning(); }
 
