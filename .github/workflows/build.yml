@@ -2,6 +2,7 @@ name: Build
 on: [push]
 env:
   QT_VERSION: 5.14.2
+  QT_MODULES: qtwebengine
 
 jobs:
   linux:
@@ -12,6 +13,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -50,6 +52,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -86,6 +89,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -136,6 +140,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
