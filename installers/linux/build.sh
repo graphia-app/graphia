@@ -48,6 +48,8 @@ then
   (
     cd ${BUILD_DIR}
 
+    # Below -exclude-libs line is a work around for https://github.com/probonopd/linuxdeployqt/issues/35
+
     ${LINUXDEPLOYQT} \
       AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
       ${QML_DIRS} \
@@ -56,6 +58,7 @@ then
       -executable=AppDir/usr/bin/MessageBox \
       -executable=AppDir/usr/bin/Updater \
       -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so \
+      -exclude-libs=libnss3.so,libnssutil3.so \
       || exit $?
 
     for APPIMAGE_FILENAME in $(find -iname "*.AppImage")
