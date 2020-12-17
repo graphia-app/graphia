@@ -92,10 +92,30 @@ macdeployqt ${PRODUCT_NAME}.app ${MACDEPLOYQT_ARGS}
 
 if [ -n "${SIGNING_ENABLED}" ]
 then
-  # Need to sign again because macdeployqt won't sign the additional executables
-  echo "Resigning..."
+  echo "Signing..."
   codesign --verbose --deep --force --options runtime --sign "${APPLE_SIGN_ID}" \
     ${PRODUCT_NAME}.app || exit $?
+
+  cat <<EOF > QtWebEngineProcess.entitlements
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.cs.disable-executable-page-protection</key>
+  <true/>
+</dict>
+</plist>
+EOF
+
+  echo "Signing QtWebEngine..."
+  codesign --verbose --force --options runtime --sign "${APPLE_SIGN_ID}" \
+    --entitlements QtWebEngineProcess.entitlements \
+    ${PRODUCT_NAME}.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess || exit $?
+
+  echo "Resigning main executable..."
+  codesign --verbose --force --options runtime --sign "${APPLE_SIGN_ID}" \
+    ${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} || exit $?
+
   echo "Verifying..."
   codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
   echo "OK"
