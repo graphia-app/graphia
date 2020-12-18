@@ -332,6 +332,17 @@ ApplicationWindow
             return a.version - b.version;
         });
 
+        root.updatesArray.sort(function(a, b)
+        {
+            if(a.version < b.version)
+                return -1;
+
+            if(a.version > b.version)
+                return 1;
+
+            return 0;
+        });
+
         for(const update of root.updatesArray)
         {
             let tab = tabView.createTab();
