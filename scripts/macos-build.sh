@@ -44,7 +44,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   cd ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.12 \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
     -GNinja .. || exit $?
   cat variables.sh
   cmake --build . --target all 2>&1 | tee compiler.log
