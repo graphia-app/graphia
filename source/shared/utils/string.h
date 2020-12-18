@@ -84,7 +84,7 @@ namespace u
         {
             int number = 1;
 
-            // The attribute name is already used, so generate a new one
+            // The name is already used, so generate a new one
             QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
             auto match = re.match(newName);
             if(match.hasMatch())
