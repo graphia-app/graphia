@@ -48,11 +48,8 @@ private:
 
     void generateElementIdMapping(E elementId)
     {
-        if(_indexes->get(elementId)._set)
-        {
-            // Already got one
+        if(haveIndexFor(elementId))
             return;
-        }
 
         _indexes->set(elementId, {true, static_cast<size_t>(numValues())});
         _indexToElementIdMap[numValues()] = elementId;
@@ -80,6 +77,11 @@ public:
         return {};
     }
 
+    bool haveIndexFor(E elementId) const
+    {
+        return _indexes->get(elementId)._set;
+    }
+
     size_t indexFor(E elementId) const
     {
         return _indexes->get(elementId)._value;
@@ -93,6 +95,9 @@ public:
 
     QVariant valueBy(E elementId, const QString& name) const
     {
+        if(!haveIndexFor(elementId))
+            return {};
+
         return value(indexFor(elementId), name);
     }
 
@@ -159,8 +164,18 @@ public:
             default: break;
             }
 
-            bool hasMissingValues = std::any_of(userDataVector.begin(), userDataVector.end(),
-                                                [](const auto& v) { return v.isEmpty(); });
+            bool hasMissingValues = false;
+
+            auto testElementIdsForMissingValues = [this](const auto& elementIds)
+            {
+                return std::any_of(elementIds.begin(), elementIds.end(),
+                    [this](const auto elementId) { return !haveIndexFor(elementId); });
+            };
+
+            if constexpr(std::is_same_v<E, NodeId>)
+                hasMissingValues = testElementIdsForMissingValues(graphModel.graph().nodeIds());
+            else if constexpr(std::is_same_v<E, EdgeId>)
+                hasMissingValues = testElementIdsForMissingValues(graphModel.graph().edgeIds());
 
             if(hasMissingValues)
             {
