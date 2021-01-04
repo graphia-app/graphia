@@ -354,9 +354,14 @@ ApplicationWindow
 
             for(const osName in update.payloads)
             {
+                let url = update.payloads[osName].url;
+                let checksum = update.payloads[osName].installerChecksum;
+
                 let item = tab.item.osControlsFor(osName);
                 item.osEnabledChecked = true;
-                item.urlText = update.payloads[osName].url;
+                item.urlText = url;
+
+                root.checksums[url] = checksum;
             }
 
             for(const image of update.images)
