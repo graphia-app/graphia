@@ -2269,7 +2269,8 @@ ApplicationWindow
                             else
                                 addToRecentFiles(fileUrl);
 
-                            onDocumentShown(currentDocument);
+                            if(currentDocument !== null)
+                                onDocumentShown(currentDocument);
                         }
                         else
                             tabView.onLoadFailure(tabView.findTabIndex(document), fileUrl);
