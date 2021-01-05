@@ -111,8 +111,8 @@ ApplicationWindow
         {
             if(xhr.readyState === XMLHttpRequest.DONE)
             {
-                let status = xhr.status;
-                if(status >= 200 && status < 400)
+                let httpStatus = xhr.status;
+                if(httpStatus >= 200 && httpStatus < 400)
                 {
                     // Success
                     root.checksums[url] = QmlUtils.sha256(xhr.response);
@@ -120,8 +120,15 @@ ApplicationWindow
                 }
                 else
                 {
-                    validateErrorDialog.text = "HTTP status " + status + " while validating " + url + ".";
+                    validateErrorDialog.text = "HTTP status " + httpStatus + " while validating " + url + ".";
                     validateErrorDialog.open();
+                    status.text = qsTr("Failed to download");
+
+                    for(let index = 0; index < tabView.count; index++)
+                    {
+                        let updateUI = tabView.getTab(index).item;
+                        updateUI.highlightUrl(url);
+                    }
                 }
 
                 root.numActiveChecksummings--;
@@ -765,6 +772,7 @@ ApplicationWindow
                                                 root.checksums[text] = "";
 
                                             setSaveRequired();
+                                            textColor = "black";
                                         }
                                     }
                                 }
@@ -810,6 +818,20 @@ ApplicationWindow
                     }
 
                     property var updateObject: ({})
+
+                    function highlightUrl(url)
+                    {
+                        for(let i = 0; i < osControls.count; i++)
+                        {
+                            let item = osControls.itemAt(i);
+
+                            if(!item.osEnabledChecked)
+                                continue;
+
+                            if(item.urlText === url)
+                                item.urlTextField.textColor = "red";
+                        }
+                    }
 
                     function generateJSON(onComplete)
                     {
