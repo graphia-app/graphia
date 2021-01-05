@@ -29,7 +29,8 @@ cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja ^
     -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" ^
     .. || EXIT /B 1
 type variables.bat
-cmake --build . --target all | tee compiler.log || EXIT /B 1
+call variables.bat
+cmake --build . --target all | tee compiler-%VERSION%.log || EXIT /B 1
 
 cd ..
 

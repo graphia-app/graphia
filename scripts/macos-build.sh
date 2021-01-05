@@ -47,7 +47,8 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
     -GNinja .. || exit $?
   cat variables.sh
-  cmake --build . --target all 2>&1 | tee compiler.log
+  . variables.sh
+  cmake --build . --target all 2>&1 | tee compiler-${VERSION}.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 )
 

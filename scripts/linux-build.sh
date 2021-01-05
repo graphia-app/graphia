@@ -49,6 +49,7 @@ mkdir -p ${BUILD_DIR}
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
     -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
   cat variables.sh
-  cmake --build . --target install 2>&1 | tee compiler.log
+  . variables.sh
+  cmake --build . --target install 2>&1 | tee compiler-${VERSION}.log
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 )
