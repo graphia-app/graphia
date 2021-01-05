@@ -164,26 +164,13 @@ public:
             default: break;
             }
 
-            bool hasMissingValues = false;
-
-            auto testElementIdsForMissingValues = [this](const auto& elementIds)
+            attribute.setValueMissingFn([this, userDataVectorName](E elementId)
             {
-                return std::any_of(elementIds.begin(), elementIds.end(),
-                    [this](const auto elementId) { return !haveIndexFor(elementId); });
-            };
+                if(!haveIndexFor(elementId))
+                    return false;
 
-            if constexpr(std::is_same_v<E, NodeId>)
-                hasMissingValues = testElementIdsForMissingValues(graphModel.graph().nodeIds());
-            else if constexpr(std::is_same_v<E, EdgeId>)
-                hasMissingValues = testElementIdsForMissingValues(graphModel.graph().edgeIds());
-
-            if(hasMissingValues)
-            {
-                attribute.setValueMissingFn([this, userDataVectorName](E elementId)
-                {
-                   return valueBy(elementId, userDataVectorName).toString().isEmpty();
-                });
-            }
+                return value(indexFor(elementId), userDataVectorName).toString().isEmpty();
+            });
 
             attribute.setDescription(QString(QObject::tr("%1 is a user defined attribute.")).arg(userDataVectorName));
         }
