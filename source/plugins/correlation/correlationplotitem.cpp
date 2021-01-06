@@ -383,6 +383,8 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
     default:
         break;
     }
+
+    updateTooltip();
 }
 
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
