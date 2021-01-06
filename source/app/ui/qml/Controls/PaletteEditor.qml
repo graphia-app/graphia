@@ -45,12 +45,7 @@ ColumnLayout
 
         if(palette.autoColors !== undefined)
         {
-            let numKeys = palette.autoColors.length;
-
-            if(root.stringValues.length > 0 && root.stringValues.length < numKeys)
-                numKeys = root.stringValues.length;
-
-            for(let key = 0; key < numKeys; key++)
+            for(let key = 0; key < palette.autoColors.length; key++)
                 root._autoColors.push(palette.autoColors[key]);
         }
 
@@ -215,7 +210,13 @@ ColumnLayout
                     Layout.fillWidth: true
 
                     elide: Text.ElideRight
-                    text: root.stringValues[index]
+                    text:
+                    {
+                        if(index >= root.stringValues.length)
+                            return qsTr("<i>[Not Assigned]</i>");
+
+                        return root.stringValues[index];
+                    }
                 }
 
                 Text
