@@ -54,7 +54,11 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/multisamples.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultgradients.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/defaultpalettes.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.h
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/cancellable.h
@@ -119,6 +123,8 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/tableproxymodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/updates/updates.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorgradient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp

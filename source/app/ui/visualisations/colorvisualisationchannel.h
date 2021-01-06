@@ -20,8 +20,9 @@
 #define COLORVISUALISATIONCHANNEL_H
 
 #include "visualisationchannel.h"
-#include "colorgradient.h"
-#include "colorpalette.h"
+
+#include "shared/ui/visualisations/colorgradient.h"
+#include "shared/ui/visualisations/colorpalette.h"
 
 #include <vector>
 #include <QString>

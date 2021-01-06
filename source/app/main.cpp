@@ -42,8 +42,6 @@
 #include "limitconstants.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
-#include "ui/visualisations/defaultgradients.h"
-#include "ui/visualisations/defaultpalettes.h"
 #include "ui/visualisations/visualisationmappingplotitem.h"
 #include "ui/hovermousepassthrough.h"
 #include "ui/enrichmentheatmapitem.h"
@@ -57,6 +55,8 @@
 #include "shared/utils/modelcompleter.h"
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
+#include "shared/ui/visualisations/defaultgradients.h"
+#include "shared/ui/visualisations/defaultpalettes.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
