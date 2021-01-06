@@ -33,6 +33,7 @@
 #include <QDesktopServices>
 #include <QSet>
 #include <QCollator>
+#include <QDebug>
 
 #include <cmath>
 #include <algorithm>
