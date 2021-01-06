@@ -1275,6 +1275,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
     size_t y = numColumnAnnotations - 1;
+    size_t offset = 0;
 
     auto* qcpColumnAnnotations = new QCPColumnAnnotations(caXAxis, caYAxis);
 
@@ -1285,7 +1286,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
         if(visible)
         {
-            qcpColumnAnnotations->setData(y, _sortMap, selected, &columnAnnotation);
+            qcpColumnAnnotations->setData(y, _sortMap, selected, offset, &columnAnnotation);
 
             QString prefix;
             QString postfix;
@@ -1312,6 +1313,8 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
             y--;
         }
+
+        offset++;
     }
 
     caYAxis->setTickPen(QPen(Qt::transparent)); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks

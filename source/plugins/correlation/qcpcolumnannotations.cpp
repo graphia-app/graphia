@@ -21,8 +21,10 @@
 #include "shared/utils/color.h"
 #include "shared/utils/container.h"
 
+#include "shared/ui/visualisations/defaultpalettes.h"
+
 QCPColumnAnnotations::QCPColumnAnnotations(QCPAxis* keyAxis, QCPAxis* valueAxis) :
-    QCPAbstractPlottable(keyAxis, valueAxis)
+    QCPAbstractPlottable(keyAxis, valueAxis), _colorPalette(Defaults::PALETTE)
 {}
 
 double QCPColumnAnnotations::selectTest(const QPointF&, bool, QVariant*) const
@@ -44,9 +46,9 @@ QCPRange QCPColumnAnnotations::getValueRange(bool& foundRange, QCP::SignDomain, 
 }
 
 void QCPColumnAnnotations::setData(size_t y, std::vector<size_t> indices,
-    bool selected, const ColumnAnnotation* columnAnnotation)
+    bool selected, size_t offset, const ColumnAnnotation* columnAnnotation)
 {
-    _rows.emplace(y, Row(std::move(indices), selected, columnAnnotation));
+    _rows.emplace(y, Row(std::move(indices), selected, offset, columnAnnotation));
 
 }
 
@@ -62,7 +64,7 @@ int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString
 }
 
 void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
-    size_t w, const QString& value, bool selected)
+    size_t w, const QString& value, size_t index, bool selected)
 {
     auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
     auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
@@ -73,7 +75,7 @@ void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
     if(!rect.intersects(painter->clipBoundingRect()))
         return;
 
-    auto color = u::colorForString(value);
+    auto color = _colorPalette.get(value, static_cast<int>(index));
 
     if(value.isEmpty())
         color = Qt::transparent;
@@ -124,23 +126,27 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
         auto currentValue = row._columnAnnotation->valueAt(row._indices.at(0));
 
+        auto offsetByPrime = row._offset * 13;
+        auto currentIndex = row._columnAnnotation->uniqueIndexOf(currentValue) + offsetByPrime;
+
         for(auto index : row._indices)
         {
             const auto& value = row._columnAnnotation->valueAt(index);
 
             if(value != currentValue)
             {
-                renderRect(painter, left, y, width, currentValue, row._selected);
+                renderRect(painter, left, y, width, currentValue, currentIndex, row._selected);
 
                 left = right;
                 currentValue = value;
+                currentIndex = row._columnAnnotation->uniqueIndexOf(currentValue) + offsetByPrime;
             }
 
             right++;
             width = right - left;
         }
 
-        renderRect(painter, left, y, width, currentValue, row._selected);
+        renderRect(painter, left, y, width, currentValue, currentIndex, row._selected);
     }
 }
 

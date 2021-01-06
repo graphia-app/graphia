@@ -18,11 +18,17 @@
 
 #include "columnannotation.h"
 
+#include "shared/utils/container.h"
+
 ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
     _name(std::move(name)), _values(std::move(values))
 {
+    int index = 0;
     for(const auto& value : _values)
-        _uniqueValues.emplace(value);
+    {
+        if(_uniqueValues.emplace(value, index).second)
+            index++;
+    }
 }
 
 ColumnAnnotation::ColumnAnnotation(QString name,
@@ -30,9 +36,20 @@ ColumnAnnotation::ColumnAnnotation(QString name,
     const ColumnAnnotation::Iterator& end) :
     _name(std::move(name))
 {
+    int index = 0;
     for(auto it = begin; it != end; ++it)
     {
         _values.emplace_back(*it);
-        _uniqueValues.emplace(*it);
+
+        if(_uniqueValues.emplace(*it, index).second)
+            index++;
     }
+}
+
+int ColumnAnnotation::uniqueIndexOf(const QString& value) const
+{
+    if(u::contains(_uniqueValues, value))
+        return _uniqueValues.at(value);
+
+    return -1;
 }

@@ -23,6 +23,8 @@
 
 #include "columnannotation.h"
 
+#include "shared/ui/visualisations/colorpalette.h"
+
 #include <QColor>
 #include <QRect>
 #include <QString>
@@ -38,14 +40,16 @@ private:
     struct Row
     {
         // cppcheck-suppress passedByValue
-        Row(std::vector<size_t> indices, bool selected,
+        Row(std::vector<size_t> indices, bool selected, size_t offset,
             const ColumnAnnotation* columnAnnotation) :
-            _indices(std::move(indices)), _selected(selected),
+            _indices(std::move(indices)),
+            _selected(selected), _offset(offset),
             _columnAnnotation(columnAnnotation)
         {}
 
         std::vector<size_t> _indices;
         bool _selected = true;
+        size_t _offset = 0;
         const ColumnAnnotation* _columnAnnotation;
     };
 
@@ -56,6 +60,8 @@ private:
     double _cellHeight = 0.0;
     double _halfCellWidth = 0.0;
 
+    ColorPalette _colorPalette;
+
 public:
     explicit QCPColumnAnnotations(QCPAxis *keyAxis, QCPAxis *valueAxis);
 
@@ -64,7 +70,7 @@ public:
     QCPRange getValueRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth,
         const QCPRange& inKeyRange = QCPRange()) const override;
 
-    void setData(size_t y, std::vector<size_t> indices, bool selected,
+    void setData(size_t y, std::vector<size_t> indices, bool selected, size_t offset,
         const ColumnAnnotation* columnAnnotation);
 
 protected:
@@ -74,7 +80,7 @@ protected:
 private:
     int widthForValue(const QCPPainter* painter, const QString& value);
     void renderRect(QCPPainter* painter, size_t x, size_t y,
-        size_t w, const QString& value, bool selected);
+        size_t w, const QString& value, size_t index, bool selected);
 };
 
 #endif // QCPCOLUMNANNOTATIONS_H

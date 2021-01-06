@@ -22,7 +22,7 @@
 #include <QString>
 
 #include <vector>
-#include <set>
+#include <map>
 
 class ColumnAnnotation
 {
@@ -30,7 +30,7 @@ private:
     QString _name;
 
     std::vector<QString> _values;
-    std::set<QString> _uniqueValues;
+    std::map<QString, int> _uniqueValues;
 
 public:
     using Iterator = std::vector<QString>::const_iterator;
@@ -39,9 +39,9 @@ public:
     ColumnAnnotation(QString name, const Iterator& begin, const Iterator& end);
 
     const QString& name() const { return _name; }
-    std::set<QString> uniqueValues() const { return _uniqueValues; }
 
     const QString& valueAt(size_t index) const { return _values.at(index); }
+    int uniqueIndexOf(const QString& value) const;
 };
 
 #endif // COLUMNANNOTATION_H
