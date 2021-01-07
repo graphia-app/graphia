@@ -110,9 +110,57 @@ Item
                 }
             }
         }
+
+        onClicked: { root.clicked(row); }
+
+        onDoubleClicked:
+        {
+            // See TreeBox for an explanation
+            doubleClickHack.row = row;
+        }
+
+        Connections
+        {
+            id: doubleClickHack
+            property int row: -1
+
+            target: tableView.__mouseArea
+
+            function onPressedChanged()
+            {
+                if(!tableView.__mouseArea.pressed && row !== -1)
+                {
+                    root.doubleClicked(row);
+                    row = -1;
+
+                    if(root.selectedValue)
+                        root.accepted();
+                }
+            }
+        }
+
+        Keys.onPressed:
+        {
+            switch(event.key)
+            {
+            case Qt.Key_Enter:
+            case Qt.Key_Return:
+                if(root.selectedValue)
+                {
+                    event.accepted = true;
+                    root.accepted();
+                }
+                break;
+            }
+        }
     }
 
     function clear() { tableView.selection.clear(); }
     function selectAll() { if(root.count > 0) tableView.selection.selectAll(); }
+
+    signal accepted()
+
+    signal clicked(var row)
+    signal doubleClicked(var row)
 }
 
