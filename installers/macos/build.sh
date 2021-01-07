@@ -185,7 +185,7 @@ done
 
 echo "...complete"
 
-curl -s --output notarization.log "${NOTARIZE_LOGFILE_URL}"
+curl -s --output notarization-${VERSION}.log "${NOTARIZE_LOGFILE_URL}"
 
 if [[ "${NOTARIZE_STATUS}" =~ "success" ]]
 then
@@ -193,6 +193,6 @@ then
   xcrun stapler staple "${PRODUCT_NAME}-${VERSION}.dmg" || exit $?
 else
   echo "Notarization failed!"
-  cat notarization.log
+  cat notarization-${VERSION}.log
   exit 1
 fi
