@@ -109,6 +109,8 @@ Window
                     description.update();
                     updateVisualisationExpressions();
                 }
+
+                onAccepted: { root.accept(); }
             }
 
             Text
