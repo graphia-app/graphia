@@ -264,7 +264,10 @@ Item
         let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
 
+        let previousSelectedRows = root.selectedRows;
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+
+        return !Utils.arrayCompare(previousSelectedRows, root.selectedRows);
     }
 
     function deselectRows(inStartRow, inEndRow)
@@ -275,7 +278,10 @@ Item
         let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
 
+        let previousSelectedRows = root.selectedRows;
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+
+        return !Utils.arrayCompare(previousSelectedRows, root.selectedRows);
     }
 
     ItemSelectionModel
@@ -284,7 +290,6 @@ Item
         model: proxyModel
         onSelectionChanged: { proxyModel.setSubSelection(selectionModel.selection, deselected); }
     }
-
 
     Item
     {
@@ -791,7 +796,7 @@ Item
                 signal fetchColumnSizes;
 
                 clip: true
-                visible: tableView.columns != 0
+                visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
                 layer
@@ -1122,32 +1127,60 @@ Item
                     if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
                         return;
 
-                    startRow = tableItem.modelRow;
+                    let selectionChanged = false;
+                    let clickedRow = tableItem.modelRow;
+                    let rowIsSelected = selectionModel.isSelected(
+                        proxyModel.index(clickedRow, 0));
 
-                    if(mouse.modifiers & Qt.ShiftModifier)
+                    if((mouse.modifiers & Qt.ShiftModifier) && endRow != -1)
                     {
-                        if(endRow != -1)
-                            selectRows(startRow, endRow);
+                        selectionChanged = selectRows(endRow, clickedRow);
                     }
-                    else if(!(mouse.modifiers & Qt.ControlModifier))
-                        selectionModel.clear();
-
-                    endRow = tableItem.modelRow;
-
-                    // Deselect with ctrl-click
-                    let modelIndex = proxyModel.index(startRow, 0);
-                    if((mouse.modifiers & Qt.ControlModifier) &&
-                            selectionModel.isSelected(modelIndex))
+                    else if((mouse.modifiers & Qt.ControlModifier) && rowIsSelected)
                     {
-                        deselectRows(startRow, startRow);
+                        selectionChanged = deselectRows(clickedRow, clickedRow);
                         deselectDrag = true;
                     }
                     else
                     {
-                        selectRows(startRow, startRow);
+                        if(!(mouse.modifiers & Qt.ControlModifier))
+                            selectionModel.clear();
+
+                        selectionChanged = selectRows(clickedRow, clickedRow);
                     }
 
-                    previousRow = startRow;
+                    previousRow = startRow = endRow = clickedRow;
+                }
+
+                onPositionChanged:
+                {
+                    if(mouse.buttons !== Qt.LeftButton)
+                        return;
+
+                    let tableItem = tableView.getItem(mouseX, mouseY);
+                    if(tableItem && tableItem.modelRow !== previousRow)
+                    {
+                        if(deselectDrag)
+                        {
+                            deselectRows(startRow, tableItem.modelRow);
+                        }
+                        else
+                        {
+                            if(previousRow != -1)
+                                deselectRows(startRow, previousRow);
+
+                            selectRows(startRow, tableItem.modelRow);
+                        }
+
+                        previousRow = tableItem.modelRow;
+                        endRow = tableItem.modelRow;
+                    }
+                }
+
+                onReleased:
+                {
+                    previousRow = -1;
+                    deselectDrag = false;
                 }
 
                 Keys.onDownPressed:
@@ -1196,36 +1229,6 @@ Item
                     {
                         startRow = endRow;
                         selectRows(endRow, endRow);
-                    }
-                }
-
-                onReleased:
-                {
-                    previousRow = -1;
-                    deselectDrag = false;
-                }
-                onPositionChanged:
-                {
-                    if(mouse.buttons !== Qt.LeftButton)
-                        return;
-
-                    let tableItem = tableView.getItem(mouseX, mouseY);
-                    if(tableItem && tableItem.modelRow !== previousRow)
-                    {
-                        if(deselectDrag)
-                        {
-                            deselectRows(startRow, tableItem.modelRow);
-                        }
-                        else
-                        {
-                            if(previousRow != -1)
-                                deselectRows(startRow, previousRow);
-
-                            selectRows(startRow, tableItem.modelRow);
-                        }
-
-                        previousRow = tableItem.modelRow;
-                        endRow = tableItem.modelRow
                     }
                 }
             }
