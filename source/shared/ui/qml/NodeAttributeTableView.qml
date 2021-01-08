@@ -667,6 +667,9 @@ Item
                                 }
                                 else if(mouse.button === Qt.RightButton)
                                     headerContextMenu.popup();
+
+                                selectionModel.clear();
+                                root.selectedRows = [];
                             }
 
                             Menu

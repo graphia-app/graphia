@@ -20,6 +20,8 @@
 
 #include "nodeattributetablemodel.h"
 
+#include "shared/utils/container.h"
+
 #include <QDebug>
 
 bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
@@ -37,7 +39,7 @@ bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex&) 
 QVariant TableProxyModel::data(const QModelIndex& index, int role) const
 {
     if(role == SubSelectedRole)
-        return _subSelectionRows.find(index.row()) != _subSelectionRows.end();
+        return u::contains(_subSelectionRows, index.row());
 
     auto unorderedSourceIndex = mapToSource(index);
 
@@ -66,6 +68,7 @@ void TableProxyModel::setSubSelection(const QItemSelection& subSelection, const 
 
     for(const auto& range : _subSelection)
         emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
+
     for(const auto& range : subDeSelection)
         emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
 }
