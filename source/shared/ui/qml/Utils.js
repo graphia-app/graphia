@@ -389,3 +389,25 @@ function regexEscape(text)
 {
     return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
+
+// This is only a shallow value comparison
+function arrayCompare(a, b)
+{
+    if(!Array.isArray(a) || !Array.isArray(b))
+        return false;
+
+    if(a.length !== b.length)
+        return false;
+
+    let as = a.sort((x, y) => x - y);
+    let bs = b.sort((x, y) => x - y);
+
+    let i = a.length;
+    while(i--)
+    {
+        if(as[i] !== bs[i])
+            return false;
+    }
+
+    return true;
+}
