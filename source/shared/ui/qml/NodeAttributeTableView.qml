@@ -264,10 +264,7 @@ Item
         let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
 
-        let previousSelectedRows = root.selectedRows;
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
-
-        return !Utils.arrayCompare(previousSelectedRows, root.selectedRows);
     }
 
     function deselectRows(inStartRow, inEndRow)
@@ -278,10 +275,7 @@ Item
         let range = proxyModel.buildRowSelectionRange(less, max);
         selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
 
-        let previousSelectedRows = root.selectedRows;
         root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
-
-        return !Utils.arrayCompare(previousSelectedRows, root.selectedRows);
     }
 
     ItemSelectionModel
@@ -1134,11 +1128,11 @@ Item
 
                     if((mouse.modifiers & Qt.ShiftModifier) && endRow != -1)
                     {
-                        selectionChanged = selectRows(endRow, clickedRow);
+                        selectRows(endRow, clickedRow);
                     }
                     else if((mouse.modifiers & Qt.ControlModifier) && rowIsSelected)
                     {
-                        selectionChanged = deselectRows(clickedRow, clickedRow);
+                        deselectRows(clickedRow, clickedRow);
                         deselectDrag = true;
                     }
                     else
@@ -1146,7 +1140,7 @@ Item
                         if(!(mouse.modifiers & Qt.ControlModifier))
                             selectionModel.clear();
 
-                        selectionChanged = selectRows(clickedRow, clickedRow);
+                        selectRows(clickedRow, clickedRow);
                     }
 
                     previousRow = startRow = endRow = clickedRow;
