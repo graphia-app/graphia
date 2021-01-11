@@ -1092,8 +1092,6 @@ Item
                 property bool deselectDrag: false
                 anchors.fill: parent
                 anchors.rightMargin: verticalTableViewScrollBar.width
-                z: 5
-                hoverEnabled: true
                 visible: !columnSelectionMode
 
                 onDoubleClicked:
