@@ -789,6 +789,8 @@ Item
 
                 signal fetchColumnSizes;
 
+                property string linkHovered: ""
+
                 clip: true
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
@@ -1011,7 +1013,7 @@ Item
                             objectName: "label"
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
-                            textFormat: Text.PlainText
+                            textFormat: Text.StyledText
                             width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -1041,13 +1043,22 @@ Item
                                 if(root.model.columnIsFloatingPoint(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);
 
-                                // Replace newlines with spaces
                                 if(typeof(model.display) === "string")
-                                    return model.display.replace(/[\r\n]+/g, " ");
+                                {
+                                    let linkifyRe = /(?![^<]*>|[^<>]*<\/)((https?:)\/\/[a-z0-9&#=.\/\-?_]+)/gi;
+                                    let stripNewlinesRe = /[\r\n]+/g;
+
+                                    return model.display
+                                        .replace(linkifyRe, "<a href=\"$1\">$1</a>")
+                                        .replace(stripNewlinesRe, " ");
+                                }
 
                                 return model.display;
                             }
                             renderType: Text.NativeRendering
+
+                            onLinkHovered: { tableView.linkHovered = link; }
+                            onLinkActivated: Qt.openUrlExternally(link);
                         }
                     }
                 }
@@ -1094,6 +1105,9 @@ Item
                 anchors.rightMargin: verticalTableViewScrollBar.width
                 visible: !columnSelectionMode
 
+                cursorShape: tableView.linkHovered.length > 0 ?
+                    Qt.PointingHandCursor : Qt.ArrowCursor;
+
                 onDoubleClicked:
                 {
                     let tableItem = tableView.getItem(mouseX, mouseY);
@@ -1111,6 +1125,9 @@ Item
 
                 onPressed:
                 {
+                    if(tableView.linkHovered.length > 0)
+                        mouse.accepted = false;
+
                     forceActiveFocus();
                     if(tableView.rows === 0)
                         return;
