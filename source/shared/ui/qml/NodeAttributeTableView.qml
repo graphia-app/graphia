@@ -960,12 +960,12 @@ Item
 
                     TableView.onPooled:
                     {
-                        tableView.fetchColumnSizes.disconnect(updateColumnWidths)
+                        tableView.fetchColumnSizes.disconnect(updateColumnWidths);
                     }
 
                     Component.onCompleted:
                     {
-                        tableView.fetchColumnSizes.connect(updateColumnWidths)
+                        tableView.fetchColumnSizes.connect(updateColumnWidths);
                     }
 
                     function updateColumnWidths()
