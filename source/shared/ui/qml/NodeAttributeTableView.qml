@@ -1011,6 +1011,7 @@ Item
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
                             textFormat: Text.StyledText
+                            renderType: Text.NativeRendering
                             width: parent.width
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -1052,7 +1053,6 @@ Item
 
                                 return model.display;
                             }
-                            renderType: Text.NativeRendering
 
                             onLinkHovered: { tableView.linkHovered = link; }
                             onLinkActivated: Qt.openUrlExternally(link);
