@@ -982,14 +982,6 @@ Item
 
                     Rectangle
                     {
-                        width: tableView.width
-                        height: parent.height
-                        color: systemPalette.highlight;
-                        visible: (model.column === (proxyModel.columnCount() - 1)) && model.subSelected
-                    }
-
-                    Rectangle
-                    {
                         width: parent.width
 
                         anchors.centerIn: parent
