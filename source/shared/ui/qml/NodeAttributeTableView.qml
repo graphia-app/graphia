@@ -955,7 +955,6 @@ Item
 
                     clip: false
 
-                    property int modelColumn: model.column
                     property int modelRow: model.row
 
                     TableView.onReused:
@@ -977,11 +976,11 @@ Item
                     {
                         if(typeof model === 'undefined')
                             return;
-                        let storedWidth = tableView.columnWidths[modelColumn];
+                        let storedWidth = tableView.columnWidths[model.column];
                         if(storedWidth !== undefined)
-                            tableView.columnWidths[modelColumn] = Math.max(implicitWidth, storedWidth);
+                            tableView.columnWidths[model.column] = Math.max(implicitWidth, storedWidth);
                         else
-                            tableView.columnWidths[modelColumn] = implicitWidth;
+                            tableView.columnWidths[model.column] = implicitWidth;
                     }
 
                     SystemPalette { id: systemPalette }
@@ -1026,12 +1025,12 @@ Item
 
                             text:
                             {
-                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(modelColumn);
+                                let sourceColumn = proxyModel.mapOrderedToSourceColumn(model.column);
 
                                 // This can happen during column removal
                                 if(sourceColumn === undefined || sourceColumn < 0)
                                 {
-                                    console.log("Model Column Unable to map", modelRow, modelColumn);
+                                    console.log("Model Column Unable to map", model.row, model.column);
                                     return "";
                                 }
 
