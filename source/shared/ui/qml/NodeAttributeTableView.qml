@@ -949,6 +949,7 @@ Item
 
                     clip: false
 
+                    // For access from the outside
                     property int modelRow: model.row
 
                     TableView.onReused:
