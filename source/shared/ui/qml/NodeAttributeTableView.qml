@@ -978,8 +978,6 @@ Item
                             tableView.columnWidths[model.column] = implicitWidth;
                     }
 
-                    SystemPalette { id: systemPalette }
-
                     Rectangle
                     {
                         width: parent.width
@@ -989,7 +987,7 @@ Item
                         color:
                         {
                             if(model.subSelected)
-                                return systemPalette.highlight;
+                                return sysPalette.highlight;
 
                             return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
                         }
