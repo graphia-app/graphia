@@ -795,6 +795,9 @@ Item
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
+                // Disable touch style scrolling
+                interactive: false
+
                 layer
                 {
                     enabled: columnSelectionMode
