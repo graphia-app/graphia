@@ -789,7 +789,7 @@ Item
 
                 signal fetchColumnSizes;
 
-                property string linkHovered: ""
+                property string hoveredLink: ""
 
                 clip: true
                 visible: tableView.columns !== 0
@@ -1044,7 +1044,7 @@ Item
                                 return model.display;
                             }
 
-                            onLinkHovered: { tableView.linkHovered = link; }
+                            onLinkHovered: { tableView.hoveredLink = link; }
                             onLinkActivated: Qt.openUrlExternally(link);
                         }
                     }
@@ -1092,7 +1092,7 @@ Item
                 anchors.rightMargin: verticalTableViewScrollBar.width
                 visible: !columnSelectionMode
 
-                cursorShape: tableView.linkHovered.length > 0 ?
+                cursorShape: tableView.hoveredLink.length > 0 ?
                     Qt.PointingHandCursor : Qt.ArrowCursor;
 
                 onDoubleClicked:
@@ -1113,7 +1113,7 @@ Item
 
                 onPressed:
                 {
-                    if(tableView.linkHovered.length > 0)
+                    if(tableView.hoveredLink.length > 0)
                         mouse.accepted = false;
 
                     forceActiveFocus();
