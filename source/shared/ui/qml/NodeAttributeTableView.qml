@@ -880,28 +880,22 @@ Item
                         headerView.forceLayout();
                 }
 
-                function getItem(mouseX, mouseY)
+                function rowAt(mouseY)
                 {
-                    let tableViewContentContainsMouse = mouseY > 0 && mouseY < tableView.height &&
-                            mouseX < tableView.width && mouseX < tableView.contentWidth
-                            && mouseY < tableView.contentHeight;
+                    let tableViewContentContainsMouse = mouseY >= 0 && mouseY < tableView.height;
 
                     if(!tableViewContentContainsMouse)
-                        return false;
+                        return -1;
 
-                    let hoverItem = tableView.childAt(mouseX, mouseY);
-                    if(hoverItem !== null && (hoverItem === horizontalTableViewScrollBar ||
-                                              hoverItem === verticalTableViewScrollBar))
-                    {
-                        return false;
-                    }
-                    if(hoverItem === null)
-                        return false;
+                    let hoverItem = tableView.childAt(0, mouseY);
+                    if(!hoverItem)
+                        return -1;
 
-                    let tableItem = hoverItem.childAt(
-                                mouseX + tableView.contentX,
-                                mouseY + tableView.contentY);
-                    return tableItem;
+                    let tableItem = hoverItem.childAt(tableView.contentX, mouseY + tableView.contentY);
+                    if(!tableItem || tableItem.modelRow === undefined)
+                        return -1;
+
+                    return tableItem.modelRow;
                 }
 
                 function calculateMinimumColumnWidth(col)
@@ -1112,10 +1106,11 @@ Item
 
                 onDoubleClicked:
                 {
-                    let tableItem = tableView.getItem(mouseX, mouseY);
-                    if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
+                    let clickedRow = tableView.rowAt(mouseY);
+                    if(clickedRow < 0)
                         return;
-                    let mappedRow = proxyModel.mapToSourceRow(tableItem.modelRow);
+
+                    let mappedRow = proxyModel.mapToSourceRow(clickedRow);
                     root.model.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
@@ -1134,12 +1129,11 @@ Item
                     if(tableView.rows === 0)
                         return;
 
-                    let tableItem = tableView.getItem(mouseX, mouseY);
-                    if(tableItem === false || !tableItem.hasOwnProperty('modelRow'))
+                    let clickedRow = tableView.rowAt(mouseY);
+                    if(clickedRow < 0)
                         return;
 
                     let selectionChanged = false;
-                    let clickedRow = tableItem.modelRow;
                     let rowIsSelected = selectionModel.isSelected(
                         proxyModel.index(clickedRow, 0));
 
@@ -1168,23 +1162,25 @@ Item
                     if(mouse.buttons !== Qt.LeftButton)
                         return;
 
-                    let tableItem = tableView.getItem(mouseX, mouseY);
-                    if(tableItem && tableItem.modelRow !== previousRow)
+                    let rowUnderCursor = tableView.rowAt(mouseY);
+                    if(rowUnderCursor < 0)
+                        return;
+
+                    if(rowUnderCursor !== previousRow)
                     {
                         if(deselectDrag)
                         {
-                            deselectRows(startRow, tableItem.modelRow);
+                            deselectRows(startRow, rowUnderCursor);
                         }
                         else
                         {
                             if(previousRow != -1)
                                 deselectRows(startRow, previousRow);
 
-                            selectRows(startRow, tableItem.modelRow);
+                            selectRows(startRow, rowUnderCursor);
                         }
 
-                        previousRow = tableItem.modelRow;
-                        endRow = tableItem.modelRow;
+                        previousRow = endRow = rowUnderCursor;
                     }
                 }
 
@@ -1214,14 +1210,12 @@ Item
                 function arrowPress(modifier)
                 {
                     // Horrible hack to scroll the view
-                    let bottomTableItem = tableView.getItem(1, tableView.height - 1);
-                    let topTableItem = tableView.getItem(1, 1);
+                    let topTableVisibleRow = tableView.rowAt(0);
+                    let bottomTableVisibleRow = tableView.rowAt(tableView.height - 1);
                     let diff = 0;
 
-                    if(bottomTableItem)
-                        diff = Math.max(endRow - (bottomTableItem.modelRow - 1) , 0);
-                    if(topTableItem)
-                        diff += Math.min(endRow - (topTableItem.modelRow + 1), 0);
+                    diff = Math.max(endRow - (bottomTableVisibleRow - 1) , 0);
+                    diff += Math.min(endRow - (topTableVisibleRow + 1), 0);
                     tableView.contentY += diff * tableView.rowHeight;
 
                     // Clamp scrollbar to prevent overscrolling
@@ -1234,6 +1228,7 @@ Item
                     {
                         if(startRow == -1)
                             startRow = endRow;
+
                         selectRows(startRow, endRow);
                     }
                     else
