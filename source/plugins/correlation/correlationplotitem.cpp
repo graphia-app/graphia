@@ -574,7 +574,7 @@ void CorrelationPlotItem::updateTooltip()
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
                 _hoverLabel->setText(QStringLiteral("%1, %2: %3")
                     .arg(plottableUnderCursor->name(), _pluginInstance->columnName(mappedCol))
-                    .arg(_itemTracer->position->value()));
+                    .arg(u::formatNumberScientific(_itemTracer->position->value())));
             }
         }
 
