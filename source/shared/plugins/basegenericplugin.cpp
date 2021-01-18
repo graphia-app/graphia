@@ -23,7 +23,6 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
-#include "shared/loading/matfileparser.h"
 #include "shared/loading/jsongraphparser.h"
 
 #include "shared/attributes/iattribute.h"
@@ -78,8 +77,8 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QLatin1String("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
     
-    if(urlTypeName == QLatin1String("MatFile"))
-        return std::make_unique<MatFileParser>(&_userNodeData, &_userEdgeData);
+    if(urlTypeName == QLatin1String("MatrixMatLab"))
+        return std::make_unique<AdjacencyMatrixMatLabFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("JSONGraph"))
         return std::make_unique<JsonGraphParser>(&_userNodeData, &_userEdgeData);
@@ -186,7 +185,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv", "matrix"});
     registerUrlType(QStringLiteral("MatrixXLSX"), QObject::tr("Adjacency Matrix Excel File"), QObject::tr("Adjacency Matrix Excel Files"), {"xlsx", "matrix"});
     registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
-    registerUrlType(QStringLiteral("MatFile"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
+    registerUrlType(QStringLiteral("MatrixMatLab"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
     registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
 }
 
@@ -209,8 +208,8 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             (urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixXLSX") && AdjacencyMatrixXLSXFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("MatrixMatLab") && AdjacencyMatrixMatLabFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatFile") && MatFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("JSONGraph") && JsonGraphParser::canLoad(url));
 
         if(canLoad)

@@ -39,7 +39,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/matfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
@@ -109,7 +109,8 @@ list(APPEND HEADERS
 list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/matfileparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
