@@ -978,12 +978,24 @@ Item
                             tableView.columnWidths[model.column] = implicitWidth;
                     }
 
+                    // When the columns don't occupy the full view of the TableView, we display a "filler"
+                    // selection marker in the empty space to the right of the last column
                     Rectangle
                     {
-                        width: parent.width
+                        anchors.left: parent.right
 
-                        anchors.centerIn: parent
+                        // The remaining width to the right of this cell
+                        width: tableView.width - (parent.x + parent.width)
                         height: parent.height
+
+                        color: sysPalette.highlight;
+                        visible: (model.column === (proxyModel.columnCount() - 1)) && model.subSelected
+                    }
+
+                    Rectangle
+                    {
+                        anchors.fill: parent
+
                         color:
                         {
                             if(model.subSelected)
