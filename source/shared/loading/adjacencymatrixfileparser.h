@@ -34,7 +34,7 @@ template<typename> class UserElementData;
 using UserNodeData = UserElementData<NodeId>;
 using UserEdgeData = UserElementData<EdgeId>;
 
-class AdjacencyTabularDataMatrixParser
+class AdjacencyMatrixTabularDataParser
 {
 public:
     static bool isAdjacencyMatrix(const TabularData& tabularData, size_t maxRows = 5);
@@ -45,7 +45,7 @@ public:
 };
 
 template<typename TabularDataParser>
-class AdjacencyMatrixParser : public IParser, public AdjacencyTabularDataMatrixParser
+class AdjacencyMatrixParser : public IParser, public AdjacencyMatrixTabularDataParser
 {
 private:
     UserNodeData* _userNodeData;
@@ -63,7 +63,7 @@ public:
         if(!parser.parse(url, graphModel))
             return false;
 
-        return AdjacencyTabularDataMatrixParser::parse(parser.tabularData(), parser,
+        return AdjacencyMatrixTabularDataParser::parse(parser.tabularData(), parser,
             graphModel, _userNodeData, _userEdgeData);
     }
 
@@ -86,8 +86,8 @@ public:
             parser.parse(url);
             const auto& tabularData = parser.tabularData();
 
-            return AdjacencyTabularDataMatrixParser::isEdgeList(tabularData) ||
-                AdjacencyTabularDataMatrixParser::isAdjacencyMatrix(tabularData);
+            return AdjacencyMatrixTabularDataParser::isEdgeList(tabularData) ||
+                AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(tabularData);
         }
 
         return true;

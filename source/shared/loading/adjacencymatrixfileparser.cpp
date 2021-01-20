@@ -226,7 +226,7 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
 }
 }
 
-bool AdjacencyTabularDataMatrixParser::isAdjacencyMatrix(const TabularData& tabularData, size_t maxRows)
+bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabularData, size_t maxRows)
 {
     // A matrix can optionally have column or row headers. Or none.
     // A matrix data rect must be square.
@@ -289,7 +289,7 @@ bool AdjacencyTabularDataMatrixParser::isAdjacencyMatrix(const TabularData& tabu
     return headerMatch || firstColumnAllDouble || firstRowAllDouble;
 }
 
-bool AdjacencyTabularDataMatrixParser::isEdgeList(const TabularData& tabularData, size_t maxRows)
+bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData, size_t maxRows)
 {
     if(tabularData.numColumns() != 3)
         return false;
@@ -308,7 +308,7 @@ bool AdjacencyTabularDataMatrixParser::isEdgeList(const TabularData& tabularData
     return true;
 }
 
-bool AdjacencyTabularDataMatrixParser::parse(const TabularData& tabularData, Progressable& progressable,
+bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Progressable& progressable,
     IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData)
 {
     if(isEdgeList(tabularData))
