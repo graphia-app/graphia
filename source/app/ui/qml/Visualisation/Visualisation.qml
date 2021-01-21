@@ -260,8 +260,7 @@ Item
                 if(mouse.button === Qt.LeftButton)
                 {
                     gradientSelector.visualisationIndex = index;
-                    gradientSelector.configuration = gradientKey.configuration;
-                    gradientSelector.show();
+                    gradientSelector.open(gradientKey.configuration);
                 }
                 else
                     mouse.accepted = false;
@@ -285,9 +284,8 @@ Item
                 if(mouse.button === Qt.LeftButton)
                 {
                     paletteSelector.visualisationIndex = index;
-                    paletteSelector.configuration = paletteKey.configuration;
-                    paletteSelector.stringValues = root._visualisationInfo.stringValues;
-                    paletteSelector.show();
+                    paletteSelector.open(paletteKey.configuration,
+                        root._visualisationInfo.stringValues);
                 }
                 else
                     mouse.accepted = false;

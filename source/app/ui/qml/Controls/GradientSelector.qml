@@ -58,14 +58,11 @@ Window
 
     ExclusiveGroup { id: selectedGroup }
 
-    onVisibleChanged:
+    function open(configuration)
     {
-        // When the window is first shown
-        if(visible)
-        {
-            root.applied = false;
-            gradientEditor.setup(root.configuration);
-        }
+        root.applied = false;
+        gradientEditor.setup(configuration);
+        show();
     }
 
     Preferences

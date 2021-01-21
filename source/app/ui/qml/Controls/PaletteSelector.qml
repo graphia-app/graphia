@@ -32,14 +32,13 @@ Window
     id: root
 
     property string configuration
+    property var stringValues: []
     property bool applied: false
 
     // The window is shared between visualisations so
     // we need some way of knowing which one we're currently
     // changing
     property int visualisationIndex
-
-    property var stringValues: []
 
     signal accepted()
     signal rejected()
@@ -60,14 +59,12 @@ Window
 
     ExclusiveGroup { id: selectedGroup }
 
-    onVisibleChanged:
+    function open(configuration, stringValues)
     {
-        // When the window is first shown
-        if(visible)
-        {
-            root.applied = false;
-            paletteEditor.setup(root.configuration);
-        }
+        root.applied = false;
+        root.stringValues = paletteEditor.stringValues = stringValues;
+        paletteEditor.setup(configuration);
+        show();
     }
 
     Preferences
@@ -306,8 +303,6 @@ Window
                     id: paletteEditor
 
                     width: paletteEditorScrollview.viewport.width
-
-                    stringValues: root.stringValues
 
                     function scrollToItem(item)
                     {
