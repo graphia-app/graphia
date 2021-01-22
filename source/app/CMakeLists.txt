@@ -49,7 +49,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/layout/sequencelayout.h
     ${CMAKE_CURRENT_LIST_DIR}/layout/spatialtree.h
     ${CMAKE_CURRENT_LIST_DIR}/limitconstants.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/isaver.h
@@ -176,6 +176,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphsaver.cpp
