@@ -313,14 +313,14 @@ QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
     return attributeNames;
 }
 
-std::vector<CorrelationEdge> CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
+EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
 {
     auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
     return correlation->process(_dataRows, minimumThreshold,
         static_cast<CorrelationPolarity>(_correlationPolarity), &parser, &parser);
 }
 
-bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser)
+bool CorrelationPluginInstance::createEdges(const EdgeList& edges, IParser& parser)
 {
     parser.setProgress(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
@@ -333,7 +333,7 @@ bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationEdge>& 
 
         const auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
-        _correlationValues->set(edgeId, edge._r);
+        _correlationValues->set(edgeId, edge._weight);
     }
 
     return true;

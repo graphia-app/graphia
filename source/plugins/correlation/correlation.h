@@ -20,13 +20,14 @@
 #define CORRELATION_H
 
 #include "correlationdatarow.h"
-#include "correlationedge.h"
 
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 #include "shared/utils/threadpool.h"
 #include "shared/utils/redirects.h"
+
+#include "shared/graph/edgelist.h"
 
 #include <vector>
 #include <cmath>
@@ -53,7 +54,7 @@ class Correlation
 public:
     virtual ~Correlation() = default;
 
-    virtual std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
+    virtual EdgeList process(const std::vector<CorrelationDataRow>& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
@@ -73,7 +74,7 @@ template<typename Algorithm, RowType rowType = RowType::Raw>
 class CovarianceCorrelation : public Correlation
 {
 public:
-    std::vector<CorrelationEdge> process(const std::vector<CorrelationDataRow>& rows,
+    EdgeList process(const std::vector<CorrelationDataRow>& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
@@ -104,7 +105,7 @@ public:
             if constexpr(rowType == RowType::Ranking)
                 rowA = rowA->ranking();
 
-            std::vector<CorrelationEdge> edges;
+            EdgeList edges;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return edges;
@@ -149,7 +150,7 @@ public:
             progressable->setProgress(-1);
         }
 
-        std::vector<CorrelationEdge> edges;
+        EdgeList edges;
         edges.reserve(std::distance(results.begin(), results.end()));
         edges.insert(edges.end(), std::make_move_iterator(results.begin()),
             std::make_move_iterator(results.end()));

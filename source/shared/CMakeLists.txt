@@ -16,6 +16,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/commands/compoundcommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/icommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/icommandmanager.h
+    ${CMAKE_CURRENT_LIST_DIR}/graph/edgelist.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_containers.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_debug.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid.h

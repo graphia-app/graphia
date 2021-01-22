@@ -22,6 +22,7 @@
 #include "shared/plugins/baseplugin.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
+#include "shared/graph/edgelist.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 #include "shared/loading/userdata.h"
@@ -30,7 +31,6 @@
 #include "loading/correlationfileparser.h"
 
 #include "columnannotation.h"
-#include "correlationedge.h"
 #include "correlationdatarow.h"
 #include "correlationnodeattributetablemodel.h"
 
@@ -134,12 +134,12 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    std::vector<CorrelationEdge> correlation(double minimumThreshold, IParser& parser);
+    EdgeList correlation(double minimumThreshold, IParser& parser);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
-    bool createEdges(const std::vector<CorrelationEdge>& edges, IParser& parser);
+    bool createEdges(const EdgeList& edges, IParser& parser);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;

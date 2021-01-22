@@ -25,8 +25,9 @@
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/cancellable.h"
 
+#include "shared/graph/edgelist.h"
+
 #include "correlation.h"
-#include "correlationedge.h"
 #include "correlationdatarow.h"
 #include "datarecttablemodel.h"
 
@@ -99,7 +100,7 @@ public:
         std::vector<CorrelationDataRow>& dataRows,
         IParser* parser = nullptr);
 
-    static std::vector<CorrelationEdge> pearsonCorrelation(
+    static EdgeList pearsonCorrelation(
         const std::vector<CorrelationDataRow>& rows,
         double minimumThreshold, IParser* parser = nullptr);
 

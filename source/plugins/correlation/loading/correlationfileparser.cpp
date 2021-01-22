@@ -622,9 +622,9 @@ void CorrelationTabularDataParser::estimateGraphSize()
             return QVariantMap();
 
         std::sort(sampleEdges.begin(), sampleEdges.end(),
-            [](const auto& a, const auto& b) { return std::abs(a._r) > std::abs(b._r); });
+            [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });
 
-        const auto smallestSampledCorrelation = sampleEdges.back()._r;
+        const auto smallestSampledCorrelation = sampleEdges.back()._weight;
         const auto numEstimateSamples = 100;
         const auto sampleQuantum = (1.0 - smallestSampledCorrelation) / (numEstimateSamples - 1);
         auto sampleCutoff = 1.0;
@@ -646,9 +646,9 @@ void CorrelationTabularDataParser::estimateGraphSize()
             nonSingletonNodes.insert(sampleEdge._target);
             numSampledEdges++;
 
-            if(std::abs(sampleEdge._r) <= sampleCutoff)
+            if(std::abs(sampleEdge._weight) <= sampleCutoff)
             {
-                keys.append(std::abs(sampleEdge._r));
+                keys.append(std::abs(sampleEdge._weight));
                 auto numNodes = (nonSingletonNodes.size() * 100) / percent;
                 auto numEdges = (numSampledEdges * 10000) / percentSq;
 
@@ -665,7 +665,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
             }
         }
 
-        keys.append(std::abs(sampleEdges.back()._r));
+        keys.append(std::abs(sampleEdges.back()._weight));
         auto numNodes = (nonSingletonNodes.size() * 100) / percent;
         auto numEdges = (numSampledEdges * 10000) / percentSq;
         estimatedNumNodes.append(numNodes);

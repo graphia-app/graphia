@@ -16,16 +16,20 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORRELATIONEDGE_H
-#define CORRELATIONEDGE_H
+#ifndef EDGELIST_H
+#define EDGELIST_H
 
 #include "shared/graph/elementid.h"
 
-struct CorrelationEdge
+#include <vector>
+
+struct EdgeListEdge
 {
     NodeId _source;
     NodeId _target;
-    double _r = 0.0;
+    double _weight = 0.0;
 };
 
-#endif // CORRELATIONEDGE_H
+using EdgeList = std::vector<EdgeListEdge>;
+
+#endif // EDGELIST_H
