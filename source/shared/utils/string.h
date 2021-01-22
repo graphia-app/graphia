@@ -38,6 +38,9 @@ namespace u
     bool isNumeric(const std::string& string);
     bool isNumeric(const QString& string);
 
+    bool isInteger(const std::string& string);
+    bool isInteger(const QString& string);
+
     double toNumber(const std::string& string);
     double toNumber(const QString& string);
 

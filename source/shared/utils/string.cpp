@@ -51,6 +51,30 @@ bool u::isNumeric(const QString& string)
     return success;
 }
 
+bool u::isInteger(const std::string& string)
+{
+    if(string.empty())
+        return false;
+
+    std::stringstream ss;
+    ss << string;
+
+    long int value = 0.0;
+    ss >> value;
+
+    return ss.eof();
+}
+
+bool u::isInteger(const QString& string)
+{
+    bool success = false;
+
+    // cppcheck-suppress ignoredReturnValue
+    string.toInt(&success);
+
+    return success;
+}
+
 double u::toNumber(const std::string& string)
 {
     if(string.empty())
