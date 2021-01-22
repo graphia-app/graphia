@@ -627,11 +627,6 @@ void CorrelationTabularDataParser::estimateGraphSize()
     _graphSizeEstimateFutureWatcher.setFuture(future);
 }
 
-QVariantMap CorrelationTabularDataParser::graphSizeEstimate() const
-{
-    return _graphSizeEstimate;
-}
-
 void CorrelationTabularDataParser::onDataLoaded()
 {
     if(_dataPtr != nullptr)

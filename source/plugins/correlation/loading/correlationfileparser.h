@@ -133,7 +133,7 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
     Q_PROPERTY(double replacementValue MEMBER _replacementValue NOTIFY parameterChanged)
 
-    Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate NOTIFY graphSizeEstimateChanged)
+    Q_PROPERTY(QVariantMap graphSizeEstimate MEMBER _graphSizeEstimate NOTIFY graphSizeEstimateChanged)
     Q_PROPERTY(bool graphSizeEstimateInProgress READ graphSizeEstimateInProgress
         NOTIFY graphSizeEstimateInProgressChanged)
 
@@ -180,9 +180,7 @@ public:
     Q_INVOKABLE void clearData();
 
     void estimateGraphSize();
-    QVariantMap graphSizeEstimate() const;
     bool graphSizeEstimateInProgress() const { return _graphSizeEstimateFutureWatcher.isRunning(); }
-
 
     DataRectTableModel* tableModel();
     bool busy() const { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
