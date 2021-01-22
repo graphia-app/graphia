@@ -25,6 +25,7 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
+#include "shared/loading/graphsizeestimate.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
@@ -605,9 +606,6 @@ void CorrelationTabularDataParser::estimateGraphSize()
 
         const size_t maxSampleRows = 1400;
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
-        size_t percent = numSampleRows * 100 / _dataPtr->numRows();
-        percent = percent < 1 ? 1 : percent;
-        auto percentSq = percent * percent;
 
         auto dataRows = sampledDataRows(numSampleRows);
 
@@ -618,68 +616,12 @@ void CorrelationTabularDataParser::estimateGraphSize()
         auto sampleEdges = correlation->process(dataRows, _minimumCorrelation,
             static_cast<CorrelationPolarity>(_correlationPolarity), &_graphSizeEstimateCancellable);
 
-        if(sampleEdges.empty())
-            return QVariantMap();
+        auto nodesScale = static_cast<double>(_dataPtr->numRows() / numSampleRows);
+        auto edgesScale = nodesScale * nodesScale;
+        auto maxNodes = static_cast<double>(_dataPtr->numRows());
+        auto maxEdges = maxNodes * maxNodes;
 
-        std::sort(sampleEdges.begin(), sampleEdges.end(),
-            [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });
-
-        const auto smallestSampledCorrelation = sampleEdges.back()._weight;
-        const auto numEstimateSamples = 100;
-        const auto sampleQuantum = (1.0 - smallestSampledCorrelation) / (numEstimateSamples - 1);
-        auto sampleCutoff = 1.0;
-
-        QVector<double> keys;
-        QVector<double> estimatedNumNodes;
-        QVector<double> estimatedNumEdges;
-
-        keys.reserve(static_cast<int>(sampleEdges.size()));
-        estimatedNumNodes.reserve(static_cast<int>(sampleEdges.size()));
-        estimatedNumEdges.reserve(static_cast<int>(sampleEdges.size()));
-
-        size_t numSampledEdges = 0;
-        NodeIdSet nonSingletonNodes;
-
-        for(const auto& sampleEdge : sampleEdges)
-        {
-            nonSingletonNodes.insert(sampleEdge._source);
-            nonSingletonNodes.insert(sampleEdge._target);
-            numSampledEdges++;
-
-            if(std::abs(sampleEdge._weight) <= sampleCutoff)
-            {
-                keys.append(std::abs(sampleEdge._weight));
-                auto numNodes = (nonSingletonNodes.size() * 100) / percent;
-                auto numEdges = (numSampledEdges * 10000) / percentSq;
-
-                // Cap the estimates at their theoretical maxima, in order
-                // to avoid confusing the user with an estimate that's larger
-                // than the source dataset
-                numNodes = std::min(numNodes, _dataPtr->numRows());
-                numEdges = std::min(numEdges, _dataPtr->numRows() * _dataPtr->numRows());
-
-                estimatedNumNodes.append(numNodes);
-                estimatedNumEdges.append(numEdges);
-
-                sampleCutoff -= sampleQuantum;
-            }
-        }
-
-        keys.append(std::abs(sampleEdges.back()._weight));
-        auto numNodes = (nonSingletonNodes.size() * 100) / percent;
-        auto numEdges = (numSampledEdges * 10000) / percentSq;
-        estimatedNumNodes.append(numNodes);
-        estimatedNumEdges.append(numEdges);
-
-        std::reverse(keys.begin(), keys.end());
-        std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());
-        std::reverse(estimatedNumEdges.begin(), estimatedNumEdges.end());
-
-        QVariantMap map;
-        map.insert(QStringLiteral("keys"), QVariant::fromValue(keys));
-        map.insert(QStringLiteral("numNodes"), QVariant::fromValue(estimatedNumNodes));
-        map.insert(QStringLiteral("numEdges"), QVariant::fromValue(estimatedNumEdges));
-        return map;
+        return graphSizeEstimate(sampleEdges, nodesScale, edgesScale, maxNodes, maxEdges);
     });
 
     _graphSizeEstimateFutureWatcher.setFuture(future);
