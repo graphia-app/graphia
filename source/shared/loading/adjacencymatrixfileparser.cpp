@@ -296,13 +296,14 @@ bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {
-        for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
-        {
-            const auto& value = tabularData.valueAt(columnIndex, rowIndex);
+        if(!u::isInteger(tabularData.valueAt(0, rowIndex)))
+            return false;
 
-            if(!u::isNumeric(value))
-                return false;
-        }
+        if(!u::isInteger(tabularData.valueAt(1, rowIndex)))
+            return false;
+
+        if(!u::isNumeric(tabularData.valueAt(2, rowIndex)))
+            return false;
     }
 
     return true;
