@@ -404,9 +404,9 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
 
 void CorrelationPluginInstance::setNodeAttributeTableModelDataColumns()
 {
-    // Don't include data columns in the table model when transposing as this is likely to
-    // result in a very large number of columns in the table model, which hurt performance
-    if(_transpose)
+    // When there is a very large number of data columns (where very large is fairly arbitrary),
+    // don't add them to the table as it can't cope with it performance wise
+    if(_dataColumnNames.size() > 1000)
         return;
 
     _nodeAttributeTableModel.addDataColumns(_dataColumnNames, &_data);
