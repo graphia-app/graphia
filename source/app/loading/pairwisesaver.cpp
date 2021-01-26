@@ -29,12 +29,6 @@
 #include <QString>
 #include <QTextStream>
 
-static QString escape(QString string)
-{
-    string.replace(QStringLiteral("\""), QStringLiteral("\\\""));
-    return string;
-}
-
 bool PairwiseSaver::save()
 {
     QFile file(_url.toLocalFile());
@@ -43,6 +37,12 @@ bool PairwiseSaver::save()
     QTextStream stream(&file);
     int edgeCount = _graphModel->graph().numEdges();
     int runningCount = 0;
+
+    auto escape = [](QString string)
+    {
+        string.replace(QStringLiteral("\""), QStringLiteral("\\\""));
+        return string;
+    };
 
     _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())

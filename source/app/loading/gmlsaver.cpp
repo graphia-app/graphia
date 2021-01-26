@@ -25,11 +25,6 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-static QString escape(const QString& string)
-{
-    return string.toHtmlEscaped();
-}
-
 bool GMLSaver::save()
 {
     QFile file(_url.toLocalFile());
@@ -40,6 +35,11 @@ bool GMLSaver::save()
                        static_cast<size_t>(_graphModel->graph().numNodes()) +
                        static_cast<size_t>(_graphModel->graph().numEdges());
     size_t runningCount = 0;
+
+    auto escape = [](const QString& string)
+    {
+        return string.toHtmlEscaped();
+    };
 
     std::map<QString, QString> alphanumAttributeNames;
     _graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
