@@ -71,7 +71,7 @@ jobs:
       shell: cmd
       run: call installers\windows\build.bat
       env:
-        CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT"
+        CRTDIRECTORY: ${{ env.VcToolsRedistDir }}\x64\Microsoft.VC142.CRT
         WINDOWS_SIGN_KEYSTORE_BASE64: ${{ secrets.WINDOWS_SIGN_KEYSTORE_BASE64 }}
         WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
         WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
