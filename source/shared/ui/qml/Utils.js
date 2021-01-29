@@ -162,24 +162,12 @@ function decimalPointsForRange(min, max)
 
 function incrementForRange(min, max)
 {
-    let range = max - min;
+    let range = Math.abs(max - min);
+    let largeFractionOfRange = range * 0.999;
+    let nextPowerOfTenSmallerThanRange =
+        Math.pow(10.0, Math.floor(Math.log10(largeFractionOfRange)));
 
-    if(range <= 0.001)
-        return 0.00001;
-    else if(range <= 0.01)
-        return 0.0001;
-    else if(range <= 1.0)
-        return 0.001;
-    else if(range <= 100.0)
-        return 0.1;
-    else if(range <= 1000.0)
-        return 10.0;
-    else if(range <= 10000.0)
-        return 100.0;
-    else if(range <= 100000.0)
-        return 1000.0;
-
-    return 100000.0;
+    return nextPowerOfTenSmallerThanRange * 0.01;
 }
 
 function desaturate(colorString, factor)
