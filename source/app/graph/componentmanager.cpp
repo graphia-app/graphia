@@ -472,9 +472,9 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
-    auto i = std::find(_componentIds.begin(), _componentIds.end(), componentId);
-    if(i != _componentIds.end())
-        return *i;
+    // A binary search works here because _componentIds is sorted
+    if(std::binary_search(_componentIds.begin(), _componentIds.end(), componentId))
+        return componentId;
 
     if(_debug) qDebug() << "Can't find componentId of nodeId" << nodeId;
     return {};
@@ -488,7 +488,11 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
-    auto i = std::find(_componentIds.begin(), _componentIds.end(), componentId);
-    return i != _componentIds.end() ? *i : ComponentId();
+    // A binary search works here because _componentIds is sorted
+    if(std::binary_search(_componentIds.begin(), _componentIds.end(), componentId))
+        return componentId;
+
+    if(_debug) qDebug() << "Can't find componentId of edgeId" << edgeId;
+    return {};
 }
 
