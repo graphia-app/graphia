@@ -33,4 +33,5 @@ Window
 
     title: pluginName + qsTr(" Parameters")
     signal accepted();
+    signal rejected();
 }
