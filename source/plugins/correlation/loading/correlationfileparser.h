@@ -108,8 +108,6 @@ public:
     static bool canLoad(const QUrl&) { return true; }
 };
 
-Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
-
 class CorrelationTabularDataParser : public QObject, public Cancellable
 {
     Q_OBJECT

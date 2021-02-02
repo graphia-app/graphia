@@ -80,6 +80,8 @@ public:
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
 };
 
+Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
+
 template<const char Delimiter>
 class TextDelimitedTabularDataParser : public IParser
 {
