@@ -19,6 +19,8 @@
 #include "qmltabulardataparser.h"
 
 #include "shared/loading/xlsxtabulardataparser.h"
+#include "shared/loading/matlabfileparser.h"
+
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
 
@@ -33,9 +35,9 @@ QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser*
     QAbstractListModel(),
     _parser(parser)
 {
-    _columnIndices.reserve(_parser->_data.numColumns());
+    _columnIndices.reserve(_parser->_dataPtr->numColumns());
 
-    for(size_t column = 0; column < _parser->_data.numColumns(); column++)
+    for(size_t column = 0; column < _parser->_dataPtr->numColumns(); column++)
     {
         auto type = _parser->_columnTypeIdentities.at(column).type();
 
@@ -48,7 +50,7 @@ QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser*
         if(type == TypeIdentity::Type::Float && !(valueTypes & ValueType::Float))
             continue;
 
-        const auto& value = _parser->_data.valueAt(column, 0);
+        const auto& value = _parser->_dataPtr->valueAt(column, 0);
 
         if(value.isEmpty())
             continue;
@@ -76,7 +78,7 @@ QVariant QmlTabularDataHeaderModel::data(const QModelIndex& index, int role) con
     auto columnIndex = _columnIndices.at(columnIndicesIndex);
 
     if(role == Qt::DisplayRole)
-        return _parser->_data.valueAt(columnIndex, 0);
+        return _parser->_dataPtr->valueAt(columnIndex, 0);
 
     if(role == Roles::ColumnIndex)
         return QVariant(static_cast<int>(columnIndex));
@@ -113,7 +115,6 @@ QmlTabularDataParser::QmlTabularDataParser()
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &QmlTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &QmlTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &QmlTabularDataParser::onDataLoaded);
-    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &QmlTabularDataParser::dataLoaded);
 
     setProgressFn([this](int progress)
     {
@@ -123,6 +124,8 @@ QmlTabularDataParser::QmlTabularDataParser()
             emit progressChanged();
         }
     });
+
+    _dataPtr = std::make_shared<TabularData>();
 }
 
 QmlTabularDataParser::~QmlTabularDataParser()
@@ -132,7 +135,7 @@ QmlTabularDataParser::~QmlTabularDataParser()
 
 void QmlTabularDataParser::updateColumnTypes()
 {
-    _columnTypeIdentities = _data.typeIdentities(this);
+    _columnTypeIdentities = _dataPtr->typeIdentities(this);
 }
 
 bool QmlTabularDataParser::parse(const QUrl& fileUrl)
@@ -146,7 +149,7 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
 
         auto tryToParseUsing = [fileUrl, this](auto&& parser)
         {
-            _data.reset();
+            _dataPtr->reset();
             _cancellableParser = &parser;
             auto atExit = std::experimental::make_scope_exit([this] { _cancellableParser = nullptr; });
 
@@ -158,7 +161,7 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
             if(!parser.parse(fileUrl))
                 return false;
 
-            _data = std::move(parser.tabularData());
+            _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
             updateColumnTypes();
             emit dataChanged();
 
@@ -170,7 +173,8 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
             {QStringLiteral("csv"),     [&]{ return tryToParseUsing(CsvFileParser()); }},
             {QStringLiteral("tsv"),     [&]{ return tryToParseUsing(TsvFileParser()); }},
             {QStringLiteral("ssv"),     [&]{ return tryToParseUsing(SsvFileParser()); }},
-            {QStringLiteral("xlsx"),    [&]{ return tryToParseUsing(XlsxTabularDataParser()); }}
+            {QStringLiteral("xlsx"),    [&]{ return tryToParseUsing(XlsxTabularDataParser()); }},
+            {QStringLiteral("mat"),     [&]{ return tryToParseUsing(MatLabFileParser()); }}
         };
 
         auto extension = QFileInfo(fileUrl.toLocalFile()).suffix();
@@ -178,24 +182,26 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
 
         if(u::contains(parsers, extension))
         {
-            const auto& parser = parsers.at(extension);
-            success = parser();
+            const auto& tryParse = parsers.at(extension);
+            success = tryParse();
         }
 
         if(!success)
         {
             // Try all the other parsers, in case the user used the wrong extension
-            for(const auto& [parserExtension, parser] : parsers)
+            for(const auto& [parserExtension, tryParse] : parsers)
             {
                 if(parserExtension == extension)
                     continue;
 
-                if(parser())
+                success = tryParse();
+                if(success)
                     break;
             }
         }
 
         setProgress(-1);
+        onParseComplete();
     });
 
     _dataParserWatcher.setFuture(future);
@@ -212,9 +218,9 @@ void QmlTabularDataParser::cancelParse()
 
 void QmlTabularDataParser::reset()
 {
-    if(!_data.empty())
+    if(!_dataPtr->empty())
     {
-        _data.reset();
+        _dataPtr->reset();
         emit dataChanged();
     }
 
@@ -239,6 +245,10 @@ void QmlTabularDataParser::reset()
 
 QmlTabularDataHeaderModel* QmlTabularDataParser::headers(int _valueTypes, const QStringList& skip) const
 {
+    Q_ASSERT(_dataPtr != nullptr);
+    if(_dataPtr == nullptr)
+        return {};
+
     auto valueTypes = static_cast<ValueType>(_valueTypes);
 
     // Caller takes ownership (usually QML/JS)
@@ -247,11 +257,13 @@ QmlTabularDataHeaderModel* QmlTabularDataParser::headers(int _valueTypes, const 
 
 void QmlTabularDataParser::onDataLoaded()
 {
-    if(_data.empty())
+    if(_dataPtr->empty())
     {
         _failed = true;
         emit failedChanged();
     }
+    else
+        emit dataLoaded();
 
     _complete = true;
     emit completeChanged();

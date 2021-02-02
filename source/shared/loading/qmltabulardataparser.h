@@ -63,13 +63,13 @@ private:
     std::vector<size_t> _columnIndices;
 };
 
-class QmlTabularDataParser : public QObject, public Cancellable, public Progressable
+class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual public Progressable
 {
     friend class QmlTabularDataHeaderModel;
 
     Q_OBJECT
 
-    Q_PROPERTY(TabularData* data READ dataPtr NOTIFY dataChanged)
+    Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(int progress MEMBER _progress WRITE setProgress NOTIFY progressChanged)
@@ -78,7 +78,7 @@ class QmlTabularDataParser : public QObject, public Cancellable, public Progress
 
 private:
     QFutureWatcher<void> _dataParserWatcher;
-    TabularData _data;
+    std::shared_ptr<TabularData> _dataPtr = nullptr;
 
     std::vector<TypeIdentity> _columnTypeIdentities;
 
@@ -87,9 +87,13 @@ private:
     bool _complete = false;
     bool _failed = false;
 
-    TabularData* dataPtr() { return &_data; }
-
     void updateColumnTypes();
+
+protected:
+    const TabularData& tabularData() const { return *_dataPtr; }
+
+    // This is called from a worker thread
+    virtual bool onParseComplete() { return true; }
 
 public:
     QmlTabularDataParser();

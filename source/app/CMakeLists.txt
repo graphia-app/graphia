@@ -57,7 +57,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/saverfactory.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/boundingbox.h
@@ -183,7 +182,6 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativeloader.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/parserthread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisesaver.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/nativesaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/saverfactory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
