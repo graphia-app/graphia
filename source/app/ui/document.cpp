@@ -756,6 +756,9 @@ void Document::onLoadComplete(const QUrl&, bool success)
     }
 
     // Final tasks before load is considered complete
+    _graphModel->initialiseAttributeRanges();
+    _graphModel->updateSharedAttributeValues();
+
     setTransforms(_graphTransforms);
     setVisualisations(_visualisations);
 
@@ -935,8 +938,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
         setSaveRequired();
     });
 
-    _graphModel->initialiseAttributeRanges();
-    _graphModel->updateSharedAttributeValues();
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
