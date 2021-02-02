@@ -18,6 +18,9 @@
 
 #include "adjacencymatrixfileparser.h"
 
+#include "shared/graph/edgelist.h"
+
+#include "shared/loading/graphsizeestimate.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/userelementdata.h"
 
@@ -30,26 +33,22 @@
 namespace
 {
 bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData)
+    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+    double minimumAbsEdgeWeight)
 {
     progressable.setProgress(-1);
 
     if(tabularData.numRows() == 0 || tabularData.numColumns() == 0)
         return false;
 
-    std::map<size_t, NodeId> rowToNodeId;
-    std::map<size_t, NodeId> columnToNodeId;
     bool hasColumnHeaders = false;
     bool hasRowHeaders = false;
-    size_t dataStartRow = 0;
-    size_t dataStartColumn = 0;
 
     // Check first column for row headers
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
-        const auto& stringValue = tabularData.valueAt(0, rowIndex);
-        // Not a header if I can convert to double
-        if(rowIndex > 0 && !stringValue.isEmpty() && !u::isNumeric(stringValue))
+        const auto& value = tabularData.valueAt(0, rowIndex);
+        if(rowIndex > 0 && !value.isEmpty() && !u::isNumeric(value))
         {
             hasRowHeaders = true;
             break;
@@ -59,60 +58,16 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
     // Check first row for column headers
     for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
     {
-        const auto& stringValue = tabularData.valueAt(columnIndex, 0);
-        if(columnIndex > 0 && !stringValue.isEmpty() && !u::isNumeric(stringValue))
+        const auto& value = tabularData.valueAt(columnIndex, 0);
+        if(columnIndex > 0 && !value.isEmpty() && !u::isNumeric(value))
         {
-            // Probably doesnt have headers if I can convert the header to double
             hasColumnHeaders = true;
             break;
         }
     }
 
-    dataStartRow = hasColumnHeaders ? 1 : 0;
-    dataStartColumn = hasRowHeaders ? 1 : 0;
-
-    // Populate Nodes from headers
-    if(hasColumnHeaders)
-    {
-        for(size_t columnIndex = dataStartColumn; columnIndex < tabularData.numColumns();
-            columnIndex++)
-        {
-            // Add column headers as nodes
-            auto nodeId = graphModel->mutableGraph().addNode();
-            userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
-                                     tabularData.valueAt(columnIndex, 0));
-
-            columnToNodeId[columnIndex] = nodeId;
-            rowToNodeId[dataStartRow + (columnIndex - dataStartColumn)] = nodeId;
-        }
-    }
-
-    if(hasRowHeaders)
-    {
-        for(size_t rowIndex = dataStartRow; rowIndex < tabularData.numRows(); rowIndex++)
-        {
-            if(hasColumnHeaders)
-            {
-                // Nodes have already been added
-                // Check row and column match (they should!)
-                auto expectedRowName = userNodeData->valueBy(rowToNodeId.at(rowIndex),
-                                                             QObject::tr("Node Name"));
-                const auto& actualRowName = tabularData.valueAt(0, rowIndex);
-
-                if(expectedRowName.toString() != actualRowName)
-                    return false;
-            }
-            else
-            {
-                // Add row headers as nodes
-                auto nodeId = graphModel->mutableGraph().addNode();
-                userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
-                                         tabularData.valueAt(0, rowIndex));
-                rowToNodeId[rowIndex] = nodeId;
-                columnToNodeId[dataStartColumn + (rowIndex - dataStartRow)] = nodeId;
-            }
-        }
-    }
+    size_t dataStartRow = hasColumnHeaders ? 1 : 0;
+    size_t dataStartColumn = hasRowHeaders ? 1 : 0;
 
     // Check datarect is square
     auto dataHeight = tabularData.numRows() - dataStartRow;
@@ -120,45 +75,60 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
     if(dataWidth != dataHeight)
         return false;
 
-    // Generate Node names if there are no headers
-    if(!hasColumnHeaders && !hasRowHeaders)
-    {
-        // "Node 1, Node 2..."
-        for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
-        {
-            auto nodeId = graphModel->mutableGraph().addNode();
-
-            userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
-                                     QObject::tr("Node %1").arg(rowIndex + 1));
-            rowToNodeId[rowIndex] = nodeId;
-            columnToNodeId[rowIndex] = nodeId;
-        }
-    }
-
     auto totalIterations = static_cast<uint64_t>(tabularData.numColumns() * tabularData.numRows());
     uint64_t progress = 0;
 
-    // Generate Edges from dataset
+    std::map<size_t, NodeId> rowToNodeId;
+    std::map<size_t, NodeId> columnToNodeId;
+
     for(size_t rowIndex = dataStartRow; rowIndex < tabularData.numRows(); rowIndex++)
     {
-        for(size_t columnIndex = dataStartColumn; columnIndex < tabularData.numColumns();
-            columnIndex++)
+        QString rowHeader = hasRowHeaders ? tabularData.valueAt(0, rowIndex) : QString();
+
+        for(size_t columnIndex = dataStartColumn; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            // Edges
-            const auto& qStringValue = tabularData.valueAt(columnIndex, rowIndex);
-            bool success = false;
-            double doubleValue = qStringValue.toDouble(&success);
-            NodeId targetNode, sourceNode;
+            QString columnHeader = hasColumnHeaders ? tabularData.valueAt(columnIndex, 0) : QString();
 
-            targetNode = columnToNodeId.at(columnIndex);
-            sourceNode = rowToNodeId.at(rowIndex);
+            const auto& value = tabularData.valueAt(columnIndex, rowIndex);
+            double edgeWeight = u::toNumber(value);
 
-            if(success && doubleValue != 0.0)
+            if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
+                edgeWeight = 0.0;
+
+            auto absEdgeWeight = std::abs(edgeWeight);
+
+            if(absEdgeWeight <= minimumAbsEdgeWeight)
+                continue;
+
+            NodeId sourceNodeId;
+            if(!u::contains(columnToNodeId, columnIndex))
             {
-                auto edgeId = graphModel->mutableGraph().addEdge(sourceNode, targetNode);
-                userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"),
-                                         QString::number(doubleValue));
+                sourceNodeId = graphModel->mutableGraph().addNode();
+                userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"),
+                    !columnHeader.isEmpty() ? columnHeader :
+                    QObject::tr("Node %1").arg(columnIndex + 1));
+
+                columnToNodeId[columnIndex] = sourceNodeId;
             }
+            else
+                sourceNodeId = columnToNodeId[columnIndex];
+
+            NodeId targetNodeId;
+            if(!u::contains(rowToNodeId, rowIndex))
+            {
+                targetNodeId = graphModel->mutableGraph().addNode();
+                userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"),
+                    !rowHeader.isEmpty() ? rowHeader :
+                    QObject::tr("Node %1").arg(rowIndex + 1));
+
+                rowToNodeId[rowIndex] = targetNodeId;
+            }
+            else
+                targetNodeId = rowToNodeId[rowIndex];
+
+            auto edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
+            userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
+            userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"), QString::number(absEdgeWeight));
 
             progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
         }
@@ -170,7 +140,8 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
 }
 
 bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData)
+    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+    double minimumAbsEdgeWeight)
 {
     std::map<QString, NodeId> nodeIdMap;
 
@@ -181,7 +152,15 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
     {
         const auto& firstCell = tabularData.valueAt(0, rowIndex);
         const auto& secondCell = tabularData.valueAt(1, rowIndex);
+
         auto edgeWeight = u::toNumber(tabularData.valueAt(2, rowIndex));
+        if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
+            edgeWeight = 0.0;
+
+        auto absEdgeWeight = std::abs(edgeWeight);
+
+        if(absEdgeWeight <= minimumAbsEdgeWeight)
+            continue;
 
         NodeId firstNodeId;
         NodeId secondNodeId;
@@ -212,10 +191,9 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
 
         auto edgeId = graphModel->mutableGraph().addEdge(firstNodeId, secondNodeId);
 
-        if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
-            edgeWeight = 1.0;
-
         userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
+        userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"),
+            QString::number(absEdgeWeight));
 
         progressable.setProgress(static_cast<int>((progress++ * 100) / tabularData.numRows()));
     }
@@ -226,7 +204,70 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
 }
 }
 
-bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabularData, size_t maxRows)
+bool AdjacencyMatrixTabularDataParser::onParseComplete()
+{
+    const auto& data = tabularData();
+    QPoint topLeft;
+    EdgeList edgeList;
+
+    setProgress(-1);
+
+    if(isEdgeList(data))
+    {
+        for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
+        {
+            NodeId source = data.valueAt(0, rowIndex).toInt();
+            NodeId target = data.valueAt(1, rowIndex).toInt();
+            double weight = data.valueAt(2, rowIndex).toDouble();
+            EdgeListEdge edge{source, target, weight};
+
+            edgeList.emplace_back(edge);
+
+            setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
+        }
+    }
+    else if(isAdjacencyMatrix(data, &topLeft))
+    {
+        for(size_t rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
+        {
+            for(size_t columnIndex = static_cast<size_t>(topLeft.x()); columnIndex < data.numColumns(); columnIndex++)
+            {
+                double weight = data.valueAt(columnIndex, rowIndex).toDouble();
+
+                if(weight == 0.0)
+                    continue;
+
+                edgeList.emplace_back(EdgeListEdge{rowIndex, columnIndex, weight});
+            }
+
+            setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
+        }
+    }
+
+    setProgress(-1);
+
+    _binaryMatrix = true;
+    double lastSeenWeight = 0.0;
+    for(const auto& edge : edgeList)
+    {
+        if(lastSeenWeight != 0.0 && edge._weight != lastSeenWeight)
+        {
+            _binaryMatrix = false;
+            break;
+        }
+
+        lastSeenWeight = edge._weight;
+    }
+
+    emit binaryMatrixChanged();
+
+    _graphSizeEstimate = graphSizeEstimate(edgeList);
+    emit graphSizeEstimateChanged();
+
+    return true;
+}
+
+bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft, size_t maxRows)
 {
     // A matrix can optionally have column or row headers. Or none.
     // A matrix data rect must be square.
@@ -286,6 +327,12 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
     if(numDataColumns < numDataRows)
         return false;
 
+    if(topLeft != nullptr)
+    {
+        topLeft->setX(firstColumnAllDouble ? 1 : 0);
+        topLeft->setY(firstRowAllDouble ? 1 : 0);
+    }
+
     return headerMatch || firstColumnAllDouble || firstRowAllDouble;
 }
 
@@ -315,12 +362,12 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Pro
     if(isEdgeList(tabularData))
     {
         return parseEdgeList(tabularData, progressable,
-            graphModel, userNodeData, userEdgeData);
+            graphModel, userNodeData, userEdgeData, _minimumAbsEdgeWeight);
     }
     else if(isAdjacencyMatrix(tabularData))
     {
         return parseAdjacencyMatrix(tabularData, progressable,
-            graphModel, userNodeData, userEdgeData);
+            graphModel, userNodeData, userEdgeData, _minimumAbsEdgeWeight);
     }
 
     return false;

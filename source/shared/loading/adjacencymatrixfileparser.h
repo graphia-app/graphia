@@ -21,10 +21,16 @@
 
 #include "shared/loading/iparser.h"
 
+#include "shared/loading/qmltabulardataparser.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 #include "shared/loading/matlabfileparser.h"
 
 #include "shared/utils/is_detected.h"
+
+#include <QQmlEngine>
+#include <QCoreApplication>
+#include <QVariantMap>
+#include <QPoint>
 
 #include <type_traits>
 
@@ -34,14 +40,46 @@ template<typename> class UserElementData;
 using UserNodeData = UserElementData<NodeId>;
 using UserEdgeData = UserElementData<EdgeId>;
 
-class AdjacencyMatrixTabularDataParser
+class AdjacencyMatrixTabularDataParser : public QmlTabularDataParser
 {
+    Q_OBJECT
+
+    Q_PROPERTY(QVariantMap graphSizeEstimate MEMBER _graphSizeEstimate NOTIFY graphSizeEstimateChanged)
+    Q_PROPERTY(bool binaryMatrix MEMBER _binaryMatrix NOTIFY binaryMatrixChanged)
+
+private:
+    QVariantMap _graphSizeEstimate;
+    bool _binaryMatrix = true;
+    double _minimumAbsEdgeWeight = 0.0;
+
+    bool onParseComplete() override;
+
 public:
-    static bool isAdjacencyMatrix(const TabularData& tabularData, size_t maxRows = 5);
+    static bool isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft = nullptr, size_t maxRows = 5);
     static bool isEdgeList(const TabularData& tabularData, size_t maxRows = 5);
 
     bool parse(const TabularData& tabularData, Progressable& progressable,
         IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData);
+
+    void setMinimumAbsEdgeWeight(double minimumAbsEdgeWeight)
+    {
+        _minimumAbsEdgeWeight = minimumAbsEdgeWeight;
+    }
+
+    static void registerQmlType()
+    {
+        static bool initialised = false;
+        if(initialised)
+            return;
+        initialised = true;
+
+        qmlRegisterType<AdjacencyMatrixTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
+            APP_MINOR_VERSION, "AdjacencyMatrixTabularDataParser");
+    }
+
+signals:
+    void graphSizeEstimateChanged();
+    void binaryMatrixChanged();
 };
 
 template<typename TabularDataParser>
@@ -50,20 +88,30 @@ class AdjacencyMatrixParser : public IParser, public AdjacencyMatrixTabularDataP
 private:
     UserNodeData* _userNodeData;
     UserEdgeData* _userEdgeData;
+    TabularData _tabularData;
 
 public:
-    AdjacencyMatrixParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+    AdjacencyMatrixParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+        TabularData* tabularData = nullptr) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-    {}
+    {
+        if(tabularData != nullptr)
+            _tabularData = std::move(*tabularData);
+    }
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override
     {
-        TabularDataParser parser(this);
+        if(_tabularData.empty())
+        {
+            TabularDataParser parser(this);
 
-        if(!parser.parse(url, graphModel))
-            return false;
+            if(!parser.parse(url, graphModel))
+                return false;
 
-        return AdjacencyMatrixTabularDataParser::parse(parser.tabularData(), parser,
+            _tabularData = std::move(parser.tabularData());
+        }
+
+        return AdjacencyMatrixTabularDataParser::parse(_tabularData, *this,
             graphModel, _userNodeData, _userEdgeData);
     }
 
@@ -99,5 +147,12 @@ using AdjacencyMatrixSSVFileParser =    AdjacencyMatrixParser<SsvFileParser>;
 using AdjacencyMatrixCSVFileParser =    AdjacencyMatrixParser<CsvFileParser>;
 using AdjacencyMatrixXLSXFileParser =   AdjacencyMatrixParser<XlsxTabularDataParser>;
 using AdjacencyMatrixMatLabFileParser = AdjacencyMatrixParser<MatLabFileParser>;
+
+static void adjacencyMatrixTabularDataParserInitialiser()
+{
+    AdjacencyMatrixTabularDataParser::registerQmlType();
+}
+
+Q_COREAPP_STARTUP_FUNCTION(adjacencyMatrixTabularDataParserInitialiser)
 
 #endif // ADJACENCYMATRIXFILEPARSER_H
