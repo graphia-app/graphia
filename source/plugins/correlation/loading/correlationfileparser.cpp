@@ -430,13 +430,8 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::finished, [this]
     {
-        const auto& graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
-
-        if(!graphSizeEstimate.empty())
-        {
-            _graphSizeEstimate = graphSizeEstimate;
-            emit graphSizeEstimateChanged();
-        }
+        _graphSizeEstimate = _graphSizeEstimateFutureWatcher.result();
+        emit graphSizeEstimateChanged();
 
         // Another estimate was queued while we were busy
         if(_graphSizeEstimateQueued)
