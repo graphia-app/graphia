@@ -120,16 +120,18 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
         _sourceColumnOrder = _columnNames;
     }
 
-    QStringList columnOrder;
-    std::copy_if(_sourceColumnOrder.begin(), _sourceColumnOrder.end(), std::back_inserter(columnOrder),
-    [this](const auto& value)
-    {
-        return !u::contains(_hiddenColumns, value);
-    });
-
     _orderedProxyToSourceColumn.clear();
-    for(const auto& columnName : columnOrder)
-        _orderedProxyToSourceColumn.emplace_back(_columnNames.indexOf(columnName));
+
+    std::map<QString, int> columnNameIndicies;
+    int index = 0;
+    for(const auto& columnName : std::as_const(_columnNames))
+        columnNameIndicies.emplace(columnName, index++);
+
+    for(const auto& sourceColumnName : std::as_const(_sourceColumnOrder))
+    {
+        if(!u::contains(_hiddenColumns, sourceColumnName))
+            _orderedProxyToSourceColumn.emplace_back(columnNameIndicies.at(sourceColumnName));
+    }
 
     _headerModel.clear();
     _headerModel.setRowCount(1);
