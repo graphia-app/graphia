@@ -174,6 +174,7 @@ void NodeAttributeTableModel::onUpdateColumnComplete(const QString& columnName)
     auto column = static_cast<size_t>(indexForColumnName(columnName));
     _data.at(column) = _pendingData.at(column);
 
+    //FIXME: FIXME: This comment is out of date and refers to TableView 1
     //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
     // for some reason it's not, even with https://codereview.qt-project.org/#/c/219278/
     // applied. Most of the performance seems to be lost deep in TableView's JS so perhaps
@@ -182,7 +183,7 @@ void NodeAttributeTableModel::onUpdateColumnComplete(const QString& columnName)
     //      https://stackoverflow.com/a/43856015
     //      https://stackoverflow.com/a/45188582
     // Also, note that NodeAttributeTableView currently relies on layoutChanged, so if
-    // what we emit changes, we need to be account for it there too.
+    // what we emit changes, we need to account for it there too.
     //emit dataChanged(index(0, column), index(rowCount() - 1, column), {role});
 
     emit layoutChanged();
