@@ -32,7 +32,7 @@ class IGraphModel;
 class Document;
 class IPluginInstance;
 
-class ISaver : public Progressable, public Cancellable
+class ISaver : virtual public Progressable, virtual public Cancellable
 {
 public:
     ~ISaver() override = default;

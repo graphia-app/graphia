@@ -31,7 +31,7 @@
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 
-class ICommand : public Progressable, public Cancellable
+class ICommand : virtual public Progressable, virtual public Cancellable
 {
 public:
     ~ICommand() override = default;

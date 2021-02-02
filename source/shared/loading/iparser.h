@@ -27,7 +27,7 @@ class QUrl;
 class IGraphModel;
 class QString;
 
-class IParser : public Progressable, public Cancellable, public FailureReason
+class IParser : virtual public Progressable, virtual public Cancellable, virtual public FailureReason
 {
 public:
     ~IParser() override = default;
