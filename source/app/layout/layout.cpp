@@ -64,6 +64,19 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
+
+
+    connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
+    [this]
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        _layoutPotentiallyRequired = true;
+        unfinish();
+    });
+
+    connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
+        this, &LayoutThread::settingChanged);
 }
 
 void LayoutThread::pause()
@@ -287,19 +300,6 @@ void LayoutThread::addComponent(ComponentId componentId)
 
         auto layout = _layoutFactory->create(componentId,
             _nodeLayoutPositions, _dimensionalityMode);
-
-        connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
-        [this]
-        {
-            std::unique_lock<std::mutex> innerLock(_mutex);
-
-            _layoutPotentiallyRequired = true;
-            unfinish();
-
-            innerLock.unlock();
-
-            emit settingChanged();
-        });
 
         _graphModel->nodePositions().setScale(layout->scaling());
         _graphModel->nodePositions().setSmoothing(layout->smoothing());
