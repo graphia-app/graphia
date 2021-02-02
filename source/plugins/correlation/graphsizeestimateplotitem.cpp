@@ -41,7 +41,11 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
     if(threshold != _threshold)
     {
         if(!_keys.isEmpty())
-            threshold = std::clamp(threshold, std::as_const(_keys).first(), 1.0);
+        {
+            threshold = std::clamp(threshold,
+                std::as_const(_keys).first(),
+                std::as_const(_keys).last());
+        }
 
         _threshold = threshold;
         emit thresholdChanged();
@@ -74,14 +78,22 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
     if(_thresholdIndicator == nullptr || _keys.isEmpty())
         return;
 
-    _thresholdIndicator->point1->setCoords(_threshold, 0.0);
-    _thresholdIndicator->point2->setCoords(_threshold, 1.0);
+    // Clamp the indicator x coordinate to within the bounds of the
+    // plot by a small margin, so that it's always visible
+    auto smallestWeight = std::as_const(_keys).first();
+    auto largestWeight = std::as_const(_keys).last();
+    const double keepVisibleOffset = (largestWeight - smallestWeight) * 0.002;
+
+    auto x = std::clamp(_threshold,
+        smallestWeight + keepVisibleOffset,
+        largestWeight - keepVisibleOffset);
+
+    _thresholdIndicator->point1->setCoords(x, 0.0);
+    _thresholdIndicator->point2->setCoords(x, 1.0);
 
     int index = 0;
     while(_keys.at(index) < _threshold && index < _keys.size() - 1)
         index++;
-
-    index++;
 
     size_t numNodes = 0;
     size_t numEdges = 0;
@@ -131,10 +143,10 @@ void GraphSizeEstimatePlotItem::buildPlot()
     customPlot().yAxis->setNumberPrecision(0);
     customPlot().yAxis->grid()->setSubGridVisible(true);
 
-    customPlot().xAxis->setRange(std::as_const(_keys).first(),
-        // If the threshold is 1.0, stretch the X axis a little,
-        // so that the marker is always visible
-        qFuzzyCompare(_threshold, 1.0) ? 1.001 : 1.0);
+    auto smallestWeight = std::as_const(_keys).first();
+    auto largestWeight = std::as_const(_keys).last();
+
+    customPlot().xAxis->setRange(smallestWeight, largestWeight);
 
     customPlot().yAxis->rescale();
 
