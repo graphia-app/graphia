@@ -224,7 +224,9 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
     auto urlTypes = identifyByExtension(url);
     if(!urlTypes.isEmpty())
     {
-        return tr("The file's contents do not match its filename extension. Extension: %1")
+        return tr("The file cannot be loaded. The file extension "
+            "was used to determine the file's possible type(s): %1. "
+            "Please check its contents are of this type.")
             .arg(urlTypes.join(','));
     }
 
