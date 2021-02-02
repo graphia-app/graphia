@@ -83,7 +83,7 @@ public:
     virtual bool editable() const = 0;
     virtual bool directed() const = 0;
 
-    virtual QString parametersQmlPath() const = 0;
+    virtual QString parametersQmlPath(const QString& urlType) const = 0;
     virtual QString qmlPath() const = 0;
 };
 

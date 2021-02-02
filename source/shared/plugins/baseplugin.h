@@ -167,7 +167,7 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
     QString imageSource() const override { return {}; }
 
     // Default to no settings UI
-    QString parametersQmlPath() const override { return {}; }
+    QString parametersQmlPath(const QString&) const override { return {}; }
 
     // Default to no UI
     QString qmlPath() const override { return {}; }

@@ -195,7 +195,7 @@ public:
     bool editable() const override { return true; }
     bool directed() const override { return false; }
 
-    QString parametersQmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationParameters.qml"); }
+    QString parametersQmlPath(const QString&) const override { return QStringLiteral("qrc:///qml/CorrelationParameters.qml"); }
     QString qmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationPlugin.qml"); }
 };
 

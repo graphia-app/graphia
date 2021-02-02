@@ -176,7 +176,8 @@ public:
     Q_INVOKABLE QVariantList saverFileTypes();
 
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
-    Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName) const;
+    Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName,
+        const QString& urlType) const;
 
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }

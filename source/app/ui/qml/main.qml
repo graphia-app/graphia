@@ -543,7 +543,7 @@ ApplicationWindow
 
     function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     {
-        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName);
+        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName, fileType);
 
         if(parametersQmlPath.length > 0)
         {
