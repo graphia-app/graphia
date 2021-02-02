@@ -35,10 +35,11 @@ QVariantMap graphSizeEstimate(EdgeList edgeList,
     std::sort(edgeList.begin(), edgeList.end(),
         [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });
 
-    const auto smallestWeight = edgeList.back()._weight;
+    const auto smallestWeight = std::abs(edgeList.back()._weight);
+    const auto largestWeight = std::abs(edgeList.front()._weight);
     const auto numEstimateSamples = 100;
-    const auto sampleQuantum = (1.0 - smallestWeight) / (numEstimateSamples - 1);
-    auto sampleCutoff = 1.0;
+    const auto sampleQuantum = (largestWeight - smallestWeight) / (numEstimateSamples - 1);
+    auto sampleCutoff = std::abs(largestWeight) - sampleQuantum;
 
     QVector<double> keys;
     QVector<double> estimatedNumNodes;
@@ -48,32 +49,38 @@ QVariantMap graphSizeEstimate(EdgeList edgeList,
     estimatedNumNodes.reserve(static_cast<int>(edgeList.size()));
     estimatedNumEdges.reserve(static_cast<int>(edgeList.size()));
 
-    size_t numSampledEdges = 0;
+    size_t numEdges = 0;
     NodeIdSet nonSingletonNodes;
+    auto weight = std::abs(edgeList.front()._weight);
 
     for(const auto& edge : edgeList)
     {
-        nonSingletonNodes.insert(edge._source);
-        nonSingletonNodes.insert(edge._target);
-        numSampledEdges++;
-
-        if(std::abs(edge._weight) <= sampleCutoff)
+        if(std::abs(edge._weight) < sampleCutoff)
         {
-            keys.append(std::abs(edge._weight));
+            keys.append(weight);
             estimatedNumNodes.append(std::min(nonSingletonNodes.size() * nodesScale, nodesMax));
-            estimatedNumEdges.append(std::min(numSampledEdges * edgesScale, edgesMax));
+            estimatedNumEdges.append(std::min(numEdges * edgesScale, edgesMax));
 
             sampleCutoff -= sampleQuantum;
+            weight = std::abs(edge._weight);
         }
+
+        nonSingletonNodes.insert(edge._source);
+        nonSingletonNodes.insert(edge._target);
+        numEdges++;
     }
 
-    keys.append(std::abs(edgeList.back()._weight));
+    keys.append(std::min(weight, smallestWeight));
     estimatedNumNodes.append(std::min(nonSingletonNodes.size() * nodesScale, nodesMax));
-    estimatedNumEdges.append(std::min(numSampledEdges * edgesScale, edgesMax));
+    estimatedNumEdges.append(std::min(numEdges * edgesScale, edgesMax));
 
     std::reverse(keys.begin(), keys.end());
     std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());
     std::reverse(estimatedNumEdges.begin(), estimatedNumEdges.end());
+
+    keys.shrink_to_fit();
+    estimatedNumNodes.shrink_to_fit();
+    estimatedNumEdges.shrink_to_fit();
 
     QVariantMap map;
     map.insert(QStringLiteral("keys"), QVariant::fromValue(keys));
