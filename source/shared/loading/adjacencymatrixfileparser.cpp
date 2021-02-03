@@ -32,9 +32,33 @@
 
 namespace
 {
+void addEdge(IGraphModel* graphModel, UserEdgeData* userEdgeData,
+    NodeId sourceNodeId, NodeId targetNodeId,
+    double edgeWeight, double absEdgeWeight,
+    bool skipDoubles)
+{
+    EdgeId edgeId;
+    bool setWeights = true;
+
+    if(skipDoubles)
+        edgeId = graphModel->mutableGraph().firstEdgeIdBetween(sourceNodeId, targetNodeId);
+
+    if(edgeId.isNull())
+        edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
+    else
+        setWeights = userEdgeData->valueBy(edgeId, QObject::tr("Absolute Edge Weight")).toDouble() < absEdgeWeight;
+
+    if(setWeights)
+    {
+        userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
+        userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"),
+            QString::number(absEdgeWeight));
+    }
+}
+
 bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progressable,
     IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
-    double minimumAbsEdgeWeight)
+    double minimumAbsEdgeWeight, bool skipDoubles)
 {
     progressable.setProgress(-1);
 
@@ -126,9 +150,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
             else
                 targetNodeId = rowToNodeId[rowIndex];
 
-            auto edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
-            userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
-            userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"), QString::number(absEdgeWeight));
+            addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDoubles);
 
             progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
         }
@@ -141,7 +163,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
 
 bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
     IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
-    double minimumAbsEdgeWeight)
+    double minimumAbsEdgeWeight, bool skipDoubles)
 {
     std::map<QString, NodeId> nodeIdMap;
 
@@ -162,38 +184,34 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
         if(absEdgeWeight <= minimumAbsEdgeWeight)
             continue;
 
-        NodeId firstNodeId;
-        NodeId secondNodeId;
+        NodeId sourceNodeId;
+        NodeId targetNodeId;
 
         if(!u::contains(nodeIdMap, firstCell))
         {
-            firstNodeId = graphModel->mutableGraph().addNode();
-            nodeIdMap.emplace(firstCell, firstNodeId);
+            sourceNodeId = graphModel->mutableGraph().addNode();
+            nodeIdMap.emplace(firstCell, sourceNodeId);
 
-            auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(firstNodeId + 1));
-            userNodeData->setValueBy(firstNodeId, QObject::tr("Node Name"), nodeName);
-            graphModel->setNodeName(firstNodeId, nodeName);
+            auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(sourceNodeId + 1));
+            userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"), nodeName);
+            graphModel->setNodeName(sourceNodeId, nodeName);
         }
         else
-            firstNodeId = nodeIdMap[firstCell];
+            sourceNodeId = nodeIdMap[firstCell];
 
         if(!u::contains(nodeIdMap, secondCell))
         {
-            secondNodeId = graphModel->mutableGraph().addNode();
-            nodeIdMap.emplace(secondCell, secondNodeId);
+            targetNodeId = graphModel->mutableGraph().addNode();
+            nodeIdMap.emplace(secondCell, targetNodeId);
 
-            auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(secondNodeId + 1));
-            userNodeData->setValueBy(secondNodeId, QObject::tr("Node Name"), nodeName);
-            graphModel->setNodeName(secondNodeId, nodeName);
+            auto nodeName = QObject::tr("Node %1").arg(static_cast<int>(targetNodeId + 1));
+            userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"), nodeName);
+            graphModel->setNodeName(targetNodeId, nodeName);
         }
         else
-            secondNodeId = nodeIdMap[secondCell];
+            targetNodeId = nodeIdMap[secondCell];
 
-        auto edgeId = graphModel->mutableGraph().addEdge(firstNodeId, secondNodeId);
-
-        userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
-        userEdgeData->setValueBy(edgeId, QObject::tr("Absolute Edge Weight"),
-            QString::number(absEdgeWeight));
+        addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDoubles);
 
         progressable.setProgress(static_cast<int>((progress++ * 100) / tabularData.numRows()));
     }
@@ -362,12 +380,14 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Pro
     if(isEdgeList(tabularData))
     {
         return parseEdgeList(tabularData, progressable,
-            graphModel, userNodeData, userEdgeData, _minimumAbsEdgeWeight);
+            graphModel, userNodeData, userEdgeData,
+            _minimumAbsEdgeWeight, _skipDoubles);
     }
     else if(isAdjacencyMatrix(tabularData))
     {
         return parseAdjacencyMatrix(tabularData, progressable,
-            graphModel, userNodeData, userEdgeData, _minimumAbsEdgeWeight);
+            graphModel, userNodeData, userEdgeData,
+            _minimumAbsEdgeWeight, _skipDoubles);
     }
 
     return false;
