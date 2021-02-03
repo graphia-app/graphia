@@ -220,7 +220,7 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
         columnValues.begin(), columnValues.end(),
         std::inserter(intersection, intersection.begin()));
 
-    int percent = (intersection.size() * 100) / referenceValues.size();
+    auto percent = static_cast<int>((intersection.size() * 100) / referenceValues.size());
 
     // In the case where the intersection is very small, but non-zero,
     // don't report a 0% match
