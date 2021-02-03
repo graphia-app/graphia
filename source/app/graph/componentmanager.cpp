@@ -240,6 +240,7 @@ void ComponentManager::update(const Graph* graph)
         }
 
         u::removeByValue(_componentIds, componentId);
+        _componentIdsSet.erase(componentId);
         removeGraphComponent(componentId);
     }
 
@@ -252,6 +253,8 @@ void ComponentManager::update(const Graph* graph)
 
     std::copy(componentIdsToBeAdded.begin(), componentIdsToBeAdded.end(),
         std::back_inserter(_componentIds));
+    std::copy(componentIdsToBeAdded.begin(), componentIdsToBeAdded.end(),
+        std::inserter(_componentIdsSet, _componentIdsSet.begin()));
 
     std::stable_sort(_componentIds.begin(), _componentIds.end(),
     [this](auto a, auto b)
@@ -472,8 +475,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
-    // A binary search works here because _componentIds is sorted
-    if(std::binary_search(_componentIds.begin(), _componentIds.end(), componentId))
+    if(u::contains(_componentIdsSet, componentId))
         return componentId;
 
     if(_debug) qDebug() << "Can't find componentId of nodeId" << nodeId;
@@ -488,8 +490,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
-    // A binary search works here because _componentIds is sorted
-    if(std::binary_search(_componentIds.begin(), _componentIds.end(), componentId))
+    if(u::contains(_componentIdsSet, componentId))
         return componentId;
 
     if(_debug) qDebug() << "Can't find componentId of edgeId" << edgeId;

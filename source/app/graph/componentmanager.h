@@ -27,6 +27,7 @@
 #include <queue>
 #include <mutex>
 #include <vector>
+#include <set>
 #include <functional>
 #include <algorithm>
 #include <memory>
@@ -88,6 +89,7 @@ public:
 
 private:
     std::vector<ComponentId> _componentIds;
+    std::set<ComponentId> _componentIdsSet; // Mirror of above, for fast checking
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::unique_ptr<GraphComponent>> _componentsMap;
