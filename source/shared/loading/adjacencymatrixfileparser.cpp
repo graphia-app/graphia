@@ -237,7 +237,7 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
                 if(weight == 0.0)
                     continue;
 
-                edgeList.emplace_back(EdgeListEdge{rowIndex, columnIndex, weight});
+                edgeList.emplace_back(EdgeListEdge{NodeId(rowIndex), NodeId(columnIndex), weight});
             }
 
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
