@@ -33,11 +33,42 @@ QCustomPlotQuickItem::QCustomPlotQuickItem(int multisamples, QQuickItem* parent)
     connect(this, &QQuickPaintedItem::widthChanged, this, &QCustomPlotQuickItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::heightChanged, this, &QCustomPlotQuickItem::updatePlotSize);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &QCustomPlotQuickItem::onReplot);
+    connect(this, &QQuickPaintedItem::enabledChanged, [this] { update(); });
 }
 
 void QCustomPlotQuickItem::paint(QPainter* painter)
 {
-    painter->drawPixmap(0, 0, _customPlot.toPixmap());
+    if(!isEnabled())
+    {
+        // Create a desaturated version of the pixmap
+        auto image = _customPlot.toPixmap().toImage();
+        const auto bytes = image.depth() >> 3;
+
+        for(int y = 0; y < image.height(); y++)
+        {
+            auto* scanLine = image.scanLine(y);
+            for(int x = 0; x < image.width(); x++)
+            {
+                auto* pixel = reinterpret_cast<QRgb*>(scanLine + (x * bytes));
+                const int gray = qGray(*pixel);
+                const int alpha = qAlpha(*pixel);
+                *pixel = QColor(gray, gray, gray, alpha).rgba();
+            }
+        }
+
+        // The pixmap that QCustomPlot creates is a mixture of premultipled
+        // pixels and pixels with an alpha value, so to keep things simple
+        // we just use an alpha value in the destination buffer instead
+        painter->setCompositionMode(QPainter::CompositionMode_DestinationOver);
+
+        auto backgroundColor = QColor(Qt::white);
+        backgroundColor.setAlpha(127);
+
+        painter->fillRect(0, 0, width(), height(), backgroundColor);
+        painter->drawPixmap(0, 0, QPixmap::fromImage(image));
+    }
+    else
+        painter->drawPixmap(0, 0, _customPlot.toPixmap());
 }
 
 void QCustomPlotQuickItem::updatePlotSize()
