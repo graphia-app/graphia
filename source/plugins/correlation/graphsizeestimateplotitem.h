@@ -30,6 +30,7 @@ class GraphSizeEstimatePlotItem : public QCustomPlotQuickItem
     Q_OBJECT
     Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate WRITE setGraphSizeEstimate)
     Q_PROPERTY(double threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged)
+    Q_PROPERTY(bool uniqueEdgesOnly MEMBER _uniqueEdgesOnly NOTIFY uniqueEdgesOnlyChanged)
 
 public:
     explicit GraphSizeEstimatePlotItem(QQuickItem* parent = nullptr);
@@ -40,8 +41,10 @@ private:
     QVector<double> _keys;
     QVector<double> _numNodes;
     QVector<double> _numEdges;
+    QVector<double> _numUniqueEdges;
 
     double _threshold = 0.0;
+    bool _uniqueEdgesOnly = false;
     bool _dragging = false;
 
     double threshold() const;
@@ -59,6 +62,7 @@ private:
 
 signals:
     void thresholdChanged();
+    void uniqueEdgesOnlyChanged();
 };
 
 #endif // GRAPHSIZEESTIMATEPLOTITEM_H

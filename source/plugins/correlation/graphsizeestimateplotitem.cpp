@@ -29,7 +29,9 @@
 
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent)
-{}
+{
+    connect(this, &GraphSizeEstimatePlotItem::uniqueEdgesOnlyChanged, [this] { buildPlot(); });
+}
 
 double GraphSizeEstimatePlotItem::threshold() const
 {
@@ -66,9 +68,13 @@ void GraphSizeEstimatePlotItem::setGraphSizeEstimate(const QVariantMap& graphSiz
     if(!graphSizeEstimate.contains(QStringLiteral("numEdges")))
         return;
 
+    if(!graphSizeEstimate.contains(QStringLiteral("numUniqueEdges")))
+        return;
+
     _keys = graphSizeEstimate.value(QStringLiteral("keys")).value<QVector<double>>();
     _numNodes = graphSizeEstimate.value(QStringLiteral("numNodes")).value<QVector<double>>();
     _numEdges = graphSizeEstimate.value(QStringLiteral("numEdges")).value<QVector<double>>();
+    _numUniqueEdges = graphSizeEstimate.value(QStringLiteral("numUniqueEdges")).value<QVector<double>>();
 
     buildPlot();
 }
@@ -101,7 +107,9 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
     if(index < _keys.size())
     {
         numNodes = static_cast<size_t>(_numNodes.at(index));
-        numEdges = static_cast<size_t>(_numEdges.at(index));
+        numEdges = _uniqueEdgesOnly ?
+            static_cast<size_t>(_numUniqueEdges.at(index)) :
+            static_cast<size_t>(_numEdges.at(index));
     }
 
     customPlot().xAxis->setLabel(tr("Estimated Graph Size: %1 Nodes, %2 Edges")
@@ -122,7 +130,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     nodesGraph->setData(_keys, _numNodes, true);
     nodesGraph->setPen(QPen(Qt::red));
     nodesGraph->setName(tr("Nodes"));
-    edgesGraph->setData(_keys, _numEdges, true);
+    edgesGraph->setData(_keys, _uniqueEdgesOnly ? _numUniqueEdges : _numEdges, true);
     edgesGraph->setPen(QPen(Qt::blue));
     edgesGraph->setName(tr("Edges"));
 
