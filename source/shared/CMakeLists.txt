@@ -29,6 +29,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraph.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraphmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/imutablegraph.h
+    ${CMAKE_CURRENT_LIST_DIR}/graph/undirectededge.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.h

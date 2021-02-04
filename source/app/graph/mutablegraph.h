@@ -20,33 +20,14 @@
 #define MUTABLEGRAPH_H
 
 #include "graph.h"
+
 #include "shared/graph/imutablegraph.h"
+#include "shared/graph/undirectededge.h"
 
 #include <deque>
 #include <mutex>
 #include <vector>
 #include <map>
-
-class UndirectedEdge
-{
-private:
-    NodeId lo;
-    NodeId hi;
-
-public:
-    UndirectedEdge(NodeId a, NodeId b)
-    {
-        std::tie(lo, hi) = std::minmax(a, b);
-    }
-
-    bool operator<(const UndirectedEdge& other) const
-    {
-        if(lo == other.lo)
-            return hi < other.hi;
-
-        return lo < other.lo;
-    }
-};
 
 class MutableGraph : public Graph, public virtual IMutableGraph
 {
