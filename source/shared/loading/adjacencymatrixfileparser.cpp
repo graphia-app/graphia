@@ -102,8 +102,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
     auto totalIterations = static_cast<uint64_t>(tabularData.numColumns() * tabularData.numRows());
     uint64_t progress = 0;
 
-    std::map<size_t, NodeId> rowToNodeId;
-    std::map<size_t, NodeId> columnToNodeId;
+    std::map<size_t, NodeId> indexToNodeId;
 
     for(size_t rowIndex = dataStartRow; rowIndex < tabularData.numRows(); rowIndex++)
     {
@@ -124,32 +123,23 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
             if(absEdgeWeight <= minimumAbsEdgeWeight)
                 continue;
 
-            NodeId sourceNodeId;
-            if(!u::contains(columnToNodeId, columnIndex))
+            auto addNode = [&](size_t index, const QString& name)
             {
-                sourceNodeId = graphModel->mutableGraph().addNode();
-                userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"),
-                    !columnHeader.isEmpty() ? columnHeader :
-                    QObject::tr("Node %1").arg(columnIndex + 1));
+                if(u::contains(indexToNodeId, index))
+                    return indexToNodeId.at(index);
 
-                columnToNodeId[columnIndex] = sourceNodeId;
-            }
-            else
-                sourceNodeId = columnToNodeId[columnIndex];
+                auto nodeId = graphModel->mutableGraph().addNode();
+                userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
+                    !name.isEmpty() ? name :
+                    QObject::tr("Node %1").arg(index + 1));
 
-            NodeId targetNodeId;
-            if(!u::contains(rowToNodeId, rowIndex))
-            {
-                targetNodeId = graphModel->mutableGraph().addNode();
-                userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"),
-                    !rowHeader.isEmpty() ? rowHeader :
-                    QObject::tr("Node %1").arg(rowIndex + 1));
+                indexToNodeId[index] = nodeId;
 
-                rowToNodeId[rowIndex] = targetNodeId;
-            }
-            else
-                targetNodeId = rowToNodeId[rowIndex];
+                return nodeId;
+            };
 
+            NodeId sourceNodeId = addNode(columnIndex, columnHeader);
+            NodeId targetNodeId = addNode(rowIndex, rowHeader);
             addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDoubles);
 
             progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
