@@ -22,6 +22,8 @@
 #include "baseplugin.h"
 
 #include "shared/loading/userelementdata.h"
+#include "shared/loading/tabulardata.h"
+
 #include "shared/plugins/nodeattributetablemodel.h"
 
 #include "shared/graph/grapharray.h"
@@ -45,6 +47,15 @@ private:
     UserNodeData _userNodeData;
     UserEdgeData _userEdgeData;
 
+    struct AdjacencyMatrixParameters
+    {
+        double _minimumAbsEdgeWeight = 0.0;
+        double _initialAbsEdgeWeightThreshold = 0.0;
+        bool _filterEdges = false;
+        bool _skipDuplicates = false;
+        TabularData _tabularData;
+    } _adjacencyMatrixParameters;
+
     NodeAttributeTableModel _nodeAttributeTableModel;
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
 
@@ -52,6 +63,8 @@ public:
     BaseGenericPluginInstance();
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
+    void applyParameter(const QString& name, const QVariant& value) override;
+    QStringList defaultTransforms() const override;
 
     QByteArray save(IMutableGraph&, Progressable&) const override;
     bool load(const QByteArray&, int, IMutableGraph&, IParser& parser) override;
@@ -87,6 +100,8 @@ public:
     QString failureReason(const QUrl&) const override;
 
     bool editable() const override { return true; }
+
+    QString parametersQmlPath(const QString& urlType) const override;
 };
 
 #endif // BASEGENERICPLUGIN_H

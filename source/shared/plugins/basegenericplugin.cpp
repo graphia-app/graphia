@@ -62,28 +62,73 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QLatin1String("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData, &_userEdgeData);
 
-    if(urlTypeName == QLatin1String("MatrixCSV"))
-        return std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData);
+    if(urlTypeName.startsWith(QLatin1String("Matrix")))
+    {
+        std::unique_ptr<IParser> parser;
 
-    if(urlTypeName == QLatin1String("MatrixSSV"))
-        return std::make_unique<AdjacencyMatrixSSVFileParser>(&_userNodeData, &_userEdgeData);
+        if(urlTypeName == QLatin1String("MatrixCSV"))
+            parser = std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+        else if(urlTypeName == QLatin1String("MatrixSSV"))
+            parser = std::make_unique<AdjacencyMatrixSSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+        else if(urlTypeName == QLatin1String("MatrixTSV"))
+            parser = std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+        else if(urlTypeName == QLatin1String("MatrixXLSX"))
+            parser = std::make_unique<AdjacencyMatrixXLSXFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+        else if(urlTypeName == QLatin1String("MatrixMatLab"))
+            parser = std::make_unique<AdjacencyMatrixMatLabFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
 
-    if(urlTypeName == QLatin1String("MatrixTSV"))
-        return std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData);
+        if(parser != nullptr)
+        {
+            auto* matrixParser = dynamic_cast<AdjacencyMatrixTabularDataParser*>(parser.get());
 
-    if(urlTypeName == QLatin1String("MatrixXLSX"))
-        return std::make_unique<AdjacencyMatrixXLSXFileParser>(&_userNodeData, &_userEdgeData);
+            Q_ASSERT(matrixParser != nullptr);
+            if(matrixParser != nullptr)
+            {
+                if(_adjacencyMatrixParameters._filterEdges)
+                    matrixParser->setMinimumAbsEdgeWeight(_adjacencyMatrixParameters._minimumAbsEdgeWeight);
+
+                matrixParser->setSkipDuplicates(_adjacencyMatrixParameters._skipDuplicates);
+            }
+        }
+
+        return parser;
+    }
 
     if(urlTypeName == QLatin1String("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
-    
-    if(urlTypeName == QLatin1String("MatrixMatLab"))
-        return std::make_unique<AdjacencyMatrixMatLabFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("JSONGraph"))
         return std::make_unique<JsonGraphParser>(&_userNodeData, &_userEdgeData);
 
     return nullptr;
+}
+
+void BaseGenericPluginInstance::applyParameter(const QString& name, const QVariant& value)
+{
+    if(name == QLatin1String("minimumThreshold"))
+        _adjacencyMatrixParameters._minimumAbsEdgeWeight = value.toDouble();
+    else if(name == QLatin1String("initialThreshold"))
+        _adjacencyMatrixParameters._initialAbsEdgeWeightThreshold = value.toDouble();
+    else if(name == QLatin1String("filterEdges"))
+        _adjacencyMatrixParameters._filterEdges = (value == QLatin1String("true"));
+    else if(name == QLatin1String("skipDuplicates"))
+        _adjacencyMatrixParameters._skipDuplicates = (value == QLatin1String("true"));
+    else if(name == QLatin1String("data") && value.canConvert<std::shared_ptr<TabularData>>())
+        _adjacencyMatrixParameters._tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
+}
+
+QStringList BaseGenericPluginInstance::defaultTransforms() const
+{
+    QStringList defaultTransforms;
+
+    if(_adjacencyMatrixParameters._filterEdges)
+    {
+        defaultTransforms.append(
+            QStringLiteral(R"("Remove Edges" where $"Absolute Edge Weight" < %2)")
+            .arg(_adjacencyMatrixParameters._initialAbsEdgeWeightThreshold));
+    }
+
+    return defaultTransforms;
 }
 
 QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
@@ -229,6 +274,14 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
             "Please check its contents are of this type.")
             .arg(urlTypes.join(','));
     }
+
+    return {};
+}
+
+QString BaseGenericPlugin::parametersQmlPath(const QString& urlType) const
+{
+    if(urlType.startsWith(QStringLiteral("Matrix")))
+        return QStringLiteral("qrc:///qml/MatrixParameters.qml");
 
     return {};
 }

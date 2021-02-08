@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/">
+        <file>matrix.svg</file>
         <file>tools.svg</file>
         <file>qml/GenericPlugin.qml</file>
+        <file>qml/MatrixParameters.qml</file>
     </qresource>
 </RCC>
