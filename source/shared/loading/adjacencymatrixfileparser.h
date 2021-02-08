@@ -51,7 +51,7 @@ private:
     QVariantMap _graphSizeEstimate;
     bool _binaryMatrix = true;
     double _minimumAbsEdgeWeight = 0.0;
-    bool _skipDoubles = false;
+    bool _skipDuplicates = false;
 
     bool onParseComplete() override;
 
@@ -63,7 +63,7 @@ public:
         IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData);
 
     void setMinimumAbsEdgeWeight(double minimumAbsEdgeWeight) { _minimumAbsEdgeWeight = minimumAbsEdgeWeight; }
-    void setSkipDoubles(bool skipDoubles) { _skipDoubles = skipDoubles; }
+    void setSkipDuplicates(bool skipDuplicates) { _skipDuplicates = skipDuplicates; }
 
     static void registerQmlType()
     {

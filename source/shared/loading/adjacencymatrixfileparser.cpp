@@ -35,12 +35,12 @@ namespace
 void addEdge(IGraphModel* graphModel, UserEdgeData* userEdgeData,
     NodeId sourceNodeId, NodeId targetNodeId,
     double edgeWeight, double absEdgeWeight,
-    bool skipDoubles)
+    bool skipDuplicates)
 {
     EdgeId edgeId;
     bool setWeights = true;
 
-    if(skipDoubles)
+    if(skipDuplicates)
         edgeId = graphModel->mutableGraph().firstEdgeIdBetween(sourceNodeId, targetNodeId);
 
     if(edgeId.isNull())
@@ -58,7 +58,7 @@ void addEdge(IGraphModel* graphModel, UserEdgeData* userEdgeData,
 
 bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progressable,
     IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
-    double minimumAbsEdgeWeight, bool skipDoubles)
+    double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     progressable.setProgress(-1);
 
@@ -140,7 +140,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
 
             NodeId sourceNodeId = addNode(columnIndex, columnHeader);
             NodeId targetNodeId = addNode(rowIndex, rowHeader);
-            addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDoubles);
+            addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDuplicates);
 
             progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
         }
@@ -153,7 +153,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
 
 bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
     IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
-    double minimumAbsEdgeWeight, bool skipDoubles)
+    double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     std::map<QString, NodeId> nodeIdMap;
 
@@ -201,7 +201,7 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
         else
             targetNodeId = nodeIdMap[secondCell];
 
-        addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDoubles);
+        addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDuplicates);
 
         progressable.setProgress(static_cast<int>((progress++ * 100) / tabularData.numRows()));
     }
@@ -371,13 +371,13 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Pro
     {
         return parseEdgeList(tabularData, progressable,
             graphModel, userNodeData, userEdgeData,
-            _minimumAbsEdgeWeight, _skipDoubles);
+            _minimumAbsEdgeWeight, _skipDuplicates);
     }
     else if(isAdjacencyMatrix(tabularData))
     {
         return parseAdjacencyMatrix(tabularData, progressable,
             graphModel, userNodeData, userEdgeData,
-            _minimumAbsEdgeWeight, _skipDoubles);
+            _minimumAbsEdgeWeight, _skipDuplicates);
     }
 
     return false;
