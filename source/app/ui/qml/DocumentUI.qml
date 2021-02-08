@@ -84,7 +84,7 @@ Item
 
     property string status: document.status
 
-    property bool busy: document.busy
+    property bool busy: document.busy || !graph.initialised
     property bool editable: document.editable
     property bool directed: document.directed
     property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
@@ -1226,6 +1226,7 @@ Item
             {
                 id: transforms
                 visible: plugin.loaded
+                enabled: !busy
 
                 anchors.right: parent.right
                 anchors.top: parent.top
@@ -1241,6 +1242,7 @@ Item
             {
                 id: visualisations
                 visible: plugin.loaded
+                enabled: !busy
 
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
@@ -1571,11 +1573,11 @@ Item
 
         menuBar: MenuBar
         {
-            Menu { id: pluginMenu0; visible: false; enabled: !document.busy }
-            Menu { id: pluginMenu1; visible: false; enabled: !document.busy }
-            Menu { id: pluginMenu2; visible: false; enabled: !document.busy }
-            Menu { id: pluginMenu3; visible: false; enabled: !document.busy }
-            Menu { id: pluginMenu4; visible: false; enabled: !document.busy }
+            Menu { id: pluginMenu0; visible: false; enabled: !busy }
+            Menu { id: pluginMenu1; visible: false; enabled: !busy }
+            Menu { id: pluginMenu2; visible: false; enabled: !busy }
+            Menu { id: pluginMenu3; visible: false; enabled: !busy }
+            Menu { id: pluginMenu4; visible: false; enabled: !busy }
         }
 
         toolBar: ToolBar
@@ -1583,7 +1585,7 @@ Item
             id: pluginWindowToolStrip
             visible: plugin.content !== undefined && plugin.content.toolStrip !== null &&
                 plugin.content.toolStrip !== undefined
-            enabled: !document.busy
+            enabled: !busy
         }
 
         Item

@@ -37,8 +37,6 @@ Item
     property color disabledTextColor
     property color heldColor
 
-    enabled: !document.busy
-
     CreateVisualisationDialog
     {
         id: createVisualisationDialog
