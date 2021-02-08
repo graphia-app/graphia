@@ -44,7 +44,11 @@ namespace u
             QObject::connect(watcher, &QFutureWatcher<AsyncFnResult>::finished,
             [thenFn, watcher]
             {
-                thenFn(watcher->result());
+                if constexpr(!std::is_same_v<AsyncFnResult, void>)
+                    thenFn(watcher->result());
+                else
+                    thenFn();
+
                 watcher->deleteLater();
             });
 
