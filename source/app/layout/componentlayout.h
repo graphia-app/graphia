@@ -34,14 +34,14 @@ public:
     virtual ~ComponentLayout() = default;
 
     void execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
-                 ComponentLayoutData &componentLayoutData);
+        ComponentLayoutData& componentLayoutData);
 
     float boundingWidth() const { return _boundingBox.width(); }
     float boundingHeight() const { return _boundingBox.height(); }
 
 private:
     virtual void executeReal(const Graph& graph, const std::vector<ComponentId>& componentIds,
-                             ComponentLayoutData &componentLayoutData) = 0;
+        ComponentLayoutData& componentLayoutData) = 0;
 
     QRectF _boundingBox;
 };
