@@ -96,8 +96,11 @@ public:
     MutableGraph& mutableGraph();
     const MutableGraph& mutableGraph() const;
     const Graph& graph() const;
+
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
+    std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;
+    std::vector<ElementVisual> edgeVisuals(const std::vector<EdgeId>& edgeIds) const;
 
     NodePositions& nodePositions();
     const NodePositions& nodePositions() const;

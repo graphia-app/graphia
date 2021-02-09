@@ -325,6 +325,28 @@ const Graph& GraphModel::graph() const { return _->_transformedGraph; }
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
 const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
 
+std::vector<ElementVisual> GraphModel::nodeVisuals(const std::vector<NodeId>& nodeIds) const
+{
+    std::vector<ElementVisual> visuals;
+    visuals.reserve(nodeIds.size());
+
+    for(auto nodeId : nodeIds)
+        visuals.emplace_back(nodeVisual(nodeId));
+
+    return visuals;
+}
+
+std::vector<ElementVisual> GraphModel::edgeVisuals(const std::vector<EdgeId>& edgeIds) const
+{
+    std::vector<ElementVisual> visuals;
+    visuals.reserve(edgeIds.size());
+
+    for(auto edgeId : edgeIds)
+        visuals.emplace_back(edgeVisual(edgeId));
+
+    return visuals;
+}
+
 NodePositions& GraphModel::nodePositions() { return _->_nodePositions; }
 const NodePositions& GraphModel::nodePositions() const { return _->_nodePositions; }
 
