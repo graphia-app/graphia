@@ -191,8 +191,8 @@ void ComponentManager::update(const Graph* graph)
         componentArray->resize(componentArrayCapacity());
 
     // Search for added or removed components
-    auto componentIdsToBeAdded = u::setDifference(componentIds, _componentIds);
-    auto componentIdsToBeRemoved = u::setDifference(_componentIds, componentIds);
+    auto componentIdsToBeAdded = u::setDifference(componentIds, _componentIdsSet);
+    auto componentIdsToBeRemoved = u::setDifference(_componentIdsSet, componentIds);
 
     // Find nodes and edges that have been added or removed
     std::map<ComponentId, std::vector<NodeId>> nodeIdAdds;
@@ -453,7 +453,7 @@ bool ComponentManager::containsComponentId(ComponentId componentId) const
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
-    return u::contains(_componentsMap, componentId);
+    return u::contains(_componentIdsSet, componentId);
 }
 
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
