@@ -239,10 +239,13 @@ void ComponentManager::update(const Graph* graph)
             edgeIdRemoves.erase(componentId);
         }
 
-        u::removeByValue(_componentIds, componentId);
         _componentIdsSet.erase(componentId);
         removeGraphComponent(componentId);
     }
+
+    _componentIds.clear();
+    std::copy(_componentIdsSet.begin(), _componentIdsSet.end(),
+        std::back_inserter(_componentIds));
 
     shrinkComponentsArrayToFit();
 
@@ -386,7 +389,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 
 void ComponentManager::removeGraphComponent(ComponentId componentId)
 {
-    if(u::contains(_componentIds, componentId))
+    if(componentFor(componentId) != nullptr)
     {
         setComponentFor(componentId, nullptr);
         _vacatedComponentIdQueue.push(componentId);
@@ -515,11 +518,10 @@ const GraphComponent* ComponentManager::componentById(ComponentId componentId) c
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
-    if(u::contains(_componentIdsSet, componentId))
-        return componentFor(componentId);
+    auto* component = componentFor(componentId);
+    Q_ASSERT(component != nullptr);
 
-    Q_ASSERT(!"ComponentManager::componentById returning nullptr");
-    return nullptr;
+    return component;
 }
 
 ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
