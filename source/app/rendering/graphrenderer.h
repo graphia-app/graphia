@@ -253,7 +253,7 @@ private:
     GLuint sdfTextureOffscreen() const;
     void swapSdfTexture();
 
-    void updateText(std::function<void()> onCompleteFn = []{});
+    void updateText(bool wait = false);
 
     void enableSceneUpdate();
     void disableSceneUpdate();

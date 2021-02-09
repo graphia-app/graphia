@@ -22,7 +22,9 @@
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
 #include "compute/sdfcomputejob.h"
+
 #include "shared/utils/preferences.h"
+#include "shared/utils/doasyncthen.h"
 
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
@@ -75,7 +77,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
 
-    const auto& graph = &_graphModel->graph();
+    const auto* graph = &_graphModel->graph();
 
     connect(graph, &Graph::nodeAdded, this, &GraphRenderer::onNodeAdded, Qt::DirectConnection);
     connect(graph, &Graph::edgeAdded, this, &GraphRenderer::onEdgeAdded, Qt::DirectConnection);
@@ -97,19 +99,9 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _graphOverviewInteractor = new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this);
     _graphComponentInteractor = new GraphComponentInteractor(_graphModel, _graphComponentScene, commandManager, _selectionManager, this);
 
-    initialiseFromGraph(graph, *this);
-    initialiseFromGraph(graph, *_graphOverviewScene);
-    initialiseFromGraph(graph, *_graphComponentScene);
-
     _screenshotRenderer = std::make_unique<ScreenshotRenderer>();
     connect(_screenshotRenderer.get(), &ScreenshotRenderer::screenshotComplete, this, &GraphRenderer::screenshotComplete);
     connect(_screenshotRenderer.get(), &ScreenshotRenderer::previewComplete, this, &GraphRenderer::previewComplete);
-
-    // If the graph is a single component or empty, use component mode by default
-    if(graph->numComponents() <= 1)
-        switchToComponentMode(false);
-    else
-        switchToOverviewMode(false);
 
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
@@ -137,7 +129,21 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         emit fpsChanged(ticksPerSecond);
     });
 
-    updateText([this]
+    u::doAsync([this, graph]
+    {
+        initialiseFromGraph(graph, *this);
+        initialiseFromGraph(graph, *_graphOverviewScene);
+        initialiseFromGraph(graph, *_graphComponentScene);
+
+        // If the graph is a single component or empty, use component mode by default
+        if(graph->numComponents() <= 1)
+            switchToComponentMode(false);
+        else
+            switchToOverviewMode(false);
+
+        updateText(true);
+
+    }).then([this]
     {
         emit initialised();
         enableSceneUpdate();
@@ -842,7 +848,7 @@ GLuint GraphRenderer::sdfTexture() const
     return _sdfTexture.front();
 }
 
-void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
+void GraphRenderer::updateText(bool wait)
 {
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
@@ -857,7 +863,7 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
         glyphMapLock.unlock();
 
         auto job = std::make_unique<SDFComputeJob>(&_sdfTexture, _glyphMap.get());
-        job->executeWhenComplete([this, onCompleteFn]
+        job->executeWhenComplete([this]
         {
             executeOnRendererThread([this]
             {
@@ -867,14 +873,13 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
                 updateGPUData(When::Later);
                 update(); // QQuickFramebufferObject::Renderer::update
             }, QStringLiteral("GraphRenderer::updateText"));
-
-            onCompleteFn();
         });
 
         _gpuComputeThread->enqueue(job);
+
+        if(wait)
+            _gpuComputeThread->wait();
     }
-    else
-        onCompleteFn();
 }
 
 void GraphRenderer::resetView()
