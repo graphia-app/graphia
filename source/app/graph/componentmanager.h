@@ -23,7 +23,6 @@
 
 #include "graphfilter.h"
 
-#include <map>
 #include <queue>
 #include <mutex>
 #include <vector>
@@ -91,7 +90,7 @@ private:
     ComponentIdSet _componentIdsSet; // Mirror of above, for fast checking
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
-    std::map<ComponentId, std::unique_ptr<GraphComponent>> _componentsMap;
+    std::vector<std::unique_ptr<GraphComponent>> _components;
     ComponentIdSet _updatesRequired;
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;
@@ -108,6 +107,11 @@ private:
     void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
     void updateGraphComponents(const Graph* graph);
     void removeGraphComponent(ComponentId componentId);
+
+    GraphComponent* componentFor(ComponentId componentId);
+    const GraphComponent* componentFor(ComponentId componentId) const;
+    void setComponentFor(ComponentId componentId, std::unique_ptr<GraphComponent> graphComponent);
+    void shrinkComponentsArrayToFit();
 
     void update(const Graph* graph);
     int componentArrayCapacity() const { return static_cast<int>(_nextComponentId); }

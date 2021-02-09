@@ -244,6 +244,8 @@ void ComponentManager::update(const Graph* graph)
         removeGraphComponent(componentId);
     }
 
+    shrinkComponentsArrayToFit();
+
     _nodesComponentId = std::move(newNodesComponentId);
     _edgesComponentId = std::move(newEdgesComponentId);
 
@@ -339,21 +341,23 @@ void ComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId
 {
     _updatesRequired.insert(componentId);
 
-    if(!u::contains(_componentsMap, componentId))
+    if(componentFor(componentId) == nullptr)
     {
         auto graphComponent = std::make_unique<GraphComponent>(graph);
-        _componentsMap.emplace(componentId, std::move(graphComponent));
+        setComponentFor(componentId, std::move(graphComponent));
     }
 }
 
 void ComponentManager::updateGraphComponents(const Graph* graph)
 {
-    for(auto& graphComponent : _componentsMap)
+    for(auto componentId : _componentIds)
     {
-        if(u::contains(_updatesRequired, graphComponent.first))
+        if(u::contains(_updatesRequired, componentId))
         {
-            graphComponent.second->_nodeIds.clear();
-            graphComponent.second->_edgeIds.clear();
+            auto* graphComponent = componentFor(componentId);
+
+            graphComponent->_nodeIds.clear();
+            graphComponent->_edgeIds.clear();
         }
     }
 
@@ -365,7 +369,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
         auto componentId = _nodesComponentId[nodeId];
 
         if(u::contains(_updatesRequired, componentId))
-            _componentsMap[componentId]->_nodeIds.push_back(nodeId);
+            componentFor(componentId)->_nodeIds.push_back(nodeId);
     }
 
     for(auto edgeId : graph->edgeIds())
@@ -376,18 +380,69 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
         auto componentId = _edgesComponentId[edgeId];
 
         if(u::contains(_updatesRequired, componentId))
-            _componentsMap[componentId]->_edgeIds.push_back(edgeId);
+            componentFor(componentId)->_edgeIds.push_back(edgeId);
     }
 }
 
 void ComponentManager::removeGraphComponent(ComponentId componentId)
 {
-    if(u::contains(_componentsMap, componentId))
+    if(u::contains(_componentIds, componentId))
     {
-        _componentsMap.erase(componentId);
+        setComponentFor(componentId, nullptr);
         _vacatedComponentIdQueue.push(componentId);
         _updatesRequired.erase(componentId);
     }
+}
+
+GraphComponent* ComponentManager::componentFor(ComponentId componentId)
+{
+    Q_ASSERT(!componentId.isNull());
+
+    auto index = static_cast<int>(componentId);
+
+    if(static_cast<size_t>(index) >= _components.size())
+        return nullptr;
+
+    return _components.at(index).get();
+}
+
+const GraphComponent* ComponentManager::componentFor(ComponentId componentId) const
+{
+    Q_ASSERT(!componentId.isNull());
+
+    auto index = static_cast<int>(componentId);
+
+    if(static_cast<size_t>(index) >= _components.size())
+        return nullptr;
+
+    return _components.at(index).get();
+}
+
+void ComponentManager::setComponentFor(ComponentId componentId, std::unique_ptr<GraphComponent> graphComponent)
+{
+    Q_ASSERT(!componentId.isNull());
+
+    auto index = static_cast<int>(componentId);
+    if(graphComponent != nullptr && static_cast<size_t>(index) >= _components.size())
+    {
+        auto newSize = static_cast<size_t>(std::max(index * 2, 1));
+        _components.resize(newSize);
+    }
+
+    _components[index] = std::move(graphComponent);
+}
+
+void ComponentManager::shrinkComponentsArrayToFit()
+{
+    if(_components.empty())
+        return;
+
+    size_t newSize = _components.size();
+
+    while(newSize > 0 && _components.at(newSize - 1) == nullptr)
+        newSize--;
+
+    _components.resize(newSize);
 }
 
 void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
@@ -460,8 +515,8 @@ const GraphComponent* ComponentManager::componentById(ComponentId componentId) c
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
-    if(u::contains(_componentsMap, componentId))
-        return _componentsMap.at(componentId).get();
+    if(u::contains(_componentIdsSet, componentId))
+        return componentFor(componentId);
 
     Q_ASSERT(!"ComponentManager::componentById returning nullptr");
     return nullptr;
