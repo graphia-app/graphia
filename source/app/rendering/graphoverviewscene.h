@@ -106,8 +106,8 @@ private:
 
     std::atomic_bool _renderersRequireReset = false;
 
-    ComponentArray<float, LockingGraphArray> _previousComponentAlpha;
-    ComponentArray<float, LockingGraphArray> _componentAlpha;
+    ComponentArray<float> _previousComponentAlpha;
+    ComponentArray<float> _componentAlpha;
 
     std::atomic<bool> _nextComponentLayoutDataChanged;
     ComponentLayoutData _nextComponentLayoutData;

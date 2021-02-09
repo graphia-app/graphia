@@ -24,7 +24,7 @@
 
 #include <QRectF>
 
-using ComponentLayoutData = ComponentArray<Circle, LockingGraphArray>;
+using ComponentLayoutData = ComponentArray<Circle>;
 
 class Graph;
 
