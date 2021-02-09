@@ -455,6 +455,10 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
         const auto* mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
         const auto& mergedNodeIds = mergedComponent->nodeIds();
 
+        auto centreOfMass = _graphModel->nodePositions().centreOfMass(mergedNodeIds);
+        auto radius = GraphComponentRenderer::maxNodeDistanceFromPoint(
+            *_graphModel, centreOfMass, mergedNodeIds);
+
         // Use the rotation of the new component
         auto* renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
         QQuaternion rotation = renderer->camera()->rotation();
@@ -462,7 +466,7 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
         for(auto merger : componentMergeSet.mergers())
         {
             renderer = _graphRenderer->componentRendererForId(merger);
-            renderer->moveFocusToNodes(mergedNodeIds, rotation);
+            renderer->moveFocusTo(centreOfMass, radius, rotation);
         }
     }
 
