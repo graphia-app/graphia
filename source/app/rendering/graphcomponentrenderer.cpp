@@ -215,6 +215,10 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
             maxDistance = distance;
     }
 
+    // HACK: allow single node components to be zoomed out beyond their natural maximum
+    if(nodeIds.size() == 1)
+        maxDistance *= 2.2f;
+
     return maxDistance;
 }
 
@@ -274,13 +278,7 @@ float GraphComponentRenderer::maxDistanceFor(NodeId nodeId,
         _graphModel->nodePositions().get(nodeId) :
         _viewData._componentCentre;
 
-    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, position, *nodeIds);
-
-    // HACK: allow single node components to be zoomed out beyond their natural maximum
-    if(nodeIds->size() == 1)
-        maxDistance *= 2.2f;
-
-    return maxDistance;
+    return maxNodeDistanceFromPoint(*_graphModel, position, *nodeIds);
 }
 
 float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
