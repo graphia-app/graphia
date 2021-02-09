@@ -201,10 +201,14 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     const QVector3D& centre, const std::vector<NodeId>& nodeIds)
 {
     float maxDistance = std::numeric_limits<float>::lowest();
-    for(auto nodeId : nodeIds)
+    auto nodePositions = graphModel.nodePositions().get(nodeIds);
+    auto nodeVisuals = graphModel.nodeVisuals(nodeIds);
+    Q_ASSERT(nodePositions.size() == nodeVisuals.size());
+
+    for(size_t i = 0; i < nodeIds.size(); i++)
     {
-        QVector3D nodePosition = graphModel.nodePositions().get(nodeId);
-        const auto& nodeVisual = graphModel.nodeVisual(nodeId);
+        QVector3D nodePosition = nodePositions.at(i);
+        const auto& nodeVisual = nodeVisuals.at(i);
         float distance = (centre - nodePosition).length() + nodeVisual._size;
 
         if(distance > maxDistance)
