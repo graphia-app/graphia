@@ -44,8 +44,10 @@ private:
     float _scale = 1.0f;
     int _smoothing = 1;
 
+    QVector3D getNoLocking(NodeId nodeId) const;
+
 protected:
-    const QVector3D& getUnsafe(NodeId nodeId) const;
+    const QVector3D& getNewestNoLocking(NodeId nodeId) const;
 
 public:
     using NodeArray::NodeArray;
@@ -61,6 +63,7 @@ public:
     int smoothing() const { return _smoothing; }
 
     QVector3D get(NodeId nodeId) const;
+    std::vector<QVector3D> get(const std::vector<NodeId>& nodeIds) const;
 
     void flatten();
 

@@ -21,7 +21,12 @@
 #include <cmath>
 #include <numeric>
 
-const QVector3D& NodePositions::getUnsafe(NodeId nodeId) const
+QVector3D NodePositions::getNoLocking(NodeId nodeId) const
+{
+    return elementFor(nodeId).mean(_smoothing) * _scale;
+}
+
+const QVector3D& NodePositions::getNewestNoLocking(NodeId nodeId) const
 {
     return elementFor(nodeId).newest();
 }
@@ -47,7 +52,20 @@ QVector3D NodePositions::get(NodeId nodeId) const
 {
     std::unique_lock<const NodePositions> lock(*this);
 
-    return elementFor(nodeId).mean(_smoothing) * _scale;
+    return getNoLocking(nodeId);
+}
+
+std::vector<QVector3D> NodePositions::get(const std::vector<NodeId>& nodeIds) const
+{
+    std::unique_lock<const NodePositions> lock(*this);
+
+    std::vector<QVector3D> positions;
+    positions.reserve(nodeIds.size());
+
+    for(auto nodeId : nodeIds)
+        positions.emplace_back(getNoLocking(nodeId));
+
+    return positions;
 }
 
 void NodePositions::flatten()
@@ -88,21 +106,21 @@ QVector3D NodePositions::centreOfMass(const std::vector<NodeId>& nodeIds) const
 {
     std::unique_lock<const NodePositions> lock(*this);
 
-    return centreOfMassWithFn(nodeIds, [this](NodeId nodeId) { return get(nodeId); });
+    return centreOfMassWithFn(nodeIds, [this](NodeId nodeId) { return getNoLocking(nodeId); });
 }
 
 const QVector3D& NodePositions::at(NodeId nodeId) const
 {
     std::unique_lock<const NodePositions> lock(*this);
 
-    return getUnsafe(nodeId);
+    return getNewestNoLocking(nodeId);
 }
 
 const QVector3D& NodeLayoutPositions::get(NodeId nodeId) const
 {
     Q_ASSERT(unlocked());
 
-    return getUnsafe(nodeId);
+    return getNewestNoLocking(nodeId);
 }
 
 void NodeLayoutPositions::set(NodeId nodeId, const QVector3D& position)
@@ -130,7 +148,7 @@ QVector3D NodeLayoutPositions::centreOfMass(const std::vector<NodeId>& nodeIds) 
 {
     Q_ASSERT(unlocked());
 
-    return centreOfMassWithFn(nodeIds, [this](NodeId nodeId) { return getUnsafe(nodeId); });
+    return centreOfMassWithFn(nodeIds, [this](NodeId nodeId) { return getNewestNoLocking(nodeId); });
 }
 
 BoundingBox3D NodeLayoutPositions::boundingBox(const std::vector<NodeId>& nodeIds) const
@@ -142,7 +160,7 @@ BoundingBox3D NodeLayoutPositions::boundingBox(const std::vector<NodeId>& nodeId
 
     Q_ASSERT(!nodeIds.empty());
 
-    auto firstPosition = getUnsafe(nodeIds.front());
+    auto firstPosition = getNewestNoLocking(nodeIds.front());
     BoundingBox3D boundingBox(firstPosition, firstPosition);
 
     for(NodeId nodeId : nodeIds)
