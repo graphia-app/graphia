@@ -60,7 +60,7 @@ UserDataVector& UserData::add(QString name)
     }
 
     auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-                           [&name](const auto& it2) { return it2.first == name; });
+        [&name](const auto& it2) { return it2.first == name; });
 
     Q_ASSERT(it != _userDataVectors.end());
 
@@ -78,7 +78,7 @@ void UserData::setValue(size_t index, const QString& name, const QString& value)
 QVariant UserData::value(size_t index, const QString& name) const
 {
     auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-                           [&name](const auto& it2) { return it2.first == name; });
+        [&name](const auto& it2) { return it2.first == name; });
 
     if(it != _userDataVectors.end())
     {
