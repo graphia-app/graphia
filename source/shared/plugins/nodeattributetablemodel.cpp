@@ -211,7 +211,13 @@ void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
 
 bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
 {
-    return !u::contains(_userNodeData->vectorNames(), columnName);
+    const auto* graphModel = _document->graphModel();
+    const auto* attribute = graphModel->attributeByName(columnName);
+
+    if(attribute != nullptr && attribute->isValid())
+        return !attribute->userDefined();
+
+    return true;
 }
 
 bool NodeAttributeTableModel::columnIsHiddenByDefault(const QString&) const
