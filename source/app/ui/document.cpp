@@ -564,6 +564,14 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     for(const auto& name : keys)
         _pluginInstance->applyParameter(name, parameters.value(name));
 
+    // Connect this before the plugin is initialised, in case it needs to see
+    // all the available attributes during initialisation
+    connect(_graphFileParserThread.get(), &ParserThread::success, [this]
+    {
+        _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
+        _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
+    });
+
     _pluginInstance->initialise(plugin, this, _graphFileParserThread.get());
 
     // The plugin won't necessarily have the saveRequired signal or in fact be
@@ -627,9 +635,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             Q_ASSERT(completedLoader != nullptr);
             if(completedLoader == nullptr)
                 return;
-
-            _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
-            _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
 
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
                 completedLoader->transforms());
