@@ -619,8 +619,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         }
     }
 
-    connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
-
     // Build the transforms and visualisations in the parser thread since they may
     // take time to compute and we may as well roll them into the loading process
     if(loader != nullptr)
@@ -692,6 +690,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         });
     }
 
+    connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::cancelledChanged,
