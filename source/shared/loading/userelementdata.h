@@ -33,7 +33,7 @@
 #include <memory>
 
 template<typename E>
-class UserElementData : public UserData
+class UserElementDataMapping
 {
 private:
     struct Index
@@ -44,21 +44,22 @@ private:
 
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
-    std::set<QString> _exposedAsAttributes;
 
-    void generateElementIdMapping(E elementId)
-    {
-        if(haveIndexFor(elementId))
-            return;
+    int _numMappings = 0;
 
-        _indexes->set(elementId, {true, static_cast<size_t>(numValues())});
-        _indexToElementIdMap[numValues()] = elementId;
-    }
+protected:
+    void setNumMappings(int numMappings) { _numMappings = numMappings; }
 
 public:
     void initialise(IMutableGraph& mutableGraph)
     {
         _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
+    }
+
+    void resetMapping()
+    {
+        _indexes->resetElements();
+        _indexToElementIdMap.clear();
     }
 
     void setElementIdForIndex(E elementId, size_t index)
@@ -87,18 +88,34 @@ public:
         return _indexes->get(elementId)._value;
     }
 
+    int numMappings() const { return _numMappings; }
+};
+
+using UserNodeDataMapping = UserElementDataMapping<NodeId>;
+using UserEdgeDataMapping = UserElementDataMapping<EdgeId>;
+
+template<typename E>
+class UserElementData : public UserElementDataMapping<E>, public UserData
+{
+private:
+    std::set<QString> _exposedAsAttributes;
+
+public:
     void setValueBy(E elementId, const QString& name, const QString& value)
     {
-        generateElementIdMapping(elementId);
-        setValue(indexFor(elementId), name, value);
+        if(!this->haveIndexFor(elementId))
+            this->setElementIdForIndex(elementId, static_cast<size_t>(numValues()));
+
+        setValue(this->indexFor(elementId), name, value);
+        this->setNumMappings(numValues());
     }
 
     QVariant valueBy(E elementId, const QString& name) const
     {
-        if(!haveIndexFor(elementId))
+        if(!this->haveIndexFor(elementId))
             return {};
 
-        return value(indexFor(elementId), name);
+        return value(this->indexFor(elementId), name);
     }
 
     void remove(const QString& name) override
@@ -166,10 +183,10 @@ public:
 
             attribute.setValueMissingFn([this, userDataVectorName](E elementId)
             {
-                if(!haveIndexFor(elementId))
+                if(!this->haveIndexFor(elementId))
                     return false;
 
-                return value(indexFor(elementId), userDataVectorName).toString().isEmpty();
+                return value(this->indexFor(elementId), userDataVectorName).toString().isEmpty();
             });
 
             attribute.setDescription(QString(QObject::tr("%1 is a user defined attribute.")).arg(userDataVectorName));
@@ -185,11 +202,10 @@ public:
 
         for(auto elementId : elementIds)
         {
-            auto index = _indexes->at(elementId);
-            if(index._set)
+            if(this->haveIndexFor(elementId))
             {
                 jsonIds.push_back(elementId);
-                indexes.push_back(index._value);
+                indexes.push_back(this->indexFor(elementId));
             }
         }
 
@@ -204,8 +220,7 @@ public:
         if(!UserData::load(jsonObject, progressable))
             return false;
 
-        _indexes->resetElements();
-        _indexToElementIdMap.clear();
+        this->resetMapping();
 
         const char* idsKey = "ids";
         if(!u::contains(jsonObject, idsKey) || !jsonObject[idsKey].is_array())
@@ -222,8 +237,10 @@ public:
         for(const auto& id : ids)
         {
             E elementId = id.get<int>();
-            setElementIdForIndex(elementId, index++);
+            this->setElementIdForIndex(elementId, index++);
         }
+
+        this->setNumMappings(numValues());
 
         return true;
     }
