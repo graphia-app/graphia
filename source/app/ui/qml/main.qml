@@ -580,6 +580,10 @@ ApplicationWindow
                     contentObject.parameters, contentObject.inNewTab);
             });
 
+            // Offset parameters position from top left of main window
+            contentObject.x = x + (width * 0.3);
+            contentObject.y = y + (height * 0.3);
+
             contentObject.show();
         }
         else
