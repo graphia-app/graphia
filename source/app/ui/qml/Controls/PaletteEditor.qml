@@ -29,7 +29,7 @@ ColumnLayout
 {
     id: root
 
-    spacing: 10
+    spacing: Constants.spacing
 
     property var stringValues: []
 

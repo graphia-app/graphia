@@ -537,7 +537,7 @@ BaseParameterDialog
                 {
                     Layout.fillHeight: true
 
-                    spacing: 10
+                    spacing: Constants.spacing
 
                     Text
                     {
@@ -846,7 +846,7 @@ BaseParameterDialog
                 }
                 ColumnLayout
                 {
-                    spacing: 10
+                    spacing: Constants.spacing
 
                     Text
                     {
@@ -1027,7 +1027,7 @@ BaseParameterDialog
                             GridLayout
                             {
                                 columns: 2
-                                rowSpacing: 10
+                                rowSpacing: Constants.spacing
 
                                 Text
                                 {

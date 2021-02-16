@@ -1044,8 +1044,6 @@ Item
 
             Column
             {
-                spacing: 10
-
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: Constants.margin
@@ -1927,7 +1925,7 @@ Item
             y: 10
             RowLayout
             {
-                spacing: 10
+                spacing: Constants.spacing
                 Column
                 {
                     Image
@@ -2054,7 +2052,7 @@ Item
             edges: Qt.RightEdge | Qt.TopEdge
             RowLayout
             {
-                spacing: 10
+                spacing: Constants.spacing
                 Column
                 {
                     Image
@@ -2093,7 +2091,7 @@ Item
             edges: Qt.RightEdge | Qt.BottomEdge
             RowLayout
             {
-                spacing: 10
+                spacing: Constants.spacing
                 Column
                 {
                     Image
@@ -2172,7 +2170,7 @@ Item
             y: 10
             RowLayout
             {
-                spacing: 10
+                spacing: Constants.spacing
                 Text
                 {
                     Layout.preferredWidth: 600

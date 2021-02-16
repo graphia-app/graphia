@@ -142,7 +142,7 @@ Item
         tooltipMode: true
         RowLayout
         {
-            spacing: 10
+            spacing: Constants.spacing
             Column
             {
                 Image

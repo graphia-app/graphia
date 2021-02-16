@@ -28,6 +28,7 @@ import Qt.labs.platform 1.0 as Labs
 
 import app.graphia 1.0
 import "../../../shared/ui/qml/Utils.js" as Utils
+import "../../../shared/ui/qml/Constants.js" as Constants
 
 import "Loading"
 import "Options"
@@ -2401,7 +2402,7 @@ ApplicationWindow
         tooltipMode: true
         RowLayout
         {
-            spacing: 10
+            spacing: Constants.spacing
             Column
             {
                 ToolButton { iconName: "media-playback-start" }
