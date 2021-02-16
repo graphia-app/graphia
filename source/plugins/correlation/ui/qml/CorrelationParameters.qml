@@ -1125,7 +1125,7 @@ BaseParameterDialog
                                                "This is useful if the columns in the dataset " +
                                                "have differing scales or units. " +
                                                "Note: If all elements in a column have the same value " +
-                                               "this will rescale the values to 0.");
+                                               "this will rescale the values to 0.0.");
                                     wrapMode: Text.WordWrap
                                     Layout.fillWidth: true
                                 }
