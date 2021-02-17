@@ -38,20 +38,20 @@ static void normaliseColumnsColumnMajor(MatrixType &mclMatrix)
 {
     for(size_t column = 0; column<mclMatrix.columns(); column++)
     {
-        MatrixType::Iterator lelem=mclMatrix.begin(column);
-        MatrixType::Iterator lend=mclMatrix.end(column);
+        MatrixType::Iterator lelem = mclMatrix.begin(column);
+        MatrixType::Iterator lend = mclMatrix.end(column);
 
         if(lelem == lend)
             continue;
 
         float value = 0.0f;
-        for(lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
+        for(lelem = mclMatrix.begin(column); lelem != lend; ++lelem)
             value += lelem->value();
 
         Q_ASSERT(value > 0.0f);
         value = 1.0f / value;
 
-        for(lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
+        for(lelem = mclMatrix.begin(column); lelem != lend; ++lelem)
             lelem->value() = lelem->value() * value;
     }
 }
@@ -60,8 +60,8 @@ static void sumColumns(MatrixType &mclMatrix, VectorType &output)
 {
     for(size_t column = 0; column<mclMatrix.columns(); column++)
     {
-        MatrixType::ConstIterator lend=mclMatrix.cend(column);
-        for(MatrixType::ConstIterator lelem=mclMatrix.cbegin(column); lelem!=lend; ++lelem)
+        MatrixType::ConstIterator lend = mclMatrix.cend(column);
+        for(MatrixType::ConstIterator lelem = mclMatrix.cbegin(column); lelem != lend; ++lelem)
         {
             output[column] = output[column] + lelem->value();
         }
