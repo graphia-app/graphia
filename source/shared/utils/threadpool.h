@@ -374,7 +374,7 @@ private:
                     return f(it);
             }
 
-            // Fn argument is an value/reference
+            // Fn argument is a value/reference
             if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>)
             {
                 if constexpr(HasThreadIndexArgument<Fn>)
