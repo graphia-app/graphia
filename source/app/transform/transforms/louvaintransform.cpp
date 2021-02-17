@@ -328,6 +328,7 @@ void LouvainTransform::apply(TransformedGraph& target) const
     }
 
     NodeArray<QString> clusterNames(target);
+    NodeArray<int> clusterSizes(target);
 
     for(auto nodeId : target.nodeIds())
     {
@@ -337,12 +338,18 @@ void LouvainTransform::apply(TransformedGraph& target) const
 
         clusterNumber = clusterNumbers[communityId];
         clusterNames[nodeId] = QObject::tr("Cluster %1").arg(clusterNumber);
+        clusterSizes[nodeId] = static_cast<int>(communityHistogram.at(communityId));
     }
 
     _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster" : "Louvain Cluster"))
-        .setDescription(QObject::tr("The Louvain-calculated cluster in which the node resides."))
+        .setDescription(QObject::tr("The Louvain cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);
+
+    _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster Size" : "Louvain Cluster Size"))
+        .setDescription(QObject::tr("The size of the Louvain cluster in which the node resides."))
+        .setIntValueFn([clusterSizes](NodeId nodeId) { return clusterSizes[nodeId]; })
+        .setFlag(AttributeFlag::AutoRange);
 }
