@@ -32,46 +32,6 @@ QSettings settings()
 }
 } // namespace
 
-void copyKajekaSettings()
-{
-    QSettings kajekaSettings(QStringLiteral("Kajeka"), QStringLiteral("Graphia"));
-    auto targetSettings = settings();
-
-    // No settings present
-    if(kajekaSettings.allKeys().empty())
-        return;
-
-    // Already copied
-    if(kajekaSettings.value(QStringLiteral("misc/ossCopied")).toBool())
-        return;
-
-    kajekaSettings.setValue(QStringLiteral("misc/ossCopied"), true);
-
-    auto keys = kajekaSettings.allKeys();
-    for(const auto& key : keys)
-    {
-        // The auth group is handled specially, see below
-        if(key.startsWith(QStringLiteral("auth")))
-            continue;
-
-        // This system has changed significantly, and we don't want to carry it over anyway
-        if(key == QStringLiteral("misc/update"))
-            continue;
-
-        targetSettings.setValue(key, kajekaSettings.value(key));
-    }
-
-    // Convert auth section to tracking section
-    if(kajekaSettings.contains(QStringLiteral("auth/emailAddress")))
-    {
-        targetSettings.setValue(QStringLiteral("tracking/emailAddress"),
-            kajekaSettings.value(QStringLiteral("auth/emailAddress")));
-
-        targetSettings.setValue(QStringLiteral("tracking/permission"),
-            QStringLiteral("given"));
-    }
-}
-
 void u::definePref(const QString& key, const QVariant& defaultValue)
 {
     if(!u::prefExists(key))

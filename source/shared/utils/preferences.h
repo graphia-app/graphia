@@ -23,9 +23,6 @@
 
 class QString;
 
-//FIXME: Eventually remove this
-void copyKajekaSettings();
-
 namespace u
 {
     void definePref(const QString& key, const QVariant& defaultValue = QVariant());

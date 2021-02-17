@@ -200,9 +200,6 @@ int start(int argc, char *argv[])
     ThreadPoolSingleton threadPool;
     ScopeTimerManager scopeTimerManager;
 
-    //FIXME: Eventually remove this
-    copyKajekaSettings();
-
     u::definePref(QStringLiteral("visuals/defaultNodeColor"),               "#0000FF");
     u::definePref(QStringLiteral("visuals/defaultEdgeColor"),               "#FFFFFF");
     u::definePref(QStringLiteral("visuals/multiElementColor"),              "#FF0000");

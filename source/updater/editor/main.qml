@@ -181,11 +181,11 @@ ApplicationWindow
         {
             settings.credentials = JSON.stringify(
             [
-                {
-                    domain: "ci.kajeka.com",
-                    username: "guest",
-                    password: "BPXtis733qQKqeB"
-                },
+                /*{
+                    domain: "",
+                    username: "",
+                    password: ""
+                },*/
             ]);
         }
 
