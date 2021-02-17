@@ -174,6 +174,9 @@ void TransformedGraph::rebuild()
             auto newAttributeNames = u::setDifference(_graphModel->attributeNames(), attributeNames);
             for(const auto& newAttributeName : newAttributeNames)
             {
+                _graphModel->calculateAttributeRange(newAttributeName);
+                _graphModel->updateSharedAttributeValues(newAttributeName);
+
                 result._newAttributes.emplace(newAttributeName, _graphModel->attributeValueByName(newAttributeName));
                 _cache.attributeAdded(newAttributeName);
                 updatedAttributeNames.append(newAttributeName);

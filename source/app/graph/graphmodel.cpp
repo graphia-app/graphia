@@ -196,7 +196,14 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
         &GraphModel::attributeValuesChanged, Qt::DirectConnection);
 
-    connect(this, &GraphModel::attributesChanged, this, &GraphModel::updateSharedAttributeValues, Qt::DirectConnection);
+    connect(this, &GraphModel::attributesChanged, [this](const QStringList& newAttributeNames, const QStringList&)
+    {
+        for(const auto& attributeName : newAttributeNames)
+        {
+            calculateAttributeRange(attributeName);
+            updateSharedAttributeValues(attributeName);
+        }
+    });
 
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
@@ -907,6 +914,31 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
     return attribute;
 }
 
+void GraphModel::calculateAttributeRange(const IGraph* graph, Attribute& attribute)
+{
+    if(!attribute.testFlag(AttributeFlag::AutoRange))
+        return;
+
+    if(attribute.elementType() == ElementType::Node)
+        attribute.autoSetRangeForElements(graph->nodeIds());
+    else if(attribute.elementType() == ElementType::Edge)
+        attribute.autoSetRangeForElements(graph->edgeIds());
+}
+
+void GraphModel::calculateAttributeRange(Attribute& attribute)
+{
+    calculateAttributeRange(&mutableGraph(), attribute);
+}
+
+void GraphModel::calculateAttributeRange(const QString& name)
+{
+    auto attributeName = Attribute::parseAttributeName(name);
+    Q_ASSERT(u::contains(_->_attributes, attributeName._name));
+
+    auto& attribute = _->_attributes.at(attributeName._name);
+    calculateAttributeRange(attribute);
+}
+
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
@@ -919,18 +951,30 @@ void GraphModel::initialiseAttributeRanges()
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
 }
 
-void GraphModel::updateSharedAttributeValues()
+void GraphModel::updateSharedAttributeValues(Attribute& attribute)
+{
+    if(!attribute.testFlag(AttributeFlag::FindShared))
+        return;
+
+    if(attribute.elementType() == ElementType::Node)
+        attribute.updateSharedValuesForElements(graph().nodeIds());
+    else if(attribute.elementType() == ElementType::Edge)
+        attribute.updateSharedValuesForElements(graph().edgeIds());
+}
+
+void GraphModel::updateSharedAttributeValues(const QString& name)
+{
+    auto attributeName = Attribute::parseAttributeName(name);
+    Q_ASSERT(u::contains(_->_attributes, attributeName._name));
+
+    auto& attribute = _->_attributes.at(attributeName._name);
+    updateSharedAttributeValues(attribute);
+}
+
+void GraphModel::initialiseSharedAttributeValues()
 {
     for(auto& attribute : make_value_wrapper(_->_attributes))
-    {
-        if(!attribute.testFlag(AttributeFlag::FindShared))
-            continue;
-
-        if(attribute.elementType() == ElementType::Node)
-            attribute.updateSharedValuesForElements(graph().nodeIds());
-        else if(attribute.elementType() == ElementType::Edge)
-            attribute.updateSharedValuesForElements(graph().edgeIds());
-    }
+        updateSharedAttributeValues(attribute);
 }
 
 bool GraphModel::attributeNameIsValid(const QString& attributeName)
@@ -940,17 +984,6 @@ bool GraphModel::attributeNameIsValid(const QString& attributeName)
 
     auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
     return attributeNameRegex.match(attributeName).hasMatch();
-}
-
-void GraphModel::calculateAttributeRange(const IGraph* graph, Attribute& attribute)
-{
-    if(!attribute.testFlag(AttributeFlag::AutoRange))
-        return;
-
-    if(attribute.elementType() == ElementType::Node)
-        attribute.autoSetRangeForElements(graph->nodeIds());
-    else if(attribute.elementType() == ElementType::Edge)
-        attribute.autoSetRangeForElements(graph->edgeIds());
 }
 
 UserNodeData& GraphModel::userNodeData() { return _->_userNodeData; }

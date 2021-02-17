@@ -761,7 +761,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     // Final tasks before load is considered complete
     _graphModel->initialiseAttributeRanges();
-    _graphModel->updateSharedAttributeValues();
+    _graphModel->initialiseSharedAttributeValues();
 
     setTransforms(_graphTransforms);
     setVisualisations(_visualisations);

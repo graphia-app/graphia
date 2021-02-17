@@ -164,12 +164,17 @@ public:
     bool attributeIsValid(const QString& name) const;
     Attribute attributeValueByName(const QString& name) const;
 
-    void initialiseAttributeRanges();
-    void updateSharedAttributeValues();
-
     static bool attributeNameIsValid(const QString& attributeName);
 
     static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);
+    void calculateAttributeRange(Attribute& attribute);
+    void calculateAttributeRange(const QString& name);
+
+    void updateSharedAttributeValues(Attribute& attribute);
+    void updateSharedAttributeValues(const QString& name);
+
+    void initialiseAttributeRanges();
+    void initialiseSharedAttributeValues();
 
     UserNodeData& userNodeData();
     UserEdgeData& userEdgeData();
