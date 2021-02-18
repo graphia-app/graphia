@@ -84,11 +84,18 @@ BaseParameterDialog
     {
         id: loadingInfo
 
-        anchors.centerIn: parent
+        anchors.fill: parent
         visible: !tabularDataParser.complete || tabularDataParser.failed
+
+        Item { Layout.fillHeight: true }
 
         Text
         {
+            Layout.fillWidth: true
+
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+
             text: tabularDataParser.failed ?
                 qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(fileUrl) + "." :
                 qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…"
@@ -117,6 +124,8 @@ BaseParameterDialog
                 }
             }
         }
+
+        Item { Layout.fillHeight: true }
     }
 
     ListTabView
