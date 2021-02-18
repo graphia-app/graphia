@@ -923,6 +923,8 @@ void GraphModel::calculateAttributeRange(const IGraph* graph, Attribute& attribu
         attribute.autoSetRangeForElements(graph->nodeIds());
     else if(attribute.elementType() == ElementType::Edge)
         attribute.autoSetRangeForElements(graph->edgeIds());
+    else if(attribute.elementType() == ElementType::Component)
+        qDebug() << "calculateAttributeRange called on component attribute";
 }
 
 void GraphModel::calculateAttributeRange(Attribute& attribute)
@@ -960,6 +962,8 @@ void GraphModel::updateSharedAttributeValues(Attribute& attribute)
         attribute.updateSharedValuesForElements(graph().nodeIds());
     else if(attribute.elementType() == ElementType::Edge)
         attribute.updateSharedValuesForElements(graph().edgeIds());
+    else if(attribute.elementType() == ElementType::Component)
+        qDebug() << "updateSharedAttributeValues called on component attribute";
 }
 
 void GraphModel::updateSharedAttributeValues(const QString& name)
