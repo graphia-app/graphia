@@ -116,6 +116,9 @@ Item
         // Reset the scroll position in case the new visible columns are no longer in view
         horizontalTableViewScrollBar.position = 0;
 
+        selectionModel.clear();
+        root.selectedRows = [];
+
         tableView._updateColumnVisibility();
         tableView.forceLayoutSafe();
     }
