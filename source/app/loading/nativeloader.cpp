@@ -199,7 +199,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     QString fragment(byteArray);
 
     // Strip off the leading [
-    fragment.replace(QRegularExpression(QStringLiteral(R"(^\s*\[\s*)")), QLatin1String(""));
+    fragment.replace(QRegularExpression(QStringLiteral(R"(^\s*\[\s*)")), {});
 
     int position = 0;
     int braceDepth = 0;
@@ -548,7 +548,7 @@ QString Loader::pluginNameFor(const QUrl& url)
     if(parseHeader(url, &header))
         return header._pluginName;
 
-    return QLatin1String("");
+    return {};
 }
 
 bool Loader::canOpen(const QUrl& url)

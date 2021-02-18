@@ -2512,14 +2512,14 @@ void Document::writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl, co
 
         auto csvEscapedString = [](const QString& string)
         {
-            if(string.contains(QRegularExpression(QStringLiteral("[\",]"))))
+            if(string.contains(QRegularExpression(QStringLiteral(R"([",])"))))
             {
                 QString escaped = string;
 
                 // Encode " as ""
-                escaped.replace(QLatin1String("\""), QLatin1String("\"\""));
+                escaped.replace(QStringLiteral(R"(")"), QStringLiteral(R"("")"));
 
-                return QStringLiteral("\"%1\"").arg(escaped);
+                return QStringLiteral(R"("%1")").arg(escaped);
             }
 
             return string;
@@ -2624,14 +2624,14 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
 
         auto csvEscapedString = [](const QString& string)
         {
-            if(string.contains(QRegularExpression(QStringLiteral("[\",]"))))
+            if(string.contains(QRegularExpression(QStringLiteral(R"([",])"))))
             {
                 QString escaped = string;
 
                 // Encode " as ""
-                escaped.replace(QLatin1String("\""), QLatin1String("\"\""));
+                escaped.replace(QStringLiteral(R"(")"), QStringLiteral(R"("")"));
 
-                return QStringLiteral("\"%1\"").arg(escaped);
+                return QStringLiteral(R"("%1")").arg(escaped);
             }
 
             return string;

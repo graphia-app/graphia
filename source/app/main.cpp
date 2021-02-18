@@ -159,7 +159,7 @@ int start(int argc, char *argv[])
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
         QString vendor = OpenGLFunctions::vendor();
-        vendor.replace(QLatin1String(" "), QLatin1String("+"));
+        vendor.replace(QStringLiteral(" "), QStringLiteral("+"));
         QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
 
         QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),

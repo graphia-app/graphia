@@ -53,28 +53,28 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    if(urlTypeName == QLatin1String("GML"))
+    if(urlTypeName == QStringLiteral("GML"))
         return std::make_unique<GmlFileParser>(&_userNodeData, &_userEdgeData);
 
-    if(urlTypeName == QLatin1String("PairwiseTXT"))
+    if(urlTypeName == QStringLiteral("PairwiseTXT"))
         return std::make_unique<PairwiseTxtFileParser>(&_userNodeData, &_userEdgeData);
 
-    if(urlTypeName == QLatin1String("GraphML"))
+    if(urlTypeName == QStringLiteral("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData, &_userEdgeData);
 
-    if(urlTypeName.startsWith(QLatin1String("Matrix")))
+    if(urlTypeName.startsWith(QStringLiteral("Matrix")))
     {
         std::unique_ptr<IParser> parser;
 
-        if(urlTypeName == QLatin1String("MatrixCSV"))
+        if(urlTypeName == QStringLiteral("MatrixCSV"))
             parser = std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
-        else if(urlTypeName == QLatin1String("MatrixSSV"))
+        else if(urlTypeName == QStringLiteral("MatrixSSV"))
             parser = std::make_unique<AdjacencyMatrixSSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
-        else if(urlTypeName == QLatin1String("MatrixTSV"))
+        else if(urlTypeName == QStringLiteral("MatrixTSV"))
             parser = std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
-        else if(urlTypeName == QLatin1String("MatrixXLSX"))
+        else if(urlTypeName == QStringLiteral("MatrixXLSX"))
             parser = std::make_unique<AdjacencyMatrixXLSXFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
-        else if(urlTypeName == QLatin1String("MatrixMatLab"))
+        else if(urlTypeName == QStringLiteral("MatrixMatLab"))
             parser = std::make_unique<AdjacencyMatrixMatLabFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
 
         if(parser != nullptr)
@@ -94,10 +94,10 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return parser;
     }
 
-    if(urlTypeName == QLatin1String("BiopaxOWL"))
+    if(urlTypeName == QStringLiteral("BiopaxOWL"))
         return std::make_unique<BiopaxFileParser>(&_userNodeData);
 
-    if(urlTypeName == QLatin1String("JSONGraph"))
+    if(urlTypeName == QStringLiteral("JSONGraph"))
         return std::make_unique<JsonGraphParser>(&_userNodeData, &_userEdgeData);
 
     return nullptr;
@@ -105,15 +105,15 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
 void BaseGenericPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QLatin1String("minimumThreshold"))
+    if(name == QStringLiteral("minimumThreshold"))
         _adjacencyMatrixParameters._minimumAbsEdgeWeight = value.toDouble();
-    else if(name == QLatin1String("initialThreshold"))
+    else if(name == QStringLiteral("initialThreshold"))
         _adjacencyMatrixParameters._initialAbsEdgeWeightThreshold = value.toDouble();
-    else if(name == QLatin1String("filterEdges"))
-        _adjacencyMatrixParameters._filterEdges = (value == QLatin1String("true"));
-    else if(name == QLatin1String("skipDuplicates"))
-        _adjacencyMatrixParameters._skipDuplicates = (value == QLatin1String("true"));
-    else if(name == QLatin1String("data") && value.canConvert<std::shared_ptr<TabularData>>())
+    else if(name == QStringLiteral("filterEdges"))
+        _adjacencyMatrixParameters._filterEdges = (value == QStringLiteral("true"));
+    else if(name == QStringLiteral("skipDuplicates"))
+        _adjacencyMatrixParameters._skipDuplicates = (value == QStringLiteral("true"));
+    else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
         _adjacencyMatrixParameters._tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
 }
 
@@ -180,7 +180,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     for(auto nodeId : selectionManager()->selectedNodes())
     {
         if(!s.isEmpty())
-            s += QLatin1String(", ");
+            s += QStringLiteral(", ");
 
         s += graphModel()->nodeName(nodeId);
     }

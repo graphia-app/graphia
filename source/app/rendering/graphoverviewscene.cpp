@@ -642,8 +642,8 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(visible() && (key == QLatin1String("visuals/minimumComponentRadius") ||
-                     key == QLatin1String("visuals/defaultNodeSize")))
+    if(visible() && (key == QStringLiteral("visuals/minimumComponentRadius") ||
+                     key == QStringLiteral("visuals/defaultNodeSize")))
     {
         _commandManager->executeOnce(
         [this](Command&)

@@ -484,31 +484,31 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 
 void CorrelationPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QLatin1String("minimumCorrelation"))
+    if(name == QStringLiteral("minimumCorrelation"))
         _minimumCorrelationValue = value.toDouble();
-    else if(name == QLatin1String("initialThreshold"))
+    else if(name == QStringLiteral("initialThreshold"))
         _initialCorrelationThreshold = value.toDouble();
-    else if(name == QLatin1String("transpose"))
-        _transpose = (value == QLatin1String("true"));
-    else if(name == QLatin1String("correlationType"))
+    else if(name == QStringLiteral("transpose"))
+        _transpose = (value == QStringLiteral("true"));
+    else if(name == QStringLiteral("correlationType"))
         _correlationType = static_cast<CorrelationType>(value.toInt());
-    else if(name == QLatin1String("correlationPolarity"))
+    else if(name == QStringLiteral("correlationPolarity"))
         _correlationPolarity = static_cast<CorrelationPolarity>(value.toInt());
-    else if(name == QLatin1String("scaling"))
+    else if(name == QStringLiteral("scaling"))
         _scalingType = static_cast<ScalingType>(value.toInt());
-    else if(name == QLatin1String("normalise"))
+    else if(name == QStringLiteral("normalise"))
         _normaliseType = static_cast<NormaliseType>(value.toInt());
-    else if(name == QLatin1String("missingDataType"))
+    else if(name == QStringLiteral("missingDataType"))
         _missingDataType = static_cast<MissingDataType>(value.toInt());
-    else if(name == QLatin1String("missingDataValue"))
+    else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
-    else if(name == QLatin1String("dataFrame"))
+    else if(name == QStringLiteral("dataFrame"))
         _dataRect = value.toRect();
-    else if(name == QLatin1String("clusteringType"))
+    else if(name == QStringLiteral("clusteringType"))
         _clusteringType = static_cast<ClusteringType>(value.toInt());
-    else if(name == QLatin1String("edgeReductionType"))
+    else if(name == QStringLiteral("edgeReductionType"))
         _edgeReductionType = static_cast<EdgeReductionType>(value.toInt());
-    else if(name == QLatin1String("data") && value.canConvert<std::shared_ptr<TabularData>>())
+    else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
         _tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
 }
 

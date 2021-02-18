@@ -470,11 +470,11 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
         };
 
-        if(fileType == QLatin1String("CorrelationCSV"))
+        if(fileType == QStringLiteral("CorrelationCSV"))
             parseUsing(CsvFileParser());
-        else if(fileType == QLatin1String("CorrelationTSV"))
+        else if(fileType == QStringLiteral("CorrelationTSV"))
             parseUsing(TsvFileParser());
-        else if(fileType == QLatin1String("CorrelationXLSX"))
+        else if(fileType == QStringLiteral("CorrelationXLSX"))
             parseUsing(XlsxTabularDataParser());
 
         setProgress(-1);

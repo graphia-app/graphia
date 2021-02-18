@@ -414,7 +414,7 @@ void Graph::clearPhase() const
 {
     std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
 
-    setPhase(QLatin1String(""));
+    setPhase(QStringLiteral(""));
 }
 
 QString Graph::phase() const

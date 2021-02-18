@@ -805,7 +805,7 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& value)
 {
-    if(key == QLatin1String("visuals/textFont"))
+    if(key == QStringLiteral("visuals/textFont"))
     {
         _glyphMap->setFontName(value.toString());
         updateText();
