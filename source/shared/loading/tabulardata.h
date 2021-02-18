@@ -85,7 +85,7 @@ Q_DECLARE_METATYPE(std::shared_ptr<TabularData>)
 template<const char Delimiter>
 class TextDelimitedTabularDataParser : public IParser
 {
-    static_assert(Delimiter != '\"', "Delimiter cannot be a quotemark");
+    static_assert(Delimiter != '"', "Delimiter cannot be a quotemark");
 
 private:
     size_t _rowLimit = 0;

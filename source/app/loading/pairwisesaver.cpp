@@ -40,7 +40,7 @@ bool PairwiseSaver::save()
 
     auto escape = [](QString string)
     {
-        string.replace(QStringLiteral("\""), QStringLiteral("\\\""));
+        string.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
         return string;
     };
 
@@ -61,14 +61,14 @@ bool PairwiseSaver::save()
            _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() & ValueType::Numerical)
         {
             const auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
-            stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
-                   << QStringLiteral("\"%1\"").arg(targetName) << " " << attribute->floatValueOf(edgeId)
+            stream << QStringLiteral(R"("%1")").arg(sourceName) << " "
+                   << QStringLiteral(R"("%1")").arg(targetName) << " " << attribute->floatValueOf(edgeId)
                    << "\n";
         }
         else
         {
-            stream << QStringLiteral("\"%1\"").arg(sourceName) << " "
-                   << QStringLiteral("\"%1\"").arg(targetName) << "\n";
+            stream << QStringLiteral(R"("%1")").arg(sourceName) << " "
+                   << QStringLiteral(R"("%1")").arg(targetName) << "\n";
         }
 
         runningCount++;

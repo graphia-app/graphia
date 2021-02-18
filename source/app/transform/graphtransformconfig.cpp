@@ -328,14 +328,14 @@ QString GraphTransformConfig::asString() const
         s += QStringLiteral("] ");
     }
 
-    s += QStringLiteral("\"%1\"").arg(_action);
+    s += QStringLiteral(R"("%1")").arg(_action);
 
     if(!_attributes.empty())
     {
         s += QStringLiteral(" using ");
 
         for(const auto& attribute : _attributes)
-            s += QStringLiteral("$\"%1\"").arg(attribute);
+            s += QStringLiteral(R"($"%1")").arg(attribute);
     }
 
     if(!_parameters.empty())
@@ -345,7 +345,7 @@ QString GraphTransformConfig::asString() const
         for(const auto& parameter : _parameters)
         {
             // cppcheck-suppress useStlAlgorithm
-            s += QStringLiteral(" \"%1\" = %2").arg(parameter._name,
+            s += QStringLiteral(R"( "%1" = %2)").arg(parameter._name,
                 parameter.valueAsString(true));
         }
     }

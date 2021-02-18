@@ -69,7 +69,7 @@ QStringList showUpdater(int argc, char *argv[])
 
     auto unquotedArguments = arguments.mid(1);
     unquotedArguments.replaceInStrings(QRegularExpression(QStringLiteral("^\"(.*)\"$")),
-        QStringLiteral("\\1"));
+        QStringLiteral(R"(\1)"));
     auto exe = unquotedArguments.at(0);
 
     QApplication::setOrganizationName(QStringLiteral("Graphia"));

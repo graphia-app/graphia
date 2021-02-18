@@ -313,7 +313,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     if(item == nullptr)
         return {};
 
-    QString text = QStringLiteral("\"%1\"").arg(item->value());
+    QString text = QStringLiteral(R"("%1")").arg(item->value());
 
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))

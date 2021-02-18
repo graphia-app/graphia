@@ -81,7 +81,7 @@ public:
                 ValueType::String,
                 QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "
                     "by the first and second attributes, respectively."),
-                "\\1 \\2"
+                R"(\1 \2)"
             }
         };
     }

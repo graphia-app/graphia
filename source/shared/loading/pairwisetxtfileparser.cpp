@@ -96,7 +96,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
                 codePoint = utf8::next(it, end);
             }
 
-            if(codePoint == '\"')
+            if(codePoint == '"')
             {
                 if(inQuotes)
                 {

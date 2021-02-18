@@ -490,9 +490,9 @@ bool Updater::showUpdatePrompt(const QStringList& arguments)
         return false;
 
     auto quotedArguments = arguments;
-    quotedArguments.replaceInStrings(QStringLiteral("\""), QStringLiteral("\\\""));
+    quotedArguments.replaceInStrings(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
     quotedArguments.replaceInStrings(QRegularExpression(QStringLiteral("^(.*)$")),
-        QStringLiteral("\"\\1\""));
+        QStringLiteral(R"("\1")"));
 
     std::cerr << "Starting Updater: " << updaterExeFileName.toStdString() << "\n";
     if(!QProcess::startDetached(updaterExeFileName, quotedArguments))

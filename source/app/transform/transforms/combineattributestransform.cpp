@@ -80,8 +80,8 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
             QString secondValue = secondAttribute.stringValueOf(elementId);
 
             QString replacement = attributeValue;
-            replacement.replace(QStringLiteral("\\1"), firstValue);
-            replacement.replace(QStringLiteral("\\2"), secondValue);
+            replacement.replace(QStringLiteral(R"(\1)"), firstValue);
+            replacement.replace(QStringLiteral(R"(\2)"), secondValue);
 
             newValues[elementId] = replacement;
             typeIdentity.updateType(newValues[elementId]);

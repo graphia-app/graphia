@@ -90,7 +90,7 @@ QString VisualisationConfig::asString() const
         s += QStringLiteral("] ");
     }
 
-    s += QStringLiteral("\"%1\" \"%2\"").arg(_attributeName, _channelName);
+    s += QStringLiteral(R"("%1" "%2")").arg(_attributeName, _channelName);
 
     if(!_parameters.empty())
     {

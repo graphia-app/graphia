@@ -85,7 +85,7 @@ public:
                 ValueType::String,
                 QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
                     "syntax, where n is the index of the regex capture group."),
-                "\\1"
+                R"(\1)"
             }
         };
     }

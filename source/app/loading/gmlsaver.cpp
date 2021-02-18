@@ -46,7 +46,7 @@ bool GMLSaver::save()
     for(const auto& nodeAttributeName : _graphModel->attributeNames())
     {
         auto cleanName = nodeAttributeName;
-        cleanName.remove(QRegularExpression(QStringLiteral("[^a-zA-Z\\d]")));
+        cleanName.remove(QRegularExpression(QStringLiteral(R"([^a-zA-Z\d])")));
         if(cleanName.isEmpty())
             cleanName = QStringLiteral("Attribute");
 
@@ -88,7 +88,7 @@ bool GMLSaver::save()
             {
                 QString escapedValue = escape(attribute->stringValueOf(elementId));
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
-                       << QStringLiteral("\"%1\"").arg(escapedValue) << "\n";
+                       << QStringLiteral(R"("%1")").arg(escapedValue) << "\n";
             }
             else if(attribute->valueType() & ValueType::Numerical)
             {
@@ -109,7 +109,7 @@ bool GMLSaver::save()
         stream << indent(level) << "node\n[\n";
         level++;
         stream << indent(level) << "id " << static_cast<int>(nodeId) << "\n";
-        QString labelString = QStringLiteral("\"%1\"").arg(nodeName);
+        QString labelString = QStringLiteral(R"("%1")").arg(nodeName);
         stream << indent(level) << "label " << labelString << "\n";
         attributes(nodeId, _graphModel->attributeNames(ElementType::Node));
         stream << indent(--level) << "]\n"; // node

@@ -367,8 +367,8 @@ Attribute::Name Attribute::parseAttributeName(QString name)
         name = name.mid(0, dotIndex);
     }
 
-    name.replace("\"", "");
-    parameter.replace("\"", "");
+    name.replace(R"(")", "");
+    parameter.replace(R"(")", "");
 
     return {type, name, parameter};
 }
@@ -390,9 +390,9 @@ QString Attribute::enquoteAttributeName(const QString& name)
     }
 
     if(!parsedAttributeName._parameter.isEmpty())
-        postfix = QStringLiteral(".\"%1\"").arg(parsedAttributeName._parameter);
+        postfix = QStringLiteral(R"(."%1")").arg(parsedAttributeName._parameter);
 
-    return QStringLiteral("%1\"%2\"%3").arg(prefix,
+    return QStringLiteral(R"(%1"%2"%3)").arg(prefix,
         parsedAttributeName._name, postfix);
 }
 
