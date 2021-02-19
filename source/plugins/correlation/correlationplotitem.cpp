@@ -2119,10 +2119,10 @@ double CorrelationPlotItem::minColumnWidth() const
 double CorrelationPlotItem::columnAxisWidth() const
 {
     const auto& margins = _mainAxisRect->margins();
-    const unsigned int axisWidth = margins.left() + margins.right();
+    const unsigned int marginWidth = margins.left() + margins.right();
 
     //FIXME This value is wrong when the legend is enabled
-    return width() - axisWidth;
+    return width() - marginWidth;
 }
 
 double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
