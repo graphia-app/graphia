@@ -95,6 +95,7 @@ public:
 
     bool busy() const;
 
+    Q_INVOKABLE void setShowGridLines(bool showGridLines);
     Q_INVOKABLE void setWidth(int width);
     Q_INVOKABLE void setHeight(int height);
     Q_INVOKABLE void setXAxisRange(double min, double max);
@@ -115,6 +116,7 @@ private:
     int _height = -1;
     double _xAxisMin = 0.0;
     double _xAxisMax = 0.0;
+    bool _showGridLines = true;
 
     std::atomic_bool _updateQueued = false;
     CorrelationPlotUpdateType _updateType = CorrelationPlotUpdateType::None;

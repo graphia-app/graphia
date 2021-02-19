@@ -64,6 +64,11 @@ bool CorrelationPlotWorker::busy() const
     return _busy;
 }
 
+void CorrelationPlotWorker::setShowGridLines(bool showGridLines)
+{
+    _showGridLines = showGridLines;
+}
+
 void CorrelationPlotWorker::setWidth(int width)
 {
     _width = width;
@@ -141,7 +146,15 @@ void CorrelationPlotWorker::renderPixmap()
     {
         auto* axisRect = dynamic_cast<QCPAxisRect*>(element);
         if(axisRect != nullptr)
-            axisRect->axis(QCPAxis::atBottom)->setRange(_xAxisMin, _xAxisMax);
+        {
+            auto numVisibleColumns = (_xAxisMax - _xAxisMin);
+            bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.3);
+
+            auto* axis = axisRect->axis(QCPAxis::atBottom);
+            axis->setRange(_xAxisMin, _xAxisMax);
+            axis->grid()->setVisible(_showGridLines && !columnsAreDense);
+            axis->setTicks(!columnsAreDense);
+        }
     }
 
     if(_updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
@@ -1597,7 +1610,6 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
     xAxis->setLabel({});
     xAxis->setTicker(categoryTicker);
-    xAxis->setTicks(minColumnWidth() >= 1.0);
 
     xAxis->grid()->setVisible(_showGridLines);
     _mainYAxis->grid()->setVisible(_showGridLines);
@@ -1829,6 +1841,7 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
     if(_showGridLines != showGridLines)
     {
         _showGridLines = showGridLines;
+        QMetaObject::invokeMethod(_worker, "setShowGridLines", Q_ARG(bool, showGridLines));
         rebuildPlot();
     }
 }
