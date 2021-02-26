@@ -28,16 +28,16 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig::Parameter,
-    (QString, _name),
-    (VisualisationConfig::ParameterValue, _value)
+    _name,
+    _value
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig,
-    (std::vector<QString>, _flags),
-    (QString, _attributeName),
-    (QString, _channelName),
-    (std::vector<VisualisationConfig::Parameter>, _parameters)
+    _flags,
+    _attributeName,
+    _channelName,
+    _parameters
 )
 
 namespace SpiritVisualisationParser

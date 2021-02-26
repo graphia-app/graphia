@@ -29,37 +29,37 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,
-    (GraphTransformConfig::TerminalValue, _lhs),
-    (GraphTransformConfig::TerminalOp, _op),
-    (GraphTransformConfig::TerminalValue, _rhs)
+    _lhs,
+    _op,
+    _rhs
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::UnaryCondition,
-    (GraphTransformConfig::TerminalValue, _lhs),
-    (ConditionFnOp::Unary, _op)
+    _lhs,
+    _op
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::CompoundCondition,
-    (GraphTransformConfig::Condition, _lhs),
-    (ConditionFnOp::Logical, _op),
-    (GraphTransformConfig::Condition, _rhs)
+    _lhs,
+    _op,
+    _rhs
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::Parameter,
-    (QString, _name),
-    (GraphTransformConfig::ParameterValue, _value)
+    _name,
+    _value
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig,
-    (std::vector<QString>, _flags),
-    (QString, _action),
-    (std::vector<QString>, _attributes),
-    (std::vector<GraphTransformConfig::Parameter>, _parameters),
-    (GraphTransformConfig::Condition, _condition)
+    _flags,
+    _action,
+    _attributes,
+    _parameters,
+    _condition
 )
 
 namespace SpiritGraphTranformConfigParser

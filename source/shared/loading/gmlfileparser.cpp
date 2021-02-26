@@ -53,8 +53,8 @@ struct KeyValue
 
 BOOST_FUSION_ADAPT_STRUCT(
     SpiritGmlParser::KeyValue,
-    (QString, _key),
-    (SpiritGmlParser::Value, _value)
+    _key,
+    _value
 )
 
 namespace SpiritGmlParser
