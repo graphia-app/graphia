@@ -72,10 +72,10 @@ using ascii::char_;
 const x3::rule<class L, List> gmlList = "list";
 
 const x3::rule<class NoQuotesString, QString> noQuotesString = "noQuotesString";
-const auto noQuotesString_def = lexeme[x3::lit('"') >> *(~char_('"')) >> x3::lit('"')];
+const auto noQuotesString_def = lexeme[lit('"') >> *(~char_('"')) >> lit('"')];
 
 const x3::rule<class V, Value> gmlValue = "value";
-const auto gmlValue_def = double_ | int_ | noQuotesString | (x3::lit('[') >> gmlList >> x3::lit(']'));
+const auto gmlValue_def = double_ | int_ | noQuotesString | (lit('[') >> gmlList >> lit(']'));
 
 const x3::rule<class K, QString> gmlKey = "key";
 const auto gmlKey_def = lexeme[char_("a-zA-Z") >> *char_("a-zA-Z0-9")];

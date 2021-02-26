@@ -52,7 +52,7 @@ using x3::lexeme;
 using unicode::char_;
 
 const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto escapedQuote = x3::lit('\\') >> char_('"');
+const auto escapedQuote = lit('\\') >> char_('"');
 const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
 const x3::rule<class Identifier, QString> identifier = "identifier";
@@ -60,10 +60,10 @@ const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
 const x3::rule<class Parameter, VisualisationConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | quotedString);
+const auto parameter_def = parameterName >> lit('=') >> (double_ | quotedString);
 
-const auto identifierList = identifier % x3::lit(',');
-const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
+const auto identifierList = identifier % lit(',');
+const auto flags = lit('[') >> -identifierList >> lit(']');
 
 const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
 const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
@@ -76,7 +76,7 @@ const auto channelName = quotedString | identifier;
 const auto visualisation_def =
     -flags >>
     attributeName >> channelName >>
-    -(x3::lit("with") >> +parameter);
+    -(lit("with") >> +parameter);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName, visualisation, parameter)
 } // namespace SpiritVisualisationParser

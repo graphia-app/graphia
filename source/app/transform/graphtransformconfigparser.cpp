@@ -75,7 +75,7 @@ using x3::lexeme;
 using unicode::char_;
 
 const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto escapedQuote = x3::lit('\\') >> char_('"');
+const auto escapedQuote = lit('\\') >> char_('"');
 const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
 const x3::rule<class Identifier, QString> identifier = "identifier";
@@ -159,26 +159,26 @@ struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
 } logical_op;
 
 const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
-const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
+const auto operand = terminalCondition | unaryCondition | (lit('(') >> condition >> lit(')'));
 const auto condition_def = (operand >> logical_op >> operand) | operand;
 
-const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier) >> *attributeParameter];
+const auto attributeNameNoDollarCapture = lexeme[lit('$') >> (quotedString | identifier) >> *attributeParameter];
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | int_ | quotedString);
+const auto parameter_def = parameterName >> lit('=') >> (double_ | int_ | quotedString);
 
-const auto identifierList = identifier % x3::lit(',');
-const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
+const auto identifierList = identifier % lit(',');
+const auto flags = lit('[') >> -identifierList >> lit(']');
 
 const x3::rule<class Transform, GraphTransformConfig> transform = "transform";
 const auto transformName = quotedString | identifier;
 const auto transform_def =
     -flags >>
     transformName >>
-    -(x3::lit("using") >> +attributeNameNoDollarCapture) >>
-    -(x3::lit("with") >> +parameter) >>
-    -(x3::lit("where") >> condition);
+    -(lit("using") >> +attributeNameNoDollarCapture) >>
+    -(lit("with") >> +parameter) >>
+    -(lit("where") >> condition);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
     transform, parameter, condition, terminalCondition, unaryCondition)
