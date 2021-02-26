@@ -20,6 +20,7 @@
 
 #include "shared/loading/biopaxfileparser.h"
 #include "shared/loading/gmlfileparser.h"
+#include "shared/loading/dotfileparser.h"
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
@@ -61,6 +62,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
     if(urlTypeName == QStringLiteral("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData, &_userEdgeData);
+
+    if(urlTypeName == QStringLiteral("DOT"))
+        return std::make_unique<DotFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName.startsWith(QStringLiteral("Matrix")))
     {
@@ -225,6 +229,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("GML"), QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
     registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
     registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
+    registerUrlType(QStringLiteral("DOT"), QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"csv", "matrix"});
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv", "matrix"});
@@ -249,6 +254,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             (urlType == QStringLiteral("GML") && GmlFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("PairwiseTXT") && PairwiseTxtFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url)) ||
+            (urlType == QStringLiteral("DOT") && DotFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixCSV") && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
