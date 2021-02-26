@@ -34,6 +34,7 @@
 
 #include <fstream>
 #include <variant>
+#include <map>
 
 // http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf
 
