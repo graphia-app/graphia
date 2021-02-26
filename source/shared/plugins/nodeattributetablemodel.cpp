@@ -31,15 +31,14 @@
 
 #include <QtGlobal>
 
-void NodeAttributeTableModel::initialise(IDocument* document,
-    const UserNodeDataMapping* userNodeDataMapping)
+void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
 {
     _roleNames.insert(Roles::NodeIdRole, "nodeId");
     _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
     _roleNames.insert(Qt::DisplayRole, "display");
 
     _document = document;
-    _userNodeDataMapping = userNodeDataMapping;
+    _userNodeData = userNodeData;
     _graph = &_document->graphModel()->graph();
 
     const auto* graphModel = _document->graphModel();
@@ -60,6 +59,10 @@ void NodeAttributeTableModel::initialise(IDocument* document,
 QStringList NodeAttributeTableModel::columnNames() const
 {
     QStringList list;
+    list.reserve(_userNodeData->numUserDataVectors());
+
+    for(const auto& [name, userDataVector] : *_userNodeData)
+        list.append(userDataVector.name());
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
@@ -91,7 +94,7 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
     {
         Q_ASSERT(attribute->elementType() == ElementType::Node);
 
-        auto nodeId = _userNodeDataMapping->elementIdForIndex(row);
+        auto nodeId = _userNodeData->elementIdForIndex(row);
         if(!attribute->valueMissingOf(nodeId))
             return attribute->valueOf(nodeId);
     }
@@ -128,7 +131,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 
     for(size_t row = 0; row < static_cast<size_t>(rowCount()); row++)
     {
-        NodeId nodeId = _userNodeDataMapping->elementIdForIndex(row);
+        NodeId nodeId = _userNodeData->elementIdForIndex(row);
 
         if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
@@ -224,7 +227,7 @@ bool NodeAttributeTableModel::columnIsHiddenByDefault(const QString&) const
 
 void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
 {
-    auto nodeId = _userNodeDataMapping->elementIdForIndex(row);
+    auto nodeId = _userNodeData->elementIdForIndex(row);
     _document->moveFocusToNode(nodeId);
 }
 
@@ -347,7 +350,7 @@ void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attrib
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(_userNodeDataMapping->numMappings());
+    return static_cast<int>(_userNodeData->numValues());
 }
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const

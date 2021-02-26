@@ -44,7 +44,7 @@ class NodeAttributeTableModel : public QAbstractTableModel
 private:
     IDocument* _document = nullptr;
     const IGraph* _graph = nullptr;
-    const UserNodeDataMapping* _userNodeDataMapping = nullptr;
+    const UserNodeData* _userNodeData = nullptr;
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
@@ -87,7 +87,7 @@ public:
         FirstAttributeRole
     };
 
-    void initialise(IDocument* document, const UserNodeDataMapping* userNodeData);
+    void initialise(IDocument* document, UserNodeData* userNodeData);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
