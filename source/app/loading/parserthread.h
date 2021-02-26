@@ -39,6 +39,8 @@ private:
     std::unique_ptr<IParser> _parser;
     std::thread _thread;
 
+    bool _cancelled = false;
+
 public:
     ParserThread(GraphModel& graphModel, QUrl url);
     ~ParserThread() override;

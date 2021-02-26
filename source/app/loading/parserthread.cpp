@@ -40,6 +40,7 @@ ParserThread::~ParserThread()
 
 void ParserThread::start(std::unique_ptr<IParser> parser)
 {
+    _cancelled = false;
     _parser = std::move(parser);
     _thread = std::thread(&ParserThread::run, this);
 }
@@ -55,7 +56,10 @@ void ParserThread::cancel()
 
 bool ParserThread::cancelled() const
 {
-    return _parser != nullptr && _parser->cancelled();
+    if(_parser != nullptr)
+        return _parser->cancelled();
+
+    return _cancelled;
 }
 
 void ParserThread::wait()
@@ -66,6 +70,9 @@ void ParserThread::wait()
 
 void ParserThread::reset()
 {
+    if(_parser != nullptr)
+        _cancelled = _parser->cancelled();
+
     // Free up any memory used by the parser
     _parser = nullptr;
 }
