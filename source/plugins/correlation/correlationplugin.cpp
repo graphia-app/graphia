@@ -429,6 +429,76 @@ void CorrelationPluginInstance::onLoadSuccess()
     _userNodeData.exposeAsAttributes(*graphModel());
     buildColumnAnnotations();
     _nodeAttributeTableModel.updateColumnNames();
+
+    QString log = document()->log();
+
+    if(log.isEmpty())
+        log.append(tr("NOTE: This log is reconstructed and may be incomplete."));
+
+    log.append("\n\n");
+
+    if(_transpose)
+        log.append(tr("Transposed\n"));
+
+    log.append(tr("Data Frame: [ Column: %1 Row: %2 Width: %3 Height: %4 ]\n")
+        .arg(_dataRect.x()).arg(_dataRect.y()).arg(_dataRect.width()).arg(_dataRect.height()));
+
+    log.append(tr("Correlation Metric: "));
+    switch(_correlationType)
+    {
+    default:
+    case CorrelationType::Pearson: log.append(tr("Pearson\n")); break;
+    case CorrelationType::SpearmanRank: log.append(tr("Spearman Rank\n")); break;
+    }
+
+    log.append(tr("Correlation Polarity: "));
+    switch(_correlationPolarity)
+    {
+    default:
+    case CorrelationPolarity::Positive: log.append(tr("Positive\n")); break;
+    case CorrelationPolarity::Negative: log.append(tr("Negative\n")); break;
+    case CorrelationPolarity::Both: log.append(tr("Both\n")); break;
+    }
+
+    log.append(tr("Minimum Correlation Value: %1\n").arg(
+        u::formatNumberScientific(_minimumCorrelationValue)));
+
+    switch(_scalingType)
+    {
+    default:
+    case ScalingType::None: break;
+    case ScalingType::Log2: log.append(tr("Scaling: Log2(x + ε)\n")); break;
+    case ScalingType::Log10: log.append(tr("Scaling: Log10(x + ε)\n")); break;
+    case ScalingType::AntiLog2: log.append(tr("Scaling: AntiLog2(x)\n")); break;
+    case ScalingType::AntiLog10: log.append(tr("Scaling: AntiLog10(x)\n")); break;
+    case ScalingType::ArcSin: log.append(tr("Scaling: Arcsin(x)\n")); break;
+    }
+
+    switch(_normaliseType)
+    {
+    default:
+    case NormaliseType::None: break;
+    case NormaliseType::MinMax: log.append(tr("Normalisation: Min/Max\n")); break;
+    case NormaliseType::Quantile: log.append(tr("Normalisation: Quantile\n")); break;
+    case NormaliseType::Mean: log.append(tr("Normalisation: Mean\n")); break;
+    case NormaliseType::Standarisation: log.append(tr("Normalisation: Standarisation\n")); break;
+    case NormaliseType::UnitScaling: log.append(tr("Normalisation: Unit Scaling\n")); break;
+    }
+
+    if(_imputedValues)
+    {
+        log.append(tr("Imputation: "));
+        switch(_missingDataType)
+        {
+        default:
+        case MissingDataType::Constant: log.append(tr("Constant %1\n")
+            .arg(u::formatNumberScientific(_missingDataReplacementValue))); break;
+        case MissingDataType::ColumnAverage: log.append(tr("Column Mean\n")); break;
+        case MissingDataType::RowInterpolation: log.append(tr("Row Interpolate\n")); break;
+        }
+    }
+
+    document()->setLog(log);
 }
 
 QVector<double> CorrelationPluginInstance::rawData()

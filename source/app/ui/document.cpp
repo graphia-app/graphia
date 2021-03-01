@@ -545,6 +545,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     if(plugin == nullptr)
         return false;
 
+    if(fileType != Application::NativeFileType)
+    {
+        setLog(tr("Loaded from %1, as file type %2, using plugin %3 (version %4)")
+            .arg(fileUrl.fileName(), fileType, pluginName)
+            .arg(plugin->dataVersion()));
+    }
+
     _pluginName = pluginName;
     emit pluginNameChanged();
 
