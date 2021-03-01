@@ -44,8 +44,12 @@ static void launch(const wchar_t* program, const wchar_t** options, const wchar_
         options++;
     }
     wcscat_s(commandLine, dmpFile);
-    wcscat_s(commandLine, L" ");
-    wcscat_s(commandLine, dir);
+
+    if(dir && *dir)
+    {
+        wcscat_s(commandLine, L" ");
+        wcscat_s(commandLine, dir);
+    }
 
     if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
         CREATE_DEFAULT_ERROR_MODE, nullptr, nullptr, &si, &pi))
@@ -84,7 +88,9 @@ static void launch(const char* program, const char** options, const char* dmpFil
         }
 
         addArg(dmpFile);
-        addArg(dir);
+
+        if(dir && *dir)
+            addArg(dir);
 
         execv(program, const_cast<platform_char* const*>(args));
 

@@ -182,27 +182,30 @@ static void uploadReport(const QString& email, const QString& text,
     file->setParent(multiPart);
     multiPart->append(dmpPart);
 
-    QDirIterator dirIterator(attachmentDir);
-    int fileIndex = 0;
-    while(dirIterator.hasNext())
+    if(!attachmentDir.isEmpty())
     {
-        QString fileName = dirIterator.next();
-        QFileInfo fileInfo(fileName);
+        QDirIterator dirIterator(attachmentDir);
+        int fileIndex = 0;
+        while(dirIterator.hasNext())
+        {
+            QString fileName = dirIterator.next();
+            QFileInfo fileInfo(fileName);
 
-        // Skip . and ..
-        if(!fileInfo.exists() || !fileInfo.isFile())
-            continue;
+            // Skip . and ..
+            if(!fileInfo.exists() || !fileInfo.isFile())
+                continue;
 
-        QHttpPart attachmentPart;
-        attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
-        attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                                 QVariant(QStringLiteral(R"(form-data; name="attachment%1"; filename="%2")")
-                                    .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
-        auto* attachment = new QFile(fileName);
-        attachment->open(QIODevice::ReadOnly);
-        attachmentPart.setBodyDevice(attachment);
-        attachment->setParent(multiPart);
-        multiPart->append(attachmentPart);
+            QHttpPart attachmentPart;
+            attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
+            attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                                     QVariant(QStringLiteral(R"(form-data; name="attachment%1"; filename="%2")")
+                                        .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
+            auto* attachment = new QFile(fileName);
+            attachment->open(QIODevice::ReadOnly);
+            attachmentPart.setBodyDevice(attachment);
+            attachment->setParent(multiPart);
+            multiPart->append(attachmentPart);
+        }
     }
 
     auto queryUrl = QUrl(u::pref(QStringLiteral("servers/crashreports")).toString());
