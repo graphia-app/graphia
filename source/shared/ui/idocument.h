@@ -77,6 +77,9 @@ public:
     virtual void highlightNodes(const NodeIdSet& nodeIds) = 0;
 
     virtual void reportProblem(const QString& description) const = 0;
+
+    virtual const QString& log() const = 0;
+    virtual void setLog(const QString& log) = 0;
 };
 
 #endif // IDOCUMENT_H

@@ -1420,6 +1420,17 @@ void Document::reportProblem(const QString& description) const
     S(CrashHandler)->submitMinidump(description);
 }
 
+const QString& Document::log() const
+{
+    return _log;
+}
+
+void Document::setLog(const QString& log)
+{
+    _log = log;
+    emit logChanged();
+}
+
 void Document::setSaveRequired()
 {
     if(!_loadComplete)

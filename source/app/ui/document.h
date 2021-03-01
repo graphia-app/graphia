@@ -80,6 +80,7 @@ class Document : public QObject, public IDocument, public FailureReason
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(QString log MEMBER _log WRITE setLog NOTIFY logChanged)
     Q_PROPERTY(bool loadComplete MEMBER _loadComplete NOTIFY loadComplete)
     Q_PROPERTY(QString failureReason READ failureReason WRITE setFailureReason NOTIFY failureReasonChanged)
 
@@ -157,6 +158,9 @@ public: // IDocument
 
     void reportProblem(const QString& description) const override;
 
+    const QString& log() const override;
+    void setLog(const QString& log) override;
+
 public:
     static QColor contrastingColorForBackground();
 
@@ -224,6 +228,7 @@ private:
 
     QString _title;
     QString _status;
+    QString _log;
 
     int _loadProgress = 0;
     bool _loadComplete = false;
@@ -327,6 +332,7 @@ signals:
     void titleChanged();
     void contrastingColorChanged();
     void statusChanged();
+    void logChanged();
 
     void busyChanged();
     void editableChanged();
