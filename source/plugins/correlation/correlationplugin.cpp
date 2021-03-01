@@ -141,6 +141,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 {
                     transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
                         tabularData, dataRect, columnIndex, rowIndex);
+                    _imputedValues = true;
                 }
 
                 transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
