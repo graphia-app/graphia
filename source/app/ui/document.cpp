@@ -649,6 +649,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
             _visualisations = completedLoader->visualisations();
             _bookmarks = completedLoader->bookmarks();
+            _log = completedLoader->log();
 
             _graphModel->buildTransforms(_graphTransforms);
 

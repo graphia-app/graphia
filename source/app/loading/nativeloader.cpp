@@ -392,6 +392,9 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         }
     }
 
+    if(u::contains(jsonBody, "log"))
+        _log = QString::fromStdString(jsonBody["log"]);
+
     if(u::contains(jsonBody, "enrichmentTables"))
     {
         for(const auto& tableModel : jsonBody["enrichmentTables"])

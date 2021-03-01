@@ -214,6 +214,8 @@ bool NativeSaver::save()
 
     content["bookmarks"] = bookmarksAsJson(*_document);
 
+    content["log"] = _document->log();
+
     for(const auto* table : *_document->enrichmentTableModels())
         content["enrichmentTables"].push_back(enrichmentTableModelAsJson(*table));
 

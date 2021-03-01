@@ -60,6 +60,8 @@ private:
     Projection _projection = Projection::Perspective;
     Shading _shading = Shading::Smooth;
 
+    QString _log;
+
 public:
     bool parse(const QUrl& url, IGraphModel* igraphModel) override;
     void setPluginInstance(IPluginInstance* pluginInstance);
@@ -67,6 +69,7 @@ public:
     QStringList transforms() const { return _transforms; }
     QStringList visualisations() const { return _visualisations; }
     const auto& bookmarks() const { return _bookmarks; }
+    QString log() const { return _log; }
     const std::vector<EnrichmentTableModel::Table>& enrichmentTableModels() const
     { return _enrichmentTablesData; }
 
