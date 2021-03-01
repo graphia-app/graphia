@@ -31,6 +31,7 @@ Window
     id: root
 
     property string text: ""
+    property bool showCopyToClipboard: true
 
     flags: Qt.Window|Qt.Dialog
 
@@ -44,6 +45,8 @@ Window
 
         TextArea
         {
+            id: textArea
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -62,6 +65,20 @@ Window
             Layout.fillWidth: true
 
             Item { Layout.fillWidth: true }
+
+            Button
+            {
+                visible: root.showCopyToClipboard
+
+                text: qsTr("Copy To Clipboard")
+                onClicked:
+                {
+                    textArea.selectAll();
+                    textArea.copy();
+                    textArea.deselect();
+                    textArea.cursorPosition = 0;
+                }
+            }
 
             Button
             {
