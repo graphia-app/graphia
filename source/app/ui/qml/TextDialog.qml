@@ -49,6 +49,12 @@ Window
 
             readOnly: true
             text: root.text
+
+            onTextChanged:
+            {
+                // Suppress a Qt warning; bug?
+                cursorPosition = 0;
+            }
         }
 
         RowLayout
