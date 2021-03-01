@@ -349,6 +349,13 @@ ApplicationWindow
         }
     }
 
+    TextDialog
+    {
+        id: provenanceLogDialog
+        title: qsTr("Provenance Log")
+        text: currentDocument !== null ? currentDocument.log : ""
+    }
+
     Preferences
     {
         id: windowPreferences
@@ -1499,6 +1506,18 @@ ApplicationWindow
 
     Action
     {
+        id: showProvenanceLogAction
+        text: qsTr("Show Provenance Log…")
+        enabled: currentDocument !== null && !currentDocument.busy
+        onTriggered:
+        {
+            provenanceLogDialog.raise();
+            provenanceLogDialog.show();
+        }
+    }
+
+    Action
+    {
         id: aboutPluginsAction
         // Don't ask...
         text: Qt.platform.os === "osx" ? qsTr("Plugins…") : qsTr("About Plugins…")
@@ -1776,6 +1795,8 @@ ApplicationWindow
             MenuItem { action: enrichmentAction }
             MenuItem { action: searchWebAction }
             MenuItem { action: importAttributesAction }
+            MenuSeparator {}
+            MenuItem { action: showProvenanceLogAction }
         }
         Menu
         {
