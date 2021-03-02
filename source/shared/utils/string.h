@@ -102,5 +102,7 @@ namespace u
         return newName;
     }
 
+    QString escapeQuotes(QString s);
+
 } // namespace u
 #endif // STRING_H

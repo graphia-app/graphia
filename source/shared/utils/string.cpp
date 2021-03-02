@@ -339,3 +339,9 @@ std::vector<std::byte> u::hexToBytes(const QString& string)
 {
     return hexToBytes(string.toStdString());
 }
+
+QString u::escapeQuotes(QString s)
+{
+    s.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+    return s;
+}
