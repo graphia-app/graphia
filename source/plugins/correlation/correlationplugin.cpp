@@ -798,64 +798,64 @@ QString CorrelationPluginInstance::log() const
 {
     QString text;
 
-    if(_transpose)
-        text.append(tr("Transposed\n"));
-
-    text.append(tr("Data Frame: [ Column: %1 Row: %2 Width: %3 Height: %4 ]\n")
+    text.append(tr("Data Frame: [ Column: %1 Row: %2 Width: %3 Height: %4 ]")
         .arg(_dataRect.x()).arg(_dataRect.y()).arg(_dataRect.width()).arg(_dataRect.height()));
 
-    text.append(tr("Correlation Metric: "));
+    if(_transpose)
+        text.append(tr("\nTransposed"));
+
+    text.append(tr("\nCorrelation Metric: "));
     switch(_correlationType)
     {
     default:
-    case CorrelationType::Pearson: text.append(tr("Pearson\n")); break;
-    case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank\n")); break;
+    case CorrelationType::Pearson: text.append(tr("Pearson")); break;
+    case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank")); break;
     }
 
-    text.append(tr("Correlation Polarity: "));
+    text.append(tr("\nCorrelation Polarity: "));
     switch(_correlationPolarity)
     {
     default:
-    case CorrelationPolarity::Positive: text.append(tr("Positive\n")); break;
-    case CorrelationPolarity::Negative: text.append(tr("Negative\n")); break;
-    case CorrelationPolarity::Both: text.append(tr("Both\n")); break;
+    case CorrelationPolarity::Positive: text.append(tr("Positive")); break;
+    case CorrelationPolarity::Negative: text.append(tr("Negative")); break;
+    case CorrelationPolarity::Both: text.append(tr("Both")); break;
     }
 
-    text.append(tr("Minimum Correlation Value: %1\n").arg(
+    text.append(tr("\nMinimum Correlation Value: %1").arg(
         u::formatNumberScientific(_minimumCorrelationValue)));
 
     switch(_scalingType)
     {
     default:
     case ScalingType::None: break;
-    case ScalingType::Log2: text.append(tr("Scaling: Log2(x + ε)\n")); break;
-    case ScalingType::Log10: text.append(tr("Scaling: Log10(x + ε)\n")); break;
-    case ScalingType::AntiLog2: text.append(tr("Scaling: AntiLog2(x)\n")); break;
-    case ScalingType::AntiLog10: text.append(tr("Scaling: AntiLog10(x)\n")); break;
-    case ScalingType::ArcSin: text.append(tr("Scaling: Arcsin(x)\n")); break;
+    case ScalingType::Log2: text.append(tr("\nScaling: Log2(x + ε)")); break;
+    case ScalingType::Log10: text.append(tr("\nScaling: Log10(x + ε)")); break;
+    case ScalingType::AntiLog2: text.append(tr("\nScaling: AntiLog2(x)")); break;
+    case ScalingType::AntiLog10: text.append(tr("\nScaling: AntiLog10(x)")); break;
+    case ScalingType::ArcSin: text.append(tr("\nScaling: Arcsin(x)")); break;
     }
 
     switch(_normaliseType)
     {
     default:
     case NormaliseType::None: break;
-    case NormaliseType::MinMax: text.append(tr("Normalisation: Min/Max\n")); break;
-    case NormaliseType::Quantile: text.append(tr("Normalisation: Quantile\n")); break;
-    case NormaliseType::Mean: text.append(tr("Normalisation: Mean\n")); break;
-    case NormaliseType::Standarisation: text.append(tr("Normalisation: Standarisation\n")); break;
-    case NormaliseType::UnitScaling: text.append(tr("Normalisation: Unit Scaling\n")); break;
+    case NormaliseType::MinMax: text.append(tr("\nNormalisation: Min/Max")); break;
+    case NormaliseType::Quantile: text.append(tr("\nNormalisation: Quantile")); break;
+    case NormaliseType::Mean: text.append(tr("\nNormalisation: Mean")); break;
+    case NormaliseType::Standarisation: text.append(tr("\nNormalisation: Standarisation")); break;
+    case NormaliseType::UnitScaling: text.append(tr("\nNormalisation: Unit Scaling")); break;
     }
 
     if(_imputedValues)
     {
-        text.append(tr("Imputation: "));
+        text.append(tr("\nImputation: "));
         switch(_missingDataType)
         {
         default:
-        case MissingDataType::Constant: text.append(tr("Constant %1\n")
+        case MissingDataType::Constant: text.append(tr("Constant (%1)")
             .arg(u::formatNumberScientific(_missingDataReplacementValue))); break;
-        case MissingDataType::ColumnAverage: text.append(tr("Column Mean\n")); break;
-        case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate\n")); break;
+        case MissingDataType::ColumnAverage: text.append(tr("Column Mean")); break;
+        case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate")); break;
         }
     }
 

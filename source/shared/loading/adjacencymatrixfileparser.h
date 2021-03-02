@@ -123,12 +123,15 @@ public:
 
         if(minimumAbsEdgeWeight() > 0.0)
         {
-            text.append(tr("Minimum Absolute Edge Weight: %1\n").arg(
+            text.append(tr("Minimum Absolute Edge Weight: %1").arg(
                 u::formatNumberScientific(minimumAbsEdgeWeight())));
         }
 
         if(skipDuplicates())
-            text.append(tr("Duplicate Edges Filtered\n"));
+        {
+            if(!text.isEmpty()) text.append("\n");
+            text.append(tr("Duplicate Edges Filtered"));
+        }
 
         return text;
     }
