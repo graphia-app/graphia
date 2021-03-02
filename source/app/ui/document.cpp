@@ -697,6 +697,31 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _visualisations = _pluginInstance->defaultVisualisations();
 
             _graphModel->buildTransforms(_graphTransforms);
+
+            for(auto& visualisation : _visualisations)
+            {
+                VisualisationConfigParser p;
+                bool success = p.parse(visualisation);
+                Q_ASSERT(success);
+
+                const auto& attributeName = p.result()._attributeName;
+                auto valueType = _graphModel->attributeValueByName(attributeName).valueType();
+                const auto& channelName = p.result()._channelName;
+
+                auto defaultParameters = _graphModel->visualisationDefaultParameters(valueType, channelName);
+
+                if(!defaultParameters.isEmpty())
+                {
+                    visualisation += QStringLiteral(" with");
+
+                    for(const auto& key : defaultParameters.keys())
+                    {
+                        auto value = u::escapeQuotes(defaultParameters.value(key).toString());
+                        visualisation += QStringLiteral(R"( %1 = "%2")").arg(key, value);
+                    }
+                }
+            }
+
             _graphModel->buildVisualisations(_visualisations);
         });
     }
