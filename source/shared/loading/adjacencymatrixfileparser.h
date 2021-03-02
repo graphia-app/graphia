@@ -62,6 +62,9 @@ public:
     bool parse(const TabularData& tabularData, Progressable& progressable,
         IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData);
 
+    double minimumAbsEdgeWeight() const { return _minimumAbsEdgeWeight; }
+    bool skipDuplicates() const { return _skipDuplicates; }
+
     void setMinimumAbsEdgeWeight(double minimumAbsEdgeWeight) { _minimumAbsEdgeWeight = minimumAbsEdgeWeight; }
     void setSkipDuplicates(bool skipDuplicates) { _skipDuplicates = skipDuplicates; }
 
@@ -112,6 +115,22 @@ public:
 
         return AdjacencyMatrixTabularDataParser::parse(_tabularData, *this,
             graphModel, _userNodeData, _userEdgeData);
+    }
+
+    QString log() const override
+    {
+        QString text;
+
+        if(minimumAbsEdgeWeight() > 0.0)
+        {
+            text.append(tr("Minimum Absolute Edge Weight: %1\n").arg(
+                u::formatNumberScientific(minimumAbsEdgeWeight())));
+        }
+
+        if(skipDuplicates())
+            text.append(tr("Duplicate Edges Filtered\n"));
+
+        return text;
     }
 
     template<typename Parser>

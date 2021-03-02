@@ -160,6 +160,8 @@ public:
     QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;
 
+    QString log() const;
+
 private slots:
     void onLoadSuccess();
     void onSelectionChanged(const ISelectionManager* selectionManager);

@@ -363,6 +363,11 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     return true;
 }
 
+QString CorrelationFileParser::log() const
+{
+    return _plugin->log();
+}
+
 bool CorrelationTabularDataParser::transposed() const
 {
     return _model.transposed();

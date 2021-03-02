@@ -216,24 +216,6 @@ void BaseGenericPluginInstance::onLoadSuccess()
     _userNodeData.exposeAsAttributes(*graphModel());
     _userEdgeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateColumnNames();
-
-    QString log = document()->log();
-
-    if(log.isEmpty())
-        log.append(tr("NOTE: This log is reconstructed and may be incomplete."));
-
-    log.append("\n\n");
-
-    if(_adjacencyMatrixParameters._filterEdges)
-    {
-        log.append(tr("Minimum Absolute Edge Weight: %1\n").arg(
-            u::formatNumberScientific(_adjacencyMatrixParameters._minimumAbsEdgeWeight)));
-    }
-
-    if(_adjacencyMatrixParameters._skipDuplicates)
-        log.append(tr("Duplicate Edges Filtered\n"));
-
-    document()->setLog(log);
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)

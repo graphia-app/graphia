@@ -105,6 +105,8 @@ public:
         double minimumThreshold, IParser* parser = nullptr);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    QString log() const override;
+
     static bool canLoad(const QUrl&) { return true; }
 };
 

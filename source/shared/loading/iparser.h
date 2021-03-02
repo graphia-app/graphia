@@ -33,6 +33,7 @@ public:
     ~IParser() override = default;
 
     virtual bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) = 0;
+    virtual QString log() const { return {}; }
 };
 
 #endif // IPARSER_H

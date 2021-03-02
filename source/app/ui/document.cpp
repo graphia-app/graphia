@@ -649,7 +649,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
             _visualisations = completedLoader->visualisations();
             _bookmarks = completedLoader->bookmarks();
-            _log = completedLoader->log();
+            setLog(completedLoader->log());
 
             _graphModel->buildTransforms(_graphTransforms);
 
@@ -690,8 +690,14 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     }
     else
     {
-        connect(_graphFileParserThread.get(), &ParserThread::success, [this]
+        connect(_graphFileParserThread.get(), &ParserThread::success,
+        [this](IParser* completedParser)
         {
+            auto parserLog = completedParser->log();
+
+            if(!parserLog.isEmpty())
+                setLog(log() + "\n\n" + parserLog);
+
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
                 sortedTransforms(_pluginInstance->defaultTransforms()));
             _visualisations = _pluginInstance->defaultVisualisations();
@@ -1460,8 +1466,11 @@ const QString& Document::log() const
 
 void Document::setLog(const QString& log)
 {
-    _log = log;
-    emit logChanged();
+    if(log != _log)
+    {
+        _log = log;
+        emit logChanged();
+    }
 }
 
 void Document::setSaveRequired()
