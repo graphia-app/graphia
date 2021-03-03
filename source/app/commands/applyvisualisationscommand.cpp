@@ -19,6 +19,7 @@
 #include "applyvisualisationscommand.h"
 
 #include <QObject>
+#include <QRegularExpression>
 
 #include "graph/graphmodel.h"
 #include "ui/document.h"
@@ -60,6 +61,8 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
 
 QStringList ApplyVisualisationsCommand::patchedVisualisations() const
 {
+    //FIXME This whole approach is pretty fragile and needs to be made more robust
+
     if(_transformIndex >= 0 && _visualisations.size() > _previousVisualisations.size())
     {
         // When a transform creates a new attribute, its name may not match the default
@@ -90,9 +93,13 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
 
                 auto visualisationConfig = p.result();
 
+                // c.f. u::findUniqueName
+                QRegularExpression re(QStringLiteral(R"(^%1\(\d+\))")
+                    .arg(visualisationConfig._attributeName));
+
                 for(const auto& createdAttributeName : createdAttributeNames)
                 {
-                    if(createdAttributeName.startsWith(visualisationConfig._attributeName))
+                    if(re.match(createdAttributeName).hasMatch())
                         visualisationConfig._attributeName = createdAttributeName;
                 }
 
