@@ -698,6 +698,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             if(!parserLog.isEmpty())
                 setLog(log() + "\n\n" + parserLog);
 
+            const auto& graph = _graphModel->mutableGraph();
+            setLog(log() + QStringLiteral("\n\nNodes: %1 Edges: %2")
+                .arg(graph.numNodes()).arg(graph.numEdges()));
+
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
                 sortedTransforms(_pluginInstance->defaultTransforms()));
             _visualisations = _pluginInstance->defaultVisualisations();
