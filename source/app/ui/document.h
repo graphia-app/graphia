@@ -531,6 +531,8 @@ public:
     Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,
         TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices);
 
+    Q_INVOKABLE QString graphSizeSummary() const;
+
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);

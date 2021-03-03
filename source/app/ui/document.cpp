@@ -2945,3 +2945,22 @@ void Document::importAttributesFromTable(const QString& keyAttributeName,
         std::make_unique<ImportAttributesCommand>(_graphModel.get(),
         keyAttributeName, data, keyColumnIndex, importColumnIndices));
 }
+
+QString Document::graphSizeSummary() const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    QString text;
+
+    text += QStringLiteral("Mutable Graph Nodes: %1 Edges: %2\n")
+        .arg(_graphModel->mutableGraph().numNodes())
+        .arg(_graphModel->mutableGraph().numEdges());
+
+    text += QStringLiteral("Transformed Graph Nodes: %1 Edges: %2 Components: %3")
+        .arg(_graphModel->graph().numNodes())
+        .arg(_graphModel->graph().numEdges())
+        .arg(_graphModel->graph().numComponents());
+
+    return text;
+}
