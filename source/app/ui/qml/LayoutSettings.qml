@@ -81,7 +81,7 @@ Rectangle
 
             Repeater
             {
-                model: document.layoutSettings
+                model: document.layoutSettingNames
 
                 LayoutSetting
                 {

@@ -85,7 +85,6 @@ Document::Document(QObject* parent) :
     QObject(parent),
     _graphChanging(false),
     _layoutRequired(true),
-    _graphTransformsModel(this),
     _enrichmentTableModels(this)
 {}
 
@@ -390,13 +389,10 @@ void Document::setStatus(const QString& status)
 
 void Document::setTransforms(const QStringList& transforms)
 {
-    // This stores the current active configuration...
     _graphTransforms = transforms;
 
-    // ...while the model has the state of the UI
-    _graphTransformsModel.clear();
-    for(const auto& transform : transforms)
-        _graphTransformsModel.append(transform);
+    _graphTransformsFromUI = transforms;
+    emit transformsChanged();
 
     setSaveRequired();
 }
@@ -406,9 +402,8 @@ void Document::setVisualisations(const QStringList& visualisations)
     _visualisations = visualisations;
     _graphModel->buildVisualisations(_visualisations);
 
-    _visualisationsModel.clear();
-    for(const auto& visualisation : visualisations)
-        _visualisationsModel.append(visualisation);
+    _visualisationsFromUI = visualisations;
+    emit visualisationsChanged();
 
     setSaveRequired();
 }
@@ -494,26 +489,7 @@ static QStringList sortedTransforms(QStringList transforms)
 
 QStringList Document::graphTransformConfigurationsFromUI() const
 {
-    QStringList transforms;
-
-    const auto list = _graphTransformsModel.list();
-    transforms.reserve(list.size());
-    for(const auto& variant : list)
-        transforms.append(variant.toString());
-
-    return sortedTransforms(transforms);
-}
-
-QStringList Document::visualisationsFromUI() const
-{
-    QStringList visualisations;
-
-    const auto list = _visualisationsModel.list();
-    visualisations.reserve(list.size());
-    for(const auto& variant : list)
-        visualisations.append(variant.toString());
-
-    return visualisations;
+    return sortedTransforms(_graphTransformsFromUI);
 }
 
 bool Document::hasValidEdgeTextVisualisation() const
@@ -523,9 +499,12 @@ bool Document::hasValidEdgeTextVisualisation() const
 
 void Document::initialiseLayoutSettingsModel()
 {
-    _layoutSettingsModel.clear();
+    QStringList layoutSettingNames;
     for(const auto& setting : _layoutThread->settings())
-        _layoutSettingsModel.append(setting.name());
+        layoutSettingNames.append(setting.name());
+
+    _layoutSettingNames = layoutSettingNames;
+    emit layoutSettingNamesChanged();
 }
 
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pluginName, const QVariantMap& parameters)
@@ -2203,10 +2182,18 @@ bool Document::graphTransformIsValid(const QString& transform) const
     return _graphModel != nullptr ? _graphModel->graphTransformIsValid(transform) : false;
 }
 
+void Document::setGraphTransform(int index, const QString& transform)
+{
+    Q_ASSERT(index >= 0 && index < _graphTransformsFromUI.count());
+    _graphTransformsFromUI[index] = transform;
+    emit transformsChanged();
+}
+
 void Document::removeGraphTransform(int index)
 {
-    Q_ASSERT(index >= 0 && index < _graphTransformsModel.count());
-    _graphTransformsModel.remove(index);
+    Q_ASSERT(index >= 0 && index < _graphTransformsFromUI.count());
+    _graphTransformsFromUI.removeAt(index);
+    emit transformsChanged();
 }
 
 // This tests two transform lists to determine if replacing one with the
@@ -2360,10 +2347,18 @@ bool Document::visualisationIsValid(const QString& visualisation) const
     return _graphModel != nullptr ? _graphModel->visualisationIsValid(visualisation) : false;
 }
 
+void Document::setVisualisation(int index, const QString& visualisation)
+{
+    Q_ASSERT(index >= 0 && index < _visualisationsFromUI.count());
+    _visualisationsFromUI[index] = visualisation;
+    emit visualisationsChanged();
+}
+
 void Document::removeVisualisation(int index)
 {
-    Q_ASSERT(index >= 0 && index < _visualisationsModel.count());
-    _visualisationsModel.remove(index);
+    Q_ASSERT(index >= 0 && index < _visualisationsFromUI.count());
+    _visualisationsFromUI.removeAt(index);
+    emit visualisationsChanged();
 }
 
 // This tests two visualisation lists to determine if replacing one with the
@@ -2458,7 +2453,7 @@ void Document::update(QStringList newGraphTransforms,
     else
         setTransforms(uiGraphTransforms);
 
-    auto uiVisualisations = visualisationsFromUI();
+    auto uiVisualisations = _visualisationsFromUI;
 
     if(!newVisualisations.empty())
     {

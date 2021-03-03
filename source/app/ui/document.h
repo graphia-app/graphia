@@ -39,7 +39,6 @@
 
 #include "attributes/enrichmenttablemodel.h"
 
-#include <QQmlVariantListModel.h>
 #include <QQmlObjectListModel.h>
 
 #include <QQuickItem>
@@ -109,9 +108,9 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(bool canResetView READ canResetView NOTIFY canResetViewChanged)
     Q_PROPERTY(bool canEnterOverviewMode READ canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
-    Q_PROPERTY(QQmlVariantListModel* transforms READ transformsModel CONSTANT)
-    Q_PROPERTY(QQmlVariantListModel* visualisations READ visualisationsModel CONSTANT)
-    Q_PROPERTY(QQmlVariantListModel* layoutSettings READ settingsModel CONSTANT)
+    Q_PROPERTY(QStringList transforms MEMBER _graphTransformsFromUI NOTIFY transformsChanged)
+    Q_PROPERTY(QStringList visualisations MEMBER _visualisationsFromUI NOTIFY visualisationsChanged)
+    Q_PROPERTY(QStringList layoutSettingNames MEMBER _layoutSettingNames NOTIFY layoutSettingNamesChanged)
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
 
@@ -193,18 +192,14 @@ public:
     void setTitle(const QString& title);
     void setStatus(const QString& status);
 
-    QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
     QStringList transforms() const { return _graphTransforms; }
     void setTransforms(const QStringList& transforms);
 
     QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModels()
     { return &_enrichmentTableModels; }
 
-    QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
     QStringList visualisations() const { return _visualisations; }
     void setVisualisations(const QStringList& visualisations);
-
-    QQmlVariantListModel* settingsModel() { return &_layoutSettingsModel; }
 
     float fps() const;
 
@@ -248,7 +243,7 @@ private:
     std::unique_ptr<ParserThread> _graphFileParserThread;
 
     std::unique_ptr<LayoutThread> _layoutThread;
-    QQmlVariantListModel _layoutSettingsModel;
+    QStringList _layoutSettingNames;
 
     DeferredExecutor _deferredExecutor;
 
@@ -261,12 +256,12 @@ private:
     // found nodes text in the UI gets updated minimally
     bool _numNodesFoundChanged = false;
 
-    QQmlVariantListModel _graphTransformsModel;
+    QStringList _graphTransformsFromUI;
     QStringList _graphTransforms;
 
     QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
 
-    QQmlVariantListModel _visualisationsModel;
+    QStringList _visualisationsFromUI;
     QStringList _visualisations;
 
     std::atomic_bool _saveRequired{false};
@@ -285,7 +280,6 @@ private:
     std::map<QString, NodeIdSet> _bookmarks;
 
     QStringList graphTransformConfigurationsFromUI() const;
-    QStringList visualisationsFromUI() const;
 
     bool hasValidEdgeTextVisualisation() const;
 
@@ -388,6 +382,10 @@ signals:
 
     void hasValidEdgeTextVisualisationChanged();
 
+    void transformsChanged();
+    void visualisationsChanged();
+    void layoutSettingNamesChanged();
+
 public:
     // Main QML interface
     Q_INVOKABLE bool openFile(const QUrl& fileUrl,
@@ -480,6 +478,7 @@ public:
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
+    Q_INVOKABLE void setGraphTransform(int index, const QString& transform);
     Q_INVOKABLE void removeGraphTransform(int index);
     Q_INVOKABLE void moveGraphTransform(int from, int to);
 
@@ -493,6 +492,7 @@ public:
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
     Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType, const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
+    Q_INVOKABLE void setVisualisation(int index, const QString& visualisation);
     Q_INVOKABLE void removeVisualisation(int index);
     Q_INVOKABLE void moveVisualisation(int from, int to);
 

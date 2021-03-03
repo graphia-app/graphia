@@ -592,6 +592,7 @@ Item
             newExpression += " " + key + " = " + parameters[key];
 
         value = newExpression;
+        document.setVisualisation(index, value);
         document.update([], [], replaceLastCommand);
     }
 

@@ -249,6 +249,7 @@ Item
             flagsString = "[" + flags.toString() + "] ";
 
         value = flagsString + expandedTemplate;
+        document.setGraphTransform(index, value);
         document.update();
     }
 

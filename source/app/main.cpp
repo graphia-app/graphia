@@ -195,7 +195,6 @@ int start(int argc, char *argv[])
     qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qRegisterMetaType<size_t>("size_t");
-    qRegisterMetaType<QQmlVariantListModel*>("QQmlVariantListModel*");
 
     ThreadPoolSingleton threadPool;
     ScopeTimerManager scopeTimerManager;
