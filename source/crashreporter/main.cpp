@@ -184,8 +184,9 @@ static void uploadReport(const QString& email, const QString& text,
 
     if(!attachmentDir.isEmpty())
     {
+        QString fingerPrint = QFileInfo(dmpFile).baseName();
+
         QDirIterator dirIterator(attachmentDir);
-        int fileIndex = 0;
         while(dirIterator.hasNext())
         {
             QString fileName = dirIterator.next();
@@ -198,8 +199,8 @@ static void uploadReport(const QString& email, const QString& text,
             QHttpPart attachmentPart;
             attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
             attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                                     QVariant(QStringLiteral(R"(form-data; name="attachment%1"; filename="%2")")
-                                        .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
+                                     QVariant(QStringLiteral(R"(form-data; name="%1_%2"; filename="%2")")
+                                        .arg(fingerPrint, fileInfo.fileName())));
             auto* attachment = new QFile(fileName);
             attachment->open(QIODevice::ReadOnly);
             attachmentPart.setBodyDevice(attachment);
