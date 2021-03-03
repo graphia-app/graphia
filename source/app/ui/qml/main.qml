@@ -141,6 +141,46 @@ ApplicationWindow
         }
     }
 
+    function currentState()
+    {
+        let s = tabView.count + " tabs";
+
+        for(let index = 0; index < tabView.count; index++)
+        {
+            if(s.length !== 0)
+                s += "\n\n";
+
+            s += "Tab " + index + ": ";
+            let tab = tabView.getTab(index).item;
+            if(tab === null)
+            {
+                s += "null";
+                continue;
+            }
+
+            s += tab.title;
+            s += "\n\n" + tab.document.graphSizeSummary();
+            s += "\n\nParse Log:\n" + tab.document.log;
+
+            let qqvlmToString = function(qqvlm, title)
+            {
+                if(qqvlm.rowCount() > 0)
+                {
+                    s += "\n" + title;
+                    for(let row = 0; row < qqvlm.rowCount(); row++)
+                        s += "\n  " + qqvlm.data(qqvlm.index(row, 0), /*UserRole*/0x0100);
+                }
+            };
+
+            qqvlmToString(tab.document.transforms, "Transforms:");
+            qqvlmToString(tab.document.visualisations, "Visualisations:");
+        }
+
+        s += "\n\nEnvironment:\n" + mainWindow.environment;
+
+        return s;
+    }
+
     property var _pendingArguments: []
 
     // This is called with the arguments of a second instance of the app,

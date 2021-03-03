@@ -286,6 +286,24 @@ int start(int argc, char *argv[])
 
 #ifndef _DEBUG
     CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));
+    c.onCrash([mainWindow](const QString& directory)
+    {
+        QVariant state;
+
+        bool success = QMetaObject::invokeMethod(mainWindow, "currentState",
+            Q_RETURN_ARG(QVariant, state));
+
+        if(success)
+        {
+            QFile file(QDir(directory).filePath("state.txt"));
+            std::cerr << "Writing " << file.fileName().toStdString() << "\n";
+
+            file.open(QIODevice::ReadWrite);
+            QTextStream stream(&file);
+            stream << state.toString();
+            file.close();
+        }
+    });
 #endif
 
     auto exitCode = QCoreApplication::exec();
