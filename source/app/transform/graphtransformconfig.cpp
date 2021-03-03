@@ -332,15 +332,15 @@ QString GraphTransformConfig::asString() const
 
     if(!_attributes.empty())
     {
-        s += QStringLiteral(" using ");
+        s += QStringLiteral(" using");
 
         for(const auto& attribute : _attributes)
-            s += QStringLiteral(R"($"%1")").arg(attribute);
+            s += QStringLiteral(R"( $"%1")").arg(attribute);
     }
 
     if(!_parameters.empty())
     {
-        s += QStringLiteral(" with ");
+        s += QStringLiteral(" with");
 
         for(const auto& parameter : _parameters)
         {
