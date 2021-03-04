@@ -1182,6 +1182,16 @@ void CorrelationPlotItem::populateLinePlot()
             double stdDev = std::sqrt(variance);
             double pareto = std::sqrt(stdDev);
 
+            double attributeValue = 1.0;
+
+            if(static_cast<PlotScaleType>(_plotScaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
+            {
+                attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, row));
+
+                if(attributeValue == 0.0 || !std::isfinite(attributeValue))
+                    attributeValue = 1.0;
+            }
+
             yData.clear();
             xData.clear();
 
@@ -1211,6 +1221,9 @@ void CorrelationPlotItem::populateLinePlot()
                 case PlotScaleType::Pareto:
                     value -= rowMean;
                     value /= pareto;
+                    break;
+                case PlotScaleType::ByAttribute:
+                    value /= attributeValue;
                     break;
                 default:
                     break;
@@ -1756,6 +1769,17 @@ void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
     if(_plotScaleType != plotScaleType)
     {
         _plotScaleType = plotScaleType;
+        emit plotOptionsChanged();
+        rebuildPlot(InvalidateCache::Yes);
+    }
+}
+
+void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
+{
+    if(_scaleByAttributeName != attributeName || _plotScaleType != static_cast<int>(PlotScaleType::ByAttribute))
+    {
+        _scaleByAttributeName = attributeName;
+        _plotScaleType = static_cast<int>(PlotScaleType::ByAttribute);
         emit plotOptionsChanged();
         rebuildPlot(InvalidateCache::Yes);
     }

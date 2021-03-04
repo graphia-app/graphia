@@ -63,6 +63,8 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     const auto* modelQObject = dynamic_cast<const QObject*>(_graphModel);
     connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
             this, SIGNAL(sharedValuesAttributeNamesChanged()));
+    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
+            this, SIGNAL(numericalAttributeNamesChanged()));
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
@@ -309,6 +311,26 @@ QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
 
         if(attribute != nullptr && !attribute->sharedValues().empty())
             attributeNames.append(attributeName);
+    }
+
+    return attributeNames;
+}
+
+QStringList CorrelationPluginInstance::numericalAttributeNames() const
+{
+    QStringList attributeNames;
+    attributeNames.reserve(static_cast<int>(_graphModel->attributeNames().size()));
+
+    for(const auto& attributeName : _graphModel->attributeNames())
+    {
+        const auto* attribute = _graphModel->attributeByName(attributeName);
+        Q_ASSERT(attribute != nullptr);
+
+        if(attribute != nullptr && !attribute->hasParameter() &&
+            attribute->valueType() & ValueType::Numerical)
+        {
+            attributeNames.append(attributeName);
+        }
     }
 
     return attributeNames;

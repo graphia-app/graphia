@@ -58,6 +58,9 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QStringList sharedValuesAttributeNames READ sharedValuesAttributeNames
         NOTIFY sharedValuesAttributeNamesChanged)
 
+    Q_PROPERTY(QStringList numericalAttributeNames READ numericalAttributeNames
+        NOTIFY numericalAttributeNamesChanged)
+
     Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
@@ -126,6 +129,7 @@ private:
     void setHighlightedRows(const QVector<int>& highlightedRows);
 
     QStringList sharedValuesAttributeNames() const;
+    QStringList numericalAttributeNames() const;
 
 public:
     void setDimensions(size_t numColumns, size_t numRows);
@@ -169,6 +173,7 @@ private slots:
 signals:
     void columnAnnotationNamesChanged();
     void sharedValuesAttributeNamesChanged();
+    void numericalAttributeNamesChanged();
     void nodeColorsChanged();
     void highlightedRowsChanged();
 };

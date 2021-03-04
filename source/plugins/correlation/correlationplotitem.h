@@ -49,7 +49,8 @@ DEFINE_QML_ENUM(
     Log,
     MeanCentre,
     UnitVariance,
-    Pareto);
+    Pareto,
+    ByAttribute);
 
 DEFINE_QML_ENUM(
     Q_GADGET, PlotAveragingType,
@@ -148,6 +149,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString scaleByAttributeName MEMBER _scaleByAttributeName
+        WRITE setScaleByAttributeName NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString plotAveragingAttributeName MEMBER _plotAveragingAttributeName
         WRITE setPlotAveragingAttributeName NOTIFY plotOptionsChanged)
@@ -177,6 +180,7 @@ public:
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
 
     void setPlotScaleType(int plotScaleType);
+    void setScaleByAttributeName(const QString& attributeName);
     void setPlotDispersionType(int plotDispersionType);
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
@@ -239,6 +243,7 @@ private:
     bool _showGridLines = true;
     bool _showLegend = false;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
+    QString _scaleByAttributeName;
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     QString _plotAveragingAttributeName;
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);

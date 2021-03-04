@@ -323,6 +323,11 @@ PluginContent
         id: sharedValuesAttributeExclusiveGroup
     }
 
+    ExclusiveGroup
+    {
+        id: scaleByAttributeExclusiveGroup
+    }
+
     Action
     {
         id: savePlotImageAction
@@ -410,6 +415,17 @@ PluginContent
                 plot.plotAveragingAttributeName = "";
             }
         }
+
+        function onNumericalAttributeNamesChanged()
+        {
+            if(!plugin.model.numericalAttributeNames.includes(
+                plot.scaleByAttributeName))
+            {
+                // The scaling attribute doesn't exist any more, so unset it
+                plot.plotScaleType = PlotScaleType.Raw;
+                plot.scaleByAttributeName = "";
+            }
+        }
     }
 
     function createMenu(index, menu)
@@ -448,6 +464,29 @@ PluginContent
             scalingMenu.enabled = Qt.binding(function()
             {
                 return plot.plotAveragingType === PlotAveragingType.Individual
+            });
+
+            scalingMenu.addSeparator();
+            let scaleByAttributeMenu = scalingMenu.addMenu(qsTr("By Attribute"));
+            plugin.model.numericalAttributeNames.forEach(function(attributeName)
+            {
+                let attributeMenuItem = scaleByAttributeMenu.addItem(attributeName);
+
+                attributeMenuItem.exclusiveGroup = scaleByAttributeExclusiveGroup;
+                attributeMenuItem.checkable = true;
+                attributeMenuItem.checked = Qt.binding(function()
+                {
+                    if(plot.plotScaleType !== PlotScaleType.ByAttribute)
+                        return false;
+
+                    return attributeName === plot.scaleByAttributeName;
+                });
+
+                attributeMenuItem.triggered.connect(function()
+                {
+                    plot.scaleByAttributeName = attributeName;
+                    plot.plotScaleType = PlotScaleType.ByAttribute;
+                });
             });
 
             let averagingMenu = menu.addMenu(qsTr("Averaging"));
@@ -807,6 +846,7 @@ PluginContent
             "showColumnNames": plot.showColumnNames,
 
             "plotScaling": plot.plotScaleType,
+            "plotScaleAttributeName": plot.scaleByAttributeName,
             "plotAveraging": plot.plotAveragingType,
             "plotAveragingAttributeName": plot.plotAveragingAttributeName,
             "plotDispersion": plot.plotDispersionType,
@@ -847,6 +887,7 @@ PluginContent
         if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
 
         if(data.plotScaling !== undefined)                  plot.plotScaleType = data.plotScaling;
+        if(data.plotScaleAttributeName !== undefined)       plot.scaleByAttributeName = data.plotScaleAttributeName;
         if(data.plotAveraging !== undefined)                plot.plotAveragingType = data.plotAveraging;
         if(data.plotAveragingAttributeName !== undefined)   plot.plotAveragingAttributeName = data.plotAveragingAttributeName;
         if(data.plotDispersion !== undefined)               plot.plotDispersionType = data.plotDispersion;
