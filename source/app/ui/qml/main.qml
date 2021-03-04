@@ -1069,7 +1069,7 @@ ApplicationWindow
         {
             if(currentDocument !== null)
             {
-                if(enrichmentResults.models.size() > 0)
+                if(enrichmentResults.models.length > 0)
                     enrichmentResults.show();
                 else
                     enrichmentWizard.show();

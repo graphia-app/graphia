@@ -184,19 +184,19 @@ ApplicationWindow
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
-                                sourceModel: qtObject
+                                sourceModel: modelData
 
                                 sorters:
                                 [
                                     RoleSorter
                                     {
-                                        enabled: qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        enabled: modelData.resultIsNumerical(tableView.sortIndicatorColumn)
                                         roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
                                         sortOrder: tableView.sortIndicatorOrder
                                     },
                                     StringSorter
                                     {
-                                        enabled: !qtObject.resultIsNumerical(tableView.sortIndicatorColumn)
+                                        enabled: !modelData.resultIsNumerical(tableView.sortIndicatorColumn)
                                         roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
                                         sortOrder: tableView.sortIndicatorOrder
                                         numericMode: true
@@ -251,17 +251,17 @@ ApplicationWindow
                                 }
                             }
 
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.AdjustedFishers); title: qsTr("Adjusted Fishers"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.AdjustedFishers); title: qsTr("Adjusted Fishers"); }
 
                             Connections
                             {
-                                target: qtObject
+                                target: modelData
                                 function onDataChanged() { resizeColumnsToContentsBugWorkaround(); }
                             }
                         }
@@ -280,7 +280,7 @@ ApplicationWindow
                                 Layout.minimumHeight: 200
                                 Layout.minimumWidth: 170
                                 Layout.preferredWidth: (tab.width * 0.5) - 5
-                                model: qtObject
+                                model: modelData
                                 elideLabelWidth: 100
                                 showOnlyEnriched: showOnlyEnrichedButton.checked
                                 property bool horizontalScrollBarRequired: (heatmap.width / heatmap.horizontalRangeSize) > scrollView.viewport.width;
@@ -331,7 +331,7 @@ ApplicationWindow
 
                         Connections
                         {
-                            target: qtObject
+                            target: modelData
                             function onModelReset() { heatmap.buildPlot(); }
                         }
                     }

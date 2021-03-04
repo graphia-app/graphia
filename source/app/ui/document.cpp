@@ -84,8 +84,7 @@ QColor Document::contrastingColorForBackground()
 Document::Document(QObject* parent) :
     QObject(parent),
     _graphChanging(false),
-    _layoutRequired(true),
-    _enrichmentTableModels(this)
+    _layoutRequired(true)
 {}
 
 Document::~Document()
@@ -660,10 +659,11 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
                 for(const auto& table : enrichmentTableModels)
                 {
                     auto* tableModel = new EnrichmentTableModel(this);
-                    _enrichmentTableModels.append(tableModel);
                     tableModel->setTableData(table);
-                    emit enrichmentTableModelsChanged();
+                    _enrichmentTableModels.append(QVariant::fromValue(tableModel));
                 }
+
+                emit enrichmentTableModelsChanged();
             });
         });
     }
@@ -2874,10 +2874,12 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         tableModel->setTableData(result);
         executeOnMainThreadAndWait([this, tableModel]
         {
-            _enrichmentTableModels.append(tableModel);
+            _enrichmentTableModels.append(QVariant::fromValue(tableModel));
         });
+
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
+
         return true;
     }, tr("Enrichment Analysis"));
 }

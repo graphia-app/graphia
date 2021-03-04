@@ -216,8 +216,11 @@ bool NativeSaver::save()
 
     content["log"] = _document->log();
 
-    for(const auto* table : *_document->enrichmentTableModels())
+    for(const auto& variant : _document->enrichmentTableModels())
+    {
+        auto* table = variant.value<EnrichmentTableModel*>();
         content["enrichmentTables"].push_back(enrichmentTableModelAsJson(*table));
+    }
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 

@@ -39,8 +39,6 @@
 
 #include "attributes/enrichmenttablemodel.h"
 
-#include <QQmlObjectListModel.h>
-
 #include <QQuickItem>
 #include <QString>
 #include <QStringList>
@@ -89,7 +87,7 @@ class Document : public QObject, public IDocument, public FailureReason
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
-    Q_PROPERTY(QAbstractListModel* enrichmentTableModels READ enrichmentTableModels NOTIFY enrichmentTableModelsChanged)
+    Q_PROPERTY(QVariantList enrichmentTableModels READ enrichmentTableModels NOTIFY enrichmentTableModelsChanged)
 
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
@@ -195,11 +193,10 @@ public:
     QStringList transforms() const { return _graphTransforms; }
     void setTransforms(const QStringList& transforms);
 
-    QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModels()
-    { return &_enrichmentTableModels; }
-
     QStringList visualisations() const { return _visualisations; }
     void setVisualisations(const QStringList& visualisations);
+
+    const QVariantList& enrichmentTableModels() { return _enrichmentTableModels; }
 
     float fps() const;
 
@@ -259,10 +256,10 @@ private:
     QStringList _graphTransformsFromUI;
     QStringList _graphTransforms;
 
-    QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
-
     QStringList _visualisationsFromUI;
     QStringList _visualisations;
+
+    QVariantList _enrichmentTableModels;
 
     std::atomic_bool _saveRequired{false};
 
