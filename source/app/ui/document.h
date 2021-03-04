@@ -529,6 +529,7 @@ public:
         TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices);
 
     Q_INVOKABLE QString graphSizeSummary() const;
+    Q_INVOKABLE QString commandStackSummary() const;
 
 private slots:
     void onLoadProgress(int percentage);

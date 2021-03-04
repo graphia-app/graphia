@@ -2961,3 +2961,8 @@ QString Document::graphSizeSummary() const
 
     return text;
 }
+
+QString Document::commandStackSummary() const
+{
+    return _commandManager.commandStackSummary();
+}

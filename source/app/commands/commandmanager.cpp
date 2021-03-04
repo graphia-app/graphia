@@ -387,6 +387,29 @@ void CommandManager::wait()
     while(commandsArePending());
 }
 
+QString CommandManager::commandStackSummary() const
+{
+    // Strictly speaking this should be locked, but since
+    // it is only ever called in a setting where we're
+    // crashed, that could cause problems
+
+    QString text;
+    int index = 0;
+
+    for(const auto& command : _stack)
+    {
+        if(!text.isEmpty())
+            text.append("\n");
+
+        if(_lastExecutedIndex == index++)
+            text.append("*");
+
+        text.append(command->description());
+    }
+
+    return text;
+}
+
 void CommandManager::joinThread()
 {
     if(_thread.joinable())

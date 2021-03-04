@@ -80,6 +80,9 @@ public:
 
     void wait();
 
+    // This is intended for debugging only
+    QString commandStackSummary() const;
+
 private:
     template<typename Fn> void doCommand(ICommand* command,
                                          const QString& verb, Fn&& fn)

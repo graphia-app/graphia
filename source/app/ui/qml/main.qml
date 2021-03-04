@@ -162,6 +162,10 @@ ApplicationWindow
             s += "\n\n" + tab.document.graphSizeSummary();
             s += "\n\nParse Log:\n" + tab.document.log;
 
+            let stack = tab.document.commandStackSummary();
+            if(stack.length > 0)
+                s += "\n\nCommand Stack:\n" + stack;
+
             let listToString = function(list, title)
             {
                 if(list.length > 0)
