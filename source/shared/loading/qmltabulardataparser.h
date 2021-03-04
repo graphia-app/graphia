@@ -123,8 +123,6 @@ public:
             , APP_MAJOR_VERSION
 #endif
             );
-
-        qRegisterMetaType<TabularData*>("TabularData*");
     }
 
 signals:

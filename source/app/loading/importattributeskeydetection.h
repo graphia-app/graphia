@@ -65,8 +65,6 @@ public:
         initialised = true;
         qmlRegisterType<ImportAttributesKeyDetection>(APP_URI, APP_MAJOR_VERSION,
             APP_MINOR_VERSION, "ImportAttributesKeyDetection");
-
-        qRegisterMetaType<TabularData*>("TabularData*");
     }
 
 signals:
