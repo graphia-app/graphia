@@ -2106,9 +2106,6 @@ ApplicationWindow
 
         function onPluginLoadComplete() { updatePluginMenus(); }
         function onPluginPoppedOutChanged() { updatePluginMenus(); }
-
-        // Plugin menus may reference attributes, so regenerate menus when these change
-        function onSharedValuesAttributeNamesChanged() { updatePluginMenus(); }
     }
 
     Connections
@@ -2121,6 +2118,9 @@ ApplicationWindow
         }
 
         function onEnrichmentAnalysisComplete() { enrichmentResults.visible = true; }
+
+        // Plugin menus may reference attributes, so regenerate menus when these change
+        function onAttributesChanged() { updatePluginMenus(); }
     }
 
     toolBar: ToolBar
