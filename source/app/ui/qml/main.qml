@@ -162,18 +162,18 @@ ApplicationWindow
             s += "\n\n" + tab.document.graphSizeSummary();
             s += "\n\nParse Log:\n" + tab.document.log;
 
-            let qqvlmToString = function(qqvlm, title)
+            let listToString = function(list, title)
             {
-                if(qqvlm.rowCount() > 0)
+                if(list.length > 0)
                 {
-                    s += "\n" + title;
-                    for(let row = 0; row < qqvlm.rowCount(); row++)
-                        s += "\n  " + qqvlm.data(qqvlm.index(row, 0), /*UserRole*/0x0100);
+                    s += "\n\n" + title;
+                    for(let row = 0; row < list.length; row++)
+                        s += "\n  " + list[row];
                 }
             };
 
-            qqvlmToString(tab.document.transforms, "Transforms:");
-            qqvlmToString(tab.document.visualisations, "Visualisations:");
+            listToString(tab.document.transforms, "Transforms:");
+            listToString(tab.document.visualisations, "Visualisations:");
         }
 
         s += "\n\nEnvironment:\n" + mainWindow.environment;
