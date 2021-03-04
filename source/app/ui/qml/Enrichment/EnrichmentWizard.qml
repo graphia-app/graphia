@@ -42,7 +42,7 @@ Wizard
     property string selectedAttributeGroupB: ""
 
     nextEnabled: proxyModel.count > 1
-    finishEnabled: (attributeSelectedAExclusiveGroup.current != null) && (attributeSelectedBExclusiveGroup.current != null)
+    finishEnabled: (attributeSelectedAExclusiveGroup.current !== null) && (attributeSelectedBExclusiveGroup.current !== null)
 
     function reset()
     {
@@ -264,7 +264,7 @@ Wizard
                             id: attributeSelectedBExclusiveGroup
                             onCurrentChanged:
                             {
-                                if(current != null && root.visible)
+                                if(current !== null && root.visible)
                                     selectedAttributeGroupB = current.attributeName;
                             }
                         }

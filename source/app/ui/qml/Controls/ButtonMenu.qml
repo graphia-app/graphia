@@ -92,7 +92,7 @@ Item
                 verticalCenter: parent.verticalCenter
             }
 
-            text: root.selectedValue != "" ? root.selectedValue : root.text
+            text: root.selectedValue !== "" ? root.selectedValue : root.text
             color: root._contrastingColor
             font.bold: true
         }

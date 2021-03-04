@@ -664,7 +664,7 @@ ApplicationWindow
             tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
         };
 
-        if(currentTab != null && !inNewTab)
+        if(currentTab !== null && !inNewTab)
             tabView.replaceTab(openInCurrentTab);
         else
             tabView.createTab(openInCurrentTab);
@@ -2089,7 +2089,7 @@ ApplicationWindow
         document: currentDocument
         onAccepted:
         {
-            if(currentDocument != null)
+            if(currentDocument !== null)
                 currentDocument.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
 
             enrichmentWizard.reset();

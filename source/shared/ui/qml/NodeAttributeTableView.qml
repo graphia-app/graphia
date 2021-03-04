@@ -392,7 +392,7 @@ Item
                     return row > 0 ? 0 : -1;
                 }
                 columnWidthProvider: tableView.columnWidthProvider;
-                visible: tableView.columns != 0
+                visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
                 onOriginXChanged:
@@ -1140,7 +1140,7 @@ Item
                     let rowIsSelected = selectionModel.isSelected(
                         proxyModel.index(clickedRow, 0));
 
-                    if((mouse.modifiers & Qt.ShiftModifier) && endRow != -1)
+                    if((mouse.modifiers & Qt.ShiftModifier) && endRow !== -1)
                     {
                         selectRows(endRow, clickedRow);
                     }
@@ -1177,7 +1177,7 @@ Item
                         }
                         else
                         {
-                            if(previousRow != -1)
+                            if(previousRow !== -1)
                                 deselectRows(startRow, previousRow);
 
                             selectRows(startRow, rowUnderCursor);
@@ -1195,7 +1195,7 @@ Item
 
                 Keys.onDownPressed:
                 {
-                    if(endRow != -1 && (endRow + 1) < tableView.rows)
+                    if(endRow !== -1 && (endRow + 1) < tableView.rows)
                     {
                         endRow++;
                         arrowPress(event.modifiers);
@@ -1203,7 +1203,7 @@ Item
                 }
                 Keys.onUpPressed:
                 {
-                    if(endRow != -1 && (endRow - 1) >= 0)
+                    if(endRow !== -1 && (endRow - 1) >= 0)
                     {
                         endRow--;
                         arrowPress(event.modifiers);
@@ -1248,7 +1248,7 @@ Item
             id: horizontalScrollItem
             height: 9
             Layout.fillWidth: true
-            visible: horizontalTableViewScrollBar.size != 1.0
+            visible: horizontalTableViewScrollBar.size !== 1.0
         }
     }
 
