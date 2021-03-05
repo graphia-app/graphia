@@ -301,43 +301,28 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
 
 QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
 {
-    QStringList attributeNames;
-    attributeNames.reserve(static_cast<int>(_graphModel->attributeNames().size()));
-
-    for(const auto& attributeName : _graphModel->attributeNames())
+    auto attributeNames = _graphModel->attributeNamesMatching(
+    [](const IAttribute& attribute)
     {
-        const auto* attribute = _graphModel->attributeByName(attributeName);
-        Q_ASSERT(attribute != nullptr);
+        return !attribute.hasParameter() &&
+            attribute.elementType() == ElementType::Node &&
+            !attribute.sharedValues().empty();
+    });
 
-        if(attribute != nullptr && attribute->elementType() == ElementType::Node &&
-            !attribute->sharedValues().empty())
-        {
-            attributeNames.append(attributeName);
-        }
-    }
-
-    return attributeNames;
+    return u::toQStringList(attributeNames);
 }
 
 QStringList CorrelationPluginInstance::numericalAttributeNames() const
 {
-    QStringList attributeNames;
-    attributeNames.reserve(static_cast<int>(_graphModel->attributeNames().size()));
-
-    for(const auto& attributeName : _graphModel->attributeNames())
+    auto attributeNames = _graphModel->attributeNamesMatching(
+    [](const IAttribute& attribute)
     {
-        const auto* attribute = _graphModel->attributeByName(attributeName);
-        Q_ASSERT(attribute != nullptr);
+        return !attribute.hasParameter() &&
+            attribute.elementType() == ElementType::Node &&
+            attribute.valueType() & ValueType::Numerical;
+    });
 
-        if(attribute != nullptr && !attribute->hasParameter() &&
-            attribute->elementType() == ElementType::Node &&
-            attribute->valueType() & ValueType::Numerical)
-        {
-            attributeNames.append(attributeName);
-        }
-    }
-
-    return attributeNames;
+    return u::toQStringList(attributeNames);
 }
 
 EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
