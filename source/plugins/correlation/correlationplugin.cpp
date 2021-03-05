@@ -309,8 +309,11 @@ QStringList CorrelationPluginInstance::sharedValuesAttributeNames() const
         const auto* attribute = _graphModel->attributeByName(attributeName);
         Q_ASSERT(attribute != nullptr);
 
-        if(attribute != nullptr && !attribute->sharedValues().empty())
+        if(attribute != nullptr && attribute->elementType() == ElementType::Node &&
+            !attribute->sharedValues().empty())
+        {
             attributeNames.append(attributeName);
+        }
     }
 
     return attributeNames;
@@ -327,6 +330,7 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
         Q_ASSERT(attribute != nullptr);
 
         if(attribute != nullptr && !attribute->hasParameter() &&
+            attribute->elementType() == ElementType::Node &&
             attribute->valueType() & ValueType::Numerical)
         {
             attributeNames.append(attributeName);
