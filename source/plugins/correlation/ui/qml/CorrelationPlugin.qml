@@ -173,8 +173,8 @@ PluginContent
             id: rawScaling
             text: qsTr("Raw")
             checkable: true
-            checked: plot.plotScaleType === PlotScaleType.Raw
-            onTriggered: { plot.plotScaleType = PlotScaleType.Raw; }
+            checked: plot.scaleType === PlotScaleType.Raw
+            onTriggered: { plot.scaleType = PlotScaleType.Raw; }
         }
 
         Action
@@ -182,8 +182,8 @@ PluginContent
             id: logScaling
             text:  qsTr("Log(x + ε)");
             checkable: true
-            checked: plot.plotScaleType === PlotScaleType.Log
-            onTriggered: { plot.plotScaleType = PlotScaleType.Log; }
+            checked: plot.scaleType === PlotScaleType.Log
+            onTriggered: { plot.scaleType = PlotScaleType.Log; }
         }
 
         Action
@@ -191,8 +191,8 @@ PluginContent
             id: meanCentreScaling
             text: qsTr("Mean Centre Scaling")
             checkable: true
-            checked: plot.plotScaleType === PlotScaleType.MeanCentre
-            onTriggered: { plot.plotScaleType = PlotScaleType.MeanCentre; }
+            checked: plot.scaleType === PlotScaleType.MeanCentre
+            onTriggered: { plot.scaleType = PlotScaleType.MeanCentre; }
         }
 
         Action
@@ -200,8 +200,8 @@ PluginContent
             id: unitVarianceScaling
             text: qsTr("Unit Variance Scaling")
             checkable: true
-            checked: plot.plotScaleType === PlotScaleType.UnitVariance
-            onTriggered: { plot.plotScaleType = PlotScaleType.UnitVariance; }
+            checked: plot.scaleType === PlotScaleType.UnitVariance
+            onTriggered: { plot.scaleType = PlotScaleType.UnitVariance; }
         }
 
         Action
@@ -209,8 +209,8 @@ PluginContent
             id: paretoScaling
             text: qsTr("Pareto Scaling")
             checkable: true
-            checked: plot.plotScaleType === PlotScaleType.Pareto
-            onTriggered: { plot.plotScaleType = PlotScaleType.Pareto; }
+            checked: plot.scaleType === PlotScaleType.Pareto
+            onTriggered: { plot.scaleType = PlotScaleType.Pareto; }
         }
     }
 
@@ -219,21 +219,21 @@ PluginContent
         Action
         {
             id: barDeviationVisual
-            enabled: plot.plotDispersionType !== PlotDispersionType.None
+            enabled: plot.dispersionType !== PlotDispersionType.None
             text: qsTr("Error Bars")
             checkable: true
-            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Bars
-            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Bars; }
+            checked: plot.dispersionVisualType === PlotDispersionVisualType.Bars
+            onTriggered: { plot.dispersionVisualType = PlotDispersionVisualType.Bars; }
         }
 
         Action
         {
             id: graphDeviationVisual
-            enabled: plot.plotDispersionType !== PlotDispersionType.None
+            enabled: plot.dispersionType !== PlotDispersionType.None
             text: qsTr("Area")
             checkable: true
-            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Area
-            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Area; }
+            checked: plot.dispersionVisualType === PlotDispersionVisualType.Area
+            onTriggered: { plot.dispersionVisualType = PlotDispersionVisualType.Area; }
         }
     }
 
@@ -244,24 +244,24 @@ PluginContent
             id: noDispersion
             text: qsTr("None")
             checkable: true
-            checked: plot.plotDispersionType === PlotDispersionType.None
-            onTriggered: { plot.plotDispersionType = PlotDispersionType.None; }
+            checked: plot.dispersionType === PlotDispersionType.None
+            onTriggered: { plot.dispersionType = PlotDispersionType.None; }
         }
         Action
         {
             id: stdDeviations
             text: qsTr("Standard Deviation")
             checkable: true
-            checked: plot.plotDispersionType === PlotDispersionType.StdDev
-            onTriggered: { plot.plotDispersionType = PlotDispersionType.StdDev; }
+            checked: plot.dispersionType === PlotDispersionType.StdDev
+            onTriggered: { plot.dispersionType = PlotDispersionType.StdDev; }
         }
         Action
         {
             id: stdErrorDeviations
             text: qsTr("Standard Error")
             checkable: true
-            checked: plot.plotDispersionType === PlotDispersionType.StdErr
-            onTriggered: { plot.plotDispersionType = PlotDispersionType.StdErr; }
+            checked: plot.dispersionType === PlotDispersionType.StdErr
+            onTriggered: { plot.dispersionType = PlotDispersionType.StdErr; }
         }
     }
 
@@ -272,8 +272,8 @@ PluginContent
             id: individualLineAverage
             text: qsTr("Individual Line")
             checkable: true
-            checked: plot.plotAveragingType === PlotAveragingType.Individual
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.Individual; }
+            checked: plot.averagingType === PlotAveragingType.Individual
+            onTriggered: { plot.averagingType = PlotAveragingType.Individual; }
         }
 
         Action
@@ -281,8 +281,8 @@ PluginContent
             id: meanLineAverage
             text:  qsTr("Mean Line");
             checkable: true
-            checked: plot.plotAveragingType === PlotAveragingType.MeanLine
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanLine; }
+            checked: plot.averagingType === PlotAveragingType.MeanLine
+            onTriggered: { plot.averagingType = PlotAveragingType.MeanLine; }
         }
 
         Action
@@ -290,8 +290,8 @@ PluginContent
             id: medianLineAverage
             text: qsTr("Median Line")
             checkable: true
-            checked: plot.plotAveragingType === PlotAveragingType.MedianLine
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.MedianLine; }
+            checked: plot.averagingType === PlotAveragingType.MedianLine
+            onTriggered: { plot.averagingType = PlotAveragingType.MedianLine; }
         }
 
         Action
@@ -299,8 +299,8 @@ PluginContent
             id: meanHistogramAverage
             text: qsTr("Mean Histogram")
             checkable: true
-            checked: plot.plotAveragingType === PlotAveragingType.MeanHistogram
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanHistogram; }
+            checked: plot.averagingType === PlotAveragingType.MeanHistogram
+            onTriggered: { plot.averagingType = PlotAveragingType.MeanHistogram; }
         }
 
         Action
@@ -308,8 +308,8 @@ PluginContent
             id: iqrAverage
             text: qsTr("IQR Plot")
             checkable: true
-            checked: plot.plotAveragingType === PlotAveragingType.IQRPlot
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.IQRPlot; }
+            checked: plot.averagingType === PlotAveragingType.IQRPlot
+            onTriggered: { plot.averagingType = PlotAveragingType.IQRPlot; }
         }
     }
 
@@ -409,10 +409,10 @@ PluginContent
         function onSharedValuesAttributeNamesChanged()
         {
             if(!plugin.model.sharedValuesAttributeNames.includes(
-                plot.plotAveragingAttributeName))
+                plot.averagingAttributeName))
             {
                 // The averaging attribute doesn't exist any more, so unset it
-                plot.plotAveragingAttributeName = "";
+                plot.averagingAttributeName = "";
             }
         }
 
@@ -422,7 +422,7 @@ PluginContent
                 plot.scaleByAttributeName))
             {
                 // The scaling attribute doesn't exist any more, so unset it
-                plot.plotScaleType = PlotScaleType.Raw;
+                plot.scaleType = PlotScaleType.Raw;
                 plot.scaleByAttributeName = "";
             }
         }
@@ -463,7 +463,7 @@ PluginContent
             scalingMenu.addItem("").action = paretoScaling;
             scalingMenu.enabled = Qt.binding(function()
             {
-                return plot.plotAveragingType === PlotAveragingType.Individual
+                return plot.averagingType === PlotAveragingType.Individual
             });
 
             scalingMenu.addSeparator();
@@ -476,7 +476,7 @@ PluginContent
                 attributeMenuItem.checkable = true;
                 attributeMenuItem.checked = Qt.binding(function()
                 {
-                    if(plot.plotScaleType !== PlotScaleType.ByAttribute)
+                    if(plot.scaleType !== PlotScaleType.ByAttribute)
                         return false;
 
                     return attributeName === plot.scaleByAttributeName;
@@ -485,7 +485,7 @@ PluginContent
                 attributeMenuItem.triggered.connect(function()
                 {
                     plot.scaleByAttributeName = attributeName;
-                    plot.plotScaleType = PlotScaleType.ByAttribute;
+                    plot.scaleType = PlotScaleType.ByAttribute;
                 });
             });
 
@@ -501,19 +501,19 @@ PluginContent
             let sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
             sharedValuesAttributesMenu.enabled = Qt.binding(function()
             {
-                return plot.plotAveragingType !== PlotAveragingType.Individual &&
-                    plot.plotAveragingType !== PlotAveragingType.IQRPlot;
+                return plot.averagingType !== PlotAveragingType.Individual &&
+                    plot.averagingType !== PlotAveragingType.IQRPlot;
             });
             let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
             allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
             allAttributesMenuItem.checkable = true;
             allAttributesMenuItem.checked = Qt.binding(function()
             {
-                return plot.plotAveragingAttributeName.length === 0;
+                return plot.averagingAttributeName.length === 0;
             });
             allAttributesMenuItem.triggered.connect(function()
             {
-                plot.plotAveragingAttributeName = "";
+                plot.averagingAttributeName = "";
             });
 
             sharedValuesAttributesMenu.addSeparator();
@@ -526,12 +526,12 @@ PluginContent
                 attributeMenuItem.checkable = true;
                 attributeMenuItem.checked = Qt.binding(function()
                 {
-                    return attributeName === plot.plotAveragingAttributeName;
+                    return attributeName === plot.averagingAttributeName;
                 });
 
                 attributeMenuItem.triggered.connect(function()
                 {
-                    plot.plotAveragingAttributeName = attributeName;
+                    plot.averagingAttributeName = attributeName;
                 });
             });
 
@@ -544,8 +544,8 @@ PluginContent
             dispersionMenu.addItem("").action = graphDeviationVisual;
             dispersionMenu.enabled = Qt.binding(function()
             {
-                return plot.plotAveragingType === PlotAveragingType.MeanLine ||
-                        plot.plotAveragingType === PlotAveragingType.MeanHistogram
+                return plot.averagingType === PlotAveragingType.MeanLine ||
+                        plot.averagingType === PlotAveragingType.MeanHistogram
             });
 
             menu.addItem("").action = toggleIncludeYZero;
@@ -845,12 +845,12 @@ PluginContent
 
             "showColumnNames": plot.showColumnNames,
 
-            "plotScaling": plot.plotScaleType,
+            "plotScaling": plot.scaleType,
             "plotScaleAttributeName": plot.scaleByAttributeName,
-            "plotAveraging": plot.plotAveragingType,
-            "plotAveragingAttributeName": plot.plotAveragingAttributeName,
-            "plotDispersion": plot.plotDispersionType,
-            "plotDispersionVisual": plot.plotDispersionVisualType,
+            "plotAveraging": plot.averagingType,
+            "plotAveragingAttributeName": plot.averagingAttributeName,
+            "plotDispersion": plot.dispersionType,
+            "plotDispersionVisual": plot.dispersionVisualType,
 
             "plotIncludeYZero": plot.includeYZero,
             "plotShowAllColumns": plot.showAllColumns,
@@ -886,12 +886,12 @@ PluginContent
 
         if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
 
-        if(data.plotScaling !== undefined)                  plot.plotScaleType = data.plotScaling;
+        if(data.plotScaling !== undefined)                  plot.scaleType = data.plotScaling;
         if(data.plotScaleAttributeName !== undefined)       plot.scaleByAttributeName = data.plotScaleAttributeName;
-        if(data.plotAveraging !== undefined)                plot.plotAveragingType = data.plotAveraging;
-        if(data.plotAveragingAttributeName !== undefined)   plot.plotAveragingAttributeName = data.plotAveragingAttributeName;
-        if(data.plotDispersion !== undefined)               plot.plotDispersionType = data.plotDispersion;
-        if(data.plotDispersionVisual !== undefined)         plot.plotDispersionVisualType = data.plotDispersionVisual;
+        if(data.plotAveraging !== undefined)                plot.averagingType = data.plotAveraging;
+        if(data.plotAveragingAttributeName !== undefined)   plot.averagingAttributeName = data.plotAveragingAttributeName;
+        if(data.plotDispersion !== undefined)               plot.dispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)         plot.dispersionVisualType = data.plotDispersionVisual;
 
         if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
         if(data.plotShowAllColumns !== undefined)           plot.showAllColumns = data.plotShowAllColumns;

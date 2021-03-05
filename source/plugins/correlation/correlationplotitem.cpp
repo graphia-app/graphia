@@ -784,10 +784,10 @@ void CorrelationPlotItem::populateMeanLinePlot()
         populateDispersion(graph, minY, maxY, rows, yDataAvg);
     };
 
-    if(!_plotAveragingAttributeName.isEmpty())
+    if(!_averagingAttributeName.isEmpty())
     {
         addPlotPerAttributeValue(_pluginInstance, tr("Mean average of %1: %2"),
-            _plotAveragingAttributeName, _selectedRows, addMeanPlot);
+            _averagingAttributeName, _selectedRows, addMeanPlot);
     }
     else
     {
@@ -851,10 +851,10 @@ void CorrelationPlotItem::populateMedianLinePlot()
         populateDispersion(graph, minY, maxY, rows, yDataAvg);
     };
 
-    if(!_plotAveragingAttributeName.isEmpty())
+    if(!_averagingAttributeName.isEmpty())
     {
         addPlotPerAttributeValue(_pluginInstance, tr("Median average of %1: %2"),
-            _plotAveragingAttributeName, _selectedRows, addMedianPlot);
+            _averagingAttributeName, _selectedRows, addMedianPlot);
     }
     else
     {
@@ -903,10 +903,10 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         populateDispersion(histogramBars, minY, maxY, rows, yDataAvg);
     };
 
-    if(!_plotAveragingAttributeName.isEmpty())
+    if(!_averagingAttributeName.isEmpty())
     {
         addPlotPerAttributeValue(_pluginInstance, tr("Median histogram of %1: %2"),
-            _plotAveragingAttributeName, _selectedRows, addMeanBars);
+            _averagingAttributeName, _selectedRows, addMeanBars);
 
         auto* barsGroup = new QCPBarsGroup(&_customPlot);
         barsGroup->setSpacingType(QCPBarsGroup::stAbsolute);
@@ -1028,7 +1028,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = QStringLiteral("Deviation"))
 {
-    auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
+    auto visualType = static_cast<PlotDispersionVisualType>(_dispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
         auto* stdDevBars = new QCPErrorBars(_mainXAxis, _mainYAxis);
@@ -1133,15 +1133,15 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
-    auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
-    auto plotDispersionType = static_cast<PlotDispersionType>(_plotDispersionType);
+    auto averagingType = static_cast<PlotAveragingType>(_averagingType);
+    auto dispersionType = static_cast<PlotDispersionType>(_dispersionType);
 
-    if(plotAveragingType == PlotAveragingType::Individual || plotAveragingType == PlotAveragingType::IQRPlot)
+    if(averagingType == PlotAveragingType::Individual || averagingType == PlotAveragingType::IQRPlot)
         return;
 
-    if(plotDispersionType == PlotDispersionType::StdDev)
+    if(dispersionType == PlotDispersionType::StdDev)
         populateStdDevPlot(meanPlot, minY, maxY, rows, means);
-    else if(plotDispersionType == PlotDispersionType::StdErr)
+    else if(dispersionType == PlotDispersionType::StdErr)
         populateStdErrorPlot(meanPlot, minY, maxY, rows, means);
 }
 
@@ -1184,7 +1184,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             double attributeValue = 1.0;
 
-            if(static_cast<PlotScaleType>(_plotScaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
+            if(static_cast<PlotScaleType>(_scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
             {
                 attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, row));
 
@@ -1199,7 +1199,7 @@ void CorrelationPlotItem::populateLinePlot()
             {
                 auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
 
-                switch(static_cast<PlotScaleType>(_plotScaleType))
+                switch(static_cast<PlotScaleType>(_scaleType))
                 {
                 case PlotScaleType::Log:
                 {
@@ -1605,7 +1605,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
     removeAllExcept(_mainAxisLayout, _mainAxisRect);
     removeAllExcept(_customPlot.plotLayout(), _mainAxisLayout);
 
-    auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
+    auto plotAveragingType = static_cast<PlotAveragingType>(_averagingType);
     if(plotAveragingType == PlotAveragingType::MeanLine)
         populateMeanLinePlot();
     else if(plotAveragingType == PlotAveragingType::MedianLine)
@@ -1713,11 +1713,11 @@ void CorrelationPlotItem::setYAxisRange(double min, double max)
     _mainYAxis->setRange(min, max);
 }
 
-void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
+void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
 {
-    if(_plotDispersionVisualType != plotDispersionVisualType)
+    if(_dispersionVisualType != dispersionVisualType)
     {
-        _plotDispersionVisualType = plotDispersionVisualType;
+        _dispersionVisualType = dispersionVisualType;
         emit plotOptionsChanged();
         rebuildPlot();
     }
@@ -1764,11 +1764,11 @@ void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
     }
 }
 
-void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
+void CorrelationPlotItem::setScaleType(int scaleType)
 {
-    if(_plotScaleType != plotScaleType)
+    if(_scaleType != scaleType)
     {
-        _plotScaleType = plotScaleType;
+        _scaleType = scaleType;
         emit plotOptionsChanged();
         rebuildPlot(InvalidateCache::Yes);
     }
@@ -1776,40 +1776,40 @@ void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 
 void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
 {
-    if(_scaleByAttributeName != attributeName || _plotScaleType != static_cast<int>(PlotScaleType::ByAttribute))
+    if(_scaleByAttributeName != attributeName || _scaleType != static_cast<int>(PlotScaleType::ByAttribute))
     {
         _scaleByAttributeName = attributeName;
-        _plotScaleType = static_cast<int>(PlotScaleType::ByAttribute);
+        _scaleType = static_cast<int>(PlotScaleType::ByAttribute);
         emit plotOptionsChanged();
         rebuildPlot(InvalidateCache::Yes);
     }
 }
 
-void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
+void CorrelationPlotItem::setAveragingType(int averagingType)
 {
-    if(_plotAveragingType != plotAveragingType)
+    if(_averagingType != averagingType)
     {
-        _plotAveragingType = plotAveragingType;
+        _averagingType = averagingType;
         emit plotOptionsChanged();
         rebuildPlot();
     }
 }
 
-void CorrelationPlotItem::setPlotAveragingAttributeName(const QString& attributeName)
+void CorrelationPlotItem::setAveragingAttributeName(const QString& attributeName)
 {
-    if(_plotAveragingAttributeName != attributeName)
+    if(_averagingAttributeName != attributeName)
     {
-        _plotAveragingAttributeName = attributeName;
+        _averagingAttributeName = attributeName;
         emit plotOptionsChanged();
         rebuildPlot();
     }
 }
 
-void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
+void CorrelationPlotItem::setDispersionType(int dispersionType)
 {
-    if(_plotDispersionType != plotDispersionType)
+    if(_dispersionType != dispersionType)
     {
-        _plotDispersionType = plotDispersionType;
+        _dispersionType = dispersionType;
         emit plotOptionsChanged();
         rebuildPlot();
     }

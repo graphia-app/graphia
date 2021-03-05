@@ -148,15 +148,15 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int scaleType MEMBER _scaleType WRITE setScaleType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString scaleByAttributeName MEMBER _scaleByAttributeName
         WRITE setScaleByAttributeName NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(QString plotAveragingAttributeName MEMBER _plotAveragingAttributeName
-        WRITE setPlotAveragingAttributeName NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
-        WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int averagingType MEMBER _averagingType WRITE setAveragingType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString averagingAttributeName MEMBER _averagingAttributeName
+        WRITE setAveragingAttributeName NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int dispersionType MEMBER _dispersionType WRITE setDispersionType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int dispersionVisualType MEMBER _dispersionVisualType
+        WRITE setDispersionVisualType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QVector<QVariantMap> columnSortOrders MEMBER _columnSortOrders
         WRITE setColumnSortOrders NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
@@ -179,16 +179,16 @@ public:
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
 
-    void setPlotScaleType(int plotScaleType);
+    void setScaleType(int scaleType);
     void setScaleByAttributeName(const QString& attributeName);
-    void setPlotDispersionType(int plotDispersionType);
+    void setDispersionType(int dispersionType);
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
     void setIncludeYZero(bool includeYZero);
     void setShowAllColumns(bool showAllColumns);
-    void setPlotAveragingType(int plotAveragingType);
-    void setPlotAveragingAttributeName(const QString& attributeName);
-    void setPlotDispersionVisualType(int plotDispersionVisualType);
+    void setAveragingType(int averagingType);
+    void setAveragingAttributeName(const QString& attributeName);
+    void setDispersionVisualType(int dispersionVisualType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -242,12 +242,12 @@ private:
     bool _showColumnNames = true;
     bool _showGridLines = true;
     bool _showLegend = false;
-    int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
+    int _scaleType = static_cast<int>(PlotScaleType::Raw);
     QString _scaleByAttributeName;
-    int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
-    QString _plotAveragingAttributeName;
-    int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
-    int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
+    int _averagingType = static_cast<int>(PlotAveragingType::Individual);
+    QString _averagingAttributeName;
+    int _dispersionType = static_cast<int>(PlotDispersionType::None);
+    int _dispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     QVector<QVariantMap> _columnSortOrders;
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
