@@ -58,6 +58,25 @@ public:
     virtual const IAttribute* attributeByName(const QString& name) const = 0;
     virtual bool attributeExists(const QString& name) const = 0;
     virtual std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const = 0;
+
+    template<typename Fn>
+    std::vector<QString> attributeNamesMatching(Fn&& predicate) const
+    {
+        std::vector<QString> matchingAttributeNames;
+        matchingAttributeNames.reserve(attributeNames().size());
+
+        for(const auto& attributeName : attributeNames())
+        {
+            const auto* attribute = attributeByName(attributeName);
+            Q_ASSERT(attribute != nullptr);
+
+            if(predicate(*attribute))
+                matchingAttributeNames.push_back(attributeName);
+        }
+
+        matchingAttributeNames.shrink_to_fit();
+        return matchingAttributeNames;
+    }
 };
 
 #endif // IGRAPHMODEL_H
