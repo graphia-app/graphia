@@ -1040,7 +1040,7 @@ Item
                                     return "";
 
                                 let columnName = root.model.columnNameFor(sourceColumn);
-                                if(root.model.columnIsFloatingPoint(columnName))
+                                if(root.model.columnIsNumerical(columnName))
                                     return QmlUtils.formatNumberScientific(model.display, 1);
 
                                 if(typeof(model.display) === "string")
