@@ -164,33 +164,34 @@ std::istream& u::getline(std::istream& is, std::string& t)
 
 static QString stripZeroes(QString value)
 {
-    // Leading Zero
-    auto indexOfDecimal = value.indexOf(QLocale::system().decimalPoint(), 1);
-    for(int i = 0; i < value.length(); ++i)
+    auto indexOfDecimalPoint = value.indexOf(QLocale::system().decimalPoint(), 1);
+    auto indexOfLastDigit = (indexOfDecimalPoint < 0 ? value.length() : indexOfDecimalPoint) - 1;
+
+    int i = 0;
+
+    // Skip leading non-digits (+/- etc.)
+    while(i < (indexOfLastDigit + 1) && !value[i].isDigit())
+        i++;
+
+    // Strip leading zeroes
+    while(i < indexOfLastDigit && value[i].isDigit() && value[i] == '0')
     {
-        if(!value[i].isDigit())
-            continue;
-
-        if(indexOfDecimal == (i + 1))
-            break;
-
-        if(value[i] == '0')
-            value.remove(i, 1);
-        else
-            break;
+        value.remove(i, 1);
+        indexOfDecimalPoint--;
+        indexOfLastDigit--;
     }
 
-    // Trailing Zero
-    if(indexOfDecimal > -1)
+    if(indexOfDecimalPoint >= 0)
     {
-        while(indexOfDecimal < value.length() - 2)
-        {
-            if(value[value.length() - 1] == '0')
-                value.chop(1);
-            else
-                break;
-        }
+        // Strip trailing zeroes
+        while(value[value.length() - 1] == '0')
+            value.chop(1);
+
+        // Strip trailing decimal point
+        if(value.length() - 1 == indexOfDecimalPoint)
+            value.chop(1);
     }
+
     return value;
 }
 
