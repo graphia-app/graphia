@@ -53,6 +53,8 @@ public:
     QString verb() const override;
     QString pastParticiple() const override;
 
+    QString debugDescription() const override;
+
     bool execute() override;
     void undo() override;
 };

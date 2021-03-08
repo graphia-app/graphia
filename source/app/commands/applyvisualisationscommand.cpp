@@ -19,6 +19,7 @@
 #include "applyvisualisationscommand.h"
 
 #include <QObject>
+#include <QSet>
 #include <QRegularExpression>
 
 #include "graph/graphmodel.h"
@@ -45,6 +46,20 @@ QString ApplyVisualisationsCommand::description() const
 QString ApplyVisualisationsCommand::verb() const
 {
     return QObject::tr("Applying Visualisations");
+}
+
+QString ApplyVisualisationsCommand::debugDescription() const
+{
+    auto prev = QSet<QString>(_previousVisualisations.begin(), _previousVisualisations.end());
+    auto diff = QSet<QString>(_visualisations.begin(), _visualisations.end());
+    diff.subtract(prev);
+
+    auto text = description();
+
+    for(const auto& visualisation : diff)
+        text.append(QStringLiteral("\n  %1").arg(visualisation));
+
+    return text;
 }
 
 void ApplyVisualisationsCommand::apply(const QStringList& visualisations,

@@ -19,6 +19,7 @@
 #include "applytransformscommand.h"
 
 #include <QObject>
+#include <QSet>
 
 #include "graph/graphmodel.h"
 #include "ui/selectionmanager.h"
@@ -44,6 +45,20 @@ QString ApplyTransformsCommand::description() const
 QString ApplyTransformsCommand::verb() const
 {
     return QObject::tr("Applying Transforms");
+}
+
+QString ApplyTransformsCommand::debugDescription() const
+{
+    auto prev = QSet<QString>(_previousTransformations.begin(), _previousTransformations.end());
+    auto diff = QSet<QString>(_transformations.begin(), _transformations.end());
+    diff.subtract(prev);
+
+    auto text = description();
+
+    for(const auto& transform : diff)
+        text.append(QStringLiteral("\n  %1").arg(transform));
+
+    return text;
 }
 
 void ApplyTransformsCommand::doTransform(const QStringList& transformations, const QStringList& previousTransformations)

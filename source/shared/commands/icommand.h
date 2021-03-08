@@ -40,6 +40,9 @@ public:
     virtual QString verb() const { return description(); }
     virtual QString pastParticiple() const { return {}; }
 
+    // A more detailed description for the purposes of debugging
+    virtual QString debugDescription() const { return description(); }
+
     // Return false if the command failed, or did nothing
     virtual bool execute() = 0;
     virtual void undo() { Q_ASSERT(!"undo() not implemented for this ICommand"); }

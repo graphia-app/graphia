@@ -51,6 +51,16 @@ QString ImportAttributesCommand::pastParticiple() const
         QObject::tr("Attribute %1 Imported").arg(_createdAttributeNames.front());
 }
 
+QString ImportAttributesCommand::debugDescription() const
+{
+    QString text = description();
+
+    for(const auto& attributeName : _createdAttributeNames)
+        text.append(QStringLiteral("\n  %1").arg(attributeName));
+
+    return text;
+}
+
 bool ImportAttributesCommand::execute()
 {
     auto tracker = _graphModel->attributeChangesTracker();

@@ -56,6 +56,8 @@ public:
     QString description() const override;
     QString verb() const override;
 
+    QString debugDescription() const override;
+
     bool execute() override;
     void undo() override;
 

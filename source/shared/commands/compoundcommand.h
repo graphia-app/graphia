@@ -82,6 +82,22 @@ public:
         _pastParticiple = pastParticiple;
     }
 
+    QString debugDescription() const override
+    {
+        auto text = _description;
+
+        for(const auto& command : _commands)
+        {
+            auto indent = QStringLiteral("  ");
+            auto commandDescription = indent + command->debugDescription();
+            commandDescription.replace("\n", "\n" + indent);
+
+            text.append(QStringLiteral("\n%1").arg(commandDescription));
+        }
+
+        return text;
+    }
+
     void cancel() override
     {
         ICommand::cancel();
