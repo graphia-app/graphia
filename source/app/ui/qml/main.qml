@@ -1438,6 +1438,18 @@ ApplicationWindow
 
     Action
     {
+        id: dumpCommandStackAction
+        text: qsTr("Dump command stack to qDebug")
+        enabled: application.debugEnabled
+        onTriggered:
+        {
+            if(currentDocument)
+                console.log(currentDocument.commandStackSummary());
+        }
+    }
+
+    Action
+    {
         id: reportScopeTimersAction
         text: qsTr("Report Scope Timers")
         onTriggered: { application.reportScopeTimers(); }
@@ -1949,6 +1961,7 @@ ApplicationWindow
                 }
             }
             MenuItem { action: dumpGraphAction }
+            MenuItem { action: dumpCommandStackAction }
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
             MenuItem { action: reportScopeTimersAction }
