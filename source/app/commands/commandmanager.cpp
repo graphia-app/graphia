@@ -404,7 +404,7 @@ QString CommandManager::commandStackSummary() const
         if(_lastExecutedIndex == index++)
             text.append("*");
 
-        text.append(command->description());
+        text.append(command->debugDescription());
     }
 
     return text;
