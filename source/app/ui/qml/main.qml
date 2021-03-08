@@ -214,7 +214,12 @@ ApplicationWindow
             return;
 
         let url = QmlUtils.urlForUserInput(argument);
-        openFile(url, true);
+        Qt.callLater(function()
+        {
+            // Queue this up to do later in the event loop, in case there
+            // is any other plugin initialisation to do be done beforehand
+            openFile(url, true);
+        });
     }
 
     Component.onCompleted:
@@ -605,7 +610,7 @@ ApplicationWindow
             let component = Qt.createComponent(parametersQmlPath);
             if(component.status !== Component.Ready)
             {
-                console.log(component.errorString());
+                console.log("Error loading parameters QML: " + component.errorString());
                 return;
             }
 
