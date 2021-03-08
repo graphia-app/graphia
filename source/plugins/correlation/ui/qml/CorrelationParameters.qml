@@ -302,6 +302,9 @@ BaseParameterDialog
                                     text:
                                     {
                                         let headerIndex = tabularDataParser.model.index(0, model.column);
+                                        if(!headerIndex.valid)
+                                            return "";
+
                                         return tabularDataParser.model.data(headerIndex);
                                     }
 
