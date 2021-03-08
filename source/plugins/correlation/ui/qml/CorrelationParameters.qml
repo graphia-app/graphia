@@ -327,8 +327,8 @@ BaseParameterDialog
                             syncView: columnHeaderView
 
                             clip: true
-                            QQC2.ScrollBar.vertical: QQC2.ScrollBar { policy: QQC2.ScrollBar.AlwaysOn }
-                            QQC2.ScrollBar.horizontal: QQC2.ScrollBar { policy: QQC2.ScrollBar.AlwaysOn }
+                            QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
+                            QQC2.ScrollBar.horizontal: QQC2.ScrollBar {}
                             Layout.fillHeight: true
                             Layout.fillWidth: true
                             anchors.margins: 1
