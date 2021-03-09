@@ -77,10 +77,10 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
             }
 
             row++;
-
-            if(parser != nullptr)
-                parser->setProgress(static_cast<int>((j++ * 100) / dataRows.size()));
         }
+
+        if(parser != nullptr)
+            parser->setProgress(static_cast<int>((column * 100) / numColumns));
 
         // Copy Result to sortedColumns
         sortedColumnValues[column] = sortedValues;
