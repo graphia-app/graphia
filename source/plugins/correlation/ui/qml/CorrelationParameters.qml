@@ -40,6 +40,12 @@ BaseParameterDialog
 
     modality: Qt.ApplicationModal
 
+    Preferences
+    {
+        section: "correlation"
+        property alias advancedParameters: advancedCheckBox.checked
+    }
+
     function isInsideRect(x, y, rect)
     {
         return  x >= rect.x &&
@@ -160,7 +166,7 @@ BaseParameterDialog
                 {
                     Text
                     {
-                        text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a numerical dataset.<br>" +
+                        text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a dataset.<br>" +
                                    "<br>" +
                                    "A ") + QmlUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")) + qsTr(" " +
                                    "provides this similarity metric. " +
@@ -200,7 +206,7 @@ BaseParameterDialog
 
                 Text
                 {
-                    text: qsTr("<h2>Data Selection - Select and adjust</h2>")
+                    text: qsTr("<h2>Data Selection - Select and Adjust</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                 }
@@ -209,7 +215,7 @@ BaseParameterDialog
                 {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("A contiguous numerical dataframe will automatically be selected from your dataset. " +
+                    text: qsTr("A contiguous numerical dataframe has been automatically selected for your dataset. " +
                                "If you would like to adjust the dataframe, select the new starting cell below.")
                 }
 
@@ -538,132 +544,477 @@ BaseParameterDialog
             {
                 anchors.fill: parent
 
-                Text
+                RowLayout
                 {
-                    text: qsTr("<h2>Correlation - Adjust Thresholds</h2>")
-                    Layout.alignment: Qt.AlignLeft
-                    textFormat: Text.StyledText
+                    Layout.fillWidth: true
+                    Text
+                    {
+                        text: qsTr("<h2>Correlation - Adjust Parameters</h2>")
+                        textFormat: Text.StyledText
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    CheckBox
+                    {
+                        id: advancedCheckBox
+
+                        Layout.alignment: Qt.AlignTop
+                        text: qsTr("Advanced")
+                    }
                 }
 
                 ColumnLayout
                 {
                     Layout.fillHeight: true
 
-                    spacing: Constants.spacing
+                    spacing: Constants.spacing * 2
 
                     Text
                     {
-                        text: qsTr("A value of 1.0 represents perfectly correlated rows whereas " +
-                                   "0.0 indicates no correlation. Should they be enabled, negative " +
-                                   "correlation values indicate an anti-correlation. " +
-                                   "All absolute values below the minimum correlation threshold are " +
-                                   "discarded and will not be used to create edges.<br>" +
-                                   "<br>" +
-                                   "By default a transform is added which will remove edges for all " +
-                                   "absolute values below the initial correlation threshold.")
+                        Layout.fillWidth: true
+                        visible: !advancedCheckBox.checked
+
+                        text: qsTr("Correlation values of 1 represent perfectly correlated rows whereas " +
+                            "0 indicates no correlation. " +
+                            "All absolute values below the selected minimum correlation threshold are " +
+                            "discarded and will not be used to create edges. " +
+                            "By default a transform is added which will remove edges for all " +
+                            "absolute values below the initial correlation threshold." +
+                            "<br><br>" +
+                            "For more control over the parameters used, check the <b>Advanced</b> option " +
+                            "on the top right.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
-                        Layout.fillWidth: true
                     }
 
-                    RowLayout
+                    ColumnLayout
                     {
                         Layout.fillWidth: true
+                        visible: advancedCheckBox.checked
 
-                        Text { text: qsTr("Algorithm:") }
-
-                        ComboBox
+                        GridLayout
                         {
-                            id: algorithm
+                            columns: 6
+                            Layout.fillWidth: true
 
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("Pearson");        value: CorrelationType.Pearson }
-                                ListElement { text: qsTr("Spearman Rank");  value: CorrelationType.SpearmanRank }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.correlationType = model.get(currentIndex).value;
-                            }
-
-                            property int value: { return model.get(currentIndex).value; }
-                        }
-
-                        HelpTooltip
-                        {
-                            title: qsTr("Correlation Algorithm")
-                            GridLayout
-                            {
-                                columns: 2
-                                Text
-                                {
-                                    text: qsTr("<b>Pearson:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("The Pearson correlation coefficient is a measure " +
-                                        "of the linear correlation between two variables.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Spearman Rank:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Spearman's rank correlation coefficient is a " +
-                                        "nonparametric measure of the statistical dependence between " +
-                                        "the rankings of two variables. It assesses how well the " +
-                                        "relationship between two variables can be described using a " +
-                                        "monotonic function.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-                            }
-                        }
-
-                        Text { text: qsTr("Polarity:") }
-
-                        ComboBox
-                        {
-                            id: polarity
-
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("Positive");   value: CorrelationPolarity.Positive }
-                                ListElement { text: qsTr("Negative");   value: CorrelationPolarity.Negative }
-                                ListElement { text: qsTr("Both");       value: CorrelationPolarity.Both }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.correlationPolarity = model.get(currentIndex).value;
-                            }
-
-                            property int value: { return model.get(currentIndex).value; }
-                        }
-
-                        HelpTooltip
-                        {
-                            title: qsTr("Polarity")
                             Text
                             {
-                                wrapMode: Text.WordWrap
-                                text: qsTr("By default only positive correlations are used to create " +
-                                           "the graph. In most cases this is the correct setting, " +
-                                           "but for some data sources it may make more sense to take " +
-                                           "account of the magnitude of the correlation.")
+                                text: qsTr("Algorithm:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: algorithm
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("Pearson");        value: CorrelationType.Pearson }
+                                    ListElement { text: qsTr("Spearman Rank");  value: CorrelationType.SpearmanRank }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.correlationType = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            HelpTooltip
+                            {
+                                Layout.rightMargin: Constants.spacing * 2
+
+                                title: qsTr("Correlation Algorithm")
+                                GridLayout
+                                {
+                                    columns: 2
+                                    Text
+                                    {
+                                        text: qsTr("<b>Pearson:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("The Pearson correlation coefficient is a measure " +
+                                            "of the linear correlation between two variables.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Spearman Rank:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("Spearman's rank correlation coefficient is a " +
+                                            "nonparametric measure of the statistical dependence between " +
+                                            "the rankings of two variables. It assesses how well the " +
+                                            "relationship between two variables can be described using a " +
+                                            "monotonic function.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+                                }
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Polarity:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: polarity
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("Positive");   value: CorrelationPolarity.Positive }
+                                    ListElement { text: qsTr("Negative");   value: CorrelationPolarity.Negative }
+                                    ListElement { text: qsTr("Both");       value: CorrelationPolarity.Both }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.correlationPolarity = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            HelpTooltip
+                            {
+                                title: qsTr("Polarity")
+                                Text
+                                {
+                                    wrapMode: Text.WordWrap
+                                    text: qsTr("By default only positive correlations are considered when creating " +
+                                               "the graph. In most cases this is the correct setting, " +
+                                               "but for some data sources it may make more sense to take " +
+                                               "account of the polarity of the correlation.")
+                                }
+                            }
+
+                            Text
+                            {
+                                visible: tabularDataParser.hasMissingValues
+                                text: qsTr("Imputation:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: missingDataType
+                                visible: tabularDataParser.hasMissingValues
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("Constant");           value: MissingDataType.Constant }
+                                    ListElement { text: qsTr("Row Interpolate");    value: MissingDataType.RowInterpolation }
+                                    ListElement { text: qsTr("Column Mean");        value: MissingDataType.ColumnAverage }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.missingDataType = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            RowLayout
+                            {
+                                Layout.columnSpan: 4
+                                visible: tabularDataParser.hasMissingValues
+
+                                TextField
+                                {
+                                    id: replacementConstant
+                                    visible: missingDataType.currentText === qsTr("Constant")
+
+                                    validator: DoubleValidator{}
+
+                                    onTextChanged: { parameters.missingDataValue = text; }
+
+                                    text: "0.0"
+                                }
+
+                                HelpTooltip
+                                {
+                                    title: qsTr("Imputation")
+                                    GridLayout
+                                    {
+                                        columns: 2
+                                        Text
+                                        {
+                                            text: qsTr("<b>None:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("All empty or missing values will be treated as zeroes.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("<b>Constant:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("Replace all missing values with a constant.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("<b>Row Interpolate:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("Linearly interpolate missing values using the nearest surrounding" +
+                                                       " values in the row and their relative positions. If only one surrounding value" +
+                                                       " is available the value will be set to match." +
+                                                       " The value will be set to zero if the row is empty.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("<b>Column Mean:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("Replace missing values with the mean value of their column, excluding missing values.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Scaling:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: scaling
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("None");          value: ScalingType.None }
+                                    ListElement { text: qsTr("Log2(x + ε)");   value: ScalingType.Log2 }
+                                    ListElement { text: qsTr("Log10(x + ε)");  value: ScalingType.Log10 }
+                                    ListElement { text: qsTr("AntiLog2(x)");   value: ScalingType.AntiLog2 }
+                                    ListElement { text: qsTr("AntiLog10(x)");  value: ScalingType.AntiLog10 }
+                                    ListElement { text: qsTr("Arcsin(x)");     value: ScalingType.ArcSin }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.scaling = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            HelpTooltip
+                            {
+                                title: qsTr("Scaling Types")
+                                GridLayout
+                                {
+                                    columns: 2
+                                    rowSpacing: Constants.spacing
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Log</b><i>b</i>(<i>x</i> + ε):")
+                                        Layout.alignment: Qt.AlignTop
+                                        textFormat: Text.StyledText
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("Perform a Log of <i>x</i> + ε to base <i>b</i>, where <i>x</i> is the input data and ε is a very small constant.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.alignment: Qt.AlignTop
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>AntiLog</b><i>b</i>(<i>x</i>):")
+                                        Layout.alignment: Qt.AlignTop
+                                        textFormat: Text.StyledText
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("Raise <i>x</i> to the power of <i>b</i>, where <i>x</i> is the input data.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Arcsin</b>(<i>x</i>):")
+                                        Layout.alignment: Qt.AlignTop
+                                        textFormat: Text.StyledText
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
+                                            "you require a log transform but the dataset contains negative numbers or zeros.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+                                }
+
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Normalisation:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: normalise
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("None");               value: NormaliseType.None }
+                                    ListElement { text: qsTr("Min/Max");            value: NormaliseType.MinMax }
+                                    ListElement { text: qsTr("Mean");               value: NormaliseType.Mean }
+                                    ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standarisation }
+                                    ListElement { text: qsTr("Unit Scaling");       value: NormaliseType.UnitScaling }
+                                    ListElement { text: qsTr("Quantile");           value: NormaliseType.Quantile }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.normalise = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            HelpTooltip
+                            {
+                                title: qsTr("Normalisation Types")
+                                GridLayout
+                                {
+                                    columns: 2
+                                    Text
+                                    {
+                                        text: qsTr("<b>Min/Max:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Rescale the data so that its values " +
+                                                   "lie within the [0, 1] range: " +
+                                                   "(<i>x</i>-min(<i>x</i>))/(max(<i>x</i>)-min(<i>x</i>)). " +
+                                                   "This is useful if the columns in the dataset " +
+                                                   "have differing scales or units. " +
+                                                   "Note: If all elements in a column have the same value " +
+                                                   "this will rescale the values to 0.0.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Mean:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Similar to Min/Max scaling except the resultant " +
+                                                   "values are centred around their column mean: " +
+                                                   "(<i>x</i>-µ)/(max(<i>x</i>)-min(<i>x</i>)). " +
+                                                   "Note: If all elements in a column have the same value " +
+                                                   "this will rescale the values to 0.0.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Standardisation:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Also known as Z-score normalisation, this method " +
+                                                   "centres the value around the mean and scales by " +
+                                                   "the standard deviation: (<i>x</i>-µ)/σ.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Unit Scaling:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Values are divided by the euclidean length of " +
+                                                   "the vector formed by the column of data: <i>x</i>/‖<i>x</i>‖.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Quantile:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Normalise the data so that the columns have equal distributions.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -707,7 +1058,7 @@ BaseParameterDialog
 
                             Layout.fillWidth: true
                             Layout.minimumWidth: 50
-                            Layout.maximumWidth: 175
+                            Layout.maximumWidth: 150
 
                             minimumValue: 0.0
                             maximumValue: 1.0
@@ -720,6 +1071,8 @@ BaseParameterDialog
 
                         HelpTooltip
                         {
+                            Layout.rightMargin: Constants.spacing * 2
+
                             title: qsTr("Minimum Correlation Value")
                             Text
                             {
@@ -844,374 +1197,11 @@ BaseParameterDialog
 
         ListTab
         {
-            title: qsTr("Data Manipulation")
-            ColumnLayout
-            {
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                Text
-                {
-                    text: qsTr("<h2>Data Manipulation</h2>")
-                    Layout.alignment: Qt.AlignLeft
-                    textFormat: Text.StyledText
-                }
-                ColumnLayout
-                {
-                    spacing: Constants.spacing
-
-                    Text
-                    {
-                        text: qsTr("Please select the required data manipulation. The manipulation " +
-                                   "will occur in the order it is displayed below. Resultant changes " +
-                                   "in the estimated graph size may be observed on the Correlation tab.")
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
-
-                    GridLayout
-                    {
-                        columns: 3
-
-                        Text
-                        {
-                            visible: tabularDataParser.hasMissingValues
-                            text: qsTr("Imputation:")
-                            Layout.alignment: Qt.AlignLeft
-                        }
-
-                        ComboBox
-                        {
-                            id: missingDataType
-                            visible: tabularDataParser.hasMissingValues
-                            Layout.alignment: Qt.AlignRight
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("Constant");           value: MissingDataType.Constant }
-                                ListElement { text: qsTr("Row Interpolate");    value: MissingDataType.RowInterpolation }
-                                ListElement { text: qsTr("Column Mean");        value: MissingDataType.ColumnAverage }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.missingDataType = model.get(currentIndex).value;
-                            }
-
-                            property int value: { return model.get(currentIndex).value; }
-                        }
-
-                        HelpTooltip
-                        {
-                            visible: tabularDataParser.hasMissingValues
-                            title: qsTr("Imputation")
-                            GridLayout
-                            {
-                                columns: 2
-                                Text
-                                {
-                                    text: qsTr("<b>None:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("All empty or missing values will be treated as zeroes.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Constant:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Replace all missing values with a constant.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Row Interpolate:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Linearly interpolate missing values using the nearest surrounding" +
-                                               " values in the row and their relative positions. If only one surrounding value" +
-                                               " is available the value will be set to match." +
-                                               " The value will be set to zero if the row is empty.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Column Mean:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Replace missing values with the mean value of their column, excluding missing values.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-                            }
-                        }
-
-                        RowLayout
-                        {
-                            Layout.columnSpan: 2
-                            Layout.alignment: Qt.AlignRight
-                            visible: tabularDataParser.hasMissingValues &&
-                                missingDataType.currentText === qsTr("Constant")
-
-                            Text
-                            {
-                                text: qsTr("Value:")
-                                Layout.alignment: Qt.AlignLeft
-                            }
-
-                            TextField
-                            {
-                                id: replacementConstant
-                                validator: DoubleValidator{}
-
-                                onTextChanged:
-                                {
-                                    parameters.missingDataValue = text;
-                                }
-
-                                text: "0.0"
-                            }
-                        }
-
-                        Item
-                        {
-                            // Cell filler
-                            Layout.fillHeight: true
-                            visible: tabularDataParser.hasMissingValues &&
-                                missingDataType.currentText === qsTr("Constant")
-                        }
-
-                        Text
-                        {
-                            text: qsTr("Scaling:")
-                            Layout.alignment: Qt.AlignLeft
-                        }
-
-                        ComboBox
-                        {
-                            id: scaling
-                            Layout.alignment: Qt.AlignRight
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("None");          value: ScalingType.None }
-                                ListElement { text: qsTr("Log2(x + ε)");   value: ScalingType.Log2 }
-                                ListElement { text: qsTr("Log10(x + ε)");  value: ScalingType.Log10 }
-                                ListElement { text: qsTr("AntiLog2(x)");   value: ScalingType.AntiLog2 }
-                                ListElement { text: qsTr("AntiLog10(x)");  value: ScalingType.AntiLog10 }
-                                ListElement { text: qsTr("Arcsin(x)");     value: ScalingType.ArcSin }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.scaling = model.get(currentIndex).value;
-                            }
-
-                            property int value: { return model.get(currentIndex).value; }
-                        }
-
-                        HelpTooltip
-                        {
-                            title: qsTr("Scaling Types")
-                            GridLayout
-                            {
-                                columns: 2
-                                rowSpacing: Constants.spacing
-
-                                Text
-                                {
-                                    text: qsTr("<b>Log</b><i>b</i>(<i>x</i> + ε):")
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Perform a Log of <i>x</i> + ε to base <i>b</i>, where <i>x</i> is the input data and ε is a very small constant.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.alignment: Qt.AlignTop
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>AntiLog</b><i>b</i>(<i>x</i>):")
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Raise <i>x</i> to the power of <i>b</i>, where <i>x</i> is the input data.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Arcsin</b>(<i>x</i>):")
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
-                                        "you require a log transform but the dataset contains negative numbers or zeros.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-                            }
-
-                        }
-
-                        Text
-                        {
-                            text: qsTr("Normalisation:")
-                            Layout.alignment: Qt.AlignLeft
-                        }
-
-                        ComboBox
-                        {
-                            id: normalise
-                            Layout.alignment: Qt.AlignRight
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("None");               value: NormaliseType.None }
-                                ListElement { text: qsTr("Min/Max");            value: NormaliseType.MinMax }
-                                ListElement { text: qsTr("Mean");               value: NormaliseType.Mean }
-                                ListElement { text: qsTr("Standardisation");    value: NormaliseType.Standarisation }
-                                ListElement { text: qsTr("Unit Scaling");       value: NormaliseType.UnitScaling }
-                                ListElement { text: qsTr("Quantile");           value: NormaliseType.Quantile }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.normalise = model.get(currentIndex).value;
-                            }
-
-                            property int value: { return model.get(currentIndex).value; }
-                        }
-
-                        HelpTooltip
-                        {
-                            title: qsTr("Normalisation Types")
-                            GridLayout
-                            {
-                                columns: 2
-                                Text
-                                {
-                                    text: qsTr("<b>Min/Max:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-                                Text
-                                {
-                                    text: qsTr("Rescale the data so that its values " +
-                                               "lie within the [0, 1] range: " +
-                                               "(<i>x</i>-min(<i>x</i>))/(max(<i>x</i>)-min(<i>x</i>)). " +
-                                               "This is useful if the columns in the dataset " +
-                                               "have differing scales or units. " +
-                                               "Note: If all elements in a column have the same value " +
-                                               "this will rescale the values to 0.0.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Mean:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-                                Text
-                                {
-                                    text: qsTr("Similar to Min/Max scaling except the resultant " +
-                                               "values are centred around their column mean: " +
-                                               "(<i>x</i>-µ)/(max(<i>x</i>)-min(<i>x</i>)). " +
-                                               "Note: If all elements in a column have the same value " +
-                                               "this will rescale the values to 0.0.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Standardisation:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-                                Text
-                                {
-                                    text: qsTr("Also known as Z-score normalisation, this method " +
-                                               "centres the value around the mean and scales by " +
-                                               "the standard deviation: (<i>x</i>-µ)/σ.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Unit Scaling:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-                                Text
-                                {
-                                    text: qsTr("Values are divided by the euclidean length of " +
-                                               "the vector formed by the column of data: <i>x</i>/‖<i>x</i>‖.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>Quantile:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-                                Text
-                                {
-                                    text: qsTr("Normalise the data so that the columns have equal distributions.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ListTab
-        {
             title: qsTr("Initial Transforms")
             ColumnLayout
             {
+                spacing: Constants.spacing * 2
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 Text
@@ -1241,7 +1231,6 @@ BaseParameterDialog
                     ComboBox
                     {
                         id: clustering
-                        Layout.alignment: Qt.AlignRight
                         model: ListModel
                         {
                             ListElement { text: qsTr("None");       value: ClusteringType.None }
@@ -1310,7 +1299,6 @@ BaseParameterDialog
                     ComboBox
                     {
                         id: edgeReduction
-                        Layout.alignment: Qt.AlignRight
                         model: ListModel
                         {
                             ListElement { text: qsTr("None");   value: EdgeReductionType.None }
