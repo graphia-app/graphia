@@ -280,7 +280,7 @@ BaseParameterDialog
                                 return row > 1 ? 0 : -1;
                             }
 
-                            columnWidthProvider: dataRectView.columnWidthProvider;
+                            columnWidthProvider: dataRectView.columnWidthProvider
 
                             FontMetrics
                             {
@@ -318,12 +318,36 @@ BaseParameterDialog
                                     padding: columnHeaderView.headerPadding
                                     renderType: Text.NativeRendering
                                 }
+
                                 Rectangle
                                 {
                                     anchors.right: parent.right
                                     height: parent.height
                                     width: 1
                                     color: sysPalette.midlight
+
+                                    MouseArea
+                                    {
+                                        cursorShape: Qt.SizeHorCursor
+                                        width: 5
+                                        height: parent.height
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        drag.target: parent
+                                        drag.axis: Drag.XAxis
+
+                                        onMouseXChanged:
+                                        {
+                                            if(drag.active)
+                                            {
+                                                let currentWidth = dataRectView.userColumnWidths[model.column];
+                                                if(currentWidth === undefined)
+                                                    currentWidth = headerDelegate.implicitWidth;
+
+                                                dataRectView.userColumnWidths[model.column] = Math.max(30, currentWidth + mouseX);
+                                                dataRectView.forceLayoutSafe();
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -352,12 +376,19 @@ BaseParameterDialog
                                 return -1;
                             }
 
-                            columnWidthProvider: function(col)
+                            property var userColumnWidths: []
+
+                            columnWidthProvider: function(column)
                             {
-                                let headerIndex = tabularDataParser.model.index(0, col);
+                                let userWidth = userColumnWidths[column];
+                                if(userWidth !== undefined)
+                                    return userWidth;
+
+                                let headerIndex = tabularDataParser.model.index(0, column);
                                 let headerText = tabularDataParser.model.data(headerIndex);
-                                let width = headerFontMetrics.advanceWidth(headerText);
-                                return width + columnHeaderView.headerPadding + columnHeaderView.headerPadding;
+                                let textWidth = headerFontMetrics.advanceWidth(headerText);
+
+                                return textWidth + (2 * columnHeaderView.headerPadding);
                             }
 
                             Rectangle
