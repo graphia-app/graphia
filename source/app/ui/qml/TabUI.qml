@@ -1700,8 +1700,6 @@ Item
 
         onGraphChanged: { root._refreshNumAttributesWithSharedValues(); }
 
-        onEnrichmentAnalysisComplete: { root.enrichmentAnalysisComplete(); }
-
         property var _comandProgressSamples: []
         property int commandSecondsRemaining
 
@@ -1757,7 +1755,6 @@ Item
 
     signal loadComplete(url fileUrl, bool success)
     signal pluginLoadComplete()
-    signal enrichmentAnalysisComplete()
 
     signal commandStarted();
     signal commandComplete();
