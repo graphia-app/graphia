@@ -34,9 +34,9 @@ BaseParameterDialog
     //FIXME These should be set automatically by Wizard
     minimumWidth: 700
     minimumHeight: 500
-    property int selectedRow: -1
-    property int selectedCol: -1
-    property bool _clickedCell: false
+    property int _clickedRow: -1
+    property int _clickedColumn: -1
+    property bool _cellWasClicked: false
 
     modality: Qt.ApplicationModal
 
@@ -70,12 +70,12 @@ BaseParameterDialog
         {
             parameters.dataFrame = dataRect;
 
-            if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
-                selectedCol >= 0 && selectedRow >= 0)
+            if(!isInsideRect(_clickedColumn, _clickedRow, dataRect) &&
+                _clickedColumn >= 0 && _clickedRow >= 0)
             {
                 dataRectView.scrollToDataRect();
-                tooltipNonNumerical.visible = _clickedCell;
-                _clickedCell = false;
+                tooltipNonNumerical.visible = _cellWasClicked;
+                _cellWasClicked = false;
             }
         }
 
@@ -492,9 +492,9 @@ BaseParameterDialog
                                         {
                                             tooltipNonNumerical.visible = false;
                                             nonNumericalTimer.stop();
-                                            selectedCol = model.column;
-                                            selectedRow = model.row;
-                                            _clickedCell = true;
+                                            _clickedColumn = model.column;
+                                            _clickedRow = model.row;
+                                            _cellWasClicked = true;
                                             tabularDataParser.autoDetectDataRectangle(model.column, model.row);
                                         }
                                     }
@@ -560,9 +560,9 @@ BaseParameterDialog
 
                     function onModelReset()
                     {
-                        selectedCol = 0;
-                        selectedRow = 0;
-                        _clickedCell = false;
+                        _clickedColumn = 0;
+                        _clickedRow = 0;
+                        _cellWasClicked = false;
                     }
                 }
             }
