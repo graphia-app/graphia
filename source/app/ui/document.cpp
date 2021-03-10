@@ -968,6 +968,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
         setSaveRequired();
     });
 
+    connect(this, &Document::enrichmentTableModelsChanged, this, &Document::setSaveRequired);
+
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
