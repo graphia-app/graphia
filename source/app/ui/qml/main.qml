@@ -2103,6 +2103,11 @@ ApplicationWindow
         id: enrichmentResults
         wizard: enrichmentWizard
         models: currentDocument ? currentDocument.enrichmentTableModels : []
+
+        onRemoveResults:
+        {
+            currentDocument.removeEnrichmentResults(index);
+        }
     }
 
     EnrichmentWizard

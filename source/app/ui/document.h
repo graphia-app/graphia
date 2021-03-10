@@ -522,6 +522,7 @@ public:
     Q_INVOKABLE void dumpGraph();
 
     Q_INVOKABLE void performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB);
+    Q_INVOKABLE void removeEnrichmentResults(int index);
 
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
 

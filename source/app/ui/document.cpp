@@ -2884,6 +2884,12 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
     }, tr("Enrichment Analysis"));
 }
 
+void Document::removeEnrichmentResults(int index)
+{
+    _enrichmentTableModels.removeAt(index);
+    emit enrichmentTableModelsChanged();
+}
+
 void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 {
     QString localFileName = fileUrl.toLocalFile();

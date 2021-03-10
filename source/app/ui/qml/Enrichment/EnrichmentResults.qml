@@ -66,9 +66,11 @@ ApplicationWindow
         standardButtons: StandardButton.Yes | StandardButton.Cancel
         onYes:
         {
-            root.models.remove(root.models.get(tabView.currentIndex));
+            root.removeResults(tabView.currentIndex);
         }
     }
+
+    signal removeResults(int index)
 
     toolBar: ToolBar
     {
