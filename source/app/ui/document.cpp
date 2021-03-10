@@ -972,11 +972,11 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphModel->enableVisualUpdates();
 
-    setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
-                _graphModel->name()).arg(
-                _graphModel->graph().numNodes()).arg(
-                _graphModel->graph().numEdges()).arg(
-                _graphModel->graph().numComponents()));
+    setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)"))
+        .arg(_graphModel->name())
+        .arg(_graphModel->graph().numNodes())
+        .arg(_graphModel->graph().numEdges())
+        .arg(_graphModel->graph().numComponents()));
 }
 
 void Document::onBusyChanged() const
