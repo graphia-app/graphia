@@ -143,7 +143,7 @@ BaseParameterDialog
         onListTabChanged:
         {
             if(currentItem == dataRectPage)
-                dataRectView.forceLayoutSafe();
+                dataRectView.forceLayout();
         }
 
         ListTab
@@ -344,7 +344,7 @@ BaseParameterDialog
                                                     currentWidth = headerDelegate.implicitWidth;
 
                                                 dataRectView.userColumnWidths[model.column] = Math.max(30, currentWidth + mouseX);
-                                                dataRectView.forceLayoutSafe();
+                                                dataRectView.forceLayout();
                                             }
                                         }
                                     }
@@ -501,13 +501,9 @@ BaseParameterDialog
                                 }
                             }
 
-                            // tableview.forceLayout() seems to CRASH on empty rows or columns.
-                            // It's a bug, been reported. This gives us some safety net.
-                            // https://bugreports.qt.io/browse/QTBUG-77459
-                            function forceLayoutSafe()
+                            function forceLayout()
                             {
-                                if(dataRectView.rows > 0 && dataRectView.columns > 0)
-                                    dataRectView.forceLayout();
+                                dataRectView.forceLayout();
                                 columnHeaderView.forceLayout();
                             }
 
