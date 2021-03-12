@@ -59,7 +59,7 @@ bool u::isInteger(const std::string& string)
     std::stringstream ss;
     ss << string;
 
-    long int value = 0.0;
+    long int value = 0;
     ss >> value;
 
     return ss.eof();
