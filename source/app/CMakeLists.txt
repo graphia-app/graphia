@@ -322,7 +322,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} thirdparty_static thirdparty shared)
 
-find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions Svg PrintSupport Widgets Xml REQUIRED)
+find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions Svg PrintSupport Widgets Xml Network REQUIRED)
 target_link_libraries(${PROJECT_NAME}
     Qt5::Core
     Qt5::Qml
@@ -333,6 +333,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Svg
     Qt5::Widgets
     Qt5::Xml
+    Qt5::Network
 )
 
 find_package(OpenGL REQUIRED)
