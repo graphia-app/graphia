@@ -77,8 +77,8 @@ Updater::Updater()
     connect(&_networkManager, &QNetworkAccessManager::finished,
         this, &Updater::onReplyReceived);
 
-    QObject::connect(&_timeoutTimer, &QTimer::timeout, this, &Updater::onTimeout);
-    QObject::connect(&_backgroundCheckTimer, &QTimer::timeout,
+    connect(&_timeoutTimer, &QTimer::timeout, this, &Updater::onTimeout);
+    connect(&_backgroundCheckTimer, &QTimer::timeout,
         this, &Updater::startBackgroundUpdateCheck);
 
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
