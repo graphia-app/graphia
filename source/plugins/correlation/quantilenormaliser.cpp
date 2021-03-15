@@ -36,7 +36,6 @@ bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IPar
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
     std::vector<size_t> ranking(dataRows.size() * numColumns);
 
-    uint64_t j = 0;
     size_t row = 0;
 
     for(size_t column = 0; column < numColumns; column++)
