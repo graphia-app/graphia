@@ -34,9 +34,6 @@ BaseParameterDialog
     //FIXME These should be set automatically by Wizard
     minimumWidth: 700
     minimumHeight: 500
-    property int _clickedRow: -1
-    property int _clickedColumn: -1
-    property bool _cellWasClicked: false
 
     modality: Qt.ApplicationModal
 
@@ -70,13 +67,12 @@ BaseParameterDialog
         {
             parameters.dataFrame = dataRect;
 
-            if(!isInsideRect(_clickedColumn, _clickedRow, dataRect) &&
-                _clickedColumn >= 0 && _clickedRow >= 0)
-            {
-                dataRectView.scrollToDataRect();
-                tooltipNonNumerical.visible = _cellWasClicked;
-                _cellWasClicked = false;
-            }
+            if(hasDiscreteValues)
+                dataTypeComboBox.setDiscrete();
+            else if(appearsToBeContinuous)
+                dataTypeComboBox.setContinuous();
+
+            dataRectView.scrollToDataRect();
         }
 
         onDataLoaded:
@@ -143,7 +139,7 @@ BaseParameterDialog
         onListTabChanged:
         {
             if(currentItem == dataRectPage)
-                dataRectView.forceLayout();
+                dataTable.forceLayout();
         }
 
         ListTab
@@ -215,8 +211,9 @@ BaseParameterDialog
                 {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: qsTr("A contiguous numerical dataframe has been automatically selected for your dataset. " +
-                               "If you would like to adjust the dataframe, select the new starting cell below.")
+                    text: qsTr("A dataframe has been automatically selected for your dataset. " +
+                        "If you would like to adjust it, select the new starting cell below. " +
+                        "Note that the dataframe always extends to the bottom rightmost cell of the dataset.")
                 }
 
                 RowLayout
@@ -225,7 +222,7 @@ BaseParameterDialog
                     {
                         id: transposeCheckBox
 
-                        text: qsTr("Transpose Dataset")
+                        text: qsTr("Transpose")
                         enabled: !dataRectPage._busy
                         onCheckedChanged:
                         {
@@ -233,6 +230,7 @@ BaseParameterDialog
                             tabularDataParser.transposed = checked;
                         }
                     }
+
                     HelpTooltip
                     {
                         title: qsTr("Transpose")
@@ -245,11 +243,113 @@ BaseParameterDialog
                     }
                 }
 
-                Text
+                RowLayout
                 {
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                    text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input.")
+                    Text
+                    {
+                        text: qsTr("Data Type:")
+                        Layout.alignment: Qt.AlignRight
+                    }
+
+                    ComboBox
+                    {
+                        id: dataTypeComboBox
+                        enabled: tabularDataParser.hasNumericalValues && !dataRectPage._busy
+
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("Continuous"); value: "continuous" }
+                            ListElement { text: qsTr("Discrete");   value: "discrete" }
+                        }
+                        textRole: "text"
+
+                        property bool _setting: false
+                        onCurrentIndexChanged:
+                        {
+                            if(_setting)
+                                return;
+
+                            let newValue = model.get(currentIndex).value;
+                            if(newValue === "continuous" && tabularDataParser.hasDiscreteValues)
+                                tabularDataParser.autoDetectDataRectangle();
+                        }
+
+                        function indexForDataType(type)
+                        {
+                            for(let index = 0; index < model.count; index++)
+                            {
+                                if(model.get(index).value === type)
+                                    return index;
+                            }
+
+                            return -1;
+                        }
+
+                        function setContinuous()
+                        {
+                            _setting = true;
+                            currentIndex = indexForDataType("continuous");
+                            _setting = false;
+                        }
+
+                        function setDiscrete()
+                        {
+                            _setting = true;
+                            currentIndex = indexForDataType("discrete");
+                            _setting = false;
+                        }
+
+                        property string value:
+                        {
+                            if(currentIndex < 0)
+                                return "";
+
+                            return model.get(currentIndex).value;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        Layout.rightMargin: Constants.spacing * 2
+
+                        title: qsTr("Data Type")
+                        GridLayout
+                        {
+                            columns: 2
+                            Text
+                            {
+                                text: qsTr("<b>Continuous:</b>")
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Interpret the selected data as " +
+                                    "rows of continuous data. A numerical " +
+                                    "correlation measure will be used between rows.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
+                            Text
+                            {
+                                text: qsTr("<b>Discrete:</b>")
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Interpret the selected data as " +
+                                    "rows of discrete values. The values may be numerical, " +
+                                    "but in the normal case they will be textual. A discrete " +
+                                    "correlation measure will be used between rows.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
                 }
 
                 Rectangle
@@ -261,8 +361,17 @@ BaseParameterDialog
 
                     ColumnLayout
                     {
+                        id: dataTable
+
                         anchors.margins: 1
                         anchors.fill: parent
+
+                        function forceLayout()
+                        {
+                            dataRectView.forceLayout();
+                            columnHeaderView.forceLayout();
+                        }
+
                         TableView
                         {
                             property var headerPadding: 4
@@ -344,7 +453,7 @@ BaseParameterDialog
                                                     currentWidth = headerDelegate.implicitWidth;
 
                                                 dataRectView.userColumnWidths[model.column] = Math.max(30, currentWidth + mouseX);
-                                                dataRectView.forceLayout();
+                                                dataTable.forceLayout();
                                             }
                                         }
                                     }
@@ -391,40 +500,6 @@ BaseParameterDialog
                                 return textWidth + (2 * columnHeaderView.headerPadding);
                             }
 
-                            Rectangle
-                            {
-                                id: tooltipNonNumerical
-                                z: 2
-                                x: dataRectView.contentX + ((dataRectView.width - implicitWidth) * 0.5)
-                                y: dataRectView.contentY + dataRectView.height - implicitHeight - 25
-                                color: sysPalette.light
-                                border.color: sysPalette.mid
-                                border.width: 1
-                                implicitWidth: messageText.width + 5
-                                implicitHeight: messageText.height + 5
-                                onVisibleChanged:
-                                {
-                                    if(visible)
-                                        nonNumericalTimer.start();
-                                }
-                                visible: false
-
-                                Timer
-                                {
-                                    id: nonNumericalTimer
-                                    interval: 5000
-                                    onTriggered: { tooltipNonNumerical.visible = false; }
-                                }
-
-                                Text
-                                {
-                                    anchors.centerIn: parent
-                                    id: messageText
-                                    text: qsTr("Selected frame contains non-numerical data. " +
-                                               "Next availaible frame selected.");
-                                }
-                            }
-
                             SystemPalette
                             {
                                 id: sysPalette
@@ -450,11 +525,6 @@ BaseParameterDialog
 
                                 SystemPalette { id: systemPalette }
 
-                                property var isInDataFrame:
-                                {
-                                    return isInsideRect(model.column, model.row, tabularDataParser.dataRect);
-                                }
-
                                 Rectangle
                                 {
                                     width: parent.width
@@ -463,7 +533,7 @@ BaseParameterDialog
                                     height: parent.height
                                     color:
                                     {
-                                        if(isInDataFrame)
+                                        if(isInsideRect(model.column, model.row, tabularDataParser.dataRect))
                                             return systemPalette.highlight;
 
                                         return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
@@ -490,32 +560,41 @@ BaseParameterDialog
                                         anchors.fill: parent
                                         onClicked:
                                         {
-                                            tooltipNonNumerical.visible = false;
-                                            nonNumericalTimer.stop();
-                                            _clickedColumn = model.column;
-                                            _clickedRow = model.row;
-                                            _cellWasClicked = true;
-                                            tabularDataParser.autoDetectDataRectangle(model.column, model.row);
+                                            tabularDataParser.setDataRectangle(model.column, model.row);
                                         }
                                     }
                                 }
                             }
 
-                            function forceLayout()
+                            function firstDataCellVisible()
                             {
-                                dataRectView.forceLayout();
-                                columnHeaderView.forceLayout();
+                                let firstDataColumnPosition = 0;
+                                for(let column = 0; column < tabularDataParser.dataRect.x; column++)
+                                    firstDataColumnPosition += columnWidthProvider(column);
+
+                                let firstDataRowPosition = 0;
+                                for(let row = 0; row < tabularDataParser.dataRect.y; row++)
+                                    firstDataRowPosition += delegateHeight;
+
+                                let x = firstDataColumnPosition - contentX;
+                                let y = (firstDataRowPosition - contentY) - delegateHeight;
+
+                                return x >= 0.0 && x < width && y >= 0.0 && y < height;
                             }
 
                             function scrollToDataRect()
                             {
+                                if(dataRectView.firstDataCellVisible())
+                                    return;
+
                                 let columnPosition = -topMargin;
-                                let rowPosition = 0;
-                                for(let i=0; i < tabularDataParser.dataRect.x - 1; i++)
-                                    columnPosition += columnWidthProvider(i);
-                                rowPosition = delegateHeight * ((tabularDataParser.dataRect.y - 2) - 1);
+                                for(let column = 0; column < tabularDataParser.dataRect.x - 1; column++)
+                                    columnPosition += columnWidthProvider(column);
+
+                                let rowPosition = delegateHeight * ((tabularDataParser.dataRect.y - 2) - 1);
                                 if(rowPosition < 0)
                                     rowPosition = -topMargin;
+
                                 scrollXAnimation.to = columnPosition;
                                 scrollXAnimation.running = true;
                                 scrollYAnimation.to = rowPosition;
@@ -550,15 +629,24 @@ BaseParameterDialog
                     }
                 }
 
-                Connections
+                Text
                 {
-                    target: tabularDataParser.model
+                    id: warningText
+                    visible: text.length > 0
 
-                    function onModelReset()
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+
+                    text:
                     {
-                        _clickedColumn = 0;
-                        _clickedRow = 0;
-                        _cellWasClicked = false;
+                        if(dataTypeComboBox.value === "discrete" && tabularDataParser.appearsToBeContinuous)
+                        {
+                            return qsTr("<font color=\"red\">WARNING: the selected dataframe appears " +
+                                "to contain contiguous data; interpreting it as discrete may " +
+                                "result in only a low level of correlation.</font>");
+                        }
+
+                        return "";
                     }
                 }
             }
@@ -1554,6 +1642,7 @@ BaseParameterDialog
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
+        dataTypeComboBox.currentIndex = 0;
     }
 
     onVisibleChanged:

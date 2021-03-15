@@ -116,6 +116,9 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
 
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
     Q_PROPERTY(bool hasMissingValues MEMBER _hasMissingValues NOTIFY hasMissingValuesChanged)
+    Q_PROPERTY(bool hasDiscreteValues MEMBER _hasDiscreteValues NOTIFY hasDiscreteValuesChanged)
+    Q_PROPERTY(bool appearsToBeContinuous MEMBER _appearsToBeContinuous NOTIFY appearsToBeContinuousChanged)
+    Q_PROPERTY(bool hasNumericalValues MEMBER _hasNumericalValues NOTIFY hasNumericalValuesChanged)
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
@@ -138,10 +141,13 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
         NOTIFY graphSizeEstimateInProgressChanged)
 
 private:
-    QFutureWatcher<void> _autoDetectDataRectangleWatcher;
+    QFutureWatcher<void> _dataRectangleFutureWatcher;
     QFutureWatcher<void> _dataParserWatcher;
     QRect _dataRect;
     bool _hasMissingValues = false;
+    bool _hasDiscreteValues = false;
+    bool _appearsToBeContinuous = false;
+    bool _hasNumericalValues = false;
     std::shared_ptr<TabularData> _dataPtr = nullptr;
     DataRectTableModel _model;
     bool _transposed = false;
@@ -168,6 +174,7 @@ private:
     QVariantMap _graphSizeEstimate;
 
     std::vector<CorrelationDataRow> sampledDataRows(size_t numSamples);
+    void waitForDataRectangleFuture();
 
 public:
     CorrelationTabularDataParser();
@@ -175,7 +182,8 @@ public:
 
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
     Q_INVOKABLE void cancelParse();
-    Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
+    Q_INVOKABLE void autoDetectDataRectangle();
+    Q_INVOKABLE void setDataRectangle(size_t column, size_t row);
 
     Q_INVOKABLE void clearData();
 
@@ -183,7 +191,7 @@ public:
     bool graphSizeEstimateInProgress() const { return _graphSizeEstimateFutureWatcher.isRunning(); }
 
     DataRectTableModel* tableModel();
-    bool busy() const { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
+    bool busy() const { return _dataRectangleFutureWatcher.isRunning() || _dataParserWatcher.isRunning(); }
 
     bool transposed() const;
     void setTransposed(bool transposed);
@@ -192,6 +200,9 @@ signals:
     void dataChanged();
     void dataRectChanged();
     void hasMissingValuesChanged();
+    void hasDiscreteValuesChanged();
+    void appearsToBeContinuousChanged();
+    void hasNumericalValuesChanged();
     void busyChanged();
     void dataLoaded();
     void transposedChanged();

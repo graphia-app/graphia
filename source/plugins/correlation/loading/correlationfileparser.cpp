@@ -31,12 +31,14 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/container_randomsample.h"
+#include "shared/utils/string.h"
 #include "shared/utils/scope_exit.h"
 
 #include <QRect>
 
 #include <vector>
 #include <stack>
+#include <set>
 #include <utility>
 
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
@@ -45,7 +47,8 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
     _tabularData(std::move(tabularData)), _dataRect(dataRect)
 {}
 
-static QRect findLargestDataRect(const TabularData& tabularData, size_t startColumn = 0, size_t startRow = 0)
+static QRect findLargestNumericalDataRect(const TabularData& tabularData,
+    size_t startColumn = 0, size_t startRow = 0)
 {
     std::vector<int> heightHistogram(tabularData.numColumns());
 
@@ -121,6 +124,23 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
     return dataRect;
 }
 
+static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect)
+{
+    for(auto column = dataRect.left(); column <= dataRect.right(); column++)
+    {
+        for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
+        {
+            const auto& value = tabularData.valueAt(
+                static_cast<size_t>(column), static_cast<size_t>(row));
+
+            if(!value.isEmpty() && !u::isNumeric(value))
+                return true;
+        }
+    }
+
+    return false;
+}
+
 static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect& dataRect)
 {
     for(auto column = dataRect.left(); column <= dataRect.right(); column++)
@@ -136,6 +156,44 @@ static bool dataRectHasMissingValues(const TabularData& tabularData, const QRect
     }
 
     return false;
+}
+
+// This is designed to detect the case where a numerical dataRect contains continuous values
+// It's all a bit finger in the air, but should hopefully catch the obvious cases
+static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const QRect& dataRect)
+{
+    size_t numProbablyDiscreteColumns = 0;
+
+    for(auto column = dataRect.left(); column <= dataRect.right(); column++)
+    {
+        std::set<QString> uniqueValues;
+
+        for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
+        {
+            const auto& value = tabularData.valueAt(
+                static_cast<size_t>(column), static_cast<size_t>(row));
+
+            // We should only be getting called on numeric dataRects
+            Q_ASSERT(u::isNumeric(value));
+
+            // If the dataRect contains at least one floating point value,
+            // assume it's continuous data
+            if(!u::isInteger(value))
+                return true;
+
+            uniqueValues.emplace(value);
+        }
+
+        auto percentOfValuesInColumnThatAreUnique =
+            (uniqueValues.size() * 100) / dataRect.height();
+
+        // If we have few values relative to the size of the column,
+        // assume it's discrete data
+        if(percentOfValuesInColumnThatAreUnique < 50)
+            numProbablyDiscreteColumns++;
+    }
+
+    return numProbablyDiscreteColumns == 0;
 }
 
 double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
@@ -317,7 +375,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     {
         graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
         setProgress(-1);
-        _dataRect = findLargestDataRect(_tabularData);
+        _dataRect = findLargestNumericalDataRect(_tabularData);
     }
 
     if(_dataRect.isEmpty() || cancelled())
@@ -377,8 +435,8 @@ void CorrelationTabularDataParser::setTransposed(bool transposed)
 {
     // If we manage to get here while the rect detection is still running,
     // wait until it has finished before proceeding
-    if(_autoDetectDataRectangleWatcher.isRunning())
-        _autoDetectDataRectangleWatcher.waitForFinished();
+    if(_dataRectangleFutureWatcher.isRunning())
+        _dataRectangleFutureWatcher.waitForFinished();
 
     if(_graphSizeEstimateFutureWatcher.isRunning())
     {
@@ -388,10 +446,10 @@ void CorrelationTabularDataParser::setTransposed(bool transposed)
 
     if(this->transposed() != transposed)
     {
-        auto transDataRect = _dataRect.transposed();
-        transDataRect.moveLeft(_dataRect.y());
-        transDataRect.moveTop(_dataRect.x());
-        _dataRect = transDataRect;
+        auto transposedDataRect = _dataRect.transposed();
+        transposedDataRect.moveLeft(_dataRect.y());
+        transposedDataRect.moveTop(_dataRect.x());
+        _dataRect = transposedDataRect;
     }
 
     _model.setTransposed(transposed);
@@ -410,11 +468,13 @@ void CorrelationTabularDataParser::setProgress(int progress)
 
 CorrelationTabularDataParser::CorrelationTabularDataParser()
 {
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataRectChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasMissingValuesChanged);
-    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, [this]
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataRectChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasMissingValuesChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasDiscreteValuesChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::appearsToBeContinuousChanged);
+    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, [this]
     {
         // An estimate was started while the data rectangle was being calculated
         if(_graphSizeEstimateQueued)
@@ -447,7 +507,7 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
 CorrelationTabularDataParser::~CorrelationTabularDataParser()
 {
     _graphSizeEstimateFutureWatcher.waitForFinished();
-    _autoDetectDataRectangleWatcher.waitForFinished();
+    _dataRectangleFutureWatcher.waitForFinished();
     _dataParserWatcher.waitForFinished();
 }
 
@@ -473,6 +533,9 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
                 return;
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
+
+            _hasNumericalValues = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
+            emit hasNumericalValuesChanged();
         };
 
         if(fileType == QStringLiteral("CorrelationCSV"))
@@ -497,18 +560,84 @@ void CorrelationTabularDataParser::cancelParse()
     cancel();
 }
 
-void CorrelationTabularDataParser::autoDetectDataRectangle(size_t column, size_t row)
+void CorrelationTabularDataParser::waitForDataRectangleFuture()
+{
+    if(_dataRectangleFutureWatcher.isRunning())
+    {
+        qDebug() << "CorrelationTabularDataParser QFutureWatcher "
+            "still running while attempting more processing";
+        _dataRectangleFutureWatcher.waitForFinished();
+    }
+}
+
+void CorrelationTabularDataParser::autoDetectDataRectangle()
 {
     Q_ASSERT(_dataPtr != nullptr);
     if(_dataPtr == nullptr)
         return;
 
-    QFuture<void> future = QtConcurrent::run([this, column, row]()
+    waitForDataRectangleFuture();
+
+    QFuture<void> future = QtConcurrent::run([this]()
     {
-        _dataRect = findLargestDataRect(*_dataPtr, column, row);
+        _hasDiscreteValues = false;
+        _appearsToBeContinuous = true;
+        auto numericalDataRect = findLargestNumericalDataRect(*_dataPtr);
+
+        if(numericalDataRect.isEmpty())
+        {
+            // A numerical rectangle can't be found and there isn't an
+            // existing selected rectangle, so just use the whole table
+            if(_dataRect.isEmpty())
+            {
+                _dataRect =
+                {
+                    1, 1,
+                    static_cast<int>(_dataPtr->numColumns()) - 1,
+                    static_cast<int>(_dataPtr->numRows()) - 1
+                };
+            }
+
+            _hasDiscreteValues = true;
+            _appearsToBeContinuous = false;
+        }
+        else
+            _dataRect = numericalDataRect;
+
         _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
     });
-    _autoDetectDataRectangleWatcher.setFuture(future);
+    _dataRectangleFutureWatcher.setFuture(future);
+}
+
+void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
+{
+    Q_ASSERT(_dataPtr != nullptr);
+    if(_dataPtr == nullptr)
+        return;
+
+    waitForDataRectangleFuture();
+
+    column = std::max(size_t{1}, column);
+
+    QFuture<void> future = QtConcurrent::run([column, row, this]()
+    {
+        _dataRect =
+        {
+            static_cast<int>(column), static_cast<int>(row),
+            static_cast<int>(_dataPtr->numColumns() - column),
+            static_cast<int>(_dataPtr->numRows() - row)
+        };
+
+        _hasDiscreteValues = dataRectHasDiscreteValues(*_dataPtr, _dataRect);
+
+        if(!_hasDiscreteValues)
+            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
+        else
+            _appearsToBeContinuous = false;
+
+        _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
+    });
+    _dataRectangleFutureWatcher.setFuture(future);
 }
 
 void CorrelationTabularDataParser::clearData()
@@ -590,7 +719,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
     if(_dataPtr == nullptr)
         return;
 
-    if(_graphSizeEstimateFutureWatcher.isRunning() || _autoDetectDataRectangleWatcher.isRunning())
+    if(_graphSizeEstimateFutureWatcher.isRunning() || _dataRectangleFutureWatcher.isRunning())
     {
         _graphSizeEstimateQueued = true;
         return;
