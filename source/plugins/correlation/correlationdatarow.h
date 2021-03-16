@@ -27,21 +27,29 @@
 #include <iterator>
 #include <memory>
 
-class ContinuousDataRow
+#include <QString>
+
+template<typename T>
+class CorrelationDataRow
 {
-private:
-    std::vector<double> _data;
+protected:
+    std::vector<T> _data;
+
+    size_t _numColumns = 0;
+    NodeId _nodeId;
+    uint64_t _cost = 0;
 
 public:
-    using ConstDataIterator = decltype(_data)::const_iterator;
-    using DataIterator = decltype(_data)::iterator;
-    using DataOffset = decltype(_data)::size_type;
+    using ConstDataIterator = typename decltype(_data)::const_iterator;
+    using DataIterator = typename decltype(_data)::iterator;
+    using DataOffset = typename decltype(_data)::size_type;
 
-    ContinuousDataRow() = default;
-    ContinuousDataRow(const ContinuousDataRow&) = default;
+    CorrelationDataRow() = default;
+    CorrelationDataRow(const CorrelationDataRow&) = default;
+    virtual ~CorrelationDataRow() = default;
 
-    template<typename T>
-    ContinuousDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
+    template<typename U>
+    CorrelationDataRow(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
         _nodeId(nodeId), _cost(computeCost)
     {
@@ -53,10 +61,10 @@ public:
         update();
     }
 
-    template<typename T>
-    ContinuousDataRow(const std::vector<T>& dataRow,
+    template<typename U>
+    CorrelationDataRow(const std::vector<U>& dataRow,
         NodeId nodeId, uint64_t computeCost = 1) :
-        ContinuousDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
+        CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
     {}
 
     DataIterator begin() { return _data.begin(); }
@@ -73,6 +81,18 @@ public:
 
     NodeId nodeId() const { return _nodeId; }
 
+    virtual void update() {}
+};
+
+class ContinuousDataRow : public CorrelationDataRow<double>
+{
+private:
+    u::Statistics _statistics;
+    mutable std::shared_ptr<ContinuousDataRow> _rankingRow;
+
+public:
+    using CorrelationDataRow::CorrelationDataRow;
+
     double sum() const { return _statistics._sum; }
     double variability() const { return _statistics._variability; }
     double mean() const { return _statistics._mean; }
@@ -84,17 +104,10 @@ public:
     double maxValue() const { return _statistics._max; }
     size_t largestColumnIndex() const { return _statistics._largestIndex; }
 
-    void update();
+    void update() override;
 
     void generateRanking() const;
     const ContinuousDataRow* ranking() const;
-
-private:
-    size_t _numColumns = 0;
-    NodeId _nodeId;
-    uint64_t _cost = 0;
-    u::Statistics _statistics;
-    mutable std::shared_ptr<ContinuousDataRow> _rankingRow;
 };
 
 using ContinuousDataRows = std::vector<ContinuousDataRow>;
