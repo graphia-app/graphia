@@ -88,15 +88,10 @@ public:
 
 private:
     std::vector<double> _data;
-
     size_t _numColumns = 0;
-
     NodeId _nodeId;
-
     uint64_t _cost = 0;
-
     u::Statistics _statistics;
-
     mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
 };
 
