@@ -110,6 +110,13 @@ public:
     const ContinuousDataRow* ranking() const;
 };
 
+class DiscreteDataRow : public CorrelationDataRow<QString>
+{
+public:
+    using CorrelationDataRow::CorrelationDataRow;
+};
+
 using ContinuousDataRows = std::vector<ContinuousDataRow>;
+using DiscreteDataRows = std::vector<DiscreteDataRow>;
 
 #endif // CORRELATIONDATAROW_H
