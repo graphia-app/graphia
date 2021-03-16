@@ -67,9 +67,9 @@ BaseParameterDialog
         {
             parameters.dataFrame = dataRect;
 
-            if(hasDiscreteValues)
+            if(dataRect.hasDiscreteValues)
                 dataTypeComboBox.setDiscrete();
-            else if(appearsToBeContinuous)
+            else if(dataRect.appearsToBeContinuous)
                 dataTypeComboBox.setContinuous();
 
             dataRectView.scrollToDataRect();
@@ -254,7 +254,7 @@ BaseParameterDialog
                     ComboBox
                     {
                         id: dataTypeComboBox
-                        enabled: tabularDataParser.hasNumericalValues && !dataRectPage._busy
+                        enabled: tabularDataParser.dataHasNumericalRect && !dataRectPage._busy
 
                         model: ListModel
                         {
@@ -270,7 +270,7 @@ BaseParameterDialog
                                 return;
 
                             let newValue = model.get(currentIndex).value;
-                            if(newValue === "continuous" && tabularDataParser.hasDiscreteValues)
+                            if(newValue === "continuous" && tabularDataParser.dataRect.hasDiscreteValues)
                                 tabularDataParser.autoDetectDataRectangle();
                         }
 
@@ -639,7 +639,7 @@ BaseParameterDialog
 
                     text:
                     {
-                        if(dataTypeComboBox.value === "discrete" && tabularDataParser.appearsToBeContinuous)
+                        if(dataTypeComboBox.value === "discrete" && tabularDataParser.dataRect.appearsToBeContinuous)
                         {
                             return qsTr("<font color=\"red\">WARNING: the selected dataframe appears " +
                                 "to contain contiguous data; interpreting it as discrete may " +
@@ -822,7 +822,7 @@ BaseParameterDialog
 
                             Text
                             {
-                                visible: tabularDataParser.hasMissingValues
+                                visible: tabularDataParser.dataRect.hasMissingValues
                                 text: qsTr("Imputation:")
                                 Layout.alignment: Qt.AlignRight
                             }
@@ -830,7 +830,7 @@ BaseParameterDialog
                             ComboBox
                             {
                                 id: missingDataType
-                                visible: tabularDataParser.hasMissingValues
+                                visible: tabularDataParser.dataRect.hasMissingValues
 
                                 model: ListModel
                                 {
@@ -851,7 +851,7 @@ BaseParameterDialog
                             RowLayout
                             {
                                 Layout.columnSpan: 4
-                                visible: tabularDataParser.hasMissingValues
+                                visible: tabularDataParser.dataRect.hasMissingValues
 
                                 TextField
                                 {
@@ -1535,7 +1535,7 @@ BaseParameterDialog
                         if(normalise.value !== NormaliseType.None)
                             summaryString += qsTr("Normalisation: ") + normalise.currentText + "<br>";
 
-                        if(tabularDataParser.hasMissingValues)
+                        if(tabularDataParser.dataRect.hasMissingValues)
                         {
                             summaryString += qsTr("Imputation: ") + missingDataType.currentText;
 

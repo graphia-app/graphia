@@ -33,6 +33,7 @@
 
 #include <QString>
 #include <QRect>
+#include <QVariantMap>
 #include <QtConcurrent/QtConcurrent>
 
 #include <memory>
@@ -114,11 +115,8 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
 {
     Q_OBJECT
 
-    Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
-    Q_PROPERTY(bool hasMissingValues MEMBER _hasMissingValues NOTIFY hasMissingValuesChanged)
-    Q_PROPERTY(bool hasDiscreteValues MEMBER _hasDiscreteValues NOTIFY hasDiscreteValuesChanged)
-    Q_PROPERTY(bool appearsToBeContinuous MEMBER _appearsToBeContinuous NOTIFY appearsToBeContinuousChanged)
-    Q_PROPERTY(bool hasNumericalValues MEMBER _hasNumericalValues NOTIFY hasNumericalValuesChanged)
+    Q_PROPERTY(QVariantMap dataRect READ dataRect NOTIFY dataRectChanged)
+    Q_PROPERTY(bool dataHasNumericalRect MEMBER _dataHasNumericalRect NOTIFY dataHasNumericalRectChanged)
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
@@ -147,7 +145,7 @@ private:
     bool _hasMissingValues = false;
     bool _hasDiscreteValues = false;
     bool _appearsToBeContinuous = false;
-    bool _hasNumericalValues = false;
+    bool _dataHasNumericalRect = false;
     std::shared_ptr<TabularData> _dataPtr = nullptr;
     DataRectTableModel _model;
     bool _transposed = false;
@@ -172,6 +170,8 @@ private:
     Cancellable _graphSizeEstimateCancellable;
     QFutureWatcher<QVariantMap> _graphSizeEstimateFutureWatcher;
     QVariantMap _graphSizeEstimate;
+
+    QVariantMap dataRect() const;
 
     std::vector<CorrelationDataRow> sampledDataRows(size_t numSamples);
     void waitForDataRectangleFuture();
@@ -199,10 +199,7 @@ public:
 signals:
     void dataChanged();
     void dataRectChanged();
-    void hasMissingValuesChanged();
-    void hasDiscreteValuesChanged();
-    void appearsToBeContinuousChanged();
-    void hasNumericalValuesChanged();
+    void dataHasNumericalRectChanged();
     void busyChanged();
     void dataLoaded();
     void transposedChanged();

@@ -466,14 +466,27 @@ void CorrelationTabularDataParser::setProgress(int progress)
     }
 }
 
+QVariantMap CorrelationTabularDataParser::dataRect() const
+{
+    QVariantMap m;
+
+    m.insert(QStringLiteral("x"), _dataRect.x());
+    m.insert(QStringLiteral("y"), _dataRect.y());
+    m.insert(QStringLiteral("width"), _dataRect.width());
+    m.insert(QStringLiteral("height"), _dataRect.height());
+
+    m.insert(QStringLiteral("hasMissingValues"), _hasMissingValues);
+    m.insert(QStringLiteral("hasDiscreteValues"), _hasDiscreteValues);
+    m.insert(QStringLiteral("appearsToBeContinuous"), _appearsToBeContinuous);
+
+    return m;
+}
+
 CorrelationTabularDataParser::CorrelationTabularDataParser()
 {
     connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::dataRectChanged);
-    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasMissingValuesChanged);
-    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::hasDiscreteValuesChanged);
-    connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::appearsToBeContinuousChanged);
     connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, [this]
     {
         // An estimate was started while the data rectangle was being calculated
@@ -534,8 +547,8 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
 
-            _hasNumericalValues = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
-            emit hasNumericalValuesChanged();
+            _dataHasNumericalRect = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
+            emit dataHasNumericalRectChanged();
         };
 
         if(fileType == QStringLiteral("CorrelationCSV"))
