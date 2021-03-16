@@ -29,10 +29,13 @@
 
 class ContinuousDataRow
 {
+private:
+    std::vector<double> _data;
+
 public:
-    using ConstDataIterator = std::vector<double>::const_iterator;
-    using DataIterator = std::vector<double>::iterator;
-    using DataOffset = std::vector<double>::size_type;
+    using ConstDataIterator = decltype(_data)::const_iterator;
+    using DataIterator = decltype(_data)::iterator;
+    using DataOffset = decltype(_data)::size_type;
 
     ContinuousDataRow() = default;
     ContinuousDataRow(const ContinuousDataRow&) = default;
@@ -87,7 +90,6 @@ public:
     const ContinuousDataRow* ranking() const;
 
 private:
-    std::vector<double> _data;
     size_t _numColumns = 0;
     NodeId _nodeId;
     uint64_t _cost = 0;
