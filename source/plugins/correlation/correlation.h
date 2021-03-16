@@ -54,7 +54,7 @@ class Correlation
 public:
     virtual ~Correlation() = default;
 
-    virtual EdgeList process(const CorrelationDataRows& rows,
+    virtual EdgeList process(const ContinuousDataRows& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
@@ -74,7 +74,7 @@ template<typename Algorithm, RowType rowType = RowType::Raw>
 class CovarianceCorrelation : public Correlation
 {
 public:
-    EdgeList process(const CorrelationDataRows& rows,
+    EdgeList process(const ContinuousDataRows& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
@@ -98,7 +98,7 @@ public:
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
-        [&](CorrelationDataRows::const_iterator rowAIt)
+        [&](ContinuousDataRows::const_iterator rowAIt)
         {
             const auto* rowA = &(*rowAIt);
 
@@ -161,7 +161,7 @@ public:
 
 struct PearsonAlgorithm
 {
-    static double evaluate(size_t numColumns, const CorrelationDataRow* rowA, const CorrelationDataRow* rowB)
+    static double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
     {
         double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
         double numerator = (numColumns * productSum) - (rowA->sum() * rowB->sum());

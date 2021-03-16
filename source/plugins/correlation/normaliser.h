@@ -31,7 +31,7 @@ class Normaliser
 {
 public:
     virtual ~Normaliser() = default;
-    virtual bool process(CorrelationDataRows& dataRows, IParser* parser = nullptr) const = 0;
+    virtual bool process(ContinuousDataRows& dataRows, IParser* parser = nullptr) const = 0;
 };
 
 #endif // NORMALISER_H

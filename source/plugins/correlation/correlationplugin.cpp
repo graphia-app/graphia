@@ -469,7 +469,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     emit columnAnnotationNamesChanged();
 }
 
-const CorrelationDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
+const ContinuousDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
     return _dataRows.at(_userNodeData.indexFor(nodeId));
 }

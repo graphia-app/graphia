@@ -83,7 +83,7 @@ private:
 
     std::vector<double> _data;
 
-    CorrelationDataRows _dataRows;
+    ContinuousDataRows _dataRows;
 
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
@@ -124,7 +124,7 @@ private:
 
     void buildColumnAnnotations();
 
-    const CorrelationDataRow& dataRowForNodeId(NodeId nodeId) const;
+    const ContinuousDataRow& dataRowForNodeId(NodeId nodeId) const;
 
     void setHighlightedRows(const QVector<int>& highlightedRows);
 

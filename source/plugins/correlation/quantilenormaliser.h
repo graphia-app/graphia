@@ -24,7 +24,7 @@
 class QuantileNormaliser : public Normaliser
 {
 public:
-    bool process(CorrelationDataRows& dataRows, IParser* parser) const override;
+    bool process(ContinuousDataRows& dataRows, IParser* parser) const override;
 };
 
 #endif // QUANTILENORMALISER_H

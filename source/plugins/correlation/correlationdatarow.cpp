@@ -23,17 +23,17 @@
 #include <algorithm>
 #include <cmath>
 
-void CorrelationDataRow::update()
+void ContinuousDataRow::update()
 {
     _statistics = u::findStatisticsFor(_data);
 }
 
-void CorrelationDataRow::generateRanking() const
+void ContinuousDataRow::generateRanking() const
 {
-    _rankingRow = std::make_shared<CorrelationDataRow>(u::rankingOf(_data), _nodeId, _cost);
+    _rankingRow = std::make_shared<ContinuousDataRow>(u::rankingOf(_data), _nodeId, _cost);
 }
 
-const CorrelationDataRow* CorrelationDataRow::ranking() const
+const ContinuousDataRow* ContinuousDataRow::ranking() const
 {
     return _rankingRow.get();
 }

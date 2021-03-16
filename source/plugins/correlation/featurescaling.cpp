@@ -34,7 +34,7 @@ struct StandardNormalisationValues
     std::vector<double>* stddevs = nullptr;
 };
 
-static bool calcStandardValues(const CorrelationDataRows& dataRows,
+static bool calcStandardValues(const ContinuousDataRows& dataRows,
     const StandardNormalisationValues& values, IParser* parser = nullptr)
 {
     if(dataRows.empty())
@@ -120,7 +120,7 @@ static bool calcStandardValues(const CorrelationDataRows& dataRows,
     return true;
 }
 
-static bool normalise(CorrelationDataRows& dataRows,
+static bool normalise(ContinuousDataRows& dataRows,
     const std::vector<double>& subtractors,
     const std::vector<double>& denominators,
     IParser* parser)
@@ -157,7 +157,7 @@ static bool normalise(CorrelationDataRows& dataRows,
     return true;
 }
 
-bool MinMaxNormaliser::process(CorrelationDataRows& dataRows,
+bool MinMaxNormaliser::process(ContinuousDataRows& dataRows,
     IParser* parser) const
 {
     if(dataRows.empty())
@@ -173,7 +173,7 @@ bool MinMaxNormaliser::process(CorrelationDataRows& dataRows,
     return normalise(dataRows, mins, ranges, parser);
 }
 
-bool MeanNormaliser::process(CorrelationDataRows& dataRows, IParser* parser) const
+bool MeanNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;
@@ -189,7 +189,7 @@ bool MeanNormaliser::process(CorrelationDataRows& dataRows, IParser* parser) con
     return normalise(dataRows, means, ranges, parser);
 }
 
-bool StandardisationNormaliser::process(CorrelationDataRows& dataRows, IParser* parser) const
+bool StandardisationNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;
@@ -206,7 +206,7 @@ bool StandardisationNormaliser::process(CorrelationDataRows& dataRows, IParser* 
     return normalise(dataRows, means, stddevs, parser);
 }
 
-bool UnitScalingNormaliser::process(CorrelationDataRows& dataRows, IParser* parser) const
+bool UnitScalingNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
 {
     auto numColumns = dataRows.at(0).numColumns();
 

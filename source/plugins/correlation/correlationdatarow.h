@@ -27,18 +27,18 @@
 #include <iterator>
 #include <memory>
 
-class CorrelationDataRow
+class ContinuousDataRow
 {
 public:
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;
     using DataOffset = std::vector<double>::size_type;
 
-    CorrelationDataRow() = default;
-    CorrelationDataRow(const CorrelationDataRow&) = default;
+    ContinuousDataRow() = default;
+    ContinuousDataRow(const ContinuousDataRow&) = default;
 
     template<typename T>
-    CorrelationDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
+    ContinuousDataRow(const std::vector<T>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
         _nodeId(nodeId), _cost(computeCost)
     {
@@ -51,9 +51,9 @@ public:
     }
 
     template<typename T>
-    CorrelationDataRow(const std::vector<T>& dataRow,
+    ContinuousDataRow(const std::vector<T>& dataRow,
         NodeId nodeId, uint64_t computeCost = 1) :
-        CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
+        ContinuousDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
     {}
 
     DataIterator begin() { return _data.begin(); }
@@ -84,7 +84,7 @@ public:
     void update();
 
     void generateRanking() const;
-    const CorrelationDataRow* ranking() const;
+    const ContinuousDataRow* ranking() const;
 
 private:
     std::vector<double> _data;
@@ -92,9 +92,9 @@ private:
     NodeId _nodeId;
     uint64_t _cost = 0;
     u::Statistics _statistics;
-    mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
+    mutable std::shared_ptr<ContinuousDataRow> _rankingRow;
 };
 
-using CorrelationDataRows = std::vector<CorrelationDataRow>;
+using ContinuousDataRows = std::vector<ContinuousDataRow>;
 
 #endif // CORRELATIONDATAROW_H
