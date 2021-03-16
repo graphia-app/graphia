@@ -100,4 +100,6 @@ private:
     mutable std::shared_ptr<CorrelationDataRow> _rankingRow;
 };
 
+using CorrelationDataRows = std::vector<CorrelationDataRow>;
+
 #endif // CORRELATIONDATAROW_H

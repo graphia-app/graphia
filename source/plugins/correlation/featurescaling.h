@@ -28,25 +28,25 @@
 class MinMaxNormaliser : public Normaliser
 {
 public:
-    bool process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const override;
+    bool process(CorrelationDataRows& dataRows, IParser* parser) const override;
 };
 
 class MeanNormaliser : public Normaliser
 {
 public:
-    bool process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const override;
+    bool process(CorrelationDataRows& dataRows, IParser* parser) const override;
 };
 
 class StandardisationNormaliser : public Normaliser
 {
 public:
-    bool process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const override;
+    bool process(CorrelationDataRows& dataRows, IParser* parser) const override;
 };
 
 class UnitScalingNormaliser : public Normaliser
 {
 public:
-    bool process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const override;
+    bool process(CorrelationDataRows& dataRows, IParser* parser) const override;
 };
 
 #endif // FEATURESCALING_H

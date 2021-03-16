@@ -318,7 +318,7 @@ double CorrelationFileParser::scaleValue(ScalingType scalingType, double value)
 }
 
 void CorrelationFileParser::normalise(NormaliseType normaliseType,
-    std::vector<CorrelationDataRow>& dataRows, IParser* parser)
+    CorrelationDataRows& dataRows, IParser* parser)
 {
     switch(normaliseType)
     {
@@ -659,12 +659,12 @@ void CorrelationTabularDataParser::clearData()
         _dataPtr->reset();
 }
 
-std::vector<CorrelationDataRow> CorrelationTabularDataParser::sampledDataRows(size_t numSamples)
+CorrelationDataRows CorrelationTabularDataParser::sampledDataRows(size_t numSamples)
 {
     if(_dataRect.isEmpty())
         return {};
 
-    std::vector<CorrelationDataRow> dataRows;
+    CorrelationDataRows dataRows;
 
     Q_ASSERT(static_cast<size_t>(_dataRect.x() + _dataRect.width() - 1) < _dataPtr->numColumns());
     Q_ASSERT(static_cast<size_t>(_dataRect.y() + _dataRect.height() - 1) < _dataPtr->numRows());

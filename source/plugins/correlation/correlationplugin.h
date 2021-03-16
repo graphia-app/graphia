@@ -83,7 +83,7 @@ private:
 
     std::vector<double> _data;
 
-    std::vector<CorrelationDataRow> _dataRows;
+    CorrelationDataRows _dataRows;
 
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;

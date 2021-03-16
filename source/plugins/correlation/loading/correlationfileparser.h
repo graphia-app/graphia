@@ -98,11 +98,11 @@ public:
         const TabularData& tabularData, const QRect& dataRect, size_t columnIndex, size_t rowIndex);
     static double scaleValue(ScalingType scalingType, double value);
     static void normalise(NormaliseType normaliseType,
-        std::vector<CorrelationDataRow>& dataRows,
+        CorrelationDataRows& dataRows,
         IParser* parser = nullptr);
 
     static EdgeList pearsonCorrelation(
-        const std::vector<CorrelationDataRow>& rows,
+        const CorrelationDataRows& rows,
         double minimumThreshold, IParser* parser = nullptr);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
@@ -173,7 +173,7 @@ private:
 
     QVariantMap dataRect() const;
 
-    std::vector<CorrelationDataRow> sampledDataRows(size_t numSamples);
+    CorrelationDataRows sampledDataRows(size_t numSamples);
     void waitForDataRectangleFuture();
 
 public:

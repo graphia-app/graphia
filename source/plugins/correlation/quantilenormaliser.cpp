@@ -26,7 +26,7 @@
 
 #include <QtGlobal>
 
-bool QuantileNormaliser::process(std::vector<CorrelationDataRow>& dataRows, IParser* parser) const
+bool QuantileNormaliser::process(CorrelationDataRows& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;

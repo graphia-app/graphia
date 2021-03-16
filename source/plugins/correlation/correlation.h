@@ -54,7 +54,7 @@ class Correlation
 public:
     virtual ~Correlation() = default;
 
-    virtual EdgeList process(const std::vector<CorrelationDataRow>& rows,
+    virtual EdgeList process(const CorrelationDataRows& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
@@ -74,7 +74,7 @@ template<typename Algorithm, RowType rowType = RowType::Raw>
 class CovarianceCorrelation : public Correlation
 {
 public:
-    EdgeList process(const std::vector<CorrelationDataRow>& rows,
+    EdgeList process(const CorrelationDataRows& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
@@ -98,7 +98,7 @@ public:
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
-        [&](std::vector<CorrelationDataRow>::const_iterator rowAIt)
+        [&](CorrelationDataRows::const_iterator rowAIt)
         {
             const auto* rowA = &(*rowAIt);
 
