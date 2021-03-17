@@ -728,6 +728,40 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
     return dataRows;
 }
 
+DiscreteDataRows CorrelationTabularDataParser::sampledDiscreteDataRows(size_t numSampleRows)
+{
+    if(_dataRect.isEmpty())
+        return {};
+
+    DiscreteDataRows dataRows;
+    std::vector<QString> rowData;
+    rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
+
+    NodeId nodeId(0);
+
+    auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
+    for(size_t rowIndex : rowIndices)
+    {
+        rowData.clear();
+
+        auto startColumn = static_cast<size_t>(_dataRect.x());
+        auto finishColumn = startColumn + _dataRect.width();
+        for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
+        {
+            if(_graphSizeEstimateCancellable.cancelled())
+                return {};
+
+            const auto& value = _dataPtr->valueAt(columnIndex, rowIndex);
+            rowData.emplace_back(value);
+        }
+
+        dataRows.emplace_back(rowData, nodeId);
+        ++nodeId;
+    }
+
+    return dataRows;
+}
+
 void CorrelationTabularDataParser::estimateGraphSize()
 {
     if(_dataPtr == nullptr)

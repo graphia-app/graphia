@@ -174,6 +174,8 @@ private:
     QVariantMap dataRect() const;
 
     ContinuousDataRows sampledContinuousDataRows(size_t numSampleRows);
+    DiscreteDataRows sampledDiscreteDataRows(size_t numSampleRows);
+
     void waitForDataRectangleFuture();
 
 public:
