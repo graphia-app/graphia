@@ -254,7 +254,7 @@ void CorrelationPluginInstance::createAttributes()
             "with the node. It is defined as the standard deviation divided by the mean.")
             .arg(u::redirectLink("coef_variation", tr("Coefficient of Variation"))));
 
-    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+    auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
     _correlationAttributeName = correlation->attributeName();
 
     graphModel()->createAttribute(_correlationAttributeName)
@@ -327,7 +327,7 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
 
 EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
 {
-    auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+    auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
     return correlation->process(_dataRows, minimumThreshold,
         static_cast<CorrelationPolarity>(_correlationPolarity), &parser, &parser);
 }

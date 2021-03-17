@@ -792,7 +792,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
         if(dataRows.empty())
             return QVariantMap();
 
-        auto correlation = Correlation::create(static_cast<CorrelationType>(_correlationType));
+        auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
         auto sampleEdges = correlation->process(dataRows, _minimumCorrelation,
             static_cast<CorrelationPolarity>(_correlationPolarity), &_graphSizeEstimateCancellable);
 

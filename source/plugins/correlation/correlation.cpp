@@ -18,7 +18,7 @@
 
 #include "correlation.h"
 
-std::unique_ptr<Correlation> Correlation::create(CorrelationType correlationType)
+std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(CorrelationType correlationType)
 {
     switch(correlationType)
     {

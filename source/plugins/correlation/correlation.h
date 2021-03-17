@@ -54,19 +54,19 @@ DEFINE_QML_ENUM(
     Negative,
     Both);
 
-class Correlation
+class ContinuousCorrelation
 {
 public:
-    virtual ~Correlation() = default;
+    virtual ~ContinuousCorrelation() = default;
 
-    virtual EdgeList process(const ContinuousDataRows& rows,
-        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+    virtual EdgeList process(const ContinuousDataRows& rows, double minimumThreshold,
+        CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     virtual QString attributeName() const = 0;
     virtual QString attributeDescription() const = 0;
 
-    static std::unique_ptr<Correlation> create(CorrelationType correlationType);
+    static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
 
 enum class RowType
@@ -76,7 +76,7 @@ enum class RowType
 };
 
 template<typename Algorithm, RowType rowType = RowType::Raw>
-class CovarianceCorrelation : public Correlation
+class CovarianceCorrelation : public ContinuousCorrelation
 {
 public:
     EdgeList process(const ContinuousDataRows& rows,
