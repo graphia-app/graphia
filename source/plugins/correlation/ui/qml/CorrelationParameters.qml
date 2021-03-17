@@ -57,6 +57,7 @@ BaseParameterDialog
 
         minimumCorrelation: minimumCorrelationSpinBox.value
         correlationType: { return algorithm.model.get(algorithm.currentIndex).value; }
+        correlationDataType: { return dataType.model.get(dataType.currentIndex).value; }
         correlationPolarity: { return polarity.model.get(polarity.currentIndex).value; }
         scalingType: { return scaling.model.get(scaling.currentIndex).value; }
         normaliseType: { return normalise.model.get(normalise.currentIndex).value; }
@@ -68,9 +69,9 @@ BaseParameterDialog
             parameters.dataFrame = dataRect;
 
             if(dataRect.hasDiscreteValues)
-                dataTypeComboBox.setDiscrete();
+                dataType.setDiscrete();
             else if(dataRect.appearsToBeContinuous)
-                dataTypeComboBox.setContinuous();
+                dataType.setContinuous();
 
             dataRectView.scrollToDataRect();
         }
@@ -253,24 +254,26 @@ BaseParameterDialog
 
                     ComboBox
                     {
-                        id: dataTypeComboBox
+                        id: dataType
                         enabled: tabularDataParser.dataHasNumericalRect && !dataRectPage._busy
 
                         model: ListModel
                         {
-                            ListElement { text: qsTr("Continuous"); value: "continuous" }
-                            ListElement { text: qsTr("Discrete");   value: "discrete" }
+                            ListElement { text: qsTr("Continuous"); value: CorrelationDataType.Continuous }
+                            ListElement { text: qsTr("Discrete");   value: CorrelationDataType.Discrete }
                         }
                         textRole: "text"
 
                         property bool _setting: false
                         onCurrentIndexChanged:
                         {
+                            parameters.correlationDataType = model.get(currentIndex).value;
+
                             if(_setting)
                                 return;
 
                             let newValue = model.get(currentIndex).value;
-                            if(newValue === "continuous" && tabularDataParser.dataRect.hasDiscreteValues)
+                            if(newValue === CorrelationDataType.Continuous && tabularDataParser.dataRect.hasDiscreteValues)
                                 tabularDataParser.autoDetectDataRectangle();
                         }
 
@@ -288,24 +291,18 @@ BaseParameterDialog
                         function setContinuous()
                         {
                             _setting = true;
-                            currentIndex = indexForDataType("continuous");
+                            currentIndex = indexForDataType(CorrelationDataType.Continuous);
                             _setting = false;
                         }
 
                         function setDiscrete()
                         {
                             _setting = true;
-                            currentIndex = indexForDataType("discrete");
+                            currentIndex = indexForDataType(CorrelationDataType.Discrete);
                             _setting = false;
                         }
 
-                        property string value:
-                        {
-                            if(currentIndex < 0)
-                                return "";
-
-                            return model.get(currentIndex).value;
-                        }
+                        property int value: { return model.get(currentIndex).value; }
                     }
 
                     HelpTooltip
@@ -639,7 +636,7 @@ BaseParameterDialog
 
                     text:
                     {
-                        if(dataTypeComboBox.value === "discrete" && tabularDataParser.dataRect.appearsToBeContinuous)
+                        if(dataType.value === CorrelationDataType.Discrete && tabularDataParser.dataRect.appearsToBeContinuous)
                         {
                             return qsTr("<font color=\"red\">WARNING: the selected dataframe appears " +
                                 "to contain contiguous data; interpreting it as discrete may " +
@@ -1635,6 +1632,7 @@ BaseParameterDialog
         parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
             initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
             correlationType: CorrelationType.Pearson,
+            correlationDataType: CorrelationDataType.Continuous,
             correlationPolarity: CorrelationPolarity.Positive,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.Constant };
@@ -1642,7 +1640,7 @@ BaseParameterDialog
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
-        dataTypeComboBox.currentIndex = 0;
+        dataType.currentIndex = 0;
     }
 
     onVisibleChanged:

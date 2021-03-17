@@ -44,6 +44,11 @@ DEFINE_QML_ENUM(
     SpearmanRank);
 
 DEFINE_QML_ENUM(
+    Q_GADGET, CorrelationDataType,
+    Continuous,
+    Discrete);
+
+DEFINE_QML_ENUM(
     Q_GADGET, CorrelationPolarity,
     Positive,
     Negative,
