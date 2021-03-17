@@ -659,27 +659,28 @@ void CorrelationTabularDataParser::clearData()
         _dataPtr->reset();
 }
 
-ContinuousDataRows CorrelationTabularDataParser::sampledDataRows(size_t numSamples)
+static std::vector<size_t> randomRowIndices(size_t first, size_t numRows, size_t numSamples)
+{
+    std::vector<size_t> rowIndices(numRows - first);
+    std::iota(rowIndices.begin(), rowIndices.end(), first);
+    rowIndices = u::randomSample(rowIndices, numSamples);
+    std::sort(rowIndices.begin(), rowIndices.end());
+
+    return rowIndices;
+}
+
+ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_t numSampleRows)
 {
     if(_dataRect.isEmpty())
         return {};
 
     ContinuousDataRows dataRows;
-
-    Q_ASSERT(static_cast<size_t>(_dataRect.x() + _dataRect.width() - 1) < _dataPtr->numColumns());
-    Q_ASSERT(static_cast<size_t>(_dataRect.y() + _dataRect.height() - 1) < _dataPtr->numRows());
-
     std::vector<double> rowData;
     rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
 
-    // Choose numSamples random row indices from tabularData
-    std::vector<size_t> rowIndices(_dataPtr->numRows() - _dataRect.y());
-    std::iota(rowIndices.begin(), rowIndices.end(), _dataRect.y());
-    rowIndices = u::randomSample(rowIndices, numSamples);
-    std::sort(rowIndices.begin(), rowIndices.end());
-
     NodeId nodeId(0);
 
+    auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
     for(size_t rowIndex : rowIndices)
     {
         rowData.clear();
@@ -746,10 +747,13 @@ void CorrelationTabularDataParser::estimateGraphSize()
         if(_dataPtr->numRows() == 0)
             return QVariantMap();
 
+        Q_ASSERT(static_cast<size_t>(_dataRect.x() + _dataRect.width()) <= _dataPtr->numColumns());
+        Q_ASSERT(static_cast<size_t>(_dataRect.y() + _dataRect.height()) <= _dataPtr->numRows());
+
         const size_t maxSampleRows = 1400;
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
 
-        auto dataRows = sampledDataRows(numSampleRows);
+        auto dataRows = sampledContinuousDataRows(numSampleRows);
 
         if(dataRows.empty())
             return QVariantMap();
