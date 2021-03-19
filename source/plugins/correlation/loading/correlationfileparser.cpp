@@ -718,6 +718,9 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
 
     CorrelationFileParser::normalise(static_cast<NormaliseType>(_normaliseType), dataRows);
 
+    for(auto& dataRow : dataRows)
+        dataRow.update();
+
     return dataRows;
 }
 
@@ -752,6 +755,9 @@ DiscreteDataRows CorrelationTabularDataParser::sampledDiscreteDataRows(size_t nu
         ++nodeId;
     }
 
+    for(auto& dataRow : dataRows)
+        dataRow.update();
+
     return dataRows;
 }
 
@@ -779,15 +785,40 @@ void CorrelationTabularDataParser::estimateGraphSize()
 
         const size_t maxSampleRows = 1400;
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
+        EdgeList sampleEdges;
 
-        auto dataRows = sampledContinuousDataRows(numSampleRows);
+        switch(static_cast<CorrelationDataType>(_correlationDataType))
+        {
+        default:
+        case CorrelationDataType::Continuous:
+        {
+            auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_continuousCorrelationType));
+            auto dataRows = sampledContinuousDataRows(numSampleRows);
 
-        if(dataRows.empty())
-            return QVariantMap();
+            if(correlation == nullptr || dataRows.empty())
+                return QVariantMap();
 
-        auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
-        auto sampleEdges = correlation->process(dataRows, _minimumCorrelation,
-            static_cast<CorrelationPolarity>(_correlationPolarity), &_graphSizeEstimateCancellable);
+            sampleEdges = correlation->process(dataRows, _minimumCorrelation,
+                static_cast<CorrelationPolarity>(_correlationPolarity),
+                &_graphSizeEstimateCancellable);
+
+            break;
+        }
+
+        case CorrelationDataType::Discrete:
+        {
+            auto correlation = DiscreteCorrelation::create(static_cast<CorrelationType>(_discreteCorrelationType));
+            auto dataRows = sampledDiscreteDataRows(numSampleRows);
+
+            if(correlation == nullptr || dataRows.empty())
+                return QVariantMap();
+
+            sampleEdges = correlation->process(dataRows, _minimumCorrelation,
+                &_graphSizeEstimateCancellable);
+
+            break;
+        }
+        }
 
         auto nodesScale = static_cast<double>(_dataPtr->numRows() / numSampleRows);
         auto edgesScale = nodesScale * nodesScale;

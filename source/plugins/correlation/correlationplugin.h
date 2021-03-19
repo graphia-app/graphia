@@ -81,9 +81,11 @@ private:
 
     CorrelationNodeAttributeTableModel _nodeAttributeTableModel;
 
-    std::vector<double> _data;
+    std::vector<double> _continuousData;
+    std::vector<QString> _discreteData;
 
-    ContinuousDataRows _dataRows;
+    ContinuousDataRows _continuousDataRows;
+    DiscreteDataRows _discreteDataRows;
 
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
@@ -91,7 +93,9 @@ private:
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
-    CorrelationType _correlationType = CorrelationType::Pearson;
+    CorrelationDataType _correlationDataType = CorrelationDataType::Continuous;
+    CorrelationType _continuousCorrelationType = CorrelationType::Pearson;
+    CorrelationType _discreteCorrelationType = CorrelationType::Jaccard;
     CorrelationPolarity _correlationPolarity = CorrelationPolarity::Positive;
     ScalingType _scalingType = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
@@ -113,8 +117,6 @@ private:
     void setDataColumnName(size_t column, const QString& name);
     void makeDataColumnNamesUnique();
 
-    void setData(size_t column, size_t row, double value);
-
     void finishDataRow(size_t row);
 
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
@@ -123,7 +125,8 @@ private:
 
     void buildColumnAnnotations();
 
-    const ContinuousDataRow& dataRowForNodeId(NodeId nodeId) const;
+    const ContinuousDataRow& continuousDataRowForNodeId(NodeId nodeId) const;
+    const DiscreteDataRow& discreteDataRowForNodeId(NodeId nodeId) const;
 
     void setHighlightedRows(const QVector<int>& highlightedRows);
 
@@ -151,7 +154,7 @@ public:
     QStringList defaultVisualisations() const override;
 
     size_t numColumns() const;
-    double dataAt(int row, int column) const;
+    double continuousDataAt(int row, int column) const;
     QString rowName(int row) const;
     QString columnName(int column) const;
     QColor nodeColorForRow(int row) const;
@@ -194,7 +197,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 6; }
+    int dataVersion() const override { return 7; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

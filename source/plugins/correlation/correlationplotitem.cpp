@@ -677,7 +677,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
         double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
-            return partial + _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+            return partial + _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
         });
 
         yDataAvg.append(runningTotal / rows.length());
@@ -826,7 +826,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
             std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
             [this, col](auto row)
             {
-                return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+                return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
             });
 
             if(!rows.empty())
@@ -966,7 +966,7 @@ void CorrelationPlotItem::populateIQRPlot()
         std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
         [this, col](auto row)
         {
-            return _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
         });
 
         if(!_selectedRows.empty())
@@ -1094,7 +1094,7 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
         double stdDev = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
             stdDev += (value * value);
         }
 
@@ -1117,7 +1117,7 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
         double stdErr = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
             stdErr += (value * value);
         }
 
@@ -1167,14 +1167,14 @@ void CorrelationPlotItem::populateLinePlot()
 
             double rowSum = 0.0;
             for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
-                rowSum += _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+                rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
 
             double rowMean = rowSum / _pluginInstance->numColumns();
 
             double variance = 0.0;
             for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
             {
-                auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col])) - rowMean;
+                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - rowMean;
                 variance += (value * value);
             }
 
@@ -1197,7 +1197,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
             {
-                auto value = _pluginInstance->dataAt(row, static_cast<int>(_sortMap[col]));
+                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
 
                 switch(static_cast<PlotScaleType>(_scaleType))
                 {

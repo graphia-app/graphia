@@ -119,6 +119,8 @@ void BaseGenericPluginInstance::applyParameter(const QString& name, const QVaria
         _adjacencyMatrixParameters._skipDuplicates = (value == QStringLiteral("true"));
     else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
         _adjacencyMatrixParameters._tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
+    else
+        qDebug() << "BaseGenericPluginInstance::applyParameter unknown parameter" << name << value;
 }
 
 QStringList BaseGenericPluginInstance::defaultTransforms() const

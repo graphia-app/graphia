@@ -33,16 +33,21 @@ class CorrelationNodeAttributeTableModel : public NodeAttributeTableModel
 
 private:
     std::vector<QString> _dataColumnNames;
-    std::vector<double>* _dataValues = nullptr;
+    std::vector<double>* _continuousDataValues = nullptr;
+    std::vector<QString>* _discreteDataValues = nullptr;
 
     // For fast lookup in dataValue(...)
     std::map<QString, size_t> _dataColumnIndexes;
 
     QStringList columnNames() const override;
 
+    void addDataColumnNames(const std::vector<QString>& dataColumnNames);
+
 public:
-    void addDataColumns(const std::vector<QString>& dataColumnNames,
-        std::vector<double>* dataValues = nullptr);
+    void addContinuousDataColumns(const std::vector<QString>& dataColumnNames,
+        std::vector<double>* dataValues);
+    void addDiscreteDataColumns(const std::vector<QString>& dataColumnNames,
+        std::vector<QString>* dataValues);
 
     QVariant dataValue(size_t row, const QString& columnName) const override;
 

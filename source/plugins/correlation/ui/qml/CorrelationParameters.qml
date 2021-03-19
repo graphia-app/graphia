@@ -56,12 +56,13 @@ BaseParameterDialog
         id: tabularDataParser
 
         minimumCorrelation: minimumCorrelationSpinBox.value
-        correlationType: { return algorithm.model.get(algorithm.currentIndex).value; }
-        correlationDataType: { return dataType.model.get(dataType.currentIndex).value; }
-        correlationPolarity: { return polarity.model.get(polarity.currentIndex).value; }
-        scalingType: { return scaling.model.get(scaling.currentIndex).value; }
-        normaliseType: { return normalise.model.get(normalise.currentIndex).value; }
-        missingDataType: { return missingDataType.model.get(missingDataType.currentIndex).value; }
+        correlationDataType: dataType.value
+        continuousCorrelationType: continuousAlgorithm.value
+        correlationPolarity: polarity.value
+        discreteCorrelationType: discreteAlgorithm.value
+        scalingType: scaling.value
+        normaliseType: normalise.value
+        missingDataType: missingDataType.value
         replacementValue: replacementConstant.text
 
         onDataRectChanged:
@@ -712,13 +713,67 @@ BaseParameterDialog
 
                             Text
                             {
+                                visible: dataType.value === CorrelationDataType.Discrete
                                 text: qsTr("Algorithm:")
                                 Layout.alignment: Qt.AlignRight
                             }
 
                             ComboBox
                             {
-                                id: algorithm
+                                visible: dataType.value === CorrelationDataType.Discrete
+                                id: discreteAlgorithm
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("Jaccard"); value: CorrelationType.Jaccard }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.discreteCorrelationType = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            HelpTooltip
+                            {
+                                visible: dataType.value === CorrelationDataType.Discrete
+                                Layout.rightMargin: Constants.spacing * 2
+
+                                title: qsTr("Correlation Algorithm")
+                                GridLayout
+                                {
+                                    columns: 2
+                                    Text
+                                    {
+                                        text: qsTr("<b>Jaccard:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("The Jaccard Index is a statistic used for " +
+                                            "gauging the similarity and diversity of sample sets.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+                                }
+                            }
+
+                            Text
+                            {
+                                visible: dataType.value === CorrelationDataType.Continuous
+                                text: qsTr("Algorithm:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                visible: dataType.value === CorrelationDataType.Continuous
+                                id: continuousAlgorithm
 
                                 model: ListModel
                                 {
@@ -729,7 +784,7 @@ BaseParameterDialog
 
                                 onCurrentIndexChanged:
                                 {
-                                    parameters.correlationType = model.get(currentIndex).value;
+                                    parameters.continuousCorrelationType = model.get(currentIndex).value;
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -737,6 +792,7 @@ BaseParameterDialog
 
                             HelpTooltip
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 Layout.rightMargin: Constants.spacing * 2
 
                                 title: qsTr("Correlation Algorithm")
@@ -780,12 +836,14 @@ BaseParameterDialog
 
                             Text
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 text: qsTr("Polarity:")
                                 Layout.alignment: Qt.AlignRight
                             }
 
                             ComboBox
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 id: polarity
 
                                 model: ListModel
@@ -806,6 +864,7 @@ BaseParameterDialog
 
                             HelpTooltip
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 title: qsTr("Polarity")
                                 Text
                                 {
@@ -819,7 +878,8 @@ BaseParameterDialog
 
                             Text
                             {
-                                visible: tabularDataParser.dataRect.hasMissingValues
+                                visible: dataType.value === CorrelationDataType.Continuous &&
+                                    tabularDataParser.dataRect.hasMissingValues
                                 text: qsTr("Imputation:")
                                 Layout.alignment: Qt.AlignRight
                             }
@@ -827,7 +887,8 @@ BaseParameterDialog
                             ComboBox
                             {
                                 id: missingDataType
-                                visible: tabularDataParser.dataRect.hasMissingValues
+                                visible: dataType.value === CorrelationDataType.Continuous &&
+                                    tabularDataParser.dataRect.hasMissingValues
 
                                 model: ListModel
                                 {
@@ -848,7 +909,8 @@ BaseParameterDialog
                             RowLayout
                             {
                                 Layout.columnSpan: 4
-                                visible: tabularDataParser.dataRect.hasMissingValues
+                                visible: dataType.value === CorrelationDataType.Continuous &&
+                                    tabularDataParser.dataRect.hasMissingValues
 
                                 TextField
                                 {
@@ -864,6 +926,7 @@ BaseParameterDialog
 
                                 HelpTooltip
                                 {
+                                    visible: dataType.value === CorrelationDataType.Continuous
                                     title: qsTr("Imputation")
                                     GridLayout
                                     {
@@ -932,12 +995,14 @@ BaseParameterDialog
 
                             Text
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 text: qsTr("Scaling:")
                                 Layout.alignment: Qt.AlignRight
                             }
 
                             ComboBox
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 id: scaling
 
                                 model: ListModel
@@ -961,6 +1026,7 @@ BaseParameterDialog
 
                             HelpTooltip
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 title: qsTr("Scaling Types")
                                 GridLayout
                                 {
@@ -1016,12 +1082,14 @@ BaseParameterDialog
 
                             Text
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 text: qsTr("Normalisation:")
                                 Layout.alignment: Qt.AlignRight
                             }
 
                             ComboBox
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 id: normalise
 
                                 model: ListModel
@@ -1045,6 +1113,7 @@ BaseParameterDialog
 
                             HelpTooltip
                             {
+                                visible: dataType.value === CorrelationDataType.Continuous
                                 title: qsTr("Normalisation Types")
                                 GridLayout
                                 {
@@ -1521,25 +1590,34 @@ BaseParameterDialog
                             qsTr(" Width: ") + tabularDataParser.dataRect.width +
                             qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]<br>";
 
-                        summaryString += qsTr("Correlation Metric: ") + algorithm.currentText + "<br>";
-                        summaryString += qsTr("Correlation Polarity: ") + polarity.currentText + "<br>";
-                        summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
-                        summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
-
-                        if(scaling.value !== ScalingType.None)
-                            summaryString += qsTr("Scaling: ") + scaling.currentText + "<br>";
-
-                        if(normalise.value !== NormaliseType.None)
-                            summaryString += qsTr("Normalisation: ") + normalise.currentText + "<br>";
-
-                        if(tabularDataParser.dataRect.hasMissingValues)
+                        if(dataType.value === CorrelationDataType.Continuous)
                         {
-                            summaryString += qsTr("Imputation: ") + missingDataType.currentText;
+                            summaryString += qsTr("Continuous Correlation Metric: ") + continuousAlgorithm.currentText + "<br>";
+                            summaryString += qsTr("Correlation Polarity: ") + polarity.currentText + "<br>";
+                            summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
+                            summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
 
-                            if(missingDataType.value === MissingDataType.Constant)
-                                summaryString += qsTr(" (") + replacementConstant.text + qsTr(")");
+                            if(scaling.value !== ScalingType.None)
+                                summaryString += qsTr("Scaling: ") + scaling.currentText + "<br>";
 
-                            summaryString += "<br>";
+                            if(normalise.value !== NormaliseType.None)
+                                summaryString += qsTr("Normalisation: ") + normalise.currentText + "<br>";
+
+                            if(tabularDataParser.dataRect.hasMissingValues)
+                            {
+                                summaryString += qsTr("Imputation: ") + missingDataType.currentText;
+
+                                if(missingDataType.value === MissingDataType.Constant)
+                                    summaryString += qsTr(" (") + replacementConstant.text + qsTr(")");
+
+                                summaryString += "<br>";
+                            }
+                        }
+                        else if(dataType.value === CorrelationDataType.Discrete)
+                        {
+                            summaryString += qsTr("Discrete Correlation Metric: ") + discreteAlgorithm.currentText + "<br>";
+                            summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
+                            summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
                         }
 
                         let transformString = ""
@@ -1631,9 +1709,10 @@ BaseParameterDialog
 
         parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
             initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
-            correlationType: CorrelationType.Pearson,
             correlationDataType: CorrelationDataType.Continuous,
+            continuousCorrelationType: CorrelationType.Pearson,
             correlationPolarity: CorrelationPolarity.Positive,
+            discreteCorrelationType: CorrelationType.Jaccard,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.Constant };
 

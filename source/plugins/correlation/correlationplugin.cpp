@@ -131,24 +131,41 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             }
             else if(isColumnInDataRect)
             {
-                double transformedValue = 0.0;
+                auto index = (dataRowIndex * _numColumns) + dataColumnIndex;
+                Q_ASSERT(index < _continuousData.size() && index < _discreteData.size());
 
-                if(!value.isEmpty())
+                switch(_correlationDataType)
                 {
-                    bool success = false;
-                    transformedValue = value.toDouble(&success);
-                    Q_ASSERT(success);
-                }
-                else
+                default:
+                case CorrelationDataType::Continuous:
                 {
-                    transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
-                        tabularData, dataRect, columnIndex, rowIndex);
-                    _imputedValues = true;
+                    double transformedValue = 0.0;
+
+                    if(!value.isEmpty())
+                    {
+                        bool success = false;
+                        transformedValue = value.toDouble(&success);
+                        Q_ASSERT(success);
+                    }
+                    else
+                    {
+                        transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
+                            tabularData, dataRect, columnIndex, rowIndex);
+                        _imputedValues = true;
+                    }
+
+                    transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
+
+                    _continuousData.at(index) = transformedValue;
+                    break;
                 }
 
-                transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
-
-                setData(dataColumnIndex, dataRowIndex, transformedValue);
+                case CorrelationDataType::Discrete:
+                {
+                    _discreteData.at(index) = value;
+                    break;
+                }
+                }
             }
             else if(isRowAttribute)
                 _userNodeData.setValue(dataRowIndex, tabularData.valueAt(columnIndex, 0), value);
@@ -164,19 +181,25 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
 void CorrelationPluginInstance::normalise(IParser* parser)
 {
-    CorrelationFileParser::normalise(_normaliseType, _dataRows, parser);
+    CorrelationFileParser::normalise(_normaliseType, _continuousDataRows, parser);
 
-    // Normalising obviously changes all the values in _dataRows, so we
+    // Normalising obviously changes all the values in _continuousDataRows, so we
     // must sync _data up so that it matches
-    _data.clear();
-    for(const auto& dataRow : _dataRows)
-        _data.insert(_data.end(), dataRow.begin(), dataRow.end());
+    _continuousData.clear();
+    for(const auto& dataRow : _continuousDataRows)
+        _continuousData.insert(_continuousData.end(), dataRow.begin(), dataRow.end());
 }
 
 void CorrelationPluginInstance::finishDataRows()
 {
     for(size_t row = 0; row < _numRows; row++)
         finishDataRow(row);
+
+    for(auto& continuousDataRow : _continuousDataRows)
+        continuousDataRow.update();
+
+    for(auto& discreteDataRow : _discreteDataRows)
+        discreteDataRow.update();
 }
 
 void CorrelationPluginInstance::createAttributes()
@@ -187,80 +210,113 @@ void CorrelationPluginInstance::createAttributes()
     for(const auto& dataColumnName : _dataColumnNames)
         dataValueAttributeColumn[dataColumnName] = columnIndex++;
 
-    graphModel()->createAttribute(tr("Data Value"))
-        .setFloatValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
-        {
-            auto columnName = attribute.parameterValue();
-            if(columnName.isEmpty())
-                return 0.0;
-
-            auto column = dataValueAttributeColumn.at(columnName);
-            return dataRowForNodeId(nodeId).valueAt(column);
-        })
-        .setFlag(AttributeFlag::AutoRange)
+    auto& dataValueAttribute = graphModel()->createAttribute(tr("Data Value"))
         .setUserDefined(true)
         .setDescription(tr("The Data Value is a parameterised attribute that permits referencing "
             "a specific column in the correlated data."))
         .setValidParameterValues(u::toQStringList(_dataColumnNames));
 
-    graphModel()->createAttribute(tr("Strongest Data Column"))
-        .setStringValueFn([this](NodeId nodeId)
-        {
-            const auto& dataRow = dataRowForNodeId(nodeId);
-            return _dataColumnNames.at(dataRow.largestColumnIndex());
-        })
-        .setFlag(AttributeFlag::FindShared)
-        .setFlag(AttributeFlag::Searchable)
-        .setDescription(tr("The name of the data column which has the largest absolute value for "
-            "the data row associated with the node."));
+    QString correlationAttributeDescription;
 
-    graphModel()->createAttribute(tr("Mean Data Value"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).mean(); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The Mean Data Value is the mean of the values associated "
-            "with the node."));
+    auto correlationDataType = static_cast<CorrelationDataType>(_correlationDataType);
+    switch(correlationDataType)
+    {
+    default:
+    case CorrelationDataType::Continuous:
+    {
+        dataValueAttribute
+            .setFloatValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
+            {
+                auto columnName = attribute.parameterValue();
+                if(columnName.isEmpty())
+                    return 0.0;
 
-    graphModel()->createAttribute(tr("Minimum Data Value"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).minValue(); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The Minimum Data Value is the minimum value associated "
-            "with the node."));
+                auto column = dataValueAttributeColumn.at(columnName);
+                return continuousDataRowForNodeId(nodeId).valueAt(column);
+            })
+            .setFlag(AttributeFlag::AutoRange);
 
-    graphModel()->createAttribute(tr("Maximum Data Value"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).maxValue(); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The Maximum Data Value is the maximum value associated "
-            "with the node."));
+        graphModel()->createAttribute(tr("Strongest Data Column"))
+            .setStringValueFn([this](NodeId nodeId)
+            {
+                const auto& dataRow = continuousDataRowForNodeId(nodeId);
+                return _dataColumnNames.at(dataRow.largestColumnIndex());
+            })
+            .setFlag(AttributeFlag::FindShared)
+            .setFlag(AttributeFlag::Searchable)
+            .setDescription(tr("The name of the data column which has the largest absolute value for "
+                "the data row associated with the node."));
 
-    graphModel()->createAttribute(tr("Variance"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).variance(); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The %1 is a measure of the spread of the values associated with the node. "
-            "It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean.")
-            .arg(u::redirectLink("variance", tr("Variance"))));
+        graphModel()->createAttribute(tr("Mean Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).mean(); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The Mean Data Value is the mean of the values associated "
+                "with the node."));
 
-    graphModel()->createAttribute(tr("Standard Deviation"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).stddev(); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The %1 is a measure of the spread of the values associated "
-            "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
-            "and µ is the mean.").arg(u::redirectLink("stddev", tr("Standard Deviation"))));
+        graphModel()->createAttribute(tr("Minimum Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).minValue(); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The Minimum Data Value is the minimum value associated "
+                "with the node."));
 
-    graphModel()->createAttribute(tr("Coefficient of Variation"))
-        .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId).coefVar(); })
-        .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId).coefVar()); })
-        .setFlag(AttributeFlag::AutoRange)
-        .setDescription(tr("The %1 is a measure of the spread of the values associated "
-            "with the node. It is defined as the standard deviation divided by the mean.")
-            .arg(u::redirectLink("coef_variation", tr("Coefficient of Variation"))));
+        graphModel()->createAttribute(tr("Maximum Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).maxValue(); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The Maximum Data Value is the maximum value associated "
+                "with the node."));
 
-    auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
-    _correlationAttributeName = correlation->attributeName();
+        graphModel()->createAttribute(tr("Variance"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).variance(); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The %1 is a measure of the spread of the values associated with the node. "
+                "It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value and µ is the mean.")
+                .arg(u::redirectLink("variance", tr("Variance"))));
+
+        graphModel()->createAttribute(tr("Standard Deviation"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).stddev(); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The %1 is a measure of the spread of the values associated "
+                "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
+                "and µ is the mean.").arg(u::redirectLink("stddev", tr("Standard Deviation"))));
+
+        graphModel()->createAttribute(tr("Coefficient of Variation"))
+            .setFloatValueFn([this](NodeId nodeId) { return continuousDataRowForNodeId(nodeId).coefVar(); })
+            .setValueMissingFn([this](NodeId nodeId) { return std::isnan(continuousDataRowForNodeId(nodeId).coefVar()); })
+            .setFlag(AttributeFlag::AutoRange)
+            .setDescription(tr("The %1 is a measure of the spread of the values associated "
+                "with the node. It is defined as the standard deviation divided by the mean.")
+                .arg(u::redirectLink("coef_variation", tr("Coefficient of Variation"))));
+
+        auto continuousCorrelation = ContinuousCorrelation::create(static_cast<CorrelationType>(_continuousCorrelationType));
+        _correlationAttributeName = continuousCorrelation->attributeName();
+        correlationAttributeDescription = continuousCorrelation->attributeDescription();
+        break;
+    }
+
+    case CorrelationDataType::Discrete:
+    {
+        dataValueAttribute
+            .setStringValueFn([this, dataValueAttributeColumn](NodeId nodeId, const IAttribute& attribute)
+            {
+                auto columnName = attribute.parameterValue();
+                if(columnName.isEmpty())
+                    return QString();
+
+                auto column = dataValueAttributeColumn.at(columnName);
+                return discreteDataRowForNodeId(nodeId).valueAt(column);
+            });
+
+        auto discreteCorrelation = DiscreteCorrelation::create(static_cast<CorrelationType>(_discreteCorrelationType));
+        _correlationAttributeName = discreteCorrelation->attributeName();
+        correlationAttributeDescription = discreteCorrelation->attributeDescription();
+        break;
+    }
+    }
 
     graphModel()->createAttribute(_correlationAttributeName)
         .setFloatValueFn([this](EdgeId edgeId) { return _correlationValues->get(edgeId); })
         .setFlag(AttributeFlag::AutoRange)
-        .setDescription(correlation->attributeDescription());
+        .setDescription(correlationAttributeDescription);
 
     auto correlationPolarity = static_cast<CorrelationPolarity>(_correlationPolarity);
     switch(correlationPolarity)
@@ -272,7 +328,7 @@ void CorrelationPluginInstance::createAttributes()
         graphModel()->createAttribute(_correlationAbsAttributeName)
             .setFloatValueFn([this](EdgeId edgeId) { return std::abs(_correlationValues->get(edgeId)); })
             .setFlag(AttributeFlag::AutoRange)
-            .setDescription(correlation->attributeDescription());
+            .setDescription(correlationAttributeDescription);
         break;
 
     default:
@@ -327,9 +383,25 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
 
 EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
 {
-    auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_correlationType));
-    return correlation->process(_dataRows, minimumThreshold,
-        static_cast<CorrelationPolarity>(_correlationPolarity), &parser, &parser);
+    auto correlationDataType = static_cast<CorrelationDataType>(_correlationDataType);
+    switch(correlationDataType)
+    {
+    default:
+    case CorrelationDataType::Continuous:
+    {
+        auto continuousCorrelation = ContinuousCorrelation::create(static_cast<CorrelationType>(_continuousCorrelationType));
+        return continuousCorrelation->process(_continuousDataRows, minimumThreshold,
+            static_cast<CorrelationPolarity>(_correlationPolarity), &parser, &parser);
+    }
+
+    case CorrelationDataType::Discrete:
+    {
+        auto discreteCorrelation = DiscreteCorrelation::create(static_cast<CorrelationType>(_discreteCorrelationType));
+        return discreteCorrelation->process(_discreteDataRows, minimumThreshold, &parser, &parser);
+    }
+    }
+
+    return {};
 }
 
 bool CorrelationPluginInstance::createEdges(const EdgeList& edges, IParser& parser)
@@ -361,7 +433,8 @@ void CorrelationPluginInstance::setDimensions(size_t numColumns, size_t numRows)
     _numRows = numRows;
 
     _dataColumnNames.resize(numColumns);
-    _data.resize(numColumns * numRows);
+    _continuousData.resize(numColumns * numRows);
+    _discreteData.resize(numColumns * numRows);
 }
 
 void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name)
@@ -393,13 +466,6 @@ void CorrelationPluginInstance::makeDataColumnNamesUnique()
     }
 }
 
-void CorrelationPluginInstance::setData(size_t column, size_t row, double value)
-{
-    auto index = (row * _numColumns) + column;
-    Q_ASSERT(index < _data.size());
-    _data.at(index) = value;
-}
-
 void CorrelationPluginInstance::finishDataRow(size_t row)
 {
     Q_ASSERT(row < _numRows);
@@ -407,7 +473,9 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     auto nodeId = graphModel()->mutableGraph().addNode();
     auto computeCost = static_cast<uint64_t>(_numRows - row + 1);
 
-    _dataRows.emplace_back(_data, row, _numColumns, nodeId, computeCost);
+    _continuousDataRows.emplace_back(_continuousData, row, _numColumns, nodeId, computeCost);
+    _discreteDataRows.emplace_back(_discreteData, row, _numColumns, nodeId, computeCost);
+
     _userNodeData.setElementIdForIndex(nodeId, row);
 
     auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
@@ -421,7 +489,17 @@ void CorrelationPluginInstance::setNodeAttributeTableModelDataColumns()
     if(_dataColumnNames.size() > 1000)
         return;
 
-    _nodeAttributeTableModel.addDataColumns(_dataColumnNames, &_data);
+    switch(_correlationDataType)
+    {
+    default:
+    case CorrelationDataType::Continuous:
+        _nodeAttributeTableModel.addContinuousDataColumns(_dataColumnNames, &_continuousData);
+        break;
+
+    case CorrelationDataType::Discrete:
+        _nodeAttributeTableModel.addDiscreteDataColumns(_dataColumnNames, &_discreteData);
+        break;
+    }
 }
 
 QStringList CorrelationPluginInstance::columnAnnotationNames() const
@@ -464,9 +542,14 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     emit columnAnnotationNamesChanged();
 }
 
-const ContinuousDataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
+const ContinuousDataRow& CorrelationPluginInstance::continuousDataRowForNodeId(NodeId nodeId) const
 {
-    return _dataRows.at(_userNodeData.indexFor(nodeId));
+    return _continuousDataRows.at(_userNodeData.indexFor(nodeId));
+}
+
+const DiscreteDataRow& CorrelationPluginInstance::discreteDataRowForNodeId(NodeId nodeId) const
+{
+    return _discreteDataRows.at(_userNodeData.indexFor(nodeId));
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
@@ -497,8 +580,12 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _initialCorrelationThreshold = value.toDouble();
     else if(name == QStringLiteral("transpose"))
         _transpose = (value == QStringLiteral("true"));
-    else if(name == QStringLiteral("correlationType"))
-        _correlationType = static_cast<CorrelationType>(value.toInt());
+    else if(name == QStringLiteral("correlationDataType"))
+        _correlationDataType = static_cast<CorrelationDataType>(value.toInt());
+    else if(name == QStringLiteral("continuousCorrelationType"))
+        _continuousCorrelationType = static_cast<CorrelationType>(value.toInt());
+    else if(name == QStringLiteral("discreteCorrelationType"))
+        _discreteCorrelationType = static_cast<CorrelationType>(value.toInt());
     else if(name == QStringLiteral("correlationPolarity"))
         _correlationPolarity = static_cast<CorrelationPolarity>(value.toInt());
     else if(name == QStringLiteral("scaling"))
@@ -509,7 +596,7 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _missingDataType = static_cast<MissingDataType>(value.toInt());
     else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
-    else if(name == QStringLiteral("dataFrame"))
+    else if(name == QStringLiteral("dataRect"))
         _dataRect = value.toRect();
     else if(name == QStringLiteral("clusteringType"))
         _clusteringType = static_cast<ClusteringType>(value.toInt());
@@ -517,6 +604,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _edgeReductionType = static_cast<EdgeReductionType>(value.toInt());
     else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
         _tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
+    else
+        qDebug() << "CorrelationPluginInstance::applyParameter unknown parameter" << name << value;
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const
@@ -589,9 +678,9 @@ size_t CorrelationPluginInstance::numColumns() const
     return _numColumns;
 }
 
-double CorrelationPluginInstance::dataAt(int row, int column) const
+double CorrelationPluginInstance::continuousDataAt(int row, int column) const
 {
-    return _data.at((row * _numColumns) + column);
+    return _continuousData.at((row * _numColumns) + column);
 }
 
 QString CorrelationPluginInstance::rowName(int row) const
@@ -637,14 +726,32 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
     graph.setPhase(QObject::tr("Data"));
-    jsonObject["data"] = [&]
+    jsonObject["continuousData"] = [&]
     {
         json array;
 
         uint64_t i = 0;
         for(const auto& nodeId : graph.nodeIds())
         {
-            const auto& dataRow = dataRowForNodeId(nodeId);
+            const auto& dataRow = continuousDataRowForNodeId(nodeId);
+            std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
+
+            progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
+        }
+
+        progressable.setProgress(-1);
+
+        return array;
+    }();
+
+    jsonObject["discreteData"] = [&]
+    {
+        json array;
+
+        uint64_t i = 0;
+        for(const auto& nodeId : graph.nodeIds())
+        {
+            const auto& dataRow = discreteDataRowForNodeId(nodeId);
             std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
 
             progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
@@ -660,7 +767,9 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
-    jsonObject["correlationType"] = static_cast<int>(_correlationType);
+    jsonObject["correlationDataType"] = static_cast<int>(_correlationDataType);
+    jsonObject["continuousCorrelationType"] = static_cast<int>(_continuousCorrelationType);
+    jsonObject["discreteCorrelationType"] = static_cast<int>(_discreteCorrelationType);
     jsonObject["correlationPolarity"] = static_cast<int>(_correlationPolarity);
     jsonObject["scaling"] = static_cast<int>(_scalingType);
     jsonObject["normalisation"] = static_cast<int>(_normaliseType);
@@ -670,8 +779,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     return QByteArray::fromStdString(jsonObject.dump());
 }
 
-bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-                                     IParser& parser)
+bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser)
 {
     json jsonObject = parseJsonFrom(data, &parser);
 
@@ -714,11 +822,22 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         return false;
 
     graph.setPhase(QObject::tr("Data"));
-    const auto& jsonData = jsonObject["data"];
-    for(const auto& value : jsonData)
+
+    const char* continuousDataKey =
+        dataVersion >= 7 ? "continuousData" : "data";
+
+    const auto& jsonContinuousData = jsonObject[continuousDataKey];
+    for(const auto& value : jsonContinuousData)
     {
-        _data.emplace_back(value);
-        parser.setProgress(static_cast<int>((i++ * 100) / jsonData.size()));
+        _continuousData.emplace_back(value);
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
+    }
+
+    const auto& jsonDiscreteData = jsonObject["discreteData"];
+    for(const auto& value : jsonDiscreteData)
+    {
+        _discreteData.emplace_back(value);
+        parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
     }
 
     parser.setProgress(-1);
@@ -728,7 +847,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         auto nodeId = _userNodeData.elementIdForIndex(row);
 
         if(!nodeId.isNull())
-            _dataRows.emplace_back(_data, row, _numColumns, nodeId);
+        {
+            _continuousDataRows.emplace_back(_continuousData, row, _numColumns, nodeId);
+            _discreteDataRows.emplace_back(_discreteData, row, _numColumns, nodeId);
+        }
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));
     }
@@ -784,12 +906,27 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _missingDataType = static_cast<MissingDataType>(jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
-    if(dataVersion >= 3)
+    if(dataVersion >= 7)
+    {
+        if(!u::containsAllOf(jsonObject, {"correlationDataType", "continuousCorrelationType",
+            "discreteCorrelationType", "correlationPolarity"}))
+        {
+            return false;
+        }
+
+        _correlationDataType = static_cast<CorrelationDataType>(jsonObject["correlationDataType"]);
+        _continuousCorrelationType = static_cast<CorrelationType>(jsonObject["continuousCorrelationType"]);
+        _discreteCorrelationType = static_cast<CorrelationType>(jsonObject["discreteCorrelationType"]);
+        _correlationPolarity = static_cast<CorrelationPolarity>(jsonObject["correlationPolarity"]);
+    }
+    else if(dataVersion >= 3)
     {
         if(!u::contains(jsonObject, "correlationType") || !u::contains(jsonObject, "correlationPolarity"))
             return false;
 
-        _correlationType = static_cast<CorrelationType>(jsonObject["correlationType"]);
+        _correlationDataType = CorrelationDataType::Continuous;
+        _continuousCorrelationType = static_cast<CorrelationType>(jsonObject["correlationType"]);
+        _discreteCorrelationType = CorrelationType::Jaccard;
         _correlationPolarity = static_cast<CorrelationPolarity>(jsonObject["correlationPolarity"]);
     }
 
@@ -810,21 +947,35 @@ QString CorrelationPluginInstance::log() const
     if(_transpose)
         text.append(tr("\nTransposed"));
 
-    text.append(tr("\nCorrelation Metric: "));
-    switch(_correlationType)
+    switch(_correlationDataType)
     {
     default:
-    case CorrelationType::Pearson: text.append(tr("Pearson")); break;
-    case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank")); break;
-    }
+    case CorrelationDataType::Continuous:
+        text.append(tr("\nContinuous Correlation Metric: "));
+        switch(_continuousCorrelationType)
+        {
+        default:
+        case CorrelationType::Pearson: text.append(tr("Pearson")); break;
+        case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank")); break;
+        }
 
-    text.append(tr("\nCorrelation Polarity: "));
-    switch(_correlationPolarity)
-    {
-    default:
-    case CorrelationPolarity::Positive: text.append(tr("Positive")); break;
-    case CorrelationPolarity::Negative: text.append(tr("Negative")); break;
-    case CorrelationPolarity::Both: text.append(tr("Both")); break;
+        text.append(tr("\nCorrelation Polarity: "));
+        switch(_correlationPolarity)
+        {
+        default:
+        case CorrelationPolarity::Positive: text.append(tr("Positive")); break;
+        case CorrelationPolarity::Negative: text.append(tr("Negative")); break;
+        case CorrelationPolarity::Both: text.append(tr("Both")); break;
+        }
+        break;
+
+    case CorrelationDataType::Discrete:
+        text.append(tr("\nDiscrete Correlation Metric: "));
+        switch(_discreteCorrelationType)
+        {
+        default:
+        case CorrelationType::Jaccard: text.append(tr("Jaccard")); break;
+        }
     }
 
     text.append(tr("\nMinimum Correlation Value: %1").arg(
