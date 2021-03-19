@@ -120,7 +120,6 @@ private:
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     void setNodeAttributeTableModelDataColumns();
     QStringList columnAnnotationNames() const;
-    QVector<double> rawData();
 
     void buildColumnAnnotations();
 

@@ -442,11 +442,6 @@ void CorrelationPluginInstance::onLoadSuccess()
     _nodeAttributeTableModel.updateColumnNames();
 }
 
-QVector<double> CorrelationPluginInstance::rawData()
-{
-    return QVector<double>(_data.begin(), _data.end());
-}
-
 void CorrelationPluginInstance::buildColumnAnnotations()
 {
     _columnAnnotations.reserve(_userColumnData.numUserDataVectors());
