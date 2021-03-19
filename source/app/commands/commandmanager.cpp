@@ -407,6 +407,12 @@ QString CommandManager::commandStackSummary() const
         text.append(command->debugDescription());
     }
 
+    if(_currentCommand != nullptr)
+    {
+        text.append(QStringLiteral("\n#%1").arg(
+            _currentCommand->debugDescription()));
+    }
+
     return text;
 }
 
