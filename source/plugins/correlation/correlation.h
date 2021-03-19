@@ -41,7 +41,8 @@
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationType,
     Pearson,
-    SpearmanRank);
+    SpearmanRank,
+    Jaccard);
 
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationDataType,
@@ -205,6 +206,39 @@ public:
         return QObject::tr("The %1 is an indication of "
             "the monotomic relationship between two variables.")
             .arg(u::redirectLink("spearman", QObject::tr("Spearman Rank Correlation Coefficient")));
+    }
+};
+
+class DiscreteCorrelation
+{
+public:
+    virtual ~DiscreteCorrelation() = default;
+
+    virtual EdgeList process(const DiscreteDataRows& rows, double minimumThreshold,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
+
+    virtual QString attributeName() const = 0;
+    virtual QString attributeDescription() const = 0;
+
+    static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
+};
+
+class JaccardCorrelation : public DiscreteCorrelation
+{
+public:
+    EdgeList process(const DiscreteDataRows& rows, double minimumThreshold,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final;
+
+    QString attributeName() const override
+    {
+        return QObject::tr("Jaccard Correlation Value");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr("The %1 is a statistic used for gauging "
+            "the similarity and diversity of sample sets.")
+            .arg(u::redirectLink("jaccard", QObject::tr("Jaccard Index")));
     }
 };
 

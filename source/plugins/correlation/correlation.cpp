@@ -29,3 +29,20 @@ std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(Correlation
 
     return nullptr;
 }
+
+std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType correlationType)
+{
+    switch(correlationType)
+    {
+    case CorrelationType::Jaccard:      return std::make_unique<JaccardCorrelation>();
+    default: break;
+    }
+
+    return nullptr;
+}
+
+EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimumThreshold,
+    Cancellable* cancellable, Progressable* progressable) const
+{
+    return {};
+}
