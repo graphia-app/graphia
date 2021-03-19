@@ -57,8 +57,6 @@ public:
         auto cend = cbegin + numColumns;
         _data = {cbegin, cend};
         _numColumns = std::distance(begin(), end());
-
-        update();
     }
 
     template<typename U>
@@ -76,12 +74,12 @@ public:
     uint64_t computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }
-    double valueAt(size_t column) const { return _data.at(column); }
-    void setValueAt(size_t column, double value) { _data[column] = value; }
+    T valueAt(size_t column) const { return _data.at(column); }
+    void setValueAt(size_t column, const T& value) { _data[column] = value; }
 
     NodeId nodeId() const { return _nodeId; }
 
-    virtual void update() {}
+    virtual void update() = 0;
 };
 
 class ContinuousDataRow : public CorrelationDataRow<double>
@@ -114,6 +112,8 @@ class DiscreteDataRow : public CorrelationDataRow<QString>
 {
 public:
     using CorrelationDataRow::CorrelationDataRow;
+
+    void update() override {}
 };
 
 using ContinuousDataRows = std::vector<ContinuousDataRow>;
