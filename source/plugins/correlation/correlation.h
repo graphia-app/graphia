@@ -86,7 +86,7 @@ public:
         if(rows.empty())
             return {};
 
-        size_t numColumns = std::distance(rows.front().begin(), rows.front().end());
+        size_t numColumns = rows.front().numColumns();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);
