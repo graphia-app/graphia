@@ -66,7 +66,7 @@ BaseParameterDialog
 
         onDataRectChanged:
         {
-            parameters.dataFrame = dataRect;
+            parameters.dataRect = dataRect.asQRect;
 
             if(dataRect.hasDiscreteValues)
                 dataType.setDiscrete();

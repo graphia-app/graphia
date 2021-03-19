@@ -370,14 +370,6 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 
     _tabularData.setTransposed(_plugin->transpose());
 
-    // May be set by parameters
-    if(_dataRect.isEmpty())
-    {
-        graphModel->mutableGraph().setPhase(QObject::tr("Finding Data Points"));
-        setProgress(-1);
-        _dataRect = findLargestNumericalDataRect(_tabularData);
-    }
-
     if(_dataRect.isEmpty() || cancelled())
         return false;
 
@@ -474,6 +466,7 @@ QVariantMap CorrelationTabularDataParser::dataRect() const
     m.insert(QStringLiteral("y"), _dataRect.y());
     m.insert(QStringLiteral("width"), _dataRect.width());
     m.insert(QStringLiteral("height"), _dataRect.height());
+    m.insert(QStringLiteral("asQRect"), _dataRect);
 
     m.insert(QStringLiteral("hasMissingValues"), _hasMissingValues);
     m.insert(QStringLiteral("hasDiscreteValues"), _hasDiscreteValues);
