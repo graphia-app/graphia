@@ -613,17 +613,10 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
 
         if(numericalDataRect.isEmpty())
         {
-            // A numerical rectangle can't be found and there isn't an
-            // existing selected rectangle, so just use the whole table
+            // A numerical rectangle can't be found and there isn't an existing
+            // selected rectangle, so search for a non-numerical rectangle instead
             if(_dataRect.isEmpty())
-            {
-                _dataRect =
-                {
-                    1, 1,
-                    static_cast<int>(_dataPtr->numColumns()) - 1,
-                    static_cast<int>(_dataPtr->numRows()) - 1
-                };
-            }
+                _dataRect = findLargestNonNumericalDataRect(*_dataPtr);
 
             _hasDiscreteValues = true;
             _appearsToBeContinuous = false;
