@@ -607,8 +607,6 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
 
     QFuture<void> future = QtConcurrent::run([this]()
     {
-        _hasDiscreteValues = false;
-        _appearsToBeContinuous = true;
         auto numericalDataRect = findLargestNumericalDataRect(*_dataPtr);
 
         if(numericalDataRect.isEmpty())
@@ -622,7 +620,11 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
             _appearsToBeContinuous = false;
         }
         else
+        {
             _dataRect = numericalDataRect;
+            _hasDiscreteValues = false;
+            _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
+        }
 
         _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
     });
