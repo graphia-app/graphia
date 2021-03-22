@@ -194,6 +194,9 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
             const auto& value = tabularData.valueAt(
                 static_cast<size_t>(column), static_cast<size_t>(row));
 
+            if(value.isEmpty())
+                continue;
+
             // We should only be getting called on numeric dataRects
             Q_ASSERT(u::isNumeric(value));
 
