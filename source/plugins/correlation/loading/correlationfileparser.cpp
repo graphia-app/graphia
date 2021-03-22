@@ -47,7 +47,8 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
     _tabularData(std::move(tabularData)), _dataRect(dataRect)
 {}
 
-static QRect findLargestNumericalDataRect(const TabularData& tabularData,
+template<typename Fn>
+static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
     size_t startColumn = 0, size_t startRow = 0)
 {
     std::vector<int> heightHistogram(tabularData.numColumns());
@@ -57,7 +58,7 @@ static QRect findLargestNumericalDataRect(const TabularData& tabularData,
         for(size_t row = tabularData.numRows(); row-- > startRow; )
         {
             const auto& value = tabularData.valueAt(column, row);
-            if(u::isNumeric(value) || value.isEmpty())
+            if(predicate(value) || value.isEmpty())
                 heightHistogram.at(column)++;
             else
                 break;
@@ -128,6 +129,20 @@ static QRect findLargestNumericalDataRect(const TabularData& tabularData,
         return {};
 
     return dataRect;
+}
+
+static QRect findLargestNumericalDataRect(const TabularData& tabularData,
+    size_t startColumn = 0, size_t startRow = 0)
+{
+    return findLargestDataRect(tabularData,
+        [](const auto& value) { return u::isNumeric(value); }, startColumn, startRow);
+}
+
+static QRect findLargestNonNumericalDataRect(const TabularData& tabularData,
+    size_t startColumn = 0, size_t startRow = 0)
+{
+    return findLargestDataRect(tabularData,
+        [](const auto& value) { return !u::isNumeric(value); }, startColumn, startRow);
 }
 
 static bool dataRectHasDiscreteValues(const TabularData& tabularData, const QRect& dataRect)
