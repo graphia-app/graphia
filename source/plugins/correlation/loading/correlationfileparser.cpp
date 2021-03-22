@@ -121,6 +121,12 @@ static QRect findLargestNumericalDataRect(const TabularData& tabularData,
     if(dataRect.height() >= 2 && dataRect.top() == 0)
         dataRect.setTop(1);
 
+    int bottomMargin = dataRect.top() - (static_cast<int>(tabularData.numRows()) - dataRect.height());
+    int rightMargin = dataRect.left() - (static_cast<int>(tabularData.numColumns()) - dataRect.width());
+
+    if(bottomMargin != 0 || rightMargin != 0)
+        return {};
+
     return dataRect;
 }
 
