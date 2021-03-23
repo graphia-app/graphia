@@ -1674,19 +1674,26 @@ Item
         {
             // If a new attribute has been created and advanced find or FBAV have
             // not yet been used, set the new attribute as the default for both
-            if(addedNames.length > 0)
+            while(addedNames.length > 0)
             {
                 let lastAddedAttributeName = addedNames[addedNames.length - 1];
                 let lastAddedAttribute = attribute(lastAddedAttributeName);
 
-                if(find.lastAdvancedFindAttributeName.length === 0)
-                    find.lastAdvancedFindAttributeName = lastAddedAttributeName;
-
-                if(lastAddedAttribute.sharedValues.length > 0 &&
-                    find.lastFindByAttributeName.length === 0)
+                if(lastAddedAttribute.valueType === ValueType.String)
                 {
-                    find.lastFindByAttributeName = lastAddedAttributeName;
+                    if(find.lastAdvancedFindAttributeName.length === 0)
+                        find.lastAdvancedFindAttributeName = lastAddedAttributeName;
+
+                    if(lastAddedAttribute.sharedValues.length > 0 &&
+                        find.lastFindByAttributeName.length === 0)
+                    {
+                        find.lastFindByAttributeName = lastAddedAttributeName;
+                    }
+
+                    break;
                 }
+
+                addedNames.pop();
             }
         }
 
