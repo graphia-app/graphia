@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 
 template<typename T> class ElementId
 {
@@ -36,8 +37,10 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
-    // Prevent warnings when initialising an ElementId with a size_t
+    // Prevent warnings when initialising an ElementId with other types
     ElementId(size_t value) : ElementId(static_cast<int>(value)) {}
+    ElementId(uint32_t value) : ElementId(static_cast<int>(value)) {}
+    ElementId(uint64_t value) : ElementId(static_cast<int>(value)) {}
 
     explicit operator int() const { return _value; }
 
