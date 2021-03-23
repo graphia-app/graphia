@@ -836,7 +836,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     const auto& jsonDiscreteData = jsonObject["discreteData"];
     for(const auto& value : jsonDiscreteData)
     {
-        _discreteData.emplace_back(value);
+        _discreteData.emplace_back(QString::fromStdString(value));
         parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
     }
 
