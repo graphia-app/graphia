@@ -103,7 +103,8 @@ private:
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
     double _missingDataReplacementValue = 0.0;
-    bool _imputedValues = false;
+
+    bool _valuesWereImputed = false;
 
     QString _correlationAttributeName;
     QString _correlationAbsAttributeName;

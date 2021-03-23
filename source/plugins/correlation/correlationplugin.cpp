@@ -151,7 +151,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                     {
                         transformedValue = CorrelationFileParser::imputeValue(_missingDataType, _missingDataReplacementValue,
                             tabularData, dataRect, columnIndex, rowIndex);
-                        _imputedValues = true;
+                        _valuesWereImputed = true;
                     }
 
                     transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
@@ -1003,7 +1003,7 @@ QString CorrelationPluginInstance::log() const
     case NormaliseType::UnitScaling: text.append(tr("\nNormalisation: Unit Scaling")); break;
     }
 
-    if(_imputedValues)
+    if(_valuesWereImputed)
     {
         text.append(tr("\nImputation: "));
         switch(_missingDataType)
