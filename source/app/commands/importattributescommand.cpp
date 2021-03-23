@@ -91,7 +91,7 @@ bool ImportAttributesCommand::execute()
                 }
             }
 
-            setProgress((++elementIdsProcessed * 100) / elementIds.size());
+            setProgress((++elementIdsProcessed * 100) / static_cast<int>(elementIds.size()));
         }
 
         setProgress(-1);
