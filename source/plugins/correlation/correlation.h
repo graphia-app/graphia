@@ -214,19 +214,21 @@ class DiscreteCorrelation
 public:
     virtual ~DiscreteCorrelation() = default;
 
-    virtual EdgeList process(const DiscreteDataRows& rows, double minimumThreshold,
+    virtual EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     virtual QString attributeName() const = 0;
     virtual QString attributeDescription() const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
+
+    static bool isTrue(const QString& value);
 };
 
 class JaccardCorrelation : public DiscreteCorrelation
 {
 public:
-    EdgeList process(const DiscreteDataRows& rows, double minimumThreshold,
+    EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final;
 
     QString attributeName() const override

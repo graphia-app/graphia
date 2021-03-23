@@ -41,8 +41,22 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
     return nullptr;
 }
 
+bool DiscreteCorrelation::isTrue(const QString& value)
+{
+    if(value.isEmpty())
+        return false;
+
+    if(value == "0")
+        return false;
+
+    if(QString::compare(value, "false", Qt::CaseInsensitive) == 0)
+        return false;
+
+    return true;
+}
+
 EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimumThreshold,
-    Cancellable* cancellable, Progressable* progressable) const
+    bool treatAsBinary, Cancellable* cancellable, Progressable* progressable) const
 {
     return {};
 }

@@ -100,9 +100,10 @@ private:
     ScalingType _scalingType = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::Constant;
+    double _missingDataReplacementValue = 0.0;
+    bool _treatAsBinary = false;
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
-    double _missingDataReplacementValue = 0.0;
 
     bool _valuesWereImputed = false;
 

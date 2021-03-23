@@ -832,7 +832,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->process(dataRows, _minimumCorrelation,
+            sampleEdges = correlation->process(dataRows, _minimumCorrelation, _treatAsBinary,
                 &_graphSizeEstimateCancellable);
 
             break;

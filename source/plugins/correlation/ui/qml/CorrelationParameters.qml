@@ -64,6 +64,7 @@ BaseParameterDialog
         normaliseType: normalise.value
         missingDataType: missingDataType.value
         replacementValue: replacementConstant.text
+        treatAsBinary: treatAsBinaryCheckbox.checked
 
         onDataRectChanged:
         {
@@ -348,6 +349,35 @@ BaseParameterDialog
                             }
                         }
                     }
+
+                    CheckBox
+                    {
+                        id: treatAsBinaryCheckbox
+
+                        visible: dataType.value === CorrelationDataType.Discrete
+                        text: qsTr("Treat As Binary")
+
+                        onCheckedChanged:
+                        {
+                            parameters.treatAsBinary = checked;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        visible: dataType.value === CorrelationDataType.Discrete
+                        title: qsTr("Treat As Binary")
+                        Text
+                        {
+                            wrapMode: Text.WordWrap
+                            text: qsTr("If this is enabled, for the purposes of the " +
+                                "correlation algorithm empty cells or cells containing " +
+                                "the values <i>0</i> or <i>false</i> are considered to " +
+                                "be false, while all other values are considered to be true.")
+                        }
+                    }
+
+
                 }
 
                 Rectangle

@@ -135,6 +135,7 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(int normaliseType MEMBER _normaliseType NOTIFY parameterChanged)
     Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
     Q_PROPERTY(double replacementValue MEMBER _replacementValue NOTIFY parameterChanged)
+    Q_PROPERTY(bool treatAsBinary MEMBER _treatAsBinary NOTIFY parameterChanged)
 
     Q_PROPERTY(QVariantMap graphSizeEstimate MEMBER _graphSizeEstimate NOTIFY graphSizeEstimateChanged)
     Q_PROPERTY(bool graphSizeEstimateInProgress READ graphSizeEstimateInProgress
@@ -166,6 +167,7 @@ private:
     int _normaliseType = static_cast<int>(NormaliseType::None);
     int _missingDataType = static_cast<int>(MissingDataType::Constant);
     double _replacementValue = 0.0;
+    bool _treatAsBinary = false;
 
     void setProgress(int progress);
 

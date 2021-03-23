@@ -397,7 +397,7 @@ EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser
     case CorrelationDataType::Discrete:
     {
         auto discreteCorrelation = DiscreteCorrelation::create(static_cast<CorrelationType>(_discreteCorrelationType));
-        return discreteCorrelation->process(_discreteDataRows, minimumThreshold, &parser, &parser);
+        return discreteCorrelation->process(_discreteDataRows, minimumThreshold, _treatAsBinary, &parser, &parser);
     }
     }
 
@@ -596,6 +596,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _missingDataType = static_cast<MissingDataType>(value.toInt());
     else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
+    else if(name == QStringLiteral("treatAsBinary"))
+        _treatAsBinary = value.toBool();
     else if(name == QStringLiteral("dataRect"))
         _dataRect = value.toRect();
     else if(name == QStringLiteral("clusteringType"))
