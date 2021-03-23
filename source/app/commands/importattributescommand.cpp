@@ -105,7 +105,7 @@ bool ImportAttributesCommand::execute()
             auto name = _data.valueAt(columnIndex, 0);
             name = u::findUniqueName(userData.vectorNames(), name);
 
-            for(const auto [row, elementId] : map)
+            for(const auto& [row, elementId] : map)
             {
                 auto value = _data.valueAt(columnIndex, row);
                 userData.setValueBy(elementId, name, value);

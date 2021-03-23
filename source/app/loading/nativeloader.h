@@ -69,7 +69,7 @@ public:
     QStringList transforms() const { return _transforms; }
     QStringList visualisations() const { return _visualisations; }
     const auto& bookmarks() const { return _bookmarks; }
-    QString log() const { return _log; }
+    QString log() const override { return _log; }
     const std::vector<EnrichmentTableModel::Table>& enrichmentTableModels() const
     { return _enrichmentTablesData; }
 

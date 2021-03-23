@@ -517,7 +517,7 @@ public:
         return u::findStatisticsFor(elementIds,
         [this](const auto& elementId)
         {
-            return floatValueOf(elementId);
+            return this->floatValueOf(elementId);
         }, storeValues);
     }
 
