@@ -35,6 +35,9 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
+    // Prevent warnings when initialising an ElementId with a size_t
+    ElementId(size_t value) : ElementId(static_cast<int>(value)) {}
+
     explicit operator int() const { return _value; }
 
     ElementId(const ElementId<T>& other) = default;
