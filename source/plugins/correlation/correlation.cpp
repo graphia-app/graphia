@@ -126,8 +126,10 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
                 for(size_t column = 0; column < numColumns; column++)
                     fraction += f(column, rowAIt, rowBIt);
 
-                if(std::isfinite(fraction) && fraction >= minimumThreshold)
-                    edges.push_back({rowAIt->nodeId(), rowBIt->nodeId(), fraction});
+                double r = fraction;
+
+                if(std::isfinite(r) && r >= minimumThreshold)
+                    edges.push_back({rowAIt->nodeId(), rowBIt->nodeId(), r});
             }
         };
 
