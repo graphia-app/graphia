@@ -58,5 +58,102 @@ bool DiscreteCorrelation::isTrue(const QString& value)
 EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimumThreshold,
     bool treatAsBinary, Cancellable* cancellable, Progressable* progressable) const
 {
-    return {};
+    if(rows.empty())
+        return {};
+
+    size_t numColumns = rows.front().numColumns();
+
+    if(progressable != nullptr)
+        progressable->setProgress(-1);
+
+    uint64_t totalCost = 0;
+    for(const auto& row : rows)
+        totalCost += row.computeCostHint();
+
+    std::atomic<uint64_t> cost(0);
+
+    auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
+    [&](DiscreteDataRows::const_iterator rowAIt)
+    {
+        EdgeList edges;
+
+        if(cancellable != nullptr && cancellable->cancelled())
+            return edges;
+
+        struct Fraction
+        {
+            int _numerator = 0;
+            int _denominator = 0;
+
+            Fraction& operator+=(const Fraction& other)
+            {
+                _numerator += other._numerator;
+                _denominator += other._denominator;
+
+                return *this;
+            }
+
+            operator double() const { return static_cast<double>(_numerator) / _denominator; }
+        };
+
+        auto binary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
+        {
+            auto rowAValue = DiscreteCorrelation::isTrue(rowA->valueAt(column));
+            auto rowBValue = DiscreteCorrelation::isTrue(rowB->valueAt(column));
+
+            if(!rowAValue && !rowBValue)
+                return {0, 0};
+
+            return {rowAValue == rowBValue ? 1 : 0, 1};
+        };
+
+        auto nonBinary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
+        {
+            const auto& rowAValue = rowA->valueAt(column);
+            const auto& rowBValue = rowB->valueAt(column);
+
+            if(rowAValue.isEmpty() && rowBValue.isEmpty())
+                return {0, 0};
+
+            return {rowAValue == rowBValue ? 1 : 0, 1};
+        };
+
+        auto createEdgesForRowPairs = [&](auto&& f)
+        {
+            for(auto rowBIt = rowAIt + 1; rowBIt != rows.end(); ++rowBIt)
+            {
+                Fraction fraction;
+                for(size_t column = 0; column < numColumns; column++)
+                    fraction += f(column, rowAIt, rowBIt);
+
+                if(std::isfinite(fraction) && fraction >= minimumThreshold)
+                    edges.push_back({rowAIt->nodeId(), rowBIt->nodeId(), fraction});
+            }
+        };
+
+        if(treatAsBinary)
+            createEdgesForRowPairs(binary);
+        else
+            createEdgesForRowPairs(nonBinary);
+
+        cost += rowAIt->computeCostHint();
+
+        if(progressable != nullptr)
+            progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
+
+        return edges;
+    });
+
+    if(progressable != nullptr)
+    {
+        // Returning the results might take time
+        progressable->setProgress(-1);
+    }
+
+    EdgeList edges;
+    edges.reserve(std::distance(results.begin(), results.end()));
+    edges.insert(edges.end(), std::make_move_iterator(results.begin()),
+        std::make_move_iterator(results.end()));
+
+    return edges;
 }
