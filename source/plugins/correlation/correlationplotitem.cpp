@@ -186,15 +186,15 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     _customPlot.plotLayout()->clear();
 
     // ...and manage our own layout
-    _mainAxisLayout = new QCPLayoutGrid;
-    _customPlot.plotLayout()->addElement(_mainAxisLayout);
+    _mainLayoutGrid = new QCPLayoutGrid;
+    _customPlot.plotLayout()->addElement(_mainLayoutGrid);
 
-    _mainAxisRect = new QCPAxisRect(&_customPlot);
-    _mainAxisLayout->addElement(_mainAxisRect);
-    _mainXAxis = _mainAxisRect->axis(QCPAxis::atBottom);
-    _mainYAxis = _mainAxisRect->axis(QCPAxis::atLeft);
+    _continuousAxisRect = new QCPAxisRect(&_customPlot);
+    _mainLayoutGrid->addElement(_continuousAxisRect);
+    _continuousXAxis = _continuousAxisRect->axis(QCPAxis::atBottom);
+    _continuousYAxis = _continuousAxisRect->axis(QCPAxis::atLeft);
 
-    for(auto& axis : _mainAxisRect->axes())
+    for(auto& axis : _continuousAxisRect->axes())
     {
         axis->setLayer(QStringLiteral("axes"));
         axis->grid()->setLayer(QStringLiteral("grid"));
@@ -519,7 +519,7 @@ void CorrelationPlotItem::updateTooltip()
 
     if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
     {
-        if(axisRectUnderCursor == _mainAxisRect && plottableUnderCursor != nullptr)
+        if(axisRectUnderCursor == _continuousAxisRect && plottableUnderCursor != nullptr)
         {
             if(auto* graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
             {
@@ -883,7 +883,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         // Use Average Calculation and set min / max
         QVector<double> yDataAvg = meanAverageData(minY, maxY, rows);
 
-        auto* histogramBars = new QCPBars(_mainXAxis, _mainYAxis);
+        auto* histogramBars = new QCPBars(_continuousXAxis, _continuousYAxis);
         histogramBars->setName(name);
         histogramBars->setData(xData, yDataAvg, true);
         histogramBars->setPen(QPen(color.darker(150)));
@@ -948,7 +948,7 @@ void CorrelationPlotItem::populateIQRPlot()
     // Whiskers represent the maximum and minimum non-outlier values
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
-    auto* statPlot = new QCPStatisticalBox(_mainXAxis, _mainYAxis);
+    auto* statPlot = new QCPStatisticalBox(_continuousXAxis, _continuousYAxis);
     statPlot->setName(tr("Median (IQR plots) of selection"));
 
     double minY = std::numeric_limits<double>::max();
@@ -1031,7 +1031,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     auto visualType = static_cast<PlotDispersionVisualType>(_dispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
-        auto* stdDevBars = new QCPErrorBars(_mainXAxis, _mainYAxis);
+        auto* stdDevBars = new QCPErrorBars(_continuousXAxis, _continuousYAxis);
         stdDevBars->setName(name);
         stdDevBars->setSelectable(QCP::SelectionType::stNone);
         stdDevBars->setAntialiased(false);
@@ -1040,8 +1040,8 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     }
     else if(visualType == PlotDispersionVisualType::Area)
     {
-        auto* devTop = new QCPGraph(_mainXAxis, _mainYAxis);
-        auto* devBottom = new QCPGraph(_mainXAxis, _mainYAxis);
+        auto* devTop = new QCPGraph(_continuousXAxis, _continuousYAxis);
+        auto* devBottom = new QCPGraph(_continuousXAxis, _continuousYAxis);
         devTop->setName(QStringLiteral("%1 Top").arg(name));
         devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
 
@@ -1162,7 +1162,7 @@ void CorrelationPlotItem::populateLinePlot()
 
         if(!_lineGraphCache.contains(row))
         {
-            graph = _customPlot.addGraph(_mainXAxis, _mainYAxis);
+            graph = _customPlot.addGraph(_continuousXAxis, _continuousYAxis);
             graph->setLayer(_lineGraphLayer);
 
             double rowSum = 0.0;
@@ -1277,17 +1277,17 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     size_t numColumnAnnotations = numVisibleColumnAnnotations();
 
     _columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, _columnAnnotationsAxisRect);
+    _mainLayoutGrid->addElement(_mainLayoutGrid->rowCount(), 0, _columnAnnotationsAxisRect);
 
     const auto separation = 8;
-    _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
-    _mainAxisRect->setMargins(QMargins(0, 0, 0, separation));
+    _continuousAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
+    _continuousAxisRect->setMargins(QMargins(0, 0, 0, separation));
     _columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
     _columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
 
     // Align the left and right hand sides of the axes
     auto* group = new QCPMarginGroup(&_customPlot);
-    _mainAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+    _continuousAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
     _columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
 
     xAxis->setTickLabels(false);
@@ -1420,7 +1420,7 @@ void CorrelationPlotItem::configureLegend()
             auto* plottable = _customPlot.plottable(i);
 
             // Don't add invisible plots to the legend
-            if(!plottable->visible() || plottable->valueAxis() != _mainYAxis)
+            if(!plottable->visible() || plottable->valueAxis() != _continuousYAxis)
                 continue;
 
             plottable->addToLegend(legend);
@@ -1602,8 +1602,8 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
     _columnAnnotationsAxisRect = nullptr;
 
     // Return the plot layout to its immediate post-construction state
-    removeAllExcept(_mainAxisLayout, _mainAxisRect);
-    removeAllExcept(_customPlot.plotLayout(), _mainAxisLayout);
+    removeAllExcept(_mainLayoutGrid, _continuousAxisRect);
+    removeAllExcept(_customPlot.plotLayout(), _mainLayoutGrid);
 
     auto plotAveragingType = static_cast<PlotAveragingType>(_averagingType);
     if(plotAveragingType == PlotAveragingType::MeanLine)
@@ -1619,22 +1619,22 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
 
-    auto* xAxis = _mainXAxis;
+    auto* xAxis = _continuousXAxis;
 
     xAxis->setLabel({});
     xAxis->setTicker(categoryTicker);
 
     xAxis->grid()->setVisible(_showGridLines);
-    _mainYAxis->grid()->setVisible(_showGridLines);
+    _continuousYAxis->grid()->setVisible(_showGridLines);
 
     // Don't show an emphasised vertical zero line
     xAxis->grid()->setZeroLinePen(xAxis->grid()->pen());
 
-    _mainYAxis->setLabel(_yAxisLabel);
+    _continuousYAxis->setLabel(_yAxisLabel);
 
-    _mainAxisLayout->setRowSpacing(0);
-    _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
-    _mainAxisRect->setMargins(QMargins(0, 0, 0, 0));
+    _mainLayoutGrid->setRowSpacing(0);
+    _continuousAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
+    _continuousAxisRect->setMargins(QMargins(0, 0, 0, 0));
 
     xAxis = configureColumnAnnotations(xAxis);
 
@@ -1710,7 +1710,7 @@ void CorrelationPlotItem::setYAxisRange(double min, double max)
             max = 0.0;
     }
 
-    _mainYAxis->setRange(min, max);
+    _continuousYAxis->setRange(min, max);
 }
 
 void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
@@ -2155,7 +2155,7 @@ double CorrelationPlotItem::minColumnWidth() const
 
 double CorrelationPlotItem::columnAxisWidth() const
 {
-    const auto& margins = _mainAxisRect->margins();
+    const auto& margins = _continuousAxisRect->margins();
     const unsigned int marginWidth = margins.left() + margins.right();
 
     //FIXME This value is wrong when the legend is enabled

@@ -227,10 +227,10 @@ private:
     QFontMetrics _defaultFontMetrics{_defaultFont9Pt};
 
     QCustomPlot _customPlot;
-    QCPLayoutGrid* _mainAxisLayout = nullptr;
-    QCPAxisRect* _mainAxisRect = nullptr;
-    QCPAxis* _mainXAxis = nullptr;
-    QCPAxis* _mainYAxis = nullptr;
+    QCPLayoutGrid* _mainLayoutGrid = nullptr;
+    QCPAxisRect* _continuousAxisRect = nullptr;
+    QCPAxis* _continuousXAxis = nullptr;
+    QCPAxis* _continuousYAxis = nullptr;
     QVector<QCPAbstractPlottable*> _meanPlots;
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
