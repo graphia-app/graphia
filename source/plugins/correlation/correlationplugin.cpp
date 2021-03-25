@@ -79,6 +79,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     parser.setProgress(-1);
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
+    size_t numColumns = _numContinuousColumns + _numDiscreteColumns;
     size_t left = dataRect.x();
     size_t right = dataRect.x() + dataRect.width();
     size_t top = dataRect.y();
@@ -97,6 +98,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
             const auto& value = tabularData.valueAt(columnIndex, rowIndex);
 
+            //FIXME: If there are continuous and discrete columns, dataColumnIndex will need to change
             size_t dataColumnIndex = columnIndex - dataRect.x();
             size_t dataRowIndex = rowIndex - dataRect.y();
             bool isColumnInDataRect = left <= columnIndex && columnIndex < right;
@@ -104,13 +106,13 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             bool isColumnAnnotation = rowIndex < top;
             bool isRowAttribute = columnIndex < left;
 
-            if((isColumnInDataRect && dataColumnIndex >= _numColumns) ||
+            if((isColumnInDataRect && dataColumnIndex >= numColumns) ||
                 (isRowInDataRect && dataRowIndex >= _numRows))
             {
                 qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
                                     "dataRect of dimensions (%3, %4)")
                     .arg(dataColumnIndex).arg(dataRowIndex)
-                    .arg(_numColumns).arg(_numRows);
+                    .arg(numColumns).arg(_numRows);
 
                 continue;
             }
@@ -131,9 +133,6 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             }
             else if(isColumnInDataRect)
             {
-                auto index = (dataRowIndex * _numColumns) + dataColumnIndex;
-                Q_ASSERT(index < _continuousData.size() && index < _discreteData.size());
-
                 switch(_correlationDataType)
                 {
                 default:
@@ -156,12 +155,16 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
                     transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
 
+                    auto index = (dataRowIndex * _numContinuousColumns) + dataColumnIndex;
+                    Q_ASSERT(index < _continuousData.size());
                     _continuousData.at(index) = transformedValue;
                     break;
                 }
 
                 case CorrelationDataType::Discrete:
                 {
+                    auto index = (dataRowIndex * _numDiscreteColumns) + dataColumnIndex;
+                    Q_ASSERT(index < _discreteData.size());
                     _discreteData.at(index) = value;
                     break;
                 }
@@ -423,23 +426,24 @@ bool CorrelationPluginInstance::createEdges(const EdgeList& edges, IParser& pars
     return true;
 }
 
-void CorrelationPluginInstance::setDimensions(size_t numColumns, size_t numRows)
+void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_t numDiscreteColumns, size_t numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
     Q_ASSERT(_userColumnData.empty());
     Q_ASSERT(_userNodeData.empty());
 
-    _numColumns = numColumns;
+    _numContinuousColumns = numContinuousColumns;
+    _numDiscreteColumns = numDiscreteColumns;
     _numRows = numRows;
 
-    _dataColumnNames.resize(numColumns);
-    _continuousData.resize(numColumns * numRows);
-    _discreteData.resize(numColumns * numRows);
+    _dataColumnNames.resize(numContinuousColumns + numDiscreteColumns);
+    _continuousData.resize(numContinuousColumns * numRows);
+    _discreteData.resize(numDiscreteColumns * numRows);
 }
 
 void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name)
 {
-    Q_ASSERT(column < _numColumns);
+    Q_ASSERT(column < (_numContinuousColumns + _numDiscreteColumns));
     _dataColumnNames.at(column) = name;
 }
 
@@ -473,8 +477,8 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     auto nodeId = graphModel()->mutableGraph().addNode();
     auto computeCost = static_cast<uint64_t>(_numRows - row + 1);
 
-    _continuousDataRows.emplace_back(_continuousData, row, _numColumns, nodeId, computeCost);
-    _discreteDataRows.emplace_back(_discreteData, row, _numColumns, nodeId, computeCost);
+    _continuousDataRows.emplace_back(_continuousData, row, _numContinuousColumns, nodeId, computeCost);
+    _discreteDataRows.emplace_back(_discreteData, row, _numDiscreteColumns, nodeId, computeCost);
 
     _userNodeData.setElementIdForIndex(nodeId, row);
 
@@ -675,14 +679,14 @@ QStringList CorrelationPluginInstance::defaultVisualisations() const
     return {};
 }
 
-size_t CorrelationPluginInstance::numColumns() const
-{
-    return _numColumns;
-}
-
 double CorrelationPluginInstance::continuousDataAt(int row, int column) const
 {
-    return _continuousData.at((row * _numColumns) + column);
+    return _continuousData.at((row * _numContinuousColumns) + column);
+}
+
+double CorrelationPluginInstance::discreteDataAt(int row, int column) const
+{
+    return _continuousData.at((row * _numDiscreteColumns) + column);
 }
 
 QString CorrelationPluginInstance::rowName(int row) const
@@ -721,7 +725,8 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 {
     json jsonObject;
 
-    jsonObject["numColumns"] = static_cast<int>(_numColumns);
+    jsonObject["numContinuousColumns"] = static_cast<int>(_numContinuousColumns);
+    jsonObject["numDiscreteColumns"] = static_cast<int>(_numDiscreteColumns);
     jsonObject["numRows"] = static_cast<int>(_numRows);
     jsonObject["userNodeData"] = _userNodeData.save(graph, graph.nodeIds(), progressable);
     jsonObject["userColumnData"] =_userColumnData.save(progressable);
@@ -794,7 +799,14 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(!u::contains(jsonObject, "numColumns") || !u::contains(jsonObject, "numRows"))
         return false;
 
-    _numColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
+    if(dataVersion >= 7)
+    {
+        _numContinuousColumns = static_cast<size_t>(jsonObject["numContinuousColumns"].get<int>());
+        _numDiscreteColumns = static_cast<size_t>(jsonObject["numDiscreteColumns"].get<int>());
+    }
+    else
+        _numContinuousColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
+
     _numRows = static_cast<size_t>(jsonObject["numRows"].get<int>());
 
     if(!u::contains(jsonObject, "userNodeData") || !u::contains(jsonObject, "userColumnData"))
@@ -850,8 +862,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
         if(!nodeId.isNull())
         {
-            _continuousDataRows.emplace_back(_continuousData, row, _numColumns, nodeId);
-            _discreteDataRows.emplace_back(_discreteData, row, _numColumns, nodeId);
+            _continuousDataRows.emplace_back(_continuousData, row, _numContinuousColumns, nodeId);
+            _discreteDataRows.emplace_back(_discreteData, row, _numContinuousColumns, nodeId);
         }
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));

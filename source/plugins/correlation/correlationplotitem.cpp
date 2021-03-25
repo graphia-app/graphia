@@ -582,7 +582,7 @@ void CorrelationPlotItem::updateTooltip()
         {
             auto index = static_cast<size_t>(key);
 
-            if(index < _pluginInstance->numColumns())
+            if(index < _pluginInstance->numContinuousColumns())
             {
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
                 _hoverLabel->setText(QStringLiteral("%1, %2: %3")
@@ -672,7 +672,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(rows.size());
 
-    for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
+    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
     {
         double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
@@ -771,7 +771,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
         graph->setPen(QPen(color, 2.0, Qt::DashLine));
         graph->setName(name);
 
-        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
         std::iota(std::begin(xData), std::end(xData), 0);
 
@@ -813,14 +813,14 @@ void CorrelationPlotItem::populateMedianLinePlot()
         graph->setPen(QPen(color, 2.0, Qt::DashLine));
         graph->setName(name);
 
-        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
         std::iota(std::begin(xData), std::end(xData), 0);
 
         QVector<double> rowsEntries(rows.length());
-        QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numColumns()));
+        QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-        for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
+        for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
         {
             rowsEntries.clear();
             std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
@@ -876,7 +876,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     auto addMeanBars =
     [this, &minY, &maxY](const QColor& color, const QString& name, const QVector<int>& rows)
     {
-        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         // xData is just the column indices
         std::iota(std::begin(xData), std::end(xData), 0);
 
@@ -958,7 +958,7 @@ void CorrelationPlotItem::populateIQRPlot()
     QVector<double> outliers;
 
     // Calculate IQRs, outliers and ranges
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
     {
         rowsEntries.clear();
         outliers.clear();
@@ -1059,24 +1059,24 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
         devBottom->setSelectable(QCP::SelectionType::stNone);
         devTop->setSelectable(QCP::SelectionType::stNone);
 
-        auto topErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
-        auto bottomErr = QVector<double>(static_cast<int>(_pluginInstance->numColumns()));
+        auto topErr = QVector<double>(static_cast<int>(_pluginInstance->numContinuousColumns()));
+        auto bottomErr = QVector<double>(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-        for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
+        for(int i = 0; i < static_cast<int>(_pluginInstance->numContinuousColumns()); i++)
         {
             topErr[i] = meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
             bottomErr[i] = meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
         }
 
         // xData is just the column indices
-        QVector<double> xData(static_cast<int>(_pluginInstance->numColumns()));
+        QVector<double> xData(static_cast<int>(_pluginInstance->numContinuousColumns()));
         std::iota(std::begin(xData), std::end(xData), 0);
 
         devTop->setData(xData, topErr);
         devBottom->setData(xData, bottomErr);
     }
 
-    for(int i = 0; i < static_cast<int>(_pluginInstance->numColumns()); i++)
+    for(int i = 0; i < static_cast<int>(_pluginInstance->numContinuousColumns()); i++)
     {
         minY = std::min(minY, meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
         maxY = std::max(maxY, meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
@@ -1087,9 +1087,9 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
-    QVector<double> stdDevs(static_cast<int>(_pluginInstance->numColumns()));
+    QVector<double> stdDevs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
     {
         double stdDev = 0.0;
         for(auto row : rows)
@@ -1098,7 +1098,7 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
             stdDev += (value * value);
         }
 
-        stdDev /= _pluginInstance->numColumns();
+        stdDev /= _pluginInstance->numContinuousColumns();
         stdDev = std::sqrt(stdDev);
         stdDevs[col] = stdDev;
     }
@@ -1110,9 +1110,9 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
-    QVector<double> stdErrs(static_cast<int>(_pluginInstance->numColumns()));
+    QVector<double> stdErrs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numColumns()); col++)
+    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
     {
         double stdErr = 0.0;
         for(auto row : rows)
@@ -1121,7 +1121,7 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
             stdErr += (value * value);
         }
 
-        stdErr /= _pluginInstance->numColumns();
+        stdErr /= _pluginInstance->numContinuousColumns();
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(rows.length()));
         stdErrs[col] = stdErr;
     }
@@ -1151,7 +1151,7 @@ void CorrelationPlotItem::populateLinePlot()
     double maxY = std::numeric_limits<double>::lowest();
 
     QVector<double> yData; yData.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(static_cast<int>(_pluginInstance->numColumns()));
+    QVector<double> xData; xData.reserve(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
     // Plot each row individually
     for(auto row : std::as_const(_selectedRows))
@@ -1166,19 +1166,19 @@ void CorrelationPlotItem::populateLinePlot()
             graph->setLayer(_lineGraphLayer);
 
             double rowSum = 0.0;
-            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
+            for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
                 rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
 
-            double rowMean = rowSum / _pluginInstance->numColumns();
+            double rowMean = rowSum / _pluginInstance->numContinuousColumns();
 
             double variance = 0.0;
-            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
+            for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
                 auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - rowMean;
                 variance += (value * value);
             }
 
-            variance /= _pluginInstance->numColumns();
+            variance /= _pluginInstance->numContinuousColumns();
             double stdDev = std::sqrt(variance);
             double pareto = std::sqrt(stdDev);
 
@@ -1195,7 +1195,7 @@ void CorrelationPlotItem::populateLinePlot()
             yData.clear();
             xData.clear();
 
-            for(size_t col = 0; col < _pluginInstance->numColumns(); col++)
+            for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
                 auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
 
@@ -1648,7 +1648,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
     xAxis->setPadding(_xAxisPadding);
 
-    for(size_t x = 0U; x < _pluginInstance->numColumns(); x++)
+    for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
     {
         auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
         categoryTicker->addTick(x, labelName);
@@ -1681,7 +1681,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 void CorrelationPlotItem::computeXAxisRange()
 {
     auto min = 0.0;
-    auto max = static_cast<double>(_pluginInstance->numColumns() - 1);
+    auto max = static_cast<double>(_pluginInstance->numContinuousColumns() - 1);
     auto maxVisibleColumns = columnAxisWidth() / minColumnWidth();
     auto numHiddenColumns = max - maxVisibleColumns;
 
@@ -1891,7 +1891,7 @@ void CorrelationPlotItem::updateSortMap()
 {
     _sortMap.clear();
 
-    for(size_t i = 0U; i < _pluginInstance->numColumns(); i++)
+    for(size_t i = 0U; i < _pluginInstance->numContinuousColumns(); i++)
         _sortMap.push_back(i);
 
     QCollator collator;
@@ -2124,7 +2124,7 @@ double CorrelationPlotItem::visibleHorizontalFraction() const
     if(_pluginInstance == nullptr)
         return 1.0;
 
-    auto f = (columnAxisWidth() / (minColumnWidth() * _pluginInstance->numColumns()));
+    auto f = (columnAxisWidth() / (minColumnWidth() * _pluginInstance->numContinuousColumns()));
 
     return std::min(f, 1.0);
 }
@@ -2139,7 +2139,7 @@ const double minColumnPixelWidth = 1.0;
 
 bool CorrelationPlotItem::isWide() const
 {
-    return (_pluginInstance->numColumns() * minColumnPixelWidth) > columnAxisWidth();
+    return (_pluginInstance->numContinuousColumns() * minColumnPixelWidth) > columnAxisWidth();
 }
 
 double CorrelationPlotItem::minColumnWidth() const
@@ -2148,7 +2148,7 @@ double CorrelationPlotItem::minColumnWidth() const
         return labelHeight();
 
     if(_showAllColumns)
-        return columnAxisWidth() / _pluginInstance->numColumns();
+        return columnAxisWidth() / _pluginInstance->numContinuousColumns();
 
     return minColumnPixelWidth;
 }

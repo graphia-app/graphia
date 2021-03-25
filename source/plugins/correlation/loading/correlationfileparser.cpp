@@ -397,7 +397,22 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     if(_dataRect.isEmpty() || cancelled())
         return false;
 
-    _plugin->setDimensions(_dataRect.width(), _dataRect.height());
+    size_t numContinuousColumns = 0;
+    size_t numDiscreteColumns = 0;
+
+    switch(_plugin->dataType())
+    {
+    default:
+    case CorrelationDataType::Continuous:
+        numContinuousColumns = _dataRect.width();
+        break;
+
+    case CorrelationDataType::Discrete:
+        numDiscreteColumns = _dataRect.width();
+        break;
+    }
+
+    _plugin->setDimensions(numContinuousColumns, numDiscreteColumns, _dataRect.height());
 
     graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
     if(!_plugin->loadUserData(_tabularData, _dataRect, *this))

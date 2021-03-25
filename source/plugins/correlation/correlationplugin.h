@@ -70,7 +70,8 @@ public:
 private:
     IGraphModel* _graphModel = nullptr;
 
-    size_t _numColumns = 0;
+    size_t _numContinuousColumns = 0;
+    size_t _numDiscreteColumns = 0;
     size_t _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
@@ -136,7 +137,7 @@ private:
     QStringList numericalAttributeNames() const;
 
 public:
-    void setDimensions(size_t numColumns, size_t numRows);
+    void setDimensions(size_t numContinuousColumns, size_t numDiscreteColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, const QRect& dataRect, IParser& parser);
     bool requiresNormalisation() const { return _normaliseType != NormaliseType::None; }
     void normalise(IParser* parser);
@@ -147,6 +148,7 @@ public:
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
+    CorrelationDataType dataType() const { return _correlationDataType; }
 
     bool createEdges(const EdgeList& edges, IParser& parser);
 
@@ -155,8 +157,12 @@ public:
     QStringList defaultTransforms() const override;
     QStringList defaultVisualisations() const override;
 
-    size_t numColumns() const;
+    size_t numContinuousColumns() const { return _numContinuousColumns; }
     double continuousDataAt(int row, int column) const;
+
+    size_t numDiscreteColumns() const { return _numDiscreteColumns; }
+    double discreteDataAt(int row, int column) const;
+
     QString rowName(int row) const;
     QString columnName(int column) const;
     QColor nodeColorForRow(int row) const;
