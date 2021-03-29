@@ -873,8 +873,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
         if(!nodeId.isNull())
         {
-            _continuousDataRows.emplace_back(_continuousData, row, _numContinuousColumns, nodeId);
-            _discreteDataRows.emplace_back(_discreteData, row, _numDiscreteColumns, nodeId);
+            _continuousDataRows.emplace_back(_continuousData, row, _numContinuousColumns, nodeId).update();
+            _discreteDataRows.emplace_back(_discreteData, row, _numDiscreteColumns, nodeId).update();
         }
 
         parser.setProgress(static_cast<int>((row * 100) / _numRows));
