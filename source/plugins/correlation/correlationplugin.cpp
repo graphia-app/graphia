@@ -796,16 +796,24 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(jsonObject.is_null() || !jsonObject.is_object())
         return false;
 
-    if(!u::contains(jsonObject, "numColumns") || !u::contains(jsonObject, "numRows"))
-        return false;
-
     if(dataVersion >= 7)
     {
+        if(!u::contains(jsonObject, "numContinuousColumns") || !u::contains(jsonObject, "numDiscreteColumns"))
+            return false;
+
         _numContinuousColumns = static_cast<size_t>(jsonObject["numContinuousColumns"].get<int>());
         _numDiscreteColumns = static_cast<size_t>(jsonObject["numDiscreteColumns"].get<int>());
     }
     else
+    {
+        if(!u::contains(jsonObject, "numColumns"))
+            return false;
+
         _numContinuousColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
+    }
+
+    if(!u::contains(jsonObject, "numRows"))
+        return false;
 
     _numRows = static_cast<size_t>(jsonObject["numRows"].get<int>());
 
@@ -832,13 +840,13 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     uint64_t i = 0;
 
-    if(!u::contains(jsonObject, "data"))
-        return false;
-
     graph.setPhase(QObject::tr("Data"));
 
     const char* continuousDataKey =
         dataVersion >= 7 ? "continuousData" : "data";
+
+    if(!u::contains(jsonObject, continuousDataKey))
+        return false;
 
     const auto& jsonContinuousData = jsonObject[continuousDataKey];
     for(const auto& value : jsonContinuousData)
@@ -846,6 +854,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _continuousData.emplace_back(value);
         parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
     }
+
+    if(!u::contains(jsonObject, "discreteData"))
+        return false;
 
     const auto& jsonDiscreteData = jsonObject["discreteData"];
     for(const auto& value : jsonDiscreteData)
