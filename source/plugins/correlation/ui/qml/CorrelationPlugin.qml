@@ -854,6 +854,8 @@ PluginContent
 
             "plotIncludeYZero": plot.includeYZero,
             "plotShowAllColumns": plot.showAllColumns,
+            "plotXAxisLabel": plot.xAxisLabel,
+            "plotYAxisLabel": plot.yAxisLabel,
 
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines,
@@ -895,6 +897,8 @@ PluginContent
 
         if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
         if(data.plotShowAllColumns !== undefined)           plot.showAllColumns = data.plotShowAllColumns;
+        if(data.plotXAxisLabel !== undefined)               plot.xAxisLabel = data.plotXAxisLabel;
+        if(data.plotYAxisLabel !== undefined)               plot.yAxisLabel = data.plotYAxisLabel;
 
         if(data.plotLegend !== undefined)                   plot.showLegend = data.plotLegend;
         if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
