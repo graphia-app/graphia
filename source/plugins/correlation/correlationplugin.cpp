@@ -855,14 +855,17 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
     }
 
-    if(!u::contains(jsonObject, "discreteData"))
-        return false;
-
-    const auto& jsonDiscreteData = jsonObject["discreteData"];
-    for(const auto& value : jsonDiscreteData)
+    if(dataVersion >= 7)
     {
-        _discreteData.emplace_back(QString::fromStdString(value));
-        parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
+        if(!u::contains(jsonObject, "discreteData"))
+            return false;
+
+        const auto& jsonDiscreteData = jsonObject["discreteData"];
+        for(const auto& value : jsonDiscreteData)
+        {
+            _discreteData.emplace_back(QString::fromStdString(value));
+            parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
+        }
     }
 
     parser.setProgress(-1);
