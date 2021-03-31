@@ -227,12 +227,21 @@ private:
 
     QCustomPlot _customPlot;
     QCPLayoutGrid* _mainLayoutGrid = nullptr;
+    QCPLayoutGrid* _axesLayoutGrid = nullptr;
+
+    QCPAxisRect* _discreteAxisRect = nullptr;
+    QCPAxis* _discreteXAxis = nullptr;
+    QCPAxis* _discreteYAxis = nullptr;
+
     QCPAxisRect* _continuousAxisRect = nullptr;
     QCPAxis* _continuousXAxis = nullptr;
     QCPAxis* _continuousYAxis = nullptr;
     QVector<QCPAbstractPlottable*> _meanPlots;
+
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
+
+    QCPTextElement* _xAxisLabelTextElement = nullptr;
 
     CorrelationPluginInstance* _pluginInstance = nullptr;
 
@@ -280,6 +289,8 @@ private:
 
     QPixmap _pixmap;
 
+    size_t numColumns() const;
+
     void populateMeanLinePlot();
     void populateMedianLinePlot();
     void populateLinePlot();
@@ -325,7 +336,7 @@ private:
     QString columnAnnotationValueAt(size_t x, size_t y) const;
 
     void computeXAxisRange();
-    void setYAxisRange(double min, double max);
+    void setContinousYAxisRange(double min, double max);
     QVector<double> meanAverageData(double& min, double& max, const QVector<int>& rows);
 
     void updateColumnAnnotationVisibility();
@@ -338,7 +349,13 @@ private:
     double columnAxisWidth() const;
     double columnAnnotaionsHeight(bool allAttributes) const;
 
-    QCPAxis* configureColumnAnnotations(QCPAxis* xAxis);
+    void createTooltip();
+
+    void configureDiscreteAxisRect();
+    void configureContinuousAxisRect();
+    void configureAxisRects();
+
+    QCPAxis* configureColumnAnnotations(QCPAxisRect* axisRect);
     void configureLegend();
 
     void onLeftClick(const QPoint& pos);
