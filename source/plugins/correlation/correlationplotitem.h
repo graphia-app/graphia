@@ -92,7 +92,7 @@ class CorrelationPlotWorker : public QObject
 
 public:
     CorrelationPlotWorker(std::recursive_mutex& mutex,
-        QCustomPlot& customPlot, QCPLayer& tooltipLayer);
+        QCustomPlot& customPlot);
 
     bool busy() const;
 
@@ -111,7 +111,6 @@ private:
 
     QCustomPlot* _customPlot = nullptr;
     QOffscreenSurface* _surface = nullptr;
-    QCPLayer* _tooltipLayer = nullptr;
 
     int _width = -1;
     int _height = -1;

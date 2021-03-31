@@ -40,10 +40,10 @@
 #include <numeric>
 
 CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
-    QCustomPlot& customPlot, QCPLayer& tooltipLayer) :
+    QCustomPlot& customPlot) :
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
     _mutex(&mutex), _busy(false),
-    _customPlot(&customPlot), _tooltipLayer(&tooltipLayer)
+    _customPlot(&customPlot)
 {
     // Qt requires that this is created on the UI thread, so we do so here
     // Note QCustomPlot takes ownership of the memory, so it does not need
@@ -161,8 +161,9 @@ void CorrelationPlotWorker::renderPixmap()
         }
     }
 
-    if(_updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
-        _tooltipLayer->replot();
+    auto* tooltipLayer = _customPlot->layer(QStringLiteral("tooltipLayer"));
+    if(tooltipLayer != nullptr && _updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
+        tooltipLayer->replot();
 
     if(_updateType >= CorrelationPlotUpdateType::ReplotAndRenderAndTooltips)
         _customPlot->replot(QCustomPlot::rpImmediateRefresh);
@@ -251,7 +252,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
 
     qRegisterMetaType<CorrelationPlotUpdateType>("CorrelationPlotUpdateType");
 
-    _worker = new CorrelationPlotWorker(_mutex, _customPlot, *_tooltipLayer);
+    _worker = new CorrelationPlotWorker(_mutex, _customPlot);
     _worker->moveToThread(&_plotRenderThread);
     connect(&_plotRenderThread, &QThread::finished, _worker, &QObject::deleteLater);
 
@@ -401,7 +402,7 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
         break;
     }
 
-    updateTooltip();
+    _tooltipUpdateRequired = true;
 }
 
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
@@ -505,6 +506,9 @@ void CorrelationPlotItem::updateTooltip()
     }
 
     _tooltipUpdateRequired = false;
+
+    if(_tooltipLayer == nullptr)
+        return;
 
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
     QCPAxisRect* axisRectUnderCursor = nullptr;
