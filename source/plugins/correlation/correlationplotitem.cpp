@@ -141,6 +141,10 @@ void CorrelationPlotWorker::renderPixmap()
     // a resizeEvent, so its viewport never gets set, so we must do so manually
     _customPlot->setViewport(_customPlot->geometry());
 
+    // Force a layout so that any QCPAxisRects' dimensions are correct, before
+    // calculating if the columns are considered to be dense
+    _customPlot->plotLayout()->update(QCPLayoutElement::upLayout);
+
     auto elements = _customPlot->plotLayout()->elements(true);
     for(auto* element : elements)
     {
