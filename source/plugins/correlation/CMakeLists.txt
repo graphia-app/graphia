@@ -31,6 +31,9 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatarow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_discrete.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_continuous.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_columnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp

@@ -189,6 +189,10 @@ public:
     void setAveragingAttributeName(const QString& attributeName);
     void setDispersionVisualType(int dispersionVisualType);
 
+    static bool axisRectIsColumnAnnotations(const QCPAxisRect* axisRect);
+    static QColor colorForRows(const CorrelationPluginInstance* pluginInstance,
+        const QVector<int>& rows);
+
 protected:
     void routeMouseEvent(QMouseEvent* event);
     void routeWheelEvent(QWheelEvent* event);
@@ -359,10 +363,16 @@ private:
     void configureLegend();
 
     void onLeftClick(const QPoint& pos);
+    void onLeftClickColumnAnnotation(const QCPAxisRect* axisRect, const QPoint& pos);
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 
     QCPAbstractPlottable* abstractPlottableUnderCursor(double& keyCoord);
+    bool discreteTooltip(const QCPAxisRect* axisRect,
+        const QCPAbstractPlottable* plottable, double xCoord);
+    bool continuousTooltip(const QCPAxisRect* axisRect,
+        const QCPAbstractPlottable* plottable, double xCoord);
+    bool columnAnnotationTooltip(const QCPAxisRect* axisRect);
 
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);
