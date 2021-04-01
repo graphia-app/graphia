@@ -323,16 +323,15 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
 {
     auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-                                     event->button(), event->buttons(),
-                                     event->modifiers());
+        event->button(), event->buttons(), event->modifiers());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
 void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
 {
-    auto* newEvent = new QWheelEvent(event->position(), event->globalPosition(), event->pixelDelta(),
-                                     event->angleDelta(), event->buttons(), event->modifiers(), event->phase(),
-                                     event->inverted());
+    auto* newEvent = new QWheelEvent(event->position(), event->globalPosition(),
+        event->pixelDelta(), event->angleDelta(), event->buttons(),
+        event->modifiers(), event->phase(), event->inverted());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
