@@ -341,7 +341,7 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
         [this](const auto& v)
         {
             return !u::contains(_visibleColumnAnnotationNames, v);
-        }));
+        }), annotationNames.end());
     }
 
     const auto& name = annotationNames.at(index);
