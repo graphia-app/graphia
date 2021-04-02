@@ -74,7 +74,7 @@ public:
     uint64_t computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }
-    T valueAt(size_t column) const { return _data.at(column); }
+    const T& valueAt(size_t column) const { return _data.at(column); }
     void setValueAt(size_t column, const T& value) { _data[column] = value; }
 
     NodeId nodeId() const { return _nodeId; }
