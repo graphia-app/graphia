@@ -684,9 +684,9 @@ double CorrelationPluginInstance::continuousDataAt(int row, int column) const
     return _continuousData.at((row * _numContinuousColumns) + column);
 }
 
-double CorrelationPluginInstance::discreteDataAt(int row, int column) const
+QString CorrelationPluginInstance::discreteDataAt(int row, int column) const
 {
-    return _continuousData.at((row * _numDiscreteColumns) + column);
+    return _discreteData.at((row * _numDiscreteColumns) + column);
 }
 
 QString CorrelationPluginInstance::rowName(int row) const

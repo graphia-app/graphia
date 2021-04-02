@@ -161,7 +161,7 @@ public:
     double continuousDataAt(int row, int column) const;
 
     size_t numDiscreteColumns() const { return _numDiscreteColumns; }
-    double discreteDataAt(int row, int column) const;
+    QString discreteDataAt(int row, int column) const;
 
     QString rowName(int row) const;
     QString columnName(int column) const;
