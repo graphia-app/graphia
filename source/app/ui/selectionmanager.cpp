@@ -49,6 +49,8 @@ SelectionManager::SelectionManager(const GraphModel& graphModel) :
 
 NodeIdSet SelectionManager::selectedNodes() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
 #ifdef EXPENSIVE_DEBUG_CHECKS
     // Assertion that our selection doesn't contain things that aren't in the graph
     Q_ASSERT(std::all_of(_selectedNodes.begin(), _selectedNodes.end(),
@@ -64,6 +66,8 @@ NodeIdSet SelectionManager::selectedNodes() const
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     const auto& nodeIds = _graphModel->graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodeIds.begin(), _selectedNodeIds.end());
@@ -212,6 +216,8 @@ bool SelectionManager::toggleNode(NodeId nodeId)
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
 #ifdef EXPENSIVE_DEBUG_CHECKS
     Q_ASSERT(u::contains(_graphModel->graph().nodeIds(), nodeId));
 #endif
@@ -254,6 +260,8 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     _toggleNodes(_selectedNodeIds, _nodeIdsMask, _graphModel->graph().nodeIds());
 
     if(!signalsSuppressed())

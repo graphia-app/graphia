@@ -25,6 +25,7 @@
 #include <QObject>
 
 #include <memory>
+#include <mutex>
 
 class GraphModel;
 
@@ -66,6 +67,7 @@ public:
 private:
     const GraphModel* _graphModel = nullptr;
 
+    mutable std::recursive_mutex _mutex;
     NodeIdSet _selectedNodeIds;
 
     // Temporary storage for NodeIds that have been deleted
@@ -80,6 +82,8 @@ private:
     template<typename Fn>
     bool callFnAndMaybeEmit(Fn&& fn)
     {
+        std::unique_lock<std::recursive_mutex> lock(_mutex);
+
         bool selectionWillChange = fn();
 
         if(!signalsSuppressed() && selectionWillChange)

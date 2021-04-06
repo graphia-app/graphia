@@ -147,6 +147,8 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
         }
     }
 
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     bool changed = u::setsDiffer(_foundNodeIds, foundNodeIds);
 
     _foundNodeIds = std::move(foundNodeIds);
@@ -157,6 +159,8 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
 void SearchManager::clearFoundNodeIds()
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     bool changed = !_foundNodeIds.empty();
     _foundNodeIds.clear();
 
@@ -169,7 +173,9 @@ void SearchManager::refresh()
     findNodes(_term, _options, _attributeNames, _selectStyle);
 }
 
-bool SearchManager::SearchManager::nodeWasFound(NodeId nodeId) const
+NodeIdSet SearchManager::foundNodeIds() const
 {
-    return u::contains(_foundNodeIds, nodeId);
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    return _foundNodeIds;
 }
