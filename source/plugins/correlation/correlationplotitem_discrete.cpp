@@ -20,6 +20,13 @@
 
 #include "correlationplugin.h"
 
+#include "shared/utils/color.h"
+
+#include "shared/ui/visualisations/colorpalette.h"
+#include "shared/ui/visualisations/defaultpalettes.h"
+
+#include <map>
+
 void CorrelationPlotItem::configureDiscreteAxisRect()
 {
     if(_discreteAxisRect == nullptr)
@@ -39,6 +46,56 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         // Don't show an emphasised vertical zero line
         _discreteXAxis->grid()->setZeroLinePen(_discreteXAxis->grid()->pen());
     }
+
+    std::map<QString, QVector<double>> yData;
+
+    QVector<double> columnTotals(_pluginInstance->numDiscreteColumns());
+
+    for(auto row : std::as_const(_selectedRows))
+    {
+        for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
+        {
+            const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(_sortMap[column]));
+            auto& dataRow = yData[value];
+
+            if(dataRow.isEmpty())
+                dataRow.resize(_pluginInstance->numDiscreteColumns());
+
+            dataRow[column] += 1.0;
+            columnTotals[column] += 1.0;
+        }
+    }
+
+    double maxY = *std::max_element(columnTotals.begin(), columnTotals.end());
+    QCPBars* last = nullptr;
+
+    ColorPalette colorPalette(Defaults::PALETTE);
+    int index = 0;
+
+    for(const auto& [value, row] : yData)
+    {
+        QVector<double> xData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
+        // xData is just the column indices
+        std::iota(std::begin(xData), std::end(xData), 0);
+
+        auto* bars = new QCPBars(_discreteXAxis, _discreteYAxis);
+        bars->setData(xData, row, true);
+
+        if(last != nullptr)
+            bars->moveAbove(last);
+
+        last = bars;
+
+        bars->setAntialiased(false);
+
+        bars->setStackingGap(-2.0);
+        bars->setPen(QPen({}, 0.0));
+
+        auto color = colorPalette.get(value, index++);
+        bars->setBrush(color);
+    }
+
+    _discreteYAxis->setRange(0.0, maxY);
 
     _discreteXAxis->grid()->setVisible(_showGridLines);
     _discreteYAxis->grid()->setVisible(_showGridLines);
