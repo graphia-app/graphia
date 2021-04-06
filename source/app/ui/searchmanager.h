@@ -29,6 +29,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <mutex>
+
 class GraphModel;
 
 // What to select when found nodes changes
@@ -47,8 +49,7 @@ public:
     void clearFoundNodeIds();
     void refresh();
 
-    const NodeIdSet& foundNodeIds() const { return _foundNodeIds; }
-    bool nodeWasFound(NodeId nodeId) const;
+    NodeIdSet foundNodeIds() const;
 
     bool active() const { return !_term.isEmpty(); }
 
@@ -61,6 +62,8 @@ private:
     FindSelectStyle _selectStyle = FindSelectStyle::None;
 
     const GraphModel* _graphModel = nullptr;
+
+    mutable std::recursive_mutex _mutex;
     NodeIdSet _foundNodeIds;
 
 signals:

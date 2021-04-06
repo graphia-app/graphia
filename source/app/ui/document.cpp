@@ -841,7 +841,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
-            _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
+            _graphModel.get(), &GraphModel::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numHeadNodesSelectedChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
@@ -851,7 +851,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
-            _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
+            _graphModel.get(), &GraphModel::onFoundNodeIdsChanged);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
