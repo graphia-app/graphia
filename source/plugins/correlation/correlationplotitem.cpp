@@ -497,18 +497,21 @@ void CorrelationPlotItem::updateTooltip()
 
         _hoverLabel->setVisible(true);
 
-        auto key = _itemTracer->position->key();
+        auto key = std::round(_itemTracer->position->key());
 
-        if(_hoverLabel->text().isEmpty() && plottableUnderCursor != nullptr && key >= 0.0)
+        if(_hoverLabel->text().isEmpty() && plottableUnderCursor != nullptr && key >= 0)
         {
             auto index = static_cast<size_t>(key);
 
             if(index < numColumns())
             {
+                auto* plottable1D = dynamic_cast<const QCPPlottableInterface1D*>(plottableUnderCursor);
+                auto value = plottable1D != nullptr ? plottable1D->dataMainValue(key) : 0.0;
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
+
                 _hoverLabel->setText(QStringLiteral("%1, %2: %3")
                     .arg(plottableUnderCursor->name(), _pluginInstance->columnName(mappedCol))
-                    .arg(u::formatNumberScientific(_itemTracer->position->value())));
+                    .arg(u::formatNumberScientific(value)));
             }
         }
 
@@ -538,7 +541,7 @@ void CorrelationPlotItem::updateTooltip()
         {
             _hoverColorRect->setVisible(true);
 
-            QColor color = plottableUnderCursor->pen().color();
+            QColor color = plottableUnderCursor->brush().color();
 
             _hoverColorRect->setBrush(QBrush(color));
             _hoverColorRect->bottomRight->setPixelPosition(
