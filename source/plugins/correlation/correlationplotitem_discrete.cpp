@@ -88,6 +88,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         bars->setAntialiased(false);
 
+        bars->setName(value);
         bars->setStackingGap(-2.0);
         bars->setPen(QPen({}, 0.0));
 
@@ -122,5 +123,14 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 bool CorrelationPlotItem::discreteTooltip(const QCPAxisRect* axisRect,
     const QCPAbstractPlottable* plottable, double xCoord)
 {
+    if(axisRect != _discreteAxisRect || plottable == nullptr)
+        return false;
+
+    if(auto* bars = dynamic_cast<const QCPBars*>(plottable))
+    {
+        _itemTracer->position->setPixelPosition(bars->dataPixelPosition(static_cast<int>(xCoord)));
+        return true;
+    }
+
     return false;
 }
