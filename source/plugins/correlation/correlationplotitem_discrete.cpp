@@ -56,6 +56,10 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
         {
             const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(_sortMap[column]));
+
+            if(value.isEmpty())
+                continue;
+
             auto& dataRow = yData[value];
 
             if(dataRow.isEmpty())
