@@ -79,7 +79,7 @@ public:
 
     NodeId nodeId() const { return _nodeId; }
 
-    virtual void update() = 0;
+    virtual void update() {}
 };
 
 class ContinuousDataRow : public CorrelationDataRow<double>
@@ -113,7 +113,6 @@ class DiscreteDataRow : public CorrelationDataRow<QString>
 public:
     using CorrelationDataRow::CorrelationDataRow;
 
-    void update() override {}
 };
 
 using ContinuousDataRows = std::vector<ContinuousDataRow>;
