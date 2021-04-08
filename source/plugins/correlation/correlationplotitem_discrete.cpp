@@ -47,57 +47,101 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         _discreteXAxis->grid()->setZeroLinePen(_discreteXAxis->grid()->pen());
     }
 
-    std::map<QString, QVector<double>> yData;
+    std::vector<size_t> columnTotals(_pluginInstance->numDiscreteColumns());
+    std::vector<std::map<QString, size_t>> columnData(_pluginInstance->numDiscreteColumns());
 
-    QVector<double> columnTotals(_pluginInstance->numDiscreteColumns());
-
-    for(auto row : std::as_const(_selectedRows))
+    for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
     {
-        for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
+        auto& m = columnData[column];
+
+        for(auto row : std::as_const(_selectedRows))
         {
             const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(_sortMap[column]));
 
             if(value.isEmpty())
                 continue;
 
-            auto& dataRow = yData[value];
-
-            if(dataRow.isEmpty())
-                dataRow.resize(_pluginInstance->numDiscreteColumns());
-
-            dataRow[column] += 1.0;
-            columnTotals[column] += 1.0;
+            m[value]++;
+            columnTotals[column]++;
         }
     }
 
     double maxY = *std::max_element(columnTotals.begin(), columnTotals.end());
-    QCPBars* last = nullptr;
 
     ColorPalette colorPalette(Defaults::PALETTE);
-    int index = 0;
 
-    for(const auto& [value, row] : yData)
+    QVector<double> xData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
+    std::iota(std::begin(xData), std::end(xData), 0); // xData is just the column indices
+
+    for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
     {
-        QVector<double> xData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
-        // xData is just the column indices
-        std::iota(std::begin(xData), std::end(xData), 0);
+        const auto& m = columnData[column];
+        QCPBars* last = nullptr;
+        int index = 0;
 
-        auto* bars = new QCPBars(_discreteXAxis, _discreteYAxis);
-        bars->setData(xData, row, true);
+        auto layerName = QStringLiteral("discrete%1").arg(column);
+        if(_customPlot.layer(layerName) == nullptr)
+            _customPlot.addLayer(layerName);
 
-        if(last != nullptr)
-            bars->moveAbove(last);
+        auto addBars = [&](const auto& value, const auto& yData, QColor color = {})
+        {
+            auto* bars = new QCPBars(_discreteXAxis, _discreteYAxis);
+            bars->setData(xData, yData, true);
 
-        last = bars;
+            if(last != nullptr)
+                bars->moveAbove(last);
 
-        bars->setAntialiased(false);
+            last = bars;
 
-        bars->setName(value);
-        bars->setStackingGap(-2.0);
-        bars->setPen(QPen({}, 0.0));
+            bars->setAntialiased(false);
+            bars->setName(value);
 
-        auto color = colorPalette.get(value, index++);
-        bars->setBrush(color);
+            if(!color.isValid())
+                color = colorPalette.get(value, index++);
+
+            bars->setPen(QPen(color.darker(150)));
+
+            auto innerColor = color.lighter(110);
+
+            // If the value is 0, i.e. the color is black, .lighter won't have
+            // had any effect, so just pick an arbitrary higher value
+            if(innerColor.value() == 0)
+                innerColor.setHsv(innerColor.hue(), innerColor.saturation(), 92);
+
+            bars->setBrush(innerColor);
+            bars->setLayer(layerName);
+        };
+
+        // When the number of possible values is large, for an arbitrary value of large,
+        // performance suffers given the way we're using QCPBars, so in that case just
+        // display a single bar that's the sum of all the values it represents
+        if(m.size() >= 16)
+        {
+            size_t totalSize = 0;
+            for(const auto& [value, size] : m)
+                totalSize += size;
+
+            QVector<double> yData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
+            yData[column] = static_cast<double>(totalSize);
+
+            const auto& keys = u::keysFor(m);
+            auto value = QStringLiteral("%1, %2 and %3 more…")
+                .arg(keys.at(0))
+                .arg(keys.at(1))
+                .arg(m.size() - 2);
+
+            addBars(value, yData, Qt::black);
+        }
+        else
+        {
+            for(const auto& [value, size] : m)
+            {
+                QVector<double> yData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
+                yData[column] = static_cast<double>(size);
+
+                addBars(value, yData);
+            }
+        }
     }
 
     _discreteYAxis->setRange(0.0, maxY);
