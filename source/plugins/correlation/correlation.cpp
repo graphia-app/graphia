@@ -66,14 +66,16 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
     if(progressable != nullptr)
         progressable->setProgress(-1);
 
+    const auto tokenisedRows = tokeniseDataRows(rows);
+
     uint64_t totalCost = 0;
     for(const auto& row : rows)
         totalCost += row.computeCostHint();
 
     std::atomic<uint64_t> cost(0);
 
-    auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
-    [&](DiscreteDataRows::const_iterator rowAIt)
+    auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(tokenisedRows.begin(), tokenisedRows.end(),
+    [&](TokenisedDataRows::const_iterator rowAIt)
     {
         EdgeList edges;
 
@@ -98,13 +100,13 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
 
         auto binary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
         {
-            auto rowAValue = DiscreteCorrelation::isTrue(rowA->valueAt(column));
-            auto rowBValue = DiscreteCorrelation::isTrue(rowB->valueAt(column));
+            auto rowAValue = rowA->valueAt(column);
+            auto rowBValue = rowB->valueAt(column);
 
             if(!rowAValue && !rowBValue)
                 return {0, 0};
 
-            return {rowAValue == rowBValue ? 1 : 0, 1};
+            return {rowAValue && rowBValue ? 1 : 0, 1};
         };
 
         auto nonBinary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
@@ -112,7 +114,7 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
             const auto& rowAValue = rowA->valueAt(column);
             const auto& rowBValue = rowB->valueAt(column);
 
-            if(rowAValue.isEmpty() && rowBValue.isEmpty())
+            if(!rowAValue && !rowBValue)
                 return {0, 0};
 
             return {rowAValue == rowBValue ? 1 : 0, 1};
@@ -120,7 +122,7 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
 
         auto createEdgesForRowPairs = [&](auto&& f)
         {
-            for(auto rowBIt = rowAIt + 1; rowBIt != rows.end(); ++rowBIt)
+            for(auto rowBIt = rowAIt + 1; rowBIt != tokenisedRows.end(); ++rowBIt)
             {
                 Fraction fraction;
                 for(size_t column = 0; column < numColumns; column++)
