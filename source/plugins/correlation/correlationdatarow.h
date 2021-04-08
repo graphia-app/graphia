@@ -21,11 +21,14 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/utils/statistics.h"
+#include "shared/utils/container.h"
 
 #include <vector>
 #include <limits>
 #include <iterator>
 #include <memory>
+#include <map>
+#include <type_traits>
 
 #include <QString>
 
@@ -112,10 +115,54 @@ class DiscreteDataRow : public CorrelationDataRow<QString>
 {
 public:
     using CorrelationDataRow::CorrelationDataRow;
+};
 
+class TokenisedDataRow : public CorrelationDataRow<size_t>
+{
+public:
+    using CorrelationDataRow::CorrelationDataRow;
 };
 
 using ContinuousDataRows = std::vector<ContinuousDataRow>;
 using DiscreteDataRows = std::vector<DiscreteDataRow>;
+using TokenisedDataRows = std::vector<TokenisedDataRow>;
+
+template<typename DataRows>
+TokenisedDataRows tokeniseDataRows(const DataRows& dataRows)
+{
+    using T = typename DataRows::value_type::ConstDataIterator::value_type;
+
+    TokenisedDataRows tokenisedDataRows;
+
+    size_t token = 1;
+    std::map<T, size_t> valueMap;
+
+    // Map various falsey values to the 0 token
+    if constexpr(std::is_same_v<T, QString>)
+        valueMap[""] = valueMap["0"] = valueMap["false"] = 0;
+    else
+        valueMap[0] = 0;
+
+    for(const auto& dataRow : dataRows)
+    {
+        std::vector<size_t> tokens;
+        tokens.reserve(dataRow.numColumns());
+
+        for(const auto& value : dataRow)
+        {
+            if(!u::contains(valueMap, value))
+            {
+                valueMap[value] = token;
+                token++;
+            }
+
+            tokens.emplace_back(valueMap.at(value));
+        }
+
+        tokenisedDataRows.emplace_back(tokens, dataRow.nodeId(), dataRow.computeCostHint());
+    }
+
+    return tokenisedDataRows;
+}
 
 #endif // CORRELATIONDATAROW_H
