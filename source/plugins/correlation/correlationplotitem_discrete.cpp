@@ -77,7 +77,6 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
     {
         const auto& m = columnData[column];
         QCPBars* last = nullptr;
-        int index = 0;
 
         auto layerName = QStringLiteral("discrete%1").arg(column);
         if(_customPlot.layer(layerName) == nullptr)
@@ -97,7 +96,10 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
             bars->setName(value);
 
             if(!color.isValid())
-                color = colorPalette.get(value, index++);
+            {
+                auto index = _pluginInstance->discreteDataValueIndex(value);
+                color = colorPalette.get(value, index);
+            }
 
             bars->setPen(QPen(color.darker(150)));
 
