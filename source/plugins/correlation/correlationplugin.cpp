@@ -175,6 +175,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
         }
     }
 
+    buildDiscreteDataValueIndex(parser);
     makeDataColumnNamesUnique();
     setNodeAttributeTableModelDataColumns();
     parser.setProgress(-1);
@@ -546,6 +547,35 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     emit columnAnnotationNamesChanged();
 }
 
+void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progressable)
+{
+    if(_correlationDataType != CorrelationDataType::Discrete)
+        return;
+
+    size_t dataValueIndex = 0;
+
+    for(size_t columnIndex = 0; columnIndex < _numDiscreteColumns; columnIndex++)
+    {
+        std::set<QString> values;
+
+        for(size_t rowIndex = 0; rowIndex < _numRows; rowIndex++)
+            values.emplace(discreteDataAt(rowIndex, columnIndex));
+
+        std::vector<QString> sortedValues;
+        sortedValues.reserve(values.size());
+        std::copy(values.begin(), values.end(), std::back_inserter(sortedValues));
+        std::sort(sortedValues.begin(), sortedValues.end());
+
+        for(const auto& sortedValue : sortedValues)
+        {
+            if(!u::contains(_discreteDataValueIndex, sortedValue))
+                _discreteDataValueIndex[sortedValue] = dataValueIndex++;
+        }
+
+        progressable.setProgress(static_cast<int>((columnIndex * 100) / _numDiscreteColumns));
+    }
+}
+
 const ContinuousDataRow& CorrelationPluginInstance::continuousDataRowForNodeId(NodeId nodeId) const
 {
     return _continuousDataRows.at(_userNodeData.indexFor(nodeId));
@@ -687,6 +717,14 @@ double CorrelationPluginInstance::continuousDataAt(int row, int column) const
 QString CorrelationPluginInstance::discreteDataAt(int row, int column) const
 {
     return _discreteData.at((row * _numDiscreteColumns) + column);
+}
+
+int CorrelationPluginInstance::discreteDataValueIndex(const QString& value) const
+{
+    if(!u::contains(_discreteDataValueIndex, value) || _discreteDataValueIndex.empty())
+        return -1;
+
+    return static_cast<int>(_discreteDataValueIndex.at(value));
 }
 
 QString CorrelationPluginInstance::rowName(int row) const
@@ -959,6 +997,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     }
 
     createAttributes();
+    buildDiscreteDataValueIndex(parser);
     makeDataColumnNamesUnique();
     setNodeAttributeTableModelDataColumns();
 

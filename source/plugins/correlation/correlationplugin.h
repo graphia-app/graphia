@@ -35,6 +35,7 @@
 #include "correlationnodeattributetablemodel.h"
 
 #include <vector>
+#include <map>
 #include <functional>
 #include <algorithm>
 #include <utility>
@@ -88,6 +89,8 @@ private:
     ContinuousDataRows _continuousDataRows;
     DiscreteDataRows _discreteDataRows;
 
+    std::map<QString, size_t> _discreteDataValueIndex;
+
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
     double _initialCorrelationThreshold = 0.85;
@@ -127,6 +130,7 @@ private:
     QStringList columnAnnotationNames() const;
 
     void buildColumnAnnotations();
+    void buildDiscreteDataValueIndex(Progressable& progressable);
 
     const ContinuousDataRow& continuousDataRowForNodeId(NodeId nodeId) const;
     const DiscreteDataRow& discreteDataRowForNodeId(NodeId nodeId) const;
@@ -162,6 +166,8 @@ public:
 
     size_t numDiscreteColumns() const { return _numDiscreteColumns; }
     QString discreteDataAt(int row, int column) const;
+
+    int discreteDataValueIndex(const QString& value) const;
 
     QString rowName(int row) const;
     QString columnName(int column) const;
