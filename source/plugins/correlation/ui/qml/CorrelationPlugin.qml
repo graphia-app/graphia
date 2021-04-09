@@ -455,102 +455,106 @@ PluginContent
             axisLabels.addItem("").action = setYAxisLabelAction;
             menu.addSeparator();
 
-            let scalingMenu = menu.addMenu(qsTr("Scaling"));
-            scalingMenu.addItem("").action = rawScaling;
-            scalingMenu.addItem("").action = logScaling;
-            scalingMenu.addItem("").action = meanCentreScaling;
-            scalingMenu.addItem("").action = unitVarianceScaling;
-            scalingMenu.addItem("").action = paretoScaling;
-            scalingMenu.enabled = Qt.binding(function()
+            if(plugin.model.numContinuousColumns > 0)
             {
-                return plot.averagingType === PlotAveragingType.Individual
-            });
-
-            scalingMenu.addSeparator();
-            let scaleByAttributeMenu = scalingMenu.addMenu(qsTr("By Attribute"));
-            plugin.model.numericalAttributeNames.forEach(function(attributeName)
-            {
-                let attributeMenuItem = scaleByAttributeMenu.addItem(attributeName);
-
-                attributeMenuItem.exclusiveGroup = scaleByAttributeExclusiveGroup;
-                attributeMenuItem.checkable = true;
-                attributeMenuItem.checked = Qt.binding(function()
+                let scalingMenu = menu.addMenu(qsTr("Scaling"));
+                scalingMenu.addItem("").action = rawScaling;
+                scalingMenu.addItem("").action = logScaling;
+                scalingMenu.addItem("").action = meanCentreScaling;
+                scalingMenu.addItem("").action = unitVarianceScaling;
+                scalingMenu.addItem("").action = paretoScaling;
+                scalingMenu.enabled = Qt.binding(function()
                 {
-                    if(plot.scaleType !== PlotScaleType.ByAttribute)
-                        return false;
-
-                    return attributeName === plot.scaleByAttributeName;
+                    return plot.averagingType === PlotAveragingType.Individual
                 });
 
-                attributeMenuItem.triggered.connect(function()
+                scalingMenu.addSeparator();
+                let scaleByAttributeMenu = scalingMenu.addMenu(qsTr("By Attribute"));
+                plugin.model.numericalAttributeNames.forEach(function(attributeName)
                 {
-                    plot.scaleByAttributeName = attributeName;
-                    plot.scaleType = PlotScaleType.ByAttribute;
-                });
-            });
+                    let attributeMenuItem = scaleByAttributeMenu.addItem(attributeName);
 
-            let averagingMenu = menu.addMenu(qsTr("Averaging"));
-            averagingMenu.addItem("").action = individualLineAverage;
-            averagingMenu.addItem("").action = meanLineAverage;
-            averagingMenu.addItem("").action = medianLineAverage;
-            averagingMenu.addItem("").action = meanHistogramAverage;
-            averagingMenu.addItem("").action = iqrAverage;
+                    attributeMenuItem.exclusiveGroup = scaleByAttributeExclusiveGroup;
+                    attributeMenuItem.checkable = true;
+                    attributeMenuItem.checked = Qt.binding(function()
+                    {
+                        if(plot.scaleType !== PlotScaleType.ByAttribute)
+                            return false;
 
-            averagingMenu.addSeparator();
+                        return attributeName === plot.scaleByAttributeName;
+                    });
 
-            let sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
-            sharedValuesAttributesMenu.enabled = Qt.binding(function()
-            {
-                return plot.averagingType !== PlotAveragingType.Individual &&
-                    plot.averagingType !== PlotAveragingType.IQRPlot;
-            });
-            let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
-            allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
-            allAttributesMenuItem.checkable = true;
-            allAttributesMenuItem.checked = Qt.binding(function()
-            {
-                return plot.averagingAttributeName.length === 0;
-            });
-            allAttributesMenuItem.triggered.connect(function()
-            {
-                plot.averagingAttributeName = "";
-            });
-
-            sharedValuesAttributesMenu.addSeparator();
-
-            plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
-            {
-                let attributeMenuItem = sharedValuesAttributesMenu.addItem(attributeName);
-
-                attributeMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
-                attributeMenuItem.checkable = true;
-                attributeMenuItem.checked = Qt.binding(function()
-                {
-                    return attributeName === plot.averagingAttributeName;
+                    attributeMenuItem.triggered.connect(function()
+                    {
+                        plot.scaleByAttributeName = attributeName;
+                        plot.scaleType = PlotScaleType.ByAttribute;
+                    });
                 });
 
-                attributeMenuItem.triggered.connect(function()
+                let averagingMenu = menu.addMenu(qsTr("Averaging"));
+                averagingMenu.addItem("").action = individualLineAverage;
+                averagingMenu.addItem("").action = meanLineAverage;
+                averagingMenu.addItem("").action = medianLineAverage;
+                averagingMenu.addItem("").action = meanHistogramAverage;
+                averagingMenu.addItem("").action = iqrAverage;
+
+                averagingMenu.addSeparator();
+
+                let sharedValuesAttributesMenu = averagingMenu.addMenu(qsTr("By Attribute"));
+                sharedValuesAttributesMenu.enabled = Qt.binding(function()
                 {
-                    plot.averagingAttributeName = attributeName;
+                    return plot.averagingType !== PlotAveragingType.Individual &&
+                        plot.averagingType !== PlotAveragingType.IQRPlot;
                 });
-            });
+                let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
+                allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
+                allAttributesMenuItem.checkable = true;
+                allAttributesMenuItem.checked = Qt.binding(function()
+                {
+                    return plot.averagingAttributeName.length === 0;
+                });
+                allAttributesMenuItem.triggered.connect(function()
+                {
+                    plot.averagingAttributeName = "";
+                });
 
-            let dispersionMenu = menu.addMenu(qsTr("Dispersion"));
-            dispersionMenu.addItem("").action = noDispersion;
-            dispersionMenu.addItem("").action = stdDeviations;
-            dispersionMenu.addItem("").action = stdErrorDeviations;
-            dispersionMenu.addSeparator();
-            dispersionMenu.addItem("").action = barDeviationVisual;
-            dispersionMenu.addItem("").action = graphDeviationVisual;
-            dispersionMenu.enabled = Qt.binding(function()
-            {
-                return plot.averagingType === PlotAveragingType.MeanLine ||
-                        plot.averagingType === PlotAveragingType.MeanHistogram
-            });
+                sharedValuesAttributesMenu.addSeparator();
 
-            menu.addItem("").action = toggleIncludeYZero;
+                plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+                {
+                    let attributeMenuItem = sharedValuesAttributesMenu.addItem(attributeName);
 
-            menu.addSeparator();
+                    attributeMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
+                    attributeMenuItem.checkable = true;
+                    attributeMenuItem.checked = Qt.binding(function()
+                    {
+                        return attributeName === plot.averagingAttributeName;
+                    });
+
+                    attributeMenuItem.triggered.connect(function()
+                    {
+                        plot.averagingAttributeName = attributeName;
+                    });
+                });
+
+                let dispersionMenu = menu.addMenu(qsTr("Dispersion"));
+                dispersionMenu.addItem("").action = noDispersion;
+                dispersionMenu.addItem("").action = stdDeviations;
+                dispersionMenu.addItem("").action = stdErrorDeviations;
+                dispersionMenu.addSeparator();
+                dispersionMenu.addItem("").action = barDeviationVisual;
+                dispersionMenu.addItem("").action = graphDeviationVisual;
+                dispersionMenu.enabled = Qt.binding(function()
+                {
+                    return plot.averagingType === PlotAveragingType.MeanLine ||
+                            plot.averagingType === PlotAveragingType.MeanHistogram
+                });
+
+                menu.addItem("").action = toggleIncludeYZero;
+
+                menu.addSeparator();
+            }
+
             let sortByMenu = menu.addMenu(qsTr("Sort Columns By"));
             root._availableplotColumnSortOptions.forEach(function(sortOption)
             {

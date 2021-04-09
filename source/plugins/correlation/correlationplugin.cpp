@@ -437,6 +437,8 @@ void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_
     _numDiscreteColumns = numDiscreteColumns;
     _numRows = numRows;
 
+    emit numColumnsChanged();
+
     _dataColumnNames.resize(numContinuousColumns + numDiscreteColumns);
     _continuousData.resize(numContinuousColumns * numRows);
     _discreteData.resize(numDiscreteColumns * numRows);
