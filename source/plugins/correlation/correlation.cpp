@@ -84,25 +84,13 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
             operator double() const { return static_cast<double>(_numerator) / _denominator; }
         };
 
-        auto binary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
+        auto binary = [&](auto rowAValue, auto rowBValue) -> Fraction
         {
-            auto rowAValue = rowA->valueAt(column);
-            auto rowBValue = rowB->valueAt(column);
-
-            if(!rowAValue && !rowBValue)
-                return {0, 0};
-
             return {rowAValue && rowBValue ? 1 : 0, 1};
         };
 
-        auto nonBinary = [&](size_t column, const auto rowA, const auto rowB) -> Fraction
+        auto nonBinary = [&](auto rowAValue, auto rowBValue) -> Fraction
         {
-            const auto& rowAValue = rowA->valueAt(column);
-            const auto& rowBValue = rowB->valueAt(column);
-
-            if(!rowAValue && !rowBValue)
-                return {0, 0};
-
             return {rowAValue == rowBValue ? 1 : 0, 1};
         };
 
@@ -112,7 +100,15 @@ EdgeList JaccardCorrelation::process(const DiscreteDataRows& rows, double minimu
             {
                 Fraction fraction;
                 for(size_t column = 0; column < numColumns; column++)
-                    fraction += f(column, rowAIt, rowBIt);
+                {
+                    const auto& rowAValue = rowAIt->valueAt(column);
+                    const auto& rowBValue = rowBIt->valueAt(column);
+
+                    if(!rowAValue && !rowBValue)
+                        fraction += {0, 0};
+                    else
+                        fraction += f(rowAValue, rowBValue);
+                }
 
                 double r = fraction;
 
