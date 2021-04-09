@@ -221,8 +221,6 @@ public:
     virtual QString attributeDescription() const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
-
-    static bool isTrue(const QString& value);
 };
 
 class JaccardCorrelation : public DiscreteCorrelation
