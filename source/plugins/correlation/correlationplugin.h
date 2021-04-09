@@ -65,6 +65,9 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QVector<int> highlightedRows MEMBER _highlightedRows
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
+    Q_PROPERTY(size_t numContinuousColumns MEMBER _numContinuousColumns NOTIFY numColumnsChanged)
+    Q_PROPERTY(size_t numDiscreteColumns MEMBER _numDiscreteColumns NOTIFY numColumnsChanged)
+
 public:
     CorrelationPluginInstance();
 
@@ -192,6 +195,7 @@ signals:
     void numericalAttributeNamesChanged();
     void nodeColorsChanged();
     void highlightedRowsChanged();
+    void numColumnsChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
