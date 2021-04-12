@@ -38,6 +38,7 @@ struct Statistics
     double _sumSq = 0.0;
     double _sumAllSq = 0.0;
     double _variability = 0.0;
+    double _magnitude = 0.0;
 
     double _mean = 0.0;
     double _variance = 0.0;
@@ -89,6 +90,7 @@ Statistics findStatisticsFor(const C<T, Args...>& container,
     s._range = s._max - s._min;
     s._sumAllSq = s._sum * s._sum;
     s._variability = std::sqrt((container.size() * s._sumSq) - s._sumAllSq);
+    s._magnitude = std::sqrt(s._sumSq);
 
     double sum = 0.0;
     for(auto value : values)
