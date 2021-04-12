@@ -22,8 +22,9 @@ std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(Correlation
 {
     switch(correlationType)
     {
-    case CorrelationType::Pearson:      return std::make_unique<PearsonCorrelation>();
-    case CorrelationType::SpearmanRank: return std::make_unique<SpearmanRankCorrelation>();
+    case CorrelationType::Pearson:              return std::make_unique<PearsonCorrelation>();
+    case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelation>();
+    case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelation>();
     default: break;
     }
 
@@ -34,8 +35,8 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
 {
     switch(correlationType)
     {
-    case CorrelationType::Jaccard:      return std::make_unique<JaccardCorrelation>();
-    case CorrelationType::SMC:          return std::make_unique<SMCCorrelation>();
+    case CorrelationType::Jaccard:              return std::make_unique<JaccardCorrelation>();
+    case CorrelationType::SMC:                  return std::make_unique<SMCCorrelation>();
     default: break;
     }
 

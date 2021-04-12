@@ -1026,6 +1026,7 @@ QString CorrelationPluginInstance::log() const
         default:
         case CorrelationType::Pearson: text.append(tr("Pearson")); break;
         case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank")); break;
+        case CorrelationType::EuclideanSimilarity: text.append(tr("Euclidean Similarity")); break;
         }
 
         text.append(tr("\nCorrelation Polarity: "));

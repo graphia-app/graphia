@@ -43,7 +43,8 @@ DEFINE_QML_ENUM(
     Pearson,
     SpearmanRank,
     Jaccard,
-    SMC);
+    SMC,
+    EuclideanSimilarity);
 
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationDataType,
@@ -207,6 +208,41 @@ public:
         return QObject::tr("The %1 is an indication of "
             "the monotomic relationship between two variables.")
             .arg(u::redirectLink("spearman", QObject::tr("Spearman Rank Correlation Coefficient")));
+    }
+};
+
+struct EuclideanSimilarityAlgorithm
+{
+    static double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+    {
+        double sum = 0.0;
+
+        for(size_t i = 0; i < numColumns; i++)
+        {
+            auto diff = rowA->valueAt(i) - rowB->valueAt(i);
+            auto diffSq = diff * diff;
+            sum += diffSq;
+        }
+
+        auto sqrtSum = sum != 0.0 ? std::sqrt(sum) : 0.0;
+
+        return 1.0 / (1.0 + sqrtSum);
+    }
+};
+
+class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm>
+{
+public:
+    QString attributeName() const override
+    {
+        return QObject::tr("Euclidean Similarity");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr("%1 is essentially the inverse "
+            "of the Euclidean distance between two vectors.")
+            .arg(u::redirectLink("euclidean", QObject::tr("Euclidean Similarity")));
     }
 };
 
