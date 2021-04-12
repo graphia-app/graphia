@@ -756,6 +756,7 @@ BaseParameterDialog
                                 model: ListModel
                                 {
                                     ListElement { text: qsTr("Jaccard"); value: CorrelationType.Jaccard }
+                                    ListElement { text: qsTr("SMC"); value: CorrelationType.SMC }
                                 }
                                 textRole: "text"
 
@@ -782,11 +783,25 @@ BaseParameterDialog
                                         textFormat: Text.StyledText
                                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                                     }
-
                                     Text
                                     {
                                         text: qsTr("The Jaccard Index is a statistic used for " +
                                             "gauging the similarity and diversity of sample sets.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Simple Matching Coefficient:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("The Simple Matching Coefficient is a statistic used for " +
+                                            "gauging the similarity and diversity of sample sets. It is identical " +
+                                            "to Jaccard, except that it counts mutual abscence.");
                                         wrapMode: Text.WordWrap
                                         Layout.fillWidth: true
                                     }
@@ -835,7 +850,6 @@ BaseParameterDialog
                                         textFormat: Text.StyledText
                                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                                     }
-
                                     Text
                                     {
                                         text: qsTr("The Pearson correlation coefficient is a measure " +
@@ -850,7 +864,6 @@ BaseParameterDialog
                                         textFormat: Text.StyledText
                                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                                     }
-
                                     Text
                                     {
                                         text: qsTr("Spearman's rank correlation coefficient is a " +

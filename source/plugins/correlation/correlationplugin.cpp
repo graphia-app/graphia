@@ -1044,6 +1044,7 @@ QString CorrelationPluginInstance::log() const
         {
         default:
         case CorrelationType::Jaccard: text.append(tr("Jaccard")); break;
+        case CorrelationType::SMC: text.append(tr("Simple Matching Coefficient")); break;
         }
     }
 

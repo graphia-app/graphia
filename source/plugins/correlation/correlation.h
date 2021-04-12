@@ -42,7 +42,8 @@ DEFINE_QML_ENUM(
     Q_GADGET, CorrelationType,
     Pearson,
     SpearmanRank,
-    Jaccard);
+    Jaccard,
+    SMC);
 
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationDataType,
@@ -223,12 +224,117 @@ public:
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
 };
 
-class JaccardCorrelation : public DiscreteCorrelation
+template<int Denominator>
+class MatchingCorrelation : public DiscreteCorrelation
 {
 public:
     EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
-        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final;
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+    {
+        if(rows.empty())
+            return {};
 
+        size_t numColumns = rows.front().numColumns();
+
+        if(progressable != nullptr)
+            progressable->setProgress(-1);
+
+        const auto tokenisedRows = tokeniseDataRows(rows);
+
+        uint64_t totalCost = 0;
+        for(const auto& row : rows)
+            totalCost += row.computeCostHint();
+
+        std::atomic<uint64_t> cost(0);
+
+        auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(tokenisedRows.begin(), tokenisedRows.end(),
+        [&](TokenisedDataRows::const_iterator rowAIt)
+        {
+            EdgeList edges;
+
+            if(cancellable != nullptr && cancellable->cancelled())
+                return edges;
+
+            struct Fraction
+            {
+                int _numerator = 0;
+                int _denominator = 0;
+
+                Fraction& operator+=(const Fraction& other)
+                {
+                    _numerator += other._numerator;
+                    _denominator += other._denominator;
+
+                    return *this;
+                }
+
+                operator double() const { return static_cast<double>(_numerator) / _denominator; }
+            };
+
+            auto binary = [&](auto rowAValue, auto rowBValue) -> Fraction
+            {
+                return {rowAValue && rowBValue ? 1 : 0, 1};
+            };
+
+            auto nonBinary = [&](auto rowAValue, auto rowBValue) -> Fraction
+            {
+                return {rowAValue == rowBValue ? 1 : 0, 1};
+            };
+
+            auto createEdgesForRowPairs = [&](auto&& f)
+            {
+                for(auto rowBIt = rowAIt + 1; rowBIt != tokenisedRows.end(); ++rowBIt)
+                {
+                    Fraction fraction;
+                    for(size_t column = 0; column < numColumns; column++)
+                    {
+                        const auto& rowAValue = rowAIt->valueAt(column);
+                        const auto& rowBValue = rowBIt->valueAt(column);
+
+                        if(!rowAValue && !rowBValue)
+                            fraction += {0, Denominator};
+                        else
+                            fraction += f(rowAValue, rowBValue);
+                    }
+
+                    double r = fraction;
+
+                    if(std::isfinite(r) && r >= minimumThreshold)
+                        edges.push_back({rowAIt->nodeId(), rowBIt->nodeId(), r});
+                }
+            };
+
+            if(treatAsBinary)
+                createEdgesForRowPairs(binary);
+            else
+                createEdgesForRowPairs(nonBinary);
+
+            cost += rowAIt->computeCostHint();
+
+            if(progressable != nullptr)
+                progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
+
+            return edges;
+        });
+
+        if(progressable != nullptr)
+        {
+            // Returning the results might take time
+            progressable->setProgress(-1);
+        }
+
+        EdgeList edges;
+        edges.reserve(std::distance(results.begin(), results.end()));
+        edges.insert(edges.end(), std::make_move_iterator(results.begin()),
+            std::make_move_iterator(results.end()));
+
+        return edges;
+    }
+};
+
+class JaccardCorrelation : public MatchingCorrelation<0>
+{
+public:
     QString attributeName() const override
     {
         return QObject::tr("Jaccard Correlation Value");
@@ -239,6 +345,22 @@ public:
         return QObject::tr("The %1 is a statistic used for gauging "
             "the similarity and diversity of sample sets.")
             .arg(u::redirectLink("jaccard", QObject::tr("Jaccard Index")));
+    }
+};
+
+class SMCCorrelation : public MatchingCorrelation<1>
+{
+public:
+    QString attributeName() const override
+    {
+        return QObject::tr("Simple Matching Coefficient");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr("The %1 is a statistic used for gauging "
+            "the similarity and diversity of sample sets.")
+            .arg(u::redirectLink("smc", QObject::tr("Simple Matching Coefficient (SMC)")));
     }
 };
 
