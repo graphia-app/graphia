@@ -25,6 +25,7 @@ std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(Correlation
     case CorrelationType::Pearson:              return std::make_unique<PearsonCorrelation>();
     case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelation>();
     case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelation>();
+    case CorrelationType::CosineSimilarity:     return std::make_unique<CosineSimilarityCorrelation>();
     default: break;
     }
 

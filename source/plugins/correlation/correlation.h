@@ -44,7 +44,8 @@ DEFINE_QML_ENUM(
     SpearmanRank,
     Jaccard,
     SMC,
-    EuclideanSimilarity);
+    EuclideanSimilarity,
+    CosineSimilarity);
 
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationDataType,
@@ -243,6 +244,33 @@ public:
         return QObject::tr("%1 is essentially the inverse "
             "of the Euclidean distance between two vectors.")
             .arg(u::redirectLink("euclidean", QObject::tr("Euclidean Similarity")));
+    }
+};
+
+struct CosineSimilarityAlgorithm
+{
+    static double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+    {
+        double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
+        double magnitudeProduct = rowA->magnitude() * rowB->magnitude();
+
+        return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
+    }
+};
+
+class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm>
+{
+public:
+    QString attributeName() const override
+    {
+        return QObject::tr("Cosine Similarity");
+    }
+
+    QString attributeDescription() const override
+    {
+        return QObject::tr("%1 is a measure of similarity between two "
+            "non-zero vectors of an inner product space.")
+            .arg(u::redirectLink("cosine", QObject::tr("Cosine Similarity")));
     }
 };
 

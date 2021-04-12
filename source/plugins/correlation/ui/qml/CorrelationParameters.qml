@@ -825,6 +825,7 @@ BaseParameterDialog
                                     ListElement { text: qsTr("Pearson");                value: CorrelationType.Pearson }
                                     ListElement { text: qsTr("Spearman Rank");          value: CorrelationType.SpearmanRank }
                                     ListElement { text: qsTr("Euclidean Similarity");   value: CorrelationType.EuclideanSimilarity }
+                                    ListElement { text: qsTr("Cosine Similarity");      value: CorrelationType.CosineSimilarity }
                                 }
                                 textRole: "text"
 
@@ -886,6 +887,22 @@ BaseParameterDialog
                                     {
                                         text: qsTr("Euclidean Similarity is essentially the inverse " +
                                             "of the Euclidean distance between two vectors.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>Cosine Similarity:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Cosine Similarity is a measure of similarity between two " +
+                                            "non-zero vectors of an inner product space. It is defined to equal " +
+                                            "the cosine of the angle between them, which is also the same as the " +
+                                            "inner product of the same vectors normalized to both have length 1.");
                                         wrapMode: Text.WordWrap
                                         Layout.fillWidth: true
                                     }
