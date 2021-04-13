@@ -1016,19 +1016,14 @@ QString CorrelationPluginInstance::log() const
     if(_transpose)
         text.append(tr("\nTransposed"));
 
+    auto correlation = ContinuousCorrelation::create(
+        static_cast<CorrelationType>(_continuousCorrelationType));
+
     switch(_correlationDataType)
     {
     default:
     case CorrelationDataType::Continuous:
-        text.append(tr("\nContinuous Correlation Metric: "));
-        switch(_continuousCorrelationType)
-        {
-        default:
-        case CorrelationType::Pearson: text.append(tr("Pearson")); break;
-        case CorrelationType::SpearmanRank: text.append(tr("Spearman Rank")); break;
-        case CorrelationType::EuclideanSimilarity: text.append(tr("Euclidean Similarity")); break;
-        case CorrelationType::CosineSimilarity: text.append(tr("Cosine Similarity")); break;
-        }
+        text.append(tr("\nContinuous Correlation Metric: %1").arg(correlation->name()));
 
         text.append(tr("\nCorrelation Polarity: "));
         switch(_correlationPolarity)
@@ -1041,13 +1036,8 @@ QString CorrelationPluginInstance::log() const
         break;
 
     case CorrelationDataType::Discrete:
-        text.append(tr("\nDiscrete Correlation Metric: "));
-        switch(_discreteCorrelationType)
-        {
-        default:
-        case CorrelationType::Jaccard: text.append(tr("Jaccard")); break;
-        case CorrelationType::SMC: text.append(tr("Simple Matching Coefficient")); break;
-        }
+        text.append(tr("\nDiscrete Correlation Metric: %1").arg(correlation->name()));
+        break;
     }
 
     text.append(tr("\nMinimum Correlation Value: %1").arg(

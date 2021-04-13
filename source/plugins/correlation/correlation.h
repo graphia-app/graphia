@@ -58,17 +58,22 @@ DEFINE_QML_ENUM(
     Negative,
     Both);
 
-class ContinuousCorrelation
+class ICorrelation
 {
 public:
-    virtual ~ContinuousCorrelation() = default;
+    virtual ~ICorrelation() = default;
 
+    virtual QString name() const = 0;
+    virtual QString attributeName() const = 0;
+    virtual QString attributeDescription() const = 0;
+};
+
+class ContinuousCorrelation : public ICorrelation
+{
+public:
     virtual EdgeList process(const ContinuousDataRows& rows, double minimumThreshold,
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
-
-    virtual QString attributeName() const = 0;
-    virtual QString attributeDescription() const = 0;
 
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
@@ -183,11 +188,9 @@ struct PearsonAlgorithm
 class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Pearson Correlation Value");
-    }
+    QString name() const override { return QObject::tr("Pearson"); }
 
+    QString attributeName() const override { return QObject::tr("Pearson Correlation Value"); }
     QString attributeDescription() const override
     {
         return QObject::tr("The %1 is an indication of "
@@ -199,11 +202,9 @@ public:
 class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, RowType::Ranking>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Spearman Rank Correlation Value");
-    }
+    QString name() const override { return QObject::tr("Spearman Rank"); }
 
+    QString attributeName() const override { return QObject::tr("Spearman Rank Correlation Value"); }
     QString attributeDescription() const override
     {
         return QObject::tr("The %1 is an indication of "
@@ -234,11 +235,9 @@ struct EuclideanSimilarityAlgorithm
 class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Euclidean Similarity");
-    }
+    QString name() const override { return QObject::tr("Euclidean Similarity"); }
 
+    QString attributeName() const override { return QObject::tr("Euclidean Similarity"); }
     QString attributeDescription() const override
     {
         return QObject::tr("%1 is essentially the inverse "
@@ -261,11 +260,9 @@ struct CosineSimilarityAlgorithm
 class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Cosine Similarity");
-    }
+    QString name() const override { return QObject::tr("Cosine Similarity"); }
 
+    QString attributeName() const override { return QObject::tr("Cosine Similarity"); }
     QString attributeDescription() const override
     {
         return QObject::tr("%1 is a measure of similarity between two "
@@ -274,16 +271,11 @@ public:
     }
 };
 
-class DiscreteCorrelation
+class DiscreteCorrelation : public ICorrelation
 {
 public:
-    virtual ~DiscreteCorrelation() = default;
-
     virtual EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
-
-    virtual QString attributeName() const = 0;
-    virtual QString attributeDescription() const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
 };
@@ -399,11 +391,9 @@ public:
 class JaccardCorrelation : public MatchingCorrelation<0>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Jaccard Correlation Value");
-    }
+    QString name() const override { return QObject::tr("Jaccard"); }
 
+    QString attributeName() const override { return QObject::tr("Jaccard Correlation Value"); }
     QString attributeDescription() const override
     {
         return QObject::tr("The %1 is a statistic used for gauging "
@@ -415,11 +405,9 @@ public:
 class SMCCorrelation : public MatchingCorrelation<1>
 {
 public:
-    QString attributeName() const override
-    {
-        return QObject::tr("Simple Matching Coefficient");
-    }
+    QString name() const override { return QObject::tr("Simple Matching Coefficient"); }
 
+    QString attributeName() const override { return QObject::tr("Simple Matching Coefficient"); }
     QString attributeDescription() const override
     {
         return QObject::tr("The %1 is a statistic used for gauging "
