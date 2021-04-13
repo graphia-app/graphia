@@ -215,6 +215,16 @@ QVariantList Application::saverFileTypes()
     return saverData;
 }
 
+QObject* Application::qmlPluginForName(const QString& pluginName) const
+{
+    auto* plugin = pluginForName(pluginName);
+
+    if(plugin != nullptr)
+        return plugin->ptr();
+
+    return {};
+}
+
 QStringList Application::pluginNames(const QString& urlTypeName) const
 {
     QStringList viablePluginNames;

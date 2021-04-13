@@ -174,6 +174,8 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
 
     // Default to directed graphs
     bool directed() const override { return true; }
+
+    QObject* ptr() override { return this; }
 };
 
 #endif // BASEPLUGIN_H

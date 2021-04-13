@@ -29,9 +29,12 @@ Window
     property string fileUrl: ""
     property string fileType: ""
     property string pluginName: ""
+    property var plugin: null
     property bool inNewTab: false
 
     title: pluginName + qsTr(" Parameters")
+
+    signal initialised();
     signal accepted();
     signal rejected();
 }

@@ -1775,8 +1775,7 @@ BaseParameterDialog
         onRejected: { root.close(); }
     }
 
-    Component.onCompleted: { initialise(); }
-    function initialise()
+    onInitialised:
     {
         let DEFAULT_MINIMUM_CORRELATION = 0.7;
         let DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +

@@ -175,6 +175,7 @@ public:
     ISaverFactory* saverFactoryByName(const QString& name);
     Q_INVOKABLE QVariantList saverFileTypes();
 
+    Q_INVOKABLE QObject* qmlPluginForName(const QString& pluginName) const;
     Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
     Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName,
         const QString& urlType) const;

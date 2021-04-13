@@ -631,6 +631,7 @@ ApplicationWindow
             contentObject.fileUrl = fileUrl
             contentObject.fileType = fileType;
             contentObject.pluginName = pluginName;
+            contentObject.plugin = application.qmlPluginForName(pluginName);
             contentObject.inNewTab = inNewTab;
 
             contentObject.accepted.connect(function()
@@ -644,6 +645,7 @@ ApplicationWindow
             contentObject.x = x + (width * 0.3);
             contentObject.y = y + (height * 0.3);
 
+            contentObject.initialised();
             contentObject.show();
         }
         else
@@ -656,6 +658,7 @@ ApplicationWindow
             element['fileUrl'] === undefined ||
             element['fileType'] === undefined ||
             element['pluginName'] === undefined ||
+            element['plugin'] === undefined ||
             element['inNewTab'] === undefined ||
             element['show'] === undefined ||
             element['accepted'] === undefined)

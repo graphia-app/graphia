@@ -450,8 +450,7 @@ BaseParameterDialog
         }
     }
 
-    Component.onCompleted: { initialise(); }
-    function initialise()
+    onInitialised:
     {
         parameters =
         {

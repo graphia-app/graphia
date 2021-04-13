@@ -35,6 +35,7 @@ class IPlugin;
 class IDocument;
 class IParserThread;
 class IMutableGraph;
+class QObject;
 class QUrl;
 
 class IPluginInstance : public FailureReason
@@ -85,6 +86,8 @@ public:
 
     virtual QString parametersQmlPath(const QString& urlType) const = 0;
     virtual QString qmlPath() const = 0;
+
+    virtual QObject* ptr() = 0;
 };
 
 #define IPluginIID "app.graphia.IPlugin/" VERSION
