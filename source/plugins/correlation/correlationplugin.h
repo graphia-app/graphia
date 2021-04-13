@@ -225,6 +225,8 @@ public:
 
     QString parametersQmlPath(const QString&) const override { return QStringLiteral("qrc:///qml/CorrelationParameters.qml"); }
     QString qmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationPlugin.qml"); }
+
+    Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };
 
 #endif // CORRELATIONPLUGIN_H

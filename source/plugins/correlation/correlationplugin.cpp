@@ -1094,6 +1094,31 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<DataRectTableModel>("app.graphia", 1, 0, "DataRectTableModel");
 }
 
+QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
+{
+    auto makeVariantMap = [](const auto& correlation)
+    {
+        QVariantMap m;
+
+        m.insert(QStringLiteral("name"), correlation->name());
+        m.insert(QStringLiteral("description"), correlation->description());
+        m.insert(QStringLiteral("attributeName"), correlation->attributeName());
+        m.insert(QStringLiteral("attributeDescription"), correlation->attributeDescription());
+
+        return m;
+    };
+
+    auto discreteCorrelation = DiscreteCorrelation::create(static_cast<CorrelationType>(correlationType));
+    if(discreteCorrelation != nullptr)
+        return makeVariantMap(discreteCorrelation);
+
+    auto continuousCorrelation = ContinuousCorrelation::create(static_cast<CorrelationType>(correlationType));
+    if(continuousCorrelation != nullptr)
+        return makeVariantMap(continuousCorrelation);
+
+    return {};
+}
+
 static QString contentIdentityOf(const QUrl& url)
 {
     if(XlsxTabularDataParser::canLoad(url))
