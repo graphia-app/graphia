@@ -64,6 +64,7 @@ public:
     virtual ~ICorrelation() = default;
 
     virtual QString name() const = 0;
+    virtual QString description() const = 0;
     virtual QString attributeName() const = 0;
     virtual QString attributeDescription() const = 0;
 };
@@ -189,6 +190,11 @@ class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm>
 {
 public:
     QString name() const override { return QObject::tr("Pearson"); }
+    QString description() const override
+    {
+        return QObject::tr("The Pearson Correlation Coefficient is an indication "
+            "of the linear correlation between two variables.");
+    }
 
     QString attributeName() const override { return QObject::tr("Pearson Correlation Value"); }
     QString attributeDescription() const override
@@ -203,6 +209,14 @@ class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, R
 {
 public:
     QString name() const override { return QObject::tr("Spearman Rank"); }
+    QString description() const override
+    {
+        return QObject::tr("Spearman's rank correlation coefficient is a "
+            "nonparametric measure of the statistical dependence between "
+            "the rankings of two variables. It assesses how well the "
+            "relationship between two variables can be described using a "
+            "monotonic function.");
+    }
 
     QString attributeName() const override { return QObject::tr("Spearman Rank Correlation Value"); }
     QString attributeDescription() const override
@@ -236,6 +250,11 @@ class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSim
 {
 public:
     QString name() const override { return QObject::tr("Euclidean Similarity"); }
+    QString description() const override
+    {
+        return QObject::tr("Euclidean Similarity is essentially the inverse "
+            "of the Euclidean distance between two vectors.");
+    }
 
     QString attributeName() const override { return QObject::tr("Euclidean Similarity"); }
     QString attributeDescription() const override
@@ -261,6 +280,13 @@ class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarit
 {
 public:
     QString name() const override { return QObject::tr("Cosine Similarity"); }
+    QString description() const override
+    {
+        return QObject::tr("Cosine Similarity is a measure of similarity between two "
+            "non-zero vectors of an inner product space. It is defined to equal "
+            "the cosine of the angle between them, which is also the same as the "
+            "inner product of the same vectors normalized to both have length 1.");
+    }
 
     QString attributeName() const override { return QObject::tr("Cosine Similarity"); }
     QString attributeDescription() const override
@@ -392,6 +418,11 @@ class JaccardCorrelation : public MatchingCorrelation<0>
 {
 public:
     QString name() const override { return QObject::tr("Jaccard"); }
+    QString description() const override
+    {
+        return QObject::tr("The Jaccard Index is a statistic used for "
+            "gauging the similarity and diversity of sample sets.");
+    }
 
     QString attributeName() const override { return QObject::tr("Jaccard Correlation Value"); }
     QString attributeDescription() const override
@@ -406,6 +437,12 @@ class SMCCorrelation : public MatchingCorrelation<1>
 {
 public:
     QString name() const override { return QObject::tr("Simple Matching Coefficient"); }
+    QString description() const override
+    {
+        return QObject::tr("The Simple Matching Coefficient is a statistic used for "
+            "gauging the similarity and diversity of sample sets. It is identical "
+            "to Jaccard, except that it counts mutual abscence.");
+    }
 
     QString attributeName() const override { return QObject::tr("Simple Matching Coefficient"); }
     QString attributeDescription() const override
