@@ -31,6 +31,7 @@ void ContinuousDataRow::update()
 void ContinuousDataRow::generateRanking() const
 {
     _rankingRow = std::make_shared<ContinuousDataRow>(u::rankingOf(_data), _nodeId, _cost);
+    _rankingRow->update();
 }
 
 const ContinuousDataRow* ContinuousDataRow::ranking() const
