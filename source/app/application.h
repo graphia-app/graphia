@@ -60,11 +60,11 @@ DEFINE_QML_ENUM(
 
 struct LoadedPlugin
 {
-    LoadedPlugin(IPlugin* instance, std::unique_ptr<QPluginLoader> loader) :
-        _instance(instance), _loader(std::move(loader))
+    LoadedPlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> loader) :
+        _interface(plugin), _loader(std::move(loader))
     {}
 
-    IPlugin* _instance;
+    IPlugin* _interface;
     std::unique_ptr<QPluginLoader> _loader;
 };
 

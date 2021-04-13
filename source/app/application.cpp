@@ -80,11 +80,11 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     auto pluginIt = std::find_if(_loadedPlugins.begin(), _loadedPlugins.end(),
     [&pluginName](const auto& loadedPlugin)
     {
-        return loadedPlugin._instance->name().compare(pluginName) == 0;
+        return loadedPlugin._interface->name().compare(pluginName) == 0;
     });
 
     if(pluginIt != _loadedPlugins.end())
-        return pluginIt->_instance;
+        return pluginIt->_interface;
 
     return nullptr;
 }
@@ -137,7 +137,7 @@ bool Application::canOpen(const QString& urlTypeName) const
     return std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
     [&urlTypeName](const auto& loadedPlugin)
     {
-        return loadedPlugin._instance->loadableUrlTypeNames().contains(urlTypeName);
+        return loadedPlugin._interface->loadableUrlTypeNames().contains(urlTypeName);
     });
 }
 
@@ -158,7 +158,7 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     QStringList urlTypeNames;
 
     for(const auto& loadedPlugin : _loadedPlugins)
-        urlTypeNames.append(loadedPlugin._instance->identifyUrl(url));
+        urlTypeNames.append(loadedPlugin._interface->identifyUrl(url));
 
     urlTypeNames.removeDuplicates();
 
@@ -172,7 +172,7 @@ QStringList Application::failureReasons(const QUrl& url) const
 
     for(const auto& loadedPlugin : _loadedPlugins)
     {
-        auto failureReason = loadedPlugin._instance->failureReason(url);
+        auto failureReason = loadedPlugin._interface->failureReason(url);
 
         if(!failureReason.isEmpty())
             failureReasons.append(failureReason);
@@ -221,7 +221,7 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
 
     for(const auto& loadedPlugin : _loadedPlugins)
     {
-        auto urlTypeNames = loadedPlugin._instance->loadableUrlTypeNames();
+        auto urlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
         bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
         [&urlTypeName](const QString& loadableUrlTypeName)
         {
@@ -229,7 +229,7 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
         });
 
         if(willLoad)
-            viablePluginNames.append(loadedPlugin._instance->name());
+            viablePluginNames.append(loadedPlugin._interface->name());
     }
 
     return viablePluginNames;
@@ -532,7 +532,7 @@ void Application::loadPlugins()
                     bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
                     [pluginName = iplugin->name()](const auto& loadedPlugin)
                     {
-                        return loadedPlugin._instance->name().compare(pluginName, Qt::CaseInsensitive) == 0;
+                        return loadedPlugin._interface->name().compare(pluginName, Qt::CaseInsensitive) == 0;
                     });
 
                     if(pluginNameAlreadyUsed)
@@ -589,12 +589,12 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
     for(const auto& plugin : plugins)
     {
-        for(auto& urlTypeName : plugin._instance->loadableUrlTypeNames())
+        for(auto& urlTypeName : plugin._interface->loadableUrlTypeNames())
         {
             UrlType fileType = {urlTypeName,
-                                plugin._instance->individualDescriptionForUrlTypeName(urlTypeName),
-                                plugin._instance->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                plugin._instance->extensionsForUrlTypeName(urlTypeName)};
+                                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
+                                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                plugin._interface->extensionsForUrlTypeName(urlTypeName)};
             fileTypes.emplace_back(fileType);
         }
     }
@@ -730,7 +730,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     if(row < 0 || row >= rowCount(index))
         return QVariant(QVariant::Invalid);
 
-    auto* plugin = _loadedPlugins->at(row)._instance;
+    auto* plugin = _loadedPlugins->at(row)._interface;
 
     switch(role)
     {
