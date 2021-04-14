@@ -255,16 +255,13 @@ ApplicationWindow
                 mainWindow.y -= (bottomEdge - Screen.desktopAvailableHeight);
         }
 
-        if(windowPreferences.maximised !== undefined)
-        {
-            mainWindow.visibility = Utils.castToBool(windowPreferences.maximised) ?
-                Window.Maximized : Window.Windowed;
-        }
+        if(windowPreferences.maximised !== undefined && Utils.castToBool(windowPreferences.maximised))
+            mainWindow.showMaximized();
+        else
+            mainWindow.showNormal();
 
         // Arguments minus the executable
         _pendingArguments = Qt.application.arguments.slice(1);
-
-        mainWindow.visible = true;
 
         if(!misc.hasSeenTutorial)
         {
