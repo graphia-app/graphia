@@ -776,35 +776,8 @@ BaseParameterDialog
                                 title: qsTr("Correlation Algorithm")
                                 GridLayout
                                 {
+                                    id: discreteAlgorithmTooltip
                                     columns: 2
-                                    Text
-                                    {
-                                        text: qsTr("<b>Jaccard:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("The Jaccard Index is a statistic used for " +
-                                            "gauging the similarity and diversity of sample sets.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text
-                                    {
-                                        text: qsTr("<b>Simple Matching Coefficient:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("The Simple Matching Coefficient is a statistic used for " +
-                                            "gauging the similarity and diversity of sample sets. It is identical " +
-                                            "to Jaccard, except that it counts mutual abscence.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
                                 }
                             }
 
@@ -845,67 +818,8 @@ BaseParameterDialog
                                 title: qsTr("Correlation Algorithm")
                                 GridLayout
                                 {
+                                    id: continuousAlgorithmTooltip
                                     columns: 2
-                                    Text
-                                    {
-                                        text: qsTr("<b>Pearson:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("The Pearson correlation coefficient is a measure " +
-                                            "of the linear correlation between two variables.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text
-                                    {
-                                        text: qsTr("<b>Spearman Rank:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("Spearman's rank correlation coefficient is a " +
-                                            "nonparametric measure of the statistical dependence between " +
-                                            "the rankings of two variables. It assesses how well the " +
-                                            "relationship between two variables can be described using a " +
-                                            "monotonic function.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text
-                                    {
-                                        text: qsTr("<b>Euclidean Similarity:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("Euclidean Similarity is essentially the inverse " +
-                                            "of the Euclidean distance between two vectors.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text
-                                    {
-                                        text: qsTr("<b>Cosine Similarity:</b>")
-                                        textFormat: Text.StyledText
-                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                    }
-                                    Text
-                                    {
-                                        text: qsTr("Cosine Similarity is a measure of similarity between two " +
-                                            "non-zero vectors of an inner product space. It is defined to equal " +
-                                            "the cosine of the angle between them, which is also the same as the " +
-                                            "inner product of the same vectors normalized to both have length 1.");
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
                                 }
                             }
 
@@ -1775,6 +1689,31 @@ BaseParameterDialog
         onRejected: { root.close(); }
     }
 
+    function populateCorrelationAlgorithmTooltip(model, layout)
+    {
+        for(let i = 0; i < model.count; i++)
+        {
+            let item = model.get(i);
+            let correlation = root.plugin.correlationInfoFor(item.value);
+
+            Qt.createQmlObject("import QtQuick 2.14; import QtQuick.Layouts 1.3;" +
+            "Text" +
+            "{" +
+                "text: qsTr(\"<b>" + correlation.name + ":</b>\");" +
+                "textFormat: Text.StyledText;" +
+                "Layout.alignment: Qt.AlignTop | Qt.AlignLeft" +
+            "}", layout, "CorrelationParametersToolTipName");
+
+            Qt.createQmlObject("import QtQuick 2.14; import QtQuick.Layouts 1.3;" +
+            "Text" +
+            "{" +
+                "text: qsTr(\"" + correlation.description + "\");" +
+                "wrapMode: Text.WordWrap;" +
+                "Layout.fillWidth: true" +
+            "}", layout, "CorrelationParametersToolTipText");
+        }
+    }
+
     onInitialised:
     {
         let DEFAULT_MINIMUM_CORRELATION = 0.7;
@@ -1794,6 +1733,9 @@ BaseParameterDialog
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
         dataType.currentIndex = 0;
+
+        populateCorrelationAlgorithmTooltip(discreteAlgorithm.model, discreteAlgorithmTooltip);
+        populateCorrelationAlgorithmTooltip(continuousAlgorithm.model, continuousAlgorithmTooltip);
     }
 
     onVisibleChanged:
