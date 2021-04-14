@@ -107,7 +107,6 @@ NamedIcon
         {
             id: wrapperLayout
             anchors.centerIn: parent
-            width: Math.min(containerLayout.width, root._maxWidth)
 
             Text
             {
@@ -115,7 +114,11 @@ NamedIcon
                 font.pointSize: FontPointSize.h2
             }
 
-            ColumnLayout { id: containerLayout }
+            ColumnLayout
+            {
+                id: containerLayout
+                Layout.maximumWidth: root._maxWidth
+            }
         }
     }
 }
