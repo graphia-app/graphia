@@ -1695,6 +1695,8 @@ Item
 
                 addedNames.pop();
             }
+
+            _refreshAttributesWithSharedValues();
         }
 
         onLoadComplete:
