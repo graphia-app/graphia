@@ -116,3 +116,11 @@ bool CorrelationNodeAttributeTableModel::columnIsFloatingPoint(const QString& co
 
     return NodeAttributeTableModel::columnIsFloatingPoint(columnName);
 }
+
+bool CorrelationNodeAttributeTableModel::columnIsNumerical(const QString& columnName) const
+{
+    if(u::contains(_dataColumnIndexes, columnName))
+        return _continuousDataValues != nullptr;
+
+    return NodeAttributeTableModel::columnIsNumerical(columnName);
+}

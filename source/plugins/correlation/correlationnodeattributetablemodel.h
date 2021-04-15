@@ -54,6 +54,7 @@ public:
     bool columnIsCalculated(const QString& columnName) const override;
     bool columnIsHiddenByDefault(const QString& columnName) const override;
     bool columnIsFloatingPoint(const QString& columnName) const override;
+    bool columnIsNumerical(const QString& columnName) const override;
 };
 
 #endif // CORRELATIONNODEATTRIBUTETABLEMODEL_H
