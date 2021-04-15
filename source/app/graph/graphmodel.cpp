@@ -159,6 +159,8 @@ private:
     NodeIdSet _highlightedNodeIds;
 
     bool _nodesMaskActive = false;
+
+    bool _visualUpdateRequired = false;
 };
 
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
@@ -177,6 +179,11 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     });
 
     connect(&_->_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
+    connect(&_->_graph, &MutableGraph::transactionEnded, this, [this]
+    {
+        if(_->_visualUpdateRequired)
+            updateVisuals();
+    });
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
     connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
@@ -940,8 +947,19 @@ static float mappedSize(float min, float max, float user, float mapped)
 
 void GraphModel::updateVisuals()
 {
+    // Prevent any changes to the graph while we read from it
+    auto lock = std::move(mutableGraph().tryLock());
+    if(!lock.owns_lock())
+    {
+        // Delay the update until we can get exclusive access to the graph
+        _->_visualUpdateRequired = true;
+        return;
+    }
+
     if(!_visualUpdatesEnabled)
         return;
+
+    _->_visualUpdateRequired = false;
 
     emit visualsWillChange();
 

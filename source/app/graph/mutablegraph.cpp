@@ -624,6 +624,7 @@ void MutableGraph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
     {
+        emit transactionWillBegin(this);
         _mutex.lock();
         _graphChangeOccurred = false;
         emit graphWillChange(this);
@@ -641,6 +642,7 @@ void MutableGraph::endTransaction(bool graphChangeOccurred)
         emit graphChanged(this, _graphChangeOccurred);
         _mutex.unlock();
         clearPhase();
+        emit transactionEnded(this);
     }
 }
 
@@ -698,4 +700,9 @@ bool MutableGraph::update()
     }
 
     return true;
+}
+
+std::unique_lock<std::mutex> MutableGraph::tryLock()
+{
+    return std::unique_lock<std::mutex>(_mutex, std::try_to_lock);
 }
