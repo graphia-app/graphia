@@ -638,9 +638,22 @@ ApplicationWindow
                     contentObject.parameters, contentObject.inNewTab);
             });
 
-            // Offset parameters position from top left of main window
-            contentObject.x = x + (width * 0.3);
-            contentObject.y = y + (height * 0.3);
+            if(mainWindow.maximised)
+            {
+                // When maximised neither the mainWindow coordinates or the screen member
+                // are up to date (Qt bug(s)?), so just resort to using the same position
+                // as the (non-maximised) window, the reasonable assumption being that the
+                // user has it in a sensible place
+                contentObject.x = mainWindow.x;
+                contentObject.y = mainWindow.y;
+            }
+            else
+            {
+                // Offset parameters position from top left of main window (because
+                // we don't know the size of contentObject yet)
+                contentObject.x = mainWindow.x + (mainWindow.width * 0.3);
+                contentObject.y = mainWindow.y + (mainWindow.height * 0.3);
+            }
 
             contentObject.initialised();
             contentObject.show();
