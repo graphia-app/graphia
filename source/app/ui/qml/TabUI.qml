@@ -147,7 +147,7 @@ Item
 
     property string _lastSharedValueAttributeName
 
-    function _refreshNumAttributesWithSharedValues()
+    function _refreshAttributesWithSharedValues()
     {
         sharedValuesProxyModel.sourceModel =
             _document.availableAttributesModel(ElementType.Node);
@@ -1700,12 +1700,12 @@ Item
         onLoadComplete:
         {
             if(success)
-                _refreshNumAttributesWithSharedValues();
+                _refreshAttributesWithSharedValues();
 
             root.loadComplete(url, success);
         }
 
-        onGraphChanged: { root._refreshNumAttributesWithSharedValues(); }
+        onGraphChanged: { root._refreshAttributesWithSharedValues(); }
 
         property var _comandProgressSamples: []
         property int commandSecondsRemaining
