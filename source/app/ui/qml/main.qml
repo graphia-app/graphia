@@ -2381,7 +2381,6 @@ ApplicationWindow
                                 // Mild hack: if it looks like the tutorial file,
                                 // it probably is, so start the tutorial
                                 startTutorial();
-                                misc.hasSeenTutorial = true;
                             }
                             else
                                 addToRecentFiles(fileUrl);

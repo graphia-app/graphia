@@ -1274,6 +1274,7 @@ Item
 
         property var fileSaveInitialFolder
         property string webSearchEngineUrl
+        property bool hasSeenTutorial
     }
 
     // This is only here to get at the default values of its properties
@@ -1797,8 +1798,28 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: qsTr("As this is your first time starting ") + appName + qsTr(", we have opened an example graph.<br>" +
-                      "The graph represents the <b>London Tube System and River Buses!</b>")
+                text:
+                {
+                    let s = "";
+
+                    if(!misc.hasSeenTutorial)
+                    {
+                        s += qsTr("As this is your first time starting ") + appName +
+                            qsTr(", we have opened an example graph.<br>");
+                    }
+
+                    s += qsTr("This example graph represents the <b>London Tube System and River Buses!</b>");
+
+                    if(!misc.hasSeenTutorial)
+                    {
+                        s += qsTr("<br><br>If you choose to skip the tutorial at this point, it can " +
+                            "be restarted later from the <i>Help</i> menu.");
+                    }
+
+                    s += qsTr("<br><br>Click <i>Next</i> to start the tutorial.");
+
+                    return s;
+                }
             }
         }
 

@@ -48,6 +48,7 @@ Item
         id: misc
         section: "misc"
         property bool disableHubbles
+        property bool hasSeenTutorial
     }
 
     // We unconditionally disable tooltip style Hubbles for the duration of
@@ -110,9 +111,13 @@ Item
             currentHubble.nextClicked.connect(gotoNextHubble);
 
         if(currentHubble.displayClose)
+        {
             currentHubble.closeClicked.connect(reset);
+            currentHubble.closeClicked.connect(closed);
+        }
 
         currentHubble.skipClicked.connect(reset);
+        currentHubble.skipClicked.connect(closed);
 
         currentHubble.opacity = 1.0;
         currentHubble.visible = true;
@@ -150,5 +155,11 @@ Item
             currentHubble.opacity = 0.0;
             currentHubble.visible = false;
         }
+    }
+
+    signal closed();
+    onClosed:
+    {
+        misc.hasSeenTutorial = true;
     }
 }
