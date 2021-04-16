@@ -101,7 +101,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     axisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
     axisRect->setMargins(QMargins(0, 0, 0, separation));
     columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
-    columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
+    columnAnnotationsAxisRect->setMargins({0, 0, separation, 0});
 
     // Align the left and right hand sides of the axes
     auto* group = new QCPMarginGroup(&_customPlot);
