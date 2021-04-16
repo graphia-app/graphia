@@ -19,6 +19,7 @@
 #include "columnannotation.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 
 ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
     _name(std::move(name)), _values(std::move(values))
@@ -28,23 +29,30 @@ ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
     {
         if(_uniqueValues.emplace(value, index).second)
             index++;
+
+        if(_hasOnlyNumericValues)
+        {
+            if(u::isNumeric(value))
+            {
+                auto d = u::toNumber(value);
+                _minValue = std::min(d, _minValue);
+                _maxValue = std::max(d, _maxValue);
+            }
+            else
+            {
+                _hasOnlyNumericValues = false;
+                _minValue = std::numeric_limits<double>::max();
+                _maxValue = std::numeric_limits<double>::min();
+            }
+        }
     }
 }
 
 ColumnAnnotation::ColumnAnnotation(QString name,
     const ColumnAnnotation::Iterator& begin,
     const ColumnAnnotation::Iterator& end) :
-    _name(std::move(name))
-{
-    int index = 0;
-    for(auto it = begin; it != end; ++it)
-    {
-        _values.emplace_back(*it);
-
-        if(_uniqueValues.emplace(*it, index).second)
-            index++;
-    }
-}
+    ColumnAnnotation(std::move(name), {begin, end})
+{}
 
 int ColumnAnnotation::uniqueIndexOf(const QString& value) const
 {
@@ -52,4 +60,17 @@ int ColumnAnnotation::uniqueIndexOf(const QString& value) const
         return _uniqueValues.at(value);
 
     return -1;
+}
+
+double ColumnAnnotation::normalisedNumericValueAt(size_t index) const
+{
+    Q_ASSERT(isNumeric());
+    if(!isNumeric())
+        return 0.0;
+
+    Q_ASSERT(_minValue <= _maxValue);
+
+    auto value = u::toNumber(valueAt(index));
+
+    return (value - _minValue) / (_maxValue - _minValue);
 }

@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <map>
+#include <limits>
 
 class ColumnAnnotation
 {
@@ -31,6 +32,10 @@ private:
 
     std::vector<QString> _values;
     std::map<QString, int> _uniqueValues;
+
+    bool _hasOnlyNumericValues = true; // Assume until proved otherwise
+    double _minValue = std::numeric_limits<double>::max();
+    double _maxValue = std::numeric_limits<double>::min();
 
 public:
     using Iterator = std::vector<QString>::const_iterator;
@@ -42,6 +47,9 @@ public:
 
     const QString& valueAt(size_t index) const { return _values.at(index); }
     int uniqueIndexOf(const QString& value) const;
+
+    bool isNumeric() const { return _hasOnlyNumericValues; }
+    double normalisedNumericValueAt(size_t index) const;
 };
 
 #endif // COLUMNANNOTATION_H
