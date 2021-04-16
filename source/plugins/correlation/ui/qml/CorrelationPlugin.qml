@@ -729,11 +729,7 @@ PluginContent
             }
 
             property bool scrollBarRequired: visibleHorizontalFraction < 1.0
-
-            // On platforms where the scrollbar doesn't auto-hide or appear transparent,
-            // we need to provide a little room for it to be visible
-            xAxisPadding: Qt.platform.os !== "osx" && scrollBarRequired ?
-                scrollView.__horizontalScrollBar.height + Constants.padding : 0
+            xAxisPadding: Constants.padding + (scrollBarRequired ? scrollView.__horizontalScrollBar.height : 0)
 
             horizontalScrollPosition:
             {
