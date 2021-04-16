@@ -23,6 +23,7 @@
 
 #include "columnannotation.h"
 
+#include "shared/ui/visualisations/colorgradient.h"
 #include "shared/ui/visualisations/colorpalette.h"
 
 #include <QColor>
@@ -60,6 +61,7 @@ private:
     double _cellHeight = 0.0;
     double _halfCellWidth = 0.0;
 
+    ColorGradient _colorGradient;
     ColorPalette _colorPalette;
 
 public:
@@ -80,7 +82,7 @@ protected:
 private:
     int widthForValue(const QCPPainter* painter, const QString& value);
     void renderRect(QCPPainter* painter, size_t x, size_t y,
-        size_t w, const QString& value, size_t index, bool selected);
+        size_t w, const QString& value, QColor color, bool selected);
 };
 
 #endif // QCPCOLUMNANNOTATIONS_H

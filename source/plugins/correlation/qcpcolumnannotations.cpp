@@ -21,10 +21,13 @@
 #include "shared/utils/color.h"
 #include "shared/utils/container.h"
 
+#include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
 QCPColumnAnnotations::QCPColumnAnnotations(QCPAxis* keyAxis, QCPAxis* valueAxis) :
-    QCPAbstractPlottable(keyAxis, valueAxis), _colorPalette(Defaults::PALETTE)
+    QCPAbstractPlottable(keyAxis, valueAxis),
+    _colorGradient(Defaults::GRADIENT),
+    _colorPalette(Defaults::PALETTE)
 {}
 
 double QCPColumnAnnotations::selectTest(const QPointF&, bool, QVariant*) const
@@ -64,7 +67,7 @@ int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString
 }
 
 void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
-    size_t w, const QString& value, size_t index, bool selected)
+    size_t w, const QString& value, QColor color, bool selected)
 {
     auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
     auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
@@ -75,11 +78,7 @@ void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
     if(!rect.intersects(painter->clipBoundingRect()))
         return;
 
-    auto color = _colorPalette.get(value, static_cast<int>(index));
-
-    if(value.isEmpty())
-        color = Qt::transparent;
-    else if(!selected)
+    if(!value.isEmpty() && !selected)
         color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
 
     painter->setPen(color);
@@ -115,6 +114,28 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
     font.setPixelSize(static_cast<int>(_cellHeight * 0.7));
     painter->setFont(font);
 
+    auto colorFor = [this](const Row& row, int index) -> QColor
+    {
+        const auto* annotation = row._columnAnnotation;
+
+        if(!annotation->isNumeric())
+        {
+            auto value = annotation->valueAt(index);
+
+            if(value.isEmpty())
+                return Qt::transparent;
+
+            auto offsetByPrime = row._offset * 13;
+            auto colorIndex = annotation->uniqueIndexOf(value) + offsetByPrime;
+            return _colorPalette.get(value, colorIndex);
+        }
+        else
+        {
+            auto value = annotation->normalisedNumericValueAt(index);
+            return _colorGradient.get(value);
+        }
+    };
+
     for(const auto& [y, row] : _rows)
     {
         if(row._indices.empty())
@@ -125,9 +146,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
         size_t width = 0;
 
         auto currentValue = row._columnAnnotation->valueAt(row._indices.at(0));
-
-        auto offsetByPrime = row._offset * 13;
-        auto currentIndex = row._columnAnnotation->uniqueIndexOf(currentValue) + offsetByPrime;
+        auto currentColor = colorFor(row, row._indices.front());
 
         for(auto index : row._indices)
         {
@@ -135,18 +154,18 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
             if(value != currentValue)
             {
-                renderRect(painter, left, y, width, currentValue, currentIndex, row._selected);
+                renderRect(painter, left, y, width, currentValue, currentColor, row._selected);
 
                 left = right;
                 currentValue = value;
-                currentIndex = row._columnAnnotation->uniqueIndexOf(currentValue) + offsetByPrime;
+                currentColor = colorFor(row, index);
             }
 
             right++;
             width = right - left;
         }
 
-        renderRect(painter, left, y, width, currentValue, currentIndex, row._selected);
+        renderRect(painter, left, y, width, currentValue, currentColor, row._selected);
     }
 }
 
