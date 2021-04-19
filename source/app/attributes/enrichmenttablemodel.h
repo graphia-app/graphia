@@ -25,6 +25,10 @@
 class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(QString selectionA READ selectionA WRITE setSelectionA NOTIFY selectionNamesChanged)
+    Q_PROPERTY(QString selectionB READ selectionB WRITE setSelectionB NOTIFY selectionNamesChanged)
+
 public:
     enum Results
     {
@@ -50,13 +54,24 @@ public:
     int rowFromAttributeSets(const QString& attributeA, const QString& attributeB);
     QHash<int, QByteArray> roleNames() const override { return _roleNames; }
 
-    void setTableData(Table data);
+    QString selectionA() const { return _selectionA; }
+    void setSelectionA(const QString& selectionA);
+    QString selectionB() const { return _selectionB; }
+    void setSelectionB(const QString& selectionB);
+
+    void setTableData(Table data, QString selectionA, QString selectionB);
     Q_INVOKABLE QString resultToString(EnrichmentTableModel::Results result);
     Q_INVOKABLE bool resultIsNumerical(EnrichmentTableModel::Results result);
 
 private:
     Table _data;
+    QString _selectionA;
+    QString _selectionB;
+
     QHash<int, QByteArray> _roleNames;
+
+signals:
+    void selectionNamesChanged();
 };
 
 #endif // ENRICHMENTTABLEMODEL_H

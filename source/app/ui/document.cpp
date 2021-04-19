@@ -653,13 +653,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _pluginUiData = completedLoader->pluginUiData();
             _pluginUiDataVersion = completedLoader->pluginUiDataVersion();
 
-            const auto& enrichmentTableModels = completedLoader->enrichmentTableModels();
-            executeOnMainThread([this, enrichmentTableModels]()
+            const auto& enrichmentTableData = completedLoader->enrichmentTableData();
+            executeOnMainThread([this, enrichmentTableData]()
             {
-                for(const auto& table : enrichmentTableModels)
+                for(const auto& data : enrichmentTableData)
                 {
                     auto* tableModel = new EnrichmentTableModel(this);
-                    tableModel->setTableData(table);
+                    tableModel->setTableData(data._table, data._selectionA, data._selectionB);
                     _enrichmentTableModels.append(QVariant::fromValue(tableModel));
                 }
 
@@ -2871,9 +2871,11 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
     commandManager()->executeOnce(
     [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
     {
-        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
-                                                                        graphModel(), command);
-        tableModel->setTableData(result);
+        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(
+            selectedAttributeA, selectedAttributeB, graphModel(), command);
+
+        tableModel->setTableData(result, selectedAttributeA, selectedAttributeB);
+
         executeOnMainThreadAndWait([this, tableModel]
         {
             _enrichmentTableModels.append(QVariant::fromValue(tableModel));

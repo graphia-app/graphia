@@ -158,6 +158,9 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
         }
     }
 
+    jsonObject["selectionA"] = table.selectionA();
+    jsonObject["selectionB"] = table.selectionB();
+
     return jsonObject;
 }
 

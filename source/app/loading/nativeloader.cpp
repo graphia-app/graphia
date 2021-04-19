@@ -399,16 +399,16 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     {
         for(const auto& tableModel : jsonBody["enrichmentTables"])
         {
-            _enrichmentTablesData.emplace_back();
-            auto& table = _enrichmentTablesData.back();
+            auto& data = _enrichmentTableData.emplace_back();
+
             // If Data is empty then it's just an empty table
             if(u::contains(tableModel, "data"))
             {
                 for(const auto& dataRow : tableModel["data"])
                 {
-                    table.emplace_back();
-                    auto& row = table.back();
+                    auto& row = data._table.emplace_back();
                     row.reserve(dataRow.size());
+
                     for(const auto& value : dataRow)
                     {
                         if(value.is_number())
@@ -418,6 +418,12 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
                     }
                 }
             }
+
+            if(u::contains(tableModel, "selectionA"))
+                data._selectionA = QString::fromStdString(tableModel["selectionA"]);
+
+            if(u::contains(tableModel, "selectionB"))
+                data._selectionB = QString::fromStdString(tableModel["selectionB"]);
         }
     }
 

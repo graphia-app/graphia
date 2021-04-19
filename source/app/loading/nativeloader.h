@@ -46,7 +46,14 @@ private:
 
     std::map<QString, NodeIdSet> _bookmarks;
 
-    std::vector<EnrichmentTableModel::Table> _enrichmentTablesData;
+    struct EnrichmentTableData
+    {
+        EnrichmentTableModel::Table _table;
+        QString _selectionA;
+        QString _selectionB;
+    };
+
+    std::vector<EnrichmentTableData> _enrichmentTableData;
 
     QByteArray _uiData;
     QByteArray _pluginUiData;
@@ -70,8 +77,8 @@ public:
     QStringList visualisations() const { return _visualisations; }
     const auto& bookmarks() const { return _bookmarks; }
     QString log() const override { return _log; }
-    const std::vector<EnrichmentTableModel::Table>& enrichmentTableModels() const
-    { return _enrichmentTablesData; }
+    const std::vector<EnrichmentTableData>& enrichmentTableData() const
+    { return _enrichmentTableData; }
 
     const QByteArray& uiData() const { return _uiData; }
     const QByteArray& pluginUiData() const { return _pluginUiData; }

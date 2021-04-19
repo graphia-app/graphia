@@ -80,10 +80,30 @@ int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const 
     return -1;
 }
 
-void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
+void EnrichmentTableModel::setSelectionA(const QString& selectionA)
+{
+    if(selectionA != _selectionA)
+    {
+        _selectionA = selectionA;
+        emit selectionNamesChanged();
+    }
+}
+
+void EnrichmentTableModel::setSelectionB(const QString& selectionB)
+{
+    if(selectionB != _selectionB)
+    {
+        _selectionB = selectionB;
+        emit selectionNamesChanged();
+    }
+}
+
+void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QString selectionA, QString selectionB)
 {
     beginResetModel();
     _data = std::move(data);
+    _selectionA = std::move(selectionA);
+    _selectionB = std::move(selectionB);
     endResetModel();
 }
 
