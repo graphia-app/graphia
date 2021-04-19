@@ -150,6 +150,12 @@ void EnrichmentHeatmapItem::buildPlot()
 
     customPlot().plotLayout()->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
 
+    if(!_xAxisLabel.isEmpty())
+        customPlot().xAxis->setLabel(_xAxisLabel);
+
+    if(!_yAxisLabel.isEmpty())
+        customPlot().yAxis2->setLabel(_yAxisLabel);
+
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
     std::map<QString, int> fullLabelToXAxis;
@@ -321,6 +327,26 @@ void EnrichmentHeatmapItem::setYAxisPadding(int padding)
 
     if(changed)
     {
+        buildPlot();
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
+void EnrichmentHeatmapItem::setXAxisLabel(const QString& xAxisLabel)
+{
+    if(xAxisLabel != _xAxisLabel)
+    {
+        _xAxisLabel = xAxisLabel;
+        buildPlot();
+        customPlot().replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
+void EnrichmentHeatmapItem::setYAxisLabel(const QString& yAxisLabel)
+{
+    if(yAxisLabel != _yAxisLabel)
+    {
+        _yAxisLabel = yAxisLabel;
         buildPlot();
         customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
