@@ -253,8 +253,18 @@ ApplicationWindow
                                 }
                             }
 
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
+                            TableViewColumn
+                            {
+                                role: modelData.resultToString(EnrichmentRoles.SelectionA)
+                                title: modelData.selectionA.length > 0 ? modelData.selectionA : qsTr("Selection A")
+                            }
+
+                            TableViewColumn
+                            {
+                                role: modelData.resultToString(EnrichmentRoles.SelectionB)
+                                title: modelData.selectionB.length > 0 ? modelData.selectionB : qsTr("Selection B")
+                            }
+
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
@@ -289,6 +299,8 @@ ApplicationWindow
                                 property bool verticalScrollBarRequired: (heatmap.height / heatmap.verticalRangeSize) > scrollView.viewport.height;
                                 xAxisPadding: horizontalScrollBarRequired ? 20 : 0
                                 yAxisPadding: verticalScrollBarRequired ? 20 : 0
+                                xAxisLabel: modelData.selectionA
+                                yAxisLabel: modelData.selectionB
 
                                 onPlotValueClicked:
                                 {
