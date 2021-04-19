@@ -287,8 +287,8 @@ ApplicationWindow
                                 showOnlyEnriched: showOnlyEnrichedButton.checked
                                 property bool horizontalScrollBarRequired: (heatmap.width / heatmap.horizontalRangeSize) > scrollView.viewport.width;
                                 property bool verticalScrollBarRequired: (heatmap.height / heatmap.verticalRangeSize) > scrollView.viewport.height;
-                                xAxisPadding: Qt.platform.os !== "osx" && horizontalScrollBarRequired ? 20 : 0
-                                yAxisPadding: Qt.platform.os !== "osx" && verticalScrollBarRequired ? 20 : 0
+                                xAxisPadding: horizontalScrollBarRequired ? 20 : 0
+                                yAxisPadding: verticalScrollBarRequired ? 20 : 0
 
                                 onPlotValueClicked:
                                 {
