@@ -64,6 +64,7 @@ public:
     int numValues() const { return static_cast<int>(_values.size()); }
     int numUniqueValues() const;
     void reserve(int size) { _values.reserve(size); }
+    void clear() { _values.clear(); }
 
     int intMin() const { return _intMin; }
     int intMax() const { return _intMax; }
