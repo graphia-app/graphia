@@ -20,6 +20,8 @@
 
 #include "shared/utils/container.h"
 
+#include <QDebug>
+
 QString UserData::firstUserDataVectorName() const
 {
     if(!_userDataVectors.empty())
@@ -101,6 +103,30 @@ QVariant UserData::value(size_t index, const QString& name) const
     }
 
     return {};
+}
+
+UserDataVector* UserData::vector(const QString& name)
+{
+    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+    [&name](const auto& pair)
+    {
+        return pair.first == name;
+    });
+
+    return it != _userDataVectors.end() ? &it->second : nullptr;
+}
+
+void UserData::setVector(const QString& name, UserDataVector&& other)
+{
+    auto* v = vector(name);
+
+    if(v == nullptr)
+    {
+        qDebug() << "UserData::setVector: can't find vector named" << name;
+        return;
+    }
+
+    *v = std::move(other);
 }
 
 void UserData::remove(const QString& name)

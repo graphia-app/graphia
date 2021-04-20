@@ -59,6 +59,9 @@ public:
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 
+    UserDataVector* vector(const QString& name);
+    void setVector(const QString& name, UserDataVector&& other);
+
     virtual void remove(const QString& name);
 
     json save(Progressable& progressable, const std::vector<size_t>& indexes = {}) const;
