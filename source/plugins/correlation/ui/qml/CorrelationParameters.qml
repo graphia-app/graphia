@@ -859,9 +859,10 @@ BaseParameterDialog
                                 {
                                     wrapMode: Text.WordWrap
                                     text: qsTr("By default only positive correlations are considered when creating " +
-                                               "the graph. In most cases this is the correct setting, " +
-                                               "but for some data sources it may make more sense to take " +
-                                               "account of the polarity of the correlation.")
+                                        "the graph. In almost all cases this is the correct setting, " +
+                                        "but for some data sources it may make more sense to take " +
+                                        "account of the polarity of the correlation. Note that not all " +
+                                        "correlation algorithms are capable of finding negative relationships.")
                                 }
                             }
 
