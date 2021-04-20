@@ -1222,6 +1222,7 @@ AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :
     _graphModel->_->_trackAttributeChanges = true;
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
+    _attributesWithChangedValues.clear();
 }
 
 AttributeChangesTracker::~AttributeChangesTracker()
@@ -1232,7 +1233,15 @@ AttributeChangesTracker::~AttributeChangesTracker()
         _graphModel->_->_trackedAddedAttributes,
         _graphModel->_->_trackedRemovedAttributes);
 
+    emit _graphModel->attributeValuesChanged(_attributesWithChangedValues);
+
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
+    _attributesWithChangedValues.clear();
     _graphModel->_->_trackAttributeChanges = false;
+}
+
+void AttributeChangesTracker::setAttributeValuesChanged(const QString& attributeName)
+{
+    _attributesWithChangedValues.append(attributeName);
 }
