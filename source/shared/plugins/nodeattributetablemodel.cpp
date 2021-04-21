@@ -46,10 +46,8 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
     updateColumnNames();
 
     const auto* modelQObject = dynamic_cast<const QObject*>(graphModel);
-    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
-            this, SLOT(onAttributesChanged(const QStringList&, const QStringList&)), Qt::DirectConnection);
-    connect(modelQObject, SIGNAL(attributeValuesChanged(const QStringList&)),
-            this, SLOT(onAttributeValuesChanged(const QStringList&)), Qt::DirectConnection);
+    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&, const QStringList&)),
+            this, SLOT(onAttributesChanged(const QStringList&, const QStringList&, const QStringList&)), Qt::DirectConnection);
 
     const auto* graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
@@ -265,7 +263,7 @@ QString NodeAttributeTableModel::columnNameFor(size_t column) const
     return _columnNames.at(static_cast<int>(column));
 }
 
-void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed)
+void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
@@ -292,18 +290,17 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     {
         // There is no structural change to the table, but some roles' values
         // may have changed, so we need to update these individually
-        while(!_columnsRequiringUpdates.empty())
+        for(const auto& attribute : changed)
         {
-            auto attribute = _columnsRequiringUpdates.back();
-            updateAttribute(attribute);
-            _columnsRequiringUpdates.pop_back();
+            if(u::contains(_columnNames, attribute))
+                updateAttribute(attribute);
         }
 
         return;
     }
 
-    // Any roles requiring an update will be taken care of en-masse, in onUpdateComplete
-    _columnsRequiringUpdates.clear();
+    // We can ignore attributes with changed values from here on out, as any roles requiring
+    // an update will be taken care of en-masse, in onUpdateComplete
 
     std::vector<size_t> removedIndices;
     std::transform(removedSet.begin(), removedSet.end(), std::back_inserter(removedIndices),
@@ -337,15 +334,6 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     }
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
-}
-
-void NodeAttributeTableModel::onAttributeValuesChanged(const QStringList& attributeNames)
-{
-    std::copy_if(attributeNames.begin(), attributeNames.end(), std::back_inserter(_columnsRequiringUpdates),
-    [&](const auto& attributeName)
-    {
-        return u::contains(_columnNames, attributeName);
-    });
 }
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const

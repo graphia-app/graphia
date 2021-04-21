@@ -48,7 +48,6 @@ private:
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
-    std::vector<QString> _columnsRequiringUpdates;
 
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;
@@ -109,8 +108,7 @@ public:
     void updateColumnNames();
 
 public slots:
-    void onAttributesChanged(QStringList added, QStringList removed);
-    void onAttributeValuesChanged(const QStringList& attributeNames);
+    void onAttributesChanged(QStringList added, QStringList removed, QStringList changed);
 
 signals:
     void columnNamesChanged();

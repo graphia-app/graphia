@@ -153,6 +153,8 @@ private:
         return attributeIdentities;
     }
 
+    QStringList _updatedDynamicAttributeNames;
+
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
@@ -200,12 +202,17 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
     connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
-    connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
-        &GraphModel::attributeValuesChanged, Qt::DirectConnection);
-
-    connect(this, &GraphModel::attributesChanged, [this](const QStringList& newAttributeNames, const QStringList&)
+    connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged,
+    [this](const QStringList& attributeNames)
     {
-        for(const auto& attributeName : newAttributeNames)
+        _->_updatedDynamicAttributeNames = attributeNames;
+    });
+
+
+    connect(this, &GraphModel::attributesChanged, [this](const QStringList& newAttributeNames, const QStringList&,
+        const QStringList& changedValuesNames)
+    {
+        for(const auto& attributeName : (QStringList() << newAttributeNames << changedValuesNames))
         {
             calculateAttributeRange(attributeName);
             updateSharedAttributeValues(attributeName);
@@ -1211,7 +1218,16 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
     std::transform(addedAttributeIdentities.begin(), addedAttributeIdentities.end(),
         std::back_inserter(addedAttributeNames), identityToName);
 
-    emit attributesChanged(addedAttributeNames, removedAttributeNames);
+    QStringList changedAttributeNames(std::move(_->_updatedDynamicAttributeNames));
+
+    changedAttributeNames.erase(std::remove_if(changedAttributeNames.begin(), changedAttributeNames.end(),
+    [&](const auto& dynamicAttributeName)
+    {
+        return u::contains(removedAttributeNames, dynamicAttributeName) ||
+            u::contains(addedAttributeNames, dynamicAttributeName);
+    }), changedAttributeNames.end());
+
+    emit attributesChanged(addedAttributeNames, removedAttributeNames, changedAttributeNames);
 }
 
 AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :
@@ -1231,9 +1247,8 @@ AttributeChangesTracker::~AttributeChangesTracker()
 
     emit _graphModel->attributesChanged(
         _graphModel->_->_trackedAddedAttributes,
-        _graphModel->_->_trackedRemovedAttributes);
-
-    emit _graphModel->attributeValuesChanged(_attributesWithChangedValues);
+        _graphModel->_->_trackedRemovedAttributes,
+        _attributesWithChangedValues);
 
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
