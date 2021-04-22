@@ -92,7 +92,7 @@ public:
     bool empty() const { return _cache.empty(); }
     void clear() { _cache.clear(); }
     void add(Result&& result);
-    void attributeAdded(const QString& attributeName);
+    void attributeAddedOrChanged(const QString& attributeName);
     Result apply(int index, const GraphTransformConfig& config, TransformedGraph& graph);
 
     const MutableGraph* graph() const;

@@ -175,7 +175,7 @@ void TransformedGraph::rebuild()
             for(const auto& newAttributeName : newAttributeNames)
             {
                 result._newAttributes.emplace(newAttributeName, _graphModel->attributeValueByName(newAttributeName));
-                _cache.attributeAdded(newAttributeName);
+                _cache.attributeAddedOrChanged(newAttributeName);
                 updatedAttributeNames.append(newAttributeName);
             }
 

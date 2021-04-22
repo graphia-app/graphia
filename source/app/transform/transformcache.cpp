@@ -72,7 +72,7 @@ void TransformCache::add(TransformCache::Result&& result)
     _cache.back().emplace_back(std::move(result));
 }
 
-void TransformCache::attributeAdded(const QString& attributeName)
+void TransformCache::attributeAddedOrChanged(const QString& attributeName)
 {
     // When an attribute is added its values may differ to previous incarnations, so
     // invalidate any subsequent entries that depend on it
