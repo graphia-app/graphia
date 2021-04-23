@@ -34,6 +34,8 @@
 #include <mutex>
 #include <atomic>
 
+class Graph;
+
 class CommandManager : public QObject, public ICommandManager
 {
     Q_OBJECT
@@ -192,7 +194,7 @@ private slots:
     void update();
 
 public slots:
-    void onGraphChanged() { _graphChanged = true; }
+    void onGraphChanged(const Graph*, bool changeOccurred);
 
 signals:
     void started();

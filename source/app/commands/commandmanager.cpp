@@ -54,6 +54,9 @@ void CommandManager::execute(ExecutePolicy policy, ICommandPtr command)
     default:
     case ExecutePolicy::Add:        action = CommandAction::Execute; break;
     case ExecutePolicy::Replace:    action = CommandAction::ExecuteReplace; break;
+
+    case ExecutePolicy::OnceMutate: command->_notAllowedToChangeGraph = false;
+        [[fallthrough]];
     case ExecutePolicy::Once:       action = CommandAction::ExecuteOnce; break;
     }
 
@@ -152,12 +155,14 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 
                 _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
             }
-            else if(_graphChanged)
+            else if(command->_notAllowedToChangeGraph && _graphChanged)
             {
                 // The graph changed during an irreversible command, so throw
                 // away our redo history as it is likely no longer coherent with
                 // the current state
                 clearCommandStackNoLocking();
+                qDebug() << "WARNING: ExecuteOnce command" << commandName <<
+                    "changed state, so the command stack was cleared";
             }
         }
 
@@ -532,4 +537,10 @@ void CommandManager::update()
     case CommandAction::Rollback:   undoReal(true); break;
     default: break;
     }
+}
+
+void CommandManager::onGraphChanged(const Graph*, bool changeOccurred)
+{
+    if(changeOccurred)
+        _graphChanged = true;
 }

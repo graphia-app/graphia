@@ -33,6 +33,8 @@
 
 class ICommand : virtual public Progressable, virtual public Cancellable
 {
+    friend class CommandManager;
+
 public:
     ~ICommand() override = default;
 
@@ -71,6 +73,7 @@ public:
 
 private:
     std::atomic<int> _progress{-1};
+    bool _notAllowedToChangeGraph = true;
 };
 
 using ICommandPtr = std::unique_ptr<ICommand>;

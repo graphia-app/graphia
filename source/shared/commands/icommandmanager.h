@@ -31,7 +31,8 @@ enum class ExecutePolicy
 {
     Add,        // Add to the execution stack
     Replace,    // Replace the top of the execution stack
-    Once        // Don't add to the execution stack
+    Once,       // Don't add to the execution stack...
+    OnceMutate  // ...but allow state change (not for general use)
 };
 
 class ICommandManager
