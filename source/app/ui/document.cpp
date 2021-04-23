@@ -2973,14 +2973,16 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 }
 
 void Document::importAttributesFromTable(const QString& keyAttributeName,
-    std::shared_ptr<TabularData> data, int keyColumnIndex, std::vector<int> importColumnIndices)
+    std::shared_ptr<TabularData> data, int keyColumnIndex,
+    std::vector<int> importColumnIndices, bool replace)
 {
     if(busy())
         return;
 
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<ImportAttributesCommand>(_graphModel.get(),
-        keyAttributeName, data.get(), keyColumnIndex, importColumnIndices));
+        keyAttributeName, data.get(), keyColumnIndex,
+        importColumnIndices, replace));
 }
 
 QString Document::graphSizeSummary() const

@@ -27,28 +27,43 @@
 #include <map>
 
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
-    TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices) :
+    TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
-    _keyColumnIndex(keyColumnIndex), _importColumnIndices(std::move(importColumnIndices))
+    _keyColumnIndex(keyColumnIndex), _importColumnIndices(std::move(importColumnIndices)),
+    _replace(replace)
+{}
+
+size_t ImportAttributesCommand::numAttributes() const
 {
-    _multipleAttributes = (_importColumnIndices.size() > 1);
+    return _createdAttributeNames.size() + _replacedUserDataVectors.size();
+}
+
+QString ImportAttributesCommand::firstAttributeName() const
+{
+    if(!_createdAttributeNames.empty())
+        return _createdAttributeNames.front();
+
+    if(!_replacedUserDataVectors.empty())
+        return _replacedUserDataVectors.begin()->first;
+
+    return {};
 }
 
 QString ImportAttributesCommand::description() const
 {
-    return _multipleAttributes ? QObject::tr("Import Attributes") : QObject::tr("Import Attribute");
+    return multipleAttributes() ? QObject::tr("Import Attributes") : QObject::tr("Import Attribute");
 }
 
 QString ImportAttributesCommand::verb() const
 {
-    return _multipleAttributes ? QObject::tr("Importing Attributes") : QObject::tr("Importing Attribute");
+    return multipleAttributes() ? QObject::tr("Importing Attributes") : QObject::tr("Importing Attribute");
 }
 
 QString ImportAttributesCommand::pastParticiple() const
 {
-    return _multipleAttributes ?
-        QObject::tr("%1 Attributes Imported").arg(_createdAttributeNames.size()) :
-        QObject::tr("Attribute %1 Imported").arg(_createdAttributeNames.front());
+    return multipleAttributes() ?
+        QObject::tr("%1 Attributes Imported").arg(numAttributes()) :
+        QObject::tr("Attribute %1 Imported").arg(firstAttributeName());
 }
 
 QString ImportAttributesCommand::debugDescription() const
@@ -57,6 +72,9 @@ QString ImportAttributesCommand::debugDescription() const
 
     for(const auto& attributeName : _createdAttributeNames)
         text.append(QStringLiteral("\n  %1").arg(attributeName));
+
+    for(const auto& [vectorName, vector] : _replacedUserDataVectors)
+        text.append(QStringLiteral("\n  %1 (replaced)").arg(vectorName));
 
     return text;
 }
@@ -68,7 +86,7 @@ bool ImportAttributesCommand::execute()
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
 
-    auto createAttributes = [this, keyAttribute](const auto& elementIds, auto& userData)
+    auto createAttributes = [&](const auto& elementIds)
     {
         using ElementId = typename std::remove_reference_t<decltype(elementIds)>::value_type;
 
@@ -100,27 +118,47 @@ bool ImportAttributesCommand::execute()
         if(map.empty())
             return std::vector<QString>();
 
+        UserElementData<ElementId>* userData = nullptr;
+
+        if constexpr(std::is_same_v<ElementId, NodeId>)
+            userData = &_graphModel->userNodeData();
+        else if constexpr(std::is_same_v<ElementId, EdgeId>)
+            userData = &_graphModel->userEdgeData();
+
         for(auto columnIndex : _importColumnIndices)
         {
             auto name = _data.valueAt(columnIndex, 0);
-            name = u::findUniqueName(userData.vectorNames(), name);
+            auto* existingVector = userData->vector(name);
+
+            bool replace = _replace && existingVector != nullptr &&
+                existingVector->type() == _data.typeIdentity(columnIndex).type();
+
+            if(replace)
+            {
+                _replacedUserDataVectors[name] = *existingVector;
+                existingVector->clear();
+                tracker->setAttributeValuesChanged(name);
+            }
+            else
+            {
+                name = u::findUniqueName(userData->vectorNames(), name);
+                _createdVectorNames.emplace(name);
+            }
 
             for(const auto& [row, elementId] : map)
             {
                 auto value = _data.valueAt(columnIndex, row);
-                userData.setValueBy(elementId, name, value);
-
-                _createdVectorNames.emplace(name);
+                userData->setValueBy(elementId, name, value);
             }
         }
 
-        return userData.exposeAsAttributes(*_graphModel);
+        return userData->exposeAsAttributes(*_graphModel);
     };
 
     if(keyAttribute->elementType() == ElementType::Node)
-        _createdAttributeNames = createAttributes(_graphModel->mutableGraph().nodeIds(), _graphModel->userNodeData());
+        _createdAttributeNames = createAttributes(_graphModel->mutableGraph().nodeIds());
     else if(keyAttribute->elementType() == ElementType::Edge)
-        _createdAttributeNames = createAttributes(_graphModel->mutableGraph().edgeIds(), _graphModel->userEdgeData());
+        _createdAttributeNames = createAttributes(_graphModel->mutableGraph().edgeIds());
 
     return true;
 }
@@ -135,11 +173,20 @@ void ImportAttributesCommand::undo()
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
 
-    for(const auto& vectorName : _createdVectorNames)
+    auto undoUserData = [&](auto& userData)
     {
-        if(keyAttribute->elementType() == ElementType::Node)
-            _graphModel->userNodeData().remove(vectorName);
-        else if(keyAttribute->elementType() == ElementType::Edge)
-            _graphModel->userEdgeData().remove(vectorName);
-    }
+        for(const auto& vectorName : _createdVectorNames)
+            userData.remove(vectorName);
+
+        for(auto&& [vectorName, vector] : _replacedUserDataVectors)
+        {
+            userData.setVector(vectorName, std::move(vector));
+            tracker->setAttributeValuesChanged(vectorName);
+        }
+    };
+
+    if(keyAttribute->elementType() == ElementType::Node)
+        undoUserData(_graphModel->userNodeData());
+    else if(keyAttribute->elementType() == ElementType::Edge)
+        undoUserData(_graphModel->userEdgeData());
 }

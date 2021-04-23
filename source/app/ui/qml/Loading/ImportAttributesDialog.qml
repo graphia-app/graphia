@@ -367,8 +367,15 @@ Window
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                     }
+
+                    CheckBox
+                    {
+                        id: replaceCheckbox
+                        text: qsTr("Replace Existing Attributes")
+                    }
+
+                    Item { Layout.fillHeight: true }
                 }
 
                 ColumnLayout
@@ -527,7 +534,8 @@ Window
 
             document.importAttributesFromTable(
                 keyAttributeName, tabularDataParser.data,
-                keyColumnIndex, attributeColumnIndices);
+                keyColumnIndex, attributeColumnIndices,
+                replaceCheckbox.checked);
 
             root.accepted();
         }

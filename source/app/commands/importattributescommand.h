@@ -22,11 +22,13 @@
 #include "shared/commands/icommand.h"
 
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/userdatavector.h"
 
 #include <QString>
 
 #include <vector>
 #include <set>
+#include <map>
 
 class GraphModel;
 
@@ -40,14 +42,20 @@ private:
     int _keyColumnIndex;
     std::vector<int> _importColumnIndices;
 
-    bool _multipleAttributes = false;
+    bool _replace = false;
+    std::map<QString, UserDataVector> _replacedUserDataVectors;
 
     std::set<QString> _createdVectorNames;
     std::vector<QString> _createdAttributeNames;
 
+    size_t numAttributes() const;
+    bool multipleAttributes() const { return numAttributes() > 1; }
+    QString firstAttributeName() const;
+
 public:
     ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
-        TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices);
+        TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices,
+        bool replace);
 
     QString description() const override;
     QString verb() const override;

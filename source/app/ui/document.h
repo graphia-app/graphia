@@ -528,7 +528,8 @@ public:
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
 
     Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,
-        std::shared_ptr<TabularData> data, int keyColumnIndex, std::vector<int> importColumnIndices);
+        std::shared_ptr<TabularData> data, int keyColumnIndex,
+        std::vector<int> importColumnIndices, bool replace);
 
     Q_INVOKABLE QString graphSizeSummary() const;
     Q_INVOKABLE QString commandStackSummary() const;
