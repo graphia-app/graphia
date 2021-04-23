@@ -54,6 +54,8 @@ public:
     void clearTransforms() { _transforms.clear(); }
     int numTransforms() const { return static_cast<int>(_transforms.size()); }
 
+    bool onAttributeValuesChangedExternally(const QStringList& changedAttributeNames);
+
     void setCommand(ICommand* command) { _command = command; }
 
     const std::vector<NodeId>& nodeIds() const override { return _target.nodeIds(); }

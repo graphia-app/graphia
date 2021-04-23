@@ -195,11 +195,16 @@ private slots:
     void onTransformedGraphWillChange(const Graph* graph);
     void onTransformedGraphChanged(const Graph* graph);
 
+    void onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
+        const QStringList& changedValuesNames);
+
 signals:
     void visualsWillChange();
     void visualsChanged();
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
         const QStringList& changedValuesNames);
+
+    void rebuildRequired(bool transforms, bool visualisations);
 };
 
 class AttributeChangesTracker

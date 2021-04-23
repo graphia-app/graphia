@@ -908,6 +908,36 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
     connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
+    connect(_graphModel.get(), &GraphModel::rebuildRequired,
+    [this](bool transforms, bool visualisations)
+    {
+        ICommandPtrsVector commands;
+
+        if(transforms)
+        {
+            commands.emplace_back(std::move(
+                std::make_unique<ApplyTransformsCommand>(
+                _graphModel.get(), _selectionManager.get(), this,
+                _graphTransforms, graphTransformConfigurationsFromUI())));
+        }
+
+        if(visualisations)
+        {
+            commands.emplace_back(std::move(
+                std::make_unique<ApplyVisualisationsCommand>(
+                _graphModel.get(), this,
+                _visualisations, _visualisationsFromUI)));
+        }
+
+        if(!commands.empty())
+        {
+            _commandManager.execute(ExecutePolicy::OnceMutate, std::move(commands),
+                {
+                    tr("Apply Transforms and Visualisations"),
+                    tr("Applying Transforms and Visualisations")
+                });
+        }
+    });
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::graphWillChange);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::graphChanged);

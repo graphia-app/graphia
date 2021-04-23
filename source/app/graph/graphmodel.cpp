@@ -108,6 +108,7 @@ private:
     EdgeVisuals _edgeVisuals;
     NodeVisuals _mappedNodeVisuals;
     EdgeVisuals _mappedEdgeVisuals;
+    QStringList _visualisedAttributeNames;
     VisualisationInfosMap _visualisationInfos;
 
     NodeArray<QString> _nodeNames;
@@ -209,15 +210,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     });
 
 
-    connect(this, &GraphModel::attributesChanged, [this](const QStringList& newAttributeNames, const QStringList&,
-        const QStringList& changedValuesNames)
-    {
-        for(const auto& attributeName : (QStringList() << newAttributeNames << changedValuesNames))
-        {
-            calculateAttributeRange(attributeName);
-            updateSharedAttributeValues(attributeName);
-        }
-    });
+    connect(this, &GraphModel::attributesChanged, this, &GraphModel::onAttributesChanged, Qt::DirectConnection);
 
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
@@ -613,6 +606,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     _->_mappedEdgeVisuals.resetElements();
     clearVisualisationInfos();
 
+    _->_visualisedAttributeNames.clear();
     _->_hasValidEdgeTextVisualisation = false;
 
     VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), _->_mappedNodeVisuals);
@@ -710,6 +704,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                 info.addStringValue(sharedValue._value);
             }
         }
+
+        _->_visualisedAttributeNames.append(attributeName);
 
         switch(attribute.elementType())
         {
@@ -1200,8 +1196,6 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
 
 void GraphModel::onTransformedGraphChanged(const Graph*)
 {
-    _transformedGraphIsChanging = false;
-
     auto attributeIdentities = _->currentAttributeIdentities();
 
     // Compare with previous attributes
@@ -1228,6 +1222,34 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
     }), changedAttributeNames.end());
 
     emit attributesChanged(addedAttributeNames, removedAttributeNames, changedAttributeNames);
+
+    _transformedGraphIsChanging = false;
+}
+
+void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList&,
+    const QStringList& changedValuesNames)
+{
+    for(const auto& attributeName : (QStringList() << addedNames << changedValuesNames))
+    {
+        calculateAttributeRange(attributeName);
+        updateSharedAttributeValues(attributeName);
+    }
+
+    if(!_transformedGraphIsChanging)
+    {
+        // If the attribute change isn't as a result of a graph transform, any change in values
+        // may actually require a graph transform or visualisation to be rebuilt, so check for this
+
+        bool transformRebuildRequired =
+            _->_transformedGraph.onAttributeValuesChangedExternally(changedValuesNames);
+
+        bool visualisationRebuildRequired = !u::setIntersection(
+            static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
+            static_cast<const QList<QString>&>(changedValuesNames)).empty();
+
+        if(transformRebuildRequired || visualisationRebuildRequired)
+            emit rebuildRequired(transformRebuildRequired, visualisationRebuildRequired);
+    }
 }
 
 AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :

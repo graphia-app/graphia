@@ -23,6 +23,7 @@
 
 #include "shared/commands/icommand.h"
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 
 #include <functional>
 
@@ -68,6 +69,32 @@ void TransformedGraph::cancelRebuild()
 
     if(_currentTransform != nullptr)
         _currentTransform->cancel();
+}
+
+bool TransformedGraph::onAttributeValuesChangedExternally(const QStringList& changedAttributeNames)
+{
+    std::vector<QString> referencedAttributeNames;
+
+    for(const auto& transform : _transforms)
+    {
+        const auto& names = transform->config().referencedAttributeNames();
+        referencedAttributeNames.insert(referencedAttributeNames.end(),
+            names.begin(), names.end());
+    }
+
+    u::removeDuplicates(referencedAttributeNames);
+
+    auto affectedAttributeNames = u::setIntersection(referencedAttributeNames,
+        u::toQStringVector(changedAttributeNames));
+
+    if(affectedAttributeNames.empty())
+        return false;
+
+    // Invalidate any cache entries affected by the changing attributes
+    for(const auto& attributeName : affectedAttributeNames)
+        _cache.attributeAddedOrChanged(attributeName);
+
+    return true;
 }
 
 void TransformedGraph::setProgress(int progress)
