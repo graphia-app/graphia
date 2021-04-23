@@ -34,6 +34,13 @@ namespace u
         container.erase(std::remove(container.begin(), container.end(), value), container.end());
     }
 
+    template<typename C>
+    void removeDuplicates(C& container)
+    {
+        std::sort(container.begin(), container.end());
+        container.erase(std::unique(container.begin(), container.end()), container.end());
+    }
+
     template<typename C, typename T> int indexOf(C& container, const T& value)
     {
         auto it = std::find(container.begin(), container.end(), value);
