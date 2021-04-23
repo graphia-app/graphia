@@ -111,9 +111,9 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
     {
         std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        QString threadName = command->description().length() > 0 ?
+        QString commandName = command->description().length() > 0 ?
             command->description() : QStringLiteral("Anon Command");
-        u::setCurrentThreadName(threadName);
+        u::setCurrentThreadName(commandName);
 
         _graphChanged = false;
 
