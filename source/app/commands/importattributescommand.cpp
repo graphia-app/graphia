@@ -24,8 +24,6 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 
-#include <map>
-
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
     TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
