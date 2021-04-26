@@ -269,7 +269,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     if(version > NativeSaver::Version)
     {
-        setFailureReason(QObject::tr("Produced using a newer version of %1.")
+        setFailureReason(QObject::tr("Produced using a newer version of %1. Please upgrade.")
             .arg(Application::name()));
         return false;
     }
@@ -512,7 +512,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     if(header._pluginDataVersion > _pluginInstance->plugin()->dataVersion())
     {
-        setFailureReason(QObject::tr("Produced using a newer version of the plugin '%1'.")
+        setFailureReason(QObject::tr("Produced using a newer version of the plugin '%1'. Please upgrade.")
             .arg(_pluginInstance->plugin()->name()));
         return false;
     }
