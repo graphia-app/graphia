@@ -59,6 +59,12 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     file.seekg(0, std::ios::end);
     fileSize = file.tellg() - fileSize;
 
+    if(fileSize == 0)
+    {
+        setFailureReason(QObject::tr("File is empty."));
+        return false;
+    }
+
     std::unordered_map<std::string, NodeId> nodeIdMap;
 
     std::string line;

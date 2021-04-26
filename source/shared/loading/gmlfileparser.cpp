@@ -287,6 +287,11 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
         return false;
 
     auto fileSize = fileInfo.size();
+    if(fileSize == 0)
+    {
+        setFailureReason(QObject::tr("File is empty."));
+        return false;
+    }
 
     setProgress(-1);
 

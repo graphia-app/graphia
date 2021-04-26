@@ -117,10 +117,16 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
         return false;
 
     QFile file(url.toLocalFile());
-    auto fileSize = file.size();
     if(!file.open(QFile::ReadOnly))
     {
         setFailureReason(QStringLiteral("Unable to Open File: %1").arg(url.toLocalFile()));
+        return false;
+    }
+
+    auto fileSize = file.size();
+    if(fileSize == 0)
+    {
+        setFailureReason(QObject::tr("File is empty."));
         return false;
     }
 
