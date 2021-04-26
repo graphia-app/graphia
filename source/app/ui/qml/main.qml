@@ -47,7 +47,7 @@ ApplicationWindow
     minimumHeight: 480
     property bool maximised: mainWindow.visibility === Window.Maximized
 
-    property TabUI currentTab: tabView.currentIndex < tabView.count ?
+    property TabUI currentTab: tabView.count > 0 && tabView.currentIndex < tabView.count ?
         tabView.getTab(tabView.currentIndex).item : null
     property var currentDocument: currentTab !== null ? currentTab.document : null
 
