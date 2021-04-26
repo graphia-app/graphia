@@ -785,7 +785,7 @@ ApplicationWindow
         onTriggered:
         {
             // If we're currently busy, cancel and wait before closing
-            if(currentDocument.significantCommandInProgress)
+            if(currentDocument.commandInProgress)
             {
                 // If a load is cancelled the tab is closed automatically,
                 // and there is no command involved anyway, so in that case we
