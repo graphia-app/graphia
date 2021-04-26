@@ -105,6 +105,12 @@ public:
         fileSize = file.tellg() - fileSize;
         file.seekg(0, std::ios::beg);
 
+        if(fileSize == 0)
+        {
+            setFailureReason(QObject::tr("File is empty."));
+            return false;
+        }
+
         auto parser = std::make_unique<aria::csv::CsvParser>(file);
         parser->delimiter(Delimiter);
         for(const auto& row : *parser)
