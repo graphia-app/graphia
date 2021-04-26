@@ -119,7 +119,7 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     QFile file(url.toLocalFile());
     if(!file.open(QFile::ReadOnly))
     {
-        setFailureReason(QStringLiteral("Unable to Open File: %1").arg(url.toLocalFile()));
+        setFailureReason(QObject::tr("Unable to open file."));
         return false;
     }
 
@@ -163,7 +163,7 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
                 if(!attributes.hasAttribute(QStringLiteral("rdf:ID")))
                 {
-                    setFailureReason(QStringLiteral("Node element has no id"));
+                    setFailureReason(QObject::tr("Node element has no id."));
                     return false;
                 }
 
@@ -185,7 +185,7 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
                 {
                     if(!attributes.hasAttribute(QStringLiteral("rdf:resource")))
                     {
-                        setFailureReason(QStringLiteral("Edge element has no resource"));
+                        setFailureReason(QObject::tr("Edge element has no resource."));
                         return false;
                     }
 
@@ -234,14 +234,14 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(activeElements.empty())
             {
-                setFailureReason(QStringLiteral("Orphan end element: %1").arg(elementName));
+                setFailureReason(QObject::tr("Orphan end element: %1").arg(elementName));
                 return false;
             }
 
             const auto& top = activeElements.top();
             if(top != xsr.name())
             {
-                setFailureReason(QStringLiteral("Start and end element mismatch: %1 != %2").arg(top, elementName));
+                setFailureReason(QObject::tr("Start and end element mismatch: %1 != %2").arg(top, elementName));
                 return false;
             }
 

@@ -49,7 +49,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     QFile file(url.toLocalFile());
     if(!file.open(QFile::ReadOnly))
     {
-        setFailureReason(QStringLiteral("Unable to Open File: %1").arg(url.toLocalFile()));
+        setFailureReason(QObject::tr("Unable to Open File."));
         return false;
     }
 
@@ -78,7 +78,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
     {
         if(!activeNodeId.isNull() && !activeEdgeId.isNull())
         {
-            setFailureReason(QStringLiteral("Node and edge both active: %1 %2")
+            setFailureReason(QObject::tr("Node and edge both active: %1 %2")
                 .arg(static_cast<int>(activeNodeId), static_cast<int>(activeEdgeId)));
             return false;
         }
@@ -130,7 +130,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
                 if(!attributes.hasAttribute("id"))
                 {
-                    setFailureReason(QStringLiteral("Node has no id"));
+                    setFailureReason(QObject::tr("Node has no id."));
                     return false;
                 }
 
@@ -138,7 +138,7 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 if(u::contains(nodes, nodeName))
                 {
-                    setFailureReason(QStringLiteral("Duplicate node id: %1").arg(nodeName));
+                    setFailureReason(QObject::tr("Duplicate node id: %1").arg(nodeName));
                     return false;
                 }
 
@@ -152,13 +152,13 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
                 if(!attributes.hasAttribute("source"))
                 {
-                    setFailureReason(QStringLiteral("Edge missing source"));
+                    setFailureReason(QObject::tr("Edge missing source."));
                     return false;
                 }
 
                 if(!attributes.hasAttribute("target"))
                 {
-                    setFailureReason(QStringLiteral("Edge missing target"));
+                    setFailureReason(QObject::tr("Edge missing target."));
                     return false;
                 }
 
@@ -217,14 +217,14 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(stack.empty())
             {
-                setFailureReason(QStringLiteral("Orphan end element: %1").arg(elementName));
+                setFailureReason(QObject::tr("Orphan end element: %1").arg(elementName));
                 return false;
             }
 
             const auto& top = stack.top();
             if(top != xsr.name())
             {
-                setFailureReason(QStringLiteral("Start and end element mismatch: %1 != %2")
+                setFailureReason(QObject::tr("Start and end element mismatch: %1 != %2")
                     .arg(top, elementName));
                 return false;
             }
@@ -272,13 +272,13 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     if(!graphmlElementFound)
     {
-        setFailureReason(QStringLiteral("graphml header not found"));
+        setFailureReason(QObject::tr("graphml header not found."));
         return false;
     }
 
     if(xsr.hasError())
     {
-        setFailureReason(QStringLiteral("XML parse error: %1").arg(xsr.errorString()));
+        setFailureReason(QObject::tr("XML parse error: %1").arg(xsr.errorString()));
         return false;
     }
 
