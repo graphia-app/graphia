@@ -313,6 +313,9 @@ ApplicationWindow
             return;
         }
 
+        // Prevent any further access to enrichmentResults during destruction
+        enrichmentResults.models = [];
+
         windowPreferences.maximised = mainWindow.maximised;
 
         if(!mainWindow.maximised)
