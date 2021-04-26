@@ -306,7 +306,7 @@ ApplicationWindow
             _restartOnExit = false;
 
             // If any tabs are open, close the first one and cancel the window close, followed
-            // by (recursive) calls to clostTabFunction, assuming the user doesn't cancel
+            // by (recursive) calls to closeTabFunction, assuming the user doesn't cancel
             tabView.closeTab(0, closeTabFunction);
 
             close.accepted = false;
