@@ -61,6 +61,7 @@ MouseArea
                     });
                     menuItem.triggered.connect(function()
                     {
+                        attributeList.clearSelection();
                         return attributeList.sortRoleName = roleName;
                     });
                 });
