@@ -28,6 +28,7 @@ Item
     id: root
 
     property var selectedValue: undefined
+    property var selectedValues: []
     property var model: null
 
     property var currentIndex:
@@ -68,6 +69,7 @@ Item
     onModelChanged:
     {
         selectedValue = undefined;
+        selectedValues = [];
         treeBoxSearch.visible = false;
     }
 
@@ -158,6 +160,15 @@ Item
 
                     let sourceIndex = sortFilterProxyModel.mapToSource(target.currentIndex);
                     root.selectedValue = root.textFor(sourceIndex);
+
+                    let newSelectedValues = [];
+                    for(let index of target.selectedIndexes)
+                    {
+                        sourceIndex = sortFilterProxyModel.mapToSource(index);
+                        newSelectedValues.push(root.textFor(sourceIndex));
+                    }
+
+                    root.selectedValues = newSelectedValues;
                 }
             }
 
