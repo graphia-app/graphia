@@ -214,6 +214,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
         return attribute->userDefined() ? userDefinedTr : calculatedTr;
     }
+    case Roles::HasParameterRole:
+    {
+        return attribute->hasParameter();
+    }
     default:
         return {};
     }
@@ -389,6 +393,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
     names[Roles::SearchableRole] = "searchable";
     names[Roles::UserDefinedRole] = "userDefined";
     names[Roles::HasChildrenRole] = "hasChildren";
+    names[Roles::HasParameterRole] = "hasParameter";
 
     return names;
 }

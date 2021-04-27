@@ -83,6 +83,7 @@ private:
         SearchableRole,
         UserDefinedRole,
         HasChildrenRole,
+        HasParameterRole,
     };
 
     const GraphModel* _graphModel = nullptr;
