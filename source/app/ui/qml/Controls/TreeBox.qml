@@ -403,9 +403,9 @@ Item
         treeView.__listView.positionViewAtIndex(row, ListView.Center);
     }
 
-    function deselect()
+    function clearSelection()
     {
-        treeView.selection.clearCurrentIndex();
+        treeView.selection.clearSelection();
     }
 
     Keys.forwardTo: [treeView.__mouseArea]
