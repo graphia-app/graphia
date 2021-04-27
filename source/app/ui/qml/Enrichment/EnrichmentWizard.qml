@@ -52,7 +52,7 @@ Wizard
         scrollViewB.flickableItem.contentY = 0;
     }
 
-    onVisibilityChanged:
+    onVisibleChanged:
     {
         reset();
         proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
