@@ -214,7 +214,7 @@ Wizard
                                 property var attributeName: model.display
                                 text: document !== null ? model.display + " (" +
                                             document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries") + ")" : "";
+                                            qsTr(" entries") + ")" : ""
                                 exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
@@ -278,7 +278,7 @@ Wizard
                                 property var attributeName: model.display
                                 text: document !== null ? model.display + " (" +
                                             document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries") + ")" : "";
+                                            qsTr(" entries") + ")" : ""
                                 exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
                         }
