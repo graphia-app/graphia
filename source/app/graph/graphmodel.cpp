@@ -1226,7 +1226,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
     _transformedGraphIsChanging = false;
 }
 
-void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList&,
+void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
     const QStringList& changedValuesNames)
 {
     for(const auto& attributeName : (QStringList() << addedNames << changedValuesNames))
@@ -1237,15 +1237,18 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
 
     if(!_transformedGraphIsChanging)
     {
-        // If the attribute change isn't as a result of a graph transform, any change in values
+        // If the attribute change isn't as a result of a graph transform, any change
         // may actually require a graph transform or visualisation to be rebuilt, so check for this
+        QStringList changed;
+        changed << addedNames << removedNames << changedValuesNames;
+        u::removeDuplicates(changed);
 
         bool transformRebuildRequired =
-            _->_transformedGraph.onAttributeValuesChangedExternally(changedValuesNames);
+            _->_transformedGraph.onAttributeValuesChangedExternally(changed);
 
         bool visualisationRebuildRequired = !u::setIntersection(
             static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
-            static_cast<const QList<QString>&>(changedValuesNames)).empty();
+            static_cast<const QList<QString>&>(changed)).empty();
 
         if(transformRebuildRequired || visualisationRebuildRequired)
             emit rebuildRequired(transformRebuildRequired, visualisationRebuildRequired);
