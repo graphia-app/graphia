@@ -531,6 +531,8 @@ public:
         std::shared_ptr<TabularData> data, int keyColumnIndex,
         std::vector<int> importColumnIndices, bool replace);
 
+    Q_INVOKABLE void removeAttributes(const QStringList& attributeNames);
+
     Q_INVOKABLE QString graphSizeSummary() const;
     Q_INVOKABLE QString commandStackSummary() const;
 

@@ -45,6 +45,7 @@
 #include "commands/applyvisualisationscommand.h"
 #include "commands/deletenodescommand.h"
 #include "commands/importattributescommand.h"
+#include "commands/removeattributescommand.h"
 #include "commands/selectnodescommand.h"
 
 #include "transform/graphtransform.h"
@@ -2983,6 +2984,15 @@ void Document::importAttributesFromTable(const QString& keyAttributeName,
         std::make_unique<ImportAttributesCommand>(_graphModel.get(),
         keyAttributeName, data.get(), keyColumnIndex,
         importColumnIndices, replace));
+}
+
+void Document::removeAttributes(const QStringList& attributeNames)
+{
+    if(busy())
+        return;
+
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<RemoveAttributesCommand>(_graphModel.get(), attributeNames));
 }
 
 QString Document::graphSizeSummary() const
