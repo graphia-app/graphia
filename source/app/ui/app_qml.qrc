@@ -60,5 +60,6 @@
         <file>qml/AttributeUtils.js</file>
         <file>qml/LatestChangesDialog.qml</file>
         <file>qml/Loading/ImportAttributesDialog.qml</file>
+        <file>qml/RemoveAttributesDialog.qml</file>
     </qresource>
 </RCC>

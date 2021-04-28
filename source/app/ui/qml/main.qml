@@ -1158,6 +1158,12 @@ ApplicationWindow
         }
     }
 
+    RemoveAttributesDialog
+    {
+        id: removeAttributesDialog
+        document: currentDocument
+    }
+
     Action
     {
         id: importAttributesAction
@@ -1170,6 +1176,14 @@ ApplicationWindow
 
             importAttributesFileOpenDialog.open();
         }
+    }
+
+    Action
+    {
+        id: removeAttributesAction
+        text: qsTr("Remove Attributes…")
+        enabled: currentDocument !== null && !currentDocument.busy
+        onTriggered: { removeAttributesDialog.show(); }
     }
 
     Action
@@ -1874,6 +1888,7 @@ ApplicationWindow
             MenuItem { action: enrichmentAction }
             MenuItem { action: searchWebAction }
             MenuItem { action: importAttributesAction }
+            MenuItem { action: removeAttributesAction }
             MenuSeparator {}
             MenuItem { action: showProvenanceLogAction }
         }
