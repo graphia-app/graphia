@@ -24,9 +24,13 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/graph/grapharray_json.h"
+
 #include "shared/plugins/iplugin.h"
+
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
+
+#include "shared/loading/userelementdata.h"
 #include "shared/loading/progress_iterator.h"
 #include "shared/loading/jsongraphparser.h"
 

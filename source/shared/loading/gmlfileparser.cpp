@@ -27,6 +27,9 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/graph/imutablegraph.h"
+
+#include "shared/utils/container.h"
 
 #include <QUrl>
 #include <QFileInfo>
