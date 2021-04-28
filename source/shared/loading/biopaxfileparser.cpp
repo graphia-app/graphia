@@ -94,7 +94,7 @@ bool isEdgeElementName(const QString& name)
 }
 }
 
-BiopaxFileParser::BiopaxFileParser(UserNodeData* userNodeData) : _userNodeData(userNodeData)
+BiopaxFileParser::BiopaxFileParser(IUserNodeData* userNodeData) : _userNodeData(userNodeData)
 {
     // Add this up front, so that it appears first in the attribute table
     userNodeData->add(QObject::tr("Node Name"));

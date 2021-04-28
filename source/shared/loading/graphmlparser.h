@@ -20,18 +20,18 @@
 #define GRAPHMLPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/loading/userelementdata.h"
+#include "shared/loading/iuserelementdata.h"
 
 class IGraphModel;
 
 class GraphMLParser: public IParser
 {
 private:
-    UserNodeData* _userNodeData = nullptr;
-    UserEdgeData* _userEdgeData = nullptr;
+    IUserNodeData* _userNodeData = nullptr;
+    IUserEdgeData* _userEdgeData = nullptr;
 
 public:
-    explicit GraphMLParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
+    explicit GraphMLParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     static bool canLoad(const QUrl&) { return true; }
 };

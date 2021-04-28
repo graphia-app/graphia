@@ -40,7 +40,7 @@
 #include <fstream>
 #include <cctype>
 
-PairwiseTxtFileParser::PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+PairwiseTxtFileParser::PairwiseTxtFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table

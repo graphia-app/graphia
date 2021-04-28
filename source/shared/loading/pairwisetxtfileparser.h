@@ -20,16 +20,16 @@
 #define PAIRWISETXTFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/loading/userelementdata.h"
+#include "shared/loading/iuserelementdata.h"
 
 class PairwiseTxtFileParser : public IParser
 {
 private:
-    UserNodeData* _userNodeData;
-    UserEdgeData* _userEdgeData;
+    IUserNodeData* _userNodeData;
+    IUserEdgeData* _userEdgeData;
 
 public:
-    explicit PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
+    explicit PairwiseTxtFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
 

@@ -33,7 +33,7 @@
 
 // http://graphml.graphdrawing.org/primer/graphml-primer.html
 
-GraphMLParser::GraphMLParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+GraphMLParser::GraphMLParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table

@@ -19,7 +19,8 @@
 #ifndef USERELEMENTDATA_H
 #define USERELEMENTDATA_H
 
-#include "userdata.h"
+#include "shared/loading/iuserelementdata.h"
+#include "shared/loading/userdata.h"
 
 #include "shared/graph/grapharray.h"
 #include "shared/graph/imutablegraph.h"
@@ -33,7 +34,7 @@
 #include <memory>
 
 template<typename E>
-class UserElementData : public UserData
+class UserElementData : public IUserElementData<E>, public UserData
 {
 private:
     struct Index
@@ -87,13 +88,13 @@ public:
         return _indexes->get(elementId)._value;
     }
 
-    void setValueBy(E elementId, const QString& name, const QString& value)
+    void setValueBy(E elementId, const QString& name, const QString& value) override
     {
         generateElementIdMapping(elementId);
         setValue(indexFor(elementId), name, value);
     }
 
-    QVariant valueBy(E elementId, const QString& name) const
+    QVariant valueBy(E elementId, const QString& name) const override
     {
         if(!haveIndexFor(elementId))
             return {};

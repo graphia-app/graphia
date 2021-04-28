@@ -138,7 +138,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
 }
 
 bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
-    UserNodeData& userNodeData, UserEdgeData& userEdgeData)
+    IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
     auto findIntValue = [](const List& list, const QString& key) -> const int*
     {
@@ -270,7 +270,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
 } // namespace SpiritGmlParser
 
-GmlFileParser::GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+GmlFileParser::GmlFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table

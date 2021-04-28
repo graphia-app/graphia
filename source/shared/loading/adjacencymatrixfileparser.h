@@ -36,9 +36,9 @@
 
 class TabularData;
 
-template<typename> class UserElementData;
-using UserNodeData = UserElementData<NodeId>;
-using UserEdgeData = UserElementData<EdgeId>;
+template<typename> class IUserElementData;
+using IUserNodeData = IUserElementData<NodeId>;
+using IUserEdgeData = IUserElementData<EdgeId>;
 
 class AdjacencyMatrixTabularDataParser : public QmlTabularDataParser
 {
@@ -60,7 +60,7 @@ public:
     static bool isEdgeList(const TabularData& tabularData, size_t maxRows = 5);
 
     bool parse(const TabularData& tabularData, Progressable& progressable,
-        IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData);
+        IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
 
     double minimumAbsEdgeWeight() const { return _minimumAbsEdgeWeight; }
     bool skipDuplicates() const { return _skipDuplicates; }
@@ -88,12 +88,12 @@ template<typename TabularDataParser>
 class AdjacencyMatrixParser : public IParser, public AdjacencyMatrixTabularDataParser
 {
 private:
-    UserNodeData* _userNodeData;
-    UserEdgeData* _userEdgeData;
+    IUserNodeData* _userNodeData;
+    IUserEdgeData* _userEdgeData;
     TabularData _tabularData;
 
 public:
-    AdjacencyMatrixParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+    AdjacencyMatrixParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
         TabularData* tabularData = nullptr) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
     {

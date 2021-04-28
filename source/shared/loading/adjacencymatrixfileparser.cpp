@@ -32,7 +32,7 @@
 
 namespace
 {
-void addEdge(IGraphModel* graphModel, UserEdgeData* userEdgeData,
+void addEdge(IGraphModel* graphModel, IUserEdgeData* userEdgeData,
     NodeId sourceNodeId, NodeId targetNodeId,
     double edgeWeight, double absEdgeWeight,
     bool skipDuplicates)
@@ -57,7 +57,7 @@ void addEdge(IGraphModel* graphModel, UserEdgeData* userEdgeData,
 }
 
 bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+    IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     progressable.setProgress(-1);
@@ -152,7 +152,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
 }
 
 bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData,
+    IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     std::map<QString, NodeId> nodeIdMap;
@@ -365,7 +365,7 @@ bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData
 }
 
 bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, UserNodeData* userNodeData, UserEdgeData* userEdgeData)
+    IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
     if(isEdgeList(tabularData))
     {

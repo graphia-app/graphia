@@ -83,8 +83,8 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 }
 
 bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel* graphModel,
-                                       IParser& parser, bool useElementIdsLiterally,
-                                       UserNodeData* userNodeData, UserEdgeData* userEdgeData)
+    IParser& parser, bool useElementIdsLiterally,
+    IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
     if(!u::contains(jsonGraphObject, "nodes") || !u::contains(jsonGraphObject, "edges"))
     {

@@ -2,16 +2,16 @@
 #define DOTFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-#include "shared/loading/userelementdata.h"
+#include "shared/loading/iuserelementdata.h"
 
 class DotFileParser : public IParser
 {
 private:
-    UserNodeData* _userNodeData;
-    UserEdgeData* _userEdgeData;
+    IUserNodeData* _userNodeData;
+    IUserEdgeData* _userEdgeData;
 
 public:
-    explicit DotFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
+    explicit DotFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     static bool canLoad(const QUrl&) { return true; }

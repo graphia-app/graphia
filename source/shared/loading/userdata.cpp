@@ -40,38 +40,46 @@ int UserData::numValues() const
     return _numValues;
 }
 
-std::vector<QString> UserData::vectorNames() const
-{
-    return _vectorNames;
-}
-
-UserDataVector& UserData::add(QString name)
+static QString normalise(QString name)
 {
     if(name.isEmpty())
-        name = QObject::tr("Unnamed");
+        return QObject::tr("Unnamed");
 
     // These may ultimately be used as attribute names, and
     // dots aren't allowed there
     name.replace('.', '_');
 
-    if(!u::contains(_vectorNames, name))
-    {
-        _vectorNames.emplace_back(name);
-        _userDataVectors.emplace_back(std::make_pair(name, UserDataVector(name)));
-        return _userDataVectors.back().second;
-    }
+    return name;
+}
 
-    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-        [&name](const auto& it2) { return it2.first == name; });
+std::vector<QString> UserData::vectorNames() const
+{
+    return _vectorNames;
+}
 
-    Q_ASSERT(it != _userDataVectors.end());
+void UserData::add(const QString& name)
+{
+    QString normalisedName = normalise(name);
+    if(u::contains(_vectorNames, normalisedName))
+        return;
 
-    return it->second;
+    _vectorNames.emplace_back(normalisedName);
+    _userDataVectors.emplace_back(std::make_pair(normalisedName, UserDataVector(normalisedName)));
 }
 
 void UserData::setValue(size_t index, const QString& name, const QString& value)
 {
-    auto& userDataVector = add(name);
+    QString normalisedName = normalise(name);
+
+    // Make sure the vector exists first
+    add(normalisedName);
+
+    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+        [&normalisedName](const auto& it2) { return it2.first == normalisedName; });
+
+    Q_ASSERT(it != _userDataVectors.end());
+
+    auto& userDataVector = it->second;
 
     userDataVector.set(index, value);
     _numValues = std::max(_numValues, userDataVector.numValues());
@@ -79,8 +87,9 @@ void UserData::setValue(size_t index, const QString& name, const QString& value)
 
 QVariant UserData::value(size_t index, const QString& name) const
 {
+    QString normalisedName = normalise(name);
     auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-        [&name](const auto& it2) { return it2.first == name; });
+        [&normalisedName](const auto& it2) { return it2.first == normalisedName; });
 
     if(it != _userDataVectors.end())
     {
@@ -107,10 +116,11 @@ QVariant UserData::value(size_t index, const QString& name) const
 
 UserDataVector* UserData::vector(const QString& name)
 {
+    QString normalisedName = normalise(name);
     auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-    [&name](const auto& pair)
+    [&normalisedName](const auto& pair)
     {
-        return pair.first == name;
+        return pair.first == normalisedName;
     });
 
     return it != _userDataVectors.end() ? &it->second : nullptr;
@@ -118,11 +128,12 @@ UserDataVector* UserData::vector(const QString& name)
 
 void UserData::setVector(const QString& name, UserDataVector&& other)
 {
-    auto* v = vector(name);
+    QString normalisedName = normalise(name);
+    auto* v = vector(normalisedName);
 
     if(v == nullptr)
     {
-        qDebug() << "UserData::setVector: can't find vector named" << name;
+        qDebug() << "UserData::setVector: can't find vector named" << normalisedName;
         return;
     }
 
@@ -131,13 +142,14 @@ void UserData::setVector(const QString& name, UserDataVector&& other)
 
 void UserData::remove(const QString& name)
 {
+    QString normalisedName = normalise(name);
     _userDataVectors.erase(std::remove_if(_userDataVectors.begin(), _userDataVectors.end(),
-    [&name](const auto& pair)
+    [&normalisedName](const auto& pair)
     {
-        return pair.first == name;
+        return pair.first == normalisedName;
     }), _userDataVectors.end());
 
-    u::removeByValue(_vectorNames, name);
+    u::removeByValue(_vectorNames, normalisedName);
 }
 
 json UserData::save(Progressable& progressable, const std::vector<size_t>& indexes) const

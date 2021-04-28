@@ -16,25 +16,17 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BIOPAXFILEPARSER_H
-#define BIOPAXFILEPARSER_H
+#ifndef IUSERDATA_H
+#define IUSERDATA_H
 
-#include "shared/loading/iparser.h"
-#include "shared/loading/iuserelementdata.h"
+class QString;
 
-class IGraphModel;
-
-class BiopaxFileParser : public IParser
+class IUserData
 {
-
-private:
-    IUserNodeData* _userNodeData;
-
 public:
-    explicit BiopaxFileParser(IUserNodeData* userNodeData);
+    virtual ~IUserData() = default;
 
-    bool parse(const QUrl& url, IGraphModel* graphModel) override;
-    static bool canLoad(const QUrl&) { return true; }
+    virtual void add(const QString& name) = 0;
 };
 
-#endif // BIOPAXFILEPARSER_H
+#endif // IUSERDATA_H

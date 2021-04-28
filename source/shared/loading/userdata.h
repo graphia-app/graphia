@@ -19,7 +19,8 @@
 #ifndef USERDATA_H
 #define USERDATA_H
 
-#include "userdatavector.h"
+#include "shared/loading/iuserdata.h"
+#include "shared/loading/userdatavector.h"
 
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/progressable.h"
@@ -32,7 +33,7 @@
 
 #include <vector>
 
-class UserData
+class UserData : public virtual IUserData
 {
 private:
     // This is not a map because the data needs to be ordered
@@ -55,7 +56,7 @@ public:
     auto begin() const { return _userDataVectors.begin(); }
     auto end() const { return _userDataVectors.end(); }
 
-    UserDataVector& add(QString name);
+    void add(const QString& name) override;
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 

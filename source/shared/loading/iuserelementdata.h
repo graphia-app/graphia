@@ -16,25 +16,28 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BIOPAXFILEPARSER_H
-#define BIOPAXFILEPARSER_H
+#ifndef IUSERELEMENTDATA_H
+#define IUSERELEMENTDATA_H
 
-#include "shared/loading/iparser.h"
-#include "shared/loading/iuserelementdata.h"
+#include "shared/loading/iuserdata.h"
 
-class IGraphModel;
+#include "shared/graph/elementid.h"
 
-class BiopaxFileParser : public IParser
+#include <QVariant>
+
+class QString;
+
+template<typename E>
+class IUserElementData : public virtual IUserData
 {
-
-private:
-    IUserNodeData* _userNodeData;
-
 public:
-    explicit BiopaxFileParser(IUserNodeData* userNodeData);
+    virtual ~IUserElementData() = default;
 
-    bool parse(const QUrl& url, IGraphModel* graphModel) override;
-    static bool canLoad(const QUrl&) { return true; }
+    virtual QVariant valueBy(E elementId, const QString& name) const = 0;
+    virtual void setValueBy(E elementId, const QString& name, const QString& value) = 0;
 };
 
-#endif // BIOPAXFILEPARSER_H
+using IUserNodeData = IUserElementData<NodeId>;
+using IUserEdgeData = IUserElementData<EdgeId>;
+
+#endif // IUSERELEMENTDATA_H

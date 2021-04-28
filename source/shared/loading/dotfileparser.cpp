@@ -221,7 +221,7 @@ const auto comment = lexeme[
 const auto skipper = comment | ascii::space;
 
 bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
-    UserNodeData& userNodeData, UserEdgeData& userEdgeData)
+    IUserNodeData& userNodeData, IUserEdgeData& userEdgeData)
 {
     std::vector<NodeId> nodeIds;
     std::vector<EdgeId> edgeIds;
@@ -379,7 +379,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
 
 } // namespace SpiritDotParser
 
-DotFileParser::DotFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+DotFileParser::DotFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
     // Add this up front, so that it appears first in the attribute table

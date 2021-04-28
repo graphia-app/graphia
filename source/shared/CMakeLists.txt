@@ -38,6 +38,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iparserthread.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iurltypes.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/iuserdata.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/iuserelementdata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
