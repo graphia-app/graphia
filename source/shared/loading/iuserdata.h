@@ -19,12 +19,19 @@
 #ifndef IUSERDATA_H
 #define IUSERDATA_H
 
-class QString;
+#include <QString>
+
+#include <vector>
 
 class IUserData
 {
 public:
     virtual ~IUserData() = default;
+
+    virtual int numUserDataVectors() const = 0;
+    virtual int numValues() const = 0;
+
+    virtual std::vector<QString> vectorNames() const = 0;
 
     virtual void add(const QString& name) = 0;
 };

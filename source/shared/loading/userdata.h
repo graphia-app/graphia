@@ -46,12 +46,12 @@ public:
 
     QString firstUserDataVectorName() const;
 
-    int numUserDataVectors() const;
-    int numValues() const;
+    int numUserDataVectors() const override;
+    int numValues() const override;
 
     bool empty() const { return _userDataVectors.empty(); }
 
-    std::vector<QString> vectorNames() const;
+    std::vector<QString> vectorNames() const override;
 
     auto begin() const { return _userDataVectors.begin(); }
     auto end() const { return _userDataVectors.end(); }

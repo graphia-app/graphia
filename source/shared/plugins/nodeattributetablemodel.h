@@ -21,7 +21,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/ui/idocument.h"
-#include "shared/loading/userelementdata.h"
+#include "shared/loading/iuserelementdata.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -44,7 +44,7 @@ class NodeAttributeTableModel : public QAbstractTableModel
 private:
     IDocument* _document = nullptr;
     const IGraph* _graph = nullptr;
-    const UserNodeData* _userNodeData = nullptr;
+    const IUserNodeData* _userNodeData = nullptr;
 
     QHash<int, QByteArray> _roleNames;
     std::recursive_mutex _updateMutex;
@@ -86,7 +86,7 @@ public:
         FirstAttributeRole
     };
 
-    void initialise(IDocument* document, UserNodeData* userNodeData);
+    void initialise(IDocument* document, IUserNodeData* userNodeData);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;

@@ -33,6 +33,8 @@ class IUserElementData : public virtual IUserData
 public:
     virtual ~IUserElementData() = default;
 
+    virtual E elementIdForIndex(size_t index) const = 0;
+
     virtual QVariant valueBy(E elementId, const QString& name) const = 0;
     virtual void setValueBy(E elementId, const QString& name, const QString& value) = 0;
 };

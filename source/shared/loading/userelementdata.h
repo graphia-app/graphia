@@ -68,7 +68,7 @@ public:
         _indexToElementIdMap[index] = elementId;
     }
 
-    E elementIdForIndex(size_t index) const
+    E elementIdForIndex(size_t index) const override
     {
         if(u::contains(_indexToElementIdMap, index))
             return _indexToElementIdMap.at(index);

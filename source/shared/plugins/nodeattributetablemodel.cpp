@@ -18,8 +18,6 @@
 
 #include "nodeattributetablemodel.h"
 
-#include "shared/loading/userelementdata.h"
-
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/igraph.h"
@@ -29,9 +27,10 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
+#include <QSet>
 #include <QtGlobal>
 
-void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
+void NodeAttributeTableModel::initialise(IDocument* document, IUserNodeData* userNodeData)
 {
     _roleNames.insert(Roles::NodeIdRole, "nodeId");
     _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
@@ -56,11 +55,7 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
 
 QStringList NodeAttributeTableModel::columnNames() const
 {
-    QStringList list;
-    list.reserve(_userNodeData->numUserDataVectors());
-
-    for(const auto& [name, userDataVector] : *_userNodeData)
-        list.append(userDataVector.name());
+    QStringList list = u::toQStringList(_userNodeData->vectorNames());
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
