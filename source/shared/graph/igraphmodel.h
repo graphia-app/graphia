@@ -30,6 +30,10 @@ class IMutableGraph;
 class IAttribute;
 struct IElementVisual;
 
+template<typename> class IUserElementData;
+using IUserNodeData = IUserElementData<NodeId>;
+using IUserEdgeData = IUserElementData<EdgeId>;
+
 class IGraphModel
 {
 public:
@@ -77,6 +81,9 @@ public:
         matchingAttributeNames.shrink_to_fit();
         return matchingAttributeNames;
     }
+
+    virtual IUserNodeData& userNodeData() = 0;
+    virtual IUserEdgeData& userEdgeData() = 0;
 };
 
 #endif // IGRAPHMODEL_H

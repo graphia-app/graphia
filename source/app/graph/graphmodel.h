@@ -23,6 +23,8 @@
 #include "shared/graph/grapharray.h"
 #include "shared/graph/igraphmodel.h"
 
+#include "shared/loading/userelementdata.h"
+
 #include "shared/utils/preferenceswatcher.h"
 
 #include "attributes/attribute.h"
@@ -53,10 +55,6 @@ class TransformInfo;
 class VisualisationInfo;
 
 class GraphTransformFactory;
-
-template<typename> class UserElementData;
-using UserNodeData = UserElementData<NodeId>;
-using UserEdgeData = UserElementData<EdgeId>;
 
 class AttributeChangesTracker;
 
@@ -176,8 +174,8 @@ public:
     void initialiseAttributeRanges();
     void initialiseSharedAttributeValues();
 
-    UserNodeData& userNodeData();
-    UserEdgeData& userEdgeData();
+    UserNodeData& userNodeData() override;
+    UserEdgeData& userEdgeData() override;
 
     void clearHighlightedNodes();
     void highlightNodes(const NodeIdSet& nodeIds);
