@@ -205,9 +205,6 @@ public:
         if(!UserData::load(jsonObject, progressable))
             return false;
 
-        _indexes->resetElements();
-        _indexToElementIdMap.clear();
-
         const char* idsKey = "ids";
         if(!u::contains(jsonObject, idsKey) || !jsonObject[idsKey].is_array())
         {
@@ -220,10 +217,28 @@ public:
         const auto& ids = jsonObject[idsKey];
 
         size_t index = 0;
+
+        if(!_indexes->empty())
+        {
+            auto it = std::max_element(_indexes->begin(), _indexes->end(),
+            [](const auto& a, const auto& b)
+            {
+                if(!a._set && b._set)
+                    return true;
+
+                return a._value < b._value;
+            });
+
+            if(it->_set)
+                index = it->_value;
+        }
+
         for(const auto& id : ids)
         {
             E elementId = id.get<int>();
-            setElementIdForIndex(elementId, index++);
+
+            if(!haveIndexFor(elementId))
+                setElementIdForIndex(elementId, index++);
         }
 
         return true;

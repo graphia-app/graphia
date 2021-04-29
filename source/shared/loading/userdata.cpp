@@ -182,9 +182,6 @@ bool UserData::load(const json& jsonObject, Progressable& progressable)
     if(!jsonObject["vectors"].is_array())
         return false;
 
-    _userDataVectors.clear();
-    _numValues = 0;
-
     const auto& vectorsObject = jsonObject["vectors"];
     for(const auto& vector : vectorsObject)
     {
