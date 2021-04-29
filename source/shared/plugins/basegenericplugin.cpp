@@ -44,42 +44,41 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 {
     BasePluginInstance::initialise(plugin, document, parserThread);
 
-    auto* graphModel = document->graphModel();
-
-    _userNodeData.initialise(graphModel->mutableGraph());
-    _nodeAttributeTableModel.initialise(document, &_userNodeData);
-
-    _userEdgeData.initialise(graphModel->mutableGraph());
+    _graphModel = document->graphModel();
+    _nodeAttributeTableModel.initialise(document, &_graphModel->userNodeData());
 }
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
+    auto* userNodeData = &_graphModel->userNodeData();
+    auto* userEdgeData = &_graphModel->userEdgeData();
+
     if(urlTypeName == QStringLiteral("GML"))
-        return std::make_unique<GmlFileParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<GmlFileParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == QStringLiteral("PairwiseTXT"))
-        return std::make_unique<PairwiseTxtFileParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == QStringLiteral("GraphML"))
-        return std::make_unique<GraphMLParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<GraphMLParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == QStringLiteral("DOT"))
-        return std::make_unique<DotFileParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
 
     if(urlTypeName.startsWith(QStringLiteral("Matrix")))
     {
         std::unique_ptr<IParser> parser;
 
         if(urlTypeName == QStringLiteral("MatrixCSV"))
-            parser = std::make_unique<AdjacencyMatrixCSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+            parser = std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData);
         else if(urlTypeName == QStringLiteral("MatrixSSV"))
-            parser = std::make_unique<AdjacencyMatrixSSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+            parser = std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData);
         else if(urlTypeName == QStringLiteral("MatrixTSV"))
-            parser = std::make_unique<AdjacencyMatrixTSVFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+            parser = std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData);
         else if(urlTypeName == QStringLiteral("MatrixXLSX"))
-            parser = std::make_unique<AdjacencyMatrixXLSXFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+            parser = std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData);
         else if(urlTypeName == QStringLiteral("MatrixMatLab"))
-            parser = std::make_unique<AdjacencyMatrixMatLabFileParser>(&_userNodeData, &_userEdgeData, &_adjacencyMatrixParameters._tabularData);
+            parser = std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData);
 
         if(parser != nullptr)
         {
@@ -99,10 +98,10 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     }
 
     if(urlTypeName == QStringLiteral("BiopaxOWL"))
-        return std::make_unique<BiopaxFileParser>(&_userNodeData);
+        return std::make_unique<BiopaxFileParser>(userNodeData);
 
     if(urlTypeName == QStringLiteral("JSONGraph"))
-        return std::make_unique<JsonGraphParser>(&_userNodeData, &_userEdgeData);
+        return std::make_unique<JsonGraphParser>(userNodeData, userEdgeData);
 
     return nullptr;
 }
@@ -137,48 +136,6 @@ QStringList BaseGenericPluginInstance::defaultTransforms() const
     return defaultTransforms;
 }
 
-QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
-{
-    json jsonObject;
-
-    progressable.setProgress(-1);
-
-    jsonObject["userNodeData"] = _userNodeData.save(graph, graph.nodeIds(), progressable);
-    jsonObject["userEdgeData"] = _userEdgeData.save(graph, graph.edgeIds(), progressable);
-
-    return QByteArray::fromStdString(jsonObject.dump());
-}
-
-bool BaseGenericPluginInstance::load(const QByteArray& data, int /*dataVersion*/,
-                                     IMutableGraph& graph, IParser& parser)
-{
-    json jsonObject = parseJsonFrom(data, &parser);
-
-    if(parser.cancelled())
-        return false;
-
-    if(jsonObject.is_null() || !jsonObject.is_object())
-        return false;
-
-    parser.setProgress(-1);
-
-    if(!u::contains(jsonObject, "userNodeData") || !jsonObject["userNodeData"].is_object())
-        return false;
-
-    graph.setPhase(QObject::tr("Node Data"));
-    if(!_userNodeData.load(jsonObject["userNodeData"], parser))
-        return false;
-
-    if(!u::contains(jsonObject, "userEdgeData") || !jsonObject["userEdgeData"].is_object())
-        return false;
-
-    graph.setPhase(QObject::tr("Edge Data"));
-    if(!_userEdgeData.load(jsonObject["userEdgeData"], parser))
-        return false; // NOLINT
-
-    return true;
-}
-
 QString BaseGenericPluginInstance::selectedNodeNames() const
 {
     QString s;
@@ -204,7 +161,7 @@ void BaseGenericPluginInstance::setHighlightedRows(const QVector<int>& highlight
     NodeIdSet highlightedNodeIds;
     for(auto row : highlightedRows)
     {
-        auto nodeId = _userNodeData.elementIdForIndex(static_cast<size_t>(row));
+        auto nodeId = _graphModel->userNodeData().elementIdForIndex(static_cast<size_t>(row));
         highlightedNodeIds.insert(nodeId);
     }
 
@@ -215,8 +172,6 @@ void BaseGenericPluginInstance::setHighlightedRows(const QVector<int>& highlight
 
 void BaseGenericPluginInstance::onLoadSuccess()
 {
-    _userNodeData.exposeAsAttributes(*graphModel());
-    _userEdgeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateColumnNames();
 }
 

@@ -39,7 +39,7 @@ public:
                   "of file formats.");
     }
     QString imageSource() const { return "qrc:///tools.svg"; }
-    int dataVersion() const { return 2; }
+    int dataVersion() const { return 3; }
     QString qmlPath() const { return "qrc:///qml/GenericPlugin.qml"; }
 };
 

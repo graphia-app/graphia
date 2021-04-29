@@ -81,7 +81,6 @@ private:
     std::vector<QString> _dataColumnNames;
     std::vector<ColumnAnnotation> _columnAnnotations;
 
-    UserNodeData _userNodeData;
     UserData _userColumnData;
 
     CorrelationNodeAttributeTableModel _nodeAttributeTableModel;
@@ -215,7 +214,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 7; }
+    int dataVersion() const override { return 8; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

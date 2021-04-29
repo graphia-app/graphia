@@ -55,8 +55,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     BasePluginInstance::initialise(plugin, document, parserThread);
 
     _graphModel = document->graphModel();
-    _userNodeData.initialise(_graphModel->mutableGraph());
-    _nodeAttributeTableModel.initialise(document, &_userNodeData);
+    _nodeAttributeTableModel.initialise(document, &_graphModel->userNodeData());
 
     _correlationValues = std::make_unique<EdgeArray<double>>(_graphModel->mutableGraph());
 
@@ -122,14 +121,14 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 if(isColumnInDataRect)
                     setDataColumnName(dataColumnIndex, value);
                 else if(isRowAttribute)
-                    _userNodeData.add(value);
+                    _graphModel->userNodeData().add(value);
             }
             else if(isColumnAnnotation)
             {
                 if(columnIndex == 0)
-                    _userColumnData.add(value);
+                    _graphModel->userNodeData().add(value);
                 else if(isColumnInDataRect)
-                    _userColumnData.setValue(dataColumnIndex, tabularData.valueAt(0, rowIndex), value);
+                    _graphModel->userNodeData().setValue(dataColumnIndex, tabularData.valueAt(0, rowIndex), value);
             }
             else if(isColumnInDataRect)
             {
@@ -171,7 +170,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 }
             }
             else if(isRowAttribute)
-                _userNodeData.setValue(dataRowIndex, tabularData.valueAt(columnIndex, 0), value);
+                _graphModel->userNodeData().setValue(dataRowIndex, tabularData.valueAt(columnIndex, 0), value);
         }
     }
 
@@ -350,7 +349,7 @@ void CorrelationPluginInstance::setHighlightedRows(const QVector<int>& highlight
     NodeIdSet highlightedNodeIds;
     for(auto row : highlightedRows)
     {
-        auto nodeId = _userNodeData.elementIdForIndex(static_cast<size_t>(row));
+        auto nodeId = _graphModel->userNodeData().elementIdForIndex(static_cast<size_t>(row));
         highlightedNodeIds.insert(nodeId);
     }
 
@@ -431,7 +430,7 @@ void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_
 {
     Q_ASSERT(_dataColumnNames.empty());
     Q_ASSERT(_userColumnData.empty());
-    Q_ASSERT(_userNodeData.empty());
+    Q_ASSERT(_graphModel->userNodeData().numUserDataVectors() == 0);
 
     _numContinuousColumns = numContinuousColumns;
     _numDiscreteColumns = numDiscreteColumns;
@@ -483,9 +482,10 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     _continuousDataRows.emplace_back(_continuousData, row, _numContinuousColumns, nodeId, computeCost);
     _discreteDataRows.emplace_back(_discreteData, row, _numDiscreteColumns, nodeId, computeCost);
 
-    _userNodeData.setElementIdForIndex(nodeId, row);
+    _graphModel->userNodeData().setElementIdForIndex(nodeId, row);
 
-    auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
+    auto nodeName = _graphModel->userNodeData().valueBy(nodeId,
+        _graphModel->userNodeData().firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
 }
 
@@ -522,7 +522,6 @@ QStringList CorrelationPluginInstance::columnAnnotationNames() const
 
 void CorrelationPluginInstance::onLoadSuccess()
 {
-    _userNodeData.exposeAsAttributes(*graphModel());
     buildColumnAnnotations();
     _nodeAttributeTableModel.updateColumnNames();
 }
@@ -580,12 +579,12 @@ void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progre
 
 const ContinuousDataRow& CorrelationPluginInstance::continuousDataRowForNodeId(NodeId nodeId) const
 {
-    return _continuousDataRows.at(_userNodeData.indexFor(nodeId));
+    return _continuousDataRows.at(_graphModel->userNodeData().indexFor(nodeId));
 }
 
 const DiscreteDataRow& CorrelationPluginInstance::discreteDataRowForNodeId(NodeId nodeId) const
 {
-    return _discreteDataRows.at(_userNodeData.indexFor(nodeId));
+    return _discreteDataRows.at(_graphModel->userNodeData().indexFor(nodeId));
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
@@ -731,8 +730,8 @@ int CorrelationPluginInstance::discreteDataValueIndex(const QString& value) cons
 
 QString CorrelationPluginInstance::rowName(int row) const
 {
-    const auto& [name, firstColumn] = *_userNodeData.begin();
-    return firstColumn.get(row);
+    return _graphModel->userNodeData().value(row,
+        _graphModel->userNodeData().firstUserDataVectorName()).toString();
 }
 
 QString CorrelationPluginInstance::columnName(int column) const
@@ -742,7 +741,7 @@ QString CorrelationPluginInstance::columnName(int column) const
 
 QColor CorrelationPluginInstance::nodeColorForRow(int row) const
 {
-    auto nodeId = _userNodeData.elementIdForIndex(row);
+    auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
 
     if(nodeId.isNull())
         return {};
@@ -753,7 +752,7 @@ QColor CorrelationPluginInstance::nodeColorForRow(int row) const
 QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, int row) const
 {
     const auto* attribute = _graphModel->attributeByName(attributeName);
-    auto nodeId = _userNodeData.elementIdForIndex(row);
+    auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
 
     if(attribute == nullptr || nodeId.isNull())
         return {};
@@ -768,7 +767,6 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["numContinuousColumns"] = static_cast<int>(_numContinuousColumns);
     jsonObject["numDiscreteColumns"] = static_cast<int>(_numDiscreteColumns);
     jsonObject["numRows"] = static_cast<int>(_numRows);
-    jsonObject["userNodeData"] = _userNodeData.save(graph, graph.nodeIds(), progressable);
     jsonObject["userColumnData"] =_userColumnData.save(progressable);
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
@@ -857,10 +855,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     _numRows = static_cast<size_t>(jsonObject["numRows"].get<int>());
 
-    if(!u::contains(jsonObject, "userNodeData") || !u::contains(jsonObject, "userColumnData"))
-        return false;
-
-    if(!_userNodeData.load(jsonObject["userNodeData"], parser))
+    if(!u::contains(jsonObject, "userColumnData"))
         return false;
 
     if(!_userColumnData.load(jsonObject["userColumnData"], parser))
@@ -912,7 +907,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     for(size_t row = 0; row < _numRows; row++)
     {
-        auto nodeId = _userNodeData.elementIdForIndex(row);
+        auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
 
         if(!nodeId.isNull())
         {

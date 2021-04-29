@@ -342,6 +342,27 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         }
     }
 
+    if(version < 6)
+    {
+        // Older files store the user attribute data in the plugin section
+        const auto& pluginData = jsonBody["pluginData"];
+
+        if(pluginData.is_object())
+        {
+            if(u::contains(pluginData, "userNodeData") && pluginData["userNodeData"].is_object())
+            {
+                if(!graphModel->userNodeData().load(pluginData["userNodeData"], *this))
+                    return false;
+            }
+
+            if(u::contains(pluginData, "userEdgeData") && pluginData["userEdgeData"].is_object())
+            {
+                if(!graphModel->userEdgeData().load(pluginData["userEdgeData"], *this))
+                    return false;
+            }
+        }
+    }
+
     if(u::contains(jsonBody, "userNodeData") && jsonBody["userNodeData"].is_object())
     {
         if(!graphModel->userNodeData().load(jsonBody["userNodeData"], *this))

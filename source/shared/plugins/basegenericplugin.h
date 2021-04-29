@@ -44,8 +44,7 @@ class BaseGenericPluginInstance : public BasePluginInstance
         WRITE setHighlightedRows NOTIFY highlightedRowsChanged)
 
 private:
-    UserNodeData _userNodeData;
-    UserEdgeData _userEdgeData;
+    IGraphModel* _graphModel = nullptr;
 
     struct AdjacencyMatrixParameters
     {
@@ -65,9 +64,6 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;
     QStringList defaultTransforms() const override;
-
-    QByteArray save(IMutableGraph&, Progressable&) const override;
-    bool load(const QByteArray&, int, IMutableGraph&, IParser& parser) override;
 
 private:
     // The rows that are selected in the table view
