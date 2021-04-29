@@ -20,6 +20,7 @@
 #define IUSERDATA_H
 
 #include <QString>
+#include <QVariant>
 
 #include <vector>
 
@@ -28,12 +29,17 @@ class IUserData
 public:
     virtual ~IUserData() = default;
 
+    virtual QString firstUserDataVectorName() const = 0;
+
     virtual int numUserDataVectors() const = 0;
     virtual int numValues() const = 0;
 
-    virtual std::vector<QString> vectorNames() const = 0;
+    virtual const std::vector<QString>& vectorNames() const = 0;
 
     virtual void add(const QString& name) = 0;
+
+    virtual QVariant value(size_t index, const QString& name) const = 0;
+    virtual void setValue(size_t index, const QString& name, const QString& value) = 0;
 };
 
 #endif // IUSERDATA_H

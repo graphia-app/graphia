@@ -44,21 +44,21 @@ private:
 public:
     virtual ~UserData() = default;
 
-    QString firstUserDataVectorName() const;
+    QString firstUserDataVectorName() const override;
 
     int numUserDataVectors() const override;
     int numValues() const override;
 
     bool empty() const { return _userDataVectors.empty(); }
 
-    std::vector<QString> vectorNames() const override;
+    const std::vector<QString>& vectorNames() const override;
 
     auto begin() const { return _userDataVectors.begin(); }
     auto end() const { return _userDataVectors.end(); }
 
     void add(const QString& name) override;
-    void setValue(size_t index, const QString& name, const QString& value);
-    QVariant value(size_t index, const QString& name) const;
+    void setValue(size_t index, const QString& name, const QString& value) override;
+    QVariant value(size_t index, const QString& name) const override;
 
     UserDataVector* vector(const QString& name);
     void setVector(const QString& name, UserDataVector&& other);

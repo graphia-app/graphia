@@ -62,7 +62,7 @@ public:
         _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
     }
 
-    void setElementIdForIndex(E elementId, size_t index)
+    void setElementIdForIndex(E elementId, size_t index) override
     {
         _indexes->set(elementId, {true, index});
         _indexToElementIdMap[index] = elementId;
@@ -83,7 +83,7 @@ public:
         return _indexes->get(elementId)._set;
     }
 
-    size_t indexFor(E elementId) const
+    size_t indexFor(E elementId) const override
     {
         return _indexes->get(elementId)._value;
     }

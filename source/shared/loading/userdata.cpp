@@ -52,7 +52,7 @@ static QString normalise(QString name)
     return name;
 }
 
-std::vector<QString> UserData::vectorNames() const
+const std::vector<QString>& UserData::vectorNames() const
 {
     return _vectorNames;
 }
