@@ -33,6 +33,7 @@
 #include <QSysInfo>
 #include <QDir>
 #include <QFileInfo>
+#include <QCollator>
 
 #include <algorithm>
 #include <regex>
@@ -101,11 +102,14 @@ json updateStringToJson(const QString& updateString, QString* status)
         return payloads.find(QSysInfo::kernelType().toStdString()) == payloads.end();
     }), updates.end());
 
+    QCollator collator;
+    collator.setNumericMode(true);
+
     // Remove updates that are older than the running version
     updates.erase(std::remove_if(updates.begin(), updates.end(),
-    [](const auto& update)
+    [&collator](const auto& update)
     {
-        return update["version"] < VERSION;
+        return collator.compare(update["version"], VERSION) < 0;
     }), updates.end());
 
     if(updates.empty())
