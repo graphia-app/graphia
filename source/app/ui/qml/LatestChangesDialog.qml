@@ -52,6 +52,8 @@ Window
             textFormat: TextEdit.MarkdownText
 
             text: root.text
+
+            onLinkActivated: Qt.openUrlExternally(link);
         }
 
         Button

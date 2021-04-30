@@ -93,6 +93,8 @@ ApplicationWindow
 
                     return adjustedChangeLog;
                 }
+
+                onLinkActivated: Qt.openUrlExternally(link);
             }
 
             RowLayout
