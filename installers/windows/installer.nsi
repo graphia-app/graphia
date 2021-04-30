@@ -216,6 +216,13 @@ SectionGroup /e "File associations"
 				"$INSTDIR\${EXE} $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
+	Section "Graphviz DOT file (.dot)"
+		IfSilent skipFileAssociation
+		!insertmacro APP_ASSOCIATE "dot" "${PRODUCT_NAME}.dot" "${PRODUCT_NAME} DOT File" \
+				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+				"$INSTDIR\${EXE} $\"%1$\""
+		skipFileAssociation:
+	SectionEnd
 SectionGroupEnd
 
 Section /o "Desktop shortcut"
@@ -244,5 +251,8 @@ Section "Uninstall"
 
 	!insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}"
 	!insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
+	!insertmacro APP_UNASSOCIATE "graphml" "${PRODUCT_NAME}.graphml"
+	!insertmacro APP_UNASSOCIATE "owl" "${PRODUCT_NAME}.owl"
+	!insertmacro APP_UNASSOCIATE "dot" "${PRODUCT_NAME}.dot"
 	!insertmacro UPDATEFILEASSOC
 SectionEnd
