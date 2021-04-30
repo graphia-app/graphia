@@ -916,18 +916,18 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
         if(transforms)
         {
-            commands.emplace_back(std::move(
+            commands.emplace_back(
                 std::make_unique<ApplyTransformsCommand>(
                 _graphModel.get(), _selectionManager.get(), this,
-                _graphTransforms, graphTransformConfigurationsFromUI())));
+                _graphTransforms, graphTransformConfigurationsFromUI()));
         }
 
         if(visualisations)
         {
-            commands.emplace_back(std::move(
+            commands.emplace_back(
                 std::make_unique<ApplyVisualisationsCommand>(
                 _graphModel.get(), this,
-                _visualisations, _visualisationsFromUI)));
+                _visualisations, _visualisationsFromUI));
         }
 
         if(!commands.empty())

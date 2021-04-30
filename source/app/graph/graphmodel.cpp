@@ -1041,7 +1041,7 @@ static float mappedSize(float min, float max, float user, float mapped)
 void GraphModel::updateVisuals()
 {
     // Prevent any changes to the graph while we read from it
-    auto lock = std::move(mutableGraph().tryLock());
+    auto lock = mutableGraph().tryLock();
     if(!lock.owns_lock())
     {
         // Delay the update until we can get exclusive access to the graph
