@@ -45,6 +45,9 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         // Don't show an emphasised vertical zero line
         _discreteXAxis->grid()->setZeroLinePen(_discreteXAxis->grid()->pen());
+
+        for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
+            _customPlot.addLayer(QStringLiteral("discrete%1").arg(column));
     }
 
     std::vector<size_t> columnTotals(_pluginInstance->numDiscreteColumns());
@@ -78,10 +81,6 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         const auto& m = columnData[column];
         QCPBars* last = nullptr;
 
-        auto layerName = QStringLiteral("discrete%1").arg(column);
-        if(_customPlot.layer(layerName) == nullptr)
-            _customPlot.addLayer(layerName);
-
         auto addBars = [&](const auto& value, const auto& yData, QColor color = {})
         {
             auto* bars = new QCPBars(_discreteXAxis, _discreteYAxis);
@@ -111,7 +110,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
                 innerColor.setHsv(innerColor.hue(), innerColor.saturation(), 92);
 
             bars->setBrush(innerColor);
-            bars->setLayer(layerName);
+            bars->setLayer(QStringLiteral("discrete%1").arg(column));
         };
 
         // When the number of possible values is large, for an arbitrary value of large,
