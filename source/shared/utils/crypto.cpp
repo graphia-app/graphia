@@ -118,14 +118,15 @@ Key loadKey(const std::string& fileName)
 
 std::string u::rsaSignString(const std::string& string, const std::string& privateKeyFileName)
 {
-    auto privateKey = loadKey<CryptoPP::RSA::PrivateKey>(privateKeyFileName);
-
-    CryptoPP::AutoSeededRandomPool rng;
-    CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
     std::string signature;
 
     try
     {
+        auto privateKey = loadKey<CryptoPP::RSA::PrivateKey>(privateKeyFileName);
+
+        CryptoPP::AutoSeededRandomPool rng;
+        CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
+
         CryptoPP::StringSource ss(string, true,
             new CryptoPP::SignerFilter(rng, signer,
                 new CryptoPP::StringSink(signature)
