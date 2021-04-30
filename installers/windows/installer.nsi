@@ -108,6 +108,35 @@ RequestExecutionLevel highest
 !insertmacro ONINIT ""
 !insertmacro ONINIT "un"
 
+!macro REMOVE_OLD_INSTALLATION
+	RMDir /r "$INSTDIR\bearer"
+	RMDir /r "$INSTDIR\examples"
+	RMDir /r "$INSTDIR\iconengines"
+	RMDir /r "$INSTDIR\imageformats"
+	RMDir /r "$INSTDIR\platforms"
+	RMDir /r "$INSTDIR\plugins"
+	RMDir /r "$INSTDIR\position"
+	RMDir /r "$INSTDIR\printsupport"
+	RMDir /r "$INSTDIR\qmltooling"
+	RMDir /r "$INSTDIR\Qt"
+	RMDir /r "$INSTDIR\QtGraphicalEffects"
+	RMDir /r "$INSTDIR\QtQml"
+	RMDir /r "$INSTDIR\QtQuick"
+	RMDir /r "$INSTDIR\QtQuick.2"
+	RMDir /r "$INSTDIR\QtTest"
+	RMDir /r "$INSTDIR\QtWebEngine"
+	RMDir /r "$INSTDIR\resources"
+	RMDir /r "$INSTDIR\scenegraph"
+	RMDir /r "$INSTDIR\styles"
+	RMDir /r "$INSTDIR\translations"
+	Delete "$INSTDIR\*.dll"
+	Delete "$INSTDIR\*.exe"
+	Delete "$INSTDIR\Updater.deps"
+
+	; Not recursive, in case the user chose to install it to a non-empty directory
+	RMDir "$INSTDIR"
+!macroend
+
 ; Installer Icons
 !insertmacro MUI_DEFAULT MUI_ICON "source\app\icon\Installer.ico"
 !insertmacro MUI_DEFAULT MUI_UNICON "source\app\icon\Installer.ico"
@@ -158,7 +187,7 @@ Section "-Main Component"
 	SetOutPath "$INSTDIR"
 
 	; Clear out the target directory first
-	RMDir /r "$INSTDIR"
+	!insertmacro REMOVE_OLD_INSTALLATION
 
 	File /r "installer\*.*"
 
@@ -237,7 +266,7 @@ Function Launch
 FunctionEnd
 
 Section "Uninstall"
-	RMDir /r "$INSTDIR"
+	!insertmacro REMOVE_OLD_INSTALLATION
 
 	!insertmacro MUI_STARTMENU_GETFOLDER ${PRODUCT_NAME} $STARTMENU_FOLDER
 	Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk"
