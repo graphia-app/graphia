@@ -40,6 +40,12 @@ ApplicationWindow
         property string credentials: ""
         property string privateKeyFile: ""
 
+        onPrivateKeyFileChanged:
+        {
+            root.privateKeyFileExists =
+                QmlUtils.fileUrlExists(privateKeyFile);
+        }
+
         property string defaultOpenFolder
         property string defaultImageOpenFolder
     }
@@ -51,6 +57,8 @@ ApplicationWindow
 
     property string lastUsedFilename: ""
     property bool saveRequired: false
+
+    property bool privateKeyFileExists: false
 
     function setSaveRequired()
     {
@@ -407,6 +415,9 @@ ApplicationWindow
                 return false;
         }
 
+        if(!root.privateKeyFileExists)
+            return false;
+
         return !root.busy
     }
 
@@ -436,10 +447,12 @@ ApplicationWindow
                 signature: updatesSignature
             };
 
-            let success = QmlUtils.writeToFile(QmlUtils.fileNameForUrl(fileUrl),
-                JSON.stringify(saveObject));
-
-            if(!success)
+            if(updatesSignature.length === 0)
+            {
+                console.log("Failed to sign " + fileUrl);
+                status.text = qsTr("Failed to sign");
+            }
+            else if(!QmlUtils.writeToFile(QmlUtils.fileNameForUrl(fileUrl), JSON.stringify(saveObject)))
             {
                 console.log("Failed to write " + fileUrl);
                 status.text = qsTr("Failed to save");
