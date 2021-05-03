@@ -214,6 +214,8 @@ static bool minidumpCallback(
     {
         QTemporaryDir tempDir;
         tempDir.setAutoRemove(false);
+
+        std::cerr << "Invoking userHandler\n";
         exceptionHandler->userHandler()(tempDir.path());
 
 #if defined(Q_OS_WIN)
@@ -222,6 +224,8 @@ static bool minidumpCallback(
         strncpy(dir, tempDir.path().toUtf8(), sizeof(dir) - 1);
 #endif
     }
+    else
+        std::cerr << "No userHandler installer\n";
 
 #if defined(Q_OS_WIN)
     swprintf(path, sizeof(path) / sizeof(path[0]),

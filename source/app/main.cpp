@@ -302,6 +302,8 @@ int start(int argc, char *argv[])
             stream << state.toString();
             file.close();
         }
+        else
+            std::cerr << "Failed to invoke 'currentState'\n";
     });
 #endif
 
