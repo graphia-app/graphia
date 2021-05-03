@@ -290,7 +290,7 @@ int start(int argc, char *argv[])
         QVariant state;
 
         bool success = QMetaObject::invokeMethod(mainWindow, "currentState",
-            Q_RETURN_ARG(QVariant, state));
+            Qt::DirectConnection, Q_RETURN_ARG(QVariant, state));
 
         if(success)
         {
@@ -303,7 +303,10 @@ int start(int argc, char *argv[])
             file.close();
         }
         else
-            std::cerr << "Failed to invoke 'currentState'\n";
+        {
+            auto index = mainWindow->metaObject()->indexOfMethod("currentState()");
+            std::cerr << "Failed to invoke 'currentState' (" << index << ")\n";
+        }
     });
 #endif
 
