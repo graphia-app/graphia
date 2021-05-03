@@ -126,9 +126,9 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             else if(isColumnAnnotation)
             {
                 if(columnIndex == 0)
-                    _graphModel->userNodeData().add(value);
+                    _userColumnData.add(value);
                 else if(isColumnInDataRect)
-                    _graphModel->userNodeData().setValue(dataColumnIndex, tabularData.valueAt(0, rowIndex), value);
+                    _userColumnData.setValue(dataColumnIndex, tabularData.valueAt(0, rowIndex), value);
             }
             else if(isColumnInDataRect)
             {
