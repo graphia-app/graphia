@@ -116,9 +116,10 @@ json updateStringToJson(const QString& updateString, QString* status)
         return {};
 
     std::sort(updates.begin(), updates.end(),
-    [](const auto& a, const auto& b)
+    [&collator](const auto& a, const auto& b)
     {
-        return a["version"] > b["version"];
+        return collator.compare(QString::fromStdString(a["version"]),
+            QString::fromStdString(b["version"])) > 0;
     });
 
     json latestUpdate = updates.at(0);
