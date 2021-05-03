@@ -1018,6 +1018,13 @@ void CorrelationPlotItem::updateSortMap()
                 if(annotationValueA == annotationValueB)
                     continue;
 
+                if(columnSortOrder._annotation->isNumeric())
+                {
+                    return columnSortOrder._order == Qt::AscendingOrder ?
+                        u::toNumber(annotationValueA) < u::toNumber(annotationValueB) :
+                        u::toNumber(annotationValueB) < u::toNumber(annotationValueA);
+                }
+
                 return columnSortOrder._order == Qt::AscendingOrder ?
                     collator.compare(annotationValueA, annotationValueB) < 0 :
                     collator.compare(annotationValueB, annotationValueA) < 0;
