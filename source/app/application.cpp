@@ -22,6 +22,7 @@
 #include "tracking.h"
 
 #include "shared/plugins/iplugin.h"
+#include "shared/utils/container_combine.h"
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
@@ -624,11 +625,11 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 void Application::updateNameFilters()
 {
     // Initialise with native file type
-    std::vector<UrlType> fileTypes{{NativeFileType, QString("%1 File").arg(name()),
+    std::vector<UrlType> nativeFileTypes{{NativeFileType, QString("%1 File").arg(name()),
         QString("%1 Files").arg(name()), {nativeExtension()}}};
 
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
-    fileTypes.insert(fileTypes.end(), pluginFileTypes.begin(), pluginFileTypes.end());
+    auto fileTypes = u::combine(nativeFileTypes, pluginFileTypes);
 
     QString description = QObject::tr("All Files (");
     bool second = false;

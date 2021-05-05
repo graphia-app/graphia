@@ -63,6 +63,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/commands/icommand.h"
 
+#include "shared/utils/container_combine.h"
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
@@ -1229,7 +1230,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
 void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
     const QStringList& changedValuesNames)
 {
-    for(const auto& attributeName : (QStringList() << addedNames << changedValuesNames))
+    for(const auto& attributeName : u::combine(addedNames, changedValuesNames))
     {
         calculateAttributeRange(attributeName);
         updateSharedAttributeValues(attributeName);
