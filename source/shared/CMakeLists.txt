@@ -75,6 +75,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/constants.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/container_combine.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container_randomsample.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/debugger.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.h
