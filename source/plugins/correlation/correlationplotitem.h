@@ -232,6 +232,7 @@ private:
     QCustomPlot _customPlot;
     QCPLayoutGrid* _mainLayoutGrid = nullptr;
     QCPLayoutGrid* _axesLayoutGrid = nullptr;
+    QCPLayoutGrid* _legendLayoutGrid = nullptr;
 
     QCPAxisRect* _discreteAxisRect = nullptr;
     QCPAxis* _discreteXAxis = nullptr;

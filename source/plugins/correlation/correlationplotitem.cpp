@@ -617,29 +617,43 @@ QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* plugin
 void CorrelationPlotItem::configureLegend()
 {
     if(_selectedRows.empty() || !_showLegend)
+    {
+        if(_legendLayoutGrid != nullptr)
+        {
+            _customPlot.plotLayout()->remove(_legendLayoutGrid);
+            _customPlot.plotLayout()->simplify();
+            _customPlot.plotLayout()->setColumnStretchFactor(0, 1.0);
+            _legendLayoutGrid = nullptr;
+        }
+
         return;
+    }
 
-    // Create a subLayout to position the Legend
-    auto* subLayout = new QCPLayoutGrid;
-    _customPlot.plotLayout()->insertColumn(1);
-    _customPlot.plotLayout()->addElement(0, 1, subLayout);
+    if(_legendLayoutGrid == nullptr)
+    {
+        // Create a subLayout to position the Legend
+        _legendLayoutGrid = new QCPLayoutGrid;
+        _customPlot.plotLayout()->insertColumn(1);
+        _customPlot.plotLayout()->addElement(0, 1, _legendLayoutGrid);
 
-    auto* legend = new QCPLegend;
+        // Surround the legend row in two empty rows that are stretched maximally, and
+        // stretch the legend itself minimally, thus centreing the legend vertically
+        _legendLayoutGrid->insertRow(0);
+        _legendLayoutGrid->setRowStretchFactor(0, 1.0);
+        _legendLayoutGrid->addElement(1, 0, new QCPLegend);
+        _legendLayoutGrid->setRowStretchFactor(1, std::numeric_limits<double>::min());
+        _legendLayoutGrid->insertRow(2);
+        _legendLayoutGrid->setRowStretchFactor(2, 1.0);
+    }
 
-    // Surround the legend row in two empty rows that are stretched maximally, and
-    // stretch the legend itself minimally, thus centreing the legend vertically
-    subLayout->insertRow(0);
-    subLayout->setRowStretchFactor(0, 1.0);
-    subLayout->addElement(1, 0, legend);
-    subLayout->setRowStretchFactor(1, std::numeric_limits<double>::min());
-    subLayout->insertRow(2);
-    subLayout->setRowStretchFactor(2, 1.0);
+    auto legend = dynamic_cast<QCPLegend*>(_legendLayoutGrid->elementAt(
+        _legendLayoutGrid->rowColToIndex(1, 0)));
 
     legend->setLayer(QStringLiteral("legend"));
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
-    subLayout->setMargins(QMargins(0, marginSize, marginSize, marginSize));
+    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize));
 
     // BIGGEST HACK
     // Layouts and sizes aren't done until a replot, and layout is performed on another
@@ -649,10 +663,10 @@ void CorrelationPlotItem::configureLegend()
     // estimated using the total height of the QQuickItem, not the (unknowable) plot height
 
     // See QCPPlottableLegendItem::draw for the reasoning behind this value
-    const auto legendElementHeight = std::max(QFontMetrics(legend->font()).height(),
-                                              legend->iconSize().height());
+    const auto legendElementHeight =
+        std::max(QFontMetrics(legend->font()).height(), legend->iconSize().height());
 
-    const auto totalExternalMargins = subLayout->margins().top() + subLayout->margins().bottom();
+    const auto totalExternalMargins = _legendLayoutGrid->margins().top() + _legendLayoutGrid->margins().bottom();
     const auto totalInternalMargins = legend->margins().top() + legend->margins().bottom();
     const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
 
