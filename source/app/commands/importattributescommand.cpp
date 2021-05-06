@@ -31,11 +31,6 @@ ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const Q
     _replace(replace)
 {}
 
-size_t ImportAttributesCommand::numAttributes() const
-{
-    return _createdAttributeNames.size() + _replacedUserDataVectors.size();
-}
-
 QString ImportAttributesCommand::firstAttributeName() const
 {
     if(!_createdAttributeNames.empty())

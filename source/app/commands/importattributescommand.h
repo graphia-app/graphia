@@ -48,7 +48,7 @@ private:
     std::set<QString> _createdVectorNames;
     std::vector<QString> _createdAttributeNames;
 
-    size_t numAttributes() const;
+    size_t numAttributes() const { return _importColumnIndices.size(); }
     bool multipleAttributes() const { return numAttributes() > 1; }
     QString firstAttributeName() const;
 
