@@ -22,9 +22,17 @@
 
 #include "shared/loading/userelementdata.h"
 
+#include <algorithm>
+
 RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, QStringList attributeNames) :
     _graphModel(graphModel), _attributeNames(std::move(attributeNames))
-{}
+{
+    std::transform(_attributeNames.begin(), _attributeNames.end(), _attributeNames.begin(),
+    [](const auto& attributeName)
+    {
+        return Attribute::parseAttributeName(attributeName)._name;
+    });
+}
 
 QString RemoveAttributesCommand::description() const
 {
@@ -57,10 +65,9 @@ bool RemoveAttributesCommand::execute()
 {
     auto tracker = _graphModel->attributeChangesTracker();
 
-    for(auto attributeName : std::as_const(_attributeNames))
+    for(const auto& attributeName : std::as_const(_attributeNames))
     {
         const auto* attribute = _graphModel->attributeByName(attributeName);
-        attributeName = Attribute::parseAttributeName(attributeName)._name;
 
         Q_ASSERT(attribute->userDefined());
         if(!attribute->userDefined())
