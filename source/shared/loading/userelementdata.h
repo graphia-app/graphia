@@ -45,7 +45,7 @@ private:
 
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
-    std::set<QString> _exposedAsAttributes;
+    std::map<QString, QString> _exposedAsAttributes;
 
     void generateElementIdMapping(E elementId)
     {
@@ -120,13 +120,13 @@ public:
             if(u::contains(_exposedAsAttributes, userDataVectorName))
                 continue;
 
-            _exposedAsAttributes.emplace(userDataVectorName);
-
             QString attributeName;
 
             auto& attribute = graphModel.createAttribute(userDataVectorName, &attributeName)
                 .setFlag(AttributeFlag::Searchable)
                 .setUserDefined(true);
+
+            _exposedAsAttributes.emplace(userDataVectorName, attributeName);
 
             createdAttributeNames.emplace_back(attributeName);
 
@@ -177,6 +177,20 @@ public:
         }
 
         return createdAttributeNames;
+    }
+
+    QString vectorNameForExposedAttributeName(const QString& attributeName)
+    {
+        auto it = std::find_if(_exposedAsAttributes.begin(), _exposedAsAttributes.end(),
+        [&](const auto& v)
+        {
+            return v.second == attributeName;
+        });
+
+        if(it == _exposedAsAttributes.end())
+            return {};
+
+        return it->first;
     }
 
     json save(const IMutableGraph&, const std::vector<E>& elementIds, Progressable& progressable) const
