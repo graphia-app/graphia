@@ -73,22 +73,18 @@ bool RemoveAttributesCommand::execute()
         if(!attribute->userDefined())
             continue;
 
+        auto removeVector = [&](auto& userData, auto& removedMap)
+        {
+            auto vectorName = userData.vectorNameForExposedAttributeName(attributeName);
+            auto* v = userData.vector(vectorName);
+            removedMap[vectorName] = std::move(*v);
+            userData.remove(vectorName);
+        };
+
         if(attribute->elementType() == ElementType::Node)
-        {
-            auto vectorName = _graphModel->userNodeData()
-                .vectorNameForExposedAttributeName(attributeName);
-            auto* v = _graphModel->userNodeData().vector(vectorName);
-            _removedUserNodeDataVectors[vectorName] = std::move(*v);
-            _graphModel->userNodeData().remove(vectorName);
-        }
+            removeVector(_graphModel->userNodeData(), _removedUserNodeDataVectors);
         else if(attribute->elementType() == ElementType::Edge)
-        {
-            auto vectorName = _graphModel->userEdgeData()
-                .vectorNameForExposedAttributeName(attributeName);
-            auto* v = _graphModel->userEdgeData().vector(vectorName);
-            _removedUserEdgeDataVectors[vectorName] = std::move(*v);
-            _graphModel->userEdgeData().remove(vectorName);
-        }
+            removeVector(_graphModel->userEdgeData(), _removedUserEdgeDataVectors);
 
         _graphModel->removeAttribute(attributeName);
     }
