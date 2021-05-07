@@ -102,4 +102,7 @@ void RemoveAttributesCommand::undo()
 
     _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
     _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
+
+    _removedUserNodeDataVectors.clear();
+    _removedUserEdgeDataVectors.clear();
 }

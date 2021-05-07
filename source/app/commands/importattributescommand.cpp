@@ -163,6 +163,8 @@ void ImportAttributesCommand::undo()
     for(const auto& attributeName : _createdAttributeNames)
         _graphModel->removeAttribute(attributeName);
 
+    _createdAttributeNames.clear();
+
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
 
@@ -182,4 +184,7 @@ void ImportAttributesCommand::undo()
         undoUserData(_graphModel->userNodeData());
     else if(keyAttribute->elementType() == ElementType::Edge)
         undoUserData(_graphModel->userEdgeData());
+
+    _createdVectorNames.clear();
+    _replacedUserDataVectors.clear();
 }
