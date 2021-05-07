@@ -29,7 +29,7 @@ class IUserData
 public:
     virtual ~IUserData() = default;
 
-    virtual QString firstUserDataVectorName() const = 0;
+    virtual QString firstVectorName() const = 0;
 
     virtual int numUserDataVectors() const = 0;
     virtual int numValues() const = 0;

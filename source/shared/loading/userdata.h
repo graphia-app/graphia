@@ -44,7 +44,7 @@ private:
 public:
     virtual ~UserData() = default;
 
-    QString firstUserDataVectorName() const override;
+    QString firstVectorName() const override;
 
     int numUserDataVectors() const override;
     int numValues() const override;

@@ -22,7 +22,7 @@
 
 #include <QDebug>
 
-QString UserData::firstUserDataVectorName() const
+QString UserData::firstVectorName() const
 {
     if(!_vectorNames.empty())
         return _vectorNames.front();

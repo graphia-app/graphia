@@ -485,7 +485,7 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     _graphModel->userNodeData().setElementIdForIndex(nodeId, row);
 
     auto nodeName = _graphModel->userNodeData().valueBy(nodeId,
-        _graphModel->userNodeData().firstUserDataVectorName()).toString();
+        _graphModel->userNodeData().firstVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
 }
 
@@ -732,7 +732,7 @@ int CorrelationPluginInstance::discreteDataValueIndex(const QString& value) cons
 QString CorrelationPluginInstance::rowName(int row) const
 {
     return _graphModel->userNodeData().value(row,
-        _graphModel->userNodeData().firstUserDataVectorName()).toString();
+        _graphModel->userNodeData().firstVectorName()).toString();
 }
 
 QString CorrelationPluginInstance::columnName(int column) const
