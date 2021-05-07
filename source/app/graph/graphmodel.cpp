@@ -1216,6 +1216,13 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
     {
         auto& attribute = _->_attributes.at(Attribute::parseAttributeName(attributeName)._name);
 
+        if(attribute.testFlag(AttributeFlag::Dynamic) && attribute.userDefined())
+        {
+            qDebug() << "WARNING: Dynamic attribute" << attributeName <<
+                "has userDefined set, this is not allowed, resetting...";
+            attribute.setUserDefined(false);
+        }
+
         calculateAttributeRange(attribute);
         updateSharedAttributeValues(attribute);
     }
