@@ -166,10 +166,8 @@ public:
 
     static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);
     void calculateAttributeRange(Attribute& attribute);
-    void calculateAttributeRange(const QString& name);
 
     void updateSharedAttributeValues(Attribute& attribute);
-    void updateSharedAttributeValues(const QString& name);
 
     void initialiseAttributeRanges();
     void initialiseSharedAttributeValues();

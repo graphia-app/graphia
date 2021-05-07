@@ -943,15 +943,6 @@ void GraphModel::calculateAttributeRange(Attribute& attribute)
     calculateAttributeRange(&mutableGraph(), attribute);
 }
 
-void GraphModel::calculateAttributeRange(const QString& name)
-{
-    auto attributeName = Attribute::parseAttributeName(name);
-    Q_ASSERT(u::contains(_->_attributes, attributeName._name));
-
-    auto& attribute = _->_attributes.at(attributeName._name);
-    calculateAttributeRange(attribute);
-}
-
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
@@ -975,15 +966,6 @@ void GraphModel::updateSharedAttributeValues(Attribute& attribute)
         attribute.updateSharedValuesForElements(graph().edgeIds());
     else if(attribute.elementType() == ElementType::Component)
         qDebug() << "updateSharedAttributeValues called on component attribute";
-}
-
-void GraphModel::updateSharedAttributeValues(const QString& name)
-{
-    auto attributeName = Attribute::parseAttributeName(name);
-    Q_ASSERT(u::contains(_->_attributes, attributeName._name));
-
-    auto& attribute = _->_attributes.at(attributeName._name);
-    updateSharedAttributeValues(attribute);
 }
 
 void GraphModel::initialiseSharedAttributeValues()
@@ -1232,8 +1214,10 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
 {
     for(const auto& attributeName : u::combine(addedNames, changedValuesNames))
     {
-        calculateAttributeRange(attributeName);
-        updateSharedAttributeValues(attributeName);
+        auto& attribute = _->_attributes.at(Attribute::parseAttributeName(attributeName)._name);
+
+        calculateAttributeRange(attribute);
+        updateSharedAttributeValues(attribute);
     }
 
     if(!_transformedGraphIsChanging)
