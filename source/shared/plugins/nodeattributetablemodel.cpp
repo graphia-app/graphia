@@ -55,19 +55,22 @@ void NodeAttributeTableModel::initialise(IDocument* document, IUserNodeData* use
 
 QStringList NodeAttributeTableModel::columnNames() const
 {
-    QStringList list = u::toQStringList(_userNodeData->vectorNames());
+    // First make a list from the user data that has been exposed as attributes; the only
+    // reason we do this instead of directly using the general list of attributes (below)
+    // is because we want to preserve the order in which the attributes were created
+    QStringList list = u::toQStringList(_userNodeData->exposedAttributeNames());
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
         const auto* attribute = _document->graphModel()->attributeByName(attributeName);
         Q_ASSERT(attribute != nullptr);
 
-        // We can't show parameterised attributes in the table
-        if(attribute->hasParameter())
+        // Skip the ones that should have already been added or we can't display in a table
+        if(attribute->userDefined() || attribute->hasParameter())
             continue;
 
-        if(!u::contains(list, attributeName))
-            list.append(attributeName);
+        Q_ASSERT(!u::contains(list, attributeName));
+        list.append(attributeName);
     }
 
     return list;
