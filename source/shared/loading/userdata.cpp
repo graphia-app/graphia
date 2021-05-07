@@ -24,8 +24,8 @@
 
 QString UserData::firstUserDataVectorName() const
 {
-    if(!_userDataVectors.empty())
-        return _userDataVectors.at(0).first;
+    if(!_vectorNames.empty())
+        return _vectorNames.front();
 
     return {};
 }
@@ -64,7 +64,7 @@ void UserData::add(const QString& name)
         return;
 
     _vectorNames.emplace_back(normalisedName);
-    _userDataVectors.emplace_back(std::make_pair(normalisedName, UserDataVector(normalisedName)));
+    _userDataVectors.emplace(normalisedName, UserDataVector(normalisedName));
 }
 
 void UserData::setValue(size_t index, const QString& name, const QString& value)
@@ -143,12 +143,7 @@ void UserData::setVector(const QString& name, UserDataVector&& other)
 void UserData::remove(const QString& name)
 {
     QString normalisedName = normalise(name);
-    _userDataVectors.erase(std::remove_if(_userDataVectors.begin(), _userDataVectors.end(),
-    [&normalisedName](const auto& pair)
-    {
-        return pair.first == normalisedName;
-    }), _userDataVectors.end());
-
+    _userDataVectors.erase(normalisedName);
     u::removeByValue(_vectorNames, normalisedName);
 }
 
@@ -198,7 +193,7 @@ bool UserData::load(const json& jsonObject, Progressable& progressable)
             return false;
 
         _vectorNames.emplace_back(name);
-        _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
+        _userDataVectors.emplace(name, userDataVector);
 
         progressable.setProgress(static_cast<int>((i++ * 100) / vectorsObject.size()));
     }

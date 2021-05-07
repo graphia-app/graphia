@@ -112,10 +112,9 @@ public:
     {
         std::vector<QString> createdAttributeNames;
 
-        for(const auto& [name, userDataVector] : *this)
+        for(const auto& userDataVectorName : *this)
         {
-            // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
-            const auto& userDataVectorName = name;
+            const auto* userDataVector = vector(userDataVectorName);
 
             if(u::contains(_exposedAsAttributes, userDataVectorName))
                 continue;
@@ -130,7 +129,7 @@ public:
 
             createdAttributeNames.emplace_back(attributeName);
 
-            switch(userDataVector.type())
+            switch(userDataVector->type())
             {
             case UserDataVector::Type::Float:
                 attribute.setFloatValueFn(

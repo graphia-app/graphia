@@ -31,13 +31,13 @@
 
 #include <json_helper.h>
 
+#include <map>
 #include <vector>
 
 class UserData : public virtual IUserData
 {
 private:
-    // This is not a map because the data needs to be ordered
-    std::vector<std::pair<QString, UserDataVector>> _userDataVectors;
+    std::map<QString, UserDataVector> _userDataVectors;
     std::vector<QString> _vectorNames;
     int _numValues = 0;
 
@@ -53,8 +53,8 @@ public:
 
     const std::vector<QString>& vectorNames() const override;
 
-    auto begin() const { return _userDataVectors.begin(); }
-    auto end() const { return _userDataVectors.end(); }
+    auto begin() const { return _vectorNames.begin(); }
+    auto end() const { return _vectorNames.end(); }
 
     void add(const QString& name) override;
     void setValue(size_t index, const QString& name, const QString& value) override;

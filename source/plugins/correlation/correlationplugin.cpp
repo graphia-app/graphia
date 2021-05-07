@@ -530,10 +530,11 @@ void CorrelationPluginInstance::buildColumnAnnotations()
 {
     _columnAnnotations.reserve(_userColumnData.numUserDataVectors());
 
-    for(const auto& [name, values] : _userColumnData)
+    for(const auto& name : _userColumnData)
     {
-        auto numValues = values.numValues();
-        auto numUniqueValues = values.numUniqueValues();
+        const auto* values = _userColumnData.vector(name);
+        auto numValues = values->numValues();
+        auto numUniqueValues = values->numUniqueValues();
 
         // If the number of unique values is more than a half of the total
         // number of values, skip it, since a large number of unique values
@@ -542,7 +543,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
         if((numValues > 300) && (numUniqueValues * 2 > numValues))
             continue;
 
-        _columnAnnotations.emplace_back(name, values.begin(), values.end());
+        _columnAnnotations.emplace_back(name, values->begin(), values->end());
     }
 
     emit columnAnnotationNamesChanged();
