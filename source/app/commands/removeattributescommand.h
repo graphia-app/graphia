@@ -26,7 +26,7 @@
 #include <QString>
 #include <QStringList>
 
-#include <map>
+#include <vector>
 
 class GraphModel;
 
@@ -36,8 +36,8 @@ private:
     GraphModel* _graphModel = nullptr;
 
     QStringList _attributeNames;
-    std::map<QString, UserDataVector> _removedUserNodeDataVectors;
-    std::map<QString, UserDataVector> _removedUserEdgeDataVectors;
+    std::vector<UserDataVector> _removedUserNodeDataVectors;
+    std::vector<UserDataVector> _removedUserEdgeDataVectors;
 
 public:
     RemoveAttributesCommand(GraphModel* graphModel, QStringList attributeNames);

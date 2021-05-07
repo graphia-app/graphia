@@ -73,18 +73,16 @@ bool RemoveAttributesCommand::execute()
         if(!attribute->userDefined())
             continue;
 
-        auto removeVector = [&](auto& userData, auto& removedMap)
-        {
-            auto vectorName = userData.vectorNameForExposedAttributeName(attributeName);
-            auto* v = userData.vector(vectorName);
-            removedMap[vectorName] = std::move(*v);
-            userData.remove(vectorName);
-        };
-
         if(attribute->elementType() == ElementType::Node)
-            removeVector(_graphModel->userNodeData(), _removedUserNodeDataVectors);
+        {
+            auto v = _graphModel->userNodeData().removeByAttributeName(attributeName);
+            _removedUserNodeDataVectors.emplace_back(std::move(v));
+        }
         else if(attribute->elementType() == ElementType::Edge)
-            removeVector(_graphModel->userEdgeData(), _removedUserEdgeDataVectors);
+        {
+            auto v = _graphModel->userEdgeData().removeByAttributeName(attributeName);
+            _removedUserEdgeDataVectors.emplace_back(std::move(v));
+        }
 
         _graphModel->removeAttribute(attributeName);
     }
@@ -96,17 +94,11 @@ void RemoveAttributesCommand::undo()
 {
     auto tracker = _graphModel->attributeChangesTracker();
 
-    for(auto&& [vectorName, vector] : _removedUserNodeDataVectors)
-    {
-        _graphModel->userNodeData().add(vectorName);
-        _graphModel->userNodeData().setVector(vectorName, std::move(vector));
-    }
+    for(auto&& vector : _removedUserNodeDataVectors)
+        _graphModel->userNodeData().setVector(std::move(vector));
 
-    for(auto&& [vectorName, vector] : _removedUserEdgeDataVectors)
-    {
-        _graphModel->userEdgeData().add(vectorName);
-        _graphModel->userEdgeData().setVector(vectorName, std::move(vector));
-    }
+    for(auto&& vector : _removedUserEdgeDataVectors)
+        _graphModel->userEdgeData().setVector(std::move(vector));
 
     _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
     _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);

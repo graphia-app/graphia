@@ -61,7 +61,7 @@ public:
     QVariant value(size_t index, const QString& name) const override;
 
     UserDataVector* vector(const QString& name);
-    void setVector(const QString& name, UserDataVector&& other);
+    void setVector(UserDataVector&& other);
 
     virtual void remove(const QString& name);
 

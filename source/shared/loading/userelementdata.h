@@ -188,18 +188,20 @@ public:
         return createdAttributeNames;
     }
 
-    QString vectorNameForExposedAttributeName(const QString& attributeName)
+    UserDataVector removeByAttributeName(const QString& attributeName)
     {
         auto it = std::find_if(_exposedAsAttributes.begin(), _exposedAsAttributes.end(),
-        [&](const auto& v)
+            [&](const auto& v) { return v.second == attributeName; });
+
+        UserDataVector removee;
+
+        if(it != _exposedAsAttributes.end())
         {
-            return v.second == attributeName;
-        });
+            removee = std::move(*vector(it->first));
+            remove(it->first);
+        }
 
-        if(it == _exposedAsAttributes.end())
-            return {};
-
-        return it->first;
+        return removee;
     }
 
     json save(const IMutableGraph&, const std::vector<E>& elementIds, Progressable& progressable) const

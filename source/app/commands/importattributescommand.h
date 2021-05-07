@@ -28,7 +28,6 @@
 
 #include <vector>
 #include <set>
-#include <map>
 
 class GraphModel;
 
@@ -43,7 +42,7 @@ private:
     std::vector<int> _importColumnIndices;
 
     bool _replace = false;
-    std::map<QString, UserDataVector> _replacedUserDataVectors;
+    std::vector<UserDataVector> _replacedUserDataVectors;
 
     std::set<QString> _createdVectorNames;
     std::vector<QString> _createdAttributeNames;

@@ -37,7 +37,7 @@ QString ImportAttributesCommand::firstAttributeName() const
         return _createdAttributeNames.front();
 
     if(!_replacedUserDataVectors.empty())
-        return _replacedUserDataVectors.begin()->first;
+        return _replacedUserDataVectors.begin()->name();
 
     return {};
 }
@@ -66,8 +66,8 @@ QString ImportAttributesCommand::debugDescription() const
     for(const auto& attributeName : _createdAttributeNames)
         text.append(QStringLiteral("\n  %1").arg(attributeName));
 
-    for(const auto& [vectorName, vector] : _replacedUserDataVectors)
-        text.append(QStringLiteral("\n  %1 (replaced)").arg(vectorName));
+    for(const auto& vector : _replacedUserDataVectors)
+        text.append(QStringLiteral("\n  %1 (replaced)").arg(vector.name()));
 
     return text;
 }
@@ -128,7 +128,7 @@ bool ImportAttributesCommand::execute()
 
             if(replace)
             {
-                _replacedUserDataVectors[name] = *existingVector;
+                _replacedUserDataVectors.emplace_back(*existingVector);
                 existingVector->clear();
                 tracker->setAttributeValuesChanged(name);
             }
@@ -171,10 +171,10 @@ void ImportAttributesCommand::undo()
         for(const auto& vectorName : _createdVectorNames)
             userData.remove(vectorName);
 
-        for(auto&& [vectorName, vector] : _replacedUserDataVectors)
+        for(auto&& vector : _replacedUserDataVectors)
         {
-            userData.setVector(vectorName, std::move(vector));
-            tracker->setAttributeValuesChanged(vectorName);
+            tracker->setAttributeValuesChanged(vector.name());
+            userData.setVector(std::move(vector));
         }
     };
 

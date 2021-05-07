@@ -126,18 +126,11 @@ UserDataVector* UserData::vector(const QString& name)
     return it != _userDataVectors.end() ? &it->second : nullptr;
 }
 
-void UserData::setVector(const QString& name, UserDataVector&& other)
+void UserData::setVector(UserDataVector&& other)
 {
-    QString normalisedName = normalise(name);
-    auto* v = vector(normalisedName);
-
-    if(v == nullptr)
-    {
-        qDebug() << "UserData::setVector: can't find vector named" << normalisedName;
-        return;
-    }
-
-    *v = std::move(other);
+    QString normalisedName = normalise(other.name());
+    add(normalisedName);
+    *vector(normalisedName) = std::move(other);
 }
 
 void UserData::remove(const QString& name)
