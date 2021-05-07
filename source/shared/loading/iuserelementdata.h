@@ -23,15 +23,18 @@
 
 #include "shared/graph/elementid.h"
 
+#include <QString>
 #include <QVariant>
 
-class QString;
+#include <vector>
 
 template<typename E>
 class IUserElementData : public virtual IUserData
 {
 public:
     virtual ~IUserElementData() = default;
+
+    virtual std::vector<QString> exposedAttributeNames() const = 0;
 
     virtual E elementIdForIndex(size_t index) const = 0;
     virtual void setElementIdForIndex(E elementId, size_t index) = 0;

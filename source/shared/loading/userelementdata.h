@@ -62,6 +62,16 @@ public:
         _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
     }
 
+    std::vector<QString> exposedAttributeNames() const override
+    {
+        auto attributeNames = vectorNames();
+
+        std::transform(attributeNames.begin(), attributeNames.end(), attributeNames.begin(),
+            [this](const auto& vectorName) { return _exposedAsAttributes.at(vectorName); });
+
+        return attributeNames;
+    }
+
     void setElementIdForIndex(E elementId, size_t index) override
     {
         _indexes->set(elementId, {true, index});
