@@ -631,6 +631,9 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         const auto& channelName = visualisationConfig._channelName;
         auto& info = _->_visualisationInfos[index];
 
+        // Track referenced attribute names, even if the attributes in question don't exist
+        _->_visualisedAttributeNames.append(attributeName);
+
         if(!attributeExists(attributeName))
         {
             info.addAlert(AlertType::Error, tr("Attribute '%1' doesn't exist").arg(attributeName));
@@ -705,8 +708,6 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                 info.addStringValue(sharedValue._value);
             }
         }
-
-        _->_visualisedAttributeNames.append(attributeName);
 
         switch(attribute.elementType())
         {
