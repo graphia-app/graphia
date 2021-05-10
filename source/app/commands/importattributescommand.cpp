@@ -83,7 +83,7 @@ bool ImportAttributesCommand::execute()
     {
         using ElementId = typename std::remove_reference_t<decltype(elementIds)>::value_type;
 
-        std::map<size_t, ElementId> map;
+        std::map<ElementId, size_t> map;
 
         int elementIdsProcessed = 0;
 
@@ -97,7 +97,7 @@ bool ImportAttributesCommand::execute()
 
                 if(attributeValue == keyColumnValue)
                 {
-                    map[row] = elementId;
+                    map[elementId] = row;
                     break;
                 }
             }
@@ -127,19 +127,17 @@ bool ImportAttributesCommand::execute()
                 existingVector->type() == _data.typeIdentity(columnIndex).type();
 
             if(replace)
-            {
                 _replacedUserDataVectors.emplace_back(*existingVector);
-                existingVector->clear();
-            }
             else
             {
                 name = u::findUniqueName(userData->vectorNames(), name);
                 _createdVectorNames.emplace(name);
             }
 
-            for(const auto& [row, elementId] : map)
+            for(auto elementId : elementIds)
             {
-                auto value = _data.valueAt(columnIndex, row);
+                auto value = u::contains(map, elementId) ?
+                    _data.valueAt(columnIndex, map.at(elementId)) : QString{};
                 userData->setValueBy(elementId, name, value);
             }
         }
