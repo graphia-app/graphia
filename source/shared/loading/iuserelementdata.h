@@ -42,7 +42,7 @@ public:
     virtual size_t indexFor(E elementId) const = 0;
 
     virtual QVariant valueBy(E elementId, const QString& name) const = 0;
-    virtual void setValueBy(E elementId, const QString& name, const QString& value) = 0;
+    virtual bool setValueBy(E elementId, const QString& name, const QString& value) = 0;
 };
 
 using IUserNodeData = IUserElementData<NodeId>;

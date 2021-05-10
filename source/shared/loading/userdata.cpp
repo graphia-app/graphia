@@ -67,7 +67,7 @@ void UserData::add(const QString& name)
     _userDataVectors.emplace(normalisedName, UserDataVector(normalisedName));
 }
 
-void UserData::setValue(size_t index, const QString& name, const QString& value)
+bool UserData::setValue(size_t index, const QString& name, const QString& value)
 {
     QString normalisedName = normalise(name);
 
@@ -81,8 +81,10 @@ void UserData::setValue(size_t index, const QString& name, const QString& value)
 
     auto& userDataVector = it->second;
 
-    userDataVector.set(index, value);
+    bool changed = userDataVector.set(index, value);
     _numValues = std::max(_numValues, userDataVector.numValues());
+
+    return changed;
 }
 
 QVariant UserData::value(size_t index, const QString& name) const

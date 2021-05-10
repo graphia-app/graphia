@@ -98,10 +98,10 @@ public:
         return _indexes->get(elementId)._value;
     }
 
-    void setValueBy(E elementId, const QString& name, const QString& value) override
+    bool setValueBy(E elementId, const QString& name, const QString& value) override
     {
         generateElementIdMapping(elementId);
-        setValue(indexFor(elementId), name, value);
+        return setValue(indexFor(elementId), name, value);
     }
 
     QVariant valueBy(E elementId, const QString& name) const override

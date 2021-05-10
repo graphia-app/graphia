@@ -41,12 +41,19 @@ int UserDataVector::numUniqueValues() const
     return static_cast<int>(v.size());
 }
 
-void UserDataVector::set(size_t index, const QString& value)
+bool UserDataVector::set(size_t index, const QString& newValue)
 {
-    if(index >= _values.size())
-        _values.resize(index + 1);
+    bool changed = false;
 
-    _values.at(index) = value;
+    if(index >= _values.size())
+    {
+        _values.resize(index + 1);
+        changed = true;
+    }
+
+    auto& value = _values.at(index);
+    changed = changed || (value != newValue);
+    value = newValue;
 
     updateType(value);
 
@@ -62,6 +69,8 @@ void UserDataVector::set(size_t index, const QString& value)
         _floatMin = std::min(_floatMin, floatValue);
         _floatMax = std::max(_floatMax, floatValue);
     }
+
+    return changed;
 }
 
 QString UserDataVector::get(size_t index) const

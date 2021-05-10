@@ -71,7 +71,7 @@ public:
     double floatMin() const { return _floatMin; }
     double floatMax() const { return _floatMax; }
 
-    void set(size_t index, const QString& value);
+    bool set(size_t index, const QString& value);
     QString get(size_t index) const;
 
     json save(const std::vector<size_t>& indexes = {}) const;

@@ -39,7 +39,7 @@ public:
     virtual void add(const QString& name) = 0;
 
     virtual QVariant value(size_t index, const QString& name) const = 0;
-    virtual void setValue(size_t index, const QString& name, const QString& value) = 0;
+    virtual bool setValue(size_t index, const QString& name, const QString& value) = 0;
 };
 
 #endif // IUSERDATA_H

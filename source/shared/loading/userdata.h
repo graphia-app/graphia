@@ -57,7 +57,7 @@ public:
     auto end() const { return _vectorNames.end(); }
 
     void add(const QString& name) override;
-    void setValue(size_t index, const QString& name, const QString& value) override;
+    bool setValue(size_t index, const QString& name, const QString& value) override;
     QVariant value(size_t index, const QString& name) const override;
 
     UserDataVector* vector(const QString& name);
