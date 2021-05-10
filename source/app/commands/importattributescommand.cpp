@@ -130,7 +130,6 @@ bool ImportAttributesCommand::execute()
             {
                 _replacedUserDataVectors.emplace_back(*existingVector);
                 existingVector->clear();
-                tracker->setAttributeValuesChanged(name);
             }
             else
             {
@@ -174,10 +173,7 @@ void ImportAttributesCommand::undo()
             userData.remove(vectorName);
 
         for(auto&& vector : _replacedUserDataVectors)
-        {
-            tracker->setAttributeValuesChanged(vector.name());
             userData.setVector(std::move(vector));
-        }
     };
 
     if(keyAttribute->elementType() == ElementType::Node)

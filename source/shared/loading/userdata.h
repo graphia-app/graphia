@@ -25,6 +25,7 @@
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/progressable.h"
 
+#include <QObject>
 #include <QString>
 #include <QVariant>
 #include <QSet>
@@ -34,8 +35,10 @@
 #include <map>
 #include <vector>
 
-class UserData : public virtual IUserData
+class UserData : public QObject, public virtual IUserData
 {
+    Q_OBJECT
+
 private:
     std::map<QString, UserDataVector> _userDataVectors;
     std::vector<QString> _vectorNames;
@@ -67,6 +70,9 @@ public:
 
     json save(Progressable& progressable, const std::vector<size_t>& indexes = {}) const;
     bool load(const json& jsonObject, Progressable& progressable);
+
+signals:
+    void vectorValuesChanged(const QString& vectorName);
 };
 
 #endif // USERDATA_H

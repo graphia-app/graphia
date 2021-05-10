@@ -207,13 +207,10 @@ class AttributeChangesTracker
 {
 private:
     GraphModel* _graphModel;
-    QStringList _attributesWithChangedValues;
 
 public:
     AttributeChangesTracker(GraphModel& graphModel);
     ~AttributeChangesTracker();
-
-    void setAttributeValuesChanged(const QString& attributeName);
 };
 
 #endif // GRAPHMODEL_H

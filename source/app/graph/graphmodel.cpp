@@ -174,8 +174,9 @@ private:
     bool _nodesMaskActive = false;
 
     bool _trackAttributeChanges = false;
-    QStringList _trackedAddedAttributes;
-    QStringList _trackedRemovedAttributes;
+    QSet<QString> _trackedAddedAttributes;
+    QSet<QString> _trackedRemovedAttributes;
+    QSet<QString> _trackedChangedAttributes;
 
     bool _visualUpdateRequired = false;
 };
@@ -210,6 +211,19 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         _->_updatedDynamicAttributeNames = attributeNames;
     });
 
+    connect(&_->_userNodeData, &UserData::vectorValuesChanged, [this](const QString& vectorName)
+    {
+        auto attributeName = _->_userNodeData.exposedAttributeName(vectorName);
+        if(_->_trackAttributeChanges && !attributeName.isEmpty())
+            _->_trackedChangedAttributes.insert(attributeName);
+    });
+
+    connect(&_->_userEdgeData, &UserData::vectorValuesChanged, [this](const QString& vectorName)
+    {
+        auto attributeName = _->_userEdgeData.exposedAttributeName(vectorName);
+        if(_->_trackAttributeChanges && !attributeName.isEmpty())
+            _->_trackedChangedAttributes.insert(attributeName);
+    });
 
     connect(this, &GraphModel::attributesChanged, this, &GraphModel::onAttributesChanged, Qt::DirectConnection);
 
@@ -843,7 +857,7 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
         attribute.setFlag(AttributeFlag::Dynamic);
 
     if(_->_trackAttributeChanges)
-        _->_trackedAddedAttributes.append(name);
+        _->_trackedAddedAttributes.insert(name);
 
     return attribute;
 }
@@ -861,7 +875,7 @@ void GraphModel::removeAttribute(const QString& name)
     _->_attributes.erase(name);
 
     if(_->_trackAttributeChanges)
-        _->_trackedRemovedAttributes.append(name);
+        _->_trackedRemovedAttributes.insert(name);
 }
 
 std::unique_ptr<AttributeChangesTracker> GraphModel::attributeChangesTracker()
@@ -1256,25 +1270,21 @@ AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :
     _graphModel->_->_trackAttributeChanges = true;
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
-    _attributesWithChangedValues.clear();
+    _graphModel->_->_trackedChangedAttributes.clear();
 }
 
 AttributeChangesTracker::~AttributeChangesTracker()
 {
     Q_ASSERT(_graphModel->_->_trackAttributeChanges);
 
-    emit _graphModel->attributesChanged(
-        _graphModel->_->_trackedAddedAttributes,
-        _graphModel->_->_trackedRemovedAttributes,
-        _attributesWithChangedValues);
+    QStringList added(_graphModel->_->_trackedAddedAttributes.begin(), _graphModel->_->_trackedAddedAttributes.end());
+    QStringList removed(_graphModel->_->_trackedRemovedAttributes.begin(), _graphModel->_->_trackedRemovedAttributes.end());
+    QStringList changed(_graphModel->_->_trackedChangedAttributes.begin(), _graphModel->_->_trackedChangedAttributes.end());
+
+    emit _graphModel->attributesChanged(added, removed, changed);
 
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
-    _attributesWithChangedValues.clear();
+    _graphModel->_->_trackedChangedAttributes.clear();
     _graphModel->_->_trackAttributeChanges = false;
-}
-
-void AttributeChangesTracker::setAttributeValuesChanged(const QString& attributeName)
-{
-    _attributesWithChangedValues.append(attributeName);
 }

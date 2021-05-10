@@ -84,6 +84,9 @@ bool UserData::setValue(size_t index, const QString& name, const QString& value)
     bool changed = userDataVector.set(index, value);
     _numValues = std::max(_numValues, userDataVector.numValues());
 
+    if(changed)
+        emit vectorValuesChanged(name);
+
     return changed;
 }
 

@@ -62,6 +62,14 @@ public:
         _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
     }
 
+    QString exposedAttributeName(const QString& vectorName) const override
+    {
+        if(u::contains(_exposedAsAttributes, vectorName))
+            return _exposedAsAttributes.at(vectorName);
+
+        return {};
+    }
+
     std::vector<QString> exposedAttributeNames() const override
     {
         auto attributeNames = vectorNames();
