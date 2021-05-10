@@ -1281,7 +1281,8 @@ AttributeChangesTracker::~AttributeChangesTracker()
     QStringList removed(_graphModel->_->_trackedRemovedAttributes.begin(), _graphModel->_->_trackedRemovedAttributes.end());
     QStringList changed(_graphModel->_->_trackedChangedAttributes.begin(), _graphModel->_->_trackedChangedAttributes.end());
 
-    emit _graphModel->attributesChanged(added, removed, changed);
+    if(!added.isEmpty() || !removed.isEmpty() || !changed.isEmpty())
+        emit _graphModel->attributesChanged(added, removed, changed);
 
     _graphModel->_->_trackedAddedAttributes.clear();
     _graphModel->_->_trackedRemovedAttributes.clear();
