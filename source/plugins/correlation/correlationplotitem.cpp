@@ -657,6 +657,7 @@ void CorrelationPlotItem::configureLegend()
         _legendLayoutGrid->rowColToIndex(1, 0)));
 
     legend->setLayer(QStringLiteral("legend"));
+    legend->clear();
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
@@ -685,54 +686,66 @@ void CorrelationPlotItem::configureLegend()
         maxNumberOfElementsToDraw++;
     };
 
-    auto numberOfElementsToDraw = std::min(_selectedRows.size(), maxNumberOfElementsToDraw);
+    std::vector<QCPAbstractPlottable*> plottables;
+    std::set<QCPAbstractPlottable*> plottablesSet;
+    size_t numTruncated = 0;
 
-    if(numberOfElementsToDraw > 0)
+    for(int i = 0; i < _customPlot.plottableCount(); i++)
     {
-        // Populate the legend
-        legend->clear();
-        for(int i = 0; i < _customPlot.plottableCount() && numberOfElementsToDraw > 0; i++)
+        auto* plottable = _customPlot.plottable(i);
+
+        // Don't add invisible plots to the legend
+        if(!plottable->visible() || plottable->valueAxis() != _continuousYAxis)
+            continue;
+
+        if(!u::contains(plottablesSet, plottable))
         {
-            auto* plottable = _customPlot.plottable(i);
-
-            // Don't add invisible plots to the legend
-            if(!plottable->visible() || plottable->valueAxis() != _continuousYAxis)
-                continue;
-
-            plottable->addToLegend(legend);
-            numberOfElementsToDraw--;
+            plottablesSet.insert(plottable);
+            plottables.push_back(plottable);
         }
-
-        // Cap the legend count to only those visible
-        if(_selectedRows.size() > maxNumberOfElementsToDraw)
-        {
-            auto* moreText = new QCPTextElement(&_customPlot);
-            moreText->setMargins(QMargins());
-            moreText->setLayer(_tooltipLayer);
-            moreText->setTextFlags(Qt::AlignLeft);
-            moreText->setFont(legend->font());
-            moreText->setTextColor(Qt::gray);
-            moreText->setText(QString(tr("…and %1 more"))
-                .arg(_selectedRows.size() - maxNumberOfElementsToDraw + 1));
-            moreText->setVisible(true);
-
-            auto lastElementIndex = legend->rowColToIndex(legend->rowCount() - 1, 0);
-            legend->removeAt(lastElementIndex);
-            legend->addElement(moreText);
-
-            // When we're overflowing, hackily enlarge the bottom margin to
-            // compensate for QCP's layout algorithm being a bit rubbish
-            auto margins = legend->margins();
-            margins.setBottom(margins.bottom() * 3);
-            legend->setMargins(margins);
-        }
-
-        // Make the plot take 85% of the width, and the legend the remaining 15%
-        _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
-        _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
-
-        legend->setVisible(true);
     }
+
+    // Not sure why it would be, at this point, but let's be safe
+    if(plottables.empty())
+        return;
+
+    if(static_cast<int>(plottables.size()) > maxNumberOfElementsToDraw)
+    {
+        auto maxMinusOne = maxNumberOfElementsToDraw - 1;
+        numTruncated = plottables.size() - maxMinusOne;
+
+        // Remove the excess plottables and another to make room for the overflow text
+        plottables.resize(maxMinusOne);
+    }
+
+    for(auto* plottable : plottables)
+        plottable->addToLegend(legend);
+
+    if(numTruncated > 0)
+    {
+        auto* moreText = new QCPTextElement(&_customPlot);
+        moreText->setMargins(QMargins());
+        moreText->setLayer(_tooltipLayer);
+        moreText->setTextFlags(Qt::AlignLeft);
+        moreText->setFont(legend->font());
+        moreText->setTextColor(Qt::gray);
+        moreText->setText(tr("…and %1 more").arg(numTruncated));
+        moreText->setVisible(true);
+
+        legend->addElement(moreText);
+
+        // When we're overflowing, hackily enlarge the bottom margin to
+        // compensate for QCP's layout algorithm being a bit rubbish
+        auto margins = legend->margins();
+        margins.setBottom(margins.bottom() * 3);
+        legend->setMargins(margins);
+    }
+
+    // Make the plot take 85% of the width, and the legend the remaining 15%
+    _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
+    _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
+
+    legend->setVisible(true);
 }
 
 void CorrelationPlotItem::onLeftClick(const QPoint& pos)
