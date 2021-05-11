@@ -152,11 +152,12 @@ json UserData::save(Progressable& progressable, const std::vector<size_t>& index
     int i = 0;
 
     std::vector<std::map<std::string, json>> vectors;
-    for(const auto& userDataVector : _userDataVectors)
+    for(const auto& vectorName : _vectorNames)
     {
+        const auto& userDataVector = _userDataVectors.at(vectorName);
+
         std::map<std::string, json> vector;
-        const auto& name = userDataVector.first.toStdString();
-        vector.emplace(name, userDataVector.second.save(indexes));
+        vector.emplace(vectorName.toStdString(), userDataVector.save(indexes));
         vectors.emplace_back(vector);
         progressable.setProgress((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
