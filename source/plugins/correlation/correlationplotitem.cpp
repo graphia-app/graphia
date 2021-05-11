@@ -505,8 +505,15 @@ void CorrelationPlotItem::updateTooltip()
 
             if(index < numColumns())
             {
+                double value = 0.0;
+
                 auto* plottable1D = dynamic_cast<const QCPPlottableInterface1D*>(plottableUnderCursor);
-                auto value = plottable1D != nullptr ? plottable1D->dataMainValue(key) : 0.0;
+                if(plottable1D != nullptr)
+                {
+                    auto dataIndex = plottable1D->dataCount() == 1 ? 0 : static_cast<int>(key);
+                    value = plottable1D->dataMainValue(dataIndex);
+                }
+
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
 
                 _hoverLabel->setText(QStringLiteral("%1, %2: %3")

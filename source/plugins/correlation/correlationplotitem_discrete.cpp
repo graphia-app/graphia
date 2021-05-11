@@ -45,9 +45,6 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         // Don't show an emphasised vertical zero line
         _discreteXAxis->grid()->setZeroLinePen(_discreteXAxis->grid()->pen());
-
-        for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
-            _customPlot.addLayer(QStringLiteral("discrete%1").arg(column));
     }
 
     std::vector<size_t> columnTotals(_pluginInstance->numDiscreteColumns());
@@ -73,18 +70,15 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
     ColorPalette colorPalette(Defaults::PALETTE);
 
-    QVector<double> xData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
-    std::iota(std::begin(xData), std::end(xData), 0); // xData is just the column indices
-
     for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
     {
         const auto& m = columnData[column];
         QCPBars* last = nullptr;
 
-        auto addBars = [&](const auto& value, const auto& yData, QColor color = {})
+        auto addBars = [&](const QString& value, double size, QColor color = {})
         {
             auto* bars = new QCPBars(_discreteXAxis, _discreteYAxis);
-            bars->setData(xData, yData, true);
+            bars->addData(static_cast<double>(column), size);
 
             if(last != nullptr)
                 bars->moveAbove(last);
@@ -110,7 +104,6 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
                 innerColor.setHsv(innerColor.hue(), innerColor.saturation(), 92);
 
             bars->setBrush(innerColor);
-            bars->setLayer(QStringLiteral("discrete%1").arg(column));
         };
 
         // When the number of possible values is large, for an arbitrary value of large,
@@ -122,26 +115,18 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
             for(const auto& [value, size] : m)
                 totalSize += size;
 
-            QVector<double> yData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
-            yData[column] = static_cast<double>(totalSize);
-
             const auto& keys = u::keysFor(m);
             auto value = QStringLiteral("%1, %2 and %3 more…")
                 .arg(keys.at(0))
                 .arg(keys.at(1))
                 .arg(m.size() - 2);
 
-            addBars(value, yData, Qt::black);
+            addBars(value, totalSize, Qt::black);
         }
         else
         {
             for(const auto& [value, size] : m)
-            {
-                QVector<double> yData(static_cast<int>(_pluginInstance->numDiscreteColumns()));
-                yData[column] = static_cast<double>(size);
-
-                addBars(value, yData);
-            }
+                addBars(value, size);
         }
     }
 
