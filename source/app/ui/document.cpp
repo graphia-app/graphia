@@ -2477,14 +2477,20 @@ void Document::update(QStringList newGraphTransforms,
             newGraphTransformIndex = index;
     }
 
-    if(transformsDiffer(_graphTransforms, uiGraphTransforms))
+    bool transformsValid = std::all_of(uiGraphTransforms.begin(), uiGraphTransforms.end(),
+    [this](const auto& transform)
+    {
+        return _graphModel->graphTransformIsValid(transform);
+    });
+
+    if(transformsValid && transformsDiffer(_graphTransforms, uiGraphTransforms))
     {
         commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
             _graphModel.get(), _selectionManager.get(), this,
             _graphTransforms, uiGraphTransforms));
     }
     else
-        setTransforms(uiGraphTransforms);
+        setTransforms(transformsValid ? uiGraphTransforms : _graphTransforms);
 
     auto uiVisualisations = _visualisationsFromUI;
 
