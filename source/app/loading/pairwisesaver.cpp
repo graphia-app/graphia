@@ -108,15 +108,11 @@ bool PairwiseSaver::save()
         if(!edgeWeightAttributeName.isEmpty())
         {
             const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
-            stream << QStringLiteral(R"("%1")").arg(sourceName) << " "
-                   << QStringLiteral(R"("%1")").arg(targetName) << " " << attribute->floatValueOf(edgeId)
-                   << "\n";
+            stream << QStringLiteral(R"("%1" "%2" %3)""\n").arg(sourceName, targetName)
+                .arg(attribute->floatValueOf(edgeId));
         }
         else
-        {
-            stream << QStringLiteral(R"("%1")").arg(sourceName) << " "
-                   << QStringLiteral(R"("%1")").arg(targetName) << "\n";
-        }
+            stream << QStringLiteral(R"(""%1" "%2")""\n").arg(sourceName, targetName);
 
         runningCount++;
         setProgress(runningCount * 100 / edgeCount);
