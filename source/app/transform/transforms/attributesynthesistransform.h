@@ -67,26 +67,22 @@ public:
     {
         return
         {
-            {
-                "Name",
-                ValueType::String,
-                QObject::tr("The name of the new attribute."),
-                QObject::tr("New Attribute")
-            },
-            {
-                "Regular Expression",
-                ValueType::String,
-                QObject::tr("A %1 that is matched against the source attribute values.")
-                    .arg(u::redirectLink("regex", QObject::tr("regular expression"))),
-                "(^.*$)"
-            },
-            {
-                "Attribute Value",
-                ValueType::String,
-                QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
-                    "syntax, where n is the index of the regex capture group."),
-                R"(\1)"
-            }
+            GraphTransformParameter::create("Name")
+                .setType(ValueType::String)
+                .setDescription(QObject::tr("The name of the new attribute."))
+                .setInitialValue(QObject::tr("New Attribute")),
+
+            GraphTransformParameter::create("Regular Expression")
+                .setType(ValueType::String)
+                .setDescription(QObject::tr("A %1 that is matched against the source attribute values.")
+                    .arg(u::redirectLink("regex", QObject::tr("regular expression"))))
+                .setInitialValue("(^.*$)"),
+
+            GraphTransformParameter::create("Attribute Value")
+                .setType(ValueType::String)
+                .setDescription(QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
+                    "syntax, where n is the index of the regex capture group."))
+                .setInitialValue(R"(\1)")
         };
     }
 

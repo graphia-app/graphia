@@ -46,18 +46,17 @@ public:
     {
         return
         {
-            {
-                "Percentage",
-                ValueType::Int,
-                QObject::tr("The percentage of edges to retain, per node."),
-                10, 0, 100
-            },
-            {
-                "Minimum",
-                ValueType::Int,
-                QObject::tr("The minimum number of edges to retain, per node."),
-                5, 1
-            }
+            GraphTransformParameter::create("Percentage")
+                .setType(ValueType::Int)
+                .setDescription(QObject::tr("The percentage of edges to retain, per node."))
+                .setInitialValue(10)
+                .setRange(0, 100),
+
+            GraphTransformParameter::create("Minimum")
+                .setType(ValueType::Int)
+                .setDescription(QObject::tr("The minimum number of edges to retain, per node."))
+                .setInitialValue(5)
+                .setMin(1)
         };
     }
 

@@ -32,26 +32,31 @@ class GraphTransformParameter
 {
 public:
     GraphTransformParameter() = default;
-    GraphTransformParameter(QString name, ValueType type, QString description,
-                            QVariant initialValue = QVariant(""),
-                            double min = std::numeric_limits<double>::max(),
-                            double max = std::numeric_limits<double>::lowest()) :
-        _name(std::move(name)), _type(type), _description(std::move(description)),
-        _initialValue(std::move(initialValue)), _min(min), _max(max)
-    {}
+    GraphTransformParameter(QString name) : _name(std::move(name)) {}
 
     QString name() const { return _name; }
     ValueType type() const { return _type; }
     QString description() const { return _description; }
 
-    bool hasMin() const { return _min != std::numeric_limits<double>::max(); }
-    bool hasMax() const { return _max != std::numeric_limits<double>::lowest(); }
-    bool hasRange() const { return hasMin() && hasMax(); }
+    GraphTransformParameter& setName(const QString& name) { _name = name; return *this; }
+    GraphTransformParameter& setType(ValueType type) { _type = type; return *this; }
+    GraphTransformParameter& setDescription(const QString& description) { _description = description; return *this; }
 
     double min() const { return _min; }
     double max() const { return _max; }
 
+    GraphTransformParameter& setMin(double min) { _min = min; return *this; }
+    GraphTransformParameter& setMax(double max) { _max = max; return *this; }
+    GraphTransformParameter& setRange(double min, double max) { _min = min; _max = max; return *this; }
+
     QVariant initialValue() const { return _initialValue; }
+    GraphTransformParameter& setInitialValue(const QVariant& initialValue) { _initialValue = initialValue; return *this; }
+
+    bool hasMin() const { return _min != std::numeric_limits<double>::max(); }
+    bool hasMax() const { return _max != std::numeric_limits<double>::lowest(); }
+    bool hasRange() const { return hasMin() && hasMax(); }
+
+    static GraphTransformParameter create(const QString& name) { return GraphTransformParameter(name); }
 
 private:
     QString _name;

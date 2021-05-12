@@ -51,12 +51,11 @@ public:
     {
         return
         {
-            {
-                "Limit",
-                ValueType::Int,
-                QObject::tr("The number of leaves to remove from a branch before stopping."),
-                1, 1
-            }
+            GraphTransformParameter::create("Limit")
+                .setType(ValueType::Int)
+                .setDescription(QObject::tr("The number of leaves to remove from a branch before stopping."))
+                .setInitialValue(1)
+                .setMin(1)
         };
     }
 

@@ -70,19 +70,16 @@ public:
     {
         return
         {
-            {
-                "Name",
-                ValueType::String,
-                QObject::tr("The name of the new attribute."),
-                QObject::tr("New Attribute")
-            },
-            {
-                "Attribute Value",
-                ValueType::String,
-                QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "
-                    "by the first and second attributes, respectively."),
-                R"(\1 \2)"
-            }
+            GraphTransformParameter::create("Name")
+                .setType(ValueType::String)
+                .setDescription(QObject::tr("The name of the new attribute."))
+                .setInitialValue(QObject::tr("New Attribute")),
+
+            GraphTransformParameter::create("Attribute Value")
+                .setType(ValueType::String)
+                .setDescription(QObject::tr("The value to assign to the attribute. \\1 and \\2 will be substituted "
+                    "by the first and second attributes, respectively."))
+                .setInitialValue(R"(\1 \2)")
         };
     }
 

@@ -72,24 +72,22 @@ public:
     {
         return
         {
-            {
-                "Percent",
-                ValueType::Int,
-                QObject::tr("The percentage of edges to rank and retain, per node."),
-                10, 0, 100
-            },
-            {
-                "Minimum",
-                ValueType::Int,
-                QObject::tr("The minimum number of edges to retain, per node."),
-                5, 1
-            },
-            {
-                "Rank Order",
-                ValueType::StringList,
-                QObject::tr("Whether or not larger or smaller values are ranked higher."),
-                QStringList{"Descending", "Ascending"}
-            }
+            GraphTransformParameter::create("Percent")
+                .setType(ValueType::Int)
+                .setDescription(QObject::tr("The percentage of edges to rank and retain, per node."))
+                .setInitialValue(10)
+                .setRange(0, 100),
+
+            GraphTransformParameter::create("Minimum")
+                .setType(ValueType::Int)
+                .setDescription(QObject::tr("The minimum number of edges to retain, per node."))
+                .setInitialValue(5)
+                .setMin(1),
+
+            GraphTransformParameter::create("Rank Order")
+                .setType(ValueType::StringList)
+                .setDescription(QObject::tr("Whether or not larger or smaller values are ranked higher."))
+                .setInitialValue(QStringList{"Descending", "Ascending"})
         };
     }
 

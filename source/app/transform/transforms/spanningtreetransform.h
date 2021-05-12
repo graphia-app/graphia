@@ -51,12 +51,10 @@ public:
     {
         return
         {
-            {
-                "Traversal Order",
-                ValueType::StringList,
-                QObject::tr("Whether to visit nodes level by level, or by maximising depth."),
-                QStringList{"Breadth First", "Depth First"}
-            }
+            GraphTransformParameter::create("Traversal Order")
+                .setType(ValueType::StringList)
+                .setDescription(QObject::tr("Whether to visit nodes level by level, or by maximising depth."))
+                .setInitialValue(QStringList{"Breadth First", "Depth First"})
         };
     }
 

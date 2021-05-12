@@ -68,12 +68,12 @@ public:
     {
         return
         {
-            {
-                "Granularity", ValueType::Float,
-                QObject::tr("The size of the resultant clusters. "
-                    "A larger granularity value results in smaller clusters."),
-                2.0, 1.1, 3.5
-            }
+            GraphTransformParameter::create("Granularity")
+                .setType(ValueType::Float)
+                .setDescription(QObject::tr("The size of the resultant clusters. "
+                    "A larger granularity value results in smaller clusters."))
+                .setInitialValue(2.0)
+                .setRange(1.1, 3.5)
         };
     }
 
