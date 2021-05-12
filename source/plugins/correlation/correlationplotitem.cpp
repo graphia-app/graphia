@@ -38,6 +38,8 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <vector>
+#include <map>
 
 CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     QCustomPlot& customPlot) :
@@ -686,28 +688,34 @@ void CorrelationPlotItem::configureLegend()
         maxNumberOfElementsToDraw++;
     };
 
-    std::vector<QCPAbstractPlottable*> plottables;
-    std::set<QCPAbstractPlottable*> plottablesSet;
-    size_t numTruncated = 0;
+    std::map<QString, QCPAbstractPlottable*> plottablesMap;
 
     for(int i = 0; i < _customPlot.plottableCount(); i++)
     {
         auto* plottable = _customPlot.plottable(i);
 
         // Don't add invisible plots to the legend
-        if(!plottable->visible() || plottable->valueAxis() != _continuousYAxis)
+        if(!plottable->visible())
             continue;
 
-        if(!u::contains(plottablesSet, plottable))
-        {
-            plottablesSet.insert(plottable);
-            plottables.push_back(plottable);
-        }
+        if(plottable->valueAxis() != _continuousYAxis && plottable->valueAxis() != _discreteYAxis)
+            continue;
+
+        plottablesMap[plottable->name()] = plottable;
     }
 
     // Not sure why it would be, at this point, but let's be safe
-    if(plottables.empty())
+    if(plottablesMap.empty())
         return;
+
+    std::vector<QCPAbstractPlottable*> plottables;
+
+    std::transform(plottablesMap.begin(), plottablesMap.end(), std::back_inserter(plottables),
+        [](auto& pair){ return pair.second; });
+    std::sort(plottables.begin(), plottables.end(),
+        [](const auto& a, const auto& b) { return a->name() < b->name(); });
+
+    size_t numTruncated = 0;
 
     if(static_cast<int>(plottables.size()) > maxNumberOfElementsToDraw)
     {
