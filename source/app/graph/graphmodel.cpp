@@ -994,7 +994,7 @@ bool GraphModel::attributeNameIsValid(const QString& attributeName)
     if(attributeName.isEmpty())
         return false;
 
-    auto attributeNameRegex = QRegularExpression(GraphModel::ValidAttributeNameRegex);
+    auto attributeNameRegex = QRegularExpression(Attribute::ValidNameRegex);
     return attributeNameRegex.match(attributeName).hasMatch();
 }
 

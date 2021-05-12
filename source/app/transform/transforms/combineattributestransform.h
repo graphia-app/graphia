@@ -20,8 +20,7 @@
 #define COMBINEATTRIBUTESTRANSFORM_H
 
 #include "transform/graphtransform.h"
-
-#include "graph/graphmodel.h"
+#include "attributes/attribute.h"
 
 class CombineAttributesTransform : public GraphTransform
 {
@@ -76,7 +75,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
-                .setValidatorRegex(GraphModel::ValidAttributeNameRegex),
+                .setValidatorRegex(Attribute::ValidNameRegex),
 
             GraphTransformParameter::create("Attribute Value")
                 .setType(ValueType::String)

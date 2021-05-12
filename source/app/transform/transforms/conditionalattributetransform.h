@@ -22,8 +22,6 @@
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
 
-#include "graph/graphmodel.h"
-
 #include <vector>
 
 class ConditionalAttributeTransform : public GraphTransform
@@ -69,7 +67,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
-                .setValidatorRegex(GraphModel::ValidAttributeNameRegex),
+                .setValidatorRegex(Attribute::ValidNameRegex),
         };
     }
 

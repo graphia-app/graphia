@@ -162,7 +162,6 @@ public:
     bool attributeIsValid(const QString& name) const;
     Attribute attributeValueByName(const QString& name) const;
 
-    static constexpr auto ValidAttributeNameRegex = "^[a-zA-Z_][a-zA-Z0-9_ ]*$";
     static bool attributeNameIsValid(const QString& attributeName);
 
     static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);

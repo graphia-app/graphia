@@ -20,8 +20,7 @@
 #define ATTRIBUTESYNTHESISTRANSFORM_H
 
 #include "transform/graphtransform.h"
-
-#include "graph/graphmodel.h"
+#include "attributes/attribute.h"
 
 #include "shared/utils/redirects.h"
 
@@ -73,7 +72,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
-                .setValidatorRegex(GraphModel::ValidAttributeNameRegex),
+                .setValidatorRegex(Attribute::ValidNameRegex),
 
             GraphTransformParameter::create("Regular Expression")
                 .setType(ValueType::String)
