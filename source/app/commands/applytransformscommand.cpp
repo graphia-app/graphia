@@ -18,12 +18,14 @@
 
 #include "applytransformscommand.h"
 
-#include <QObject>
-#include <QSet>
-
 #include "graph/graphmodel.h"
 #include "ui/selectionmanager.h"
 #include "ui/document.h"
+
+#include <QObject>
+#include <QSet>
+
+#include <algorithm>
 
 ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
                                                SelectionManager* selectionManager, Document* document,
@@ -35,7 +37,15 @@ ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
     _previousTransformations(std::move(previousTransformations)),
     _transformations(std::move(transformations)),
     _selectedNodeIds(_selectionManager->selectedNodes())
-{}
+{
+    bool transformsValid = std::all_of(transformations.begin(), transformations.end(),
+    [graphModel](const auto& transform)
+    {
+        return graphModel->graphTransformIsValid(transform);
+    });
+
+    Q_ASSERT(transformsValid);
+}
 
 QString ApplyTransformsCommand::description() const
 {
