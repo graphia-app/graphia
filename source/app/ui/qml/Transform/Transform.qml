@@ -298,10 +298,14 @@ Item
             }
             else
             {
+                let detail = document.hasTransformInfo() && index >= 0 ?
+                    document.transformInfoAtIndex(index).alertText : "";
+
                 setAlertIcon(
                 {
                     "alertType": AlertType.Error,
                     "alertText": qsTr("This transform expression is invalid\n" +
+                        (detail.length > 0 ? "(Reason: " + detail + ")\n" : "") +
                         "Please send a screenshot to the developers")
                 });
 
@@ -309,7 +313,8 @@ Item
                 template = "";
                 _parameterComponents = [];
 
-                TransformConfig.addLabelTo("Invalid Expression: " +
+                TransformConfig.addLabelTo(
+                    (detail.length > 0 ? detail + ": " : "Invalid Expression: ") +
                     Utils.addSlashes(value), expression);
             }
 
