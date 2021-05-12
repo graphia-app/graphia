@@ -29,6 +29,52 @@
 #include <QString>
 #include <QTextStream>
 
+// Find an attribute that looks like an edge weight
+static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
+{
+    auto edgeAttributeNames = graphModel->attributeNamesMatching(
+    [](const IAttribute& attribute)
+    {
+        return !attribute.hasParameter() &&
+            attribute.elementType() == ElementType::Edge &&
+            attribute.valueType() & ValueType::Numerical;
+    });
+
+    auto isWeight = [](const QString& attributeName) { return attributeName.contains("weight", Qt::CaseInsensitive); };
+    auto isValue = [](const QString& attributeName) { return attributeName.contains("value", Qt::CaseInsensitive); };
+
+    edgeAttributeNames.erase(std::remove_if(edgeAttributeNames.begin(), edgeAttributeNames.end(),
+    [&](const auto& attributeName)
+    {
+        return !isWeight(attributeName) && !isValue(attributeName);
+    }), edgeAttributeNames.end());
+
+    std::sort(edgeAttributeNames.begin(), edgeAttributeNames.end(),
+    [&](const auto& a, const auto& b)
+    {
+        auto aIsWeight = isWeight(a);
+        auto bIsWeight = isWeight(b);
+
+        if(aIsWeight && bIsWeight) return a < b;
+        if(aIsWeight) return true;
+        if(bIsWeight) return false;
+
+        auto aIsValue = isValue(a);
+        auto bIsValue = isValue(b);
+
+        if(aIsValue && bIsValue) return a < b;
+        if(aIsValue) return true;
+        if(bIsValue) return false;
+
+        return a < b;
+    });
+
+    if(edgeAttributeNames.empty())
+        return {};
+
+    return edgeAttributeNames.front();
+}
+
 bool PairwiseSaver::save()
 {
     QFile file(_url.toLocalFile());
@@ -44,6 +90,8 @@ bool PairwiseSaver::save()
         return string;
     };
 
+    auto edgeWeightAttributeName = findEdgeWeightAttributeName(_graphModel);
+
     _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
@@ -57,10 +105,9 @@ bool PairwiseSaver::save()
         if(targetName.isEmpty())
             targetName = QString::number(static_cast<int>(edge.targetId()));
 
-        if(_graphModel->attributeExists(QStringLiteral("Edge Weight")) &&
-           _graphModel->attributeByName(QStringLiteral("Edge Weight"))->valueType() & ValueType::Numerical)
+        if(!edgeWeightAttributeName.isEmpty())
         {
-            const auto* attribute = _graphModel->attributeByName(QStringLiteral("Edge Weight"));
+            const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
             stream << QStringLiteral(R"("%1")").arg(sourceName) << " "
                    << QStringLiteral(R"("%1")").arg(targetName) << " " << attribute->floatValueOf(edgeId)
                    << "\n";
