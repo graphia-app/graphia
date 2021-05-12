@@ -42,6 +42,9 @@ public:
     GraphTransformParameter& setType(ValueType type) { _type = type; return *this; }
     GraphTransformParameter& setDescription(const QString& description) { _description = description; return *this; }
 
+    QVariant initialValue() const { return _initialValue; }
+    GraphTransformParameter& setInitialValue(const QVariant& initialValue) { _initialValue = initialValue; return *this; }
+
     double min() const { return _min; }
     double max() const { return _max; }
 
@@ -49,8 +52,8 @@ public:
     GraphTransformParameter& setMax(double max) { _max = max; return *this; }
     GraphTransformParameter& setRange(double min, double max) { _min = min; _max = max; return *this; }
 
-    QVariant initialValue() const { return _initialValue; }
-    GraphTransformParameter& setInitialValue(const QVariant& initialValue) { _initialValue = initialValue; return *this; }
+    QString validatorRegex() const { return _validatorRegex; }
+    GraphTransformParameter& setValidatorRegex(const QString& validatorRegex) { _validatorRegex = validatorRegex; return *this; }
 
     bool hasMin() const { return _min != std::numeric_limits<double>::max(); }
     bool hasMax() const { return _max != std::numeric_limits<double>::lowest(); }
@@ -65,6 +68,7 @@ private:
     QVariant _initialValue;
     double _min = std::numeric_limits<double>::max();
     double _max = std::numeric_limits<double>::lowest();
+    QString _validatorRegex;
 };
 
 using GraphTransformParameters = std::vector<GraphTransformParameter>;

@@ -994,7 +994,7 @@ bool GraphModel::attributeNameIsValid(const QString& attributeName)
     if(attributeName.isEmpty())
         return false;
 
-    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
+    auto attributeNameRegex = QRegularExpression(GraphModel::ValidAttributeNameRegex);
     return attributeNameRegex.match(attributeName).hasMatch();
 }
 

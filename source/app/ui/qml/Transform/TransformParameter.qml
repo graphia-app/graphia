@@ -37,6 +37,7 @@ GridLayout
     property bool hasMaximumValue
     property real minimumValue
     property real maximumValue
+    property string validatorRegex
 
     // In configure(...) we test properties for undefined, which is the default
     // for variant, so give initialValue some other (arbitrary) value
@@ -182,6 +183,9 @@ GridLayout
         visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
         enabled: valueType !== ValueType.Unknown
 
+        property string validatorRegex: "^.*$"
+        validator: RegExpValidator { regExp: RegExp(validatorRegex) }
+
         function updateValue()
         {
             root.value = "\"" + Utils.escapeQuotes(text) + "\"";
@@ -311,6 +315,9 @@ GridLayout
         case ValueType.String:
             textField.text = initialValue;
 
+            if(validatorRegex.length > 0)
+                textField.validatorRegex = validatorRegex;
+
             value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
             break;
 
@@ -346,6 +353,7 @@ GridLayout
                    hasRange: false,
                    hasMinimumValue: false,
                    hasMaximumValue: false,
+                   validatorRegex: "",
                    initialValue: "",
                    initialIndex: -1});
     }
