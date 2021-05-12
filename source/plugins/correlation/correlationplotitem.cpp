@@ -661,7 +661,7 @@ void CorrelationPlotItem::configureLegend()
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
-    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize));
+    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize + _xAxisPadding));
 
     // BIGGEST HACK
     // Layouts and sizes aren't done until a replot, and layout is performed on another
@@ -737,7 +737,7 @@ void CorrelationPlotItem::configureLegend()
         // When we're overflowing, hackily enlarge the bottom margin to
         // compensate for QCP's layout algorithm being a bit rubbish
         auto margins = legend->margins();
-        margins.setBottom(margins.bottom() * 3);
+        margins.setBottom(margins.bottom() * 2);
         legend->setMargins(margins);
     }
 
