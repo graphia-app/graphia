@@ -196,7 +196,8 @@ function Create(transformIndex, transform)
 
             let parameter = transform.parameters[index];
             this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
-            appendConditionToElements(this._elements, {lhs: "$" + parameter.name, op:"=", rhs: parameter.value});
+            appendConditionToElements(this._elements,
+                {type: "parameter", lhs: "$" + parameter.name, op: "=", rhs: parameter.value});
         }
     }
 
@@ -205,8 +206,11 @@ function Create(transformIndex, transform)
     {
         this.template += " where " + conditionToTemplate(transform.condition);
 
+        let condition = {type: "condition"};
+        condition = Object.assign(condition, transform.condition);
+
         appendToElements(this._elements, " where ");
-        appendConditionToElements(this._elements, transform.condition);
+        appendConditionToElements(this._elements, condition);
     }
 
     this.toComponents =
@@ -247,7 +251,13 @@ function Create(transformIndex, transform)
                             if(opposite !== undefined && opposite.length > 0 && opposite[0] === '$')
                             {
                                 let parameterName = opposite.substring(1);
-                                parameterData = document.findTransformParameter(that.action, parameterName);
+
+                                if(parameter.type === "parameter")
+                                    parameterData = document.transformParameter(that.action, parameterName);
+                                else if(parameter.type === "condition")
+                                    parameterData = document.attribute(parameterName);
+                                else
+                                    console.log("Transform element parameter type unknown: " + parameter.type);
                             }
                             else
                             {

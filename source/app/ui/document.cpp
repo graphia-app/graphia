@@ -2181,28 +2181,6 @@ QStringList Document::createdAttributeNamesAtTransformIndexOrLater(int firstInde
     return u::toQStringList(_graphModel->createdAttributeNamesAtTransformIndexOrLater(firstIndex));
 }
 
-QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
-{
-    if(_graphModel == nullptr)
-        return {};
-
-    if(_graphModel->transformFactory(transformName) == nullptr)
-    {
-        // Unrecognised transform
-        return {};
-    }
-
-    auto attributeObject = attribute(parameterName);
-    if(attributeObject["isValid"].toBool())
-    {
-        // It's an Attribute
-        return attributeObject;
-    }
-
-    // It's a with ... parameter
-    return transformParameter(transformName, parameterName);
-}
-
 // NOLINTNEXTLINE readability-convert-member-functions-to-static
 QVariantMap Document::parseGraphTransform(const QString& transform) const
 {

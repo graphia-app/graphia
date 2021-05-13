@@ -228,8 +228,7 @@ Window
                                     {
                                         opList.updateModel(attribute.ops);
 
-                                        let parameterData = document.findTransformParameter(
-                                            transformsList.selectedValue, lhsAttributeList.selectedValue);
+                                        let parameterData = document.attribute(lhsAttributeList.selectedValue);
                                         rhs.configure(parameterData);
                                     }
                                     else
@@ -715,8 +714,7 @@ Window
 
                         if(lhsAttributeList.selectedValue !== undefined)
                         {
-                            let parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                                lhsAttributeList.selectedValue);
+                            let parameterData = document.attribute(lhsAttributeList.selectedValue);
 
                             if(parameterData.description !== undefined)
                                 text += "<br><br>" + parameterData.description;

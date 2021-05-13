@@ -304,7 +304,6 @@ private:
 
     void initialiseLayoutSettingsModel();
 
-    QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
     QVariantMap transformAttributeParameter(const QString& transformName, const QString& parameterName) const;
 
 signals:
@@ -454,7 +453,7 @@ public:
 
     Q_INVOKABLE AvailableTransformsModel* availableTransforms() const;
     Q_INVOKABLE QVariantMap transform(const QString& transformName) const;
-    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName, const QString& parameterName) const;
+    Q_INVOKABLE QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
     Q_INVOKABLE bool hasTransformInfo() const;
     Q_INVOKABLE QVariantMap transformInfoAtIndex(int index) const;
 
