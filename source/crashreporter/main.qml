@@ -114,7 +114,7 @@ ApplicationWindow
             id: email
             enabled: window.enabled
             placeholderText: qsTr("Email address (optional)")
-            validator: RegExpValidator { regExp:/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
+            validator: RegExpValidator { regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
             Layout.fillWidth: true
         }
 
