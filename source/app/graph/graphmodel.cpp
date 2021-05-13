@@ -74,7 +74,9 @@
 #include "shared/loading/userelementdata.h"
 
 #include <QRegularExpression>
+#include <QSet>
 
+#include <vector>
 #include <utility>
 
 using NodeVisuals = NodeArray<ElementVisual>;
@@ -857,7 +859,16 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
         attribute.setFlag(AttributeFlag::Dynamic);
 
     if(_->_trackAttributeChanges)
-        _->_trackedAddedAttributes.insert(name);
+    {
+        if(u::contains(_->_trackedRemovedAttributes, name))
+        {
+            // If it's been removed and added, count that as changed (potentially)
+            _->_trackedRemovedAttributes.remove(name);
+            _->_trackedChangedAttributes.insert(name);
+        }
+        else
+            _->_trackedAddedAttributes.insert(name);
+    }
 
     return attribute;
 }
@@ -875,7 +886,15 @@ void GraphModel::removeAttribute(const QString& name)
     _->_attributes.erase(name);
 
     if(_->_trackAttributeChanges)
-        _->_trackedRemovedAttributes.insert(name);
+    {
+        if(u::contains(_->_trackedAddedAttributes, name))
+        {
+            // If it's been added and removed, count that as net zero
+            _->_trackedAddedAttributes.remove(name);
+        }
+        else
+            _->_trackedRemovedAttributes.insert(name);
+    }
 }
 
 std::unique_ptr<AttributeChangesTracker> GraphModel::attributeChangesTracker()
