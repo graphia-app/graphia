@@ -28,17 +28,21 @@
 #include <QObject>
 #include <QRegularExpression>
 
-static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphModel, const GraphTransformConfig& config)
+static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphModel,
+    const GraphTransformConfig& config, bool atApplication = false)
 {
     const auto& attributeNames = config.attributeNames();
     if(attributeNames.size() != 2)
         return {AlertType::Error, QObject::tr("Invalid parameters")};
 
-    auto firstAttribute = graphModel.attributeValueByName(attributeNames.at(0));
-    auto secondAttribute = graphModel.attributeValueByName(attributeNames.at(1));
+    if(atApplication)
+    {
+        auto firstAttribute = graphModel.attributeValueByName(attributeNames.at(0));
+        auto secondAttribute = graphModel.attributeValueByName(attributeNames.at(1));
 
-    if(firstAttribute.elementType() != secondAttribute.elementType())
-        return {AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
+        if(firstAttribute.elementType() != secondAttribute.elementType())
+            return {AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
+    }
 
     auto newAttributeName = config.parameterByName(QStringLiteral("Name"))->valueAsString();
     if(!GraphModel::attributeNameIsValid(newAttributeName))
@@ -51,7 +55,7 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Combine Attributes"));
 
-    auto alert = combineAttributesTransformConfigIsValid(*_graphModel, config());
+    auto alert = combineAttributesTransformConfigIsValid(*_graphModel, config(), true);
     if(alert._type != AlertType::None)
     {
         addAlert(alert);
