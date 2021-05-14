@@ -60,8 +60,6 @@ private:
 
     QStringList _columnNames;
 
-    int _columnCount = 0;
-
 protected:
     virtual QStringList columnNames() const;
     virtual QVariant dataValue(size_t row, const QString& columnName) const;
@@ -69,12 +67,10 @@ protected:
     int indexForColumnName(const QString& columnName);
 
 private:
-    void updateAttribute(const QString& attributeName);
     void updateColumn(int role, Column& column, const QString& columnName = {});
     void update();
 
 private slots:
-    void onUpdateColumnComplete(const QString& columnName);
     void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 

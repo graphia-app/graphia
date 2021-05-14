@@ -100,24 +100,13 @@ QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnNam
 
 void NodeAttributeTableModel::updateColumnNames()
 {
-    _columnNames = columnNames();
-    _columnCount = _columnNames.size();
-    Q_ASSERT(u::hasUniqueValues(u::toQStringVector(_columnNames)));
-    emit columnNamesChanged();
-}
-
-void NodeAttributeTableModel::updateAttribute(const QString& attributeName)
-{
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
-
-    auto index = static_cast<size_t>(indexForColumnName(attributeName));
-
-    Q_ASSERT(index < _pendingData.size());
-    auto& column = _pendingData.at(index);
-
-    updateColumn(Qt::DisplayRole, column, attributeName);
-
-    QMetaObject::invokeMethod(this, "onUpdateColumnComplete", Q_ARG(QString, attributeName));
+    auto newColumnNames = columnNames();
+    if(newColumnNames != _columnNames)
+    {
+        _columnNames = columnNames();
+        Q_ASSERT(u::hasUniqueValues(u::toQStringVector(_columnNames)));
+        emit columnNamesChanged();
+    }
 }
 
 void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column,
@@ -153,7 +142,7 @@ void NodeAttributeTableModel::update()
     updateColumn(Roles::NodeSelectedRole, _nodeSelectedColumn);
     updateColumn(Roles::NodeIdRole, _nodeIdColumn);
 
-    for(const auto& columnName : _columnNames)
+    for(const auto& columnName : std::as_const(_columnNames))
     {
         _pendingData.emplace_back(rowCount());
         updateColumn(Qt::DisplayRole, _pendingData.back(), columnName);
@@ -162,36 +151,19 @@ void NodeAttributeTableModel::update()
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::onUpdateColumnComplete(const QString& columnName)
-{
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
-
-    emit layoutAboutToBeChanged();
-    auto column = static_cast<size_t>(indexForColumnName(columnName));
-    _data.at(column) = _pendingData.at(column);
-
-    //FIXME: FIXME: This comment is out of date and refers to TableView 1
-    //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
-    // for some reason it's not, even with https://codereview.qt-project.org/#/c/219278/
-    // applied. Most of the performance seems to be lost deep in TableView's JS so perhaps
-    // we should just ditch TableView and implement our own custom table, that we can
-    // control better. Certainly the internet suggests using ListView:
-    //      https://stackoverflow.com/a/43856015
-    //      https://stackoverflow.com/a/45188582
-    // Also, note that NodeAttributeTableView currently relies on layoutChanged, so if
-    // what we emit changes, we need to account for it there too.
-    //emit dataChanged(index(0, column), index(rowCount() - 1, column), {role});
-
-    emit layoutChanged();
-}
-
 void NodeAttributeTableModel::onUpdateComplete()
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
+    //FIXME this could probably be made more targetted; in the general case only
+    // a subset of _data will actually be updated, in which case we don't need
+    // to reset the entire model
     beginResetModel();
     _data = _pendingData;
     endResetModel();
+
+    //FIXME is this actually necessary, in addition to
+    // the emit in NodeAttributeTableModel::updateColumnNames()?
     emit columnNamesChanged();
 }
 
@@ -277,6 +249,16 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
 
     QSet<QString> addedSet(added.begin(), added.end());
     QSet<QString> removedSet(removed.begin(), removed.end());
+    QSet<QString> changedSet(changed.begin(), changed.end());
+
+    // Identify any attributes that have been simultaneously added and removed
+    auto addedAndRemovedSet = addedSet;
+    addedAndRemovedSet.intersect(removedSet);
+
+    // Move them to the set of changed attributes
+    addedSet.subtract(addedAndRemovedSet);
+    removedSet.subtract(addedAndRemovedSet);
+    changedSet.unite(addedAndRemovedSet);
 
     // Either no attributes are being added, or the ones that are are not in the table already
     Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_columnNames.begin(), _columnNames.end()}));
@@ -284,27 +266,24 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     // Ignore attribute names that aren't in the table
     removedSet.intersect({_columnNames.begin(), _columnNames.end()});
 
-    if(addedSet.isEmpty() && removedSet.isEmpty())
+    auto indicesForColumnNames = [this](const auto& names, auto compare)
     {
-        // There is no structural change to the table, but some roles' values
-        // may have changed, so we need to update these individually
-        for(const auto& attribute : changed)
-        {
-            if(u::contains(_columnNames, attribute))
-                updateAttribute(attribute);
-        }
+        std::vector<size_t> indices;
+        std::transform(names.begin(), names.end(), std::back_inserter(indices),
+            [this](const auto& name) { return static_cast<size_t>(indexForColumnName(name)); });
+        std::sort(indices.begin(), indices.end(), compare);
+        return indices;
+    };
 
-        return;
+    std::vector<size_t> changedIndices = indicesForColumnNames(changedSet, std::less<>());
+    for(size_t index : changedIndices)
+    {
+        const auto& columnName = _columnNames.at(static_cast<int>(index));
+        auto& column = _pendingData.at(index);
+        updateColumn(Qt::DisplayRole, column, columnName);
     }
 
-    // We can ignore attributes with changed values from here on out, as any roles requiring
-    // an update will be taken care of en-masse, in onUpdateComplete
-
-    std::vector<size_t> removedIndices;
-    std::transform(removedSet.begin(), removedSet.end(), std::back_inserter(removedIndices),
-        [this](const auto& name) { return static_cast<size_t>(_columnNames.indexOf(name)); });
-    std::sort(removedIndices.begin(), removedIndices.end(), std::greater<>());
-
+    std::vector<size_t> removedIndices = indicesForColumnNames(removedSet, std::greater<>());
     for(size_t index : removedIndices)
     {
         Q_ASSERT(index < _pendingData.size());
@@ -313,14 +292,10 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
 
     updateColumnNames();
 
-    std::vector<size_t> addedIndices;
-    std::transform(addedSet.begin(), addedSet.end(), std::back_inserter(addedIndices),
-        [this](const auto& name) { return static_cast<size_t>(_columnNames.indexOf(name)); });
-    std::sort(addedIndices.begin(), addedIndices.end(), std::less<>());
-
+    std::vector<size_t> addedIndices = indicesForColumnNames(addedSet, std::less<>());
     for(size_t index : addedIndices)
     {
-        auto columnName = _columnNames.at(static_cast<int>(index));
+        const auto& columnName = _columnNames.at(static_cast<int>(index));
 
         if(index < _pendingData.size())
             _pendingData.insert(_pendingData.begin() + static_cast<int>(index), {{}});
@@ -331,7 +306,8 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
         updateColumn(Qt::DisplayRole, column, columnName);
     }
 
-    QMetaObject::invokeMethod(this, "onUpdateComplete");
+    if(!addedIndices.empty() || !removedIndices.empty() || !changedIndices.empty())
+        QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const
@@ -341,7 +317,7 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return _columnCount;
+    return _columnNames.size();
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
