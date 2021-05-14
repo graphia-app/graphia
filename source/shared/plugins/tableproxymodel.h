@@ -80,6 +80,8 @@ private:
 
     void resort();
 
+    void onColumnNamesChanged();
+
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
     bool filterAcceptsColumn(int sourceColumn, const QModelIndex& sourceParent) const override;
