@@ -45,7 +45,7 @@ Item
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
 
-    function defaultColumnVisibility()
+    function initialise()
     {
         root.model.columnNames.forEach(function(columnName)
         {

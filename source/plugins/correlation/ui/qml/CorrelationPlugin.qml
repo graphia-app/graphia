@@ -826,12 +826,12 @@ PluginContent
         onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }
 
-    property bool saveRequired: false
-
     function initialise()
     {
-        tableView.defaultColumnVisibility();
+        tableView.initialise();
     }
+
+    property bool saveRequired: false
 
     function save()
     {

@@ -103,6 +103,11 @@ PluginContent
         }
     }
 
+    function initialise()
+    {
+        tableView.initialise();
+    }
+
     property bool saveRequired: false
 
     function save()
