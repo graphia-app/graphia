@@ -437,7 +437,6 @@ Item
                 property int sortIndicatorWidth: 7
                 property int sortIndicatorMargin: 3
                 property int delegatePadding: 4
-                property var columnOrder: Array.from(root.model.columnNames);
 
                 Rectangle
                 {
@@ -632,15 +631,18 @@ Item
                             {
                                 if(headerContent.target > -1)
                                 {
-                                    let currentIndex = headerView.columnOrder.indexOf(
+                                    let newColumnOrder = Array.from(proxyModel.columnOrder);
+
+                                    let currentIndex = newColumnOrder.indexOf(
                                         root.model.columnNameFor(sourceColumn));
-                                    let targetIndex = headerView.columnOrder.indexOf(
+                                    let targetIndex = newColumnOrder.indexOf(
                                         root.model.columnNameFor(headerContent.target));
-                                    array_move(headerView.columnOrder, currentIndex, targetIndex);
+                                    array_move(newColumnOrder, currentIndex, targetIndex);
                                     headerContent.target = -1;
+
+                                    proxyModel.columnOrder = newColumnOrder;
                                 }
 
-                                proxyModel.columnOrder = headerView.columnOrder;
                                 tableView.forceLayoutSafe();
                             }
                         }

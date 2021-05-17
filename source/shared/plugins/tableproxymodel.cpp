@@ -117,7 +117,7 @@ void TableProxyModel::setHiddenColumns(const QStringList& hiddenColumns)
 
 void TableProxyModel::calculateOrderedProxySourceMapping()
 {
-    Q_ASSERT(_sourceColumnOrder.size() == sourceModel()->columnCount());
+    Q_ASSERT(!sourceModel() || _sourceColumnOrder.size() == sourceModel()->columnCount());
 
     _orderedProxyToSourceColumn.clear();
 
@@ -129,7 +129,10 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
     for(const auto& sourceColumnName : std::as_const(_sourceColumnOrder))
     {
         if(!u::contains(_hiddenColumns, sourceColumnName))
+        {
+            Q_ASSERT(u::contains(columnNameIndicies, sourceColumnName));
             _orderedProxyToSourceColumn.emplace_back(columnNameIndicies.at(sourceColumnName));
+        }
     }
 
     _headerModel.clear();
@@ -145,8 +148,12 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
 
 void TableProxyModel::setColumnOrder(const QStringList& columnOrder)
 {
-    _sourceColumnOrder = columnOrder;
-    invalidateFilter();
+    if(columnOrder != _sourceColumnOrder)
+    {
+        _sourceColumnOrder = columnOrder;
+        invalidateFilter();
+        emit columnOrderChanged();
+    }
 }
 
 QString TableProxyModel::sortColumn_() const
@@ -248,7 +255,7 @@ void TableProxyModel::onColumnNamesChanged()
         static_cast<const QList<QString>&>(_columnNames)));
 
     // Remove everything from _sourceColumnOrder that's not in _columnNames
-    _sourceColumnOrder = u::toQStringList(u::setIntersection(
+    auto newSourceColumnOrder = u::toQStringList(u::setIntersection(
         static_cast<const QList<QString>&>(_sourceColumnOrder),
         static_cast<const QList<QString>&>(_columnNames)));
 
@@ -256,13 +263,21 @@ void TableProxyModel::onColumnNamesChanged()
     for(int i = 0; i < _columnNames.size(); i++)
     {
         const auto& value = _columnNames.at(i);
-        if(!u::contains(_sourceColumnOrder, value))
+        if(!u::contains(newSourceColumnOrder, value))
             newColumns.emplace_back(i, value);
     }
 
     // Add everything from _columnNames that's not in _sourceColumnOrder, in the same index as in _columnNames
     for(const auto& newColumn : newColumns)
-        _sourceColumnOrder.insert(newColumn.first, newColumn.second);
+        newSourceColumnOrder.insert(newColumn.first, newColumn.second);
+
+    if(newSourceColumnOrder != _sourceColumnOrder)
+    {
+        _sourceColumnOrder = newSourceColumnOrder;
+        emit columnOrderChanged();
+    }
+
+    invalidateFilter();
 }
 
 bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
