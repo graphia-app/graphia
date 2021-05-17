@@ -183,8 +183,7 @@ GridLayout
         visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
         enabled: valueType !== ValueType.Unknown
 
-        property string validatorRegex: "^.*$"
-        validator: RegExpValidator { regExp: RegExp(validatorRegex) }
+        validator: RegExpValidator { id: textFieldValidator }
 
         function updateValue()
         {
@@ -316,7 +315,7 @@ GridLayout
             textField.text = initialValue;
 
             if(validatorRegex.length > 0)
-                textField.validatorRegex = validatorRegex;
+                textFieldValidator.regExp = new RegExp(validatorRegex);
 
             value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
             break;
