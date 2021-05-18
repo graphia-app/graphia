@@ -24,12 +24,15 @@ if [ -n "${APPLE_CERTIFICATE_P12_BASE64}" ]
 then
   echo ${APPLE_CERTIFICATE_P12_BASE64} | base64 --decode > ${CERTIFICATE_P12_FILE}
 
-  security create-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
-  security default-keychain -s build.keychain
-  security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+  echo "Creating keychain..."
+  security create-keychain -p password.keychain build.keychain || exit $?
+  security default-keychain -s build.keychain || exit $?
+  security unlock-keychain -p password.keychain build.keychain || exit $?
+
+  echo "Importing certificate into keychain..."
   security import ${CERTIFICATE_P12_FILE} -k build.keychain \
-      -P ${APPLE_CERTIFICATE_PASSWORD} -T /usr/bin/codesign
-  security set-key-partition-list -S apple-tool:,apple: -s -k ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+      -P ${APPLE_CERTIFICATE_PASSWORD} -T /usr/bin/codesign || exit $?
+  security set-key-partition-list -S apple-tool:,apple: -s -k password.keychain build.keychain || exit $?
 
   rm -rf ${CERTIFICATE_P12_FILE}
   SIGNING_ENABLED=true
@@ -44,7 +47,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
 if [ -n "${SIGNING_ENABLED}" ]
 then
-  security unlock-keychain -p ${APPLE_KEYCHAIN_PASSWORD} build.keychain
+  security unlock-keychain -p password.keychain build.keychain
 fi
 
 cd ${BUILD_DIR}
