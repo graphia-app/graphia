@@ -40,6 +40,7 @@ list(APPEND HEADERS
 )
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/misc/gdbVisualiser.py
     ${CMAKE_CURRENT_LIST_DIR}/misc/MacOSXBundleInfo.plist.in
 )
 

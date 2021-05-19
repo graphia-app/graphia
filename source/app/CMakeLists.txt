@@ -9,6 +9,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/ui/licensing/generate-OSS.sh
+    ${CMAKE_CURRENT_LIST_DIR}/ui/licensing/update-license.pl
+    ${CMAKE_CURRENT_LIST_DIR}/icon-themes/generate-icons-qrc.sh
+    ${CMAKE_CURRENT_LIST_DIR}/icon/generate.sh
+)
+
+list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/application.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.h
