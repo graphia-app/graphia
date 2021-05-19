@@ -1,5 +1,3 @@
-diff --git a/source/thirdparty/qcustomplot/qcustomplot.cpp b/source/thirdparty/qcustomplot/qcustomplot.cpp
-index 408381a0..2b689cbb 100644
 --- a/source/thirdparty/qcustomplot/qcustomplot.cpp
 +++ b/source/thirdparty/qcustomplot/qcustomplot.cpp
 @@ -13314,14 +13314,16 @@ void QCustomPlot::setSelectionRect(QCPSelectionRect *selectionRect)

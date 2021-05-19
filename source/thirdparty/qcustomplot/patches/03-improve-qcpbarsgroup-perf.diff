@@ -1,0 +1,131 @@
+--- a/source/thirdparty/qcustomplot/qcustomplot.cpp
++++ b/source/thirdparty/qcustomplot/qcustomplot.cpp
+@@ -23284,6 +23284,7 @@ void QCPBarsGroup::insert(int i, QCPBars *bars)
+     bars->setBarsGroup(this);
+   // then move to according position:
+   mBars.move(mBars.indexOf(bars), qBound(0, i, mBars.size()-1));
++  updateBaseBars();
+ }
+ 
+ /*!
+@@ -23305,6 +23306,22 @@ void QCPBarsGroup::remove(QCPBars *bars)
+     qDebug() << Q_FUNC_INFO << "bars plottable is not in this bars group:" << reinterpret_cast<quintptr>(bars);
+ }
+ 
++void QCPBarsGroup::updateBaseBars()
++{
++  // find list of all base bars in case some mBars are stacked:
++  // This is used in keyPixelOffset
++
++  mBaseBars.clear();
++
++  foreach (QCPBars *b, mBars)
++  {
++    while (b->barBelow())
++      b = b->barBelow();
++    if (!mBaseBars.contains(b))
++      mBaseBars.append(b);
++  }
++}
++
+ /*! \internal
+   
+   Adds the specified \a bars to the internal mBars list of bars. This method does not change the
+@@ -23315,7 +23332,10 @@ void QCPBarsGroup::remove(QCPBars *bars)
+ void QCPBarsGroup::registerBars(QCPBars *bars)
+ {
+   if (!mBars.contains(bars))
++  {
+     mBars.append(bars);
++    updateBaseBars();
++  }
+ }
+ 
+ /*! \internal
+@@ -23328,6 +23348,7 @@ void QCPBarsGroup::registerBars(QCPBars *bars)
+ void QCPBarsGroup::unregisterBars(QCPBars *bars)
+ {
+   mBars.removeOne(bars);
++  updateBaseBars();
+ }
+ 
+ /*! \internal
+@@ -23338,15 +23359,6 @@ void QCPBarsGroup::unregisterBars(QCPBars *bars)
+ */
+ double QCPBarsGroup::keyPixelOffset(const QCPBars *bars, double keyCoord)
+ {
+-  // find list of all base bars in case some mBars are stacked:
+-  QList<const QCPBars*> baseBars;
+-  foreach (const QCPBars *b, mBars)
+-  {
+-    while (b->barBelow())
+-      b = b->barBelow();
+-    if (!baseBars.contains(b))
+-      baseBars.append(b);
+-  }
+   // find base bar this "bars" is stacked on:
+   const QCPBars *thisBase = bars;
+   while (thisBase->barBelow())
+@@ -23354,36 +23366,36 @@ double QCPBarsGroup::keyPixelOffset(const QCPBars *bars, double keyCoord)
+   
+   // determine key pixel offset of this base bars considering all other base bars in this barsgroup:
+   double result = 0;
+-  int index = baseBars.indexOf(thisBase);
++  int index = mBaseBars.indexOf(thisBase);
+   if (index >= 0)
+   {
+-    if (baseBars.size() % 2 == 1 && index == (baseBars.size()-1)/2) // is center bar (int division on purpose)
++    if (mBaseBars.size() % 2 == 1 && index == (mBaseBars.size()-1)/2) // is center bar (int division on purpose)
+     {
+       return result;
+     } else
+     {
+       double lowerPixelWidth, upperPixelWidth;
+       int startIndex;
+-      int dir = (index <= (baseBars.size()-1)/2) ? -1 : 1; // if bar is to lower keys of center, dir is negative
+-      if (baseBars.size() % 2 == 0) // even number of bars
++      int dir = (index <= (mBaseBars.size()-1)/2) ? -1 : 1; // if bar is to lower keys of center, dir is negative
++      if (mBaseBars.size() % 2 == 0) // even number of bars
+       {
+-        startIndex = baseBars.size()/2 + (dir < 0 ? -1 : 0);
+-        result += getPixelSpacing(baseBars.at(startIndex), keyCoord)*0.5; // half of middle spacing
++        startIndex = mBaseBars.size()/2 + (dir < 0 ? -1 : 0);
++        result += getPixelSpacing(mBaseBars.at(startIndex), keyCoord)*0.5; // half of middle spacing
+       } else // uneven number of bars
+       {
+-        startIndex = (baseBars.size()-1)/2+dir;
+-        baseBars.at((baseBars.size()-1)/2)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
++        startIndex = (mBaseBars.size()-1)/2+dir;
++        mBaseBars.at((mBaseBars.size()-1)/2)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
+         result += qAbs(upperPixelWidth-lowerPixelWidth)*0.5; // half of center bar
+-        result += getPixelSpacing(baseBars.at((baseBars.size()-1)/2), keyCoord); // center bar spacing
++        result += getPixelSpacing(mBaseBars.at((mBaseBars.size()-1)/2), keyCoord); // center bar spacing
+       }
+       for (int i = startIndex; i != index; i += dir) // add widths and spacings of bars in between center and our bars
+       {
+-        baseBars.at(i)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
++        mBaseBars.at(i)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
+         result += qAbs(upperPixelWidth-lowerPixelWidth);
+-        result += getPixelSpacing(baseBars.at(i), keyCoord);
++        result += getPixelSpacing(mBaseBars.at(i), keyCoord);
+       }
+       // finally half of our bars width:
+-      baseBars.at(index)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
++      mBaseBars.at(index)->getPixelWidth(keyCoord, lowerPixelWidth, upperPixelWidth);
+       result += qAbs(upperPixelWidth-lowerPixelWidth)*0.5;
+       // correct sign of result depending on orientation and direction of key axis:
+       result *= dir*thisBase->keyAxis()->pixelOrientation();
+--- a/source/thirdparty/qcustomplot/qcustomplot.h
++++ b/source/thirdparty/qcustomplot/qcustomplot.h
+@@ -5421,9 +5421,11 @@ protected:
+   QCustomPlot *mParentPlot;
+   SpacingType mSpacingType;
+   double mSpacing;
++  QList<const QCPBars*> mBaseBars;
+   QList<QCPBars*> mBars;
+   
+   // non-virtual methods:
++  void updateBaseBars();
+   void registerBars(QCPBars *bars);
+   void unregisterBars(QCPBars *bars);
+   

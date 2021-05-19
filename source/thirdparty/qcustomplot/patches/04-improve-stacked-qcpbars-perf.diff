@@ -1,0 +1,49 @@
+--- a/source/thirdparty/qcustomplot/qcustomplot.cpp
++++ b/source/thirdparty/qcustomplot/qcustomplot.cpp
+@@ -24222,15 +24222,22 @@ void QCPBars::getPixelWidth(double key, double &lower, double &upper) const
+ */
+ double QCPBars::getStackedBaseValue(double key, bool positive) const
+ {
+-  if (mBarBelow)
++  // find bars of mBarBelow that are approximately at key and find largest one:
++  double epsilon = qAbs(key)*(sizeof(key)==4 ? 1e-6 : 1e-14); // should be safe even when changed to use float at some point
++  if (key == 0)
++    epsilon = (sizeof(key)==4 ? 1e-6 : 1e-14);
++  std::ptrdiff_t itOffset = mDataContainer->findBegin(key-epsilon) - mDataContainer->constBegin();
++  std::ptrdiff_t itEndOffset = mDataContainer->findEnd(key+epsilon) - mDataContainer->constBegin();
++
++  QCPBars* barBelow = mBarBelow.data();
++  double below = 0.0;
++  while (barBelow != nullptr)
+   {
+     double max = 0; // don't initialize with mBaseValue here because only base value of bottom-most bar has meaning in a bar stack
+-    // find bars of mBarBelow that are approximately at key and find largest one:
+-    double epsilon = qAbs(key)*(sizeof(key)==4 ? 1e-6 : 1e-14); // should be safe even when changed to use float at some point
+-    if (key == 0)
+-      epsilon = (sizeof(key)==4 ? 1e-6 : 1e-14);
+-    QCPBarsDataContainer::const_iterator it = mBarBelow.data()->mDataContainer->findBegin(key-epsilon);
+-    QCPBarsDataContainer::const_iterator itEnd = mBarBelow.data()->mDataContainer->findEnd(key+epsilon);
++
++    QCPBarsDataContainer::const_iterator it = barBelow->mDataContainer->constBegin() + itOffset;
++    QCPBarsDataContainer::const_iterator itEnd = barBelow->mDataContainer->constBegin() + itEndOffset;
++
+     while (it != itEnd)
+     {
+       if (it->key > key-epsilon && it->key < key+epsilon)
+@@ -24241,10 +24248,12 @@ double QCPBars::getStackedBaseValue(double key, bool positive) const
+       }
+       ++it;
+     }
+-    // recurse down the bar-stack to find the total height:
+-    return max + mBarBelow.data()->getStackedBaseValue(key, positive);
+-  } else
+-    return mBaseValue;
++
++    below += max;
++    barBelow = barBelow->mBarBelow.data();
++  }
++
++  return mBaseValue + below;
+ }
+ 
+ /*! \internal
