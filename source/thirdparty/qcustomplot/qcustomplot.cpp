@@ -929,8 +929,8 @@ void QCPPaintBufferGlFbo::clear(const QColor &color)
   if (QOpenGLContext::currentContext() != context.data())
     context->makeCurrent(context->surface());
   mGlFrameBuffer->bind();
-  glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  mGlContext.toStrongRef()->functions()->glClearColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+  mGlContext.toStrongRef()->functions()->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   mGlFrameBuffer->release();
 }
 
