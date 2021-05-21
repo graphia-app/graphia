@@ -38,8 +38,6 @@ BaseParameterDialog
 
     maximumHeight: tabularDataParser.binaryMatrix ? minimumHeight : (1 << 24) - 1
 
-    modality: Qt.ApplicationModal
-
     property bool _graphEstimatePerformed: false
 
     AdjacencyMatrixTabularDataParser

@@ -25,6 +25,9 @@ import "../../shared/ui/qml/Constants.js" as Constants
 
 Window
 {
+    modality: Qt.ApplicationModal
+    flags: Qt.Window|Qt.Dialog
+
     property var parameters: ({})
     property url url: ""
     property string type: ""

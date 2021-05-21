@@ -35,8 +35,6 @@ BaseParameterDialog
     minimumWidth: 700
     minimumHeight: 500
 
-    modality: Qt.ApplicationModal
-
     Preferences
     {
         section: "correlation"

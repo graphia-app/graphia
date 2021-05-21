@@ -37,8 +37,6 @@ BaseParameterDialog
         return listPages[currentIndex];
     }
 
-    modality: Qt.ApplicationModal
-
     //FIXME Set these based on the content pages
     //minimumWidth: 640
     //minimumHeight: 480
