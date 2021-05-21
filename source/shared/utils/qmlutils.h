@@ -63,6 +63,21 @@ public:
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool urlIsFile(const QUrl& url) const { return url.isLocalFile(); }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool urlIsDownloadable(const QUrl& url) const
+    {
+        auto validSchemes = {"http", "https", "ftp"};
+
+        return url.isValid() && std::any_of(std::begin(validSchemes), std::end(validSchemes),
+        [&url](const auto& scheme)
+        {
+            return url.scheme() == scheme;
+        });
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
@@ -85,6 +100,12 @@ public:
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString currentThreadName() const { return u::currentThreadName(); }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool urlIsValid(const QUrl& url) const
+    {
+        return url.isValid();
+    }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE bool urlStringIsValid(const QString& urlString) const
