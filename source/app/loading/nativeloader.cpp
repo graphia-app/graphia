@@ -194,6 +194,9 @@ struct Header
 
 static bool parseHeader(const QUrl& url, Header* header = nullptr)
 {
+    if(!url.isLocalFile())
+        return false;
+
     QByteArray byteArray;
 
     if(!load(url.toLocalFile(), byteArray, NativeSaver::MaxHeaderSize))
@@ -587,6 +590,9 @@ QString Loader::pluginNameFor(const QUrl& url)
 
 bool Loader::canOpen(const QUrl& url)
 {
+    if(!url.isLocalFile())
+        return false;
+
     Header header;
     auto result = parseHeader(url, &header);
 

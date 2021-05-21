@@ -198,6 +198,9 @@ BaseGenericPlugin::BaseGenericPlugin()
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 {
+    if(!url.isLocalFile())
+        return {};
+
     auto urlTypes = identifyByExtension(url);
 
     if(urlTypes.isEmpty())

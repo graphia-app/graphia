@@ -1167,6 +1167,9 @@ static QString contentIdentityOf(const QUrl& url)
 
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const
 {
+    if(!url.isLocalFile())
+        return {};
+
     auto urlTypes = identifyByExtension(url);
 
     if(urlTypes.isEmpty() || contentIdentityOf(url) != urlTypes.first())
