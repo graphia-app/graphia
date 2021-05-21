@@ -26,8 +26,8 @@ import "../../shared/ui/qml/Constants.js" as Constants
 Window
 {
     property var parameters: ({})
-    property string fileUrl: ""
-    property string fileType: ""
+    property url url: ""
+    property string type: ""
     property string pluginName: ""
     property var plugin: null
     property bool inNewTab: false

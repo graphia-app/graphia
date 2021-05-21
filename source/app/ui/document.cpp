@@ -507,16 +507,16 @@ void Document::initialiseLayoutSettingsModel()
     emit layoutSettingNamesChanged();
 }
 
-bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pluginName, const QVariantMap& parameters)
+bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName, const QVariantMap& parameters)
 {
     std::unique_ptr<IParser> parser;
     Loader* loader = nullptr;
 
-    if(fileType == Application::NativeFileType)
+    if(type == Application::NativeFileType)
     {
         parser = std::make_unique<Loader>();
         loader = dynamic_cast<Loader*>(parser.get());
-        pluginName = Loader::pluginNameFor(fileUrl);
+        pluginName = Loader::pluginNameFor(url);
     }
 
     auto* plugin = _application->pluginForName(pluginName);
@@ -524,10 +524,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     if(plugin == nullptr)
         return false;
 
-    if(fileType != Application::NativeFileType)
+    if(type != Application::NativeFileType)
     {
-        setLog(tr("Loaded from %1, as file type %2, using plugin %3 (version %4)")
-            .arg(fileUrl.fileName(), fileType, pluginName)
+        setLog(tr("Loaded from %1, as type %2, using plugin %3 (version %4)")
+            .arg(url.toString(), type, pluginName)
             .arg(plugin->dataVersion()));
     }
 
@@ -538,10 +538,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
 
-    _graphModel = std::make_unique<GraphModel>(fileUrl.fileName(), plugin);
+    _graphModel = std::make_unique<GraphModel>(url.fileName(), plugin);
 
     _gpuComputeThread = std::make_unique<GPUComputeThread>();
-    _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, fileUrl);
+    _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, url);
 
     _selectionManager = std::make_unique<SelectionManager>(*_graphModel);
     _searchManager = std::make_unique<SearchManager>(*_graphModel);
@@ -598,7 +598,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     if(parser == nullptr)
     {
         // If we don't yet have a parser, we need to ask the plugin for one
-        parser = _pluginInstance->parserForUrlTypeName(fileType);
+        parser = _pluginInstance->parserForUrlTypeName(type);
 
         if(parser == nullptr)
         {

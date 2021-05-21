@@ -28,17 +28,18 @@ import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Dialog
 {
-    id: fileTypeChooserDialog
+    id: root
 
-    title: qsTr("File Type Ambiguous")
+    title: qsTr("Type Ambiguous")
     width: 500
 
     property var application
     property var model
 
-    property string fileUrl
-    property var fileTypes: []
-    property string fileType
+    property url url
+    property string urlText
+    property var types: []
+    property string type
     property bool inNewTab
 
     GridLayout
@@ -50,9 +51,8 @@ Dialog
 
         Text
         {
-            text: QmlUtils.baseFileNameForUrl(fileUrl) +
-                  qsTr(" may be interpreted as two or more possible formats. " +
-                       "Please select how you wish to proceed below.")
+            text: urlText + qsTr(" may be interpreted as two or more possible formats. " +
+                "Please select how you wish to proceed below.")
             Layout.fillWidth: true
             Layout.columnSpan: 2
             wrapMode: Text.WordWrap
@@ -80,10 +80,10 @@ Dialog
                 {
                     let s = "";
 
-                    for(let i = 0; i < fileTypeChooserDialog.fileTypes.length; i++)
+                    for(let i = 0; i < root.types.length; i++)
                     {
                         if(i !== 0) s += "|";
-                        s += fileTypeChooserDialog.fileTypes[i];
+                        s += root.types[i];
                     }
 
                     return s;
@@ -100,7 +100,7 @@ Dialog
             property var selectedFileType:
             {
                 let mappedIndex = proxyModel.mapToSource(currentIndex);
-                return fileTypeChooserDialog.model.nameAtIndex(mappedIndex);
+                return root.model.nameAtIndex(mappedIndex);
             }
 
             textRole: "individualDescription"
@@ -111,6 +111,6 @@ Dialog
 
     onAccepted:
     {
-        fileType = fileTypeChoice.selectedFileType;
+        type = fileTypeChoice.selectedFileType;
     }
 }

@@ -218,7 +218,7 @@ ApplicationWindow
         {
             // Queue this up to do later in the event loop, in case there
             // is any other plugin initialisation to do be done beforehand
-            openFile(url, true);
+            openUrl(url, true);
         });
     }
 
@@ -500,35 +500,39 @@ ApplicationWindow
         misc.recentFiles = JSON.stringify(localRecentFiles);
     }
 
-    function openFile(fileUrl, inNewTab)
+    function userTextForUrl(url)
     {
-        fileUrl = fileUrl.toString().trim();
+        return QmlUtils.urlIsFile(url) ? QmlUtils.baseFileNameForUrl(url) : url;
+    }
 
-        // If the file name is empty, avoid doing anything with it
-        if(fileUrl.length === 0)
+    function openUrl(url, inNewTab)
+    {
+        // If the URL is empty, avoid doing anything with it
+        if(url.toString().trim().length === 0)
             return;
 
-        if(!QmlUtils.fileUrlExists(fileUrl))
+        if(QmlUtils.urlIsFile(url) && !QmlUtils.fileUrlExists(url))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
-            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(url) +
                     qsTr(" does not exist.");
             errorOpeningFileMessageDialog.open();
             return;
         }
 
-        let fileTypes = application.urlTypesOf(fileUrl);
+        let types = application.urlTypesOf(url);
 
-        if(fileTypes.length === 0)
+        if(types.length === 0)
         {
             errorOpeningFileMessageDialog.text = "";
 
-            let failureReasons = application.failureReasons(fileUrl);
+            let failureReasons = application.failureReasons(url);
             if(failureReasons.length === 0)
             {
-                errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
-                errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
-                    qsTr(" cannot be loaded as its file type is unknown.");
+                errorOpeningFileMessageDialog.title = QmlUtils.urlIsFile(url) ?
+                    qsTr("Unknown File Type") : qsTr("Unknown URL Type");
+                errorOpeningFileMessageDialog.text = userTextForUrl(url) +
+                    qsTr(" cannot be loaded as its type is unknown.");
             }
             else
             {
@@ -541,50 +545,54 @@ ApplicationWindow
             return;
         }
 
-        if(!application.canOpenAnyOf(fileTypes))
+        if(!application.canOpenAnyOf(types))
         {
-            errorOpeningFileMessageDialog.title = qsTr("Can't Open File");
-            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
-                    qsTr(" cannot be loaded."); //FIXME more elaborate error message
+            errorOpeningFileMessageDialog.title = QmlUtils.urlIsFile(url) ?
+                qsTr("Can't Open File") : qsTr("Can't Open URL");
+            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
+                qsTr(" cannot be loaded."); //FIXME more elaborate error message
+
             errorOpeningFileMessageDialog.open();
             return;
         }
 
-        if(fileTypes.length > 1)
+        if(types.length > 1)
         {
-            fileTypeChooserDialog.fileUrl = fileUrl
-            fileTypeChooserDialog.fileTypes = fileTypes;
-            fileTypeChooserDialog.inNewTab = inNewTab;
-            fileTypeChooserDialog.open();
+            typeChooserDialog.url = url;
+            typeChooserDialog.urlText = userTextForUrl(url);
+            typeChooserDialog.types = types;
+            typeChooserDialog.inNewTab = inNewTab;
+            typeChooserDialog.open();
         }
         else
-            openFileOfType(fileUrl, fileTypes[0], inNewTab);
+            openUrlOfType(url, types[0], inNewTab);
     }
 
-    FileTypeChooserDialog
+    TypeChooserDialog
     {
-        id: fileTypeChooserDialog
+        id: typeChooserDialog
         application: application
         model: application.urlTypeDetails
-        onAccepted: openFileOfType(fileUrl, fileType, inNewTab)
+        onAccepted: openUrlOfType(url, type, inNewTab)
     }
 
-    function openFileOfType(fileUrl, fileType, inNewTab)
+    function openUrlOfType(url, type, inNewTab)
     {
         let onSaveConfirmed = function()
         {
-            let pluginNames = application.pluginNames(fileType);
+            let pluginNames = application.pluginNames(type);
 
             if(pluginNames.length > 1)
             {
-                pluginChooserDialog.fileUrl = fileUrl
-                pluginChooserDialog.fileType = fileType;
+                pluginChooserDialog.url = url;
+                pluginChooserDialog.urlText = userTextForUrl(url);
+                pluginChooserDialog.type = type;
                 pluginChooserDialog.pluginNames = pluginNames;
                 pluginChooserDialog.inNewTab = inNewTab;
                 pluginChooserDialog.open();
             }
             else
-                openFileOfTypeWithPlugin(fileUrl, fileType, pluginNames[0], inNewTab);
+                openUrlOfTypeWithPlugin(url, type, pluginNames[0], inNewTab);
         };
 
         if(currentTab !== null && !inNewTab)
@@ -598,12 +606,12 @@ ApplicationWindow
         id: pluginChooserDialog
         application: application
         model: application.pluginDetails
-        onAccepted: openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
+        onAccepted: openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)
     }
 
-    function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
+    function openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)
     {
-        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName, fileType);
+        let parametersQmlPath = application.parametersQmlPathForPlugin(pluginName, type);
 
         if(parametersQmlPath.length > 0)
         {
@@ -628,16 +636,16 @@ ApplicationWindow
                 return;
             }
 
-            contentObject.fileUrl = fileUrl
-            contentObject.fileType = fileType;
+            contentObject.url = url
+            contentObject.type = type;
             contentObject.pluginName = pluginName;
             contentObject.plugin = application.qmlPluginForName(pluginName);
             contentObject.inNewTab = inNewTab;
 
             contentObject.accepted.connect(function()
             {
-                openFileOfTypeWithPluginAndParameters(contentObject.fileUrl,
-                    contentObject.fileType, contentObject.pluginName,
+                openUrlOfTypeWithPluginAndParameters(contentObject.url,
+                    contentObject.type, contentObject.pluginName,
                     contentObject.parameters, contentObject.inNewTab);
             });
 
@@ -645,14 +653,14 @@ ApplicationWindow
             contentObject.show();
         }
         else
-            openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, {}, inNewTab);
+            openUrlOfTypeWithPluginAndParameters(url, type, pluginName, {}, inNewTab);
     }
 
     function isValidParameterDialog(element)
     {
         if (element['parameters'] === undefined ||
-            element['fileUrl'] === undefined ||
-            element['fileType'] === undefined ||
+            element['url'] === undefined ||
+            element['type'] === undefined ||
             element['pluginName'] === undefined ||
             element['plugin'] === undefined ||
             element['inNewTab'] === undefined ||
@@ -665,11 +673,11 @@ ApplicationWindow
         return true;
     }
 
-    function openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
+    function openUrlOfTypeWithPluginAndParameters(url, type, pluginName, parameters, inNewTab)
     {
         let openInCurrentTab = function()
         {
-            tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
+            tabView.openInCurrentTab(url, type, pluginName, parameters);
         };
 
         if(currentTab !== null && !inNewTab)
@@ -685,7 +693,7 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileOpenInitialFolder = folder.toString();
-            openFile(file, inTab);
+            openUrl(file, inTab);
         }
 
         property bool inTab: false
@@ -1724,7 +1732,7 @@ ApplicationWindow
                             text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
                             onTriggered:
                             {
-                                openFile(QmlUtils.urlForFileName(text), true);
+                                openUrl(QmlUtils.urlForFileName(text), true);
                             }
                         }
                     }
@@ -2005,7 +2013,7 @@ ApplicationWindow
                     if(QmlUtils.fileUrlExists(exampleFileUrl))
                     {
                         let tutorialAlreadyOpen = tabView.findAndActivateTab(exampleFileUrl);
-                        openFile(exampleFileUrl, !tutorialAlreadyOpen);
+                        openUrl(exampleFileUrl, !tutorialAlreadyOpen);
                     }
                 }
             }
@@ -2228,7 +2236,7 @@ ApplicationWindow
         onDropped:
         {
             if(drop.text.length > 0)
-                openFile(drop.text, true)
+                openUrl(drop.text, true)
         }
 
         TabView
@@ -2282,7 +2290,7 @@ ApplicationWindow
 
             // This is called if the file can't be opened immediately, or
             // if the load has been attempted but it failed later
-            function onLoadFailure(index, fileUrl)
+            function onLoadFailure(index, url)
             {
                 let tab = getTab(index).item;
                 let loadWasCancelled = tab.document.commandIsCancelling;
@@ -2294,12 +2302,12 @@ ApplicationWindow
                 {
                     if(tab.document.failureReason.length > 0)
                     {
-                        errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+                        errorOpeningFileMessageDialog.text = userTextForUrl(url) +
                             qsTr(" could not be opened:\n\n") + tab.document.failureReason;
                     }
                     else
                     {
-                        errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+                        errorOpeningFileMessageDialog.text = userTextForUrl(url) +
                             qsTr(" could not be opened due to an unspecified error.");
                     }
 
@@ -2307,12 +2315,12 @@ ApplicationWindow
                 }
             }
 
-            function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
+            function openInCurrentTab(url, type, pluginName, parameters)
             {
                 let tab = currentTab;
                 tab.application = application;
-                if(!tab.openFile(fileUrl, fileType, pluginName, parameters))
-                    onLoadFailure(findTabIndex(tab), fileUrl);
+                if(!tab.openUrl(url, type, pluginName, parameters))
+                    onLoadFailure(findTabIndex(tab), url);
             }
 
             function closeTab(index, onCloseFunction)
@@ -2347,12 +2355,12 @@ ApplicationWindow
                 return -1;
             }
 
-            function findAndActivateTab(fileUrl)
+            function findAndActivateTab(url)
             {
                 for(let index = 0; index < count; index++)
                 {
                     let tab = getTab(index);
-                    if(tab.item.fileUrl === fileUrl)
+                    if(tab.item.url === url)
                     {
                         currentIndex = index;
                         return true;
@@ -2376,21 +2384,21 @@ ApplicationWindow
                         {
                             processOnePendingArgument();
 
-                            if(application.isResourceFileUrl(fileUrl) &&
-                                QmlUtils.baseFileNameForUrlNoExtension(fileUrl) === "Tutorial")
+                            if(application.isResourceFileUrl(url) &&
+                                QmlUtils.baseFileNameForUrlNoExtension(url) === "Tutorial")
                             {
                                 // Mild hack: if it looks like the tutorial file,
                                 // it probably is, so start the tutorial
                                 startTutorial();
                             }
                             else
-                                addToRecentFiles(fileUrl);
+                                addToRecentFiles(url);
 
                             if(currentDocument !== null)
                                 onDocumentShown(currentDocument);
                         }
                         else
-                            tabView.onLoadFailure(tabView.findTabIndex(tab), fileUrl);
+                            tabView.onLoadFailure(tabView.findTabIndex(tab), url);
                     }
                 }
             }

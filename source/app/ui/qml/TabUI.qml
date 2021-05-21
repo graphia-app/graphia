@@ -43,19 +43,18 @@ Item
 
     property Application application
 
-    property url fileUrl
+    property url url
     property url savedFileUrl
     property string savedFileSaver
-    property string fileType
 
     property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length > 0; }
 
     property string baseFileName:
     {
         if(hasBeenSaved)
-            return QmlUtils.baseFileNameForUrl(savedFileUrl);
-        else if(Qt.resolvedUrl(fileUrl).length > 0)
-            return QmlUtils.baseFileNameForUrl(fileUrl);
+            return QmlUtils.baseFileNameForUrl(root.savedFileUrl);
+        else if(Qt.resolvedUrl(root.url).length > 0)
+            return QmlUtils.baseFileNameForUrl(root.url);
 
         return "";
     }
@@ -67,7 +66,7 @@ Item
         if(hasBeenSaved)
         {
             // Don't display the file extension when it's a native file
-            text = QmlUtils.baseFileNameForUrlNoExtension(savedFileUrl);
+            text = QmlUtils.baseFileNameForUrlNoExtension(root.savedFileUrl);
         }
         else
             text = baseFileName;
@@ -230,18 +229,17 @@ Item
                                                            _lesserContrastingColors[2],
                                                            _lesserContrastingColors[2], 1.0); }
 
-    function openFile(fileUrl, fileType, pluginName, parameters)
+    function openUrl(url, type, pluginName, parameters)
     {
-        if(!_document.openFile(fileUrl, fileType, pluginName, parameters))
+        if(!_document.openUrl(url, type, pluginName, parameters))
             return false;
 
-        this.fileUrl = fileUrl;
-        this.fileType = fileType;
+        root.url = url;
 
-        if(fileType === "Native")
+        if(type === "Native")
         {
-            this.savedFileUrl = fileUrl;
-            this.savedFileSaver = appName;
+            root.savedFileUrl = url;
+            root.savedFileSaver = appName;
         }
 
         return true;
@@ -315,11 +313,11 @@ Item
 
         if(!hasBeenSaved)
         {
-            initialFileUrl = QmlUtils.replaceExtension(fileUrl,
+            initialFileUrl = QmlUtils.replaceExtension(root.url,
                 application.nativeExtension);
         }
         else
-            initialFileUrl = savedFileUrl;
+            initialFileUrl = root.savedFileUrl;
 
         let fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
         {
@@ -334,7 +332,7 @@ Item
         if(!hasBeenSaved)
             saveAsFile();
         else
-            saveAsNamedFile(savedFileUrl, savedFileSaver);
+            saveAsNamedFile(root.savedFileUrl, savedFileSaver);
     }
 
     MessageDialog
@@ -1660,13 +1658,13 @@ Item
         {
             if(!success)
             {
-                errorSavingFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
+                errorSavingFileMessageDialog.text = QmlUtils.baseFileNameForUrl(root.url) +
                         qsTr(" could not be saved.");
                 errorSavingFileMessageDialog.open();
             }
             else
             {
-                savedFileUrl = fileUrl;
+                savedFileUrl = root.url;
                 savedFileSaver = saverName;
             }
         }
@@ -1763,7 +1761,7 @@ Item
         }
     }
 
-    signal loadComplete(url fileUrl, bool success)
+    signal loadComplete(url url, bool success)
     signal pluginLoadComplete()
 
     signal commandStarted();

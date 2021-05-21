@@ -385,15 +385,11 @@ signals:
 
 public:
     // Main QML interface
-    Q_INVOKABLE bool openFile(const QUrl& fileUrl,
-                              const QString& fileType,
-                              QString pluginName,
-                              const QVariantMap& parameters);
+    Q_INVOKABLE bool openUrl(const QUrl& url, const QString& type,
+        QString pluginName, const QVariantMap& parameters);
 
-    Q_INVOKABLE void saveFile(const QUrl& fileUrl,
-                              const QString& saverName,
-                              const QByteArray& uiData,
-                              const QByteArray& pluginUiData);
+    Q_INVOKABLE void saveFile(const QUrl& fileUrl, const QString& saverName,
+        const QByteArray& uiData, const QByteArray& pluginUiData);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

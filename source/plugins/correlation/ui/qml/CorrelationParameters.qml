@@ -102,8 +102,8 @@ BaseParameterDialog
             wrapMode: Text.Wrap
 
             text: tabularDataParser.failed ?
-                qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(fileUrl) + "." :
-                qsTr("Loading ") + QmlUtils.baseFileNameForUrl(fileUrl) + "…"
+                qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url) + "." :
+                qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + "…"
         }
 
         RowLayout
@@ -1743,10 +1743,10 @@ BaseParameterDialog
     {
         if(visible)
         {
-            if(root.fileUrl.length !== 0 && root.fileType.length !== 0)
-                tabularDataParser.parse(root.fileUrl, root.fileType);
+            if(QmlUtils.urlIsValid(root.url) && root.type.length !== 0)
+                tabularDataParser.parse(root.url, root.type);
             else
-                console.log("ERROR: fileUrl or fileType is empty");
+                console.log("ERROR: url or type is empty");
         }
     }
 }

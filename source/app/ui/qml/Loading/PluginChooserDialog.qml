@@ -37,8 +37,9 @@ Dialog
     property var application
     property var model
 
-    property string fileUrl
-    property string fileType
+    property url url
+    property string urlText
+    property string type
     property var pluginNames: []
     property string pluginName
     property bool inNewTab
@@ -52,9 +53,8 @@ Dialog
 
         Text
         {
-            text: QmlUtils.baseFileNameForUrl(fileUrl) +
-                  qsTr(" may be loaded by two or more plugins. " +
-                       "Please select how you wish to proceed below.")
+            text: urlText + qsTr(" may be loaded by two or more plugins. " +
+                "Please select how you wish to proceed below.")
             Layout.fillWidth: true
             Layout.columnSpan: 2
             wrapMode: Text.WordWrap

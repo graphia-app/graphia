@@ -32,7 +32,7 @@
         <file>qml/Enrichment/EnrichmentWizard.qml</file>
         <file>qml/Find.qml</file>
         <file>qml/LayoutSettings.qml</file>
-        <file>qml/Loading/FileTypeChooserDialog.qml</file>
+        <file>qml/Loading/TypeChooserDialog.qml</file>
         <file>qml/Loading/PluginChooserDialog.qml</file>
         <file>qml/main.qml</file>
         <file>qml/ManageBookmarks.qml</file>
