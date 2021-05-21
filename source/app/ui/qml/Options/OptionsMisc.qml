@@ -261,7 +261,7 @@ Item
 
                     style: TextFieldStyle
                     {
-                        textColor: QmlUtils.userUrlIsValid(webSearchEngineField.text) ? "black" : "red"
+                        textColor: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
                     }
 
                     property string _defaultValue: "https://www.google.com/search?q=%1"

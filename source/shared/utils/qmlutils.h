@@ -87,7 +87,7 @@ public:
     Q_INVOKABLE QString currentThreadName() const { return u::currentThreadName(); }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
-    Q_INVOKABLE bool urlIsValid(const QString& urlString) const
+    Q_INVOKABLE bool urlStringIsValid(const QString& urlString) const
     {
         QUrl url = QUrl(urlString, QUrl::ParsingMode::StrictMode);
         auto validSchemes = {"http", "https", "ftp", "file"};
@@ -100,7 +100,7 @@ public:
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
-    Q_INVOKABLE bool userUrlIsValid(const QString& urlString) const
+    Q_INVOKABLE bool userUrlStringIsValid(const QString& urlString) const
     {
         QUrl url = QUrl::fromUserInput(urlString);
         return url.isValid();

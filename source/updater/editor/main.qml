@@ -818,7 +818,7 @@ ApplicationWindow
                             if(item.urlTextField.length === 0)
                                 return false;
 
-                            if(!QmlUtils.urlIsValid(item.urlTextField.text))
+                            if(!QmlUtils.urlStringIsValid(item.urlTextField.text))
                                 return false;
 
                             enabledOses.push(item.osName);
