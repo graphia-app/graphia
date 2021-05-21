@@ -747,8 +747,8 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     }
     else
     {
-        QMessageBox::critical(nullptr, tr("Save Error"),
-                              QStringLiteral("%1 %2").arg(tr("Unable to find registered saver with name:"), saverName));
+        QMessageBox::critical(nullptr, tr("Save Error"), QStringLiteral("%1 %2")
+            .arg(tr("Unable to find registered saver with name:"), saverName));
     }
 }
 
