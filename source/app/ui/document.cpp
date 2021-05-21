@@ -534,7 +534,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _pluginName = pluginName;
     emit pluginNameChanged();
 
-    setTitle(fileUrl.fileName());
     emit commandInProgressChanged();
     emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
