@@ -191,7 +191,7 @@ ApplicationWindow
     // when it starts then immediately exits
     function processArguments(arguments)
     {
-        _pendingArguments = arguments.slice(1);
+        _pendingArguments.push(...arguments);
         processOnePendingArgument();
     }
 

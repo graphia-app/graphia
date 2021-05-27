@@ -268,8 +268,10 @@ int start(int argc, char *argv[])
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
     mainWindow, [mainWindow](const QString& message, QObject*)
     {
-        QMetaObject::invokeMethod(mainWindow, "processArguments",
-            Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
+        auto arguments = message.split(QStringLiteral("\n"));
+        arguments.pop_front(); // Executable
+
+        QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, arguments));
     });
 
     int qmlExitCode = 0;
