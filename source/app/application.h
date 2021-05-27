@@ -22,6 +22,7 @@
 #include "updates/updater.h"
 
 #include "shared/utils/qmlenum.h"
+#include "shared/utils/downloadqueue.h"
 
 #include <QObject>
 #include <QString>
@@ -143,6 +144,9 @@ class Application : public QObject
 
     Q_PROPERTY(int updateDownloadProgress READ updateDownloadProgress NOTIFY updateDownloadProgressChanged)
 
+    Q_PROPERTY(bool downloadActive READ downloadActive NOTIFY downloadActiveChanged)
+    Q_PROPERTY(int downloadProgress READ downloadProgress NOTIFY downloadProgressChanged)
+
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
 
 public:
@@ -170,6 +174,11 @@ public:
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
+
+    Q_INVOKABLE void download(const QUrl& url);
+    Q_INVOKABLE void cancelDownload();
+    Q_INVOKABLE void resumeDownload();
+    Q_INVOKABLE bool downloaded(const QUrl& url);
 
     void registerSaverFactory(std::unique_ptr<ISaverFactory> saver);
     ISaverFactory* saverFactoryByName(const QString& name);
@@ -213,6 +222,11 @@ signals:
 
     void changeLogStored();
 
+    void downloadActiveChanged();
+    void downloadProgressChanged();
+    void downloadError(const QUrl& url, const QString& text);
+    void downloadComplete(const QUrl& url, const QString& fileName);
+
 private:
     static const char* _uri;
     static const int _majorVersion = APP_MAJOR_VERSION;
@@ -221,6 +235,8 @@ private:
     static QString _appDir;
 
     Updater _updater;
+
+    DownloadQueue _downloadQueue;
 
     UrlTypeDetailsModel _urlTypeDetails;
 
@@ -240,6 +256,9 @@ private:
     QAbstractListModel* pluginDetails();
 
     int updateDownloadProgress() const { return _updater.progress(); }
+
+    int downloadActive() const { return !_downloadQueue.idle(); }
+    int downloadProgress() const { return _downloadQueue.progress(); }
 
     static bool debugEnabled()
     {

@@ -64,6 +64,11 @@ Application::Application(QObject *parent) :
     connect(&_updater, &Updater::progressChanged, this, &Application::updateDownloadProgressChanged);
     connect(&_updater, &Updater::changeLogStored, this, &Application::changeLogStored);
 
+    connect(&_downloadQueue, &DownloadQueue::idleChanged, this, &Application::downloadActiveChanged);
+    connect(&_downloadQueue, &DownloadQueue::progressChanged, this, &Application::downloadProgressChanged);
+    connect(&_downloadQueue, &DownloadQueue::complete, this, &Application::downloadComplete);
+    connect(&_downloadQueue, &DownloadQueue::error, this, &Application::downloadError);
+
     registerSaverFactory(std::make_unique<NativeSaverFactory>());
     registerSaverFactory(std::make_unique<GraphMLSaverFactory>());
     registerSaverFactory(std::make_unique<GMLSaverFactory>());
@@ -182,6 +187,26 @@ QStringList Application::failureReasons(const QUrl& url) const
     failureReasons.removeDuplicates();
 
     return failureReasons;
+}
+
+void Application::download(const QUrl& url)
+{
+    _downloadQueue.add(url);
+}
+
+void Application::cancelDownload()
+{
+    _downloadQueue.cancel();
+}
+
+void Application::resumeDownload()
+{
+    _downloadQueue.resume();
+}
+
+bool Application::downloaded(const QUrl& url)
+{
+    return _downloadQueue.downloaded(url);
 }
 
 void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
