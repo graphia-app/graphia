@@ -63,6 +63,21 @@ ApplicationWindow
         return false;
     }
 
+    function _modalChildWindowVisible()
+    {
+        for(let i in mainWindow.data)
+        {
+            let item = mainWindow.data[i];
+
+            if(item instanceof Dialog && item.visible)
+                return true;
+            else if(item instanceof Window && item.visible && item.modality !== Qt.NonModal)
+                return true;
+        }
+
+        return false;
+    }
+
     title:
     {
         let text = "";
