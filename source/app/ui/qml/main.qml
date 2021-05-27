@@ -622,7 +622,7 @@ ApplicationWindow
                 return;
             }
 
-            let contentObject = component.createObject(this);
+            let contentObject = component.createObject(mainWindow);
             if(contentObject === null)
             {
                 console.log(parametersQmlPath + ": failed to create instance");
@@ -641,6 +641,8 @@ ApplicationWindow
             contentObject.pluginName = pluginName;
             contentObject.plugin = application.qmlPluginForName(pluginName);
             contentObject.inNewTab = inNewTab;
+
+            mainWindow.data.push(contentObject);
 
             contentObject.accepted.connect(function()
             {
