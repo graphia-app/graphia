@@ -80,6 +80,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/debugger.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/doasyncthen.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/enumbitmask.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/enumreflection.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.h
@@ -144,6 +145,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
