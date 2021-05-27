@@ -67,7 +67,7 @@ void TableProxyModel::setSubSelection(const QItemSelection& subSelection, const 
     for(auto index : _subSelection.indexes())
         _subSelectionRows.insert(index.row());
 
-    for(const auto& range : _subSelection)
+    for(const auto& range : std::as_const(_subSelection))
         emit dataChanged(range.topLeft(), range.bottomRight(), { Roles::SubSelectedRole });
 
     for(const auto& range : subDeSelection)
