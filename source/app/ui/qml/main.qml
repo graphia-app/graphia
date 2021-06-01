@@ -651,6 +651,13 @@ ApplicationWindow
                     contentObject.parameters, contentObject.inNewTab);
             });
 
+            //FIXME: We should be doing this, but it seems to cause crashes
+            // after opening multiple (3 or so) files one after another
+            /*contentObject.closing.connect(function()
+            {
+                contentObject.destroy();
+            });*/
+
             contentObject.initialised();
             contentObject.show();
         }
