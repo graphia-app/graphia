@@ -120,7 +120,7 @@ void DownloadQueue::start(const QUrl& url)
     // Follow any redirects
     connect(_reply, &QNetworkReply::redirected, _reply, &QNetworkReply::redirectAllowed);
 
-    connect(_reply, &QNetworkReply::downloadProgress, [this]
+    connect(_reply, &QNetworkReply::downloadProgress, [this, HTTP_TIMEOUT]
     (qint64 bytesReceived, qint64 bytesTotal)
     {
         _timeoutTimer.start(HTTP_TIMEOUT);
