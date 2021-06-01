@@ -88,6 +88,9 @@
 		<file>Tango/16x16/actions/media-playback-stop.png</file>
 		<file>Tango/22x22/actions/media-playback-stop.png</file>
 		<file>Tango/32x32/actions/media-playback-stop.png</file>
+		<file>Tango/16x16/places/network-server.png</file>
+		<file>Tango/22x22/places/network-server.png</file>
+		<file>Tango/32x32/places/network-server.png</file>
 		<file>Tango/16x16/graphia/node-size.png</file>
 		<file>Tango/22x22/graphia/node-size.png</file>
 		<file>Tango/32x32/graphia/node-size.png</file>
