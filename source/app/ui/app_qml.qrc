@@ -61,6 +61,7 @@
         <file>qml/LatestChangesDialog.qml</file>
         <file>qml/Loading/ImportAttributesDialog.qml</file>
         <file>qml/RemoveAttributesDialog.qml</file>
+        <file>qml/OpenUrlDialog.qml</file>
         <file>qml/DownloadProgress.qml</file>
     </qresource>
 </RCC>

@@ -750,6 +750,12 @@ ApplicationWindow
         property bool inTab: false
     }
 
+    OpenUrlDialog
+    {
+        id: openUrlDialog
+        onAccepted: { openUrl(openUrlDialog.url, true); }
+    }
+
     Action
     {
         id: fileOpenAction
@@ -784,6 +790,14 @@ ApplicationWindow
 
             fileOpenDialog.open();
         }
+    }
+
+    Action
+    {
+        id: urlOpenAction
+        iconName: "network-server"
+        text: qsTr("Open &URL…")
+        onTriggered: { openUrlDialog.show(); }
     }
 
     Action
@@ -1765,6 +1779,7 @@ ApplicationWindow
             title: qsTr("&File")
             MenuItem { action: fileOpenAction }
             MenuItem { action: fileOpenInTabAction }
+            MenuItem { action: urlOpenAction }
             Menu
             {
                 id: recentFileMenu
