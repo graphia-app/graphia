@@ -2259,8 +2259,18 @@ ApplicationWindow
         anchors.fill: parent
         onDropped:
         {
-            if(drop.text.length > 0)
-                openUrl(drop.text, true)
+            let arguments = [];
+
+            if(drop.hasText && drop.text.length > 0)
+                arguments.push(drop.text);
+
+            if(drop.hasUrls)
+            {
+                let resolvedUrls = drop.urls.map(url => Qt.resolvedUrl(url));
+                arguments.push(...resolvedUrls);
+            }
+
+            processArguments(arguments);
         }
 
         TabView
