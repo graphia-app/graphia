@@ -131,6 +131,26 @@ ApplicationWindow
         {
             changeLog.refresh();
         }
+
+        function onDownloadComplete(url, filename)
+        {
+            let fileUrl = QmlUtils.urlForFileName(filename);
+
+            if(!mainWindow._modalChildWindowVisible())
+            {
+                processArguments([fileUrl]);
+                application.resumeDownload();
+            }
+            else
+                downloadUI.blockedUrl = fileUrl;
+        }
+
+        function onDownloadError(url, error)
+        {
+            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
+                qsTr(" could not be opened:\n\n") + error;
+            errorOpeningFileMessageDialog.open();
+        }
     }
 
     Tracking
@@ -536,6 +556,13 @@ ApplicationWindow
         }
 
         let types = application.urlTypesOf(url);
+
+        // The application and/or plugins can't load the URL, but it might be downloadable
+        if((types.length === 0 || !application.canOpenAnyOf(types)) && QmlUtils.urlIsDownloadable(url))
+        {
+            application.download(url);
+            return;
+        }
 
         if(types.length === 0)
         {
@@ -2425,7 +2452,7 @@ ApplicationWindow
                                 // it probably is, so start the tutorial
                                 startTutorial();
                             }
-                            else
+                            else if(!application.downloaded(url))
                                 addToRecentFiles(url);
 
                             if(currentDocument !== null)
@@ -2543,6 +2570,22 @@ ApplicationWindow
 
                 id: cancelledIndicator
                 visible: currentDocument ? currentDocument.commandIsCancelling : false
+            }
+
+            DownloadProgress
+            {
+                id: downloadUI
+
+                visible: application.downloadActive || waitingForOpen
+                progress: application.downloadProgress
+
+                onOpenClicked:
+                {
+                    mainWindow.openUrl(url, true);
+                    application.resumeDownload();
+                }
+
+                onCancelClicked: { application.cancelDownload(); }
             }
 
             // Hack to force the RowLayout height to be the maximum of its children
