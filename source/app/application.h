@@ -201,6 +201,10 @@ public:
     Q_INVOKABLE bool isResourceFile(const QString& path) const;
     Q_INVOKABLE bool isResourceFileUrl(const QUrl& url) const;
 
+    Q_INVOKABLE bool isNativeLink(const QUrl& url) const;
+    Q_INVOKABLE int linkVersionFor(const QUrl& url) const;
+    Q_INVOKABLE QStringList linkArgumentsFor(const QUrl& url) const;
+
     Q_INVOKABLE void crash(int crashType);
 
     Q_INVOKABLE void reportScopeTimers();

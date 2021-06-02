@@ -7,5 +7,6 @@
         <file>Icon128x128.png</file>
         <file>Icon256x256.png</file>
         <file>Icon512x512.png</file>
+        <file>Icon.svg</file>
     </qresource>
 </RCC>

@@ -546,6 +546,27 @@ ApplicationWindow
         if(url.toString().trim().length === 0)
             return;
 
+        // The URL is a web link, handle it as such
+        if(application.isNativeLink(url))
+        {
+            if(application.linkVersionFor(url) === 1)
+            {
+                let arguments = application.linkArgumentsFor(url);
+                processArguments(arguments);
+            }
+            else
+            {
+                errorOpeningFileMessageDialog.title = qsTr("Unknown URL Scheme");
+                errorOpeningFileMessageDialog.text =
+                    qsTr("The hyperlink is not of a known version. ") +
+                    qsTr("Please upgrade ") + application.name +
+                    qsTr(", or check that the link is well-formed.");
+                errorOpeningFileMessageDialog.open();
+            }
+
+            return;
+        }
+
         if(QmlUtils.urlIsFile(url) && !QmlUtils.fileUrlExists(url))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");

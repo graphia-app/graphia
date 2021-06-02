@@ -336,6 +336,55 @@ bool Application::isResourceFileUrl(const QUrl& url) const
     return isResourceFile(url.toLocalFile());
 }
 
+bool Application::isNativeLink(const QUrl& url) const
+{
+    return url.scheme() == nativeExtension();
+}
+
+int Application::linkVersionFor(const QUrl& url) const
+{
+    if(!isNativeLink(url))
+        return -1;
+
+    auto host = url.host();
+
+    if(host.isEmpty() || host.at(0) != 'v')
+        return -1;
+
+    host = host.mid(1);
+    bool success = false;
+    auto version = host.toInt(&success);
+
+    if(!success)
+        return -1;
+
+    return version;
+}
+
+QStringList Application::linkArgumentsFor(const QUrl& url) const
+{
+    Q_ASSERT(isNativeLink(url));
+    if(!isNativeLink(url))
+        return {};
+
+    auto path = url.path(QUrl::FullyEncoded);
+    auto arguments = path.split('/');
+
+    arguments.erase(std::remove_if(arguments.begin(), arguments.end(),
+    [&](const auto& argument)
+    {
+        return argument.isEmpty();
+    }), arguments.end());
+
+    std::transform(arguments.begin(), arguments.end(), arguments.begin(),
+    [](const auto& argument)
+    {
+        return QUrl::fromPercentEncoding(argument.toUtf8());
+    });
+
+    return arguments;
+}
+
 #if defined(Q_OS_WIN32)
 #include <Windows.h>
 #endif
