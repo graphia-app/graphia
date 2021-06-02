@@ -148,9 +148,27 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
 
 void TableProxyModel::setColumnOrder(const QStringList& columnOrder)
 {
-    if(columnOrder != _sourceColumnOrder)
+    // Remove everything from columnOrder that's not in _columnNames
+    auto newColumnOrder = u::toQStringList(u::setIntersection(
+        static_cast<const QList<QString>&>(columnOrder),
+        static_cast<const QList<QString>&>(_columnNames)));
+
+    std::vector<std::pair<int, QString>> newColumns;
+    for(int i = 0; i < _columnNames.size(); i++)
     {
-        _sourceColumnOrder = columnOrder;
+        const auto& value = _columnNames.at(i);
+        if(!u::contains(newColumnOrder, value))
+            newColumns.emplace_back(i, value);
+    }
+
+    // Add everything from _columnNames that's not in columnOrder,
+    // in the same index as in _columnNames
+    for(const auto& newColumn : newColumns)
+        newColumnOrder.insert(newColumn.first, newColumn.second);
+
+    if(newColumnOrder != _sourceColumnOrder)
+    {
+        _sourceColumnOrder = newColumnOrder;
         invalidateFilter();
         emit columnOrderChanged();
     }
@@ -254,28 +272,8 @@ void TableProxyModel::onColumnNamesChanged()
         static_cast<const QList<QString>&>(_hiddenColumns),
         static_cast<const QList<QString>&>(_columnNames)));
 
-    // Remove everything from _sourceColumnOrder that's not in _columnNames
-    auto newSourceColumnOrder = u::toQStringList(u::setIntersection(
-        static_cast<const QList<QString>&>(_sourceColumnOrder),
-        static_cast<const QList<QString>&>(_columnNames)));
-
-    std::vector<std::pair<int, QString>> newColumns;
-    for(int i = 0; i < _columnNames.size(); i++)
-    {
-        const auto& value = _columnNames.at(i);
-        if(!u::contains(newSourceColumnOrder, value))
-            newColumns.emplace_back(i, value);
-    }
-
-    // Add everything from _columnNames that's not in _sourceColumnOrder, in the same index as in _columnNames
-    for(const auto& newColumn : newColumns)
-        newSourceColumnOrder.insert(newColumn.first, newColumn.second);
-
-    if(newSourceColumnOrder != _sourceColumnOrder)
-    {
-        _sourceColumnOrder = newSourceColumnOrder;
-        emit columnOrderChanged();
-    }
+    // Refresh column order
+    setColumnOrder(_sourceColumnOrder);
 
     invalidateFilter();
 }
