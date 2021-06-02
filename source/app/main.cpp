@@ -79,6 +79,58 @@ static QString resolvedExeName(const QString& baseExeName)
     return baseExeName;
 }
 
+static void configureXDG()
+{
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+    auto dotDesktopFileContent = QStringLiteral(
+        "[Desktop Entry]\n"
+        "Name=%1\n"
+        "Comment=Visualise and analyse graphs\n"
+        "Exec=%2 %U\n"
+        "Icon=%1.svg\n"
+        "Terminal=false\n"
+        "Type=Application\n"
+        "Encoding=UTF-8\n"
+        "Categories=Application;Graphics;Science;\n"
+        "StartupWMClass=%1\n"
+        "MimeType=x-scheme-handler/%3\n"
+        "X-KDE-Protocols=%3;\n")
+        .arg(Application::name(), u::appPathName(),
+        Application::nativeExtension());
+
+    auto applicationsDirname = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+    auto genericDirname = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    if(applicationsDirname.isEmpty() || genericDirname.isEmpty())
+    {
+        std::cerr << "Could not determine XDG directories.\n";
+        return;
+    }
+
+    auto dotDesktopFilename = QDir(applicationsDirname)
+        .filePath(QStringLiteral("%1.desktop").arg(Application::name()));
+    auto dotDesktopFile = QFile(dotDesktopFilename);
+
+    auto iconsDirname = QDir(genericDirname).filePath(QStringLiteral("icons"));
+    auto iconsDir = QDir(iconsDirname);
+    auto iconFilename = iconsDir.filePath(QStringLiteral("%1.svg").arg(Application::name()));
+    auto iconPermissions = QFileDevice::ReadOwner|QFileDevice::WriteOwner|
+        QFileDevice::ReadGroup|QFileDevice::WriteGroup|QFileDevice::ReadOther;
+
+    auto schemeHandlerRegistrationCommand = QStringLiteral("xdg-mime default %1.desktop x-scheme-handler/%2")
+        .arg(Application::name(), Application::nativeExtension());
+
+    auto success = ((iconsDir.exists() || iconsDir.mkpath(iconsDir.absolutePath())) &&
+        dotDesktopFile.open(QIODevice::WriteOnly) && dotDesktopFile.write(dotDesktopFileContent.toUtf8()) >= 0 &&
+        (QFileInfo(iconFilename).exists() ||
+            (QFile::copy(QStringLiteral(":/icon/Icon.svg"), iconFilename) &&
+            QFile::setPermissions(iconFilename, iconPermissions))) &&
+        QProcess::startDetached(schemeHandlerRegistrationCommand)) || false;
+
+    if(!success)
+        std::cerr << "Failed to configure for XDG.\n";
+#endif
+}
+
 int start(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
@@ -173,6 +225,8 @@ int start(int argc, char *argv[])
 
         return 1;
     }
+
+    configureXDG();
 
     const char* uri = Application::uri();
     const int maj = Application::majorVersion();
