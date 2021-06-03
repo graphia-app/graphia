@@ -200,7 +200,7 @@ Section "-Main Component"
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "EstimatedSize" "${BUILD_SIZE}"
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "InstallLocation" "$INSTDIR"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
@@ -221,35 +221,35 @@ SectionGroup /e "File associations"
 		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}" "${PRODUCT_NAME} File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$INSTDIR\${EXE} $\"%1$\""
+				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
 	Section "Graph Modelling Language file (.gml)"
 		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$INSTDIR\${EXE} $\"%1$\""
+				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
 	Section "Graph Markup Language file (.graphml)"
 		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "graphml" "${PRODUCT_NAME}.graphml" "${PRODUCT_NAME} GraphML File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$INSTDIR\${EXE} $\"%1$\""
+				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
 	Section "Biopax OWL file (.owl)"
 		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "owl" "${PRODUCT_NAME}.owl" "${PRODUCT_NAME} OWL File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$INSTDIR\${EXE} $\"%1$\""
+				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
 	Section "Graphviz DOT file (.dot)"
 		IfSilent skipFileAssociation
 		!insertmacro APP_ASSOCIATE "dot" "${PRODUCT_NAME}.dot" "${PRODUCT_NAME} DOT File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$INSTDIR\${EXE} $\"%1$\""
+				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
 	SectionEnd
 SectionGroupEnd
