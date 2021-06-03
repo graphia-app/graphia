@@ -204,6 +204,11 @@ Section "-Main Component"
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
+	; Register protocol handler for dealing with hyperlinks
+	WriteRegStr HKCR "${NATIVE_EXTENSION}" "" "URL:${PRODUCT_NAME} Protocol"
+	WriteRegStr HKCR "${NATIVE_EXTENSION}" "URL Protocol" ""
+	WriteRegStr HKCR "${NATIVE_EXTENSION}\shell\open\command" "" "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+
 	IfFileExists "$INSTDIR\Uninstall.exe" +2 ; Don't make Uninstall.exe if it already exists
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -219,7 +224,7 @@ SectionEnd
 SectionGroup /e "File associations"
 	Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
 		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}" "${PRODUCT_NAME} File" \
+		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native" "${PRODUCT_NAME} File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
 				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
 		skipFileAssociation:
@@ -278,7 +283,9 @@ Section "Uninstall"
 
 	DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
-	!insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}"
+	DeleteRegKey HKCR "${NATIVE_EXTENSION}"
+
+	!insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native"
 	!insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
 	!insertmacro APP_UNASSOCIATE "graphml" "${PRODUCT_NAME}.graphml"
 	!insertmacro APP_UNASSOCIATE "owl" "${PRODUCT_NAME}.owl"
