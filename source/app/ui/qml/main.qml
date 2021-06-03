@@ -2333,6 +2333,9 @@ ApplicationWindow
                 arguments.push(...resolvedUrls);
             }
 
+            // Remove duplicates
+            arguments = [...new Set(arguments)];
+
             processArguments(arguments);
         }
 
