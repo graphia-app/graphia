@@ -220,6 +220,7 @@ ApplicationWindow
         return s;
     }
 
+    property var _processedArguments: []
     property var _pendingArguments: []
 
     // This is called with the arguments of a second instance of the app,
@@ -241,6 +242,7 @@ ApplicationWindow
             // Pop
             argument = _pendingArguments[0];
             _pendingArguments.shift();
+            _processedArguments.push(argument);
         }
         while(argument[0] === "-" && _pendingArguments.length > 0);
 
@@ -1579,19 +1581,19 @@ ApplicationWindow
         id: commandLineArgumentsMessageDialog
         icon: StandardIcon.Information
         title: qsTr("Command Line Arguments")
-
-        text:
-        {
-            let text = "Arguments:\n\n";
-            return text + JSON.stringify(application.arguments, null, 4);
-        }
     }
 
     Action
     {
         id: showCommandLineArgumentsAction
         text: qsTr("Show Command Line Arguments")
-        onTriggered: { commandLineArgumentsMessageDialog.open(); }
+        onTriggered:
+        {
+            commandLineArgumentsMessageDialog.text = "Arguments:\n\n" +
+                JSON.stringify(mainWindow._processedArguments, null, 4);
+
+            commandLineArgumentsMessageDialog.open();
+        }
     }
 
     Action
