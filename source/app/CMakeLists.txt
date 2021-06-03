@@ -288,6 +288,8 @@ if(APPLE)
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${Version})
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${Version})
     set(MACOSX_BUNDLE_COPYRIGHT ${Copyright})
+    set(MACOSX_BUNDLE_BUNDLE_URL_NAME app.graphia.${PROJECT_NAME})
+    set(MACOSX_BUNDLE_BUNDLE_URL_SCHEME ${NativeExtension})
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 

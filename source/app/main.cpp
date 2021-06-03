@@ -55,6 +55,7 @@
 #include "shared/utils/qmlpreferences.h"
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/scopetimer.h"
+#include "shared/utils/macosfileopeneventfilter.h"
 #include "shared/utils/modelcompleter.h"
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
@@ -329,6 +330,14 @@ int start(int argc, char *argv[])
         arguments.pop_front(); // Executable
 
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, arguments));
+    });
+
+    MacOsFileOpenEventFilter macOsfileOpenEventFilter;
+    app.installEventFilter(&macOsfileOpenEventFilter);
+    QObject::connect(&macOsfileOpenEventFilter, &MacOsFileOpenEventFilter::externalOpen,
+    mainWindow, [mainWindow](const QString& argument)
+    {
+        QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, QStringList{argument}));
     });
 
     int qmlExitCode = 0;
