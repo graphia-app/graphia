@@ -47,6 +47,53 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>${MACOSX_BUNDLE_COPYRIGHT}</string>
 
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>${MACOSX_BUNDLE_BUNDLE_NAME} file</string>
+
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+			</array>
+		</dict>
+	</array>
+
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+
+			<key>UTTypeDescription</key>
+			<string>${MACOSX_BUNDLE_BUNDLE_NAME} file</string>
+
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.content</string>
+				<string>public.data</string>
+			</array>
+
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>${MACOSX_BUNDLE_NATIVE_EXTENSION}</string>
+				</array>
+
+				<key>public.mime-type</key>
+				<string>application/octet-stream</string>
+			</dict>
+		</dict>
+	</array>
+
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
