@@ -30,6 +30,9 @@
 #include <QWindow>
 #include <QScreen>
 #include <QDir>
+#include <QFile>
+#include <QFileDevice>
+#include <QFileInfo>
 #include <QStandardPaths>
 #include <QTimer>
 #include <QCommandLineParser>
