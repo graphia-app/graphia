@@ -121,7 +121,7 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
     auto& resultSet = _cache.front();
 
     auto it = std::find_if(resultSet.begin(), resultSet.end(),
-    [&](const auto& cachedResult)
+    [index, &config](const auto& cachedResult)
     {
         return cachedResult._index == index && cachedResult._config == config;
     });

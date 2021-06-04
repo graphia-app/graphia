@@ -1232,7 +1232,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
     QStringList changedAttributeNames(std::move(_->_updatedDynamicAttributeNames));
 
     changedAttributeNames.erase(std::remove_if(changedAttributeNames.begin(), changedAttributeNames.end(),
-    [&](const auto& dynamicAttributeName)
+    [&removedAttributeNames, &addedAttributeNames](const auto& dynamicAttributeName)
     {
         return u::contains(removedAttributeNames, dynamicAttributeName) ||
             u::contains(addedAttributeNames, dynamicAttributeName);

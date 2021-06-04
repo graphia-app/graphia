@@ -170,11 +170,11 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
 
         std::map<QString, std::function<bool()>> parsers =
         {
-            {QStringLiteral("csv"),     [&]{ return tryToParseUsing(CsvFileParser()); }},
-            {QStringLiteral("tsv"),     [&]{ return tryToParseUsing(TsvFileParser()); }},
-            {QStringLiteral("ssv"),     [&]{ return tryToParseUsing(SsvFileParser()); }},
-            {QStringLiteral("xlsx"),    [&]{ return tryToParseUsing(XlsxTabularDataParser()); }},
-            {QStringLiteral("mat"),     [&]{ return tryToParseUsing(MatLabFileParser()); }}
+            {QStringLiteral("csv"),     [&tryToParseUsing]{ return tryToParseUsing(CsvFileParser()); }},
+            {QStringLiteral("tsv"),     [&tryToParseUsing]{ return tryToParseUsing(TsvFileParser()); }},
+            {QStringLiteral("ssv"),     [&tryToParseUsing]{ return tryToParseUsing(SsvFileParser()); }},
+            {QStringLiteral("xlsx"),    [&tryToParseUsing]{ return tryToParseUsing(XlsxTabularDataParser()); }},
+            {QStringLiteral("mat"),     [&tryToParseUsing]{ return tryToParseUsing(MatLabFileParser()); }}
         };
 
         auto extension = QFileInfo(fileUrl.toLocalFile()).suffix();

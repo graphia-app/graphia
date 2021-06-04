@@ -44,13 +44,13 @@ static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
     auto isValue = [](const QString& attributeName) { return attributeName.contains("value", Qt::CaseInsensitive); };
 
     edgeAttributeNames.erase(std::remove_if(edgeAttributeNames.begin(), edgeAttributeNames.end(),
-    [&](const auto& attributeName)
+    [&isWeight, &isValue](const auto& attributeName)
     {
         return !isWeight(attributeName) && !isValue(attributeName);
     }), edgeAttributeNames.end());
 
     std::sort(edgeAttributeNames.begin(), edgeAttributeNames.end(),
-    [&](const auto& a, const auto& b)
+    [&isWeight, &isValue](const auto& a, const auto& b)
     {
         auto aIsWeight = isWeight(a);
         auto bIsWeight = isWeight(b);

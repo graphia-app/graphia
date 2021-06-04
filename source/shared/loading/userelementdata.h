@@ -199,7 +199,7 @@ public:
     UserDataVector removeByAttributeName(const QString& attributeName)
     {
         auto it = std::find_if(_exposedAsAttributes.begin(), _exposedAsAttributes.end(),
-            [&](const auto& v) { return v.second == attributeName; });
+            [&attributeName](const auto& v) { return v.second == attributeName; });
 
         UserDataVector removee;
 

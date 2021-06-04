@@ -245,7 +245,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
 
     std::function<std::vector<QString>(const Statement& s)> processStatement;
 
-    auto processStatementList = [&](const StatementList& l)
+    auto processStatementList = [&parser, &processStatement](const StatementList& l)
     {
         std::vector<QString> nodes;
         size_t i = 0;
@@ -261,13 +261,13 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
         return nodes;
     };
 
-    auto processEdgeEnd = [&](const EdgeEnd& e)
+    auto processEdgeEnd = [&processStatementList](const EdgeEnd& e)
     {
         return std::visit(Visitor
         {
-            [&](const boost::recursive_wrapper<DotSubGraph>& subGraph)
+            [&processStatementList](const boost::recursive_wrapper<DotSubGraph>& subGraph)
                 { return processStatementList(subGraph.get()._statementList); },
-            [&](const DotNode& node)
+            [](const DotNode& node)
                 { return std::vector<QString>({node._text}); }
         }, e);
     };

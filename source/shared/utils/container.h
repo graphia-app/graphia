@@ -68,7 +68,7 @@ namespace u
 
     template<typename C, typename T> bool containsAnyOf(const C& container, std::initializer_list<T>&& values)
     {
-        return std::any_of(values.begin(), values.end(), [&](const auto& value)
+        return std::any_of(values.begin(), values.end(), [&container](const auto& value)
         {
            return contains(container, value, 0);
         });
@@ -76,7 +76,7 @@ namespace u
 
     template<typename C, typename T> bool containsAllOf(const C& container, std::initializer_list<T>&& values)
     {
-        return std::all_of(values.begin(), values.end(), [&](const auto& value)
+        return std::all_of(values.begin(), values.end(), [&container](const auto& value)
         {
            return contains(container, value, 0);
         });
@@ -200,7 +200,7 @@ namespace u
         // Give duplicates the same rank
         auto it = ranking.begin();
         while((it = std::adjacent_find(it, ranking.end(),
-            [&](size_t a, size_t b)
+            [&container, &ranking](size_t a, size_t b)
             {
                 return a != b && container[a] == container[b];
             })) != ranking.end())

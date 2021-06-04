@@ -123,7 +123,7 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
             if(absEdgeWeight <= minimumAbsEdgeWeight)
                 continue;
 
-            auto addNode = [&](size_t index, const QString& name)
+            auto addNode = [&indexToNodeId, graphModel, userNodeData](size_t index, const QString& name)
             {
                 if(u::contains(indexToNodeId, index))
                     return indexToNodeId.at(index);

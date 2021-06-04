@@ -371,7 +371,7 @@ QStringList Application::linkArgumentsFor(const QUrl& url) const
     auto arguments = path.split('/');
 
     arguments.erase(std::remove_if(arguments.begin(), arguments.end(),
-    [&](const auto& argument)
+    [](const auto& argument)
     {
         return argument.isEmpty();
     }), arguments.end());

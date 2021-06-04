@@ -609,7 +609,7 @@ QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* plugin
     auto color = pluginInstance->nodeColorForRow(rows.at(0));
 
     auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
-    [&](auto row)
+    [pluginInstance, &color](auto row)
     {
         return pluginInstance->nodeColorForRow(row) != color;
     });

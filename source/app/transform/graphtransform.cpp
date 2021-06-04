@@ -46,7 +46,7 @@ static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
 {
     bool invalidAttributes =
     std::any_of(attributeNames.begin(), attributeNames.end(),
-    [&](const auto& attributeName)
+    [&graphModel](const auto& attributeName)
     {
         return !graphModel.attributeIsValid(attributeName);
     });
@@ -91,7 +91,7 @@ GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const
 {
     const auto& p = attributeParameters();
     auto it = std::find_if(p.begin(), p.end(),
-    [&](const auto& attributeParameter)
+    [&parameterName](const auto& attributeParameter)
     {
         return attributeParameter.name() == parameterName;
     });
@@ -106,7 +106,7 @@ GraphTransformParameter GraphTransformFactory::parameter(const QString& paramete
 {
     const auto& p = parameters();
     auto it = std::find_if(p.begin(), p.end(),
-    [&](const auto& parameter)
+    [&parameterName](const auto& parameter)
     {
         return parameter.name() == parameterName;
     });

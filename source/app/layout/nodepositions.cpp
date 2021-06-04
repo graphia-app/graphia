@@ -96,7 +96,7 @@ static QVector3D centreOfMassWithFn(const std::vector<NodeId>& nodeIds, GetFn&& 
     float reciprocal = 1.0f / nodeIds.size();
 
     return std::accumulate(nodeIds.begin(), nodeIds.end(), QVector3D(),
-    [&](const auto& com, auto nodeId)
+    [reciprocal, getFn](const auto& com, auto nodeId)
     {
         return com + (getFn(nodeId) * reciprocal);
     });

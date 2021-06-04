@@ -119,7 +119,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
 
     size_t numColumnAnnotations = numVisibleColumnAnnotations();
 
-    auto forEachColumnAnnotation = [&](auto&& fn)
+    auto forEachColumnAnnotation = [this, numColumnAnnotations, &columnAnnotations](auto&& fn)
     {
         size_t y = numColumnAnnotations - 1;
         size_t offset = 0;
@@ -142,7 +142,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     // This gets removed (and thus delete'd) for every call to rebuildPlot
     auto* qcpColumnAnnotations = new QCPColumnAnnotations(caXAxis, caYAxis);
 
-    forEachColumnAnnotation([&](const ColumnAnnotation& columnAnnotation,
+    forEachColumnAnnotation([this, qcpColumnAnnotations](const ColumnAnnotation& columnAnnotation,
         bool selected, size_t y, size_t offset)
     {
         qcpColumnAnnotations->setData(y, _sortMap, selected, offset, &columnAnnotation);
@@ -153,7 +153,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     {
         QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
-        forEachColumnAnnotation([&](const ColumnAnnotation& columnAnnotation,
+        forEachColumnAnnotation([this, columnAnnotationTicker](const ColumnAnnotation& columnAnnotation,
             bool selected, size_t y, size_t)
         {
             QString prefix;
