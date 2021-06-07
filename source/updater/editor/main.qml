@@ -38,6 +38,7 @@ ApplicationWindow
 
         property string operatingSystems: ""
         property string credentials: ""
+        property bool hexEncodeUpdatesString: true
         property string privateKeyFile: ""
 
         onPrivateKeyFileChanged:
@@ -320,6 +321,19 @@ ApplicationWindow
                     keyFileDialog.open();
                 }
             }
+
+            MenuItem
+            {
+                checkable: true
+                checked: settings.hexEncodeUpdatesString
+                text: qsTr("Hex Encode Updates String")
+
+                onCheckedChanged:
+                {
+                    settings.hexEncodeUpdatesString = checked;
+                    root.saveRequired = true;
+                }
+            }
         }
     }
 
@@ -330,7 +344,9 @@ ApplicationWindow
         try
         {
             let savedObject = JSON.parse(fileContents);
-            let jsonString = QmlUtils.hexStringAsString(savedObject.updates);
+            let jsonString = QmlUtils.isHexString(savedObject.updates) ?
+                QmlUtils.hexStringAsString(savedObject.updates) : savedObject.updates;
+
             root.updatesArray = JSON.parse(jsonString);
         }
         catch(e)
@@ -437,13 +453,16 @@ ApplicationWindow
         let updatesRemaining = tabView.count;
         let onComplete = function()
         {
-            let hexEncodedUpdates = QmlUtils.stringAsHexString(JSON.stringify(root.updatesArray));
+            let updatesString = settings.hexEncodeUpdatesString ?
+                QmlUtils.stringAsHexString(JSON.stringify(root.updatesArray)) :
+                JSON.stringify(root.updatesArray);
+
             let updatesSignature =
-                QmlUtils.rsaSignatureForString(hexEncodedUpdates, settings.privateKeyFile);
+                QmlUtils.rsaSignatureForString(updatesString, settings.privateKeyFile);
 
             let saveObject =
             {
-                updates: hexEncodedUpdates,
+                updates: updatesString,
                 signature: updatesSignature
             };
 

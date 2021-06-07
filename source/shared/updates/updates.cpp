@@ -65,14 +65,17 @@ json updateStringToJson(const QString& updateString, QString* status)
     if(!u::contains(updateObject, "updates") || !u::contains(updateObject, "signature"))
         return {};
 
-    auto hexString = updateObject["updates"];
+    if(!updateObject["updates"].is_string() || !updateObject["signature"].is_string())
+        return {};
+
+    auto updatesString = updateObject["updates"].get<std::string>();
     auto hexSignature = updateObject["signature"].get<std::string>();
     auto signature = u::hexToString(hexSignature);
 
-    if(!u::rsaVerifySignature(hexString, signature, ":/update_keys/public_update_key.der"))
+    if(!u::rsaVerifySignature(updatesString, signature, ":/update_keys/public_update_key.der"))
         return {};
 
-    auto decodedUpdatesString = u::hexToString(hexString.get<std::string>());
+    auto decodedUpdatesString = u::isHex(updatesString) ? u::hexToString(updatesString) : updatesString;
     auto updates = json::parse(decodedUpdatesString.begin(), decodedUpdatesString.end(), nullptr, false);
 
     if(updates.is_discarded())

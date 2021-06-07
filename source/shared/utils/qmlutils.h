@@ -272,6 +272,12 @@ public:
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE bool isHexString(const QString& string)
+    {
+        return u::isHex(string);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString rsaSignatureForString(const QString& string, const QString& keyFilename)
     {
         auto signature = u::rsaSignString(string.toStdString(),
