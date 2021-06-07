@@ -24,6 +24,7 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
+#include "shared/loading/pairwisefileparser.h"
 #include "shared/loading/jsongraphparser.h"
 
 #include "shared/attributes/iattribute.h"
@@ -56,14 +57,29 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QStringLiteral("GML"))
         return std::make_unique<GmlFileParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName == QStringLiteral("PairwiseTXT"))
-        return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
-
     if(urlTypeName == QStringLiteral("GraphML"))
         return std::make_unique<GraphMLParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == QStringLiteral("DOT"))
         return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
+
+    if(urlTypeName.startsWith(QStringLiteral("Pairwise")))
+    {
+        std::unique_ptr<IParser> parser;
+
+        if(urlTypeName == QStringLiteral("PairwiseTXT"))
+            return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
+        else if(urlTypeName == QStringLiteral("PairwiseCSV"))
+            parser = std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData);
+        else if(urlTypeName == QStringLiteral("PairwiseSSV"))
+            parser = std::make_unique<PairwiseSSVFileParser>(userNodeData, userEdgeData);
+        else if(urlTypeName == QStringLiteral("PairwiseTSV"))
+            parser = std::make_unique<PairwiseTSVFileParser>(userNodeData, userEdgeData);
+        else if(urlTypeName == QStringLiteral("PairwiseXLSX"))
+            parser = std::make_unique<PairwiseXLSXFileParser>(userNodeData, userEdgeData);
+
+        return parser;
+    }
 
     if(urlTypeName.startsWith(QStringLiteral("Matrix")))
     {
@@ -187,6 +203,10 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
     registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
     registerUrlType(QStringLiteral("DOT"), QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
+    registerUrlType(QStringLiteral("PairwiseCSV"), QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
+    registerUrlType(QStringLiteral("PairwiseSSV"), QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
+    registerUrlType(QStringLiteral("PairwiseTSV"), QObject::tr("Pairwise File"), QObject::tr("Pairwise Files"), {"tsv"});
+    registerUrlType(QStringLiteral("PairwiseXLSX"), QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
     registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv"});
@@ -215,6 +235,10 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             (urlType == QStringLiteral("PairwiseTXT") && PairwiseTxtFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url)) ||
             (urlType == QStringLiteral("DOT") && DotFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("PairwiseCSV") && PairwiseCSVFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("PairwiseSSV") && PairwiseSSVFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("PairwiseTSV") && PairwiseTSVFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("PairwiseXLSX") && PairwiseXLSXFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixCSV") && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
