@@ -88,8 +88,8 @@ template<typename TabularDataParser>
 class AdjacencyMatrixParser : public IParser, public AdjacencyMatrixTabularDataParser
 {
 private:
-    IUserNodeData* _userNodeData;
-    IUserEdgeData* _userEdgeData;
+    IUserNodeData* _userNodeData = nullptr;
+    IUserEdgeData* _userEdgeData = nullptr;
     TabularData _tabularData;
 
 public:
