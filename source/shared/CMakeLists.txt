@@ -40,6 +40,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iurltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iuserdata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/iuserelementdata.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisefileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.h
@@ -129,6 +130,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.cpp
