@@ -23,45 +23,9 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 
-#include <QDataStream>
-#include <QFile>
-#include <QUrl>
-
-bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
+bool JsonGraphParser::parseJson(const json& jsonObject, IGraphModel* graphModel)
 {
-    QFile file(url.toLocalFile());
-    QByteArray byteArray;
-
-    if(!file.open(QIODevice::ReadOnly))
-        return false;
-
-    auto totalBytes = file.size();
-
-    if(totalBytes == 0)
-        return false;
-
-    qint64 bytesRead = 0;
-    QDataStream input(&file);
-
-    do
-    {
-        const int ChunkSize = 2 << 16;
-        std::vector<unsigned char> buffer(ChunkSize);
-
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(buffer.data()), ChunkSize);
-        byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
-
-        bytesRead += numBytes;
-
-        setProgress(static_cast<int>((bytesRead * 100) / totalBytes));
-    } while(!input.atEnd());
-
-    auto jsonBody = parseJsonFrom(byteArray, this);
-
-    if(cancelled())
-        return false;
-
-    if(jsonBody.is_null() || !jsonBody.is_object())
+    if(jsonObject.is_null() || !jsonObject.is_object())
     {
         setFailureReason(QObject::tr("Body is empty, or not an object."));
         return false;
@@ -69,10 +33,10 @@ bool JsonGraphParser::parse(const QUrl &url, IGraphModel *graphModel)
 
     const json* graph = nullptr;
 
-    if(u::contains(jsonBody, "graphs") && jsonBody["graphs"].is_array() && !jsonBody["graphs"].empty())
-        graph = &jsonBody["graphs"].at(0);
-    else if(u::contains(jsonBody, "graph") && jsonBody["graph"].is_object())
-        graph = &jsonBody["graph"];
+    if(u::contains(jsonObject, "graphs") && jsonObject["graphs"].is_array() && !jsonObject["graphs"].empty())
+        graph = &jsonObject["graphs"].at(0);
+    else if(u::contains(jsonObject, "graph") && jsonObject["graph"].is_object())
+        graph = &jsonObject["graph"];
     else
     {
         setFailureReason(QObject::tr("Body doesn't contain a graph object."));

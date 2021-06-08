@@ -19,21 +19,24 @@
 #ifndef JSONGRAPHPARSER_H
 #define JSONGRAPHPARSER_H
 
-#include "shared/loading/iparser.h"
+#include "shared/loading/jsonparser.h"
 #include "shared/loading/iuserelementdata.h"
+
 #include "json_helper.h"
 
-class JsonGraphParser : public IParser
+class JsonGraphParser : public JsonParser
 {
 private:
     IUserNodeData* _userNodeData;
     IUserEdgeData* _userEdgeData;
+
+    bool parseJson(const json& jsonObject, IGraphModel* graphModel) override;
+
 public:
     JsonGraphParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
     {}
 
-    bool parse(const QUrl &url, IGraphModel *graphModel) override;
     static bool canLoad(const QUrl &) { return true; }
     static bool parseGraphObject(const json& jsonGraphObject, IGraphModel *graphModel,
         IParser& parser, bool useElementIdsLiterally = false,
