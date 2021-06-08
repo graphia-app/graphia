@@ -214,6 +214,8 @@ ApplicationWindow
             root.lastUsedFilename = "file://" + Qt.application.arguments[1];
             root.open(lastUsedFilename);
         }
+
+        resetSaveRequired();
     }
 
     onClosing:
@@ -331,7 +333,7 @@ ApplicationWindow
                 onCheckedChanged:
                 {
                     settings.hexEncodeUpdatesString = checked;
-                    root.saveRequired = true;
+                    setSaveRequired();
                 }
             }
         }
