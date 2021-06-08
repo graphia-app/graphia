@@ -26,6 +26,7 @@
 #include "shared/loading/adjacencymatrixfileparser.h"
 #include "shared/loading/pairwisefileparser.h"
 #include "shared/loading/jsongraphparser.h"
+#include "shared/loading/cxparser.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -118,6 +119,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
     if(urlTypeName == QStringLiteral("JSONGraph"))
         return std::make_unique<JsonGraphParser>(userNodeData, userEdgeData);
+
+    if(urlTypeName == QStringLiteral("CX"))
+        return std::make_unique<CxParser>(userNodeData, userEdgeData);
 
     return nullptr;
 }
@@ -214,6 +218,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixMatLab"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
     registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
     registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
+    registerUrlType(QStringLiteral("CX"), QObject::tr("Cytoscape Exchange File"), QObject::tr("Cytoscape Exchange Files"), {"cx"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
@@ -245,7 +250,8 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             (urlType == QStringLiteral("MatrixXLSX") && AdjacencyMatrixXLSXFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixMatLab") && AdjacencyMatrixMatLabFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("JSONGraph") && JsonGraphParser::canLoad(url));
+            (urlType == QStringLiteral("JSONGraph") && JsonGraphParser::canLoad(url)) ||
+            (urlType == QStringLiteral("CX") && CxParser::canLoad(url));
 
         if(canLoad)
             result.push_back(urlType);

@@ -31,6 +31,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/imutablegraph.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/undirectededge.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.h
@@ -124,6 +125,7 @@ list(APPEND HEADERS
 list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.cpp
