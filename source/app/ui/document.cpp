@@ -537,6 +537,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     _pluginName = pluginName;
     emit pluginNameChanged();
 
+    setTitle(url.fileName());
     emit commandInProgressChanged();
     emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
