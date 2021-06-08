@@ -230,6 +230,8 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
         return true;
     };
 
+    std::vector<const List*> edges;
+
     for(const auto& keyValue : gml)
     {
         const auto& key = keyValue.get()._key;
@@ -257,11 +259,19 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
                 if(type == QStringLiteral("node"))
                     success = processNode(*value);
                 else if(type == QStringLiteral("edge"))
-                    success = processEdge(*value);
+                    edges.push_back(value);
 
                 if(!success || parser.cancelled())
                     return false;
             }
+        }
+
+        // It's possible to define edges before nodes, so we save
+        // processing edges until all the nodes have been visited
+        for(const auto* edge : edges)
+        {
+            if(!processEdge(*edge) || parser.cancelled())
+                return false;
         }
     }
 
