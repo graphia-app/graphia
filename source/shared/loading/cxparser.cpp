@@ -44,6 +44,8 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
         if(u::contains(j, "nodes"))
         {
             auto nodesArray = j["nodes"];
+            auto numNodes = static_cast<int>(nodesArray.size());
+            int i = 0;
             for(const auto& node : nodesArray)
             {
                 if(!u::contains(node, "@id"))
@@ -75,15 +77,21 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                     auto represents = QString::fromStdString(node["r"].get<std::string>());
                     userNodeData->setValueBy(nodeId, QObject::tr("Node Represents"), represents);
                 }
+
+                parser->setProgress((i++ * 100) / numNodes);
             }
         }
     }
+
+    parser->setProgress(-1);
 
     for(const auto& j : jsonArray)
     {
         if(u::contains(j, "edges"))
         {
             auto edgesArray = j["edges"];
+            auto numEdges = static_cast<int>(edgesArray.size());
+            int i = 0;
             for(const auto& edge : edgesArray)
             {
                 if(!u::contains(edge, "@id"))
@@ -126,6 +134,8 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                     auto interaction = QString::fromStdString(edge["i"].get<std::string>());
                     userEdgeData->setValueBy(edgeId, QObject::tr("Edge Interaction"), interaction);
                 }
+
+                parser->setProgress((i++ * 100) / numEdges);
             }
         }
     }
@@ -176,24 +186,34 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
         return true;
     };
 
+    parser->setProgress(-1);
+
     for(const auto& j : jsonArray)
     {
         if(u::contains(j, "nodeAttributes"))
         {
             auto nodeAttributesArray = j["nodeAttributes"];
+            auto numNodeAttributes = static_cast<int>(nodeAttributesArray.size());
+            int i = 0;
             for(const auto& nodeAttribute : nodeAttributesArray)
             {
                 if(!addAttribute(nodeAttribute, "Node", cxIdToNodeId, *userNodeData))
                     return false;
+
+                parser->setProgress((i++ * 100) / numNodeAttributes);
             }
         }
         else if(u::contains(j, "edgeAttributes"))
         {
             auto edgeAttributesArray = j["edgeAttributes"];
+            auto numEdgeAttributes = static_cast<int>(edgeAttributesArray.size());
+            int i = 0;
             for(const auto& edgeAttribute : edgeAttributesArray)
             {
                 if(!addAttribute(edgeAttribute, "Edge", cxIdToEdgeId, *userEdgeData))
                     return false;
+
+                parser->setProgress((i++ * 100) / numEdgeAttributes);
             }
         }
     }
