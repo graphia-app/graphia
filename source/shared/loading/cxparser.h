@@ -30,12 +30,10 @@ private:
     IUserNodeData* _userNodeData;
     IUserEdgeData* _userEdgeData;
 
-    bool parseJson(const json& jsonObject, IGraphModel* graphModel) override;
+    bool parseJson(const json& jsonArray, IGraphModel* graphModel) override;
 
 public:
-    CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
-        _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-    {}
+    CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
 
     static bool canLoad(const QUrl &) { return true; }
 };
