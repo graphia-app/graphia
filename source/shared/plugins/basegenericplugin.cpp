@@ -218,7 +218,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("MatrixMatLab"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
     registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
     registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
-    registerUrlType(QStringLiteral("CX"), QObject::tr("Cytoscape Exchange File"), QObject::tr("Cytoscape Exchange Files"), {"cx"});
+    registerUrlType(QStringLiteral("CX"), QObject::tr("Cytoscape Exchange File"), QObject::tr("Cytoscape Exchange Files"), {"cx", "cx2"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const

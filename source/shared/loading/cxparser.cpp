@@ -33,7 +33,7 @@ CxParser::CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
+static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     IParser* parser, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
     std::map<int, NodeId> cxIdToNodeId;
@@ -233,6 +233,13 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     return true;
 }
 
+static bool parseCx2(const json& /*jsonArray*/, IGraphModel* /*graphModel*/,
+    IParser* parser, IUserNodeData* /*userNodeData*/, IUserEdgeData* /*userEdgeData*/)
+{
+    parser->setFailureReason(QObject::tr("Not implemented."));
+    return false;
+}
+
 bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
 {
     if(jsonArray.is_null() || !jsonArray.is_array() || jsonArray.empty())
@@ -255,6 +262,11 @@ bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
     bool version1 = u::contains(jsonArray.at(0), "numberVerification");
     if(version1)
         return parseCx1(jsonArray, graphModel, this, _userNodeData, _userEdgeData);
+
+    bool version2 = u::contains(jsonArray.at(0), "CXVersion") &&
+        jsonArray.at(0).at("CXVersion").get<std::string>().front() == '2';
+    if(version2)
+        return parseCx2(jsonArray, graphModel, this, _userNodeData, _userEdgeData);;
 
     setFailureReason(QObject::tr("Unknown version."));
     return false;
