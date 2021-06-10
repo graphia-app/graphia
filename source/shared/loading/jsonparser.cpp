@@ -56,6 +56,9 @@ bool JsonParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     auto jsonBody = parseJsonFrom(byteArray, this);
 
+    if(jsonBody.is_null() || jsonBody.is_discarded())
+        return false;
+
     if(cancelled())
         return false;
 
