@@ -235,7 +235,7 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
 
 bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
 {
-    if(jsonArray.is_null() || !jsonArray.is_array())
+    if(jsonArray.is_null() || !jsonArray.is_array() || jsonArray.empty())
     {
         setFailureReason(QObject::tr("Body is empty, or not an array."));
         return false;
@@ -252,5 +252,10 @@ bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
         return false;
     }
 
-    return parseCx1(jsonArray, graphModel, this, _userNodeData, _userEdgeData);
+    bool version1 = u::contains(jsonArray.at(0), "numberVerification");
+    if(version1)
+        return parseCx1(jsonArray, graphModel, this, _userNodeData, _userEdgeData);
+
+    setFailureReason(QObject::tr("Unknown version."));
+    return false;
 }
