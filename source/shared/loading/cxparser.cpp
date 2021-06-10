@@ -79,6 +79,9 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                 }
 
                 parser->setProgress((i++ * 100) / numNodes);
+
+                if(parser->cancelled())
+                    return false;
             }
         }
     }
@@ -136,6 +139,9 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                 }
 
                 parser->setProgress((i++ * 100) / numEdges);
+
+                if(parser->cancelled())
+                    return false;
             }
         }
     }
@@ -201,6 +207,9 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                     return false;
 
                 parser->setProgress((i++ * 100) / numNodeAttributes);
+
+                if(parser->cancelled())
+                    return false;
             }
         }
         else if(u::contains(j, "edgeAttributes"))
@@ -214,6 +223,9 @@ bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
                     return false;
 
                 parser->setProgress((i++ * 100) / numEdgeAttributes);
+
+                if(parser->cancelled())
+                    return false;
             }
         }
     }
