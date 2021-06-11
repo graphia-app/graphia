@@ -43,7 +43,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     {
         if(u::contains(j, "nodes"))
         {
-            auto nodesArray = j["nodes"];
+            const auto& nodesArray = j["nodes"];
             auto numNodes = static_cast<int>(nodesArray.size());
             int i = 0;
             for(const auto& node : nodesArray)
@@ -92,7 +92,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     {
         if(u::contains(j, "edges"))
         {
-            auto edgesArray = j["edges"];
+            const auto& edgesArray = j["edges"];
             auto numEdges = static_cast<int>(edgesArray.size());
             int i = 0;
             for(const auto& edge : edgesArray)
@@ -198,7 +198,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     {
         if(u::contains(j, "nodeAttributes"))
         {
-            auto nodeAttributesArray = j["nodeAttributes"];
+            const auto& nodeAttributesArray = j["nodeAttributes"];
             auto numNodeAttributes = static_cast<int>(nodeAttributesArray.size());
             int i = 0;
             for(const auto& nodeAttribute : nodeAttributesArray)
@@ -214,7 +214,7 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
         }
         else if(u::contains(j, "edgeAttributes"))
         {
-            auto edgeAttributesArray = j["edgeAttributes"];
+            const auto& edgeAttributesArray = j["edgeAttributes"];
             auto numEdgeAttributes = static_cast<int>(edgeAttributesArray.size());
             int i = 0;
             for(const auto& edgeAttribute : edgeAttributesArray)
