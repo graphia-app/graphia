@@ -533,16 +533,6 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     for(const auto& name : _userColumnData)
     {
         const auto* values = _userColumnData.vector(name);
-        auto numValues = values->numValues();
-        auto numUniqueValues = values->numUniqueValues();
-
-        // If the number of unique values is more than a half of the total
-        // number of values, skip it, since a large number of unique values
-        // potentially causes performance problems, and it's probably not a
-        // useful annotation in the first place
-        if((numValues > 300) && (numUniqueValues * 2 > numValues))
-            continue;
-
         _columnAnnotations.emplace_back(name, values->begin(), values->end());
     }
 
