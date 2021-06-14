@@ -36,7 +36,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
     target.setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
-    const auto& edegIds = target.edgeIds();
+    const auto& edgeIds = target.edgeIds();
     std::atomic_int progress(0);
 
     struct BetweennessArrays
@@ -136,7 +136,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
         for(auto nodeId : nodeIds)
             nodeBetweenness[nodeId] += arrays.nodeBetweenness[nodeId];
 
-        for(auto edgeId : edegIds)
+        for(auto edgeId : edgeIds)
             edgeBetweenness[edgeId] += arrays.edgeBetweenness[edgeId];
     }
 
