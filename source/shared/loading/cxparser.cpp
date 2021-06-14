@@ -25,6 +25,7 @@
 #include "shared/graph/imutablegraph.h"
 
 #include <map>
+#include <type_traits>
 
 CxParser::CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
@@ -233,11 +234,165 @@ static bool parseCx1(const json& jsonArray, IGraphModel* graphModel,
     return true;
 }
 
-static bool parseCx2(const json& /*jsonArray*/, IGraphModel* /*graphModel*/,
-    IParser* parser, IUserNodeData* /*userNodeData*/, IUserEdgeData* /*userEdgeData*/)
+static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
+    IParser* parser, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
 {
-    parser->setFailureReason(QObject::tr("Not implemented."));
-    return false;
+    std::map<std::string, std::string> nodeAttributeAliases;
+    std::map<std::string, std::string> edgeAttributeAliases;
+
+    auto findAttributeAliases = [](const json& declaration, std::map<std::string, std::string>& map)
+    {
+        if(!declaration.is_object())
+            return;
+
+        for(const auto& attribute : declaration.items())
+        {
+            const auto& longName = attribute.key();
+            const auto& members = attribute.value();
+            if(u::contains(members, "a"))
+            {
+                const auto& shortName = members["a"].get<std::string>();
+                map[shortName] = longName;
+            }
+        }
+    };
+
+    parser->setProgress(-1);
+
+    for(const auto& j : jsonArray)
+    {
+        if(u::contains(j, "attributeDeclarations"))
+        {
+            const auto& attributeDeclarations = j["attributeDeclarations"];
+
+            for(const auto& attributeDeclaration : attributeDeclarations)
+            {
+                if(u::contains(attributeDeclaration, "nodes"))
+                    findAttributeAliases(attributeDeclaration["nodes"], nodeAttributeAliases);
+
+                if(u::contains(attributeDeclaration, "edges"))
+                    findAttributeAliases(attributeDeclaration["edges"], edgeAttributeAliases);
+            }
+        }
+    }
+
+    auto addAttribute = [graphModel](const char* elementType, auto elementId, const json& attributes,
+        const auto& aliases, auto& userData)
+    {
+        for(const auto& attribute : attributes.items())
+        {
+            auto name = attribute.key();
+            const auto& attributeValue = attribute.value().is_string() ?
+                QString::fromStdString(attribute.value().get<std::string>()) :
+                QString::fromStdString(attribute.value().dump());
+
+            if constexpr(std::is_same_v<decltype(elementId), NodeId>)
+            {
+                if(name == "n")
+                {
+                    graphModel->setNodeName(elementId, attributeValue);
+                    userData.setValueBy(elementId, QStringLiteral("Node Name"), attributeValue);
+                    return;
+                }
+            }
+
+            if(u::contains(aliases, name))
+                name = aliases.at(name);
+
+            auto attributeName = QObject::tr("%1 %2")
+                .arg(elementType, QString::fromStdString(name));
+            userData.setValueBy(elementId, attributeName, attributeValue);
+        }
+    };
+
+    std::map<int, NodeId> cxIdToNodeId;
+
+    for(const auto& j : jsonArray)
+    {
+        if(u::contains(j, "nodes"))
+        {
+            auto nodesArray = j["nodes"];
+            auto numNodes = static_cast<int>(nodesArray.size());
+            int i = 0;
+            for(const auto& node : nodesArray)
+            {
+                if(!u::contains(node, "id"))
+                {
+                    parser->setFailureReason(QObject::tr("Node is missing ID."));
+                    return false;
+                }
+
+                auto nodeId = graphModel->mutableGraph().addNode();
+
+                if(!node["id"].is_number())
+                {
+                    parser->setFailureReason(QObject::tr("Node ID is not a number."));
+                    return false;
+                }
+
+                auto cxId = node["id"].get<int>();
+                cxIdToNodeId[cxId] = nodeId;
+
+                if(u::contains(node, "v") && node["v"].is_object())
+                    addAttribute("Node", nodeId, node["v"], nodeAttributeAliases, *userNodeData);
+
+                parser->setProgress((i++ * 100) / numNodes);
+
+                if(parser->cancelled())
+                    return false;
+            }
+        }
+    }
+
+    parser->setProgress(-1);
+
+    for(const auto& j : jsonArray)
+    {
+        if(u::contains(j, "edges"))
+        {
+            auto edgesArray = j["edges"];
+            auto numEdges = static_cast<int>(edgesArray.size());
+            int i = 0;
+            for(const auto& edge : edgesArray)
+            {
+                if(!u::contains(edge, "id"))
+                {
+                    parser->setFailureReason(QObject::tr("Edge is missing ID."));
+                    return false;
+                }
+
+                if(!u::contains(edge, "s") || !u::contains(edge, "t"))
+                {
+                    parser->setFailureReason(QObject::tr("Edge is missing source and/or target IDs."));
+                    return false;
+                }
+
+                auto sourceCxId = edge["s"].is_number() ? edge["s"].get<int>() : -1;
+                auto targetCxId = edge["t"].is_number() ? edge["t"].get<int>() : -1;
+
+                if(!u::contains(cxIdToNodeId, sourceCxId) || !u::contains(cxIdToNodeId, targetCxId))
+                {
+                    parser->setFailureReason(QObject::tr("Edge source or target ID is unknown."));
+                    return false;
+                }
+
+                auto sourceId = cxIdToNodeId.at(sourceCxId);
+                auto targetId = cxIdToNodeId.at(targetCxId);
+
+                auto edgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
+
+                if(u::contains(edge, "v") && edge["v"].is_object())
+                    addAttribute("Edge", edgeId, edge["v"], edgeAttributeAliases, *userEdgeData);
+
+                parser->setProgress((i++ * 100) / numEdges);
+
+                if(parser->cancelled())
+                    return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
