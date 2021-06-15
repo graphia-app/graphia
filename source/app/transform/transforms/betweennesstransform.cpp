@@ -106,8 +106,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
                 auto d = (static_cast<double>(sigma[predecessor]) /
                     static_cast<double>(sigma[other])) * (1.0 + delta[other]);
 
-                auto edgeIds = target.edgeIdsBetween(predecessor, other);
-                for(auto edgeId : edgeIds)
+                for(auto edgeId : target.edgeIdsBetween(predecessor, other))
                     _edgeBetweenness[edgeId] += d;
 
                 delta[predecessor] += d;
