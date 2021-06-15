@@ -236,7 +236,7 @@ private:
 
         while(!newTrees.empty())
         {
-            auto results = concurrent_for(newTrees.begin(), newTrees.end(),
+            auto results = parallel_for(newTrees.begin(), newTrees.end(),
             [&nodePositions](typename std::vector<NewTree>::iterator it)
             {
                 auto* subTree = it->_tree;

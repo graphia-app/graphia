@@ -478,7 +478,7 @@ public:
     };
 
     template<typename It, typename Fn>
-    auto concurrent_for(It first, It last, Fn f, ResultsPolicy resultsPolicy = Blocking)
+    auto parallel_for(It first, It last, Fn f, ResultsPolicy resultsPolicy = Blocking)
     {
         Coster<It> coster(first, last);
 
@@ -539,9 +539,9 @@ auto execute_on_threadpool(Fn&& f, Args&&... args)
 }
 
 template<typename It, typename Fn>
-auto concurrent_for(It first, It last, Fn&& f, ThreadPool::ResultsPolicy resultsPolicy = ThreadPool::Blocking)
+auto parallel_for(It first, It last, Fn&& f, ThreadPool::ResultsPolicy resultsPolicy = ThreadPool::Blocking)
 {
-    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::forward<Fn>(f), resultsPolicy);
+    return S(ThreadPoolSingleton)->parallel_for(first, last, std::forward<Fn>(f), resultsPolicy);
 }
 
 #endif // THREADPOOL_H

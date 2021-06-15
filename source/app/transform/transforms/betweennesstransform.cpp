@@ -54,7 +54,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
         std::thread::hardware_concurrency(),
         BetweennessArrays{target});
 
-    concurrent_for(nodeIds.begin(), nodeIds.end(),
+    parallel_for(nodeIds.begin(), nodeIds.end(),
     [&](const NodeId nodeId, size_t threadIndex)
     {
         auto& arrays = betweennessArrays.at(threadIndex);

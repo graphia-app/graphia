@@ -154,7 +154,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     const float LONG_RANGE = 0.01f + _settings->value(QStringLiteral("LongRangeRepulseTerm"));
 
     // Repulsive forces
-    auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
+    auto repulsiveResults = parallel_for(nodeIds().begin(), nodeIds().end(),
     [this, &barnesHutTree, SHORT_RANGE, LONG_RANGE](NodeId nodeId)
     {
         if(cancelled())
@@ -168,7 +168,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     }, ThreadPool::NonBlocking);
 
     // Attractive forces
-    auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
+    auto attractiveResults = parallel_for(edgeIds().begin(), edgeIds().end(),
     [this](EdgeId edgeId)
     {
         if(cancelled())
@@ -192,7 +192,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     if(cancelled())
         return;
 
-    concurrent_for(nodeIds().begin(), nodeIds().end(),
+    parallel_for(nodeIds().begin(), nodeIds().end(),
     [this](NodeId nodeId)
     {
         _displacements->at(nodeId).computeAndDamp();

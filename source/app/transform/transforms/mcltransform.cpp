@@ -446,7 +446,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         target.setProgress(0);
 
         // Pass by value rowData, this gives each THREAD a copy of rowData, rather re-allocating vectors per row (slow)
-        concurrent_for(colIterator.begin(), colIterator.end(),
+        parallel_for(colIterator.begin(), colIterator.end(),
         [&, rowData, cancelledFn = [this] { return cancelled(); }](const size_t iterator) mutable
         {
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],

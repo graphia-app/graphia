@@ -112,7 +112,7 @@ public:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(rows.begin(), rows.end(),
+        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(rows.begin(), rows.end(),
         [&](ContinuousDataRows::const_iterator rowAIt)
         {
             const auto* rowA = &(*rowAIt);
@@ -329,7 +329,7 @@ public:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).concurrent_for(tokenisedRows.begin(), tokenisedRows.end(),
+        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(tokenisedRows.begin(), tokenisedRows.end(),
         [&](TokenisedDataRows::const_iterator rowAIt)
         {
             EdgeList edges;
