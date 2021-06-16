@@ -53,6 +53,7 @@ private:
         // Null: none of prev, next or opposite is set
         // Tail: next is self, opposite set to the head
         // Head: prev is not set, has an opposite and (next isn't self or opposite is self)
+        // Middle: prev and next are set
         // Singleton: prev, next and opposite are self
 
         T _prev;
