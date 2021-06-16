@@ -174,7 +174,12 @@ void TransformedGraph::rebuild()
             result = _cache.apply(transform->index(), result._config, *this);
             if(result.isApplicable())
             {
-                newCreatedAttributeNames[transform->index()] = u::keysFor(result._newAttributes);
+                auto newAttributeNames = u::keysFor(result._newAttributes);
+
+                for(const auto& attributeName : newAttributeNames)
+                    updatedAttributeNames.append(attributeName);
+
+                newCreatedAttributeNames[transform->index()] = newAttributeNames;
                 newCache.add(std::move(result));
                 continue;
             }
