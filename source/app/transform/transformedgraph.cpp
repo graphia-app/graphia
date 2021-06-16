@@ -155,6 +155,7 @@ void TransformedGraph::rebuild()
         TransformCache newCache(*_graphModel);
         CreatedAttributeNamesMap newCreatedAttributeNames;
         *this = *_source;
+        _target.update();
 
         // Save previous state in case we get cancelled
         auto oldCache = _cache;

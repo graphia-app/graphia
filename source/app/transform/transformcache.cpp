@@ -133,7 +133,10 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
         // Apply the cached result
         _graphModel->addAttributes(cachedResult._newAttributes);
         if(cachedResult._graph != nullptr)
+        {
             graph = *(cachedResult._graph);
+            graph.update();
+        }
 
         result = std::move(cachedResult);
 
