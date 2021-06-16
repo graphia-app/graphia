@@ -29,6 +29,7 @@
 
 #include "attributes/attribute.h"
 
+#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
@@ -155,8 +156,6 @@ public:
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 
-    std::unique_ptr<AttributeChangesTracker> attributeChangesTracker();
-
     const Attribute* attributeByName(const QString& name) const override;
     bool attributeExists(const QString& name) const override;
     bool attributeIsValid(const QString& name) const;
@@ -205,12 +204,31 @@ signals:
 
 class AttributeChangesTracker
 {
+    friend class GraphModel;
+
 private:
     GraphModel* _graphModel;
+    bool _emitOnDestruct = true;
+
+    QSet<QString> _added;
+    QSet<QString> _removed;
+    QSet<QString> _changed;
+
+    // Called by GraphModel
+    void add(const QString& name);
+    void remove(const QString& name);
+    void change(const QString& name);
 
 public:
-    AttributeChangesTracker(GraphModel& graphModel);
+    AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct = true);
     ~AttributeChangesTracker();
+
+    QStringList added() const { return {_added.begin(), _added.end()}; }
+    QStringList removed() const { return {_removed.begin(), _removed.end()}; }
+    QStringList changed() const { return {_changed.begin(), _changed.end()}; }
+    QStringList addedOrChanged() const;
+
+    void emitAttributesChanged();
 };
 
 #endif // GRAPHMODEL_H

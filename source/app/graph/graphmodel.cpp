@@ -76,6 +76,8 @@
 #include <QRegularExpression>
 #include <QSet>
 
+#include <set>
+#include <map>
 #include <vector>
 #include <utility>
 
@@ -175,10 +177,7 @@ private:
 
     bool _nodesMaskActive = false;
 
-    bool _trackAttributeChanges = false;
-    QSet<QString> _trackedAddedAttributes;
-    QSet<QString> _trackedRemovedAttributes;
-    QSet<QString> _trackedChangedAttributes;
+    std::set<AttributeChangesTracker*> _attributeChangesTrackers;
 
     bool _visualUpdateRequired = false;
 };
@@ -216,15 +215,21 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     connect(&_->_userNodeData, &UserData::vectorValuesChanged, [this](const QString& vectorName)
     {
         auto attributeName = _->_userNodeData.exposedAttributeName(vectorName);
-        if(_->_trackAttributeChanges && !attributeName.isEmpty())
-            _->_trackedChangedAttributes.insert(attributeName);
+        if(attributeName.isEmpty())
+            return;
+
+        for(auto* tracker : _->_attributeChangesTrackers)
+            tracker->change(attributeName);
     });
 
     connect(&_->_userEdgeData, &UserData::vectorValuesChanged, [this](const QString& vectorName)
     {
         auto attributeName = _->_userEdgeData.exposedAttributeName(vectorName);
-        if(_->_trackAttributeChanges && !attributeName.isEmpty())
-            _->_trackedChangedAttributes.insert(attributeName);
+        if(attributeName.isEmpty())
+            return;
+
+        for(auto* tracker : _->_attributeChangesTrackers)
+            tracker->change(attributeName);
     });
 
     connect(this, &GraphModel::attributesChanged, this, &GraphModel::onAttributesChanged, Qt::DirectConnection);
@@ -858,17 +863,8 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
     if(_transformedGraphIsChanging)
         attribute.setFlag(AttributeFlag::Dynamic);
 
-    if(_->_trackAttributeChanges)
-    {
-        if(u::contains(_->_trackedRemovedAttributes, name))
-        {
-            // If it's been removed and added, count that as changed (potentially)
-            _->_trackedRemovedAttributes.remove(name);
-            _->_trackedChangedAttributes.insert(name);
-        }
-        else
-            _->_trackedAddedAttributes.insert(name);
-    }
+    for(auto* tracker : _->_attributeChangesTrackers)
+        tracker->add(name);
 
     return attribute;
 }
@@ -885,21 +881,8 @@ void GraphModel::removeAttribute(const QString& name)
 
     _->_attributes.erase(name);
 
-    if(_->_trackAttributeChanges)
-    {
-        if(u::contains(_->_trackedAddedAttributes, name))
-        {
-            // If it's been added and removed, count that as net zero
-            _->_trackedAddedAttributes.remove(name);
-        }
-        else
-            _->_trackedRemovedAttributes.insert(name);
-    }
-}
-
-std::unique_ptr<AttributeChangesTracker> GraphModel::attributeChangesTracker()
-{
-    return std::make_unique<AttributeChangesTracker>(*this);
+    for(auto* tracker : _->_attributeChangesTrackers)
+        tracker->remove(name);
 }
 
 const Attribute* GraphModel::attributeByName(const QString& name) const
@@ -1281,30 +1264,66 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
     }
 }
 
-AttributeChangesTracker::AttributeChangesTracker(GraphModel& graphModel) :
-    _graphModel(&graphModel)
+AttributeChangesTracker::AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct) :
+    _graphModel(graphModel), _emitOnDestruct(emitOnDestruct)
 {
-    Q_ASSERT(!_graphModel->_->_trackAttributeChanges);
-
-    _graphModel->_->_trackAttributeChanges = true;
-    _graphModel->_->_trackedAddedAttributes.clear();
-    _graphModel->_->_trackedRemovedAttributes.clear();
-    _graphModel->_->_trackedChangedAttributes.clear();
+    _graphModel->_->_attributeChangesTrackers.insert(this);
 }
 
 AttributeChangesTracker::~AttributeChangesTracker()
 {
-    Q_ASSERT(_graphModel->_->_trackAttributeChanges);
+    if(_emitOnDestruct)
+        emitAttributesChanged();
 
-    QStringList added(_graphModel->_->_trackedAddedAttributes.begin(), _graphModel->_->_trackedAddedAttributes.end());
-    QStringList removed(_graphModel->_->_trackedRemovedAttributes.begin(), _graphModel->_->_trackedRemovedAttributes.end());
-    QStringList changed(_graphModel->_->_trackedChangedAttributes.begin(), _graphModel->_->_trackedChangedAttributes.end());
+    _graphModel->_->_attributeChangesTrackers.erase(this);
+}
 
-    if(!added.isEmpty() || !removed.isEmpty() || !changed.isEmpty())
-        emit _graphModel->attributesChanged(added, removed, changed);
+void AttributeChangesTracker::add(const QString& name)
+{
+    if(u::contains(_changed, name))
+    {
+        qDebug() << "AttributeChangesTracker::add called on attribute marked as changed" << name;
+        _changed.remove(name);
+    }
 
-    _graphModel->_->_trackedAddedAttributes.clear();
-    _graphModel->_->_trackedRemovedAttributes.clear();
-    _graphModel->_->_trackedChangedAttributes.clear();
-    _graphModel->_->_trackAttributeChanges = false;
+    if(u::contains(_removed, name))
+    {
+        // If it's been removed and added, count that as changed (potentially)
+        _removed.remove(name);
+        _changed.insert(name);
+    }
+    else
+       _added.insert(name);
+}
+
+void AttributeChangesTracker::remove(const QString& name)
+{
+    if(u::contains(_added, name))
+    {
+        // If it's been added and removed, count that as net zero
+        _added.remove(name);
+    }
+    else
+        _removed.insert(name);
+}
+
+void AttributeChangesTracker::change(const QString& name)
+{
+    // Only count an attribute as changed if it's not new
+    if(!u::contains(_added, name))
+        _changed.insert(name);
+}
+
+QStringList AttributeChangesTracker::addedOrChanged() const
+{
+    auto combined = u::combine(_added, _changed);
+    return {combined.begin(), combined.end()};
+}
+
+void AttributeChangesTracker::emitAttributesChanged()
+{
+    if(_added.empty() && _removed.empty() && _changed.empty())
+        return;
+
+    emit _graphModel->attributesChanged(added(), removed(), changed());
 }

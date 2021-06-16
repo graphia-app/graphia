@@ -74,7 +74,7 @@ QString ImportAttributesCommand::debugDescription() const
 
 bool ImportAttributesCommand::execute()
 {
-    auto tracker = _graphModel->attributeChangesTracker();
+    AttributeChangesTracker tracker(_graphModel);
 
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
@@ -155,7 +155,7 @@ bool ImportAttributesCommand::execute()
 
 void ImportAttributesCommand::undo()
 {
-    auto tracker = _graphModel->attributeChangesTracker();
+    AttributeChangesTracker tracker(_graphModel);
 
     for(const auto& attributeName : _createdAttributeNames)
         _graphModel->removeAttribute(attributeName);

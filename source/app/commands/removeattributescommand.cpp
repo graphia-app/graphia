@@ -63,7 +63,7 @@ QString RemoveAttributesCommand::debugDescription() const
 
 bool RemoveAttributesCommand::execute()
 {
-    auto tracker = _graphModel->attributeChangesTracker();
+    AttributeChangesTracker tracker(_graphModel);
 
     for(const auto& attributeName : std::as_const(_attributeNames))
     {
@@ -92,7 +92,7 @@ bool RemoveAttributesCommand::execute()
 
 void RemoveAttributesCommand::undo()
 {
-    auto tracker = _graphModel->attributeChangesTracker();
+    AttributeChangesTracker tracker(_graphModel);
 
     for(auto&& vector : _removedUserNodeDataVectors)
         _graphModel->userNodeData().setVector(std::move(vector));
