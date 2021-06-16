@@ -184,9 +184,7 @@ void TransformedGraph::rebuild()
                 continue;
             }
 
-            // Save the attribute names before the transform application
-            // so we can see which attributes are created
-            auto attributeNames = _graphModel->attributeNames();
+            AttributeChangesTracker tracker(_graphModel, false);
 
             setCurrentTransform(transform.get());
             transform->uncancel();
@@ -204,17 +202,18 @@ void TransformedGraph::rebuild()
             if(_cancelled)
                 break;
 
-            auto newAttributeNames = u::setDifference(_graphModel->attributeNames(), attributeNames);
-            for(const auto& newAttributeName : newAttributeNames)
+            for(const auto& attributeName : tracker.added())
+                result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
+
+            for(const auto& attributeName : tracker.addedOrChanged())
             {
-                result._newAttributes.emplace(newAttributeName, _graphModel->attributeValueByName(newAttributeName));
-                _cache.attributeAddedOrChanged(newAttributeName);
-                updatedAttributeNames.append(newAttributeName);
+                _cache.attributeAddedOrChanged(attributeName);
+                updatedAttributeNames.append(attributeName);
             }
 
             result._index = transform->index();
 
-            newCreatedAttributeNames[transform->index()] = newAttributeNames;
+            newCreatedAttributeNames[transform->index()] = u::toQStringVector(tracker.added());
             newCache.add(std::move(result));
         }
 
