@@ -21,23 +21,30 @@ import QtQuick.Layouts 1.3
 
 Item
 {
-    width: 8
-    height: 16
+    id: root
+
+    property int orientation: Qt.Vertical
+
+    width: orientation === Qt.Vertical ? 8 : 16
+    height: orientation === Qt.Vertical ? 16 : 8
 
     Rectangle
     {
-        width: 1
-        height: parent.height
-        anchors.horizontalCenter: parent.horizontalCenter
+        width: root.orientation === Qt.Vertical ? 1 : root.width
+        height: root.orientation === Qt.Vertical ? root.height : 1
+        anchors.horizontalCenter: root.horizontalCenter
+        anchors.verticalCenter: root.verticalCenter
         color: "#22000000"
     }
 
     Rectangle
     {
-        width: 1
-        height: parent.height
-        anchors.horizontalCenterOffset: 1
-        anchors.horizontalCenter: parent.horizontalCenter
+        width: root.orientation === Qt.Vertical ? 1 : root.width
+        height: root.orientation === Qt.Vertical ? root.height : 1
+        anchors.horizontalCenterOffset: root.orientation === Qt.Vertical ? 1 : 0
+        anchors.verticalCenterOffset: root.orientation === Qt.Vertical ? 0 : 1
+        anchors.horizontalCenter: root.horizontalCenter
+        anchors.verticalCenter: root.verticalCenter
         color: "#33ffffff"
     }
 }
