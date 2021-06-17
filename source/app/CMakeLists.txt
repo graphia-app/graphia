@@ -116,6 +116,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgecontractiontransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgereductiontransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/forwardmultielementattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.h
@@ -232,6 +233,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgecontractiontransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgereductiontransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/forwardmultielementattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.cpp

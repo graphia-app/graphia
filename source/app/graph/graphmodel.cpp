@@ -45,6 +45,7 @@
 #include "transform/transforms/knntransform.h"
 #include "transform/transforms/percentnntransform.h"
 #include "transform/transforms/edgereductiontransform.h"
+#include "transform/transforms/forwardmultielementattributetransform.h"
 #include "transform/transforms/spanningtreetransform.h"
 #include "transform/transforms/attributesynthesistransform.h"
 #include "transform/transforms/combineattributestransform.h"
@@ -309,6 +310,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Spanning Forest"),          std::make_unique<SpanningTreeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Attribute Synthesis"),      std::make_unique<AttributeSynthesisTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Combine Attributes"),       std::make_unique<CombineAttributesTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Forward Attribute"),        std::make_unique<ForwardMultiElementAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Remove Leaves"),            std::make_unique<RemoveLeavesTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Remove Branches"),          std::make_unique<RemoveBranchesTransformFactory>(this));
 
