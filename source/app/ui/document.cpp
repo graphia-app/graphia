@@ -1908,7 +1908,9 @@ QVariantMap Document::transform(const QString& transformName) const
         auto elementType = transformFactory->elementType();
 
         map.insert(QStringLiteral("elementType"), static_cast<int>(elementType));
+        map.insert(QStringLiteral("name"), transformName);
         map.insert(QStringLiteral("description"), transformFactory->description());
+        map.insert(QStringLiteral("image"), transformFactory->image());
         map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
 
         QStringList attributeParameterNames;

@@ -269,6 +269,7 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/icon/mainicon.qrc
     ${CMAKE_CURRENT_LIST_DIR}/icon-themes/icons.qrc
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shaders.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/licensing.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/app_qml.qrc

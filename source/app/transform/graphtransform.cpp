@@ -87,6 +87,24 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
     return anyChange;
 }
 
+QString GraphTransformFactory::image() const
+{
+    if(category() == QObject::tr("Attributes"))
+        return "qrc:///transforms/images/attributes.svg";
+    else if(category() == QObject::tr("Clustering"))
+        return "qrc:///transforms/images/clustering.svg";
+    else if(category() == QObject::tr("Edge Reduction"))
+        return "qrc:///transforms/images/edgereduction.svg";
+    else if(category() == QObject::tr("Filters"))
+        return "qrc:///transforms/images/filters.svg";
+    else if(category() == QObject::tr("Metrics"))
+        return "qrc:///transforms/images/metrics.svg";
+    else if(category() == QObject::tr("Structural"))
+        return "qrc:///transforms/images/structural.svg";
+
+    return "qrc:///transforms/images/default.svg";
+}
+
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const
 {
     const auto& p = attributeParameters();

@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/transforms">
+        <file>images/default.svg</file>
+        <file>images/attributes.svg</file>
+        <file>images/filters.svg</file>
+        <file>images/metrics.svg</file>
+        <file>images/edgereduction.svg</file>
+        <file>images/clustering.svg</file>
+        <file>images/structural.svg</file>
+    </qresource>
+</RCC>

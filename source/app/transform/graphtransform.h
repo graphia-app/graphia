@@ -110,6 +110,7 @@ public:
     virtual ~GraphTransformFactory() = default;
 
     virtual QString description() const = 0;
+    virtual QString image() const;
     virtual QString category() const { return {}; }
     virtual ElementType elementType() const { return ElementType::None; }
     virtual GraphTransformAttributeParameters attributeParameters() const { return {}; }
