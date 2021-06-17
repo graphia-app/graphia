@@ -1295,8 +1295,8 @@ ApplicationWindow
     Action
     {
         id: toggleLayoutSettingsAction
-        iconName: "applications-system"
-        text: Qt.platform.os === "osx" ? qsTr("Layout Settings…") : qsTr("Settings…")
+        iconName: "preferences-desktop"
+        text: qsTr("Layout Settings…")
         shortcut: "Ctrl+L"
         enabled: currentTab && currentDocument && !currentDocument.busy
 
@@ -2277,6 +2277,7 @@ ApplicationWindow
                 action: pauseLayoutAction
                 tooltip: ""
             }
+            ToolButton { action: toggleLayoutSettingsAction }
             ToolBarSeparator {}
             ToolButton { action: deleteAction }
             ToolButton { action: findAction }

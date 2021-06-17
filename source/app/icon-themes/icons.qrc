@@ -94,6 +94,9 @@
 		<file>Tango/16x16/graphia/node-size.png</file>
 		<file>Tango/22x22/graphia/node-size.png</file>
 		<file>Tango/32x32/graphia/node-size.png</file>
+		<file>Tango/16x16/categories/preferences-desktop.png</file>
+		<file>Tango/22x22/categories/preferences-desktop.png</file>
+		<file>Tango/32x32/categories/preferences-desktop.png</file>
 		<file>Tango/16x16/apps/preferences-system-windows.png</file>
 		<file>Tango/22x22/apps/preferences-system-windows.png</file>
 		<file>Tango/32x32/apps/preferences-system-windows.png</file>
