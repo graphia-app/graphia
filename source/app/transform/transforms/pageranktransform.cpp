@@ -60,12 +60,10 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
 
         // Map NodeIds to Matrix index
         std::map<NodeId, int> nodeToIndexMap;
-        std::map<int, NodeId> indexToNodeMap;
         for(auto nodeId : component->nodeIds())
         {
             auto index = static_cast<int>(nodeToIndexMap.size());
             nodeToIndexMap[nodeId] = index;
-            indexToNodeMap[index] = nodeId;
         }
 
         QElapsedTimer timer;
