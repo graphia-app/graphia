@@ -184,7 +184,7 @@ bool UserData::load(const json& jsonObject, Progressable& progressable)
 
         auto it = vector.begin();
 
-        const QString& name = QString::fromStdString(it.key());
+        const QString& name = normalise(QString::fromStdString(it.key()));
         const auto& jsonVector = it.value();
 
         UserDataVector userDataVector;
