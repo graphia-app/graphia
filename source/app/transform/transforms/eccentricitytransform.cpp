@@ -33,7 +33,7 @@ void EccentricityTransform::apply(TransformedGraph& target) const
 void EccentricityTransform::calculateDistances(TransformedGraph& target) const
 {
     // Setup the contiguous ids
-    std::map<NodeId, int> nodeIdToMatrixIndex;
+    NodeIdMap<int> nodeIdToMatrixIndex;
     for(auto nodeId : target.nodeIds())
     {
         auto size = static_cast<int>(nodeIdToMatrixIndex.size());

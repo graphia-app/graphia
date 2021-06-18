@@ -333,7 +333,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     int nodeCount = target.numNodes();
 
     // Map NodeIds to Matrix index
-    std::map<NodeId, size_t> nodeToIndexMap;
+    NodeIdMap<size_t> nodeToIndexMap;
     std::map<size_t, NodeId> indexToNodeMap;
     for(NodeId nodeId : target.nodeIds())
     {

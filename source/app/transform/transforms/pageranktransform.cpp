@@ -59,7 +59,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
         auto componentNodeCount = static_cast<int>(component->nodeIds().size());
 
         // Map NodeIds to Matrix index
-        std::map<NodeId, int> nodeToIndexMap;
+        NodeIdMap<int> nodeToIndexMap;
         for(auto nodeId : component->nodeIds())
         {
             auto index = static_cast<int>(nodeToIndexMap.size());
