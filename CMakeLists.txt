@@ -24,6 +24,7 @@ list(APPEND HEADERS
 
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cloc.sh
+    ${CMAKE_CURRENT_LIST_DIR}/scripts/compiler-logs-to-table.pl
     ${CMAKE_CURRENT_LIST_DIR}/scripts/static-analysis.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/upload-symbols.sh
 )

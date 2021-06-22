@@ -106,7 +106,7 @@ fi
 
 # cppcheck
 ${CPPCHECK} --version
-${CPPCHECK} -v --enable=all \
+${CPPCHECK} -v --enable=all --xml \
   --suppress=unusedFunction \
   --suppress=unusedPrivateFunction \
   --suppress=*:*/source/thirdparty/* \
