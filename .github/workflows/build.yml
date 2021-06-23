@@ -3,6 +3,7 @@ on: [push]
 env:
   QT_VERSION: 5.14.2
   QT_MODULES: qtwebengine
+  CLANG_VERSION: 12
 
 jobs:
   linux:
@@ -141,10 +142,10 @@ jobs:
     - name: Install Tools
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-        sudo bash /tmp/llvm.sh 11
+        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
-        sudo apt-get install libc++-11-dev libc++1-11 libc++abi-11-dev libc++abi1-11
-        sudo apt-get install clang-tidy-11 cppcheck
+        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }} cppcheck
         curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
@@ -162,14 +163,14 @@ jobs:
     - name: Compile
       run: scripts/linux-build.sh
       env:
-        CC: clang-11
-        CXX: clang++-11
+        CC: clang-${{ env.CLANG_VERSION }}
+        CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Analyse
       run: scripts/static-analysis.sh -v
       env:
-        CC: clang-11
-        CXX: clang++-11
-        CLANGTIDY: clang-tidy-11
+        CC: clang-${{ env.CLANG_VERSION }}
+        CXX: clang++-${{ env.CLANG_VERSION }}
+        CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
         CPPCHECK: cppcheck
         CLAZY: clazy
     - uses: actions/upload-artifact@v2
