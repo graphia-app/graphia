@@ -200,7 +200,7 @@ namespace u
         // Give duplicates the same rank
         auto it = ranking.begin();
         while((it = std::adjacent_find(it, ranking.end(),
-            [&container, &ranking](size_t a, size_t b)
+            [&container](size_t a, size_t b)
             {
                 return a != b && container[a] == container[b];
             })) != ranking.end())
