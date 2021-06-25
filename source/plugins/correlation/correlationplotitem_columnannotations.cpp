@@ -368,6 +368,6 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
         return;
     }
 
-    emit plotOptionsChanged();
+    emit plotOptionsChanged(); // NOLINT
     rebuildPlot();
 }
