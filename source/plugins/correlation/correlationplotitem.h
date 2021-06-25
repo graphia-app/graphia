@@ -329,7 +329,7 @@ private:
     void setXAxisPadding(int padding);
 
     void updateSortMap();
-    void setColumnSortOrders(const QVector<QVariantMap> columnSortOrders);
+    void setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders);
 
     QString elideLabel(const QString& label);
 

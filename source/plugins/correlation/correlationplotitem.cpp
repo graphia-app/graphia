@@ -1123,7 +1123,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     rebuildPlot(InvalidateCache::Yes);
 }
 
-void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap> columnSortOrders)
+void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders)
 {
     if(_columnSortOrders != columnSortOrders)
     {
