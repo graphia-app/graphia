@@ -186,7 +186,7 @@ private:
 
 public:
     CorrelationTabularDataParser();
-    virtual ~CorrelationTabularDataParser();
+    ~CorrelationTabularDataParser() override;
 
     Q_INVOKABLE bool parse(const QUrl& fileUrl, const QString& fileType);
     Q_INVOKABLE void cancelParse();
