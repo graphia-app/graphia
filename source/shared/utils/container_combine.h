@@ -32,7 +32,7 @@ private:
     ContainerIteratorPairs _its;
 
 public:
-    combine(Containers&... cs)
+    explicit combine(Containers&... cs)
     {
         _its = std::apply([](auto&&... values)
         {
