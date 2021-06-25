@@ -92,7 +92,7 @@ bool isEdgeElementName(const QString& name)
 
     return edgeElementNames.contains(name);
 }
-}
+} // namespace
 
 BiopaxFileParser::BiopaxFileParser(IUserNodeData* userNodeData) : _userNodeData(userNodeData)
 {

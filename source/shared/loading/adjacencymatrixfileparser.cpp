@@ -210,7 +210,7 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
 
     return true;
 }
-}
+} // namespace
 
 bool AdjacencyMatrixTabularDataParser::onParseComplete()
 {

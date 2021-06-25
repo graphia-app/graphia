@@ -31,6 +31,6 @@ int multisamples()
     // This is the place where the default number of multisamples is set
     return 4;
 }
-}
+} // namespace
 
 #endif // MULTISAMPLES_H
