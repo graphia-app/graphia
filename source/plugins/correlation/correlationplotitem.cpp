@@ -795,8 +795,8 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
         return;
     }
-    else
-        _rebuildRequired = RebuildRequired::None;
+
+    _rebuildRequired = RebuildRequired::None;
 
     if(invalidateCache == InvalidateCache::Yes)
     {

@@ -373,7 +373,8 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Pro
             graphModel, userNodeData, userEdgeData,
             _minimumAbsEdgeWeight, _skipDuplicates);
     }
-    else if(isAdjacencyMatrix(tabularData))
+
+    if(isAdjacencyMatrix(tabularData))
     {
         return parseAdjacencyMatrix(tabularData, progressable,
             graphModel, userNodeData, userEdgeData,

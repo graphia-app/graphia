@@ -52,8 +52,8 @@ bool DownloadQueue::add(const QUrl& url)
         start(url);
         return true;
     }
-    else
-        _queue.push(url);
+
+    _queue.push(url);
 
     return false;
 }
