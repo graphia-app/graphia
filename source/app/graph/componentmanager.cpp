@@ -518,7 +518,7 @@ const GraphComponent* ComponentManager::componentById(ComponentId componentId) c
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
-    auto* component = componentFor(componentId);
+    const auto* component = componentFor(componentId);
     Q_ASSERT(component != nullptr);
 
     return component;

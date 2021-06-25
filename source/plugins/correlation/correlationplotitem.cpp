@@ -509,7 +509,7 @@ void CorrelationPlotItem::updateTooltip()
             {
                 double value = 0.0;
 
-                auto* plottable1D = dynamic_cast<const QCPPlottableInterface1D*>(plottableUnderCursor);
+                const auto* plottable1D = dynamic_cast<const QCPPlottableInterface1D*>(plottableUnderCursor);
                 if(plottable1D != nullptr)
                 {
                     auto dataIndex = plottable1D->dataCount() == 1 ? 0 : static_cast<int>(key);
@@ -655,7 +655,7 @@ void CorrelationPlotItem::configureLegend()
         _legendLayoutGrid->setRowStretchFactor(2, 1.0);
     }
 
-    auto legend = dynamic_cast<QCPLegend*>(_legendLayoutGrid->elementAt(
+    auto* legend = dynamic_cast<QCPLegend*>(_legendLayoutGrid->elementAt(
         _legendLayoutGrid->rowColToIndex(1, 0)));
 
     legend->setLayer(QStringLiteral("legend"));

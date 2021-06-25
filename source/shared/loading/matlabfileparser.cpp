@@ -109,7 +109,7 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
         if(candidate > biggestMatrix)
         {
             biggestMatrix = candidate;
-            auto v = biggestMatrix._var;
+            const auto* v = biggestMatrix._var;
 
             switch(v->data_type)
             {

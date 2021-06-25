@@ -232,7 +232,7 @@ signals:
     void downloadComplete(const QUrl& url, const QString& fileName);
 
 private:
-    static const char* _uri;
+    static const char* const _uri;
     static const int _majorVersion = APP_MAJOR_VERSION;
     static const int _minorVersion = APP_MINOR_VERSION;
 

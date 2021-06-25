@@ -60,7 +60,7 @@ public:
     static bool isEdgeList(const TabularData& tabularData, size_t maxRows = 5);
 
     bool parse(const TabularData& tabularData, Progressable& progressable,
-        IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData);
+        IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) const;
 
     double minimumAbsEdgeWeight() const { return _minimumAbsEdgeWeight; }
     bool skipDuplicates() const { return _skipDuplicates; }

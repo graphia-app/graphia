@@ -365,7 +365,7 @@ bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData
 }
 
 bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Progressable& progressable,
-    IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData)
+    IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) const
 {
     if(isEdgeList(tabularData))
     {

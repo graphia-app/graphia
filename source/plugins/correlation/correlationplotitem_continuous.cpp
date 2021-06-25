@@ -717,18 +717,20 @@ bool CorrelationPlotItem::continuousTooltip(const QCPAxisRect* axisRect,
     if(axisRect != _continuousAxisRect || plottable == nullptr)
         return false;
 
-    if(auto* graph = dynamic_cast<const QCPGraph*>(plottable))
+    if(const auto* graph = dynamic_cast<const QCPGraph*>(plottable))
     {
         _itemTracer->setGraph(const_cast<QCPGraph*>(graph));
         _itemTracer->setGraphKey(xCoord);
         return true;
     }
-    else if(auto* bars = dynamic_cast<const QCPBars*>(plottable))
+
+    if(const auto* bars = dynamic_cast<const QCPBars*>(plottable))
     {
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(static_cast<int>(xCoord)));
         return true;
     }
-    else if(auto* boxPlot = dynamic_cast<const QCPStatisticalBox*>(plottable))
+
+    if(const auto* boxPlot = dynamic_cast<const QCPStatisticalBox*>(plottable))
     {
         // Only show simple tooltips for now, can extend this later...
         _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(static_cast<int>(xCoord)));
