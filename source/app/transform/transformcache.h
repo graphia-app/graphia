@@ -39,14 +39,16 @@ public:
             _index(other._index),
             _config(other._config),
             _graph(other._graph ? std::make_unique<MutableGraph>(*other._graph) : nullptr),
-            _newAttributes(other._newAttributes)
+            _newAttributes(other._newAttributes),
+            _changedAttributes(other._changedAttributes)
         {}
 
         Result(Result&& other) noexcept :
             _index(other._index),
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
-            _newAttributes(std::move(other._newAttributes))
+            _newAttributes(std::move(other._newAttributes)),
+            _changedAttributes(std::move(other._changedAttributes))
         {}
 
         Result& operator=(Result&& other) noexcept

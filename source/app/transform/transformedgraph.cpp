@@ -23,6 +23,7 @@
 
 #include "shared/commands/icommand.h"
 #include "shared/utils/container.h"
+#include "shared/utils/container_combine.h"
 #include "shared/utils/string.h"
 
 #include <functional>
@@ -175,8 +176,9 @@ void TransformedGraph::rebuild()
             if(result.wasApplied())
             {
                 auto newAttributeNames = u::keysFor(result._newAttributes);
+                auto changedAttributeNames = u::keysFor(result._changedAttributes);
 
-                for(const auto& attributeName : newAttributeNames)
+                for(const auto& attributeName : u::combine(newAttributeNames, changedAttributeNames))
                     updatedAttributeNames.append(attributeName);
 
                 newCreatedAttributeNames[transform->index()] = newAttributeNames;
@@ -204,6 +206,9 @@ void TransformedGraph::rebuild()
 
             for(const auto& attributeName : tracker.added())
                 result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
+
+            for(const auto& attributeName : tracker.changed())
+                result._changedAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
 
             for(const auto& attributeName : tracker.addedOrChanged())
             {

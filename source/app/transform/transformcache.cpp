@@ -24,6 +24,7 @@
 
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
+#include "shared/utils/container_combine.h"
 
 #include <algorithm>
 
@@ -57,7 +58,7 @@ std::vector<QString> TransformCache::attributesChangedByLastResult() const
 
     for(const auto& result : _cache.back())
     {
-        auto resultAttributeNames = u::keysFor(result._newAttributes);
+        auto resultAttributeNames = u::combine(u::keysFor(result._newAttributes), u::keysFor(result._changedAttributes));
         attributeNames.insert(attributeNames.end(), resultAttributeNames.begin(), resultAttributeNames.end());
     }
 
@@ -132,6 +133,7 @@ TransformCache::Result TransformCache::apply(int index, const GraphTransformConf
 
         // Apply the cached result
         _graphModel->addAttributes(cachedResult._newAttributes);
+        _graphModel->replaceAttributes(cachedResult._changedAttributes);
         if(cachedResult._graph != nullptr)
         {
             graph = *(cachedResult._graph);
@@ -186,8 +188,10 @@ std::map<QString, Attribute> TransformCache::attributes() const
     {
         for(const auto& cachedResult : resultSet)
         {
-            const auto& newAttributes = cachedResult._newAttributes;
-            map.insert(newAttributes.begin(), newAttributes.end());
+            auto attributes = u::combine(cachedResult._newAttributes, cachedResult._changedAttributes);
+
+            for(const auto& [attributeName, attribute] : attributes)
+                map[attributeName] = attribute;
         }
     }
 

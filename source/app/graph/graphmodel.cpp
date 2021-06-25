@@ -876,6 +876,17 @@ void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
     _->_attributes.insert(attributes.begin(), attributes.end());
 }
 
+void GraphModel::replaceAttributes(const std::map<QString, Attribute>& attributes)
+{
+    for(const auto& [attributeName, attribute] : attributes)
+    {
+        if(!u::contains(_->_attributes, attributeName))
+            qDebug() << "WARNING: attribute doesn't already exist in replaceAttributes" << attributeName;
+
+        _->_attributes[attributeName] = attribute;
+    }
+}
+
 void GraphModel::removeAttribute(const QString& name)
 {
     if(!u::contains(_->_attributes, name))

@@ -154,6 +154,7 @@ public:
     Attribute& createAttribute(QString name, QString* assignedName = nullptr) override;
 
     void addAttributes(const std::map<QString, Attribute>& attributes);
+    void replaceAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 
     const Attribute* attributeByName(const QString& name) const override;
