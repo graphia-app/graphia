@@ -172,7 +172,7 @@ void TransformedGraph::rebuild()
             result._config = transform->config();
 
             result = _cache.apply(transform->index(), result._config, *this);
-            if(result.isApplicable())
+            if(result.wasApplied())
             {
                 auto newAttributeNames = u::keysFor(result._newAttributes);
 

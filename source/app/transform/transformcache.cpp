@@ -46,12 +46,12 @@ bool TransformCache::lastResultChangesGraph() const
     });
 }
 
-bool TransformCache::lastResultCreatedAnyOf(const std::vector<QString>& attributeNames) const
+bool TransformCache::lastResultChangedAnyOf(const std::vector<QString>& attributeNames) const
 {
-    return !u::setIntersection(attributesCreatedByLastResult(), attributeNames).empty();
+    return !u::setIntersection(attributesChangedByLastResult(), attributeNames).empty();
 }
 
-std::vector<QString> TransformCache::attributesCreatedByLastResult() const
+std::vector<QString> TransformCache::attributesChangedByLastResult() const
 {
     std::vector<QString> attributeNames;
 
@@ -66,7 +66,7 @@ std::vector<QString> TransformCache::attributesCreatedByLastResult() const
 
 void TransformCache::add(TransformCache::Result&& result)
 {
-    if(_cache.empty() || lastResultChangesGraph() || lastResultCreatedAnyOf(result.referencedAttributeNames()))
+    if(_cache.empty() || lastResultChangesGraph() || lastResultChangedAnyOf(result.referencedAttributeNames()))
         _cache.emplace_back();
 
     _cache.back().emplace_back(std::move(result));

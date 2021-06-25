@@ -55,12 +55,13 @@ public:
             _config = std::move(other._config);
             _graph = std::move(other._graph);
             _newAttributes = std::move(other._newAttributes);
+            _changedAttributes = std::move(other._changedAttributes);
 
             return *this;
         }
 
         bool changesGraph() const { return _graph != nullptr; }
-        bool isApplicable() const { return changesGraph() || !_newAttributes.empty(); }
+        bool wasApplied() const { return changesGraph() || !_newAttributes.empty() || !_changedAttributes.empty(); }
 
         std::vector<QString> referencedAttributeNames() const
         {
@@ -71,14 +72,15 @@ public:
         GraphTransformConfig _config;
         std::unique_ptr<MutableGraph> _graph;
         std::map<QString, Attribute> _newAttributes;
+        std::map<QString, Attribute> _changedAttributes;
     };
 
     using ResultSet = std::vector<Result>;
 
 private:
     bool lastResultChangesGraph() const;
-    bool lastResultCreatedAnyOf(const std::vector<QString>& attributeNames) const;
-    std::vector<QString> attributesCreatedByLastResult() const;
+    bool lastResultChangedAnyOf(const std::vector<QString>& attributeNames) const;
+    std::vector<QString> attributesChangedByLastResult() const;
 
     GraphModel* _graphModel;
     std::vector<ResultSet> _cache;
