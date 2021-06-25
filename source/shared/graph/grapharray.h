@@ -250,6 +250,9 @@ public:
 
     NodeArray& operator=(const NodeArray& other)
     {
+        if(this == &other)
+            return *this;
+
         GenericGraphArray<NodeId, Element, Locking>::operator=(other);
         return *this;
     }
