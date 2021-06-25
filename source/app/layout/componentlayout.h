@@ -36,8 +36,8 @@ public:
     void execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
         ComponentLayoutData& componentLayoutData);
 
-    float boundingWidth() const { return _boundingBox.width(); }
-    float boundingHeight() const { return _boundingBox.height(); }
+    float boundingWidth() const { return static_cast<float>(_boundingBox.width()); }
+    float boundingHeight() const { return static_cast<float>(_boundingBox.height()); }
 
 private:
     virtual void executeReal(const Graph& graph, const std::vector<ComponentId>& componentIds,

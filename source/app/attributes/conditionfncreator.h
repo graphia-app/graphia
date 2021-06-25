@@ -480,7 +480,7 @@ private:
                     _graphModel(graphModel)
                 {}
 
-                ResolvedTerminalValue operator()(double v) const { return v; }
+                ResolvedTerminalValue operator()(double v) const { return v; } // NOLINT
                 ResolvedTerminalValue operator()(int v) const { return v; }
                 ResolvedTerminalValue operator()(const QString& v) const
                 {

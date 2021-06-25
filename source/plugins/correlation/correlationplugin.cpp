@@ -551,7 +551,7 @@ void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progre
         std::set<QString> values;
 
         for(size_t rowIndex = 0; rowIndex < _numRows; rowIndex++)
-            values.emplace(discreteDataAt(rowIndex, columnIndex));
+            values.emplace(discreteDataAt(static_cast<int>(rowIndex), static_cast<int>(columnIndex)));
 
         std::vector<QString> sortedValues;
         sortedValues.reserve(values.size());

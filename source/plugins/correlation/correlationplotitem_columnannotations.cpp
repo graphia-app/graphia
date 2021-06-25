@@ -186,7 +186,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
         caYAxis->setTicker(nullptr);
 
     caYAxis->setTickPen(QPen(Qt::transparent)); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
-    caYAxis->setRange(0.0, numColumnAnnotations);
+    caYAxis->setRange(0.0, static_cast<double>(numColumnAnnotations));
 
     caXAxis->setTickPen(QPen(Qt::transparent));
     caXAxis->setBasePen(QPen(Qt::transparent));
@@ -309,7 +309,7 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
         (static_cast<double>(rectPoint.x() * bottomSize) / axisRect->width());
 
     auto x = static_cast<int>(xf);
-    int y = static_cast<int>((rectPoint.y() * numVisibleColumnAnnotations()) /
+    int y = static_cast<int>((rectPoint.y() * static_cast<double>(numVisibleColumnAnnotations())) /
         static_cast<double>(axisRect->height()));
 
     auto text = columnAnnotationValueAt(x, y);

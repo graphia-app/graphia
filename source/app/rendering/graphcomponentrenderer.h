@@ -75,8 +75,8 @@ public:
     int viewportWidth() const { return _viewportWidth; }
     int viewportHeight() const { return _viewportHeight; }
 
-    int width() const { return _dimensions.width(); }
-    int height() const { return _dimensions.height(); }
+    int width() const { return static_cast<int>(_dimensions.width()); }
+    int height() const { return static_cast<int>(_dimensions.height()); }
 
     Projection projection() const { return _projection; }
     void setProjection(Projection projection) { _projection = projection; }

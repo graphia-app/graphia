@@ -319,7 +319,7 @@ void GraphOverviewScene::applyComponentLayout()
         _componentLayoutData = _nextComponentLayoutData;
 
     setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
-    setOffset(_offset.x(), _offset.y());
+    setOffset(static_cast<float>(_offset.x()), static_cast<float>(_offset.y()));
 
     updateZoomedComponentLayoutData();
 

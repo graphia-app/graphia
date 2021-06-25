@@ -71,7 +71,7 @@ private:
         QString string;
 
         while(*bytes != 0)
-            string += *bytes++;
+            string += static_cast<char>(*bytes++);
 
         return string;
     }

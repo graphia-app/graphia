@@ -1158,22 +1158,22 @@ double CorrelationPlotItem::visibleHorizontalFraction() const
     if(_pluginInstance == nullptr)
         return 1.0;
 
-    auto f = (columnAxisWidth() / (minColumnWidth() * numColumns()));
+    auto f = (columnAxisWidth() / (minColumnWidth() * static_cast<double>(numColumns())));
 
     return std::min(f, 1.0);
 }
 
 double CorrelationPlotItem::labelHeight() const
 {
-    const unsigned int columnPadding = 1;
-    return _defaultFontMetrics.height() + columnPadding;
+    const int columnPadding = 1;
+    return static_cast<double>(_defaultFontMetrics.height() + columnPadding);
 }
 
 const double minColumnPixelWidth = 1.0;
 
 bool CorrelationPlotItem::isWide() const
 {
-    return (numColumns() * minColumnPixelWidth) > columnAxisWidth();
+    return (static_cast<double>(numColumns()) * minColumnPixelWidth) > columnAxisWidth();
 }
 
 double CorrelationPlotItem::minColumnWidth() const
@@ -1182,7 +1182,7 @@ double CorrelationPlotItem::minColumnWidth() const
         return labelHeight();
 
     if(_showAllColumns)
-        return columnAxisWidth() / numColumns();
+        return columnAxisWidth() / static_cast<double>(numColumns());
 
     return minColumnPixelWidth;
 }

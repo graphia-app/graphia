@@ -252,7 +252,7 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
         }
 
         if(rowCount > 0)
-            averageValue /= rowCount;
+            averageValue /= static_cast<double>(rowCount);
 
         imputedValue = averageValue;
         break;
@@ -294,8 +294,7 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
         // Lerp the result if possible, otherwise just set to found value
         if(leftValueFound && rightValueFound)
         {
-            size_t totalDistance = leftDistance + rightDistance;
-            double tween = leftDistance / static_cast<double>(totalDistance);
+            double tween = static_cast<double>(leftDistance) / static_cast<double>(leftDistance + rightDistance);
             // https://devblogs.nvidia.com/lerp-faster-cuda/
             double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
             imputedValue = lerpedValue;

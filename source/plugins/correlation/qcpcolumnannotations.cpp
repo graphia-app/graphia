@@ -114,7 +114,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
     font.setPixelSize(static_cast<int>(_cellHeight * 0.7));
     painter->setFont(font);
 
-    auto colorFor = [this](const Row& row, int index) -> QColor
+    auto colorFor = [this](const Row& row, size_t index) -> QColor
     {
         const auto* annotation = row._columnAnnotation;
 
@@ -127,7 +127,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
             auto offsetByPrime = row._offset * 13;
             auto colorIndex = annotation->uniqueIndexOf(value) + offsetByPrime;
-            return _colorPalette.get(value, colorIndex);
+            return _colorPalette.get(value, static_cast<int>(colorIndex));
         }
         else
         {

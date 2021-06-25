@@ -86,7 +86,7 @@ public:
         samples = std::min(samples, _size);
 
         T result = T();
-        float reciprocal = 1.0f / samples;
+        auto reciprocal = 1.0 / static_cast<double>(samples);
 
         for(auto i = _size - samples; i < _size; i++)
             result += at(i) * reciprocal;

@@ -179,7 +179,7 @@ struct PearsonAlgorithm
     static double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
     {
         double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
-        double numerator = (numColumns * productSum) - (rowA->sum() * rowB->sum());
+        double numerator = (static_cast<double>(numColumns) * productSum) - (rowA->sum() * rowB->sum());
         double denominator = rowA->variability() * rowB->variability();
 
         return numerator / denominator;

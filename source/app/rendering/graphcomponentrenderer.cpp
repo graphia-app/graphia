@@ -239,7 +239,7 @@ QMatrix4x4 GraphComponentRenderer::subViewportMatrix(QRectF sub, QRect viewport)
 
     auto xScale = sub.width() / viewportF.width();
     auto yScale = sub.height() / viewportF.height();
-    m.scale(xScale, yScale);
+    m.scale(static_cast<float>(xScale), static_cast<float>(yScale));
 
     return m;
 }
