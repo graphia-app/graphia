@@ -56,7 +56,7 @@ public:
 
     void setNodesMask(const NodeIdSet& nodeIds, bool applyMask = true);
     void setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask = true);
-    void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); }
+    void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); } // NOLINT readability-make-member-function-const
     bool nodesMaskActive() const { return !_nodeIdsMask.empty(); }
 
     int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }

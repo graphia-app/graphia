@@ -175,7 +175,7 @@ class LayoutThread : public QObject
 
 private:
     GraphModel* _graphModel = nullptr;
-    std::mutex _mutex;
+    mutable std::mutex _mutex;
     std::thread _thread;
     bool _started = false;
     bool _pause = false;
@@ -215,13 +215,13 @@ public:
 
     void pause();
     void pauseAndWait();
-    bool paused();
+    bool paused() const;
     void resume();
 
     void start();
     void stop();
 
-    bool finished();
+    bool finished() const;
 
     void addAllComponents();
 
@@ -241,9 +241,9 @@ public:
     void resetSettingValue(const QString& name);
 
 private:
-    bool iterative();
-    bool allLayoutsFinished();
-    bool workToDo();
+    bool iterative() const;
+    bool allLayoutsFinished() const;
+    bool workToDo() const;
     void uncancel();
     void unfinish();
     void run();

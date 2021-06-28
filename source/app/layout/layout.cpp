@@ -109,7 +109,7 @@ void LayoutThread::pauseAndWait()
     lock.unlock();
 }
 
-bool LayoutThread::paused()
+bool LayoutThread::paused() const
 {
     std::unique_lock<std::mutex> lock(_mutex);
     return _paused;
@@ -163,14 +163,14 @@ void LayoutThread::stop()
     _waitForResume.notify_all();
 }
 
-bool LayoutThread::finished()
+bool LayoutThread::finished() const
 {
     std::unique_lock<std::mutex> lock(_mutex);
 
     return !workToDo();
 }
 
-bool LayoutThread::iterative()
+bool LayoutThread::iterative() const
 {
     return std::any_of(_layouts.begin(), _layouts.end(),
     [](const auto& layout)
@@ -191,7 +191,7 @@ void LayoutThread::unfinish()
         layout.second->unfinish();
 }
 
-bool LayoutThread::allLayoutsFinished()
+bool LayoutThread::allLayoutsFinished() const
 {
     return std::all_of(_layouts.begin(), _layouts.end(),
     [](const auto& layout)
@@ -200,7 +200,7 @@ bool LayoutThread::allLayoutsFinished()
     });
 }
 
-bool LayoutThread::workToDo()
+bool LayoutThread::workToDo() const
 {
     return _layoutPotentiallyRequired || !allLayoutsFinished();
 }

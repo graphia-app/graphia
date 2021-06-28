@@ -443,7 +443,7 @@ void CorrelationPluginInstance::setDimensions(size_t numContinuousColumns, size_
     _discreteData.resize(numDiscreteColumns * numRows);
 }
 
-void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name)
+void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name) // NOLINT readability-make-member-function-const
 {
     Q_ASSERT(column < (_numContinuousColumns + _numDiscreteColumns));
     _dataColumnNames.at(column) = name;

@@ -26,7 +26,7 @@ struct MatLabMatrix
     size_t _numColumns = 0;
     size_t _numRows = 0;
 
-    bool operator>(const MatLabMatrix& other)
+    bool operator>(const MatLabMatrix& other) const
     {
         return (_numColumns * _numRows) > (other._numColumns * other._numRows);
     }

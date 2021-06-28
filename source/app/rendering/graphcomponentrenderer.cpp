@@ -632,7 +632,7 @@ void GraphComponentRenderer::resetView()
     moveFocusToCentreOfComponent();
 }
 
-void GraphComponentRenderer::moveFocusToCentreOfComponent()
+void GraphComponentRenderer::moveFocusToCentreOfComponent() // NOLINT readability-make-member-function-const
 {
     if(!componentIsValid())
         return;

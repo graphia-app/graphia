@@ -555,7 +555,7 @@ void GraphRenderer::sceneFinishedTransition()
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description)
+void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description) // NOLINT readability-make-member-function-const
 {
     _preUpdateExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();

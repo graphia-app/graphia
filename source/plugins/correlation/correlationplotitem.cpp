@@ -1134,7 +1134,7 @@ void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& column
     }
 }
 
-QString CorrelationPlotItem::elideLabel(const QString& label)
+QString CorrelationPlotItem::elideLabel(const QString& label) // NOLINT readability-make-member-function-const
 {
     if(_elideLabelWidth <= 0)
         return {};
