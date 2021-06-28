@@ -35,7 +35,7 @@
 class ScopeTimer
 {
 public:
-    explicit ScopeTimer(QString name, size_t numSamples = 1);
+    explicit ScopeTimer(const QString& name, size_t numSamples = 1);
     ~ScopeTimer();
 
     ScopeTimer(const ScopeTimer&) = delete;

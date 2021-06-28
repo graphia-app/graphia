@@ -39,8 +39,8 @@ struct Alert
     QString _text;
 
     Alert() = default;
-    Alert(AlertType type, QString text) :
-        _type(type), _text(std::move(text))
+    Alert(AlertType type, const QString& text) :
+        _type(type), _text(text)
     {}
 };
 

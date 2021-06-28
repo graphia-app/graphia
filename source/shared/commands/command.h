@@ -82,21 +82,21 @@ public:
         QString _verb;
         QString _pastParticiple;
 
-        CommandDescription(QString description = {}, // NOLINT
-                           QString verb = {},
-                           QString pastParticiple = {}) :
-            _description(std::move(description)),
-            _verb(std::move(verb)),
-            _pastParticiple(std::move(pastParticiple))
+        CommandDescription(const QString& description = {}, // NOLINT
+                           const QString& verb = {},
+                           const QString& pastParticiple = {}) :
+            _description(description),
+            _verb(verb),
+            _pastParticiple(pastParticiple)
         {}
     };
 
-    Command(CommandDescription commandDescription,
+    Command(const CommandDescription& commandDescription,
             // cppcheck-suppress passedByValue
             CommandFn executeFn,
             // cppcheck-suppress passedByValue
             CommandFn undoFn = [](Command&) { Q_ASSERT(!"undoFn not implemented"); }) :
-        _description(std::move(commandDescription._description)),
+        _description(commandDescription._description),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),
         _executeFn(std::move(executeFn)),

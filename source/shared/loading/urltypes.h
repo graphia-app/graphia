@@ -35,12 +35,12 @@ private:
     class UrlType
     {
     public:
-        UrlType(QString individualDescription,
-                QString collectiveDescription,
-                QStringList extensions) :
-            _individualDescription(std::move(individualDescription)),
-            _collectiveDescription(std::move(collectiveDescription)),
-            _extensions(std::move(extensions))
+        UrlType(const QString& individualDescription,
+                const QString& collectiveDescription,
+                const QStringList& extensions) :
+            _individualDescription(individualDescription),
+            _collectiveDescription(collectiveDescription),
+            _extensions(extensions)
         {}
 
         const QString& individualDescription() const { return _individualDescription; }

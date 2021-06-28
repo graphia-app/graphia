@@ -183,10 +183,10 @@ private:
     bool _visualUpdateRequired = false;
 };
 
-GraphModel::GraphModel(QString name, IPlugin* plugin) :
+GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _(std::make_unique<GraphModelImpl>(*this)),
     _transformedGraphIsChanging(false),
-    _name(std::move(name)),
+    _name(name),
     _plugin(plugin)
 {
     connect(&_->_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)

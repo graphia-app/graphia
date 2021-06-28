@@ -65,7 +65,7 @@ class GraphModel : public QObject, public IGraphModel
 
     Q_OBJECT
 public:
-    GraphModel(QString name, IPlugin* plugin);
+    GraphModel(const QString& name, IPlugin* plugin);
     ~GraphModel() override;
 
 private:

@@ -53,7 +53,7 @@ private:
 
 public:
     ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
-        TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices,
+        TabularData* data, int keyColumnIndex, const std::vector<int>& importColumnIndices,
         bool replace);
 
     QString description() const override;

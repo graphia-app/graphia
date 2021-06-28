@@ -52,11 +52,11 @@ public:
     static const int Version;
     static const int MaxHeaderSize;
 
-    NativeSaver(QUrl fileUrl, Document* document, const IPluginInstance* pluginInstance, QByteArray uiData,
-                QByteArray pluginUiData) :
-        _fileUrl(std::move(fileUrl)),
-        _document(document), _pluginInstance(pluginInstance), _uiData(std::move(uiData)),
-        _pluginUiData(std::move(pluginUiData))
+    NativeSaver(const QUrl& fileUrl, Document* document, const IPluginInstance* pluginInstance,
+        const QByteArray& uiData, const QByteArray& pluginUiData) :
+        _fileUrl(fileUrl),
+        _document(document), _pluginInstance(pluginInstance), _uiData(uiData),
+        _pluginUiData(pluginUiData)
     {}
 
     bool save() override;

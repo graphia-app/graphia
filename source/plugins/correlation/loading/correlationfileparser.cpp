@@ -41,9 +41,9 @@
 #include <set>
 #include <utility>
 
-CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
+CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName,
                                              TabularData& tabularData, QRect dataRect) :
-    _plugin(plugin), _urlTypeName(std::move(urlTypeName)),
+    _plugin(plugin), _urlTypeName(urlTypeName),
     _tabularData(std::move(tabularData)), _dataRect(dataRect)
 {}
 

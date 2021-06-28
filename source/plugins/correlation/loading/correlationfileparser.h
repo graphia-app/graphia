@@ -91,7 +91,7 @@ private:
     QRect _dataRect;
 
 public:
-    explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
+    explicit CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName,
         TabularData& tabularData, QRect dataRect);
 
     static double imputeValue(MissingDataType missingDataType, double replacementValue,

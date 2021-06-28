@@ -31,10 +31,10 @@ class GraphTransformAttributeParameter
 public:
     GraphTransformAttributeParameter() = default;
 
-    GraphTransformAttributeParameter(QString name, ElementType elementType,
-        ValueType valueType, QString description) :
-        _name(std::move(name)), _elementType(elementType),
-        _valueType(valueType), _description(std::move(description))
+    GraphTransformAttributeParameter(const QString& name, ElementType elementType,
+        ValueType valueType, const QString& description) :
+        _name(name), _elementType(elementType),
+        _valueType(valueType), _description(description)
     {}
 
     QString name() const { return _name; }

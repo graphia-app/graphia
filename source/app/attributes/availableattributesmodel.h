@@ -48,7 +48,7 @@ private:
         Item* _parent = nullptr;
 
     public:
-        explicit Item(QString value, const Attribute* attribute = nullptr);
+        explicit Item(const QString& value, const Attribute* attribute = nullptr);
         virtual ~Item();
 
         void addChild(Item* child);

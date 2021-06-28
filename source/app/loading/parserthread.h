@@ -42,7 +42,7 @@ private:
     bool _cancelled = false;
 
 public:
-    ParserThread(GraphModel& graphModel, QUrl url);
+    ParserThread(GraphModel& graphModel, const QUrl& url);
     ~ParserThread() override;
 
     void start(std::unique_ptr<IParser> parser);

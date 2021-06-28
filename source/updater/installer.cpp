@@ -36,10 +36,10 @@ void Installer::signalComplete()
     emit completeChanged();
 }
 
-Installer::Installer(json details, QString version,
-    QString existingInstallation) :
-    _details(std::move(details)), _version(std::move(version)),
-    _existingInstallation(std::move(existingInstallation))
+Installer::Installer(const json& details, const QString& version,
+    const QString& existingInstallation) :
+    _details(details), _version(version),
+    _existingInstallation(existingInstallation)
 {
     connect(&_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
     [this](int exitCode, QProcess::ExitStatus exitStatus)

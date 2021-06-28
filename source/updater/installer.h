@@ -51,8 +51,8 @@ private:
     void signalComplete();
 
 public:
-    Installer(json details, QString version,
-        QString existingInstallation);
+    Installer(const json& details, const QString& version,
+        const QString& existingInstallation);
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void retry();

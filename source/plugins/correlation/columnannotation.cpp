@@ -21,8 +21,8 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 
-ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
-    _name(std::move(name)), _values(std::move(values))
+ColumnAnnotation::ColumnAnnotation(const QString& name, const std::vector<QString>& values) :
+    _name(name), _values(values)
 {
     int index = 0;
     for(const auto& value : _values)
@@ -48,10 +48,10 @@ ColumnAnnotation::ColumnAnnotation(QString name, std::vector<QString> values) :
     }
 }
 
-ColumnAnnotation::ColumnAnnotation(QString name,
+ColumnAnnotation::ColumnAnnotation(const QString& name,
     const ColumnAnnotation::Iterator& begin,
     const ColumnAnnotation::Iterator& end) :
-    ColumnAnnotation(std::move(name), {begin, end})
+    ColumnAnnotation(name, {begin, end})
 {}
 
 int ColumnAnnotation::uniqueIndexOf(const QString& value) const

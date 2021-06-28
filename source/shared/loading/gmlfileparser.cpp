@@ -92,8 +92,8 @@ BOOST_SPIRIT_DEFINE(gmlList, noQuotesString, gmlKey, gmlValue, gmlKeyValue)
 
 struct Attribute
 {
-    Attribute(QString name, QString value) :
-        _name(std::move(name)), _value(std::move(value))
+    Attribute(const QString& name, const QString& value) :
+        _name(name), _value(value)
     {}
 
     QString _name;
@@ -107,7 +107,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
     struct Visitor
     {
         QString _name;
-        explicit Visitor(QString name) : _name(std::move(name)) {}
+        explicit Visitor(const QString& name) : _name(name) {}
 
         AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }

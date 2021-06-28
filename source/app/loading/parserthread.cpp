@@ -27,9 +27,9 @@
 
 #include <QDebug>
 
-ParserThread::ParserThread(GraphModel& graphModel, QUrl url) :
+ParserThread::ParserThread(GraphModel& graphModel, const QUrl& url) :
     _graphModel(&graphModel),
-    _url(std::move(url))
+    _url(url)
 {}
 
 ParserThread::~ParserThread()

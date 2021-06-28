@@ -27,8 +27,8 @@
 #include "shared/graph/elementtype.h"
 #include "shared/utils/container.h"
 
-AvailableAttributesModel::Item::Item(QString value, const Attribute* attribute) :
-    _value(std::move(value)), _attribute(attribute)
+AvailableAttributesModel::Item::Item(const QString& value, const Attribute* attribute) :
+    _value(value), _attribute(attribute)
 {}
 
 AvailableAttributesModel::Item::~Item() // NOLINT modernize-use-equals-default

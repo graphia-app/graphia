@@ -25,9 +25,9 @@
 #include "shared/loading/userelementdata.h"
 
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
-    TabularData* data, int keyColumnIndex, std::vector<int> importColumnIndices, bool replace) :
+    TabularData* data, int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
-    _keyColumnIndex(keyColumnIndex), _importColumnIndices(std::move(importColumnIndices)),
+    _keyColumnIndex(keyColumnIndex), _importColumnIndices(importColumnIndices),
     _replace(replace)
 {}
 

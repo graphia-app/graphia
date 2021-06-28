@@ -51,8 +51,8 @@ public:
     UserDataVector& operator=(const UserDataVector&) = default;
     UserDataVector& operator=(UserDataVector&&) = default;
 
-    explicit UserDataVector(QString name) :
-        _name(std::move(name))
+    explicit UserDataVector(const QString& name) :
+        _name(name)
     {}
 
     auto begin() const { return _values.begin(); }
