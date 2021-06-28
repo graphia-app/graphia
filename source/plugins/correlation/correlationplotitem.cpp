@@ -245,7 +245,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::isWideChanged);
 }
 
-CorrelationPlotItem::~CorrelationPlotItem()
+CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
 {
     _plotRenderThread.quit();
     _plotRenderThread.wait();

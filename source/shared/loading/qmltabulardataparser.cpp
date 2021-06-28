@@ -110,7 +110,7 @@ QModelIndex QmlTabularDataHeaderModel::indexOf(int columnIndex) const
     return index(row);
 }
 
-QmlTabularDataParser::QmlTabularDataParser()
+QmlTabularDataParser::QmlTabularDataParser() // NOLINT modernize-use-equals-default
 {
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &QmlTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &QmlTabularDataParser::busyChanged);
@@ -128,7 +128,7 @@ QmlTabularDataParser::QmlTabularDataParser()
     _dataPtr = std::make_shared<TabularData>();
 }
 
-QmlTabularDataParser::~QmlTabularDataParser()
+QmlTabularDataParser::~QmlTabularDataParser() // NOLINT modernize-use-equals-default
 {
     _dataParserWatcher.waitForFinished();
 }

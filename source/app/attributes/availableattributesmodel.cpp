@@ -31,7 +31,7 @@ AvailableAttributesModel::Item::Item(QString value, const Attribute* attribute) 
     _value(std::move(value)), _attribute(attribute)
 {}
 
-AvailableAttributesModel::Item::~Item()
+AvailableAttributesModel::Item::~Item() // NOLINT modernize-use-equals-default
 {
     qDeleteAll(_children);
 }

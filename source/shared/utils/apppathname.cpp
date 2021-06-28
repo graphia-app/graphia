@@ -22,7 +22,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-static QString appPath;
+static QString appPath; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 
 QString u::appPathName() { return appPath; }
 

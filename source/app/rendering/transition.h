@@ -28,8 +28,6 @@ class Transition : public QObject
 {
     Q_OBJECT
 public:
-    Transition() : _function([](float) {}) {}
-
     enum class Type
     {
         None,
@@ -43,7 +41,7 @@ private:
     Type _type = Type::None;
     float _duration = 0.0f;
     float _elapsed = std::numeric_limits<float>::max();
-    std::function<void(float)> _function;
+    std::function<void(float)> _function = [](float) {};
     std::vector<std::function<void()>> _finishedFunctions;
     bool _finishing = false;
     bool _suppressSignals = false;

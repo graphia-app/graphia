@@ -28,7 +28,7 @@ MutableGraph::MutableGraph(const MutableGraph& other)
     clone(other);
 }
 
-MutableGraph::~MutableGraph()
+MutableGraph::~MutableGraph() // NOLINT modernize-use-equals-default
 {
     // Ensure no transactions are in progress
     std::unique_lock<std::mutex> lock(_mutex);

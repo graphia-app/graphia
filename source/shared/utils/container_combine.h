@@ -72,7 +72,7 @@ public:
 
             std::apply([](auto&&... it)
             {
-                ((it.first != it.second ? it.first++, true : false) || ...); // NOLINT
+                ((it.first != it.second ? it.first++, true : false) || ...);
             }, _its);
 
             return i;
@@ -84,7 +84,7 @@ public:
 
             std::apply([&v](auto&&... it)
             {
-                ((it.first != it.second ? v = &(*it.first), true : false) || ...); // NOLINT
+                ((it.first != it.second ? v = &(*it.first), true : false) || ...);
             }, _its);
 
             return *v;

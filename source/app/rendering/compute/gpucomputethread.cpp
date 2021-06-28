@@ -25,7 +25,7 @@
 #include <QSurfaceFormat>
 #include <QOpenGLContext>
 
-GPUComputeThread::GPUComputeThread() :
+GPUComputeThread::GPUComputeThread() : // NOLINT modernize-use-equals-default
     _surface(std::make_unique<QOffscreenSurface>()),
     _format(std::make_unique<QSurfaceFormat>(QSurfaceFormat::defaultFormat()))
 {

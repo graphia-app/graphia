@@ -25,7 +25,7 @@
 #include <QTemporaryDir>
 #include <QFileInfo>
 
-DownloadQueue::DownloadQueue()
+DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
 {
     _networkManager.setRedirectPolicy(QNetworkRequest::UserVerifiedRedirectPolicy);
     connect(&_networkManager, &QNetworkAccessManager::finished, this, &DownloadQueue::onReplyReceived);

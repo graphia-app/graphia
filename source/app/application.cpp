@@ -52,7 +52,7 @@
 #include <chrono>
 
 const char* const Application::_uri = APP_URI;
-QString Application::_appDir = QStringLiteral(".");
+QString Application::_appDir = QStringLiteral("."); // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 
 Application::Application(QObject *parent) :
     QObject(parent),

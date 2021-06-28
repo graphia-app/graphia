@@ -223,7 +223,7 @@ private:
     void disableAutoRange();
 
 public:
-    Attribute()
+    Attribute() // NOLINT modernize-use-equals-default
     {
         _intRange.setAttribute(*this);
         _floatRange.setAttribute(*this);

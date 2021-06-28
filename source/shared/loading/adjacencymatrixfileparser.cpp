@@ -347,7 +347,7 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
 bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData, size_t maxRows)
 {
     if(tabularData.numColumns() != 3)
-        return false;
+        return false; // NOLINT
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {

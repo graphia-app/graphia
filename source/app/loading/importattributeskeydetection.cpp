@@ -23,13 +23,13 @@
 
 #include "ui/document.h"
 
-ImportAttributesKeyDetection::ImportAttributesKeyDetection()
+ImportAttributesKeyDetection::ImportAttributesKeyDetection() // NOLINT modernize-use-equals-default
 {
     connect(&_watcher, &QFutureWatcher<void>::started, this, &ImportAttributesKeyDetection::busyChanged);
     connect(&_watcher, &QFutureWatcher<void>::finished, this, &ImportAttributesKeyDetection::busyChanged);
 }
 
-ImportAttributesKeyDetection::~ImportAttributesKeyDetection()
+ImportAttributesKeyDetection::~ImportAttributesKeyDetection() // NOLINT modernize-use-equals-default
 {
     _watcher.waitForFinished();
 }

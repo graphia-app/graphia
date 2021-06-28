@@ -80,7 +80,7 @@ Graph::Graph() :
     connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId) { reserveEdgeId(edgeId); }); // NOLINT
 }
 
-Graph::~Graph()
+Graph::~Graph() // NOLINT modernize-use-equals-default
 {
     // Let the GraphArrays know that we're going away
     for(auto* nodeArray : _nodeArrays)

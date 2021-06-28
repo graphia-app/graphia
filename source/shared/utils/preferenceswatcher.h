@@ -21,7 +21,7 @@ private:
     {
         std::recursive_mutex _mutex;
         std::set<const PreferencesWatcher*> _set;
-    } _watchers;
+    } _watchers; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 
     static void setPref(const QString& key, const QVariant& value);
 

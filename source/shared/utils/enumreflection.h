@@ -23,8 +23,8 @@
 
 template<typename T> struct EnumStrings
 {
-    static QString values[];
-    static size_t size;
+    static QString values[]; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+    static size_t size; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 };
 
 #define DECLARE_REFLECTED_ENUM(E) /* NOLINT cppcoreguidelines-macro-usage */ \

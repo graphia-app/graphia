@@ -548,7 +548,7 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
     });
 }
 
-CorrelationTabularDataParser::~CorrelationTabularDataParser()
+CorrelationTabularDataParser::~CorrelationTabularDataParser() // NOLINT modernize-use-equals-default
 {
     _graphSizeEstimateFutureWatcher.waitForFinished();
     _dataRectangleFutureWatcher.waitForFinished();
