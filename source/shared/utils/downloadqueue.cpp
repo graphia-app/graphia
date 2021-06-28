@@ -114,7 +114,7 @@ void DownloadQueue::start(const QUrl& url)
     _reply = _networkManager.get(request);
 
     _timeoutTimer.setSingleShot(true);
-    const int HTTP_TIMEOUT = 60000;
+    /*const*/ int HTTP_TIMEOUT = 60000; // When const the capture below can be omitted, but MSVC currently fails at this
     _timeoutTimer.start(HTTP_TIMEOUT);
 
     // Follow any redirects
