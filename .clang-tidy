@@ -38,13 +38,14 @@ Checks: >
     -performance-no-automatic-move,
     -readability-braces-around-statements,
     -readability-convert-member-functions-to-static,
+    -readability-function-cognitive-complexity,
     -readability-identifier-naming,
     -readability-isolate-declaration,
     -readability-magic-numbers,
     -readability-named-parameter,
-    -readability-redundant-access-specifiers
+    -readability-redundant-access-specifiers,
     -readability-simplify-boolean-expr,
-    -readability-uppercase-literal-suffix,
+    -readability-uppercase-literal-suffix
 
 CheckOptions:
   - key:    misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
