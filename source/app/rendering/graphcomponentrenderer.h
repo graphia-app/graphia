@@ -28,6 +28,8 @@
 #include "shared/graph/igraph.h"
 #include "shared/graph/grapharray.h"
 
+#include "limitconstants.h"
+
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QQuaternion>
@@ -46,8 +48,8 @@ class Octree;
 class GraphComponentRenderer
 {
 public:
-    static const float MINIMUM_ZOOM_DISTANCE;
-    static const float COMFORTABLE_ZOOM_RADIUS;
+    static constexpr float MINIMUM_ZOOM_DISTANCE = LimitConstants::maximumNodeSize() + 0.5f;
+    static constexpr float COMFORTABLE_ZOOM_RADIUS = MINIMUM_ZOOM_DISTANCE * 2.0f;
 
     struct CameraAndLighting
     {

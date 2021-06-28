@@ -32,8 +32,6 @@ template<typename E>
 class IUserElementData : public virtual IUserData
 {
 public:
-    virtual ~IUserElementData() = default;
-
     virtual QString exposedAttributeName(const QString& vectorName) const = 0;
     virtual std::vector<QString> exposedAttributeNames() const = 0;
 

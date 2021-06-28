@@ -32,7 +32,7 @@ class GraphTransformParameter
 {
 public:
     GraphTransformParameter() = default;
-    GraphTransformParameter(QString name) : _name(std::move(name)) {}
+    explicit GraphTransformParameter(QString name) : _name(std::move(name)) {}
 
     QString name() const { return _name; }
     ValueType type() const { return _type; }

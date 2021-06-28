@@ -45,8 +45,6 @@ private:
     int _numValues = 0;
 
 public:
-    virtual ~UserData() = default;
-
     QString firstVectorName() const override;
 
     int numUserDataVectors() const override;

@@ -8,7 +8,7 @@ bool MacOsFileOpenEventFilter::eventFilter(QObject* object, QEvent* event)
 {
     if(event->type() == QEvent::FileOpen)
     {
-        QFileOpenEvent* fileOpenEvent = dynamic_cast<QFileOpenEvent*>(event);
+        auto* fileOpenEvent = dynamic_cast<QFileOpenEvent*>(event);
         QString argument;
 
         if(!fileOpenEvent->url().isEmpty())

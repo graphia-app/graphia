@@ -97,7 +97,7 @@ protected:
 
 public:
     QmlTabularDataParser();
-    virtual ~QmlTabularDataParser();
+    ~QmlTabularDataParser() override;
 
     Q_INVOKABLE bool parse(const QUrl& fileUrl);
     Q_INVOKABLE void cancelParse();

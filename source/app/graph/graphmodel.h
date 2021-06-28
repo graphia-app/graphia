@@ -221,7 +221,7 @@ private:
     void change(const QString& name);
 
 public:
-    AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct = true);
+    explicit AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct = true);
     ~AttributeChangesTracker();
 
     QStringList added() const { return {_added.begin(), _added.end()}; }

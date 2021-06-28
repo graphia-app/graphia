@@ -38,7 +38,7 @@ class DownloadQueue : public QObject
 
 public:
     DownloadQueue();
-    virtual ~DownloadQueue();
+    ~DownloadQueue() override;
 
     bool add(const QUrl& url);
     void cancel();

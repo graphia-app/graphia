@@ -39,8 +39,6 @@
 #include "shared/graph/elementid_debug.h"
 #include "shared/utils/preferences.h"
 
-#include "limitconstants.h"
-
 #include <QObject>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -49,9 +47,6 @@
 #include <cmath>
 #include <mutex>
 #include <algorithm>
-
-const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = LimitConstants::maximumNodeSize() + 0.5f;
-const float GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS = MINIMUM_ZOOM_DISTANCE * 2.0f;
 
 void GraphComponentRenderer::initialise(GraphModel* graphModel, ComponentId componentId,
                                         SelectionManager* selectionManager,

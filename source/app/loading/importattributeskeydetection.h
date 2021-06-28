@@ -49,7 +49,7 @@ private:
 
 public:
     ImportAttributesKeyDetection();
-    virtual ~ImportAttributesKeyDetection();
+    ~ImportAttributesKeyDetection() override;
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void reset();

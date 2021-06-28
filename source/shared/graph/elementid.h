@@ -41,7 +41,7 @@ public:
 
     // Prevent warnings when initialising an ElementId with other integral types
     template<typename U, typename = EnableIfConvertibleToInt<U>>
-    ElementId(U value) : ElementId(static_cast<int>(value)) {}
+    explicit ElementId(U value) : ElementId(static_cast<int>(value)) {}
 
     explicit operator int() const { return _value; }
 

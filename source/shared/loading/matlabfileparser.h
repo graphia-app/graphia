@@ -51,11 +51,11 @@ private:
                 if(cancelled())
                     return false;
 
-                size_t row = static_cast<size_t>(i);
+                auto row = static_cast<size_t>(i);
 
                 for(int j = sparseMatrix->jc[i]; j < sparseMatrix->jc[i + 1] && j < sparseMatrix->ndata; j++ )
                 {
-                    size_t column = static_cast<size_t>(sparseMatrix->ir[j]);
+                    auto column = static_cast<size_t>(sparseMatrix->ir[j]);
 
                     T value = *(dataPtr + j);
 

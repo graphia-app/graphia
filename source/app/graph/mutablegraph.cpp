@@ -23,7 +23,7 @@
 
 #include "shared/utils/container.h"
 
-MutableGraph::MutableGraph(const MutableGraph& other)
+MutableGraph::MutableGraph(const MutableGraph& other) // NOLINT bugprone-copy-constructor-init
 {
     clone(other);
 }
