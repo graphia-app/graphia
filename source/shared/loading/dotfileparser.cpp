@@ -169,7 +169,7 @@ const auto htmlString_def = lit('<') >> lexeme[*(nonXml >> xmlTag >> nonXml)] >>
 const x3::rule<class ID, QString> identifier = "identifier";
 const auto identifier_def = htmlString | quotedString | numeral | alphaNumericId;
 
-const x3::rule<class KV, KeyValue> keyValue = "keyValue";
+const x3::rule<class KV, KeyValue> keyValue = "keyValue"; // NOLINT bugprone-forward-declaration-namespace
 const auto keyValue_def = identifier >> lit('=') >> identifier;
 
 const x3::rule<class AL, AttributeList> keyValueList = "keyValueList";

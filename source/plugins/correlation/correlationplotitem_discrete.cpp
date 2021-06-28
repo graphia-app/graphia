@@ -161,7 +161,7 @@ bool CorrelationPlotItem::discreteTooltip(const QCPAxisRect* axisRect,
     if(axisRect != _discreteAxisRect || plottable == nullptr)
         return false;
 
-    if(auto* bars = dynamic_cast<const QCPBars*>(plottable))
+    if(const auto* bars = dynamic_cast<const QCPBars*>(plottable))
     {
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(static_cast<int>(xCoord)));
         return true;

@@ -32,7 +32,6 @@
 
 QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser* parser,
     ValueType valueTypes, const QStringList& skip) :
-    QAbstractListModel(),
     _parser(parser)
 {
     _columnIndices.reserve(_parser->_dataPtr->numColumns());

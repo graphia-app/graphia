@@ -20,17 +20,17 @@ class LimitConstants : public QObject
     Q_PROPERTY(float maximumTransitionTime READ maximumTransitionTime CONSTANT)
 
 public:
-    static float minimumNodeSize() { return 0.25f; }
-    static float maximumNodeSize() { return 4.0f; }
+    static constexpr float minimumNodeSize() { return 0.25f; }
+    static constexpr float maximumNodeSize() { return 4.0f; }
 
-    static float minimumEdgeSize() { return 0.02f; }
-    static float maximumEdgeSize() { return 2.0f; }
+    static constexpr float minimumEdgeSize() { return 0.02f; }
+    static constexpr float maximumEdgeSize() { return 2.0f; }
 
-    static float minimumMinimumComponentRadius() { return 0.05f; }
-    static float maximumMinimumComponentRadius() { return 15.0f; }
+    static constexpr float minimumMinimumComponentRadius() { return 0.05f; }
+    static constexpr float maximumMinimumComponentRadius() { return 15.0f; }
 
-    static float minimumTransitionTime() { return 0.1f; }
-    static float maximumTransitionTime() { return 5.0f; }
+    static constexpr float minimumTransitionTime() { return 0.1f; }
+    static constexpr float maximumTransitionTime() { return 5.0f; }
 };
 
 #endif // LIMITCONSTANTS_H

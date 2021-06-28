@@ -719,7 +719,7 @@ bool CorrelationPlotItem::continuousTooltip(const QCPAxisRect* axisRect,
 
     if(const auto* graph = dynamic_cast<const QCPGraph*>(plottable))
     {
-        _itemTracer->setGraph(const_cast<QCPGraph*>(graph));
+        _itemTracer->setGraph(const_cast<QCPGraph*>(graph)); // NOLINT cppcoreguidelines-pro-type-const-cast
         _itemTracer->setGraphKey(xCoord);
         return true;
     }

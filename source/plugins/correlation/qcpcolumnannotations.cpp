@@ -67,7 +67,7 @@ int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString
 }
 
 void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
-    size_t w, const QString& value, QColor color, bool selected)
+    size_t w, const QString& value, QColor color, bool selected) // NOLINT performance-unnecessary-value-param
 {
     auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
     auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
@@ -120,7 +120,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
         if(!annotation->isNumeric())
         {
-            auto value = annotation->valueAt(index);
+            const auto& value = annotation->valueAt(index);
 
             if(value.isEmpty())
                 return Qt::transparent;

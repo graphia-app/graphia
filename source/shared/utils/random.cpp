@@ -20,8 +20,8 @@
 
 #include <random>
 
-static std::random_device randomh_rd;
-static std::mt19937 randomh_mt19937(randomh_rd());
+static std::random_device randomh_rd; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+static std::mt19937 randomh_mt19937(randomh_rd()); // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 
 float u::rand(float low, float high)
 {

@@ -16,7 +16,7 @@ bool MacOsFileOpenEventFilter::eventFilter(QObject* object, QEvent* event)
         else if(!fileOpenEvent->file().isEmpty())
             argument = fileOpenEvent->file();
 
-        emit externalOpen(argument);
+        emit externalOpen(argument); // NOLINT readability-misleading-indentation
     }
 
     return QObject::eventFilter(object, event);
