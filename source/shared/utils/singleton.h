@@ -48,10 +48,10 @@ public:
   }
 
 private:
-  static Singleton<T>* _singletonPtr; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+  static Singleton<T>* _singletonPtr;
 };
 
-template<typename T> Singleton<T>* Singleton<T>::_singletonPtr = nullptr; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+template<typename T> Singleton<T>* Singleton<T>::_singletonPtr = nullptr;
 
 // Allows access to a singleton via S(Class)->... instead of Class::instance()->...
 #define S(X) X::instance() /* NOLINT cppcoreguidelines-macro-usage */

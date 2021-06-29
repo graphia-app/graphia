@@ -53,7 +53,7 @@
 #include <chrono>
 
 const char* const Application::_uri = APP_URI;
-QString Application::_appDir = QStringLiteral("."); // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+QString Application::_appDir = QStringLiteral(".");
 
 Application::Application(QObject *parent) :
     QObject(parent),
@@ -210,7 +210,6 @@ bool Application::downloaded(const QUrl& url)
     return _downloadQueue.downloaded(url);
 }
 
-// NOLINTNEXTLINE cppcoreguidelines-avoid-non-const-global-variables
 void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
 {
     _factories.emplace_back(std::move(saver));

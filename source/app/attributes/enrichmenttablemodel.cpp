@@ -98,7 +98,6 @@ void EnrichmentTableModel::setSelectionB(const QString& selectionB)
     }
 }
 
-// NOLINTNEXTLINE cppcoreguidelines-avoid-non-const-global-variables
 void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QString selectionA, QString selectionB)
 {
     beginResetModel();

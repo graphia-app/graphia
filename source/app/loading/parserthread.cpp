@@ -38,7 +38,6 @@ ParserThread::~ParserThread()
     wait();
 }
 
-// NOLINTNEXTLINE cppcoreguidelines-avoid-non-const-global-variables
 void ParserThread::start(std::unique_ptr<IParser> parser)
 {
     _cancelled = false;

@@ -1,6 +1,6 @@
 #include "preferenceswatcher.h"
 
-PreferencesWatcher::Watchers PreferencesWatcher::_watchers; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
+PreferencesWatcher::Watchers PreferencesWatcher::_watchers;
 
 PreferencesWatcher::PreferencesWatcher()
 {
