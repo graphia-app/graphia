@@ -429,7 +429,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
                     }
                 }
             }
-            else
+            else if(plottable != nullptr) // Placate MSVC C28182
             {
                 const auto distanceSq = plottable->selectTest(_hoverPoint, false, &details);
 
