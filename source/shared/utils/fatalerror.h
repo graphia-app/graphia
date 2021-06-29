@@ -19,6 +19,8 @@
 #ifndef FATALERROR_H
 #define FATALERROR_H
 
+#include "msvcwarningsuppress.h"
+
 #if defined(_MSC_VER)
 #define NOINLINE __declspec(noinline)
 #elif defined(__GNUC__)
@@ -33,6 +35,7 @@
             NOINLINE void operator()() \
             { \
                 int* p = nullptr; \
+                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) \
                 *p = 0; \
             } \
         } s; s(); \

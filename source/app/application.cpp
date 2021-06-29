@@ -27,6 +27,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/msvcwarningsuppress.h"
 
 #include "loading/graphmlsaver.h"
 #include "loading/jsongraphsaver.h"
@@ -448,6 +449,7 @@ void Application::crash(int crashType)
     {
         int* p = nullptr;
         // cppcheck-suppress nullPointer
+        MSVC_WARNING_SUPPRESS_NEXTLINE(6011)
         *p = 0;
         break;
     }
