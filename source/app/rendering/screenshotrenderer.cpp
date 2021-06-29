@@ -65,6 +65,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
     painter.drawImage(tileX * TILE_SIZE, tileY * TILE_SIZE, screenTile.mirrored(false, true));
 }
 
+// NOLINTNEXTLINE modernize-use-equals-default
 ScreenshotRenderer::ScreenshotRenderer()
 {
     glGenFramebuffers(1, &_screenshotFBO);
@@ -72,6 +73,7 @@ ScreenshotRenderer::ScreenshotRenderer()
     glGenTextures(1, &_sdfTexture);
 }
 
+// NOLINTNEXTLINE modernize-use-equals-default
 ScreenshotRenderer::~ScreenshotRenderer()
 {
     glDeleteTextures(1, &_sdfTexture);

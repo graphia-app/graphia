@@ -34,7 +34,7 @@ private:
     size_t _position = 0;
 
 public:
-    progress_iterator() : progress_iterator<BaseItType>::iterator_adaptor_() {}
+    progress_iterator() = default;
 
     explicit progress_iterator(const BaseItType& iterator) :
         progress_iterator<BaseItType>::iterator_adaptor_(iterator)

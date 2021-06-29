@@ -35,7 +35,7 @@ private:
     float _radius = 0.0f;
 
 public:
-    BoundingSphere();
+    BoundingSphere() = default;
     BoundingSphere(QVector3D centre, float radius);
     explicit BoundingSphere(const std::vector<QVector3D>& points);
     BoundingSphere(QVector3D centre, const std::vector<QVector3D>& points);

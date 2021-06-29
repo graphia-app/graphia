@@ -27,11 +27,10 @@ class Plane
 {
 private:
     float _distance = 0.0f;
-    QVector3D _normal;
+    QVector3D _normal{0.0f, 0.0f, 1.0f};
 
 public:
-    Plane() : _normal(0.0f, 0.0f, 1.0f) {}
-
+    Plane() = default;
     Plane(float distance, const QVector3D& normal) :
         _distance(distance), _normal(normal)
     {}

@@ -24,11 +24,6 @@
 #include <vector>
 #include <numeric>
 
-BoundingSphere::BoundingSphere() :
-    _centre()
-{
-}
-
 BoundingSphere::BoundingSphere(QVector3D centre, float radius) :
     _centre(centre), _radius(radius)
 {

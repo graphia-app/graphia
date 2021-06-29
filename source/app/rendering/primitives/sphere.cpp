@@ -25,7 +25,7 @@
 
 namespace Primitive
 {
-
+// NOLINTNEXTLINE modernize-use-equals-default
 Sphere::Sphere() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),

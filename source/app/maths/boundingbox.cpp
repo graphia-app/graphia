@@ -23,10 +23,6 @@
 #include <cmath>
 #include <limits>
 
-BoundingBox2D::BoundingBox2D() :
-    _min(), _max()
-{}
-
 BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max) :
     _min(min), _max(max)
 {}
@@ -105,10 +101,6 @@ bool BoundingBox2D::valid() const
         !std::isinf(_min.x()) && !std::isinf(_min.y()) &&
         !std::isinf(_max.x()) && !std::isinf(_max.y());
 }
-
-BoundingBox3D::BoundingBox3D() :
-    _min(), _max()
-{}
 
 BoundingBox3D::BoundingBox3D(const QVector3D& min, const QVector3D& max) :
     _min(min), _max(max)

@@ -22,6 +22,7 @@
 
 namespace Primitive
 {
+// NOLINTNEXTLINE modernize-use-equals-default
 Rectangle::Rectangle() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),

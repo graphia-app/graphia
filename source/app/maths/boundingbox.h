@@ -33,7 +33,7 @@ private:
     QVector2D _max;
 
 public:
-    BoundingBox2D();
+    BoundingBox2D() = default;
     BoundingBox2D(const QVector2D &min, const QVector2D &max);
     explicit BoundingBox2D(const std::vector<QVector2D>& points);
 
@@ -73,7 +73,7 @@ private:
     QVector3D _max;
 
 public:
-    BoundingBox3D();
+    BoundingBox3D() = default;
     BoundingBox3D(const QVector3D &min, const QVector3D &max);
     explicit BoundingBox3D(const std::vector<QVector3D>& points);
 

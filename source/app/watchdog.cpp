@@ -43,6 +43,7 @@ Watchdog::Watchdog()
     _thread.start();
 }
 
+// NOLINTNEXTLINE modernize-use-equals-default
 Watchdog::~Watchdog()
 {
     _thread.quit();
