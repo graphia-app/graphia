@@ -51,23 +51,26 @@ then
   BUILD_DIR="build/${COMPILER}"
 fi
 
-. ${BUILD_DIR}/variables.sh
+SCRIPT_DIR=$(pwd)
+cd ${BUILD_DIR}
+
+. variables.sh
 
 if [ ! -z "$@" ]
 then
   CPP_FILES=$@
 else
-  CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
+  CPP_FILES=$(cat compile_commands.json | \
     jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
     sed -e 's/"//g')
 
-  INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
+  INCLUDE_DIRS=$(cat compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-I) *.*?(?= )' | \
     grep -vE "thirdparty|autogen" | \
     sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
 
-  DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
+  DEFINES=$(cat compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-D) *.*?(?= -\D)' | \
     grep -vE "SOURCE_DIR.*" | sort | uniq | \
     sed -e 's/=.*\"/="dummyvalue"/g' |
@@ -111,9 +114,9 @@ ${CPPCHECK} -v --enable=all --xml \
   --suppress=unusedPrivateFunction \
   --suppress=*:*/source/thirdparty/* \
   --inline-suppr \
-  --library=scripts/cppcheck.cfg \
+  --library=${SCRIPT_DIR}/scripts/cppcheck.cfg \
   ${INCLUDE_DIRS} ${DEFINES} \
-  ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/cppcheck-${VERSION}.log
+  ${CPP_FILES} 2>&1 | tee cppcheck-${VERSION}.log
 
 # clang-tidy
 if [ "${VERBOSE}" != 0 ]
@@ -125,7 +128,7 @@ fi
 
 parallel -k -n1 -P${NUM_CORES} -q \
   ${CLANGTIDY} -quiet -p ${BUILD_DIR} {} \
-  ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clang-tidy-${VERSION}.log
+  ::: ${CPP_FILES} 2>&1 | tee clang-tidy-${VERSION}.log
 
 # clazy
 CHECKS="-checks=level1,\
@@ -174,16 +177,16 @@ then
 fi
 
 parallel -k -n1 -P${NUM_CORES} \
-  ${CLAZY} --standalone -p ${BUILD_DIR}/compile_commands.json \
+  ${CLAZY} --standalone -p compile_commands.json \
   --ignore-dirs="\"(\/usr|thirdparty)\"" \
   ${CHECKS} {} \
-  ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clazy-${VERSION}.log
+  ::: ${CPP_FILES} 2>&1 | tee clazy-${VERSION}.log
 
 # qmllint
 ${QMLLINT} --version
-find source/app \
-  source/shared \
-  source/plugins \
-  source/crashreporter \
+find ${SCRIPT_DIR}/source/app \
+  ${SCRIPT_DIR}/source/shared \
+  ${SCRIPT_DIR}/source/plugins \
+  ${SCRIPT_DIR}/source/crashreporter \
   -type f -iname "*.qml" | \
-  xargs -n1 -P${NUM_CORES} ${QMLLINT} 2>&1 | tee ${BUILD_DIR}/qmllint-${VERSION}.log
+  xargs -n1 -P${NUM_CORES} ${QMLLINT} 2>&1 | tee qmllint-${VERSION}.log
