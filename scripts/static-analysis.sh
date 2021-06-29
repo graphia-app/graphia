@@ -190,3 +190,5 @@ find ${SCRIPT_DIR}/source/app \
   ${SCRIPT_DIR}/source/crashreporter \
   -type f -iname "*.qml" | \
   xargs -n1 -P${NUM_CORES} ${QMLLINT} 2>&1 | tee qmllint-${VERSION}.log
+
+cp compile_commands.json compile_commands-${VERSION}.log
