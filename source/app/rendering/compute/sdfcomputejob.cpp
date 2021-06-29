@@ -239,6 +239,7 @@ void SDFComputeJob::generateSDF()
         _onCompleteFn();
 }
 
+// NOLINTNEXTLINE cppcoreguidelines-avoid-non-const-global-variables
 void SDFComputeJob::executeWhenComplete(std::function<void()> onCompleteFn)
 {
     _onCompleteFn = std::move(onCompleteFn);

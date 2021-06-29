@@ -209,6 +209,7 @@ bool Application::downloaded(const QUrl& url)
     return _downloadQueue.downloaded(url);
 }
 
+// NOLINTNEXTLINE cppcoreguidelines-avoid-non-const-global-variables
 void Application::registerSaverFactory(std::unique_ptr<ISaverFactory> saver)
 {
     _factories.emplace_back(std::move(saver));
