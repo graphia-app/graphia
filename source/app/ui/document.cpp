@@ -1101,6 +1101,7 @@ void Document::selectSources()
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::selectSourcesOf(QmlNodeId nodeId)
 {
     if(busy())
@@ -1136,6 +1137,7 @@ void Document::selectTargets()
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::selectTargetsOf(QmlNodeId nodeId)
 {
     if(busy())
@@ -1171,6 +1173,7 @@ void Document::selectNeighbours()
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::selectNeighboursOf(QmlNodeId nodeId)
 {
     if(busy())
@@ -1253,6 +1256,7 @@ void Document::invertSelection()
     }, tr("Inverting Selection"));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::undo()
 {
     if(busy())
@@ -1261,6 +1265,7 @@ void Document::undo()
     _commandManager.undo();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::redo()
 {
     if(busy())
@@ -1269,6 +1274,7 @@ void Document::redo()
     _commandManager.redo();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::rollback()
 {
     if(busy())
@@ -1277,6 +1283,7 @@ void Document::rollback()
     _commandManager.rollback();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::deleteNode(QmlNodeId nodeId)
 {
     if(busy())
@@ -1287,6 +1294,7 @@ void Document::deleteNode(QmlNodeId nodeId)
         _selectionManager.get(), NodeIdSet{nodeId}));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::deleteSelectedNodes()
 {
     if(busy())
@@ -1492,6 +1500,7 @@ void Document::setLog(const QString& log)
     }
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::setSaveRequired()
 {
     if(!_loadComplete)
@@ -1765,6 +1774,7 @@ bool Document::nodesMaskActive() const
     return false;
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
 {
     bool changed = !_foundItValid || (_foundIt != foundIt);
@@ -1780,6 +1790,7 @@ void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
         emit foundIndexChanged();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 NodeId Document::incrementFoundIt()
 {
     auto foundIt = _foundIt;
@@ -1800,6 +1811,7 @@ NodeId Document::incrementFoundIt()
     return *foundIt;
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 NodeId Document::decrementFoundIt()
 {
     auto foundIt = _foundIt;
@@ -2965,6 +2977,7 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
     }, tr("Exporting Node Positions"));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::importAttributesFromTable(const QString& keyAttributeName,
     std::shared_ptr<TabularData> data, int keyColumnIndex,
     std::vector<int> importColumnIndices, bool replace)
@@ -2978,6 +2991,7 @@ void Document::importAttributesFromTable(const QString& keyAttributeName,
         importColumnIndices, replace));
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::removeAttributes(const QStringList& attributeNames)
 {
     if(busy())

@@ -539,6 +539,7 @@ void CorrelationPluginInstance::buildColumnAnnotations()
     emit columnAnnotationNamesChanged();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progressable)
 {
     if(_correlationDataType != CorrelationDataType::Discrete)

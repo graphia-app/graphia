@@ -320,6 +320,7 @@ bool GraphComponentScene::viewIsReset() const
     return componentRenderer()->viewIsReset();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const QPoint& end)
 {
     Camera* camera = componentRenderer()->camera();

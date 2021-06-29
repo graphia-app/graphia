@@ -1212,7 +1212,7 @@ void GraphRenderer::disableSceneUpdate()
     _sceneUpdateDisabled++;
 }
 
-void GraphRenderer::ifSceneUpdateEnabled(const std::function<void()>& f)
+void GraphRenderer::ifSceneUpdateEnabled(const std::function<void()>& f) const
 {
     std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     if(_sceneUpdateDisabled == 0)

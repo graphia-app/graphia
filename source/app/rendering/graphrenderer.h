@@ -239,7 +239,7 @@ private:
     QElapsedTimer _time;
     float _lastTime = 0.0f;
     int _sceneUpdateDisabled = 1;
-    std::recursive_mutex _sceneUpdateMutex;
+    mutable std::recursive_mutex _sceneUpdateMutex;
 
     std::atomic<bool> _layoutChanged;
     bool _synchronousLayoutChanged = false;
@@ -257,7 +257,7 @@ private:
 
     void enableSceneUpdate();
     void disableSceneUpdate();
-    void ifSceneUpdateEnabled(const std::function<void()>& f);
+    void ifSceneUpdateEnabled(const std::function<void()>& f) const;
 
     void clearHiddenElements();
 

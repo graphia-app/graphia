@@ -127,7 +127,7 @@ private:
 
     std::vector<ComponentId> _componentIds;
 
-    Circle zoomedLayoutData(const Circle& data);
+    Circle zoomedLayoutData(const Circle& data) const;
 
     float minZoomFactor() const;
     bool setZoomFactor(float zoomFactor);

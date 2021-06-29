@@ -97,6 +97,7 @@ void VisualisationMappingPlotItem::setMaximum(double max)
     buildPlot();
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void VisualisationMappingPlotItem::buildPlot()
 {
     if(_values.isEmpty())

@@ -188,7 +188,7 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
         updateZoomedComponentLayoutData();
 }
 
-Circle GraphOverviewScene::zoomedLayoutData(const Circle& data)
+Circle GraphOverviewScene::zoomedLayoutData(const Circle& data) const
 {
     Circle newData(data);
 
@@ -220,6 +220,7 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
     return changed;
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void GraphOverviewScene::setOffset(float x, float y)
 {
     float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
@@ -285,6 +286,7 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId foc
     return transition;
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 Transition& GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
     float duration, Transition::Type transitionType)
 {

@@ -184,6 +184,7 @@ void GraphSizeEstimatePlotItem::mouseReleaseEvent(QMouseEvent* event)
         _dragging = false;
 }
 
+// NOLINTNEXTLINE readability-make-member-function-const
 void GraphSizeEstimatePlotItem::mouseMoveEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
