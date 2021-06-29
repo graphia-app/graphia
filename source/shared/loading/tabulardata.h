@@ -24,6 +24,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
 #include "shared/utils/typeidentity.h"
+#include "shared/utils/msvcwarningsuppress.h"
 
 #include <csv/parser.hpp>
 
@@ -157,6 +158,7 @@ public:
 
     TabularData& tabularData() { return _tabularData; }
 
+    MSVC_WARNING_SUPPRESS_NEXTLINE(6262)
     static bool canLoad(const QUrl& url)
     {
         std::ifstream file(url.toLocalFile().toStdString());

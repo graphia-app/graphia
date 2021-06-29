@@ -30,6 +30,8 @@
 #include "shared/commands/icommandmanager.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/msvcwarningsuppress.h"
+
 #include "shared/attributes/iattribute.h"
 
 static double combineLogs(double n, double r)
@@ -171,6 +173,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
     return tableModel;
 }
 
+MSVC_WARNING_SUPPRESS_NEXTLINE(6262)
 std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, double expectedFrequency)
 {
     const int NUMBER_OF_TRIALS = 1000;
