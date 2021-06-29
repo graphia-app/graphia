@@ -236,7 +236,7 @@ private:
     static const int _majorVersion = APP_MAJOR_VERSION;
     static const int _minorVersion = APP_MINOR_VERSION;
 
-    static QString _appDir;
+    static QString _appDir; // NOLINT cppcoreguidelines-avoid-non-const-global-variables
 
     Updater _updater;
 
