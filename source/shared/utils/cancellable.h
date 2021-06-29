@@ -24,7 +24,7 @@
 class Cancellable
 {
 private:
-    std::atomic_bool _cancelled = false;
+    std::atomic_bool _cancelled{false};
 
 public:
     virtual ~Cancellable() = default;

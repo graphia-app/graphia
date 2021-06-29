@@ -37,7 +37,7 @@ public:
     }
 
     template<typename I> using EnableIfConvertibleToInt = typename std::enable_if_t<
-        std::is_integral_v<I> && std::is_convertible_v<I, int>>;
+        std::is_integral<I>::value && std::is_convertible<I, int>::value>;
 
     // Prevent warnings when initialising an ElementId with other integral types
     template<typename U, typename = EnableIfConvertibleToInt<U>>

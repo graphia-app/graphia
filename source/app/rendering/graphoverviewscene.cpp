@@ -248,6 +248,7 @@ void GraphOverviewScene::setOffset(float x, float y)
     _offset.setY(y);
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
     float duration, Transition::Type transitionType)
 {

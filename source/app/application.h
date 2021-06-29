@@ -40,13 +40,13 @@
 #include <memory>
 
 #ifndef APP_URI
-#define APP_URI "uri.missing"
+#define APP_URI "uri.missing" // NOLINT cppcoreguidelines-macro-usage
 #endif
 #ifndef APP_MAJOR_VERSION
-#define APP_MAJOR_VERSION -1
+#define APP_MAJOR_VERSION (-1) // NOLINT cppcoreguidelines-macro-usage
 #endif
 #ifndef APP_MINOR_VERSION
-#define APP_MINOR_VERSION -1
+#define APP_MINOR_VERSION (-1) // NOLINT cppcoreguidelines-macro-usage
 #endif
 
 class GraphModel;

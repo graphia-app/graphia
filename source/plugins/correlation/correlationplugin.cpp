@@ -472,6 +472,7 @@ void CorrelationPluginInstance::makeDataColumnNamesUnique()
     }
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 void CorrelationPluginInstance::finishDataRow(size_t row)
 {
     Q_ASSERT(row < _numRows);

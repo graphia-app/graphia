@@ -64,23 +64,20 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QStringLiteral("DOT"))
         return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName.startsWith(QStringLiteral("Pairwise")))
-    {
-        std::unique_ptr<IParser> parser;
+    if(urlTypeName == QStringLiteral("PairwiseTXT"))
+        return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
 
-        if(urlTypeName == QStringLiteral("PairwiseTXT"))
-            return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
-        else if(urlTypeName == QStringLiteral("PairwiseCSV"))
-            parser = std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData);
-        else if(urlTypeName == QStringLiteral("PairwiseSSV"))
-            parser = std::make_unique<PairwiseSSVFileParser>(userNodeData, userEdgeData);
-        else if(urlTypeName == QStringLiteral("PairwiseTSV"))
-            parser = std::make_unique<PairwiseTSVFileParser>(userNodeData, userEdgeData);
-        else if(urlTypeName == QStringLiteral("PairwiseXLSX"))
-            parser = std::make_unique<PairwiseXLSXFileParser>(userNodeData, userEdgeData);
+    if(urlTypeName == QStringLiteral("PairwiseCSV"))
+        return std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData);
 
-        return parser;
-    }
+    if(urlTypeName == QStringLiteral("PairwiseSSV"))
+        return std::make_unique<PairwiseSSVFileParser>(userNodeData, userEdgeData);
+
+    if(urlTypeName == QStringLiteral("PairwiseTSV"))
+        return std::make_unique<PairwiseTSVFileParser>(userNodeData, userEdgeData);
+
+    if(urlTypeName == QStringLiteral("PairwiseXLSX"))
+        return std::make_unique<PairwiseXLSXFileParser>(userNodeData, userEdgeData);
 
     if(urlTypeName.startsWith(QStringLiteral("Matrix")))
     {

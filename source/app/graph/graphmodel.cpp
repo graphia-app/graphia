@@ -1051,6 +1051,7 @@ static float mappedSize(float min, float max, float user, float mapped)
     return min + (out * (max - min));
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 void GraphModel::updateVisuals()
 {
     // Prevent any changes to the graph while we read from it

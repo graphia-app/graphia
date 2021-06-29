@@ -461,6 +461,7 @@ bool CorrelationTabularDataParser::transposed() const
     return _model.transposed();
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 void CorrelationTabularDataParser::setTransposed(bool transposed)
 {
     // If we manage to get here while the rect detection is still running,

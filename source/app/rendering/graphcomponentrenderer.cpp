@@ -629,7 +629,8 @@ void GraphComponentRenderer::resetView()
     moveFocusToCentreOfComponent();
 }
 
-void GraphComponentRenderer::moveFocusToCentreOfComponent() // NOLINT readability-make-member-function-const
+// NOLINTNEXTLIME readability-make-member-function-const
+void GraphComponentRenderer::moveFocusToCentreOfComponent()
 {
     if(!componentIsValid())
         return;
@@ -640,6 +641,7 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent() // NOLINT readabilit
     centrePositionInViewport(_viewData._componentCentre);
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 {
     if(!componentIsValid())

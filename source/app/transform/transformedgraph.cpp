@@ -118,6 +118,7 @@ TransformedGraph& TransformedGraph::operator=(const MutableGraph& other)
     return *this;
 }
 
+// NOLINTNEXTLIME readability-make-member-function-const
 bool TransformedGraph::update()
 {
     _graphChangeOccurred = _target.update() || _graphChangeOccurred;

@@ -255,7 +255,7 @@ void LouvainTransform::apply(TransformedGraph& target) const
     MutableGraph graph(target.mutableGraph());
 
     bool finished = false;
-    do
+    do // NOLINT bugprone-infinite-loop
     {
         target.setProgress(-1);
 
