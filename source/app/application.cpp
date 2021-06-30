@@ -51,6 +51,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <algorithm>
 
 const char* const Application::_uri = APP_URI;
 QString Application::_appDir = QStringLiteral(".");
@@ -320,15 +321,13 @@ bool Application::isResourceFile(const QString& path) const
 {
     QString canonicalPath = QFileInfo(path).canonicalPath();
 
-    for(const auto& resourceDirectory : resourceDirectories())
+    const auto& dirs = resourceDirectories();
+
+    return std::any_of(dirs.begin(), dirs.end(), [&canonicalPath](const auto& resourceDirectory)
     {
         QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
-
-        if(canonicalPath.startsWith(canonicalResourceDirectory))
-            return true;
-    }
-
-    return false;
+        return canonicalPath.startsWith(canonicalResourceDirectory);
+    });
 }
 
 // NOLINTNEXTLINE readability-convert-member-functions-to-static

@@ -18,6 +18,8 @@
 
 #include "frustum.h"
 
+#include <algorithm>
+
 Frustum::Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, const Line3D& line4)
 {
     _planes[0] = Plane(line1.start(), line4.start(), line2.start());
@@ -33,13 +35,10 @@ Frustum::Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, 
 
 bool Frustum::containsPoint(const QVector3D& point) const
 {
-    for(const auto& plane : _planes)
+    return std::all_of(_planes.begin(), _planes.end(), [&point](const auto& plane)
     {
-        if(plane.sideForPoint(point) == Plane::Side::Front)
-            return false;
-    }
-
-    return true;
+        return plane.sideForPoint(point) == Plane::Side::Back;
+    });
 }
 
 bool BaseFrustum::containsLine(const Line3D& line) const

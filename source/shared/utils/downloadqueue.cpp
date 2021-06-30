@@ -25,6 +25,8 @@
 #include <QTemporaryDir>
 #include <QFileInfo>
 
+#include <algorithm>
+
 DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
 {
     _networkManager.setRedirectPolicy(QNetworkRequest::UserVerifiedRedirectPolicy);
@@ -91,7 +93,7 @@ bool DownloadQueue::downloaded(const QUrl& url) const
     auto filename = fileinfo.canonicalFilePath();
     auto dirname = fileinfo.canonicalPath();
 
-    for(const auto& deletee : _downloaded)
+    return std::any_of(_downloaded.begin(), _downloaded.end(), [&](const auto& deletee)
     {
         auto downloadedFilename =
             QFileInfo(deletee._filename).canonicalFilePath();
@@ -100,11 +102,8 @@ bool DownloadQueue::downloaded(const QUrl& url) const
             (dirname == downloadedFilename) :
             (filename == downloadedFilename);
 
-        if(match)
-            return true;
-    }
-
-    return false;
+        return match;
+    });
 }
 
 void DownloadQueue::start(const QUrl& url)

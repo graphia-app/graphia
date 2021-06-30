@@ -29,6 +29,7 @@
 #include <QPainterPath>
 
 #include <memory>
+#include <algorithm>
 
 GlyphMap::GlyphMap(QString fontName) :
     _fontName(std::move(fontName))
@@ -177,16 +178,14 @@ bool GlyphMap::stringsAreRenderable(const QFont &font) const
 
     // If there are zero glyphs whose paths are non-empty, this
     // is not something we want to use to render with
-    for(const auto& glyphPair : _results._glyphs)
+    return std::any_of(_results._glyphs.begin(), _results._glyphs.end(), [&](const auto& glyphPair)
     {
         auto glyph = glyphPair.first;
         auto path = rawFont.pathForGlyph(glyph);
         auto boundingRect = path.boundingRect();
-        if(!boundingRect.isEmpty())
-            return true;
-    }
 
-    return false;
+        return !boundingRect.isEmpty();
+    });
 }
 
 void GlyphMap::renderImages(const QFont &font)
