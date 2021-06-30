@@ -56,6 +56,16 @@ cd ${BUILD_DIR}
 
 . variables.sh
 
+# For some reason clang-tidy and clazy can't find various system headers, so we
+# determine and add the system include dirs to compile_commands.json here
+SYSTEM_INCLUDE_DIRS=$(${CXX} -E -xc++ - -v < /dev/null 2>&1 | \
+    sed -n '/^#include </,/^End of search list\./p' | \
+    sed -e s'/^\s\+/-isystem/' | sed '1d;$d' | tr '\n' ' ')
+
+cat compile_commands.json | jq ".[].command += \" ${SYSTEM_INCLUDE_DIRS}\"" > \
+    _compile_commands.json
+mv _compile_commands.json compile_commands.json
+
 if [ ! -z "$@" ]
 then
   CPP_FILES=$@
