@@ -184,10 +184,10 @@ void VisualisationMappingPlotItem::buildPlot()
     px.reserve(_values.size());
     py.reserve(_values.size());
 
-    for(int i = 0 ; i < _values.size(); i++)
+    for(auto value : _values)
     {
         px.append(0.5);
-        py.append(_values.at(i));
+        py.append(value);
     }
 
     auto pointColor = QColor(0, 0, 255, 53);
