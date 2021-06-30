@@ -47,6 +47,7 @@ Checks: >
     -readability-identifier-naming,
     -readability-isolate-declaration,
     -readability-magic-numbers,
+    -readability-misleading-indentation,
     -readability-named-parameter,
     -readability-redundant-access-specifiers,
     -readability-simplify-boolean-expr,
