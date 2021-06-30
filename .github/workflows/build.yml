@@ -163,6 +163,7 @@ jobs:
     - name: Compile
       run: scripts/linux-build.sh
       env:
+        BUILD_TYPE: Debug
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - name: Analyse
