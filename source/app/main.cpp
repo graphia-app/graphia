@@ -125,7 +125,7 @@ static void configureXDG()
 
     auto success = ((iconsDir.exists() || iconsDir.mkpath(iconsDir.absolutePath())) &&
         dotDesktopFile.open(QIODevice::WriteOnly) && dotDesktopFile.write(dotDesktopFileContent.toUtf8()) >= 0 &&
-        (QFileInfo(iconFilename).exists() ||
+        (QFileInfo::exists(iconFilename) ||
             (QFile::copy(QStringLiteral(":/icon/Icon.svg"), iconFilename) &&
             QFile::setPermissions(iconFilename, iconPermissions))) &&
         QProcess::startDetached(schemeHandlerRegistrationCommand)) || false;
