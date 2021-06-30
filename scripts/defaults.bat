@@ -16,3 +16,4 @@
 :: along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
 
 IF NOT DEFINED PRODUCT_NAME (SET PRODUCT_NAME=Graphia)
+IF NOT DEFINED BUILD_TYPE (SET BUILD_TYPE=Release)

@@ -19,3 +19,4 @@
 #
 
 [ -z "${PRODUCT_NAME}" ] && PRODUCT_NAME="Graphia"
+[ -z "${BUILD_TYPE}" ] && BUILD_TYPE="Release"

@@ -47,7 +47,7 @@ mkdir -p ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
-    -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
+    -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -GNinja ../.. || exit $?
   cat variables.sh
   . variables.sh
   cmake --build . --target install 2>&1 | tee compiler-${VERSION}.log
