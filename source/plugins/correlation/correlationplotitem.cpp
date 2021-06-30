@@ -1084,7 +1084,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
 {
     auto order = Qt::AscendingOrder;
 
-    auto existing = std::find_if(_columnSortOrders.begin(), _columnSortOrders.end(),
+    auto* existing = std::find_if(_columnSortOrders.begin(), _columnSortOrders.end(),
     [type, &text](const auto& value)
     {
         bool sameType = (value["type"].toInt() == type);
