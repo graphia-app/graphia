@@ -552,7 +552,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     _pluginInstance = plugin->createInstance();
 
-    const auto keys = parameters.keys();
+    const auto& keys = parameters.keys();
     for(const auto& name : keys)
         _pluginInstance->applyParameter(name, parameters.value(name));
 
@@ -707,8 +707,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 {
                     visualisation += QStringLiteral(" with");
 
-                    const auto& keys = defaultParameters.keys();
-                    for(const auto& key : keys)
+                    const auto& parameterKeys = defaultParameters.keys();
+                    for(const auto& key : parameterKeys)
                     {
                         auto value = u::escapeQuotes(defaultParameters.value(key).toString());
                         visualisation += QStringLiteral(R"( %1 = "%2")").arg(key, value);
