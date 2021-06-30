@@ -148,6 +148,7 @@ QStringList showUpdater(int argc, char *argv[])
     return unquotedArguments;
 }
 
+// NOLINTNEXTLINE bugprone-exception-escape
 int main(int argc, char *argv[])
 {
     QStringList arguments = showUpdater(argc, argv);
