@@ -60,9 +60,9 @@ private:
 
 signals:
     // Base64 encoded png image for QML...
-    void previewComplete(QString previewBase64) const;
+    void previewComplete(QString previewBase64);
     // Screenshot doesn't go to QML so we can use QImage
-    void screenshotComplete(const QImage& screenshot, const QString& path) const;
+    void screenshotComplete(const QImage& screenshot, const QString& path);
 };
 
 #endif // SCREENSHOTRENDERER_H
