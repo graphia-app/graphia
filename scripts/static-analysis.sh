@@ -175,7 +175,7 @@ fi
 
 parallel -k -n1 -P${NUM_CORES} \
   ${CLAZY} --standalone -p ${BUILD_DIR}/compile_commands.json \
-  -header-filter="\"^((?!thirdparty).)*$\"" \
+  --ignore-dirs="\"(\/usr|thirdparty)\"" \
   ${CHECKS} {} \
   ::: ${CPP_FILES} 2>&1 | tee ${BUILD_DIR}/clazy-${VERSION}.log
 

@@ -137,7 +137,7 @@ jobs:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
   static-analysis:
     name: Static Analysis
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
     - name: Install Tools
       run: |
@@ -146,7 +146,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }} cppcheck
-        curl -vL https://downloads.kdab.com/clazy/1.6/Clazy-x86_64-1.6.AppImage -o clazy
+        curl -vL https://downloads.kdab.com/clazy/1.8/Clazy-x86_64-1.8.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
     - name: Install Qt
