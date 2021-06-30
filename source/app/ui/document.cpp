@@ -594,8 +594,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
-    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged);
-    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired);
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged); // clazy:exclude=connect-non-signal
+    connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired); // clazy:exclude=connect-non-signal
 
     emit pluginInstanceChanged();
 
@@ -912,8 +912,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
-    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged);
-    connect(_graphModel.get(), &GraphModel::rebuildRequired,
+    connect(_graphModel.get(), &GraphModel::visualsChanged, this, &Document::hasValidEdgeTextVisualisationChanged); // clazy:exclude=connect-non-signal
+    connect(_graphModel.get(), &GraphModel::rebuildRequired, // clazy:exclude=connect-non-signal
     [this](bool transforms, bool visualisations)
     {
         ICommandPtrsVector commands;

@@ -924,7 +924,7 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
 {
     _pluginInstance = pluginInstance;
 
-    connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged,
+    connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged, // clazy:exclude=connect-non-signal
         this, [this] { rebuildPlot(); });
 }
 
