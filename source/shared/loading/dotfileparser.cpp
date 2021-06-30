@@ -296,9 +296,11 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
 
                     auto targetNodes = processEdgeEnd(target);
 
+                    sourceNodeIds.reserve(sourceNodes.size());
                     for(const auto& node : sourceNodes)
                         sourceNodeIds.emplace_back(addNode(node));
 
+                    targetNodeIds.reserve(targetNodes.size());
                     for(const auto& node : targetNodes)
                         targetNodeIds.emplace_back(addNode(node));
 
