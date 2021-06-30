@@ -261,7 +261,7 @@ private:
 
     int updateDownloadProgress() const { return _updater.progress(); }
 
-    int downloadActive() const { return !_downloadQueue.idle(); }
+    bool downloadActive() const { return !_downloadQueue.idle(); }
     int downloadProgress() const { return _downloadQueue.progress(); }
 
     static bool debugEnabled()
