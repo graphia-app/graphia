@@ -2439,7 +2439,8 @@ void Document::moveVisualisation(int from, int to)
 }
 
 void Document::update(QStringList newGraphTransforms,
-    QStringList newVisualisations, bool replaceLatestCommand)
+    QStringList newVisualisations, // NOLINT performance-unnecessary-value-param
+    bool replaceLatestCommand)
 {
     if(_graphModel == nullptr)
         return;
@@ -2979,8 +2980,8 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 
 // NOLINTNEXTLINE readability-make-member-function-const
 void Document::importAttributesFromTable(const QString& keyAttributeName,
-    std::shared_ptr<TabularData> data, int keyColumnIndex,
-    std::vector<int> importColumnIndices, bool replace)
+    std::shared_ptr<TabularData> data, // NOLINT performance-unnecessary-value-param
+    int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace)
 {
     if(busy())
         return;
