@@ -167,7 +167,7 @@ public:
     static void calculateAttributeRange(const IGraph* graph, Attribute& attribute);
     void calculateAttributeRange(Attribute& attribute);
 
-    void updateSharedAttributeValues(Attribute& attribute);
+    void updateSharedAttributeValues(Attribute& attribute) const;
 
     void initialiseAttributeRanges();
     void initialiseSharedAttributeValues();

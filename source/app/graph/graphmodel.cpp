@@ -985,7 +985,7 @@ void GraphModel::initialiseAttributeRanges()
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
 }
 
-void GraphModel::updateSharedAttributeValues(Attribute& attribute)
+void GraphModel::updateSharedAttributeValues(Attribute& attribute) const
 {
     if(!attribute.testFlag(AttributeFlag::FindShared))
         return;
