@@ -224,7 +224,7 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
 
     // In the case where the intersection is very small, but non-zero,
     // don't report a 0% match
-    if(percent == 0 && intersection.size() > 0)
+    if(percent == 0 && !intersection.empty())
         percent = 1;
 
     return percent;
