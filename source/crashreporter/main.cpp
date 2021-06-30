@@ -51,6 +51,8 @@
 #include <google_breakpad/processor/stack_frame.h>
 #include <processor/pathname_stripper.h>
 
+// clazy:excludeall=lambda-in-connect
+
 static QString crashedModule(const QString& dmpFile)
 {
     using google_breakpad::Minidump;
