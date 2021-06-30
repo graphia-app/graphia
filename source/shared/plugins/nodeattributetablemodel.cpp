@@ -45,12 +45,12 @@ void NodeAttributeTableModel::initialise(IDocument* document, IUserNodeData* use
     updateColumnNames();
 
     const auto* modelQObject = dynamic_cast<const QObject*>(graphModel);
-    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&, const QStringList&)),
-            this, SLOT(onAttributesChanged(const QStringList&, const QStringList&, const QStringList&)), Qt::DirectConnection);
+    connect(modelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList)),
+            this, SLOT(onAttributesChanged(QStringList,QStringList,QStringList)), Qt::DirectConnection);
 
     const auto* graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
-    connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
-            this, SLOT(onGraphChanged(const Graph*, bool)), Qt::DirectConnection);
+    connect(graphQObject, SIGNAL(graphChanged(const Graph*,bool)),
+            this, SLOT(onGraphChanged(const Graph*,bool)), Qt::DirectConnection);
 }
 
 QStringList NodeAttributeTableModel::columnNames() const

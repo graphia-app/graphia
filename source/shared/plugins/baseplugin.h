@@ -66,16 +66,16 @@ public:
         connect(graphQObject, SIGNAL(graphWillChange(const Graph*)),
                 this, SIGNAL(graphWillChange()), Qt::DirectConnection);
 
-        connect(graphQObject, SIGNAL(nodeAdded(const Graph*, NodeId)),
-                this, SLOT(onNodeAdded(const Graph*, NodeId)), Qt::DirectConnection);
-        connect(graphQObject, SIGNAL(nodeRemoved(const Graph*, NodeId)),
-                this, SLOT(onNodeRemoved(const Graph*, NodeId)), Qt::DirectConnection);
-        connect(graphQObject, SIGNAL(edgeAdded(const Graph*, EdgeId)),
-                this, SLOT(onEdgeAdded(const Graph*, EdgeId)), Qt::DirectConnection);
-        connect(graphQObject, SIGNAL(edgeRemoved(const Graph*, EdgeId)),
-                this, SLOT(onEdgeRemoved(const Graph*, EdgeId)), Qt::DirectConnection);
+        connect(graphQObject, SIGNAL(nodeAdded(const Graph*,NodeId)),
+                this, SLOT(onNodeAdded(const Graph*,NodeId)), Qt::DirectConnection);
+        connect(graphQObject, SIGNAL(nodeRemoved(const Graph*,NodeId)),
+                this, SLOT(onNodeRemoved(const Graph*,NodeId)), Qt::DirectConnection);
+        connect(graphQObject, SIGNAL(edgeAdded(const Graph*,EdgeId)),
+                this, SLOT(onEdgeAdded(const Graph*,EdgeId)), Qt::DirectConnection);
+        connect(graphQObject, SIGNAL(edgeRemoved(const Graph*,EdgeId)),
+                this, SLOT(onEdgeRemoved(const Graph*,EdgeId)), Qt::DirectConnection);
 
-        connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
+        connect(graphQObject, SIGNAL(graphChanged(const Graph*,bool)),
                 this, SIGNAL(graphChanged()), Qt::DirectConnection);
 
         const auto* selectionManagerQObject = dynamic_cast<const QObject*>(_selectionManager);
