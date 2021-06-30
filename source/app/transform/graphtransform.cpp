@@ -91,15 +91,20 @@ QString GraphTransformFactory::image() const
 {
     if(category() == QObject::tr("Attributes"))
         return "qrc:///transforms/images/attributes.svg";
-    else if(category() == QObject::tr("Clustering"))
+
+    if(category() == QObject::tr("Clustering"))
         return "qrc:///transforms/images/clustering.svg";
-    else if(category() == QObject::tr("Edge Reduction"))
+
+    if(category() == QObject::tr("Edge Reduction"))
         return "qrc:///transforms/images/edgereduction.svg";
-    else if(category() == QObject::tr("Filters"))
+
+    if(category() == QObject::tr("Filters"))
         return "qrc:///transforms/images/filters.svg";
-    else if(category() == QObject::tr("Metrics"))
+
+    if(category() == QObject::tr("Metrics"))
         return "qrc:///transforms/images/metrics.svg";
-    else if(category() == QObject::tr("Structural"))
+
+    if(category() == QObject::tr("Structural"))
         return "qrc:///transforms/images/structural.svg";
 
     return "qrc:///transforms/images/default.svg";

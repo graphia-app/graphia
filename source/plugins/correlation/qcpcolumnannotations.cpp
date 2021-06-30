@@ -129,11 +129,9 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
             auto colorIndex = annotation->uniqueIndexOf(value) + offsetByPrime;
             return _colorPalette.get(value, static_cast<int>(colorIndex));
         }
-        else
-        {
-            auto value = annotation->normalisedNumericValueAt(index);
-            return _colorGradient.get(value);
-        }
+
+        auto value = annotation->normalisedNumericValueAt(index);
+        return _colorGradient.get(value);
     };
 
     for(const auto& [y, row] : _rows)
