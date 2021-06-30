@@ -281,7 +281,8 @@ bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRec
 
     int numColumnAnnotations = 0;
 
-    for(const auto* plottable : axisRect->plottables())
+    const auto& plottables = axisRect->plottables();
+    for(const auto* plottable : plottables)
     {
         const auto* columnAnnotations =
             dynamic_cast<const QCPColumnAnnotations*>(plottable);

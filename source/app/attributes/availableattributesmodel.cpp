@@ -113,7 +113,8 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
         {
             _attributeItemsWithParameters.emplace(attributeItem);
 
-            for(const auto& validValue : attribute->validParameterValues())
+            const auto& validValues = attribute->validParameterValues();
+            for(const auto& validValue : validValues)
             {
                 auto* parameterItem = new AvailableAttributesModel::Item(validValue, attribute);
                 attributeItem->addChild(parameterItem);

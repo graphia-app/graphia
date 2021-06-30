@@ -294,7 +294,8 @@ void Updater::saveUpdate(QNetworkReply* reply)
             QDir dir(location);
             if(dir.exists())
             {
-                for(const auto& subFileName : dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot))
+                const auto& subFileNames = dir.entryList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot);
+                for(const auto& subFileName : subFileNames)
                 {
                     QFileInfo info(QStringLiteral("%1/%2").arg(location, subFileName));
 

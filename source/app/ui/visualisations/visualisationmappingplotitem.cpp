@@ -184,7 +184,7 @@ void VisualisationMappingPlotItem::buildPlot()
     px.reserve(_values.size());
     py.reserve(_values.size());
 
-    for(auto value : _values)
+    for(auto value : std::as_const(_values))
     {
         px.append(0.5);
         py.append(value);

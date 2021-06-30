@@ -707,7 +707,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 {
                     visualisation += QStringLiteral(" with");
 
-                    for(const auto& key : defaultParameters.keys())
+                    const auto& keys = defaultParameters.keys();
+                    for(const auto& key : keys)
                     {
                         auto value = u::escapeQuotes(defaultParameters.value(key).toString());
                         visualisation += QStringLiteral(R"( %1 = "%2")").arg(key, value);

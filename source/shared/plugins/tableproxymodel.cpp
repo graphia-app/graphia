@@ -64,7 +64,9 @@ void TableProxyModel::setSubSelection(const QItemSelection& subSelection, const 
     // Group selection by rows, no need to keep track of the indices for the model other than
     // emitting signals.
     _subSelectionRows.clear();
-    for(auto index : _subSelection.indexes())
+
+    const auto& indexes = _subSelection.indexes();
+    for(auto index : indexes)
         _subSelectionRows.insert(index.row());
 
     for(const auto& range : std::as_const(_subSelection))

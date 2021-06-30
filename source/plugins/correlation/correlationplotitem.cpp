@@ -1004,7 +1004,7 @@ void CorrelationPlotItem::updateSortMap()
     std::vector<ColumnSortOrder> columnSortOrders;
     columnSortOrders.reserve(_columnSortOrders.size());
 
-    for(const auto& qmlColumnSortOrder : _columnSortOrders)
+    for(const auto& qmlColumnSortOrder : std::as_const(_columnSortOrders))
     {
         Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
 

@@ -205,13 +205,17 @@ void TransformedGraph::rebuild()
             if(_cancelled)
                 break;
 
-            for(const auto& attributeName : tracker.added())
+            const auto& addedAttributeNames = tracker.added();
+            const auto& changedAttributeNames = tracker.changed();
+            const auto& addedOrChangedAttributeNames = tracker.addedOrChanged();
+
+            for(const auto& attributeName : addedAttributeNames)
                 result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
 
-            for(const auto& attributeName : tracker.changed())
+            for(const auto& attributeName : changedAttributeNames)
                 result._changedAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
 
-            for(const auto& attributeName : tracker.addedOrChanged())
+            for(const auto& attributeName : addedOrChangedAttributeNames)
             {
                 _cache.attributeAddedOrChanged(attributeName);
                 updatedAttributeNames.append(attributeName);

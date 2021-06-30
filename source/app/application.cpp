@@ -301,9 +301,10 @@ void Application::copyImageToClipboard(const QImage& image)
 // NOLINTNEXTLINE readability-convert-member-functions-to-static
 QString Application::resourceFile(const QString& relativePath) const
 {
-    for(const auto& resourceDirectory : resourceDirectories())
+    const auto& dirs = resourceDirectories();
+    for(const auto& dir : dirs)
     {
-        auto resolvedPath = QDir(resourceDirectory).filePath(relativePath);
+        auto resolvedPath = QDir(dir).filePath(relativePath);
 
         if(QFileInfo::exists(resolvedPath))
             return resolvedPath;
