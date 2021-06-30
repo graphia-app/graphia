@@ -265,7 +265,7 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_columnNames.begin(), _columnNames.end()}));
 
     // Ignore attribute names that aren't in the table
-    removedSet.intersect({_columnNames.begin(), _columnNames.end()});
+    removedSet.intersect({_columnNames.cbegin(), _columnNames.cend()});
 
     auto indicesForColumnNames = [this](const auto& names, auto compare)
     {

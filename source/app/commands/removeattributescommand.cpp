@@ -24,10 +24,11 @@
 
 #include <algorithm>
 
-RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, QStringList attributeNames) :
-    _graphModel(graphModel), _attributeNames(std::move(attributeNames))
+RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames) :
+    _graphModel(graphModel)
 {
-    std::transform(_attributeNames.begin(), _attributeNames.end(), _attributeNames.begin(),
+    std::transform(attributeNames.cbegin(), attributeNames.cend(),
+        _attributeNames.begin(), // clazy:exclude=detaching-member
     [](const auto& attributeName)
     {
         return Attribute::parseAttributeName(attributeName)._name;

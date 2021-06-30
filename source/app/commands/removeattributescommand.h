@@ -40,7 +40,7 @@ private:
     std::vector<UserDataVector> _removedUserEdgeDataVectors;
 
 public:
-    RemoveAttributesCommand(GraphModel* graphModel, QStringList attributeNames);
+    RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames);
 
     QString description() const override;
     QString verb() const override;
