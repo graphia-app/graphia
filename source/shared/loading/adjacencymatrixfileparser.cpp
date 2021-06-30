@@ -236,9 +236,9 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
     }
     else if(isAdjacencyMatrix(data, &topLeft))
     {
-        for(size_t rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
+        for(auto rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
         {
-            for(size_t columnIndex = static_cast<size_t>(topLeft.x()); columnIndex < data.numColumns(); columnIndex++)
+            for(auto columnIndex = static_cast<size_t>(topLeft.x()); columnIndex < data.numColumns(); columnIndex++)
             {
                 double weight = data.valueAt(columnIndex, rowIndex).toDouble();
 

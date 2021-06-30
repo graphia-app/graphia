@@ -196,7 +196,7 @@ void VisualisationMappingPlotItem::buildPlot()
     points->setLineStyle(QCPGraph::lsNone);
     points->setData(px, py);
 
-    QCPMarginGroup *marginGroup = new QCPMarginGroup(&customPlot());
+    auto* marginGroup = new QCPMarginGroup(&customPlot());
     mainAxisRect->setMarginGroup(QCP::msBottom, marginGroup);
     valuesAxisRect->setMarginGroup(QCP::msBottom, marginGroup);
 
