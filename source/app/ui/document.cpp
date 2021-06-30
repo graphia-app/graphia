@@ -502,8 +502,12 @@ bool Document::hasValidEdgeTextVisualisation() const
 
 void Document::initialiseLayoutSettingsModel()
 {
+    const auto& settings = _layoutThread->settings();
+
     QStringList layoutSettingNames;
-    for(const auto& setting : _layoutThread->settings())
+    layoutSettingNames.reserve(static_cast<int>(settings.size()));
+
+    for(const auto& setting : settings)
         layoutSettingNames.append(setting.name());
 
     _layoutSettingNames = layoutSettingNames;
@@ -1562,7 +1566,10 @@ QVariantList Document::selectedNodeIds() const
 
     if(_selectionManager != nullptr)
     {
-        for(auto nodeId : _selectionManager->selectedNodes())
+        const auto& selectedNodes = _selectionManager->selectedNodes();
+        nodes.reserve(static_cast<int>(selectedNodes.size()));
+
+        for(auto nodeId : selectedNodes)
             nodes.append(QVariant::fromValue<QmlNodeId>(nodeId));
     }
 

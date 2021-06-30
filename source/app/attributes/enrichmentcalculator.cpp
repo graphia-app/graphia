@@ -118,7 +118,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
         const auto& value = attributeA->stringValueOf(nodeId);
 
         if(!value.isEmpty())
-            nodeIdsForAttributeValue[value].push_back(nodeId);
+            nodeIdsForAttributeValue[value].push_back(nodeId); // clazy:exclude=reserve-candidates
     }
 
     for(auto& attributeValueA : u::keysFor(attributeValueEntryCountATotal))
