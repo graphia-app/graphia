@@ -28,7 +28,7 @@
 class GraphSizeEstimatePlotItem : public QCustomPlotQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate WRITE setGraphSizeEstimate)
+    Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate WRITE setGraphSizeEstimate) // clazy:exclude=qproperty-without-notify
     Q_PROPERTY(double threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged)
     Q_PROPERTY(bool uniqueEdgesOnly MEMBER _uniqueEdgesOnly NOTIFY uniqueEdgesOnlyChanged)
 
