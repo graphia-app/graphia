@@ -151,6 +151,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     // We only want the ticker on the left most column annotation QCPAxisRect
     if(column == 0)
     {
+        // NOLINTNEXTLINE clang-analyzer-cplusplus.NewDeleteLeaks
         QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
         forEachColumnAnnotation([this, columnAnnotationTicker](const ColumnAnnotation& columnAnnotation,
