@@ -854,10 +854,10 @@ void CorrelationTabularDataParser::estimateGraphSize()
         }
         }
 
-        auto nodesScale = static_cast<double>(_dataPtr->numRows() / numSampleRows);
-        auto edgesScale = nodesScale * nodesScale;
         auto maxNodes = static_cast<double>(_dataPtr->numRows());
         auto maxEdges = maxNodes * maxNodes;
+        auto nodesScale = maxNodes / static_cast<double>(numSampleRows);
+        auto edgesScale = nodesScale * nodesScale;
 
         return graphSizeEstimate(sampleEdges, nodesScale, edgesScale, maxNodes, maxEdges);
     });
