@@ -160,13 +160,17 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         if(DEBUG)
             qDebug() << "RowPruneSum (mass?)" << rowPruneSum << "targetmass" << targetMass;
 
+        auto first = rowData.indices.begin();
+        auto last = rowData.indices.begin() + static_cast<std::ptrdiff_t>(nonzeros);
+
         if(remainCount != nonzeros && rowPruneSum < targetMass && remainCount < RECOVERY_COUNT)
         {
             // Recover
             if(DEBUG)
                 qDebug() << "RECOVERY" << "MASS:" << rowPruneSum;
-            std::nth_element(rowData.indices.begin(), rowData.indices.begin() + RECOVERY_COUNT, rowData.indices.begin() + nonzeros,
-                             [&rowData](size_t i1, size_t i2) {return rowData.values[i1] > rowData.values[i2];});
+            std::nth_element(first, rowData.indices.begin() + RECOVERY_COUNT, last,
+                [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
+
             minValueCutoff = rowData.values[rowData.indices[RECOVERY_COUNT]];
             remainCount = RECOVERY_COUNT;
             rowPruneSum = 0;
@@ -178,8 +182,8 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
             // Selection prune
             // Refine the cutoff so MAXIMUM SELECTION_COUNT elements remain
             // Should speedtest this vs copy+std::greater<float>
-            std::nth_element(rowData.indices.begin(), rowData.indices.begin() + SELECTION_COUNT, rowData.indices.begin() + nonzeros,
-                             [&rowData](size_t i1, size_t i2) {return rowData.values[i1] > rowData.values[i2];});
+            std::nth_element(first, rowData.indices.begin() + SELECTION_COUNT, last,
+                [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
 
             minValueCutoff = rowData.values[rowData.indices[SELECTION_COUNT]];
 
@@ -206,8 +210,8 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
                 if(DEBUG)
                     qDebug() << "RECOVERY 2" << "MASS:" << rowPruneSum;
 
-                std::nth_element(rowData.indices.begin(), rowData.indices.begin() + RECOVERY_COUNT, rowData.indices.begin() + nonzeros,
-                                 [&rowData](size_t i1, size_t i2) {return rowData.values[i1] > rowData.values[i2];});
+                std::nth_element(first, rowData.indices.begin() + RECOVERY_COUNT, last,
+                    [&rowData](size_t i1, size_t i2) { return rowData.values[i1] > rowData.values[i2]; });
                 minValueCutoff = rowData.values[rowData.indices[RECOVERY_COUNT]];
                 remainCount = RECOVERY_COUNT;
                 rowPruneSum = 0;
@@ -250,9 +254,9 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         // If sorting is too big just brute force the whole range
         // If the range is small just do it contiguously
         const float EPSILON = 1e-8f;
-        if((nonzeros + nonzeros) < (maxIndex - minIndex))
+        if((2 * nonzeros) < (maxIndex - minIndex))
         {
-            std::sort(rowData.indices.begin(), rowData.indices.begin() + nonzeros);
+            std::sort(first, last);
 
             for(size_t j = 0UL; j<nonzeros; ++j)
             {
@@ -289,11 +293,11 @@ void MCLTransform::apply(TransformedGraph& target) const
     {
         QElapsedTimer mclTimer;
         mclTimer.start();
-        calculateMCL(granularity, target);
+        calculateMCL(static_cast<float>(granularity), target);
         qDebug() << "MCL Elapsed Time" << mclTimer.elapsed();
     }
     else
-        calculateMCL(granularity, target);
+        calculateMCL(static_cast<float>(granularity), target);
 }
 
 template<class MatrixType>
@@ -481,7 +485,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
         if(_debugIteration)
         {
-            int populationTime = threadedTimer.restart();
+            auto populationTime = threadedTimer.restart();
             qDebug() << "Threaded Expansion Population time LL ms" << populationTime;
 
             qDebug() << "Expand nnz" << clusterMatrix.nonZeros();
@@ -530,13 +534,14 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         sumColumns(sqClusterMatrix, colSum);
         for(size_t k=0; k<clusterMatrix.columns(); ++k)
         {
-            float max = 0;
+            float max = 0.0f;
             for(MatrixType::ConstIterator it=clusterMatrix.cbegin(k); it!=clusterMatrix.cend(k); ++it )
                 max = std::max(it->value(),max);
-            if((max - colSum[k]) * clusterMatrix.nonZeros(k) > MCL_CONVERGENCE_LIMIT)
+
+            if((max - colSum[k]) * static_cast<float>(clusterMatrix.nonZeros(k)) > MCL_CONVERGENCE_LIMIT)
             {
                 if(_debugIteration)
-                    qDebug() << "No Converge" << (max - colSum[k]) * clusterMatrix.nonZeros(k);
+                    qDebug() << "No Converge" << (max - colSum[k]) * static_cast<float>(clusterMatrix.nonZeros(k));
                 isEquiDistrubuted = false;
                 break;
             }

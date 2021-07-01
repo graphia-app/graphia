@@ -114,7 +114,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
             }
             else
             {
-                bool space = (codePoint < 0xFF) && (std::isspace(codePoint) != 0);
+                bool space = (codePoint < 0xFF) && (std::isspace(static_cast<int>(codePoint)) != 0);
                 bool trailingSpace = space && !token.empty();
 
                 if(trailingSpace && !inQuotes)

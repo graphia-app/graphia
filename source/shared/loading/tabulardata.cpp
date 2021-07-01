@@ -94,12 +94,12 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
 
         for(size_t offset = _rows - 1; offset > 0; offset--)
         {
-            auto oldPosition = _data.begin() + (offset * _columns);
-            auto newPosition = _data.begin() + (offset * columns);
+            auto oldPosition = _data.begin() + static_cast<std::ptrdiff_t>(offset * _columns);
+            auto newPosition = _data.begin() + static_cast<std::ptrdiff_t>(offset * columns);
 
             std::move_backward(oldPosition,
-                oldPosition + _columns,
-                newPosition + _columns);
+                oldPosition + static_cast<std::ptrdiff_t>(_columns),
+                newPosition + static_cast<std::ptrdiff_t>(_columns));
         }
     }
 

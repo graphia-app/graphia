@@ -142,8 +142,8 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
             auto subRect = rect.intersected(layoutRect).translated(-layoutRect.topLeft());
 
             auto frustum = renderer->camera()->frustumForViewportCoordinates(
-                        subRect.topLeft().x(), subRect.topLeft().y(),
-                        subRect.bottomRight().x(), subRect.bottomRight().y());
+                static_cast<int>(subRect.topLeft().x()), static_cast<int>(subRect.topLeft().y()),
+                static_cast<int>(subRect.bottomRight().x()), static_cast<int>(subRect.bottomRight().y()));
 
             auto subSelection = nodeIdsInsideFrustum(*_graphModel, componentId, frustum);
             selection.insert(subSelection.begin(), subSelection.end());

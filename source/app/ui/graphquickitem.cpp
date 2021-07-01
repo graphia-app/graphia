@@ -382,7 +382,9 @@ int GraphQuickItem::numVisibleNodes() const
 {
     if(_graphModel != nullptr)
     {
-        return std::count_if(_graphModel->graph().nodeIds().begin(), _graphModel->graph().nodeIds().end(),
+        const auto& nodeIds = _graphModel->graph().nodeIds();
+
+        return std::count_if(nodeIds.begin(), nodeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](NodeId nodeId)
         {
             return _graphModel->graph().typeOf(nodeId) != MultiElementType::Tail;
@@ -404,7 +406,9 @@ int GraphQuickItem::numVisibleEdges() const
 {
     if(_graphModel != nullptr)
     {
-        return std::count_if(_graphModel->graph().edgeIds().begin(), _graphModel->graph().edgeIds().end(),
+        const auto& edgeIds = _graphModel->graph().edgeIds();
+
+        return std::count_if(edgeIds.begin(), edgeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](EdgeId edgeId)
         {
             return _graphModel->graph().typeOf(edgeId) != MultiElementType::Tail;

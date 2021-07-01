@@ -51,7 +51,7 @@ float PerformanceCounter::ticksPerSecond()
 
         std::chrono::duration<float> duration = end - start;
 
-        mean += duration.count() / numSamples;
+        mean += duration.count() / static_cast<float>(numSamples);
     }
 
     if(mean == 0.0f)

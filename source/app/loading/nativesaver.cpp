@@ -91,7 +91,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
             if(ret == Z_STREAM_ERROR)
                 return false;
 
-            numBytes = ChunkSize - zstream.avail_out;
+            numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
             if(output.writeRawData(reinterpret_cast<const char*>(outBuffer.data()), numBytes) !=
                numBytes) // NOLINT
                 return false;

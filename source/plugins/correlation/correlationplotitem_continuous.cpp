@@ -562,7 +562,7 @@ void CorrelationPlotItem::populateLinePlot()
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
                 rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
 
-            double rowMean = rowSum / _pluginInstance->numContinuousColumns();
+            double rowMean = rowSum / static_cast<double>(_pluginInstance->numContinuousColumns());
 
             double variance = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
@@ -571,7 +571,7 @@ void CorrelationPlotItem::populateLinePlot()
                 variance += (value * value);
             }
 
-            variance /= _pluginInstance->numContinuousColumns();
+            variance /= static_cast<double>(_pluginInstance->numContinuousColumns());
             double stdDev = std::sqrt(variance);
             double pareto = std::sqrt(stdDev);
 
@@ -705,7 +705,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
     for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
     {
         auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
-        categoryTicker->addTick(x, labelName);
+        categoryTicker->addTick(static_cast<double>(x), labelName);
     }
 
     xAxis->setTicker(categoryTicker);

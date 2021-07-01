@@ -124,7 +124,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
                 return false;
             }
 
-            numBytes = ChunkSize - zstream.avail_out;
+            numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
             bytesDecompressed += numBytes;
             byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes); // NOLINT
 

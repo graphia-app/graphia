@@ -70,7 +70,8 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
         if (_debug)
             timer.start();
 
-        VectorType pageRankVector(componentNodeCount, 1.0f / componentNodeCount);
+        VectorType pageRankVector(componentNodeCount,
+            1.0f / static_cast<float>(componentNodeCount));
         VectorType newPageRankVector(componentNodeCount);
         VectorType delta(componentNodeCount);
         float change = std::numeric_limits<float>::max();
@@ -93,14 +94,16 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
             {
                 auto matrixId = nodeToIndexMap[nodeId];
                 float prSum = 0.0f;
+
                 for(auto edgeId : target.edgeIdsForNodeId(nodeId))
                 {
                     auto oppositeNodeId = target.edgeById(edgeId).oppositeId(nodeId);
                     prSum += pageRankVector[nodeToIndexMap[oppositeNodeId]] /
                         static_cast<float>(target.nodeById(oppositeNodeId).degree());
                 }
-                 newPageRankVector[matrixId] = (prSum * PAGERANK_DAMPING) +
-                         ((1.0f - PAGERANK_DAMPING) / componentNodeCount);
+
+                newPageRankVector[matrixId] = (prSum * PAGERANK_DAMPING) +
+                    ((1.0f - PAGERANK_DAMPING) / static_cast<float>(componentNodeCount));
             }
 
             // Normalise result

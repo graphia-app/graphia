@@ -72,7 +72,8 @@ void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
     auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
     auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
 
-    QRectF rect(xPixel - _halfCellWidth, yPixel - _cellHeight, (w * _cellWidth), _cellHeight);
+    QRectF rect(xPixel - _halfCellWidth, yPixel - _cellHeight,
+        (static_cast<double>(w) * _cellWidth), _cellHeight);
 
     // Don't continue if the rectangle is outside the clipping bounds
     if(!rect.intersects(painter->clipBoundingRect()))

@@ -64,9 +64,9 @@ QVariantMap graphSizeEstimate(EdgeList edgeList,
         if(std::abs(edge._weight) < sampleCutoff)
         {
             keys.append(weight);
-            estimatedNumNodes.append(std::min(nonSingletonNodes.size() * nodesScale, nodesMax));
-            estimatedNumEdges.append(std::min(numEdges * edgesScale, edgesMax));
-            estimatedNumUniqueEdges.append(std::min(numUniqueEdges * edgesScale, edgesMax));
+            estimatedNumNodes.append(std::min(static_cast<double>(nonSingletonNodes.size()) * nodesScale, nodesMax));
+            estimatedNumEdges.append(std::min(static_cast<double>(numEdges) * edgesScale, edgesMax));
+            estimatedNumUniqueEdges.append(std::min(static_cast<double>(numUniqueEdges) * edgesScale, edgesMax));
 
             sampleCutoff -= sampleQuantum;
             weight = std::abs(edge._weight);
@@ -81,9 +81,9 @@ QVariantMap graphSizeEstimate(EdgeList edgeList,
     }
 
     keys.append(std::min(weight, smallestWeight));
-    estimatedNumNodes.append(std::min(nonSingletonNodes.size() * nodesScale, nodesMax));
-    estimatedNumEdges.append(std::min(numEdges * edgesScale, edgesMax));
-    estimatedNumUniqueEdges.append(std::min(numUniqueEdges * edgesScale, edgesMax));
+    estimatedNumNodes.append(std::min(static_cast<double>(nonSingletonNodes.size()) * nodesScale, nodesMax));
+    estimatedNumEdges.append(std::min(static_cast<double>(numEdges) * edgesScale, edgesMax));
+    estimatedNumUniqueEdges.append(std::min(static_cast<double>(numUniqueEdges) * edgesScale, edgesMax));
 
     std::reverse(keys.begin(), keys.end());
     std::reverse(estimatedNumNodes.begin(), estimatedNumNodes.end());

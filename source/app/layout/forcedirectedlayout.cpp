@@ -222,7 +222,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     for(auto nodeId : nodeIds())
         deltaForceTotal += _displacements->at(nodeId)._nextLength;
 
-    _forceMean = deltaForceTotal / nodeIds().size();
+    _forceMean = deltaForceTotal / static_cast<float>(nodeIds().size());
 
     // Calculate Standard Deviation
     float variance = 0.0f;
@@ -232,7 +232,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         variance += (d * d);
     }
 
-    _forceStdDeviation = std::sqrt(variance / nodeIds().size());
+    _forceStdDeviation = std::sqrt(variance / static_cast<float>(nodeIds().size()));
     switch(_changeDetectionPhase)
     {
         case ChangeDetectionPhase::Initial:

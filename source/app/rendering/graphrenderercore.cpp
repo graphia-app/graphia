@@ -675,7 +675,8 @@ void GraphRendererCore::appendGPUComponentData(const QMatrix4x4& modelViewMatrix
 void GraphRendererCore::uploadGPUComponentData()
 {
     glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
-    glBufferData(GL_TEXTURE_BUFFER, _componentData.size() * sizeof(GLfloat), _componentData.data(), GL_STATIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, static_cast<GLsizeiptr>(_componentData.size() * sizeof(GLfloat)),
+        _componentData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
@@ -838,21 +839,22 @@ void GraphRendererCore::render2D(QRect selectionRect)
         r.setTop(_height - selectionRect.top());
         r.setBottom(_height - selectionRect.bottom());
 
-        std::vector<GLfloat> quadData;
+        std::vector<GLfloat> quadData =
+        {
+            static_cast<GLfloat>(r.left()), static_cast<GLfloat>(r.bottom()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
+            static_cast<GLfloat>(r.right()), static_cast<GLfloat>(r.bottom()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
+            static_cast<GLfloat>(r.right()), static_cast<GLfloat>(r.top()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
 
-        quadData.push_back(r.left()); quadData.push_back(r.bottom());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
-        quadData.push_back(r.right()); quadData.push_back(r.bottom());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
-        quadData.push_back(r.right()); quadData.push_back(r.top());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
-
-        quadData.push_back(r.right()); quadData.push_back(r.top());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
-        quadData.push_back(r.left());  quadData.push_back(r.top());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
-        quadData.push_back(r.left());  quadData.push_back(r.bottom());
-        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
+            static_cast<GLfloat>(r.right()), static_cast<GLfloat>(r.top()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
+            static_cast<GLfloat>(r.left()),  static_cast<GLfloat>(r.top()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
+            static_cast<GLfloat>(r.left()),  static_cast<GLfloat>(r.bottom()),
+            static_cast<GLfloat>(color.redF()), static_cast<GLfloat>(color.blueF()), static_cast<GLfloat>(color.greenF()),
+        };
 
         glDrawBuffer(GL_COLOR_ATTACHMENT2);
 
@@ -895,9 +897,9 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
     auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
 
-    glClearColor(backgroundColor.redF(),
-                 backgroundColor.greenF(),
-                 backgroundColor.blueF(), 1.0f);
+    glClearColor(static_cast<GLfloat>(backgroundColor.redF()),
+        static_cast<GLfloat>(backgroundColor.greenF()),
+        static_cast<GLfloat>(backgroundColor.blueF()), 1.0f);
 
     glClear(GL_COLOR_BUFFER_BIT);
 

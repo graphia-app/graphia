@@ -292,12 +292,12 @@ void CorrelationPlotItem::paint(QPainter* painter)
         auto backgroundColor = QColor(Qt::white);
         backgroundColor.setAlpha(127);
 
-        painter->fillRect(0, 0, width(), height(), backgroundColor);
+        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, backgroundColor);
         painter->drawPixmap(0, yDest, QPixmap::fromImage(image));
     }
     else
     {
-        painter->fillRect(0, 0, width(), height(), Qt::white);
+        painter->fillRect(QRectF{0.0, 0.0, width(), height()}, Qt::white);
         painter->drawPixmap(0, yDest, _pixmap);
     }
 }
@@ -425,7 +425,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
                         minDistanceSq = distanceSq;
                         nearestPlottable = plottable;
 
-                        keyCoord = std::distance(graph->data()->constBegin(), it);
+                        keyCoord = static_cast<double>(std::distance(graph->data()->constBegin(), it));
                     }
                 }
             }
@@ -1211,9 +1211,9 @@ double CorrelationPlotItem::columnAxisWidth() const
 double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
 {
     if(allAttributes)
-        return _pluginInstance->columnAnnotations().size() * labelHeight();
+        return static_cast<double>(_pluginInstance->columnAnnotations().size()) * labelHeight();
 
-    return _visibleColumnAnnotationNames.size() * labelHeight();
+    return static_cast<double>(_visibleColumnAnnotationNames.size()) * labelHeight();
 }
 
 void CorrelationPlotItem::createTooltip()

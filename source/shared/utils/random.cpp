@@ -26,7 +26,7 @@ static std::mt19937 randomh_mt19937(randomh_rd());
 float u::rand(float low, float high)
 {
     std::uniform_real_distribution<> distribution(low, high);
-    return distribution(randomh_mt19937);
+    return static_cast<float>(distribution(randomh_mt19937));
 }
 
 int u::rand(int low, int high)

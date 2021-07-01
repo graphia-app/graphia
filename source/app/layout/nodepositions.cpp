@@ -93,7 +93,7 @@ void NodePositions::update(const NodePositions& other)
 template<typename GetFn>
 static QVector3D centreOfMassWithFn(const std::vector<NodeId>& nodeIds, GetFn&& getFn)
 {
-    float reciprocal = 1.0f / nodeIds.size();
+    float reciprocal = 1.0f / static_cast<float>(nodeIds.size());
 
     return std::accumulate(nodeIds.begin(), nodeIds.end(), QVector3D(),
     [reciprocal, getFn](const auto& com, auto nodeId)

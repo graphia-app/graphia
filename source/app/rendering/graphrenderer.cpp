@@ -203,9 +203,9 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         glyphData._basePosition[1] = elementPosition.y();
         glyphData._basePosition[2] = elementPosition.z();
 
-        glyphData._color[0] = textColor.redF();
-        glyphData._color[1] = textColor.greenF();
-        glyphData._color[2] = textColor.blueF();
+        glyphData._color[0] = static_cast<float>(textColor.redF());
+        glyphData._color[1] = static_cast<float>(textColor.greenF());
+        glyphData._color[2] = static_cast<float>(textColor.blueF());
 
         gpuGraphData->_glyphData.push_back(glyphData);
     }
@@ -265,12 +265,12 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._position[2] = nodePosition.z();
             nodeData._component = componentIndex;
             nodeData._size = nodeVisual._size;
-            nodeData._outerColor[0] = nodeVisual._outerColor.redF();
-            nodeData._outerColor[1] = nodeVisual._outerColor.greenF();
-            nodeData._outerColor[2] = nodeVisual._outerColor.blueF();
-            nodeData._innerColor[0] = nodeVisual._innerColor.redF();
-            nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
-            nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
+            nodeData._outerColor[0] = static_cast<float>(nodeVisual._outerColor.redF());
+            nodeData._outerColor[1] = static_cast<float>(nodeVisual._outerColor.greenF());
+            nodeData._outerColor[2] = static_cast<float>(nodeVisual._outerColor.blueF());
+            nodeData._innerColor[0] = static_cast<float>(nodeVisual._innerColor.redF());
+            nodeData._innerColor[1] = static_cast<float>(nodeVisual._innerColor.greenF());
+            nodeData._innerColor[2] = static_cast<float>(nodeVisual._innerColor.blueF());
             nodeData._selected = nodeVisual._state.test(VisualFlags::Selected) ? 1.0f : 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
@@ -346,12 +346,12 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
-            edgeData._outerColor[0] = edgeVisual._outerColor.redF();
-            edgeData._outerColor[1] = edgeVisual._outerColor.greenF();
-            edgeData._outerColor[2] = edgeVisual._outerColor.blueF();
-            edgeData._innerColor[0] = edgeVisual._innerColor.redF();
-            edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
-            edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
+            edgeData._outerColor[0] = static_cast<float>(edgeVisual._outerColor.redF());
+            edgeData._outerColor[1] = static_cast<float>(edgeVisual._outerColor.greenF());
+            edgeData._outerColor[2] = static_cast<float>(edgeVisual._outerColor.blueF());
+            edgeData._innerColor[0] = static_cast<float>(edgeVisual._innerColor.redF());
+            edgeData._innerColor[1] = static_cast<float>(edgeVisual._innerColor.greenF());
+            edgeData._innerColor[2] = static_cast<float>(edgeVisual._innerColor.blueF());
             edgeData._selected = 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),

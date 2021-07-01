@@ -206,7 +206,9 @@ void EnrichmentHeatmapItem::buildPlot()
     // overdrawn edges. As a fix I add a 1 cell margin on all sides of the map, offset the data by 1 cell
     // and range it to match
     _colorMap->data()->setSize(static_cast<int>(attributeValueSetA.size() + 2), static_cast<int>(attributeValueSetB.size() + 2));
-    _colorMap->data()->setRange(QCPRange(-1, attributeValueSetA.size()), QCPRange(-1, attributeValueSetB.size()));
+    _colorMap->data()->setRange(
+        QCPRange(-1.0, static_cast<double>(attributeValueSetA.size())),
+        QCPRange(-1.0, static_cast<double>(attributeValueSetB.size())));
 
     _attributeACount = static_cast<int>(attributeValueSetA.size());
     _attributeBCount = static_cast<int>(attributeValueSetB.size());

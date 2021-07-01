@@ -83,13 +83,13 @@ void LouvainTransform::apply(TransformedGraph& target) const
     auto add = [&](CommunityId community, NodeId nodeId)
     {
         communities[nodeId] = community;
-        communityDegrees[community] += weightedDegrees[nodeId];
+        communityDegrees[community] += static_cast<int>(weightedDegrees[nodeId]);
     };
 
     auto remove = [&](CommunityId community, NodeId nodeId)
     {
         communities[nodeId].setToNull();
-        communityDegrees[community] -= weightedDegrees[nodeId];
+        communityDegrees[community] -= static_cast<int>(weightedDegrees[nodeId]);
     };
 
     auto relabel = [&](MutableGraph& graph)

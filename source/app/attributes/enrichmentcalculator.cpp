@@ -144,7 +144,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
             auto fexp = static_cast<double>(r1) / static_cast<double>(n);
             auto stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-            auto expectedNo = (static_cast<double>(r1) / n) * selectedNodes.size();
+            auto expectedNo = (static_cast<double>(r1) / n) * static_cast<double>(selectedNodes.size());
             auto expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
@@ -165,7 +165,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
                 QString::number(selectedNodes.size()));
             row[EnrichmentTableModel::Results::OverRep] = selectedInCategory / expectedNo;
             row[EnrichmentTableModel::Results::Fishers] = f;
-            row[EnrichmentTableModel::Results::AdjustedFishers] = f * attributeValueEntryCountBTotal.size();
+            row[EnrichmentTableModel::Results::AdjustedFishers] = f * static_cast<double>(attributeValueEntryCountBTotal.size());
 
             tableModel.push_back(row);
         }

@@ -66,7 +66,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         }
     }
 
-    double maxY = *std::max_element(columnTotals.begin(), columnTotals.end());
+    auto maxY = static_cast<double>(*std::max_element(columnTotals.begin(), columnTotals.end()));
 
     ColorPalette colorPalette(Defaults::PALETTE);
 
@@ -120,12 +120,12 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
                 .arg(keys.at(0), keys.at(1))
                 .arg(m.size() - 2);
 
-            addBars(value, totalSize, Qt::black);
+            addBars(value, static_cast<double>(totalSize), Qt::black);
         }
         else
         {
             for(const auto& [value, size] : m)
-                addBars(value, size);
+                addBars(value, static_cast<double>(size));
         }
     }
 
@@ -147,7 +147,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
     for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
     {
         auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
-        categoryTicker->addTick(x, labelName);
+        categoryTicker->addTick(static_cast<double>(x), labelName);
     }
 
     xAxis->setTicker(categoryTicker);

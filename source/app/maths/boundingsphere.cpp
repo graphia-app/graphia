@@ -48,7 +48,7 @@ BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
     // Find barycentre
     _centre(std::accumulate(points.begin(), points.end(), QVector3D(),
         [](const auto& centre, const auto& point) { return centre + point; }) /
-        points.size()),
+        static_cast<float>(points.size())),
     _radius(maxDistanceFromCentre(_centre, points))
 {
 }

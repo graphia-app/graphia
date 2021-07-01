@@ -940,8 +940,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     {
         for(const auto& correlationValue : jsonCorrelationValues)
         {
-            if(graph.containsEdgeId(i))
-                _correlationValues->set(i, correlationValue);
+            auto edgeId = static_cast<EdgeId>(i);
+            if(graph.containsEdgeId(edgeId))
+                _correlationValues->set(edgeId, correlationValue);
 
             parser.setProgress(static_cast<int>((i++ * 100) / jsonCorrelationValues.size()));
         }

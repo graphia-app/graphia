@@ -60,7 +60,7 @@ void PercentNNTransform::apply(TransformedGraph& target) const
         auto edgeIds = target.nodeById(nodeId).edgeIds();
 
         auto k = std::max((edgeIds.size() * percent) / 100, minimum);
-        auto kthPlus1 = edgeIds.begin() + std::min(k, edgeIds.size());
+        auto kthPlus1 = edgeIds.begin() + static_cast<std::ptrdiff_t>(std::min(k, edgeIds.size()));
 
         if(ascending)
         {
@@ -102,9 +102,9 @@ void PercentNNTransform::apply(TransformedGraph& target) const
             auto& rank = ranks[edgeId];
 
             if(rank._source == 0)
-                rank._mean = rank._target;
+                rank._mean = static_cast<double>(rank._target);
             else if(rank._target == 0)
-                rank._mean = rank._source;
+                rank._mean = static_cast<double>(rank._source);
             else
                 rank._mean = static_cast<double>(rank._source + rank._target) * 0.5;
         }
