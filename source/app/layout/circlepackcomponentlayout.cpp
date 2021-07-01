@@ -213,7 +213,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     ComponentArray<Links> links(graph);
 
-    auto minimumComponentRadius = u::pref("visuals/minimumComponentRadius").toFloat();
+    auto minimumComponentRadius = u::pref(QStringLiteral("visuals/minimumComponentRadius")).toFloat();
     for(auto componentId : sortedComponentIds)
     {
         componentLayoutData[componentId].setRadius(std::max(componentLayoutData[componentId].radius(),

@@ -163,9 +163,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
             if(!_columnSortOrders.empty())
             {
                 const auto& columnSortOrder = _columnSortOrders.first();
-                auto type = static_cast<PlotColumnSortType>(columnSortOrder["type"].toInt());
-                auto text = columnSortOrder["text"].toString();
-                auto order = static_cast<Qt::SortOrder>(columnSortOrder["order"].toInt());
+                auto type = static_cast<PlotColumnSortType>(columnSortOrder[QStringLiteral("type")].toInt());
+                auto text = columnSortOrder[QStringLiteral("text")].toString();
+                auto order = static_cast<Qt::SortOrder>(columnSortOrder[QStringLiteral("order")].toInt());
 
                 if(type == PlotColumnSortType::ColumnAnnotation && text == columnAnnotation.name())
                 {

@@ -237,12 +237,12 @@ QString GraphTransformConfig::conditionAsString() const
                         }
 
                         if(!info._parameter.isEmpty())
-                            return QString(R"($"%1%2"."%3")").arg(prefix, info._name, info._parameter);
+                            return QStringLiteral(R"($"%1%2"."%3")").arg(prefix, info._name, info._parameter);
 
-                        return QString(R"($"%1%2")").arg(prefix, info._name);
+                        return QStringLiteral(R"($"%1%2")").arg(prefix, info._name);
                     }
 
-                    return QString(R"("%1")").arg(s);
+                    return QStringLiteral(R"("%1")").arg(s);
                 }
             };
 
@@ -252,7 +252,7 @@ QString GraphTransformConfig::conditionAsString() const
         QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
         QString operator()(const TerminalCondition& terminalCondition) const
         {
-            return QString("%1 %2 %3").arg(
+            return QStringLiteral("%1 %2 %3").arg(
                 terminalValueAsString(terminalCondition._lhs),
                 terminalCondition.opAsString(),
                 terminalValueAsString(terminalCondition._rhs));
@@ -260,7 +260,7 @@ QString GraphTransformConfig::conditionAsString() const
 
         QString operator()(const UnaryCondition& unaryCondition) const
         {
-            return QString("%1 %2").arg(
+            return QStringLiteral("%1 %2").arg(
                 terminalValueAsString(unaryCondition._lhs),
                 unaryCondition.opAsString());
         }
@@ -270,7 +270,7 @@ QString GraphTransformConfig::conditionAsString() const
             auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
             auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
 
-            return QString("%1 %2 %3").arg(lhs, compoundCondition.opAsString(), rhs);
+            return QStringLiteral("%1 %2 %3").arg(lhs, compoundCondition.opAsString(), rhs);
         }
     };
 

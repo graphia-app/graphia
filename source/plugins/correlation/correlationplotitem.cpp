@@ -1010,13 +1010,13 @@ void CorrelationPlotItem::updateSortMap()
         Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
 
         ColumnSortOrder columnSortOrder;
-        columnSortOrder._type = static_cast<PlotColumnSortType>(qmlColumnSortOrder["type"].toInt());
-        columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder["order"].toInt());
+        columnSortOrder._type = static_cast<PlotColumnSortType>(qmlColumnSortOrder[QStringLiteral("type")].toInt());
+        columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder[QStringLiteral("order")].toInt());
 
         if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
         {
             const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-            auto columnAnnotationName = qmlColumnSortOrder["text"].toString();
+            auto columnAnnotationName = qmlColumnSortOrder[QStringLiteral("text")].toString();
             auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
                 [&columnAnnotationName](const auto& v) { return v.name() == columnAnnotationName; });
 
@@ -1088,8 +1088,8 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     const auto* existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
     [type, &text](const auto& value)
     {
-        bool sameType = (value["type"].toInt() == type);
-        bool sameText = (value["text"].toString() == text);
+        bool sameType = (value[QStringLiteral("type")].toInt() == type);
+        bool sameText = (value[QStringLiteral("text")].toString() == text);
         bool typeIsColumnAnnotation =
             (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
 
@@ -1100,7 +1100,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     // that adding it brings it to the front
     if(existing != _columnSortOrders.cend())
     {
-        order = static_cast<Qt::SortOrder>((*existing)["order"].toInt());
+        order = static_cast<Qt::SortOrder>((*existing)[QStringLiteral("order")].toInt());
 
         if(existing == _columnSortOrders.cbegin())
         {
@@ -1114,9 +1114,9 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     }
 
     QVariantMap newSortOrder;
-    newSortOrder["type"] = type;
-    newSortOrder["text"] = text;
-    newSortOrder["order"] = order;
+    newSortOrder[QStringLiteral("type")] = type;
+    newSortOrder[QStringLiteral("text")] = text;
+    newSortOrder[QStringLiteral("order")] = order;
 
     _columnSortOrders.push_front(newSortOrder);
 

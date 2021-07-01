@@ -37,7 +37,7 @@ void u::showInFolder(const QString& path)
     QFileInfo fileInfo(path);
 
     // AFAICT, the best we can do on *nix is to open the folder itself
-    QProcess::execute("xdg-open", {fileInfo.absolutePath()});
+    QProcess::execute(QStringLiteral("xdg-open"), {fileInfo.absolutePath()});
 #else
     qDebug() << "u::showInFolder not implemented";
 #endif

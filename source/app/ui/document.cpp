@@ -78,7 +78,7 @@
 
 QColor Document::contrastingColorForBackground()
 {
-    auto backColor = u::pref("visuals/backgroundColor").value<QColor>();
+    auto backColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
     return u::contrastingColor(backColor);
 }
 
@@ -196,7 +196,7 @@ void Document::maybeEmitBusyChanged()
             timer.restart();
         }
 
-        qDebug().noquote() << QString("busy %1%2%3%4%5%6").arg(
+        qDebug().noquote() << QStringLiteral("busy %1%2%3%4%5%6").arg(
             (commandInProgress() ?                  "C" : "."),
             (graphChanging() ?                      "G" : "."),
             (_graphQuickItem->updating() ?          "U" : "."),
@@ -1427,8 +1427,8 @@ void Document::resetFind()
 
 static bool shouldMoveFindFocus(bool inOverviewMode)
 {
-    return u::pref("misc/focusFoundNodes").toBool() &&
-        (!inOverviewMode || u::pref("misc/focusFoundComponents").toBool());
+    return u::pref(QStringLiteral("misc/focusFoundNodes")).toBool() &&
+        (!inOverviewMode || u::pref(QStringLiteral("misc/focusFoundComponents")).toBool());
 }
 
 void Document::selectAndFocusNode(NodeId nodeId)

@@ -144,7 +144,7 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 
                 _stack.push_back(std::move(command));
 
-                auto maxUndoLevels = u::pref("misc/maxUndoLevels").toInt();
+                auto maxUndoLevels = u::pref(QStringLiteral("misc/maxUndoLevels")).toInt();
                 if(maxUndoLevels > 0)
                 {
                     // Lose commands at the bottom of the stack until

@@ -502,10 +502,10 @@ public:
     Q_INVOKABLE void cancelCommand();
 
     Q_INVOKABLE void writeTableViewToFile(QObject* tableView, const QUrl& fileUrl,
-        const QString& extension = "csv");
+        const QString& extension = QStringLiteral("csv"));
 
     Q_INVOKABLE void writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl,
-        const QString& extension = "csv");
+        const QString& extension = QStringLiteral("csv"));
 
     Q_INVOKABLE void copyTableViewCopyToClipboard(QObject* tableView, int column);
 

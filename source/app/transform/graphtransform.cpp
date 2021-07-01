@@ -90,24 +90,24 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
 QString GraphTransformFactory::image() const
 {
     if(category() == QObject::tr("Attributes"))
-        return "qrc:///transforms/images/attributes.svg";
+        return QStringLiteral("qrc:///transforms/images/attributes.svg");
 
     if(category() == QObject::tr("Clustering"))
-        return "qrc:///transforms/images/clustering.svg";
+        return QStringLiteral("qrc:///transforms/images/clustering.svg");
 
     if(category() == QObject::tr("Edge Reduction"))
-        return "qrc:///transforms/images/edgereduction.svg";
+        return QStringLiteral("qrc:///transforms/images/edgereduction.svg");
 
     if(category() == QObject::tr("Filters"))
-        return "qrc:///transforms/images/filters.svg";
+        return QStringLiteral("qrc:///transforms/images/filters.svg");
 
     if(category() == QObject::tr("Metrics"))
-        return "qrc:///transforms/images/metrics.svg";
+        return QStringLiteral("qrc:///transforms/images/metrics.svg");
 
     if(category() == QObject::tr("Structural"))
-        return "qrc:///transforms/images/structural.svg";
+        return QStringLiteral("qrc:///transforms/images/structural.svg");
 
-    return "qrc:///transforms/images/default.svg";
+    return QStringLiteral("qrc:///transforms/images/default.svg");
 }
 
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const

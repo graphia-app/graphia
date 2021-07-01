@@ -367,8 +367,8 @@ Attribute::Name Attribute::parseAttributeName(QString name)
         name = name.mid(0, dotIndex);
     }
 
-    name.replace(R"(")", "");
-    parameter.replace(R"(")", "");
+    name.replace(QStringLiteral(R"(")"), QLatin1String(""));
+    parameter.replace(QStringLiteral(R"(")"), QLatin1String(""));
 
     return {type, name, parameter};
 }

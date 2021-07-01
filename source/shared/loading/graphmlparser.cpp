@@ -105,21 +105,21 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             }
             else if(elementName == QStringLiteral("key"))
             {
-                if(!attributes.hasAttribute("attr.name"))
+                if(!attributes.hasAttribute(QStringLiteral("attr.name")))
                     break;
 
-                if(!attributes.hasAttribute("for"))
+                if(!attributes.hasAttribute(QStringLiteral("for")))
                     break;
 
-                if(!attributes.hasAttribute("id"))
+                if(!attributes.hasAttribute(QStringLiteral("id")))
                     break;
 
-                const auto& attributeName = attributes.value("attr.name");
-                const auto& keyId = attributes.value("id");
+                const auto& attributeName = attributes.value(QStringLiteral("attr.name"));
+                const auto& keyId = attributes.value(QStringLiteral("id"));
 
-                if(attributes.value("for") == QStringLiteral("node"))
+                if(attributes.value(QStringLiteral("for")) == QStringLiteral("node"))
                     nodeAttributes.emplace(keyId.toString(), attributeName.toString());
-                else if(attributes.value("for") == QStringLiteral("edge"))
+                else if(attributes.value(QStringLiteral("for")) == QStringLiteral("edge"))
                     edgeAttributes.emplace(keyId.toString(), attributeName.toString());
             }
 
@@ -128,13 +128,13 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             if(elementName == QStringLiteral("node"))
             {
-                if(!attributes.hasAttribute("id"))
+                if(!attributes.hasAttribute(QStringLiteral("id")))
                 {
                     setFailureReason(QObject::tr("Node has no id."));
                     return false;
                 }
 
-                const auto& nodeName = attributes.value("id").toString();
+                const auto& nodeName = attributes.value(QStringLiteral("id")).toString();
 
                 if(u::contains(nodes, nodeName))
                 {
@@ -150,20 +150,20 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             }
             else if(elementName == QStringLiteral("edge"))
             {
-                if(!attributes.hasAttribute("source"))
+                if(!attributes.hasAttribute(QStringLiteral("source")))
                 {
                     setFailureReason(QObject::tr("Edge missing source."));
                     return false;
                 }
 
-                if(!attributes.hasAttribute("target"))
+                if(!attributes.hasAttribute(QStringLiteral("target")))
                 {
                     setFailureReason(QObject::tr("Edge missing target."));
                     return false;
                 }
 
-                const auto& sourceName = attributes.value("source").toString();
-                const auto& targetName = attributes.value("target").toString();
+                const auto& sourceName = attributes.value(QStringLiteral("source")).toString();
+                const auto& targetName = attributes.value(QStringLiteral("target")).toString();
 
                 if(!u::contains(nodes, sourceName) || !u::contains(nodes, targetName))
                 {
@@ -176,18 +176,18 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 activeEdgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
 
-                if(attributes.hasAttribute("id"))
+                if(attributes.hasAttribute(QStringLiteral("id")))
                 {
-                    auto edgeName = attributes.value("id").toString();
+                    auto edgeName = attributes.value(QStringLiteral("id")).toString();
                     _userEdgeData->setValueBy(activeEdgeId, QObject::tr("Edge Name"), edgeName);
                 }
             }
             else if(elementName == QStringLiteral("data"))
             {
-                if(!attributes.hasAttribute("key"))
+                if(!attributes.hasAttribute(QStringLiteral("key")))
                     break;
 
-                activeKey = attributes.value("key").toString();
+                activeKey = attributes.value(QStringLiteral("key")).toString();
             }
 
             break;

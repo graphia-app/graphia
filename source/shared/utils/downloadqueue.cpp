@@ -170,7 +170,8 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
         if(contentDisposition.isValid())
         {
             filename = contentDisposition.toString();
-            filename.replace(QRegularExpression(R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|"), R"(\1)");
+            filename.replace(QRegularExpression(QStringLiteral(
+                R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|")), QStringLiteral(R"(\1)"));
         }
         else
             filename = reply->url().fileName();

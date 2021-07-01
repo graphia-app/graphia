@@ -35,7 +35,7 @@ static QString postToTrackingServer(const QString& text)
     timer.start(10000);
 
     QNetworkRequest request;
-    request.setUrl(u::pref("servers/tracking").toString());
+    request.setUrl(u::pref(QStringLiteral("servers/tracking")).toString());
 
     auto* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -96,7 +96,7 @@ static QString anonymousIdentity()
         // Remove any sections of the hostname that contain non-alpha characters, as
         // they're probably DNS encoded IP addresses or similar such things, and we
         // only really care about the sub-top level domain
-        hostName = hostName.split('.').filter(QRegularExpression("^[a-zA-Z]+$")).join('.');
+        hostName = hostName.split('.').filter(QRegularExpression(QStringLiteral("^[a-zA-Z]+$"))).join('.');
     }
 
     if(hostInfo.error() != QHostInfo::NoError || hostName.isEmpty())
@@ -118,25 +118,25 @@ void Tracking::submit()
 {
     auto doSubmission = []
     {
-        auto permission = u::pref("tracking/permission").toString();
-        auto identity = u::pref("tracking/emailAddress").toString();
+        auto permission = u::pref(QStringLiteral("tracking/permission")).toString();
+        auto identity = u::pref(QStringLiteral("tracking/emailAddress")).toString();
 
         if(permission == QStringLiteral("rejected"))
             return;
 
         if(permission == QStringLiteral("anonymous") || identity.isEmpty())
         {
-            if(!u::prefExists("tracking/anonymousId") ||
-                u::pref("tracking/anonymousId").toString().isEmpty())
+            if(!u::prefExists(QStringLiteral("tracking/anonymousId")) ||
+                u::pref(QStringLiteral("tracking/anonymousId")).toString().isEmpty())
             {
                 identity = anonymousIdentity();
-                u::setPref("tracking/anonymousId", identity);
+                u::setPref(QStringLiteral("tracking/anonymousId"), identity);
             }
             else
-                identity = u::pref("tracking/anonymousId").toString();
+                identity = u::pref(QStringLiteral("tracking/anonymousId")).toString();
         }
 
-        auto os = QString("%1 %2 %3 %4").arg(
+        auto os = QStringLiteral("%1 %2 %3 %4").arg(
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
             QSysInfo::productType(), QSysInfo::productVersion());
 

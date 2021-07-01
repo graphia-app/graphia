@@ -48,12 +48,12 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     auto colorScaleTicker = QSharedPointer<QCPAxisTickerText>::create();
     _colorScale->axis()->setTicker(colorScaleTicker);
   
-    colorScaleTicker->addTick(0, "0");
-    colorScaleTicker->addTick(0.01, "0.01");
-    colorScaleTicker->addTick(0.02, "0.02");
-    colorScaleTicker->addTick(0.03, "0.03");
-    colorScaleTicker->addTick(0.04, "0.04");
-    colorScaleTicker->addTick(0.05, "0.05");
+    colorScaleTicker->addTick(0, QStringLiteral("0"));
+    colorScaleTicker->addTick(0.01, QStringLiteral("0.01"));
+    colorScaleTicker->addTick(0.02, QStringLiteral("0.02"));
+    colorScaleTicker->addTick(0.03, QStringLiteral("0.03"));
+    colorScaleTicker->addTick(0.04, QStringLiteral("0.04"));
+    colorScaleTicker->addTick(0.05, QStringLiteral("0.05"));
 
     QCPColorGradient gradient;
     auto insignificantColor = QColor(Qt::gray);

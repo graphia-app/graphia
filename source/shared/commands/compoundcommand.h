@@ -90,7 +90,7 @@ public:
         {
             auto indent = QStringLiteral("  ");
             auto commandDescription = indent + command->debugDescription();
-            commandDescription.replace("\n", "\n" + indent);
+            commandDescription.replace(QStringLiteral("\n"), QStringLiteral("\n") + indent);
 
             text.append(QStringLiteral("\n%1").arg(commandDescription));
         }

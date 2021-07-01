@@ -598,7 +598,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
     if(visible())
     {
         bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
-        float duration = !componentLayoutDataChanged ? 0.0f : u::pref("visuals/transitionTime").toFloat();
+        float duration = !componentLayoutDataChanged ? 0.0f : u::pref(QStringLiteral("visuals/transitionTime")).toFloat();
 
         setVisible(true); // Show new components
         setViewportSize(_width, _height);

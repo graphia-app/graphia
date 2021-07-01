@@ -254,7 +254,7 @@ void GlyphMap::renderImages(const QFont &font)
         path.translate(x, y - glyphAscent);
         textPainter->fillPath(path, QBrush(Qt::white));
 
-        if(u::pref("debug/saveGlyphMaps").toBool())
+        if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
         {
             auto xi = static_cast<int>(x);
             auto yi = static_cast<int>(y);
@@ -294,7 +294,7 @@ void GlyphMap::renderImages(const QFont &font)
     }
 
     // Save Glyphmap for debug purposes if needed
-    if(u::pref("debug/saveGlyphMaps").toBool())
+    if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
     {
         for(int i = 0; i < static_cast<int>(_images.size()); i++)
             _images[i].save(QDir::currentPath() + "/GlyphMap" + QString::number(i) + ".png");

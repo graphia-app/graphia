@@ -200,7 +200,7 @@ void SDFComputeJob::generateSDF()
     glFlush();
 
     // Debug code to pull out the SDF texture
-    if(u::pref("debug/saveGlyphMaps").toBool())
+    if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
     {
         auto pixelCount = static_cast<int>((static_cast<int>(_glyphMap->images().at(0).sizeInBytes()) /
             (scaleFactor * scaleFactor)) * _glyphMap->images().size());

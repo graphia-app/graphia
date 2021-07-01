@@ -164,6 +164,9 @@ public:
             const bool invert = config.isFlagSet(QStringLiteral("invert"));
             const bool perComponent = config.isFlagSet(QStringLiteral("component"));
 
+            // This is only here to avoid an internal compiler error
+            const auto& mappingValue = QStringLiteral("mapping");
+
             int numApplications = 0;
 
             auto applyTo = [&](const auto& graph, const u::Statistics& statistics)
@@ -175,7 +178,7 @@ public:
                     return;
                 }
 
-                VisualisationMapping mapping(statistics, config.parameterValue("mapping"));
+                VisualisationMapping mapping(statistics, config.parameterValue(mappingValue));
 
                 visualisationInfo.setMappedMinimum(mapping.min());
                 visualisationInfo.setMappedMaximum(mapping.max());

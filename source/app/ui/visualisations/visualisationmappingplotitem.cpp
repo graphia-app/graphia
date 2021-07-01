@@ -202,8 +202,8 @@ void VisualisationMappingPlotItem::buildPlot()
 
     for(auto* axis : {mainXAxis, mainYAxis, valuesXAxis, valuesYAxis})
     {
-        axis->setLayer("axes");
-        axis->grid()->setLayer("grid");
+        axis->setLayer(QStringLiteral("axes"));
+        axis->grid()->setLayer(QStringLiteral("grid"));
     }
 
     customPlot().replot(QCustomPlot::rpQueuedReplot);

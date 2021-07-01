@@ -98,7 +98,7 @@ Updater::~Updater()
 
 void Updater::enableAutoBackgroundCheck()
 {
-    if(!u::pref("misc/autoBackgroundUpdateCheck").toBool())
+    if(!u::pref(QStringLiteral("misc/autoBackgroundUpdateCheck")).toBool())
     {
         disableAutoBackgroundCheck();
         return;
@@ -153,7 +153,7 @@ void Updater::startBackgroundUpdateCheck()
     QTimer::singleShot(0, [this]
     {
         QNetworkRequest request;
-        request.setUrl(QUrl(u::pref("servers/updates").toString()));
+        request.setUrl(QUrl(u::pref(QStringLiteral("servers/updates")).toString()));
 
         _state = Updater::State::Update;
         Q_ASSERT(_reply == nullptr);
@@ -399,7 +399,7 @@ bool Updater::updateAvailable()
         return false;
 
     // Update has already been skipped or installed
-    if(status == "skipped" || status == "installed")
+    if(status == QStringLiteral("skipped") || status == QStringLiteral("installed"))
         return false;
 
     return true;

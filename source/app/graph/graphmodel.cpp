@@ -1070,12 +1070,12 @@ void GraphModel::updateVisuals()
 
     emit visualsWillChange();
 
-    auto nodeColor      = u::pref("visuals/defaultNodeColor").value<QColor>();
-    auto edgeColor      = u::pref("visuals/defaultEdgeColor").value<QColor>();
-    auto multiColor     = u::pref("visuals/multiElementColor").value<QColor>();
-    auto nodeSize       = u::pref("visuals/defaultNodeSize").toFloat();
-    auto edgeSize       = u::pref("visuals/defaultEdgeSize").toFloat();
-    auto meIndicators   = u::pref("visuals/showMultiElementIndicators").toBool();
+    auto nodeColor      = u::pref(QStringLiteral("visuals/defaultNodeColor")).value<QColor>();
+    auto edgeColor      = u::pref(QStringLiteral("visuals/defaultEdgeColor")).value<QColor>();
+    auto multiColor     = u::pref(QStringLiteral("visuals/multiElementColor")).value<QColor>();
+    auto nodeSize       = u::pref(QStringLiteral("visuals/defaultNodeSize")).toFloat();
+    auto edgeSize       = u::pref(QStringLiteral("visuals/defaultEdgeSize")).toFloat();
+    auto meIndicators   = u::pref(QStringLiteral("visuals/showMultiElementIndicators")).toBool();
 
     // Clear all edge flags as we can't know what to
     // change unless we have the previous state to hand

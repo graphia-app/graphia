@@ -554,7 +554,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     _textShader.setUniformValue("tex", 0);
-    _textShader.setUniformValue("textScale", u::pref("visuals/textSize").toFloat());
+    _textShader.setUniformValue("textScale", u::pref(QStringLiteral("visuals/textSize")).toFloat());
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
@@ -893,7 +893,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
     glViewport(0, 0, _width, _height);
 
 
-    auto backgroundColor = u::pref("visuals/backgroundColor").value<QColor>();
+    auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
 
     glClearColor(backgroundColor.redF(),
                  backgroundColor.greenF(),
@@ -920,7 +920,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
     _selectionShader.bind();
     _selectionShader.setUniformValue("highlightColor",
-        u::pref("visuals/highlightColor").value<QColor>());
+        u::pref(QStringLiteral("visuals/highlightColor")).value<QColor>());
     _selectionShader.release();
 
     _outlineShader.bind();

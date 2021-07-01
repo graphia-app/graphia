@@ -76,12 +76,12 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     case ValueType::Int:
     case ValueType::Float:
         parameters.insert(QStringLiteral("gradient"),
-            u::pref("visuals/defaultGradient").toString());
+            u::pref(QStringLiteral("visuals/defaultGradient")).toString());
         break;
 
     case ValueType::String:
         parameters.insert(QStringLiteral("palette"),
-            u::pref("visuals/defaultPalette").toString());
+            u::pref(QStringLiteral("visuals/defaultPalette")).toString());
         break;
 
     default:

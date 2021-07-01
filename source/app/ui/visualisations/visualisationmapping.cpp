@@ -71,12 +71,12 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
 
         auto typeString = QString::fromStdString(type);
 
-        if(typeString.compare("minmax", Qt::CaseInsensitive) == 0)
+        if(typeString.compare(QStringLiteral("minmax"), Qt::CaseInsensitive) == 0)
         {
             _min = statistics._min;
             _max = statistics._max;
         }
-        else if(typeString.compare("stddev", Qt::CaseInsensitive) == 0)
+        else if(typeString.compare(QStringLiteral("stddev"), Qt::CaseInsensitive) == 0)
         {
             _min = statistics._mean - statistics._stddev;
             _max = statistics._mean + statistics._stddev;

@@ -75,7 +75,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 {
     ShaderTools::loadShaderProgram(_debugLinesShader, QStringLiteral(":/shaders/debuglines.vert"), QStringLiteral(":/shaders/debuglines.frag"));
 
-    _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
+    _glyphMap = std::make_unique<GlyphMap>(u::pref(QStringLiteral("visuals/textFont")).toString());
 
     const auto* graph = &_graphModel->graph();
 
@@ -229,12 +229,12 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
-    float textScale = u::pref("visuals/textSize").toFloat();
-    auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
+    float textScale = u::pref(QStringLiteral("visuals/textSize")).toFloat();
+    auto textAlignment = static_cast<TextAlignment>(u::pref(QStringLiteral("visuals/textAlignment")).toInt());
     auto textColor = Document::contrastingColorForBackground();
-    auto showNodeText = static_cast<TextState>(u::pref("visuals/showNodeText").toInt());
-    auto showEdgeText = static_cast<TextState>(u::pref("visuals/showEdgeText").toInt());
-    auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
+    auto showNodeText = static_cast<TextState>(u::pref(QStringLiteral("visuals/showNodeText")).toInt());
+    auto showEdgeText = static_cast<TextState>(u::pref(QStringLiteral("visuals/showEdgeText")).toInt());
+    auto edgeVisualType = static_cast<EdgeVisualType>(u::pref(QStringLiteral("visuals/edgeVisualType")).toInt());
 
     // Ignore the setting if the graph is undirected
     if(!_graphModel->directed())
@@ -1031,7 +1031,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     if(componentIds.size() > 1)
     {
         // We want to focus on multiple nodes, but they span multiple components
-        if(mode() == Mode::Component && u::pref("misc/stayInComponentMode").toBool())
+        if(mode() == Mode::Component && u::pref(QStringLiteral("misc/stayInComponentMode")).toBool())
         {
             // Prune the nodeIds we consider for focus down to only those in the focused component
             auto focusedComponentId = _graphComponentScene->componentId();
