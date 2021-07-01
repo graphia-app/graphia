@@ -58,7 +58,10 @@ std::vector<QString> TransformCache::attributesChangedByLastResult() const
 
     for(const auto& result : _cache.back())
     {
-        auto resultAttributeNames = u::combine(u::keysFor(result._newAttributes), u::keysFor(result._changedAttributes));
+        auto newAttributeNames = u::keysFor(result._newAttributes);
+        auto changedAttributeNames = u::keysFor(result._changedAttributes);
+        auto resultAttributeNames = u::combine(newAttributeNames, changedAttributeNames);
+
         attributeNames.insert(attributeNames.end(), resultAttributeNames.begin(), resultAttributeNames.end());
     }
 
