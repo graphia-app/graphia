@@ -32,13 +32,15 @@ private:
     ContainerIteratorPairs _its;
 
 public:
-    combine(const Containers&... cs)
+    combine(Containers&... cs)
     {
         _its = std::apply([](auto&&... values)
         {
             return std::tuple{(std::pair{std::cbegin(values), std::cend(values)})...};
         }, std::forward_as_tuple(cs...));
     }
+
+    combine(const Containers&&... cs) = delete;
 
     using iterator_type = typename std::tuple_element_t<0, ContainerIteratorPairs>::first_type;
     using value_type = typename std::iterator_traits<iterator_type>::value_type;
