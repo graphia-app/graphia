@@ -51,24 +51,24 @@ x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
 using x3::lexeme;
 using unicode::char_;
 
-const x3::rule<class QuotedString, QString> quotedString = "quotedString";
+const x3::rule<class QuotedString, QString> quotedString = "quotedString"; // NOLINT bugprone-forward-declaration-namespace
 const auto escapedQuote = lit('\\') >> char_('"');
 const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
-const x3::rule<class Identifier, QString> identifier = "identifier";
+const x3::rule<class Identifier, QString> identifier = "identifier"; // NOLINT bugprone-forward-declaration-namespace
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const x3::rule<class Parameter, VisualisationConfig::Parameter> parameter = "parameter";
+const x3::rule<class Parameter, VisualisationConfig::Parameter> parameter = "parameter"; // NOLINT bugprone-forward-declaration-namespace
 const auto parameterName = quotedString | identifier;
 const auto parameter_def = parameterName >> lit('=') >> (double_ | quotedString);
 
 const auto identifierList = identifier % lit(',');
 const auto flags = lit('[') >> -identifierList >> lit(']');
 
-const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter";
+const x3::rule<class AttributeParameter, QString> attributeParameter = "attributeParameter"; // NOLINT bugprone-forward-declaration-namespace
 const auto attributeParameter_def = lexeme[char_('.') >> (quotedString | identifier)];
 
-const x3::rule<class AttributeName, QString> attributeName = "attributeName";
+const x3::rule<class AttributeName, QString> attributeName = "attributeName"; // NOLINT bugprone-forward-declaration-namespace
 const auto attributeName_def = lexeme[(quotedString | identifier) >> *attributeParameter];
 
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
