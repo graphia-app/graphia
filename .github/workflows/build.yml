@@ -19,7 +19,6 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: timangus/cpp-problem-matcher@master
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
@@ -62,7 +61,6 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: timangus/cpp-problem-matcher@master
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
@@ -103,7 +101,6 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: timangus/cpp-problem-matcher@master
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v1
       with:
@@ -135,8 +132,9 @@ jobs:
       shell: bash
       env:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
-  static-analysis:
-    name: Static Analysis
+
+  clang-debug:
+    name: Clang Debug
     runs-on: ubuntu-latest
     steps:
     - name: Install Tools
@@ -145,7 +143,121 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
-        sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }} cppcheck
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Compile
+      run: |
+        scripts/linux-build.sh
+        scripts/parse-compile_commands-json.sh
+      env:
+        BUILD_TYPE: Debug
+        CC: clang-${{ env.CLANG_VERSION }}
+        CXX: clang++-${{ env.CLANG_VERSION }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Build
+        path: |
+          build/clang/variables.sh
+          build/clang/compile_commands.json
+          build/clang/**/*.h
+          build/clang/**/*.hpp
+          build/clang/**/*.c
+          build/clang/**/*.cpp
+  clang-tidy:
+    name: Clang-Tidy
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+    steps:
+    - name: Install Tools
+      run: |
+        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
+        sudo apt-get update
+        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Build
+        path: build/clang/
+    - name: Analyse
+      run: scripts/clang-tidy.sh
+      env:
+        CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
+        BUILD_DIR: build/clang/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
+  cppcheck:
+    name: cppcheck
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+    steps:
+    - name: Install Tools
+      run: |
+        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
+        sudo apt-get update
+        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get update
+        sudo apt-get install cppcheck
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Build
+        path: build/clang/
+    - name: Analyse
+      run: scripts/cppcheck.sh
+      env:
+        CPPCHECK: cppcheck
+        BUILD_DIR: build/clang/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
+  clazy:
+    name: Clazy
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+    steps:
+    - name: Install Tools
+      run: |
+        sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
+        sudo apt-get update
+        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
         curl -vL https://downloads.kdab.com/clazy/1.8/Clazy-x86_64-1.8.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
@@ -158,26 +270,47 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: timangus/cpp-problem-matcher@master
-    - uses: seanmiddleditch/gha-setup-ninja@v3
-    - name: Compile
-      run: scripts/linux-build.sh
-      env:
-        BUILD_TYPE: Debug
-        CC: clang-${{ env.CLANG_VERSION }}
-        CXX: clang++-${{ env.CLANG_VERSION }}
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Build
+        path: build/clang/
     - name: Analyse
-      run: scripts/static-analysis.sh -v
+      run: scripts/clazy.sh
       env:
-        CC: clang-${{ env.CLANG_VERSION }}
-        CXX: clang++-${{ env.CLANG_VERSION }}
-        CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
-        CPPCHECK: cppcheck
         CLAZY: clazy
+        BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
+  qmllint:
+    name: QML Lint
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+    steps:
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: ${{ env.QT_VERSION }}
+        modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Build
+        path: build/clang/
+    - name: Analyse
+      run: scripts/qmllint.sh
+      env:
+        BUILD_DIR: build/clang/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: build/clang/*.log
+
   release:
     name: GitHub Release
     if: startsWith(github.ref, 'refs/tags/')
@@ -186,11 +319,19 @@ jobs:
       - linux
       - windows
       - macos
-      - static-analysis
     steps:
     - uses: actions/download-artifact@v2
       with:
-        path: release
+        name: Linux AppImage
+        path: release/Linux AppImage
+    - uses: actions/download-artifact@v2
+      with:
+        name: macOS Disk Image
+        path: release/macOS Disk Image
+    - uses: actions/download-artifact@v2
+      with:
+        name: Windows Installer
+        path: release/Windows Installer
     - name: Create Release
       uses: actions/create-release@v1
       env:
@@ -206,25 +347,56 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+
   prerelease:
-    name: Copy Pre-release
+    name: Upload to graphia.dev
     runs-on: ubuntu-latest
     needs:
       - linux
       - windows
       - macos
-      - static-analysis
+      - clang-debug
+      - clang-tidy
+      - cppcheck
+      - clazy
+      - qmllint
     steps:
     - uses: actions/download-artifact@v2
       with:
-        path: release
+        name: Linux AppImage
+        path: prerelease/Linux AppImage
+    - uses: actions/download-artifact@v2
+      with:
+        name: Linux Logs
+        path: prerelease/Linux Logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: macOS Disk Image
+        path: prerelease/macOS Disk Image
+    - uses: actions/download-artifact@v2
+      with:
+        name: macOS Logs
+        path: prerelease/macOS Logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: Windows Installer
+        path: prerelease/Windows Installer
+    - uses: actions/download-artifact@v2
+      with:
+        name: Windows Logs
+        path: prerelease/Windows Logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: prerelease/Static Analysis Logs
     - uses: horochx/deploy-via-scp@master
       with:
         host: ${{ secrets.PRERELEASE_HOST }}
         user: ${{ secrets.PRERELEASE_USERNAME }}
         key: ${{ secrets.PRERELEASE_KEY }}
-        local: "release/*"
+        local: "prerelease/*"
         remote: ${{ secrets.PRERELEASE_DIR }}
+
   log-analysis:
     name: Analyse Logs
     runs-on: ubuntu-latest
@@ -232,7 +404,11 @@ jobs:
       - linux
       - windows
       - macos
-      - static-analysis
+      - clang-debug
+      - clang-tidy
+      - cppcheck
+      - clazy
+      - qmllint
     steps:
     - uses: actions/checkout@v2
       with:
@@ -240,7 +416,20 @@ jobs:
         fetch-depth: 0
     - uses: actions/download-artifact@v2
       with:
-        path: release
+        name: Linux Logs
+        path: logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: macOS Logs
+        path: logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: Windows Logs
+        path: logs
+    - uses: actions/download-artifact@v2
+      with:
+        name: Static Analysis Logs
+        path: logs
     - name: Install Perl modules
       uses: perl-actions/install-with-cpanm@v1
       with:
@@ -259,8 +448,8 @@ jobs:
         echo "Branch: $BRANCH"
         git checkout -tb $BRANCH origin/$BRANCH || git checkout -b $BRANCH
         echo "# Summary" > README.md
-        find ../release -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --summary --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" >> README.md
+        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --summary --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" >> README.md
         echo "# Details" >> README.md
-        find ../release -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" --link "https://github.com/graphia-app/graphia/blob/$BRANCH/%file#L%line" >> README.md
+        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" --link "https://github.com/graphia-app/graphia/blob/$BRANCH/%file#L%line" >> README.md
         git add README.md
         git diff-index --quiet HEAD || git commit -m "${{ github.sha }}" && git push --force --set-upstream origin $BRANCH
