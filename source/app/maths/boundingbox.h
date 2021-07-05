@@ -90,7 +90,7 @@ public:
     QVector3D zVector() const { return {0.0f, 0.0f, zLength()}; }
 
     void scale(float s);
-    BoundingBox3D scaled(float s) const;
+    Q_REQUIRED_RESULT BoundingBox3D scaled(float s) const;
 
     float volume() const { return xLength() * yLength() * zLength(); }
 

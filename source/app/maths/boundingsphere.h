@@ -44,7 +44,7 @@ public:
     float radius() const { return _radius; }
 
     void scale(float s);
-    BoundingSphere scaled(float s) const;
+    Q_REQUIRED_RESULT BoundingSphere scaled(float s) const;
 
     float volume() const { return (4.0f * Constants::Pi() * _radius * _radius * _radius) / 3.0f; }
 
