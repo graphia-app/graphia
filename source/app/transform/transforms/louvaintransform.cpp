@@ -341,14 +341,14 @@ void LouvainTransform::apply(TransformedGraph& target) const
         clusterSizes[nodeId] = static_cast<int>(communityHistogram.at(communityId));
     }
 
-    _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster" : "Louvain Cluster"))
+    _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster" : "Louvain Cluster")) // clazy:exclude=tr-non-literal
         .setDescription(QObject::tr("The Louvain cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setFlag(AttributeFlag::FindShared)
         .setFlag(AttributeFlag::Searchable);
 
-    _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster Size" : "Louvain Cluster Size"))
+    _graphModel->createAttribute(QObject::tr(_weighted ? "Weighted Louvain Cluster Size" : "Louvain Cluster Size")) // clazy:exclude=tr-non-literal
         .setDescription(QObject::tr("The size of the Louvain cluster in which the node resides."))
         .setIntValueFn([clusterSizes](NodeId nodeId) { return clusterSizes[nodeId]; })
         .setFlag(AttributeFlag::AutoRange);
