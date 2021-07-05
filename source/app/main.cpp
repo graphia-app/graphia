@@ -40,6 +40,7 @@
 #include <QSettings>
 
 #include <iostream>
+#include <chrono>
 
 #include "application.h"
 #include "limitconstants.h"
@@ -72,6 +73,8 @@
 #include <breakpad/crashhandler.h>
 
 #include "watchdog.h"
+
+using namespace std::chrono_literals;
 
 static QString resolvedExeName(const QString& baseExeName)
 {
@@ -349,7 +352,7 @@ int start(int argc, char *argv[])
     // Poke the watch dog every now and again so that it doesn't break/crash us
     QTimer keepAliveTimer;
     QObject::connect(&keepAliveTimer, &QTimer::timeout, &watchDog, &Watchdog::reset);
-    keepAliveTimer.start(1000);
+    keepAliveTimer.start(1s);
 
 #ifndef _DEBUG
     CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));

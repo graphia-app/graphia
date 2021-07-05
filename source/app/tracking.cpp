@@ -23,6 +23,9 @@
 #include <QDebug>
 
 #include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 static QString postToTrackingServer(const QString& text)
 {
@@ -32,7 +35,7 @@ static QString postToTrackingServer(const QString& text)
     QTimer timer;
     timer.setSingleShot(true);
     QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    timer.start(10000);
+    timer.start(10s);
 
     QNetworkRequest request;
     request.setUrl(u::pref(QStringLiteral("servers/tracking")).toString());

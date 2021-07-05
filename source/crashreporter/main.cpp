@@ -38,6 +38,7 @@
 #include <map>
 #include <string>
 #include <regex>
+#include <chrono>
 
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
@@ -50,6 +51,8 @@
 #include <google_breakpad/processor/call_stack.h>
 #include <google_breakpad/processor/stack_frame.h>
 #include <processor/pathname_stripper.h>
+
+using namespace std::chrono_literals;
 
 // clazy:excludeall=lambda-in-connect
 
@@ -223,7 +226,7 @@ static void uploadReport(const QString& email, const QString& text,
         QTimer timer;
         timer.setSingleShot(true);
         QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        timer.start(60000);
+        timer.start(1min);
 
         QNetworkReply* postReply = nullptr;
 
