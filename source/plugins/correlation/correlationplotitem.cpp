@@ -1124,7 +1124,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     rebuildPlot(InvalidateCache::Yes);
 }
 
-void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders)
+void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders) // clazy:exclude=qproperty-type-mismatch
 {
     if(_columnSortOrders != columnSortOrders)
     {

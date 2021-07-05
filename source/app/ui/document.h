@@ -177,7 +177,7 @@ public:
     std::vector<LayoutSetting>& layoutSettings() const;
     void updateLayoutDimensionality();
     void updateLayoutState();
-    LayoutPauseState layoutPauseState();
+    LayoutPauseState layoutPauseState(); // clazy:exclude=qproperty-type-mismatch
 
     bool canUndo() const;
     QString nextUndoAction() const;
@@ -314,9 +314,9 @@ signals:
 
     void pluginInstanceChanged();
     void pluginNameChanged();
-    void pluginQmlPathChanged(const QByteArray& pluginUiData, int pluginUiDataVersion);
+    void pluginQmlPathChanged(const QByteArray& pluginUiData, int pluginUiDataVersion); // clazy:exclude=qproperty-type-mismatch
 
-    void loadComplete(const QUrl& url, bool success);
+    void loadComplete(const QUrl& url, bool success); // clazy:exclude=qproperty-type-mismatch
     void failureReasonChanged();
 
     void titleChanged();

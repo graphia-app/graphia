@@ -198,7 +198,7 @@ public:
     void estimateGraphSize();
     bool graphSizeEstimateInProgress() const { return _graphSizeEstimateFutureWatcher.isRunning(); }
 
-    DataRectTableModel* tableModel();
+    QAbstractTableModel* tableModel();
     bool busy() const { return _dataRectangleFutureWatcher.isRunning() || _dataParserWatcher.isRunning(); }
 
     bool transposed() const;

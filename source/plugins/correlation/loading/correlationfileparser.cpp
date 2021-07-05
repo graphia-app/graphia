@@ -882,7 +882,7 @@ void CorrelationTabularDataParser::onDataLoaded()
     emit completeChanged();
 }
 
-DataRectTableModel* CorrelationTabularDataParser::tableModel()
+QAbstractTableModel* CorrelationTabularDataParser::tableModel()
 {
     return &_model;
 }
