@@ -29,8 +29,6 @@
 #include "maths/line.h"
 #include "maths/ray.h"
 
-class CameraPrivate;
-
 class QOpenGLShaderProgram;
 using QOpenGLShaderProgramPtr = QSharedPointer<QOpenGLShaderProgram>;
 
