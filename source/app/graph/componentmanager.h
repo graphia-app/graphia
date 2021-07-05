@@ -141,15 +141,15 @@ public:
     void disbleDebug() { _debug = false; }
 
 signals:
-    void componentAdded(const Graph*, ComponentId, bool) const;
-    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
-    void componentSplit(const Graph*, const ComponentSplitSet&) const;
-    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
+    void componentAdded(const Graph*, ComponentId, bool);
+    void componentWillBeRemoved(const Graph*, ComponentId, bool);
+    void componentSplit(const Graph*, const ComponentSplitSet&);
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&);
 
-    void nodeRemovedFromComponent(const Graph*, NodeId, ComponentId) const;
-    void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId) const;
-    void nodeAddedToComponent(const Graph*, NodeId, ComponentId) const;
-    void edgeAddedToComponent(const Graph*, EdgeId, ComponentId) const;
+    void nodeRemovedFromComponent(const Graph*, NodeId, ComponentId);
+    void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId);
+    void nodeAddedToComponent(const Graph*, NodeId, ComponentId);
+    void edgeAddedToComponent(const Graph*, EdgeId, ComponentId);
 };
 
 #endif // COMPONENTMANAGER_H

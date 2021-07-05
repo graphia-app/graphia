@@ -107,7 +107,7 @@ public:
     QByteArray save(IMutableGraph&, Progressable&) const override { return {}; }
     bool load(const QByteArray&, int, IMutableGraph&, IParser&) override { return true; }
 
-    void setSaveRequired() const { emit saveRequired(); }
+    void setSaveRequired() { emit saveRequired(); }
 
     const IPlugin* plugin() override { return _plugin; }
     IDocument* document() { return _document; }
@@ -119,32 +119,32 @@ public:
     ICommandManager* commandManager() { return _commandManager; }
 
 private slots:
-    void onNodeAdded(const Graph*, NodeId nodeId) const     { emit nodeAdded(nodeId); }
-    void onNodeRemoved(const Graph*, NodeId nodeId) const   { emit nodeRemoved(nodeId); }
-    void onEdgeAdded(const Graph*, EdgeId edgeId) const     { emit edgeAdded(edgeId); }
-    void onEdgeRemoved(const Graph*, EdgeId edgeId) const   { emit edgeRemoved(edgeId); }
+    void onNodeAdded(const Graph*, NodeId nodeId)       { emit nodeAdded(nodeId); }
+    void onNodeRemoved(const Graph*, NodeId nodeId)     { emit nodeRemoved(nodeId); }
+    void onEdgeAdded(const Graph*, EdgeId edgeId)       { emit edgeAdded(edgeId); }
+    void onEdgeRemoved(const Graph*, EdgeId edgeId)     { emit edgeRemoved(edgeId); }
 
-    void onSelectionChanged(const SelectionManager*) const  { emit selectionChanged(_selectionManager); }
-    void onVisualsChanged() const                           { emit visualsChanged(); }
+    void onSelectionChanged(const SelectionManager*)    { emit selectionChanged(_selectionManager); }
+    void onVisualsChanged()                             { emit visualsChanged(); }
 
-    void onLoadSuccess() const                              { emit loadSuccess(); }
+    void onLoadSuccess()                                { emit loadSuccess(); }
 
 signals:
-    void graphWillChange() const;
+    void graphWillChange();
 
-    void nodeAdded(NodeId) const;
-    void nodeRemoved(NodeId) const;
-    void edgeAdded(EdgeId) const;
-    void edgeRemoved(EdgeId) const;
+    void nodeAdded(NodeId);
+    void nodeRemoved(NodeId);
+    void edgeAdded(EdgeId);
+    void edgeRemoved(EdgeId);
 
-    void graphChanged() const;
+    void graphChanged();
 
-    void selectionChanged(const ISelectionManager* selectionManager) const;
-    void visualsChanged() const;
+    void selectionChanged(const ISelectionManager* selectionManager);
+    void visualsChanged();
 
-    void loadSuccess() const;
+    void loadSuccess();
 
-    void saveRequired() const;
+    void saveRequired();
 };
 
 // Plugins can inherit from this to avoid having to reimplement the same createInstance member function

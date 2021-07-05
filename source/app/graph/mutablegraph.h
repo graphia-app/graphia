@@ -220,8 +220,8 @@ private:
     void endTransaction(bool graphChangeOccurred = true) final;
 
 signals:
-    void transactionWillBegin(const MutableGraph*) const;
-    void transactionEnded(const MutableGraph*) const;
+    void transactionWillBegin(const MutableGraph*);
+    void transactionEnded(const MutableGraph*);
 };
 
 #endif // MUTABLEGRAPH_H

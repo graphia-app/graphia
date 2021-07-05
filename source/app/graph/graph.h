@@ -268,7 +268,6 @@ private:
 
     mutable std::recursive_mutex _phaseMutex;
     mutable QString _phase;
-    mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
 
     void insertNodeArray(IGraphArray* nodeArray) const override;
@@ -297,26 +296,26 @@ protected:
 
 signals:
     // The signals are listed here in the order in which they are emitted
-    void graphWillChange(const Graph*) const;
+    void graphWillChange(const Graph*);
 
-    void nodeAdded(const Graph*, NodeId) const;
-    void nodeRemoved(const Graph*, NodeId) const;
-    void edgeAdded(const Graph*, EdgeId) const;
-    void edgeRemoved(const Graph*, EdgeId) const;
+    void nodeAdded(const Graph*, NodeId);
+    void nodeRemoved(const Graph*, NodeId);
+    void edgeAdded(const Graph*, EdgeId);
+    void edgeRemoved(const Graph*, EdgeId);
 
-    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
-    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
-    void componentAdded(const Graph*, ComponentId, bool) const;
-    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&);
+    void componentWillBeRemoved(const Graph*, ComponentId, bool);
+    void componentAdded(const Graph*, ComponentId, bool);
+    void componentSplit(const Graph*, const ComponentSplitSet&);
 
-    void nodeRemovedFromComponent(const Graph*, NodeId, ComponentId) const;
-    void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId) const;
-    void nodeAddedToComponent(const Graph*, NodeId, ComponentId) const;
-    void edgeAddedToComponent(const Graph*, EdgeId, ComponentId) const;
+    void nodeRemovedFromComponent(const Graph*, NodeId, ComponentId);
+    void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId);
+    void nodeAddedToComponent(const Graph*, NodeId, ComponentId);
+    void edgeAddedToComponent(const Graph*, EdgeId, ComponentId);
 
-    void graphChanged(const Graph*, bool changeOccurred) const;
+    void graphChanged(const Graph*, bool changeOccurred);
 
-    void phaseChanged() const;
+    void phaseChanged() const; // clazy:exclude=const-signal-or-slot
 };
 
 #endif // GRAPH_H

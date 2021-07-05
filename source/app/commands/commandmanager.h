@@ -199,12 +199,12 @@ public slots:
 signals:
     void started();
 
-    void commandProgressChanged() const;
-    void commandVerbChanged() const;
-    void commandIsCancellableChanged() const;
-    void commandIsCancellingChanged() const;
+    void commandProgressChanged();
+    void commandVerbChanged();
+    void commandIsCancellableChanged();
+    void commandIsCancellingChanged();
     void commandQueued();
-    void commandCompleted(bool success, const QString& description, const QString& pastParticiple) const;
+    void commandCompleted(bool success, const QString& description, const QString& pastParticiple);
     void commandStackCleared();
 
     void finished();

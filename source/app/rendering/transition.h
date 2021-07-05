@@ -84,8 +84,8 @@ public:
     void willBeImmediatelyReused();
 
 signals:
-    void started() const;
-    void finished() const;
+    void started();
+    void finished();
 };
 
 #endif // TRANSITION_H

@@ -57,11 +57,11 @@ private:
     void run();
 
 signals:
-    void progress(int percentage) const;
-    void success(IParser*) const;
-    void complete(const QUrl& url, bool success) const;
+    void progress(int percentage);
+    void success(IParser*);
+    void complete(const QUrl& url, bool success);
 
-    void cancelledChanged() const;
+    void cancelledChanged();
 };
 
 #endif // PARSERTHREAD_H

@@ -93,8 +93,8 @@ private:
     }
 
 signals:
-    void selectionChanged(const SelectionManager* selectionManager) const;
-    void nodesMaskChanged() const;
+    void selectionChanged(const SelectionManager* selectionManager);
+    void nodesMaskChanged();
 };
 
 #endif // SELECTIONMANAGER_H

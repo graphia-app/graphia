@@ -190,31 +190,31 @@ private slots:
     void onScreenshotComplete(const QImage& screenshot, const QString& path);
 
 signals:
-    void initialisedChanged() const;
+    void initialisedChanged();
 
-    void updatingChanged() const;
-    void interactingChanged() const;
-    void transitioningChanged() const;
-    void viewIsResetChanged() const;
-    void canEnterOverviewModeChanged() const;
-    void inOverviewModeChanged() const;
-    void focusedComponentIdChanged() const;
-    void visibleComponentIndexChanged() const;
+    void updatingChanged();
+    void interactingChanged() const; // clazy:exclude=const-signal-or-slot
+    void transitioningChanged() const; // clazy:exclude=const-signal-or-slot
+    void viewIsResetChanged();
+    void canEnterOverviewModeChanged();
+    void inOverviewModeChanged();
+    void focusedComponentIdChanged();
+    void visibleComponentIndexChanged();
 
-    void commandsStarted() const;
-    void commandsFinished() const;
+    void commandsStarted();
+    void commandsFinished();
 
-    void layoutChanged() const;
+    void layoutChanged();
 
-    void screenshotRequested(int width, int height, QString path, int dpi, bool fillSize) const;
-    void previewRequested(int width, int height, bool fillSize) const;
-    void previewComplete(QString previewBase64) const;
+    void screenshotRequested(int width, int height, QString path, int dpi, bool fillSize);
+    void previewRequested(int width, int height, bool fillSize);
+    void previewComplete(QString previewBase64);
 
-    void graphChanged() const;
+    void graphChanged();
 
-    void fpsChanged() const;
+    void fpsChanged();
 
-    void clicked(int button, QmlNodeId nodeId) const;
+    void clicked(int button, QmlNodeId nodeId);
 };
 
 #endif // GRAPHQUICKITEM_H

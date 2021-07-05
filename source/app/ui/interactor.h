@@ -45,10 +45,10 @@ public:
     virtual void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) = 0;
 
 signals:
-    void userInteractionStarted() const;
-    void userInteractionFinished() const;
+    void userInteractionStarted();
+    void userInteractionFinished();
 
-    void clicked(int button, QmlNodeId nodeId) const;
+    void clicked(int button, QmlNodeId nodeId);
 };
 
 #endif // INTERACTOR_H

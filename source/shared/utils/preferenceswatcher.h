@@ -20,7 +20,7 @@ private:
     static struct Watchers
     {
         std::recursive_mutex _mutex;
-        std::set<const PreferencesWatcher*> _set;
+        std::set<PreferencesWatcher*> _set;
     } _watchers;
 
     static void setPref(const QString& key, const QVariant& value);
@@ -30,7 +30,7 @@ public:
     ~PreferencesWatcher() override;
 
 signals:
-    void preferenceChanged(const QString& key, const QVariant& value) const;
+    void preferenceChanged(const QString& key, const QVariant& value);
 };
 
 #endif // PREFERENCESWATCHER_H

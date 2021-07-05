@@ -309,27 +309,27 @@ private:
                          int componentIndex, GPUGraphData* gpuGraphData);
 
 signals:
-    void initialised() const;
+    void initialised();
 
-    void modeChanged() const;
+    void modeChanged();
 
-    void synchronizeComplete() const;
+    void synchronizeComplete();
 
-    void userInteractionStarted() const;
-    void userInteractionFinished() const;
+    void userInteractionStarted();
+    void userInteractionFinished();
 
-    void transitionStarted() const;
-    void transitionFinished() const;
+    void transitionStarted();
+    void transitionFinished();
 
-    void taskAddedToExecutor() const;
+    void taskAddedToExecutor();
     // Base64 encoded png image for QML...
-    void previewComplete(QString previewBase64) const;
+    void previewComplete(QString previewBase64);
     // Screenshot doesn't go to QML so we can use QImage
-    void screenshotComplete(const QImage& screenshot, const QString& path) const;
+    void screenshotComplete(const QImage& screenshot, const QString& path);
 
-    void fpsChanged(float fps) const;
+    void fpsChanged(float fps);
 
-    void clicked(int button, QmlNodeId nodeId) const;
+    void clicked(int button, QmlNodeId nodeId);
 };
 
 #endif // GRAPHRENDERER_H
