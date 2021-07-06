@@ -1,6 +1,11 @@
 # [Graphia](https://graphia.app/)
 
 [![Build Status](https://github.com/graphia-app/graphia/workflows/Build/badge.svg)](https://github.com/graphia-app/graphia/actions?query=workflow%3ABuild)
+![Release](https://img.shields.io/github/v/release/graphia-app/graphia)
+![Size](https://img.shields.io/github/repo-size/graphia-app/graphia)
+![Downloads](https://img.shields.io/github/downloads/graphia-app/graphia/total)
+![Issues](https://img.shields.io/github/issues/graphia-app/graphia)
+![Commits](https://img.shields.io/github/commit-activity/m/graphia-app/graphia)
 
 Graphia is a powerful open source visual analytics application developed to aid the interpretation of large and complex datasets.
 
