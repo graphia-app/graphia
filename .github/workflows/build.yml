@@ -458,7 +458,7 @@ jobs:
         cd defects
         BRANCH=$(echo ${GITHUB_REF#refs/heads/})
         echo "Branch: $BRANCH"
-        git checkout -tb $BRANCH origin/$BRANCH || git checkout -b $BRANCH
+        git checkout -tb $BRANCH origin/$BRANCH || git checkout -b $BRANCH || git checkout $BRANCH
         echo "# Summary" > README.md
         find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --summary --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" >> README.md
         echo "# Details" >> README.md
