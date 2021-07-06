@@ -185,6 +185,14 @@ bool UserData::load(const json& jsonObject, Progressable& progressable)
         auto it = vector.begin();
 
         const QString& name = normalise(QString::fromStdString(it.key()));
+
+        if(u::contains(_vectorNames, name))
+        {
+            qDebug() << "WARNING: Duplicate vector name" << name <<
+                "encountered when loading UserData, skipping...";
+            continue;
+        }
+
         const auto& jsonVector = it.value();
 
         UserDataVector userDataVector;
