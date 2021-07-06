@@ -19,6 +19,10 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: linux
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: scripts/linux-build.sh
@@ -101,6 +105,10 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: macos
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - uses: actions/setup-node@v1
       with:
@@ -152,6 +160,10 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: clang-debug
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile
       run: |
