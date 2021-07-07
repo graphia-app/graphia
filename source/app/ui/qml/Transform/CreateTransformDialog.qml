@@ -754,28 +754,26 @@ Window
                             attributeDescription.text = parameterData.description;
                     }
                 }
-            }
-        }
 
-        RowLayout
-        {
-            Layout.fillHeight: true
+                RowLayout
+                {
+                    Item { Layout.fillWidth: true }
 
-            Item { Layout.fillWidth: true }
+                    Button
+                    {
+                        Layout.alignment: Qt.AlignBottom
+                        text: qsTr("OK")
+                        enabled: { return document.graphTransformIsValid(transformExpression); }
+                        onClicked: { root.accept(); }
+                    }
 
-            Button
-            {
-                Layout.alignment: Qt.AlignBottom
-                text: qsTr("OK")
-                enabled: { return document.graphTransformIsValid(transformExpression); }
-                onClicked: { root.accept(); }
-            }
-
-            Button
-            {
-                Layout.alignment: Qt.AlignBottom
-                text: qsTr("Cancel")
-                onClicked: { root.reject(); }
+                    Button
+                    {
+                        Layout.alignment: Qt.AlignBottom
+                        text: qsTr("Cancel")
+                        onClicked: { root.reject(); }
+                    }
+                }
             }
         }
 
