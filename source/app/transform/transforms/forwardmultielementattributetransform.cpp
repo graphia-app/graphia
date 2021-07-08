@@ -19,8 +19,6 @@
 #include "forwardmultielementattributetransform.h"
 
 #include "transform/transformedgraph.h"
-#include "transform/transformattribute.h"
-
 #include "graph/graphmodel.h"
 
 #include "shared/utils/typeidentity.h"
@@ -37,6 +35,21 @@ static Alert forwardMultiElementAttributeTransformConfigIsValid(const GraphTrans
     return {AlertType::None, {}};
 }
 
+template<typename E, typename V>
+struct ProxyFn
+{
+    Attribute _proxiedAttribute;
+    ElementIdArray<E, E> _headMap;
+
+    V operator()(E elementId)
+    {
+        // Always use the head ID's value
+        auto headElementId = _headMap.at(elementId);
+        Q_ASSERT(!headElementId.isNull());
+        return _proxiedAttribute.valueOf<V>(headElementId);
+    }
+};
+
 void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Forward Multi-Element Attribute"));
@@ -50,15 +63,60 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
 
     auto attributeName = config().attributeNames().front();
 
-    transformAttribute(_graphModel, target, attributeName,
-    [](const auto& attributeValueOfFn, auto headElementId, auto /*elementId*/)
+    // Take a copy of the attribute, and remove it
+    auto proxiedAttribute = _graphModel->attributeValueByName(attributeName);
+    _graphModel->removeAttribute(attributeName);
+
+    // Clone a new attribute from the copy
+    auto& attribute = _graphModel->createAttribute(attributeName);
+    attribute = proxiedAttribute;
+
+    auto setProxyFn = [&](const auto& elementIds, const auto mergedElementIdsForElementId)
     {
-        return attributeValueOfFn(headElementId);
-    },
-    [](const auto& attributeValueMissingOfFn, auto headElementId, auto /*elementId*/)
+        using E = typename std::remove_reference<decltype(elementIds)>::type::value_type;
+        ElementIdArray<E, E> headMap(target);
+
+        // Create a map of merged element IDs to respective head IDs
+        for(auto elementId : elementIds)
+        {
+            switch(target.typeOf(elementId))
+            {
+            case MultiElementType::Not: headMap[elementId] = elementId; [[fallthrough]];
+            case MultiElementType::Tail: continue;
+            default: break;
+            }
+
+            auto mergedElementIds = (target.*mergedElementIdsForElementId)(elementId);
+            for(auto mergedElementId : mergedElementIds)
+                headMap[mergedElementId] = elementId;
+        }
+
+        switch(proxiedAttribute.valueType())
+        {
+        case ValueType::Int:    attribute.setIntValueFn(ProxyFn<E, int>{proxiedAttribute, headMap});        break;
+        case ValueType::Float:  attribute.setFloatValueFn(ProxyFn<E, double>{proxiedAttribute, headMap});   break;
+        case ValueType::String: attribute.setStringValueFn(ProxyFn<E, QString>{proxiedAttribute, headMap}); break;
+        default: Q_ASSERT(!"Unhandled ValueType"); break;
+        }
+
+        if(proxiedAttribute.hasMissingValues())
+        {
+            // Set valueMissingOf function to always reference head
+            attribute.setValueMissingFn([proxiedAttribute, headMap](E elementId)
+            {
+                auto headElementId = headMap.at(elementId);
+                Q_ASSERT(!headElementId.isNull());
+                return proxiedAttribute.valueMissingOf(headElementId);
+            });
+        }
+    };
+
+    switch(proxiedAttribute.elementType())
     {
-        return attributeValueMissingOfFn(headElementId);
-    });
+    case ElementType::Node: setProxyFn(target.nodeIds(), &Graph::mergedNodeIdsForNodeId); break;
+    case ElementType::Edge: setProxyFn(target.edgeIds(), &Graph::mergedEdgeIdsForEdgeId); break;
+    default: Q_ASSERT(!"Unhandled ElementType"); break;
+    }
 }
 
 bool ForwardMultiElementAttributeTransformFactory::configIsValid(const GraphTransformConfig& graphTransformConfig) const
