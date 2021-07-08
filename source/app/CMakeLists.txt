@@ -105,7 +105,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformparameter.h
-    ${CMAKE_CURRENT_LIST_DIR}/transform/transformattribute.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformcache.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transformedgraph.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforminfo.h
