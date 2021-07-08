@@ -16,8 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FOWARDMULTIELEMENTATTRIBUTETRANSFORM_H
-#define FOWARDMULTIELEMENTATTRIBUTETRANSFORM_H
+#ifndef FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
+#define FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
 
 #include "transform/graphtransform.h"
 #include "attributes/attribute.h"
@@ -67,4 +67,4 @@ public:
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
-#endif // FOWARDMULTIELEMENTATTRIBUTETRANSFORM_H
+#endif // FORWARDMULTIELEMENTATTRIBUTETRANSFORM_H
