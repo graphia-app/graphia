@@ -36,7 +36,7 @@ static Alert forwardMultiElementAttributeTransformConfigIsValid(const GraphTrans
 }
 
 template<typename E, typename V>
-struct ProxyFn
+struct AttributeProxyFunctor
 {
     Attribute _proxiedAttribute;
     ElementIdArray<E, E> _headMap;
@@ -71,7 +71,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
     auto& attribute = _graphModel->createAttribute(attributeName);
     attribute = proxiedAttribute;
 
-    auto setProxyFn = [&](const auto& elementIds, const auto mergedElementIdsForElementId)
+    auto setProxyFunctor = [&](const auto& elementIds, const auto mergedElementIdsForElementId)
     {
         using E = typename std::remove_reference<decltype(elementIds)>::type::value_type;
         ElementIdArray<E, E> headMap(target);
@@ -93,9 +93,9 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
 
         switch(proxiedAttribute.valueType())
         {
-        case ValueType::Int:    attribute.setIntValueFn(ProxyFn<E, int>{proxiedAttribute, headMap});        break;
-        case ValueType::Float:  attribute.setFloatValueFn(ProxyFn<E, double>{proxiedAttribute, headMap});   break;
-        case ValueType::String: attribute.setStringValueFn(ProxyFn<E, QString>{proxiedAttribute, headMap}); break;
+        case ValueType::Int:    attribute.setIntValueFn(AttributeProxyFunctor<E, int>{proxiedAttribute, headMap});        break;
+        case ValueType::Float:  attribute.setFloatValueFn(AttributeProxyFunctor<E, double>{proxiedAttribute, headMap});   break;
+        case ValueType::String: attribute.setStringValueFn(AttributeProxyFunctor<E, QString>{proxiedAttribute, headMap}); break;
         default: Q_ASSERT(!"Unhandled ValueType"); break;
         }
 
@@ -113,8 +113,8 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
 
     switch(proxiedAttribute.elementType())
     {
-    case ElementType::Node: setProxyFn(target.nodeIds(), &Graph::mergedNodeIdsForNodeId); break;
-    case ElementType::Edge: setProxyFn(target.edgeIds(), &Graph::mergedEdgeIdsForEdgeId); break;
+    case ElementType::Node: setProxyFunctor(target.nodeIds(), &Graph::mergedNodeIdsForNodeId); break;
+    case ElementType::Edge: setProxyFunctor(target.edgeIds(), &Graph::mergedEdgeIdsForEdgeId); break;
     default: Q_ASSERT(!"Unhandled ElementType"); break;
     }
 }
