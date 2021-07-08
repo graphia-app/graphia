@@ -49,7 +49,6 @@ ApplicationWindow
 
     property TabUI currentTab: tabView.count > 0 && tabView.currentIndex < tabView.count ?
         tabView.getTab(tabView.currentIndex).item : null
-    property var currentDocument: currentTab !== null ? currentTab.document : null
 
     property bool _anyTabsBusy:
     {
@@ -441,7 +440,7 @@ ApplicationWindow
     {
         id: provenanceLogDialog
         title: qsTr("Provenance Log")
-        text: currentDocument !== null ? currentDocument.log : ""
+        text: currentTab !== null ? currentTab.document.log : ""
     }
 
     Preferences
@@ -829,7 +828,7 @@ ApplicationWindow
         iconName: "document-save"
         text: qsTr("&Save")
         shortcut: "Ctrl+S"
-        enabled: currentTab && currentDocument && !currentDocument.busy
+        enabled: currentTab && !currentTab.document.busy
         onTriggered:
         {
             if(currentTab === null)
@@ -844,7 +843,7 @@ ApplicationWindow
         id: fileSaveAsAction
         iconName: "document-save-as"
         text: qsTr("&Save As…")
-        enabled: currentTab && currentDocument && !currentDocument.busy
+        enabled: currentTab && !currentTab.document.busy
         onTriggered:
         {
             if(currentTab === null)
@@ -864,12 +863,12 @@ ApplicationWindow
         onTriggered:
         {
             // If we're currently busy, cancel and wait before closing
-            if(currentDocument.commandInProgress)
+            if(currentTab.document.commandInProgress)
             {
                 // If a load is cancelled the tab is closed automatically,
                 // and there is no command involved anyway, so in that case we
                 // don't need to wait for the command to complete
-                if(currentDocument.loadComplete)
+                if(currentTab.document.loadComplete)
                 {
                     // Capture the document by value so we can use it to work out
                     // which tab to close once the command is complete
@@ -885,8 +884,8 @@ ApplicationWindow
                     currentTab.commandComplete.connect(closeTabFunction);
                 }
 
-                if(currentDocument.commandIsCancellable)
-                    currentDocument.cancelCommand();
+                if(currentTab.document.commandIsCancellable)
+                    currentTab.document.cancelCommand();
             }
             else
                 tabView.closeTab(tabView.currentIndex);
@@ -928,13 +927,13 @@ ApplicationWindow
     {
         id: undoAction
         iconName: "edit-undo"
-        text: currentDocument ? currentDocument.nextUndoAction : qsTr("&Undo")
+        text: currentTab ? currentTab.document.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
-        enabled: currentDocument ? currentDocument.canUndo : false
+        enabled: currentTab ? currentTab.document.canUndo : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.undo();
+            if(currentTab)
+                currentTab.document.undo();
         }
     }
 
@@ -942,13 +941,13 @@ ApplicationWindow
     {
         id: redoAction
         iconName: "edit-redo"
-        text: currentDocument ? currentDocument.nextRedoAction : qsTr("&Redo")
+        text: currentTab ? currentTab.document.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
-        enabled: currentDocument ? currentDocument.canRedo : false
+        enabled: currentTab ? currentTab.document.canRedo : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.redo();
+            if(currentTab)
+                currentTab.document.redo();
         }
     }
 
@@ -958,10 +957,10 @@ ApplicationWindow
         iconName: "edit-delete"
         text: qsTr("&Delete Selection")
         shortcut: "Del"
-        property bool visible: currentDocument ?
-            currentDocument.canDeleteSelection : false
-        enabled: currentDocument ? !currentDocument.busy && visible : false
-        onTriggered: { currentDocument.deleteSelectedNodes(); }
+        property bool visible: currentTab ?
+            currentTab.document.canDeleteSelection : false
+        enabled: currentTab ? !currentTab.document.busy && visible : false
+        onTriggered: { currentTab.document.deleteSelectedNodes(); }
     }
 
     Action
@@ -970,11 +969,11 @@ ApplicationWindow
         iconName: "edit-select-all"
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.selectAll();
+            if(currentTab)
+                currentTab.document.selectAll();
         }
     }
 
@@ -984,11 +983,11 @@ ApplicationWindow
         iconName: "edit-select-all"
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.selectAllVisible();
+            if(currentTab)
+                currentTab.document.selectAllVisible();
         }
     }
 
@@ -997,11 +996,11 @@ ApplicationWindow
         id: selectNoneAction
         text: qsTr("Select &None")
         shortcut: "Ctrl+N"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.selectNone();
+            if(currentTab)
+                currentTab.document.selectNone();
         }
     }
 
@@ -1009,9 +1008,9 @@ ApplicationWindow
     {
         id: selectSourcesAction
         text: qsTr("Select Sources of Selection")
-        property bool visible: currentDocument ?
-            currentDocument.directed && !currentDocument.nodeSelectionEmpty : false
-        enabled: currentDocument ? !currentDocument.busy && visible : false
+        property bool visible: currentTab ?
+            currentTab.document.directed && !currentTab.document.nodeSelectionEmpty : false
+        enabled: currentTab ? !currentTab.document.busy && visible : false
         onTriggered:
         {
             if(currentTab)
@@ -1023,9 +1022,9 @@ ApplicationWindow
     {
         id: selectTargetsAction
         text: qsTr("Select Targets of Selection")
-        property bool visible: currentDocument ?
-            currentDocument.directed && !currentDocument.nodeSelectionEmpty : false
-        enabled: currentDocument ? !currentDocument.busy && visible : false
+        property bool visible: currentTab ?
+            currentTab.document.directed && !currentTab.document.nodeSelectionEmpty : false
+        enabled: currentTab ? !currentTab.document.busy && visible : false
         onTriggered:
         {
             if(currentTab)
@@ -1038,9 +1037,9 @@ ApplicationWindow
         id: selectNeighboursAction
         text: qsTr("Select Neigh&bours of Selection")
         shortcut: "Ctrl+B"
-        property bool visible: currentDocument ?
-            !currentDocument.nodeSelectionEmpty : false
-        enabled: currentDocument ? !currentDocument.busy && visible : false
+        property bool visible: currentTab ?
+            !currentTab.document.nodeSelectionEmpty : false
+        enabled: currentTab ? !currentTab.document.busy && visible : false
         onTriggered:
         {
             if(currentTab)
@@ -1068,11 +1067,11 @@ ApplicationWindow
         id: invertSelectionAction
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.invertSelection();
+            if(currentTab)
+                currentTab.document.invertSelection();
         }
     }
 
@@ -1082,7 +1081,7 @@ ApplicationWindow
         iconName: "edit-find"
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
             if(currentTab)
@@ -1096,7 +1095,7 @@ ApplicationWindow
         iconName: "edit-find"
         text: qsTr("Advanced Find")
         shortcut: "Ctrl+Shift+F"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
             if(currentTab)
@@ -1112,8 +1111,8 @@ ApplicationWindow
         shortcut: "Ctrl+H"
         enabled:
         {
-            if(currentDocument)
-                return !currentDocument.busy && currentTab.numAttributesWithSharedValues > 0;
+            if(currentTab)
+                return !currentTab.document.busy && currentTab.numAttributesWithSharedValues > 0;
 
             return false;
         }
@@ -1130,11 +1129,11 @@ ApplicationWindow
         id: prevComponentAction
         text: qsTr("Goto &Previous Component")
         shortcut: "PgUp"
-        enabled: currentDocument ? currentDocument.canChangeComponent : false
+        enabled: currentTab ? currentTab.document.canChangeComponent : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.gotoPrevComponent();
+            if(currentTab)
+                currentTab.document.gotoPrevComponent();
         }
     }
 
@@ -1143,11 +1142,11 @@ ApplicationWindow
         id: nextComponentAction
         text: qsTr("Goto &Next Component")
         shortcut: "PgDown"
-        enabled: currentDocument ? currentDocument.canChangeComponent : false
+        enabled: currentTab ? currentTab.document.canChangeComponent : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.gotoNextComponent();
+            if(currentTab)
+                currentTab.document.gotoNextComponent();
         }
     }
 
@@ -1168,10 +1167,10 @@ ApplicationWindow
     {
         id: enrichmentAction
         text: qsTr("Enrichment…")
-        enabled: currentDocument !== null && !currentDocument.busy
+        enabled: currentTab !== null && !currentTab.document.busy
         onTriggered:
         {
-            if(currentDocument !== null)
+            if(currentTab !== null)
             {
                 if(enrichmentResults.models.length > 0)
                     enrichmentResults.show();
@@ -1188,7 +1187,7 @@ ApplicationWindow
         elide: Text.ElideMiddle
         elideWidth: 200
         text: searchWebAction.enabled ?
-            currentDocument.nodeName(searchWebAction._selectedNodeId) : ""
+            currentTab.document.nodeName(searchWebAction._selectedNodeId) : ""
     }
 
     Action
@@ -1199,10 +1198,10 @@ ApplicationWindow
 
         property var _selectedNodeId:
         {
-            if(currentDocument === null || currentDocument.numHeadNodesSelected !== 1)
+            if(currentTab === null || currentTab.document.numHeadNodesSelected !== 1)
                 return null;
 
-            return currentDocument.selectedHeadNodeIds[0];
+            return currentTab.document.selectedHeadNodeIds[0];
         }
 
         enabled: currentTab !== null && _selectedNodeId !== null
@@ -1215,7 +1214,7 @@ ApplicationWindow
     ImportAttributesDialog
     {
         id: importAttributesDialog
-        document: currentDocument
+        document: currentTab && currentTab.document
     }
 
     Labs.FileDialog
@@ -1240,14 +1239,14 @@ ApplicationWindow
     RemoveAttributesDialog
     {
         id: removeAttributesDialog
-        document: currentDocument
+        document: currentTab && currentTab.document
     }
 
     Action
     {
         id: importAttributesAction
         text: qsTr("Import Attributes From Table…")
-        enabled: currentDocument !== null && !currentDocument.busy
+        enabled: currentTab !== null && !currentTab.document.busy
         onTriggered:
         {
             if(misc.fileOpenInitialFolder !== undefined)
@@ -1261,7 +1260,7 @@ ApplicationWindow
     {
         id: removeAttributesAction
         text: qsTr("Remove Attributes…")
-        enabled: currentDocument !== null && !currentDocument.busy
+        enabled: currentTab !== null && !currentTab.document.busy
         onTriggered: { removeAttributesDialog.show(); }
     }
 
@@ -1270,7 +1269,7 @@ ApplicationWindow
         id: pauseLayoutAction
         iconName:
         {
-            let layoutPauseState = currentDocument ? currentDocument.layoutPauseState : -1;
+            let layoutPauseState = currentTab ? currentTab.document.layoutPauseState : -1;
 
             switch(layoutPauseState)
             {
@@ -1281,14 +1280,14 @@ ApplicationWindow
             }
         }
 
-        text: currentDocument && currentDocument.layoutPauseState === LayoutPauseState.Paused ?
+        text: currentTab && currentTab.document.layoutPauseState === LayoutPauseState.Paused ?
                   qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
-        enabled: currentDocument ? !currentDocument.busy : false
+        enabled: currentTab ? !currentTab.document.busy : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.toggleLayout();
+            if(currentTab)
+                currentTab.document.toggleLayout();
         }
     }
 
@@ -1298,7 +1297,7 @@ ApplicationWindow
         iconName: "preferences-desktop"
         text: qsTr("Layout Settings…")
         shortcut: "Ctrl+L"
-        enabled: currentTab && currentDocument && !currentDocument.busy
+        enabled: currentTab && !currentTab.document.busy
 
         onTriggered:
         {
@@ -1311,7 +1310,7 @@ ApplicationWindow
     {
         id: exportNodePositionsAction
         text: qsTr("Export To File…")
-        enabled: currentTab && currentDocument && !currentDocument.busy
+        enabled: currentTab && !currentTab.document.busy
 
         onTriggered:
         {
@@ -1325,11 +1324,11 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
+        enabled: currentTab ? currentTab.document.canEnterOverviewMode : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.switchToOverviewMode();
+            if(currentTab)
+                currentTab.document.switchToOverviewMode();
         }
     }
 
@@ -1338,11 +1337,11 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        enabled: currentDocument ? currentDocument.canResetView : false
+        enabled: currentTab ? currentTab.document.canResetView : false
         onTriggered:
         {
-            if(currentDocument)
-                currentDocument.resetView();
+            if(currentTab)
+                currentTab.document.resetView();
         }
     }
 
@@ -1371,7 +1370,7 @@ ApplicationWindow
         iconName: "list-add"
         text: qsTr("Add Bookmark…")
         shortcut: "Ctrl+D"
-        enabled: currentDocument ? !currentDocument.busy && currentDocument.numNodesSelected > 0 : false
+        enabled: currentTab ? !currentTab.document.busy && currentTab.document.numNodesSelected > 0 : false
         onTriggered:
         {
             if(currentTab !== null)
@@ -1382,14 +1381,14 @@ ApplicationWindow
     ManageBookmarks
     {
         id: manageBookmarks
-        document: currentDocument
+        document: currentTab && currentTab.document
     }
 
     Action
     {
         id: manageBookmarksAction
         text: qsTr("Manage Bookmarks…")
-        enabled: currentDocument ? !currentDocument.busy && currentDocument.bookmarks.length > 0 : false
+        enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 0 : false
         onTriggered:
         {
             manageBookmarks.raise();
@@ -1401,7 +1400,7 @@ ApplicationWindow
     {
         id: activateAllBookmarksAction
         text: qsTr("Activate All Bookmarks")
-        enabled: currentDocument ? !currentDocument.busy && currentDocument.bookmarks.length > 1 : false
+        enabled: currentTab ? !currentTab.document.busy && currentTab.document.bookmarks.length > 1 : false
         onTriggered:
         {
             if(currentTab !== null)
@@ -1458,15 +1457,15 @@ ApplicationWindow
         Action
         {
             id: perspecitveProjectionAction
-            enabled: currentDocument ? !currentDocument.busy : false
+            enabled: currentTab ? !currentTab.document.busy : false
             text: qsTr("Perspective")
             checkable: true
             onCheckedChanged:
             {
-                if(currentDocument !== null && checked)
+                if(currentTab !== null && checked)
                 {
-                    currentDocument.setProjection(Projection.Perspective);
-                    updateShadingMode(currentDocument);
+                    currentTab.document.setProjection(Projection.Perspective);
+                    updateShadingMode(currentTab.document);
                 }
             }
         }
@@ -1474,15 +1473,15 @@ ApplicationWindow
         Action
         {
             id: orthographicProjectionAction
-            enabled: currentDocument ? !currentDocument.busy : false
+            enabled: currentTab ? !currentTab.document.busy : false
             text: qsTr("Orthographic")
             checkable: true
             onCheckedChanged:
             {
-                if(currentDocument !== null && checked)
+                if(currentTab !== null && checked)
                 {
-                    currentDocument.setProjection(Projection.Orthographic);
-                    updateShadingMode(currentDocument);
+                    currentTab.document.setProjection(Projection.Orthographic);
+                    updateShadingMode(currentTab.document);
                 }
             }
         }
@@ -1490,15 +1489,15 @@ ApplicationWindow
         Action
         {
             id: twoDeeProjectionAction
-            enabled: currentDocument ? !currentDocument.busy : false
+            enabled: currentTab ? !currentTab.document.busy : false
             text: qsTr("2D")
             checkable: true
             onCheckedChanged:
             {
-                if(currentDocument !== null && checked)
+                if(currentTab !== null && checked)
                 {
-                    currentDocument.setProjection(Projection.TwoDee);
-                    updateShadingMode(currentDocument);
+                    currentTab.document.setProjection(Projection.TwoDee);
+                    updateShadingMode(currentTab.document);
                 }
             }
         }
@@ -1511,26 +1510,26 @@ ApplicationWindow
         Action
         {
             id: smoothShadingAction
-            enabled: currentDocument ? !currentDocument.busy : false
+            enabled: currentTab ? !currentTab.document.busy : false
             text: qsTr("Smooth Shading")
             checkable: true
             onCheckedChanged:
             {
-                if(currentDocument !== null && checked)
-                    currentDocument.setShading(Shading.Smooth);
+                if(currentTab !== null && checked)
+                    currentTab.document.setShading(Shading.Smooth);
             }
         }
 
         Action
         {
             id: flatShadingAction
-            enabled: currentDocument ? !currentDocument.busy : false
+            enabled: currentTab ? !currentTab.document.busy : false
             text: qsTr("Flat Shading")
             checkable: true
             onCheckedChanged:
             {
-                if(currentDocument !== null && checked)
-                    currentDocument.setShading(Shading.Flat);
+                if(currentTab !== null && checked)
+                    currentTab.document.setShading(Shading.Flat);
             }
         }
     }
@@ -1547,7 +1546,7 @@ ApplicationWindow
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
         enabled: application.debugEnabled
-        onTriggered: currentDocument && currentDocument.dumpGraph()
+        onTriggered: currentTab && currentTab.document.dumpGraph()
     }
 
     Action
@@ -1557,8 +1556,8 @@ ApplicationWindow
         enabled: application.debugEnabled
         onTriggered:
         {
-            if(currentDocument)
-                console.log(currentDocument.commandStackSummary());
+            if(currentTab)
+                console.log(currentTab.document.commandStackSummary());
         }
     }
 
@@ -1608,7 +1607,7 @@ ApplicationWindow
         id: saveImageAction
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
-        enabled: currentTab && currentDocument && !currentDocument.busy
+        enabled: currentTab && !currentTab.document.busy
         onTriggered:
         {
             if(currentTab)
@@ -1636,8 +1635,8 @@ ApplicationWindow
         shortcut: "Ctrl+M"
         iconName: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
         text: currentTab ? (currentTab.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
-            currentDocument.pluginName : ""
-        enabled: currentDocument && currentDocument.hasPluginUI && !currentTab.pluginPoppedOut
+            currentTab.document.pluginName : ""
+        enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
 
         onTriggered:
         {
@@ -1652,11 +1651,11 @@ ApplicationWindow
         sequence: "Esc"
         onActivated:
         {
-            if(currentDocument.canEnterOverviewMode)
+            if(currentTab.document.canEnterOverviewMode)
                 overviewModeAction.trigger();
-            else if(currentDocument.canResetView)
+            else if(currentTab.document.canResetView)
                 resetViewAction.trigger();
-            else if(currentDocument.hasPluginUI && !currentTab.pluginPoppedOut)
+            else if(currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut)
                 togglePluginMinimiseAction.trigger();
        }
     }
@@ -1665,10 +1664,10 @@ ApplicationWindow
     {
         id: togglePluginWindowAction
         iconName: "preferences-system-windows"
-        text: currentDocument ? qsTr("Display ") + currentDocument.pluginName + qsTr(" In Separate &Window") : ""
+        text: currentTab ? qsTr("Display ") + currentTab.document.pluginName + qsTr(" In Separate &Window") : ""
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
-        enabled: currentDocument && currentDocument.hasPluginUI && !mainWindow._anyDocumentsBusy
+        enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy
         onTriggered:
         {
             if(currentTab)
@@ -1680,7 +1679,7 @@ ApplicationWindow
     {
         id: showProvenanceLogAction
         text: qsTr("Show Provenance Log…")
-        enabled: currentDocument !== null && !currentDocument.busy
+        enabled: currentTab !== null && !currentTab.document.busy
         onTriggered:
         {
             provenanceLogDialog.raise();
@@ -1858,7 +1857,7 @@ ApplicationWindow
             {
                 id: sharedValuesMenu
                 title: qsTr("Select Shared Values of Selection")
-                enabled: currentDocument !== null && !currentDocument.nodeSelectionEmpty &&
+                enabled: currentTab !== null && !currentTab.document.nodeSelectionEmpty &&
                     currentTab.numAttributesWithSharedValues > 0
 
                 Instantiator
@@ -1902,12 +1901,12 @@ ApplicationWindow
             MenuItem
             {
                 action: togglePluginWindowAction
-                visible: currentDocument && currentDocument.hasPluginUI
+                visible: currentTab && currentTab.document.hasPluginUI
             }
             MenuItem
             {
                 action: togglePluginMinimiseAction
-                visible: currentDocument && currentDocument.hasPluginUI
+                visible: currentTab && currentTab.document.hasPluginUI
             }
             MenuSeparator {}
             MenuItem { action: toggleGraphMetricsAction }
@@ -1928,7 +1927,7 @@ ApplicationWindow
                     id: edgeTextWarning
 
                     enabled: false
-                    visible: currentDocument && !currentDocument.hasValidEdgeTextVisualisation &&
+                    visible: currentTab && !currentTab.document.hasValidEdgeTextVisualisation &&
                         visuals.showEdgeText !== TextState.Off
                     text: qsTr("⚠ Visualisation Required For Edge Text")
                 }
@@ -1942,7 +1941,7 @@ ApplicationWindow
             MenuItem
             {
                 action: toggleEdgeDirectionAction
-                visible: currentTab && currentDocument.directed
+                visible: currentTab && currentTab.document.directed
             }
             MenuItem { action: toggleMultiElementIndicatorsAction }
             MenuSeparator {}
@@ -1979,22 +1978,22 @@ ApplicationWindow
             title: qsTr("&Bookmarks")
             MenuItem { action: addBookmarkAction }
             MenuItem { action: manageBookmarksAction }
-            MenuSeparator { visible: currentDocument ? currentDocument.bookmarks.length > 0 : false }
+            MenuSeparator { visible: currentTab ? currentTab.document.bookmarks.length > 0 : false }
 
             MenuItem
             {
                 action: activateAllBookmarksAction
-                visible: currentDocument ? currentDocument.bookmarks.length > 1 : false
+                visible: currentTab ? currentTab.document.bookmarks.length > 1 : false
             }
 
             Instantiator
             {
-                model: currentDocument ? currentDocument.bookmarks : []
+                model: currentTab ? currentTab.document.bookmarks : []
                 delegate: Component
                 {
                     MenuItem
                     {
-                        text: index > -1 ? currentDocument.bookmarks[index] : "";
+                        text: index > -1 ? currentTab.document.bookmarks[index] : "";
                         shortcut:
                         {
                             if(index >= 0 && index < 10)
@@ -2005,7 +2004,7 @@ ApplicationWindow
                             return "";
                         }
 
-                        enabled: currentTab ? !currentDocument.busy : false
+                        enabled: currentTab ? !currentTab.document.busy : false
                         onTriggered:
                         {
                             currentTab.gotoBookmark(text);
@@ -2016,11 +2015,11 @@ ApplicationWindow
                 onObjectRemoved: bookmarksMenu.removeItem(object)
             }
         }
-        Menu { id: pluginMenu0; visible: false; enabled: currentDocument && !currentDocument.busy }
-        Menu { id: pluginMenu1; visible: false; enabled: currentDocument && !currentDocument.busy }
-        Menu { id: pluginMenu2; visible: false; enabled: currentDocument && !currentDocument.busy }
-        Menu { id: pluginMenu3; visible: false; enabled: currentDocument && !currentDocument.busy }
-        Menu { id: pluginMenu4; visible: false; enabled: currentDocument && !currentDocument.busy }
+        Menu { id: pluginMenu0; visible: false; enabled: currentTab && !currentTab.document.busy }
+        Menu { id: pluginMenu1; visible: false; enabled: currentTab && !currentTab.document.busy }
+        Menu { id: pluginMenu2; visible: false; enabled: currentTab && !currentTab.document.busy }
+        Menu { id: pluginMenu3; visible: false; enabled: currentTab && !currentTab.document.busy }
+        Menu { id: pluginMenu4; visible: false; enabled: currentTab && !currentTab.document.busy }
         Menu
         {
             title: qsTr("&Debug")
@@ -2205,30 +2204,30 @@ ApplicationWindow
     {
         updatePluginMenus();
 
-        if(currentDocument !== null)
-            onDocumentShown(currentDocument);
+        if(currentTab !== null)
+            onDocumentShown(currentTab.document);
     }
 
     EnrichmentResults
     {
         id: enrichmentResults
         wizard: enrichmentWizard
-        models: currentDocument ? currentDocument.enrichmentTableModels : []
+        models: currentTab ? currentTab.document.enrichmentTableModels : []
 
         onRemoveResults:
         {
-            currentDocument.removeEnrichmentResults(index);
+            currentTab.document.removeEnrichmentResults(index);
         }
     }
 
     EnrichmentWizard
     {
         id: enrichmentWizard
-        document: currentDocument
+        document: currentTab && currentTab.document
         onAccepted:
         {
-            if(currentDocument !== null)
-                currentDocument.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
+            if(currentTab !== null)
+                currentTab.document.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
 
             enrichmentWizard.reset();
         }
@@ -2244,11 +2243,11 @@ ApplicationWindow
 
     Connections
     {
-        target: currentDocument
+        target: currentTab && currentTab.document
 
         function onEnrichmentTableModelsChanged()
         {
-            enrichmentResults.models = currentDocument.enrichmentTableModels;
+            enrichmentResults.models = currentTab.document.enrichmentTableModels;
         }
 
         function onEnrichmentAnalysisComplete() { enrichmentResults.visible = true; }
@@ -2497,8 +2496,8 @@ ApplicationWindow
                             else if(!application.downloaded(url))
                                 addToRecentFiles(url);
 
-                            if(currentDocument !== null)
-                                onDocumentShown(currentDocument);
+                            if(currentTab !== null)
+                                onDocumentShown(currentTab.document);
                         }
                         else
                             tabView.onLoadFailure(tabView.findTabIndex(tab), url);
@@ -2526,22 +2525,22 @@ ApplicationWindow
                 elide: Text.ElideRight
                 wrapMode: Text.NoWrap
                 textFormat: Text.PlainText
-                text: currentDocument ? currentDocument.status : ""
+                text: currentTab ? currentTab.document.status : ""
             }
 
             // Progress
             Label
             {
-                text: currentDocument && currentDocument.significantCommandInProgress ? currentDocument.commandVerb : ""
+                text: currentTab && currentTab.document.significantCommandInProgress ? currentTab.document.commandVerb : ""
             }
 
             ProgressBar
             {
                 id: progressBar
-                value: currentDocument && currentDocument.commandProgress >= 0.0 ? currentDocument.commandProgress / 100.0 : 0.0
-                visible: currentDocument ? currentDocument.significantCommandInProgress : false
-                indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 ||
-                    currentDocument.commandProgress === 100.0 : false
+                value: currentTab && currentTab.document.commandProgress >= 0.0 ? currentTab.document.commandProgress / 100.0 : 0.0
+                visible: currentTab ? currentTab.document.significantCommandInProgress : false
+                indeterminate: currentTab ? currentTab.document.commandProgress < 0.0 ||
+                    currentTab.document.commandProgress === 100.0 : false
             }
 
             Label
@@ -2549,22 +2548,22 @@ ApplicationWindow
                 property string currentCommandVerb
                 visible:
                 {
-                    if(!currentDocument)
+                    if(currentTab === null)
                         return false;
 
-                    if(!currentDocument.significantCommandInProgress)
+                    if(!currentTab.document.significantCommandInProgress)
                         return false;
 
                     // Show the time remaining when it's above a threshold value
-                    if(currentDocument.commandSecondsRemaining > 10)
+                    if(currentTab.document.commandSecondsRemaining > 10)
                     {
-                        currentCommandVerb = currentDocument.commandVerb;
+                        currentCommandVerb = currentTab.document.commandVerb;
                         return true;
                     }
 
                     // We've dropped below the time threshold, but we're still doing the
                     // same thing, so keep showing the timer
-                    if(currentCommandVerb.length > 0 && currentCommandVerb === currentDocument.commandVerb)
+                    if(currentCommandVerb.length > 0 && currentCommandVerb === currentTab.document.commandVerb)
                         return true;
 
                     currentCommandVerb = "";
@@ -2573,11 +2572,11 @@ ApplicationWindow
 
                 text:
                 {
-                    if(!currentDocument)
+                    if(currentTab === null)
                         return "";
 
-                    let minutes = Math.floor(currentDocument.commandSecondsRemaining / 60);
-                    let seconds = String(currentDocument.commandSecondsRemaining % 60);
+                    let minutes = Math.floor(currentTab.document.commandSecondsRemaining / 60);
+                    let seconds = String(currentTab.document.commandSecondsRemaining % 60);
                     if(seconds.length < 2)
                         seconds = "0" + seconds;
 
@@ -2595,13 +2594,13 @@ ApplicationWindow
                 iconName: "process-stop"
                 tooltip: qsTr("Cancel")
 
-                visible: currentDocument ? currentDocument.commandInProgress &&
-                    currentDocument.commandIsCancellable &&
-                    !currentDocument.commandIsCancelling : false
+                visible: currentTab ? currentTab.document.commandInProgress &&
+                    currentTab.document.commandIsCancellable &&
+                    !currentTab.document.commandIsCancelling : false
 
                 onClicked:
                 {
-                    currentDocument.cancelCommand();
+                    currentTab.document.cancelCommand();
                 }
             }
 
@@ -2611,7 +2610,7 @@ ApplicationWindow
                 implicitHeight: cancelButton.implicitHeight
 
                 id: cancelledIndicator
-                visible: currentDocument ? currentDocument.commandIsCancelling : false
+                visible: currentTab ? currentTab.document.commandIsCancelling : false
             }
 
             DownloadProgress
@@ -2677,7 +2676,7 @@ ApplicationWindow
         // Notify the user that a command is complete when the window isn't active
         if(active)
             currentTab.commandComplete.disconnect(alertWhenCommandComplete);
-        else if(currentDocument.significantCommandInProgress)
+        else if(currentTab.document.significantCommandInProgress)
             currentTab.commandComplete.connect(alertWhenCommandComplete);
     }
 }
