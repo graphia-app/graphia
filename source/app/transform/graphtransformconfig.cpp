@@ -344,7 +344,6 @@ QString GraphTransformConfig::asString() const
 
         for(const auto& parameter : _parameters)
         {
-            // cppcheck-suppress useStlAlgorithm
             s += QStringLiteral(R"( "%1" = %2)").arg(parameter._name,
                 parameter.valueAsString(true));
         }
@@ -361,7 +360,6 @@ QString GraphTransformConfig::asString() const
 
 std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 {
-    // cppcheck-suppress unreadVariable
     auto names = _attributes;
 
     struct ConditionVisitor

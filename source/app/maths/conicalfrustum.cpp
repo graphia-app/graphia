@@ -27,7 +27,6 @@ ConicalFrustum::ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLi
     _farPlane = Plane(_centreLine.end(), _centreLine.dir());
 
     _nearRadius = (_centreLine.start() - surfaceLine.start()).length();
-    // cppcheck-suppress mismatchingContainerExpression
     _farRadius = (_centreLine.end() - surfaceLine.end()).length();
 }
 

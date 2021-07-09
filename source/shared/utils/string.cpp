@@ -45,7 +45,6 @@ bool u::isNumeric(const QString& string)
 {
     bool success = false;
 
-    // cppcheck-suppress ignoredReturnValue
     string.toDouble(&success);
 
     return success;
@@ -69,7 +68,6 @@ bool u::isInteger(const QString& string)
 {
     bool success = false;
 
-    // cppcheck-suppress ignoredReturnValue
     string.toInt(&success);
 
     return success;
@@ -274,7 +272,6 @@ QString u::formatNumberSIPostfix(double value)
     for(const auto& postfix : postfixes)
     {
         if(value >= postfix._threshold)
-        // cppcheck-suppress useStlAlgorithm
         {
             auto d = value / postfix._divider;
             auto s = QString::number(d, 'f', 1);

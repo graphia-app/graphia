@@ -36,7 +36,6 @@ Plane::Plane(const QVector3D& pointA, const QVector3D& pointB, const QVector3D& 
     const QVector3D a = pointB - pointA;
     const QVector3D b = pointC - pointA;
 
-    // cppcheck-suppress useInitializationList
     _normal = QVector3D::crossProduct(a, b).normalized();
     _distance = -QVector3D::dotProduct(_normal, pointA);
 }

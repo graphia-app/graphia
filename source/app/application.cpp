@@ -447,7 +447,6 @@ void Application::crash(int crashType)
     case CrashType::NullPtrDereference:
     {
         int* p = nullptr;
-        // cppcheck-suppress nullPointer
         MSVC_WARNING_SUPPRESS_NEXTLINE(6011)
         *p = 0;
         break;

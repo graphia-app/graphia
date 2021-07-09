@@ -79,7 +79,6 @@ void ForceDirectedDisplacement::computeAndDamp()
         const float dotProduct = QVector3D::dotProduct(_previous / _previousLength, _next / _nextLength);
 
         // http://www.wolframalpha.com/input/?i=plot+0.5x%5E2%2B1.2x%2B1+from+x%3D-1to1
-        // cppcheck-suppress unreadVariable
         const float f = (0.5f * dotProduct * dotProduct) + (1.2f * dotProduct) + 1.0f;
 
         if(_nextLength > (_previousLength * f))
