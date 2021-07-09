@@ -239,6 +239,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &GraphModel::onPreferenceChanged);
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
         .intRange().setMin(0)
@@ -246,32 +247,38 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
 
     if(directed())
     {
+        // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
         createAttribute(tr("Node In Degree"))
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's in degree is its number of inbound edges."));
 
+        // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
         createAttribute(tr("Node Out Degree"))
             .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
             .intRange().setMin(0)
             .setDescription(tr("A node's out degree is its number of outbound edges."));
     }
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.multiplicityOf(nodeId); })
         .intRange().setMin(0)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Edge Multiplicity"))
         .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.multiplicityOf(edgeId); })
         .intRange().setMin(0)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Component Size"))
         .setIntValueFn([](const IGraphComponent& component) { return component.numNodes(); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Node Component Identifier"))
         .setStringValueFn([this](NodeId nodeId)
         {
@@ -280,6 +287,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
 
+    // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Edge Component Identifier"))
         .setStringValueFn([this](EdgeId edgeId)
         {

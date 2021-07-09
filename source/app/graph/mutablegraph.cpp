@@ -590,12 +590,12 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(nodeId < nextNodeId() && nodeId < other.nextNodeId())
         {
-            if(containsNodeId(nodeId) && !other.containsNodeId(nodeId))
+            if(containsNodeId(nodeId) && !other.containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
                 diff._nodesRemoved.push_back(nodeId);
-            else if(!containsNodeId(nodeId) && other.containsNodeId(nodeId))
+            else if(!containsNodeId(nodeId) && other.containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
                 diff._nodesAdded.push_back(nodeId);
         }
-        else if(nodeId < nextNodeId() && containsNodeId(nodeId))
+        else if(nodeId < nextNodeId() && containsNodeId(nodeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
             diff._nodesRemoved.push_back(nodeId);
         else if(nodeId < other.nextNodeId() && other.containsNodeId(nodeId))
             diff._nodesAdded.push_back(nodeId);
@@ -606,12 +606,12 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(edgeId < nextEdgeId() && edgeId < other.nextEdgeId())
         {
-            if(containsEdgeId(edgeId) && !other.containsEdgeId(edgeId))
+            if(containsEdgeId(edgeId) && !other.containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
                 diff._edgesRemoved.push_back(edgeId);
-            else if(!containsEdgeId(edgeId) && other.containsEdgeId(edgeId))
+            else if(!containsEdgeId(edgeId) && other.containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
                 diff._edgesAdded.push_back(edgeId);
         }
-        else if(edgeId < nextEdgeId() && containsEdgeId(edgeId))
+        else if(edgeId < nextEdgeId() && containsEdgeId(edgeId)) // NOLINT clang-analyzer-optin.cplusplus.VirtualCall
             diff._edgesRemoved.push_back(edgeId);
         else if(edgeId < other.nextEdgeId() && other.containsEdgeId(edgeId))
             diff._edgesAdded.push_back(edgeId);
