@@ -221,6 +221,12 @@ Item
             }
         }
 
+        function showGradientSelector()
+        {
+            gradientSelector.visualisationIndex = index;
+            gradientSelector.open(gradientKey.configuration);
+        }
+
         GradientKey
         {
             id: gradientKey
@@ -258,13 +264,17 @@ Item
             onClicked:
             {
                 if(mouse.button === Qt.LeftButton)
-                {
-                    gradientSelector.visualisationIndex = index;
-                    gradientSelector.open(gradientKey.configuration);
-                }
+                    row.showGradientSelector();
                 else
                     mouse.accepted = false;
             }
+        }
+
+        function showPaletteSelector()
+        {
+            paletteSelector.visualisationIndex = index;
+            paletteSelector.open(paletteKey.configuration,
+                root._visualisationInfo.stringValues);
         }
 
         PaletteKey
@@ -282,11 +292,7 @@ Item
             onClicked:
             {
                 if(mouse.button === Qt.LeftButton)
-                {
-                    paletteSelector.visualisationIndex = index;
-                    paletteSelector.open(paletteKey.configuration,
-                        root._visualisationInfo.stringValues);
-                }
+                    row.showPaletteSelector();
                 else
                     mouse.accepted = false;
             }
@@ -318,6 +324,21 @@ Item
                     {
                         setFlag("disabled", !checked);
                         root.updateExpression();
+                    }
+                }
+
+                MenuItem
+                {
+                    text: qsTr("Edit…")
+                    visible: gradientKey.visible || paletteKey.visible
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+
+                    onTriggered:
+                    {
+                        if(gradientKey.visible)
+                            row.showGradientSelector();
+                        else if(paletteKey.visible)
+                            row.showPaletteSelector();
                     }
                 }
 
