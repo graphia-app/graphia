@@ -335,7 +335,7 @@ Item
 
                     text: qsTr("Invert")
                     checkable: true
-                    enabled: alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
 
                     visible: optionsMenu._showMappingOptions
 
@@ -376,6 +376,7 @@ Item
                 {
                     id: minmaxMenuItem
                     text: qsTr("Min/Max")
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
 
                     // This is the default when there is no mapping
                     checked: parameters.mapping === undefined
@@ -396,6 +397,7 @@ Item
                 {
                     id: stddevMenuItem
                     text: qsTr("Standard Deviation")
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
 
                     checkable: true
                     exclusiveGroup: mappingExclusiveGroup
@@ -418,7 +420,7 @@ Item
                     checkable: true
                     exclusiveGroup: mappingExclusiveGroup
 
-                    enabled: alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
                     visible: optionsMenu._showMappingOptions
 
                     onTriggered:
@@ -444,7 +446,7 @@ Item
 
                     text: qsTr("Apply Per Component")
                     checkable: true
-                    enabled: alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
 
                     visible: optionsMenu._showMappingOptions
 
@@ -471,7 +473,7 @@ Item
                 {
                     id: sortByValueMenuItem
 
-                    enabled: alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
                     visible: optionsMenu._showAssignByOptions
 
                     text: qsTr("By Value")
@@ -483,7 +485,7 @@ Item
                 {
                     id: sortBySharedValuesMenuItem
 
-                    enabled: alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
                     visible: optionsMenu._showAssignByOptions
 
                     text: qsTr("By Quantity")
