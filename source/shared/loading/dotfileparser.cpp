@@ -140,7 +140,6 @@ using x3::lit;
 using x3::string;
 // Only parse strict doubles (i.e. not integers)
 x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::int_;
 using x3::lexeme;
 using ascii::char_;
 
