@@ -33,6 +33,15 @@ add_library(thirdparty SHARED
     ${SHARED_THIRDPARTY_HEADERS}
     ${SHARED_THIRDPARTY_RESOURCES})
 
+# Disable unity build for third party files
+foreach(FILE IN LISTS STATIC_THIRDPARTY_SOURCES)
+    set_property(SOURCE ${FILE} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+endforeach()
+
+foreach(FILE IN LISTS SHARED_THIRDPARTY_SOURCES)
+    set_property(SOURCE ${FILE} PROPERTY SKIP_UNITY_BUILD_INCLUSION ON)
+endforeach()
+
 # Disable all warnings
 if(MSVC)
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "/w")

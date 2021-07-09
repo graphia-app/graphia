@@ -1,6 +1,4 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
-
-set(CRYPTOPP_SOURCES
+list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/algparam.cpp
     ${CMAKE_CURRENT_LIST_DIR}/asn.cpp
     ${CMAKE_CURRENT_LIST_DIR}/basecode.cpp
@@ -29,14 +27,6 @@ set(CRYPTOPP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rsa.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sse-simd.cpp
-)
-
-if(UNITY_BUILD)
-    GenerateUnity(ORIGINAL_SOURCES CRYPTOPP_SOURCES UNITY_PREFIX "cryptopp")
-endif()
-
-list(APPEND STATIC_THIRDPARTY_SOURCES
-    ${CRYPTOPP_SOURCES}
 
     ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cpu.cpp

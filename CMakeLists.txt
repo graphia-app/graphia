@@ -6,8 +6,6 @@ else()
     project("Graphia" LANGUAGES C CXX)
 endif()
 
-option(UNITY_BUILD "Perform a unity build" OFF)
-
 include_directories(source)
 
 # The following sections are only here so that the files are available

@@ -45,7 +45,7 @@ mkdir -p ${BUILD_DIR}
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_INSTALL_PREFIX=AppDir/usr \
     -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -GNinja ../.. || exit $?
   cat variables.sh

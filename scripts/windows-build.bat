@@ -25,7 +25,7 @@ mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
 cmake --version || EXIT /B 1
-cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -GNinja ^
+cmake -DCMAKE_UNITY_BUILD=%UNITY_BUILD% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -GNinja ^
     -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" ^
     .. || EXIT /B 1
 type variables.bat

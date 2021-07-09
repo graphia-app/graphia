@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -173,10 +172,6 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/js.qrc
 )
-
-if(UNITY_BUILD)
-    GenerateUnity(ORIGINAL_SOURCES SHARED_SOURCES UNITY_PREFIX "shared")
-endif()
 
 list(APPEND SOURCES ${SHARED_SOURCES})
 

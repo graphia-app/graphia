@@ -185,8 +185,10 @@ jobs:
           build/clang/compile_commands.json
           build/clang/**/*.h
           build/clang/**/*.hpp
+          build/clang/**/*.hxx
           build/clang/**/*.c
           build/clang/**/*.cpp
+          build/clang/**/*.cxx
   clang-tidy:
     name: Clang-Tidy
     runs-on: ubuntu-latest

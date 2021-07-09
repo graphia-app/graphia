@@ -103,11 +103,6 @@ if(MSVC)
         /Zc:rvalueCast /Zc:inline /Zc:strictStrings \
         /Zc:wchar_t /Zc:throwingNew")
 
-    if(UNITY_BUILD)
-        # Unity builds may fail without this
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-    endif()
-
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)
     set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
