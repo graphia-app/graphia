@@ -37,8 +37,6 @@ fi
 ${CPPCHECK} --version
 ${CPPCHECK} --check-config ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} ${CPP_FILES}
 ${CPPCHECK} --enable=all --xml \
-  --suppress=unusedFunction \
-  --suppress=unusedPrivateFunction \
   --suppress=*:*/source/thirdparty/* \
   --inline-suppr \
   --library=${SOURCE_DIR}/scripts/cppcheck.cfg \
