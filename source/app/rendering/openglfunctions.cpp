@@ -68,12 +68,12 @@ private:
 
     QString GLubyteToQString(const GLubyte* bytes) const
     {
-        QString string;
+        QString text;
 
         while(*bytes != 0)
-            string += static_cast<char>(*bytes++);
+            text += static_cast<char>(*bytes++);
 
-        return string;
+        return text;
     }
 
 public:
