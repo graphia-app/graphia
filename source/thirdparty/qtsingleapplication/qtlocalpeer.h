@@ -23,6 +23,9 @@
 **
 ****************************************************************************/
 
+#ifndef QTLOCALPEER_H
+#define QTLOCALPEER_H
+
 #include <qtlockedfile.h>
 
 #include <QLocalServer>
@@ -57,3 +60,5 @@ protected:
 };
 
 } // namespace SharedTools
+
+#endif // QTLOCALPEER_H

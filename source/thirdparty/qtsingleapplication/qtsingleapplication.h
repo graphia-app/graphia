@@ -23,6 +23,9 @@
 **
 ****************************************************************************/
 
+#ifndef QTSINGLEAPPLICATION_H
+#define QTSINGLEAPPLICATION_H
+
 #include <QApplication>
 
 QT_FORWARD_DECLARE_CLASS(QSharedMemory)
@@ -68,3 +71,5 @@ private:
 };
 
 } // namespace SharedTools
+
+#endif // QTSINGLEAPPLICATION_H
