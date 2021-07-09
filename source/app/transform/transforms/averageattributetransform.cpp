@@ -65,8 +65,8 @@ void AverageAttributeTransform::apply(TransformedGraph& target) const
     {
         attributeName = attributeName.replace(QStringLiteral("$"), QLatin1String(""));
         attributeName = attributeName.replace(QStringLiteral(R"(")"), QLatin1String(""));
-        attributeName = attributeName.replace(QRegularExpression("^source"), QObject::tr("Source"));
-        attributeName = attributeName.replace(QRegularExpression("^target"), QObject::tr("Target"));
+        attributeName = attributeName.replace(QRegularExpression(QStringLiteral("^source")), QObject::tr("Source"));
+        attributeName = attributeName.replace(QRegularExpression(QStringLiteral("^target")), QObject::tr("Target"));
         attributeName = attributeName.replace(QStringLiteral("."), QStringLiteral(" › "));
 
         return attributeName;
