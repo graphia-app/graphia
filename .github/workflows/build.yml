@@ -463,8 +463,8 @@ jobs:
         echo "Branch: $BRANCH"
         git checkout -tb $BRANCH origin/$BRANCH || git checkout -b $BRANCH || git checkout $BRANCH
         echo "# Summary" > README.md
-        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --summary --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" >> README.md
+        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --summary --markdown --filter "^.*graphia/" --filter ".*thirdparty.*" --filter "^Qt.*" --filter "^\/usr\/.*" >> README.md
         echo "# Details" >> README.md
-        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --markdown --filter "^.*graphia/" --filter "^Qt.*" --filter ".*thirdparty.*" --link "https://github.com/graphia-app/graphia/blob/$BRANCH/%file#L%line" >> README.md
+        find ../logs -iname "*.log" -print0 | xargs -0 ../scripts/compiler-logs-to-table.pl --markdown --filter "^.*graphia/" --filter ".*thirdparty.*" --filter "^Qt.*" --filter "^\/usr\/.*" --link "https://github.com/graphia-app/graphia/blob/$BRANCH/%file#L%line" >> README.md
         git add README.md
         git diff-index --quiet HEAD || git commit -m "${{ github.sha }}" && git push --force --set-upstream origin $BRANCH
