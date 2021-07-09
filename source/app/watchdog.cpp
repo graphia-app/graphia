@@ -146,7 +146,7 @@ void WatchdogWorker::onWarningProcessFinished(int exitCode, QProcess::ExitStatus
         if(exitCode == QMessageBox::DestructiveRole)
         {
             // Deliberately crash if the user chooses not to wait
-            FATAL_ERROR(WatchdogTimedOut);
+            FATAL_ERROR(WatchdogTimedOut); // NOLINT clang-analyzer-core.NullDereference
         }
         else
         {

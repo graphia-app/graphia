@@ -448,7 +448,7 @@ void Application::crash(int crashType)
     {
         int* p = nullptr;
         MSVC_WARNING_SUPPRESS_NEXTLINE(6011)
-        *p = 0;
+        *p = 0; // NOLINT clang-analyzer-core.NullDereference
         break;
     }
 
@@ -459,7 +459,7 @@ void Application::crash(int crashType)
     }
 
     case CrashType::FatalError:
-        FATAL_ERROR(FatalErrorTest);
+        FATAL_ERROR(FatalErrorTest); // NOLINT clang-analyzer-core.NullDereference
         break;
 
     case CrashType::InfiniteLoop:
