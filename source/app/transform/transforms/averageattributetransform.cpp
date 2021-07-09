@@ -63,11 +63,11 @@ void AverageAttributeTransform::apply(TransformedGraph& target) const
 
     auto prettify = [](QString attributeName)
     {
-        attributeName = attributeName.replace("$", "");
-        attributeName = attributeName.replace(R"(")", "");
+        attributeName = attributeName.replace(QStringLiteral("$"), QLatin1String(""));
+        attributeName = attributeName.replace(QStringLiteral(R"(")"), QLatin1String(""));
         attributeName = attributeName.replace(QRegularExpression("^source"), QObject::tr("Source"));
         attributeName = attributeName.replace(QRegularExpression("^target"), QObject::tr("Target"));
-        attributeName = attributeName.replace(".", " › ");
+        attributeName = attributeName.replace(QStringLiteral("."), QStringLiteral(" › "));
 
         return attributeName;
     };
