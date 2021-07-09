@@ -33,18 +33,18 @@ my $genericRegex = qr/^\s*
     (?<file>[^\n:]*):(?<line>\d+):((?<column>\d+):)?\s*
     (?<severity>warning|error):\s*
     (?<message>.*?(\n.*?)?)
-    (\s+\[-W(?<code>(?!clazy)[a-z0-9][a-z0-9-]+)\])$/xm;
+    (\s+\[-W(?<code>(?!clazy)\w[\w\-\.]+)\])$/xm;
 my $clangTidyRegex = qr/^\s*
     (?<file>[^\n:]*):(?<line>\d+):((?<column>\d+):)?\s*
     (?<severity>warning|error):\s*
     (?<message>[^\[]*?(\n[^\[]*?)?)
-    (\s+\[(?<code>((?!-W)[a-z0-9])[a-z0-9-]+)\]
+    (\s+\[(?<code>((?!-W)\w)[\w\-\.]+)\]
     (\n(.+)(\n(\s*[\^~ ]+)(\n\s*(((?!.*(warning|error|note).*)[^\n])*))?)?)?)$/xm;
 my $clazyRegex = qr/^\s*
     (?<file>[^\n:]*):(?<line>\d+):((?<column>\d+):)?\s*
     (?<severity>warning|error):\s*
     (?<message>.*?(\n.*?)?)
-    (\s+\[-Wclazy-(?<code>[a-z0-9-]+)\])$/xm;
+    (\s+\[-Wclazy-(?<code>\w[\w\-\.]+)\])$/xm;
 my $cppCheckRegex = qr/^
     \s*<error(\s+(
         id="(?<code>[^"]+)"|
