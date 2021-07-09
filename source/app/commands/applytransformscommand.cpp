@@ -38,7 +38,7 @@ ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
     _transformations(std::move(transformations)),
     _selectedNodeIds(_selectionManager->selectedNodes())
 {
-    bool transformsValid = std::all_of(transformations.begin(), transformations.end(),
+    bool transformsValid = std::all_of(_transformations.begin(), _transformations.end(),
     [graphModel](const auto& transform)
     {
         return graphModel->graphTransformIsValid(transform);
