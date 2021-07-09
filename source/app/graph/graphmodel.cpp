@@ -50,6 +50,7 @@
 #include "transform/transforms/attributesynthesistransform.h"
 #include "transform/transforms/combineattributestransform.h"
 #include "transform/transforms/conditionalattributetransform.h"
+#include "transform/transforms/averageattributetransform.h"
 #include "transform/transforms/removeleavestransform.h"
 #include "transform/graphtransformconfigparser.h"
 
@@ -311,6 +312,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Attribute Synthesis"),      std::make_unique<AttributeSynthesisTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Combine Attributes"),       std::make_unique<CombineAttributesTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Forward Attribute"),        std::make_unique<ForwardMultiElementAttributeTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Average Attribute"),        std::make_unique<AverageAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Remove Leaves"),            std::make_unique<RemoveLeavesTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Remove Branches"),          std::make_unique<RemoveBranchesTransformFactory>(this));
 
