@@ -52,7 +52,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     Q_ASSERT(graphModel != nullptr);
 
     std::ifstream file(url.toLocalFile().toStdString());
-    if(!file.fail() || graphModel == nullptr)
+    if(file.fail() || graphModel == nullptr)
         return false;
 
     auto fileSize = file.tellg();
