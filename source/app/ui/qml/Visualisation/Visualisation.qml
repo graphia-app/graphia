@@ -183,9 +183,14 @@ Item
 
             implicitWidth: 180
             model: root.similarAttributes
-            enabled: enabledMenuItem.checked
+            enabled: !isFlagSet("disabled")
+            placeholderText: root.attributeName
 
-            onSelectedValueChanged: { root.updateExpression(); }
+            onSelectedValueChanged:
+            {
+                if(selectedValue !== undefined)
+                    root.updateExpression();
+            }
 
             prettifyFunction: AttributeUtils.prettify
 
@@ -200,7 +205,7 @@ Item
         NamedIcon
         {
             visible: iconName.length > 0
-            enabled: enabledMenuItem.checked
+            enabled: enabledMenuItem.checked && !root._error
             iconName:
             {
                 if(channel.length === 0)
@@ -215,6 +220,9 @@ Item
                         return "node-size";
                     else if(attributeElementType === ElementType.Edge)
                         return "edge-size";
+
+                    // Element type not known (probably because the visualisation is erroring)
+                    return "view-fullscreen";
                 }
 
                 return "";
@@ -231,7 +239,7 @@ Item
         {
             id: gradientKey
             visible: false
-            enabled: enabledMenuItem.checked
+            enabled: enabledMenuItem.checked && !root._error
 
             keyWidth: 100
 
@@ -281,7 +289,7 @@ Item
         {
             id: paletteKey
             visible: false
-            enabled: enabledMenuItem.checked
+            enabled: enabledMenuItem.checked && !root._error
 
             textColor: root.textColor
             hoverColor: root.hoverColor
@@ -318,7 +326,7 @@ Item
 
                     text: qsTr("Enabled")
                     checkable: true
-                    enabled: alertIcon.type !== "error"
+                    enabled: !root._error
 
                     onCheckedChanged:
                     {
@@ -331,7 +339,7 @@ Item
                 {
                     text: qsTr("Edit…")
                     visible: gradientKey.visible || paletteKey.visible
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
 
                     onTriggered:
                     {
@@ -356,7 +364,7 @@ Item
 
                     text: qsTr("Invert")
                     checkable: true
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
 
@@ -397,7 +405,7 @@ Item
                 {
                     id: minmaxMenuItem
                     text: qsTr("Min/Max")
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
 
                     // This is the default when there is no mapping
                     checked: parameters.mapping === undefined
@@ -418,7 +426,7 @@ Item
                 {
                     id: stddevMenuItem
                     text: qsTr("Standard Deviation")
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
 
                     checkable: true
                     exclusiveGroup: mappingExclusiveGroup
@@ -441,7 +449,7 @@ Item
                     checkable: true
                     exclusiveGroup: mappingExclusiveGroup
 
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showMappingOptions
 
                     onTriggered:
@@ -467,7 +475,7 @@ Item
 
                     text: qsTr("Apply Per Component")
                     checkable: true
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
 
@@ -494,7 +502,7 @@ Item
                 {
                     id: sortByValueMenuItem
 
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
 
                     text: qsTr("By Value")
@@ -506,7 +514,7 @@ Item
                 {
                     id: sortBySharedValuesMenuItem
 
-                    enabled: enabledMenuItem.checked && alertIcon.type !== "error"
+                    enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
 
                     text: qsTr("By Quantity")
@@ -578,20 +586,43 @@ Item
 
     property string attributeName
     readonly property var similarAttributes:
-        document.attributesSimilarTo(attributeName)
+    {
+        if(document.attributeExists(attributeName))
+            return document.attributesSimilarTo(attributeName);
+
+        // The attribute doesn't exist, so we work backwards to provide some sensible options
+        if(root.channel === "Size")
+            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
+
+        if(root.parameters.hasOwnProperty("gradient"))
+            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
+
+        if(root.parameters.hasOwnProperty("palette"))
+            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.String);
+
+        return document.availableAttributesModel();
+
+    }
 
     property var attributeValueType:
     {
-        let valueType = document.attribute(attributeName).valueType;
-        if(valueType === ValueType.Float || valueType === ValueType.Int)
+        let attribute = document.attribute(attributeName);
+        if(!attribute.isValid)
+            return ValueType.Unknown;
+
+        if(attribute.valueType === ValueType.Float || attribute.valueType === ValueType.Int)
             return ValueType.Numerical;
 
-        return valueType;
+        return attribute.valueType;
     }
 
     property var attributeElementType:
     {
-        return document.attribute(attributeName).elementType;
+        let attribute = document.attribute(attributeName);
+        if(!attribute.isValid)
+            return ElementType.None;
+
+        return attribute.elementType;
     }
 
     property string channel
@@ -697,7 +728,7 @@ Item
 
             parseParameters();
 
-            enabledMenuItem.checked = !isFlagSet("disabled") && !_error;
+            enabledMenuItem.checked = !isFlagSet("disabled");
             invertMenuItem.checked = isFlagSet("invert");
             perComponentMenuItem.checked = isFlagSet("component");
             sortByValueMenuItem.checked = !isFlagSet("assignByQuantity");
@@ -705,8 +736,6 @@ Item
 
             if(attributeList.model !== null)
                 attributeList.select(attributeList.model.find(attributeName));
-            else
-                attributeList.placeholderText = attributeName;
 
             ready = true;
         }
