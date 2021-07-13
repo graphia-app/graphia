@@ -766,7 +766,6 @@ PluginContent
                 }
                 else
                     busyIndicationTimer.start();
-
             }
 
             BusyIndicator
