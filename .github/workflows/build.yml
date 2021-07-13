@@ -8,7 +8,7 @@ env:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-18.04
     steps:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -31,7 +31,7 @@ jobs:
         CXX: g++-9
     - name: AppImage
       run: |
-        curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage -o linuxdeployqt
+        curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -o linuxdeployqt
         chmod +x linuxdeployqt
         sudo apt-get update
         sudo apt-get install -y libxcb-*
