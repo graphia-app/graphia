@@ -926,7 +926,7 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
 {
     _pluginInstance = pluginInstance;
 
-    connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged, // clazy:exclude=connect-non-signal
+    connect(_pluginInstance, &CorrelationPluginInstance::visualsChanged, // clazy:exclude=connect-non-signal
         this, [this](VisualChangeFlags nodeChange, VisualChangeFlags)
     {
         if(::Flags<VisualChangeFlags>(nodeChange).test(VisualChangeFlags::Color))
