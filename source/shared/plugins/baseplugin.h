@@ -87,8 +87,8 @@ public:
         const auto* graphModelQObject = dynamic_cast<const QObject*>(_graphModel);
         Q_ASSERT(graphModelQObject != nullptr);
 
-        connect(graphModelQObject, SIGNAL(visualsChanged()),
-                this, SLOT(onVisualsChanged()), Qt::DirectConnection);
+        connect(graphModelQObject, SIGNAL(visualsChanged(VisualChangeFlags,VisualChangeFlags)),
+                this, SLOT(onVisualsChanged(VisualChangeFlags,VisualChangeFlags)), Qt::DirectConnection);
 
         const auto* parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
         Q_ASSERT(parserThreadQObject != nullptr);
@@ -125,7 +125,8 @@ private slots:
     void onEdgeRemoved(const Graph*, EdgeId edgeId)     { emit edgeRemoved(edgeId); }
 
     void onSelectionChanged(const SelectionManager*)    { emit selectionChanged(_selectionManager); }
-    void onVisualsChanged()                             { emit visualsChanged(); }
+    void onVisualsChanged(VisualChangeFlags nodeChange,
+        VisualChangeFlags edgeChange)                   { emit visualsChanged(nodeChange, edgeChange); }
 
     void onLoadSuccess()                                { emit loadSuccess(); }
 
@@ -140,7 +141,7 @@ signals:
     void graphChanged();
 
     void selectionChanged(const ISelectionManager* selectionManager);
-    void visualsChanged();
+    void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
 
     void loadSuccess();
 

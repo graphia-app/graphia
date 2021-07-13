@@ -34,6 +34,15 @@ template<typename> class IUserElementData;
 using IUserNodeData = IUserElementData<NodeId>;
 using IUserEdgeData = IUserElementData<EdgeId>;
 
+enum class VisualChangeFlags
+{
+    None    = 0x0,
+    Size    = 0x1,
+    Color   = 0x2,
+    Text    = 0x4,
+    State   = 0x8
+};
+
 class IGraphModel
 {
 public:

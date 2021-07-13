@@ -35,6 +35,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/scope_exit.h"
+#include "shared/utils/flags.h"
 
 #include <QPoint>
 
@@ -575,8 +576,11 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
     }, QStringLiteral("GraphOverviewScene::onComponentsWillMerge (freeze renderers)"));
 }
 
-void GraphOverviewScene::onVisualsChanged()
+void GraphOverviewScene::onVisualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags)
 {
+    if(!Flags<VisualChangeFlags>(nodeChange).test(VisualChangeFlags::Size))
+        return;
+
     _graphRenderer->executeOnRendererThread([this]
     {
         // The camera distance for component renderers is calculated in

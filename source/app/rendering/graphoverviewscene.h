@@ -23,6 +23,7 @@
 #include "transition.h"
 
 #include "graph/componentmanager.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/grapharray.h"
 
 #include "shared/utils/preferenceswatcher.h"
@@ -145,7 +146,7 @@ private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
 
-    void onVisualsChanged();
+    void onVisualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
 
     void onPreferenceChanged(const QString& key, const QVariant& value);
 };

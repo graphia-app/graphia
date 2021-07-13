@@ -192,7 +192,7 @@ signals:
     void columnAnnotationNamesChanged();
     void sharedValuesAttributeNamesChanged();
     void numericalAttributeNamesChanged();
-    void nodeColorsChanged();
+    void nodeColorsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
     void highlightedRowsChanged();
     void numColumnsChanged();
 };

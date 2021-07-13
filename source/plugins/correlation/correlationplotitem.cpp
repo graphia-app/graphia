@@ -29,6 +29,7 @@
 #include "shared/utils/color.h"
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
+#include "shared/utils/flags.h"
 
 #include <QDesktopServices>
 #include <QSet>
@@ -926,7 +927,11 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
     _pluginInstance = pluginInstance;
 
     connect(_pluginInstance, &CorrelationPluginInstance::nodeColorsChanged, // clazy:exclude=connect-non-signal
-        this, [this] { rebuildPlot(); });
+        this, [this](VisualChangeFlags nodeChange, VisualChangeFlags)
+    {
+        if(::Flags<VisualChangeFlags>(nodeChange).test(VisualChangeFlags::Color))
+            rebuildPlot();
+    });
 }
 
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
