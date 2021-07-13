@@ -78,6 +78,11 @@ public:
         return (static_cast<int>(_value) & static_cast<int>(value)) != 0;
     }
 
+    bool operator!=(const Flags& other) const
+    {
+        return _value != other._value;
+    }
+
     bool anyOf(Enum value) const { return test(value); }
     template<typename... Tail>
     bool anyOf(Enum value, Tail... values) const
