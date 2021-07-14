@@ -29,6 +29,7 @@ DEFINE_QML_ENUM(
     String      = 0x8,
     StringList  = 0x10,
     Numerical = Int|Float,
+    Identifier = Int|String,
     All = Int|Float|String|StringList,
     Attribute   = 0x20 /* Used to indicate transform attribute parameters */);
 
