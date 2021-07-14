@@ -96,6 +96,12 @@ public:
     const MutableGraph& mutableGraph() const;
     const Graph& graph() const;
 
+    void setNodeSize(float nodeSize);
+    void setEdgeSize(float edgeSize);
+
+    float nodeSize() const;
+    float edgeSize() const;
+
     const ElementVisual& nodeVisual(NodeId nodeId) const;
     const ElementVisual& edgeVisual(EdgeId edgeId) const;
     std::vector<ElementVisual> nodeVisuals(const std::vector<NodeId>& nodeIds) const;

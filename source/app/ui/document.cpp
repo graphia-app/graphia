@@ -824,6 +824,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit editableChanged();
     emit directedChanged();
     emit commandVerbChanged(); // Stop showing loading message
+    emit nodeSizeChanged();
+    emit edgeSizeChanged();
 
     // Load UI saved data
     if(_uiData.size() > 0)
@@ -2562,6 +2564,58 @@ void Document::setLayoutSettingNormalisedValue(const QString& name, float normal
 void Document::resetLayoutSettingValue(const QString& name)
 {
     _layoutThread->resetSettingValue(name);
+}
+
+float Document::nodeSize() const
+{
+    if(_graphModel == nullptr)
+        return u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
+
+    return _graphModel->nodeSize();
+}
+
+void Document::setNodeSize(float nodeSize)
+{
+    if(_graphModel == nullptr)
+        return;
+
+    if(nodeSize != _graphModel->nodeSize())
+    {
+        _graphModel->setNodeSize(nodeSize);
+        emit nodeSizeChanged();
+    }
+}
+
+void Document::resetNodeSize()
+{
+    auto defaultNormalNodeSize = u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
+    setNodeSize(defaultNormalNodeSize);
+}
+
+float Document::edgeSize() const
+{
+    if(_graphModel == nullptr)
+        return u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+
+    return _graphModel->edgeSize();
+}
+
+void Document::setEdgeSize(float edgeSize)
+{
+    if(_graphModel == nullptr)
+        return;
+
+    if(edgeSize != _graphModel->edgeSize())
+    {
+        _graphModel->setEdgeSize(edgeSize);
+        emit edgeSizeChanged();
+    }
+}
+
+void Document::resetEdgeSize()
+{
+    auto defaultNormalEdgeSize = u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+    setEdgeSize(defaultNormalEdgeSize);
 }
 
 void Document::cancelCommand()

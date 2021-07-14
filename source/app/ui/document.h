@@ -130,6 +130,9 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(bool hasValidEdgeTextVisualisation READ hasValidEdgeTextVisualisation
         NOTIFY hasValidEdgeTextVisualisationChanged)
 
+    Q_PROPERTY(float nodeSize READ nodeSize WRITE setNodeSize NOTIFY nodeSizeChanged)
+    Q_PROPERTY(float edgeSize READ edgeSize WRITE setEdgeSize NOTIFY edgeSizeChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
     ~Document() override;
@@ -211,6 +214,12 @@ public:
 
     void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
         const QString& description = QStringLiteral("GenericTask"));
+
+    float nodeSize() const;
+    void setNodeSize(float nodeSize);
+
+    float edgeSize() const;
+    void setEdgeSize(float edgeSize);
 
 private:
     Application* _application = nullptr;
@@ -383,6 +392,9 @@ signals:
     void visualisationsChanged();
     void layoutSettingNamesChanged();
 
+    void nodeSizeChanged();
+    void edgeSizeChanged();
+
 public:
     // Main QML interface
     Q_INVOKABLE bool openUrl(const QUrl& url, const QString& type,
@@ -498,6 +510,9 @@ public:
     Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);
     Q_INVOKABLE void setLayoutSettingNormalisedValue(const QString& name, float normalisedValue);
     Q_INVOKABLE void resetLayoutSettingValue(const QString& name);
+
+    Q_INVOKABLE void resetNodeSize();
+    Q_INVOKABLE void resetEdgeSize();
 
     Q_INVOKABLE void cancelCommand();
 

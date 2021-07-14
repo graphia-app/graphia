@@ -42,8 +42,8 @@ Item
         property alias backgroundColor: backgroundColorPickButton.color
         property alias highlightColor: highlightColorPickButton.color
 
-        property double defaultNodeSize
-        property double defaultEdgeSize
+        property double defaultNormalNodeSize
+        property double defaultNormalEdgeSize
         property alias transitionTime: transitionTimeSlider.value
         property double minimumComponentRadius
 
@@ -54,8 +54,8 @@ Item
 
     Component.onCompleted:
     {
-        nodeSizeSlider.value = visuals.defaultNodeSize;
-        edgeSizeSlider.value = visuals.defaultEdgeSize;
+        nodeSizeSlider.value = visuals.defaultNormalNodeSize;
+        edgeSizeSlider.value = visuals.defaultNormalEdgeSize;
         minimumComponentRadiusSlider.value = visuals.minimumComponentRadius;
 
         delayedPreferences.enabled = true;
@@ -83,8 +83,8 @@ Item
             if(!enabled)
                 return;
 
-            visuals.defaultNodeSize = nodeSizeSlider.value;
-            visuals.defaultEdgeSize = edgeSizeSlider.value;
+            visuals.defaultNormalNodeSize = nodeSizeSlider.value;
+            visuals.defaultNormalEdgeSize = edgeSizeSlider.value;
             visuals.minimumComponentRadius = minimumComponentRadiusSlider.value;
         }
     }
@@ -106,7 +106,7 @@ Item
                 Layout.columnSpan: 2
 
                 font.bold: true
-                text: qsTr("Colours")
+                text: qsTr("Default Colours")
             }
 
             Label { text: qsTr("Nodes") }
@@ -130,15 +130,15 @@ Item
                 Layout.topMargin: Constants.margin * 2
 
                 font.bold: true
-                text: qsTr("Sizes")
+                text: qsTr("Default Sizes")
             }
 
             Label { text: qsTr("Nodes") }
             Slider
             {
                 id: nodeSizeSlider
-                minimumValue: limitConstants.minimumNodeSize
-                maximumValue: limitConstants.maximumNodeSize
+                minimumValue: 0.0
+                maximumValue: 1.0
 
                 onValueChanged: { delayedPreferences.update(); }
             }
@@ -147,8 +147,8 @@ Item
             Slider
             {
                 id: edgeSizeSlider
-                minimumValue: limitConstants.minimumEdgeSize
-                maximumValue: limitConstants.maximumEdgeSize
+                minimumValue: 0.0
+                maximumValue: 1.0
 
                 onValueChanged: { delayedPreferences.update(); }
             }

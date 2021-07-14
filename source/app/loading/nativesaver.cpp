@@ -208,6 +208,9 @@ bool NativeSaver::save()
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
+    content["nodeSize"] = _document->nodeSize();
+    content["edgeSize"] = _document->edgeSize();
+
     content["projection"] = _document->projection();
     content["2dshading"] = _document->shading2D();
     content["3dshading"] = _document->shading3D();

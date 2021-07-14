@@ -112,6 +112,9 @@ private:
     TransformInfosMap _transformInfos;
     NodePositions _nodePositions;
 
+    float _nodeSize = u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
+    float _edgeSize = u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
     NodeVisuals _mappedNodeVisuals;
@@ -372,6 +375,21 @@ const IElementVisual& GraphModel::edgeVisualImpl(EdgeId edgeId) const { return e
 MutableGraph& GraphModel::mutableGraph() { return _->_graph; }
 const MutableGraph& GraphModel::mutableGraph() const { return _->_graph; }
 const Graph& GraphModel::graph() const { return _->_transformedGraph; }
+
+void GraphModel::setNodeSize(float nodeSize)
+{
+    _->_nodeSize = nodeSize;
+    updateVisuals();
+}
+
+void GraphModel::setEdgeSize(float edgeSize)
+{
+    _->_edgeSize = edgeSize;
+    updateVisuals();
+}
+
+float GraphModel::nodeSize() const { return _->_nodeSize; }
+float GraphModel::edgeSize() const { return _->_edgeSize; }
 
 const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
 const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
@@ -1084,8 +1102,8 @@ void GraphModel::updateVisuals()
     auto nodeColor      = u::pref(QStringLiteral("visuals/defaultNodeColor")).value<QColor>();
     auto edgeColor      = u::pref(QStringLiteral("visuals/defaultEdgeColor")).value<QColor>();
     auto multiColor     = u::pref(QStringLiteral("visuals/multiElementColor")).value<QColor>();
-    auto nodeSize       = u::pref(QStringLiteral("visuals/defaultNodeSize")).toFloat();
-    auto edgeSize       = u::pref(QStringLiteral("visuals/defaultEdgeSize")).toFloat();
+    auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
+    auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
     auto meIndicators   = u::pref(QStringLiteral("visuals/showMultiElementIndicators")).toBool();
 
     auto newNodeVisuals = _->_nodeVisuals;

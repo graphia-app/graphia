@@ -497,6 +497,23 @@ ApplicationWindow
             }
         }
         property alias showMultiElementIndicators: toggleMultiElementIndicatorsAction.checked
+
+        property double defaultNormalNodeSize
+        property double defaultNormalEdgeSize
+
+        // If the default sizes are changed, reflect the sizes in the current open document,
+        // so the user has some idea about what size they're choosing
+        onDefaultNormalNodeSizeChanged:
+        {
+            if(currentTab)
+                currentTab.document.nodeSize = defaultNormalNodeSize;
+        }
+
+        onDefaultNormalEdgeSizeChanged:
+        {
+            if(currentTab)
+                currentTab.document.edgeSize = defaultNormalEdgeSize;
+        }
     }
 
     Preferences

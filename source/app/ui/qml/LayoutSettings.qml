@@ -106,7 +106,42 @@ Rectangle
                     }
                 }
             }
+
+            ToolBarSeparator
+            {
+                Layout.fillWidth: true
+                Layout.leftMargin: Constants.margin
+                Layout.rightMargin: Constants.margin
+                orientation: Qt.Horizontal
+                visible: root.document.layoutSettingNames.length > 0
+            }
+
+            LayoutSetting
+            {
+                id: nodeSizeSetting
+                name: qsTr("Nodes")
+
+                onValueChanged: { root.document.nodeSize = value; }
+                onReset: { root.document.resetNodeSize(); }
+            }
+
+            LayoutSetting
+            {
+                id: edgeSizeSetting
+                name: qsTr("Edges")
+
+                onValueChanged: { root.document.edgeSize = value; }
+                onReset: { root.document.resetEdgeSize(); }
+            }
         }
+    }
+
+    Connections
+    {
+        target: root.document
+
+        function onNodeSizeChanged() { nodeSizeSetting.value = root.document.nodeSize; }
+        function onEdgeSizeChanged() { edgeSizeSetting.value = root.document.edgeSize; }
     }
 
     function show()

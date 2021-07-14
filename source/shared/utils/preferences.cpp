@@ -18,6 +18,9 @@
 
 #include "preferences.h"
 
+#include "app/limitconstants.h"
+
+#include "shared/utils/utils.h"
 #include "shared/utils/preferenceswatcher.h"
 
 #include <QSettings>
@@ -74,4 +77,23 @@ bool u::prefExists(const QString& key)
 
 void u::updateOldPrefs()
 {
+    if(u::prefExists(QStringLiteral("visuals/defaultNodeSize")))
+    {
+        auto absNodeSize = u::pref(QStringLiteral("visuals/defaultNodeSize")).toFloat();
+        auto normalNodeSize = u::normalise(LimitConstants::minimumNodeSize(),
+            LimitConstants::maximumNodeSize(), absNodeSize);
+
+        u::setPref(QStringLiteral("visuals/defaultNormalNodeSize"), normalNodeSize);
+        u::removePref(QStringLiteral("visuals/defaultNodeSize"));
+    }
+
+    if(u::prefExists(QStringLiteral("visuals/defaultEdgeSize")))
+    {
+        auto absEdgeSize = u::pref(QStringLiteral("visuals/defaultEdgeSize")).toFloat();
+        auto normalEdgeSize = u::normalise(LimitConstants::minimumEdgeSize(),
+            LimitConstants::maximumEdgeSize(), absEdgeSize);
+
+        u::setPref(QStringLiteral("visuals/defaultNormalEdgeSize"), normalEdgeSize);
+        u::removePref(QStringLiteral("visuals/defaultEdgeSize"));
+    }
 }

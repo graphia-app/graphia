@@ -266,8 +266,8 @@ int start(int argc, char *argv[])
     u::definePref(QStringLiteral("visuals/backgroundColor"),                "#C0C0C0");
     u::definePref(QStringLiteral("visuals/highlightColor"),                 "#FFFFFF");
 
-    u::definePref(QStringLiteral("visuals/defaultNodeSize"),                1.5);
-    u::definePref(QStringLiteral("visuals/defaultEdgeSize"),                0.5);
+    u::definePref(QStringLiteral("visuals/defaultNormalNodeSize"),          0.333);
+    u::definePref(QStringLiteral("visuals/defaultNormalEdgeSize"),          0.25);
 
     u::definePref(QStringLiteral("visuals/showNodeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
     u::definePref(QStringLiteral("visuals/showEdgeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
