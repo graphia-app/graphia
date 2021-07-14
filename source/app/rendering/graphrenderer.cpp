@@ -810,6 +810,8 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
         _glyphMap->setFontName(value.toString());
         updateText();
     }
+    else if(key == QStringLiteral("visuals/backgroundColor"))
+        update();
 }
 
 void GraphRenderer::onCommandsStarted()
