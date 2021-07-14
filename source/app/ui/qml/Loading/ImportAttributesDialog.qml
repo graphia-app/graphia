@@ -47,7 +47,7 @@ Window
     function open(fileUrl)
     {
         keyAttributeList.model = document.availableAttributesModel(
-            ElementType.All, ValueType.String);
+            ElementType.NodeAndEdge, ValueType.Identifier);
 
         loadingInfo.fileUrl = fileUrl;
         tabularDataParser.parse(fileUrl);
@@ -65,14 +65,14 @@ Window
 
         onDataChanged:
         {
-            let stringHeaders = headers(ValueType.String);
+            let idHeaders = headers(ValueType.Identifier);
 
             // ComboBox gets upset if you change one or other of these
             // on live data, so reset them first
             keyHeaderComboBox.model = undefined;
             keyHeaderComboBox.textRole = "";
 
-            if(!stringHeaders || stringHeaders.rowCount() === 0)
+            if(!idHeaders || idHeaders.rowCount() === 0)
             {
                 keyHeaderComboBox.model = [qsTr("No Suitable Keys")];
                 keyHeaderComboBox.enabled = false;
@@ -80,7 +80,7 @@ Window
             else
             {
                 keyHeaderComboBox.textRole = "display";
-                keyHeaderComboBox.model = stringHeaders;
+                keyHeaderComboBox.model = idHeaders;
                 keyHeaderComboBox.enabled = true;
             }
 

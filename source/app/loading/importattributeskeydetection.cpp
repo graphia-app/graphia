@@ -45,13 +45,14 @@ void ImportAttributesKeyDetection::start()
         int bestPercent = 0;
 
         auto attributeNames = _document->availableAttributeNames(
-            static_cast<int>(ElementType::All), static_cast<int>(ValueType::String));
+            static_cast<int>(ElementType::NodeAndEdge), static_cast<int>(ValueType::Identifier));
 
         auto typeIdentities = _tabularData->typeIdentities();
 
         for(size_t columnIndex = 0; columnIndex < _tabularData->numColumns(); columnIndex++)
         {
-            if(typeIdentities.at(columnIndex).type() != TypeIdentity::Type::String)
+            auto type = typeIdentities.at(columnIndex).type();
+            if(type != TypeIdentity::Type::String && type != TypeIdentity::Type::Int)
                 continue;
 
             for(const auto& attributeName: attributeNames)
