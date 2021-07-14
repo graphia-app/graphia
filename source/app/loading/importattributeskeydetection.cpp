@@ -57,6 +57,10 @@ void ImportAttributesKeyDetection::start()
             for(const auto& attributeName: attributeNames)
             {
                 auto values = _document->allAttributeValues(attributeName);
+
+                if(values.empty())
+                    continue;
+
                 auto percent = _tabularData->columnMatchPercentage(columnIndex, values);
 
                 // If we already have an equivalent match, prefer the one with the shorter attribute name
