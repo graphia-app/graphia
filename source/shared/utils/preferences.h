@@ -26,9 +26,12 @@ class QString;
 namespace u
 {
     void definePref(const QString& key, const QVariant& defaultValue = QVariant());
+    bool removePref(const QString& key);
     QVariant pref(const QString& key);
     void setPref(const QString& key, const QVariant& value);
     bool prefExists(const QString& key);
+
+    void updateOldPrefs();
 } // namespace u
 
 #endif // PREFERENCES_H

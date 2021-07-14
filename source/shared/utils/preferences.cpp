@@ -38,6 +38,17 @@ void u::definePref(const QString& key, const QVariant& defaultValue)
         u::setPref(key, defaultValue);
 }
 
+bool u::removePref(const QString& key)
+{
+    if(u::prefExists(key))
+    {
+        settings().remove(key);
+        return true;
+    }
+
+    return false;
+}
+
 QVariant u::pref(const QString& key)
 {
     u::definePref(key);
@@ -59,4 +70,8 @@ void u::setPref(const QString& key, const QVariant& value)
 bool u::prefExists(const QString& key)
 {
     return settings().contains(key);
+}
+
+void u::updateOldPrefs()
+{
 }

@@ -313,6 +313,8 @@ int start(int argc, char *argv[])
     u::definePref(QStringLiteral("servers/crashreports"),                   "https://crashreports.graphia.app");
     u::definePref(QStringLiteral("servers/tracking"),                       "https://tracking.graphia.app");
 
+    u::updateOldPrefs();
+
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
