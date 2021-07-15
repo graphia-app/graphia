@@ -53,7 +53,7 @@ static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
 
     if(invalidAttributes)
     {
-        transform.addAlert(AlertType::Error, QObject::tr("One more more invalid attributes"));
+        transform.addAlert(AlertType::Error, QObject::tr("One or more invalid attributes"));
         return true;
     }
 
