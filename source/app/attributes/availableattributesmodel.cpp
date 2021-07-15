@@ -127,7 +127,8 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     if(Flags<ElementType>(elementTypes).test(ElementType::Edge))
     {
-        attributeList = graphModel.availableAttributeNames(ElementType::Node, valueTypes);
+        attributeList = graphModel.availableAttributeNames(ElementType::Node, valueTypes,
+            skipFlags, skipAttributeNames);
 
         if(!attributeList.empty())
         {
