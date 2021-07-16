@@ -392,6 +392,7 @@ signals:
     void visualisationsChanged();
     void layoutSettingNamesChanged();
 
+    void layoutSettingChanged();
     void nodeSizeChanged();
     void edgeSizeChanged();
 
