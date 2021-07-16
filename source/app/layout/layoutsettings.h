@@ -49,6 +49,7 @@ public:
     float normalisedValue() const;
     float minimumValue() const { return _minimumValue; }
     float maximumValue() const { return _maximumValue; }
+    float defaultValue() const { return _defaultValue; }
     float range() const { return _maximumValue - _minimumValue; }
     void setValue(float value) { _value = std::clamp(value, _minimumValue, _maximumValue); }
     void setNormalisedValue(float normalisedValue);

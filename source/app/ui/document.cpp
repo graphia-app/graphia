@@ -2546,6 +2546,7 @@ QVariantMap Document::layoutSetting(const QString& name) const
         map.insert(QStringLiteral("normalisedValue"), setting->normalisedValue());
         map.insert(QStringLiteral("minimumValue"), setting->minimumValue());
         map.insert(QStringLiteral("maximumValue"), setting->maximumValue());
+        map.insert(QStringLiteral("defaultValue"), setting->defaultValue());
     }
 
     return map;
