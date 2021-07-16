@@ -399,3 +399,15 @@ function arrayCompare(a, b)
 
     return true;
 }
+
+function floatCompare(a, b)
+{
+    // Note the relatively large epsilon
+    if(Math.abs(a - b) < 1e-5)
+        return 0;
+
+    if(a < b)
+        return -1;
+
+    return 1;
+}
