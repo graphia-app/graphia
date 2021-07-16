@@ -25,19 +25,20 @@ import app.graphia 1.0
 Item
 {
     id: root
-    width: button.width
-    height: button.height
+
     implicitWidth: button.implicitWidth
     implicitHeight: button.implicitHeight
 
     property string text: ""
     property string selectedValue: ""
-    property color hoverColor
-    property color textColor
+    property color hoverColor: "grey"
+    property color textColor: "black"
+    property alias font: label.font
+    property alias textAlignment: label.horizontalAlignment
 
     property color _contrastingColor:
     {
-        if(mouseArea.containsMouse)
+        if(mouseArea.containsMouse || root.menuDropped)
             return QmlUtils.contrastingColor(hoverColor);
 
         return textColor;
@@ -75,26 +76,28 @@ Item
     Rectangle
     {
         id: button
-
-        width: label.width + 2 * 4/*padding*/
-        height: label.height + 2 * 4/*padding*/
-        implicitWidth: width
-        implicitHeight: height
+        anchors.fill: parent
         radius: 2
         color: (mouseArea.containsMouse || root.menuDropped) ? root.hoverColor : "transparent"
+
+        implicitWidth: label.implicitWidth + 8
+        implicitHeight: label.implicitHeight + 8
 
         Label
         {
             id: label
             anchors
             {
-                horizontalCenter: parent.horizontalCenter
-                verticalCenter: parent.verticalCenter
+                fill: parent
+                margins: 4
             }
 
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+
+            elide: Text.ElideRight
             text: root.selectedValue !== "" ? root.selectedValue : root.text
             color: root._contrastingColor
-            font.bold: true
         }
     }
 

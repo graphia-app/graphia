@@ -109,6 +109,7 @@ Item
 
                 visible: !transformSummaryText.visible
                 text: qsTr("Add Transform")
+                font.bold: true
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor

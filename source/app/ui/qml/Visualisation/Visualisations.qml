@@ -77,6 +77,7 @@ Item
 
                 visible: !visualisationSummaryText.visible
                 text: qsTr("Add Visualisation")
+                font.bold: true
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
