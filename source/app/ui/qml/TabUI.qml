@@ -261,7 +261,6 @@ Item
             pluginUiData = JSON.stringify(pluginUiData);
 
         _document.saveFile(desiredFileUrl, saverName, uiData, pluginUiData);
-        mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
     Component
@@ -1664,8 +1663,9 @@ Item
             }
             else
             {
-                savedFileUrl = root.url;
+                savedFileUrl = fileUrl;
                 savedFileSaver = saverName;
+                mainWindow.addToRecentFiles(fileUrl);
             }
         }
 
