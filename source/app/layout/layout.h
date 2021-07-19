@@ -259,7 +259,7 @@ private slots:
 signals:
     void executed();
     void pausedChanged();
-    void settingChanged();
+    void settingChanged(const QString& name, float value);
 };
 
 #endif // LAYOUT_H

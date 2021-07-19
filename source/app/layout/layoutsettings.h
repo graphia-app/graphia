@@ -51,9 +51,9 @@ public:
     float maximumValue() const { return _maximumValue; }
     float defaultValue() const { return _defaultValue; }
     float range() const { return _maximumValue - _minimumValue; }
-    void setValue(float value) { _value = std::clamp(value, _minimumValue, _maximumValue); }
-    void setNormalisedValue(float normalisedValue);
-    void resetValue() { _value = _defaultValue; }
+    bool setValue(float value);
+    bool setNormalisedValue(float normalisedValue);
+    bool resetValue() { return setValue(_defaultValue); }
     const QString& name() const { return _name; }
     const QString& displayName() const { return _displayName; }
 
@@ -95,7 +95,7 @@ public:
     }
 
 signals:
-    void settingChanged();
+    void settingChanged(const QString& name, float value);
 };
 
 #endif // LAYOUTSETTINGS_H

@@ -392,7 +392,7 @@ signals:
     void visualisationsChanged();
     void layoutSettingNamesChanged();
 
-    void layoutSettingChanged();
+    void layoutSettingChanged(const QString& name, float value);
     void nodeSizeChanged();
     void edgeSizeChanged();
 

@@ -45,9 +45,8 @@ void LayoutSettings::setValue(const QString& name, float value)
     auto* v = setting(name);
     if(v != nullptr)
     {
-        v->setValue(value);
-        emit settingChanged();
-        return;
+        if(v->setValue(value))
+            emit settingChanged(name, v->value());
     }
 }
 
@@ -56,9 +55,8 @@ void LayoutSettings::setNormalisedValue(const QString& name, float normalisedVal
     auto* v = setting(name);
     if(v != nullptr)
     {
-        v->setNormalisedValue(normalisedValue);
-        emit settingChanged();
-        return;
+        if(v->setNormalisedValue(normalisedValue))
+            emit settingChanged(name, v->value());
     }
 }
 
@@ -67,9 +65,8 @@ void LayoutSettings::resetValue(const QString& name)
     auto* v = setting(name);
     if(v != nullptr)
     {
-        v->resetValue();
-        emit settingChanged();
-        return;
+        if(v->resetValue())
+            emit settingChanged(name, v->value());
     }
 }
 
@@ -113,13 +110,28 @@ float LayoutSetting::normalisedValue() const
     }
 }
 
-void LayoutSetting::setNormalisedValue(float normalisedValue)
+bool LayoutSetting::setValue(float value)
 {
+    auto newValue = std::clamp(value, _minimumValue, _maximumValue);
+
+    if(newValue != _value)
+    {
+        _value = newValue;
+        return true;
+    }
+
+    return false;
+}
+
+bool LayoutSetting::setNormalisedValue(float normalisedValue)
+{
+    float newValue;
+
     switch(_scaleType)
     {
     default:
     case LayoutSettingScaleType::Linear:
-        _value = _minimumValue + (normalisedValue * range());
+        newValue = _minimumValue + (normalisedValue * range());
         break;
 
     case LayoutSettingScaleType::Log:
@@ -128,8 +140,16 @@ void LayoutSetting::setNormalisedValue(float normalisedValue)
         auto logMax = std::log10(_maximumValue);
         auto logRange = logMax - logMin;
 
-        _value = std::pow(10.0f, logMin + (normalisedValue * logRange));
+        newValue = std::pow(10.0f, logMin + (normalisedValue * logRange));
         break;
     }
     }
+
+    if(newValue != _value)
+    {
+        _value = newValue;
+        return true;
+    }
+
+    return false;
 }
