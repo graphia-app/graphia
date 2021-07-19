@@ -579,6 +579,9 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
 
+            // findLargestNumericalDataRect can take a while for big datasets
+            setProgress(-1);
+
             _dataHasNumericalRect = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
             emit dataHasNumericalRectChanged();
         };
