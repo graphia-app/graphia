@@ -32,10 +32,7 @@
 
 template<class... Ts> struct Visitor : Ts... { using Ts::operator()...; };
 
-#if(__cplusplus < 202002L)
+//FIXME: in theory this deduction guide is unnecssary for C++20, but this doesn't appear to be the case (yet?)
 template<class... Ts> Visitor(Ts...) -> Visitor<Ts...>;
-#else
-#warning Deduction guide can be removed
-#endif
 
 #endif // VISITOR_H
