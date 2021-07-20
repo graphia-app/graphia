@@ -684,6 +684,7 @@ BaseParameterDialog
             ColumnLayout
             {
                 anchors.fill: parent
+                enabled: !dataRectPage._busy
 
                 RowLayout
                 {
@@ -1369,6 +1370,8 @@ BaseParameterDialog
             title: qsTr("Initial Transforms")
             ColumnLayout
             {
+                enabled: !dataRectPage._busy
+
                 spacing: Constants.spacing * 2
 
                 anchors.left: parent.left
@@ -1667,17 +1670,17 @@ BaseParameterDialog
                         return summaryString;
                     }
 
-                    enabled: !tabularDataParser.graphSizeEstimateInProgress
+                    enabled: !tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy
                     BusyIndicator
                     {
                         anchors.centerIn: parent
-                        running: tabularDataParser.graphSizeEstimateInProgress
+                        running: tabularDataParser.graphSizeEstimateInProgress || dataRectPage._busy
                     }
                 }
             }
         }
 
-        finishEnabled: !tabularDataParser.graphSizeEstimateInProgress
+        finishEnabled: !tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy
 
         onAccepted:
         {
