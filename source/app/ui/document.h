@@ -96,6 +96,7 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(bool commandIsCancelling READ commandIsCancelling NOTIFY commandIsCancellingChanged)
 
     Q_PROPERTY(QML_ENUM_PROPERTY(LayoutPauseState) layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
+    Q_PROPERTY(QString layoutName READ layoutName NOTIFY layoutNameChanged)
     Q_PROPERTY(QString layoutDisplayName READ layoutDisplayName NOTIFY layoutDisplayNameChanged)
 
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
@@ -348,6 +349,7 @@ signals:
     void commandIsCancellingChanged();
 
     void layoutPauseStateChanged();
+    void layoutNameChanged();
     void layoutDisplayNameChanged();
 
     void commandsFinished();

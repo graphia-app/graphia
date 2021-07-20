@@ -845,6 +845,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     _layoutRequired = true;
     updateLayoutState();
 
+    emit layoutNameChanged();
     emit layoutDisplayNameChanged();
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
