@@ -71,7 +71,7 @@ Rectangle
 
     onIsCustomChanged:
     {
-        newPresetTextField.reset();
+        presetNameTextField.reset();
     }
 
     function settingsAreDefault()
@@ -156,7 +156,7 @@ Rectangle
         presets[presetName] = preset;
         visuals.layoutPresets = JSON.stringify(presets);
 
-        newPresetTextField.reset();
+        presetNameTextField.reset();
         root.evaluateSettings();
     }
 
@@ -179,7 +179,7 @@ Rectangle
 
         visuals.layoutPresets = JSON.stringify(presets);
 
-        newPresetTextField.reset();
+        presetNameTextField.reset();
         root.evaluateSettings();
     }
 
@@ -248,7 +248,7 @@ Rectangle
                     ButtonMenu
                     {
                         id: presetChooser
-                        visible: !newPresetTextField.visible
+                        visible: !presetNameTextField.visible
                         anchors.fill: parent
                         hoverColor: systemPalette.highlight
 
@@ -319,10 +319,10 @@ Rectangle
                             if(root.matchingPreset.length > 0)
                             {
                                 // Configure TextField for renaming
-                                newPresetTextField.text = root.matchingPreset;
-                                newPresetTextField.selectAll();
-                                newPresetTextField.visible = true;
-                                newPresetTextField.forceActiveFocus();
+                                presetNameTextField.text = root.matchingPreset;
+                                presetNameTextField.selectAll();
+                                presetNameTextField.visible = true;
+                                presetNameTextField.forceActiveFocus();
                             }
                         }
                     }
@@ -330,18 +330,18 @@ Rectangle
 
                 TextField
                 {
-                    id: newPresetTextField
+                    id: presetNameTextField
                     visible: false
                     Layout.fillWidth: true
 
                     onAccepted:
                     {
-                        if(newPresetTextField.text.length > 0)
+                        if(presetNameTextField.text.length > 0)
                         {
                             if(root.matchingPreset.length === 0)
-                                root.addPreset(newPresetTextField.text);
+                                root.addPreset(presetNameTextField.text);
                             else
-                                root.renamePreset(root.matchingPreset, newPresetTextField.text);
+                                root.renamePreset(root.matchingPreset, presetNameTextField.text);
                         }
                     }
 
@@ -354,7 +354,7 @@ Rectangle
 
                 FloatingButton
                 {
-                    visible: root.matchingPreset.length > 0 && !newPresetTextField.visible
+                    visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
                     text: qsTr("Remove Preset")
                     iconName: "list-remove"
 
@@ -372,13 +372,13 @@ Rectangle
 
                     onClicked:
                     {
-                        if(!newPresetTextField.visible)
+                        if(!presetNameTextField.visible)
                         {
-                            newPresetTextField.visible = true;
-                            newPresetTextField.forceActiveFocus();
+                            presetNameTextField.visible = true;
+                            presetNameTextField.forceActiveFocus();
                         }
                         else
-                            root.addPreset(newPresetTextField.text);
+                            root.addPreset(presetNameTextField.text);
                     }
                 }
 
@@ -473,7 +473,7 @@ Rectangle
     {
         root._visible = true;
         root.evaluateSettings();
-        newPresetTextField.reset();
+        presetNameTextField.reset();
         shown();
     }
 
