@@ -334,6 +334,8 @@ Rectangle
                     visible: false
                     Layout.fillWidth: true
 
+                    placeholderText: qsTr("Preset Name")
+
                     onAccepted:
                     {
                         if(presetNameTextField.text.length > 0)
