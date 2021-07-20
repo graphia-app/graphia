@@ -116,7 +116,10 @@ Item
         }
 
         onPressed: { mouse.accepted = !propogatePresses; }
+
+        onPressAndHold: { root.held(mouse); }
     }
 
     signal clicked(var mouse)
+    signal held(var mouse)
 }
