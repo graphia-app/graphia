@@ -83,6 +83,15 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
     size_t top = dataRect.y();
     size_t bottom = dataRect.y() + dataRect.height();
 
+    // Do a pass over the non-data column names, to ensure they're unique
+    std::vector<QString> rowAttributeColumnNames(left);
+    for(size_t columnIndex = 0; columnIndex < left; columnIndex++)
+    {
+        auto columnName = tabularData.valueAt(columnIndex, 0);
+        columnName = u::findUniqueName(rowAttributeColumnNames, columnName);
+        rowAttributeColumnNames[columnIndex] = columnName;
+    }
+
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
@@ -169,7 +178,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 }
             }
             else if(isRowAttribute)
-                _graphModel->userNodeData().setValue(dataRowIndex, tabularData.valueAt(columnIndex, 0), value);
+                _graphModel->userNodeData().setValue(dataRowIndex, rowAttributeColumnNames.at(columnIndex), value);
         }
     }
 
