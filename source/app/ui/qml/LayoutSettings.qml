@@ -172,12 +172,15 @@ Rectangle
 
     function renamePreset(oldName, newName)
     {
-        let presets = root.layoutPresets;
+        if(oldName !== newName)
+        {
+            let presets = root.layoutPresets;
 
-        presets[newName] = presets[oldName];
-        delete presets[oldName];
+            presets[newName] = presets[oldName];
+            delete presets[oldName];
 
-        visuals.layoutPresets = JSON.stringify(presets);
+            visuals.layoutPresets = JSON.stringify(presets);
+        }
 
         presetNameTextField.reset();
         root.evaluateSettings();
