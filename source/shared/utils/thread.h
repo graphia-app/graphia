@@ -55,7 +55,7 @@ QString u::currentThreadName()
     char threadName[16] = {0};
     prctl(PR_GET_NAME, reinterpret_cast<uint64_t>(threadName)); // NOLINT
 
-    return QString(threadName);
+    return {threadName};
 }
 
 QString u::parentProcessName()

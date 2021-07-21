@@ -239,7 +239,7 @@ Ray Camera::rayForViewportCoordinates(int x, int y) const
 {
     Line3D line = lineForViewportCoordinates(x, y);
 
-    return Ray(line.start(), line.dir());
+    return {line.start(), line.dir()};
 }
 
 Line3D Camera::lineForViewportCoordinates(int x, int y) const
@@ -285,7 +285,7 @@ Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2) co
     Line3D line3 = lineForViewportCoordinates(maxX, maxY);
     Line3D line4 = lineForViewportCoordinates(minX, maxY);
 
-    return Frustum(line1, line2, line3, line4);
+    return {line1, line2, line3, line4};
 }
 
 ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int radius) const
@@ -293,5 +293,5 @@ ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int ra
     Line3D centreLine = lineForViewportCoordinates(x, y);
     Line3D surfaceLine = lineForViewportCoordinates(x + radius, y);
 
-    return ConicalFrustum(centreLine, surfaceLine);
+    return {centreLine, surfaceLine};
 }

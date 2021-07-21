@@ -32,7 +32,7 @@ QVariantMap graphSizeEstimate(EdgeList edgeList,
     double nodesMax, double edgesMax)
 {
     if(edgeList.empty())
-        return QVariantMap();
+        return {};
 
     std::sort(edgeList.begin(), edgeList.end(),
         [](const auto& a, const auto& b) { return std::abs(a._weight) > std::abs(b._weight); });

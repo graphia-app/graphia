@@ -704,5 +704,5 @@ bool MutableGraph::update()
 
 std::unique_lock<std::mutex> MutableGraph::tryLock()
 {
-    return std::unique_lock<std::mutex>(_mutex, std::try_to_lock);
+    return {_mutex, std::try_to_lock};
 }

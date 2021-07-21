@@ -780,7 +780,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
     int row = index.row();
 
     if(row < 0 || row >= static_cast<int>(urlTypes.size()))
-        return QVariant(QVariant::Invalid);
+        return {QVariant::Invalid};
 
     auto& urlType = urlTypes.at(row);
 
@@ -792,7 +792,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
     default: break;
     }
 
-    return QVariant(QVariant::Invalid);
+    return {QVariant::Invalid};
 }
 
 QHash<int, QByteArray> UrlTypeDetailsModel::roleNames() const
@@ -814,7 +814,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     int row = index.row();
 
     if(row < 0 || row >= rowCount(index))
-        return QVariant(QVariant::Invalid);
+        return {QVariant::Invalid};
 
     auto* plugin = _loadedPlugins->at(row)._interface;
 
@@ -848,7 +848,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
         break;
     }
 
-    return QVariant(QVariant::Invalid);
+    return {QVariant::Invalid};
 }
 
 QHash<int, QByteArray> PluginDetailsModel::roleNames() const

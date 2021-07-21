@@ -78,7 +78,7 @@ void TableProxyModel::setSubSelection(const QItemSelection& subSelection, const 
 
 QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bottomRow)
 {
-    return QItemSelectionRange(index(topRow, 0), index(bottomRow, columnCount() - 1));
+    return {index(topRow, 0), index(bottomRow, columnCount() - 1)};
 }
 
 int TableProxyModel::mapToSourceRow(int proxyRow) const
