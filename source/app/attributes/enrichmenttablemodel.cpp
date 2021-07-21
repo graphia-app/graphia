@@ -25,13 +25,15 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);
 
-    _roleNames[Qt::UserRole + Results::SelectionA] = "SelectionA";
-    _roleNames[Qt::UserRole + Results::SelectionB] = "SelectionB";
-    _roleNames[Qt::UserRole + Results::Observed] = "Observed";
-    _roleNames[Qt::UserRole + Results::ExpectedTrial] = "ExpectedTrial";
-    _roleNames[Qt::UserRole + Results::OverRep] = "OverRep";
-    _roleNames[Qt::UserRole + Results::Fishers] = "Fishers";
-    _roleNames[Qt::UserRole + Results::AdjustedFishers] = "AdjustedFishers";
+    constexpr int RoleBase = Qt::UserRole + 1;
+
+    _roleNames[RoleBase + Results::SelectionA] = "SelectionA";
+    _roleNames[RoleBase + Results::SelectionB] = "SelectionB";
+    _roleNames[RoleBase + Results::Observed] = "Observed";
+    _roleNames[RoleBase + Results::ExpectedTrial] = "ExpectedTrial";
+    _roleNames[RoleBase + Results::OverRep] = "OverRep";
+    _roleNames[RoleBase + Results::Fishers] = "Fishers";
+    _roleNames[RoleBase + Results::AdjustedFishers] = "AdjustedFishers";
 }
 
 int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
