@@ -21,11 +21,18 @@
 
 #include <iterator>
 #include <utility>
+#include <cstddef>
 
 template<typename It, typename T, T It::value_type::*member>
-class pair_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+class pair_iterator
 {
 public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = ptrdiff_t;
+    using pointer = T*;
+    using reference = T&;
+
     explicit pair_iterator(It it) : _it(std::move(it)) {}
     auto& operator++() { return _it.operator++(); }
     auto operator++(int i) { return operator++(i); }
