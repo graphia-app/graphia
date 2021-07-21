@@ -167,7 +167,7 @@ ApplicationWindow
                         "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |" +
                         "    awk 'END {print $3}'; exit ${PIPESTATUS[0]}) && " +
                         "(rsync -av \"$VOLUME\"\/*.app $(dirname EXISTING_INSTALL); SYNCED=$?;" +
-                        "    (hdiutil detach \"$VOLUME\" || exit $?) && exit \"$SYNCED\")"
+                        "    (hdiutil detach -force \"$VOLUME\" || exit $?) && exit \"$SYNCED\")"
                 },
                 {
                     name: "linux",
