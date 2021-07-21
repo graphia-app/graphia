@@ -34,11 +34,11 @@ Rectangle::Rectangle() :
 static void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
     std::vector<float>& texCoords, std::vector<float>& tangents, std::vector<unsigned int>& indices)
 {
-    vertices.resize(3 * 4);
-    normals.resize(3 * 4);
-    tangents.resize(4 * 4);
-    texCoords.resize(2 * 4);
-    indices.resize(3 * 2);
+    vertices.resize(3u * 4u);
+    normals.resize(3u * 4u);
+    tangents.resize(4u * 4u);
+    texCoords.resize(2u * 4u);
+    indices.resize(3u * 2u);
 
     std::array<float, 12> verts{{
         1.0f, 0.0f, 0.0f,

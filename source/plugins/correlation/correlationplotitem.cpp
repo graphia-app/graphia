@@ -278,7 +278,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
             auto* scanLine = image.scanLine(y);
             for(int x = 0; x < image.width(); x++)
             {
-                auto* pixel = reinterpret_cast<QRgb*>(scanLine + (x * bytes));
+                auto* pixel = reinterpret_cast<QRgb*>(scanLine + static_cast<ptrdiff_t>(x * bytes));
                 const int gray = qGray(*pixel);
                 const int alpha = qAlpha(*pixel);
                 *pixel = QColor(gray, gray, gray, alpha).rgba();
