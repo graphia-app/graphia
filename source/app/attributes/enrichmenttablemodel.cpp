@@ -52,6 +52,7 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 {
     if(role < Qt::UserRole)
         return {};
+
     auto row = static_cast<size_t>(index.row());
     auto column = static_cast<size_t>(role - Qt::UserRole);
 
@@ -66,7 +67,7 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 
 QVariant EnrichmentTableModel::data(int row, Results result) const
 {
-    return data(index(row, 0), result + Qt::UserRole);
+    return data(index(row, 0), result + static_cast<int>(Qt::UserRole));
 }
 
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
