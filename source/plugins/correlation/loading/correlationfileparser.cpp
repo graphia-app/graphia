@@ -19,6 +19,7 @@
 #include "correlationfileparser.h"
 
 #include "correlationplugin.h"
+#include "correlation.h"
 #include "featurescaling.h"
 #include "quantilenormaliser.h"
 

@@ -16,6 +16,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationtype.h
     ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.h
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.h

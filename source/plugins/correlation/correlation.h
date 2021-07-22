@@ -20,8 +20,8 @@
 #define CORRELATION_H
 
 #include "correlationdatarow.h"
+#include "correlationtype.h"
 
-#include "shared/utils/qmlenum.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
 #include "shared/utils/threadpool.h"
@@ -35,29 +35,6 @@
 
 #include <QObject>
 #include <QString>
-
-// Note: the ordering of these enums is important from a save
-// file point of view; i.e. only append, don't reorder
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationType,
-    Pearson,
-    SpearmanRank,
-    Jaccard,
-    SMC,
-    EuclideanSimilarity,
-    CosineSimilarity);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationDataType,
-    Continuous,
-    Discrete);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationPolarity,
-    Positive,
-    Negative,
-    Both);
 
 class ICorrelation
 {

@@ -27,7 +27,7 @@
 
 #include "shared/graph/edgelist.h"
 
-#include "correlation.h"
+#include "correlationtype.h"
 #include "correlationdatarow.h"
 #include "datarecttablemodel.h"
 
