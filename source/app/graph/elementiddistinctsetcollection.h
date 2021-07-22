@@ -38,10 +38,8 @@ enum class MultiElementType
 template<typename C, typename T> class ElementIdDistinctSet;
 template<typename T> class ElementIdDistinctSets;
 
-template<typename T> class ElementIdDistinctSetCollection
+template<ElementIdConcept T> class ElementIdDistinctSetCollection
 {
-    static_assert(std::is_base_of_v<ElementId<T>, T>, "T must be an ElementId");
-
     friend class ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSet<const ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSets<ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>>;
@@ -316,9 +314,10 @@ public:
 using NodeIdDistinctSetCollection = ElementIdDistinctSetCollection<NodeId>;
 using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
-template<typename C, typename T> class ElementIdDistinctSet
+template<typename C, typename T>
+class ElementIdDistinctSet
 {
-    static_assert(std::is_same_v<ElementIdDistinctSetCollection<T>, typename std::remove_const<C>::type>,
+    static_assert(std::is_same_v<ElementIdDistinctSetCollection<T>, std::remove_const_t<C>>,
                   "C must be an ElementIdDistinctSetCollection");
 
     friend class ElementIdDistinctSets<ElementIdDistinctSet<C, T>>;

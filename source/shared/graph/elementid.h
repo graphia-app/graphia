@@ -67,4 +67,7 @@ class NodeId :      public ElementId<NodeId>      { using ElementId::ElementId; 
 class EdgeId :      public ElementId<EdgeId>      { using ElementId::ElementId; };
 class ComponentId : public ElementId<ComponentId> { using ElementId::ElementId; };
 
+template<typename T>
+concept ElementIdConcept = std::derived_from<T, ElementId<T>>;
+
 #endif // ELEMENTID_H
