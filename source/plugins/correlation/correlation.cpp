@@ -43,3 +43,36 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
 
     return nullptr;
 }
+
+double PearsonAlgorithm::evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+{
+    double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
+    double numerator = (static_cast<double>(numColumns) * productSum) - (rowA->sum() * rowB->sum());
+    double denominator = rowA->variability() * rowB->variability();
+
+    return numerator / denominator;
+}
+
+double EuclideanSimilarityAlgorithm::evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+{
+    double sum = 0.0;
+
+    for(size_t i = 0; i < numColumns; i++)
+    {
+        auto diff = rowA->valueAt(i) - rowB->valueAt(i);
+        auto diffSq = diff * diff;
+        sum += diffSq;
+    }
+
+    auto sqrtSum = sum != 0.0 ? std::sqrt(sum) : 0.0;
+
+    return 1.0 / (1.0 + sqrtSum);
+}
+
+double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+{
+    double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
+    double magnitudeProduct = rowA->magnitude() * rowB->magnitude();
+
+    return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
+}
