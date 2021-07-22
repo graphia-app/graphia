@@ -74,6 +74,8 @@ public:
     ConstDataIterator begin() const { return _data.begin(); }
     ConstDataIterator end() const { return _data.end(); }
 
+    const std::vector<T>& data() const { return _data; }
+
     uint64_t computeCostHint() const { return _cost; }
 
     size_t numColumns() const { return _numColumns; }
