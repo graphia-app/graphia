@@ -20,14 +20,9 @@
 #define ELEMENTID_H
 
 #include <cassert>
-#include <concepts>
+#include <type_traits>
 
-template<typename T>
-    requires
-    std::same_as<T, class NodeId> ||
-    std::same_as<T, class EdgeId> ||
-    std::same_as<T, class ComponentId>
-class ElementId
+template<typename T> class ElementId
 {
 private:
     static const int NullValue = -1;
@@ -41,9 +36,11 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
+    template<typename I> using EnableIfConvertibleToInt = typename std::enable_if_t<
+        std::is_integral<I>::value && std::is_convertible<I, int>::value>;
 
-    template<typename U>
-        requires std::integral<U> && std::convertible_to<U, int>
+    // Prevent warnings when initialising an ElementId with other integral types
+    template<typename U, typename = EnableIfConvertibleToInt<U>>
     explicit ElementId(U value) : ElementId(static_cast<int>(value)) {}
 
     explicit operator int() const { return _value; }
