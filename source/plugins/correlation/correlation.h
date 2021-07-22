@@ -26,6 +26,7 @@
 #include "shared/utils/cancellable.h"
 #include "shared/utils/threadpool.h"
 #include "shared/utils/redirects.h"
+#include "shared/utils/is_detected.h"
 
 #include "shared/graph/edgelist.h"
 
@@ -88,6 +89,9 @@ enum class RowType
 template<typename Algorithm, RowType rowType = RowType::Raw>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
+    template<typename A>
+    using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataRows{}));
+
 public:
     EdgeList process(const ContinuousDataRows& rows,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
@@ -109,6 +113,14 @@ public:
             if constexpr(rowType == RowType::Ranking)
                 row.generateRanking();
         }
+
+        Algorithm algorithm;
+
+        constexpr bool AlgorithmHasPreprocess =
+            std::experimental::is_detected_v<preprocess_t, Algorithm>;
+
+        if constexpr(AlgorithmHasPreprocess)
+            algorithm.preprocess(numColumns, rows);
 
         std::atomic<uint64_t> cost(0);
 
@@ -132,7 +144,7 @@ public:
                 if constexpr(rowType == RowType::Ranking)
                     rowB = rowB->ranking();
 
-                double r = Algorithm::evaluate(numColumns, rowA, rowB);
+                double r = algorithm.evaluate(numColumns, rowA, rowB);
 
                 if(!std::isfinite(r))
                     continue;
@@ -176,7 +188,7 @@ public:
 
 struct PearsonAlgorithm
 {
-    static double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+    double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
     {
         double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
         double numerator = (static_cast<double>(numColumns) * productSum) - (rowA->sum() * rowB->sum());
@@ -229,7 +241,7 @@ public:
 
 struct EuclideanSimilarityAlgorithm
 {
-    static double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+    double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
     {
         double sum = 0.0;
 
@@ -267,7 +279,7 @@ public:
 
 struct CosineSimilarityAlgorithm
 {
-    static double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+    double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
     {
         double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
         double magnitudeProduct = rowA->magnitude() * rowB->magnitude();
