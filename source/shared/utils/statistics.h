@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <limits>
+#include <algorithm>
 #include <cmath>
 
 namespace u
@@ -115,6 +116,23 @@ template<typename T,
 Statistics findStatisticsFor(const C<T, Args...>& container, bool storeValues = false)
 {
     return findStatisticsFor(container, [](const T& t) { return t; }, storeValues);
+}
+
+template<typename C>
+double medianOf(const C& container)
+{
+    if(container.empty())
+        return 0.0;
+
+    std::vector<double> sorted{container.begin(), container.end()};
+    std::sort(sorted.begin(), sorted.end());
+
+    auto mid = sorted.size() / 2;
+
+    if(sorted.size() % 2 == 0)
+        return (sorted.at(mid - 1) + sorted.at(mid)) / 2.0;
+
+    return sorted.at(mid);
 }
 
 } // namespace u

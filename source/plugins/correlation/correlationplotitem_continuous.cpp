@@ -20,6 +20,8 @@
 
 #include "correlationplugin.h"
 
+#include "shared/utils/statistics.h"
+
 // NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
 {
@@ -224,14 +226,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
 
             if(!rows.empty())
             {
-                std::sort(rowsEntries.begin(), rowsEntries.end());
-                double median = 0.0;
-                if(rowsEntries.length()  % 2 == 0)
-                    median = (rowsEntries[rowsEntries.length() / 2 - 1] + rowsEntries[rowsEntries.length() / 2]) / 2.0;
-                else
-                    median = rowsEntries[rowsEntries.length() / 2];
-
-                yDataAvg[col] = median;
+                yDataAvg[col] = u::medianOf(rowsEntries);
 
                 maxY = std::max(maxY, yDataAvg[col]);
                 minY = std::min(minY, yDataAvg[col]);
@@ -321,20 +316,6 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-static double medianOf(const QVector<double>& sortedData)
-{
-    if(sortedData.length() == 0)
-        return 0.0;
-
-    double median = 0.0;
-    if(sortedData.length() % 2 == 0)
-        median = (sortedData[sortedData.length() / 2 - 1] + sortedData[sortedData.length() / 2]) / 2.0;
-    else
-        median = sortedData[sortedData.length() / 2];
-
-    return median;
-}
-
 void CorrelationPlotItem::populateIQRPlot()
 {
     // Box-plots representing the IQR.
@@ -365,7 +346,7 @@ void CorrelationPlotItem::populateIQRPlot()
         if(!_selectedRows.empty())
         {
             std::sort(rowsEntries.begin(), rowsEntries.end());
-            double secondQuartile = medianOf(rowsEntries);
+            double secondQuartile = u::medianOf(rowsEntries);
             double firstQuartile = secondQuartile;
             double thirdQuartile = secondQuartile;
 
@@ -374,13 +355,13 @@ void CorrelationPlotItem::populateIQRPlot()
             {
                 if(rowsEntries.size() % 2 == 0)
                 {
-                    firstQuartile = medianOf(rowsEntries.mid(0, (rowsEntries.size() / 2)));
-                    thirdQuartile = medianOf(rowsEntries.mid((rowsEntries.size() / 2)));
+                    firstQuartile = u::medianOf(rowsEntries.mid(0, (rowsEntries.size() / 2)));
+                    thirdQuartile = u::medianOf(rowsEntries.mid((rowsEntries.size() / 2)));
                 }
                 else
                 {
-                    firstQuartile = medianOf(rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
-                    thirdQuartile = medianOf(rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
+                    firstQuartile = u::medianOf(rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
+                    thirdQuartile = u::medianOf(rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
                 }
             }
 
