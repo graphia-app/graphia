@@ -113,7 +113,7 @@ Statistics findStatisticsFor(const C& container,
 template<typename C>
 Statistics findStatisticsFor(const C& container, bool storeValues = false)
 {
-    return findStatisticsFor(container, [](C::const_reference& t) { return t; }, storeValues);
+    return findStatisticsFor(container, [](typename C::const_reference& t) { return t; }, storeValues);
 }
 
 template<typename C>
