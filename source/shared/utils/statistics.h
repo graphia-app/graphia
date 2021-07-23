@@ -52,9 +52,8 @@ struct Statistics
     }
 };
 
-template<typename T, typename Fn,
-    template<typename, typename...> class C, typename... Args>
-Statistics findStatisticsFor(const C<T, Args...>& container,
+template<typename C, typename Fn>
+Statistics findStatisticsFor(const C& container,
     Fn&& fn, bool storeValues = false)
 {
     Statistics s;
@@ -111,11 +110,10 @@ Statistics findStatisticsFor(const C<T, Args...>& container,
     return s;
 }
 
-template<typename T,
-    template<typename, typename...> class C, typename... Args>
-Statistics findStatisticsFor(const C<T, Args...>& container, bool storeValues = false)
+template<typename C>
+Statistics findStatisticsFor(const C& container, bool storeValues = false)
 {
-    return findStatisticsFor(container, [](const T& t) { return t; }, storeValues);
+    return findStatisticsFor(container, [](C::const_reference& t) { return t; }, storeValues);
 }
 
 template<typename C>
