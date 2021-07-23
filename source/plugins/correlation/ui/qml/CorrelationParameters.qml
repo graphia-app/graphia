@@ -798,6 +798,7 @@ BaseParameterDialog
                                     ListElement { text: qsTr("Spearman Rank");          value: CorrelationType.SpearmanRank }
                                     ListElement { text: qsTr("Euclidean Similarity");   value: CorrelationType.EuclideanSimilarity }
                                     ListElement { text: qsTr("Cosine Similarity");      value: CorrelationType.CosineSimilarity }
+                                    ListElement { text: qsTr("Bicor");                  value: CorrelationType.Bicor }
                                 }
                                 textRole: "text"
 

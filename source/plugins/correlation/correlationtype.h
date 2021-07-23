@@ -31,7 +31,8 @@ DEFINE_QML_ENUM(
     Jaccard,
     SMC,
     EuclideanSimilarity,
-    CosineSimilarity);
+    CosineSimilarity,
+    Bicor);
 
 DEFINE_QML_ENUM(
     Q_GADGET, CorrelationDataType,

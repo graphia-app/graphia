@@ -259,6 +259,34 @@ public:
     }
 };
 
+struct BicorAlgorithm
+{
+    const ContinuousDataRow* _base = nullptr;
+    ContinuousDataRows _processedRows;
+
+    void preprocess(size_t numColumns, const ContinuousDataRows& rows);
+    double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB);
+};
+
+class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm>
+{
+public:
+    QString name() const override { return QObject::tr("Bicor"); }
+    QString description() const override
+    {
+        return QObject::tr("Biweight Midcorrelation (also called Bicor) is a "
+            "measure of similarity between samples. It is median-based, rather "
+            "than mean-based, thus is less sensitive to outliers.");
+    }
+
+    QString attributeName() const override { return QObject::tr("Bicor"); }
+    QString attributeDescription() const override
+    {
+        return QObject::tr("%1 is a median-based measure of similarity between samples.")
+            .arg(u::redirectLink("bicor", QObject::tr("Bicor")));
+    }
+};
+
 class DiscreteCorrelation : public ICorrelation
 {
 public:

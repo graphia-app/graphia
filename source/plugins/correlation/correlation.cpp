@@ -26,6 +26,7 @@ std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(Correlation
     case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelation>();
     case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelation>();
     case CorrelationType::CosineSimilarity:     return std::make_unique<CosineSimilarityCorrelation>();
+    case CorrelationType::Bicor:                return std::make_unique<BicorCorrelation>();
     default: break;
     }
 
@@ -75,4 +76,53 @@ double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataRow* rowA
     double magnitudeProduct = rowA->magnitude() * rowB->magnitude();
 
     return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
+}
+
+void BicorAlgorithm::preprocess(size_t numColumns, const ContinuousDataRows& rows)
+{
+    _base = &rows.front();
+    _processedRows.resize(rows.size());
+
+    for(size_t i = 0; const auto& row : rows)
+    {
+        auto median = u::medianOf(row.data());
+
+        std::vector<double> absDiffs(numColumns);
+        std::vector<double> intermediate(numColumns);
+
+        for(size_t j = 0; auto value : row)
+        {
+            intermediate[j] = value - median;
+            absDiffs[j] = std::abs(intermediate[j]);
+            j++;
+        }
+
+        auto mad = u::medianOf(absDiffs);
+
+        for(size_t j = 0; auto value : intermediate)
+        {
+            auto u = value / (9.0 * mad);
+            auto v = 1 - (u * u);
+            auto newValue = value * (v * v) * (v > 0.0 ? 1.0 : 0.0);
+
+            intermediate[j++] = newValue;
+        }
+
+        auto& processedRow = _processedRows.at(i++);
+        processedRow = {intermediate, row.nodeId(), row.computeCostHint()};
+        processedRow.update();
+    }
+}
+
+double BicorAlgorithm::evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+{
+    auto a = std::distance(_base, rowA);
+    auto b = std::distance(_base, rowB);
+    const auto& processedRowA = _processedRows.at(a);
+    const auto& processedRowB = _processedRows.at(b);
+
+    double productSum = std::inner_product(processedRowA.begin(), processedRowA.end(),
+        processedRowB.begin(), 0.0);
+
+    return productSum / (processedRowA.magnitude() * processedRowB.magnitude());
 }
