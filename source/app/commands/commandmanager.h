@@ -21,6 +21,7 @@
 
 #include "shared/commands/icommandmanager.h"
 #include "shared/utils/fatalerror.h"
+#include "shared/utils/namedbool.h"
 
 #include <QtGlobal>
 #include <QObject>
@@ -143,7 +144,7 @@ private:
     };
 
     void executeReal(ICommandPtr command, CommandAction action);
-    void undoReal(bool rollback = false);
+    void undoReal(NamedBool<"rollback"> rollback = "rollback"_no);
     void redoReal();
 
     void clearCommandStackNoLocking();
