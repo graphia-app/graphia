@@ -159,7 +159,8 @@ void CorrelationPlotWorker::renderPixmap()
 
             auto* axis = axisRect->axis(QCPAxis::atBottom);
             axis->setRange(_xAxisMin, _xAxisMax);
-            axis->grid()->setVisible(_showGridLines && !columnsAreDense);
+            axis->grid()->setVisible(_showGridLines && !columnsAreDense &&
+                axis->basePen() != QPen(Qt::transparent));
             axis->setTicks(!columnsAreDense);
         }
     }
