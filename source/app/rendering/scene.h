@@ -21,8 +21,6 @@
 
 #include "projection.h"
 
-#include "shared/utils/namedbool.h"
-
 #include <QObject>
 
 #include <memory>
@@ -48,7 +46,7 @@ public:
     virtual void onShow() {}
     virtual void onHide() {}
 
-    virtual void resetView(NamedBool<"doTransition"> doTransition = "doTransition"_yes) = 0;
+    virtual void resetView(bool doTransition = true) = 0;
     virtual bool viewIsReset() const = 0;
 
     virtual void setProjection(Projection projection) = 0;

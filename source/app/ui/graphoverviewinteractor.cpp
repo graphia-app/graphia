@@ -72,20 +72,20 @@ void GraphOverviewInteractor::leftDoubleClick()
     auto componentId = componentIdAtPosition(cursorPosition());
 
     if(!componentId.isNull())
-        _graphRenderer->switchToComponentMode("doTransition"_yes, componentId, clickedNodeId());
+        _graphRenderer->switchToComponentMode(true, componentId, clickedNodeId());
 }
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
     if(angle > 0.0f)
-        _scene->zoom(GraphOverviewScene::ZoomType::In, x, y, "doTransition"_yes);
+        _scene->zoom(GraphOverviewScene::ZoomType::In, x, y, true);
     else
-        _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, "doTransition"_yes);
+        _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, true);
 }
 
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
-    _scene->zoom(value, x, y, "doTransition"_no);
+    _scene->zoom(value, x, y, false);
 }
 
 ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& position) const

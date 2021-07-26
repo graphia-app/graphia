@@ -20,12 +20,9 @@
 #define GRAPHQUICKITEM_H
 
 #include "graph/qmlelementid.h"
-
 #include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
 #include "rendering/shading.h"
-
-#include "shared/utils/namedbool.h"
 
 #include <QQuickFramebufferObject>
 #include <QTimer>
@@ -98,7 +95,7 @@ public:
     bool inOverviewMode() const;
     bool canEnterOverviewMode() const;
 
-    void switchToOverviewMode(NamedBool<"doTransition"> doTransition = "doTransition"_yes);
+    void switchToOverviewMode(bool doTransition = true);
     bool overviewModeSwitchPending();
 
     void moveFocusToNode(NodeId nodeId);

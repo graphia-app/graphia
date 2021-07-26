@@ -172,7 +172,7 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
     });
 }
 
-void CommandManager::undoReal(NamedBool<"rollback"> rollback)
+void CommandManager::undoReal(bool rollback)
 {
     if(!canUndoNoLocking())
         return;
@@ -534,7 +534,7 @@ void CommandManager::update()
 
     case CommandAction::Undo:       undoReal(); break;
     case CommandAction::Redo:       redoReal(); break;
-    case CommandAction::Rollback:   undoReal("rollback"_yes); break;
+    case CommandAction::Rollback:   undoReal(true); break;
     default: break;
     }
 }

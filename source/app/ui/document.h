@@ -22,30 +22,22 @@
 #include "shared/ui/idocument.h"
 
 #include "attributes/availableattributesmodel.h"
-#include "attributes/enrichmenttablemodel.h"
-
 #include "commands/commandmanager.h"
-
 #include "graph/qmlelementid.h"
-
 #include "layout/layout.h"
-
 #include "loading/parserthread.h"
-
 #include "rendering/compute/gpucomputethread.h"
 #include "rendering/projection.h"
 #include "rendering/shading.h"
-
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/preferenceswatcher.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/failurereason.h"
-#include "shared/utils/namedbool.h"
-
 #include "transform/availabletransformsmodel.h"
-
 #include "ui/findoptions.h"
+
+#include "attributes/enrichmenttablemodel.h"
 
 #include <QQuickItem>
 #include <QString>

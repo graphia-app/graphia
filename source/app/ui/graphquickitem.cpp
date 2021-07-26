@@ -196,7 +196,7 @@ void GraphQuickItem::requestPreview(int width, int height, bool fillSize)
     update();
 }
 
-void GraphQuickItem::switchToOverviewMode(NamedBool<"doTransition">)
+void GraphQuickItem::switchToOverviewMode(bool)
 {
     _overviewModeSwitchPending = true;
     update();

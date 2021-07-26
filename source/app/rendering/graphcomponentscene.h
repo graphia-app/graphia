@@ -22,9 +22,7 @@
 #include "scene.h"
 
 #include "graph/componentmanager.h"
-
 #include "shared/graph/grapharray.h"
-
 #include "transition.h"
 
 class Graph;
@@ -53,7 +51,7 @@ public:
     void onShow() override;
 
     ComponentId componentId() const { return _componentId; }
-    void setComponentId(ComponentId componentId, NamedBool<"doTransition"> doTransition = "doTransition"_no);
+    void setComponentId(ComponentId componentId, bool doTransition = false);
 
     int width() const { return _width; }
     int height() const { return _height; }
@@ -62,7 +60,7 @@ public:
     bool savedViewIsReset() const;
     void restoreViewData() const;
 
-    void resetView(NamedBool<"doTransition"> doTransition) override;
+    void resetView(bool doTransition) override;
     bool viewIsReset() const override;
 
     void setProjection(Projection projection) override;
@@ -99,8 +97,8 @@ private:
 
     void updateRendererVisibility();
 
-    void finishComponentTransition(ComponentId componentId, NamedBool<"doTransition"> doTransition);
-    void finishComponentTransitionOnRendererThread(ComponentId componentId, NamedBool<"doTransition"> doTransition);
+    void finishComponentTransition(ComponentId componentId, bool doTransition);
+    void finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition);
     void performQueuedTransition();
 
     bool componentTransitionActive() const;

@@ -124,7 +124,7 @@ void GraphOverviewScene::onHide()
     setVisible(false);
 }
 
-void GraphOverviewScene::resetView(NamedBool<"doTransition"> doTransition)
+void GraphOverviewScene::resetView(bool doTransition)
 {
     setZoomFactor(minZoomFactor());
     setOffset(0.0f, 0.0f);
@@ -151,7 +151,7 @@ void GraphOverviewScene::pan(float dx, float dy)
     updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, float y, NamedBool<"doTransition"> doTransition)
+void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, float y, bool doTransition)
 {
     const float ZOOM_INCREMENT = 0.2f;
 
@@ -163,7 +163,7 @@ void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, fl
     }
 }
 
-void GraphOverviewScene::zoom(float delta, float x, float y, NamedBool<"doTransition"> doTransition)
+void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
     float nx = x / static_cast<float>(_width);
     float ny = y / static_cast<float>(_height);

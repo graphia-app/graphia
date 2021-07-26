@@ -1358,8 +1358,7 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
     }
 }
 
-AttributeChangesTracker::AttributeChangesTracker(GraphModel* graphModel,
-    NamedBool<"emitOnDestruct"> emitOnDestruct) :
+AttributeChangesTracker::AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct) :
     _graphModel(graphModel), _emitOnDestruct(emitOnDestruct)
 {
     _graphModel->_->_attributeChangesTrackers.insert(this);

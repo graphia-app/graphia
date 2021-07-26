@@ -27,7 +27,6 @@
 
 #include "shared/graph/igraph.h"
 #include "shared/graph/grapharray.h"
-#include "shared/utils/namedbool.h"
 
 #include "limitconstants.h"
 
@@ -121,7 +120,7 @@ public:
     CameraAndLighting* cameraAndLighting() { return &_viewData._cameraAndLighting; }
     const CameraAndLighting* cameraAndLighting() const { return &_viewData._cameraAndLighting; }
 
-    void zoom(float delta, NamedBool<"doTransition"> doTransition);
+    void zoom(float delta, bool doTransition);
     void zoomToDistance(float distance);
 
     void cloneViewDataFrom(const GraphComponentRenderer& other);

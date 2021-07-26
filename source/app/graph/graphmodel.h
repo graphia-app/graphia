@@ -26,7 +26,6 @@
 #include "shared/loading/userelementdata.h"
 
 #include "shared/utils/preferenceswatcher.h"
-#include "shared/utils/namedbool.h"
 
 #include "attributes/attribute.h"
 
@@ -228,8 +227,7 @@ private:
     void change(const QString& name);
 
 public:
-    explicit AttributeChangesTracker(GraphModel* graphModel,
-        NamedBool<"emitOnDestruct"> emitOnDestruct = "emitOnDestruct"_yes);
+    explicit AttributeChangesTracker(GraphModel* graphModel, bool emitOnDestruct = true);
     ~AttributeChangesTracker();
 
     QStringList added() const { return {_added.begin(), _added.end()}; }
