@@ -96,6 +96,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/movablepointer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/msvcwarningsuppress.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/namedbool.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/pair_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/passkey.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.h
