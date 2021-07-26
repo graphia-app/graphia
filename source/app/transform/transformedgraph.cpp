@@ -174,7 +174,7 @@ void TransformedGraph::rebuild()
                 continue;
             }
 
-            const AttributeChangesTracker tracker(_graphModel, false);
+            const AttributeChangesTracker tracker(_graphModel, "emitOnDestruct"_no);
 
             setCurrentTransform(transform.get());
             transform->uncancel();
