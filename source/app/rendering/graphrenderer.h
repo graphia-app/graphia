@@ -36,6 +36,7 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/namedbool.h"
 
 #include "shared/utils/qmlenum.h"
 
@@ -131,8 +132,8 @@ public:
     bool viewIsReset() const;
     void setTextColor(QColor textColor);
 
-    void switchToOverviewMode(bool doTransition = true);
-    void switchToComponentMode(bool doTransition = true,
+    void switchToOverviewMode(NamedBool<"doTransition"> doTransition = "doTransition"_yes);
+    void switchToComponentMode(NamedBool<"doTransition"> doTransition = "doTransition"_yes,
         ComponentId componentId = {}, NodeId nodeId = {}, float radius = -1.0f);
     void rendererStartedTransition();
     void rendererFinishedTransition();
@@ -253,7 +254,7 @@ private:
     GLuint sdfTextureOffscreen() const;
     void swapSdfTexture();
 
-    void updateText(bool wait = false);
+    void updateText(NamedBool<"wait"> = "wait"_false);
 
     void enableSceneUpdate();
     void disableSceneUpdate();
@@ -282,10 +283,10 @@ private:
     std::mutex _resetOpenGLStateMutex;
     std::function<void()> resetOpenGLState;
 
-    void finishTransitionToOverviewMode(bool doTransition);
-    void finishTransitionToOverviewModeOnRendererThread(bool doTransition);
-    void finishTransitionToComponentMode(bool doTransition);
-    void finishTransitionToComponentModeOnRendererThread(bool doTransition);
+    void finishTransitionToOverviewMode(NamedBool<"doTransition"> doTransition);
+    void finishTransitionToOverviewModeOnRendererThread(NamedBool<"doTransition"> doTransition);
+    void finishTransitionToComponentMode(NamedBool<"doTransition"> doTransition);
+    void finishTransitionToComponentModeOnRendererThread(NamedBool<"doTransition"> doTransition);
 
     void setScene(Scene* scene);
     void setInteractor(Interactor* interactor) { _interactor = interactor; }

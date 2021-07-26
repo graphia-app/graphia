@@ -137,11 +137,11 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
         // If the graph is a single component or empty, use component mode by default
         if(graph->numComponents() <= 1)
-            switchToComponentMode(false);
+            switchToComponentMode("doTransition"_no);
         else
-            switchToOverviewMode(false);
+            switchToOverviewMode("doTransition"_no);
 
-        updateText(true);
+        updateText("wait"_true);
 
     }).then([this]
     {
@@ -514,7 +514,7 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
     {
         // To focus on a node, we need to be in component mode
         auto componentId = _graphModel->graph().componentIdOfNode(nodeId);
-        switchToComponentMode(true, componentId, nodeId, radius);
+        switchToComponentMode("doTransition"_yes, componentId, nodeId, radius);
     }
 }
 
@@ -525,7 +525,7 @@ void GraphRenderer::moveFocusToComponent(ComponentId componentId)
         if(componentId != _graphComponentScene->componentId())
             rendererStartedTransition();
 
-        _graphComponentScene->setComponentId(componentId, true);
+        _graphComponentScene->setComponentId(componentId, "doTransition"_yes);
     }
 }
 
@@ -598,7 +598,7 @@ void GraphRenderer::onEdgeAddedToComponent(const Graph*, EdgeId edgeId, Componen
     _hiddenEdges.set(edgeId, true);
 }
 
-void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
+void GraphRenderer::finishTransitionToOverviewMode(NamedBool<"doTransition"> doTransition)
 {
     setMode(GraphRenderer::Mode::Overview);
     setScene(_graphOverviewScene);
@@ -614,14 +614,14 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
             renderer->resetView();
         }
 
-        _graphOverviewScene->resetView(false);
+        _graphOverviewScene->resetView("doTransition"_no);
         _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId());
     }
 
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransition)
+void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(NamedBool<"doTransition"> doTransition)
 {
     setMode(GraphRenderer::Mode::Overview);
     executeOnRendererThread([this, doTransition]
@@ -630,7 +630,7 @@ void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransi
     }, QStringLiteral("GraphRenderer::finishTransitionToOverviewMode"));
 }
 
-void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
+void GraphRenderer::finishTransitionToComponentMode(NamedBool<"doTransition"> doTransition)
 {
     setMode(GraphRenderer::Mode::Component);
     setScene(_graphComponentScene);
@@ -646,7 +646,7 @@ void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTransition)
+void GraphRenderer::finishTransitionToComponentModeOnRendererThread(NamedBool<"doTransition"> doTransition)
 {
     setMode(GraphRenderer::Mode::Component);
     executeOnRendererThread([this, doTransition]
@@ -655,7 +655,7 @@ void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTrans
     }, QStringLiteral("GraphRenderer::finishTransitionToComponentMode"));
 }
 
-void GraphRenderer::switchToOverviewMode(bool doTransition)
+void GraphRenderer::switchToOverviewMode(NamedBool<"doTransition"> doTransition)
 {
     // Refuse to switch to overview mode if there is nothing to display
     if(_graphModel->graph().numComponents() <= 1)
@@ -681,21 +681,21 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
                 {
                     sceneFinishedTransition();
                     _transition.willBeImmediatelyReused();
-                    finishTransitionToOverviewModeOnRendererThread(true);
+                    finishTransitionToOverviewModeOnRendererThread("doTransition"_yes);
                 });
 
-                _graphComponentScene->resetView(false);
+                _graphComponentScene->resetView("doTransition"_no);
             }
             else
-                finishTransitionToOverviewModeOnRendererThread(true);
+                finishTransitionToOverviewModeOnRendererThread("doTransition"_yes);
         }
         else
-            finishTransitionToOverviewMode(false);
+            finishTransitionToOverviewMode("doTransition"_no);
 
     }, QStringLiteral("GraphRenderer::switchToOverviewMode"));
 }
 
-void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId, float radius)
+void GraphRenderer::switchToComponentMode(NamedBool<"doTransition"> doTransition, ComponentId componentId, NodeId nodeId, float radius)
 {
     doTransition = doTransition && mode() != GraphRenderer::Mode::Component;
 
@@ -720,14 +720,14 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
                 if(!_graphComponentScene->savedViewIsReset())
                 {
                     _transition.willBeImmediatelyReused();
-                    finishTransitionToComponentModeOnRendererThread(true);
+                    finishTransitionToComponentModeOnRendererThread("doTransition"_yes);
                 }
                 else
-                    finishTransitionToComponentModeOnRendererThread(false);
+                    finishTransitionToComponentModeOnRendererThread("doTransition"_no);
             });
         }
         else
-            finishTransitionToComponentMode(false);
+            finishTransitionToComponentMode("doTransition"_no);
 
     }, QStringLiteral("GraphRenderer::switchToComponentMode"));
 }
@@ -850,7 +850,7 @@ GLuint GraphRenderer::sdfTexture() const
     return _sdfTexture.front();
 }
 
-void GraphRenderer::updateText(bool wait)
+void GraphRenderer::updateText(NamedBool<"wait"> wait)
 {
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
@@ -1164,7 +1164,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     else if(!focusComponentId.isNull())
     {
         if(mode() == Mode::Overview)
-            switchToComponentMode(true, focusComponentId);
+            switchToComponentMode("doTransition"_yes, focusComponentId);
         else
             moveFocusToComponent(focusComponentId);
     }

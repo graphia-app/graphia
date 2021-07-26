@@ -424,7 +424,7 @@ void GraphComponentRenderer::setAlpha(float alpha)
     }
 }
 
-void GraphComponentRenderer::zoom(float delta, bool doTransition)
+void GraphComponentRenderer::zoom(float delta, NamedBool<"doTransition"> doTransition)
 {
     Q_ASSERT(_graphRenderer != nullptr);
 

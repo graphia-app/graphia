@@ -1330,7 +1330,7 @@ void Document::switchToOverviewMode(bool doTransition)
     if(busy())
         return;
 
-    _graphQuickItem->switchToOverviewMode(doTransition);
+    _graphQuickItem->switchToOverviewMode(NamedBool<"doTransition">(doTransition));
 }
 
 int Document::projection() const

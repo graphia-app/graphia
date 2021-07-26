@@ -123,7 +123,7 @@ void GraphComponentInteractor::wheelMove(float angle, float, float)
     {
         const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
 
-        renderer->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
+        renderer->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, "doTransition"_yes);
     }
 }
 
@@ -132,7 +132,7 @@ void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
     auto* renderer = componentRendererUnderCursor();
 
     if(renderer != nullptr)
-        renderer->zoom(value, false);
+        renderer->zoom(value, "doTransition"_no);
 }
 
 GraphComponentRenderer* GraphComponentInteractor::componentRendererAtPosition(const QPoint&) const

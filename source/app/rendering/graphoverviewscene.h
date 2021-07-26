@@ -68,7 +68,7 @@ public:
 
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
-    void resetView(bool doTransition) override;
+    void resetView(NamedBool<"doTransition"> doTransition) override;
     bool viewIsReset() const override;
 
     void setProjection(Projection projection) override;
@@ -81,8 +81,8 @@ public:
         Out
     };
 
-    void zoom(ZoomType zoomType, float x, float y, bool doTransition);
-    void zoom(float delta, float x, float y, bool doTransition);
+    void zoom(ZoomType zoomType, float x, float y, NamedBool<"doTransition"> doTransition);
+    void zoom(float delta, float x, float y, NamedBool<"doTransition"> doTransition);
 
     Transition& startTransitionFromComponentMode(ComponentId focusComponentId,
         float duration = 0.3f, Transition::Type transitionType = Transition::Type::EaseInEaseOut);

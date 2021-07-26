@@ -134,7 +134,7 @@ void GraphComponentScene::onShow()
     updateRendererVisibility();
 }
 
-void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
+void GraphComponentScene::finishComponentTransition(ComponentId componentId, NamedBool<"doTransition"> doTransition)
 {
     // KEEP IN MIND: at this point _componentId may refer to a frozen component that is no longer
     // in the graph, and is only being kept around to refer to its renderer; in other words don't
@@ -223,7 +223,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
     updateRendererVisibility();
 }
 
-void GraphComponentScene::finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition)
+void GraphComponentScene::finishComponentTransitionOnRendererThread(ComponentId componentId, NamedBool<"doTransition"> doTransition)
 {
     _graphRenderer->executeOnRendererThread([this, componentId, doTransition]
     {
@@ -249,7 +249,7 @@ bool GraphComponentScene::componentTransitionActive() const
     return !_transitioningComponentId.isNull();
 }
 
-void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransition)
+void GraphComponentScene::setComponentId(ComponentId componentId, NamedBool<"doTransition"> doTransition)
 {
     _beingRemoved = false;
 
@@ -269,16 +269,16 @@ void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransit
             [this, componentId]
             {
                 _graphRenderer->transition().willBeImmediatelyReused();
-                finishComponentTransitionOnRendererThread(componentId, true);
+                finishComponentTransitionOnRendererThread(componentId, "doTransition"_yes);
             });
 
-            resetView(false);
+            resetView("doTransition"_no);
         }
         else
-            finishComponentTransitionOnRendererThread(componentId, true);
+            finishComponentTransitionOnRendererThread(componentId, "doTransition"_yes);
     }
     else
-        finishComponentTransition(componentId, false);
+        finishComponentTransition(componentId, "doTransition"_no);
 }
 
 void GraphComponentScene::saveViewData() const
@@ -301,7 +301,7 @@ void GraphComponentScene::restoreViewData() const
         componentRenderer()->restoreViewData();
 }
 
-void GraphComponentScene::resetView(bool doTransition)
+void GraphComponentScene::resetView(NamedBool<"doTransition"> doTransition)
 {
     if(componentRenderer() != nullptr)
     {
@@ -369,7 +369,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
         newComponentRenderer->saveViewData();
         newComponentRenderer->resetView();
 
-        setComponentId(componentId, true);
+        setComponentId(componentId, "doTransition"_yes);
     }
     else if(!componentTransitionRequired && !componentTransitionActive())
     {
@@ -490,7 +490,7 @@ void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId
     _graphRenderer->executeOnRendererThread([this, componentId]
     {
         if(_componentId.isNull())
-            setComponentId(componentId, visible());
+            setComponentId(componentId, NamedBool<"doTransition">(visible()));
     }, QStringLiteral("GraphComponentScene::onComponentAdded"));
 }
 
@@ -545,7 +545,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
 
                 if(_beingRemoved)
                 {
-                    setComponentId(_defaultComponentId, true);
+                    setComponentId(_defaultComponentId, "doTransition"_yes);
                     return true;
                 }
 
@@ -623,7 +623,7 @@ void GraphComponentScene::setProjection(Projection projection)
             startProjectionTransition();
         });
 
-        resetView(false);
+        resetView("doTransition"_no);
     }
     else
         startProjectionTransition();
