@@ -279,7 +279,7 @@ public:
             "than mean-based, thus is less sensitive to outliers.");
     }
 
-    QString attributeName() const override { return QObject::tr("Bicor"); }
+    QString attributeName() const override { return QObject::tr("Bicor Correlation Value"); }
     QString attributeDescription() const override
     {
         return QObject::tr("%1 is a median-based measure of similarity between samples.")
