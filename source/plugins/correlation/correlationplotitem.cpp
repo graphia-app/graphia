@@ -1025,14 +1025,8 @@ void CorrelationPlotItem::updateSortMap()
 
         if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
         {
-            const auto& columnAnnotations = _pluginInstance->columnAnnotations();
             auto columnAnnotationName = qmlColumnSortOrder[QStringLiteral("text")].toString();
-            auto it = std::find_if(columnAnnotations.begin(), columnAnnotations.end(),
-                [&columnAnnotationName](const auto& v) { return v.name() == columnAnnotationName; });
-
-            Q_ASSERT(it != columnAnnotations.end());
-            if(it != columnAnnotations.end())
-                columnSortOrder._annotation = &(*it);
+            columnSortOrder._annotation = _pluginInstance->columnAnnotationByName(columnAnnotationName);
         }
 
         columnSortOrders.emplace_back(columnSortOrder);

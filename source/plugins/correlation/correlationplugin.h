@@ -176,6 +176,7 @@ public:
     QColor nodeColorForRow(int row) const;
 
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
+    const ColumnAnnotation* columnAnnotationByName(const QString& name) const;
 
     QString attributeValueFor(const QString& attributeName, int row) const;
 

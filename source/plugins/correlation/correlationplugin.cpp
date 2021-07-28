@@ -750,6 +750,18 @@ QColor CorrelationPluginInstance::nodeColorForRow(int row) const
     return graphModel()->nodeVisual(nodeId).outerColor();
 }
 
+const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const QString& name) const
+{
+    auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
+        [&name](const auto& v) { return v.name() == name; });
+
+    Q_ASSERT(it != _columnAnnotations.end());
+    if(it != _columnAnnotations.end())
+        return &(*it);
+
+    return nullptr;
+}
+
 QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, int row) const
 {
     const auto* attribute = _graphModel->attributeByName(attributeName);
