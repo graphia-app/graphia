@@ -334,86 +334,86 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::populateIQRPlot()
+static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, int column, QVector<double> values)
 {
-    // Box-plots representing the IQR.
+    // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
-    auto* statPlot = new QCPStatisticalBox(_continuousXAxis, _continuousYAxis);
-    statPlot->setName(tr("Median (IQR plots) of selection"));
+    if(values.empty())
+        return;
 
-    double minY = std::numeric_limits<double>::max();
-    double maxY = std::numeric_limits<double>::lowest();
+    auto* statisticalBox = new QCPStatisticalBox(keyAxis, valueAxis);
+    statisticalBox->setName(QObject::tr("IQR"));
 
-    QVector<double> rowsEntries(_selectedRows.length());
-    QVector<double> outliers;
+    // Partial (efficient) sort which is suitable for IQR calculation
+    auto const Q1 = values.size() / 4;
+    auto const Q2 = values.size() / 2;
+    auto const Q3 = Q1 + Q2;
 
-    // Calculate IQRs, outliers and ranges
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
+    std::nth_element(values.begin(),          values.begin() + Q1, values.end());
+    std::nth_element(values.begin() + Q1 + 1, values.begin() + Q2, values.end());
+    std::nth_element(values.begin() + Q2 + 1, values.begin() + Q3, values.end());
+
+    double secondQuartile = u::medianOf(values);
+    double firstQuartile = secondQuartile;
+    double thirdQuartile = secondQuartile;
+
+    // Don't calculate medians if there's only one sample
+    if(values.size() > 1)
     {
-        rowsEntries.clear();
-        outliers.clear();
-        const auto& selectedRows = std::as_const(_selectedRows);
-        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(rowsEntries),
-        [this, col](auto row)
+        if(values.size() % 2 == 0)
         {
-            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
-        });
-
-        if(!_selectedRows.empty())
+            firstQuartile = u::medianOf(values.mid(0, (values.size() / 2)));
+            thirdQuartile = u::medianOf(values.mid((values.size() / 2)));
+        }
+        else
         {
-            std::sort(rowsEntries.begin(), rowsEntries.end());
-            double secondQuartile = u::medianOf(rowsEntries);
-            double firstQuartile = secondQuartile;
-            double thirdQuartile = secondQuartile;
-
-            // Don't calculate medians if there's only one sample!
-            if(rowsEntries.size() > 1)
-            {
-                if(rowsEntries.size() % 2 == 0)
-                {
-                    firstQuartile = u::medianOf(rowsEntries.mid(0, (rowsEntries.size() / 2)));
-                    thirdQuartile = u::medianOf(rowsEntries.mid((rowsEntries.size() / 2)));
-                }
-                else
-                {
-                    firstQuartile = u::medianOf(rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
-                    thirdQuartile = u::medianOf(rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
-                }
-            }
-
-            double iqr = thirdQuartile - firstQuartile;
-            double minValue = secondQuartile;
-            double maxValue = secondQuartile;
-
-            for(auto row : std::as_const(rowsEntries))
-            {
-                // Find Maximum and minimum non-outliers
-                if(row < thirdQuartile + (iqr * 1.5))
-                    maxValue = std::max(maxValue, row);
-
-                if(row > firstQuartile - (iqr * 1.5))
-                    minValue = std::min(minValue, row);
-
-                // Find outliers
-                if(row > thirdQuartile + (iqr * 1.5) ||
-                    row < firstQuartile - (iqr * 1.5))
-                {
-                    outliers.push_back(row);
-                }
-
-                maxY = std::max(maxY, row);
-                minY = std::min(minY, row);
-            }
-
-            // Add data for each column individually because setData doesn't let us do outliers(??)
-            statPlot->addData(col, minValue, firstQuartile, secondQuartile, thirdQuartile,
-                              maxValue, outliers);
+            firstQuartile = u::medianOf(values.mid(0, ((values.size() - 1) / 2)));
+            thirdQuartile = u::medianOf(values.mid(((values.size() + 1) / 2)));
         }
     }
 
-    setContinousYAxisRange(minY, maxY);
+    double iqr = thirdQuartile - firstQuartile;
+    double minValue = secondQuartile;
+    double maxValue = secondQuartile;
+    QVector<double> outliers;
+
+    for(auto value : std::as_const(values))
+    {
+        // Find Maximum and minimum non-outliers
+        if(value < thirdQuartile + (iqr * 1.5))
+            maxValue = std::max(maxValue, value);
+
+        if(value > firstQuartile - (iqr * 1.5))
+            minValue = std::min(minValue, value);
+
+        // Find outliers
+        if(value > thirdQuartile + (iqr * 1.5) || value < firstQuartile - (iqr * 1.5))
+            outliers.push_back(value);
+    }
+
+    statisticalBox->addData(column, minValue, firstQuartile, secondQuartile, thirdQuartile,
+        maxValue, outliers);
+}
+
+void CorrelationPlotItem::populateIQRPlot()
+{
+    for(int column = 0; column < static_cast<int>(_pluginInstance->numContinuousColumns()); column++)
+    {
+        QVector<double> values;
+
+        const auto& selectedRows = std::as_const(_selectedRows);
+        std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(values),
+        [this, column](auto row)
+        {
+            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[column]));
+        });
+
+        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
+    }
+
+    setContinousYAxisRangeForSelection();
 }
 
 void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
