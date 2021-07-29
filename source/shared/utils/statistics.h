@@ -122,15 +122,19 @@ double medianOf(const C& container)
     if(container.empty())
         return 0.0;
 
-    std::vector<double> sorted{container.begin(), container.end()};
-    std::sort(sorted.begin(), sorted.end());
+    std::vector<double> v{container.begin(), container.end()};
 
-    auto mid = sorted.size() / 2;
+    auto mid = v.size() / 2;
+    std::nth_element(v.begin(), v.begin() + mid, v.end());
+    auto median = v.at(mid);
 
-    if(sorted.size() % 2 == 0)
-        return (sorted.at(mid - 1) + sorted.at(mid)) / 2.0;
+    if(v.size() % 2 == 0)
+    {
+        auto max = *std::max_element(v.begin(), v.begin() + mid);
+        median = (max + median) / 2.0;
+    }
 
-    return sorted.at(mid);
+    return median;
 }
 
 } // namespace u
