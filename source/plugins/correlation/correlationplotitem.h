@@ -342,6 +342,7 @@ private:
 
     void computeXAxisRange();
     void setContinousYAxisRange(double min, double max);
+    void setContinousYAxisRangeForSelection();
     QVector<double> meanAverageData(double& min, double& max, const QVector<int>& rows);
 
     void updateColumnAnnotationVisibility();

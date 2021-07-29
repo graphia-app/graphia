@@ -36,6 +36,24 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
     _continuousYAxis->setRange(min, max);
 }
 
+void CorrelationPlotItem::setContinousYAxisRangeForSelection()
+{
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
+
+    for(auto row : std::as_const(_selectedRows))
+    {
+        for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
+        {
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[column]));
+            maxY = std::max(maxY, value);
+            minY = std::min(minY, value);
+        }
+    }
+
+    setContinousYAxisRange(minY, maxY);
+}
+
 void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
 {
     if(_dispersionVisualType != dispersionVisualType)
