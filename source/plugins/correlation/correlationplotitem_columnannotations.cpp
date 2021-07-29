@@ -54,16 +54,16 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     Q_ASSERT(layoutGrid != nullptr);
 
     // Find the column in which axisRect exists
-    int column = 0;
-    for(; column < layoutGrid->columnCount(); column++)
+    int layoutColumn = 0;
+    for(; layoutColumn < layoutGrid->columnCount(); layoutColumn++)
     {
-        if(layoutGrid->element(0, column) == axisRect)
+        if(layoutGrid->element(0, layoutColumn) == axisRect)
             break;
     }
 
-    Q_ASSERT(column < layoutGrid->columnCount());
+    Q_ASSERT(layoutColumn < layoutGrid->columnCount());
 
-    auto* layoutElement = layoutGrid->hasElement(1, column) ? layoutGrid->element(1, column) : nullptr;
+    auto* layoutElement = layoutGrid->hasElement(1, layoutColumn) ? layoutGrid->element(1, layoutColumn) : nullptr;
 
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
     bool invisible = !_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty();
@@ -89,7 +89,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     if(layoutElement == nullptr)
     {
         columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
-        layoutGrid->addElement(1, column, columnAnnotationsAxisRect);
+        layoutGrid->addElement(1, layoutColumn, columnAnnotationsAxisRect);
     }
     else
     {
@@ -149,7 +149,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     });
 
     // We only want the ticker on the left most column annotation QCPAxisRect
-    if(column == 0)
+    if(layoutColumn == 0)
     {
         // NOLINTNEXTLINE clang-analyzer-cplusplus.NewDeleteLeaks
         QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
