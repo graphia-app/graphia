@@ -104,5 +104,7 @@ namespace u
 
     QString escapeQuotes(QString s);
 
+    QString pluralise(size_t count, const QString& singular, const QString& plural);
+
 } // namespace u
 #endif // STRING_H

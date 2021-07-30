@@ -343,3 +343,11 @@ QString u::escapeQuotes(QString s)
     s.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
     return s;
 }
+
+QString u::pluralise(size_t count, const QString& singular, const QString& plural)
+{
+    if(count == 1)
+        return QStringLiteral("1 %1").arg(singular);
+
+    return QStringLiteral("%1 %2").arg(count).arg(plural);
+}
