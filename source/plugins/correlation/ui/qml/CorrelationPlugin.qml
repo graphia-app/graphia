@@ -465,7 +465,7 @@ PluginContent
                 scalingMenu.addItem("").action = paretoScaling;
                 scalingMenu.enabled = Qt.binding(function()
                 {
-                    return plot.averagingType === PlotAveragingType.Individual
+                    return plot.averagingType === PlotAveragingType.Individual;
                 });
 
                 scalingMenu.addSeparator();
@@ -547,7 +547,7 @@ PluginContent
                 dispersionMenu.enabled = Qt.binding(function()
                 {
                     return plot.averagingType === PlotAveragingType.MeanLine ||
-                            plot.averagingType === PlotAveragingType.MeanHistogram
+                        plot.averagingType === PlotAveragingType.MeanHistogram;
                 });
 
                 menu.addItem("").action = toggleIncludeYZero;
