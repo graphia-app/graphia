@@ -162,6 +162,7 @@ void CorrelationPlotWorker::renderPixmap()
             axis->grid()->setVisible(_showGridLines && !columnsAreDense &&
                 axis->basePen() != QPen(Qt::transparent));
             axis->setTicks(!columnsAreDense);
+            axis->setSubTicks(false);
         }
     }
 
@@ -245,6 +246,8 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::isWideChanged);
+
+    connect(this, &CorrelationPlotItem::numVisibleColumnsChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
 }
 
 CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
@@ -518,12 +521,13 @@ void CorrelationPlotItem::updateTooltip()
                     value = plottable1D->dataMainValue(dataIndex);
                 }
 
-                auto mappedCol = static_cast<int>(_sortMap.at(index));
+                auto columnName = _groupByAnnotation ?
+                    u::pluralise(_annotationGroupMap.at(index).size(), tr("column"), tr("columns")) :
+                    _pluginInstance->columnName(static_cast<int>(_sortMap.at(index)));
 
                 _hoverLabel->setText(tr("%1, %2: %3")
                     .arg(plottableUnderCursor->name(),
-                    _pluginInstance->columnName(mappedCol),
-                    u::formatNumberScientific(value)));
+                    columnName, u::formatNumberScientific(value)));
             }
         }
 
@@ -860,10 +864,18 @@ size_t CorrelationPlotItem::numColumns() const
         _pluginInstance->numContinuousColumns();
 }
 
+size_t CorrelationPlotItem::numVisibleColumns() const
+{
+    if(_groupByAnnotation)
+        return _annotationGroupMap.size();
+
+    return numColumns();
+}
+
 void CorrelationPlotItem::computeXAxisRange()
 {
     auto min = 0.0;
-    auto max = static_cast<double>(numColumns() - 1);
+    auto max = static_cast<double>(numVisibleColumns() - 1);
     auto maxVisibleColumns = columnAxisWidth() / minColumnWidth();
     auto numHiddenColumns = max - maxVisibleColumns;
 
@@ -946,8 +958,22 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
     bool changed = (_elideLabelWidth != elideLabelWidth);
     _elideLabelWidth = elideLabelWidth;
 
-    if(changed && _showColumnNames)
+    if(changed && showColumnNames())
         rebuildPlot();
+}
+
+bool CorrelationPlotItem::showColumnNames() const
+{
+    if(!_showColumnNames)
+        return false;
+
+    if(_groupByAnnotation)
+    {
+        // Only show column names if there are no groups
+        return numColumns() == numVisibleColumns();
+    }
+
+    return true;
 }
 
 void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
@@ -1083,6 +1109,42 @@ void CorrelationPlotItem::updateSortMap()
         // If all else fails, just use natural order
         return a < b;
     });
+
+    size_t oldSize = _annotationGroupMap.size();
+    _annotationGroupMap.clear();
+
+    if(_groupByAnnotation)
+    {
+        std::vector<QString> lastValueColumn;
+
+        for(size_t i = 0U; i < numColumns(); i++)
+        {
+            auto column = _sortMap.at(i);
+
+            std::vector<QString> valueColumn;
+            valueColumn.reserve(_visibleColumnAnnotationNames.size());
+
+            for(const auto& name : _visibleColumnAnnotationNames)
+            {
+                const auto* annotation = _pluginInstance->columnAnnotationByName(name);
+                valueColumn.emplace_back(annotation->valueAt(static_cast<int>(column)));
+            }
+
+            if(valueColumn != lastValueColumn || lastValueColumn.empty())
+            {
+                lastValueColumn = valueColumn;
+                _annotationGroupMap.emplace_back();
+            }
+
+            _annotationGroupMap.back().push_back(column);
+        }
+    }
+
+    if(_annotationGroupMap.size() != oldSize)
+    {
+        computeXAxisRange();
+        emit numVisibleColumnsChanged();
+    }
 }
 
 void CorrelationPlotItem::sortBy(int type, const QString& text)
@@ -1163,7 +1225,7 @@ double CorrelationPlotItem::visibleHorizontalFraction() const
     if(_pluginInstance == nullptr)
         return 1.0;
 
-    auto f = (columnAxisWidth() / (minColumnWidth() * static_cast<double>(numColumns())));
+    auto f = (columnAxisWidth() / (minColumnWidth() * static_cast<double>(numVisibleColumns())));
 
     return std::min(f, 1.0);
 }
@@ -1174,20 +1236,27 @@ double CorrelationPlotItem::labelHeight() const
     return static_cast<double>(_defaultFontMetrics.height() + columnPadding);
 }
 
-const double minColumnPixelWidth = 1.0;
+constexpr double minColumnPixelWidth = 1.0;
+constexpr double minColumnBoxPlotWidth = 10.0;
 
 bool CorrelationPlotItem::isWide() const
 {
-    return (static_cast<double>(numColumns()) * minColumnPixelWidth) > columnAxisWidth();
+    return (static_cast<double>(numVisibleColumns()) * minColumnPixelWidth) > columnAxisWidth();
 }
 
 double CorrelationPlotItem::minColumnWidth() const
 {
-    if(_showColumnNames)
+    if(showColumnNames())
         return labelHeight();
 
     if(_showAllColumns)
-        return columnAxisWidth() / static_cast<double>(numColumns());
+        return columnAxisWidth() / static_cast<double>(numVisibleColumns());
+
+    if(static_cast<PlotAveragingType>(_averagingType) == PlotAveragingType::IQR || _groupByAnnotation)
+        return minColumnBoxPlotWidth;
+
+    if(static_cast<PlotDispersionType>(_dispersionType) != PlotDispersionType::None)
+        return minColumnBoxPlotWidth;
 
     return minColumnPixelWidth;
 }

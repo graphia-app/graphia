@@ -46,7 +46,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
     {
         for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[column]));
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
             maxY = std::max(maxY, value);
             minY = std::min(minY, value);
         }
@@ -111,6 +111,16 @@ void CorrelationPlotItem::setAveragingAttributeName(const QString& attributeName
     if(_averagingAttributeName != attributeName)
     {
         _averagingAttributeName = attributeName;
+        emit plotOptionsChanged();
+        rebuildPlot();
+    }
+}
+
+void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
+{
+    if(_groupByAnnotation != groupByAnnotation)
+    {
+        _groupByAnnotation = groupByAnnotation;
         emit plotOptionsChanged();
         rebuildPlot();
     }
@@ -379,6 +389,7 @@ static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, int column, QV
     double minValue = secondQuartile;
     double maxValue = secondQuartile;
     QVector<double> outliers;
+    outliers.reserve(values.size());
 
     for(auto value : std::as_const(values))
     {
@@ -414,8 +425,26 @@ void CorrelationPlotItem::populateIQRPlot()
         std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(values),
         [this, column](auto row)
         {
-            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[column]));
+            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
         });
+
+        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
+    }
+
+    setContinousYAxisRangeForSelection();
+}
+
+void CorrelationPlotItem::populateIQRAnnotationPlot()
+{
+    for(size_t column = 0; column < _annotationGroupMap.size(); column++)
+    {
+        QVector<double> values;
+
+        for(auto row : std::as_const(_selectedRows))
+        {
+            for(size_t groupedColumn : _annotationGroupMap.at(column))
+                values.append(_pluginInstance->continuousDataAt(row, static_cast<int>(groupedColumn)));
+        }
 
         addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
     }
@@ -525,13 +554,16 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
         stdErrs[col] = stdErr;
     }
 
-    plotDispersion(meanPlot, minY, maxY, stdErrs, QStringLiteral("Std Err"));
+    plotDispersion(meanPlot, minY, maxY, stdErrs, tr("Std Err"));
 }
 
 void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<int>& rows, QVector<double>& means)
 {
+    if(_groupByAnnotation)
+        return;
+
     auto averagingType = static_cast<PlotAveragingType>(_averagingType);
     auto dispersionType = static_cast<PlotDispersionType>(_dispersionType);
 
@@ -686,14 +718,19 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
     auto plotAveragingType = static_cast<PlotAveragingType>(_averagingType);
 
-    switch(plotAveragingType)
+    if(!_groupByAnnotation || _visibleColumnAnnotationNames.empty())
     {
-    case PlotAveragingType::MeanLine:       populateMeanLinePlot(); break;
-    case PlotAveragingType::MedianLine:     populateMedianLinePlot(); break;
-    case PlotAveragingType::MeanHistogram:  populateMeanHistogramPlot(); break;
-    case PlotAveragingType::IQR:            populateIQRPlot(); break;
-    default:                                populateLinePlot(); break;
+        switch(plotAveragingType)
+        {
+        case PlotAveragingType::MeanLine:       populateMeanLinePlot(); break;
+        case PlotAveragingType::MedianLine:     populateMedianLinePlot(); break;
+        case PlotAveragingType::MeanHistogram:  populateMeanHistogramPlot(); break;
+        case PlotAveragingType::IQR:            populateIQRPlot(); break;
+        default:                                populateLinePlot(); break;
+        }
     }
+    else
+        populateIQRAnnotationPlot();
 
     _continuousXAxis->grid()->setVisible(_showGridLines);
     _continuousYAxis->grid()->setVisible(_showGridLines);
@@ -704,17 +741,21 @@ void CorrelationPlotItem::configureContinuousAxisRect()
     auto* xAxis = configureColumnAnnotations(_continuousAxisRect);
 
     xAxis->setTickLabelRotation(90);
-    xAxis->setTickLabels(_showColumnNames && (_elideLabelWidth > 0));
+    xAxis->setTickLabels(showColumnNames() && (_elideLabelWidth > 0));
 
-    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
-
-    for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
+    if(xAxis->tickLabels())
     {
-        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
-        categoryTicker->addTick(static_cast<double>(x), labelName);
+        QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+
+        for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
+        {
+            auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
+            categoryTicker->addTick(static_cast<double>(x), labelName);
+        }
+
+        xAxis->setTicker(categoryTicker);
     }
 
-    xAxis->setTicker(categoryTicker);
     xAxis->setPadding(_xAxisLabel.isEmpty() ? _xAxisPadding : 0);
 }
 

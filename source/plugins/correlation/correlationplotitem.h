@@ -142,6 +142,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
+    Q_PROPERTY(bool groupByAnnotation MEMBER _groupByAnnotation WRITE setGroupByAnnotation NOTIFY plotOptionsChanged)
 
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
@@ -187,6 +188,7 @@ public:
     void setShowAllColumns(bool showAllColumns);
     void setAveragingType(int averagingType);
     void setAveragingAttributeName(const QString& attributeName);
+    void setGroupByAnnotation(bool groupByAnnotation);
     void setDispersionVisualType(int dispersionVisualType);
 
     static bool axisRectIsColumnAnnotations(const QCPAxisRect* axisRect);
@@ -259,6 +261,7 @@ private:
     QString _scaleByAttributeName;
     int _averagingType = static_cast<int>(PlotAveragingType::Individual);
     QString _averagingAttributeName;
+    bool _groupByAnnotation = false;
     int _dispersionType = static_cast<int>(PlotDispersionType::None);
     int _dispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     QVector<QVariantMap> _columnSortOrders;
@@ -272,6 +275,7 @@ private:
     std::vector<size_t> _sortMap;
 
     std::set<QString> _visibleColumnAnnotationNames;
+    std::vector<std::vector<size_t>> _annotationGroupMap;
     bool _showColumnAnnotations = true;
 
     QCPLayer* _lineGraphLayer = nullptr;
@@ -295,12 +299,14 @@ private:
     QPixmap _pixmap;
 
     size_t numColumns() const;
+    size_t numVisibleColumns() const;
 
     void populateMeanLinePlot();
     void populateMedianLinePlot();
     void populateLinePlot();
     void populateMeanHistogramPlot();
     void populateIQRPlot();
+    void populateIQRAnnotationPlot();
     void plotDispersion(QCPAbstractPlottable* meanPlot,
         double& minY, double& maxY,
         const QVector<double>& stdDevs, const QString& name);
@@ -322,6 +328,7 @@ private:
 
     void setSelectedRows(const QVector<int>& selectedRows);
     void setElideLabelWidth(int elideLabelWidth);
+    bool showColumnNames() const;
     void setShowColumnNames(bool showColumnNames);
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
@@ -384,6 +391,7 @@ private slots:
 signals:
     void rightClick();
     void horizontalScrollPositionChanged();
+    void numVisibleColumnsChanged();
     void visibleHorizontalFractionChanged();
     void isWideChanged();
     void plotOptionsChanged();

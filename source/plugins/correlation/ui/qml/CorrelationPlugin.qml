@@ -306,11 +306,22 @@ PluginContent
         Action
         {
             id: iqrAverage
-            text: qsTr("IQR Plot")
+            text: qsTr("IQR")
             checkable: true
             checked: plot.averagingType === PlotAveragingType.IQR
             onTriggered: { plot.averagingType = PlotAveragingType.IQR; }
         }
+    }
+
+    Action
+    {
+        id: groupByAnnotation
+        text: qsTr("Group By Annotation")
+        enabled: plot.visibleColumnAnnotationNames.length > 0 || plot.columnAnnotationSelectionModeEnabled
+        checkable: true
+        checked: plot.groupByAnnotation
+
+        onTriggered: { plot.groupByAnnotation = !plot.groupByAnnotation; }
     }
 
     ExclusiveGroup
@@ -497,6 +508,10 @@ PluginContent
                 averagingMenu.addItem("").action = medianLineAverage;
                 averagingMenu.addItem("").action = meanHistogramAverage;
                 averagingMenu.addItem("").action = iqrAverage;
+                averagingMenu.enabled = Qt.binding(function()
+                {
+                    return !plot.groupByAnnotation;
+                });
 
                 averagingMenu.addSeparator();
 
@@ -504,7 +519,8 @@ PluginContent
                 sharedValuesAttributesMenu.enabled = Qt.binding(function()
                 {
                     return plot.averagingType !== PlotAveragingType.Individual &&
-                        plot.averagingType !== PlotAveragingType.IQR;
+                        plot.averagingType !== PlotAveragingType.IQR &&
+                        !plot.groupByAnnotation;
                 });
                 let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
                 allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
@@ -586,6 +602,9 @@ PluginContent
                     plot.sortBy(sortOption.type, sortOption.text);
                 });
             });
+
+            if(plugin.model.columnAnnotationNames.length > 0)
+                menu.addItem("").action = groupByAnnotation;
 
             menu.addSeparator();
             menu.addItem("").action = savePlotImageAction;
@@ -850,6 +869,7 @@ PluginContent
             "plotAveragingAttributeName": plot.averagingAttributeName,
             "plotDispersion": plot.dispersionType,
             "plotDispersionVisual": plot.dispersionVisualType,
+            "plotGroupByAnnotation": plot.groupByAnnotation,
 
             "plotIncludeYZero": plot.includeYZero,
             "plotShowAllColumns": plot.showAllColumns,
@@ -893,6 +913,7 @@ PluginContent
         if(data.plotAveragingAttributeName !== undefined)   plot.averagingAttributeName = data.plotAveragingAttributeName;
         if(data.plotDispersion !== undefined)               plot.dispersionType = data.plotDispersion;
         if(data.plotDispersionVisual !== undefined)         plot.dispersionVisualType = data.plotDispersionVisual;
+        if(data.plotGroupByAnnotation !== undefined)        plot.groupByAnnotation = data.plotGroupByAnnotation;
 
         if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
         if(data.plotShowAllColumns !== undefined)           plot.showAllColumns = data.plotShowAllColumns;

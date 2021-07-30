@@ -142,10 +142,21 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     // This gets removed (and thus delete'd) for every call to rebuildPlot
     auto* qcpColumnAnnotations = new QCPColumnAnnotations(caXAxis, caYAxis);
 
-    forEachColumnAnnotation([this, qcpColumnAnnotations](const ColumnAnnotation& columnAnnotation,
+    std::vector<size_t> indices;
+
+    if(_groupByAnnotation)
+    {
+        indices.reserve(_annotationGroupMap.size());
+        for(const auto& columnMap : _annotationGroupMap)
+            indices.push_back(columnMap.front());
+    }
+    else
+        indices = _sortMap;
+
+    forEachColumnAnnotation([&indices, qcpColumnAnnotations](const ColumnAnnotation& columnAnnotation,
         bool selected, size_t y, size_t offset)
     {
-        qcpColumnAnnotations->setData(y, _sortMap, selected, offset, &columnAnnotation);
+        qcpColumnAnnotations->setData(y, indices, selected, offset, &columnAnnotation);
     });
 
     // We only want the ticker on the left most column annotation QCPAxisRect
@@ -237,6 +248,13 @@ void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
         _columnAnnotationSelectionModeEnabled = enabled;
         emit columnAnnotationSelectionModeEnabledChanged();
 
+        // Disable group by annotation, if no annotations are visible
+        if(!enabled && _groupByAnnotation && _visibleColumnAnnotationNames.empty())
+        {
+            _groupByAnnotation = false;
+            emit plotOptionsChanged();
+        }
+
         rebuildPlot();
     }
 }
@@ -253,23 +271,38 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 {
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
 
-    std::vector<size_t> visibleRowIndices;
+    struct RowIndex { size_t _index; bool _enabled; };
+    std::vector<RowIndex> visibleRowIndices;
+    visibleRowIndices.reserve(columnAnnotations.size());
 
     size_t index = 0;
     for(const auto& columnAnnotation : columnAnnotations)
     {
-        if(_columnAnnotationSelectionModeEnabled ||
-            u::contains(_visibleColumnAnnotationNames, columnAnnotation.name()))
-        {
-            visibleRowIndices.push_back(index);
-        }
+        auto enabled = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
+        if(_columnAnnotationSelectionModeEnabled || enabled)
+            visibleRowIndices.push_back({index, enabled});
 
         index++;
     }
 
-    const auto& columnAnnotation = columnAnnotations.at(visibleRowIndices.at(y));
+    auto rowIndex = visibleRowIndices.at(y);
+    const auto& columnAnnotation = columnAnnotations.at(rowIndex._index);
 
-    return columnAnnotation.valueAt(static_cast<int>(_sortMap.at(x)));
+    if(_groupByAnnotation && !rowIndex._enabled)
+    {
+        std::set<QString> uniqueValues;
+
+        for(auto column : _annotationGroupMap.at(x))
+            uniqueValues.emplace(columnAnnotation.valueAt(static_cast<int>(column)));
+
+        if(uniqueValues.size() == 1)
+            return *uniqueValues.begin();
+
+        return tr("%1 unique values").arg(uniqueValues.size());
+    }
+
+    auto column = _groupByAnnotation ? _annotationGroupMap.at(x).front() : _sortMap.at(x);
+    return columnAnnotation.valueAt(static_cast<int>(column));
 }
 
 bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)

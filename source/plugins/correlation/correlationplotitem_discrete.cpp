@@ -47,22 +47,30 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         _discreteXAxis->grid()->setZeroLinePen(_discreteXAxis->grid()->pen());
     }
 
-    std::vector<size_t> columnTotals(_pluginInstance->numDiscreteColumns());
-    std::vector<std::map<QString, size_t>> columnData(_pluginInstance->numDiscreteColumns());
+    auto numColumns = _groupByAnnotation ? _annotationGroupMap.size() : _pluginInstance->numDiscreteColumns();
 
-    for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
+    std::vector<size_t> columnTotals(numColumns);
+    std::vector<std::map<QString, size_t>> columnData(numColumns);
+
+    for(size_t column = 0; column < numColumns; column++)
     {
         auto& m = columnData[column];
 
         for(auto row : std::as_const(_selectedRows))
         {
-            const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(_sortMap[column]));
+            std::vector<size_t> indices = _groupByAnnotation ?
+                _annotationGroupMap.at(column) : std::vector<size_t>{_sortMap.at(column)};
 
-            if(value.isEmpty())
-                continue;
+            for(auto index : indices)
+            {
+                const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(index));
 
-            m[value]++;
-            columnTotals[column]++;
+                if(value.isEmpty())
+                    continue;
+
+                m[value]++;
+                columnTotals[column]++;
+            }
         }
     }
 
@@ -70,7 +78,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
     ColorPalette colorPalette(Defaults::PALETTE);
 
-    for(size_t column = 0; column < _pluginInstance->numDiscreteColumns(); column++)
+    for(size_t column = 0; column < numColumns; column++)
     {
         const auto& m = columnData[column];
         QCPBars* last = nullptr;
@@ -140,17 +148,21 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
     auto* xAxis = configureColumnAnnotations(_discreteAxisRect);
 
     xAxis->setTickLabelRotation(90);
-    xAxis->setTickLabels(_showColumnNames && (_elideLabelWidth > 0));
+    xAxis->setTickLabels(showColumnNames() && (_elideLabelWidth > 0));
 
-    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
-
-    for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
+    if(xAxis->tickLabels())
     {
-        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
-        categoryTicker->addTick(static_cast<double>(x), labelName);
+        QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+
+        for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
+        {
+            auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
+            categoryTicker->addTick(static_cast<double>(x), labelName);
+        }
+
+        xAxis->setTicker(categoryTicker);
     }
 
-    xAxis->setTicker(categoryTicker);
     xAxis->setPadding(_xAxisLabel.isEmpty() ? _xAxisPadding : 0);
 }
 
