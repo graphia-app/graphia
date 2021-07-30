@@ -973,10 +973,14 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 
 void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
-    _horizontalScrollPosition = std::clamp(horizontalScrollPosition, 0.0, 1.0);
-    computeXAxisRange();
+    auto newHorizontalScrollPosition = std::clamp(horizontalScrollPosition, 0.0, 1.0);
 
-    updatePixmap(CorrelationPlotUpdateType::Render);
+    if(newHorizontalScrollPosition != _horizontalScrollPosition)
+    {
+        _horizontalScrollPosition = newHorizontalScrollPosition;
+        computeXAxisRange();
+        updatePixmap(CorrelationPlotUpdateType::Render);
+    }
 }
 
 void CorrelationPlotItem::setXAxisPadding(int padding)
