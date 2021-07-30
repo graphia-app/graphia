@@ -400,7 +400,7 @@ void CorrelationPlotItem::populateIQRPlot()
 
 void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
-    const QVector<double>& stdDevs, const QString& name = QStringLiteral("Deviation"))
+    const QVector<double>& stdDevs, const QString& name = tr("Deviation"))
 {
     auto visualType = static_cast<PlotDispersionVisualType>(_dispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
@@ -416,8 +416,8 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     {
         auto* devTop = new QCPGraph(_continuousXAxis, _continuousYAxis);
         auto* devBottom = new QCPGraph(_continuousXAxis, _continuousYAxis);
-        devTop->setName(QStringLiteral("%1 Top").arg(name));
-        devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
+        devTop->setName(tr("%1 Top").arg(name));
+        devBottom->setName(tr("%1 Bottom").arg(name));
 
         auto fillColour = meanPlot->pen().color();
         auto penColour = meanPlot->pen().color().lighter(150);
@@ -477,7 +477,7 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
         stdDevs[col] = stdDev;
     }
 
-    plotDispersion(meanPlot, minY, maxY, stdDevs, QStringLiteral("Std Dev"));
+    plotDispersion(meanPlot, minY, maxY, stdDevs, tr("Std Dev"));
 }
 
 void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,

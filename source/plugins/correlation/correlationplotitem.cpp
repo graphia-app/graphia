@@ -519,7 +519,7 @@ void CorrelationPlotItem::updateTooltip()
 
                 auto mappedCol = static_cast<int>(_sortMap.at(index));
 
-                _hoverLabel->setText(QStringLiteral("%1, %2: %3")
+                _hoverLabel->setText(tr("%1, %2: %3")
                     .arg(plottableUnderCursor->name(),
                     _pluginInstance->columnName(mappedCol),
                     u::formatNumberScientific(value)));
@@ -1293,7 +1293,7 @@ void CorrelationPlotItem::configureAxisRects()
         if(!warning.isEmpty())
         {
             if(!xAxisLabel.isEmpty())
-                xAxisLabel = QStringLiteral("%1 (%2)").arg(xAxisLabel, warning);
+                xAxisLabel = tr("%1 (%2)").arg(xAxisLabel, warning);
             else
                 xAxisLabel = warning;
         }

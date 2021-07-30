@@ -116,7 +116,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
                 totalSize += size;
 
             const auto& keys = u::keysFor(m);
-            auto value = QStringLiteral("%1, %2 and %3 more…")
+            auto value = tr("%1, %2 and %3 more…")
                 .arg(keys.at(0), keys.at(1))
                 .arg(m.size() - 2);
 
