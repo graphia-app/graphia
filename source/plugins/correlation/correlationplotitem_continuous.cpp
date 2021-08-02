@@ -510,7 +510,7 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
     auto averagingType = static_cast<PlotAveragingType>(_averagingType);
     auto dispersionType = static_cast<PlotDispersionType>(_dispersionType);
 
-    if(averagingType == PlotAveragingType::Individual || averagingType == PlotAveragingType::IQRPlot)
+    if(averagingType == PlotAveragingType::Individual || averagingType == PlotAveragingType::IQR)
         return;
 
     if(dispersionType == PlotDispersionType::StdDev)
@@ -666,7 +666,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
     case PlotAveragingType::MeanLine:       populateMeanLinePlot(); break;
     case PlotAveragingType::MedianLine:     populateMedianLinePlot(); break;
     case PlotAveragingType::MeanHistogram:  populateMeanHistogramPlot(); break;
-    case PlotAveragingType::IQRPlot:        populateIQRPlot(); break;
+    case PlotAveragingType::IQR:            populateIQRPlot(); break;
     default:                                populateLinePlot(); break;
     }
 

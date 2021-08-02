@@ -58,7 +58,7 @@ DEFINE_QML_ENUM(
     MeanLine,
     MedianLine,
     MeanHistogram,
-    IQRPlot);
+    IQR);
 
 DEFINE_QML_ENUM(
     Q_GADGET, PlotDispersionType,

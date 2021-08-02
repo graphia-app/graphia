@@ -308,8 +308,8 @@ PluginContent
             id: iqrAverage
             text: qsTr("IQR Plot")
             checkable: true
-            checked: plot.averagingType === PlotAveragingType.IQRPlot
-            onTriggered: { plot.averagingType = PlotAveragingType.IQRPlot; }
+            checked: plot.averagingType === PlotAveragingType.IQR
+            onTriggered: { plot.averagingType = PlotAveragingType.IQR; }
         }
     }
 
@@ -504,7 +504,7 @@ PluginContent
                 sharedValuesAttributesMenu.enabled = Qt.binding(function()
                 {
                     return plot.averagingType !== PlotAveragingType.Individual &&
-                        plot.averagingType !== PlotAveragingType.IQRPlot;
+                        plot.averagingType !== PlotAveragingType.IQR;
                 });
                 let allAttributesMenuItem = sharedValuesAttributesMenu.addItem(qsTr("All"));
                 allAttributesMenuItem.exclusiveGroup = sharedValuesAttributeExclusiveGroup;
