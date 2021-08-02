@@ -269,7 +269,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
     const auto& columnAnnotation = columnAnnotations.at(visibleRowIndices.at(y));
 
-    return columnAnnotation.valueAt(static_cast<int>(_sortMap[x]));
+    return columnAnnotation.valueAt(static_cast<int>(_sortMap.at(x)));
 }
 
 bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)

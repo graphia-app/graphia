@@ -117,7 +117,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
         double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
-            return partial + _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
+            return partial + _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
         });
 
         yDataAvg.append(runningTotal / rows.length());
@@ -221,7 +221,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
             std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
             [this, col](auto row)
             {
-                return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
+                return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
             });
 
             if(!rows.empty())
@@ -468,7 +468,7 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
         double stdDev = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - means.at(col);
             stdDev += (value * value);
         }
 
@@ -491,7 +491,7 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
         double stdErr = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - means.at(col);
             stdErr += (value * value);
         }
 
@@ -541,14 +541,14 @@ void CorrelationPlotItem::populateLinePlot()
 
             double rowSum = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
-                rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
+                rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
 
             double rowMean = rowSum / static_cast<double>(_pluginInstance->numContinuousColumns());
 
             double variance = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
-                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col])) - rowMean;
+                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - rowMean;
                 variance += (value * value);
             }
 
@@ -571,7 +571,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
-                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap[col]));
+                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
 
                 switch(static_cast<PlotScaleType>(_scaleType))
                 {
@@ -685,7 +685,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
     for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
     {
-        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
+        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
         categoryTicker->addTick(static_cast<double>(x), labelName);
     }
 

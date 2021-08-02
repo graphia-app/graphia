@@ -146,7 +146,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
     for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
     {
-        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap[x])));
+        auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
         categoryTicker->addTick(static_cast<double>(x), labelName);
     }
 
