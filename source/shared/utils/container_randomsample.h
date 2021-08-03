@@ -8,13 +8,12 @@ namespace u
 template<typename T, template<typename, typename...> typename C, typename... Args>
 C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
 {
-    if(numSamples > container.size())
+    if(container.empty() || numSamples > static_cast<size_t>(container.size()))
         return container;
 
     auto sample = container;
 
-    std::random_device rd;
-    std::default_random_engine dre(rd());
+    std::default_random_engine dre(container.front());
 
     for(size_t i = 0; i < numSamples; i++)
     {
