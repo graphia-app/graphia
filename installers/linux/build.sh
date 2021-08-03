@@ -97,9 +97,9 @@ breakpad-build/src/tools/linux/dump_syms/dump_syms \
   ${BUILD_DIR}/AppDir/usr/lib/libthirdparty.so > \
   ${BUILD_DIR}/libthirdparty.so.sym || exit $?
 
-for PLUGIN in $(find ${BUILD_DIR}/AppDir/usr/lib/${PRODUCT_NAME}/plugins -iname "*.so")
+for LIBRARY in $(find ${BUILD_DIR}/AppDir -iname "*.so*")
 do
   breakpad-build/src/tools/linux/dump_syms/dump_syms \
-    ${PLUGIN} > \
-    ${PLUGIN}.sym || exit $?
+    ${LIBRARY} > \
+    ${LIBRARY}.sym || exit $?
 done

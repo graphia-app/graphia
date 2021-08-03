@@ -2,7 +2,7 @@ name: Build
 on: [push]
 env:
   QT_VERSION: 5.14.2
-  QT_MODULES: qtwebengine
+  QT_MODULES: qtwebengine debug_info
   CLANG_VERSION: 12
 
 jobs:

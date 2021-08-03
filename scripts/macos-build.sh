@@ -39,6 +39,7 @@ fi
 
 GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   source/thirdparty/breakpad/src/tools/mac/dump_syms/dump_syms.xcodeproj
+PATH=$PATH:source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release
 
 (
   cd ${BUILD_DIR}
@@ -52,26 +53,48 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   [[ "${PIPESTATUS[0]}" -eq 0 ]] || exit ${PIPESTATUS[0]}
 )
 
-function makeSymFile
+function makeSymFileFromDsym
 {
   SOURCE=$1
   TARGET=$2
 
-  dsymutil ${SOURCE} -flat -o ${TARGET}.dsym || exit $?
-  source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
-    ${TARGET}.dsym > ${TARGET} 2> /dev/null || exit $?
-  rm ${TARGET}.dsym
+  echo "${TARGET}"
+
+  dump_syms ${SOURCE} > ${TARGET} 2> /dev/null || exit $?
 
   # Remove .sym.dsym from the MODULE name
   sed -e '1s/\.dsym$//' -e '1s/\.sym$//' -i '' ${TARGET}
 }
 
-makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym
-makeSymFile ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib \
-  ${BUILD_DIR}/libthirdparty.dylib.sym
+function makeSymFileFromObject
+{
+  SOURCE=$1
+  TARGET=$2
 
-for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
+  dsymutil ${SOURCE} -flat -o ${TARGET}.dsym || exit $?
+  makeSymFileFromDsym ${TARGET}.dsym ${TARGET}
+  rm ${TARGET}.dsym
+}
+
+makeSymFileFromObject ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
+makeSymFileFromObject ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib \
+  ${BUILD_DIR}/libthirdparty.dylib.sym || exit $?
+
+for PLUGIN in $(find ${BUILD_DIR}/plugins -iname "*.dylib")
 do
-  makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
+  makeSymFileFromObject ${PLUGIN} ${PLUGIN}.sym || exit $?
 done
+
+# Generate symbols for Qt installation
+if [[ ! -z "${Qt5_DIR}" ]]
+then
+  for DSYM_FILE in $(find ${Qt5_DIR} -iname "*.dsym")
+  do
+    OBJECT_FILE="${DSYM_FILE%.*}"
+    SYM_FILE="$BUILD_DIR/Qt${OBJECT_FILE#${Qt5_DIR}}.sym"
+    DIR_NAME=$(dirname ${SYM_FILE})
+    mkdir -p ${DIR_NAME}
+    makeSymFileFromDsym ${DSYM_FILE} ${SYM_FILE}
+  done
+fi

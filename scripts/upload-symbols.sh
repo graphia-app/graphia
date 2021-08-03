@@ -29,8 +29,21 @@ BUILD_DIR="build"
 SYM_FILES=$(find ${BUILD_DIR} -iname "*.sym")
 ARCHIVE="symbols.tar.gz"
 
-tar cfz ${ARCHIVE} ${SYM_FILES} || exit 1
-
-curl --data-binary @${ARCHIVE} -H 'Expect:' "${SYM_UPLOAD_URL}"
-
+tar cvfz ${ARCHIVE} ${SYM_FILES} || exit 1
+curl -T ${ARCHIVE} -X POST -H 'Transfer-Encoding: chunked' -H 'Expect:' "${SYM_UPLOAD_URL}"
 rm -f ${ARCHIVE}
+
+# Upload Qt pdbs, if we can find them
+if [ ! -z "${Qt5_Dir}" ]
+then
+  PDB_FILES=$(find ${Qt5_Dir} -iname "*.pdb")
+
+  if [ ! -z "${PDB_FILES}" ]
+  then
+    PDB_ARCHIVE="pdbs.tar.gz"
+
+    tar cvfz ${PDB_ARCHIVE} ${PDB_FILES} || exit 1
+    curl -T ${PDB_ARCHIVE} -X POST -H 'Transfer-Encoding: chunked' -H 'Expect:' "${SYM_UPLOAD_URL}"
+    rm -f ${PDB_ARCHIVE}
+  fi
+fi
