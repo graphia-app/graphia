@@ -21,6 +21,7 @@
 #include "correlationplugin.h"
 
 #include "shared/utils/statistics.h"
+#include "shared/utils/container_randomsample.h"
 
 // NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
@@ -392,6 +393,12 @@ static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, int column, QV
         if(value > thirdQuartile + (iqr * 1.5) || value < firstQuartile - (iqr * 1.5))
             outliers.push_back(value);
     }
+
+    outliers.shrink_to_fit();
+
+    const size_t maxOutliers = 100;
+    if(static_cast<size_t>(outliers.size()) > maxOutliers)
+        outliers = u::randomSample(outliers, maxOutliers);
 
     statisticalBox->addData(column, minValue, firstQuartile, secondQuartile, thirdQuartile,
         maxValue, outliers);
