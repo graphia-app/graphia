@@ -18,36 +18,42 @@
 
 #include "threadpool.h"
 
-#include "thread.h"
+#include "shared/utils/thread.h"
+#include "shared/utils/fatalerror.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads) :
     _stop(false), _activeThreads(0)
 {
     for(unsigned int i = 0U; i < numThreads; i++)
     {
-        _threads.emplace_back([threadNamePrefix, i, this]
+        auto threadName = QStringLiteral("%1%2").arg(threadNamePrefix).arg(i + 1);
+
+        _threads.emplace_back([threadName, this]
+        {
+            u::setCurrentThreadName(threadName);
+
+            while(!_stop)
             {
-                u::setCurrentThreadName(QStringLiteral("%1%2").arg(threadNamePrefix).arg(i + 1));
+                std::unique_lock<std::mutex> lock(_mutex);
 
-                while(!_stop)
+                if(!_tasks.empty())
                 {
-                    std::unique_lock<std::mutex> lock(_mutex);
-
-                    if(!_tasks.empty())
-                    {
-                        auto task = _tasks.front();
-                        _tasks.pop();
-                        lock.unlock();
-                        task();
-                        _activeThreads--;
-                    }
-                    else if(!_stop)
-                    {
-                        // Block until a new task is queued
-                        _waitForNewTask.wait(lock);
-                    }
+                    auto task = _tasks.front();
+                    _tasks.pop();
+                    lock.unlock();
+                    task();
+                    _activeThreads--;
                 }
-            });
+                else if(!_stop)
+                {
+                    if(!lock.owns_lock())
+                        FATAL_ERROR(ThreadPoolNoLockWhenWaiting); // NOLINT clang-analyzer-core.NullDereference
+
+                    // Block until a new task is queued
+                    _waitForNewTask.wait(lock);
+                }
+            }
+        });
     }
 }
 
