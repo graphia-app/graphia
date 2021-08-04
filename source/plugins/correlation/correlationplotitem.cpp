@@ -30,6 +30,7 @@
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/fatalerror.h"
 
 #include <QDesktopServices>
 #include <QSet>
@@ -136,7 +137,11 @@ void CorrelationPlotWorker::renderPixmap()
         _surface = nullptr;
 
         u::setCurrentThreadName(QStringLiteral("CorrPlotRender"));
+        _threadId = u::currentThreadId();
     }
+
+    if(_threadId != u::currentThreadId())
+        FATAL_ERROR(CorrPlotOnWrongThread); // NOLINT clang-analyzer-core.NullDereference
 
     _customPlot->setGeometry(0, 0, _width, _height);
 
@@ -206,6 +211,11 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     _customPlot.setSelectionTolerance(24);
     _customPlot.setBackground(Qt::transparent);
 
+    // This is the default setting, and should never be set
+    // to anything else since using the QCustomPlot interaction
+    // mechanisms can cause replots outside of the render thread
+    _customPlot.setInteractions(QCP::iNone);
+
     setFlag(QQuickItem::ItemHasContents, true);
 
     setAcceptHoverEvents(true);
@@ -219,12 +229,13 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
 
     connect(this, &QQuickPaintedItem::widthChanged, [this]
     {
-        QMetaObject::invokeMethod(_worker, "setWidth", Q_ARG(int, width()));
+        QMetaObject::invokeMethod(_worker, "setWidth", Qt::QueuedConnection,
+            Q_ARG(int, width()));
     });
 
     connect(this, &QQuickPaintedItem::heightChanged, [this]
     {
-        QMetaObject::invokeMethod(_worker, "setHeight",
+        QMetaObject::invokeMethod(_worker, "setHeight", Qt::QueuedConnection,
             Q_ARG(int, std::max(static_cast<int>(height()), minimumHeight())));
     });
 
@@ -258,7 +269,8 @@ CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-defau
 
 void CorrelationPlotItem::updatePixmap(CorrelationPlotUpdateType updateType)
 {
-    QMetaObject::invokeMethod(_worker, "updatePixmap", Q_ARG(CorrelationPlotUpdateType, updateType));
+    QMetaObject::invokeMethod(_worker, "updatePixmap", Qt::QueuedConnection,
+        Q_ARG(CorrelationPlotUpdateType, updateType));
 }
 
 void CorrelationPlotItem::paint(QPainter* painter)
@@ -890,7 +902,7 @@ void CorrelationPlotItem::computeXAxisRange()
     min -= padding;
     max += padding;
 
-    QMetaObject::invokeMethod(_worker, "setXAxisRange",
+    QMetaObject::invokeMethod(_worker, "setXAxisRange", Qt::QueuedConnection,
         Q_ARG(double, min), Q_ARG(double, max));
 }
 
@@ -993,7 +1005,8 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
     if(_showGridLines != showGridLines)
     {
         _showGridLines = showGridLines;
-        QMetaObject::invokeMethod(_worker, "setShowGridLines", Q_ARG(bool, showGridLines));
+        QMetaObject::invokeMethod(_worker, "setShowGridLines", Qt::QueuedConnection,
+            Q_ARG(bool, showGridLines));
         rebuildPlot();
     }
 }
