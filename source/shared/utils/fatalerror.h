@@ -35,7 +35,7 @@
             NOINLINE void operator()() \
             { \
                 int* p = nullptr; \
-                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) \
+                MSVC_WARNING_SUPPRESS_NEXTLINE(6011) /* NOLINTNEXTLINE clang-analyzer-core.NullDereference */ \
                 *p = 0; \
             } \
         } s; s(); \

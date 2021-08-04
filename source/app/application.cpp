@@ -459,7 +459,7 @@ void Application::crash(int crashType)
     }
 
     case CrashType::FatalError:
-        FATAL_ERROR(FatalErrorTest); // NOLINT clang-analyzer-core.NullDereference
+        FATAL_ERROR(FatalErrorTest);
         break;
 
     case CrashType::InfiniteLoop:
