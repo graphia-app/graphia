@@ -156,6 +156,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
@@ -207,6 +208,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
@@ -242,6 +244,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get update
         sudo apt-get install cppcheck
     - name: Install Qt
@@ -278,6 +281,7 @@ jobs:
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
         sudo apt-get update
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
+        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         curl -vL https://downloads.kdab.com/clazy/1.8/Clazy-x86_64-1.8.AppImage -o clazy
         chmod +x clazy
         sudo mv clazy /usr/local/bin/
