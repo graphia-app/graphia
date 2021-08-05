@@ -125,12 +125,14 @@ double medianOf(const C& container)
     std::vector<double> v{container.begin(), container.end()};
 
     auto mid = v.size() / 2;
-    std::nth_element(v.begin(), v.begin() + mid, v.end());
+    std::nth_element(v.begin(), v.begin() +
+        static_cast<std::vector<double>::difference_type>(mid), v.end());
     auto median = v.at(mid);
 
     if(v.size() % 2 == 0)
     {
-        auto max = *std::max_element(v.begin(), v.begin() + mid);
+        auto max = *std::max_element(v.begin(), v.begin() +
+            static_cast<std::vector<double>::difference_type>(mid));
         median = (max + median) / 2.0;
     }
 
