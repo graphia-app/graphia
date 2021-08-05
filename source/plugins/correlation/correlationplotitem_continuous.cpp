@@ -345,7 +345,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, int column, QVector<double> values)
+static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column, QVector<double> values)
 {
     // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values
@@ -411,8 +411,8 @@ static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, int column, QV
     if(static_cast<size_t>(outliers.size()) > maxOutliers)
         outliers = u::randomSample(outliers, maxOutliers);
 
-    statisticalBox->addData(column, minValue, firstQuartile, secondQuartile, thirdQuartile,
-        maxValue, outliers);
+    statisticalBox->addData(static_cast<int>(column), minValue, firstQuartile,
+        secondQuartile, thirdQuartile, maxValue, outliers);
 }
 
 void CorrelationPlotItem::populateIQRPlot()
