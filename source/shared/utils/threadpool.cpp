@@ -47,7 +47,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
                 else if(!_stop)
                 {
                     if(!lock.owns_lock())
-                        FATAL_ERROR(ThreadPoolNoLockWhenWaiting); // NOLINT clang-analyzer-core.NullDereference
+                        FATAL_ERROR(ThreadPoolNoLockWhenWaiting);
 
                     // Block until a new task is queued
                     _waitForNewTask.wait(lock);

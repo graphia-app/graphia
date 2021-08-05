@@ -141,7 +141,7 @@ void CorrelationPlotWorker::renderPixmap()
     }
 
     if(_threadId != u::currentThreadId())
-        FATAL_ERROR(CorrPlotOnWrongThread); // NOLINT clang-analyzer-core.NullDereference
+        FATAL_ERROR(CorrPlotOnWrongThread);
 
     _customPlot->setGeometry(0, 0, _width, _height);
 
