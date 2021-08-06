@@ -47,7 +47,6 @@ private:
     std::condition_variable _waitForNewTask;
     std::queue<std::function<void()>> _tasks;
     std::atomic<bool> _stop;
-    std::atomic<int> _activeThreads;
 
 public:
     explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
@@ -59,30 +58,26 @@ public:
     ThreadPool& operator=(const ThreadPool& other) = delete;
     ThreadPool& operator=(ThreadPool&& other) = delete;
 
-    bool saturated() const { return _activeThreads >= static_cast<int>(_threads.size()); }
-    bool idle() const { return _activeThreads == 0; }
-
     template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
 
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
     {
         if(_stop)
-            return std::future<ReturnType<Fn, Args...>>();
+            return {};
 
         auto taskPtr = std::make_shared<std::packaged_task<ReturnType<Fn, Args...>(Args...)>>(f);
 
         {
             std::unique_lock<std::mutex> lock(_mutex);
-            _tasks.push(
-                [taskPtr, args...]() mutable
-                {
-                    (*taskPtr)(std::forward<Args>(args)...);
-                });
+            _tasks.emplace([taskPtr, args...]() mutable
+            {
+                (*taskPtr)(std::forward<Args>(args)...);
+            });
         }
 
         // Wake a thread up
         _waitForNewTask.notify_one();
-        _activeThreads++;
+
         return taskPtr->get_future();
     }
 

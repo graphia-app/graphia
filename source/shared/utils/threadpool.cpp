@@ -22,7 +22,7 @@
 #include "shared/utils/fatalerror.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads) :
-    _stop(false), _activeThreads(0)
+    _stop(false)
 {
     for(unsigned int i = 0U; i < numThreads; i++)
     {
@@ -36,22 +36,23 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
             {
                 std::unique_lock<std::mutex> lock(_mutex);
 
-                if(!_tasks.empty())
-                {
-                    auto task = _tasks.front();
-                    _tasks.pop();
-                    lock.unlock();
-                    task();
-                    _activeThreads--;
-                }
-                else if(!_stop)
+                while(_tasks.empty() && !_stop)
                 {
                     if(!lock.owns_lock())
-                        FATAL_ERROR(ThreadPoolNoLockWhenWaiting);
+                        FATAL_ERROR(ThreadPoolLockNotHeldBeforeWaiting);
 
                     // Block until a new task is queued
                     _waitForNewTask.wait(lock);
                 }
+
+                if(_stop)
+                    break;
+
+                auto task = _tasks.front();
+                _tasks.pop();
+                lock.unlock();
+
+                task();
             }
         });
     }
