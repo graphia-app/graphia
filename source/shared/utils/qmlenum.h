@@ -54,7 +54,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
     { \
         _Q_GADGET /* NOLINT */ \
     public: \
-        enum class Enum {__VA_ARGS__}; Q_ENUM(Enum) \
+        enum class Enum {__VA_ARGS__, Max}; Q_ENUM(Enum) \
         static void initialise() \
         { \
             static bool initialised = false; \
@@ -92,6 +92,10 @@ constexpr bool static_strcmp(char const* a, char const* b)
             static_cast<int>(rhs)); \
     } \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
+
+#define NORMALISE_QML_ENUM(x, v) /* NOLINT cppcoreguidelines-macro-usage */ \
+    (static_cast<x>(v) < static_cast<x>(0) || static_cast<x>(v) >= x::Max ? \
+    static_cast<x>(0) : static_cast<x>(v))
 
 /*
 Example:
