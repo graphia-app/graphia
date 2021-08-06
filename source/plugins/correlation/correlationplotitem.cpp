@@ -1059,7 +1059,7 @@ void CorrelationPlotItem::updateSortMap()
         Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
 
         ColumnSortOrder columnSortOrder;
-        columnSortOrder._type = static_cast<PlotColumnSortType>(qmlColumnSortOrder[QStringLiteral("type")].toInt());
+        columnSortOrder._type = NORMALISE_QML_ENUM(PlotColumnSortType, qmlColumnSortOrder[QStringLiteral("type")].toInt());
         columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder[QStringLiteral("order")].toInt());
 
         if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
@@ -1265,10 +1265,10 @@ double CorrelationPlotItem::minColumnWidth() const
     if(_showAllColumns)
         return columnAxisWidth() / static_cast<double>(numVisibleColumns());
 
-    if(static_cast<PlotAveragingType>(_averagingType) == PlotAveragingType::IQR || _groupByAnnotation)
+    if(NORMALISE_QML_ENUM(PlotAveragingType, _averagingType) == PlotAveragingType::IQR || _groupByAnnotation)
         return minColumnBoxPlotWidth;
 
-    if(static_cast<PlotDispersionType>(_dispersionType) != PlotDispersionType::None)
+    if(NORMALISE_QML_ENUM(PlotDispersionType, _dispersionType) != PlotDispersionType::None)
         return minColumnBoxPlotWidth;
 
     return minColumnPixelWidth;

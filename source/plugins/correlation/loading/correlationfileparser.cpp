@@ -740,12 +740,12 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
             else
             {
                 transformedValue = CorrelationFileParser::imputeValue(
-                    static_cast<MissingDataType>(_missingDataType), _replacementValue,
+                    NORMALISE_QML_ENUM(MissingDataType, _missingDataType), _replacementValue,
                     *_dataPtr, _dataRect, columnIndex, rowIndex);
             }
 
             transformedValue = CorrelationFileParser::scaleValue(
-                static_cast<ScalingType>(_scalingType), transformedValue);
+                NORMALISE_QML_ENUM(ScalingType, _scalingType), transformedValue);
 
             rowData.emplace_back(transformedValue);
         }
@@ -754,7 +754,7 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
         ++nodeId;
     }
 
-    CorrelationFileParser::normalise(static_cast<NormaliseType>(_normaliseType), dataRows);
+    CorrelationFileParser::normalise(NORMALISE_QML_ENUM(NormaliseType, _normaliseType), dataRows);
 
     for(auto& dataRow : dataRows)
         dataRow.update();
@@ -825,12 +825,12 @@ void CorrelationTabularDataParser::estimateGraphSize()
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
         EdgeList sampleEdges;
 
-        switch(static_cast<CorrelationDataType>(_correlationDataType))
+        switch(NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType))
         {
         default:
         case CorrelationDataType::Continuous:
         {
-            auto correlation = ContinuousCorrelation::create(static_cast<CorrelationType>(_continuousCorrelationType));
+            auto correlation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
             auto dataRows = sampledContinuousDataRows(numSampleRows);
 
             if(correlation == nullptr || dataRows.empty())
@@ -845,7 +845,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
 
         case CorrelationDataType::Discrete:
         {
-            auto correlation = DiscreteCorrelation::create(static_cast<CorrelationType>(_discreteCorrelationType));
+            auto correlation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
             auto dataRows = sampledDiscreteDataRows(numSampleRows);
 
             if(correlation == nullptr || dataRows.empty())

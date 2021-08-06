@@ -437,7 +437,7 @@ void Application::crash(int crashType)
 {
     std::cerr << "Application::crash() invoked!\n";
 
-    auto _crashType = static_cast<CrashType>(crashType);
+    auto _crashType = NORMALISE_QML_ENUM(CrashType, crashType);
 
     switch(_crashType)
     {

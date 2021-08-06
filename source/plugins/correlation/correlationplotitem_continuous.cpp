@@ -57,6 +57,8 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
 
 void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
 {
+    dispersionVisualType = static_cast<int>(NORMALISE_QML_ENUM(PlotDispersionVisualType, dispersionVisualType));
+
     if(_dispersionVisualType != dispersionVisualType)
     {
         _dispersionVisualType = dispersionVisualType;
@@ -77,6 +79,8 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
 
 void CorrelationPlotItem::setScaleType(int scaleType)
 {
+    scaleType = static_cast<int>(NORMALISE_QML_ENUM(PlotScaleType, scaleType));
+
     if(_scaleType != scaleType)
     {
         _scaleType = scaleType;
@@ -98,6 +102,8 @@ void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
 
 void CorrelationPlotItem::setAveragingType(int averagingType)
 {
+    averagingType = static_cast<int>(NORMALISE_QML_ENUM(PlotAveragingType, averagingType));
+
     if(_averagingType != averagingType)
     {
         _averagingType = averagingType;
@@ -128,6 +134,8 @@ void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
 
 void CorrelationPlotItem::setDispersionType(int dispersionType)
 {
+    dispersionType = static_cast<int>(NORMALISE_QML_ENUM(PlotDispersionType, dispersionType));
+
     if(_dispersionType != dispersionType)
     {
         _dispersionType = dispersionType;
@@ -456,7 +464,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = tr("Deviation"))
 {
-    auto visualType = static_cast<PlotDispersionVisualType>(_dispersionVisualType);
+    auto visualType = NORMALISE_QML_ENUM(PlotDispersionVisualType, _dispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
         auto* stdDevBars = new QCPErrorBars(_continuousXAxis, _continuousYAxis);
@@ -564,8 +572,8 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
     if(_groupByAnnotation)
         return;
 
-    auto averagingType = static_cast<PlotAveragingType>(_averagingType);
-    auto dispersionType = static_cast<PlotDispersionType>(_dispersionType);
+    auto averagingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
+    auto dispersionType = NORMALISE_QML_ENUM(PlotDispersionType, _dispersionType);
 
     if(averagingType == PlotAveragingType::Individual || averagingType == PlotAveragingType::IQR)
         return;
@@ -615,7 +623,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             double attributeValue = 1.0;
 
-            if(static_cast<PlotScaleType>(_scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
+            if(NORMALISE_QML_ENUM(PlotScaleType, _scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
             {
                 attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, row));
 
@@ -630,7 +638,7 @@ void CorrelationPlotItem::populateLinePlot()
             {
                 auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
 
-                switch(static_cast<PlotScaleType>(_scaleType))
+                switch(NORMALISE_QML_ENUM(PlotScaleType, _scaleType))
                 {
                 case PlotScaleType::Log:
                 {
@@ -716,7 +724,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
         _continuousXAxis->grid()->setZeroLinePen(_continuousXAxis->grid()->pen());
     }
 
-    auto plotAveragingType = static_cast<PlotAveragingType>(_averagingType);
+    auto plotAveragingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
 
     if(!_groupByAnnotation || _visibleColumnAnnotationNames.empty())
     {
