@@ -162,12 +162,12 @@ void CorrelationPlotWorker::renderPixmap()
             auto numVisibleColumns = (_xAxisMax - _xAxisMin);
             bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.3);
 
-            auto* axis = axisRect->axis(QCPAxis::atBottom);
-            axis->setRange(_xAxisMin, _xAxisMax);
-            axis->grid()->setVisible(_showGridLines && !columnsAreDense &&
-                axis->basePen() != QPen(Qt::transparent));
-            axis->setTicks(!columnsAreDense);
-            axis->setSubTicks(false);
+            auto* xAxis = axisRect->axis(QCPAxis::atBottom);
+            xAxis->setRange(_xAxisMin, _xAxisMax);
+            xAxis->grid()->setVisible(_showGridLines && !columnsAreDense &&
+                xAxis->basePen() != QPen(Qt::transparent));
+            xAxis->setTicks(!columnsAreDense);
+            xAxis->setSubTicks(false);
         }
     }
 
