@@ -826,12 +826,16 @@ PluginContent
                 anchors.fill: parent
                 frameVisible: true
 
-                Item
+                contentItem: Item
                 {
                     // This is a fake item to give the scrollbar the correct range
                     // The maximum size is to prevent OpenGL texture overflow (2^14 pixels)
                     width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
-                    height: 0
+
+                    // This needs to match the viewport height, otherwise the plot doesn't
+                    // get vertical mouse wheel events (see the conditions required for
+                    // QQuickWheelArea1::wheelEvent to call QWheelEvent::ignore())
+                    height: scrollView.viewport.height
                 }
             }
         }
