@@ -37,6 +37,20 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
     _continuousYAxis->setRange(min, max);
 }
 
+static double logScale(double value)
+{
+    // Adding EPSILON prevents log(0) = -inf shenanigans
+    const auto EPSILON = std::nextafter(0.0, 1.0);
+    return std::log(value + EPSILON);
+}
+
+template<typename C>
+void logScale(C& values)
+{
+    for(auto& value : values)
+        value = logScale(value);
+}
+
 void CorrelationPlotItem::setContinousYAxisRangeForSelection()
 {
     double minY = std::numeric_limits<double>::max();
@@ -47,6 +61,10 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
         for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
         {
             auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
+
+            if(_scaleType == static_cast<int>(PlotScaleType::Log))
+                value = logScale(value);
+
             maxY = std::max(maxY, value);
             minY = std::min(minY, value);
         }
@@ -91,6 +109,13 @@ void CorrelationPlotItem::setScaleType(int scaleType)
 
 void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
 {
+    if(attributeName.isEmpty() && _scaleType == static_cast<int>(PlotScaleType::ByAttribute))
+    {
+        // Don't have an attribute name, so reset to default
+        setScaleType(static_cast<int>(PlotScaleType::Raw));
+        return;
+    }
+
     if(_scaleByAttributeName != attributeName || _scaleType != static_cast<int>(PlotScaleType::ByAttribute))
     {
         _scaleByAttributeName = attributeName;
@@ -436,6 +461,9 @@ void CorrelationPlotItem::populateIQRPlot()
             return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
         });
 
+        if(_scaleType == static_cast<int>(PlotScaleType::Log))
+            logScale(values);
+
         addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
     }
 
@@ -453,6 +481,9 @@ void CorrelationPlotItem::populateIQRAnnotationPlot()
             for(size_t groupedColumn : _annotationGroupMap.at(column))
                 values.append(_pluginInstance->continuousDataAt(row, static_cast<int>(groupedColumn)));
         }
+
+        if(_scaleType == static_cast<int>(PlotScaleType::Log))
+            logScale(values);
 
         addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
     }
@@ -641,14 +672,7 @@ void CorrelationPlotItem::populateLinePlot()
                 switch(NORMALISE_QML_ENUM(PlotScaleType, _scaleType))
                 {
                 case PlotScaleType::Log:
-                {
-                    // LogY(x+c) where c is EPSILON
-                    // This prevents LogY(0) which is -inf
-                    // Log2(0+c) = -1057
-                    // Document this!
-                    const double EPSILON = std::nextafter(0.0, 1.0);
-                    value = std::log(value + EPSILON);
-                }
+                    value = logScale(value);
                     break;
                 case PlotScaleType::MeanCentre:
                     value -= rowMean;

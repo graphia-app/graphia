@@ -171,7 +171,7 @@ PluginContent
         Action
         {
             id: rawScaling
-            text: qsTr("Raw")
+            text: qsTr("None")
             checkable: true
             checked: plot.scaleType === PlotScaleType.Raw
             onTriggered: { plot.scaleType = PlotScaleType.Raw; }
@@ -190,6 +190,7 @@ PluginContent
         {
             id: meanCentreScaling
             text: qsTr("Mean Centre Scaling")
+            enabled: !plot.iqrStyle
             checkable: true
             checked: plot.scaleType === PlotScaleType.MeanCentre
             onTriggered: { plot.scaleType = PlotScaleType.MeanCentre; }
@@ -199,6 +200,7 @@ PluginContent
         {
             id: unitVarianceScaling
             text: qsTr("Unit Variance Scaling")
+            enabled: !plot.iqrStyle
             checkable: true
             checked: plot.scaleType === PlotScaleType.UnitVariance
             onTriggered: { plot.scaleType = PlotScaleType.UnitVariance; }
@@ -208,6 +210,7 @@ PluginContent
         {
             id: paretoScaling
             text: qsTr("Pareto Scaling")
+            enabled: !plot.iqrStyle
             checkable: true
             checked: plot.scaleType === PlotScaleType.Pareto
             onTriggered: { plot.scaleType = PlotScaleType.Pareto; }
@@ -476,12 +479,12 @@ PluginContent
                 scalingMenu.addItem("").action = paretoScaling;
                 scalingMenu.enabled = Qt.binding(function()
                 {
-                    return plot.averagingType === PlotAveragingType.Individual &&
-                        !plot.groupByAnnotation;
+                    return plot.averagingType === PlotAveragingType.Individual || plot.iqrStyle;
                 });
 
                 scalingMenu.addSeparator();
                 let scaleByAttributeMenu = scalingMenu.addMenu(qsTr("By Attribute"));
+                scaleByAttributeMenu.enabled = Qt.binding(function() { return !plot.iqrStyle; });
                 plugin.model.numericalAttributeNames.forEach(function(attributeName)
                 {
                     let attributeMenuItem = scaleByAttributeMenu.addItem(attributeName);
@@ -748,6 +751,8 @@ PluginContent
 
                 return quantised;
             }
+
+            property bool iqrStyle: groupByAnnotation || averagingType == PlotAveragingType.IQR
 
             property bool scrollBarRequired: visibleHorizontalFraction < 1.0
             xAxisPadding: Constants.padding + (scrollBarRequired ? scrollView.__horizontalScrollBar.height : 0)
