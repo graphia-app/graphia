@@ -165,17 +165,14 @@ void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, fl
 
 void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
-    float nx = x / static_cast<float>(_width);
-    float ny = y / static_cast<float>(_height);
-
-    float oldCentreX = (nx * static_cast<float>(_width)) / _zoomFactor;
-    float oldCentreY = (ny * static_cast<float>(_height)) / _zoomFactor;
+    float oldCentreX = x / _zoomFactor;
+    float oldCentreY = y / _zoomFactor;
 
     if(!setZoomFactor(_zoomFactor + (delta * _zoomFactor)))
         return;
 
-    float newCentreX = (nx * static_cast<float>(_width)) / _zoomFactor;
-    float newCentreY = (ny * static_cast<float>(_height)) / _zoomFactor;
+    float newCentreX = x / _zoomFactor;
+    float newCentreY = y / _zoomFactor;
 
     setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
               static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
