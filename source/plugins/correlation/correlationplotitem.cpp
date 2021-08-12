@@ -469,20 +469,20 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
     return nearestPlottable;
 }
 
-void CorrelationPlotItem::updateTooltip()
+bool CorrelationPlotItem::updateTooltip()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(!lock.owns_lock())
     {
         _tooltipUpdateRequired = true;
-        return;
+        return false;
     }
 
     _tooltipUpdateRequired = false;
 
     if(_tooltipLayer == nullptr)
-        return;
+        return false;
 
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
     QCPAxisRect* axisRectUnderCursor = nullptr;
@@ -588,10 +588,12 @@ void CorrelationPlotItem::updateTooltip()
     else
     {
         // Nothing changed
-        return;
+        return false;
     }
 
     updatePixmap(CorrelationPlotUpdateType::RenderAndTooltips);
+
+    return true;
 }
 
 void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)

@@ -387,7 +387,7 @@ private:
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);
     void updatePlotSize();
-    void updateTooltip();
+    bool updateTooltip();
 
 signals:
     void rightClick();
