@@ -68,6 +68,25 @@ bool CorrelationPlotWorker::busy() const
     return _busy;
 }
 
+bool CorrelationPlotWorker::zoomed() const
+{
+    return _zoomed;
+}
+
+void CorrelationPlotWorker::updateZoomed()
+{
+    auto zoomed = std::any_of(_axisParameters.begin(), _axisParameters.end(), [](const auto& v)
+    {
+        return v.second.zoomed();
+    });
+
+    if(_zoomed != zoomed)
+    {
+        _zoomed = zoomed;
+        emit zoomedChanged();
+    }
+}
+
 void CorrelationPlotWorker::setShowGridLines(bool showGridLines)
 {
     _showGridLines = showGridLines;
@@ -87,6 +106,68 @@ void CorrelationPlotWorker::setXAxisRange(double min, double max)
 {
     _xAxisMin = min;
     _xAxisMax = max;
+}
+
+void CorrelationPlotWorker::setAxisRange(QCPAxis* axis, double min, double max)
+{
+    auto& parameters = _axisParameters[axis];
+
+    parameters._min = min;
+    parameters._max = max;
+
+    if(parameters.zoomIsReset())
+    {
+        parameters._zoomedMin = min;
+        parameters._zoomedMax = max;
+    }
+    else
+    {
+        parameters._zoomedMin = std::max(min, parameters._zoomedMin);
+        parameters._zoomedMax = std::min(max, parameters._zoomedMax);
+    }
+
+    updateZoomed();
+}
+
+void CorrelationPlotWorker::zoom(QCPAxis* axis, double centre, int direction)
+{
+    constexpr double maxScale = 20.0;
+    constexpr double zoomStepFactor = 0.8;
+
+    auto& parameters = _axisParameters[axis];
+
+    auto zoomFactor = zoomStepFactor;
+    if(direction < 0)
+        zoomFactor = 1.0 / zoomFactor;
+
+    centre = parameters._zoomedMin + ((parameters._zoomedMax - parameters._zoomedMin) * centre);
+    centre = std::clamp(centre, parameters._min, parameters._max);
+
+    auto newZoomedMin = ((parameters._zoomedMin - centre) * zoomFactor) + centre;
+    auto newZoomedMax = ((parameters._zoomedMax - centre) * zoomFactor) + centre;
+
+    if((parameters._max - parameters._min) / (newZoomedMax - newZoomedMin) > maxScale)
+        return;
+
+    parameters._zoomedMin = std::max(parameters._min, newZoomedMin);
+    parameters._zoomedMax = std::min(parameters._max, newZoomedMax);
+
+    updateZoomed();
+}
+
+void CorrelationPlotWorker::pan(QCPAxis* axis, double delta)
+{
+    auto& parameters = _axisParameters[axis];
+
+    if(delta >= 0.0)
+        delta = std::min(delta, parameters._max - parameters._zoomedMax);
+    else
+        delta = std::max(delta, parameters._min - parameters._zoomedMin);
+
+    parameters._zoomedMin = std::max(parameters._min, parameters._zoomedMin + delta);
+    parameters._zoomedMax = std::min(parameters._max, parameters._zoomedMax + delta);
+
+    updateZoomed();
 }
 
 void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
@@ -171,6 +252,9 @@ void CorrelationPlotWorker::renderPixmap()
         }
     }
 
+    for(auto& [axis, parameters] : _axisParameters)
+        axis->setRange(parameters._zoomedMin, parameters._zoomedMax);
+
     auto* tooltipLayer = _customPlot->layer(QStringLiteral("tooltipLayer"));
     if(tooltipLayer != nullptr && _updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
         tooltipLayer->replot();
@@ -242,6 +326,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
     connect(this, &CorrelationPlotItem::enabledChanged, [this] { update(); });
     connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
+    connect(_worker, &CorrelationPlotWorker::zoomedChanged, this, &CorrelationPlotItem::zoomedChanged);
 
     connect(&_customPlot, &QCustomPlot::afterReplot, [this]
     {
@@ -341,11 +426,18 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
 
 void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 {
+    _clickMousePosition = _lastMousePosition = event->pos();
     event->accept();
 }
 
 void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
+    auto delta = _clickMousePosition - event->pos();
+
+    // Ignore drags
+    if(delta.manhattanLength() > 3)
+        return;
+
     switch(event->button())
     {
     case Qt::LeftButton:
@@ -363,8 +455,22 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
     _tooltipUpdateRequired = true;
 }
 
-void CorrelationPlotItem::mouseMoveEvent(QMouseEvent*)
+void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
 {
+    auto* axisRectUnderCursor = _customPlot.axisRectAt(event->pos());
+
+    if(axisRectUnderCursor == _continuousAxisRect)
+    {
+        auto* axis = axisRectUnderCursor->axis(QCPAxis::atLeft);
+        auto delta = axis->pixelToCoord(_lastMousePosition.y()) - axis->pixelToCoord(event->pos().y());
+
+        QMetaObject::invokeMethod(_worker, "pan", Qt::QueuedConnection, Q_ARG(QCPAxis*, axis), Q_ARG(double, delta));
+        updatePixmap(CorrelationPlotUpdateType::Render);
+
+        _lastMousePosition = event->pos();
+
+        event->accept();
+    }
 }
 
 QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& keyCoord)
@@ -600,8 +706,28 @@ void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
     updateTooltip();
 }
 
-void CorrelationPlotItem::wheelEvent(QWheelEvent*)
+void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 {
+    auto* axisRectUnderCursor = _customPlot.axisRectAt(event->position());
+
+    if(event->angleDelta().y() != 0.0 && axisRectUnderCursor == _continuousAxisRect)
+    {
+        event->accept();
+
+        auto* axis = axisRectUnderCursor->axis(QCPAxis::atLeft);
+        auto f = 1.0 - ((event->position().y() - axisRectUnderCursor->top()) / axisRectUnderCursor->height());
+        f = std::clamp(f, 0.0, 1.0);
+
+        QMetaObject::invokeMethod(_worker, "zoom", Qt::QueuedConnection,
+            Q_ARG(QCPAxis*, axis), Q_ARG(double, f),
+            Q_ARG(int, event->angleDelta().y() > 0.0 ? 1 : -1));
+
+        // Hide tooltips when zooming
+        _hoverPoint = {-1.0, -1.0};
+
+        if(!updateTooltip()) // If tooltip update fails...
+            updatePixmap(CorrelationPlotUpdateType::Render);
+    }
 }
 
 QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* pluginInstance,

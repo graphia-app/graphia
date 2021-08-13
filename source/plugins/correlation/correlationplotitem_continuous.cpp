@@ -34,7 +34,8 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
             max = 0.0;
     }
 
-    _continuousYAxis->setRange(min, max);
+    QMetaObject::invokeMethod(_worker, "setAxisRange", Qt::QueuedConnection,
+        Q_ARG(QCPAxis*, _continuousYAxis), Q_ARG(double, min), Q_ARG(double, max));
 }
 
 static double logScale(double value)

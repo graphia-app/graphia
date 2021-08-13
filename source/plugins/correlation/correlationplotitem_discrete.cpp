@@ -137,7 +137,8 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
         }
     }
 
-    _discreteYAxis->setRange(0.0, maxY);
+    QMetaObject::invokeMethod(_worker, "setAxisRange", Qt::QueuedConnection,
+        Q_ARG(QCPAxis*, _discreteYAxis), Q_ARG(double, 0.0), Q_ARG(double, maxY));
 
     _discreteXAxis->grid()->setVisible(_showGridLines);
     _discreteYAxis->grid()->setVisible(_showGridLines);

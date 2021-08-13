@@ -38,6 +38,7 @@
 
 #include <vector>
 #include <set>
+#include <map>
 #include <mutex>
 #include <atomic>
 
@@ -96,10 +97,16 @@ public:
 
     bool busy() const;
 
+    bool zoomed() const;
+    void updateZoomed();
+
     Q_INVOKABLE void setShowGridLines(bool showGridLines);
     Q_INVOKABLE void setWidth(int width);
     Q_INVOKABLE void setHeight(int height);
     Q_INVOKABLE void setXAxisRange(double min, double max);
+    Q_INVOKABLE void setAxisRange(QCPAxis* axis, double min, double max);
+    Q_INVOKABLE void zoom(QCPAxis* axis, double centre, int direction);
+    Q_INVOKABLE void pan(QCPAxis* axis, double delta);
     Q_INVOKABLE void updatePixmap(CorrelationPlotUpdateType updateType);
 
 private:
@@ -119,6 +126,30 @@ private:
     double _xAxisMax = 0.0;
     bool _showGridLines = true;
 
+    struct AxisParameters
+    {
+        double _min = 0.0;
+        double _max = 0.0;
+
+        double _zoomedMin = 0.0;
+        double _zoomedMax = 0.0;
+
+        void resetZoom()
+        {
+            _zoomedMin = std::numeric_limits<double>::max();
+            _zoomedMax = std::numeric_limits<double>::lowest();
+        }
+
+        AxisParameters() { resetZoom(); }
+
+        bool zoomIsReset() const { return _zoomedMin > _zoomedMax; }
+        bool zoomed() const { return _zoomedMin > _min || _zoomedMax < _max; }
+    };
+
+    std::map<QCPAxis*, AxisParameters> _axisParameters;
+
+    std::atomic_bool _zoomed = false;
+
     std::atomic_bool _updateQueued = false;
     CorrelationPlotUpdateType _updateType = CorrelationPlotUpdateType::None;
 
@@ -127,6 +158,7 @@ private:
 signals:
     void busyChanged();
     void pixmapUpdated(QPixmap pixmap);
+    void zoomedChanged();
 };
 
 class CorrelationPlotItem : public QQuickPaintedItem
@@ -168,6 +200,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool isWide READ isWide NOTIFY isWideChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
+    Q_PROPERTY(bool zoomed READ zoomed NOTIFY zoomedChanged)
 
     Q_PROPERTY(int minimumHeight READ minimumHeight CONSTANT)
 
@@ -219,6 +252,9 @@ private:
     };
 
     RebuildRequired _rebuildRequired = RebuildRequired::None;
+
+    QPoint _clickMousePosition;
+    QPoint _lastMousePosition;
     bool _tooltipUpdateRequired = false;
     QCPLayer* _tooltipLayer = nullptr;
     QPointF _hoverPoint{-1.0, -1.0};
@@ -318,6 +354,7 @@ private:
         const QVector<int>& rows, QVector<double>& means);
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
+    bool zoomed() const { return _worker != nullptr ? _worker->zoomed() : false; }
 
     static int minimumHeight() { return 100; }
 
@@ -393,6 +430,7 @@ signals:
     void isWideChanged();
     void plotOptionsChanged();
     void busyChanged();
+    void zoomedChanged();
 
     void columnAnnotationSelectionModeEnabledChanged();
 };
