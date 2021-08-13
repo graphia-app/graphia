@@ -601,12 +601,18 @@ void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
     if(event->posF() == _hoverPoint)
         return;
 
+    if(event->posF() == event->oldPosF())
+        return;
+
     _hoverPoint = event->posF();
     updateTooltip();
 }
 
 void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
 {
+    if(_hoverPoint.x() < 0.0 && _hoverPoint.y() < 0.0)
+        return;
+
     _hoverPoint = {-1.0, -1.0};
     updateTooltip();
 }
