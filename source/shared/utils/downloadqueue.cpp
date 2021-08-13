@@ -161,6 +161,13 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
             return {};
         }
 
+        auto httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if(httpStatus != 200)
+        {
+            emit error(reply->url(), QStringLiteral("Reply has HTTP status %1").arg(httpStatus));
+            return {};
+        }
+
         _progress = -1;
         emit progressChanged(_progress);
 
