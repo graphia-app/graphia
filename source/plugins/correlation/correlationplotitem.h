@@ -197,15 +197,11 @@ public:
         const QVector<int>& rows);
 
 protected:
-    void routeMouseEvent(QMouseEvent* event);
-    void routeWheelEvent(QWheelEvent* event);
-
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void hoverMoveEvent(QHoverEvent* event) override;
     void hoverLeaveEvent(QHoverEvent* event) override;
-    void mouseDoubleClickEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
 
     enum class InvalidateCache { No, Yes };

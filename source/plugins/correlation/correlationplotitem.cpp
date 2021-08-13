@@ -339,29 +339,13 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
         updateTooltip();
 }
 
-void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
-{
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-        event->button(), event->buttons(), event->modifiers());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
-void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
-{
-    auto* newEvent = new QWheelEvent(event->position(), event->globalPosition(),
-        event->pixelDelta(), event->angleDelta(), event->buttons(),
-        event->modifiers(), event->phase(), event->inverted());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
 void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 {
-    routeMouseEvent(event);
+    event->accept();
 }
 
 void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
-    routeMouseEvent(event);
     switch(event->button())
     {
     case Qt::LeftButton:
@@ -381,7 +365,6 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
 {
-    routeMouseEvent(event);
 }
 
 QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& keyCoord)
@@ -617,14 +600,8 @@ void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
     updateTooltip();
 }
 
-void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
-{
-    routeMouseEvent(event);
-}
-
 void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 {
-    routeWheelEvent(event);
 }
 
 QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* pluginInstance,
