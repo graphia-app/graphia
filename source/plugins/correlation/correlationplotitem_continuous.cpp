@@ -447,7 +447,7 @@ static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column,
         outliers = u::randomSample(outliers, maxOutliers);
 
         // Ensure the minimum and maximum outliers are included
-        outliers.append({minmax.first, minmax.second});
+        outliers.append({*minmax.first, *minmax.second});
     }
 
     statisticalBox->addData(static_cast<int>(column), minValue, firstQuartile,
