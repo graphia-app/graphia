@@ -141,7 +141,15 @@ private slots:
 
 static void tabularDataParserInitialiser()
 {
-    QmlTabularDataParser::registerQmlType();
+    if(!QCoreApplication::instance()->startingUp())
+    {
+        // This will only occur from a DLL, where we need to delay the
+        // initialisation until later so we can guarantee it occurs
+        // after any static initialisation
+        QTimer::singleShot(0, [] {  QmlTabularDataParser::registerQmlType(); });
+    }
+    else
+        QmlTabularDataParser::registerQmlType();
 }
 
 Q_COREAPP_STARTUP_FUNCTION(tabularDataParserInitialiser)
