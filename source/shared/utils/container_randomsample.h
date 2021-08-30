@@ -13,7 +13,7 @@ C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
 
     auto sample = container;
 
-    std::default_random_engine dre(container.front());
+    std::default_random_engine dre(static_cast<int>(container.front()));
 
     for(size_t i = 0; i < numSamples; i++)
     {
