@@ -25,7 +25,7 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);
 
-    constexpr int RoleBase = Qt::UserRole + 1;
+    constexpr int RoleBase = Qt::UserRole;
 
     _roleNames[RoleBase + Results::SelectionA] = "SelectionA";
     _roleNames[RoleBase + Results::SelectionB] = "SelectionB";
