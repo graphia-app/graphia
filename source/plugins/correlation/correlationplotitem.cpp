@@ -363,7 +363,7 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
     _tooltipUpdateRequired = true;
 }
 
-void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
+void CorrelationPlotItem::mouseMoveEvent(QMouseEvent*)
 {
 }
 
@@ -600,7 +600,7 @@ void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
     updateTooltip();
 }
 
-void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
+void CorrelationPlotItem::wheelEvent(QWheelEvent*)
 {
 }
 
