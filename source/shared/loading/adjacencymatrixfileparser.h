@@ -171,7 +171,7 @@ using AdjacencyMatrixMatLabFileParser = AdjacencyMatrixParser<MatLabFileParser>;
 
 static void adjacencyMatrixTabularDataParserInitialiser()
 {
-    if(!QCoreApplication::instance()->startingUp())
+    if(!QCoreApplication::startingUp())
     {
         // This will only occur from a DLL, where we need to delay the
         // initialisation until later so we can guarantee it occurs
