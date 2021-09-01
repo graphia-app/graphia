@@ -237,7 +237,7 @@ ApplicationWindow
 
                                     text:
                                     {
-                                        if(styleData.value === undefined)
+                                        if(styleData.value === undefined || typeof(styleData.value) === 'object')
                                             return "";
 
                                         let column = tableView.getColumn(styleData.column);
