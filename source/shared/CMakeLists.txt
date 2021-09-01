@@ -120,6 +120,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/typeidentity.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/utils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/visitor.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/void_callable_wrapper.h
 )
 
 list(APPEND SHARED_SOURCES
