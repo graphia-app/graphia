@@ -23,13 +23,13 @@
 #include "function_traits.h"
 #include "is_std_container.h"
 #include "is_detected.h"
+#include "void_callable_wrapper.h"
 
 #include <QString>
 
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
-#include <functional>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -45,7 +45,7 @@ private:
     std::vector<std::thread> _threads;
     std::mutex _mutex;
     std::condition_variable _waitForNewTask;
-    std::queue<std::function<void()>> _tasks;
+    std::queue<void_callable_wrapper> _tasks;
     std::atomic<bool> _stop;
 
 public:
@@ -65,20 +65,21 @@ public:
         if(_stop)
             return {};
 
-        auto taskPtr = std::make_shared<std::packaged_task<ReturnType<Fn, Args...>(Args...)>>(f);
+        auto task = std::packaged_task<ReturnType<Fn, Args...>(Args...)>(f);
+        auto future = task.get_future();
 
         {
             std::unique_lock<std::mutex> lock(_mutex);
-            _tasks.emplace([taskPtr, args...]() mutable
+            _tasks.emplace([task = std::move(task), args...]() mutable
             {
-                (*taskPtr)(std::forward<Args>(args)...);
+                task(std::forward<Args>(args)...);
             });
         }
 
         // Wake a thread up
         _waitForNewTask.notify_one();
 
-        return taskPtr->get_future();
+        return future;
     }
 
 private:

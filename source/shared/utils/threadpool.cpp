@@ -48,7 +48,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
                 if(_stop)
                     break;
 
-                auto task = _tasks.front();
+                auto task = std::move(_tasks.front());
                 _tasks.pop();
                 lock.unlock();
 
