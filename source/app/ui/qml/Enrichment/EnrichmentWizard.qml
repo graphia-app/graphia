@@ -212,9 +212,19 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: document !== null ? model.display + " (" +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries") + ")" : ""
+
+                                text:
+                                {
+                                    if(document !== null && model.display.length > 0)
+                                    {
+                                        return model.display + qsTr(" (") +
+                                            document.attribute(model.display).sharedValues +
+                                            qsTr(" entries)");
+                                    }
+
+                                    return "";
+                                }
+
                                 exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
@@ -276,9 +286,19 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: document !== null ? model.display + " (" +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries") + ")" : ""
+
+                                text:
+                                {
+                                    if(document !== null && model.display.length > 0)
+                                    {
+                                        return model.display + qsTr(" (") +
+                                            document.attribute(model.display).sharedValues +
+                                            qsTr(" entries)");
+                                    }
+
+                                    return "";
+                                }
+
                                 exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
                         }
