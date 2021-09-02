@@ -34,7 +34,7 @@ private:
     struct callable : callable_base
     {
         F _f;
-        callable(F&& f) : _f(std::move(f)) {}
+        explicit callable(F f) : _f(std::move(f)) {}
 
         void call() override { _f(); }
     };
@@ -43,7 +43,7 @@ private:
 
 public:
     template<typename F>
-    void_callable_wrapper(F&& f) : _callable(std::make_unique<callable<F>>(std::move(f))) {}
+    explicit void_callable_wrapper(F f) : _callable(std::make_unique<callable<F>>(std::move(f))) {}
 
     void_callable_wrapper() = delete;
     void_callable_wrapper(const void_callable_wrapper&) = delete;
