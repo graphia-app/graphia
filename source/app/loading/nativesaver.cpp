@@ -180,6 +180,7 @@ bool NativeSaver::save()
     header["version"] = NativeSaver::Version;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
+    header["appVersion"] = VERSION;
     jsonArray.emplace_back(header);
 
     // The header must fit within a certain size, which is the maximum the loader will look at
