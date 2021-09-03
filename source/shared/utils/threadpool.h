@@ -490,7 +490,6 @@ public:
         static_assert(function_traits<Fn>::arity == 1 || HasThreadIndexArgument<Fn>,
             "Fn's (optional) second index argument must be size_t");
 
-        Executor<It, Fn> executor;
         std::vector<std::future<typename Executor<It, Fn>::ResultsVectorOrVoid>> futures;
         size_t threadIndex = 0;
 
@@ -507,10 +506,11 @@ public:
 
             Q_ASSERT(threadIndex < _threads.size());
 
-            futures.emplace_back(makeFuture([executor, it, threadLast, f, threadIndex]() mutable
+            futures.emplace_back(makeFuture([it, threadLast, f, threadIndex]() mutable
             {
+                Executor<It, Fn> executor;
                 executor.setIndex(threadIndex);
-                return executor(it, threadLast, f);
+                return executor(std::exchange(it, It()), std::exchange(threadLast, It()), f);
             }));
 
             it = threadLast;
