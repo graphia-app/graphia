@@ -80,8 +80,8 @@ Item
         radius: 2
         color: (mouseArea.containsMouse || root.menuDropped) ? root.hoverColor : "transparent"
 
-        implicitWidth: label.implicitWidth + 8
-        implicitHeight: label.implicitHeight + 8
+        implicitWidth: label.contentWidth + 8
+        implicitHeight: label.contentHeight + 8
 
         Label
         {
@@ -95,7 +95,7 @@ Item
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
 
-            elide: Text.ElideRight
+            elide: button.width === button.implicitWidth ? Text.ElideNone : Text.ElideRight
             text: root.selectedValue !== "" ? root.selectedValue : root.text
             color: root._contrastingColor
         }
