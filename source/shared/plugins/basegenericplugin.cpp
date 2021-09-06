@@ -83,26 +83,26 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     {
         std::unique_ptr<IParser> parser;
 
-        auto makeMatrixParser = [&](auto parser)
+        auto configureMatrixParser = [&](auto matrixParser)
         {
             if(_adjacencyMatrixParameters._filterEdges)
-                parser->setMinimumAbsEdgeWeight(_adjacencyMatrixParameters._minimumAbsEdgeWeight);
+                matrixParser->setMinimumAbsEdgeWeight(_adjacencyMatrixParameters._minimumAbsEdgeWeight);
 
-            parser->setSkipDuplicates(_adjacencyMatrixParameters._skipDuplicates);
+            matrixParser->setSkipDuplicates(_adjacencyMatrixParameters._skipDuplicates);
 
-            return parser;
+            return matrixParser;
         };
 
         if(urlTypeName == QStringLiteral("MatrixCSV"))
-            parser = makeMatrixParser(std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
         else if(urlTypeName == QStringLiteral("MatrixSSV"))
-            parser = makeMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
         else if(urlTypeName == QStringLiteral("MatrixTSV"))
-            parser = makeMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
         else if(urlTypeName == QStringLiteral("MatrixXLSX"))
-            parser = makeMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
         else if(urlTypeName == QStringLiteral("MatrixMatLab"))
-            parser = makeMatrixParser(std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
 
         return parser;
     }
