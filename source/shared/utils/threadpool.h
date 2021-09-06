@@ -348,24 +348,15 @@ private:
         std::is_same_v<LastArgumentType<Fn>, size_t>;
 
     template<typename It, typename Fn>
-    class IteratorExecutor
+    struct IteratorExecutor
     {
-    private:
-        size_t _index = 0;
-
-    public:
-        IteratorExecutor() = default;
-
-        void setIndex(size_t index) { _index = index; }
-
-    protected:
-        auto execute(Fn& f, It& it) const
+        static auto execute(Fn& f, It& it, size_t index)
         {
             // Fn argument is an iterator
             if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, It>)
             {
                 if constexpr(HasThreadIndexArgument<Fn>)
-                    return f(it, _index);
+                    return f(it, index);
                 else
                     return f(it);
             }
@@ -374,7 +365,7 @@ private:
             if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>)
             {
                 if constexpr(HasThreadIndexArgument<Fn>)
-                    return f(*it, _index);
+                    return f(*it, index);
                 else
                     return f(*it);
             }
@@ -382,33 +373,31 @@ private:
     };
 
     template<typename It, typename Fn, typename Result>
-    class ResultsExecutor : public IteratorExecutor<It, Fn>
+    struct ResultsExecutor
     {
-    public:
         using ResultsVectorOrVoid = std::vector<Result>;
 
-        ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
+        static ResultsVectorOrVoid execute(It it, It last, size_t index, Fn& f)
         {
             ResultsVectorOrVoid values;
             values.reserve(std::distance(it, last));
 
             for(; it != last; ++it)
-                values.emplace_back(std::move(this->execute(f, it)));
+                values.emplace_back(std::move(IteratorExecutor<It, Fn>::execute(f, it, index)));
 
             return values;
         }
     };
 
     template<typename It, typename Fn>
-    class ResultsExecutor<It, Fn, void> : public IteratorExecutor<It, Fn>
+    struct ResultsExecutor<It, Fn, void>
     {
-    public:
         using ResultsVectorOrVoid = void;
 
-        ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
+        static ResultsVectorOrVoid execute(It it, It last, size_t index, Fn& f)
         {
             for(; it != last; ++it)
-                this->execute(f, it);
+                IteratorExecutor<It, Fn>::execute(f, it, index);
         }
     };
 
@@ -506,11 +495,11 @@ public:
 
             Q_ASSERT(threadIndex < _threads.size());
 
-            futures.emplace_back(makeFuture([it, threadLast, f, threadIndex]() mutable
+            futures.emplace_back(makeFuture([it, threadLast, threadIndex, f]() mutable
             {
-                Executor<It, Fn> executor;
-                executor.setIndex(threadIndex);
-                return executor(std::exchange(it, It()), std::exchange(threadLast, It()), f);
+                return Executor<It, Fn>::execute(
+                    std::exchange(it, It()), std::exchange(threadLast, It()),
+                    threadIndex, f);
             }));
 
             it = threadLast;
