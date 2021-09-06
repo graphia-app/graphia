@@ -654,7 +654,11 @@ ApplicationWindow
         id: typeChooserDialog
         application: application
         model: application.urlTypeDetails
-        onAccepted: openUrlOfType(url, type, inNewTab)
+        onAccepted:
+        {
+            close();
+            openUrlOfType(url, type, inNewTab);
+        }
     }
 
     function openUrlOfType(url, type, inNewTab)
@@ -687,7 +691,11 @@ ApplicationWindow
         id: pluginChooserDialog
         application: application
         model: application.pluginDetails
-        onAccepted: openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)
+        onAccepted:
+        {
+            close();
+            openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab);
+        }
     }
 
     function openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)
