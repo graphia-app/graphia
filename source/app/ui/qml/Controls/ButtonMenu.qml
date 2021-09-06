@@ -83,6 +83,10 @@ Item
         implicitWidth: label.contentWidth + 8
         implicitHeight: label.contentHeight + 8
 
+        property bool atNaturalWidth: false
+        onWidthChanged: { atNaturalWidth = (width === implicitWidth); }
+        onImplicitWidthChanged: { atNaturalWidth = (width === implicitWidth); }
+
         Label
         {
             id: label
@@ -95,7 +99,7 @@ Item
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
 
-            elide: button.width === button.implicitWidth ? Text.ElideNone : Text.ElideRight
+            elide: button.atNaturalWidth ? Text.ElideNone : Text.ElideRight
             text: root.selectedValue !== "" ? root.selectedValue : root.text
             color: root._contrastingColor
         }
