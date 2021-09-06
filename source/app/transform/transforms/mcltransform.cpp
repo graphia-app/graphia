@@ -450,7 +450,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
         auto cancelledFn = [this] { return cancelled(); };
 
-        // Pass by value rowData, this gives each THREAD a copy of rowData, rather re-allocating vectors per row (slow)
+        // Capture rowData by value; this gives each thread a copy of rowData, rather re-allocating vectors per row (slow)
         parallel_for(colIterator.begin(), colIterator.end(),
         [&, rowData](const size_t iterator) mutable
         {
