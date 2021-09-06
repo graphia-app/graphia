@@ -350,7 +350,7 @@ private:
     template<typename It, typename Fn>
     struct IteratorExecutor
     {
-        static auto execute(Fn& f, It& it, size_t index)
+        static auto execute(Fn& f, It it, size_t index)
         {
             // Fn argument is an iterator
             if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, It>)
@@ -495,6 +495,7 @@ public:
 
             Q_ASSERT(threadIndex < _threads.size());
 
+            // Capture must be by value as the futures may outlive the invocation of parallel_for
             futures.emplace_back(makeFuture([it, threadLast, threadIndex, f]() mutable
             {
                 return Executor<It, Fn>::execute(
