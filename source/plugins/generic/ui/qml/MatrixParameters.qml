@@ -36,6 +36,18 @@ BaseParameterDialog
     minimumWidth: tabularDataParser.binaryMatrix ? 480 : 640
     minimumHeight: tabularDataParser.binaryMatrix ? 240 : 520
 
+    onMinimumWidthChanged:
+    {
+        if(root.width < root.minimumWidth)
+            root.width = root.minimumWidth;
+    }
+
+    onMinimumHeightChanged:
+    {
+        if(root.height < root.minimumHeight)
+            root.height = root.minimumHeight;
+    }
+
     maximumHeight: tabularDataParser.binaryMatrix ? minimumHeight : (1 << 24) - 1
 
     property bool _graphEstimatePerformed: false
