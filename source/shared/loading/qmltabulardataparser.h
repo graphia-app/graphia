@@ -97,7 +97,7 @@ public:
         bool _result = true;
         QString _reason;
 
-        operator bool() const { return _result; }
+        explicit operator bool() const { return _result; }
     };
 
 protected:

@@ -405,8 +405,7 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
     }
 
     failureReason.setFailureReason(tr("Failed to identify matrix type:\n %1\n %2")
-        .arg(edgeListResult._reason)
-        .arg(adjacencyMatrixResult._reason));
+        .arg(edgeListResult._reason, adjacencyMatrixResult._reason));
 
     return false;
 }
