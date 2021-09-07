@@ -200,7 +200,13 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
         }
 
         setProgress(-1);
-        onParseComplete();
+        auto result = onParseComplete();
+
+        if(!result)
+        {
+            _dataPtr->reset();
+            _failureReason = result._reason;
+        }
     });
 
     _dataParserWatcher.setFuture(future);
@@ -258,6 +264,9 @@ void QmlTabularDataParser::onDataLoaded()
 {
     if(_dataPtr->empty())
     {
+        if(!_failureReason.isEmpty())
+            emit failureReasonChanged();
+
         _failed = true;
         emit failedChanged();
     }

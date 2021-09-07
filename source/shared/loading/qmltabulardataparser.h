@@ -75,6 +75,7 @@ class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual
     Q_PROPERTY(int progress MEMBER _progress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY(bool complete MEMBER _complete NOTIFY completeChanged)
     Q_PROPERTY(bool failed MEMBER _failed NOTIFY failedChanged)
+    Q_PROPERTY(QString failureReason MEMBER _failureReason NOTIFY failureReasonChanged)
 
 private:
     QFutureWatcher<void> _dataParserWatcher;
@@ -86,14 +87,24 @@ private:
     std::atomic<Cancellable*> _cancellableParser = nullptr;
     bool _complete = false;
     bool _failed = false;
+    QString _failureReason;
 
     void updateColumnTypes();
+
+public:
+    struct MatrixTypeResult
+    {
+        bool _result = true;
+        QString _reason;
+
+        operator bool() const { return _result; }
+    };
 
 protected:
     const TabularData& tabularData() const { return *_dataPtr; }
 
     // This is called from a worker thread
-    virtual bool onParseComplete() { return true; }
+    virtual MatrixTypeResult onParseComplete() { return {}; }
 
 public:
     QmlTabularDataParser();
@@ -132,6 +143,7 @@ signals:
     void progressChanged();
     void completeChanged();
     void failedChanged();
+    void failureReasonChanged();
 
     void dataLoaded();
 

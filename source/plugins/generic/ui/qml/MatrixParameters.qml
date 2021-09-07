@@ -91,11 +91,24 @@ BaseParameterDialog
             Layout.fillWidth: true
 
             horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.Wrap
+            wrapMode: Text.WrapAnywhere
 
-            text: tabularDataParser.failed ?
-                qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url) + "." :
-                qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + "…"
+            text:
+            {
+                if(tabularDataParser.failed)
+                {
+                    let failureMessage = qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url);
+
+                    if(tabularDataParser.failureReason.length > 0)
+                        failureMessage += qsTr(":\n\n") + tabularDataParser.failureReason;
+                    else
+                        failureMessage += qsTr(".");
+
+                    return failureMessage;
+                }
+
+                return qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + qsTr("…");
+            }
         }
 
         RowLayout

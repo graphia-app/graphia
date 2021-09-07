@@ -56,14 +56,18 @@ void addEdge(IGraphModel* graphModel, IUserEdgeData* userEdgeData,
     }
 }
 
-bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progressable,
+bool parseAdjacencyMatrix(const TabularData& tabularData,
+    Progressable& progressable, FailureReason& failureReason,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
     progressable.setProgress(-1);
 
     if(tabularData.numRows() == 0 || tabularData.numColumns() == 0)
+    {
+        failureReason.setFailureReason(QObject::tr("Matrix is empty."));
         return false;
+    }
 
     bool hasColumnHeaders = false;
     bool hasRowHeaders = false;
@@ -97,7 +101,10 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
     auto dataHeight = tabularData.numRows() - dataStartRow;
     auto dataWidth = tabularData.numColumns() - dataStartColumn;
     if(dataWidth != dataHeight)
+    {
+        failureReason.setFailureReason(QObject::tr("Matrix is not square."));
         return false;
+    }
 
     auto totalIterations = static_cast<uint64_t>(tabularData.numColumns() * tabularData.numRows());
     uint64_t progress = 0;
@@ -151,7 +158,8 @@ bool parseAdjacencyMatrix(const TabularData& tabularData, Progressable& progress
     return true;
 }
 
-bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
+bool parseEdgeList(const TabularData& tabularData,
+    Progressable& progressable, FailureReason&,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
     double minimumAbsEdgeWeight, bool skipDuplicates)
 {
@@ -212,7 +220,7 @@ bool parseEdgeList(const TabularData& tabularData, Progressable& progressable,
 }
 } // namespace
 
-bool AdjacencyMatrixTabularDataParser::onParseComplete()
+QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParseComplete()
 {
     const auto& data = tabularData();
     QPoint topLeft;
@@ -220,7 +228,9 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
 
     setProgress(-1);
 
-    if(isEdgeList(data))
+    MatrixTypeResult result;
+
+    if((result = isEdgeList(data)))
     {
         for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
         {
@@ -234,7 +244,7 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
         }
     }
-    else if(isAdjacencyMatrix(data, &topLeft))
+    else if((result = isAdjacencyMatrix(data, &topLeft)))
     {
         for(auto rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
         {
@@ -251,6 +261,8 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
         }
     }
+    else
+        return result;
 
     setProgress(-1);
 
@@ -272,10 +284,11 @@ bool AdjacencyMatrixTabularDataParser::onParseComplete()
     _graphSizeEstimate = graphSizeEstimate(edgeList);
     emit graphSizeEstimateChanged();
 
-    return true;
+    return result;
 }
 
-bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft, size_t maxRows)
+QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(
+    const TabularData& tabularData, QPoint* topLeft, size_t maxRows)
 {
     // A matrix can optionally have column or row headers. Or none.
     // A matrix data rect must be square.
@@ -286,7 +299,7 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
     bool firstRowAllDouble = true;
 
     if(tabularData.numColumns() < 2)
-        return false;
+        return {false, tr("Matrix must have at least 2 rows/columns.")};
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {
@@ -305,7 +318,7 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
             if(columnIndex == 0)
             {
                 if(rowIndex >= potentialColumnHeaders.size() ||
-                        potentialColumnHeaders[rowIndex] != value)
+                    potentialColumnHeaders[rowIndex] != value)
                 {
                     headerMatch = false;
                 }
@@ -323,7 +336,7 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
                 // This will prevent loading obviously non-matrix files
                 // We could handle non-double matrix symbols in future (X, -, I, O etc)
                 if(!u::isNumeric(value) && !value.isEmpty())
-                    return false;
+                    return {false, tr("Matrix has non-numeric values.")};
             }
         }
     }
@@ -333,7 +346,7 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
 
     // Note we can't test for equality as we may not be seeing all the rows (due to a row limit)
     if(numDataColumns < numDataRows)
-        return false;
+        return {false, tr("Matrix is not square.")};
 
     if(topLeft != nullptr)
     {
@@ -341,45 +354,59 @@ bool AdjacencyMatrixTabularDataParser::isAdjacencyMatrix(const TabularData& tabu
         topLeft->setY(firstRowAllDouble ? 1 : 0);
     }
 
-    return headerMatch || firstColumnAllDouble || firstRowAllDouble;
+    if(headerMatch || firstColumnAllDouble || firstRowAllDouble)
+        return {true, {}};
+
+    return {false, !headerMatch ? tr("Matrix headers don't match.") :
+        tr("Matrix doesn't have numeric first row or column.")};
 }
 
-bool AdjacencyMatrixTabularDataParser::isEdgeList(const TabularData& tabularData, size_t maxRows)
+QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::isEdgeList(
+    const TabularData& tabularData, size_t maxRows)
 {
     if(tabularData.numColumns() != 3)
-        return false; // NOLINT
+        return {false, tr("Edge list doesn't have 3 columns.")};
 
     for(size_t rowIndex = 0; rowIndex < std::min(tabularData.numRows(), maxRows); rowIndex++)
     {
         if(!u::isInteger(tabularData.valueAt(0, rowIndex)))
-            return false;
+            return {false, tr("1st edge list column has a non-integral value.")};
 
         if(!u::isInteger(tabularData.valueAt(1, rowIndex)))
-            return false;
+            return {false, tr("2nd edge list column has a non-integral value.")};
 
         if(!u::isNumeric(tabularData.valueAt(2, rowIndex)))
-            return false;
+            return {false, tr("3rd edge list column has a non-numeric value.")};
     }
 
-    return true;
+    return {true, {}};
 }
 
-bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData, Progressable& progressable,
+bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
+    Progressable& progressable, FailureReason& failureReason,
     IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) const
 {
-    if(isEdgeList(tabularData))
+    auto edgeListResult = isEdgeList(tabularData);
+    if(edgeListResult)
     {
-        return parseEdgeList(tabularData, progressable,
+        return parseEdgeList(tabularData,
+            progressable, failureReason,
             graphModel, userNodeData, userEdgeData,
             _minimumAbsEdgeWeight, _skipDuplicates);
     }
 
-    if(isAdjacencyMatrix(tabularData))
+    auto adjacencyMatrixResult = isAdjacencyMatrix(tabularData);
+    if(adjacencyMatrixResult)
     {
-        return parseAdjacencyMatrix(tabularData, progressable,
+        return parseAdjacencyMatrix(tabularData,
+            progressable, failureReason,
             graphModel, userNodeData, userEdgeData,
             _minimumAbsEdgeWeight, _skipDuplicates);
     }
+
+    failureReason.setFailureReason(tr("Failed to identify matrix type:\n %1\n %2")
+        .arg(edgeListResult._reason)
+        .arg(adjacencyMatrixResult._reason));
 
     return false;
 }

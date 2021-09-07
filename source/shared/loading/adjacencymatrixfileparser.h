@@ -53,13 +53,13 @@ private:
     double _minimumAbsEdgeWeight = 0.0;
     bool _skipDuplicates = false;
 
-    bool onParseComplete() override;
+    MatrixTypeResult onParseComplete() override;
 
 public:
-    static bool isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft = nullptr, size_t maxRows = 5);
-    static bool isEdgeList(const TabularData& tabularData, size_t maxRows = 5);
+    static MatrixTypeResult isAdjacencyMatrix(const TabularData& tabularData, QPoint* topLeft = nullptr, size_t maxRows = 5);
+    static MatrixTypeResult isEdgeList(const TabularData& tabularData, size_t maxRows = 5);
 
-    bool parse(const TabularData& tabularData, Progressable& progressable,
+    bool parse(const TabularData& tabularData, Progressable& progressable, FailureReason& failureReason,
         IGraphModel* graphModel, IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) const;
 
     double minimumAbsEdgeWeight() const { return _minimumAbsEdgeWeight; }
@@ -113,7 +113,7 @@ public:
             _tabularData = std::move(parser.tabularData());
         }
 
-        return AdjacencyMatrixTabularDataParser::parse(_tabularData, *this,
+        return AdjacencyMatrixTabularDataParser::parse(_tabularData, *this, *this,
             graphModel, _userNodeData, _userEdgeData);
     }
 
