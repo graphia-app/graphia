@@ -1174,16 +1174,9 @@ Item
                     if(rowUnderCursor !== previousRow)
                     {
                         if(deselectDrag)
-                        {
                             deselectRows(startRow, rowUnderCursor);
-                        }
                         else
-                        {
-                            if(previousRow !== -1)
-                                deselectRows(startRow, previousRow);
-
                             selectRows(startRow, rowUnderCursor);
-                        }
 
                         previousRow = endRow = rowUnderCursor;
                     }
