@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <type_traits>
+#include <compare>
 
 template<typename T> class ElementId
 {
@@ -54,14 +55,9 @@ public:
     T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }
     T& operator--() { --_value; return static_cast<T&>(*this); }
     T operator--(int) { T previous = static_cast<T&>(*this); --_value; return previous; }
-    bool operator==(const ElementId<T>& other) const { return _value == other._value; }
-    bool operator!=(const ElementId<T>& other) const { return _value != other._value; }
-    bool operator<(const ElementId<T>& other) const { return _value < other._value; }
-    bool operator<=(const ElementId<T>& other) const { return _value <= other._value; }
-    bool operator>(const ElementId<T>& other) const { return _value > other._value; }
-    bool operator>=(const ElementId<T>& other) const { return _value >= other._value; }
     T operator+(int value) const { return _value + value; }
     T operator-(int value) const { return _value - value; }
+    auto operator<=>(const ElementId<T>& other) const = default;
 
     bool isNull() const { assert(_value >= NullValue); return _value == NullValue; }
     void setToNull() { _value = NullValue; }
