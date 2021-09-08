@@ -24,6 +24,7 @@
 #include "application.h"
 
 #include "shared/graph/elementid.h"
+#include "shared/utils/static_block.h"
 
 #include <QMetaType>
 #include <QObject>
@@ -52,13 +53,11 @@ QML_ELEMENTID(EdgeId) // NOLINT
 // cppcheck-suppress noExplicitConstructor
 QML_ELEMENTID(ComponentId) // NOLINT
 
-inline void registerQmlElementIdTypes()
+static_block
 {
     qRegisterMetaType<QmlNodeId>("QmlNodeId");
     qRegisterMetaType<QmlNodeId>("QmlEdgeId");
     qRegisterMetaType<QmlNodeId>("QmlComponentId");
 }
-
-Q_COREAPP_STARTUP_FUNCTION(registerQmlElementIdTypes)
 
 #endif // QMLELEMENTID_H

@@ -26,9 +26,9 @@
 #include "shared/loading/matlabfileparser.h"
 
 #include "shared/utils/is_detected.h"
+#include "shared/utils/static_block.h"
 
 #include <QQmlEngine>
-#include <QCoreApplication>
 #include <QVariantMap>
 #include <QPoint>
 
@@ -169,19 +169,9 @@ using AdjacencyMatrixCSVFileParser =    AdjacencyMatrixParser<CsvFileParser>;
 using AdjacencyMatrixXLSXFileParser =   AdjacencyMatrixParser<XlsxTabularDataParser>;
 using AdjacencyMatrixMatLabFileParser = AdjacencyMatrixParser<MatLabFileParser>;
 
-static void adjacencyMatrixTabularDataParserInitialiser()
+static_block
 {
-    if(!QCoreApplication::startingUp())
-    {
-        // This will only occur from a DLL, where we need to delay the
-        // initialisation until later so we can guarantee it occurs
-        // after any static initialisation
-        QTimer::singleShot(0, [] {  AdjacencyMatrixTabularDataParser::registerQmlType(); });
-    }
-    else
-        AdjacencyMatrixTabularDataParser::registerQmlType();
+    AdjacencyMatrixTabularDataParser::registerQmlType();
 }
-
-Q_COREAPP_STARTUP_FUNCTION(adjacencyMatrixTabularDataParserInitialiser)
 
 #endif // ADJACENCYMATRIXFILEPARSER_H

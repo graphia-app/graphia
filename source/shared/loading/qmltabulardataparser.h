@@ -22,13 +22,13 @@
 #include "shared/utils/cancellable.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/typeidentity.h"
+#include "shared/utils/static_block.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QObject>
 #include <QFutureWatcher>
 #include <QQmlEngine>
-#include <QCoreApplication>
 #include <QAbstractListModel>
 #include <QVariantMap>
 
@@ -151,19 +151,9 @@ private slots:
     void onDataLoaded();
 };
 
-static void tabularDataParserInitialiser()
+static_block
 {
-    if(!QCoreApplication::startingUp())
-    {
-        // This will only occur from a DLL, where we need to delay the
-        // initialisation until later so we can guarantee it occurs
-        // after any static initialisation
-        QTimer::singleShot(0, [] {  QmlTabularDataParser::registerQmlType(); });
-    }
-    else
-        QmlTabularDataParser::registerQmlType();
+    QmlTabularDataParser::registerQmlType();
 }
-
-Q_COREAPP_STARTUP_FUNCTION(tabularDataParserInitialiser)
 
 #endif // QMLTABULARDATAPARSER_H

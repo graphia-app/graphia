@@ -21,9 +21,9 @@
 
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/cancellable.h"
+#include "shared/utils/static_block.h"
 
 #include <QObject>
-#include <QCoreApplication>
 #include <QQmlEngine>
 #include <QFutureWatcher>
 #include <QVariantMap>
@@ -72,11 +72,9 @@ signals:
     void resultChanged();
 };
 
-static void keyDetectionInitialiser()
+static_block
 {
     ImportAttributesKeyDetection::registerQmlType();
 }
-
-Q_COREAPP_STARTUP_FUNCTION(keyDetectionInitialiser)
 
 #endif // IMPORTATTRIBUTESKEYDETECTION_H

@@ -18,6 +18,8 @@
 
 #include "availabletransformsmodel.h"
 
+#include "shared/utils/static_block.h"
+
 #include "application.h"
 #include "graph/graphmodel.h"
 
@@ -80,7 +82,7 @@ QHash<int, QByteArray> AvailableTransformsModel::roleNames() const
     return names;
 }
 
-void registerAvailableTransformsModelType()
+static_block
 {
     qmlRegisterInterface<AvailableTransformsModel>("AvailableTransformsModel"
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -88,5 +90,3 @@ void registerAvailableTransformsModelType()
 #endif
         );
 }
-
-Q_COREAPP_STARTUP_FUNCTION(registerAvailableTransformsModelType)

@@ -17,8 +17,7 @@
  */
 
 #include "utils.h"
-
-#include <QCoreApplication>
+#include "static_block.h"
 
 int u::smallestPowerOf2GreaterThan(int x)
 {
@@ -46,10 +45,8 @@ float u::normaliseAngle(float radians)
     return radians;
 }
 
-static void initQtResources()
+static_block
 {
     Q_INIT_RESOURCE(shared);
     Q_INIT_RESOURCE(js);
 }
-
-Q_COREAPP_STARTUP_FUNCTION(initQtResources)

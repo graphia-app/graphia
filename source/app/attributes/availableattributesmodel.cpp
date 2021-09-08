@@ -26,6 +26,7 @@
 
 #include "shared/graph/elementtype.h"
 #include "shared/utils/container.h"
+#include "shared/utils/static_block.h"
 
 AvailableAttributesModel::Item::Item(const QString& value, const Attribute* attribute) :
     _value(value), _attribute(attribute)
@@ -401,7 +402,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
     return names;
 }
 
-void registerAvailableAttributesModelType()
+static_block
 {
     qmlRegisterInterface<AvailableAttributesModel>("AvailableAttributesModel"
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -409,5 +410,3 @@ void registerAvailableAttributesModelType()
 #endif
         );
 }
-
-Q_COREAPP_STARTUP_FUNCTION(registerAvailableAttributesModelType)

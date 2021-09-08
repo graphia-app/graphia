@@ -19,17 +19,17 @@
 #ifndef TABLEPROXYMODEL_H
 #define TABLEPROXYMODEL_H
 
-#include <unordered_set>
+#include "shared/utils/static_block.h"
 
 #include <QSortFilterProxyModel>
 #include <QQmlEngine>
-#include <QCoreApplication>
 #include <QTimer>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
 #include <QCollator>
 #include <QStringList>
 
+#include <unordered_set>
 #include <deque>
 #include <utility>
 
@@ -142,19 +142,9 @@ public slots:
     void invalidateFilter();
 };
 
-static void tableProxyModelInitialiser()
+static_block
 {
-    if(!QCoreApplication::startingUp())
-    {
-        // This will only occur from a DLL, where we need to delay the
-        // initialisation until later so we can guarantee it occurs
-        // after any static initialisation
-        QTimer::singleShot(0, [] { TableProxyModel::registerQmlType(); });
-    }
-    else
-        TableProxyModel::registerQmlType();
+    TableProxyModel::registerQmlType();
 }
-
-Q_COREAPP_STARTUP_FUNCTION(tableProxyModelInitialiser)
 
 #endif // TABLEPROXYMODEL_H
