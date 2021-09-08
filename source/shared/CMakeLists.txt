@@ -112,6 +112,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/scope_exit.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_visitor.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/statistics.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.h
