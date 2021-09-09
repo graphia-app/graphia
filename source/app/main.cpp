@@ -42,6 +42,16 @@
 #include <iostream>
 #include <chrono>
 
+#include <fcntl.h>
+#include <cstdio>
+#include <cstdlib>
+
+#ifdef Q_OS_WINDOWS
+#include <io.h>
+#define S_IRUSR S_IREAD
+#define S_IWUSR S_IWRITE
+#endif
+
 #include "application.h"
 #include "limitconstants.h"
 #include "ui/document.h"
@@ -138,6 +148,33 @@ static void configureXDG()
 #endif
 }
 
+static int stdoutFd = -1;
+static int stderrFd = -1;
+static QString stdoutFilename;
+static QString stderrFilename;
+
+void captureConsoleOutput()
+{
+    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    stdoutFilename = QStringLiteral("%1/stdout.txt").arg(appDataLocation);
+    stderrFilename = QStringLiteral("%1/stderr.txt").arg(appDataLocation);
+
+    stdoutFd = open(stdoutFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
+    stderrFd = open(stderrFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
+
+    dup2(stdoutFd, fileno(stdout));
+    dup2(stderrFd, fileno(stderr));
+
+    std::atexit([]
+    {
+        if(stdoutFd >= 0)
+            close(stdoutFd);
+
+        if(stderrFd >= 0)
+            close(stderrFd);
+    });
+}
+
 int start(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
@@ -171,6 +208,9 @@ int start(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    if(!u::isDebuggerPresent())
+        captureConsoleOutput();
 
     QCommandLineParser commandLineParser;
 
@@ -379,6 +419,17 @@ int start(int argc, char *argv[])
         {
             auto index = mainWindow->metaObject()->indexOfMethod("currentState()");
             std::cerr << "Failed to invoke 'currentState' (" << index << ")\n";
+        }
+
+        if(!stdoutFilename.isEmpty() && !stderrFilename.isEmpty())
+        {
+            close(stdoutFd);
+            close(stderrFd);
+
+            stdoutFd = stderrFd = -1;
+
+            QFile::copy(stdoutFilename, QDir(directory).filePath("stdout.txt"));
+            QFile::copy(stderrFilename, QDir(directory).filePath("stderr.txt"));
         }
     });
 #endif
