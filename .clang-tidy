@@ -1,6 +1,7 @@
 Checks: >
     *,
     -altera-struct-pack-align,
+    -android-*,
     -bugprone-branch-clone,
     -bugprone-reserved-identifier,
     -bugprone-suspicious-include,
