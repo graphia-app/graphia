@@ -372,18 +372,13 @@ jobs:
         overwrite: true
         file_glob: true
 
-  prerelease:
-    name: Upload to graphia.dev
+  prereleasebuilds:
+    name: Upload Builds to graphia.dev
     runs-on: ubuntu-latest
     needs:
       - linux
       - windows
       - macos
-      - clang-debug
-      - clang-tidy
-      - cppcheck
-      - clazy
-      - qmllint
     steps:
     - uses: actions/download-artifact@v2
       with:
@@ -409,6 +404,24 @@ jobs:
       with:
         name: Windows Logs
         path: prerelease/Windows Logs
+    - uses: horochx/deploy-via-scp@master
+      with:
+        host: ${{ secrets.PRERELEASE_HOST }}
+        user: ${{ secrets.PRERELEASE_USERNAME }}
+        key: ${{ secrets.PRERELEASE_KEY }}
+        local: "prerelease/*"
+        remote: ${{ secrets.PRERELEASE_DIR }}
+
+  prereleasestaticanalysislogs:
+    name: Upload Logs to graphia.dev
+    runs-on: ubuntu-latest
+    needs:
+      - clang-debug
+      - clang-tidy
+      - cppcheck
+      - clazy
+      - qmllint
+    steps:
     - uses: actions/download-artifact@v2
       with:
         name: Static Analysis Logs
