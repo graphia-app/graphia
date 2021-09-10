@@ -26,6 +26,7 @@
 #include <QFileInfo>
 
 #include <algorithm>
+#include <iostream>
 
 DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
 {
@@ -164,6 +165,21 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
         auto httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         if(httpStatus != 200)
         {
+            std::cerr << "Reply has unexpected HTTP status " << httpStatus << "\n";
+
+            int longestHeaderName = 0;
+            for(const auto& name : reply->rawHeaderList())
+                longestHeaderName = std::max(longestHeaderName, name.length());
+
+            for(const auto& [name, content] : reply->rawHeaderPairs())
+            {
+                std::cerr << name.toStdString() << ":";
+                for(int i = 0; i < (1 + (longestHeaderName - name.length())); i++)
+                    std::cerr << " ";
+
+                std::cerr << content.toStdString() << "\n";
+            }
+
             emit error(reply->url(), QStringLiteral("Reply has HTTP status %1").arg(httpStatus));
             return {};
         }
