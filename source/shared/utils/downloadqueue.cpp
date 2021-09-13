@@ -30,7 +30,7 @@
 
 DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
 {
-    _networkManager.setRedirectPolicy(QNetworkRequest::UserVerifiedRedirectPolicy);
+    _networkManager.setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
     connect(&_networkManager, &QNetworkAccessManager::finished, this, &DownloadQueue::onReplyReceived);
 }
 
@@ -116,9 +116,6 @@ void DownloadQueue::start(const QUrl& url)
     _timeoutTimer.setSingleShot(true);
     /*const*/ int HTTP_TIMEOUT = 60000; // When const the capture below can be omitted, but MSVC currently fails at this
     _timeoutTimer.start(HTTP_TIMEOUT);
-
-    // Follow any redirects
-    connect(_reply, &QNetworkReply::redirected, _reply, &QNetworkReply::redirectAllowed);
 
     connect(_reply, &QNetworkReply::downloadProgress, [this, HTTP_TIMEOUT]
     (qint64 bytesReceived, qint64 bytesTotal)
