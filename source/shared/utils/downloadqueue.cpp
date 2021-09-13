@@ -163,12 +163,12 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
     if(_timeoutTimer.isActive())
         _timeoutTimer.stop();
 
-    u::doAsync([this, reply]() -> QString
+    u::doAsync([this]() -> QString
     {
-        if(reply->error() != QNetworkReply::NetworkError::NoError)
+        if(_reply->error() != QNetworkReply::NetworkError::NoError)
         {
-            if(reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
-                emit error(reply->url(), reply->errorString());
+            if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
+                emit error(_reply->url(), _reply->errorString());
 
             return {};
         }
@@ -178,7 +178,7 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
 
         QString filename;
 
-        auto contentDisposition = reply->header(QNetworkRequest::ContentDispositionHeader);
+        auto contentDisposition = _reply->header(QNetworkRequest::ContentDispositionHeader);
         if(contentDisposition.isValid())
         {
             filename = contentDisposition.toString();
@@ -186,7 +186,7 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
                 R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|")), QStringLiteral(R"(\1)"));
         }
         else
-            filename = reply->url().fileName();
+            filename = _reply->url().fileName();
 
         if(filename.isEmpty())
         {
@@ -212,12 +212,12 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
 
         return filename;
     })
-    .then([this, reply](const QString& filename)
+    .then([this](const QString& filename)
     {
         if(!filename.isEmpty())
-            emit complete(reply->url(), filename);
+            emit complete(_reply->url(), filename);
 
-        reply->deleteLater();
+        _reply->deleteLater();
         reset();
     });
 }
