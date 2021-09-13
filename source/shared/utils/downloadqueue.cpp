@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <cstdio>
 
 DownloadQueue::DownloadQueue() // NOLINT modernize-use-equals-default
 {
@@ -109,6 +110,14 @@ bool DownloadQueue::downloaded(const QUrl& url) const
 
 void DownloadQueue::start(const QUrl& url)
 {
+    _temporaryFile = std::make_unique<QTemporaryFile>();
+    if(!_temporaryFile->open())
+    {
+        qDebug() << "Failed to create temporary file while downloading" << url.toString();
+        return;
+    }
+    _temporaryFile->setAutoRemove(false);
+
     QNetworkRequest request;
     request.setUrl(url);
     _reply = _networkManager.get(request);
@@ -129,6 +138,11 @@ void DownloadQueue::start(const QUrl& url)
 
         if(_progress != oldProgress)
             emit progressChanged(_progress);
+    });
+
+    connect(_reply, &QNetworkReply::readyRead, [this]
+    {
+        _temporaryFile->write(_reply->readAll());
     });
 
     connect(&_timeoutTimer, &QTimer::timeout, [this]
@@ -159,28 +173,6 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
             return {};
         }
 
-        auto httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if(httpStatus != 200)
-        {
-            std::cerr << "Reply has unexpected HTTP status " << httpStatus << "\n";
-
-            int longestHeaderName = 0;
-            for(const auto& name : reply->rawHeaderList())
-                longestHeaderName = std::max(longestHeaderName, name.length());
-
-            for(const auto& [name, content] : reply->rawHeaderPairs())
-            {
-                std::cerr << name.toStdString() << ":";
-                for(int i = 0; i < (1 + (longestHeaderName - name.length())); i++)
-                    std::cerr << " ";
-
-                std::cerr << content.toStdString() << "\n";
-            }
-
-            emit error(reply->url(), QStringLiteral("Reply has HTTP status %1").arg(httpStatus));
-            return {};
-        }
-
         _progress = -1;
         emit progressChanged(_progress);
 
@@ -198,34 +190,24 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
 
         if(filename.isEmpty())
         {
-            QTemporaryFile tempFile;
-            tempFile.setAutoRemove(false);
-
-            if(!tempFile.open())
-                return {};
-
-            filename = tempFile.fileName();
+            // Can't figure out an appropriate name from the reply,
+            // so resort to using the existing temp file name
+            filename = _temporaryFile->fileName();
             _downloaded.push_back({filename, false});
-
-            tempFile.write(reply->readAll());
-            tempFile.close();
+            _temporaryFile->close();
         }
         else
         {
             QTemporaryDir tempDir;
             filename = tempDir.filePath(filename);
-
-            QSaveFile file(filename);
-            if(!file.open(QIODevice::WriteOnly))
-                return {};
-
-            file.write(reply->readAll());
-
-            if(!file.commit())
-                return {};
-
-            _downloaded.push_back({tempDir.path(), true});
             tempDir.setAutoRemove(false);
+            _downloaded.push_back({tempDir.path(), true});
+
+            if(!_temporaryFile->rename(filename))
+            {
+                qDebug() << "Failed to rename" << _temporaryFile->fileName() << "to" << filename;
+                return {};
+            }
         }
 
         return filename;
@@ -253,4 +235,7 @@ void DownloadQueue::reset()
         _reply = nullptr;
         emit idleChanged();
     }
+
+    if(_temporaryFile != nullptr)
+        _temporaryFile = nullptr;
 }

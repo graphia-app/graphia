@@ -21,12 +21,12 @@
 
 #include <vector>
 #include <queue>
+#include <memory>
 
 #include <QObject>
-
 #include <QUrl>
 #include <QString>
-
+#include <QTemporaryFile>
 #include <QTimer>
 #include <QNetworkAccessManager>
 
@@ -55,6 +55,7 @@ private:
     QTimer _timeoutTimer;
     QNetworkAccessManager _networkManager;
     QNetworkReply* _reply = nullptr;
+    std::unique_ptr<QTemporaryFile> _temporaryFile;
 
     std::queue<QUrl> _queue;
 
