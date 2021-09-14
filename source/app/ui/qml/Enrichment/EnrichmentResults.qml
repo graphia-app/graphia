@@ -36,6 +36,9 @@ ApplicationWindow
     property var currentTableView: null
     property var currentHeatmap: null
 
+    onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
+    onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
+
     function updateCurrent()
     {
         let tab = tabView.getTab(tabView.currentIndex);

@@ -1428,6 +1428,9 @@ Item
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
+        onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
+        onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
+
         onClosing:
         {
             if(visible & !destructing)
