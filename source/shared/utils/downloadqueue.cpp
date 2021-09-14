@@ -18,12 +18,11 @@
 
 #include "downloadqueue.h"
 
-#include "shared/utils/doasyncthen.h"
-
 #include <QNetworkReply>
 #include <QTemporaryFile>
 #include <QTemporaryDir>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include <algorithm>
 #include <iostream>
@@ -39,12 +38,12 @@ DownloadQueue::~DownloadQueue()
 {
     cancel();
 
-    for(const auto& deletee : _downloaded)
+    for(const auto& [deletee, isDir] : _downloaded)
     {
-        if(deletee._directory)
-            QDir(deletee._filename).removeRecursively();
+        if(isDir == IsDir::Yes)
+            QDir(deletee).removeRecursively();
         else
-            QFile::remove(deletee._filename);
+            QFile::remove(deletee);
     }
 }
 
@@ -98,9 +97,9 @@ bool DownloadQueue::downloaded(const QUrl& url) const
     return std::any_of(_downloaded.begin(), _downloaded.end(), [&](const auto& deletee)
     {
         auto downloadedFilename =
-            QFileInfo(deletee._filename).canonicalFilePath();
+            QFileInfo(deletee.first).canonicalFilePath();
 
-        bool match = deletee._directory ?
+        bool match = deletee.second == IsDir::Yes ?
             (dirname == downloadedFilename) :
             (filename == downloadedFilename);
 
@@ -116,6 +115,7 @@ void DownloadQueue::start(const QUrl& url)
         qDebug() << "Failed to create temporary file while downloading" << url.toString();
         return;
     }
+    _downloaded.emplace(_temporaryFile->fileName(), IsDir::No);
     _temporaryFile->setAutoRemove(false);
 
     QNetworkRequest request;
@@ -163,63 +163,57 @@ void DownloadQueue::onReplyReceived(QNetworkReply* reply)
     if(_timeoutTimer.isActive())
         _timeoutTimer.stop();
 
-    u::doAsync([this]() -> QString
+    if(_reply->error() != QNetworkReply::NetworkError::NoError)
     {
-        if(_reply->error() != QNetworkReply::NetworkError::NoError)
-        {
-            if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
-                emit error(_reply->url(), _reply->errorString());
+        if(_reply->error() != QNetworkReply::NetworkError::OperationCanceledError)
+            emit error(_reply->url(), _reply->errorString());
 
-            return {};
-        }
+        return;
+    }
 
-        _progress = -1;
-        emit progressChanged(_progress);
+    _progress = -1;
+    emit progressChanged(_progress);
 
-        QString filename;
+    QString filename;
 
-        auto contentDisposition = _reply->header(QNetworkRequest::ContentDispositionHeader);
-        if(contentDisposition.isValid())
-        {
-            filename = contentDisposition.toString();
-            filename.replace(QRegularExpression(QStringLiteral(
-                R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|")), QStringLiteral(R"(\1)"));
-        }
-        else
-            filename = _reply->url().fileName();
-
-        if(filename.isEmpty())
-        {
-            // Can't figure out an appropriate name from the reply,
-            // so resort to using the existing temp file name
-            filename = _temporaryFile->fileName();
-            _downloaded.push_back({filename, false});
-            _temporaryFile->close();
-        }
-        else
-        {
-            QTemporaryDir tempDir;
-            filename = tempDir.filePath(filename);
-            tempDir.setAutoRemove(false);
-            _downloaded.push_back({tempDir.path(), true});
-
-            if(!_temporaryFile->rename(filename))
-            {
-                qDebug() << "Failed to rename" << _temporaryFile->fileName() << "to" << filename;
-                return {};
-            }
-        }
-
-        return filename;
-    })
-    .then([this](const QString& filename)
+    auto contentDisposition = _reply->header(QNetworkRequest::ContentDispositionHeader);
+    if(contentDisposition.isValid())
     {
-        if(!filename.isEmpty())
-            emit complete(_reply->url(), filename);
+        filename = contentDisposition.toString();
+        filename.replace(QRegularExpression(QStringLiteral(
+            R"|(^(?:[^;]*;)*\s*filename\*?="?([^"]+)"?$)|")), QStringLiteral(R"(\1)"));
+    }
+    else
+        filename = _reply->url().fileName();
 
-        _reply->deleteLater();
-        reset();
-    });
+    if(filename.isEmpty())
+    {
+        // Can't figure out an appropriate name from the reply,
+        // so resort to using the existing temp file name
+        filename = _temporaryFile->fileName();
+        _temporaryFile->close();
+    }
+    else
+    {
+        QTemporaryDir tempDir;
+        filename = tempDir.filePath(filename);
+        tempDir.setAutoRemove(false);
+
+        if(!_temporaryFile->rename(filename))
+        {
+            qDebug() << "Failed to rename" << _temporaryFile->fileName() << "to" << filename;
+            return;
+        }
+
+        _downloaded.erase(_temporaryFile->fileName());
+        _downloaded.emplace(tempDir.path(), IsDir::Yes);
+    }
+
+    if(!filename.isEmpty())
+        emit complete(_reply->url(), filename);
+
+    _reply->deleteLater();
+    reset();
 }
 
 void DownloadQueue::reset()

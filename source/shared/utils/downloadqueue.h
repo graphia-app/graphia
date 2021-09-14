@@ -19,7 +19,7 @@
 #ifndef DOWNLOADQUEUE_H
 #define DOWNLOADQUEUE_H
 
-#include <vector>
+#include <map>
 #include <queue>
 #include <memory>
 
@@ -59,13 +59,13 @@ private:
 
     std::queue<QUrl> _queue;
 
-    struct Downloaded
+    enum class IsDir
     {
-        QString _filename;
-        bool _directory = false;
+        No,
+        Yes
     };
 
-    std::vector<Downloaded> _downloaded;
+    std::map<QString, IsDir> _downloaded;
 
     void start(const QUrl& url);
     void onReplyReceived(QNetworkReply* reply);
