@@ -58,7 +58,7 @@ double EnrichmentCalculator::fishers(int a, int b, int c, int d)
     double ac = a + c;
     double bd = b + d;
 
-    double twoPval   = 0.0;
+    double twoPval = 0.0;
 
     // range of variation
     double lm = (ac < cd) ? 0.0 : ac - cd;
@@ -165,7 +165,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
                 QString::number(selectedNodes.size()));
             row[EnrichmentTableModel::Results::OverRep] = selectedInCategory / expectedNo;
             row[EnrichmentTableModel::Results::Fishers] = f;
-            row[EnrichmentTableModel::Results::AdjustedFishers] = f * static_cast<double>(attributeValueEntryCountBTotal.size());
+            row[EnrichmentTableModel::Results::BonferroniAdjusted] =
+                std::min(1.0, f * static_cast<double>(attributeValueEntryCountBTotal.size()));
 
             tableModel.push_back(row);
         }

@@ -38,7 +38,7 @@ public:
         ExpectedTrial,
         OverRep,
         Fishers,
-        AdjustedFishers,
+        BonferroniAdjusted,
         NumResultColumns
     };
     Q_ENUM(Results)

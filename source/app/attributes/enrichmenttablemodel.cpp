@@ -33,7 +33,7 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
     _roleNames[RoleBase + Results::ExpectedTrial] = "ExpectedTrial";
     _roleNames[RoleBase + Results::OverRep] = "OverRep";
     _roleNames[RoleBase + Results::Fishers] = "Fishers";
-    _roleNames[RoleBase + Results::AdjustedFishers] = "AdjustedFishers";
+    _roleNames[RoleBase + Results::BonferroniAdjusted] = "BonferroniAdjusted";
 }
 
 int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
@@ -127,8 +127,8 @@ QString EnrichmentTableModel::resultToString(Results result)
             return QStringLiteral("OverRep");
         case Results::Fishers:
             return QStringLiteral("Fishers");
-        case Results::AdjustedFishers:
-            return QStringLiteral("AdjustedFishers");
+        case Results::BonferroniAdjusted:
+            return QStringLiteral("BonferroniAdjusted");
         default:
             qDebug() << "Unknown roleEnum passed to resultToString";
         return {};

@@ -34,7 +34,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
 
     _colorMap = new QCPColorMap(customPlot().xAxis, customPlot().yAxis2);
     _colorScale = new QCPColorScale(&customPlot());
-    _colorScale->setLabel(tr("Adjusted Fishers P-Value"));
+    _colorScale->setLabel(tr("Bonferroni Adjusted P-Value"));
     _colorScale->setType(QCPAxis::atBottom);
     customPlot().plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
@@ -220,7 +220,7 @@ void EnrichmentHeatmapItem::buildPlot()
         auto xValue = fullLabelToXAxis[_tableModel->data(i, EnrichmentTableModel::Results::SelectionA).toString()];
         auto yValue = fullLabelToYAxis[_tableModel->data(i, EnrichmentTableModel::Results::SelectionB).toString()];
 
-        auto pValue = _tableModel->data(i, EnrichmentTableModel::Results::AdjustedFishers).toDouble();
+        auto pValue = _tableModel->data(i, EnrichmentTableModel::Results::BonferroniAdjusted).toDouble();
 
         _colorMapKeyValueToTableIndex.emplace(std::make_pair(xValue, yValue), i);
 
@@ -414,7 +414,7 @@ void EnrichmentHeatmapItem::showTooltip()
     _hoverLabel->setVisible(true);
 
     auto pValue = _tableModel->data(tableIndex,
-        EnrichmentTableModel::Results::AdjustedFishers).toDouble();
+        EnrichmentTableModel::Results::BonferroniAdjusted).toDouble();
 
     _hoverLabel->setText(tr("Adj. P-value: %1").arg(u::formatNumberScientific(pValue)));
 

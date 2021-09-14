@@ -210,7 +210,7 @@ ApplicationWindow
                                     enabled: showOnlyEnrichedButton.checked
                                     expression:
                                     {
-                                        return Number(model["OverRep"]) > 1.0 && Number(model["AdjustedFishers"]) <= 0.05;
+                                        return Number(model["OverRep"]) > 1.0 && Number(model["BonferroniAdjusted"]) <= 0.05;
                                     }
                                 }
                             }
@@ -269,7 +269,7 @@ ApplicationWindow
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
                             TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.AdjustedFishers); title: qsTr("Adjusted Fishers"); }
+                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.BonferroniAdjusted); title: qsTr("Bonferroni Adjusted"); }
 
                             Connections
                             {
