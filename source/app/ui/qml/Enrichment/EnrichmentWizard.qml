@@ -218,7 +218,7 @@ Wizard
                                     if(document !== null && model.display.length > 0)
                                     {
                                         return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues +
+                                            document.attribute(model.display).sharedValues.length +
                                             qsTr(" entries)");
                                     }
 
@@ -292,7 +292,7 @@ Wizard
                                     if(document !== null && model.display.length > 0)
                                     {
                                         return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues +
+                                            document.attribute(model.display).sharedValues.length +
                                             qsTr(" entries)");
                                     }
 
