@@ -49,18 +49,35 @@ InstallDir ""
 ; This means that if it's possible to, we become an administrator
 RequestExecutionLevel highest
 
+!macro ConsoleLog message
+	System::Call 'kernel32::AttachConsole(i -1)i.r0' ;attach to parent console
+	System::Call 'kernel32::GetStdHandle(i -11)i.r0' ;console attached -- get stdout
+	FileWrite $0 "${message}"
+!macroend
+
+!macro CheckIfStillRunning
+	ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
+		$\"IMAGENAME eq ${EXE}$\" | \
+		%SystemRoot%\System32\find /I $\"${EXE}$\""
+	Pop $0 ; The handle for the process
+	ExecCmd::wait $0
+	Pop $0
+!macroend
+
 !macro ONINIT un
 	Function ${un}.onInit
-		; Make sure we're not still running first
-		ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
-			$\"IMAGENAME eq ${EXE}$\" | \
-			%SystemRoot%\System32\find /I $\"${EXE}$\""
-		Pop $0
-		ExecCmd::wait $0
-		Pop $0
+		!insertmacro CheckIfStillRunning
+		IfSilent 0 notSilent
+			IntCmp $0 1 notRunning
+				!insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
+				Sleep 10000 ; In silent mode, give the app a few seconds to close then...
+				!insertmacro CheckIfStillRunning ; ...check again
+
+		notSilent:
 		IntCmp $0 1 notRunning
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
 				"${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
+			!insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
 			Abort
 		notRunning:
 
