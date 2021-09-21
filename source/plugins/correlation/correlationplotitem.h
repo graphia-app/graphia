@@ -106,6 +106,7 @@ public:
     Q_INVOKABLE void setXAxisRange(double min, double max);
     Q_INVOKABLE void setAxisRange(QCPAxis* axis, double min, double max);
     Q_INVOKABLE void zoom(QCPAxis* axis, double centre, int direction);
+    Q_INVOKABLE void resetZoom();
     Q_INVOKABLE void pan(QCPAxis* axis, double delta);
     Q_INVOKABLE void updatePixmap(CorrelationPlotUpdateType updateType);
 
@@ -212,6 +213,7 @@ public:
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
+    Q_INVOKABLE void resetZoom();
 
     void setScaleType(int scaleType);
     void setScaleByAttributeName(const QString& attributeName);

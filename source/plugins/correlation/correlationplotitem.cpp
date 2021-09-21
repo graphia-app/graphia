@@ -155,6 +155,17 @@ void CorrelationPlotWorker::zoom(QCPAxis* axis, double centre, int direction)
     updateZoomed();
 }
 
+void CorrelationPlotWorker::resetZoom()
+{
+    for(auto& [axis, parameters] : _axisParameters)
+    {
+        parameters._zoomedMin = parameters._min;
+        parameters._zoomedMax = parameters._max;
+    }
+
+    updateZoomed();
+}
+
 void CorrelationPlotWorker::pan(QCPAxis* axis, double delta)
 {
     auto& parameters = _axisParameters[axis];
@@ -1312,6 +1323,15 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
 
     emit plotOptionsChanged();
     rebuildPlot(InvalidateCache::Yes);
+}
+
+void CorrelationPlotItem::resetZoom()
+{
+    if(_worker == nullptr)
+        return;
+
+    QMetaObject::invokeMethod(_worker, "resetZoom", Qt::QueuedConnection);
+    updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
 void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders) // clazy:exclude=qproperty-type-mismatch

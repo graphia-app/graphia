@@ -83,6 +83,7 @@ void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
         _dispersionVisualType = dispersionVisualType;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
@@ -93,6 +94,7 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
         _includeYZero = includeYZero;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
@@ -105,6 +107,7 @@ void CorrelationPlotItem::setScaleType(int scaleType)
         _scaleType = scaleType;
         emit plotOptionsChanged();
         rebuildPlot(InvalidateCache::Yes);
+        resetZoom();
     }
 }
 
@@ -123,6 +126,7 @@ void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
         _scaleType = static_cast<int>(PlotScaleType::ByAttribute);
         emit plotOptionsChanged();
         rebuildPlot(InvalidateCache::Yes);
+        resetZoom();
     }
 }
 
@@ -135,6 +139,7 @@ void CorrelationPlotItem::setAveragingType(int averagingType)
         _averagingType = averagingType;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
@@ -145,6 +150,7 @@ void CorrelationPlotItem::setAveragingAttributeName(const QString& attributeName
         _averagingAttributeName = attributeName;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
@@ -155,6 +161,7 @@ void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
         _groupByAnnotation = groupByAnnotation;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
@@ -167,6 +174,7 @@ void CorrelationPlotItem::setDispersionType(int dispersionType)
         _dispersionType = dispersionType;
         emit plotOptionsChanged();
         rebuildPlot();
+        resetZoom();
     }
 }
 
