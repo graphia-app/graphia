@@ -454,19 +454,19 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: Linux Logs
-        path: logs
+        path: logs/linux
     - uses: actions/download-artifact@v2
       with:
         name: macOS Logs
-        path: logs
+        path: logs/macos
     - uses: actions/download-artifact@v2
       with:
         name: Windows Logs
-        path: logs
+        path: logs/windows
     - uses: actions/download-artifact@v2
       with:
         name: Static Analysis Logs
-        path: logs
+        path: logs/staticanalysis
     - name: Install Perl modules
       uses: perl-actions/install-with-cpanm@v1
       with:
