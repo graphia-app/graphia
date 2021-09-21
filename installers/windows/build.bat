@@ -104,7 +104,7 @@ FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
 move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
 rmdir /s /q %UPDATER_DIR%
 
-set SIGNTOOL_ARGS=sign /tr %WINDOWS_SIGN_TSA% /td SHA256 /sm /n "%WINDOWS_SIGN_SUBJECTNAME%"
+set SIGNTOOL_ARGS=sign /fd SHA256 /tr %WINDOWS_SIGN_TSA% /td SHA256 /sm /n "%WINDOWS_SIGN_SUBJECTNAME%"
 
 IF DEFINED SIGNING_ENABLED (
   echo ------ signing executables
