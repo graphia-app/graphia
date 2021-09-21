@@ -154,6 +154,15 @@ PluginContent
 
     Action
     {
+        id: resetZoom
+        text: qsTr("Reset Zoom")
+        enabled: plot.zoomed
+
+        onTriggered: { plot.resetZoom(); }
+    }
+
+    Action
+    {
         id: toggleShowAllColumns
         text: qsTr("Show All Columns")
         checkable: true
@@ -572,6 +581,7 @@ PluginContent
                 });
 
                 menu.addItem("").action = toggleIncludeYZero;
+                menu.addItem("").action = resetZoom;
 
                 menu.addSeparator();
             }
