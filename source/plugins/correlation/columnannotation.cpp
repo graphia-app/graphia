@@ -42,7 +42,7 @@ ColumnAnnotation::ColumnAnnotation(const QString& name, const std::vector<QStrin
             {
                 _hasOnlyNumericValues = false;
                 _minValue = std::numeric_limits<double>::max();
-                _maxValue = std::numeric_limits<double>::min();
+                _maxValue = std::numeric_limits<double>::lowest();
             }
         }
     }

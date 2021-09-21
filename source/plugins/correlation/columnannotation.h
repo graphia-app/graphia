@@ -35,7 +35,7 @@ private:
 
     bool _hasOnlyNumericValues = true; // Assume until proved otherwise
     double _minValue = std::numeric_limits<double>::max();
-    double _maxValue = std::numeric_limits<double>::min();
+    double _maxValue = std::numeric_limits<double>::lowest();
 
 public:
     using Iterator = std::vector<QString>::const_iterator;
