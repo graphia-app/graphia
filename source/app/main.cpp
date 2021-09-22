@@ -162,8 +162,11 @@ void captureConsoleOutput()
     stdoutFd = open(stdoutFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
     stderrFd = open(stderrFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
 
-    dup2(stdoutFd, fileno(stdout));
-    dup2(stderrFd, fileno(stderr));
+    auto stdoutDupResult = dup2(stdoutFd, fileno(stdout));
+    auto stderrDupResult = dup2(stderrFd, fileno(stderr));
+
+    if(stdoutDupResult < 0 || stderrDupResult < 0)
+        std::cerr << "Failed to redirect stdout/stderr\n";
 
     std::atexit([]
     {
