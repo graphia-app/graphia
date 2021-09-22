@@ -8,6 +8,8 @@ namespace u
 template<typename T, template<typename, typename...> typename C, typename... Args>
 C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
 {
+    using size_type = typename C<T>::size_type;
+
     if(container.empty() || numSamples > static_cast<size_t>(container.size()))
         return container;
 
@@ -19,10 +21,10 @@ C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
     {
         int high = static_cast<int>(sample.size() - i) - 1;
         std::uniform_int_distribution uid(0, high);
-        std::swap(sample[i], sample[i + uid(dre)]);
+        std::swap(sample[static_cast<size_type>(i)], sample[static_cast<size_type>(i + uid(dre))]);
     }
 
-    sample.resize(numSamples);
+    sample.resize(static_cast<size_type>(numSamples));
 
     return sample;
 }
