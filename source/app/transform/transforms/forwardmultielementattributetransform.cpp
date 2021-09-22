@@ -22,6 +22,7 @@
 #include "graph/graphmodel.h"
 
 #include "shared/utils/typeidentity.h"
+#include "shared/utils/msvcwarningsuppress.h"
 
 #include <memory>
 
@@ -86,6 +87,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
             default: break;
             }
 
+            MSVC_WARNING_SUPPRESS_NEXTLINE(6001)
             auto mergedElementIds = (target.*mergedElementIdsForElementId)(elementId);
             for(auto mergedElementId : mergedElementIds)
                 headMap[mergedElementId] = elementId;
