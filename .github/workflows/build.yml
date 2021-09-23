@@ -4,7 +4,7 @@ env:
   QT_VERSION: 5.14.2
   QT_MODULES: qtwebengine
   GCC_VERSION: 10
-  CLANG_VERSION: 12
+  CLANG_VERSION: 14
 
 jobs:
   linux:
