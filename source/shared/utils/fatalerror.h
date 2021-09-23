@@ -21,6 +21,8 @@
 
 #include "msvcwarningsuppress.h"
 
+#include <iostream>
+
 #if defined(_MSC_VER)
 #define NOINLINE __declspec(noinline)
 #elif defined(__GNUC__)
@@ -34,6 +36,7 @@
         { \
             NOINLINE void operator()() \
             { \
+                std::cerr << "Fatal error: " #MESSAGE << "\n"; \
                 int* p = nullptr; \
                 MSVC_WARNING_SUPPRESS_NEXTLINE(6011) /* NOLINTNEXTLINE clang-analyzer-core.NullDereference */ \
                 *p = 0; \
