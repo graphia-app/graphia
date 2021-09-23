@@ -160,7 +160,7 @@ static bool load(const QString& filePath, QByteArray& byteArray,
     if(totalBytes == 0)
         return false;
 
-    int bytesRead = 0;
+    decltype(totalBytes) bytesRead = 0;
     QDataStream input(&file);
 
     do

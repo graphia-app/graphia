@@ -56,7 +56,7 @@ static QString fetchPreview(QSize screenshotSize)
 
 static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
 {
-    std::vector<GLubyte> pixelBytes(TILE_SIZE * TILE_SIZE * 4);
+    std::vector<GLubyte> pixelBytes(static_cast<size_t>(TILE_SIZE * TILE_SIZE) * 4ul);
     glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixelBytes.data());
 
     QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
