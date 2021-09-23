@@ -80,7 +80,7 @@ QVariant QmlTabularDataHeaderModel::data(const QModelIndex& index, int role) con
         return _parser->_dataPtr->valueAt(columnIndex, 0);
 
     if(role == Roles::ColumnIndex)
-        return QVariant(static_cast<int>(columnIndex));
+        return {static_cast<int>(columnIndex)};
 
     return {};
 }
