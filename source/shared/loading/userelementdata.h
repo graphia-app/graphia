@@ -98,12 +98,12 @@ public:
 
     bool haveIndexFor(E elementId) const
     {
-        return _indexes->get(elementId)._set;
+        return _indexes->get(elementId)._set; // NOLINT readability-redundant-smartptr-get
     }
 
     size_t indexFor(E elementId) const override
     {
-        return _indexes->get(elementId)._value;
+        return _indexes->get(elementId)._value; // NOLINT readability-redundant-smartptr-get
     }
 
     bool setValueBy(E elementId, const QString& name, const QString& value) override
