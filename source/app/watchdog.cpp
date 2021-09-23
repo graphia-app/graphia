@@ -34,6 +34,8 @@
 #include <QMessageBox>
 #include <QProcess>
 
+#include <iostream>
+
 Watchdog::Watchdog()
 {
     auto *worker = new WatchdogWorker;
@@ -84,6 +86,7 @@ void WatchdogWorker::showWarning()
     connect(warningProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
         warningProcess, &WatchdogWorker::deleteLater);
 
+    std::cerr << "Starting " << messageBoxExe.toStdString() << "\n";
     warningProcess->start(messageBoxExe, arguments);
 }
 
@@ -154,4 +157,6 @@ void WatchdogWorker::onWarningProcessFinished(int exitCode, QProcess::ExitStatus
             startTimer();
         }
     }
+    else
+        std::cerr << "Watchdog warning cancelled; process recovered\n";
 }
