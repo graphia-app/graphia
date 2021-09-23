@@ -49,6 +49,7 @@ public:
 
     CorrelationDataRow() = default;
     CorrelationDataRow(const CorrelationDataRow&) = default;
+    CorrelationDataRow& operator=(const CorrelationDataRow&) = default;
     virtual ~CorrelationDataRow() = default;
 
     template<typename U>
