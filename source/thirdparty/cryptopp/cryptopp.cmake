@@ -1,4 +1,5 @@
 list(APPEND STATIC_THIRDPARTY_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/allocate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/algparam.cpp
     ${CMAKE_CURRENT_LIST_DIR}/asn.cpp
     ${CMAKE_CURRENT_LIST_DIR}/basecode.cpp
@@ -11,6 +12,8 @@ list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hmac.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hrtimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/integer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/keccak.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/keccak_core.cpp
     ${CMAKE_CURRENT_LIST_DIR}/misc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/modes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mqueue.cpp
@@ -26,7 +29,7 @@ list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rijndael.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rsa.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/sse-simd.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/sse_simd.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cpu.cpp
