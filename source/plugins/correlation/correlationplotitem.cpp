@@ -113,10 +113,7 @@ void CorrelationPlotWorker::setAxisRange(QCPAxis* axis, double min, double max)
 {
     auto& parameters = _axisParameters[axis];
 
-    parameters._min = min;
-    parameters._max = max;
-
-    if(parameters.zoomIsReset())
+    if(!parameters.zoomed())
     {
         parameters._zoomedMin = min;
         parameters._zoomedMax = max;
@@ -126,6 +123,9 @@ void CorrelationPlotWorker::setAxisRange(QCPAxis* axis, double min, double max)
         parameters._zoomedMin = std::max(min, parameters._zoomedMin);
         parameters._zoomedMax = std::min(max, parameters._zoomedMax);
     }
+
+    parameters._min = min;
+    parameters._max = max;
 
     updateZoomed();
 }

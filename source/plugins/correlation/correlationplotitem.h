@@ -143,8 +143,7 @@ private:
 
         AxisParameters() { resetZoom(); }
 
-        bool zoomIsReset() const { return _zoomedMin > _zoomedMax; }
-        bool zoomed() const { return _zoomedMin > _min || _zoomedMax < _max; }
+        bool zoomed() const { return _zoomedMin < _zoomedMax && (_zoomedMin > _min || _zoomedMax < _max); }
     };
 
     std::map<QCPAxis*, AxisParameters> _axisParameters;
