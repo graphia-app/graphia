@@ -3,7 +3,7 @@ on: [push]
 env:
   QT_VERSION: 5.14.2
   QT_MODULES: qtwebengine
-  GCC_VERSION: 10
+  GCC_VERSION: 11
   CLANG_VERSION: 14
 
 jobs:
@@ -21,6 +21,10 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+    - name: Patch Qt 5 for GCC 11
+      run: |
+        ls ${{ env.Qt5_DIR }}
+        sed -i 's/ThreadEngineStarter<void>(/ThreadEngineStarter(/' ${{ env.Qt5_DIR }}/include/QtConcurrent/qtconcurrentthreadengine.h
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
