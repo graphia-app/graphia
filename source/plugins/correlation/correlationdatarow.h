@@ -54,13 +54,10 @@ public:
     template<typename U>
     CorrelationDataRow(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
+        _data({data.cbegin() + (row * numColumns), (data.cbegin() + (row * numColumns)) + numColumns}),
+        _numColumns(std::distance(begin(), end())),
         _nodeId(nodeId), _cost(computeCost)
-    {
-        auto cbegin = data.cbegin() + (row * numColumns);
-        auto cend = cbegin + numColumns;
-        _data = {cbegin, cend};
-        _numColumns = std::distance(begin(), end());
-    }
+    {}
 
     template<typename U>
     CorrelationDataRow(const std::vector<U>& dataRow,

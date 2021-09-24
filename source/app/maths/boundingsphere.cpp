@@ -54,10 +54,8 @@ BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
 }
 
 BoundingSphere::BoundingSphere(QVector3D centre, const std::vector<QVector3D>& points) :
-    _centre(centre)
-{
-    _radius = maxDistanceFromCentre(_centre, points);
-}
+    _centre(centre), _radius(maxDistanceFromCentre(_centre, points))
+{}
 
 void BoundingSphere::scale(float s)
 {

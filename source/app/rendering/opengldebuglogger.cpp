@@ -23,9 +23,8 @@
 #include <QDebug>
 
 OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
-    QObject(parent)
+    QObject(parent), _debugLevel(qEnvironmentVariableIntValue("OPENGL_DEBUG"))
 {
-    _debugLevel = qEnvironmentVariableIntValue("OPENGL_DEBUG");
     if(_debugLevel != 0)
     {
         _logger = new QOpenGLDebugLogger(this);

@@ -384,7 +384,8 @@ void GPUGraphData::copyState(const GPUGraphData& gpuGraphData,
     initialise(nodesShader, edgesShader, textShader);
 }
 
-GraphRendererCore::GraphRendererCore()
+GraphRendererCore::GraphRendererCore() :
+    _numMultiSamples(multisamples())
 {
     resolveOpenGLFunctions();
 
@@ -395,7 +396,6 @@ GraphRendererCore::GraphRendererCore()
     // use the textures in an FBO, where the sample counts for
     // each attachment must be the same
 
-    _numMultiSamples = multisamples();
     glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);
     glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &maxSamples);

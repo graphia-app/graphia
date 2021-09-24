@@ -41,9 +41,9 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _layoutFactory(std::move(layoutFactory)),
     _executedAtLeastOnce(graphModel.graph()),
     _nodeLayoutPositions(graphModel.graph()),
-    _performanceCounter(std::chrono::seconds(1))
+    _performanceCounter(std::chrono::seconds(1)),
+    _debug(qEnvironmentVariableIntValue("LAYOUT_DEBUG"))
 {
-    _debug = qEnvironmentVariableIntValue("LAYOUT_DEBUG");
     _performanceCounter.setReportFn([this](float ticksPerSecond)
     {
         if(_debug > 1)

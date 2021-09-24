@@ -27,13 +27,14 @@
 #include <iterator>
 
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
-    QCustomPlotQuickItem(multisamples(), parent)
+    QCustomPlotQuickItem(multisamples(), parent),
+    _colorMap(new QCPColorMap(customPlot().xAxis, customPlot().yAxis2)),
+    _colorScale(new QCPColorScale(&customPlot())),
+    _hoverLabel(new QCPItemText(&customPlot()))
 {
     customPlot().addLayer(QStringLiteral("textLayer"));
     customPlot().plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
 
-    _colorMap = new QCPColorMap(customPlot().xAxis, customPlot().yAxis2);
-    _colorScale = new QCPColorScale(&customPlot());
     _colorScale->setLabel(tr("Bonferroni Adjusted P-Value"));
     _colorScale->setType(QCPAxis::atBottom);
     customPlot().plotLayout()->addElement(1, 0, _colorScale);
@@ -74,7 +75,6 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
 
     _defaultFont9Pt.setPointSize(9);
 
-    _hoverLabel = new QCPItemText(&customPlot());
     _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
     _hoverLabel->setLayer(_textLayer);
     _hoverLabel->setFont(defaultFont10Pt);

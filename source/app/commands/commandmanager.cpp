@@ -26,12 +26,10 @@
 #include <thread>
 
 CommandManager::CommandManager() :
-    _graphChanged(false)
+    _graphChanged(false), _debug(qEnvironmentVariableIntValue("COMMAND_DEBUG"))
 {
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
-
-    _debug = qEnvironmentVariableIntValue("COMMAND_DEBUG");
 }
 
 CommandManager::~CommandManager()

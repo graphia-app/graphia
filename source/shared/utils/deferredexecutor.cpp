@@ -24,10 +24,9 @@
 #include <QDebug>
 #include <QtGlobal>
 
-DeferredExecutor::DeferredExecutor()
-{
-    _debug = qEnvironmentVariableIntValue("DEFERREDEXECUTOR_DEBUG");
-}
+DeferredExecutor::DeferredExecutor() :
+    _debug(qEnvironmentVariableIntValue("DEFERREDEXECUTOR_DEBUG"))
+{}
 
 DeferredExecutor::~DeferredExecutor()
 {

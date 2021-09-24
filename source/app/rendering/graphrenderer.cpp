@@ -68,6 +68,10 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _selectionManager(selectionManager),
     _gpuComputeThread(gpuComputeThread),
     _componentRenderers(_graphModel->graph()),
+    _graphOverviewScene(new GraphOverviewScene(commandManager, this)),
+    _graphComponentScene(new GraphComponentScene(this)),
+    _graphOverviewInteractor(new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this)),
+    _graphComponentInteractor(new GraphComponentInteractor(_graphModel, _graphComponentScene, commandManager, _selectionManager, this)),
     _hiddenNodes(_graphModel->graph()),
     _hiddenEdges(_graphModel->graph()),
     _layoutChanged(true),
@@ -91,13 +95,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     connect(&_transition, &Transition::started, this, &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
     connect(&_transition, &Transition::finished, this, &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
 
-    _graphOverviewScene = new GraphOverviewScene(commandManager, this);
-    _graphComponentScene = new GraphComponentScene(this);
-
     connect(graph, &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
-
-    _graphOverviewInteractor = new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this);
-    _graphComponentInteractor = new GraphComponentInteractor(_graphModel, _graphComponentScene, commandManager, _selectionManager, this);
 
     _screenshotRenderer = std::make_unique<ScreenshotRenderer>();
     connect(_screenshotRenderer.get(), &ScreenshotRenderer::screenshotComplete, this, &GraphRenderer::screenshotComplete);

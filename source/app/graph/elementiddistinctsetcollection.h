@@ -519,13 +519,14 @@ public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = int;
 
-    protected:
-        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-
     private:
         const ElementIdDistinctSets* _sets = nullptr;
         size_t _i = 0;
 
+    protected:
+        pointer _p; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+
+    private:
         const typename ElementIdDistinctSetCollection<typename T::value_type>::ListNode& listNode() const
         {
             return _sets->setAt(_i)->_collection->listNodeFor(_p);
@@ -561,10 +562,8 @@ public:
         iterator_base() = default;
 
         explicit iterator_base(const ElementIdDistinctSets* sets) :
-             _sets(sets)
-        {
-            _p = nextHead();
-        }
+            _sets(sets), _p(nextHead())
+        {}
 
         self_type operator++()
         {

@@ -32,13 +32,12 @@ private:
     ContainerIteratorPairs _its;
 
 public:
-    explicit combine(Containers&... cs)
-    {
-        _its = std::apply([](auto&&... values)
+    explicit combine(Containers&... cs) :
+        _its(std::apply([](auto&&... values)
         {
             return std::tuple{(std::pair{std::cbegin(values), std::cend(values)})...};
-        }, std::forward_as_tuple(cs...));
-    }
+        }, std::forward_as_tuple(cs...)))
+    {}
 
     combine(const Containers&&... cs) = delete;
 

@@ -47,12 +47,13 @@ CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     QCustomPlot& customPlot) :
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
     _mutex(&mutex), _busy(false),
-    _customPlot(&customPlot)
+    _customPlot(&customPlot),
+    _surface(new QOffscreenSurface)
+
 {
     // Qt requires that this is created on the UI thread, so we do so here
     // Note QCustomPlot takes ownership of the memory, so it does not need
     // to be deleted
-    _surface = new QOffscreenSurface;
     _surface->setFormat(QSurfaceFormat::defaultFormat());
     _surface->create();
 
@@ -290,13 +291,14 @@ void CorrelationPlotWorker::renderPixmap()
 
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     QQuickPaintedItem(parent),
-    _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
+    _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
+    _mainLayoutGrid(new QCPLayoutGrid),
+    _worker(new CorrelationPlotWorker(_mutex, _customPlot))
 {
     // Discard the defaults...
     _customPlot.plotLayout()->clear();
 
     // ...and manage our own layout
-    _mainLayoutGrid = new QCPLayoutGrid;
     _customPlot.plotLayout()->addElement(_mainLayoutGrid);
 
     _customPlot.setAutoAddPlottableToLegend(false);
@@ -318,7 +320,6 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
 
     qRegisterMetaType<CorrelationPlotUpdateType>("CorrelationPlotUpdateType");
 
-    _worker = new CorrelationPlotWorker(_mutex, _customPlot);
     _worker->moveToThread(&_plotRenderThread);
     connect(&_plotRenderThread, &QThread::finished, _worker, &QObject::deleteLater);
 
