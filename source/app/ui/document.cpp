@@ -2586,6 +2586,7 @@ void Document::setNodeSize(float nodeSize)
     {
         _graphModel->setNodeSize(nodeSize);
         emit nodeSizeChanged();
+        setSaveRequired();
     }
 }
 
@@ -2612,6 +2613,7 @@ void Document::setEdgeSize(float edgeSize)
     {
         _graphModel->setEdgeSize(edgeSize);
         emit edgeSizeChanged();
+        setSaveRequired();
     }
 }
 
