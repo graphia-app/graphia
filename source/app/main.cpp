@@ -133,15 +133,18 @@ static void configureXDG()
     auto iconPermissions = QFileDevice::ReadOwner|QFileDevice::WriteOwner|
         QFileDevice::ReadGroup|QFileDevice::WriteGroup|QFileDevice::ReadOther;
 
-    auto schemeHandlerRegistrationCommand = QStringLiteral("xdg-mime default %1.desktop x-scheme-handler/%2")
-        .arg(Application::name(), Application::nativeExtension());
+    auto schemeHandlerRegistrationCommand = QStringLiteral("xdg-mime");
+    auto schemeHandlerRegistrationArgs = QStringList {
+        "default",
+        QStringLiteral("%1.desktop").arg(Application::name()),
+        QStringLiteral("x-scheme-handler/%2").arg(Application::nativeExtension()) };
 
     auto success = ((iconsDir.exists() || iconsDir.mkpath(iconsDir.absolutePath())) &&
         dotDesktopFile.open(QIODevice::WriteOnly) && dotDesktopFile.write(dotDesktopFileContent.toUtf8()) >= 0 &&
         (QFileInfo::exists(iconFilename) ||
             (QFile::copy(QStringLiteral(":/icon/Icon.svg"), iconFilename) &&
             QFile::setPermissions(iconFilename, iconPermissions))) &&
-        QProcess::startDetached(schemeHandlerRegistrationCommand)) || false;
+        QProcess::startDetached(schemeHandlerRegistrationCommand, schemeHandlerRegistrationArgs)) || false;
 
     if(!success)
         std::cerr << "Failed to configure for XDG.\n";
