@@ -22,4 +22,12 @@ Item
 {
     property int minimumHeight: 100
     property var toolStrip: null
+
+    // Don't use this directly, that is naughty
+    property var _mainWindow: null
+
+    function updateMenu()
+    {
+        _mainWindow.updatePluginMenus();
+    }
 }

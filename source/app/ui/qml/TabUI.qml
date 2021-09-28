@@ -1630,6 +1630,7 @@ Item
                 }
 
                 plugin.content = pluginComponent.createObject(plugin);
+                plugin.content._mainWindow = mainWindow;
 
                 if(plugin.content === null)
                 {
