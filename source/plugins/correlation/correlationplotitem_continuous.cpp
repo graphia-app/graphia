@@ -39,18 +39,11 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
         Q_ARG(QCPAxis*, _continuousYAxis), Q_ARG(double, min), Q_ARG(double, max));
 }
 
-static double logScale(double value)
+double CorrelationPlotItem::logScale(double value)
 {
     // Adding EPSILON prevents log(0) = -inf shenanigans
     const auto EPSILON = std::nextafter(0.0, 1.0);
     return std::log(value + EPSILON);
-}
-
-template<typename C>
-void logScale(C& values)
-{
-    for(auto& value : values)
-        value = logScale(value);
 }
 
 void CorrelationPlotItem::setContinousYAxisRangeForSelection()
@@ -398,7 +391,8 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column, QVector<double> values, const QColor& color = {})
+void CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
+    size_t column, QVector<double> values, const QColor& color)
 {
     // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values

@@ -423,6 +423,18 @@ private:
         const QCPAbstractPlottable* plottable, double xCoord);
     bool columnAnnotationTooltip(const QCPAxisRect* axisRect);
 
+    static double logScale(double value);
+
+    template<typename C>
+    void logScale(C& values)
+    {
+        for(auto& value : values)
+            value = logScale(value);
+    }
+
+    static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
+        size_t column, QVector<double> values, const QColor& color = {});
+
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);
     void updatePlotSize();
