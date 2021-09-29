@@ -333,7 +333,17 @@ PluginContent
         checkable: true
         checked: plot.groupByAnnotation
 
-        onTriggered: { plot.groupByAnnotation = !plot.groupByAnnotation; }
+        onTriggered:
+        {
+            plot.groupByAnnotation = !plot.groupByAnnotation;
+
+            if(plot.groupByAnnotation)
+            {
+                plot.scaleType = PlotScaleType.Raw;
+                plot.averagingType = PlotAveragingType.Individual;
+                plot.dispersionType = PlotDispersionType.None;
+            }
+        }
     }
 
     ExclusiveGroup
