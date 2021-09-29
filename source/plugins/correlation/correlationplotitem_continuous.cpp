@@ -493,37 +493,6 @@ void CorrelationPlotItem::populateIQRPlot()
     setContinousYAxisRangeForSelection();
 }
 
-void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* qcpColumnAnnotations)
-{
-    const auto* columnAnnotation = _pluginInstance->columnAnnotationByName(_colorGroupByAnnotationName);
-
-    for(size_t column = 0; column < _annotationGroupMap.size(); column++)
-    {
-        QVector<double> values;
-
-        for(auto row : std::as_const(_selectedRows))
-        {
-            for(size_t groupedColumn : _annotationGroupMap.at(column))
-                values.append(_pluginInstance->continuousDataAt(row, static_cast<int>(groupedColumn)));
-        }
-
-        if(_scaleType == static_cast<int>(PlotScaleType::Log))
-            logScale(values);
-
-        QColor color;
-
-        if(columnAnnotation != nullptr)
-        {
-            const auto* rect = qcpColumnAnnotations->rectAt(column, *columnAnnotation);
-            color = rect->_color;
-        }
-
-        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), color);
-    }
-
-    setContinousYAxisRangeForSelection();
-}
-
 void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = tr("Deviation"))
