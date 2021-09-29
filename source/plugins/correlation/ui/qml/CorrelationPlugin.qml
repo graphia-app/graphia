@@ -343,12 +343,19 @@ PluginContent
                 plot.averagingType = PlotAveragingType.Individual;
                 plot.dispersionType = PlotDispersionType.None;
             }
+            else
+                plot.colorGroupByAnnotationName = "";
         }
     }
 
     ExclusiveGroup
     {
         id: sortByExclusiveGroup
+    }
+
+    ExclusiveGroup
+    {
+        id: colorByExclusiveGroup
     }
 
     ExclusiveGroup
@@ -629,7 +636,45 @@ PluginContent
             });
 
             if(plugin.model.columnAnnotationNames.length > 0)
+            {
                 menu.addItem("").action = groupByAnnotationAction;
+
+                let colorGroupsByMenu = menu.addMenu(qsTr("Colour Groups By"));
+                colorGroupsByMenu.visible = Qt.binding(function()
+                {
+                    return groupByAnnotationAction.checked;
+                });
+
+                let colorByNoGroupMenuItem = colorGroupsByMenu.addItem(qsTr("None"));
+                colorByNoGroupMenuItem.exclusiveGroup = colorByExclusiveGroup;
+                colorByNoGroupMenuItem.checkable = true;
+                colorByNoGroupMenuItem.checked = Qt.binding(function()
+                {
+                    return plot.colorGroupByAnnotationName.length === 0;
+                });
+
+                colorByNoGroupMenuItem.triggered.connect(function()
+                {
+                    plot.colorGroupByAnnotationName = "";
+                });
+
+                plot.visibleColumnAnnotationNames.forEach(function(columnAnnotationName)
+                {
+                    let colorGroupsByMenuItem = colorGroupsByMenu.addItem(columnAnnotationName);
+
+                    colorGroupsByMenuItem.exclusiveGroup = colorByExclusiveGroup;
+                    colorGroupsByMenuItem.checkable = true;
+                    colorGroupsByMenuItem.checked = Qt.binding(function()
+                    {
+                        return columnAnnotationName === plot.colorGroupByAnnotationName;
+                    });
+
+                    colorGroupsByMenuItem.triggered.connect(function()
+                    {
+                        plot.colorGroupByAnnotationName = columnAnnotationName;
+                    });
+                });
+            }
 
             menu.addSeparator();
             menu.addItem("").action = savePlotImageAction;
@@ -757,7 +802,17 @@ PluginContent
             selectedRows: tableView.selectedRows
 
             onPlotOptionsChanged: { root.saveRequired = true; }
-            onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
+
+            onVisibleColumnAnnotationNamesChanged:
+            {
+                root.saveRequired = true;
+
+                if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
+                    plot.colorGroupByAnnotationName = "";
+
+                updateMenu();
+            }
+
             onColumnSortOrdersChanged: { root.saveRequired = true; }
 
             elideLabelWidth:
@@ -901,6 +956,7 @@ PluginContent
             "plotDispersion": plot.dispersionType,
             "plotDispersionVisual": plot.dispersionVisualType,
             "plotGroupByAnnotation": plot.groupByAnnotation,
+            "plotColorGroupByAnnotationName": plot.colorGroupByAnnotationName,
 
             "plotIncludeYZero": plot.includeYZero,
             "plotShowAllColumns": plot.showAllColumns,
@@ -930,31 +986,32 @@ PluginContent
                 data.hiddenColumns = data.hiddenColumns.map(c => tableView.model.columnNameFor(c));
         }
 
-        if(data.sideBySide !== undefined)                   toggleUiOrientationAction.checked = data.sideBySide;
-        if(data.sortColumn !== undefined)                   tableView.sortIndicatorColumn = data.sortColumn;
-        if(data.sortOrder !== undefined)                    tableView.sortIndicatorOrder = data.sortOrder;
-        if(data.hiddenColumns !== undefined)                tableView.setHiddenColumns(data.hiddenColumns);
-        if(data.columnOrder !== undefined)                  tableView.columnOrder = data.columnOrder;
+        if(data.sideBySide !== undefined)                       toggleUiOrientationAction.checked = data.sideBySide;
+        if(data.sortColumn !== undefined)                       tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                        tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)                    tableView.setHiddenColumns(data.hiddenColumns);
+        if(data.columnOrder !== undefined)                      tableView.columnOrder = data.columnOrder;
 
-        if(data.showColumnNames !== undefined)              plot.showColumnNames = data.showColumnNames;
+        if(data.showColumnNames !== undefined)                  plot.showColumnNames = data.showColumnNames;
 
-        if(data.plotScaling !== undefined)                  plot.scaleType = data.plotScaling;
-        if(data.plotScaleAttributeName !== undefined)       plot.scaleByAttributeName = data.plotScaleAttributeName;
-        if(data.plotAveraging !== undefined)                plot.averagingType = data.plotAveraging;
-        if(data.plotAveragingAttributeName !== undefined)   plot.averagingAttributeName = data.plotAveragingAttributeName;
-        if(data.plotDispersion !== undefined)               plot.dispersionType = data.plotDispersion;
-        if(data.plotDispersionVisual !== undefined)         plot.dispersionVisualType = data.plotDispersionVisual;
-        if(data.plotGroupByAnnotation !== undefined)        plot.groupByAnnotation = data.plotGroupByAnnotation;
+        if(data.plotScaling !== undefined)                      plot.scaleType = data.plotScaling;
+        if(data.plotScaleAttributeName !== undefined)           plot.scaleByAttributeName = data.plotScaleAttributeName;
+        if(data.plotAveraging !== undefined)                    plot.averagingType = data.plotAveraging;
+        if(data.plotAveragingAttributeName !== undefined)       plot.averagingAttributeName = data.plotAveragingAttributeName;
+        if(data.plotDispersion !== undefined)                   plot.dispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)             plot.dispersionVisualType = data.plotDispersionVisual;
+        if(data.plotGroupByAnnotation !== undefined)            plot.groupByAnnotation = data.plotGroupByAnnotation;
+        if(data.plotColorGroupByAnnotationName !== undefined)   plot.colorGroupByAnnotationName = data.plotColorGroupByAnnotationName;
 
-        if(data.plotIncludeYZero !== undefined)             plot.includeYZero = data.plotIncludeYZero;
-        if(data.plotShowAllColumns !== undefined)           plot.showAllColumns = data.plotShowAllColumns;
-        if(data.plotXAxisLabel !== undefined)               plot.xAxisLabel = data.plotXAxisLabel;
-        if(data.plotYAxisLabel !== undefined)               plot.yAxisLabel = data.plotYAxisLabel;
+        if(data.plotIncludeYZero !== undefined)                 plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotShowAllColumns !== undefined)               plot.showAllColumns = data.plotShowAllColumns;
+        if(data.plotXAxisLabel !== undefined)                   plot.xAxisLabel = data.plotXAxisLabel;
+        if(data.plotYAxisLabel !== undefined)                   plot.yAxisLabel = data.plotYAxisLabel;
 
-        if(data.plotLegend !== undefined)                   plot.showLegend = data.plotLegend;
-        if(data.plotGridLines !== undefined)                plot.showGridLines = data.plotGridLines;
+        if(data.plotLegend !== undefined)                       plot.showLegend = data.plotLegend;
+        if(data.plotGridLines !== undefined)                    plot.showGridLines = data.plotGridLines;
 
-        if(data.columnAnnotations !== undefined)            plot.visibleColumnAnnotationNames = data.columnAnnotations;
+        if(data.columnAnnotations !== undefined)                plot.visibleColumnAnnotationNames = data.columnAnnotations;
 
         if(data.plotColumnSortType !== undefined)
         {

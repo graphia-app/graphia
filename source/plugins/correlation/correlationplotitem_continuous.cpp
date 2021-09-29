@@ -19,6 +19,7 @@
 #include "correlationplotitem.h"
 
 #include "correlationplugin.h"
+#include "qcpcolumnannotations.h"
 
 #include "shared/utils/statistics.h"
 #include "shared/utils/container_randomsample.h"
@@ -162,6 +163,16 @@ void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
         emit plotOptionsChanged();
         rebuildPlot();
         resetZoom();
+    }
+}
+
+void CorrelationPlotItem::setColorGroupByAnnotationName(const QString& annotationName)
+{
+    if(_colorGroupByAnnotationName != annotationName)
+    {
+        _colorGroupByAnnotationName = annotationName;
+        emit plotOptionsChanged();
+        rebuildPlot();
     }
 }
 
@@ -387,7 +398,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column, QVector<double> values)
+static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column, QVector<double> values, const QColor& color = {})
 {
     // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values
@@ -398,6 +409,9 @@ static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis, size_t column,
 
     auto* statisticalBox = new QCPStatisticalBox(keyAxis, valueAxis);
     statisticalBox->setName(QObject::tr("IQR"));
+
+    if(color.isValid())
+        statisticalBox->setBrush(color);
 
     // Partial (efficient) sort which is suitable for IQR calculation
     auto const Q1 = values.size() / 4;
@@ -485,8 +499,10 @@ void CorrelationPlotItem::populateIQRPlot()
     setContinousYAxisRangeForSelection();
 }
 
-void CorrelationPlotItem::populateIQRAnnotationPlot()
+void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* qcpColumnAnnotations)
 {
+    const auto* columnAnnotation = _pluginInstance->columnAnnotationByName(_colorGroupByAnnotationName);
+
     for(size_t column = 0; column < _annotationGroupMap.size(); column++)
     {
         QVector<double> values;
@@ -500,7 +516,15 @@ void CorrelationPlotItem::populateIQRAnnotationPlot()
         if(_scaleType == static_cast<int>(PlotScaleType::Log))
             logScale(values);
 
-        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
+        QColor color;
+
+        if(columnAnnotation != nullptr)
+        {
+            const auto* rect = qcpColumnAnnotations->rectAt(column, *columnAnnotation);
+            color = rect->_color;
+        }
+
+        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), color);
     }
 
     setContinousYAxisRangeForSelection();
@@ -776,8 +800,6 @@ void CorrelationPlotItem::configureContinuousAxisRect()
         default:                                populateLinePlot(); break;
         }
     }
-    else
-        populateIQRAnnotationPlot();
 
     _continuousXAxis->grid()->setVisible(_showGridLines);
     _continuousYAxis->grid()->setVisible(_showGridLines);

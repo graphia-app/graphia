@@ -43,6 +43,7 @@
 #include <atomic>
 
 class CorrelationPluginInstance;
+class QCPColumnAnnotations;
 
 DEFINE_QML_ENUM(
     Q_GADGET, PlotScaleType,
@@ -176,6 +177,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
     Q_PROPERTY(bool groupByAnnotation MEMBER _groupByAnnotation WRITE setGroupByAnnotation NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString colorGroupByAnnotationName MEMBER _colorGroupByAnnotationName
+        WRITE setColorGroupByAnnotationName NOTIFY plotOptionsChanged)
 
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
@@ -223,8 +226,9 @@ public:
     void setShowAllColumns(bool showAllColumns);
     void setAveragingType(int averagingType);
     void setAveragingAttributeName(const QString& attributeName);
-    void setGroupByAnnotation(bool groupByAnnotation);
     void setDispersionVisualType(int dispersionVisualType);
+    void setGroupByAnnotation(bool groupByAnnotation);
+    void setColorGroupByAnnotationName(const QString& annotationName);
 
     static bool axisRectIsColumnAnnotations(const QCPAxisRect* axisRect);
     static QColor colorForRows(const CorrelationPluginInstance* pluginInstance,
@@ -281,6 +285,7 @@ private:
 
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
+    QString _colorGroupByAnnotationName;
 
     QCPTextElement* _xAxisLabelTextElement = nullptr;
 
@@ -340,7 +345,7 @@ private:
     void populateLinePlot();
     void populateMeanHistogramPlot();
     void populateIQRPlot();
-    void populateIQRAnnotationPlot();
+    void populateIQRAnnotationPlot(const QCPColumnAnnotations* qcpColumnAnnotations);
     void plotDispersion(QCPAbstractPlottable* meanPlot,
         double& minY, double& maxY,
         const QVector<double>& stdDevs, const QString& name);

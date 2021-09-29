@@ -161,6 +161,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
 
     qcpColumnAnnotations->resolveRects();
 
+    if(_groupByAnnotation && !_visibleColumnAnnotationNames.empty())
+        populateIQRAnnotationPlot(qcpColumnAnnotations);
+
     // We only want the ticker on the left most column annotation QCPAxisRect
     if(layoutColumn == 0)
     {

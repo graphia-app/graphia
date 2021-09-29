@@ -755,7 +755,6 @@ const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const 
     auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
         [&name](const auto& v) { return v.name() == name; });
 
-    Q_ASSERT(it != _columnAnnotations.end());
     if(it != _columnAnnotations.end())
         return &(*it);
 
