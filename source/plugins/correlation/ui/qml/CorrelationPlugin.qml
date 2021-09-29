@@ -327,7 +327,7 @@ PluginContent
 
     Action
     {
-        id: groupByAnnotation
+        id: groupByAnnotationAction
         text: qsTr("Group By Annotation")
         enabled: plot.visibleColumnAnnotationNames.length > 0 || plot.columnAnnotationSelectionModeEnabled
         checkable: true
@@ -629,7 +629,7 @@ PluginContent
             });
 
             if(plugin.model.columnAnnotationNames.length > 0)
-                menu.addItem("").action = groupByAnnotation;
+                menu.addItem("").action = groupByAnnotationAction;
 
             menu.addSeparator();
             menu.addItem("").action = savePlotImageAction;
@@ -772,7 +772,7 @@ PluginContent
                 return quantised;
             }
 
-            property bool iqrStyle: groupByAnnotation || averagingType == PlotAveragingType.IQR
+            property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
 
             property bool scrollBarRequired: visibleHorizontalFraction < 1.0
             xAxisPadding: Constants.padding + (scrollBarRequired ? scrollView.__horizontalScrollBar.height : 0)
