@@ -225,11 +225,13 @@ QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
 
 void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
 {
-    _visibleColumnAnnotationNames.clear();
-    for(const auto& columnAnnotation : columnAnnotations)
-        _visibleColumnAnnotationNames.emplace(columnAnnotation);
+    std::set<QString> newVisibleColumnAnnotationNames(columnAnnotations.begin(), columnAnnotations.end());
 
-    emit plotOptionsChanged();
+    if(_visibleColumnAnnotationNames != newVisibleColumnAnnotationNames)
+    {
+        _visibleColumnAnnotationNames = newVisibleColumnAnnotationNames;
+        emit visibleColumnAnnotationNamesChanged();
+    }
 }
 
 bool CorrelationPlotItem::columnAnnotationSelectionModeEnabled() const
@@ -388,6 +390,8 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
             _visibleColumnAnnotationNames.erase(name);
         else
             _visibleColumnAnnotationNames.insert(name);
+
+        emit visibleColumnAnnotationNamesChanged();
     }
     else if(_columnAnnotationSelectionModeEnabled &&
         !u::contains(_visibleColumnAnnotationNames, name))
@@ -395,6 +399,8 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
         // Clicking anywhere else enables a column annotation
         // when it's disabled...
         _visibleColumnAnnotationNames.insert(name);
+
+        emit visibleColumnAnnotationNamesChanged();
     }
     else
     {

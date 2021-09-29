@@ -171,7 +171,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
 
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
-        WRITE setVisibleColumnAnnotationNames NOTIFY plotOptionsChanged)
+        WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
     Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
@@ -430,6 +430,7 @@ signals:
     void visibleHorizontalFractionChanged();
     void isWideChanged();
     void plotOptionsChanged();
+    void visibleColumnAnnotationNamesChanged();
     void busyChanged();
     void zoomedChanged();
 
