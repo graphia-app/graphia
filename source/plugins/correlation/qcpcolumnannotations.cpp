@@ -51,70 +51,11 @@ QCPRange QCPColumnAnnotations::getValueRange(bool& foundRange, QCP::SignDomain, 
 void QCPColumnAnnotations::setData(size_t y, std::vector<size_t> indices,
     bool selected, size_t offset, const ColumnAnnotation* columnAnnotation)
 {
-    _rows.emplace(y, Row(std::move(indices), selected, offset, columnAnnotation));
-
+    _rows.emplace(y, Row{std::move(indices), selected, offset, columnAnnotation});
 }
 
-int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString& value)
+void QCPColumnAnnotations::resolveRects()
 {
-    if(!u::contains(_valueWidths, value))
-    {
-        const auto& fontMetrics = painter->fontMetrics();
-        _valueWidths.emplace(value, fontMetrics.boundingRect(value).width());
-    }
-
-    return _valueWidths.at(value);
-}
-
-void QCPColumnAnnotations::renderRect(QCPPainter* painter, size_t x, size_t y,
-    size_t w, const QString& value, QColor color, bool selected) // NOLINT performance-unnecessary-value-param
-{
-    auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(x));
-    auto yPixel = mValueAxis->coordToPixel(static_cast<double>(y));
-
-    QRectF rect(xPixel - _halfCellWidth, yPixel - _cellHeight,
-        (static_cast<double>(w) * _cellWidth), _cellHeight);
-
-    // Don't continue if the rectangle is outside the clipping bounds
-    if(!rect.intersects(painter->clipBoundingRect()))
-        return;
-
-    if(!value.isEmpty() && !selected)
-        color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
-
-    painter->setPen(color);
-    painter->setBrush(color);
-    painter->drawRect(rect);
-
-    if(selected)
-    {
-        // Always keep the text onscreen if possible
-        rect = rect.intersected(painter->clipBoundingRect());
-
-        const auto textMargin = 1.0;
-        rect.setLeft(rect.left() + textMargin);
-        rect.setRight(rect.right() - textMargin);
-
-        if(static_cast<qreal>(widthForValue(painter, value)) <= rect.width())
-        {
-            auto textColor = u::contrastingColor(color);
-            painter->setPen(textColor);
-
-            painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, value, &rect);
-        }
-    }
-}
-
-void QCPColumnAnnotations::draw(QCPPainter* painter)
-{
-    _cellWidth = mKeyAxis->coordToPixel(1.0) -  mKeyAxis->coordToPixel(0.0);
-    _cellHeight = mValueAxis->coordToPixel(0.0) - mValueAxis->coordToPixel(1.0);
-    _halfCellWidth = _cellWidth * 0.5;
-
-    auto font = painter->font();
-    font.setPixelSize(static_cast<int>(_cellHeight * 0.7));
-    painter->setFont(font);
-
     auto colorFor = [this](const Row& row, size_t index) -> QColor
     {
         const auto* annotation = row._columnAnnotation;
@@ -153,7 +94,7 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
 
             if(value != currentValue)
             {
-                renderRect(painter, left, y, width, currentValue, currentColor, row._selected);
+                _rects[row._columnAnnotation->name()].emplace_back(Rect{left, y, width, currentValue, currentColor, row._selected});
 
                 left = right;
                 currentValue = value;
@@ -164,7 +105,95 @@ void QCPColumnAnnotations::draw(QCPPainter* painter)
             width = right - left;
         }
 
-        renderRect(painter, left, y, width, currentValue, currentColor, row._selected);
+        _rects[row._columnAnnotation->name()].emplace_back(Rect{left, y, width, currentValue, currentColor, row._selected});
+    }
+}
+
+const QCPColumnAnnotations::Rect* QCPColumnAnnotations::rectAt(size_t x, const ColumnAnnotation& annotation) const
+{
+    const auto& name = annotation.name();
+
+    if(!u::contains(_rects, name))
+        return nullptr;
+
+    const auto& rects = _rects.at(name);
+
+    for(const auto& rect: rects)
+    {
+        if(x >= rect._x && x < (rect._x + rect._width))
+            return &rect;
+    }
+
+    return nullptr;
+}
+
+int QCPColumnAnnotations::widthForValue(const QCPPainter* painter, const QString& value)
+{
+    if(!u::contains(_valueWidths, value))
+    {
+        const auto& fontMetrics = painter->fontMetrics();
+        _valueWidths.emplace(value, fontMetrics.boundingRect(value).width());
+    }
+
+    return _valueWidths.at(value);
+}
+
+void QCPColumnAnnotations::renderRect(QCPPainter* painter, const Rect& r)
+{
+    auto xPixel = mKeyAxis->coordToPixel(static_cast<double>(r._x));
+    auto yPixel = mValueAxis->coordToPixel(static_cast<double>(r._y));
+
+    QRectF rect(xPixel - _halfCellWidth, yPixel - _cellHeight,
+        (static_cast<double>(r._width) * _cellWidth), _cellHeight);
+
+    // Don't continue if the rectangle is outside the clipping bounds
+    if(!rect.intersects(painter->clipBoundingRect()))
+        return;
+
+    QColor color;
+
+    if(!r._value.isEmpty() && !r._selected)
+        color = QColor::fromHsl(r._color.hue(), 20, std::max(r._color.lightness(), 150));
+    else
+        color = r._color;
+
+    painter->setPen(color);
+    painter->setBrush(color);
+    painter->drawRect(rect);
+
+    if(r._selected)
+    {
+        // Always keep the text onscreen if possible
+        rect = rect.intersected(painter->clipBoundingRect());
+
+        const auto textMargin = 1.0;
+        rect.setLeft(rect.left() + textMargin);
+        rect.setRight(rect.right() - textMargin);
+
+        if(static_cast<qreal>(widthForValue(painter, r._value)) <= rect.width())
+        {
+            auto textColor = u::contrastingColor(color);
+            painter->setPen(textColor);
+
+            painter->drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, r._value, &rect);
+        }
+    }
+}
+
+void QCPColumnAnnotations::draw(QCPPainter* painter)
+{
+    _cellWidth = mKeyAxis->coordToPixel(1.0) -  mKeyAxis->coordToPixel(0.0);
+    _cellHeight = mValueAxis->coordToPixel(0.0) - mValueAxis->coordToPixel(1.0);
+    _halfCellWidth = _cellWidth * 0.5;
+
+    auto font = painter->font();
+    font.setPixelSize(static_cast<int>(_cellHeight * 0.7));
+    painter->setFont(font);
+
+    for(const auto& [y, rects] : _rects)
+    {
+        for(const auto& rect : rects)
+            renderRect(painter, rect);
     }
 }
 

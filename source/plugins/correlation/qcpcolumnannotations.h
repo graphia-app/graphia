@@ -40,14 +40,6 @@ class QCPColumnAnnotations : public QCPAbstractPlottable
 private:
     struct Row
     {
-        // cppcheck-suppress passedByValue
-        Row(std::vector<size_t> indices, bool selected, size_t offset,
-            const ColumnAnnotation* columnAnnotation) :
-            _indices(std::move(indices)),
-            _selected(selected), _offset(offset),
-            _columnAnnotation(columnAnnotation)
-        {}
-
         std::vector<size_t> _indices;
         bool _selected = true;
         size_t _offset = 0;
@@ -55,6 +47,19 @@ private:
     };
 
     std::map<size_t, Row> _rows;
+
+    struct Rect
+    {
+        size_t _x = 0;
+        size_t _y = 0;
+        size_t _width = 0;
+        QString _value;
+        QColor _color;
+        bool _selected = true;
+    };
+
+    std::map<QString, std::vector<Rect>> _rects;
+
     std::map<QString, int> _valueWidths;
 
     double _cellWidth = 0.0;
@@ -74,6 +79,8 @@ public:
 
     void setData(size_t y, std::vector<size_t> indices, bool selected, size_t offset,
         const ColumnAnnotation* columnAnnotation);
+    void resolveRects();
+    const Rect* rectAt(size_t x, const ColumnAnnotation& annotation) const;
 
 protected:
     void draw(QCPPainter* painter) override;
@@ -81,8 +88,7 @@ protected:
 
 private:
     int widthForValue(const QCPPainter* painter, const QString& value);
-    void renderRect(QCPPainter* painter, size_t x, size_t y,
-        size_t w, const QString& value, QColor color, bool selected);
+    void renderRect(QCPPainter* painter, const Rect& r);
 };
 
 #endif // QCPCOLUMNANNOTATIONS_H

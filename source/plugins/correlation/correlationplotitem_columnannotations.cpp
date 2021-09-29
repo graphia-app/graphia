@@ -159,6 +159,8 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
         qcpColumnAnnotations->setData(y, indices, selected, offset, &columnAnnotation);
     });
 
+    qcpColumnAnnotations->resolveRects();
+
     // We only want the ticker on the left most column annotation QCPAxisRect
     if(layoutColumn == 0)
     {
