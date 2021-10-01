@@ -92,6 +92,17 @@ void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
     }
 }
 
+void CorrelationPlotItem::setShowIqrOutliers(bool showIqrOutliers)
+{
+    if(_showIqrOutliers != showIqrOutliers)
+    {
+        _showIqrOutliers = showIqrOutliers;
+        emit plotOptionsChanged();
+        rebuildPlot();
+        resetZoom();
+    }
+}
+
 void CorrelationPlotItem::setScaleType(int scaleType)
 {
     scaleType = static_cast<int>(NORMALISE_QML_ENUM(PlotScaleType, scaleType));
@@ -131,6 +142,9 @@ void CorrelationPlotItem::setAveragingType(int averagingType)
     if(_averagingType != averagingType)
     {
         _averagingType = averagingType;
+        if(_averagingType != static_cast<int>(PlotAveragingType::IQR))
+            _showIqrOutliers = true;
+
         emit plotOptionsChanged();
         rebuildPlot();
         resetZoom();
@@ -153,6 +167,9 @@ void CorrelationPlotItem::setGroupByAnnotation(bool groupByAnnotation)
     if(_groupByAnnotation != groupByAnnotation)
     {
         _groupByAnnotation = groupByAnnotation;
+        if(!_groupByAnnotation)
+            _showIqrOutliers = true;
+
         emit plotOptionsChanged();
         rebuildPlot();
         resetZoom();
@@ -391,15 +408,15 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     setContinousYAxisRange(minY, maxY);
 }
 
-void CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
-    size_t column, QVector<double> values, const QColor& color)
+std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
+    size_t column, QVector<double> values, bool showOutliers, const QColor& color)
 {
     // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
     if(values.empty())
-        return;
+        return {};
 
     auto* statisticalBox = new QCPStatisticalBox(keyAxis, valueAxis);
     statisticalBox->setName(QObject::tr("IQR"));
@@ -450,6 +467,9 @@ void CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
         if(value > firstQuartile - (iqr * 1.5))
             minValue = std::min(minValue, value);
 
+        if(!showOutliers)
+            continue;
+
         // Find outliers
         if(value > thirdQuartile + (iqr * 1.5) || value < firstQuartile - (iqr * 1.5))
             outliers.push_back(value);
@@ -457,22 +477,36 @@ void CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
 
     outliers.shrink_to_fit();
 
+    auto minmax = std::minmax_element(outliers.begin(), outliers.end());
+    auto minOutlier = *minmax.first;
+    auto maxOutlier = *minmax.second;
+
     const size_t maxOutliers = 100;
     if(static_cast<size_t>(outliers.size()) > maxOutliers)
     {
-        auto minmax = std::minmax_element(outliers.begin(), outliers.end());
         outliers = u::randomSample(outliers, maxOutliers);
 
         // Ensure the minimum and maximum outliers are included
-        outliers.append({*minmax.first, *minmax.second});
+        outliers.append({minOutlier, maxOutlier});
     }
 
     statisticalBox->addData(static_cast<int>(column), minValue, firstQuartile,
         secondQuartile, thirdQuartile, maxValue, outliers);
+
+    if(showOutliers)
+    {
+        maxValue = std::max(maxValue, maxOutlier);
+        minValue = std::min(minValue, minOutlier);
+    }
+
+    return {minValue, maxValue};
 }
 
 void CorrelationPlotItem::populateIQRPlot()
 {
+    auto minY = std::numeric_limits<double>::max();
+    auto maxY = std::numeric_limits<double>::lowest();
+
     for(int column = 0; column < static_cast<int>(_pluginInstance->numContinuousColumns()); column++)
     {
         QVector<double> values;
@@ -487,10 +521,12 @@ void CorrelationPlotItem::populateIQRPlot()
         if(_scaleType == static_cast<int>(PlotScaleType::Log))
             logScale(values);
 
-        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values));
+        auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), _showIqrOutliers);
+        minY = std::min(minY, minmax.first);
+        maxY = std::max(maxY, minmax.second);
     }
 
-    setContinousYAxisRangeForSelection();
+    setContinousYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,

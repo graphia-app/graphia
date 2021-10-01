@@ -199,6 +199,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool showIqrOutliers MEMBER _showIqrOutliers WRITE setShowIqrOutliers NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showAllColumns MEMBER _showAllColumns WRITE setShowAllColumns NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool isWide READ isWide NOTIFY isWideChanged)
 
@@ -223,6 +224,7 @@ public:
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
     void setIncludeYZero(bool includeYZero);
+    void setShowIqrOutliers(bool showIqrOutliers);
     void setShowAllColumns(bool showAllColumns);
     void setAveragingType(int averagingType);
     void setAveragingAttributeName(const QString& attributeName);
@@ -308,6 +310,7 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
     bool _includeYZero = false;
+    bool _showIqrOutliers = true;
     bool _showAllColumns = false;
     int _xAxisPadding = 0;
 
@@ -432,8 +435,8 @@ private:
             value = logScale(value);
     }
 
-    static void addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
-        size_t column, QVector<double> values, const QColor& color = {});
+    static std::pair<double, double> addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
+        size_t column, QVector<double> values, bool showOutliers, const QColor& color = {});
 
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);

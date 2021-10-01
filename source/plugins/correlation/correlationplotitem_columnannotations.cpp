@@ -221,6 +221,9 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
 {
     const auto* columnAnnotation = _pluginInstance->columnAnnotationByName(_colorGroupByAnnotationName);
 
+    auto minY = std::numeric_limits<double>::max();
+    auto maxY = std::numeric_limits<double>::lowest();
+
     for(size_t column = 0; column < _annotationGroupMap.size(); column++)
     {
         QVector<double> values;
@@ -242,10 +245,12 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
             color = rect->_color;
         }
 
-        addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), color);
+        auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), _showIqrOutliers, color);
+        minY = std::min(minY, minmax.first);
+        maxY = std::max(maxY, minmax.second);
     }
 
-    setContinousYAxisRangeForSelection();
+    setContinousYAxisRange(minY, maxY);
 }
 
 QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const

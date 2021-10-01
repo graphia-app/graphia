@@ -154,6 +154,16 @@ PluginContent
 
     Action
     {
+        id: toggleShowOutliers
+        text: qsTr("Show Outliers")
+        checkable: true
+        checked: plot.showIqrOutliers
+
+        onTriggered: { plot.showIqrOutliers = !plot.showIqrOutliers; }
+    }
+
+    Action
+    {
         id: resetZoom
         text: qsTr("Reset Zoom")
         enabled: plot.zoomed
@@ -598,6 +608,10 @@ PluginContent
                 });
 
                 menu.addItem("").action = toggleIncludeYZero;
+
+                if(plot.iqrStyle)
+                    menu.addItem("").action = toggleShowOutliers;
+
                 menu.addItem("").action = resetZoom;
 
                 menu.addSeparator();
@@ -828,6 +842,7 @@ PluginContent
             }
 
             property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
+            onIqrStyleChanged: { updateMenu(); }
 
             property bool scrollBarRequired: visibleHorizontalFraction < 1.0
             xAxisPadding: Constants.padding + (scrollBarRequired ? scrollView.__horizontalScrollBar.height : 0)
@@ -959,6 +974,7 @@ PluginContent
             "plotColorGroupByAnnotationName": plot.colorGroupByAnnotationName,
 
             "plotIncludeYZero": plot.includeYZero,
+            "plotShowIqrOutliers": plot.showIqrOutliers,
             "plotShowAllColumns": plot.showAllColumns,
             "plotXAxisLabel": plot.xAxisLabel,
             "plotYAxisLabel": plot.yAxisLabel,
@@ -1004,6 +1020,7 @@ PluginContent
         if(data.plotColorGroupByAnnotationName !== undefined)   plot.colorGroupByAnnotationName = data.plotColorGroupByAnnotationName;
 
         if(data.plotIncludeYZero !== undefined)                 plot.includeYZero = data.plotIncludeYZero;
+        if(data.plotShowIqrOutliers !== undefined)              plot.showIqrOutliers = data.plotShowIqrOutliers;
         if(data.plotShowAllColumns !== undefined)               plot.showAllColumns = data.plotShowAllColumns;
         if(data.plotXAxisLabel !== undefined)                   plot.xAxisLabel = data.plotXAxisLabel;
         if(data.plotYAxisLabel !== undefined)                   plot.yAxisLabel = data.plotYAxisLabel;
