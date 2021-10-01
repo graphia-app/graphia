@@ -477,10 +477,14 @@ void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
         auto delta = axis->pixelToCoord(_lastMousePosition.y()) - axis->pixelToCoord(event->pos().y());
 
         QMetaObject::invokeMethod(_worker, "pan", Qt::QueuedConnection, Q_ARG(QCPAxis*, axis), Q_ARG(double, delta));
-        updatePixmap(CorrelationPlotUpdateType::Render);
+
+        // Hide tooltips when paning
+        _hoverPoint = {-1.0, -1.0};
+
+        if(!updateTooltip()) // If tooltip update fails...
+            updatePixmap(CorrelationPlotUpdateType::Render);
 
         _lastMousePosition = event->pos();
-
         event->accept();
     }
 }
