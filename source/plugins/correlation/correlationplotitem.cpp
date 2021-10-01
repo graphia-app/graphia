@@ -132,7 +132,7 @@ void CorrelationPlotWorker::setAxisRange(QCPAxis* axis, double min, double max)
 
 void CorrelationPlotWorker::zoom(QCPAxis* axis, double centre, int direction)
 {
-    constexpr double maxScale = 20.0;
+    constexpr double maxScale = 50.0;
     constexpr double zoomStepFactor = 0.8;
 
     auto& parameters = _axisParameters[axis];
