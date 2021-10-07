@@ -1048,6 +1048,7 @@ void CorrelationPlotItem::setShowAllColumns(bool showAllColumns)
     if(_showAllColumns != showAllColumns)
     {
         _showAllColumns = showAllColumns;
+        computeXAxisRange();
         emit visibleHorizontalFractionChanged();
         emit plotOptionsChanged();
         rebuildPlot();
