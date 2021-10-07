@@ -156,15 +156,18 @@ static void uploadReport(const QString& email, const QString& text,
 
     std::map<const char*, QString> fields =
     {
-        {"email",   email},
-        {"text",    text},
-        {"product", PRODUCT_NAME},
-        {"version", VERSION},
-        {"os",      QString("%1 %2 %3 %4").arg(QSysInfo::kernelType(),
-                                               QSysInfo::kernelVersion(),
-                                               QSysInfo::productType(),
-                                               QSysInfo::productVersion())},
-        {"gl",      OpenGLFunctions::info()},
+        {"email",       email},
+        {"text",        text},
+        {"product",     PRODUCT_NAME},
+        {"version",     VERSION},
+        {"os",          QString("%1 %2 %3 %4").arg(QSysInfo::kernelType(),
+                                                   QSysInfo::kernelVersion(),
+                                                   QSysInfo::productType(),
+                                                   QSysInfo::productVersion())},
+        {"gl",          OpenGLFunctions::info()},
+#ifdef GIT_BRANCH
+        {"git_branch",  GIT_BRANCH},
+#endif
     };
 
     for(auto& field : fields)
