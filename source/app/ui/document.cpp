@@ -3060,7 +3060,7 @@ void Document::importAttributesFromTable(const QString& keyAttributeName,
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
-void Document::removeAttributes(QStringList attributeNames)
+void Document::removeAttributes(const QStringList& attributeNames)
 {
     if(busy())
         return;

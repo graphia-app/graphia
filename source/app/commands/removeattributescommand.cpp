@@ -23,12 +23,13 @@
 #include "shared/loading/userelementdata.h"
 
 #include <algorithm>
+#include <iterator>
 
 RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames) :
     _graphModel(graphModel)
 {
     std::transform(attributeNames.cbegin(), attributeNames.cend(),
-        _attributeNames.begin(), // clazy:exclude=detaching-member
+        std::back_inserter(_attributeNames),
     [](const auto& attributeName)
     {
         return Attribute::parseAttributeName(attributeName)._name;
