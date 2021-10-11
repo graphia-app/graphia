@@ -19,12 +19,16 @@
 #ifndef STATIC_BLOCK_H
 #define STATIC_BLOCK_H
 
-#include <QCoreApplication>
-#include <QTimer>
+#include <map>
+#include <string>
+
+inline std::map<std::string, void(*)()> _static_blocks;
+
+void execute_static_blocks();
 
 #define STATIC_BLOCK_ID_CONCAT(p, l) p ## l // NOLINT cppcoreguidelines-macro-usage
 #define STATIC_BLOCK_ID_EXPAND(p, l) STATIC_BLOCK_ID_CONCAT(p, l) // NOLINT cppcoreguidelines-macro-usage
-#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_,  __LINE__) // NOLINT cppcoreguidelines-macro-usage
+#define STATIC_BLOCK_ID STATIC_BLOCK_ID_EXPAND(static_block_,  __COUNTER__) // NOLINT cppcoreguidelines-macro-usage
 
 #define STATIC_BLOCK_2(f, c) /* NOLINT cppcoreguidelines-macro-usage */ \
     static void f(); \
@@ -34,15 +38,8 @@
     { \
         inline c() \
         { \
-            if(!QCoreApplication::instance()->startingUp()) \
-            { \
-                /* This will only occur from a DLL, where we need to delay the \
-                initialisation until later so we can guarantee it occurs \
-                after any other static initialisation */ \
-                QTimer::singleShot(0, [] { f(); }); \
-            } \
-            else \
-                f(); \
+            std::string sid(__FILE__); sid += std::to_string(__LINE__); \
+            _static_blocks[sid] = f; \
         } \
     } STATIC_BLOCK_ID_CONCAT(c, _instance); \
     } \

@@ -70,6 +70,7 @@
 #include "shared/utils/modelcompleter.h"
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
+#include "shared/utils/static_block.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
@@ -299,6 +300,8 @@ int start(int argc, char *argv[])
     qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qRegisterMetaType<size_t>("size_t");
+
+    execute_static_blocks();
 
     ThreadPoolSingleton threadPool;
     ScopeTimerManager scopeTimerManager;

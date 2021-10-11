@@ -28,6 +28,7 @@
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/msvcwarningsuppress.h"
+#include "shared/utils/static_block.h"
 
 #include "loading/graphmlsaver.h"
 #include "loading/jsongraphsaver.h"
@@ -634,6 +635,9 @@ void Application::loadPlugins()
 
                     std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
                         " (" << iplugin->name().toStdString() << ") loaded successfully\n";
+
+                    // Some plugins might have static_blocks
+                    execute_static_blocks();
                 }
             }
         }
