@@ -20,6 +20,9 @@
 
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
+#include <QQmlEngine>
+
+#include "shared/utils/static_block.h"
 
 #include "ui/document.h"
 
@@ -108,4 +111,15 @@ void ImportAttributesKeyDetection::reset()
     _attributeValues = {};
     _result = {};
     emit resultChanged();
+}
+
+static_block
+{
+    static bool initialised = false;
+    if(initialised)
+        return;
+    initialised = true;
+
+    qmlRegisterType<ImportAttributesKeyDetection>(APP_URI, APP_MAJOR_VERSION,
+        APP_MINOR_VERSION, "ImportAttributesKeyDetection");
 }

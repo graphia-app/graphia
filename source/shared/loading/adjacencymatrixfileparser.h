@@ -26,9 +26,7 @@
 #include "shared/loading/matlabfileparser.h"
 
 #include "shared/utils/is_detected.h"
-#include "shared/utils/static_block.h"
 
-#include <QQmlEngine>
 #include <QVariantMap>
 #include <QPoint>
 
@@ -67,17 +65,6 @@ public:
 
     void setMinimumAbsEdgeWeight(double minimumAbsEdgeWeight) { _minimumAbsEdgeWeight = minimumAbsEdgeWeight; }
     void setSkipDuplicates(bool skipDuplicates) { _skipDuplicates = skipDuplicates; }
-
-    static void registerQmlType()
-    {
-        static bool initialised = false;
-        if(initialised)
-            return;
-        initialised = true;
-
-        qmlRegisterType<AdjacencyMatrixTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
-            APP_MINOR_VERSION, "AdjacencyMatrixTabularDataParser");
-    }
 
 signals:
     void graphSizeEstimateChanged();
@@ -168,10 +155,5 @@ using AdjacencyMatrixSSVFileParser =    AdjacencyMatrixParser<SsvFileParser>;
 using AdjacencyMatrixCSVFileParser =    AdjacencyMatrixParser<CsvFileParser>;
 using AdjacencyMatrixXLSXFileParser =   AdjacencyMatrixParser<XlsxTabularDataParser>;
 using AdjacencyMatrixMatLabFileParser = AdjacencyMatrixParser<MatLabFileParser>;
-
-static_block
-{
-    AdjacencyMatrixTabularDataParser::registerQmlType();
-}
 
 #endif // ADJACENCYMATRIXFILEPARSER_H

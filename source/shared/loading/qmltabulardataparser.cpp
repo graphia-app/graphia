@@ -23,10 +23,12 @@
 
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
+#include "shared/utils/static_block.h"
 
 #include <QFileInfo>
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
+#include <QQmlEngine>
 
 #include <map>
 
@@ -275,4 +277,21 @@ void QmlTabularDataParser::onDataLoaded()
 
     _complete = true;
     emit completeChanged();
+}
+
+static_block
+{
+    static bool initialised = false;
+    if(initialised)
+        return;
+    initialised = true;
+
+    qmlRegisterType<QmlTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
+        APP_MINOR_VERSION, "TabularDataParser");
+
+    qmlRegisterInterface<QmlTabularDataHeaderModel>("TabularDataHeaderModel"
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        , APP_MAJOR_VERSION
+#endif
+        );
 }

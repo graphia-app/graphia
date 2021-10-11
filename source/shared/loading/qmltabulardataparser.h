@@ -22,13 +22,11 @@
 #include "shared/utils/cancellable.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/typeidentity.h"
-#include "shared/utils/static_block.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QObject>
 #include <QFutureWatcher>
-#include <QQmlEngine>
 #include <QAbstractListModel>
 #include <QVariantMap>
 
@@ -120,22 +118,6 @@ public:
 
     bool busy() const { return _dataParserWatcher.isRunning(); }
 
-    static void registerQmlType()
-    {
-        static bool initialised = false;
-        if(initialised)
-            return;
-        initialised = true;
-        qmlRegisterType<QmlTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
-            APP_MINOR_VERSION, "TabularDataParser");
-
-        qmlRegisterInterface<QmlTabularDataHeaderModel>("TabularDataHeaderModel"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-            , APP_MAJOR_VERSION
-#endif
-            );
-    }
-
 signals:
     void dataChanged();
 
@@ -150,10 +132,5 @@ signals:
 private slots:
     void onDataLoaded();
 };
-
-static_block
-{
-    QmlTabularDataParser::registerQmlType();
-}
 
 #endif // QMLTABULARDATAPARSER_H

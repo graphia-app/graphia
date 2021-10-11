@@ -25,8 +25,10 @@
 #include "shared/loading/userelementdata.h"
 
 #include "shared/utils/string.h"
+#include "shared/utils/static_block.h"
 
 #include <QString>
+#include <QQmlEngine>
 
 #include <map>
 
@@ -408,4 +410,15 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
         .arg(edgeListResult._reason, adjacencyMatrixResult._reason));
 
     return false;
+}
+
+static_block
+{
+    static bool initialised = false;
+    if(initialised)
+        return;
+    initialised = true;
+
+    qmlRegisterType<AdjacencyMatrixTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
+        APP_MINOR_VERSION, "AdjacencyMatrixTabularDataParser");
 }

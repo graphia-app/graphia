@@ -19,10 +19,7 @@
 #ifndef TABLEPROXYMODEL_H
 #define TABLEPROXYMODEL_H
 
-#include "shared/utils/static_block.h"
-
 #include <QSortFilterProxyModel>
-#include <QQmlEngine>
 #include <QTimer>
 #include <QItemSelectionRange>
 #include <QStandardItemModel>
@@ -90,15 +87,6 @@ protected:
 public:
     QVariant data(const QModelIndex& index, int role) const override;
 
-    static void registerQmlType()
-    {
-        static bool initialised = false;
-        if(initialised)
-            return;
-        initialised = true;
-        qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
-    }
-
     QHash<int, QByteArray> roleNames() const override
     {
         auto roleNames = sourceModel()->roleNames();
@@ -141,10 +129,5 @@ signals:
 public slots:
     void invalidateFilter();
 };
-
-static_block
-{
-    TableProxyModel::registerQmlType();
-}
 
 #endif // TABLEPROXYMODEL_H

@@ -21,10 +21,8 @@
 
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/cancellable.h"
-#include "shared/utils/static_block.h"
 
 #include <QObject>
-#include <QQmlEngine>
 #include <QFutureWatcher>
 #include <QVariantMap>
 
@@ -57,24 +55,9 @@ public:
 
     bool busy() const { return _watcher.isRunning(); }
 
-    static void registerQmlType()
-    {
-        static bool initialised = false;
-        if(initialised)
-            return;
-        initialised = true;
-        qmlRegisterType<ImportAttributesKeyDetection>(APP_URI, APP_MAJOR_VERSION,
-            APP_MINOR_VERSION, "ImportAttributesKeyDetection");
-    }
-
 signals:
     void busyChanged();
     void resultChanged();
 };
-
-static_block
-{
-    ImportAttributesKeyDetection::registerQmlType();
-}
 
 #endif // IMPORTATTRIBUTESKEYDETECTION_H
