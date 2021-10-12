@@ -859,11 +859,3 @@ QHash<int, QByteArray> PluginDetailsModel::roleNames() const
     roles[ImageSource] = "imageSource";
     return roles;
 }
-
-#ifdef Q_OS_MACOS
-// https://stackoverflow.com/questions/52310835
-const char* std::bad_variant_access::what() const noexcept
-{
-    return "bad_variant_access";
-}
-#endif
