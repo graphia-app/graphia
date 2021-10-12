@@ -19,6 +19,9 @@
 #ifndef MODELCOMPLETER_H
 #define MODELCOMPLETER_H
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QAbstractItemModel>
 #include <QString>
@@ -57,5 +60,11 @@ signals:
     void commonPrefixChanged();
     void closestMatchChanged();
 };
+
+static_block
+{
+    qmlRegisterType<ModelCompleter>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ModelCompleter");
+}
 
 #endif // MODELCOMPLETER_H

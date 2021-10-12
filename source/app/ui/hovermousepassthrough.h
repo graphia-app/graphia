@@ -19,6 +19,9 @@
 #ifndef HOVERMOUSEPASSTHROUGH_H
 #define HOVERMOUSEPASSTHROUGH_H
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 #include <QObject>
 #include <QQuickItem>
 #include <QMouseEvent>
@@ -55,5 +58,11 @@ protected:
         emit hoveredChanged();
     }
 };
+
+static_block
+{
+    qmlRegisterType<HoverMousePassthrough>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "HoverMousePassthrough");
+}
 
 #endif // HOVERMOUSEPASSTHROUGH_H

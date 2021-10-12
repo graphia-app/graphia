@@ -18,6 +18,8 @@
 
 #include "graphquickitem.h"
 
+#include "shared/utils/static_block.h"
+
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
 
@@ -26,7 +28,7 @@
 #include "commands/commandmanager.h"
 
 #include <QOpenGLContext>
-
+#include <QQmlEngine>
 
 GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
     QQuickFramebufferObject(parent)
@@ -444,4 +446,10 @@ void GraphQuickItem::updateRenderer()
         emit updatingChanged();
 
     update();
+}
+
+static_block
+{
+    qmlRegisterType<GraphQuickItem>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Graph");
 }

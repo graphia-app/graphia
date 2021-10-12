@@ -20,12 +20,14 @@
 
 #include "shared/updates/updates.h"
 #include "shared/utils/container.h"
+#include "shared/utils/static_block.h"
 
 #include "application.h"
 
 #include <QByteArray>
 #include <QFile>
 #include <QRegularExpression>
+#include <QQmlEngine>
 
 #include <json_helper.h>
 
@@ -73,4 +75,9 @@ void ChangeLog::refresh()
 
     _available = true;
     emit availableChanged();
+}
+
+static_block
+{
+    qmlRegisterType<ChangeLog>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "ChangeLog");
 }

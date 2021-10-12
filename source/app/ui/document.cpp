@@ -28,6 +28,7 @@
 #include "shared/utils/color.h"
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
+#include "shared/utils/static_block.h"
 
 #include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
@@ -75,6 +76,7 @@
 #include <QVariantList>
 #include <QVector>
 #include <QClipboard>
+#include <QQmlEngine>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -3091,4 +3093,10 @@ QString Document::graphSizeSummary() const
 QString Document::commandStackSummary() const
 {
     return _commandManager.commandStackSummary();
+}
+
+static_block
+{
+    qmlRegisterType<Document>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Document");
 }

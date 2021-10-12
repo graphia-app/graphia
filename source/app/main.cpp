@@ -53,21 +53,10 @@
 #endif
 
 #include "application.h"
-#include "limitconstants.h"
-#include "ui/document.h"
-#include "ui/graphquickitem.h"
-#include "ui/visualisations/visualisationmappingplotitem.h"
-#include "ui/hovermousepassthrough.h"
-#include "ui/enrichmentheatmapitem.h"
-#include "ui/iconitem.h"
 
 #include "shared/utils/threadpool.h"
-#include "shared/utils/preferences.h"
-#include "shared/utils/qmlpreferences.h"
-#include "shared/utils/qmlutils.h"
 #include "shared/utils/scopetimer.h"
 #include "shared/utils/macosfileopeneventfilter.h"
-#include "shared/utils/modelcompleter.h"
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
 #include "shared/utils/static_block.h"
@@ -77,7 +66,6 @@
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
 
-#include "updates/changelog.h"
 #include "updates/updater.h"
 
 #include <qtsingleapplication/qtsingleapplication.h>
@@ -278,26 +266,6 @@ int start(int argc, char *argv[])
     }
 
     configureXDG();
-
-    const char* uri = Application::uri();
-    const int maj = Application::majorVersion();
-    const int min = Application::minorVersion();
-
-    qmlRegisterType<Application>                     (uri, maj, min, "Application");
-    qmlRegisterType<LimitConstants>                  (uri, maj, min, "LimitConstants");
-    qmlRegisterType<Document>                        (uri, maj, min, "Document");
-    qmlRegisterType<GraphQuickItem>                  (uri, maj, min, "Graph");
-    qmlRegisterType<IconItem>                        (uri, maj, min, "NamedIcon");
-    qmlRegisterType<ModelCompleter>                  (uri, maj, min, "ModelCompleter");
-    qmlRegisterType<QmlPreferences>                  (uri, maj, min, "Preferences");
-    qmlRegisterType<HoverMousePassthrough>           (uri, maj, min, "HoverMousePassthrough");
-    qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");
-    qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
-                                                      QStringLiteral("Exposed purely for results Enumerator"));
-    qmlRegisterType<VisualisationMappingPlotItem>    (uri, maj, min, "VisualisationMappingPlot");
-    qmlRegisterType<ChangeLog>                       (uri, maj, min, "ChangeLog");
-
-    qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qRegisterMetaType<size_t>("size_t");
 

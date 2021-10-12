@@ -185,6 +185,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/layout/powerof2gridcomponentlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/randomlayout.cpp
     ${CMAKE_CURRENT_LIST_DIR}/layout/scalinglayout.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/limitconstants.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlsaver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/importattributeskeydetection.cpp

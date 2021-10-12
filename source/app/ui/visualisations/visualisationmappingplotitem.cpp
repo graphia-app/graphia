@@ -19,6 +19,9 @@
 #include "visualisationmappingplotitem.h"
 
 #include "shared/rendering/multisamples.h"
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 
 #include <cmath>
 
@@ -272,4 +275,10 @@ void VisualisationMappingPlotItem::hoverMoveEvent(QHoverEvent* event)
         setCursor(Qt::SizeAllCursor);
     else
         setCursor({});
+}
+
+static_block
+{
+    qmlRegisterType<VisualisationMappingPlotItem>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "VisualisationMappingPlot");
 }

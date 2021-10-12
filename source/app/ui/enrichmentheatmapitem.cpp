@@ -21,7 +21,10 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/string.h"
 #include "shared/utils/container.h"
+#include "shared/utils/static_block.h"
 #include "shared/rendering/multisamples.h"
+
+#include <QQmlEngine>
 
 #include <set>
 #include <iterator>
@@ -466,4 +469,8 @@ void EnrichmentHeatmapItem::hideTooltip()
     update();
 }
 
-
+static_block
+{
+    qmlRegisterType<EnrichmentHeatmapItem>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "EnrichmentHeatmap");
+}

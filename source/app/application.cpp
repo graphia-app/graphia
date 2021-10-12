@@ -45,6 +45,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QClipboard>
+#include <QQmlEngine>
 
 #include <cmath>
 #include <memory>
@@ -862,4 +863,10 @@ QHash<int, QByteArray> PluginDetailsModel::roleNames() const
     roles[Description] = "description";
     roles[ImageSource] = "imageSource";
     return roles;
+}
+
+static_block
+{
+    qmlRegisterType<Application>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Application");
 }

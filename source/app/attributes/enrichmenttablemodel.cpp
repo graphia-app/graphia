@@ -19,6 +19,9 @@
 #include "enrichmenttablemodel.h"
 #include "enrichmentcalculator.h"
 
+#include "shared/utils/static_block.h"
+
+#include <QQmlEngine>
 #include <QDebug>
 
 EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
@@ -147,4 +150,11 @@ bool EnrichmentTableModel::resultIsNumerical(EnrichmentTableModel::Results resul
     auto variantType = firstRow.at(result).type();
 
     return variantType == QVariant::Double || variantType == QVariant::Int;
+}
+
+static_block
+{
+    qmlRegisterUncreatableType<EnrichmentTableModel>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "EnrichmentRoles",
+        QStringLiteral("Exposed purely for results Enumerator"));
 }

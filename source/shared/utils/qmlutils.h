@@ -28,6 +28,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/apppathname.h"
 #include "shared/utils/showinfolder.h"
+#include "shared/utils/static_block.h"
 
 #include <QObject>
 #include <QUrl>
@@ -40,6 +41,7 @@
 #include <QDir>
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QQmlEngine>
 
 class QQmlEngine;
 class QJSEngine;
@@ -307,5 +309,11 @@ public:
 private:
     QCollator _collator;
 };
+
+static_block
+{
+    qmlRegisterSingletonType<QmlUtils>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "QmlUtils", &QmlUtils::qmlInstance);
+}
 
 #endif // QMLUTILS_H

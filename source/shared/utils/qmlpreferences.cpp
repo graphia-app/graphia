@@ -1,8 +1,10 @@
 #include "qmlpreferences.h"
 
 #include "shared/utils/preferences.h"
+#include "shared/utils/static_block.h"
 
 #include <QRegularExpression>
+#include <QQmlEngine>
 
 QmlPreferences::QmlPreferences(QObject* parent) :
     QObject(parent)
@@ -139,4 +141,10 @@ void QmlPreferences::onPropertyChanged()
         u::setPref(preferenceNameByPropertyName(changedProperty.name()),
             changedProperty.read(this));
     }
+}
+
+static_block
+{
+    qmlRegisterType<QmlPreferences>(
+        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
 }
