@@ -58,8 +58,12 @@ void ImportAttributesKeyDetection::start()
             if(type != TypeIdentity::Type::String && type != TypeIdentity::Type::Int)
                 continue;
 
-            for(const auto& attributeName: attributeNames)
+            for(const auto& attributeName : attributeNames)
             {
+                // Don't match against any non-user defined attributes
+                if(!_document->attribute(attributeName)["userDefined"].toBool())
+                    continue;
+
                 auto values = _document->allAttributeValues(attributeName);
 
                 if(values.empty())

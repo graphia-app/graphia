@@ -46,8 +46,15 @@ Window
 
     function open(fileUrl)
     {
-        keyAttributeList.model = document.availableAttributesModel(
+        let attributeNames = document.availableAttributeNames(
             ElementType.NodeAndEdge, ValueType.Identifier);
+
+        let nonUserDefinedAttributeNames = attributeNames.filter(
+            attributeName => !document.attribute(attributeName).userDefined);
+
+        keyAttributeList.model = document.availableAttributesModel(
+            ElementType.NodeAndEdge, ValueType.Identifier,
+            AttributeFlag.None, nonUserDefinedAttributeNames);
 
         loadingInfo.fileUrl = fileUrl;
         tabularDataParser.parse(fileUrl);
