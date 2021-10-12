@@ -323,10 +323,5 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
 
 static_block
 {
-    static bool initialised = false;
-    if(initialised)
-        return;
-    initialised = true;
-
     qmlRegisterType<TableProxyModel>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "TableProxyModel");
 }

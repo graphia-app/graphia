@@ -281,11 +281,6 @@ void QmlTabularDataParser::onDataLoaded()
 
 static_block
 {
-    static bool initialised = false;
-    if(initialised)
-        return;
-    initialised = true;
-
     qmlRegisterType<QmlTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
         APP_MINOR_VERSION, "TabularDataParser");
 

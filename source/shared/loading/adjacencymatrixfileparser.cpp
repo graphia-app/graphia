@@ -414,11 +414,6 @@ bool AdjacencyMatrixTabularDataParser::parse(const TabularData& tabularData,
 
 static_block
 {
-    static bool initialised = false;
-    if(initialised)
-        return;
-    initialised = true;
-
     qmlRegisterType<AdjacencyMatrixTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
         APP_MINOR_VERSION, "AdjacencyMatrixTabularDataParser");
 }
