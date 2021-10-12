@@ -2123,6 +2123,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
         map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
         map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
+        map.insert(QStringLiteral("userDefined"), attribute.userDefined());
 
         map.insert(QStringLiteral("hasRange"), attribute.numericRange().hasRange());
         map.insert(QStringLiteral("hasMinimumValue"), attribute.numericRange().hasMin());
