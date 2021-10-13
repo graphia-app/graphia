@@ -61,7 +61,7 @@ void ImportAttributesKeyDetection::start()
             for(const auto& attributeName : attributeNames)
             {
                 // Don't match against any non-user defined attributes
-                if(!_document->attribute(attributeName)["userDefined"].toBool())
+                if(!_document->attribute(attributeName).value(QStringLiteral("userDefined")).toBool())
                     continue;
 
                 auto values = _document->allAttributeValues(attributeName);
