@@ -238,14 +238,18 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
             logScale(values);
 
         QColor color;
+        QString value;
 
         if(columnAnnotation != nullptr)
         {
             const auto* rect = qcpColumnAnnotations->rectAt(column, *columnAnnotation);
             color = rect->_color;
+            value = rect->_value;
         }
 
-        auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), _showIqrOutliers, color);
+        auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column,
+            std::move(values), _showIqrOutliers, color, value);
+
         minY = std::min(minY, minmax.first);
         maxY = std::max(maxY, minmax.second);
     }

@@ -409,7 +409,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
 }
 
 std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
-    size_t column, QVector<double> values, bool showOutliers, const QColor& color)
+    size_t column, QVector<double> values, bool showOutliers, const QColor& color, const QString& text)
 {
     // Box-plots representing the InterQuatile Range
     // Whiskers represent the maximum and minimum non-outlier values
@@ -419,7 +419,7 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
         return {};
 
     auto* statisticalBox = new QCPStatisticalBox(keyAxis, valueAxis);
-    statisticalBox->setName(QObject::tr("IQR"));
+    statisticalBox->setName(!text.isEmpty() ? QObject::tr("IQR of %1").arg(text) : QObject::tr("IQR"));
 
     if(color.isValid())
         statisticalBox->setBrush(color);

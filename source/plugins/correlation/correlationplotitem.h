@@ -436,7 +436,8 @@ private:
     }
 
     static std::pair<double, double> addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
-        size_t column, QVector<double> values, bool showOutliers, const QColor& color = {});
+        size_t column, QVector<double> values, bool showOutliers,
+        const QColor& color = {}, const QString& text = {});
 
 private slots:
     void onPixmapUpdated(const QPixmap& pixmap);
