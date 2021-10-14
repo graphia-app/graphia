@@ -96,10 +96,13 @@ public:
 
     static double imputeValue(MissingDataType missingDataType, double replacementValue,
         const TabularData& tabularData, const QRect& dataRect, size_t columnIndex, size_t rowIndex);
-    static double scaleValue(ScalingType scalingType, double value);
+    static double scaleValue(ScalingType scalingType, double value,
+        double epsilon = std::nextafter(0.0, 1.0));
     static void normalise(NormaliseType normaliseType,
         ContinuousDataRows& dataRows,
         IParser* parser = nullptr);
+
+    static double epsilonFor(const std::vector<double>& data);
 
     static EdgeList pearsonCorrelation(
         const ContinuousDataRows& rows,

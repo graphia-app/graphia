@@ -160,8 +160,6 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                         _valuesWereImputed = true;
                     }
 
-                    transformedValue = CorrelationFileParser::scaleValue(_scalingType, transformedValue);
-
                     auto index = (dataRowIndex * _numContinuousColumns) + dataColumnIndex;
                     Q_ASSERT(index < _continuousData.size());
                     _continuousData.at(index) = transformedValue;
@@ -182,10 +180,18 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
         }
     }
 
+    parser.setProgress(-1);
+
+    _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
+    std::transform(_continuousData.begin(), _continuousData.end(), _continuousData.begin(),
+    [this](double value)
+    {
+        return CorrelationFileParser::scaleValue(_scalingType, value, _continuousEpsilon);
+    });
+
     buildDiscreteDataValueIndex(parser);
     makeDataColumnNamesUnique();
     setNodeAttributeTableModelDataColumns();
-    parser.setProgress(-1);
 
     return true;
 }
@@ -901,6 +907,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _continuousData.emplace_back(value);
         parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
     }
+
+    _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
 
     if(dataVersion >= 7)
     {

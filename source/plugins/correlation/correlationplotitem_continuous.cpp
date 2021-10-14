@@ -39,11 +39,10 @@ void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
         Q_ARG(QCPAxis*, _continuousYAxis), Q_ARG(double, min), Q_ARG(double, max));
 }
 
-double CorrelationPlotItem::logScale(double value)
+double CorrelationPlotItem::logScale(double value, double epsilon)
 {
-    // Adding EPSILON prevents log(0) = -inf shenanigans
-    const auto EPSILON = std::nextafter(0.0, 1.0);
-    return std::log(value + EPSILON);
+    // Adding an epsilon prevents log(0) = -inf shenanigans
+    return std::log(value + epsilon);
 }
 
 void CorrelationPlotItem::setContinousYAxisRangeForSelection()
@@ -58,7 +57,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
             auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
 
             if(_scaleType == static_cast<int>(PlotScaleType::Log))
-                value = logScale(value);
+                value = logScale(value, _pluginInstance->continuousEpsilon());
 
             maxY = std::max(maxY, value);
             minY = std::min(minY, value);
@@ -519,7 +518,7 @@ void CorrelationPlotItem::populateIQRPlot()
         });
 
         if(_scaleType == static_cast<int>(PlotScaleType::Log))
-            logScale(values);
+            logScale(values, _pluginInstance->continuousEpsilon());
 
         auto minmax = addIQRBoxPlotTo(_continuousXAxis, _continuousYAxis, column, std::move(values), _showIqrOutliers);
         minY = std::min(minY, minmax.first);
@@ -710,7 +709,7 @@ void CorrelationPlotItem::populateLinePlot()
                 switch(NORMALISE_QML_ENUM(PlotScaleType, _scaleType))
                 {
                 case PlotScaleType::Log:
-                    value = logScale(value);
+                    value = logScale(value, _pluginInstance->continuousEpsilon());
                     break;
                 case PlotScaleType::MeanCentre:
                     value -= rowMean;

@@ -93,6 +93,8 @@ private:
 
     std::map<QString, size_t> _discreteDataValueIndex;
 
+    double _continuousEpsilon = std::nextafter(0.0, 1.0);
+
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
     double _initialCorrelationThreshold = 0.85;
@@ -165,6 +167,7 @@ public:
 
     size_t numContinuousColumns() const { return _numContinuousColumns; }
     double continuousDataAt(int row, int column) const;
+    double continuousEpsilon() const { return _continuousEpsilon; }
 
     size_t numDiscreteColumns() const { return _numDiscreteColumns; }
     QString discreteDataAt(int row, int column) const;

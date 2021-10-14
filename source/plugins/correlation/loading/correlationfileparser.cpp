@@ -315,20 +315,14 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     return imputedValue;
 }
 
-double CorrelationFileParser::scaleValue(ScalingType scalingType, double value)
+double CorrelationFileParser::scaleValue(ScalingType scalingType, double value, double epsilon)
 {
-    // LogY(x+c) where c is EPSILON
-    // This prevents LogY(0) which is -inf
-    // Log2(0+c) = -1057
-    // Document this!
-    const double EPSILON = std::nextafter(0.0, 1.0);
-
     switch(scalingType)
     {
     case ScalingType::Log2:
-        return std::log2(value + EPSILON);
+        return std::log2(value + epsilon);
     case ScalingType::Log10:
-        return std::log10(value + EPSILON);
+        return std::log10(value + epsilon);
     case ScalingType::AntiLog2:
         return std::pow(2.0, value);
     case ScalingType::AntiLog10:
@@ -385,6 +379,23 @@ void CorrelationFileParser::normalise(NormaliseType normaliseType,
         for(auto& dataRow : dataRows)
             dataRow.update();
     }
+}
+
+double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
+{
+    if(data.empty())
+        return std::nextafter(0.0, 1.0);
+
+    double minValue = std::numeric_limits<double>::max();
+    for(const auto& value : data)
+    {
+        if(value > 0.0 && value < minValue)
+            minValue = value;
+    }
+
+    // This is picked to be appropriately small for log scaling
+    // data, but not so small that it obscures the values themselves
+    return minValue * 0.5;
 }
 
 bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
@@ -744,15 +755,20 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
                     *_dataPtr, _dataRect, columnIndex, rowIndex);
             }
 
-            transformedValue = CorrelationFileParser::scaleValue(
-                NORMALISE_QML_ENUM(ScalingType, _scalingType), transformedValue);
-
             rowData.emplace_back(transformedValue);
         }
 
         dataRows.emplace_back(rowData, nodeId);
         ++nodeId;
     }
+
+    auto epsilon = CorrelationFileParser::epsilonFor(rowData);
+    std::transform(rowData.begin(), rowData.end(), rowData.begin(),
+    [this, epsilon](double value)
+    {
+        return CorrelationFileParser::scaleValue(
+            NORMALISE_QML_ENUM(ScalingType, _scalingType), value, epsilon);
+    });
 
     CorrelationFileParser::normalise(NORMALISE_QML_ENUM(NormaliseType, _normaliseType), dataRows);
 

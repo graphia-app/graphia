@@ -426,13 +426,13 @@ private:
         const QCPAbstractPlottable* plottable, double xCoord);
     bool columnAnnotationTooltip(const QCPAxisRect* axisRect);
 
-    static double logScale(double value);
+    static double logScale(double value, double epsilon = std::nextafter(0.0, 1.0));
 
     template<typename C>
-    void logScale(C& values)
+    void logScale(C& values, double epsilon = std::nextafter(0.0, 1.0))
     {
         for(auto& value : values)
-            value = logScale(value);
+            value = logScale(value, epsilon);
     }
 
     static std::pair<double, double> addIQRBoxPlotTo(QCPAxis* keyAxis, QCPAxis* valueAxis,
