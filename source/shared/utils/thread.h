@@ -37,7 +37,38 @@ inline int u::currentThreadId()
     return static_cast<int>(std::hash<std::thread::id>()(std::this_thread::get_id()));
 }
 
-#if defined(__linux__)
+#if defined(__APPLE__)
+
+#include <sys/types.h>
+#include <sys/proc_info.h>
+#include <libproc.h>
+#include <unistd.h>
+
+void u::setCurrentThreadName(const QString& name)
+{
+    if(!pthread_main_np()) // Avoid renaming main thread
+        pthread_setname_np(static_cast<const char*>(name.toUtf8().constData()));
+}
+
+QString u::currentThreadName()
+{
+    char threadName[16] = {0};
+    pthread_getname_np(pthread_self(), threadName, sizeof(threadName));
+
+    return {threadName};
+}
+
+QString u::parentProcessName()
+{
+    auto parentPid = getppid();
+
+    struct proc_bsdinfo proc;
+    if(proc_pidinfo(parentPid, PROC_PIDTBSDINFO, 0, &proc, PROC_PIDTBSDINFO_SIZE) == PROC_PIDTBSDINFO_SIZE)
+        return {proc.pbi_name};
+
+    return {};
+}
+#elif defined(__linux__)
 #include <sys/prctl.h>
 #include <unistd.h>
 #include <sys/syscall.h>
