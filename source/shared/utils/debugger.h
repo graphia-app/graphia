@@ -43,7 +43,7 @@ inline bool isDebuggerPresent()
     auto parentProcessName = u::parentProcessName();
     if(!parentProcessName.isEmpty())
     {
-        std::vector<QString> debuggers = {"qtcreator", "gdb"};
+        std::vector<QString> debuggers = {"qtcreator", "gdb", "debugserver"};
 
         return std::any_of(debuggers.begin(), debuggers.end(),
                            [&parentProcessName](const auto& debugger)
