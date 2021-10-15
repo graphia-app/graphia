@@ -38,7 +38,7 @@ ColumnAnnotation::ColumnAnnotation(const QString& name, const std::vector<QStrin
                 _minValue = std::min(d, _minValue);
                 _maxValue = std::max(d, _maxValue);
             }
-            else
+            else if(!value.isEmpty())
             {
                 _hasOnlyNumericValues = false;
                 _minValue = std::numeric_limits<double>::max();
