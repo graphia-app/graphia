@@ -62,6 +62,7 @@
 #include "shared/utils/debugger.h"
 #include "shared/utils/apppathname.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/thread.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
@@ -171,6 +172,9 @@ void captureConsoleOutput()
 
 int start(int argc, char *argv[])
 {
+    if(u::currentThreadName().isEmpty())
+        u::setCurrentThreadName(PRODUCT_NAME);
+
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 
     OpenGLFunctions::setDefaultFormat();

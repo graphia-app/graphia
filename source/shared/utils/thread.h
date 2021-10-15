@@ -46,8 +46,7 @@ inline int u::currentThreadId()
 
 void u::setCurrentThreadName(const QString& name)
 {
-    if(!pthread_main_np()) // Avoid renaming main thread
-        pthread_setname_np(static_cast<const char*>(name.toUtf8().constData()));
+    pthread_setname_np(static_cast<const char*>(name.toUtf8().constData()));
 }
 
 QString u::currentThreadName()
@@ -77,8 +76,7 @@ QString u::parentProcessName()
 
 void u::setCurrentThreadName(const QString& name)
 {
-    if(syscall(SYS_gettid) != getpid()) // Avoid renaming main thread
-        prctl(PR_SET_NAME, static_cast<const char*>(name.toUtf8().constData()));
+    prctl(PR_SET_NAME, static_cast<const char*>(name.toUtf8().constData()));
 }
 
 QString u::currentThreadName()
