@@ -94,6 +94,7 @@ Item
             {
                 id: transformSummaryText
 
+                color: enabled ? enabledTextColor : disabledTextColor
                 visible: panel.hidden && list.count > 0
                 text:
                 {
