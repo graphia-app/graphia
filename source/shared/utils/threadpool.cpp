@@ -30,14 +30,14 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 
         _threads.emplace_back([threadName, this]
         {
-            u::setCurrentThreadName(threadName);
-
             while(!_stop)
             {
                 std::unique_lock<std::mutex> lock(_mutex);
 
                 while(_tasks.empty() && !_stop)
                 {
+                    u::setCurrentThreadName(QStringLiteral("%1 (idle)").arg(threadName));
+
                     if(!lock.owns_lock())
                         FATAL_ERROR(ThreadPoolLockNotHeldBeforeWaiting);
 
@@ -52,6 +52,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
                 _tasks.pop();
                 lock.unlock();
 
+                u::setCurrentThreadName(QStringLiteral("%1 (busy)").arg(threadName));
                 task();
             }
         });
