@@ -718,15 +718,12 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
 
     ContinuousDataRows dataRows;
     std::vector<double> rowData;
-    rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
-
-    NodeId nodeId(0);
 
     auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
+    rowData.reserve(rowIndices.size() * _dataRect.width());
+
     for(size_t rowIndex : rowIndices)
     {
-        rowData.clear();
-
         auto startColumn = static_cast<size_t>(_dataRect.x());
         auto finishColumn = startColumn + _dataRect.width();
         for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
@@ -757,9 +754,6 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
 
             rowData.emplace_back(transformedValue);
         }
-
-        dataRows.emplace_back(rowData, nodeId);
-        ++nodeId;
     }
 
     auto epsilon = CorrelationFileParser::epsilonFor(rowData);
@@ -769,6 +763,14 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
         return CorrelationFileParser::scaleValue(
             NORMALISE_QML_ENUM(ScalingType, _scalingType), value, epsilon);
     });
+
+    NodeId nodeId(0);
+
+    for(size_t row = 0; row < rowIndices.size(); row++)
+    {
+        dataRows.emplace_back(rowData, row, static_cast<size_t>(_dataRect.width()), nodeId);
+        ++nodeId;
+    }
 
     CorrelationFileParser::normalise(NORMALISE_QML_ENUM(NormaliseType, _normaliseType), dataRows);
 
