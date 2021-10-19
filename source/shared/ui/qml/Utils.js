@@ -411,3 +411,13 @@ function floatCompare(a, b)
 
     return 1;
 }
+
+function lerp(min, max, value)
+{
+    return min + (value * (max - min));
+}
+
+function normalise(min, max, value)
+{
+    return (value - min) / (max - min);
+}
