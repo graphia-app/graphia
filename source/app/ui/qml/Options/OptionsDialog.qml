@@ -63,6 +63,12 @@ Window
                 title: qsTr("Misc")
                 OptionsMisc {}
             }
+
+            Tab
+            {
+                title: qsTr("Network")
+                OptionsNetwork {}
+            }
         }
 
         Button

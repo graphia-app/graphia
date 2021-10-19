@@ -38,17 +38,7 @@ Item
         property alias focusFoundComponents: focusFoundComponentsCheckbox.checked
         property alias stayInComponentMode: stayInComponentModeCheckbox.checked
         property alias disableHubbles: disableHubblesCheckbox.checked
-        property alias webSearchEngineUrl: webSearchEngineField.text
         property alias maxUndoLevels: maxUndoSpinBox.value
-        property alias autoBackgroundUpdateCheck: autoBackgroundUpdateCheckCheckbox.checked
-    }
-
-    Preferences
-    {
-        id: tracking
-        section: "tracking"
-        property string emailAddress
-        property string permission
     }
 
     Preferences
@@ -56,25 +46,6 @@ Item
         id: visuals
         section: "visuals"
         property alias disableMultisampling: disableMultisamplingCheckbox.checked
-    }
-
-    Component.onCompleted:
-    {
-        if(tracking.permission === "refused")
-        {
-            noTrackingRadioButton.checked = true;
-            emailField.text = "";
-        }
-        else if(tracking.permission === "given")
-        {
-            yesTrackingRadioButton.checked = true;
-            emailField.text = tracking.emailAddress;
-        }
-        else
-        {
-            anonTrackingRadioButton.checked = true;
-            emailField.text = "";
-        }
     }
 
     RowLayout
@@ -131,79 +102,6 @@ Item
                 text: qsTr("Disable Extended Help Tooltips")
             }
 
-            Label
-            {
-                Layout.topMargin: Constants.margin * 2
-
-                font.bold: true
-                text: qsTr("Allow Tracking")
-            }
-
-            ExclusiveGroup { id: trackingGroup }
-            RowLayout
-            {
-                RadioButton
-                {
-                    id: yesTrackingRadioButton
-                    exclusiveGroup: trackingGroup
-                    text: qsTr("Yes")
-
-                    onCheckedChanged:
-                    {
-                        if(checked)
-                            tracking.permission = "given";
-                    }
-                }
-
-                TextField
-                {
-                    id: emailField
-
-                    Layout.preferredWidth: 250
-
-                    enabled: yesTrackingRadioButton.checked
-
-                    placeholderText: qsTr("Email Address")
-                    validator: RegExpValidator
-                    {
-                        // Check it's a valid email address
-                        regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
-                    }
-
-                    onTextChanged:
-                    {
-                        if(acceptableInput)
-                            tracking.emailAddress = text;
-                    }
-                }
-            }
-
-            RadioButton
-            {
-                id: anonTrackingRadioButton
-                exclusiveGroup: trackingGroup
-                text: qsTr("Yes, Anonymously")
-
-                onCheckedChanged:
-                {
-                    if(checked)
-                        tracking.permission = "anonymous";
-                }
-            }
-
-            RadioButton
-            {
-                id: noTrackingRadioButton
-                exclusiveGroup: trackingGroup
-                text: qsTr("No")
-
-                onCheckedChanged:
-                {
-                    if(checked)
-                        tracking.permission = "refused";
-                }
-            }
-
             Item { Layout.fillHeight: true }
         }
 
@@ -249,38 +147,6 @@ Item
                 text: qsTr("Other")
             }
 
-            Label { text: qsTr("Web Search URL:") }
-
-            RowLayout
-            {
-                TextField
-                {
-                    id: webSearchEngineField
-
-                    Layout.fillWidth: true
-
-                    style: TextFieldStyle
-                    {
-                        textColor: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
-                    }
-
-                    property string _defaultValue: "https://www.google.com/search?q=%1"
-                    function reset() { text = _defaultValue; }
-
-                    Component.onCompleted:
-                    {
-                        if(text.length === 0)
-                            text = _defaultValue;
-                    }
-                }
-
-                FloatingButton
-                {
-                    iconName: "view-refresh"
-                    onClicked: { webSearchEngineField.reset(); }
-                }
-            }
-
             RowLayout
             {
                 Label { text: qsTr("Maximum Undo Levels:") }
@@ -295,14 +161,7 @@ Item
                 }
             }
 
-            CheckBox
-            {
-                id: autoBackgroundUpdateCheckCheckbox
-                text: qsTr("Check For Updates Automatically")
-            }
-
             Item { Layout.fillHeight: true }
         }
     }
 }
-
