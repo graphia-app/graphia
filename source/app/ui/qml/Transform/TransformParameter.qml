@@ -125,7 +125,7 @@ GridLayout
             let v = typedValue(value);
 
             if(slider.visible)
-                slider.value = v;
+                slider.value = Utils.normalise(root.minimumValue, root.maximumValue, v);
 
             root.value = v;
         }
@@ -157,13 +157,13 @@ GridLayout
         Layout.preferredWidth: root._preferredWidth
         visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
 
-        stepSize: Utils.incrementForRange(root.minimumValue, root.maximumValue);
+        stepSize: Utils.incrementForRange(root.minimumValue, root.maximumValue) / (root.maximumValue - root.minimumValue);
 
         onValueChanged:
         {
             if(pressed)
             {
-                spinBox.value = typedValue(value);
+                spinBox.value = typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
                 spinBox.ignoreEdits = true;
             }
         }
@@ -171,7 +171,7 @@ GridLayout
         onPressedChanged:
         {
             if(!pressed)
-                root.value = typedValue(value);
+                root.value = typedValue(Utils.lerp(root.minimumValue, root.maximumValue, value));
         }
     }
 
@@ -291,23 +291,23 @@ GridLayout
                     if(floatValue < minimumValue)
                         floatValue = minimumValue;
 
-                    spinBox.minimumValue = slider.minimumValue = minimumValue;
+                    spinBox.minimumValue = minimumValue;
                 }
                 else
-                    spinBox.minimumValue = slider.minimumValue = Number.NEGATIVE_INFINITY;
+                    spinBox.minimumValue = Number.NEGATIVE_INFINITY;
 
                 if(hasMaximumValue)
                 {
                     if(floatValue > maximumValue)
                         floatValue = maximumValue;
 
-                    spinBox.maximumValue = slider.maximumValue = maximumValue;
+                    spinBox.maximumValue = maximumValue;
                 }
                 else
-                    spinBox.maximumValue = slider.maximumValue = Number.POSITIVE_INFINITY;
+                    spinBox.maximumValue = Number.POSITIVE_INFINITY;
 
                 spinBox.value = floatValue;
-                slider.value = floatValue;
+                slider.value = Utils.normalise(root.minimumValue, root.maximumValue, floatValue);
             }
             break;
 
