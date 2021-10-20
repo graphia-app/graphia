@@ -43,7 +43,7 @@
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
 #include "shared/utils/preferences.h"
-#include "shared/utils/qmlpreferences.h"
+#include "shared/utils/static_block.h"
 
 #include <google_breakpad/processor/minidump.h>
 #include <google_breakpad/processor/process_state.h>
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
-    qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
+    execute_static_blocks();
 
     QCommandLineParser p;
 

@@ -13,6 +13,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.h
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/static_block.h
 )
 
 list(APPEND SOURCES
@@ -21,6 +22,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/static_block.cpp
 )
 
 list(APPEND RESOURCES
