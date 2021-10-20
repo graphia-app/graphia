@@ -19,7 +19,6 @@
 #include "installer.h"
 
 #include "shared/updates/updates.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/container.h"
 #include "shared/utils/checksum.h"
 #include "shared/utils/scope_exit.h"

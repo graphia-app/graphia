@@ -19,8 +19,6 @@
 #include "installer.h"
 
 #include "shared/updates/updates.h"
-#include "shared/utils/preferences.h"
-#include "shared/utils/qmlpreferences.h"
 #include "shared/utils/container.h"
 
 #include <QApplication>
@@ -78,8 +76,6 @@ QStringList showUpdater(int argc, char *argv[])
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     Q_INIT_RESOURCE(update_keys);
-
-    qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
 
     QString status;
     auto update = latestUpdateJson(&status);
