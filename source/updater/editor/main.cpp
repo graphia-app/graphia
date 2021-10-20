@@ -16,7 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <shared/utils/qmlutils.h>
+#include "shared/utils/qmlutils.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
