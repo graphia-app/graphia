@@ -1,7 +1,7 @@
 #ifndef QMLPREFERENCES_H
 #define QMLPREFERENCES_H
 
-#include "shared/utils/preferenceswatcher.h"
+#include "app/preferenceswatcher.h"
 
 #include <QObject>
 #include <QVariant>

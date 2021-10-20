@@ -33,9 +33,9 @@
 
 #include "shared/utils/utils.h"
 #include "shared/utils/container.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/flags.h"
+#include "app/preferences.h"
 
 #include <QPoint>
 

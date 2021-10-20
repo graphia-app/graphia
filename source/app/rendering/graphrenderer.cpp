@@ -23,7 +23,8 @@
 #include "graphoverviewscene.h"
 #include "compute/sdfcomputejob.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
+
 #include "shared/utils/doasyncthen.h"
 
 #include "graph/graph.h"

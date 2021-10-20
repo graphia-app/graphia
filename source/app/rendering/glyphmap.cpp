@@ -19,7 +19,7 @@
 #include "glyphmap.h"
 
 #include "shared/utils/container.h"
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 
 #include <QTextLayout>
 #include <QPainter>

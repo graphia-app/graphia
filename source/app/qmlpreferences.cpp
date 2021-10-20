@@ -1,6 +1,7 @@
 #include "qmlpreferences.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
+
 #include "shared/utils/static_block.h"
 
 #include <QRegularExpression>

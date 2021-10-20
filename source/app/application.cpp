@@ -20,13 +20,13 @@
 #include "crashtype.h"
 #include "../crashhandler.h"
 #include "tracking.h"
+#include "preferences.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/container_combine.h"
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/msvcwarningsuppress.h"
 #include "shared/utils/static_block.h"
 

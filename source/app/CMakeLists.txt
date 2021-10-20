@@ -75,6 +75,8 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/maths/line.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.h
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.h
+    ${CMAKE_CURRENT_LIST_DIR}/preferenceswatcher.h
+    ${CMAKE_CURRENT_LIST_DIR}/qmlpreferences.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/compute/gpucomputejob.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/compute/gpucomputethread.h
@@ -97,6 +99,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shading.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.h
+    ${CMAKE_CURRENT_LIST_DIR}/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/tracking.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformattributeparameter.h
@@ -202,6 +205,8 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/maths/frustum.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/plane.cpp
     ${CMAKE_CURRENT_LIST_DIR}/maths/ray.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/preferenceswatcher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/qmlpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/camera.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/compute/gpucomputethread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/compute/sdfcomputejob.cpp
@@ -219,6 +224,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/tracking.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.cpp

@@ -9,7 +9,7 @@ namespace u
 {
 static QString redirectLink(const char* shortName, QString linkText = {})
 {
-    auto baseUrl = u::pref(QStringLiteral("servers/redirects")).toString();
+    auto baseUrl = u::getPref(QStringLiteral("servers/redirects")).toString();
 
     if(linkText.isEmpty())
     {

@@ -25,7 +25,7 @@
 
 #include "shared/loading/userelementdata.h"
 
-#include "shared/utils/preferenceswatcher.h"
+#include "app/preferenceswatcher.h"
 
 #include "attributes/attribute.h"
 

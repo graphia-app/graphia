@@ -20,6 +20,7 @@
 #include "componentmanager.h"
 
 #include "limitconstants.h"
+#include "preferences.h"
 
 #include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
@@ -67,7 +68,6 @@
 
 #include "shared/utils/container_combine.h"
 #include "shared/utils/enumreflection.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/flags.h"

@@ -36,7 +36,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "graph/graphcomponent.h"
 #include "graph/componentmanager.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
+
+#include <QVariant>
 
 #include <algorithm>
 #include <cmath>

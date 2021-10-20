@@ -10,18 +10,18 @@ set(CMAKE_AUTORCC ON)
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/report.h
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.h
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.h
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/../app/preferences.h
+    ${CMAKE_CURRENT_LIST_DIR}/../app/preferenceswatcher.h
+    ${CMAKE_CURRENT_LIST_DIR}/../app/qmlpreferences.h
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/static_block.h
 )
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferenceswatcher.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/qmlpreferences.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../app/preferences.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../app/preferenceswatcher.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../app/qmlpreferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/static_block.cpp
 )
 

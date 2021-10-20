@@ -19,11 +19,11 @@
 #include "document.h"
 
 #include "application.h"
+#include "preferences.h"
 
 #include "attributes/enrichmentcalculator.h"
 
 #include "shared/plugins/iplugin.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
 #include "shared/utils/string.h"

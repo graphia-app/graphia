@@ -21,7 +21,7 @@
 
 #include "rendering/graphrenderer.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 
 #include <QObject>
 

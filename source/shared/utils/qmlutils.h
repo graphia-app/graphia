@@ -291,7 +291,7 @@ public:
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString redirectUrl(const QString& shortName)
     {
-        return QStringLiteral("%1/%2").arg(u::pref(QStringLiteral("servers/redirects")).toString(), shortName);
+        return QStringLiteral("%1/%2").arg(u::getPref(QStringLiteral("servers/redirects")).toString(), shortName);
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static

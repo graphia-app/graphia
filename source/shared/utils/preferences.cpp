@@ -18,11 +18,6 @@
 
 #include "preferences.h"
 
-#include "app/limitconstants.h"
-
-#include "shared/utils/utils.h"
-#include "shared/utils/preferenceswatcher.h"
-
 #include <QSettings>
 #include <QCoreApplication>
 
@@ -35,65 +30,7 @@ QSettings settings()
 }
 } // namespace
 
-void u::definePref(const QString& key, const QVariant& defaultValue)
+QVariant u::getPref(const QString& key)
 {
-    if(!u::prefExists(key))
-        u::setPref(key, defaultValue);
-}
-
-bool u::removePref(const QString& key)
-{
-    if(u::prefExists(key))
-    {
-        settings().remove(key);
-        return true;
-    }
-
-    return false;
-}
-
-QVariant u::pref(const QString& key)
-{
-    u::definePref(key);
-
     return settings().value(key);
-}
-
-void u::setPref(const QString& key, const QVariant& value)
-{
-    auto s = settings();
-    bool changed = (value != s.value(key));
-
-    s.setValue(key, value);
-
-    if(changed)
-        PreferencesWatcher::setPref(key, value);
-}
-
-bool u::prefExists(const QString& key)
-{
-    return settings().contains(key);
-}
-
-void u::updateOldPrefs()
-{
-    if(u::prefExists(QStringLiteral("visuals/defaultNodeSize")))
-    {
-        auto absNodeSize = u::pref(QStringLiteral("visuals/defaultNodeSize")).toFloat();
-        auto normalNodeSize = u::normalise(LimitConstants::minimumNodeSize(),
-            LimitConstants::maximumNodeSize(), absNodeSize);
-
-        u::setPref(QStringLiteral("visuals/defaultNormalNodeSize"), normalNodeSize);
-        u::removePref(QStringLiteral("visuals/defaultNodeSize"));
-    }
-
-    if(u::prefExists(QStringLiteral("visuals/defaultEdgeSize")))
-    {
-        auto absEdgeSize = u::pref(QStringLiteral("visuals/defaultEdgeSize")).toFloat();
-        auto normalEdgeSize = u::normalise(LimitConstants::minimumEdgeSize(),
-            LimitConstants::maximumEdgeSize(), absEdgeSize);
-
-        u::setPref(QStringLiteral("visuals/defaultNormalEdgeSize"), normalEdgeSize);
-        u::removePref(QStringLiteral("visuals/defaultEdgeSize"));
-    }
 }

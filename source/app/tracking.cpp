@@ -1,6 +1,6 @@
 #include "tracking.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 #include "shared/utils/container.h"
 
 #include <json_helper.h>

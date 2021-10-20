@@ -21,8 +21,8 @@
 #include "shared/updates/updates.h"
 
 #include "application.h"
+#include "preferences.h"
 
-#include "shared/utils/preferences.h"
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
 #include "shared/utils/checksum.h"

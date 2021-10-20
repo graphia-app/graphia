@@ -18,7 +18,7 @@
 
 #include "graphrenderercore.h"
 
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 #include "shared/rendering/multisamples.h"
 
 #include "shadertools.h"

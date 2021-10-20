@@ -1,7 +1,7 @@
 #ifndef PREFERENCESWATCHER_H
 #define PREFERENCESWATCHER_H
 
-#include "shared/utils/preferences.h"
+#include "preferences.h"
 
 #include <QObject>
 #include <QString>

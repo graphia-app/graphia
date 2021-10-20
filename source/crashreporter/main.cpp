@@ -42,7 +42,7 @@
 
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 #include "shared/utils/static_block.h"
 
 #include <google_breakpad/processor/minidump.h>

@@ -22,7 +22,9 @@
 
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
-#include "shared/utils/preferences.h"
+
+#include "app/preferences.h"
+
 #include "ui/document.h"
 #include "ui/visualisations/elementvisual.h"
 

@@ -35,7 +35,8 @@
 #include "shared/utils/movablepointer.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
-#include "shared/utils/preferences.h"
+
+#include "app/preferenceswatcher.h"
 
 #include "shared/utils/qmlenum.h"
 

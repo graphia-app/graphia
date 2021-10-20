@@ -37,7 +37,7 @@
 #include "ui/visualisations/elementvisual.h"
 
 #include "shared/graph/elementid_debug.h"
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 
 #include <QObject>
 #include <QKeyEvent>

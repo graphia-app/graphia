@@ -23,8 +23,9 @@
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
 
+#include "app/preferences.h"
+
 #include "shared/utils/threadpool.h"
-#include "shared/utils/preferences.h"
 #include "shared/utils/scopetimer.h"
 
 #include <cmath>

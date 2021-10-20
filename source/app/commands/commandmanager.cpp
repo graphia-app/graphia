@@ -19,7 +19,7 @@
 #include "commandmanager.h"
 
 #include "shared/utils/thread.h"
-#include "shared/utils/preferences.h"
+#include "app/preferences.h"
 
 #include <QDebug>
 

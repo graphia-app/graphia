@@ -25,7 +25,7 @@ namespace
 {
 int multisamples()
 {
-    if(u::pref(QStringLiteral("visuals/disableMultisampling")).toBool())
+    if(u::getPref(QStringLiteral("visuals/disableMultisampling")).toBool())
         return 1;
 
     // This is the place where the default number of multisamples is set
