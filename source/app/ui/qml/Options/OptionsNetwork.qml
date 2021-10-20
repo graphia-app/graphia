@@ -42,8 +42,21 @@ Item
     {
         id: tracking
         section: "tracking"
+
         property string emailAddress
         property string permission
+    }
+
+    Preferences
+    {
+        id: proxy
+        section: "proxy"
+
+        property string type
+        property alias host: proxyHostnameTextField.text
+        property alias port: proxyPortTextField.text
+        property alias username: proxyUsernameTextField.text
+        property alias password: proxyPasswordTextField.text
     }
 
     Component.onCompleted:
@@ -63,6 +76,13 @@ Item
             anonTrackingRadioButton.checked = true;
             emailField.text = "";
         }
+
+        if(proxy.type === "disabled")
+            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("Disabled"));
+        else if(proxy.type === "http")
+            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("HTTP"));
+        else if(proxy.type === "socks5")
+            proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("SOCKS5"));
     }
 
     RowLayout
@@ -148,13 +168,6 @@ Item
                 }
             }
 
-            Item { Layout.fillHeight: true }
-        }
-
-        ColumnLayout
-        {
-            spacing: Constants.spacing
-
             Label
             {
                 Layout.topMargin: Constants.margin * 2
@@ -199,6 +212,101 @@ Item
             {
                 id: autoBackgroundUpdateCheckCheckbox
                 text: qsTr("Check For Updates Automatically")
+            }
+
+            Item { Layout.fillHeight: true }
+        }
+
+        ColumnLayout
+        {
+            spacing: Constants.spacing
+
+            Label
+            {
+                Layout.topMargin: Constants.margin * 2
+
+                font.bold: true
+                text: qsTr("Proxy")
+            }
+
+            ComboBox
+            {
+                id: proxyTypeComboBox
+
+                model: [qsTr("Disabled"), qsTr("HTTP"), qsTr("SOCKS5")]
+
+                onCurrentIndexChanged:
+                {
+                    let v = model[currentIndex];
+
+                    if(proxyHostnameTextField.text.length === 0)
+                    {
+                        if(v === qsTr("HTTP"))
+                            proxyPortTextField.text = "8080";
+                        else if(v === qsTr("SOCKS5"))
+                            proxyPortTextField.text = "1080";
+                    }
+
+                    if(v === qsTr("Disabled"))
+                        proxy.type = "disabled";
+                    else if(v === qsTr("HTTP"))
+                        proxy.type = "http";
+                    else if(v === qsTr("SOCKS5"))
+                        proxy.type = "socks5";
+                }
+            }
+
+            RowLayout
+            {
+                Layout.fillWidth: true
+
+                enabled: proxyTypeComboBox.currentIndex > 0
+
+                TextField
+                {
+                    id: proxyHostnameTextField
+
+                    Layout.fillWidth: true
+
+                    placeholderText: qsTr("Host")
+                    validator: RegExpValidator { regExp: /(([a-z0-9]+|([a-z0-9]+[-]+[a-z0-9]+))[.])+/ }
+                }
+
+                TextField
+                {
+                    id: proxyPortTextField
+
+                    Layout.preferredWidth: 64
+
+                    placeholderText: qsTr("Port")
+                    validator: IntValidator { bottom: 1; top: 65535 }
+                }
+            }
+
+            RowLayout
+            {
+                Layout.fillWidth: true
+
+                enabled: proxyTypeComboBox.currentIndex > 0
+
+                TextField
+                {
+                    id: proxyUsernameTextField
+
+                    Layout.fillWidth: true
+
+                    placeholderText: qsTr("Username")
+                }
+
+                TextField
+                {
+                    id: proxyPasswordTextField
+
+                    Layout.fillWidth: true
+
+                    placeholderText: qsTr("Password")
+                    echoMode: TextInput.Password
+                }
             }
 
             Item { Layout.fillHeight: true }

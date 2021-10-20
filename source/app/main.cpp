@@ -38,6 +38,7 @@
 #include <QCommandLineParser>
 #include <QProcess>
 #include <QSettings>
+#include <QNetworkProxy>
 
 #include <iostream>
 #include <chrono>
@@ -55,6 +56,8 @@
 #endif
 
 #include "application.h"
+#include "preferences.h"
+#include "preferenceswatcher.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/scopetimer.h"
@@ -140,12 +143,36 @@ static void configureXDG()
 #endif
 }
 
+static void configureProxy()
+{
+    QNetworkProxy::ProxyType type = QNetworkProxy::DefaultProxy;
+    auto typePref = u::pref(QStringLiteral("proxy/type")).toString();
+
+    if(typePref == QStringLiteral("http"))
+        type = QNetworkProxy::HttpProxy;
+    else if(typePref == QStringLiteral("socks5"))
+        type = QNetworkProxy::Socks5Proxy;
+
+    QNetworkProxy proxy;
+    proxy.setType(type);
+
+    if(type != QNetworkProxy::DefaultProxy)
+    {
+        proxy.setHostName(u::pref(QStringLiteral("proxy/host")).toString());
+        proxy.setPort(u::pref(QStringLiteral("proxy/port")).toInt());
+        proxy.setUser(u::pref(QStringLiteral("proxy/username")).toString());
+        proxy.setPassword(u::pref(QStringLiteral("proxy/password")).toString());
+    }
+
+    QNetworkProxy::setApplicationProxy(proxy);
+}
+
 static int stdoutFd = -1;
 static int stderrFd = -1;
 static QString stdoutFilename;
 static QString stderrFilename;
 
-void captureConsoleOutput()
+static void captureConsoleOutput()
 {
     auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     stdoutFilename = QStringLiteral("%1/stdout.txt").arg(appDataLocation);
@@ -333,7 +360,16 @@ int start(int argc, char *argv[])
     u::definePref(QStringLiteral("servers/crashreports"),                   "https://crashreports.graphia.app");
     u::definePref(QStringLiteral("servers/tracking"),                       "https://tracking.graphia.app");
 
+    u::definePref(QStringLiteral("proxy/type"),                             "disabled");
+
     u::updateOldPrefs();
+
+    PreferencesWatcher preferencesWatcher;
+
+    QObject::connect(&preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+        [](const QString& key, const QVariant&) { if(key.startsWith(QStringLiteral("proxy"))) configureProxy(); });
+
+    configureProxy();
 
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));
