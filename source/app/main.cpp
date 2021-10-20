@@ -200,7 +200,7 @@ static void captureConsoleOutput()
 int start(int argc, char *argv[])
 {
     if(u::currentThreadName().isEmpty())
-        u::setCurrentThreadName(PRODUCT_NAME);
+        u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
 
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 
