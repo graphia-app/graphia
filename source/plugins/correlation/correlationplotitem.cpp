@@ -278,6 +278,9 @@ void CorrelationPlotWorker::renderPixmap()
 
     QElapsedTimer _pixmapTimer;
     _pixmapTimer.start();
+
+    // This assumes that the Qt platform has the QPlatformIntegration::ThreadedPixmaps capability,
+    // which should be true on the desktop, but a console warning will be shown if it isn't
     QPixmap pixmap = _customPlot->toPixmap();
 
     if(_debug)
