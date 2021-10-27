@@ -107,7 +107,6 @@ bool ImportAttributesCommand::execute()
 
         setProgress(-1);
 
-        Q_ASSERT(!map.empty());
         if(map.empty())
             return std::vector<QString>();
 
@@ -150,7 +149,7 @@ bool ImportAttributesCommand::execute()
     else if(keyAttribute->elementType() == ElementType::Edge)
         _createdAttributeNames = createAttributes(_graphModel->mutableGraph().edgeIds());
 
-    return true;
+    return !_createdAttributeNames.empty();
 }
 
 void ImportAttributesCommand::undo()
