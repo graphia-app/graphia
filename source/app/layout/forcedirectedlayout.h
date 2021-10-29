@@ -63,7 +63,7 @@ private:
 
     enum class ChangeDetectionPhase { Initial, FineTune, Oscillate, Finished };
 
-    ChangeDetectionPhase _changeDetectionPhase = ChangeDetectionPhase::Initial;
+    std::atomic<ChangeDetectionPhase> _changeDetectionPhase = ChangeDetectionPhase::Initial;
 
     ForceDirectedDisplacements* _displacements = nullptr;
     EdgeArray<QVector3D>* _attractiveForces = nullptr;
