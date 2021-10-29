@@ -21,8 +21,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/fatalerror.h"
 
-ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads) :
-    _stop(false)
+ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 {
     for(unsigned int i = 0U; i < numThreads; i++)
     {
@@ -30,10 +29,10 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 
         _threads.emplace_back([threadName, this]
         {
+            std::unique_lock<std::mutex> lock(_mutex);
+
             while(!_stop)
             {
-                std::unique_lock<std::mutex> lock(_mutex);
-
                 while(_tasks.empty() && !_stop)
                 {
                     u::setCurrentThreadName(QStringLiteral("%1 (idle)").arg(threadName));
@@ -54,6 +53,8 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 
                 u::setCurrentThreadName(QStringLiteral("%1 (busy)").arg(threadName));
                 task();
+
+                lock.lock();
             }
         });
     }

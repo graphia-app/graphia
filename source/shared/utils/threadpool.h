@@ -46,7 +46,7 @@ private:
     std::mutex _mutex;
     std::condition_variable _waitForNewTask;
     std::queue<void_callable_wrapper> _tasks;
-    std::atomic<bool> _stop;
+    bool _stop = false;
 
 public:
     explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
@@ -62,19 +62,20 @@ public:
 
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
     {
+        std::unique_lock<std::mutex> lock(_mutex);
+
         if(_stop)
             return {};
 
         auto task = std::packaged_task<ReturnType<Fn, Args...>(Args...)>(f);
         auto future = task.get_future();
 
+        _tasks.emplace([task = std::move(task), args...]() mutable
         {
-            std::unique_lock<std::mutex> lock(_mutex);
-            _tasks.emplace([task = std::move(task), args...]() mutable
-            {
-                task(std::forward<Args>(args)...);
-            });
-        }
+            task(std::forward<Args>(args)...);
+        });
+
+        lock.unlock();
 
         // Wake a thread up
         _waitForNewTask.notify_one();
