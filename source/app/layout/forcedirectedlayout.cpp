@@ -181,8 +181,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
             float distanceSq = difference.lengthSquared();
             const float force = distanceSq * 0.001f;
 
-            _displacements->at(edge.targetId())._attractive -= (force * difference);
-            _displacements->at(edge.sourceId())._attractive += (force * difference);
+            _attractiveForces->at(edgeId) = force * difference;
         }
     }, ThreadPool::NonBlocking);
 
@@ -195,6 +194,15 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     parallel_for(nodeIds().begin(), nodeIds().end(),
     [this](NodeId nodeId)
     {
+        const INode& node = graphComponent().graph().nodeById(nodeId);
+        auto& attractive = _displacements->at(nodeId)._attractive;
+
+        for(auto edgeId : node.inEdgeIds())
+            attractive -= _attractiveForces->at(edgeId);
+
+        for(auto edgeId : node.outEdgeIds())
+            attractive += _attractiveForces->at(edgeId);
+
         _displacements->at(nodeId).computeAndDamp();
     });
 
@@ -351,7 +359,7 @@ void ForceDirectedLayout::oscillateChangeDetection()
 }
 
 ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :
-    LayoutFactory(graphModel), _displacements(graphModel->graph())
+    LayoutFactory(graphModel), _displacements(graphModel->graph()), _attractiveForces(graphModel->graph())
 {
     _layoutSettings.registerSetting("ShortRangeRepulseTerm", QObject::tr("Local"),
                                     1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
@@ -364,6 +372,7 @@ std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId component
     NodeLayoutPositions& nodePositions, Layout::Dimensionality dimensionalityMode)
 {
     const auto* component = _graphModel->graph().componentById(componentId);
-    return std::make_unique<ForceDirectedLayout>(*component, _displacements,
+    return std::make_unique<ForceDirectedLayout>(*component,
+        _displacements, _attractiveForces,
         nodePositions, dimensionalityMode, &_layoutSettings);
 }

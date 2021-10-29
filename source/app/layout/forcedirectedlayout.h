@@ -65,7 +65,8 @@ private:
 
     ChangeDetectionPhase _changeDetectionPhase = ChangeDetectionPhase::Initial;
 
-    ForceDirectedDisplacements* _displacements;
+    ForceDirectedDisplacements* _displacements = nullptr;
+    EdgeArray<QVector3D>* _attractiveForces = nullptr;
 
     float _forceStdDeviation = 0;
     float _forceMean = 0;
@@ -84,12 +85,13 @@ private:
 public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
                         ForceDirectedDisplacements& displacements,
+                        EdgeArray<QVector3D>& attractiveForces,
                         NodeLayoutPositions& positions,
                         Layout::Dimensionality dimensionalityMode,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes,
             Dimensionality::TwoOrThreeDee, 0.4f, 4),
-        _displacements(&displacements),
+        _displacements(&displacements), _attractiveForces(&attractiveForces),
         _hasBeenFlattened(dimensionalityMode == Layout::Dimensionality::TwoDee)
     {}
 
@@ -103,6 +105,7 @@ class ForceDirectedLayoutFactory : public LayoutFactory
 {
 private:
     ForceDirectedDisplacements _displacements;
+    EdgeArray<QVector3D> _attractiveForces;
 
 public:
     explicit ForceDirectedLayoutFactory(GraphModel* graphModel);
