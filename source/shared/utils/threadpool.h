@@ -507,6 +507,10 @@ public:
             threadIndex++;
         }
 
+        // Filter any futures that aren't valid (i.e. default constructed)
+        futures.erase(std::remove_if(futures.begin(), futures.end(),
+            [](const auto& future) { return !future.valid(); }), futures.end());
+
         auto results = Results<It, Fn>(std::move(futures));
 
         if(resultsPolicy == Blocking)
