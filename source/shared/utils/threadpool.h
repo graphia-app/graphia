@@ -58,12 +58,11 @@ public:
     ThreadPool& operator=(const ThreadPool& other) = delete;
     ThreadPool& operator=(ThreadPool&& other) = delete;
 
+private:
     template<typename Fn, typename... Args> using ReturnType = typename std::invoke_result_t<Fn, Args...>;
 
     template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> makeFuture(Fn f, Args&&... args)
     {
-        std::unique_lock<std::mutex> lock(_mutex);
-
         if(_stop)
             return {};
 
@@ -75,15 +74,9 @@ public:
             task(std::forward<Args>(args)...);
         });
 
-        lock.unlock();
-
-        // Wake a thread up
-        _waitForNewTask.notify_one();
-
         return future;
     }
 
-private:
     // If the concurrent function returns a value, give the ResultsType class a std::vector _values
     // member, which contains the results from each thread
     template<typename ResultsVectorOrVoid, bool = std::is_void_v<ResultsVectorOrVoid>>
@@ -463,9 +456,24 @@ public:
         NonBlocking
     };
 
+    template<typename Fn, typename... Args>
+    auto execute_on_threadpool(Fn&& f, Args&&... args)
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        auto future = makeFuture(std::forward<Fn>(f), args...);
+
+        lock.unlock();
+        _waitForNewTask.notify_one();
+
+        return future;
+    }
+
     template<typename It, typename Fn>
     auto parallel_for(It first, It last, Fn f, ResultsPolicy resultsPolicy = Blocking)
     {
+        std::unique_lock<std::mutex> lock(_mutex);
+
         Coster<It> coster(first, last);
 
         const auto totalCost = coster.total(); Q_ASSERT(totalCost > 0);
@@ -514,6 +522,9 @@ public:
 
         auto results = Results<It, Fn>(std::move(futures));
 
+        lock.unlock();
+        _waitForNewTask.notify_all();
+
         if(resultsPolicy == Blocking)
             results.wait();
 
@@ -526,7 +537,7 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 template<typename Fn, typename... Args>
 auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPoolSingleton)->makeFuture(std::forward<Fn>(f), args...);
+    return S(ThreadPoolSingleton)->execute_on_threadpool(std::forward<Fn>(f), args...);
 }
 
 template<typename It, typename Fn>
