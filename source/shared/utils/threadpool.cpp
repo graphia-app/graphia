@@ -19,7 +19,6 @@
 #include "threadpool.h"
 
 #include "shared/utils/thread.h"
-#include "shared/utils/fatalerror.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 {
@@ -36,9 +35,6 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
                 while(_tasks.empty() && !_stop)
                 {
                     u::setCurrentThreadName(QStringLiteral("%1 (idle)").arg(threadName));
-
-                    if(!lock.owns_lock())
-                        FATAL_ERROR(ThreadPoolLockNotHeldBeforeWaiting);
 
                     // Block until a new task is queued
                     _waitForNewTask.wait(lock);
