@@ -362,10 +362,12 @@ ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :
     LayoutFactory(graphModel), _displacements(graphModel->graph()), _attractiveForces(graphModel->graph())
 {
     _layoutSettings.registerSetting("ShortRangeRepulseTerm", QObject::tr("Local"),
-                                    1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
+        QObject::tr("The repulsive force between nodes that are near each other"),
+        1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
 
     _layoutSettings.registerSetting("LongRangeRepulseTerm", QObject::tr("Global"),
-                                    0.0f, 20.0f, 10.0f);
+        QObject::tr("The repulsive force between nodes that are far apart"),
+        0.0f, 20.0f, 10.0f);
 }
 
 std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId,

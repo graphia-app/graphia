@@ -33,11 +33,12 @@ enum class LayoutSettingScaleType { Linear, Log };
 class LayoutSetting
 {
 public:
-    LayoutSetting(const QString& name, const QString& displayName,
+    LayoutSetting(const QString& name, const QString& displayName, const QString& description,
                   float minimumValue, float maximumValue, float defaultValue,
                   LayoutSettingScaleType scaleType = LayoutSettingScaleType::Linear) :
         _name(name),
         _displayName(displayName),
+        _description(description),
         _minimumValue(minimumValue),
         _maximumValue(maximumValue),
         _defaultValue(defaultValue),
@@ -56,10 +57,12 @@ public:
     bool resetValue() { return setValue(_defaultValue); }
     const QString& name() const { return _name; }
     const QString& displayName() const { return _displayName; }
+    const QString& description() const { return _description; }
 
 private:
     QString _name;
     QString _displayName;
+    QString _description;
 
     float _minimumValue = 0.0f;
     float _maximumValue = 1.0f;

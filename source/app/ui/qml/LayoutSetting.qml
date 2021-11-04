@@ -20,12 +20,15 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
+import "Controls"
+
 RowLayout
 {
     id: root
 
     property var document
     property string name
+    property string description
     property double value: -1.0
 
     onValueChanged:
@@ -43,6 +46,8 @@ RowLayout
             anchors.fill: parent
             onDoubleClicked: { root.reset(); }
         }
+
+        ToolTip { text: root.description }
     }
 
     Item { Layout.fillWidth: true }

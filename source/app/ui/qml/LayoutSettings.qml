@@ -416,6 +416,7 @@ Rectangle
                     {
                         let setting = root.document.layoutSetting(modelData);
                         name = setting.displayName;
+                        description = setting.description;
                         value = setting.normalisedValue;
                     }
 
@@ -449,6 +450,7 @@ Rectangle
                 id: nodeSizeSetting
                 Layout.leftMargin: _buttonMenuOffset
                 name: qsTr("Nodes")
+                description: qsTr("Node Size")
 
                 onValueChanged: { root.document.nodeSize = value; }
                 onReset: { root.document.resetNodeSize(); }
@@ -459,6 +461,7 @@ Rectangle
                 id: edgeSizeSetting
                 Layout.leftMargin: _buttonMenuOffset
                 name: qsTr("Edges")
+                description: qsTr("Edge Size")
 
                 onValueChanged: { root.document.edgeSize = value; }
                 onReset: { root.document.resetEdgeSize(); }
