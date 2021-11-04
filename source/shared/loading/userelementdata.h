@@ -28,10 +28,13 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/utils/container.h"
 #include "shared/utils/progressable.h"
+#include "shared/utils/string.h"
 
 #include <map>
 #include <set>
 #include <memory>
+
+#include <QDebug>
 
 template<typename E>
 class UserElementData : public IUserElementData<E>, public UserData
@@ -155,6 +158,16 @@ public:
                 {
                     return valueBy(elementId, userDataVectorName).toFloat();
                 })
+                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+                {
+                    if(!u::isNumeric(value))
+                    {
+                        qDebug() << "UserDataVector setValueFn can't convert" << value << "to float, ignoring";
+                        return;
+                    }
+
+                    setValueBy(elementId, userDataVectorName, value);
+                })
                 .setFlag(AttributeFlag::AutoRange);
                 break;
 
@@ -163,6 +176,16 @@ public:
                 [this, userDataVectorName](E elementId)
                 {
                     return valueBy(elementId, userDataVectorName).toInt();
+                })
+                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+                {
+                    if(!u::isInteger(value))
+                    {
+                        qDebug() << "UserDataVector setValueFn can't convert" << value << "to integer, ignoring";
+                        return;
+                    }
+
+                    setValueBy(elementId, userDataVectorName, value);
                 })
                 .setFlag(AttributeFlag::AutoRange);
                 break;
@@ -175,6 +198,10 @@ public:
                 [this, userDataVectorName](E elementId)
                 {
                     return valueBy(elementId, userDataVectorName).toString();
+                })
+                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+                {
+                    setValueBy(elementId, userDataVectorName, value);
                 })
                 .setFlag(AttributeFlag::FindShared);
                 break;
