@@ -69,6 +69,9 @@ public:
         std::function<T(E, const IAttribute&)>
     >;
 
+    template<typename E>
+    using SetValueFn = std::function<void(E, const QString&)>;
+
     virtual int intValueOf(NodeId nodeId) const = 0;
     virtual int intValueOf(EdgeId edgeId) const = 0;
     virtual int intValueOf(const IGraphComponent& graphComponent) const = 0;
@@ -117,6 +120,10 @@ public:
     virtual IAttribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn) = 0;
     virtual IAttribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) = 0;
 
+    virtual IAttribute& setSetValueFn(SetValueFn<NodeId> setValueFn) = 0;
+    virtual IAttribute& setSetValueFn(SetValueFn<EdgeId> setValueFn) = 0;
+    virtual IAttribute& setSetValueFn(SetValueFn<const IGraphComponent&> setValueFn) = 0;
+
     virtual ValueType valueType() const = 0;
     virtual ElementType elementType() const = 0;
 
@@ -138,6 +145,8 @@ public:
 
     virtual bool userDefined() const = 0;
     virtual IAttribute& setUserDefined(bool userDefined) = 0;
+
+    virtual bool editable() const = 0;
 
     virtual QString description() const = 0;
     virtual IAttribute& setDescription(const QString& description) = 0;

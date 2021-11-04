@@ -44,6 +44,13 @@ void Attribute::clearMissingFunctions()
     _.valueMissingComponentFn = nullptr;
 }
 
+void Attribute::clearSetValueFunctions()
+{
+    _.setValueNodeIdFn = nullptr;
+    _.setValueEdgeIdFn = nullptr;
+    _.setValueComponentFn = nullptr;
+}
+
 int Attribute::valueOf(Helper<int>, NodeId nodeId) const { return callValueFn(_.intNodeIdFn, nodeId); }
 int Attribute::valueOf(Helper<int>, EdgeId edgeId) const { return callValueFn(_.intEdgeIdFn, edgeId); }
 int Attribute::valueOf(Helper<int>, const IGraphComponent& component) const
@@ -119,6 +126,33 @@ Attribute& Attribute::setValueMissingFn(ValueFn<bool, const IGraphComponent&> mi
     _.valueMissingComponentFn = missingFn;
     if(elementType() != ElementType::Component)
         qDebug() << "Setting value missing function with mismatched element type";
+    return *this;
+}
+
+Attribute& Attribute::setSetValueFn(SetValueFn<NodeId> setValueFn)
+{
+    clearSetValueFunctions();
+    _.setValueNodeIdFn = setValueFn;
+    if(elementType() != ElementType::Node)
+        qDebug() << "Setting set value function with mismatched element type";
+    return *this;
+}
+
+Attribute& Attribute::setSetValueFn(SetValueFn<EdgeId> setValueFn)
+{
+    clearSetValueFunctions();
+    _.setValueEdgeIdFn = setValueFn;
+    if(elementType() != ElementType::Edge)
+        qDebug() << "Setting set value function with mismatched element type";
+    return *this;
+}
+
+Attribute& Attribute::setSetValueFn(SetValueFn<const IGraphComponent&> setValueFn)
+{
+    clearSetValueFunctions();
+    _.setValueComponentFn = setValueFn;
+    if(elementType() != ElementType::Component)
+        qDebug() << "Setting set value function with mismatched element type";
     return *this;
 }
 
@@ -202,6 +236,13 @@ ElementType Attribute::elementType() const
     default:
         return ElementType::None;
     }
+}
+
+bool Attribute::editable() const
+{
+    return _.setValueNodeIdFn != nullptr ||
+        _.setValueEdgeIdFn != nullptr ||
+        _.setValueComponentFn != nullptr;
 }
 
 bool Attribute::isValid() const

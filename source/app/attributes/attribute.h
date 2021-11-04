@@ -132,6 +132,10 @@ private:
         ValueFn<bool, EdgeId> valueMissingEdgeIdFn;
         ValueFn<bool, const IGraphComponent&> valueMissingComponentFn;
 
+        SetValueFn<NodeId> setValueNodeIdFn;
+        SetValueFn<EdgeId> setValueEdgeIdFn;
+        SetValueFn<const IGraphComponent&> setValueComponentFn;
+
         int intMin = std::numeric_limits<int>::max();
         int intMax = std::numeric_limits<int>::lowest();
         double floatMin = std::numeric_limits<double>::max();
@@ -156,6 +160,7 @@ private:
 
     void clearValueFunctions();
     void clearMissingFunctions();
+    void clearSetValueFunctions();
 
     template<typename T, typename E>
     bool valueFnIsSet(const ValueFn<T, E>& valueFn) const
@@ -372,6 +377,10 @@ public:
     Attribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn) override;
     Attribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) override;
 
+    Attribute& setSetValueFn(SetValueFn<NodeId> setValueFn) override;
+    Attribute& setSetValueFn(SetValueFn<EdgeId> setValueFn) override;
+    Attribute& setSetValueFn(SetValueFn<const IGraphComponent&> setValueFn) override;
+
     ValueType valueType() const override;
     ElementType elementType() const override;
 
@@ -530,6 +539,8 @@ public:
 
     bool userDefined() const override { return _.userDefined; }
     IAttribute& setUserDefined(bool userDefined) override { _.userDefined = userDefined; return *this; }
+
+    bool editable() const override;
 
     QString description() const override { return _.description; }
     Attribute& setDescription(const QString& description) override { _.description = description; return *this; }
