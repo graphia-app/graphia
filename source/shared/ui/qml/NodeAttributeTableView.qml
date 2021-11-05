@@ -187,6 +187,12 @@ Item
 
         tableView._tableMenu = menu;
         Utils.cloneMenu(menu, contextMenu);
+
+        contextMenu.addSeparator();
+        contextMenu.addItem("").action = copyTableColumnToClipboardAction;
+        contextMenu.addSeparator();
+        contextMenu.addItem("").action = sortAscendingAction;
+        contextMenu.addItem("").action = sortDescendingAction;
     }
 
     function selectAll()
@@ -234,7 +240,25 @@ Item
         }
     }
 
-    property int lastClickedColumn
+    Action
+    {
+        id: selectAllTableAction
+        text: qsTr("Select All")
+        iconName: "edit-select-all"
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.selectAll(); }
+    }
+
+    property int lastClickedColumn: -1
+    property string lastClickedColumnName:
+    {
+        if(lastClickedColumn < 0 || lastClickedColumn >= (root.model.columnNames.length - 1))
+            return "";
+
+        root.model.columnNames[lastClickedColumn];
+    }
+
     Action
     {
         id: copyTableColumnToClipboardAction
@@ -247,14 +271,42 @@ Item
         }
     }
 
+    ExclusiveGroup { id: headerSortGroup }
+
+    function updateSortActionChecked()
+    {
+        sortAscendingAction.checked = proxyModel.sortColumn === root.lastClickedColumnName &&
+            proxyModel.sortOrder === Qt.AscendingOrder;
+        sortDescendingAction.checked = proxyModel.sortColumn === root.lastClickedColumnName &&
+            proxyModel.sortOrder === Qt.DescendingOrder;
+    }
+
     Action
     {
-        id: selectAllTableAction
-        text: qsTr("Select All")
-        iconName: "edit-select-all"
-        enabled: tableView.rows > 0
+        id: sortAscendingAction
+        text: qsTr("Sort Column Ascending")
+        checkable: true
+        exclusiveGroup: headerSortGroup
+        onTriggered:
+        {
+            proxyModel.sortColumn = root.lastClickedColumnName;
+            proxyModel.sortOrder = Qt.AscendingOrder;
+            root.updateSortActionChecked();
+        }
+    }
 
-        onTriggered: { root.selectAll(); }
+    Action
+    {
+        id: sortDescendingAction
+        text: qsTr("Sort Column Descending")
+        checkable: true
+        exclusiveGroup: headerSortGroup
+        onTriggered:
+        {
+            proxyModel.sortColumn = root.lastClickedColumnName;
+            proxyModel.sortOrder = Qt.DescendingOrder;
+            root.updateSortActionChecked();
+        }
     }
 
     SystemPalette { id: sysPalette }
@@ -670,47 +722,10 @@ Item
                                         proxyModel.sortColumn = headerItem.text;
                                 }
                                 else if(mouse.button === Qt.RightButton)
-                                    headerContextMenu.popup();
+                                    contextMenu.show();
 
                                 selectionModel.clear();
                                 root.selectedRows = [];
-                            }
-
-                            Menu
-                            {
-                                id: headerContextMenu
-                                MenuItem { action: copyTableColumnToClipboardAction }
-
-                                MenuSeparator {}
-
-                                ExclusiveGroup { id: headerSortGroup }
-                                MenuItem
-                                {
-                                    text: qsTr("Sort Ascending")
-                                    checkable: true
-                                    exclusiveGroup: headerSortGroup
-                                    checked: proxyModel.sortColumn === headerItem.text &&
-                                        proxyModel.sortOrder === Qt.AscendingOrder
-                                    onTriggered:
-                                    {
-                                        proxyModel.sortColumn = headerItem.text;
-                                        proxyModel.sortOrder = Qt.AscendingOrder;
-                                    }
-                                }
-
-                                MenuItem
-                                {
-                                    text: qsTr("Sort Descending")
-                                    checkable: true
-                                    exclusiveGroup: headerSortGroup
-                                    checked: proxyModel.sortColumn === headerItem.text &&
-                                        proxyModel.sortOrder === Qt.DescendingOrder
-                                    onTriggered:
-                                    {
-                                        proxyModel.sortColumn = headerItem.text;
-                                        proxyModel.sortOrder = Qt.DescendingOrder;
-                                    }
-                                }
                             }
                         }
 
@@ -882,10 +897,26 @@ Item
                         headerView.forceLayout();
                 }
 
+                function columnAt(mouseX)
+                {
+                    let tableViewContentContainsMouse = mouseX >= 0 && mouseX < tableView.width;
+                    if(!tableViewContentContainsMouse)
+                        return -1;
+
+                    let hoverItem = tableView.childAt(mouseX, tableView.height * 0.5);
+                    if(!hoverItem)
+                        return -1;
+
+                    let tableItem = hoverItem.childAt(mouseX + tableView.contentX, tableView.contentY);
+                    if(!tableItem || tableItem.modelColumn === undefined)
+                        return -1;
+
+                    return tableItem.modelColumn;
+                }
+
                 function rowAt(mouseY)
                 {
                     let tableViewContentContainsMouse = mouseY >= 0 && mouseY < tableView.height;
-
                     if(!tableViewContentContainsMouse)
                         return -1;
 
@@ -952,6 +983,7 @@ Item
                     clip: false
 
                     // For access from the outside
+                    property int modelColumn: model.column
                     property int modelRow: model.row
 
                     TableView.onReused:
@@ -1124,6 +1156,8 @@ Item
 
                 onClicked:
                 {
+                    root.lastClickedColumn = tableView.columnAt(mouseX);
+
                     if(mouse.button === Qt.RightButton)
                         root.rightClick();
                 }
@@ -1253,13 +1287,22 @@ Item
         }
     }
 
-    Menu { id: contextMenu }
+    Menu
+    {
+        id: contextMenu
+
+        function show()
+        {
+            root.updateSortActionChecked();
+            contextMenu.popup();
+        }
+    }
 
     signal rightClick();
     onRightClick:
     {
         if(contextMenu.enabled)
-            contextMenu.popup();
+            contextMenu.show();
     }
 
     function array_move(arr, old_index, new_index)
