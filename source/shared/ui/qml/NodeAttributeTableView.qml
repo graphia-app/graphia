@@ -1111,6 +1111,9 @@ Item
 
                 onDoubleClicked:
                 {
+                    if(mouse.button !== Qt.LeftButton)
+                        return;
+
                     let clickedRow = tableView.rowAt(mouseY);
                     if(clickedRow < 0)
                         return;
@@ -1127,6 +1130,9 @@ Item
 
                 onPressed:
                 {
+                    if(mouse.button !== Qt.LeftButton)
+                        return;
+
                     if(tableView.hoveredLink.length > 0)
                         mouse.accepted = false;
 
