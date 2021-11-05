@@ -361,6 +361,10 @@ public:
         return stringValueOf<const IGraphComponent&>(graphComponent);
     }
 
+    void setValueOf(NodeId nodeId, const QString& value) const override;
+    void setValueOf(EdgeId edgeId, const QString& value) const override;
+    void setValueOf(const IGraphComponent& graphComponent, const QString& value) const override;
+
     Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn) override;
     Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) override;
     Attribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) override;

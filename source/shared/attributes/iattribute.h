@@ -104,6 +104,10 @@ public:
     virtual bool valueMissingOf(EdgeId edgeId) const = 0;
     virtual bool valueMissingOf(const IGraphComponent& graphComponent) const = 0;
 
+    virtual void setValueOf(NodeId nodeId, const QString& value) const = 0;
+    virtual void setValueOf(EdgeId edgeId, const QString& value) const = 0;
+    virtual void setValueOf(const IGraphComponent& graphComponent, const QString& value) const = 0;
+
     virtual IAttribute& setIntValueFn(ValueFn<int, NodeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) = 0;

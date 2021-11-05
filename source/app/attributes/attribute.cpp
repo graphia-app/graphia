@@ -191,6 +191,30 @@ bool Attribute::hasMissingValues() const
     return false;
 }
 
+void Attribute::setValueOf(NodeId nodeId, const QString& value) const
+{
+    Q_ASSERT(_.setValueNodeIdFn != nullptr);
+
+    if(_.setValueNodeIdFn != nullptr)
+        _.setValueNodeIdFn(nodeId, value);
+}
+
+void Attribute::setValueOf(EdgeId edgeId, const QString& value) const
+{
+    Q_ASSERT(_.setValueEdgeIdFn != nullptr);
+
+    if(_.setValueEdgeIdFn != nullptr)
+        _.setValueEdgeIdFn(edgeId, value);
+}
+
+void Attribute::setValueOf(const IGraphComponent& graphComponent, const QString& value) const
+{
+    Q_ASSERT(_.setValueComponentFn != nullptr);
+
+    if(_.setValueComponentFn != nullptr)
+        _.setValueComponentFn(graphComponent, value);
+}
+
 ValueType Attribute::valueType() const
 {
     switch(type())
