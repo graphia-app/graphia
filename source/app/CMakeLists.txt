@@ -24,6 +24,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applyvisualisationscommand.h
+    ${CMAKE_CURRENT_LIST_DIR}/commands/cloneattributecommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/deletenodescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.h
@@ -167,6 +168,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applyvisualisationscommand.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/commands/cloneattributecommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/deletenodescommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.cpp
