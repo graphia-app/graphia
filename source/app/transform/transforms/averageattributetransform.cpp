@@ -61,19 +61,8 @@ void AverageAttributeTransform::apply(TransformedGraph& target) const
     auto sharedValuesAttribute = _graphModel->attributeValueByName(sharedValuesAttributeName);
     auto sourceAttribute = _graphModel->attributeValueByName(sourceAttributeName);
 
-    auto prettify = [](QString attributeName)
-    {
-        attributeName = attributeName.replace(QStringLiteral("$"), QLatin1String(""));
-        attributeName = attributeName.replace(QStringLiteral(R"(")"), QLatin1String(""));
-        attributeName = attributeName.replace(QRegularExpression(QStringLiteral("^source")), QObject::tr("Source"));
-        attributeName = attributeName.replace(QRegularExpression(QStringLiteral("^target")), QObject::tr("Target"));
-        attributeName = attributeName.replace(QStringLiteral("."), QStringLiteral(" › "));
-
-        return attributeName;
-    };
-
-    sourceAttributeName = prettify(sourceAttributeName);
-    sharedValuesAttributeName = prettify(sharedValuesAttributeName);
+    sourceAttributeName = Attribute::prettify(sourceAttributeName);
+    sharedValuesAttributeName = Attribute::prettify(sharedValuesAttributeName);
 
     auto meanAttributeName = QObject::tr("Mean %1 of %2")
         .arg(sourceAttributeName, sharedValuesAttributeName);
