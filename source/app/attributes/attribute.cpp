@@ -20,6 +20,7 @@
 
 #include "shared/utils/container.h"
 
+#include <QRegularExpression>
 #include <QDebug>
 
 void Attribute::clearValueFunctions()
@@ -508,4 +509,15 @@ Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& no
     }
 
     return attribute;
+}
+
+QString Attribute::prettify(QString name)
+{
+    name = name.replace(QStringLiteral("$"), QLatin1String(""));
+    name = name.replace(QStringLiteral(R"(")"), QLatin1String(""));
+    name = name.replace(QRegularExpression(QStringLiteral("^source")), QObject::tr("Source"));
+    name = name.replace(QRegularExpression(QStringLiteral("^target")), QObject::tr("Target"));
+    name = name.replace(QStringLiteral("."), QStringLiteral(" › "));
+
+    return name;
 }
