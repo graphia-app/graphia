@@ -45,8 +45,9 @@
 #include "commands/applytransformscommand.h"
 #include "commands/applyvisualisationscommand.h"
 #include "commands/deletenodescommand.h"
-#include "commands/importattributescommand.h"
+#include "commands/cloneattributecommand.h"
 #include "commands/removeattributescommand.h"
+#include "commands/importattributescommand.h"
 #include "commands/selectnodescommand.h"
 
 #include "transform/graphtransform.h"
@@ -3051,6 +3052,26 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
+void Document::cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName)
+{
+    if(busy())
+        return;
+
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<CloneAttributeCommand>(_graphModel.get(), sourceAttributeName, newAttributeName));
+}
+
+// NOLINTNEXTLINE readability-make-member-function-const
+void Document::removeAttributes(const QStringList& attributeNames)
+{
+    if(busy())
+        return;
+
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<RemoveAttributesCommand>(_graphModel.get(), attributeNames));
+}
+
+// NOLINTNEXTLINE readability-make-member-function-const
 void Document::importAttributesFromTable(const QString& keyAttributeName,
     std::shared_ptr<TabularData> data, // NOLINT performance-unnecessary-value-param
     int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace)
@@ -3062,16 +3083,6 @@ void Document::importAttributesFromTable(const QString& keyAttributeName,
         std::make_unique<ImportAttributesCommand>(_graphModel.get(),
         keyAttributeName, data.get(), keyColumnIndex,
         importColumnIndices, replace));
-}
-
-// NOLINTNEXTLINE readability-make-member-function-const
-void Document::removeAttributes(const QStringList& attributeNames)
-{
-    if(busy())
-        return;
-
-    _commandManager.execute(ExecutePolicy::Add,
-        std::make_unique<RemoveAttributesCommand>(_graphModel.get(), attributeNames));
 }
 
 QString Document::graphSizeSummary() const

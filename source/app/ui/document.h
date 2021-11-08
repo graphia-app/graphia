@@ -540,11 +540,12 @@ public:
 
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
 
+    Q_INVOKABLE void cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName);
+    Q_INVOKABLE void removeAttributes(const QStringList& attributeNames);
+
     Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,
         std::shared_ptr<TabularData> data, int keyColumnIndex,
         const std::vector<int>& importColumnIndices, bool replace);
-
-    Q_INVOKABLE void removeAttributes(const QStringList& attributeNames);
 
     Q_INVOKABLE QString graphSizeSummary() const;
     Q_INVOKABLE QString commandStackSummary() const;
