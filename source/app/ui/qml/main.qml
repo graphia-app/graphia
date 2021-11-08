@@ -1261,10 +1261,32 @@ ApplicationWindow
         }
     }
 
+    CloneAttributeDialog
+    {
+        id: cloneAttributeDialog
+        document: currentTab && currentTab.document
+    }
+
+    Action
+    {
+        id: cloneAttributeAction
+        text: qsTr("Clone Attribute…")
+        enabled: currentTab !== null && !currentTab.document.busy
+        onTriggered: { cloneAttributeDialog.show(); }
+    }
+
     RemoveAttributesDialog
     {
         id: removeAttributesDialog
         document: currentTab && currentTab.document
+    }
+
+    Action
+    {
+        id: removeAttributesAction
+        text: qsTr("Remove Attributes…")
+        enabled: currentTab !== null && !currentTab.document.busy
+        onTriggered: { removeAttributesDialog.show(); }
     }
 
     Action
@@ -1279,14 +1301,6 @@ ApplicationWindow
 
             importAttributesFileOpenDialog.open();
         }
-    }
-
-    Action
-    {
-        id: removeAttributesAction
-        text: qsTr("Remove Attributes…")
-        enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: { removeAttributesDialog.show(); }
     }
 
     Action
@@ -1991,8 +2005,10 @@ ApplicationWindow
             title: qsTr("T&ools")
             MenuItem { action: enrichmentAction }
             MenuItem { action: searchWebAction }
-            MenuItem { action: importAttributesAction }
+            MenuSeparator {}
+            MenuItem { action: cloneAttributeAction }
             MenuItem { action: removeAttributesAction }
+            MenuItem { action: importAttributesAction }
             MenuSeparator {}
             MenuItem { action: showProvenanceLogAction }
         }
