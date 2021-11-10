@@ -187,7 +187,7 @@ static void captureConsoleOutput()
     if(stdoutDupResult < 0 || stderrDupResult < 0)
         std::cerr << "Failed to redirect stdout/stderr\n";
 
-    std::atexit([]
+    auto result = std::atexit([]
     {
         if(stdoutFd >= 0)
             close(stdoutFd);
@@ -195,6 +195,9 @@ static void captureConsoleOutput()
         if(stderrFd >= 0)
             close(stderrFd);
     });
+
+    if(result != 0)
+        std::cerr << "Failed to register stdout/stderr closure callback: " << result << "\n";
 }
 
 int start(int argc, char *argv[])
