@@ -285,15 +285,21 @@ int start(int argc, char *argv[])
 
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
-        QString vendor = OpenGLFunctions::vendor();
-        vendor.replace(QStringLiteral(" "), QStringLiteral("+"));
-        QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+        QString message;
 
-        QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
-            QObject::tr("The installed version of OpenGL is insufficient to run %1. "
-                        R"(Please install the latest <a href="%2">video drivers</a> available from )"
-                        "your vendor and try again.").arg(Application::name(), driversUrl),
-            QMessageBox::Close);
+        QString vendor = OpenGLFunctions::vendor();
+        if(!vendor.isEmpty())
+        {
+            vendor.replace(QStringLiteral(" "), QStringLiteral("+"));
+            QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+            message = QObject::tr("The installed version of OpenGL is insufficient to run %1. "
+                R"(Please install the latest <a href="%2">video drivers</a> available from )"
+                "your vendor and try again.").arg(Application::name(), driversUrl);
+        }
+        else
+            message = QObject::tr("OpenGL is not available. %1 will not run.").arg(Application::name());
+
+        QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"), message, QMessageBox::Close);
 
         messageBox.setTextFormat(Qt::RichText);
         messageBox.exec();
