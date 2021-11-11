@@ -133,13 +133,21 @@ QString OpenGLFunctions::vendor()
     format.setMajorVersion(1);
     format.setMajorVersion(0);
 
-    return Functions<QOpenGLFunctions_1_0>(format).getString(GL_VENDOR);
+    auto f = Functions<QOpenGLFunctions_1_0>(format);
+
+    if(!f.valid())
+        return {};
+
+    return f.getString(GL_VENDOR);
 }
 
 QString OpenGLFunctions::info()
 {
     auto format = OpenGLFunctions::defaultFormat();
     Functions<OpenGLFunctions> f(format);
+
+    if(!f.valid())
+        return {};
 
     QString extensions;
     GLint numExtensions = 0;
