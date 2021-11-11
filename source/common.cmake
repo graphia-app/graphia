@@ -39,20 +39,17 @@ if(UNIX)
     # set of symbols
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 
-    # Disable ccache if building under travis, as it manages that
-    if(NOT DEFINED ENV{TRAVIS})
-        # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
-        find_program(CCACHE_EXECUTABLE ccache)
-        mark_as_advanced(CCACHE_EXECUTABLE)
-        if(CCACHE_EXECUTABLE)
-            foreach(LANG C CXX)
-                if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
-                    NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
-                    message(STATUS "Enabling ccache for ${LANG}")
-                    set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
-                endif()
-            endforeach()
-        endif()
+    # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
+    find_program(CCACHE_EXECUTABLE ccache)
+    mark_as_advanced(CCACHE_EXECUTABLE)
+    if(CCACHE_EXECUTABLE)
+        foreach(LANG C CXX)
+            if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
+                NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
+                message(STATUS "Enabling ccache for ${LANG}")
+                set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
+            endif()
+        endforeach()
     endif()
 endif()
 
