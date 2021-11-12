@@ -55,8 +55,8 @@ Window
     Preferences
     {
         section: "misc"
-        property alias cloneAttributeSortOrder: attributeList.ascendingSortOrder
-        property alias cloneAttributeSortBy: attributeList.sortRoleName
+        property alias transformAttributeSortOrder: attributeList.ascendingSortOrder
+        property alias transformAttributeSortBy: attributeList.sortRoleName
     }
 
     ColumnLayout
