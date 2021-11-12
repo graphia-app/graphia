@@ -129,7 +129,7 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: attributeList.selectedValues.length == 1 && newAttributeName.text.length > 0
+                enabled: attributeList.selectedValues.length === 1 && newAttributeName.text.length > 0
 
                 onClicked:
                 {
