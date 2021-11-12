@@ -400,8 +400,8 @@ BaseParameterDialog
 
                         TableView
                         {
-                            property var headerPadding: 4
-                            property var headerWidthPadding: 10
+                            property int headerPadding: 4
+                            property int headerWidthPadding: 10
                             id: columnHeaderView
 
                             model: dataRectView.model
@@ -489,7 +489,7 @@ BaseParameterDialog
 
                         TableView
                         {
-                            property var delegateHeight: headerFontMetrics.height
+                            property int delegateHeight: headerFontMetrics.height
                             id: dataRectView
                             syncDirection: Qt.Horizontal
                             syncView: columnHeaderView

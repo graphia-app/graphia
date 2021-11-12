@@ -790,7 +790,7 @@ Item
 
                 property var userColumnWidths: []
                 property var currentColumnWidths: []
-                property var currentTotalColumnWidth: 0
+                property int currentTotalColumnWidth: 0
                 property var columnWidths: []
                 property int rowHeight: delegateMetrics.height + 1
 

@@ -90,7 +90,7 @@ Item
                     clip: true
 
                     property var _childWidths: []
-                    property var maxChildWidth: 0
+                    property int maxChildWidth: 0
 
                     delegate: Item
                     {
