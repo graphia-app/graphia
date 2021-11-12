@@ -62,6 +62,7 @@
         <file>qml/Loading/ImportAttributesDialog.qml</file>
         <file>qml/RemoveAttributesDialog.qml</file>
         <file>qml/CloneAttributeDialog.qml</file>
+        <file>qml/EditAttributeDialog.qml</file>
         <file>qml/OpenUrlDialog.qml</file>
         <file>qml/DownloadProgress.qml</file>
         <file>qml/Options/OptionsNetwork.qml</file>

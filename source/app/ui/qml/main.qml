@@ -1275,6 +1275,20 @@ ApplicationWindow
         onTriggered: { cloneAttributeDialog.show(); }
     }
 
+    EditAttributeDialog
+    {
+        id: editAttributeDialog
+        document: currentTab && currentTab.document
+    }
+
+    Action
+    {
+        id: editAttributeAction
+        text: qsTr("Edit Attribute…")
+        enabled: currentTab !== null && !currentTab.document.busy
+        onTriggered: { editAttributeDialog.show(); }
+    }
+
     RemoveAttributesDialog
     {
         id: removeAttributesDialog
@@ -2007,6 +2021,7 @@ ApplicationWindow
             MenuItem { action: searchWebAction }
             MenuSeparator {}
             MenuItem { action: cloneAttributeAction }
+            MenuItem { action: editAttributeAction }
             MenuItem { action: removeAttributesAction }
             MenuItem { action: importAttributesAction }
             MenuSeparator {}

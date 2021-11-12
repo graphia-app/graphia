@@ -20,6 +20,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/condtionfnops.h
+    ${CMAKE_CURRENT_LIST_DIR}/attributes/editattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.h
@@ -164,6 +165,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/attributes/editattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmentcalculator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/attributes/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/applytransformscommand.cpp
