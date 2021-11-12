@@ -218,6 +218,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
         return attribute->userDefined() ? userDefinedTr : calculatedTr;
     }
+    case Roles::EditableRole:
+    {
+        return attribute->editable();
+    }
     case Roles::HasParameterRole:
     {
         return attribute->hasParameter();
@@ -396,6 +400,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
     names[Roles::HasSharedValuesRole] = "hasSharedValues";
     names[Roles::SearchableRole] = "searchable";
     names[Roles::UserDefinedRole] = "userDefined";
+    names[Roles::EditableRole] = "editable";
     names[Roles::HasChildrenRole] = "hasChildren";
     names[Roles::HasParameterRole] = "hasParameter";
 

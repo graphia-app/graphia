@@ -82,6 +82,7 @@ private:
         HasSharedValuesRole,
         SearchableRole,
         UserDefinedRole,
+        EditableRole,
         HasChildrenRole,
         HasParameterRole,
     };
