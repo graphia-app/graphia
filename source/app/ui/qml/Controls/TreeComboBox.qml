@@ -38,6 +38,8 @@ Item
 
     property alias showSections: popupTreeBox.showSections
 
+    property alias filters: popupTreeBox.filters
+
     property var previousIndex
 
     implicitWidth: 200
