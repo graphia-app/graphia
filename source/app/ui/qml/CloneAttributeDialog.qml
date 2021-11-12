@@ -118,6 +118,12 @@ Window
 
             property bool manuallyChanged: false
             Keys.onPressed: { manuallyChanged = true; }
+
+            onFocusChanged:
+            {
+                if(focus && !manuallyChanged)
+                    selectAll();
+            }
         }
 
         RowLayout
