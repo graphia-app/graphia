@@ -261,7 +261,7 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
     removedSet.subtract(addedAndRemovedSet);
     changedSet.unite(addedAndRemovedSet);
 
-    // Either no attributes are being added, or the ones that are are not in the table already
+    // Assert that either no attributes are being added, or the ones that are are not in the table already
     Q_ASSERT(addedSet.isEmpty() || !addedSet.intersects({_columnNames.begin(), _columnNames.end()}));
 
     // Ignore attribute names that aren't in the table

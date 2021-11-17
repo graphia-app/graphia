@@ -1012,7 +1012,7 @@ Item
                             tableView.columnWidths[model.column] = implicitWidth;
                     }
 
-                    // When the columns don't occupy the full view of the TableView, we display a "filler"
+                    // When the columns don't occupy the full width of the TableView, we display a "filler"
                     // selection marker in the empty space to the right of the last column
                     Rectangle
                     {
