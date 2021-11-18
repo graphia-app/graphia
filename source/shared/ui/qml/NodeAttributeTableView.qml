@@ -429,7 +429,7 @@ Item
         Item
         {
             Layout.fillWidth: true
-            height: headerMetrics.height + 6
+            height: fontMetrics.height + 6
 
             TableView
             {
@@ -792,7 +792,7 @@ Item
                 property var currentColumnWidths: []
                 property int currentTotalColumnWidth: 0
                 property var columnWidths: []
-                property int rowHeight: delegateMetrics.height + 1
+                property int rowHeight: fontMetrics.height + 1
 
                 function visibleColumnNames() // Called from C++ when exporting table
                 {
@@ -956,7 +956,7 @@ Item
                     if(sourceColumn > -1)
                     {
                         let headerName = root.model.columnNameFor(sourceColumn);
-                        let width = headerMetrics.advanceWidth(headerName);
+                        let width = fontMetrics.advanceWidth(headerName);
                         width += sortIndicatorSpacing;
                         return width;
                     }
@@ -964,15 +964,7 @@ Item
                     return sortIndicatorSpacing;
                 }
 
-                FontMetrics
-                {
-                    id: delegateMetrics
-                }
-
-                FontMetrics
-                {
-                    id: headerMetrics
-                }
+                FontMetrics { id: fontMetrics }
 
                 delegate: Item
                 {
