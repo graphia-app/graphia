@@ -486,9 +486,9 @@ Item
                     visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
                 }
 
-                property int sortIndicatorWidth: 7
-                property int sortIndicatorMargin: 3
-                property int delegatePadding: 4
+                readonly property int sortIndicatorWidth: 7
+                readonly property int sortIndicatorMargin: 3
+                readonly property int delegatePadding: 4
 
                 Rectangle
                 {
