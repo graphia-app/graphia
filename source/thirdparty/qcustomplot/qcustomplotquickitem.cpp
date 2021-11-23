@@ -24,7 +24,14 @@
 QCustomPlotQuickItem::QCustomPlotQuickItem(int multisamples, QQuickItem* parent) :
     QQuickPaintedItem(parent)
 {
+#ifdef Q_OS_MACOS
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#warning Check if crash in QOpenGLContext::surface/QWindow::surfaceHandle still occurs on macOS
+#endif
+    Q_UNUSED(multisamples);
+#else
     _customPlot.setOpenGl(true, multisamples);
+#endif
 
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
