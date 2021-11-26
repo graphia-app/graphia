@@ -487,6 +487,7 @@ Item
                 }
 
                 readonly property int sortIndicatorWidth: 7
+                readonly property int sortIndicatorHeight: 4
                 readonly property int sortIndicatorMargin: 3
                 readonly property int delegatePadding: 4
 
@@ -645,7 +646,7 @@ Item
                             anchors.rightMargin: headerView.sortIndicatorMargin
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
-                            height: headerView.delegatePadding
+                            height: headerView.sortIndicatorHeight
                             visible: proxyModel.sortColumn === headerItem.text && !columnSelectionMode
                             transform: Rotation
                             {
