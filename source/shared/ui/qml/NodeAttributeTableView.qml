@@ -716,7 +716,7 @@ Item
                                 {
                                     if(proxyModel.sortColumn === headerItem.text)
                                     {
-                                        proxyModel.sortOrder = proxyModel.sortOrder ?
+                                        proxyModel.sortOrder = proxyModel.sortOrder === Qt.DescendingOrder ?
                                             Qt.AscendingOrder : Qt.DescendingOrder;
                                     }
                                     else
