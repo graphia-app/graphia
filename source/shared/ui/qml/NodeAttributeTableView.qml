@@ -631,7 +631,7 @@ Item
                             clip: true
                             elide: Text.ElideRight
                             maximumLineCount: 1
-                            width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth);
+                            width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
                             text: headerItem.text
                             color: sysPalette.text
                             padding: headerView.delegatePadding
