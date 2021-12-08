@@ -149,10 +149,16 @@ bool EditAttributeTableModel::rowIsEdited(int row)
         return false;
 
     if(_attribute->elementType() == ElementType::Node)
-        return u::contains(_editedNodeValues, row);
+    {
+        auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
+        return u::contains(_edits._nodeValues, nodeId);
+    }
 
     if(_attribute->elementType() == ElementType::Edge)
-        return u::contains(_editedEdgeValues, row);
+    {
+        auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
+        return u::contains(_edits._edgeValues, edgeId);
+    }
 
     return false;
 }

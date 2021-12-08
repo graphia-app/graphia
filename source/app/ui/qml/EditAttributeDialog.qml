@@ -445,7 +445,8 @@ Window
                                 {
                                     if(mouse.button === Qt.RightButton)
                                     {
-                                        contextMenu.resetRow = model.index % proxyModel.rowCount();
+                                        let row = model.index % proxyModel.rowCount();
+                                        contextMenu.resetRow = proxyModel.mapToSource(row);
                                         contextMenu.popup();
                                     }
 
@@ -494,6 +495,7 @@ Window
                                 if(visible)
                                 {
                                     let row = model.index % proxyModel.rowCount();
+                                    row = proxyModel.mapToSource(row);
                                     editAttributeTableModel.editValue(row, text);
                                     visible = false;
                                 }
