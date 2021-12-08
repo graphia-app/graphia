@@ -17,6 +17,7 @@ list(APPEND HEADERS
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/application.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.h
+    ${CMAKE_CURRENT_LIST_DIR}/attributes/attributeedits.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/conditionfncreator.h
     ${CMAKE_CURRENT_LIST_DIR}/attributes/condtionfnops.h

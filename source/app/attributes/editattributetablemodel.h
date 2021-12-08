@@ -19,6 +19,8 @@
 #ifndef EDITATTRIBUTETABLEMODEL_H
 #define EDITATTRIBUTETABLEMODEL_H
 
+#include "attributeedits.h"
+
 #include "shared/graph/elementid.h"
 
 #include <QObject>
@@ -37,6 +39,7 @@ class EditAttributeTableModel : public QAbstractTableModel
     Q_PROPERTY(Document* document MEMBER _document WRITE setDocument NOTIFY documentChanged)
     Q_PROPERTY(QString attributeName MEMBER _attributeName WRITE setAttributeName NOTIFY attributeNameChanged)
     Q_PROPERTY(bool hasEdits READ hasEdits NOTIFY hasEditsChanged)
+    Q_PROPERTY(AttributeEdits edits READ edits NOTIFY editsChanged)
 
 public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -56,8 +59,7 @@ private:
     QString _attributeName;
     const IAttribute* _attribute = nullptr;
 
-    std::map<NodeId, QString> _editedNodeValues;
-    std::map<EdgeId, QString> _editedEdgeValues;
+    AttributeEdits _edits;
 
     enum Roles
     {
@@ -79,12 +81,15 @@ private:
     void setDocument(Document* document);
     void setAttributeName(const QString& attributeName);
 
-    bool hasEdits() const { return !_editedNodeValues.empty() || !_editedEdgeValues.empty(); }
+    bool hasEdits() const { return !_edits._nodeValues.empty() || !_edits._edgeValues.empty(); }
+
+    const AttributeEdits& edits() const { return _edits; }
 
 signals:
     void documentChanged();
     void attributeNameChanged();
     void hasEditsChanged();
+    void editsChanged();
 };
 
 #endif // EDITATTRIBUTETABLEMODEL_H

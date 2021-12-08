@@ -67,19 +67,19 @@ QVariant EditAttributeTableModel::data(const QModelIndex& index, int role) const
     case LabelRole:     column = 0; break;
     case AttributeRole: column = 1; break;
     case EditedRole:
-        if(_attribute->elementType() == ElementType::Node) return u::contains(_editedNodeValues, nodeId);
-        if(_attribute->elementType() == ElementType::Edge) return u::contains(_editedEdgeValues, edgeId);
+        if(_attribute->elementType() == ElementType::Node) return u::contains(_edits._nodeValues, nodeId);
+        if(_attribute->elementType() == ElementType::Edge) return u::contains(_edits._edgeValues, edgeId);
         break;
     }
 
     if(_attribute->elementType() == ElementType::Node)
     {
-        const auto& value = u::contains(_editedNodeValues, nodeId) ? _editedNodeValues.at(nodeId) : _attribute->valueOf(nodeId);
+        const auto& value = u::contains(_edits._nodeValues, nodeId) ? _edits._nodeValues.at(nodeId) : _attribute->valueOf(nodeId);
         return column == 0 ? _document->graphModel()->nodeName(nodeId) : value;
     }
     else if(_attribute->elementType() == ElementType::Edge)
     {
-        const auto& value = u::contains(_editedEdgeValues, edgeId) ? _editedEdgeValues.at(edgeId) : _attribute->valueOf(edgeId);
+        const auto& value = u::contains(_edits._edgeValues, edgeId) ? _edits._edgeValues.at(edgeId) : _attribute->valueOf(edgeId);
         return column == 0 ? static_cast<int>(edgeId) : value;
     }
 
@@ -93,18 +93,19 @@ void EditAttributeTableModel::editValue(int row, const QString& value)
         auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
 
         if(value != _attribute->valueOf(nodeId))
-            _editedNodeValues[nodeId] = value;
+            _edits._nodeValues[nodeId] = value;
     }
     else if(_attribute->elementType() == ElementType::Edge)
     {
         auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
 
         if(value != _attribute->valueOf(edgeId))
-            _editedEdgeValues[edgeId] = value;
+            _edits._edgeValues[edgeId] = value;
     }
 
     emit dataChanged(index(row, 1), index(row, 1), {Qt::DisplayRole, AttributeRole, EditedRole});
     emit hasEditsChanged();
+    emit editsChanged();
 }
 
 void EditAttributeTableModel::resetRowValue(int row)
@@ -115,19 +116,23 @@ void EditAttributeTableModel::resetRowValue(int row)
     {
         auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
 
-        if(u::contains(_editedNodeValues, nodeId))
-            n = _editedNodeValues.erase(nodeId);
+        if(u::contains(_edits._nodeValues, nodeId))
+            n = _edits._nodeValues.erase(nodeId);
     }
     else if(_attribute->elementType() == ElementType::Edge)
     {
         auto edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
 
-        if(u::contains(_editedEdgeValues, edgeId))
-            n = _editedEdgeValues.erase(edgeId);
+        if(u::contains(_edits._edgeValues, edgeId))
+            n = _edits._edgeValues.erase(edgeId);
     }
 
     if(n > 0)
+    {
         emit dataChanged(index(row, 1), index(row, 1), {Qt::DisplayRole, AttributeRole, EditedRole});
+        emit hasEditsChanged();
+        emit editsChanged();
+    }
 }
 
 void EditAttributeTableModel::resetAllEdits()
@@ -136,11 +141,12 @@ void EditAttributeTableModel::resetAllEdits()
         return;
 
     beginResetModel();
-    _editedNodeValues.clear();
-    _editedEdgeValues.clear();
+    _edits._nodeValues.clear();
+    _edits._edgeValues.clear();
     endResetModel();
 
     emit hasEditsChanged();
+    emit editsChanged();
 }
 
 bool EditAttributeTableModel::rowIsEdited(int row)
@@ -180,15 +186,19 @@ void EditAttributeTableModel::setAttributeName(const QString& attributeName)
         return;
 
     beginResetModel();
+
     _attributeName = attributeName;
     _attribute = !attributeName.isEmpty() ?
         _document->graphModel()->attributeByName(attributeName) : nullptr;
-    _editedNodeValues.clear();
-    _editedEdgeValues.clear();
+
+    _edits._nodeValues.clear();
+    _edits._edgeValues.clear();
+
     endResetModel();
 
     emit attributeNameChanged();
     emit hasEditsChanged();
+    emit editsChanged();
 }
 
 static_block
