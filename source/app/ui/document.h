@@ -58,6 +58,7 @@ class GraphModel;
 class SearchManager;
 class SelectionManager;
 class TabularData;
+class AttributeEdits;
 
 DEFINE_QML_ENUM(
     Q_GADGET, LayoutPauseState,
@@ -541,6 +542,7 @@ public:
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
 
     Q_INVOKABLE void cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName);
+    Q_INVOKABLE void editAttribute(const QString& attributeName, const AttributeEdits& edits);
     Q_INVOKABLE void removeAttributes(const QStringList& attributeNames);
 
     Q_INVOKABLE void importAttributesFromTable(const QString& keyAttributeName,

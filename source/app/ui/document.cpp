@@ -46,6 +46,7 @@
 #include "commands/applyvisualisationscommand.h"
 #include "commands/deletenodescommand.h"
 #include "commands/cloneattributecommand.h"
+#include "commands/editattributecommand.h"
 #include "commands/removeattributescommand.h"
 #include "commands/importattributescommand.h"
 #include "commands/selectnodescommand.h"
@@ -56,6 +57,7 @@
 #include "ui/visualisations/visualisationconfigparser.h"
 
 #include "attributes/conditionfncreator.h"
+#include "attributes/attributeedits.h"
 
 #include "searchmanager.h"
 #include "selectionmanager.h"
@@ -3059,6 +3061,15 @@ void Document::cloneAttribute(const QString& sourceAttributeName, const QString&
 
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<CloneAttributeCommand>(_graphModel.get(), sourceAttributeName, newAttributeName));
+}
+
+void Document::editAttribute(const QString& attributeName, const AttributeEdits& edits)
+{
+    if(busy())
+        return;
+
+    _commandManager.execute(ExecutePolicy::Add,
+        std::make_unique<EditAttributeCommand>(_graphModel.get(), attributeName, edits));
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const

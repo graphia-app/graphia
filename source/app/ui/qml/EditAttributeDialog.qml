@@ -526,7 +526,7 @@ Window
 
                 onClicked:
                 {
-                    //document.editAttribute(...);
+                    document.editAttribute(attributeList.selectedValue, editAttributeTableModel.edits);
                     root.close();
                 }
             }
