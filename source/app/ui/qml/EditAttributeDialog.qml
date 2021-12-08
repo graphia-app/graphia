@@ -369,6 +369,8 @@ Window
                     visible: size < 1.0 && tableView.rows > 0
                 }
 
+                property var activeEditField: null
+
                 model: SortFilterProxyModel
                 {
                     id: proxyModel
@@ -446,6 +448,9 @@ Window
                                         contextMenu.resetRow = model.index % proxyModel.rowCount();
                                         contextMenu.popup();
                                     }
+
+                                    if(tableView.activeEditField !== null && tableView.activeEditField !== editField)
+                                        tableView.activeEditField.cancel();
                                 }
 
                                 onDoubleClicked:
@@ -463,6 +468,12 @@ Window
                         {
                             id: editField
 
+                            function cancel()
+                            {
+                                text = model.display;
+                                visible = false;
+                            }
+
                             visible: false
                             onVisibleChanged:
                             {
@@ -471,7 +482,11 @@ Window
                                     text = model.display;
                                     selectAll();
                                     forceActiveFocus();
+
+                                    tableView.activeEditField = editField;
                                 }
+                                else
+                                    tableView.activeEditField = null;
                             }
 
                             onEditingFinished:
@@ -484,11 +499,7 @@ Window
                                 }
                             }
 
-                            Keys.onEscapePressed:
-                            {
-                                text = model.display;
-                                visible = false;
-                            }
+                            Keys.onEscapePressed: { cancel(); }
 
                             anchors.left: parent.left
                             anchors.right: parent.right
