@@ -55,6 +55,8 @@ Window
             editAttributeTableModel.attributeName = "";
             headerView.columnDivisorPosition = 0.5;
             headerView.forceLayout();
+            proxyModel.sortColumn = -1;
+            proxyModel.ascendingSortOrder = true;
         }
     }
 
