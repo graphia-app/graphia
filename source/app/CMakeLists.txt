@@ -29,6 +29,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/commands/cloneattributecommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/deletenodescommand.h
+    ${CMAKE_CURRENT_LIST_DIR}/commands/editattributecommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/removeattributescommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/selectnodescommand.h
@@ -174,6 +175,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/commands/cloneattributecommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/commandmanager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/deletenodescommand.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/commands/editattributecommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/importattributescommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/commands/removeattributescommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/componentmanager.cpp
