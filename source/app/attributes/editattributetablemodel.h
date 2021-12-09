@@ -27,10 +27,12 @@
 #include <QString>
 #include <QAbstractTableModel>
 
+#include <vector>
 #include <map>
 
 class Document;
 class IAttribute;
+class SelectionManager;
 
 class EditAttributeTableModel : public QAbstractTableModel
 {
@@ -59,6 +61,8 @@ private:
     QString _attributeName;
     const IAttribute* _attribute = nullptr;
 
+    std::vector<NodeId> _selectedNodes;
+
     AttributeEdits _edits;
 
     enum Roles
@@ -78,12 +82,17 @@ private:
         {EditedRole,        "edited"},
     };
 
+    NodeId rowToNodeId(int row) const;
+
     void setDocument(Document* document);
     void setAttributeName(const QString& attributeName);
 
     bool hasEdits() const { return !_edits._nodeValues.empty() || !_edits._edgeValues.empty(); }
 
     const AttributeEdits& edits() const { return _edits; }
+
+private slots:
+    void onSelectionChanged();
 
 signals:
     void documentChanged();

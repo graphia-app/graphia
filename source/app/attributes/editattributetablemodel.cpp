@@ -19,6 +19,7 @@
 #include "editattributetablemodel.h"
 
 #include "ui/document.h"
+#include "ui/selectionmanager.h"
 
 #include "shared/graph/igraphmodel.h"
 #include "shared/attributes/iattribute.h"
@@ -36,8 +37,8 @@ int EditAttributeTableModel::rowCount(const QModelIndex&) const
     switch(_attribute->elementType())
     {
     case ElementType::Node:
-        //FIXME insert code for selection based model here
-        return _document->graphModel()->graph().numNodes();
+        return !_selectedNodes.empty() ? static_cast<int>(_selectedNodes.size()) :
+            _document->graphModel()->graph().numNodes();
 
     case ElementType::Edge: return _document->graphModel()->graph().numEdges();
     default: return 0;
@@ -58,7 +59,7 @@ QVariant EditAttributeTableModel::data(const QModelIndex& index, int role) const
     EdgeId edgeId;
 
     if(_attribute->elementType() == ElementType::Node)
-        nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
+        nodeId = rowToNodeId(row);
     else if(_attribute->elementType() == ElementType::Edge)
         edgeId = _document->graphModel()->graph().edgeIds().at(static_cast<size_t>(row));
 
@@ -90,7 +91,7 @@ void EditAttributeTableModel::editValue(int row, const QString& value)
 {
     if(_attribute->elementType() == ElementType::Node)
     {
-        auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
+        auto nodeId = rowToNodeId(row);
 
         if(value != _attribute->valueOf(nodeId))
             _edits._nodeValues[nodeId] = value;
@@ -114,7 +115,7 @@ void EditAttributeTableModel::resetRowValue(int row)
 
     if(_attribute->elementType() == ElementType::Node)
     {
-        auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
+        auto nodeId = rowToNodeId(row);
 
         if(u::contains(_edits._nodeValues, nodeId))
             n = _edits._nodeValues.erase(nodeId);
@@ -155,10 +156,7 @@ bool EditAttributeTableModel::rowIsEdited(int row)
         return false;
 
     if(_attribute->elementType() == ElementType::Node)
-    {
-        auto nodeId = _document->graphModel()->graph().nodeIds().at(static_cast<size_t>(row));
-        return u::contains(_edits._nodeValues, nodeId);
-    }
+        return u::contains(_edits._nodeValues, rowToNodeId(row));
 
     if(_attribute->elementType() == ElementType::Edge)
     {
@@ -169,6 +167,24 @@ bool EditAttributeTableModel::rowIsEdited(int row)
     return false;
 }
 
+NodeId EditAttributeTableModel::rowToNodeId(int row) const
+{
+    if(_attribute->elementType() != ElementType::Node)
+    {
+        qDebug() << "EditAttributeTableModel::rowToNodeId called with non-node attribute";
+        return {};
+    }
+
+    const auto& v = !_selectedNodes.empty() ? _selectedNodes :
+        _document->graphModel()->graph().nodeIds();
+
+    auto index = static_cast<size_t>(row);
+    if(index < v.size())
+        return v.at(index);
+
+    return {};
+}
+
 void EditAttributeTableModel::setDocument(Document* document)
 {
     if(document == _document)
@@ -176,7 +192,24 @@ void EditAttributeTableModel::setDocument(Document* document)
 
     setAttributeName({});
 
+    if(_document != nullptr)
+    {
+        disconnect(_document, &Document::selectedNodeIdsChanged,
+            this, &EditAttributeTableModel::onSelectionChanged);
+    }
+
     _document = document;
+
+    if(_document != nullptr)
+    {
+        connect(_document, &Document::selectedNodeIdsChanged,
+            this, &EditAttributeTableModel::onSelectionChanged);
+
+        onSelectionChanged();
+    }
+    else
+        _selectedNodes.clear();
+
     emit documentChanged();
 }
 
@@ -199,6 +232,26 @@ void EditAttributeTableModel::setAttributeName(const QString& attributeName)
     emit attributeNameChanged();
     emit hasEditsChanged();
     emit editsChanged();
+}
+
+void EditAttributeTableModel::onSelectionChanged()
+{
+    beginResetModel();
+
+    _selectedNodes.clear();
+
+    if(_document->selectionManager() != nullptr)
+    {
+        const auto& selectedNodes = _document->selectionManager()->selectedNodes();
+
+        _selectedNodes.reserve(selectedNodes.size());
+
+        _selectedNodes.insert(_selectedNodes.begin(),
+            selectedNodes.begin(), selectedNodes.end());
+        std::sort(_selectedNodes.begin(), _selectedNodes.end());
+    }
+
+    endResetModel();
 }
 
 static_block
