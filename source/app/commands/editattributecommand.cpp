@@ -61,7 +61,7 @@ QString EditAttributeCommand::debugDescription() const
         }
     };
 
-    auto* attribute = _graphModel->attributeByName(_attributeName);
+    const auto* attribute = _graphModel->attributeByName(_attributeName);
 
     if(attribute->elementType() == ElementType::Node)
         appendDetails(_edits._nodeValues, _reverseEdits._nodeValues);
@@ -75,7 +75,7 @@ bool EditAttributeCommand::execute()
 {
     AttributeChangesTracker tracker(_graphModel);
 
-    auto* attribute = _graphModel->attributeByName(_attributeName);
+    const auto* attribute = _graphModel->attributeByName(_attributeName);
 
     Q_ASSERT(attribute != nullptr);
     if(attribute == nullptr)
@@ -102,7 +102,7 @@ void EditAttributeCommand::undo()
 {
     AttributeChangesTracker tracker(_graphModel);
 
-    auto* attribute = _graphModel->attributeByName(_attributeName);
+    const auto* attribute = _graphModel->attributeByName(_attributeName);
 
     auto undoEdits = [attribute](auto& reverseEdits)
     {
