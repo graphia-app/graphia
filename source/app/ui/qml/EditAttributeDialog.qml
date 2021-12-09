@@ -47,17 +47,31 @@ Window
     minimumWidth: 400
     minimumHeight: 500
 
+    function initialise()
+    {
+        if(document === null)
+            return;
+
+        attributeList.model = document.availableAttributesModel();
+        editAttributeTableModel.attributeName = "";
+        headerView.columnDivisorPosition = 0.5;
+        headerView.forceLayout();
+        proxyModel.sortColumn = -1;
+        proxyModel.ascendingSortOrder = true;
+    }
+
+    onDocumentChanged: { root.initialise(); }
+
+    Connections
+    {
+        target: document
+        function onLoadComplete() { root.initialise(); }
+    }
+
     onVisibleChanged:
     {
         if(visible)
-        {
-            attributeList.model = document.availableAttributesModel();
-            editAttributeTableModel.attributeName = "";
-            headerView.columnDivisorPosition = 0.5;
-            headerView.forceLayout();
-            proxyModel.sortColumn = -1;
-            proxyModel.ascendingSortOrder = true;
-        }
+            root.initialise();
     }
 
     EditAttributeTableModel
@@ -111,6 +125,8 @@ Window
 
     ColumnLayout
     {
+        enabled: root.document !== null && !root.document.busy
+
         anchors.fill: parent
         anchors.margins: Constants.margin
 
