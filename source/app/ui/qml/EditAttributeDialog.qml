@@ -176,12 +176,26 @@ Window
 
             spacing: 0
 
+            Label
+            {
+                visible: !tableView.visible
+                Layout.fillWidth: visible
+                Layout.fillHeight: visible
+
+                horizontalAlignment: Qt.AlignCenter
+                verticalAlignment: Qt.AlignVCenter
+                font.pixelSize: 16
+                font.italic: true
+
+                text: qsTr("Select an Attribute")
+            }
+
             TableView
             {
                 id: headerView
 
                 Layout.fillWidth: true
-                height: fontMetrics.height + 8
+                Layout.preferredHeight: fontMetrics.height + 8
 
                 interactive: false
                 clip: true
@@ -230,6 +244,8 @@ Window
                 delegate: Item
                 {
                     id: headerItem
+
+                    visible: attributeList.selectedValue !== undefined
 
                     implicitHeight: headerLabel.height + (headerView.labelPadding * 2)
 
@@ -432,7 +448,7 @@ Window
                 }
 
                 clip: true
-                visible: tableView.columns !== 0
+                visible: tableView.columns !== 0 && attributeList.selectedValue !== undefined
                 boundsBehavior: Flickable.StopAtBounds
 
                 syncView: headerView
