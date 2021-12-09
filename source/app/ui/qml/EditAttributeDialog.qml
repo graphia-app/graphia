@@ -192,7 +192,24 @@ Window
                     TableModelColumn { display: "id" }
                     TableModelColumn { display: "name" }
 
-                    rows: [{ "id": "Node Name", "name": "Value"}]
+                    rows:
+                    {
+                        let emptyHeader = [{ "id": "", "name": ""}];
+
+                        if(document === null)
+                            return emptyHeader;
+
+                        let attribute = document.attribute(attributeList.selectedValue);
+
+                        if(!attribute.isValid)
+                            return emptyHeader;
+
+                        if(attribute.elementType === ElementType.Node)
+                            return [{ "id": qsTr("Node Name"), "name": qsTr("Value")}];
+
+                        if(attribute.elementType === ElementType.Edge)
+                            return [{ "id": qsTr("Edge Identifier"), "name": qsTr("Value")}];
+                    }
                 }
 
                 property double columnDivisorPosition: 0.5
