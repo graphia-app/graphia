@@ -153,6 +153,9 @@ Item
 
         onOpened:
         {
+            if(root.currentIndex === null)
+                return;
+
             // Clone the current index
             root.previousIndex = root.model.index(root.currentIndex.row,
                 root.currentIndex.column, root.currentIndex.parent);
