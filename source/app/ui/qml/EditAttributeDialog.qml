@@ -556,6 +556,27 @@ Window
                             anchors.right: parent.right
                             anchors.leftMargin: 5
                             anchors.rightMargin: 10
+
+                            property var _doubleValidator: DoubleValidator{}
+                            property var _intValidator: IntValidator{}
+
+                            validator:
+                            {
+                                if(root.document === null)
+                                    return null;
+
+                                let attribute = document.attribute(attributeList.selectedValue);
+                                if(attribute === null || !attribute.isValid)
+                                    return null;
+
+                                switch(attribute.valueType)
+                                {
+                                case ValueType.Float:   return _doubleValidator;
+                                case ValueType.Int:     return _intValidator;
+                                }
+
+                                return null;
+                            }
                         }
                     }
                 }
