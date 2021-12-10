@@ -78,7 +78,8 @@ QVariant EditAttributeTableModel::data(const QModelIndex& index, int role) const
         const auto& value = u::contains(_edits._nodeValues, nodeId) ? _edits._nodeValues.at(nodeId) : _attribute->valueOf(nodeId);
         return column == 0 ? _document->graphModel()->nodeName(nodeId) : value;
     }
-    else if(_attribute->elementType() == ElementType::Edge)
+
+    if(_attribute->elementType() == ElementType::Edge)
     {
         const auto& value = u::contains(_edits._edgeValues, edgeId) ? _edits._edgeValues.at(edgeId) : _attribute->valueOf(edgeId);
         return column == 0 ? static_cast<int>(edgeId) : value;
