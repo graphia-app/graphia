@@ -210,7 +210,7 @@ Window
                     {
                         let emptyHeader = [{ "id": "", "name": ""}];
 
-                        if(document === null)
+                        if(root.document === null)
                             return emptyHeader;
 
                         let attribute = document.attribute(attributeList.selectedValue);
