@@ -69,7 +69,7 @@ private:
         auto task = std::packaged_task<ReturnType<Fn, Args...>(Args...)>(f);
         auto future = task.get_future();
 
-        _tasks.emplace([task = std::move(task), args...]() mutable
+        _tasks.emplace([task = std::move(task), ...args = std::forward<Args>(args)]() mutable
         {
             task(std::forward<Args>(args)...);
         });
@@ -461,7 +461,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(_mutex);
 
-        auto future = makeFuture(std::forward<Fn>(f), args...);
+        auto future = makeFuture(std::forward<Fn>(f), std::forward<Args>(args)...);
 
         lock.unlock();
         _waitForNewTask.notify_one();
