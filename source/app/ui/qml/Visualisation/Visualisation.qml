@@ -585,23 +585,29 @@ Item
     }
 
     property string attributeName
-    readonly property var similarAttributes:
+
+    property var similarAttributes: []
+    function updateSimilarAttributes()
     {
         if(document.attributeExists(attributeName))
-            return document.attributesSimilarTo(attributeName);
+            similarAttributes = document.attributesSimilarTo(attributeName);
 
         // The attribute doesn't exist, so we work backwards to provide some sensible options
-        if(root.channel === "Size")
-            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
+        else if(root.channel === "Size")
+            similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
+        else if(root.parameters.hasOwnProperty("gradient"))
+            similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
+        else if(root.parameters.hasOwnProperty("palette"))
+            similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.String);
+        else
+            similarAttributes = document.availableAttributesModel();
+    }
 
-        if(root.parameters.hasOwnProperty("gradient"))
-            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
-
-        if(root.parameters.hasOwnProperty("palette"))
-            return document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.String);
-
-        return document.availableAttributesModel();
-
+    onAttributeNameChanged: { updateSimilarAttributes(); }
+    Connections
+    {
+        target: document
+        function onAttributesChanged() { updateSimilarAttributes(); }
     }
 
     property var attributeValueType:
