@@ -332,11 +332,17 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
         index++;
     }
 
+    if(y >= visibleRowIndices.size())
+        return {};
+
     auto rowIndex = visibleRowIndices.at(y);
     const auto& columnAnnotation = columnAnnotations.at(rowIndex._index);
 
     if(_groupByAnnotation && !rowIndex._enabled)
     {
+        if(x >= _annotationGroupMap.size())
+            return {};
+
         std::set<QString> uniqueValues;
 
         for(auto column : _annotationGroupMap.at(x))
@@ -347,6 +353,8 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
         return tr("%1 unique values").arg(uniqueValues.size());
     }
+    else if(x >= _sortMap.size())
+        return {};
 
     auto column = _groupByAnnotation ? _annotationGroupMap.at(x).front() : _sortMap.at(x);
     return columnAnnotation.valueAt(static_cast<int>(column));
@@ -393,6 +401,9 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
     auto x = static_cast<int>(xf);
     int y = static_cast<int>((rectPoint.y() * static_cast<double>(numVisibleColumnAnnotations())) /
         static_cast<double>(axisRect->height()));
+
+    if(x < 0 || y < 0)
+        return false;
 
     auto text = columnAnnotationValueAt(x, y);
     if(text.isEmpty())
