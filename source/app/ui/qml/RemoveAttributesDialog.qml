@@ -59,12 +59,31 @@ Window
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
+        spacing: Constants.spacing
 
-        Text
+        RowLayout
         {
             Layout.fillWidth: true
+            spacing: Constants.spacing
 
-            text: qsTr("Please select the attributes to remove:")
+            Text
+            {
+                wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                text: qsTr("Please select an attribute(s) to remove.")
+            }
+
+            NamedIcon
+            {
+                iconName: "edit-delete"
+
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignTop
+            }
         }
 
         TreeBox
