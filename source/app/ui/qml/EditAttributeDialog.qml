@@ -68,11 +68,7 @@ Window
         function onLoadComplete() { root.initialise(); }
     }
 
-    onVisibleChanged:
-    {
-        if(visible)
-            root.initialise();
-    }
+    onVisibleChanged: { root.initialise(); }
 
     EditAttributeTableModel
     {
