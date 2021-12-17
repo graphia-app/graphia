@@ -429,7 +429,7 @@ Item
         Item
         {
             Layout.fillWidth: true
-            height: fontMetrics.height + 6
+            Layout.preferredHeight: fontMetrics.height + (2 * headerView.delegatePadding)
 
             TableView
             {
@@ -563,6 +563,7 @@ Item
                         height: headerItem.implicitHeight
                         anchors.left: parent.left
                         anchors.top: parent.top
+                        anchors.bottom: parent.bottom
                         clip: true
 
                         states:
@@ -760,6 +761,14 @@ Item
 
                                 onDoubleClicked: { root.resizeColumnsToContents(); }
                             }
+                        }
+
+                        Rectangle
+                        {
+                            anchors.bottom: parent.bottom
+                            width: parent.width
+                            height: 1
+                            color: sysPalette.midlight
                         }
                     }
                 }
