@@ -53,7 +53,9 @@ Window
             return;
 
         attributeList.model = document.availableAttributesModel();
+        editAllSharedValuesCheckbox.checked = false;
         editAttributeTableModel.attributeName = "";
+        editAttributeTableModel.combineSharedValues = false;
         headerView.columnDivisorPosition = 0.5;
         headerView.forceLayout();
         proxyModel.sortColumn = -1;
@@ -74,6 +76,12 @@ Window
     {
         id: editAttributeTableModel
         document: root.document
+
+        onCombineSharedValuesChanged:
+        {
+            proxyModel.sortColumn = -1;
+            proxyModel.ascendingSortOrder = true;
+        }
     }
 
     Menu
@@ -111,11 +119,30 @@ Window
         standardButtons: StandardButton.Yes | StandardButton.Cancel
 
         property string attributeToEdit: ""
+        property bool toggleSharedValuesMode: false
+
+        function resetFlags()
+        {
+            attributeToEdit = "";
+            toggleSharedValuesMode = false;
+        }
 
         onYes:
         {
             if(attributeToEdit.length > 0)
                 editAttributeTableModel.attributeName = attributeToEdit;
+            else if(toggleSharedValuesMode)
+                editAttributeTableModel.combineSharedValues = editAllSharedValuesCheckbox.checked;
+
+            resetFlags();
+        }
+
+        onRejected:
+        {
+            if(toggleSharedValuesMode)
+                editAllSharedValuesCheckbox.checked = !editAllSharedValuesCheckbox.checked;
+
+            resetFlags();
         }
     }
 
@@ -159,6 +186,42 @@ Window
                 }
                 else
                     editAttributeTableModel.attributeName = selectedValue;
+            }
+        }
+
+        CheckBox
+        {
+            id: editAllSharedValuesCheckbox
+
+            visible:
+            {
+                if(root.document === null)
+                    return false;
+
+                let attribute = document.attribute(attributeList.selectedValue);
+
+                if(!attribute.isValid)
+                    return false;
+
+                return attribute.sharedValues.length > 0;
+            }
+
+            text: qsTr("Edit All Shared Values")
+
+            onCheckedChanged:
+            {
+                if(confirmDiscard.toggleSharedValuesMode)
+                    return;
+
+                // Confirm edit discard when going from non-combined to combined
+                if(checked && editAttributeTableModel.hasEdits)
+                {
+                    confirmDiscard.toggleSharedValuesMode = true;
+                    confirmDiscard.open();
+                    return;
+                }
+
+                editAttributeTableModel.combineSharedValues = checked;
             }
         }
 
@@ -215,10 +278,20 @@ Window
                             return emptyHeader;
 
                         if(attribute.elementType === ElementType.Node)
+                        {
+                            if(editAttributeTableModel.combineSharedValues)
+                                return [{ "id": qsTr("Number of Nodes"), "name": qsTr("Value")}];
+
                             return [{ "id": qsTr("Node Name"), "name": qsTr("Value")}];
+                        }
 
                         if(attribute.elementType === ElementType.Edge)
+                        {
+                            if(editAttributeTableModel.combineSharedValues)
+                                return [{ "id": qsTr("Number of Edges"), "name": qsTr("Value")}];
+
                             return [{ "id": qsTr("Edge Identifier"), "name": qsTr("Value")}];
+                        }
                     }
                 }
 
