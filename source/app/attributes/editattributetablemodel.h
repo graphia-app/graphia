@@ -42,8 +42,11 @@ class EditAttributeTableModel : public QAbstractTableModel
     Q_PROPERTY(QString attributeName MEMBER _attributeName WRITE setAttributeName NOTIFY attributeNameChanged)
     Q_PROPERTY(bool hasEdits READ hasEdits NOTIFY hasEditsChanged)
     Q_PROPERTY(AttributeEdits edits READ edits NOTIFY editsChanged)
+    Q_PROPERTY(bool combineSharedValues MEMBER _combineSharedValues NOTIFY combineSharedValuesChanged)
 
 public:
+    EditAttributeTableModel();
+
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role) const override;
@@ -54,12 +57,13 @@ public:
     Q_INVOKABLE void resetRowValue(int row);
     Q_INVOKABLE void resetAllEdits();
 
-    Q_INVOKABLE bool rowIsEdited(int row);
+    Q_INVOKABLE bool rowIsEdited(int row) const;
 
 private:
     Document* _document = nullptr;
     QString _attributeName;
     const IAttribute* _attribute = nullptr;
+    bool _combineSharedValues = false;
 
     std::vector<NodeId> _selectedNodes;
 
@@ -99,6 +103,7 @@ signals:
     void attributeNameChanged();
     void hasEditsChanged();
     void editsChanged();
+    void combineSharedValuesChanged();
 };
 
 #endif // EDITATTRIBUTETABLEMODEL_H
