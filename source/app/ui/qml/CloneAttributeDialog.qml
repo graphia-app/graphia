@@ -68,7 +68,7 @@ Window
         {
             Layout.fillWidth: true
 
-            text: qsTr("Please select and name the attribute to clone:")
+            text: qsTr("Please select and name an attribute to clone:")
         }
 
         TreeBox
