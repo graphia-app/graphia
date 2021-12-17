@@ -63,12 +63,31 @@ Window
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
+        spacing: Constants.spacing
 
-        Text
+        RowLayout
         {
             Layout.fillWidth: true
+            spacing: Constants.spacing
 
-            text: qsTr("Please select and name an attribute to clone:")
+            Text
+            {
+                wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                text: qsTr("Please select an attribute to clone, then enter a name for the new attribute.")
+            }
+
+            NamedIcon
+            {
+                iconName: "edit-copy"
+
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignTop
+            }
         }
 
         TreeBox
