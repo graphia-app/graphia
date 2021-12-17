@@ -81,9 +81,9 @@ bool ImportAttributesCommand::execute()
 
     auto createAttributes = [&](const auto& elementIds)
     {
-        using ElementId = typename std::remove_reference_t<decltype(elementIds)>::value_type;
+        using E = typename std::remove_reference_t<decltype(elementIds)>::value_type;
 
-        std::map<ElementId, size_t> map;
+        std::map<E, size_t> map;
 
         int elementIdsProcessed = 0;
 
@@ -110,11 +110,11 @@ bool ImportAttributesCommand::execute()
         if(map.empty())
             return std::vector<QString>();
 
-        UserElementData<ElementId>* userData = nullptr;
+        UserElementData<E>* userData = nullptr;
 
-        if constexpr(std::is_same_v<ElementId, NodeId>)
+        if constexpr(std::is_same_v<E, NodeId>)
             userData = &_graphModel->userNodeData();
-        else if constexpr(std::is_same_v<ElementId, EdgeId>)
+        else if constexpr(std::is_same_v<E, EdgeId>)
             userData = &_graphModel->userEdgeData();
 
         for(auto columnIndex : _importColumnIndices)
