@@ -44,8 +44,10 @@ Window
     title: qsTr("Edit Attribute")
     flags: Qt.Window|Qt.Dialog
 
-    minimumWidth: 400
-    minimumHeight: 500
+    minimumWidth: 500
+    minimumHeight: 600
+
+    readonly property double _defaultColumnDivisor: 0.3
 
     function initialise()
     {
@@ -56,7 +58,7 @@ Window
         editAllSharedValuesCheckbox.checked = false;
         editAttributeTableModel.attributeName = "";
         editAttributeTableModel.combineSharedValues = false;
-        headerView.columnDivisorPosition = 0.5;
+        headerView.columnDivisorPosition = _defaultColumnDivisor;
         headerView.forceLayout();
         proxyModel.sortColumn = -1;
         proxyModel.ascendingSortOrder = true;
@@ -152,6 +154,34 @@ Window
 
         anchors.fill: parent
         anchors.margins: Constants.margin
+        spacing: Constants.spacing
+
+        RowLayout
+        {
+            Layout.fillWidth: true
+            spacing: Constants.spacing
+
+            Text
+            {
+                wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
+
+                text: qsTr("Please select an attribute. Double click on a value to edit it. " +
+                    "For attributes with shared values, selecting <i>Edit All Shared Values</i> " +
+                    "allows for bulk editing many attribute values at once.")
+            }
+
+            NamedIcon
+            {
+                iconName: "document-properties"
+
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                Layout.alignment: Qt.AlignTop
+            }
+        }
 
         TreeComboBox
         {
@@ -228,423 +258,444 @@ Window
         SystemPalette { id: sysPalette }
         FontMetrics { id: fontMetrics }
 
-        ColumnLayout
+        Label
         {
+            visible: !tableView.visible
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            spacing: 0
+            horizontalAlignment: Qt.AlignCenter
+            verticalAlignment: Qt.AlignVCenter
+            font.pixelSize: 16
+            font.italic: true
 
-            Label
+            text: qsTr("Select an Attribute")
+        }
+
+        Rectangle
+        {
+            visible: attributeList.selectedValue !== undefined
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            border.color: sysPalette.midlight
+            border.width: 1
+
+            ColumnLayout
             {
-                visible: !tableView.visible
-                Layout.fillWidth: visible
-                Layout.fillHeight: visible
+                anchors.fill: parent
+                anchors.margins: 1
 
-                horizontalAlignment: Qt.AlignCenter
-                verticalAlignment: Qt.AlignVCenter
-                font.pixelSize: 16
-                font.italic: true
+                spacing: 0
 
-                text: qsTr("Select an Attribute")
-            }
+                //FIXME for reasons not understood, the header and table vanish
+                // if this dummy Item isn't included
+                Item { width: 1 }
 
-            TableView
-            {
-                id: headerView
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: fontMetrics.height + 8
-
-                interactive: false
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-
-                model: TableModel
+                TableView
                 {
-                    TableModelColumn { display: "id" }
-                    TableModelColumn { display: "name" }
+                    id: headerView
 
-                    rows:
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: fontMetrics.height + 8
+
+                    interactive: false
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    model: TableModel
                     {
-                        let emptyHeader = [{ "id": "", "name": ""}];
+                        TableModelColumn { display: "id" }
+                        TableModelColumn { display: "name" }
 
-                        if(root.document === null)
-                            return emptyHeader;
-
-                        let attribute = document.attribute(attributeList.selectedValue);
-
-                        if(!attribute.isValid)
-                            return emptyHeader;
-
-                        if(attribute.elementType === ElementType.Node)
+                        rows:
                         {
-                            if(editAttributeTableModel.combineSharedValues)
-                                return [{ "id": qsTr("Number of Nodes"), "name": qsTr("Value")}];
+                            let emptyHeader = [{ "id": "", "name": ""}];
 
-                            return [{ "id": qsTr("Node Name"), "name": qsTr("Value")}];
-                        }
+                            if(root.document === null)
+                                return emptyHeader;
 
-                        if(attribute.elementType === ElementType.Edge)
-                        {
-                            if(editAttributeTableModel.combineSharedValues)
-                                return [{ "id": qsTr("Number of Edges"), "name": qsTr("Value")}];
+                            let attribute = document.attribute(attributeList.selectedValue);
 
-                            return [{ "id": qsTr("Edge Identifier"), "name": qsTr("Value")}];
+                            if(!attribute.isValid)
+                                return emptyHeader;
+
+                            if(attribute.elementType === ElementType.Node)
+                            {
+                                if(editAttributeTableModel.combineSharedValues)
+                                    return [{ "id": qsTr("Number of Nodes"), "name": qsTr("Value")}];
+
+                                return [{ "id": qsTr("Node Name"), "name": qsTr("Value")}];
+                            }
+
+                            if(attribute.elementType === ElementType.Edge)
+                            {
+                                if(editAttributeTableModel.combineSharedValues)
+                                    return [{ "id": qsTr("Number of Edges"), "name": qsTr("Value")}];
+
+                                return [{ "id": qsTr("Edge Identifier"), "name": qsTr("Value")}];
+                            }
                         }
                     }
-                }
 
-                property double columnDivisorPosition: 0.5
+                    property double columnDivisorPosition: 0.5
 
-                onWidthChanged: { headerView.forceLayout(); }
-                columnWidthProvider: function(column)
-                {
-                    return column === 0 ?
-                        headerView.width * columnDivisorPosition :
-                        headerView.width * (1.0 - columnDivisorPosition);
-                }
-
-                readonly property int sortIndicatorWidth: 7
-                readonly property int sortIndicatorHeight: 4
-                readonly property int sortIndicatorMargin: 3
-                readonly property int labelPadding: 4
-
-                delegate: Item
-                {
-                    id: headerItem
-
-                    visible: attributeList.selectedValue !== undefined
-
-                    implicitHeight: headerLabel.height + (headerView.labelPadding * 2)
-
-                    Item
+                    onWidthChanged: { headerView.forceLayout(); }
+                    columnWidthProvider: function(column)
                     {
-                        anchors.fill: parent
-                        clip: true
+                        return column === 0 ?
+                            headerView.width * columnDivisorPosition :
+                            headerView.width * (1.0 - columnDivisorPosition);
+                    }
 
-                        Rectangle
+                    readonly property int sortIndicatorWidth: 7
+                    readonly property int sortIndicatorHeight: 4
+                    readonly property int sortIndicatorMargin: 3
+                    readonly property int labelPadding: 4
+
+                    delegate: Item
+                    {
+                        id: headerItem
+
+                        implicitHeight: headerLabel.height + (headerView.labelPadding * 2)
+
+                        Item
                         {
                             anchors.fill: parent
-                            color: headerMouseArea.containsMouse && headerMouseArea.cursorShape !== Qt.SizeHorCursor ?
-                                Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
-                        }
-
-                        Text
-                        {
-                            id: headerLabel
-
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: headerView.labelPadding
-
-                            width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
-
                             clip: true
-                            elide: Text.ElideRight
-                            wrapMode: Text.NoWrap
-                            renderType: Text.NativeRendering
-                            color: sysPalette.text
-                            text: model.display
-                        }
 
-                        Shape
-                        {
-                            id: sortIndicator
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.right: parent.right
-                            anchors.rightMargin: headerView.sortIndicatorMargin
-                            antialiasing: false
-                            width: headerView.sortIndicatorWidth
-                            height: headerView.sortIndicatorHeight
-                            visible: proxyModel.sortColumn === model.column
-                            transform: Rotation
+                            Rectangle
                             {
-                                origin.x: sortIndicator.width * 0.5
-                                origin.y: sortIndicator.height * 0.5
-                                angle: proxyModel.ascendingSortOrder ? 180 : 0
+                                anchors.fill: parent
+                                color: headerMouseArea.containsMouse && headerMouseArea.cursorShape !== Qt.SizeHorCursor ?
+                                    Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
                             }
 
-                            ShapePath
+                            Text
                             {
-                                miterLimit: 0
-                                strokeColor: sysPalette.mid
-                                fillColor: "transparent"
-                                strokeWidth: 2
-                                startY: sortIndicator.height - 1
-                                PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
-                                PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
-                            }
-                        }
+                                id: headerLabel
 
-                        Rectangle
-                        {
-                            visible: model.column === 0
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: headerView.labelPadding
 
-                            anchors.right: parent.right
-                            height: parent.height
-                            width: 1
-                            color: sysPalette.midlight
-                        }
+                                width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
 
-                        MouseArea
-                        {
-                            id: headerMouseArea
-                            anchors.fill: parent
-
-                            property bool mouseOverResizeHandle:
-                            {
-                                let halfWidth = 5;
-
-                                let atLeft = mouseX <= halfWidth;
-                                let atRight = mouseX >= (width - halfWidth);
-
-                                if(atLeft && model.column === 0)
-                                    return false;
-
-                                if(atRight && model.column === (headerView.model.columnCount - 1))
-                                    return false;
-
-                                return atLeft || atRight;
+                                clip: true
+                                elide: Text.ElideRight
+                                wrapMode: Text.NoWrap
+                                renderType: Text.NativeRendering
+                                color: sysPalette.text
+                                text: model.display
                             }
 
-                            cursorShape: mouseOverResizeHandle || resizing ? Qt.SizeHorCursor : Qt.ArrowCursor
-
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton|Qt.RightButton
-
-                            onClicked:
+                            Shape
                             {
-                                if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
+                                id: sortIndicator
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.right: parent.right
+                                anchors.rightMargin: headerView.sortIndicatorMargin
+                                antialiasing: false
+                                width: headerView.sortIndicatorWidth
+                                height: headerView.sortIndicatorHeight
+                                visible: proxyModel.sortColumn === model.column
+                                transform: Rotation
                                 {
-                                    if(proxyModel.sortColumn === model.column)
-                                        proxyModel.ascendingSortOrder = !proxyModel.ascendingSortOrder;
-                                    else
-                                        proxyModel.sortColumn = model.column;
+                                    origin.x: sortIndicator.width * 0.5
+                                    origin.y: sortIndicator.height * 0.5
+                                    angle: proxyModel.ascendingSortOrder ? 180 : 0
+                                }
+
+                                ShapePath
+                                {
+                                    miterLimit: 0
+                                    strokeColor: sysPalette.mid
+                                    fillColor: "transparent"
+                                    strokeWidth: 2
+                                    startY: sortIndicator.height - 1
+                                    PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
+                                    PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
                                 }
                             }
 
-                            onDoubleClicked:
+                            Rectangle
                             {
-                                if(mouseOverResizeHandle)
-                                {
-                                    headerView.columnDivisorPosition = 0.5;
-                                    headerView.forceLayout();
-                                }
+                                visible: model.column === 0
+
+                                anchors.right: parent.right
+                                width: 1
+                                height: parent.height
+                                color: sysPalette.midlight
                             }
 
-                            drag.target: parent
-                            drag.axis: Drag.XAxis
-                            drag.threshold: 0
-
-                            property bool resizing: false
-
-                            onMouseXChanged:
+                            Rectangle
                             {
-                                if(drag.active)
-                                {
-                                    if(mouseOverResizeHandle)
-                                        resizing = true;
-                                }
-                                else
-                                    resizing = false;
-
-                                if(resizing)
-                                {
-                                    let d = (headerItem.x + mouseX) / headerView.width;
-                                    d = Utils.clamp(d, 0.1, 0.9);
-
-                                    headerView.columnDivisorPosition = d;
-                                    headerView.forceLayout();
-                                }
+                                anchors.bottom: parent.bottom
+                                width: parent.width
+                                height: 1
+                                color: sysPalette.midlight
                             }
-
-                            onReleased: { resizing = false; }
-                        }
-                    }
-                }
-            }
-
-            TableView
-            {
-                id: tableView
-
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-
-                QQC2.ScrollBar.vertical: QQC2.ScrollBar
-                {
-                    z: 100
-                    id: verticalTableViewScrollBar
-                    policy: QQC2.ScrollBar.AsNeeded
-                    contentItem: Rectangle
-                    {
-                        implicitWidth: 5
-                        radius: width / 2
-                        color: sysPalette.dark
-                    }
-                    minimumSize: 0.1
-                    visible: size < 1.0 && tableView.rows > 0
-                }
-
-                property var activeEditField: null
-
-                model: SortFilterProxyModel
-                {
-                    id: proxyModel
-
-                    property int sortColumn: -1
-
-                    sourceModel: editAttributeTableModel
-
-                    sorters: StringSorter
-                    {
-                        roleName:
-                        {
-                            switch(proxyModel.sortColumn)
-                            {
-                            case 0: return "label"
-                            case 1: return "attribute";
-                            }
-
-                            return "";
-                        }
-
-                        sortOrder: proxyModel.ascendingSortOrder ?
-                            Qt.AscendingOrder : Qt.DescendingOrder
-                        numericMode: true
-                    }
-                }
-
-                clip: true
-                visible: tableView.columns !== 0 && attributeList.selectedValue !== undefined
-                boundsBehavior: Flickable.StopAtBounds
-
-                syncView: headerView
-                syncDirection: Qt.Horizontal
-
-                delegate: Item
-                {
-                    // Based on Qt source for BaseTableView delegate
-                    implicitHeight: editField.implicitHeight + 1
-                    implicitWidth: label.implicitWidth + 16
-
-                    clip: false
-
-                    Rectangle
-                    {
-                        anchors.fill: parent
-
-                        color: model.row % 2 ? sysPalette.window : sysPalette.alternateBase
-
-                        Text
-                        {
-                            id: label
-
-                            visible: !editField.visible
-
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-
-                            elide: Text.ElideRight
-                            wrapMode: Text.NoWrap
-                            color: QmlUtils.contrastingColor(parent.color)
-                            font.bold: model.edited
-
-                            text: model.display
 
                             MouseArea
                             {
+                                id: headerMouseArea
                                 anchors.fill: parent
 
+                                property bool mouseOverResizeHandle:
+                                {
+                                    let halfWidth = 5;
+
+                                    let atLeft = mouseX <= halfWidth;
+                                    let atRight = mouseX >= (width - halfWidth);
+
+                                    if(atLeft && model.column === 0)
+                                        return false;
+
+                                    if(atRight && model.column === (headerView.model.columnCount - 1))
+                                        return false;
+
+                                    return atLeft || atRight;
+                                }
+
+                                cursorShape: mouseOverResizeHandle || resizing ? Qt.SizeHorCursor : Qt.ArrowCursor
+
+                                hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton|Qt.RightButton
 
                                 onClicked:
                                 {
-                                    if(mouse.button === Qt.RightButton)
+                                    if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
                                     {
-                                        let row = model.index % proxyModel.rowCount();
-                                        contextMenu.resetRow = proxyModel.mapToSource(row);
-                                        contextMenu.popup();
+                                        if(proxyModel.sortColumn === model.column)
+                                            proxyModel.ascendingSortOrder = !proxyModel.ascendingSortOrder;
+                                        else
+                                            proxyModel.sortColumn = model.column;
                                     }
-
-                                    if(tableView.activeEditField !== null && tableView.activeEditField !== editField)
-                                        tableView.activeEditField.cancel();
                                 }
 
                                 onDoubleClicked:
                                 {
-                                    if(model.column !== 1)
-                                        return;
-
-                                    if(mouse.button === Qt.LeftButton)
-                                        editField.visible = true;
+                                    if(mouseOverResizeHandle)
+                                    {
+                                        headerView.columnDivisorPosition = _defaultColumnDivisor;
+                                        headerView.forceLayout();
+                                    }
                                 }
+
+                                drag.target: parent
+                                drag.axis: Drag.XAxis
+                                drag.threshold: 0
+
+                                property bool resizing: false
+
+                                onMouseXChanged:
+                                {
+                                    if(drag.active)
+                                    {
+                                        if(mouseOverResizeHandle)
+                                            resizing = true;
+                                    }
+                                    else
+                                        resizing = false;
+
+                                    if(resizing)
+                                    {
+                                        let d = (headerItem.x + mouseX) / headerView.width;
+                                        d = Utils.clamp(d, 0.1, 0.9);
+
+                                        headerView.columnDivisorPosition = d;
+                                        headerView.forceLayout();
+                                    }
+                                }
+
+                                onReleased: { resizing = false; }
                             }
                         }
+                    }
+                }
 
-                        TextField
+                TableView
+                {
+                    id: tableView
+
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+
+                    QQC2.ScrollBar.vertical: QQC2.ScrollBar
+                    {
+                        z: 100
+                        id: verticalTableViewScrollBar
+                        policy: QQC2.ScrollBar.AsNeeded
+                        contentItem: Rectangle
                         {
-                            id: editField
+                            implicitWidth: 5
+                            radius: width / 2
+                            color: sysPalette.dark
+                        }
+                        minimumSize: 0.1
+                        visible: size < 1.0 && tableView.rows > 0
+                    }
 
-                            function cancel()
+                    property var activeEditField: null
+
+                    model: SortFilterProxyModel
+                    {
+                        id: proxyModel
+
+                        property int sortColumn: -1
+
+                        sourceModel: editAttributeTableModel
+
+                        sorters: StringSorter
+                        {
+                            roleName:
                             {
-                                text = model.display;
-                                visible = false;
+                                switch(proxyModel.sortColumn)
+                                {
+                                case 0: return "label"
+                                case 1: return "attribute";
+                                }
+
+                                return "";
                             }
 
-                            visible: false
-                            onVisibleChanged:
+                            sortOrder: proxyModel.ascendingSortOrder ?
+                                Qt.AscendingOrder : Qt.DescendingOrder
+                            numericMode: true
+                        }
+                    }
+
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    syncView: headerView
+                    syncDirection: Qt.Horizontal
+
+                    delegate: Item
+                    {
+                        // Based on Qt source for BaseTableView delegate
+                        implicitHeight: editField.implicitHeight + 1
+                        implicitWidth: label.implicitWidth + 16
+
+                        clip: false
+
+                        Rectangle
+                        {
+                            anchors.fill: parent
+
+                            color: model.row % 2 ? sysPalette.window : sysPalette.alternateBase
+
+                            Text
                             {
-                                if(visible)
+                                id: label
+
+                                visible: !editField.visible
+
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+
+                                elide: Text.ElideRight
+                                wrapMode: Text.NoWrap
+                                color: QmlUtils.contrastingColor(parent.color)
+                                font.bold: model.edited
+
+                                text: model.display
+
+                                MouseArea
+                                {
+                                    anchors.fill: parent
+
+                                    acceptedButtons: Qt.LeftButton|Qt.RightButton
+
+                                    onClicked:
+                                    {
+                                        if(mouse.button === Qt.RightButton)
+                                        {
+                                            let row = model.index % proxyModel.rowCount();
+                                            contextMenu.resetRow = proxyModel.mapToSource(row);
+                                            contextMenu.popup();
+                                        }
+
+                                        if(tableView.activeEditField !== null && tableView.activeEditField !== editField)
+                                            tableView.activeEditField.cancel();
+                                    }
+
+                                    onDoubleClicked:
+                                    {
+                                        if(model.column !== 1)
+                                            return;
+
+                                        if(mouse.button === Qt.LeftButton)
+                                            editField.visible = true;
+                                    }
+                                }
+                            }
+
+                            TextField
+                            {
+                                id: editField
+
+                                function cancel()
                                 {
                                     text = model.display;
-                                    selectAll();
-                                    forceActiveFocus();
-
-                                    tableView.activeEditField = editField;
-                                }
-                                else
-                                    tableView.activeEditField = null;
-                            }
-
-                            onEditingFinished:
-                            {
-                                if(visible)
-                                {
-                                    let row = model.index % proxyModel.rowCount();
-                                    row = proxyModel.mapToSource(row);
-                                    editAttributeTableModel.editValue(row, text);
                                     visible = false;
                                 }
-                            }
 
-                            Keys.onEscapePressed: { cancel(); }
-
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: 5
-                            anchors.rightMargin: 10
-
-                            property var _doubleValidator: DoubleValidator{}
-                            property var _intValidator: IntValidator{}
-
-                            validator:
-                            {
-                                if(root.document === null)
-                                    return null;
-
-                                let attribute = document.attribute(attributeList.selectedValue);
-                                if(attribute === null || !attribute.isValid)
-                                    return null;
-
-                                switch(attribute.valueType)
+                                visible: false
+                                onVisibleChanged:
                                 {
-                                case ValueType.Float:   return _doubleValidator;
-                                case ValueType.Int:     return _intValidator;
+                                    if(visible)
+                                    {
+                                        text = model.display;
+                                        selectAll();
+                                        forceActiveFocus();
+
+                                        tableView.activeEditField = editField;
+                                    }
+                                    else
+                                        tableView.activeEditField = null;
                                 }
 
-                                return null;
+                                onEditingFinished:
+                                {
+                                    if(visible)
+                                    {
+                                        let row = model.index % proxyModel.rowCount();
+                                        row = proxyModel.mapToSource(row);
+                                        editAttributeTableModel.editValue(row, text);
+                                        visible = false;
+                                    }
+                                }
+
+                                Keys.onEscapePressed: { cancel(); }
+
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 5
+                                anchors.rightMargin: 10
+
+                                property var _doubleValidator: DoubleValidator{}
+                                property var _intValidator: IntValidator{}
+
+                                validator:
+                                {
+                                    if(root.document === null)
+                                        return null;
+
+                                    let attribute = document.attribute(attributeList.selectedValue);
+                                    if(attribute === null || !attribute.isValid)
+                                        return null;
+
+                                    switch(attribute.valueType)
+                                    {
+                                    case ValueType.Float:   return _doubleValidator;
+                                    case ValueType.Int:     return _intValidator;
+                                    }
+
+                                    return null;
+                                }
                             }
                         }
                     }

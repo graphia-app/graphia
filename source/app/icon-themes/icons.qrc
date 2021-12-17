@@ -19,6 +19,9 @@
 		<file>Tango/16x16/actions/document-open.png</file>
 		<file>Tango/22x22/actions/document-open.png</file>
 		<file>Tango/32x32/actions/document-open.png</file>
+		<file>Tango/16x16/actions/document-properties.png</file>
+		<file>Tango/22x22/actions/document-properties.png</file>
+		<file>Tango/32x32/actions/document-properties.png</file>
 		<file>Tango/16x16/actions/document-save.png</file>
 		<file>Tango/22x22/actions/document-save.png</file>
 		<file>Tango/32x32/actions/document-save.png</file>
