@@ -338,25 +338,36 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
     auto rowIndex = visibleRowIndices.at(y);
     const auto& columnAnnotation = columnAnnotations.at(rowIndex._index);
 
-    if(_groupByAnnotation && !rowIndex._enabled)
+    size_t column;
+
+    if(_groupByAnnotation)
     {
         if(x >= _annotationGroupMap.size())
             return {};
 
-        std::set<QString> uniqueValues;
+        if(!rowIndex._enabled)
+        {
+            std::set<QString> uniqueValues;
 
-        for(auto column : _annotationGroupMap.at(x))
-            uniqueValues.emplace(columnAnnotation.valueAt(static_cast<int>(column)));
+            for(auto groupColumn : _annotationGroupMap.at(x))
+                uniqueValues.emplace(columnAnnotation.valueAt(static_cast<int>(groupColumn)));
 
-        if(uniqueValues.size() == 1)
-            return *uniqueValues.begin();
+            if(uniqueValues.size() == 1)
+                return *uniqueValues.begin();
 
-        return tr("%1 unique values").arg(uniqueValues.size());
+            return tr("%1 unique values").arg(uniqueValues.size());
+        }
+
+        column = _annotationGroupMap.at(x).front();
     }
-    else if(x >= _sortMap.size())
-        return {};
+    else
+    {
+        if(x >= _sortMap.size())
+            return {};
 
-    auto column = _groupByAnnotation ? _annotationGroupMap.at(x).front() : _sortMap.at(x);
+        column = _sortMap.at(x);
+    }
+
     return columnAnnotation.valueAt(static_cast<int>(column));
 }
 
