@@ -737,7 +737,7 @@ Item
 
                             onClicked:
                             {
-                                root.lastClickedColumn = headerItem.modelColumn;
+                                root.lastClickedColumn = headerItem.sourceColumn;
 
                                 if(mouse.button === Qt.LeftButton)
                                 {
