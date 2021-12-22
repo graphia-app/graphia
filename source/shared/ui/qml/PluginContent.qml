@@ -30,4 +30,9 @@ Item
     {
         _mainWindow.updatePluginMenus();
     }
+
+    function cloneAttribute(attributeName)
+    {
+        _mainWindow.cloneAttribute(attributeName);
+    }
 }

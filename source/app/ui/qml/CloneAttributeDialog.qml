@@ -34,22 +34,45 @@ Window
     id: root
 
     property var document: null
+    property string sourceAttributeName: ""
+
+    property string selectedAttributeName:
+    {
+        if(sourceAttributeName.length === 0)
+            return attributeList.selectedValue ? attributeList.selectedValue : "";
+
+        return sourceAttributeName;
+    }
 
     title: qsTr("Clone Attribute")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
 
+    readonly property int _preselectedAttributeDialogHeight: (mainLayout.implicitHeight + (2 * Constants.margin))
+
     minimumWidth: 400
-    minimumHeight: 250
+    minimumHeight: sourceAttributeName.length === 0 ? 250 : _preselectedAttributeDialogHeight
+    maximumHeight: sourceAttributeName.length === 0 ? (1 << 24) - 1 : minimumHeight
 
     onVisibleChanged:
     {
         if(visible)
         {
-            attributeList.model = document.availableAttributesModel();
-            newAttributeName.text = "";
             newAttributeName.manuallyChanged = false;
+
+            if(root.sourceAttributeName.length === 0)
+            {
+                attributeList.model = document.availableAttributesModel();
+                newAttributeName.text = "";
+            }
+            else
+            {
+                newAttributeName.setDefaultName(root.sourceAttributeName);
+                newAttributeName.forceActiveFocus();
+            }
         }
+        else
+            attributeList.model = null;
     }
 
     Preferences
@@ -61,6 +84,8 @@ Window
 
     ColumnLayout
     {
+        id: mainLayout
+
         anchors.fill: parent
         anchors.margins: Constants.margin
         spacing: Constants.spacing
@@ -77,7 +102,9 @@ Window
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
-                text: qsTr("Please select an attribute to clone, then enter a name for the new attribute.")
+                text: root.sourceAttributeName.length === 0 ?
+                    qsTr("Please select an attribute to clone, then enter a name for the new attribute.") :
+                    qsTr("Please enter a name for the new attribute.")
             }
 
             NamedIcon
@@ -96,6 +123,8 @@ Window
 
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            visible: root.sourceAttributeName.length === 0
 
             showSections: sortRoleName !== "display"
             showSearch: true
@@ -121,7 +150,7 @@ Window
             onSelectedValueChanged:
             {
                 if(selectedValue != undefined && !newAttributeName.manuallyChanged)
-                    newAttributeName.text = qsTr("Clone of ") + AttributeUtils.prettify(selectedValue);
+                    newAttributeName.setDefaultName(selectedValue);
             }
 
             AttributeListSortMenu { attributeList: parent }
@@ -134,6 +163,11 @@ Window
             Layout.fillWidth: true
 
             placeholderText: qsTr("New Attribute Name")
+
+            function setDefaultName(attributeName)
+            {
+                text = qsTr("Clone of ") + AttributeUtils.prettify(attributeName);
+            }
 
             property bool manuallyChanged: false
             Keys.onPressed: { manuallyChanged = true; }
@@ -154,11 +188,11 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: attributeList.selectedValues.length === 1 && newAttributeName.text.length > 0
+                enabled: root.selectedAttributeName.length > 0 && newAttributeName.text.length > 0
 
                 onClicked:
                 {
-                    document.cloneAttribute(attributeList.selectedValue, newAttributeName.text);
+                    document.cloneAttribute(root.selectedAttributeName, newAttributeName.text);
                     root.close();
                 }
             }

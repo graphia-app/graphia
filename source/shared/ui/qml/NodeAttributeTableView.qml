@@ -193,6 +193,8 @@ Item
         contextMenu.addSeparator();
         contextMenu.addItem("").action = sortAscendingAction;
         contextMenu.addItem("").action = sortDescendingAction;
+        contextMenu.addSeparator();
+        contextMenu.addItem("").action = cloneSpecificAttributeAction;
     }
 
     function selectAll()
@@ -333,6 +335,13 @@ Item
             proxyModel.sortOrder = Qt.DescendingOrder;
             root.updateSortActionChecked();
         }
+    }
+
+    Action
+    {
+        id: cloneSpecificAttributeAction
+        text: qsTr("Clone Attribute…")
+        onTriggered: { cloneAttribute(root.lastClickedColumnName); }
     }
 
     SystemPalette { id: sysPalette }

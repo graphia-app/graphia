@@ -1272,7 +1272,20 @@ ApplicationWindow
         id: cloneAttributeAction
         text: qsTr("Clone Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: { cloneAttributeDialog.show(); }
+        onTriggered:
+        {
+            cloneAttributeDialog.sourceAttributeName = "";
+            cloneAttributeDialog.show();
+        }
+    }
+
+    function cloneAttribute(attributeName)
+    {
+        if(!cloneAttributeAction.enabled)
+            return;
+
+        cloneAttributeDialog.sourceAttributeName = attributeName;
+        cloneAttributeDialog.show();
     }
 
     EditAttributeDialog
