@@ -939,15 +939,15 @@ Item
                     if(!tableViewContentContainsMouse)
                         return -1;
 
-                    let hoverItem = tableView.childAt(mouseX, tableView.height * 0.5);
-                    if(!hoverItem)
+                    let item = headerView.childAt(mouseX, headerView.height * 0.5);
+                    if(!item)
                         return -1;
 
-                    let tableItem = hoverItem.childAt(mouseX + tableView.contentX, tableView.contentY);
-                    if(!tableItem || tableItem.modelColumn === undefined)
+                    let headerDropAreaItem = item.childAt(mouseX + headerView.contentX, headerView.contentY);
+                    if(!headerDropAreaItem || headerDropAreaItem.modelColumn === undefined)
                         return -1;
 
-                    return tableItem.modelColumn;
+                    return headerDropAreaItem.sourceColumn;
                 }
 
                 function rowAt(mouseY)
