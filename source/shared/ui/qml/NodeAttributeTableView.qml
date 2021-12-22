@@ -223,6 +223,32 @@ Item
         }
     }
 
+    property alias resizeColumnsAction: resizeColumnsToContentsAction
+
+    Action
+    {
+        id: resizeColumnsToContentsAction
+        text: qsTr("&Resize Columns To Contents")
+        iconName: "auto-column-resize"
+        onTriggered:
+        {
+            root.resizeColumnsToContents();
+        }
+    }
+
+    property alias selectAction: selectColumnsAction
+
+    Action
+    {
+        id: selectColumnsAction
+        text: qsTr("&Select Visible Columns")
+        iconName: "column-select"
+        checkable: true
+        checked: root.columnSelectionMode
+
+        onTriggered: { root.columnSelectionMode = !root.columnSelectionMode; }
+    }
+
     property alias exportAction: exportTableAction
 
     Action

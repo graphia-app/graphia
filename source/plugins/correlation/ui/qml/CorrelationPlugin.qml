@@ -50,14 +50,6 @@ PluginContent
 
     Action
     {
-        id: resizeColumnsToContentsAction
-        text: qsTr("Resize Columns To Fit Contents")
-        iconName: "auto-column-resize"
-        onTriggered: tableView.resizeColumnsToContents();
-    }
-
-    Action
-    {
         id: toggleColumnNamesAction
         text: qsTr("Show &Column Names")
         iconName: "format-text-bold"
@@ -68,20 +60,6 @@ PluginContent
         {
             plot.showAllColumns = false;
             plot.showColumnNames = !plot.showColumnNames;
-        }
-    }
-
-    Action
-    {
-        id: selectColumnsAction
-        text: qsTr("Select Visible Columns")
-        iconName: "column-select"
-        checkable: true
-        checked: tableView.columnSelectionMode
-
-        onTriggered:
-        {
-            tableView.columnSelectionMode = !tableView.columnSelectionMode;
         }
     }
 
@@ -738,8 +716,8 @@ PluginContent
 
             ToolButton { action: toggleUiOrientationAction }
             ToolBarSeparator {}
-            ToolButton { action: resizeColumnsToContentsAction }
-            ToolButton { action: selectColumnsAction }
+            ToolButton { action: tableView.resizeColumnsAction }
+            ToolButton { action: tableView.selectAction }
             ToolButton { action: tableView.exportAction }
             ToolBarSeparator {}
             ToolButton { action: toggleColumnNamesAction }

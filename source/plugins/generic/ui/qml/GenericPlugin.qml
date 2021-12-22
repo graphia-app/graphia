@@ -28,28 +28,6 @@ PluginContent
 
     anchors.fill: parent
 
-    Action
-    {
-        id: resizeColumnsToContentsAction
-        text: qsTr("&Resize Columns To Contents")
-        iconName: "auto-column-resize"
-        onTriggered:
-        {
-            tableView.resizeColumnsToContents();
-        }
-    }
-
-    Action
-    {
-        id: selectColumnsAction
-        text: qsTr("&Select Visible Columns")
-        iconName: "column-select"
-        checkable: true
-        checked: tableView.columnSelectionMode
-
-        onTriggered: { tableView.columnSelectionMode = !tableView.columnSelectionMode; }
-    }
-
     function createMenu(index, menu)
     {
         switch(index)
@@ -68,8 +46,8 @@ PluginContent
         {
             anchors.fill: parent
 
-            ToolButton { action: resizeColumnsToContentsAction }
-            ToolButton { action: selectColumnsAction }
+            ToolButton { action: tableView.resizeColumnsAction }
+            ToolButton { action: tableView.selectAction }
             ToolButton { action: tableView.exportAction }
 
             Item { Layout.fillWidth: true }
