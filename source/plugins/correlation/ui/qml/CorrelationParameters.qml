@@ -1662,11 +1662,13 @@ BaseParameterDialog
                                     "usually reduce the graph size.") + "</font>";
                             }
                         }
-                        else if(!tabularDataParser.graphSizeEstimateInProgress)
+                        else if(!tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy)
                         {
-                            summaryString += "<br><br>" + warningFont +
+                            summaryString += "<br>" + warningFont +
                                 qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
                         }
+                        else
+                            summaryString += "<br>Estimate in progress...";
 
                         return summaryString;
                     }
