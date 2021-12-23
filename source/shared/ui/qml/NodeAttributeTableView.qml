@@ -356,21 +356,21 @@ Item
     Action
     {
         id: cloneSpecificAttributeAction
-        text: qsTr("Clone Attribute…")
+        text: qsTr("Clone…")
         onTriggered: { cloneAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: editSpecificAttributeAction
-        text: qsTr("Edit Attribute…")
+        text: qsTr("Edit…")
         onTriggered: { editAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: removeSpecificAttributeAction
-        text: qsTr("Remove Attribute")
+        text: qsTr("Remove")
         onTriggered: { document.removeAttributes([root.lastClickedColumnName]); }
     }
 
