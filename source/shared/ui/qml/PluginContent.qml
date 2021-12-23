@@ -26,18 +26,7 @@ Item
     // Don't use this directly, that is naughty
     property var _mainWindow: null
 
-    function updateMenu()
-    {
-        _mainWindow.updatePluginMenus();
-    }
-
-    function cloneAttribute(attributeName)
-    {
-        _mainWindow.cloneAttribute(attributeName);
-    }
-
-    function editAttribute(attributeName)
-    {
-        _mainWindow.editAttribute(attributeName);
-    }
+    function updateMenu() { _mainWindow.updatePluginMenus(); }
+    function cloneAttribute(attributeName) { _mainWindow.cloneAttribute(attributeName); }
+    function editAttribute(attributeName) { _mainWindow.editAttribute(attributeName); }
 }
