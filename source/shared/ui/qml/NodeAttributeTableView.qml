@@ -194,7 +194,19 @@ Item
         contextMenu.addItem("").action = sortAscendingAction;
         contextMenu.addItem("").action = sortDescendingAction;
         contextMenu.addSeparator();
+
+        let attributeIsEditable = function()
+        {
+            let attribute = document.attribute(root.lastClickedColumnName);
+
+            return attribute.isValid && attribute.editable;
+        };
+
         contextMenu.addItem("").action = cloneSpecificAttributeAction;
+
+        let editItem = contextMenu.addItem("");
+        editItem.action = editSpecificAttributeAction;
+        editItem.visible = Qt.binding(attributeIsEditable);
     }
 
     function selectAll()
@@ -342,6 +354,13 @@ Item
         id: cloneSpecificAttributeAction
         text: qsTr("Clone Attribute…")
         onTriggered: { cloneAttribute(root.lastClickedColumnName); }
+    }
+
+    Action
+    {
+        id: editSpecificAttributeAction
+        text: qsTr("Edit Attribute…")
+        onTriggered: { editAttribute(root.lastClickedColumnName); }
     }
 
     SystemPalette { id: sysPalette }

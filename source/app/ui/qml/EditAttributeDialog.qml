@@ -40,6 +40,15 @@ Window
     id: root
 
     property var document: null
+    property string attributeName: ""
+
+    property string selectedAttributeName:
+    {
+        if(attributeName.length === 0)
+            return attributeList.selectedValue ? attributeList.selectedValue : "";
+
+        return attributeName;
+    }
 
     title: qsTr("Edit Attribute")
     flags: Qt.Window|Qt.Dialog
@@ -56,7 +65,8 @@ Window
 
         attributeList.model = document.availableAttributesModel();
         editAllSharedValuesCheckbox.checked = false;
-        editAttributeTableModel.attributeName = "";
+        editAttributeTableModel.attributeName =
+            root.attributeName.length !== 0 ? root.attributeName : "";
         editAttributeTableModel.combineSharedValues = false;
         headerView.columnDivisorPosition = _defaultColumnDivisor;
         headerView.forceLayout();
@@ -72,7 +82,13 @@ Window
         function onLoadComplete() { root.initialise(); }
     }
 
-    onVisibleChanged: { root.initialise(); }
+    onVisibleChanged:
+    {
+        if(!visible)
+            root.attributeName = "";
+
+        root.initialise();
+    }
 
     EditAttributeTableModel
     {
@@ -168,7 +184,8 @@ Window
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
 
-                text: qsTr("Please select an attribute. Double click on a value to edit it. " +
+                text: (root.attributeName.length === 0 ? qsTr("Please select an attribute. ") : "") +
+                    qsTr("Double click on a value to edit it. " +
                     "For attributes with shared values, selecting <i>Edit All Shared Values</i> " +
                     "allows for bulk editing many attribute values at once.")
             }
@@ -186,6 +203,8 @@ Window
         TreeComboBox
         {
             id: attributeList
+
+            visible: root.attributeName.length === 0
 
             Layout.fillWidth: true
 
@@ -228,7 +247,7 @@ Window
                 if(root.document === null)
                     return false;
 
-                let attribute = document.attribute(attributeList.selectedValue);
+                let attribute = document.attribute(root.selectedAttributeName);
 
                 if(!attribute.isValid)
                     return false;
@@ -275,7 +294,7 @@ Window
 
         Rectangle
         {
-            visible: attributeList.selectedValue !== undefined
+            visible: root.selectedAttributeName.length > 0
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -317,7 +336,7 @@ Window
                             if(root.document === null)
                                 return emptyHeader;
 
-                            let attribute = document.attribute(attributeList.selectedValue);
+                            let attribute = document.attribute(root.selectedAttributeName);
 
                             if(!attribute.isValid)
                                 return emptyHeader;
@@ -684,7 +703,7 @@ Window
                                     if(root.document === null)
                                         return null;
 
-                                    let attribute = document.attribute(attributeList.selectedValue);
+                                    let attribute = document.attribute(root.selectedAttributeName);
                                     if(attribute === null || !attribute.isValid)
                                         return null;
 
@@ -712,11 +731,11 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: attributeList.selectedValue !== undefined && editAttributeTableModel.hasEdits
+                enabled: root.selectedAttributeName.length > 0 && editAttributeTableModel.hasEdits
 
                 onClicked:
                 {
-                    document.editAttribute(attributeList.selectedValue, editAttributeTableModel.edits);
+                    document.editAttribute(root.selectedAttributeName, editAttributeTableModel.edits);
                     root.close();
                 }
             }

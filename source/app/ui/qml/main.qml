@@ -1299,7 +1299,20 @@ ApplicationWindow
         id: editAttributeAction
         text: qsTr("Edit Attribute…")
         enabled: currentTab !== null && !currentTab.document.busy
-        onTriggered: { editAttributeDialog.show(); }
+        onTriggered:
+        {
+            editAttributeDialog.attributeName = "";
+            editAttributeDialog.show();
+        }
+    }
+
+    function editAttribute(attributeName)
+    {
+        if(!editAttributeAction.enabled)
+            return;
+
+        editAttributeDialog.attributeName = attributeName;
+        editAttributeDialog.show();
     }
 
     RemoveAttributesDialog

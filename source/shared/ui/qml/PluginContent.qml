@@ -35,4 +35,9 @@ Item
     {
         _mainWindow.cloneAttribute(attributeName);
     }
+
+    function editAttribute(attributeName)
+    {
+        _mainWindow.editAttribute(attributeName);
+    }
 }
