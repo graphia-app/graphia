@@ -207,6 +207,10 @@ Item
         let editItem = contextMenu.addItem("");
         editItem.action = editSpecificAttributeAction;
         editItem.visible = Qt.binding(attributeIsEditable);
+
+        let removeItem = contextMenu.addItem("");
+        removeItem.action = removeSpecificAttributeAction;
+        removeItem.visible = Qt.binding(attributeIsEditable);
     }
 
     function selectAll()
@@ -361,6 +365,13 @@ Item
         id: editSpecificAttributeAction
         text: qsTr("Edit Attribute…")
         onTriggered: { editAttribute(root.lastClickedColumnName); }
+    }
+
+    Action
+    {
+        id: removeSpecificAttributeAction
+        text: qsTr("Remove Attribute")
+        onTriggered: { document.removeAttributes([root.lastClickedColumnName]); }
     }
 
     SystemPalette { id: sysPalette }
