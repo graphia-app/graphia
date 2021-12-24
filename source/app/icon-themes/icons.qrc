@@ -58,6 +58,9 @@
 		<file>Tango/16x16/mimetypes/font-x-generic.png</file>
 		<file>Tango/22x22/mimetypes/font-x-generic.png</file>
 		<file>Tango/32x32/mimetypes/font-x-generic.png</file>
+		<file>Tango/16x16/actions/format-justify-left.png</file>
+		<file>Tango/22x22/actions/format-justify-left.png</file>
+		<file>Tango/32x32/actions/format-justify-left.png</file>
 		<file>Tango/16x16/actions/format-text-bold.png</file>
 		<file>Tango/22x22/actions/format-text-bold.png</file>
 		<file>Tango/32x32/actions/format-text-bold.png</file>
@@ -73,9 +76,18 @@
 		<file>Tango/16x16/actions/go-top.png</file>
 		<file>Tango/22x22/actions/go-top.png</file>
 		<file>Tango/32x32/actions/go-top.png</file>
+		<file>Tango/16x16/graphia/grid-lines.png</file>
+		<file>Tango/22x22/graphia/grid-lines.png</file>
+		<file>Tango/32x32/graphia/grid-lines.png</file>
+		<file>Tango/16x16/graphia/group-by.png</file>
+		<file>Tango/22x22/graphia/group-by.png</file>
+		<file>Tango/32x32/graphia/group-by.png</file>
 		<file>Tango/16x16/apps/help-browser.png</file>
 		<file>Tango/22x22/apps/help-browser.png</file>
 		<file>Tango/32x32/apps/help-browser.png</file>
+		<file>Tango/16x16/graphia/include-zero.png</file>
+		<file>Tango/22x22/graphia/include-zero.png</file>
+		<file>Tango/32x32/graphia/include-zero.png</file>
 		<file>Tango/16x16/actions/list-add.png</file>
 		<file>Tango/22x22/actions/list-add.png</file>
 		<file>Tango/32x32/actions/list-add.png</file>
@@ -106,6 +118,9 @@
 		<file>Tango/16x16/actions/process-stop.png</file>
 		<file>Tango/22x22/actions/process-stop.png</file>
 		<file>Tango/32x32/actions/process-stop.png</file>
+		<file>Tango/16x16/graphia/show-outliers.png</file>
+		<file>Tango/22x22/graphia/show-outliers.png</file>
+		<file>Tango/32x32/graphia/show-outliers.png</file>
 		<file>Tango/16x16/status/software-update-available.png</file>
 		<file>Tango/22x22/status/software-update-available.png</file>
 		<file>Tango/32x32/status/software-update-available.png</file>

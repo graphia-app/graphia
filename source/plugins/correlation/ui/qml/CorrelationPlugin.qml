@@ -104,6 +104,8 @@ PluginContent
     {
         id: toggleGridLines
         text: qsTr("Grid Lines")
+        iconName: "grid-lines"
+
         checkable: true
         checked: plot.showGridLines
 
@@ -114,6 +116,8 @@ PluginContent
     {
         id: togglePlotLegend
         text: qsTr("Legend")
+        iconName: "format-justify-left"
+
         checkable: true
         checked: plot.showLegend
 
@@ -124,6 +128,8 @@ PluginContent
     {
         id: toggleIncludeYZero
         text: qsTr("Include Zero In Y Axis")
+        iconName: "include-zero"
+
         checkable: true
         checked: plot.includeYZero
 
@@ -134,6 +140,10 @@ PluginContent
     {
         id: toggleShowOutliers
         text: qsTr("Show Outliers")
+        iconName: "show-outliers"
+
+        enabled: plot.iqrStyle
+
         checkable: true
         checked: plot.showIqrOutliers
 
@@ -317,6 +327,8 @@ PluginContent
     {
         id: groupByAnnotationAction
         text: qsTr("Group By Annotation")
+        iconName: "group-by"
+
         enabled: plot.visibleColumnAnnotationNames.length > 0 || plot.columnAnnotationSelectionModeEnabled
         checkable: true
         checked: plot.groupByAnnotation
@@ -360,7 +372,7 @@ PluginContent
     {
         id: savePlotImageAction
         text: qsTr("Save As &Image…")
-        iconName: "edit-save"
+        iconName: "camera-photo"
         onTriggered: { imageSaveDialog.open(); }
     }
 
@@ -723,9 +735,23 @@ PluginContent
             ToolButton { action: toggleColumnNamesAction }
             ToolButton
             {
-                visible: plugin.model.columnAnnotationNames.length > 0
+                visible: selectColumnAnnotationsAction.enabled
                 action: selectColumnAnnotationsAction
             }
+            ToolButton { action: toggleGridLines }
+            ToolButton { action: togglePlotLegend }
+            ToolButton { action: toggleIncludeYZero }
+            ToolButton
+            {
+                visible: groupByAnnotationAction.enabled
+                action: groupByAnnotationAction
+            }
+            ToolButton
+            {
+                visible: toggleShowOutliers.enabled
+                action: toggleShowOutliers
+            }
+            ToolButton { action: savePlotImageAction }
 
             Item { Layout.fillWidth: true }
         }
