@@ -41,19 +41,8 @@
 #include <QNetworkProxy>
 
 #include <iostream>
+#include <fstream>
 #include <chrono>
-
-#include <fcntl.h>
-#include <cstdio>
-#include <cstdlib>
-
-#ifdef Q_OS_WINDOWS
-#include <io.h>
-#define S_IRUSR S_IREAD
-#define S_IWUSR S_IWRITE
-#else
-#include <unistd.h>
-#endif
 
 #include "application.h"
 #include "preferences.h"
@@ -167,8 +156,8 @@ static void configureProxy()
     QNetworkProxy::setApplicationProxy(proxy);
 }
 
-static int stdoutFd = -1;
-static int stderrFd = -1;
+std::ofstream stdoutFile;
+std::ofstream stderrFile;
 static QString stdoutFilename;
 static QString stderrFilename;
 
@@ -178,22 +167,16 @@ static void captureConsoleOutput()
     stdoutFilename = QStringLiteral("%1/stdout.txt").arg(appDataLocation);
     stderrFilename = QStringLiteral("%1/stderr.txt").arg(appDataLocation);
 
-    stdoutFd = open(stdoutFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
-    stderrFd = open(stderrFilename.toLocal8Bit().constData(), O_CREAT|O_TRUNC|O_RDWR, S_IRUSR|S_IWUSR);
+    stdoutFile.open(stdoutFilename.toLocal8Bit().constData());
+    std::cout.rdbuf(stdoutFile.rdbuf());
 
-    auto stdoutDupResult = dup2(stdoutFd, fileno(stdout));
-    auto stderrDupResult = dup2(stderrFd, fileno(stderr));
-
-    if(stdoutDupResult < 0 || stderrDupResult < 0)
-        std::cerr << "Failed to redirect stdout/stderr\n";
+    stderrFile.open(stderrFilename.toLocal8Bit().constData());
+    std::cerr.rdbuf(stderrFile.rdbuf());
 
     auto result = std::atexit([]
     {
-        if(stdoutFd >= 0)
-            close(stdoutFd);
-
-        if(stderrFd >= 0)
-            close(stderrFd);
+        stdoutFile.close();
+        stderrFile.close();
     });
 
     if(result != 0)
@@ -448,10 +431,8 @@ int start(int argc, char *argv[])
 
         if(!stdoutFilename.isEmpty() && !stderrFilename.isEmpty())
         {
-            close(stdoutFd);
-            close(stderrFd);
-
-            stdoutFd = stderrFd = -1;
+            stdoutFile.close();
+            stderrFile.close();
 
             QFile::copy(stdoutFilename, QDir(directory).filePath("stdout.txt"));
             QFile::copy(stderrFilename, QDir(directory).filePath("stderr.txt"));
