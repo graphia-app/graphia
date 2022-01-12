@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2021 Graphia Technologies Ltd.
+ * Copyright © 2013-2022 Graphia Technologies Ltd.
  *
  * This file is part of Graphia.
  *
