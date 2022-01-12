@@ -141,6 +141,8 @@ function sanitiseJson(text)
 
 function decimalPointsForValue(value)
 {
+    value = Math.abs(value);
+
     if(value <= 0.001)
         return 5;
     else if(value <= 0.01)
