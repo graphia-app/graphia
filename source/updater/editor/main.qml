@@ -409,7 +409,7 @@ ApplicationWindow
                 }
             }
 
-            tab.item.markdownText = update.changeLog;
+            tab.item.markdownText = tab.item.previewText = update.changeLog;
         }
 
         // Newly opened file doesn't need to be saved
@@ -675,6 +675,7 @@ ApplicationWindow
                     property alias versionText: version.text
                     property alias targetVersionRegexText: targetVersionRegex.text
                     property alias markdownText: markdownChangelog.text
+                    property alias previewText: preview.text
 
                     property alias markdownTextArea: markdownChangelog
 
@@ -749,7 +750,19 @@ ApplicationWindow
 
                                 id: markdownChangelog
 
-                                onTextChanged: { setSaveRequired(); }
+                                Timer
+                                {
+                                    id: editTimer
+                                    interval: 500
+
+                                    onTriggered: { preview.text = markdownChangelog.text; }
+                                }
+
+                                onTextChanged:
+                                {
+                                    editTimer.restart();
+                                    setSaveRequired();
+                                }
                             }
 
                             RowLayout
@@ -818,8 +831,9 @@ ApplicationWindow
                             Layout.minimumWidth: 400
                             Layout.fillHeight: true
 
+                            id: preview
+
                             readOnly: true
-                            text: markdownChangelog.text
 
                             textFormat: TextEdit.MarkdownText
                         }
