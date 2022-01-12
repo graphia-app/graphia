@@ -159,6 +159,9 @@ function decimalPointsForValue(value)
 
 function decimalPointsForRange(min, max)
 {
+    if(!min || !max || min > max)
+        return 0;
+
     return decimalPointsForValue(max - min);
 }
 
