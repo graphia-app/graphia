@@ -50,7 +50,7 @@ struct scope_exit {
 
 private:
     EF exit_function;
-    bool execute_on_destruction; // exposition only
+    bool execute_on_destruction = false; // exposition only
 };
 template <typename EF>
 auto make_scope_exit(EF &&exit_function) noexcept {
