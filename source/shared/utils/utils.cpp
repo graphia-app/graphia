@@ -19,6 +19,8 @@
 #include "utils.h"
 #include "static_block.h"
 
+#include <numbers>
+
 int u::smallestPowerOf2GreaterThan(int x)
 {
     if(x < 0)
@@ -36,11 +38,11 @@ int u::smallestPowerOf2GreaterThan(int x)
 
 float u::normaliseAngle(float radians)
 {
-    while(radians > Constants::Pi())
-        radians -= Constants::TwoPi();
+    while(radians > std::numbers::pi_v<float>)
+        radians -= (2.0f * std::numbers::pi_v<float>);
 
-    while(radians <= -Constants::Pi())
-        radians += Constants::TwoPi();
+    while(radians <= -std::numbers::pi_v<float>)
+        radians += (2.0f * std::numbers::pi_v<float>);
 
     return radians;
 }
