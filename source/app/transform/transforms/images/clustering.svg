@@ -1,56 +1,35 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
-xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-viewBox="0 0 53 53" style="enable-background:new 0 0 53 53;"
-xml:space="preserve">
-<rect x="27" y="28" style="fill:#424A60;" width="2" height="18" />
-<rect x="37.5" y="2.893"
-transform="matrix(0.7071 0.7071 -0.7071 0.7071 20.8223 -23.2696)"
-style="fill:#424A60;" width="2" height="21.213" />
-<rect x="15" y="21.858"
-transform="matrix(0.7071 0.7071 -0.7071 0.7071 30.1421 -0.7696)"
-style="fill:#424A60;" width="2" height="28.284" />
-<rect x="10.722" y="13.5"
-transform="matrix(0.7071 0.7071 -0.7071 0.7071 15.6716 -8.8345)"
-style="fill:#424A60;" width="15.556" height="2" />
-<rect x="26.893" y="32.5"
-transform="matrix(0.7071 0.7071 -0.7071 0.7071 34.6716 -16.7046)"
-style="fill:#424A60;" width="21.213" height="2" />
-<circle style="fill:#43B05C;" cx="48" cy="5" r="5" />
-<circle style="fill:#7383BF;" cx="28" cy="48" r="5" />
-<circle style="fill:#57D8AB;" cx="5" cy="46" r="5" />
-<circle style="fill:#D75A4A;" cx="12" cy="8" r="3" />
-<circle style="fill:#EBBA16;" cx="44" cy="40" r="3" />
-<circle style="fill:#4B6DAA;" cx="28" cy="24" r="7" />
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
+<svg width="800" height="800" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <line fill="none" id="svg_35" stroke="#9b9b9b" stroke-width="25" transform="rotate(27.6562 442.5 486)" x1="442.00011" x2="443.00011" y1="406.65139" y2="565.34862"/>
+  <line fill="none" id="svg_16" stroke="#9b9b9b" stroke-width="25" x1="241" x2="221" y1="79" y2="215"/>
+  <line fill="none" id="svg_21" points="null" stroke="#9b9b9b" stroke-width="25" transform="matrix(1 0 0 1 0 0) rotate(-12.2577 415.058 186.527)" x1="448.78888" x2="381.32686" y1="124.42362" y2="248.63008"/>
+  <line fill="none" id="svg_22" stroke="#9b9b9b" stroke-width="25" transform="rotate(-28.8108 432.961 352.747)" x1="432.46065" x2="433.46065" y1="266.66596" y2="438.82732"/>
+  <line fill="none" id="svg_23" stroke="#9b9b9b" stroke-width="25" transform="rotate(-59.1963 168.023 180.423)" x1="167.52299" x2="168.52299" y1="109.76228" y2="251.08374"/>
+  <circle cx="240.5" cy="82" fill="#199311" id="svg_7" r="50" stroke="#000000" stroke-width="6"/>
+  <circle cx="100.5" cy="141.5" fill="#199311" id="svg_1" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_24" stroke="#9b9b9b" stroke-width="25" transform="rotate(-70.6795 306.5 249)" x1="306" x2="307" y1="153.5" y2="344.5"/>
+  <circle cx="219.5" cy="214" fill="#199311" id="svg_8" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_25" stroke="#9b9b9b" stroke-width="25" transform="rotate(16.1439 308.483 364.88)" x1="364.40851" x2="252.55815" y1="248.14385" y2="481.61606"/>
+  <circle cx="434.5" cy="106" fill="#8126c0" id="svg_11" r="50" stroke="#000000" stroke-width="6" transform="matrix(1 0 0 1 0 0)"/>
+  <line fill="none" id="svg_26" stroke="#9b9b9b" stroke-width="25" transform="rotate(56.7396 180.493 486.116)" x1="179.99258" x2="180.99258" y1="424.40082" y2="547.83043"/>
+  <circle cx="105.5" cy="531" fill="#ff7700" id="svg_14" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_27" stroke="#9b9b9b" stroke-width="25" x1="232.67234" x2="234.32766" y1="453.50322" y2="588.49678"/>
+  <circle cx="233.5" cy="599" fill="#ff7700" id="svg_2" r="50" stroke="#000000" stroke-width="6"/>
+  <circle cx="229.5" cy="449" fill="#ff7700" id="svg_13" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_28" stroke="#9b9b9b" stroke-width="25" transform="rotate(94.8181 477.571 285.163)" x1="477.07057" x2="478.07057" y1="199.6277" y2="370.69837"/>
+  <line fill="none" id="svg_29" stroke="#9b9b9b" stroke-width="25" transform="rotate(32.6163 512.86 363.23)" x1="512.36004" x2="513.36004" y1="283.88157" y2="442.5788"/>
+  <circle cx="550.5" cy="294" fill="#8126c0" id="svg_3" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_30" stroke="#9b9b9b" stroke-width="25" transform="rotate(-4.44738 599.591 621.032)" x1="599.09136" x2="600.09136" y1="539.60595" y2="702.45762"/>
+  <line fill="none" id="svg_31" stroke="#9b9b9b" stroke-width="25" transform="rotate(49.8812 669.355 652.548)" x1="668.85537" x2="669.85537" y1="570.31425" y2="734.78231"/>
+  <circle cx="607.5" cy="698" fill="#1df3f3" id="svg_9" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_32" stroke="#9b9b9b" stroke-width="25" transform="rotate(-65.6646 661.509 571.979)" x1="661.00944" x2="662.00944" y1="488.56213" y2="655.39608"/>
+  <circle cx="725.5" cy="607" fill="#1df3f3" id="svg_4" r="50" stroke="#000000" stroke-width="6"/>
+  <line fill="none" id="svg_33" stroke="#9b9b9b" stroke-width="25" transform="rotate(-43.6103 531.588 484.44)" x1="531.0877" x2="532.0877" y1="399.21589" y2="569.66437"/>
+  <circle cx="594.5" cy="548" fill="#1df3f3" id="svg_10" r="50" stroke="#000000" stroke-width="6"/>
+  <circle cx="470.5" cy="424" fill="#8126c0" id="svg_12" r="50" stroke="#000000" stroke-width="6"/>
+  <circle cx="388.5" cy="279" fill="#8126c0" id="svg_15" r="50" stroke="#000000" stroke-width="6"/>
+  <circle cx="408.5" cy="554" fill="#8126c0" id="svg_34" r="50" stroke="#000000" stroke-width="6"/>
+ </g>
 </svg>

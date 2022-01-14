@@ -1,30 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<svg version="1" xmlns="http://www.w3.org/2000/svg"
-viewBox="0 0 48 48" enable-background="new 0 0 48 48">
-  <rect x="16.7" y="1.6"
-  transform="matrix(-.707 -.707 .707 -.707 24 57.941)"
-  fill="#FFA000" width="14.6" height="44.8" />
-  <g fill="#9E6400">
-    <rect x="17.9" y="20.2"
-    transform="matrix(-.707 -.707 .707 -.707 21.177 51.125)"
-    width="6.6" height="2" />
-    <rect x="22.3" y="15.2"
-    transform="matrix(-.707 -.707 .707 -.707 29.833 44.71)"
-    width="3.7" height="2" />
-    <rect x="25.9" y="12.2"
-    transform="matrix(-.707 -.707 .707 -.707 40.49 43.125)"
-    width="6.6" height="2" />
-    <rect x="31.2" y="6.3"
-    transform="matrix(.707 -.707 .707 .707 3.643 25.147)" width="2"
-    height="3.7" />
-    <rect x="6.3" y="31.2"
-    transform="matrix(-.707 -.707 .707 -.707 -8.794 60.71)"
-    width="3.7" height="2" />
-    <rect x="9.9" y="28.2"
-    transform="matrix(-.707 -.707 .707 -.707 1.863 59.125)"
-    width="6.6" height="2" />
-    <rect x="14.3" y="23.2"
-    transform="matrix(-.707 -.707 .707 -.707 10.52 52.71)"
-    width="3.7" height="2" />
-  </g>
+<svg width="800" height="800" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" enable-background="new 0 0 48 48" version="1">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <rect fill="#d8d847" height="200" id="svg_1" stroke="#000000" stroke-linejoin="round" stroke-width="15" transform="rotate(-45 403.553 403.553)" width="800" x="3.55338" y="303.55338"/>
+  <line fill="none" id="svg_2" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 367.439 366.438)" x1="367.4385" x2="367.4385" y1="323.92686" y2="408.95012"/>
+  <line fill="none" id="svg_3" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 225.017 507.86)" x1="225.01714" x2="225.01714" y1="465.34821" y2="550.37146"/>
+  <line fill="none" id="svg_4" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 507.86 225.017)" x1="507.85985" x2="507.85985" y1="182.50549" y2="267.52874"/>
+  <line fill="none" id="svg_5" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 419.463 278.042)" x1="419.46329" x2="419.46329" y1="260.54192" y2="295.54192"/>
+  <line fill="none" id="svg_6" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 136.621 560.885)" x1="136.62057" x2="136.62057" y1="543.38463" y2="578.38463"/>
+  <line fill="none" id="svg_7" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 278.042 419.463)" x1="278.04193" x2="278.04193" y1="401.96328" y2="436.96328"/>
+  <line fill="none" id="svg_8" stroke="#000000" stroke-linecap="round" stroke-width="15" transform="rotate(-45 560.885 136.621)" x1="560.88464" x2="560.88464" y1="119.12054" y2="154.12054"/>
+ </g>
 </svg>
