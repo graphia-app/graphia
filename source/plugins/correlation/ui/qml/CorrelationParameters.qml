@@ -391,6 +391,7 @@ BaseParameterDialog
 
                         anchors.margins: 1
                         anchors.fill: parent
+                        spacing: 0
 
                         function forceLayout()
                         {
@@ -405,7 +406,7 @@ BaseParameterDialog
                             id: columnHeaderView
 
                             model: dataRectView.model
-                            height: headerFontMetrics.height + columnHeaderView.headerPadding
+                            height: headerFontMetrics.height + (2 * columnHeaderView.headerPadding)
                             Layout.fillWidth: true
                             interactive: false
                             clip: true
@@ -426,7 +427,7 @@ BaseParameterDialog
                             {
                                 property var modelIndex: index
                                 implicitWidth: headerLabel.contentWidth + columnHeaderView.headerWidthPadding
-                                implicitHeight: headerFontMetrics.height + columnHeaderView.headerPadding
+                                implicitHeight: columnHeaderView.height
 
                                 id: headerDelegate
                                 Rectangle
@@ -484,6 +485,15 @@ BaseParameterDialog
                                         }
                                     }
                                 }
+
+                                Rectangle
+                                {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
+                                    height: 1
+                                    color: sysPalette.midlight
+                                }
+
                             }
                         }
 
