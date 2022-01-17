@@ -443,11 +443,11 @@ BaseParameterDialog
                                     width: parent.width
                                     text:
                                     {
-                                        let headerIndex = tabularDataParser.model.index(0, model.column);
+                                        let headerIndex = columnHeaderView.model.index(0, model.column);
                                         if(!headerIndex.valid)
                                             return "";
 
-                                        return tabularDataParser.model.data(headerIndex);
+                                        return columnHeaderView.model.data(headerIndex);
                                     }
 
                                     color: sysPalette.text
