@@ -425,7 +425,6 @@ BaseParameterDialog
 
                             delegate: Item
                             {
-                                property var modelIndex: index
                                 implicitWidth: headerLabel.contentWidth + columnHeaderView.headerWidthPadding
                                 implicitHeight: columnHeaderView.height
 
@@ -554,10 +553,6 @@ BaseParameterDialog
                                 visible: model.row > 0
 
                                 clip: true
-
-                                property var modelColumn: model.column
-                                property var modelRow: model.row
-                                property var modelIndex: model.index
 
                                 SystemPalette { id: systemPalette }
 
