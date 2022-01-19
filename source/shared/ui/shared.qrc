@@ -11,5 +11,6 @@
         <file>qml/Controls/Hubble.qml</file>
         <file>qml/FontPointSize.qml</file>
         <file>qml/qmldir</file>
+        <file>qml/Controls/DataTable.qml</file>
     </qresource>
 </RCC>
