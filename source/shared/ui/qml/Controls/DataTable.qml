@@ -31,13 +31,79 @@ Rectangle
 
     property var highlightedProvider: function(column, row) { return false; }
 
-    readonly property int _headerVerticalPadding: 4
-    readonly property int _headerHorizontalPadding: 10
-    readonly property int _minimumColumnWidth: 30
-    readonly property int _minimumColumnHeight: 16
+    readonly property int _padding: 4
+    readonly property int _minimumColumnWidth: 32
+
+    onWidthChanged: { root.forceLayout(); }
+    onHeightChanged: { root.forceLayout(); }
+
+    property var _columnWidths: []
+
+    function resetColumnWidths()
+    {
+        if(!root.model)
+            return;
+
+        root._columnWidths = new Array(root.model.columnCount()).fill(undefined);
+    }
+
+    onModelChanged:
+    {
+        root.resetColumnWidths();
+    }
+
+    Connections
+    {
+        target: root.model
+
+        // If the underlying data model has been reset, the column widths also need to be reset
+        function onModelReset() { root.resetColumnWidths(); }
+    }
 
     SystemPalette { id: systemPalette }
-    FontMetrics { id: fontMetrics }
+
+    property Component headerDelegate: Label
+    {
+        maximumLineCount: 1
+        text: value
+
+        background: Rectangle { color: systemPalette.light }
+        color: systemPalette.text
+        padding: root._padding
+        renderType: Text.NativeRendering
+    }
+
+    onHeaderDelegateChanged:
+    {
+        root.resetColumnWidths();
+        root.forceLayout();
+    }
+
+    property Component cellDelegate: Label
+    {
+        maximumLineCount: 1
+        text: value
+
+        background: Rectangle { color: parent.backgroundColor }
+
+        property var backgroundColor:
+        {
+            if(root.highlightedProvider(modelColumn, modelRow))
+                return systemPalette.highlight;
+
+            return modelRow % 2 ? systemPalette.window : systemPalette.alternateBase;
+        }
+
+        color: QmlUtils.contrastingColor(backgroundColor)
+        leftPadding: root._padding
+        rightPadding: root._padding
+        topPadding: root._padding * 0.5
+        bottomPadding: root._padding * 0.5
+        elide: Text.ElideRight
+        renderType: Text.NativeRendering
+    }
+
+    property int _cellDelegateHeight: 0
 
     border.width: 1
     border.color: systemPalette.dark
@@ -51,12 +117,15 @@ Rectangle
         TableView
         {
             id: headerView
-
-            model: tableView.model
-            height: fontMetrics.height + (2 * root._headerVerticalPadding)
             Layout.fillWidth: true
+
+            syncDirection: Qt.Horizontal
+            syncView: tableView
+            model: tableView.model
+
             interactive: false
             clip: true
+            pixelAligned: true
 
             rowHeightProvider: function(row)
             {
@@ -67,33 +136,43 @@ Rectangle
                 return 0;
             }
 
-            columnWidthProvider: tableView.columnWidthProvider
+            columnWidthProvider: function(column)
+            {
+                if(root._columnWidths[column] === undefined)
+                {
+                    let headerIndex = root.model.index(0, column);
+                    let headerText = root.model.data(headerIndex);
+
+                    // Create a header so we can determine the default width for headerText
+                    let dummyHeader = root.headerDelegate.createObject(null, {text: headerText});
+                    root._columnWidths[column] = Math.max(root._minimumColumnWidth, dummyHeader.implicitWidth);
+                    dummyHeader.destroy();
+                }
+
+                return root._columnWidths[column];
+            }
 
             delegate: Item
             {
-                implicitWidth: headerLabel.contentWidth + root._headerHorizontalPadding
-                implicitHeight: headerView.height
+                clip: true
 
-                id: headerDelegate
-                Rectangle
+                implicitWidth: headerDelegateLoader.width
+                implicitHeight: headerDelegateLoader.height
+
+                Loader
                 {
-                    anchors.fill: parent
-                    color: systemPalette.light
+                    id: headerDelegateLoader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+
+                    sourceComponent: root.headerDelegate
+                    readonly property string value: modelData
+                    readonly property int modelColumn: model.column
+
+                    onLoaded: { headerView.implicitHeight = height; }
                 }
 
-                Label
-                {
-                    id: headerLabel
-                    clip: true
-                    maximumLineCount: 1
-                    width: parent.width
-                    text: modelData
-
-                    color: systemPalette.text
-                    padding: root._headerVerticalPadding
-                    renderType: Text.NativeRendering
-                }
-
+                // Column resize handle
                 Rectangle
                 {
                     anchors.right: parent.right
@@ -114,11 +193,11 @@ Rectangle
                         {
                             if(drag.active)
                             {
-                                let currentWidth = tableView.userColumnWidths[model.column];
+                                let currentWidth = root._columnWidths[model.column];
                                 if(currentWidth === undefined)
-                                    currentWidth = headerDelegate.implicitWidth;
+                                    currentWidth = parent.width;
 
-                                tableView.userColumnWidths[model.column] =
+                                root._columnWidths[model.column] =
                                     Math.max(root._minimumColumnWidth, currentWidth + mouseX);
                                 root.forceLayout();
                             }
@@ -126,6 +205,7 @@ Rectangle
                     }
                 }
 
+                // Header underline
                 Rectangle
                 {
                     anchors.bottom: parent.bottom
@@ -138,88 +218,61 @@ Rectangle
 
         TableView
         {
-            property int delegateHeight: fontMetrics.height
             id: tableView
-            syncDirection: Qt.Horizontal
-            syncView: headerView
 
             clip: true
+            pixelAligned: true
+
             ScrollBar.vertical: ScrollBar {}
             ScrollBar.horizontal: ScrollBar {}
+            boundsBehavior: Flickable.StopAtBounds
+
             Layout.fillHeight: true
             Layout.fillWidth: true
             anchors.margins: 1
 
             rowHeightProvider: function(row)
             {
+                // Hide first row
                 if(row === 0)
                     return 0;
 
-                return -1;
+                // If the static height is set, use it, otherwise automatically size
+                return root._cellDelegateHeight ? root._cellDelegateHeight : -1;
             }
 
-            property var userColumnWidths: []
-
-            columnWidthProvider: function(column)
-            {
-                let userWidth = userColumnWidths[column];
-                if(userWidth !== undefined)
-                    return userWidth;
-
-                let headerIndex = tabularDataParser.model.index(0, column);
-                let headerText = tabularDataParser.model.data(headerIndex);
-                let textWidth = fontMetrics.advanceWidth(headerText);
-
-                return textWidth + (2 * root._headerVerticalPadding);
-            }
+            columnWidthProvider: headerView.columnWidthProvider
 
             delegate: Item
             {
-                // Based on Qt source for BaseTableView delegate
-                implicitHeight: Math.max(root._minimumColumnHeight, label.implicitHeight)
-                onImplicitHeightChanged: { tableView.delegateHeight = implicitHeight; }
-
-                implicitWidth: label.implicitWidth + 16
-                visible: model.row > 0
-
                 clip: true
 
-                Rectangle
+                implicitWidth: cellDelegateLoader.width
+                implicitHeight: Math.max(1, cellDelegateLoader.height)
+
+                Loader
                 {
-                    width: parent.width
+                    id: cellDelegateLoader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
 
-                    anchors.centerIn: parent
-                    height: parent.height
-                    color:
+                    sourceComponent: root.cellDelegate
+                    readonly property string value: modelData
+                    readonly property int modelColumn: model.column
+                    readonly property int modelRow: model.row
+
+                    onLoaded:
                     {
-                        if(root.highlightedProvider(model.column, model.row))
-                            return systemPalette.highlight;
-
-                        return model.row % 2 ? systemPalette.window : systemPalette.alternateBase;
+                        if(root._cellDelegateHeight === 0 && height !== 0)
+                            root._cellDelegateHeight = height;
                     }
+                }
 
-                    Label
-                    {
-                        id: label
-                        elide: Text.ElideRight
-                        width: parent.width
-
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 10
-
-                        color: QmlUtils.contrastingColor(parent.color)
-                        renderType: Text.NativeRendering
-
-                        text: modelData
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked: { root.clicked(model.column, model.row); }
-                    }
+                MouseArea
+                {
+                    anchors.fill: parent
+                    onClicked: { root.clicked(model.column, model.row); }
+                    onDoubleClicked: { root.doubleClicked(model.column, model.row); }
                 }
             }
         }
@@ -227,22 +280,22 @@ Rectangle
 
     function forceLayout()
     {
-        tableView.forceLayout();
         headerView.forceLayout();
+        tableView.forceLayout();
     }
 
     function cellIsVisible(column, row)
     {
-        let firstDataColumnPosition = 0;
+        let cellX = 0;
         for(let c = 0; c < column; c++)
-            firstDataColumnPosition += tableView.columnWidthProvider(c);
+            cellX += headerView.columnWidthProvider(c);
 
-        let firstDataRowPosition = 0;
+        let cellY = 0;
         for(let r = 0; r < row; r++)
-            firstDataRowPosition += tableView.delegateHeight;
+            cellY += root._cellDelegateHeight;
 
-        let x = firstDataColumnPosition - tableView.contentX;
-        let y = (firstDataRowPosition - tableView.contentY) - tableView.delegateHeight;
+        let x = cellX - (tableView.contentX - tableView.originX);
+        let y = (cellY - (tableView.contentY - tableView.originY)) - root._cellDelegateHeight;
 
         return x >= 0.0 && x < tableView.width && y >= 0.0 && y < tableView.height;
     }
@@ -265,23 +318,30 @@ Rectangle
         easing.type: Easing.OutQuad
     }
 
-    function scrollToCell(column, row)
+    function scrollToCell(targetColumn, targetRow)
     {
+        // Goto the preceding column
+        targetColumn = Math.max(0, targetColumn - 1);
 
-        let columnPosition = -tableView.topMargin;
-        for(let c = 0; c < column - 1; c++)
-            columnPosition += tableView.columnWidthProvider(c);
+        let columnPosition = tableView.originX;
+        for(let c = 0; c < targetColumn; c++)
+            columnPosition += headerView.columnWidthProvider(c);
 
-        let rowPosition = tableView.delegateHeight * ((row - 2) - 1);
-        if(rowPosition < 0)
-            rowPosition = -tableView.topMargin;
+        // Account for input being in whole table coordinates (i.e. including header row)
+        targetRow -= 1;
+
+        // Goto the preceding column
+        targetRow = Math.max(0, targetRow - 1);
+
+        let rowPosition = tableView.originY + (root._cellDelegateHeight * targetRow);
 
         scrollXAnimation.to = columnPosition;
-        scrollXAnimation.running = true;
+        scrollXAnimation.restart();
         scrollYAnimation.to = rowPosition;
-        scrollYAnimation.running = true;
+        scrollYAnimation.restart();
     }
 
     signal clicked(var column, var row);
+    signal doubleClicked(var column, var row);
 }
 
