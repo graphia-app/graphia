@@ -17,7 +17,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationtype.h
-    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.h
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
@@ -36,7 +35,6 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_continuous.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_columnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/datarecttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.cpp

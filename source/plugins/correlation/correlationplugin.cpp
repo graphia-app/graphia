@@ -1107,7 +1107,6 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
     qmlRegisterType<GraphSizeEstimatePlotItem>("app.graphia", 1, 0, "GraphSizeEstimatePlot");
     qmlRegisterType<CorrelationTabularDataParser>("app.graphia", 1, 0, "CorrelationTabularDataParser");
-    qmlRegisterType<DataRectTableModel>("app.graphia", 1, 0, "DataRectTableModel");
 }
 
 QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const

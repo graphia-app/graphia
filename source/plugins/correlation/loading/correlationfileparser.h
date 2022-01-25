@@ -21,6 +21,7 @@
 
 #include "shared/loading/iparser.h"
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/tabulardatamodel.h"
 
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/cancellable.h"
@@ -29,7 +30,6 @@
 
 #include "correlationtype.h"
 #include "correlationdatarow.h"
-#include "datarecttablemodel.h"
 
 #include <QString>
 #include <QRect>
@@ -153,7 +153,7 @@ private:
     bool _appearsToBeContinuous = false;
     bool _dataHasNumericalRect = false;
     std::shared_ptr<TabularData> _dataPtr = nullptr;
-    DataRectTableModel _model;
+    TabularDataModel _model;
     bool _transposed = false;
 
     int _progress = -1;

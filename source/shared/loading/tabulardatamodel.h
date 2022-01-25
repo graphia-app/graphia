@@ -16,15 +16,15 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATARECTTABLEMODEL_H
-#define DATARECTTABLEMODEL_H
+#ifndef TABULARDATAMODEL_H
+#define TABULARDATAMODEL_H
 
 #include <QObject>
 #include <QAbstractTableModel>
 
 #include "shared/loading/tabulardata.h"
 
-class DataRectTableModel : public QAbstractTableModel
+class TabularDataModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -44,4 +44,4 @@ public:
     void setTransposed(bool transposed);
 };
 
-#endif // DATARECTTABLEMODEL_H
+#endif // TABULARDATAMODEL_H

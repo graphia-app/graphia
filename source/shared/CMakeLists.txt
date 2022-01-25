@@ -48,6 +48,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardatamodel.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/matlabfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/adjacencymatrixfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.h
@@ -138,6 +139,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardatamodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/userdatavector.cpp
