@@ -34,10 +34,47 @@ Rectangle
     readonly property int _padding: 4
     readonly property int _minimumColumnWidth: 32
 
+    readonly property int headerHeight: headerView.height
+
     onWidthChanged: { root.forceLayout(); }
     onHeightChanged: { root.forceLayout(); }
 
     property var _columnWidths: []
+    property var _loadedCells: new Set()
+
+    property int _leftLoadedColumn: -1
+    property int _rightLoadedColumn: -1
+    property int _topLoadedRow: -1
+    property int _bottomLoadedRow: -1
+
+    readonly property int leftColumn: _leftLoadedColumn
+    readonly property int rightColumn: _rightLoadedColumn
+    readonly property int topRow: _topLoadedRow
+    readonly property int bottomRow: _bottomLoadedRow
+
+    function _updateCellExtents()
+    {
+        if(root._loadedCells.size === 0)
+            return;
+
+        let left = Number.MAX_SAFE_INTEGER;
+        let right = Number.MIN_SAFE_INTEGER;
+        let top = Number.MAX_SAFE_INTEGER;
+        let bottom = Number.MIN_SAFE_INTEGER;
+
+        root._loadedCells.forEach((cell) =>
+        {
+            left = Math.min(left, cell.x);
+            right = Math.max(right, cell.x);
+            top = Math.min(top, cell.y);
+            bottom = Math.max(bottom, cell.y);
+        });
+
+        root._leftLoadedColumn = left;
+        root._rightLoadedColumn = right;
+        root._topLoadedRow = top;
+        root._bottomLoadedRow = bottom;
+    }
 
     function resetColumnWidths()
     {
@@ -47,10 +84,7 @@ Rectangle
         root._columnWidths = new Array(root.model.columnCount()).fill(undefined);
     }
 
-    onModelChanged:
-    {
-        root.resetColumnWidths();
-    }
+    onModelChanged: { root.resetColumnWidths(); }
 
     Connections
     {
@@ -274,6 +308,29 @@ Rectangle
                     onClicked: { root.clicked(model.column, model.row); }
                     onDoubleClicked: { root.doubleClicked(model.column, model.row); }
                 }
+
+                Component.onCompleted:
+                {
+                    root._loadedCells.add({x: model.column, y: model.row});
+                    root._updateCellExtents();
+                }
+
+                TableView.onReused:
+                {
+                    root._loadedCells.add({x: model.column, y: model.row});
+                    root._updateCellExtents();
+                }
+
+                TableView.onPooled:
+                {
+                    root._loadedCells.forEach((cell) =>
+                    {
+                        if(cell.x === model.column && cell.y === model.row)
+                            root._loadedCells.delete(cell);
+                    });
+
+                    root._updateCellExtents();
+                }
             }
         }
     }
@@ -286,59 +343,8 @@ Rectangle
 
     function cellIsVisible(column, row)
     {
-        let cellX = 0;
-        for(let c = 0; c < column; c++)
-            cellX += headerView.columnWidthProvider(c);
-
-        let cellY = 0;
-        for(let r = 0; r < row; r++)
-            cellY += root._cellDelegateHeight;
-
-        let x = cellX - (tableView.contentX - tableView.originX);
-        let y = (cellY - (tableView.contentY - tableView.originY)) - root._cellDelegateHeight;
-
-        return x >= 0.0 && x < tableView.width && y >= 0.0 && y < tableView.height;
-    }
-
-    PropertyAnimation
-    {
-        id: scrollXAnimation
-        target: tableView
-        property: "contentX"
-        duration: 750
-        easing.type: Easing.OutQuad
-    }
-
-    PropertyAnimation
-    {
-        id: scrollYAnimation
-        target: tableView
-        property: "contentY"
-        duration: 750
-        easing.type: Easing.OutQuad
-    }
-
-    function scrollToCell(targetColumn, targetRow)
-    {
-        // Goto the preceding column
-        targetColumn = Math.max(0, targetColumn - 1);
-
-        let columnPosition = tableView.originX;
-        for(let c = 0; c < targetColumn; c++)
-            columnPosition += headerView.columnWidthProvider(c);
-
-        // Account for input being in whole table coordinates (i.e. including header row)
-        targetRow -= 1;
-
-        // Goto the preceding column
-        targetRow = Math.max(0, targetRow - 1);
-
-        let rowPosition = tableView.originY + (root._cellDelegateHeight * targetRow);
-
-        scrollXAnimation.to = columnPosition;
-        scrollXAnimation.restart();
-        scrollYAnimation.to = rowPosition;
-        scrollYAnimation.restart();
+        return column >= root._leftLoadedColumn && column <= root._rightLoadedColumn &&
+            row >= root._topLoadedRow && row <= root._bottomLoadedRow;
     }
 
     signal clicked(var column, var row);

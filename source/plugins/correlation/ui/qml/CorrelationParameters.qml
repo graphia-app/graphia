@@ -72,9 +72,6 @@ BaseParameterDialog
                 dataTypeComboBox.setDiscrete();
             else if(dataRect.appearsToBeContinuous)
                 dataTypeComboBox.setContinuous();
-
-            if(!dataTable.cellIsVisible(tabularDataParser.dataRect.x, tabularDataParser.dataRect.y))
-                dataTable.scrollToCell(tabularDataParser.dataRect.x, tabularDataParser.dataRect.y);
         }
 
         onDataLoaded:
