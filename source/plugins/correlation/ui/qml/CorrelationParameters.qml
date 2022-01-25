@@ -390,6 +390,34 @@ BaseParameterDialog
                         anchors.centerIn: parent
                         running: dataRectPage._busy
                     }
+
+                    NamedIcon
+                    {
+                        visible: tabularDataParser.dataRect.x < dataTable.leftColumn
+                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; margins: Constants.margin }
+                        iconName: "go-previous"
+                    }
+
+                    NamedIcon
+                    {
+                        visible: tabularDataParser.dataRect.x > dataTable.rightColumn
+                        anchors { verticalCenter: parent.verticalCenter; right: parent.right; margins: Constants.margin }
+                        iconName: "go-next"
+                    }
+
+                    NamedIcon
+                    {
+                        visible: tabularDataParser.dataRect.y < dataTable.topRow
+                        anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; margins: Constants.margin + parent.headerHeight }
+                        iconName: "go-up"
+                    }
+
+                    NamedIcon
+                    {
+                        visible: tabularDataParser.dataRect.y > dataTable.bottomRow
+                        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; margins: Constants.margin }
+                        iconName: "go-down"
+                    }
                 }
 
                 Text

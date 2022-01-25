@@ -67,6 +67,9 @@
 		<file>Tango/16x16/actions/go-bottom.png</file>
 		<file>Tango/22x22/actions/go-bottom.png</file>
 		<file>Tango/32x32/actions/go-bottom.png</file>
+		<file>Tango/16x16/actions/go-down.png</file>
+		<file>Tango/22x22/actions/go-down.png</file>
+		<file>Tango/32x32/actions/go-down.png</file>
 		<file>Tango/16x16/actions/go-next.png</file>
 		<file>Tango/22x22/actions/go-next.png</file>
 		<file>Tango/32x32/actions/go-next.png</file>
@@ -76,6 +79,9 @@
 		<file>Tango/16x16/actions/go-top.png</file>
 		<file>Tango/22x22/actions/go-top.png</file>
 		<file>Tango/32x32/actions/go-top.png</file>
+		<file>Tango/16x16/actions/go-up.png</file>
+		<file>Tango/22x22/actions/go-up.png</file>
+		<file>Tango/32x32/actions/go-up.png</file>
 		<file>Tango/16x16/graphia/grid-lines.png</file>
 		<file>Tango/22x22/graphia/grid-lines.png</file>
 		<file>Tango/32x32/graphia/grid-lines.png</file>
