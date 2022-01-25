@@ -232,6 +232,8 @@ BaseParameterDialog
 
                     HelpTooltip
                     {
+                        Layout.rightMargin: Constants.spacing * 2
+
                         title: qsTr("Transpose")
                         Text
                         {
@@ -240,10 +242,7 @@ BaseParameterDialog
                                        "Moving rows to columns and vice versa.")
                         }
                     }
-                }
 
-                RowLayout
-                {
                     Text
                     {
                         text: qsTr("Data Type:")
