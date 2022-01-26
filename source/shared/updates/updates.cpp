@@ -115,6 +115,10 @@ json updateStringToJson(const QString& updateString, QString* status)
     updates.erase(std::remove_if(updates.begin(), updates.end(),
     [&collator](const auto& update)
     {
+        // Don't discard updates on the basis of version number if they are forced
+        if(u::contains(update, "force"))
+            return false;
+
         return collator.compare(update["version"], VERSION) < 0;
     }), updates.end());
 
