@@ -228,6 +228,16 @@ public:
     }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QByteArray filterHtmlHack(const QByteArray& data)
+    {
+        if(!data.startsWith("<html>"))
+            return data;
+
+        auto index = data.indexOf("</html>") + 7;
+        return data.mid(index);
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QByteArray readFromFile(const QString& filename)
     {
         QFile file(filename);
