@@ -386,6 +386,9 @@ ApplicationWindow
             tab.item.versionText = update.version;
             tab.item.targetVersionRegexText = update.targetVersionRegex;
 
+            if("force" in update)
+                tab.item.forceInstallationChecked = true;
+
             tab.item.resetOsControls();
 
             for(const osName in update.payloads)
@@ -679,6 +682,7 @@ ApplicationWindow
                     property alias targetVersionRegexText: targetVersionRegex.text
                     property alias markdownText: markdownChangelog.text
                     property alias previewText: preview.text
+                    property alias forceInstallationChecked: forceInstallation.checked
 
                     property alias markdownTextArea: markdownChangelog
 
@@ -777,6 +781,8 @@ ApplicationWindow
                                     id: forceInstallation
                                     text: qsTr("Force")
                                     checked: false
+
+                                    onCheckedChanged: { setSaveRequired(); }
                                 }
 
                                 Button
