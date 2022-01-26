@@ -769,6 +769,13 @@ ApplicationWindow
                             {
                                 Item { Layout.fillWidth: true }
 
+                                CheckBox
+                                {
+                                    id: forceInstallation
+                                    text: qsTr("Force")
+                                    checked: false
+                                }
+
                                 Button
                                 {
                                     text: qsTr("Add Image")
@@ -888,6 +895,9 @@ ApplicationWindow
                         updateObject.targetVersionRegex = targetVersionRegex.text;
                         updateObject.changeLog = markdownChangelog.text;
                         updateObject.images = [];
+
+                        if(forceInstallation.checked)
+                            updateObject.force = true;
 
                         let mdImageRegex = /\!\[[^\]]*\]\(([^ \)]*)[^\)]*\)/g;
 
