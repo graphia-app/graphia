@@ -85,7 +85,7 @@ json updateStringToJson(const QString& updateString, QString* status)
     [](const auto& update)
     {
         // Retain if it matches the running version, so that the changelog can be grabbed
-        if(!u::contains(update, "version") && update["version"] == VERSION)
+        if(u::contains(update, "version") && update["version"] == VERSION)
             return false;
 
         if(!u::contains(update, "targetVersionRegex"))
