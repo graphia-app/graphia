@@ -22,6 +22,7 @@
 #include "shared/utils/checksum.h"
 #include "shared/utils/string.h"
 #include "shared/utils/crypto.h"
+#include "shared/utils/utils.h"
 
 #include <json_helper.h>
 
@@ -128,6 +129,10 @@ json updateStringToJson(const QString& updateString, QString* status)
     std::sort(updates.begin(), updates.end(),
     [&collator](const auto& a, const auto& b)
     {
+        // Forced updates get sorted to the front
+        if(u::exclusiveOr(u::contains(a, "force"), u::contains(b, "force")))
+            return u::contains(a, "force");
+
         return collator.compare(QString::fromStdString(a["version"]),
             QString::fromStdString(b["version"])) > 0;
     });
