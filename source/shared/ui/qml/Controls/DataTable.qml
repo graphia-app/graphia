@@ -40,12 +40,21 @@ Rectangle
     onHeightChanged: { root.forceLayout(); }
 
     property var _columnWidths: []
-    property var _loadedCells: new Set()
 
+    property var _loadedCells: new Set()
     property int _leftLoadedColumn: -1
     property int _rightLoadedColumn: -1
     property int _topLoadedRow: -1
     property int _bottomLoadedRow: -1
+
+    function _resetLoadedCells()
+    {
+        root._loadedCells = new Set();
+        root._leftLoadedColumn = -1;
+        root._rightLoadedColumn = -1;
+        root._topLoadedRow = -1;
+        root._bottomLoadedRow = -1;
+    }
 
     readonly property int leftColumn: _leftLoadedColumn
     readonly property int rightColumn: _rightLoadedColumn
@@ -76,7 +85,7 @@ Rectangle
         root._bottomLoadedRow = bottom;
     }
 
-    function resetColumnWidths()
+    function _resetColumnWidths()
     {
         if(!root.model)
             return;
@@ -84,14 +93,22 @@ Rectangle
         root._columnWidths = new Array(root.model.columnCount()).fill(undefined);
     }
 
-    onModelChanged: { root.resetColumnWidths(); }
+    onModelChanged:
+    {
+        root._resetColumnWidths();
+        root._resetLoadedCells();
+    }
 
     Connections
     {
         target: root.model
 
         // If the underlying data model has been reset, the column widths also need to be reset
-        function onModelReset() { root.resetColumnWidths(); }
+        function onModelReset()
+        {
+            root._resetColumnWidths();
+            root._resetLoadedCells();
+        }
     }
 
     SystemPalette { id: systemPalette }
@@ -109,7 +126,7 @@ Rectangle
 
     onHeaderDelegateChanged:
     {
-        root.resetColumnWidths();
+        root._resetColumnWidths();
         root.forceLayout();
     }
 
