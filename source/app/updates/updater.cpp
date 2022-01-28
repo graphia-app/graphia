@@ -185,6 +185,8 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         {
             // Update isn't valid, for whatever reason
             update["error"] = QStringLiteral("invalid");
+            std::cerr << "Update not valid: " <<
+                (!urlIsValid ? update["url"] : "not an object") << "\n";
             return update;
         }
 
@@ -306,13 +308,20 @@ void Updater::saveUpdate(QNetworkReply* reply)
 
         QTemporaryFile tempFile;
         if(!tempFile.open())
+        {
+            std::cerr << "Failed to open temporary file for update\n";
             return false;
+        }
 
         tempFile.write(reply->readAll());
         tempFile.close();
 
         if(!u::sha256ChecksumMatchesFile(tempFile.fileName(), _checksum))
+        {
+            std::cerr << "Downloaded installer " << tempFile.fileName().toStdString() <<
+                " does not match SHA256 checksum: " << _checksum.toStdString() << "\n";
             return false;
+        }
 
         QDir().mkpath(QFileInfo(_fileName).absolutePath());
         tempFile.rename(_fileName);
