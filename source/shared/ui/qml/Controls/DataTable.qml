@@ -209,8 +209,6 @@ Rectangle
 
             delegate: Item
             {
-                clip: true
-
                 implicitWidth: headerDelegateLoader.width
                 implicitHeight: headerDelegateLoader.height
 
@@ -219,6 +217,7 @@ Rectangle
                     id: headerDelegateLoader
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    clip: true
 
                     sourceComponent: root.headerDelegate
                     readonly property string value: modelData
@@ -226,6 +225,9 @@ Rectangle
 
                     onLoaded: { headerView.implicitHeight = height; }
                 }
+
+                // Pass through hover events to the header to immediately to the left
+                HoverMousePassthrough { anchors.fill: parent }
 
                 // Column resize handle
                 Rectangle
@@ -238,22 +240,23 @@ Rectangle
                     MouseArea
                     {
                         cursorShape: Qt.SizeHorCursor
-                        width: 5
+                        width: 8
                         height: parent.height
                         anchors.horizontalCenter: parent.horizontalCenter
                         drag.target: parent
                         drag.axis: Drag.XAxis
+                        drag.threshold: 0
 
                         onMouseXChanged:
                         {
                             if(drag.active)
                             {
-                                let currentWidth = root._columnWidths[model.column];
-                                if(currentWidth === undefined)
-                                    currentWidth = parent.width;
+                                let currentColumnWidth = root._columnWidths[model.column];
+                                if(currentColumnWidth === undefined)
+                                    currentColumnWidth = parent.width;
 
                                 root._columnWidths[model.column] =
-                                    Math.max(root._minimumColumnWidth, currentWidth + mouseX);
+                                    Math.max(root._minimumColumnWidth, currentColumnWidth + (mouseX - width));
                                 root.forceLayout();
                             }
                         }
