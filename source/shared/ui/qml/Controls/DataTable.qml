@@ -39,6 +39,7 @@ Rectangle
     onWidthChanged: { root.forceLayout(); }
     onHeightChanged: { root.forceLayout(); }
 
+    property var _naturalHeaderWidths: []
     property var _columnWidths: []
 
     property var _loadedCells: new Set()
@@ -55,6 +56,8 @@ Rectangle
         root._topLoadedRow = -1;
         root._bottomLoadedRow = -1;
     }
+
+    property var _cellWidths: new Map()
 
     readonly property int leftColumn: _leftLoadedColumn
     readonly property int rightColumn: _rightLoadedColumn
@@ -197,6 +200,7 @@ Rectangle
                     // Create a header so we can determine the default width for headerText
                     let dummyHeader = root.headerDelegate.createObject(null, {text: headerText});
                     root._columnWidths[column] = Math.max(root._minimumColumnWidth, dummyHeader.implicitWidth);
+                    root._naturalHeaderWidths[column] = root._columnWidths[column];
                     dummyHeader.destroy();
                 }
 
@@ -253,6 +257,8 @@ Rectangle
                                 root.forceLayout();
                             }
                         }
+
+                        onDoubleClicked: { root.resizeColumnToContents(model.column); }
                     }
                 }
 
@@ -317,6 +323,8 @@ Rectangle
                         if(root._cellDelegateHeight === 0 && height !== 0)
                             root._cellDelegateHeight = height;
                     }
+
+                    onImplicitWidthChanged: { root._cellWidths.set(model.column + "," + model.row, implicitWidth); }
                 }
 
                 MouseArea
@@ -336,6 +344,8 @@ Rectangle
                 {
                     root._loadedCells.add({x: model.column, y: model.row});
                     root._updateCellExtents();
+
+                    root._cellWidths.set(model.column + "," + model.row, cellDelegateLoader.implicitWidth);
                 }
 
                 TableView.onPooled:
@@ -347,6 +357,8 @@ Rectangle
                     });
 
                     root._updateCellExtents();
+
+                    root._cellWidths.delete(model.column + "," + model.row);
                 }
             }
         }
@@ -362,6 +374,31 @@ Rectangle
     {
         return column >= root._leftLoadedColumn && column <= root._rightLoadedColumn &&
             row >= root._topLoadedRow && row <= root._bottomLoadedRow;
+    }
+
+    function resizeColumnToContents(column)
+    {
+        let maxWidth = 0;
+        for(let row = root.topRow; row <= root.bottomRow; row++)
+        {
+            let cellWidth = root._cellWidths.get(column + "," + row);
+            maxWidth = Math.max(maxWidth, cellWidth);
+        }
+
+        if(isNaN(maxWidth))
+        {
+            console.log("DataTable.resizeColumnToContents: maxWidth calculated as NaN");
+            return;
+        }
+
+        root._columnWidths[column] = Math.max(root._naturalHeaderWidths[column], maxWidth);
+        root.forceLayout();
+    }
+
+    function resizeVisibleColumnsToContents()
+    {
+        for(let column = root.rightColumn; column >= root.leftColumn; column--)
+            resizeColumnToContents(column);
     }
 
     signal clicked(var column, var row);
