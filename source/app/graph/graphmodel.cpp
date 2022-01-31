@@ -1315,6 +1315,17 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
             u::contains(addedAttributeNames, dynamicAttributeName);
     }), changedAttributeNames.end());
 
+    // When the graph changes, every attribute's range and shared values also potentially change
+    for(auto& [name, attribute] : _->_attributes)
+    {
+        // These ones will be taken care of in onAttributesChanged, below...
+        if(u::contains(addedAttributeNames, name) || u::contains(changedAttributeNames, name))
+            continue;
+
+        calculateAttributeRange(attribute);
+        updateSharedAttributeValues(attribute);
+    }
+
     emit attributesChanged(addedAttributeNames, removedAttributeNames, changedAttributeNames);
 
     _transformedGraphIsChanging = false;
