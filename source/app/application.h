@@ -173,6 +173,7 @@ public:
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
+    Q_INVOKABLE QString urlTypeFor(const QString& description, const QStringList& extensions) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
 
     Q_INVOKABLE void download(const QUrl& url);

@@ -219,6 +219,25 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     return urlTypeNames;
 }
 
+QString Application::urlTypeFor(const QString& description, const QStringList& extensions) const
+{
+    auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
+
+    pluginFileTypes.erase(std::remove_if(pluginFileTypes.begin(), pluginFileTypes.end(),
+    [&](const auto& type)
+    {
+        return type._collectiveDescription != description || type._extensions != extensions;
+    }), pluginFileTypes.end());
+
+    if(pluginFileTypes.size() == 1)
+        return pluginFileTypes.at(0)._name;
+
+    if(pluginFileTypes.size() > 1)
+        qDebug() << "Ambiguous identification of" << description << extensions;
+
+    return {};
+}
+
 QStringList Application::failureReasons(const QUrl& url) const
 {
     QStringList failureReasons;
