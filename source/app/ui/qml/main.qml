@@ -791,10 +791,27 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileOpenInitialFolder = folder.toString();
-            openUrl(file, inTab);
+
+            if(type.length !== 0)
+                openUrlOfType(file, type, inTab);
+            else
+                openUrl(file, inTab);
+        }
+
+        Connections
+        {
+            target: fileOpenDialog.selectedNameFilter
+
+            function onIndexChanged()
+            {
+                fileOpenDialog.type = application.urlTypeFor(
+                    fileOpenDialog.selectedNameFilter.name,
+                    fileOpenDialog.selectedNameFilter.extensions);
+            }
         }
 
         property bool inTab: false
+        property string type: ""
     }
 
     OpenUrlDialog
@@ -813,6 +830,7 @@ ApplicationWindow
         {
             fileOpenDialog.title = qsTr("Open File…");
             fileOpenDialog.inTab = false;
+            fileOpenDialog.type = "";
 
             if(misc.fileOpenInitialFolder !== undefined)
                 fileOpenDialog.folder = misc.fileOpenInitialFolder;
@@ -831,6 +849,7 @@ ApplicationWindow
         {
             fileOpenDialog.title = qsTr("Open File In New Tab…");
             fileOpenDialog.inTab = true;
+            fileOpenDialog.type = "";
 
             if(misc.fileOpenInitialFolder !== undefined)
                 fileOpenDialog.folder = misc.fileOpenInitialFolder;
