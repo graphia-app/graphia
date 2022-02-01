@@ -58,6 +58,50 @@
 const char* const Application::_uri = APP_URI;
 QString Application::_appDir = QStringLiteral(".");
 
+struct UrlType
+{
+    QString _name;
+    QString _individualDescription;
+    QString _collectiveDescription;
+    QStringList _extensions;
+
+    bool operator==(const UrlType& other) const
+    {
+        return _name == other._name &&
+               _individualDescription == other._individualDescription &&
+               _collectiveDescription == other._collectiveDescription &&
+               _extensions == other._extensions;
+    }
+};
+
+static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& plugins)
+{
+    std::vector<UrlType> fileTypes;
+
+    for(const auto& plugin : plugins)
+    {
+        for(auto& urlTypeName : plugin._interface->loadableUrlTypeNames())
+        {
+            UrlType fileType = {urlTypeName,
+                                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
+                                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                plugin._interface->extensionsForUrlTypeName(urlTypeName)};
+            fileTypes.emplace_back(fileType);
+        }
+    }
+
+    // Sort by collective description
+    std::sort(fileTypes.begin(), fileTypes.end(),
+    [](const auto& a, const auto& b)
+    {
+        return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
+    });
+
+    fileTypes.erase(std::unique(fileTypes.begin(), fileTypes.end()), fileTypes.end());
+
+    return fileTypes;
+}
+
 Application::Application(QObject *parent) :
     QObject(parent),
     _urlTypeDetails(&_loadedPlugins),
@@ -656,50 +700,6 @@ void Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
     _loadedPlugins.emplace_back(plugin, std::move(pluginLoader));
     _urlTypeDetails.update();
     _pluginDetails.update();
-}
-
-struct UrlType
-{
-    QString _name;
-    QString _individualDescription;
-    QString _collectiveDescription;
-    QStringList _extensions;
-
-    bool operator==(const UrlType& other) const
-    {
-        return _name == other._name &&
-               _individualDescription == other._individualDescription &&
-               _collectiveDescription == other._collectiveDescription &&
-               _extensions == other._extensions;
-    }
-};
-
-static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& plugins)
-{
-    std::vector<UrlType> fileTypes;
-
-    for(const auto& plugin : plugins)
-    {
-        for(auto& urlTypeName : plugin._interface->loadableUrlTypeNames())
-        {
-            UrlType fileType = {urlTypeName,
-                                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
-                                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                plugin._interface->extensionsForUrlTypeName(urlTypeName)};
-            fileTypes.emplace_back(fileType);
-        }
-    }
-
-    // Sort by collective description
-    std::sort(fileTypes.begin(), fileTypes.end(),
-    [](const auto& a, const auto& b)
-    {
-        return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
-    });
-
-    fileTypes.erase(std::unique(fileTypes.begin(), fileTypes.end()), fileTypes.end());
-
-    return fileTypes;
 }
 
 void Application::updateNameFilters()
