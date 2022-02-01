@@ -894,7 +894,6 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 {
     glViewport(0, 0, _width, _height);
 
-
     auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
 
     glClearColor(static_cast<GLfloat>(backgroundColor.redF()),
