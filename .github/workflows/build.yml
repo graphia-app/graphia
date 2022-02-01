@@ -280,17 +280,25 @@ jobs:
       run: |
         sudo wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
         sudo bash /tmp/llvm.sh ${{ env.CLANG_VERSION }}
-        sudo apt-get update
-        sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
-        sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
-        curl -vL https://downloads.kdab.com/clazy/1.8/Clazy-x86_64-1.8.AppImage -o clazy
-        chmod +x clazy
-        sudo mv clazy /usr/local/bin/
+        sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
+        sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${{ env.CLANG_VERSION }} 100
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
+    - uses: actions/checkout@v2
+      with:
+        repository: KDE/clazy
+        ref: 1.11
+        path: clazy
+    - uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Build clazy
+      run: |
+        cd clazy/
+        cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build .
+        sudo cmake --build . --target install
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -302,7 +310,7 @@ jobs:
     - name: Analyse
       run: scripts/clazy.sh
       env:
-        CLAZY: clazy
+        CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
       with:

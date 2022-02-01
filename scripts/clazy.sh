@@ -33,6 +33,10 @@ then
     CLAZY="clazy"
 fi
 
+LEVEL0="\
+level0\
+"
+
 LEVEL1="\
 level1,\
 no-connect-3arg-lambda,\
@@ -56,13 +60,13 @@ container-inside-loop,\
 detaching-member,\
 heap-allocated-small-trivial-type,\
 ifndef-define-typo,\
-inefficient-qlist,\
 isempty-vs-count,\
 jni-signatures,\
 qhash-with-char-pointer-key,\
 qproperty-type-mismatch,\
 qrequiredresult-candidates,\
 qstring-varargs,\
+qt6-fwd-fixes,\
 qt6-header-fixes,\
 qt6-qhash-signature,\
 qvariant-template-instantiation,\
@@ -71,7 +75,9 @@ reserve-candidates,\
 signal-with-return-value,\
 thread-with-slots,\
 tr-non-literal,\
+unexpected-flag-enumerator-value,\
 unneeded-cast,\
+use-arrow-operator-instead-of-data,\
 use-chrono-in-qtimer\
 "
 
@@ -83,7 +89,7 @@ use-chrono-in-qtimer\
 
 export CLAZY_EXTRA_OPTIONS="unneeded-cast-prefer-dynamic-cast-over-qobject"
 
-CHECKS="-checks=\"${LEVEL1},${LEVEL2},${MANUAL}\""
+CHECKS="-checks=\"${LEVEL0},${LEVEL1},${LEVEL2},${MANUAL}\""
 
 ${CLAZY} --version
 
