@@ -42,7 +42,7 @@ QString EditAttributeCommand::pastParticiple() const
 
 QString EditAttributeCommand::debugDescription() const
 {
-    auto text = QStringLiteral("%1 %2").arg(description()).arg(_attributeName);
+    auto text = QStringLiteral("%1 %2").arg(description(), _attributeName);
 
     auto appendDetails = [&text](const auto& edits, auto& reverseEdits)
     {
