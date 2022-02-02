@@ -37,7 +37,7 @@ enum class MessageBoxIcon
     Question    = 4,
     Information = 1,
     Warning     = 2,
-    Critical    = 3
+    Critical    = 3 // clazy:exclude=unexpected-flag-enumerator-value
 };
 
 enum class MessageBoxButton
