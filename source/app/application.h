@@ -35,6 +35,7 @@
 #include <QImage>
 #include <QCoreApplication>
 #include <QProcessEnvironment>
+#include <QStringListModel>
 
 #include <vector>
 #include <memory>
@@ -139,6 +140,7 @@ class Application : public QObject
     Q_PROPERTY(QStringList environment READ environment CONSTANT)
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
+    Q_PROPERTY(QStringListModel* loadableExtensions READ loadableExtensions NOTIFY loadableExtensionsChanged)
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
@@ -218,6 +220,7 @@ public:
 
 signals:
     void nameFiltersChanged();
+    void loadableExtensionsChanged();
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
@@ -249,13 +252,16 @@ private:
     PluginDetailsModel _pluginDetails;
     std::vector<std::unique_ptr<ISaverFactory>> _factories;
 
+    QStringList _nameFilters;
+    QStringListModel _loadableExtensions;
+
     void loadPlugins();
     void initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
-    void updateNameFilters();
+    void updateLoadingCapabilities();
     void unloadPlugins();
 
-    QStringList _nameFilters;
     QStringList nameFilters() const { return _nameFilters; }
+    QStringListModel* loadableExtensions() { return &_loadableExtensions; }
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();

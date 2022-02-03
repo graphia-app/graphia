@@ -715,7 +715,7 @@ void Application::loadPlugins()
     // that were created in plugins
     QCoreApplication::processEvents();
 
-    updateNameFilters();
+    updateLoadingCapabilities();
 }
 
 void Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader)
@@ -725,7 +725,7 @@ void Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoade
     _pluginDetails.update();
 }
 
-void Application::updateNameFilters()
+void Application::updateLoadingCapabilities()
 {
     // Initialise with native file type
     std::vector<UrlType> nativeFileTypes{{NativeFileType, QString("%1 File").arg(name()),
@@ -776,6 +776,18 @@ void Application::updateNameFilters()
     }
 
     emit nameFiltersChanged();
+
+    QStringList loadableExtensions;
+    for(const auto& fileType : fileTypes)
+    {
+        for(const auto& extension : fileType._extensions)
+            loadableExtensions.append(extension);
+    }
+
+    u::removeDuplicates(loadableExtensions);
+    _loadableExtensions.setStringList(loadableExtensions);
+
+    emit loadableExtensionsChanged();
 }
 
 void Application::unloadPlugins()
