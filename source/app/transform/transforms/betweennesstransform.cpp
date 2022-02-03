@@ -55,7 +55,7 @@ void BetweennessTransform::apply(TransformedGraph& target) const
         BetweennessArrays{target});
 
     parallel_for(nodeIds.begin(), nodeIds.end(),
-    [&](const NodeId nodeId, size_t threadIndex)
+    [&](NodeId nodeId, size_t threadIndex)
     {
         auto& arrays = betweennessArrays.at(threadIndex);
         auto& _nodeBetweenness = arrays.nodeBetweenness;

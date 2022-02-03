@@ -60,7 +60,7 @@ public:
 
     bool valid() const;
 
-    BoundingBox2D operator+(const QVector2D v) const { return {_min + v, _max + v}; }
+    BoundingBox2D operator+(const QVector2D& v) const { return {_min + v, _max + v}; }
     BoundingBox2D operator*(float s) const { return {_min * s, _max * s}; }
 };
 
@@ -107,7 +107,7 @@ public:
 
     bool valid() const;
 
-    BoundingBox3D operator+(const QVector3D v) const { return {_min + v, _max + v}; }
+    BoundingBox3D operator+(const QVector3D& v) const { return {_min + v, _max + v}; }
     BoundingBox3D operator*(float s) const { return {_min * s, _max * s}; }
 };
 

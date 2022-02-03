@@ -238,7 +238,7 @@ void TableProxyModel::invalidateFilter()
 
     // Remove any sorting criteria that might not exist any more
     _sortColumnAndOrders.erase(std::remove_if(_sortColumnAndOrders.begin(), _sortColumnAndOrders.end(),
-    [this](const auto sortColumnAndOrder)
+    [this](const auto& sortColumnAndOrder)
     {
         return _columnNames.indexOf(sortColumnAndOrder.first) < 0;
     }), _sortColumnAndOrders.end());

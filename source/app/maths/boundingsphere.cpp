@@ -29,7 +29,7 @@ BoundingSphere::BoundingSphere(QVector3D centre, float radius) :
 {
 }
 
-static float maxDistanceFromCentre(const QVector3D centre, const std::vector<QVector3D>& points)
+static float maxDistanceFromCentre(const QVector3D& centre, const std::vector<QVector3D>& points)
 {
     float radius = 0.0f;
 

@@ -72,7 +72,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
     auto& attribute = _graphModel->createAttribute(attributeName);
     attribute = proxiedAttribute;
 
-    auto setProxyFunctor = [&](const auto& elementIds, const auto mergedElementIdsForElementId)
+    auto setProxyFunctor = [&](const auto& elementIds, auto Graph::* mergedElementIdsForElementId)
     {
         using E = typename std::remove_reference<decltype(elementIds)>::type::value_type;
         ElementIdArray<E, E> headMap(target);

@@ -145,7 +145,7 @@ void Graph::disableComponentManagement()
         _componentManager->disable();
 }
 
-template<typename G, typename C> void dumpGraphToQDebug(const G& graph, const C& component, const int detail)
+template<typename G, typename C> void dumpGraphToQDebug(const G& graph, const C& component, int detail)
 {
     qDebug() << component.numNodes() << "nodes" << component.numEdges() << "edges";
 

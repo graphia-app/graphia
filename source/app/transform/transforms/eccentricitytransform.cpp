@@ -47,7 +47,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     const auto& nodeIds = target.nodeIds();
     std::atomic_int progress(0);
     parallel_for(nodeIds.begin(), nodeIds.end(),
-    [this, &maxDistances, &progress, &target](const NodeId source)
+    [this, &maxDistances, &progress, &target](NodeId source)
     {
         if(cancelled())
             return;

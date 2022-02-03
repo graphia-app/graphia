@@ -395,7 +395,7 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
     [this, targetComponentLayoutData = std::move(targetComponentLayoutData),
            targetComponentAlpha = std::move(targetComponentAlpha)](float f)
     {
-        auto interpolate = [&](const ComponentId componentId)
+        auto interpolate = [&](ComponentId componentId)
         {
             _zoomedComponentLayoutData[componentId] = interpolateCircle(
                 _previousZoomedComponentLayoutData[componentId],

@@ -96,7 +96,7 @@ void ForceDirectedDisplacement::computeAndDamp()
 // This is a fairly arbitrary function that was arrived at through experimentation. The parameters
 // shortRange and longRange affect the emphasis that the result places on local forces and global
 // forces, respectively.
-static float repulse(const float distanceSq, const float shortRange, const float longRange)
+static float repulse(float distanceSq, float shortRange, float longRange)
 {
     return ((distanceSq * distanceSq * longRange) + shortRange) /
         ((distanceSq * distanceSq * distanceSq) + 0.0001f);

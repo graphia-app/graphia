@@ -452,7 +452,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
         // Capture rowData by value; this gives each thread a copy of rowData, rather re-allocating vectors per row (slow)
         parallel_for(colIterator.begin(), colIterator.end(),
-        [&, rowData](const size_t iterator) mutable
+        [&, rowData](size_t iterator) mutable
         {
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],
                 rowData, MCL_PRUNE_LIMIT, cancelledFn);
