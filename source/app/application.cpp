@@ -80,12 +80,16 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
     for(const auto& plugin : plugins)
     {
-        for(auto& urlTypeName : plugin._interface->loadableUrlTypeNames())
+        for(const auto& urlTypeName : plugin._interface->loadableUrlTypeNames())
         {
-            UrlType fileType = {urlTypeName,
-                                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
-                                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                plugin._interface->extensionsForUrlTypeName(urlTypeName)};
+            UrlType fileType =
+            {
+                urlTypeName,
+                plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
+                plugin._interface->collectiveDescriptionForUrlTypeName(urlTypeName),
+                plugin._interface->extensionsForUrlTypeName(urlTypeName)
+            };
+
             fileTypes.emplace_back(fileType);
         }
     }
