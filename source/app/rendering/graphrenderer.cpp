@@ -544,6 +544,10 @@ void GraphRenderer::rendererFinishedTransition()
     if(transitionActive())
         return;
 
+    // The transition may have been initiated by changes that
+    // require the GPU data to be updated, so ensure this is done
+    updateGPUData(When::Later);
+
     _transitionPotentiallyInProgress = false;
     emit transitionFinished();
 }
