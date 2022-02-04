@@ -203,7 +203,7 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(QStringLiteral("DOT"), QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
     registerUrlType(QStringLiteral("PairwiseCSV"), QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("PairwiseSSV"), QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
-    registerUrlType(QStringLiteral("PairwiseTSV"), QObject::tr("Pairwise File"), QObject::tr("Pairwise Files"), {"tsv"});
+    registerUrlType(QStringLiteral("PairwiseTSV"), QObject::tr("Pairwise TSV File"), QObject::tr("Pairwise TSV Files"), {"tsv"});
     registerUrlType(QStringLiteral("PairwiseXLSX"), QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
