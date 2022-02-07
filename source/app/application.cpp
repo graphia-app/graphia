@@ -857,6 +857,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
     {
     case Name:                  return urlType._name;
     case IndividualDescription: return urlType._individualDescription;
+    case Qt::DisplayRole:
     case CollectiveDescription: return urlType._collectiveDescription;
     default: break;
     }
