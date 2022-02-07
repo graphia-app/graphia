@@ -519,6 +519,31 @@ ApplicationWindow
 
     Preferences
     {
+        id: defaults
+        section: "defaults"
+
+        function _stringToObject(s)
+        {
+            let o = {};
+
+            if(s.length > 0)
+            {
+                try { o = JSON.parse(s); }
+                catch(e) { o = {}; }
+            }
+
+            return o;
+        }
+
+        property string extensions
+        function urlTypeFor(extension) { return _stringToObject(defaults.extensions)[extension]; }
+
+        property string plugins
+        function pluginFor(urlType) { return _stringToObject(defaults.plugins)[urlType]; }
+    }
+
+    Preferences
+    {
         section: "debug"
         property alias showFpsMeter: toggleFpsMeterAction.checked
         property alias saveGlyphMaps: toggleGlyphmapSaveAction.checked
@@ -640,11 +665,17 @@ ApplicationWindow
 
         if(types.length > 1)
         {
-            typeChooserDialog.url = url;
-            typeChooserDialog.urlText = userTextForUrl(url);
-            typeChooserDialog.types = types;
-            typeChooserDialog.inNewTab = inNewTab;
-            typeChooserDialog.open();
+            let defaultType = defaults.urlTypeFor(QmlUtils.extensionForUrl(url));
+            if(defaultType === undefined || types.indexOf(defaultType) === -1)
+            {
+                typeChooserDialog.url = url;
+                typeChooserDialog.urlText = userTextForUrl(url);
+                typeChooserDialog.types = types;
+                typeChooserDialog.inNewTab = inNewTab;
+                typeChooserDialog.open();
+            }
+            else
+                openUrlOfType(url, defaultType, inNewTab);
         }
         else
             openUrlOfType(url, types[0], inNewTab);
@@ -670,12 +701,18 @@ ApplicationWindow
 
             if(pluginNames.length > 1)
             {
-                pluginChooserDialog.url = url;
-                pluginChooserDialog.urlText = userTextForUrl(url);
-                pluginChooserDialog.type = type;
-                pluginChooserDialog.pluginNames = pluginNames;
-                pluginChooserDialog.inNewTab = inNewTab;
-                pluginChooserDialog.open();
+                let defaultPlugin = defaults.pluginFor(type);
+                if(defaultPlugin === undefined || pluginNames.indexOf(defaultPlugin) === -1)
+                {
+                    pluginChooserDialog.url = url;
+                    pluginChooserDialog.urlText = userTextForUrl(url);
+                    pluginChooserDialog.type = type;
+                    pluginChooserDialog.pluginNames = pluginNames;
+                    pluginChooserDialog.inNewTab = inNewTab;
+                    pluginChooserDialog.open();
+                }
+                else
+                    openUrlOfTypeWithPlugin(url, type, defaultPlugin, inNewTab);
             }
             else
                 openUrlOfTypeWithPlugin(url, type, pluginNames[0], inNewTab);
