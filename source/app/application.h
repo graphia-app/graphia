@@ -175,6 +175,8 @@ public:
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
+    Q_INVOKABLE QStringList urlTypesFor(const QString& extension) const;
+    Q_INVOKABLE QString descriptionForUrlType(const QString& urlType) const;
     Q_INVOKABLE QString urlTypeFor(const QString& description, const QStringList& extensions) const;
     Q_INVOKABLE QStringList failureReasons(const QUrl& url) const;
 

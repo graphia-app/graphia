@@ -223,6 +223,35 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     return urlTypeNames;
 }
 
+QStringList Application::urlTypesFor(const QString& extension) const
+{
+    QStringList urlTypeNames;
+
+    for(const auto& loadedPlugin : _loadedPlugins)
+    {
+        for(const auto& urlTypeName : loadedPlugin._interface->loadableUrlTypeNames())
+        {
+            if(u::contains(loadedPlugin._interface->extensionsForUrlTypeName(urlTypeName), extension))
+                urlTypeNames.append(urlTypeName);
+        }
+    }
+
+    urlTypeNames.removeDuplicates();
+
+    return urlTypeNames;
+}
+
+QString Application::descriptionForUrlType(const QString& urlType) const
+{
+    for(const auto& loadedPlugin : _loadedPlugins)
+    {
+        if(u::contains(loadedPlugin._interface->loadableUrlTypeNames(), urlType))
+            return loadedPlugin._interface->collectiveDescriptionForUrlTypeName(urlType);
+    }
+
+    return {};
+}
+
 QString Application::urlTypeFor(const QString& description, const QStringList& extensions) const
 {
     auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
