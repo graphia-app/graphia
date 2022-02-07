@@ -97,8 +97,6 @@ Item
 
             Label
             {
-                Layout.topMargin: Constants.margin * 2
-
                 font.bold: true
                 text: qsTr("Allow Tracking")
             }
@@ -223,8 +221,6 @@ Item
 
             Label
             {
-                Layout.topMargin: Constants.margin * 2
-
                 font.bold: true
                 text: qsTr("Proxy")
             }
