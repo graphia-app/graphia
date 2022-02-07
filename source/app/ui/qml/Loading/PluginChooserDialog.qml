@@ -29,7 +29,7 @@ import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Dialog
 {
-    id: pluginChooserDialog
+    id: root
 
     title: qsTr("Multiple Plugins Applicable")
     width: 500
@@ -76,16 +76,16 @@ Dialog
             {
                 id: proxyModel
 
-                sourceModel: pluginChooserDialog.model
+                sourceModel: root.model
                 filterRoleName: "name"
                 filterPattern:
                 {
                     let s = "";
 
-                    for(let i = 0; i < pluginChooserDialog.pluginNames.length; i++)
+                    for(let i = 0; i < root.pluginNames.length; i++)
                     {
                         if(i !== 0) s += "|";
-                        s += pluginChooserDialog.pluginNames[i];
+                        s += root.pluginNames[i];
                     }
 
                     return s;
@@ -102,7 +102,7 @@ Dialog
             property var selectedPlugin:
             {
                 let mappedIndex = proxyModel.mapToSource(currentIndex);
-                return pluginChooserDialog.model.nameAtIndex(mappedIndex);
+                return root.model.nameAtIndex(mappedIndex);
             }
 
             textRole: "name"

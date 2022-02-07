@@ -74,7 +74,7 @@ Dialog
             {
                 id: proxyModel
 
-                sourceModel: model
+                sourceModel: root.model
                 filterRoleName: "name"
                 filterPattern:
                 {
