@@ -26,7 +26,7 @@ import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Window
 {
-    id: optionsWindow
+    id: root
 
     title: qsTr("Options")
     flags: Qt.Window|Qt.Dialog
@@ -50,7 +50,7 @@ Window
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            enabled: optionsWindow.enabled
+            enabled: root.enabled
 
             Tab
             {
@@ -75,7 +75,7 @@ Window
         {
             text: qsTr("Close")
             Layout.alignment: Qt.AlignRight
-            onClicked: optionsWindow.close()
+            onClicked: root.close()
         }
     }
 }
