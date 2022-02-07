@@ -58,6 +58,13 @@ public:
     Q_INVOKABLE QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
 
     // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE QString extensionForUrl(const QUrl& url) const
+    {
+        auto fi = QFileInfo(url.toLocalFile());
+        return fi.completeSuffix();
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
     Q_INVOKABLE QString baseFileNameForUrlNoExtension(const QUrl& url) const
     {
         auto fi = QFileInfo(url.toLocalFile());
