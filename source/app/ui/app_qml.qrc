@@ -3,19 +3,23 @@
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>
+        <file>qml/AttributeUtils.js</file>
         <file>qml/CaptureScreenshot.qml</file>
+        <file>qml/CloneAttributeDialog.qml</file>
         <file>qml/Controls/AlertIcon.qml</file>
         <file>qml/Controls/AttributeListSortMenu.qml</file>
         <file>qml/Controls/ButtonMenu.qml</file>
         <file>qml/Controls/ColorPickButton.qml</file>
         <file>qml/Controls/DraggableList.qml</file>
         <file>qml/Controls/error.png</file>
+        <file>qml/Controls/FloatingButton.qml</file>
         <file>qml/Controls/GradientEditor.qml</file>
         <file>qml/Controls/GradientKey.qml</file>
         <file>qml/Controls/GradientSelector.qml</file>
         <file>qml/Controls/Hamburger.qml</file>
         <file>qml/Controls/HiddenSwitch.qml</file>
         <file>qml/Controls/ListBox.qml</file>
+        <file>qml/Controls/MappingSelector.qml</file>
         <file>qml/Controls/PaletteEditor.qml</file>
         <file>qml/Controls/PaletteKey.qml</file>
         <file>qml/Controls/PaletteSelector.qml</file>
@@ -24,21 +28,34 @@
         <file>qml/Controls/ToolTip.qml</file>
         <file>qml/Controls/TransformListSortMenu.qml</file>
         <file>qml/Controls/TreeBox.qml</file>
+        <file>qml/Controls/TreeBoxSearch.qml</file>
+        <file>qml/Controls/TreeComboBox.qml</file>
         <file>qml/Controls/Tutorial.qml</file>
         <file>qml/Controls/warning.png</file>
         <file>qml/DebugRectangle.qml</file>
-        <file>qml/TabUI.qml</file>
+        <file>qml/DownloadProgress.qml</file>
+        <file>qml/EditAttributeDialog.qml</file>
         <file>qml/Enrichment/EnrichmentResults.qml</file>
         <file>qml/Enrichment/EnrichmentWizard.qml</file>
         <file>qml/Find.qml</file>
+        <file>qml/LatestChangesDialog.qml</file>
+        <file>qml/LayoutSetting.qml</file>
         <file>qml/LayoutSettings.qml</file>
-        <file>qml/Loading/TypeChooserDialog.qml</file>
+        <file>qml/Loading/ImportAttributesDialog.qml</file>
         <file>qml/Loading/PluginChooserDialog.qml</file>
+        <file>qml/Loading/TypeChooserDialog.qml</file>
         <file>qml/main.qml</file>
         <file>qml/ManageBookmarks.qml</file>
+        <file>qml/NewUpdate.qml</file>
+        <file>qml/OpenUrlDialog.qml</file>
         <file>qml/Options/OptionsAppearance.qml</file>
+        <file>qml/Options/OptionsDefaults.qml</file>
         <file>qml/Options/OptionsDialog.qml</file>
         <file>qml/Options/OptionsMisc.qml</file>
+        <file>qml/Options/OptionsNetwork.qml</file>
+        <file>qml/RemoveAttributesDialog.qml</file>
+        <file>qml/TabUI.qml</file>
+        <file>qml/TextDialog.qml</file>
         <file>qml/tracking-background.png</file>
         <file>qml/Tracking.qml</file>
         <file>qml/Transform/CreateTransformDialog.qml</file>
@@ -49,23 +66,6 @@
         <file>qml/Visualisation/CreateVisualisationDialog.qml</file>
         <file>qml/Visualisation/Visualisation.qml</file>
         <file>qml/Visualisation/Visualisations.qml</file>
-        <file>qml/Controls/FloatingButton.qml</file>
         <file>qml/Visualisation/VisualisationUtils.js</file>
-        <file>qml/TextDialog.qml</file>
-        <file>qml/NewUpdate.qml</file>
-        <file>qml/LayoutSetting.qml</file>
-        <file>qml/Controls/MappingSelector.qml</file>
-        <file>qml/Controls/TreeBoxSearch.qml</file>
-        <file>qml/Controls/TreeComboBox.qml</file>
-        <file>qml/AttributeUtils.js</file>
-        <file>qml/LatestChangesDialog.qml</file>
-        <file>qml/Loading/ImportAttributesDialog.qml</file>
-        <file>qml/RemoveAttributesDialog.qml</file>
-        <file>qml/CloneAttributeDialog.qml</file>
-        <file>qml/EditAttributeDialog.qml</file>
-        <file>qml/OpenUrlDialog.qml</file>
-        <file>qml/DownloadProgress.qml</file>
-        <file>qml/Options/OptionsNetwork.qml</file>
-        <file>qml/Options/OptionsDefaults.qml</file>
     </qresource>
 </RCC>
