@@ -383,6 +383,7 @@ ApplicationWindow
     OptionsDialog
     {
         id: optionsDialog
+        application: application
 
         enabled: !mainWindow._anyTabsBusy
     }

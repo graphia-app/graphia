@@ -66,5 +66,6 @@
         <file>qml/OpenUrlDialog.qml</file>
         <file>qml/DownloadProgress.qml</file>
         <file>qml/Options/OptionsNetwork.qml</file>
+        <file>qml/Options/OptionsDefaults.qml</file>
     </qresource>
 </RCC>

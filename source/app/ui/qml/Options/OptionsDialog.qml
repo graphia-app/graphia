@@ -36,6 +36,8 @@ Window
     maximumWidth: minimumWidth
     maximumHeight: minimumHeight
 
+    property var application: null
+
     property bool enabled: true
 
     ColumnLayout
@@ -68,6 +70,12 @@ Window
             {
                 title: qsTr("Network")
                 OptionsNetwork {}
+            }
+
+            Tab
+            {
+                title: qsTr("Defaults")
+                OptionsDefaults { application: root.application }
             }
         }
 
