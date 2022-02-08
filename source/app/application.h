@@ -90,8 +90,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
-
     void update() { emit layoutChanged(); }
 
 private:
@@ -117,8 +115,6 @@ public:
     int rowCount(const QModelIndex&) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
-
-    Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
     void update() { emit layoutChanged(); }
 
