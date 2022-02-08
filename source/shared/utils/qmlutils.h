@@ -142,27 +142,27 @@ public:
         return new QmlUtils;
     }
 
-    Q_INVOKABLE QString formatNumberScientific(double value)
+    Q_INVOKABLE QString formatNumberScientific(double value) const
     {
         return u::formatNumberScientific(value);
     }
 
-    Q_INVOKABLE QString formatNumberSIPostfix(double value)
+    Q_INVOKABLE QString formatNumberSIPostfix(double value) const
     {
         return u::formatNumberSIPostfix(value);
     }
 
-    Q_INVOKABLE QColor contrastingColor(const QColor& color)
+    Q_INVOKABLE QColor contrastingColor(const QColor& color) const
     {
         return u::contrastingColor(color);
     }
 
-    Q_INVOKABLE QColor colorForString(const QString& string)
+    Q_INVOKABLE QColor colorForString(const QString& string) const
     {
         return u::colorForString(string);
     }
 
-    Q_INVOKABLE QString base64EncodingOf(const QString& filename)
+    Q_INVOKABLE QString base64EncodingOf(const QString& filename) const
     {
         QFile file(filename);
 
@@ -172,12 +172,12 @@ public:
         return file.readAll().toBase64();
     }
 
-    Q_INVOKABLE QByteArray byteArrayFromBase64String(const QString& base64String)
+    Q_INVOKABLE QByteArray byteArrayFromBase64String(const QString& base64String) const
     {
         return QByteArray::fromBase64(base64String.toLatin1());
     }
 
-    Q_INVOKABLE QString tempDirectory()
+    Q_INVOKABLE QString tempDirectory() const
     {
         QTemporaryDir tempDir;
         tempDir.setAutoRemove(false);
@@ -188,28 +188,28 @@ public:
         return tempDir.path();
     }
 
-    Q_INVOKABLE bool cd(const QString& dirName)
+    Q_INVOKABLE bool cd(const QString& dirName) const
     {
         return QDir::setCurrent(dirName);
     }
 
-    Q_INVOKABLE bool rmdir(const QString& dirName)
+    Q_INVOKABLE bool rmdir(const QString& dirName) const
     {
         QDir dir(dirName);
         return dir.removeRecursively();
     }
 
-    Q_INVOKABLE bool copy(const QString& from, const QString& to)
+    Q_INVOKABLE bool copy(const QString& from, const QString& to) const
     {
         return QFile::copy(from, to);
     }
 
-    Q_INVOKABLE QString sha256(const QByteArray& data)
+    Q_INVOKABLE QString sha256(const QByteArray& data) const
     {
         return QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex();
     }
 
-    Q_INVOKABLE QByteArray filterHtmlHack(const QByteArray& data)
+    Q_INVOKABLE QByteArray filterHtmlHack(const QByteArray& data) const
     {
         if(!data.startsWith("<html>"))
             return data;
@@ -218,7 +218,7 @@ public:
         return data.mid(index);
     }
 
-    Q_INVOKABLE QByteArray readFromFile(const QString& filename)
+    Q_INVOKABLE QByteArray readFromFile(const QString& filename) const
     {
         QFile file(filename);
 
@@ -228,7 +228,7 @@ public:
         return file.readAll();
     }
 
-    Q_INVOKABLE bool writeToFile(const QString& filename, const QByteArray& data)
+    Q_INVOKABLE bool writeToFile(const QString& filename, const QByteArray& data) const
     {
         QFile file(filename);
 
@@ -238,32 +238,32 @@ public:
         return file.write(data) == data.size();
     }
 
-    Q_INVOKABLE QString bytesToHexString(const QByteArray& data)
+    Q_INVOKABLE QString bytesToHexString(const QByteArray& data) const
     {
         return data.toHex();
     }
 
-    Q_INVOKABLE QString stringAsHexString(const QString& data)
+    Q_INVOKABLE QString stringAsHexString(const QString& data) const
     {
         return bytesToHexString(data.toUtf8());
     }
 
-    Q_INVOKABLE QByteArray hexStringAsBytes(const QString& data)
+    Q_INVOKABLE QByteArray hexStringAsBytes(const QString& data) const
     {
         return QByteArray::fromHex(data.toUtf8());
     }
 
-    Q_INVOKABLE QString hexStringAsString(const QString& data)
+    Q_INVOKABLE QString hexStringAsString(const QString& data) const
     {
         return hexStringAsBytes(data.toUtf8());
     }
 
-    Q_INVOKABLE bool isHexString(const QString& string)
+    Q_INVOKABLE bool isHexString(const QString& string) const
     {
         return u::isHex(string);
     }
 
-    Q_INVOKABLE QString rsaSignatureForString(const QString& string, const QString& keyFilename)
+    Q_INVOKABLE QString rsaSignatureForString(const QString& string, const QString& keyFilename) const
     {
         auto signature = u::rsaSignString(string.toStdString(),
             fileNameForUrl(keyFilename).toStdString());
@@ -271,22 +271,22 @@ public:
         return QString::fromStdString(u::bytesToHex(signature));
     }
 
-    Q_INVOKABLE QString redirectUrl(const QString& shortName)
+    Q_INVOKABLE QString redirectUrl(const QString& shortName) const
     {
         return QStringLiteral("%1/%2").arg(u::getPref(QStringLiteral("servers/redirects")).toString(), shortName);
     }
 
-    Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText)
+    Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText) const
     {
         return u::redirectLink(shortName.toLocal8Bit().data(), linkText);
     }
 
-    Q_INVOKABLE void showAppInFileManager()
+    Q_INVOKABLE void showAppInFileManager() const
     {
         u::showInFolder(u::appPathName());
     }
 
-    Q_INVOKABLE int modelRoleForName(QAbstractItemModel* model, const QByteArray& roleName)
+    Q_INVOKABLE int modelRoleForName(QAbstractItemModel* model, const QByteArray& roleName) const
     {
         Q_ASSERT(model != nullptr);
         if(model == nullptr)
