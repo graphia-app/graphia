@@ -42,8 +42,7 @@
         <file>qml/LayoutSetting.qml</file>
         <file>qml/LayoutSettings.qml</file>
         <file>qml/Loading/ImportAttributesDialog.qml</file>
-        <file>qml/Loading/PluginChooserDialog.qml</file>
-        <file>qml/Loading/TypeChooserDialog.qml</file>
+        <file>qml/Loading/ChooserDialog.qml</file>
         <file>qml/main.qml</file>
         <file>qml/ManageBookmarks.qml</file>
         <file>qml/NewUpdate.qml</file>

@@ -584,6 +584,8 @@ ApplicationWindow
         return QmlUtils.urlIsFile(url) ? QmlUtils.baseFileNameForUrl(url) : url;
     }
 
+    ChooserDialog { id: chooserDialog }
+
     function openUrl(url, inNewTab)
     {
         // If the URL is empty, avoid doing anything with it
@@ -668,29 +670,26 @@ ApplicationWindow
             let defaultType = defaults.urlTypeFor(QmlUtils.extensionForUrl(url));
             if(defaultType === undefined || types.indexOf(defaultType) === -1)
             {
-                typeChooserDialog.url = url;
-                typeChooserDialog.urlText = userTextForUrl(url);
-                typeChooserDialog.types = types;
-                typeChooserDialog.inNewTab = inNewTab;
-                typeChooserDialog.open();
+                chooserDialog.title = qsTr("Type Ambiguous");
+                chooserDialog.explanationText = userTextForUrl(url) +
+                    qsTr(" may be interpreted as two or more possible formats. ") +
+                    qsTr("Please select how you wish to proceed below.");
+                chooserDialog.choiceLabelText = qsTr("Open As:");
+                chooserDialog.model = application.urlTypeDetails;
+                chooserDialog.displayRole = "individualDescription";
+                chooserDialog.valueRole = "name";
+                chooserDialog.values = types;
+
+                chooserDialog.show(function(selectedType)
+                {
+                    openUrlOfType(url, selectedType, inNewTab);
+                });
             }
             else
                 openUrlOfType(url, defaultType, inNewTab);
         }
         else
             openUrlOfType(url, types[0], inNewTab);
-    }
-
-    TypeChooserDialog
-    {
-        id: typeChooserDialog
-        application: application
-        model: application.urlTypeDetails
-        onAccepted:
-        {
-            close();
-            openUrlOfType(url, type, inNewTab);
-        }
     }
 
     function openUrlOfType(url, type, inNewTab)
@@ -704,12 +703,20 @@ ApplicationWindow
                 let defaultPlugin = defaults.pluginFor(type);
                 if(defaultPlugin === undefined || pluginNames.indexOf(defaultPlugin) === -1)
                 {
-                    pluginChooserDialog.url = url;
-                    pluginChooserDialog.urlText = userTextForUrl(url);
-                    pluginChooserDialog.type = type;
-                    pluginChooserDialog.pluginNames = pluginNames;
-                    pluginChooserDialog.inNewTab = inNewTab;
-                    pluginChooserDialog.open();
+                    chooserDialog.title = qsTr("Multiple Plugins Applicable");
+                    chooserDialog.explanationText = userTextForUrl(url) +
+                        qsTr(" may be loaded by two or more plugins. ") +
+                        qsTr("Please select how you wish to proceed below.");
+                    chooserDialog.choiceLabelText = qsTr("Open With Plugin:");
+                    chooserDialog.model = application.pluginDetails;
+                    chooserDialog.displayRole = "name";
+                    chooserDialog.valueRole = "name";
+                    chooserDialog.values = pluginNames;
+
+                    chooserDialog.show(function(selectedPlugin)
+                    {
+                        openUrlOfTypeWithPlugin(url, type, selectedPlugin, inNewTab);
+                    });
                 }
                 else
                     openUrlOfTypeWithPlugin(url, type, defaultPlugin, inNewTab);
@@ -722,18 +729,6 @@ ApplicationWindow
             currentTab.confirmSave(onSaveConfirmed);
         else
             onSaveConfirmed();
-    }
-
-    PluginChooserDialog
-    {
-        id: pluginChooserDialog
-        application: application
-        model: application.pluginDetails
-        onAccepted:
-        {
-            close();
-            openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab);
-        }
     }
 
     function openUrlOfTypeWithPlugin(url, type, pluginName, inNewTab)

@@ -30,17 +30,15 @@ Dialog
 {
     id: root
 
-    title: qsTr("Type Ambiguous")
     width: 500
 
-    property var application
-    property var model
+    property var model: null
+    property string displayRole: "display"
+    property string valueRole: "display"
+    property string explanationText: ""
+    property string choiceLabelText: ""
 
-    property url url
-    property string urlText
-    property var types: []
-    property string type
-    property bool inNewTab
+    property var values: []
 
     GridLayout
     {
@@ -51,8 +49,7 @@ Dialog
 
         Text
         {
-            text: urlText + qsTr(" may be interpreted as two or more possible formats. " +
-                "Please select how you wish to proceed below.")
+            text: explanationText
             Layout.fillWidth: true
             Layout.columnSpan: 2
             wrapMode: Text.WordWrap
@@ -60,13 +57,13 @@ Dialog
 
         Text
         {
-            text: qsTr("Open As:")
+            text: root.choiceLabelText
             Layout.alignment: Qt.AlignRight
         }
 
         ComboBox
         {
-            id: fileTypeChoice
+            id: comboBox
             Layout.alignment: Qt.AlignLeft
             implicitWidth: 200
 
@@ -75,15 +72,15 @@ Dialog
                 id: proxyModel
 
                 sourceModel: root.model
-                filterRoleName: "name"
+                filterRoleName: root.valueRole
                 filterPattern:
                 {
                     let s = "";
 
-                    for(let i = 0; i < root.types.length; i++)
+                    for(let i = 0; i < root.values.length; i++)
                     {
                         if(i !== 0) s += "|";
-                        s += root.types[i];
+                        s += root.values[i];
                     }
 
                     return s;
@@ -92,25 +89,44 @@ Dialog
                 onFilterPatternChanged:
                 {
                     // Reset to first item
-                    fileTypeChoice.currentIndex = -1;
-                    fileTypeChoice.currentIndex = 0;
+                    comboBox.currentIndex = -1;
+                    comboBox.currentIndex = 0;
                 }
             }
 
-            property var selectedFileType:
+            property string selectedValue:
             {
-                let mappedIndex = proxyModel.mapToSource(currentIndex);
-                return root.model.nameAtIndex(mappedIndex);
+                if(root.model === null)
+                    return "";
+
+                let row = proxyModel.mapToSource(currentIndex);
+                if(row < 0)
+                    return "";
+
+                let role = QmlUtils.modelRoleForName(root.model, root.valueRole);
+                return root.model.data(root.model.index(row, 0), role);
             }
 
-            textRole: "individualDescription"
+            textRole: root.displayRole
         }
     }
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel
 
+    property var _onAcceptedFn: null
+
     onAccepted:
     {
-        type = fileTypeChoice.selectedFileType;
+        //FIXME: macOS seems to need an explicit close, for some reason
+        close();
+
+        if(_onAcceptedFn !== null)
+            _onAcceptedFn(comboBox.selectedValue);
+    }
+
+    function show(onAcceptedFn)
+    {
+        root._onAcceptedFn = onAcceptedFn;
+        open();
     }
 }
