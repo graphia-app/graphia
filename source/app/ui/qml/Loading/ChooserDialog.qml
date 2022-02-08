@@ -127,6 +127,11 @@ Dialog
     function show(onAcceptedFn)
     {
         root._onAcceptedFn = onAcceptedFn;
-        open();
+        Qt.callLater(function()
+        {
+            // Delay the opening in case an existing choice is still "in-flight",
+            // e.g. when choosing a plugin immediately after choosing file type
+            open();
+        });
     }
 }
