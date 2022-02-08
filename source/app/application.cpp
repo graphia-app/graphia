@@ -890,6 +890,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
 
     switch(role)
     {
+    case Qt::DisplayRole:
     case Name:
         return plugin->name();
 
