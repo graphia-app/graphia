@@ -30,8 +30,6 @@ Dialog
 {
     id: root
 
-    width: 500
-
     property var model: null
     property string displayRole: "display"
     property string valueRole: "display"
@@ -40,74 +38,88 @@ Dialog
 
     property var values: []
 
-    GridLayout
+    onVisibleChanged:
     {
-        columns: 2
+        if(visible)
+            rememberThisChoiceCheckBox.checked = false;
+    }
 
-        width: parent.width
+    ColumnLayout
+    {
+        spacing: Constants.spacing
+
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.margins: Constants.margin
 
         Text
         {
-            text: explanationText
             Layout.fillWidth: true
-            Layout.columnSpan: 2
+            Layout.preferredWidth: 350
+
+            text: explanationText
             wrapMode: Text.WordWrap
         }
 
-        Text
+        RowLayout
         {
-            text: root.choiceLabelText
-            Layout.alignment: Qt.AlignRight
-        }
+            spacing: Constants.spacing
 
-        ComboBox
-        {
-            id: comboBox
-            Layout.alignment: Qt.AlignLeft
-            implicitWidth: 200
+            Text { text: root.choiceLabelText }
 
-            model: SortFilterProxyModel
+            ComboBox
             {
-                id: proxyModel
+                id: comboBox
+                Layout.preferredWidth: 200
 
-                sourceModel: root.model
-                filterRoleName: root.valueRole
-                filterPattern:
+                model: SortFilterProxyModel
                 {
-                    let s = "";
+                    id: proxyModel
 
-                    for(let i = 0; i < root.values.length; i++)
+                    sourceModel: root.model
+                    filterRoleName: root.valueRole
+                    filterPattern:
                     {
-                        if(i !== 0) s += "|";
-                        s += root.values[i];
+                        let s = "";
+
+                        for(let i = 0; i < root.values.length; i++)
+                        {
+                            if(i !== 0) s += "|";
+                            s += root.values[i];
+                        }
+
+                        return s;
                     }
 
-                    return s;
+                    onFilterPatternChanged:
+                    {
+                        // Reset to first item
+                        comboBox.currentIndex = -1;
+                        comboBox.currentIndex = 0;
+                    }
                 }
 
-                onFilterPatternChanged:
+                property string selectedValue:
                 {
-                    // Reset to first item
-                    comboBox.currentIndex = -1;
-                    comboBox.currentIndex = 0;
+                    if(root.model === null)
+                        return "";
+
+                    let row = proxyModel.mapToSource(currentIndex);
+                    if(row < 0)
+                        return "";
+
+                    let role = QmlUtils.modelRoleForName(root.model, root.valueRole);
+                    return root.model.data(root.model.index(row, 0), role);
                 }
+
+                textRole: root.displayRole
             }
+        }
 
-            property string selectedValue:
-            {
-                if(root.model === null)
-                    return "";
-
-                let row = proxyModel.mapToSource(currentIndex);
-                if(row < 0)
-                    return "";
-
-                let role = QmlUtils.modelRoleForName(root.model, root.valueRole);
-                return root.model.data(root.model.index(row, 0), role);
-            }
-
-            textRole: root.displayRole
+        CheckBox
+        {
+            id: rememberThisChoiceCheckBox
+            text: qsTr("Remember This Choice")
         }
     }
 
@@ -121,7 +133,7 @@ Dialog
         close();
 
         if(_onAcceptedFn !== null)
-            _onAcceptedFn(comboBox.selectedValue);
+            _onAcceptedFn(comboBox.selectedValue, rememberThisChoiceCheckBox.checked);
     }
 
     function show(onAcceptedFn)

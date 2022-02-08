@@ -538,8 +538,22 @@ ApplicationWindow
         property string extensions
         function urlTypeFor(extension) { return _stringToObject(defaults.extensions)[extension]; }
 
+        function setUrlTypeFor(extension, urlType)
+        {
+            let o = _stringToObject(defaults.extensions);
+            o[extension] = urlType;
+            extensions = JSON.stringify(o);
+        }
+
         property string plugins
         function pluginFor(urlType) { return _stringToObject(defaults.plugins)[urlType]; }
+
+        function setPluginFor(urlType, pluginName)
+        {
+            let o = _stringToObject(defaults.plugins);
+            o[urlType] = pluginName;
+            plugins = JSON.stringify(o);
+        }
     }
 
     Preferences
@@ -667,7 +681,8 @@ ApplicationWindow
 
         if(types.length > 1)
         {
-            let defaultType = defaults.urlTypeFor(QmlUtils.extensionForUrl(url));
+            let extension = QmlUtils.extensionForUrl(url);
+            let defaultType = defaults.urlTypeFor(extension);
             if(defaultType === undefined || types.indexOf(defaultType) === -1)
             {
                 chooserDialog.title = qsTr("Type Ambiguous");
@@ -680,8 +695,11 @@ ApplicationWindow
                 chooserDialog.valueRole = "name";
                 chooserDialog.values = types;
 
-                chooserDialog.show(function(selectedType)
+                chooserDialog.show(function(selectedType, remember)
                 {
+                    if(remember)
+                        defaults.setUrlTypeFor(extension, selectedType);
+
                     openUrlOfType(url, selectedType, inNewTab);
                 });
             }
@@ -713,8 +731,11 @@ ApplicationWindow
                     chooserDialog.valueRole = "name";
                     chooserDialog.values = pluginNames;
 
-                    chooserDialog.show(function(selectedPlugin)
+                    chooserDialog.show(function(selectedPlugin, remember)
                     {
+                        if(remember)
+                            defaults.setPluginFor(type, selectedPlugin);
+
                         openUrlOfTypeWithPlugin(url, type, selectedPlugin, inNewTab);
                     });
                 }
