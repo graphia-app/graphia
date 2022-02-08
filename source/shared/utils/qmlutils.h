@@ -42,6 +42,7 @@
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QQmlEngine>
+#include <QAbstractListModel>
 
 class QQmlEngine;
 class QJSEngine;
@@ -321,6 +322,16 @@ public:
     Q_INVOKABLE void showAppInFileManager()
     {
         u::showInFolder(u::appPathName());
+    }
+
+    // NOLINTNEXTLINE readability-convert-member-functions-to-static
+    Q_INVOKABLE int modelRoleForName(QAbstractItemModel* model, const QByteArray& roleName)
+    {
+        Q_ASSERT(model != nullptr);
+        if(model == nullptr)
+            return -1;
+
+        return model->roleNames().key(roleName);
     }
 
 private:
