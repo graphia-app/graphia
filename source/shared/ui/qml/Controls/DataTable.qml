@@ -264,16 +264,15 @@ Rectangle
                         onDoubleClicked: { root.resizeColumnToContents(model.column); }
                     }
                 }
-
-                // Header underline
-                Rectangle
-                {
-                    anchors.bottom: parent.bottom
-                    width: parent.width
-                    height: 1
-                    color: systemPalette.midlight
-                }
             }
+        }
+
+        // Header underline
+        Rectangle
+        {
+            Layout.fillWidth: true
+            height: 1
+            color: systemPalette.midlight
         }
 
         TableView

@@ -827,16 +827,16 @@ Item
                                 onDoubleClicked: { root.resizeColumnsToContents(); }
                             }
                         }
-
-                        Rectangle
-                        {
-                            anchors.bottom: parent.bottom
-                            width: parent.width
-                            height: 1
-                            color: sysPalette.midlight
-                        }
                     }
                 }
+            }
+
+            Rectangle
+            {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: 1
+                color: sysPalette.midlight
             }
         }
 
