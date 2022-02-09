@@ -92,10 +92,9 @@ Window
                 Component.onCompleted:
                 {
                     presetsListModel.update();
-                    model = presetsListModel;
                 }
 
-                ListModel
+                model: ListModel
                 {
                     id: presetsListModel
 
