@@ -113,7 +113,7 @@ void ScreenshotRenderer::render()
     glViewport(0, 0, this->width(), this->height());
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width(), this->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  nullptr);
 
     renderGraph();
@@ -157,6 +157,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 
     // Need a pixmap to construct the full image
     auto fullScreenshot = QPixmap(screenshotSize.width(), screenshotSize.height());
+    fullScreenshot.fill(Qt::transparent);
 
     auto tileXCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(TILE_SIZE)));
     auto tileYCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.height()) / static_cast<float>(TILE_SIZE)));
