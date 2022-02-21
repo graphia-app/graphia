@@ -51,10 +51,10 @@ ApplicationWindow
 
         root.currentTableView = item.childTableView;
         root.currentHeatmap = item.childHeatmap;
-
     }
 
     onModelsChanged: { root.updateCurrent(); }
+    onVisibleChanged: { if(visible) root.updateCurrent(); }
 
     title: qsTr("Enrichment Results")
     minimumHeight: 400
