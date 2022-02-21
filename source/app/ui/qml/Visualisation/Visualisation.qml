@@ -595,9 +595,9 @@ Item
         // The attribute doesn't exist, so we work backwards to provide some sensible options
         else if(root.channel === "Size")
             similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
-        else if(root.parameters.hasOwnProperty("gradient"))
+        else if(root.parameters !== undefined && root.parameters.hasOwnProperty("gradient"))
             similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.Numerical);
-        else if(root.parameters.hasOwnProperty("palette"))
+        else if(root.parameters !== undefined && root.parameters.hasOwnProperty("palette"))
             similarAttributes = document.availableAttributesModel(ElementType.NodeAndEdge, ValueType.String);
         else
             similarAttributes = document.availableAttributesModel();
