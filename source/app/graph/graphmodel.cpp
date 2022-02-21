@@ -1083,7 +1083,7 @@ static float mappedSize(float min, float max, float user, float mapped)
 }
 
 // NOLINTNEXTLIME readability-make-member-function-const
-void GraphModel::updateVisuals()
+void GraphModel::updateVisuals(bool force)
 {
     // Prevent any changes to the graph while we read from it
     auto lock = mutableGraph().tryLock();
@@ -1240,7 +1240,7 @@ void GraphModel::updateVisuals()
     VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
     VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
 
-    if(nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None)
+    if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None)
     {
         emit visualsWillChange();
 
@@ -1270,7 +1270,10 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
     if(!name.startsWith(QStringLiteral("visuals")))
         return;
 
-    updateVisuals();
+    bool force = name.endsWith(QStringLiteral("showNodeText")) ||
+        name.endsWith(QStringLiteral("showEdgeText"));
+
+    updateVisuals(force);
 }
 
 void GraphModel::onMutableGraphChanged(const Graph* graph)
