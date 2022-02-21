@@ -185,7 +185,7 @@ public:
     void highlightNodes(const NodeIdSet& nodeIds);
 
     void enableVisualUpdates();
-    void updateVisuals();
+    void updateVisuals(bool force = false);
 
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
