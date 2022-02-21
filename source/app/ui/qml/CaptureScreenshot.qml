@@ -86,13 +86,11 @@ Window
             Text { text: qsTr("Preset:") }
             ComboBox
             {
-                Layout.fillWidth: true
                 id: presets
 
-                Component.onCompleted:
-                {
-                    presetsListModel.update();
-                }
+                Layout.fillWidth: true
+
+                textRole: "text"
 
                 model: ListModel
                 {
@@ -491,22 +489,17 @@ Window
             refreshTimer.restart();
     }
 
-    Component.onCompleted:
-    {
-        aspectRatio = screenshot.width / screenshot.height
-        pixelWidthSpin.value = screenshot.width
-        pixelHeightSpin.value = screenshot.height
-
-        loadPreset(presets.currentIndex);
-    }
-
     onVisibleChanged:
     {
         if(visible)
         {
-            aspectRatio = screenshot.width / screenshot.height
-            pixelWidthSpin.value = screenshot.width
-            pixelHeightSpin.value = screenshot.height
+            presetsListModel.update();
+
+            aspectRatio = screenshot.width / screenshot.height;
+            pixelWidthSpin.value = screenshot.width;
+            pixelHeightSpin.value = screenshot.height;
+
+            loadPreset(presets.currentIndex);
 
             preview.visible = false;
             requestPreview();
@@ -519,13 +512,17 @@ Window
 
         function onWidthChanged()
         {
-            presetsListModel.update();
+            if(root.visible)
+                presetsListModel.update();
+
             loadPreset(presets.currentIndex);
         }
 
         function onHeightChanged()
         {
-            presetsListModel.update();
+            if(root.visible)
+                presetsListModel.update();
+
             loadPreset(presets.currentIndex);
         }
     }
