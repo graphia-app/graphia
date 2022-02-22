@@ -31,6 +31,8 @@ Item
 
     property var application: null
 
+    property bool _storingPreference: false
+
     Preferences
     {
         id: defaults
@@ -46,20 +48,44 @@ Item
                 catch(e) { o = {}; }
             }
 
-            o.store = function() { storeFn(JSON.stringify(o)); };
+            if(storeFn !== undefined)
+                o.store = function() { storeFn(JSON.stringify(o)); };
 
             return o;
         }
 
         property string extensions
-        function extensionsAsObject() { return _stringToObject(defaults.extensions, v => defaults.extensions = v); }
+        onExtensionsChanged: { root.syncControlsToExtensionsPreference(); }
+
+        function extensionsAsObject()
+        {
+            return _stringToObject(defaults.extensions, function(v)
+            {
+                root._storingPreference = true;
+                defaults.extensions = v;
+                root._storingPreference = false;
+            });
+        }
 
         property string plugins
-        function pluginsAsObject() { return _stringToObject(defaults.plugins, v => defaults.plugins = v); }
+        onPluginsChanged: { root.syncControlsToPluginsPreference(); }
+
+        function pluginsAsObject()
+        {
+            return _stringToObject(defaults.plugins, function(v)
+            {
+                root._storingPreference = true;
+                defaults.plugins = v;
+                root._storingPreference = false;
+            });
+        }
     }
 
-    Component.onCompleted:
+    function syncControlsToExtensionsPreference()
     {
+        if(root._storingPreference)
+            return;
+
         let extensionsObject = defaults.extensionsAsObject();
 
         for(let i = 0; i < urlTypeSelectors.count; i++)
@@ -70,6 +96,12 @@ Item
             if(urlType !== undefined)
                 comboBox.currentIndex = application.urlTypesFor(comboBox.extension).indexOf(urlType) + 1;
         }
+    }
+
+    function syncControlsToPluginsPreference()
+    {
+        if(root._storingPreference)
+            return;
 
         let pluginsObject = defaults.pluginsAsObject();
 
@@ -81,6 +113,12 @@ Item
             if(plugin !== undefined)
                 comboBox.currentIndex = application.pluginNames(comboBox.urlType).indexOf(plugin) + 1;
         }
+    }
+
+    Component.onCompleted:
+    {
+        root.syncControlsToExtensionsPreference();
+        root.syncControlsToPluginsPreference();
     }
 
     property var ambiguousExtensions: SortFilterProxyModel
