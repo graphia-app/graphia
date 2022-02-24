@@ -46,7 +46,6 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QQuickFramebufferObject>
-#include <array>
 
 #include <functional>
 #include <memory>

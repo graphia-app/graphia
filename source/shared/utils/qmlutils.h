@@ -39,7 +39,6 @@
 #include <QTemporaryDir>
 #include <QFile>
 #include <QDir>
-#include <QByteArray>
 #include <QCryptographicHash>
 #include <QQmlEngine>
 #include <QAbstractListModel>

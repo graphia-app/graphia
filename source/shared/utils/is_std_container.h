@@ -35,7 +35,6 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <type_traits>
 
 // Specialize a type for all of the std containers
 namespace is_std_container_impl

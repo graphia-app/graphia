@@ -33,7 +33,6 @@
 #include <QSysInfo>
 #include <QDir>
 #include <QFileInfo>
-#include <QCollator>
 
 #include <algorithm>
 #include <regex>
