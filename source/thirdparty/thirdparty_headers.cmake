@@ -7,6 +7,7 @@ include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/matio)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/zlib)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/qcustomplot)
 include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/breakpad/src)
+include_directories(SYSTEM ${CMAKE_CURRENT_LIST_DIR}/utfcpp/source)
 
 add_definitions(-DQCUSTOMPLOT_USE_OPENGL -DQCUSTOMPLOT_USE_LIBRARY)
 add_definitions(-DCRYPTOPP_DISABLE_ASM)

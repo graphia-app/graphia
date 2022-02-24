@@ -25,7 +25,7 @@
 #include "shared/utils/string.h"
 #include "shared/utils/typeidentity.h"
 
-#include <utfcpp/utf8.h>
+#include <utf8.h>
 
 #include <QObject>
 #include <QString>
