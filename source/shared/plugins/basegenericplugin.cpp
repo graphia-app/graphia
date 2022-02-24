@@ -94,15 +94,15 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         };
 
         if(urlTypeName == QStringLiteral("MatrixCSV"))
-            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == QStringLiteral("MatrixSSV"))
-            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == QStringLiteral("MatrixTSV"))
-            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == QStringLiteral("MatrixXLSX"))
-            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == QStringLiteral("MatrixMatLab"))
-            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_adjacencyMatrixParameters._tabularData));
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
 
         return parser;
     }
@@ -130,7 +130,7 @@ void BaseGenericPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QStringLiteral("skipDuplicates"))
         _adjacencyMatrixParameters._skipDuplicates = (value == QStringLiteral("true"));
     else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
-        _adjacencyMatrixParameters._tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
+        _preloadedTabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
     else
         qDebug() << "BaseGenericPluginInstance::applyParameter unknown parameter" << name << value;
 }

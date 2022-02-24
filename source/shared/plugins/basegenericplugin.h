@@ -52,8 +52,9 @@ private:
         double _initialAbsEdgeWeightThreshold = 0.0;
         bool _filterEdges = false;
         bool _skipDuplicates = false;
-        TabularData _tabularData;
     } _adjacencyMatrixParameters;
+
+    TabularData _preloadedTabularData;
 
     NodeAttributeTableModel _nodeAttributeTableModel;
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
