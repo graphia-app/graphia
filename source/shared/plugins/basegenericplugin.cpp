@@ -21,7 +21,6 @@
 #include "shared/loading/biopaxfileparser.h"
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/dotfileparser.h"
-#include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 #include "shared/loading/adjacencymatrixfileparser.h"
 #include "shared/loading/pairwisefileparser.h"
@@ -64,9 +63,6 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     if(urlTypeName == QStringLiteral("DOT"))
         return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName == QStringLiteral("PairwiseTXT"))
-        return std::make_unique<PairwiseTxtFileParser>(userNodeData, userEdgeData);
-
     if(urlTypeName == QStringLiteral("PairwiseCSV"))
         return std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData);
 
@@ -75,6 +71,10 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
     if(urlTypeName == QStringLiteral("PairwiseTSV"))
         return std::make_unique<PairwiseTSVFileParser>(userNodeData, userEdgeData);
+
+
+    if(urlTypeName == QStringLiteral("PairwiseTXT"))
+        return std::make_unique<PairwiseTXTFileParser>(userNodeData, userEdgeData);
 
     if(urlTypeName == QStringLiteral("PairwiseXLSX"))
         return std::make_unique<PairwiseXLSXFileParser>(userNodeData, userEdgeData);
@@ -198,12 +198,12 @@ void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 BaseGenericPlugin::BaseGenericPlugin()
 {
     registerUrlType(QStringLiteral("GML"), QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
-    registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
     registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
     registerUrlType(QStringLiteral("DOT"), QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
     registerUrlType(QStringLiteral("PairwiseCSV"), QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("PairwiseSSV"), QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
     registerUrlType(QStringLiteral("PairwiseTSV"), QObject::tr("Pairwise TSV File"), QObject::tr("Pairwise TSV Files"), {"tsv"});
+    registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt"});
     registerUrlType(QStringLiteral("PairwiseXLSX"), QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
     registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
@@ -231,12 +231,12 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
     {
         bool canLoad =
             (urlType == QStringLiteral("GML") && GmlFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseTXT") && PairwiseTxtFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url)) ||
             (urlType == QStringLiteral("DOT") && DotFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("PairwiseCSV") && PairwiseCSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("PairwiseSSV") && PairwiseSSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("PairwiseTSV") && PairwiseTSVFileParser::canLoad(url)) ||
+            (urlType == QStringLiteral("PairwiseTXT") && PairwiseTXTFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("PairwiseXLSX") && PairwiseXLSXFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixCSV") && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url)) ||

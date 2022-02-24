@@ -139,9 +139,10 @@ public:
     }
 };
 
-using PairwiseTSVFileParser =   PairwiseFileParser<TsvFileParser>;
-using PairwiseSSVFileParser =   PairwiseFileParser<SsvFileParser>;
 using PairwiseCSVFileParser =   PairwiseFileParser<CsvFileParser>;
+using PairwiseSSVFileParser =   PairwiseFileParser<SsvFileParser>;
+using PairwiseTSVFileParser =   PairwiseFileParser<TsvFileParser>;
+using PairwiseTXTFileParser =   PairwiseFileParser<TxtFileParser>;
 using PairwiseXLSXFileParser =  PairwiseFileParser<XlsxTabularDataParser>;
 
 #endif // PAIRWISEFILEPARSER_H

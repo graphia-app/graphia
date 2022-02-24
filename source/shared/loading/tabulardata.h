@@ -24,9 +24,8 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
 #include "shared/utils/typeidentity.h"
-#include "shared/utils/msvcwarningsuppress.h"
 
-#include <csv/parser.hpp>
+#include <utfcpp/utf8.h>
 
 #include <QObject>
 #include <QString>
@@ -37,8 +36,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
-#include <cstring>
+#include <limits>
 
 class Progressable;
 
@@ -84,10 +82,12 @@ public:
 
 Q_DECLARE_METATYPE(std::shared_ptr<TabularData>) // NOLINT performance-no-int-to-ptr
 
-template<const char Delimiter>
+enum class EmptyCellPolicy { Keep, Skip };
+
+template<EmptyCellPolicy ECP, const char... Delimiters>
 class TextDelimitedTabularDataParser : public IParser
 {
-    static_assert(Delimiter != '"', "Delimiter cannot be a quotemark");
+    static_assert(((Delimiters != '"') && ...), "Delimiter cannot be a quotemark");
 
 private:
     size_t _rowLimit = 0;
@@ -124,19 +124,59 @@ public:
             return false;
         }
 
-        auto parser = std::make_unique<aria::csv::CsvParser>(file);
-        parser->delimiter(Delimiter);
-        for(const auto& row : *parser)
-        {
-            auto progress = file.eof() ? 100 :
-                static_cast<int>(parser->position() * 100 / fileSize);
-            setProgress(progress);
+        int progress = 0;
+        std::string line;
+        std::string token;
 
-            for(const auto& field : row)
+        auto setCurrentCellToToken = [&]
+        {
+            _tabularData.setValueAt(columnIndex, rowIndex,
+                QString::fromStdString(token), progress);
+
+            token.clear();
+            columnIndex++;
+        };
+
+        file.seekg(0, std::ios::beg);
+        while(!u::getline(file, line).eof())
+        {
+            bool inQuotes = false;
+            bool delimiter = false;
+
+            std::string validatedLine;
+            utf8::replace_invalid(line.begin(), line.end(), std::back_inserter(validatedLine));
+            auto it = validatedLine.begin();
+            auto end = validatedLine.end();
+            while(it < end)
             {
-                _tabularData.setValueAt(columnIndex++, rowIndex,
-                    QString::fromStdString(field), progress);
+                uint32_t codePoint = utf8::next(it, end);
+
+                if(codePoint == '"')
+                {
+                    if(inQuotes)
+                        setCurrentCellToToken();
+
+                    inQuotes = !inQuotes;
+                    delimiter = false;
+                }
+                else
+                {
+                    auto previousTokenWasDelimiter = delimiter;
+                    delimiter = ((Delimiters == codePoint) || ...);
+
+                    if(!delimiter || inQuotes)
+                        utf8::unchecked::append(codePoint, std::back_inserter(token));
+                    else if(!token.empty() || (previousTokenWasDelimiter && ECP == EmptyCellPolicy::Keep))
+                        setCurrentCellToToken();
+                }
             }
+
+            if(!token.empty())
+                setCurrentCellToToken();
+
+            progress = file.eof() ? 100 :
+                static_cast<int>(file.tellg() * 100 / fileSize);
+            setProgress(progress);
 
             rowIndex++;
             columnIndex = 0;
@@ -158,30 +198,30 @@ public:
 
     TabularData& tabularData() { return _tabularData; }
 
-    MSVC_WARNING_SUPPRESS_NEXTLINE(6262)
     static bool canLoad(const QUrl& url)
     {
-        std::ifstream file(url.toLocalFile().toStdString());
+        TextDelimitedTabularDataParser<ECP, Delimiters...> testParser;
 
-        if(!file)
+        testParser.setRowLimit(5);
+        if(!testParser.parse(url))
             return false;
 
-        auto testParser = aria::csv::CsvParser(file);
-        testParser.delimiter(Delimiter);
-
-        // Count the maximum and minimum number of columns in the first few rows
-        size_t linesToScan = 5;
+        const auto& tabularData = testParser.tabularData();
         size_t minColumns = std::numeric_limits<size_t>::max();
         size_t maxColumns = std::numeric_limits<size_t>::min();
-        for(const auto& testRow : testParser)
+
+        for(size_t row = 0; row < tabularData.numRows(); row++)
         {
-            auto numColumns = testRow.size();
+            size_t numColumns = 0;
+
+            for(size_t column = 0; column < tabularData.numColumns(); column++)
+            {
+                if(!tabularData.valueAt(column, row).isEmpty())
+                    numColumns = column + 1;
+            }
 
             minColumns = std::min(numColumns, minColumns);
             maxColumns = std::max(numColumns, maxColumns);
-
-            if(--linesToScan == 0)
-                break;
         }
 
         if(minColumns > maxColumns)
@@ -203,8 +243,9 @@ public:
     }
 };
 
-using CsvFileParser = TextDelimitedTabularDataParser<','>;
-using TsvFileParser = TextDelimitedTabularDataParser<'\t'>;
-using SsvFileParser = TextDelimitedTabularDataParser<';'>;
+using CsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, ','>;
+using TsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, '\t'>;
+using TxtFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Skip, ' ', '\t'>;
+using SsvFileParser = TextDelimitedTabularDataParser<EmptyCellPolicy::Keep, ';'>;
 
 #endif // TABULARDATA_H
