@@ -4,5 +4,6 @@
         <file>tools.svg</file>
         <file>qml/GenericPlugin.qml</file>
         <file>qml/MatrixParameters.qml</file>
+        <file>qml/PairwiseParameters.qml</file>
     </qresource>
 </RCC>
