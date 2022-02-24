@@ -273,7 +273,10 @@ void QmlTabularDataParser::onDataLoaded()
         emit failedChanged();
     }
     else
+    {
+        _model.setTabularData(*_dataPtr);
         emit dataLoaded();
+    }
 
     _complete = true;
     emit completeChanged();

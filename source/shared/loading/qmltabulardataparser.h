@@ -23,6 +23,7 @@
 #include "shared/utils/progressable.h"
 #include "shared/utils/typeidentity.h"
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/tabulardatamodel.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QObject>
@@ -35,6 +36,7 @@
 #include <atomic>
 
 class QmlTabularDataParser;
+class QAbstractTableModel;
 
 class QmlTabularDataHeaderModel : public QAbstractListModel
 {
@@ -68,6 +70,7 @@ class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual
     Q_OBJECT
 
     Q_PROPERTY(std::shared_ptr<TabularData> data MEMBER _dataPtr NOTIFY dataChanged)
+    Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataLoaded)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(int progress MEMBER _progress WRITE setProgress NOTIFY progressChanged)
@@ -78,6 +81,7 @@ class QmlTabularDataParser : public QObject, virtual public Cancellable, virtual
 private:
     QFutureWatcher<void> _dataParserWatcher;
     std::shared_ptr<TabularData> _dataPtr = nullptr;
+    TabularDataModel _model;
 
     std::vector<TypeIdentity> _columnTypeIdentities;
 
@@ -117,6 +121,8 @@ public:
         const QStringList& skip = {}) const;
 
     bool busy() const { return _dataParserWatcher.isRunning(); }
+
+    QAbstractTableModel* tableModel() { return &_model; }
 
 signals:
     void dataChanged();
