@@ -43,7 +43,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisefileparser.h
-    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.h
@@ -135,7 +134,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphsizeestimate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/qmltabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/xlsxtabulardataparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp
