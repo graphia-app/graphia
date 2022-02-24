@@ -38,31 +38,40 @@ class PairwiseFileParser : public IParser
 private:
     IUserNodeData* _userNodeData = nullptr;
     IUserEdgeData* _userEdgeData = nullptr;
+    TabularData _tabularData;
 
 public:
-    PairwiseFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
+    PairwiseFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
+        TabularData* tabularData = nullptr) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
     {
+        if(tabularData != nullptr)
+            _tabularData = std::move(*tabularData);
+
         // Add this up front, so that it appears first in the attribute table
         userNodeData->add(QObject::tr("Node Name"));
     }
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override
     {
-        TabularDataParser parser(this);
+        if(_tabularData.empty())
+        {
+            TabularDataParser parser(this);
 
-        if(!parser.parse(url, graphModel))
-            return false;
+            if(!parser.parse(url, graphModel))
+                return false;
 
-        const auto& data = parser.tabularData();
+            _tabularData = std::move(parser.tabularData());
+        }
+
         setProgress(-1);
 
         std::map<QString, NodeId> nodeIdMap;
 
-        for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
+        for(size_t rowIndex = 0; rowIndex < _tabularData.numRows(); rowIndex++)
         {
-            auto source = data.valueAt(0, rowIndex);
-            auto target = data.valueAt(1, rowIndex);
+            auto source = _tabularData.valueAt(0, rowIndex);
+            auto target = _tabularData.valueAt(1, rowIndex);
 
             NodeId firstNodeId;
             NodeId secondNodeId;
@@ -97,10 +106,10 @@ public:
 
             auto edgeId = graphModel->mutableGraph().addEdge(firstNodeId, secondNodeId);
 
-            if(data.numColumns() == 3)
+            if(_tabularData.numColumns() == 3)
             {
                 // We have an edge weight too
-                double edgeWeight = data.valueAt(2, rowIndex).toDouble();
+                double edgeWeight = _tabularData.valueAt(2, rowIndex).toDouble();
 
                 if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                     edgeWeight = 1.0;
@@ -108,7 +117,7 @@ public:
                 _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
             }
 
-            setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
+            setProgress(static_cast<int>((rowIndex * 100) / _tabularData.numRows()));
         }
 
         return true;
