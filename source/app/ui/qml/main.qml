@@ -598,7 +598,11 @@ ApplicationWindow
         return QmlUtils.urlIsFile(url) ? QmlUtils.baseFileNameForUrl(url) : url;
     }
 
-    ChooserDialog { id: chooserDialog }
+    Component
+    {
+        id: chooserDialogComponent
+        ChooserDialog {}
+    }
 
     function openUrl(url, inNewTab)
     {
@@ -685,17 +689,20 @@ ApplicationWindow
             let defaultType = defaults.urlTypeFor(extension);
             if(defaultType === undefined || types.indexOf(defaultType) === -1)
             {
-                chooserDialog.title = qsTr("Type Ambiguous");
-                chooserDialog.explanationText = userTextForUrl(url) +
-                    qsTr(" may be interpreted as two or more possible formats. ") +
-                    qsTr("Please select how you wish to proceed below.");
-                chooserDialog.choiceLabelText = qsTr("Open As:");
-                chooserDialog.model = application.urlTypeDetails;
-                chooserDialog.displayRole = "individualDescription";
-                chooserDialog.valueRole = "name";
-                chooserDialog.values = types;
+                let urlTypeChooserDialog = chooserDialogComponent.createObject(mainWindow,
+                {
+                    "title": qsTr("Type Ambiguous"),
+                    "explanationText": userTextForUrl(url) +
+                        qsTr(" may be interpreted as two or more possible formats. ") +
+                        qsTr("Please select how you wish to proceed below."),
+                    "choiceLabelText": qsTr("Open As:"),
+                    "model": application.urlTypeDetails,
+                    "displayRole": "individualDescription",
+                    "valueRole": "name",
+                    "values": types
+                });
 
-                chooserDialog.show(function(selectedType, remember)
+                urlTypeChooserDialog.show(function(selectedType, remember)
                 {
                     if(remember)
                         defaults.setUrlTypeFor(extension, selectedType);
@@ -721,17 +728,20 @@ ApplicationWindow
                 let defaultPlugin = defaults.pluginFor(type);
                 if(defaultPlugin === undefined || pluginNames.indexOf(defaultPlugin) === -1)
                 {
-                    chooserDialog.title = qsTr("Multiple Plugins Applicable");
-                    chooserDialog.explanationText = userTextForUrl(url) +
-                        qsTr(" may be loaded by two or more plugins. ") +
-                        qsTr("Please select how you wish to proceed below.");
-                    chooserDialog.choiceLabelText = qsTr("Open With Plugin:");
-                    chooserDialog.model = application.pluginDetails;
-                    chooserDialog.displayRole = "name";
-                    chooserDialog.valueRole = "name";
-                    chooserDialog.values = pluginNames;
+                    let pluginChooserDialog = chooserDialogComponent.createObject(mainWindow,
+                    {
+                        "title": qsTr("Multiple Plugins Applicable"),
+                        "explanationText": userTextForUrl(url) +
+                            qsTr(" may be loaded by two or more plugins. ") +
+                            qsTr("Please select how you wish to proceed below."),
+                        "choiceLabelText": qsTr("Open With Plugin:"),
+                        "model": application.pluginDetails,
+                        "displayRole": "name",
+                        "valueRole": "name",
+                        "values": pluginNames
+                    });
 
-                    chooserDialog.show(function(selectedPlugin, remember)
+                    pluginChooserDialog.show(function(selectedPlugin, remember)
                     {
                         if(remember)
                             defaults.setPluginFor(type, selectedPlugin);

@@ -138,6 +138,10 @@ Dialog
 
     function show(onAcceptedFn)
     {
+        // Force comboBox.selectedValue to be updated
+        comboBox.currentIndex = -1;
+        comboBox.currentIndex = 0;
+
         root._onAcceptedFn = onAcceptedFn;
         Qt.callLater(function()
         {
