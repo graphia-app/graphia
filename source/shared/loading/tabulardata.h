@@ -161,7 +161,7 @@ public:
                 }
                 else
                 {
-                    auto previousTokenWasDelimiter = delimiter;
+                    auto previousTokenWasDelimiter = delimiter || columnIndex == 0;
                     delimiter = ((Delimiters == codePoint) || ...);
 
                     if(!delimiter || inQuotes)
