@@ -29,6 +29,14 @@ Rectangle
 
     property alias model: tableView.model
 
+    property bool useFirstRowAsHeader: true
+    onUseFirstRowAsHeaderChanged:
+    {
+        //FIXME ideally this would reposition to show the first row when it was unhidden,
+        // but it's really hard to get TableView to do this, at least it is with 5.14
+        root.forceLayout();
+    }
+
     property var highlightedProvider: function(column, row) { return false; }
 
     readonly property int _padding: 4
@@ -293,7 +301,7 @@ Rectangle
             rowHeightProvider: function(row)
             {
                 // Hide first row
-                if(row === 0)
+                if(root.useFirstRowAsHeader && row === 0)
                     return 0;
 
                 // If the static height is set, use it, otherwise automatically size
