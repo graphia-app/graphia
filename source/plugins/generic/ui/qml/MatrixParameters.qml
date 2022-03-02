@@ -160,6 +160,7 @@ BaseParameterDialog
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
 
                     text: qsTr("An adjacency matrix is a square matrix used to represent a graph. " +
                         "The elements of the matrix indicate whether pairs of nodes are adjacent or " +
@@ -170,7 +171,6 @@ BaseParameterDialog
                 {
                     Layout.minimumWidth: 80
                     Layout.minimumHeight: 80
-                    Layout.margins: Constants.margin
 
                     sourceSize.width: 80
                     sourceSize.height: 80
