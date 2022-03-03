@@ -47,7 +47,6 @@ Rectangle
     onWidthChanged: { root.forceLayout(); }
     onHeightChanged: { root.forceLayout(); }
 
-    property var _naturalHeaderWidths: []
     property var _columnWidths: []
 
     property var _loadedCells: new Set()
@@ -65,6 +64,7 @@ Rectangle
         root._bottomLoadedRow = -1;
     }
 
+    property var _headerWidths: new Map()
     property var _cellWidths: new Map()
 
     readonly property int leftColumn: _leftLoadedColumn
@@ -181,8 +181,6 @@ Rectangle
             id: headerView
             Layout.fillWidth: true
 
-            syncDirection: Qt.Horizontal
-            syncView: tableView
             model: tableView.model
 
             interactive: false
@@ -202,14 +200,11 @@ Rectangle
             {
                 if(root._columnWidths[column] === undefined)
                 {
-                    let headerIndex = root.model.index(0, column);
-                    let headerText = root.model.data(headerIndex);
+                    let headerWidth = root._headerWidths.get(column);
+                    if(headerWidth === undefined)
+                        return -1;
 
-                    // Create a header so we can determine the default width for headerText
-                    let dummyHeader = root.headerDelegate.createObject(null, {text: headerText});
-                    root._columnWidths[column] = Math.max(root._minimumColumnWidth, dummyHeader.implicitWidth);
-                    root._naturalHeaderWidths[column] = root._columnWidths[column];
-                    dummyHeader.destroy();
+                    root._columnWidths[column] = headerWidth;
                 }
 
                 return root._columnWidths[column];
@@ -217,7 +212,7 @@ Rectangle
 
             delegate: Item
             {
-                implicitWidth: headerDelegateLoader.width
+                implicitWidth: Math.max(1, headerDelegateLoader.width)
                 implicitHeight: headerDelegateLoader.height
 
                 Loader
@@ -232,6 +227,8 @@ Rectangle
                     readonly property int modelColumn: model.column
 
                     onLoaded: { headerView.implicitHeight = height; }
+
+                    onImplicitWidthChanged: { root._headerWidths.set(model.column, Math.max(1, implicitWidth)); }
                 }
 
                 // Pass through hover events to the header to immediately to the left
@@ -273,6 +270,16 @@ Rectangle
                     }
                 }
             }
+
+            TableView.onReused:
+            {
+                root._headerWidths.set(model.column, Math.max(1, headerDelegateLoader.implicitWidth));
+            }
+
+            TableView.onPooled:
+            {
+                root._headerWidths.delete(model.column);
+            }
         }
 
         // Header underline
@@ -286,6 +293,9 @@ Rectangle
         TableView
         {
             id: tableView
+
+            syncDirection: Qt.Horizontal
+            syncView: headerView
 
             clip: true
             pixelAligned: true
@@ -314,7 +324,7 @@ Rectangle
             {
                 clip: true
 
-                implicitWidth: cellDelegateLoader.width
+                implicitWidth: Math.max(1, cellDelegateLoader.width)
                 implicitHeight: Math.max(1, cellDelegateLoader.height)
 
                 Loader
@@ -334,7 +344,7 @@ Rectangle
                             root._cellDelegateHeight = height;
                     }
 
-                    onImplicitWidthChanged: { root._cellWidths.set(model.column + "," + model.row, implicitWidth); }
+                    onImplicitWidthChanged: { root._cellWidths.set(model.column + "," + model.row, Math.max(1, implicitWidth)); }
                 }
 
                 MouseArea
@@ -355,7 +365,7 @@ Rectangle
                     root._loadedCells.add({x: model.column, y: model.row});
                     root._updateCellExtents();
 
-                    root._cellWidths.set(model.column + "," + model.row, cellDelegateLoader.implicitWidth);
+                    root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.implicitWidth));
                 }
 
                 TableView.onPooled:
@@ -401,12 +411,18 @@ Rectangle
             return;
         }
 
-        root._columnWidths[column] = Math.max(root._naturalHeaderWidths[column], maxWidth);
+        root._columnWidths[column] = Math.max(root._headerWidths.get(column), maxWidth);
         root.forceLayout();
     }
 
     function resizeVisibleColumnsToContents()
     {
+        if(root.leftColumn < 0 || root.rightColumn < 0)
+        {
+            console.log("DataTable.resizeVisibleColumnsToContents: column extents not determined");
+            return;
+        }
+
         for(let column = root.rightColumn; column >= root.leftColumn; column--)
             resizeColumnToContents(column);
     }
