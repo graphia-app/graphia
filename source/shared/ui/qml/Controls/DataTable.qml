@@ -231,9 +231,6 @@ Rectangle
                     onImplicitWidthChanged: { root._headerWidths.set(model.column, Math.max(1, implicitWidth)); }
                 }
 
-                // Pass through hover events to the header to immediately to the left
-                HoverMousePassthrough { anchors.fill: parent }
-
                 // Column resize handle
                 Rectangle
                 {
@@ -245,9 +242,9 @@ Rectangle
                     MouseArea
                     {
                         cursorShape: Qt.SizeHorCursor
-                        width: 8
+                        width: 4
                         height: parent.height
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.right: parent.right
                         drag.target: parent
                         drag.axis: Drag.XAxis
                         drag.threshold: 0
