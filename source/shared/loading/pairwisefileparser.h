@@ -20,6 +20,7 @@
 #define PAIRWISEFILEPARSER_H
 
 #include "shared/loading/iparser.h"
+#include "shared/loading/iuserelementdata.h"
 
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
@@ -27,10 +28,7 @@
 #include <QString>
 
 #include <map>
-
-template<typename> class IUserElementData;
-using IUserNodeData = IUserElementData<NodeId>;
-using IUserEdgeData = IUserElementData<EdgeId>;
+#include <cmath>
 
 template<typename TabularDataParser>
 class PairwiseFileParser : public IParser
