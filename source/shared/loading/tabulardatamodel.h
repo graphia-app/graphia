@@ -42,6 +42,8 @@ public:
 
     bool transposed() const;
     void setTransposed(bool transposed);
+
+    Q_INVOKABLE bool columnIsNumerical(int column) const;
 };
 
 #endif // TABULARDATAMODEL_H

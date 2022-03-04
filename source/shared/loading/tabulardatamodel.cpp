@@ -37,10 +37,25 @@ void TabularDataModel::setTransposed(bool transposed)
     }
 }
 
+bool TabularDataModel::columnIsNumerical(int column) const
+{
+    auto c = static_cast<size_t>(column);
+
+    if(_data != nullptr && c < _data->numColumns())
+    {
+        auto type = _data->typeIdentity(c, 0).type();
+
+        return type == TypeIdentity::Type::Int || type == TypeIdentity::Type::Float;
+    }
+
+    return false;
+}
+
 int TabularDataModel::rowCount(const QModelIndex&) const
 {
     if(_data != nullptr)
         return static_cast<int>(_data->numRows());
+
     return 0;
 }
 
@@ -48,6 +63,7 @@ int TabularDataModel::columnCount(const QModelIndex&) const
 {
     if(_data != nullptr)
         return static_cast<int>(_data->numColumns());
+
     return 0;
 }
 
