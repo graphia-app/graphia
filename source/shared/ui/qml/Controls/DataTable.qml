@@ -393,6 +393,12 @@ Rectangle
             row >= root._topLoadedRow && row <= root._bottomLoadedRow;
     }
 
+    function resizeColumnToHeader(column)
+    {
+        root._columnWidths[column] = root._headerWidths.get(column);
+        root.forceLayout();
+    }
+
     function resizeColumnToContents(column)
     {
         let maxWidth = 0;
