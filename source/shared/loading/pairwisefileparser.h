@@ -25,10 +25,21 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/xlsxtabulardataparser.h"
 
+#include "shared/utils/qmlenum.h"
+
 #include <QString>
 
 #include <map>
 #include <cmath>
+
+DEFINE_QML_ENUM(
+    Q_GADGET, PairwiseColumnType,
+    Unused,
+    SourceNode,
+    TargetNode,
+    EdgeAttribute,
+    SourceNodeAttribute,
+    TargetNodeAttribute);
 
 template<typename TabularDataParser>
 class PairwiseFileParser : public IParser
