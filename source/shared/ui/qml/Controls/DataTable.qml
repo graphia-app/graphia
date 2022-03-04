@@ -212,8 +212,8 @@ Rectangle
 
             delegate: Item
             {
-                implicitWidth: Math.max(1, headerDelegateLoader.width)
-                implicitHeight: headerDelegateLoader.height
+                implicitWidth: Math.max(1, headerDelegateLoader.implicitWidth)
+                implicitHeight: Math.max(1, headerDelegateLoader.implicitHeight)
 
                 Loader
                 {
@@ -327,8 +327,8 @@ Rectangle
             {
                 clip: true
 
-                implicitWidth: Math.max(1, cellDelegateLoader.width)
-                implicitHeight: Math.max(1, cellDelegateLoader.height)
+                implicitWidth: Math.max(1, cellDelegateLoader.implicitWidth)
+                implicitHeight: Math.max(1, cellDelegateLoader.implicitHeight)
 
                 Loader
                 {
