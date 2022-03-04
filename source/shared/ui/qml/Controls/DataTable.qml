@@ -270,11 +270,17 @@ Rectangle
                 TableView.onReused:
                 {
                     root._headerWidths.set(model.column, Math.max(1, headerDelegateLoader.implicitWidth));
+
+                    if(typeof(headerDelegateLoader.item.onReused) === "function")
+                        headerDelegateLoader.item.onReused();
                 }
 
                 TableView.onPooled:
                 {
                     root._headerWidths.delete(model.column);
+
+                    if(typeof(headerDelegateLoader.item.onPooled) === "function")
+                        headerDelegateLoader.item.onPooled();
                 }
             }
         }
@@ -363,6 +369,9 @@ Rectangle
                     root._updateCellExtents();
 
                     root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.implicitWidth));
+
+                    if(typeof(cellDelegateLoader.item.onReused) === "function")
+                        cellDelegateLoader.item.onReused();
                 }
 
                 TableView.onPooled:
@@ -376,6 +385,9 @@ Rectangle
                     root._updateCellExtents();
 
                     root._cellWidths.delete(model.column + "," + model.row);
+
+                    if(typeof(cellDelegateLoader.item.onPooled) === "function")
+                        cellDelegateLoader.item.onPooled();
                 }
             }
         }
