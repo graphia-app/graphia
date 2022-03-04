@@ -123,26 +123,7 @@ public:
 
     static bool canLoad(const QUrl& url)
     {
-        if(!TabularDataParser::canLoad(url))
-            return false;
-
-        TabularDataParser parser;
-        parser.setRowLimit(5);
-        parser.parse(url);
-        const auto& tabularData = parser.tabularData();
-
-        if(tabularData.numColumns() == 2)
-            return true;
-
-        if(tabularData.numColumns() == 3)
-        {
-            auto thirdColumnType = tabularData.typeIdentity(2, 0).type();
-
-            return thirdColumnType == TypeIdentity::Type::Float ||
-                thirdColumnType == TypeIdentity::Type::Int;
-        }
-
-        return false;
+        return TabularDataParser::canLoad(url);
     }
 };
 
