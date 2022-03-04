@@ -266,16 +266,16 @@ Rectangle
                         onDoubleClicked: { root.resizeColumnToContents(model.column); }
                     }
                 }
-            }
 
-            TableView.onReused:
-            {
-                root._headerWidths.set(model.column, Math.max(1, headerDelegateLoader.implicitWidth));
-            }
+                TableView.onReused:
+                {
+                    root._headerWidths.set(model.column, Math.max(1, headerDelegateLoader.implicitWidth));
+                }
 
-            TableView.onPooled:
-            {
-                root._headerWidths.delete(model.column);
+                TableView.onPooled:
+                {
+                    root._headerWidths.delete(model.column);
+                }
             }
         }
 
