@@ -42,6 +42,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iuserelementdata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsonparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/jsongraphparser.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisecolumntype.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisefileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
