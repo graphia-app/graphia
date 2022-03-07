@@ -49,7 +49,7 @@ Item
 
         property string textFont
         property var textSize
-        property int textAlignment
+        property alias textAlignment: textAlignmentCombobox.currentIndex
     }
 
     Component.onCompleted:
@@ -180,6 +180,8 @@ Item
             Label { text: qsTr("Alignment") }
             ComboBox
             {
+                id: textAlignmentCombobox
+
                 model:
                 [
                     // Must stay synced with TextAlignment in graphrenderer.h
@@ -189,8 +191,6 @@ Item
                     qsTr("Top"),
                     qsTr("Bottom")
                 ]
-                currentIndex: visuals.textAlignment
-                onCurrentIndexChanged: visuals.textAlignment = currentIndex;
             }
 
             Label
