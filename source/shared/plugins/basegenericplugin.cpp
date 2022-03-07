@@ -69,6 +69,9 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 
         auto configurePairwiseParser = [&](auto pairwiseParser)
         {
+            pairwiseParser->setFirstRowIsHeader(_pairwiseParameters._firstRowIsHeader);
+            pairwiseParser->setColumnsConfiguration(_pairwiseParameters._columns);
+
             return pairwiseParser;
         };
 

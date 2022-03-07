@@ -39,7 +39,20 @@ private:
     IUserEdgeData* _userEdgeData = nullptr;
     TabularData _tabularData;
 
+    bool _firstRowIsHeader = false;
+    PairwiseColumnsConfiguration _columnsConfiguration =
+    {
+        {0, {PairwiseColumnType::SourceNode, {}}},
+        {1, {PairwiseColumnType::TargetNode, {}}},
+    };
+
 public:
+    void setFirstRowIsHeader(bool firstRowIsHeader) { _firstRowIsHeader = firstRowIsHeader; }
+    void setColumnsConfiguration(const PairwiseColumnsConfiguration& columnsConfiguration)
+    {
+        _columnsConfiguration = columnsConfiguration;
+    }
+
     PairwiseFileParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData,
         TabularData* tabularData = nullptr) :
         _userNodeData(userNodeData), _userEdgeData(userEdgeData)
@@ -65,55 +78,88 @@ public:
 
         setProgress(-1);
 
+        size_t sourceNodeColumn = 0;
+        size_t targetNodeColumn = 0;
+
+        struct AttributeColumn
+        {
+            size_t _column;
+            PairwiseColumnType _type;
+            QString _name;
+        };
+
+        std::vector<AttributeColumn> _attributeColumns;
+
+        for(const auto& [column, configuration] : _columnsConfiguration)
+        {
+            Q_ASSERT(column < _tabularData.numColumns());
+
+            switch(configuration._type)
+            {
+            case PairwiseColumnType::Unused: break;
+            case PairwiseColumnType::SourceNode: sourceNodeColumn = column; break;
+            case PairwiseColumnType::TargetNode: targetNodeColumn = column; break;
+            default:
+                _attributeColumns.emplace_back(AttributeColumn{column, configuration._type, configuration._name});
+                break;
+            }
+        }
+
         std::map<QString, NodeId> nodeIdMap;
 
-        for(size_t rowIndex = 0; rowIndex < _tabularData.numRows(); rowIndex++)
+        for(size_t rowIndex = _firstRowIsHeader ? 1 : 0; rowIndex < _tabularData.numRows(); rowIndex++)
         {
-            auto source = _tabularData.valueAt(0, rowIndex);
-            auto target = _tabularData.valueAt(1, rowIndex);
+            auto source = _tabularData.valueAt(sourceNodeColumn, rowIndex);
+            auto target = _tabularData.valueAt(targetNodeColumn, rowIndex);
 
-            NodeId firstNodeId;
-            NodeId secondNodeId;
+            NodeId sourceNodeId;
+            NodeId targetNodeId;
 
             if(!u::contains(nodeIdMap, source))
             {
-                firstNodeId = graphModel->mutableGraph().addNode();
-                nodeIdMap.emplace(source, firstNodeId);
+                sourceNodeId = graphModel->mutableGraph().addNode();
+                nodeIdMap.emplace(source, sourceNodeId);
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->setValueBy(firstNodeId, QObject::tr("Node Name"), source);
-                    graphModel->setNodeName(firstNodeId, source);
+                    _userNodeData->setValueBy(sourceNodeId, QObject::tr("Node Name"), source);
+                    graphModel->setNodeName(sourceNodeId, source);
                 }
             }
             else
-                firstNodeId = nodeIdMap[source];
+                sourceNodeId = nodeIdMap[source];
 
             if(!u::contains(nodeIdMap, target))
             {
-                secondNodeId = graphModel->mutableGraph().addNode();
-                nodeIdMap.emplace(target, secondNodeId);
+                targetNodeId = graphModel->mutableGraph().addNode();
+                nodeIdMap.emplace(target, targetNodeId);
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->setValueBy(secondNodeId, QObject::tr("Node Name"), target);
-                    graphModel->setNodeName(secondNodeId, target);
+                    _userNodeData->setValueBy(targetNodeId, QObject::tr("Node Name"), target);
+                    graphModel->setNodeName(targetNodeId, target);
                 }
             }
             else
-                secondNodeId = nodeIdMap[target];
+                targetNodeId = nodeIdMap[target];
 
-            auto edgeId = graphModel->mutableGraph().addEdge(firstNodeId, secondNodeId);
+            auto edgeId = graphModel->mutableGraph().addEdge(sourceNodeId, targetNodeId);
 
-            if(_tabularData.numColumns() == 3)
+            for(const auto& attributeColumn : _attributeColumns)
             {
-                // We have an edge weight too
-                double edgeWeight = _tabularData.valueAt(2, rowIndex).toDouble();
+                auto value = _tabularData.valueAt(attributeColumn._column, rowIndex);
 
-                if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
-                    edgeWeight = 1.0;
+                switch(attributeColumn._type)
+                {
+                case PairwiseColumnType::EdgeAttribute:
+                    _userEdgeData->setValueBy(edgeId, attributeColumn._name, value); break;
+                case PairwiseColumnType::SourceNodeAttribute:
+                    _userNodeData->setValueBy(sourceNodeId, attributeColumn._name, value); break;
+                case PairwiseColumnType::TargetNodeAttribute:
+                    _userNodeData->setValueBy(targetNodeId, attributeColumn._name, value); break;
 
-                _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
+                default: break;
+                }
             }
 
             setProgress(static_cast<int>((rowIndex * 100) / _tabularData.numRows()));
