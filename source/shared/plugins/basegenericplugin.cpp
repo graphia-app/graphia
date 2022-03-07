@@ -126,9 +126,36 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     return nullptr;
 }
 
+static auto pairwiseColumns(const QVariant& value)
+{
+    PairwiseColumnsConfiguration columns;
+
+    const auto map = value.toMap();
+
+    const auto& keys = map.keys();
+    for(const auto& key : keys)
+    {
+        Q_ASSERT(u::isInteger(key));
+
+        auto column = static_cast<size_t>(key.toInt());
+        auto info = map.value(key).toMap();
+        auto type = u::contains(info, "type") ?
+            static_cast<PairwiseColumnType>(info.value(QStringLiteral("type")).toInt()) : PairwiseColumnType::Unused;
+        auto name = u::contains(info, "name") ? info.value(QStringLiteral("name")).toString() : QString();
+
+        columns[column] = {type, name};
+    }
+
+    return columns;
+}
+
 void BaseGenericPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QStringLiteral("minimumThreshold"))
+    if(name == QStringLiteral("firstRowIsHeader"))
+        _pairwiseParameters._firstRowIsHeader = (value == QStringLiteral("true"));
+    else if(name == QStringLiteral("columns"))
+        _pairwiseParameters._columns = pairwiseColumns(value);
+    else if(name == QStringLiteral("minimumThreshold"))
         _adjacencyMatrixParameters._minimumAbsEdgeWeight = value.toDouble();
     else if(name == QStringLiteral("initialThreshold"))
         _adjacencyMatrixParameters._initialAbsEdgeWeightThreshold = value.toDouble();

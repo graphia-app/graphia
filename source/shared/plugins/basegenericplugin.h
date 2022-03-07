@@ -23,6 +23,7 @@
 
 #include "shared/loading/userelementdata.h"
 #include "shared/loading/tabulardata.h"
+#include "shared/loading/pairwisecolumntype.h"
 
 #include "shared/plugins/nodeattributetablemodel.h"
 
@@ -53,6 +54,12 @@ private:
         bool _filterEdges = false;
         bool _skipDuplicates = false;
     } _adjacencyMatrixParameters;
+
+    struct PairwiseParameters
+    {
+        bool _firstRowIsHeader = false;
+        PairwiseColumnsConfiguration _columns;
+    } _pairwiseParameters;
 
     TabularData _preloadedTabularData;
 

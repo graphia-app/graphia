@@ -18,6 +18,8 @@
 
 #include "shared/utils/qmlenum.h"
 
+#include <map>
+
 #ifndef PAIRWISECOLUMNTYPE_H
 #define PAIRWISECOLUMNTYPE_H
 
@@ -29,5 +31,13 @@ DEFINE_QML_ENUM(
     EdgeAttribute,
     SourceNodeAttribute,
     TargetNodeAttribute);
+
+struct PairwiseColumnConfiguration
+{
+    PairwiseColumnType _type;
+    QString _name;
+};
+
+using PairwiseColumnsConfiguration = std::map<size_t, PairwiseColumnConfiguration>;
 
 #endif // PAIRWISECOLUMNTYPE_H
