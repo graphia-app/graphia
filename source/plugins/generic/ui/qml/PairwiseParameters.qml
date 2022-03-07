@@ -151,9 +151,10 @@ BaseParameterDialog
 
                 text: qsTr("A graph can be created from pairwise information, that is " +
                     "to say two columns in a table may be used to indicate pairs of nodes " +
-                    "which are connected by an edge. These columns are selected below. " +
-                    "Furthermore, other columns can be interpreted as attributes, associated " +
-                    "either with the edge or its connecting nodes.")
+                    "which are connected by an edge. These columns are selected by clicking " +
+                    "on the table headers below. Furthermore, other columns can be " +
+                    "interpreted as attributes, associated either with the edge or its " +
+                    "connecting nodes.")
             }
 
             Image
