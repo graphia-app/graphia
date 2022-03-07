@@ -188,6 +188,7 @@ Rectangle
         property alias matchUsingRegex: matchUsingRegexAction.checked
         property alias findByAttribtueSelectOnly: selectOnlyAction.checked
         property alias findByAttribtueSelectMultiple: selectMultipleModeAction.checked
+        property bool findByAttributeSortLexically
     }
 
     width: row.width
@@ -494,6 +495,10 @@ Rectangle
                             let preUpdateText = currentText;
 
                             let attribute = document.attribute(selectAttributeComboBox.currentText);
+
+                            if(preferences.findByAttributeSortLexically)
+                                attribute.sharedValues.sort(QmlUtils.localeCompareStrings);
+
                             model = attribute.sharedValues;
 
                             let rowIndex = find(preUpdateText);

@@ -48,6 +48,14 @@ Item
         property alias disableMultisampling: disableMultisamplingCheckbox.checked
     }
 
+    Preferences
+    {
+        id: find
+        section: "find"
+
+        property alias findByAttributeSortLexically: fbavSortStyleCombobox.lexical
+    }
+
     RowLayout
     {
         anchors.fill: parent
@@ -86,6 +94,22 @@ Item
                 enabled: focusFoundNodesCheckbox.checked &&
                     focusFoundComponentsCheckbox.checked
                 text: qsTr("…But Not From Component Mode")
+            }
+
+            RowLayout
+            {
+                Label { text: qsTr("Sort Find By Attribute:") }
+
+                ComboBox
+                {
+                    id: fbavSortStyleCombobox
+
+                    model: [qsTr("By Quantity"), qsTr("By Value")]
+
+                    property bool lexical
+                    onLexicalChanged: { currentIndex = lexical ? 1 : 0; }
+                    onCurrentIndexChanged: { lexical = (currentIndex !== 0); }
+                }
             }
 
             Label
