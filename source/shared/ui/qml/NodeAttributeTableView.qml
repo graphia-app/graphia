@@ -79,7 +79,7 @@ Item
             tableView.currentColumnWidths = [];
             tableView.currentColumnWidths = tempArr;
 
-            tableView.columnWidths = []
+            tableView.columnWidths = [];
         }
         tableView.currentTotalColumnWidth = 0;
         for(let i = 0; i < tableView.columns; i++)
