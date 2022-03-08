@@ -78,7 +78,8 @@ DEFINE_QML_ENUM(
     Q_GADGET, PlotColumnSortType,
     Natural,
     ColumnName,
-    ColumnAnnotation);
+    ColumnAnnotation,
+    DataValue);
 
 enum class CorrelationPlotUpdateType
 {

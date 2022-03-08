@@ -633,6 +633,14 @@ PluginContent
                     return sortOption.type === columnSortType;
                 });
 
+                if(sortOption.type === PlotColumnSortType.DataValue)
+                {
+                    sortByMenuItem.visible = Qt.binding(function()
+                    {
+                        return !plot.groupByAnnotation;
+                    });
+                }
+
                 sortByMenuItem.triggered.connect(function()
                 {
                     plot.sortBy(sortOption.type, sortOption.text);
@@ -707,7 +715,8 @@ PluginContent
         let options =
         [
             {type: PlotColumnSortType.Natural, text: qsTr("Natural Order")},
-            {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")}
+            {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")},
+            {type: PlotColumnSortType.DataValue, text: qsTr("Data Value")}
         ];
 
         root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)

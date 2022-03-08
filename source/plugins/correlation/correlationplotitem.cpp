@@ -917,14 +917,17 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
     if(point.y() >= axisRect->height())
     {
         // Click is below either/both axes
-        sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
+        if(point.x() < 0)
+            sortBy(static_cast<int>(PlotColumnSortType::Natural));
+        else
+            sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
     }
     else if(!CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
     {
         if(point.x() < 0)
         {
             // Click is to the left of the main axis
-            sortBy(static_cast<int>(PlotColumnSortType::Natural));
+            sortBy(static_cast<int>(PlotColumnSortType::DataValue));
         }
     }
     else
@@ -1199,11 +1202,81 @@ void CorrelationPlotItem::updateSortMap()
             columnSortOrder._annotation = _pluginInstance->columnAnnotationByName(columnAnnotationName);
         }
 
+        // If grouping by annotation, sorting by data value doesn't really make sense
+        if(_groupByAnnotation && columnSortOrder._type == PlotColumnSortType::DataValue)
+            continue;
+
         columnSortOrders.emplace_back(columnSortOrder);
     }
 
+    std::vector<double> columnValues;
+    columnValues.resize(numColumns(), std::numeric_limits<double>::lowest());
+
+    if(std::any_of(columnSortOrders.begin(), columnSortOrders.end(),
+        [](const auto& cso) { return cso._type == PlotColumnSortType::DataValue; }))
+    {
+        for(size_t col = 0; col < _pluginInstance->numDiscreteColumns(); col++)
+        {
+            columnValues.at(col) = 0.0;
+
+            for(auto row : std::as_const(_selectedRows))
+            {
+                if(!_pluginInstance->discreteDataAt(row, static_cast<int>(col)).isEmpty())
+                    columnValues.at(col) += 1.0;
+            }
+        }
+
+        auto plotAveragingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
+        auto offset = _pluginInstance->numDiscreteColumns();
+
+        for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
+        {
+            double total = 0.0;
+            std::vector<double> values;
+            values.reserve(_selectedRows.size());
+
+            for(auto row : std::as_const(_selectedRows))
+            {
+                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(col));
+
+                switch(plotAveragingType)
+                {
+                case PlotAveragingType::MeanLine:
+                case PlotAveragingType::MeanHistogram:
+                    total += value;
+                    break;
+
+                case PlotAveragingType::MedianLine:
+                case PlotAveragingType::IQR:
+                    values.push_back(value);
+                    break;
+
+                default:
+                    columnValues.at(col + offset) = std::max(columnValues.at(col + offset), value);
+                    break;
+                }
+            }
+
+            switch(plotAveragingType)
+            {
+            case PlotAveragingType::MeanLine:
+            case PlotAveragingType::MeanHistogram:
+                columnValues.at(col + offset) = total / static_cast<double>(_selectedRows.size());
+                break;
+
+            case PlotAveragingType::MedianLine:
+            case PlotAveragingType::IQR:
+                columnValues.at(col + offset) = u::medianOf(values);
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
     std::sort(_sortMap.begin(), _sortMap.end(),
-    [this, &columnSortOrders, &collator](size_t a, size_t b)
+    [this, &columnSortOrders, &collator, &columnValues](size_t a, size_t b)
     {
         for(const auto& columnSortOrder : columnSortOrders)
         {
@@ -1226,6 +1299,10 @@ void CorrelationPlotItem::updateSortMap()
                     collator.compare(columnNameA, columnNameB) < 0 :
                     collator.compare(columnNameB, columnNameA) < 0;
             }
+
+            case PlotColumnSortType::DataValue:
+                return columnSortOrder._order == Qt::AscendingOrder ?
+                    columnValues.at(a) < columnValues.at(b) : columnValues.at(b) < columnValues.at(a);
 
             case PlotColumnSortType::ColumnAnnotation:
             {
