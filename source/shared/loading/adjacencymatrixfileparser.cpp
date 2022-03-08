@@ -138,9 +138,9 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
                     return indexToNodeId.at(index);
 
                 auto nodeId = graphModel->mutableGraph().addNode();
-                userNodeData->setValueBy(nodeId, QObject::tr("Node Name"),
-                    !name.isEmpty() ? name :
-                    QObject::tr("Node %1").arg(index + 1));
+                auto nodeName = !name.isEmpty() ? name : QObject::tr("Node %1").arg(index + 1);
+                userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
+                graphModel->setNodeName(nodeId, nodeName);
 
                 indexToNodeId[index] = nodeId;
 
