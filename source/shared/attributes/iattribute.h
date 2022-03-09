@@ -163,6 +163,8 @@ public:
     virtual bool hasParameter() const = 0;
     virtual QStringList validParameterValues() const = 0;
     virtual IAttribute& setValidParameterValues(const QStringList& values) = 0;
+
+    static constexpr auto ValidNameRegex = "^[a-zA-Z_][a-zA-Z0-9_ ]*$";
 };
 
 #endif // IATTRIBUTE_H

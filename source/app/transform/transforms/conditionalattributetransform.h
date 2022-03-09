@@ -67,7 +67,7 @@ public:
                 .setType(ValueType::String)
                 .setDescription(QObject::tr("The name of the new attribute."))
                 .setInitialValue(QObject::tr("New Attribute"))
-                .setValidatorRegex(Attribute::ValidNameRegex),
+                .setValidatorRegex(IAttribute::ValidNameRegex),
         };
     }
 

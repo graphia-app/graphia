@@ -572,8 +572,6 @@ public:
         const Attribute& nodeAttribute, EdgeNodeType edgeNodeType);
 
     static QString prettify(QString name);
-
-    static constexpr auto ValidNameRegex = "^[a-zA-Z_][a-zA-Z0-9_ ]*$";
 };
 
 #endif // ATTRIBUTE_H
