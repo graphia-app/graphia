@@ -363,7 +363,8 @@ BaseParameterDialog
 
                         visible: false
 
-                        validator: RegExpValidator { regExp: /^[a-zA-Z_][a-zA-Z0-9_ ]*$/ }
+                        validator: RegExpValidator { regExp: new RegExp(QmlUtils.validAttributeNameRegex) }
+                        textColor: acceptableInput ? "black" : "red"
 
                         function activate()
                         {
@@ -374,6 +375,8 @@ BaseParameterDialog
 
                         onEditingFinished:
                         {
+                            text = QmlUtils.sanitiseAttributeName(text);
+
                             let newParameters = Object.assign({}, root.parameters);
                             newParameters.columns[modelColumn].name = text;
                             root.parameters = newParameters;
