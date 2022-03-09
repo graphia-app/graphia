@@ -28,6 +28,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/apppathname.h"
 #include "shared/utils/showinfolder.h"
+#include "shared/attributes/iattribute.h"
 #include "shared/utils/static_block.h"
 
 #include <QObject>
@@ -52,6 +53,8 @@ class QmlUtils : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QmlUtils)
+
+    Q_PROPERTY(QString validAttributeNameRegex READ validAttributeNameRegex CONSTANT)
 
 public:
     QmlUtils() = default;
@@ -292,6 +295,22 @@ public:
             return -1;
 
         return model->roleNames().key(roleName);
+    }
+
+    QString validAttributeNameRegex() const { return IAttribute::ValidNameRegex; }
+
+    Q_INVOKABLE QString sanitiseAttributeName(const QString& attributeName) const
+    {
+        // Strip off the ^ and $
+        QString partialRegex(IAttribute::ValidNameRegex);
+        partialRegex = partialRegex.mid(1, partialRegex.length() - 2);
+        QRegularExpression re(partialRegex);
+
+        auto match = re.match(attributeName, 0, QRegularExpression::PartialPreferCompleteMatch);
+        if(match.hasMatch())
+            return match.captured();
+
+        return {};
     }
 
 private:
