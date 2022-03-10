@@ -62,7 +62,7 @@ We would like to thank those who have helped us develop Graphia:
 
 ## Pre-release Builds ##
 
-Pre-release builds are [available](https://graphia.dev/). Stability is not guaranteed, but any testing undertaken is greatly appreciated.
+Pre-release builds are [available](https://graphia.dev/?dir=Latest). Stability is not guaranteed, but any testing undertaken is greatly appreciated.
 
 ## Building ##
 
