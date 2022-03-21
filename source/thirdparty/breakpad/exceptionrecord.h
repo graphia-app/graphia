@@ -8,7 +8,9 @@
 #include <Windows.h>
 
 #include <typeinfo>
+#include <exception>
 #include <cstdint>
+#include <cstring>
 
 // https://stackoverflow.com/questions/39113168
 static const char* exceptionRecordType(const EXCEPTION_RECORD* exr)
@@ -52,7 +54,7 @@ static const char* exceptionRecordType(const EXCEPTION_RECORD* exr)
     if(exr->NumberParameters < 2)
         return nullptr;
 
-    auto throwInfo = reinterpret_cast<const ThrowInfo*>(exr->ExceptionInformation[2]);
+    const auto* throwInfo = reinterpret_cast<const ThrowInfo*>(exr->ExceptionInformation[2]);
 
     if(throwInfo == nullptr)
         return nullptr;
@@ -61,12 +63,26 @@ static const char* exceptionRecordType(const EXCEPTION_RECORD* exr)
     (uintptr_t)(module) + (uint32_t)(ADDR)))
 
 
-    auto cArray = RVA_TO_VA(const CatchableTypeArray*, throwInfo->pCatchableTypeArray);
-    auto cType = RVA_TO_VA(const CatchableType*, cArray->arrayOfCatchableTypes[0]);
+    const auto* cArray = RVA_TO_VA(const CatchableTypeArray*, throwInfo->pCatchableTypeArray);
+    const auto* cType = RVA_TO_VA(const CatchableType*, cArray->arrayOfCatchableTypes[0]);
 
-    auto type = RVA_TO_VA(const std::type_info*, cType->pType);
+    const auto* type = RVA_TO_VA(const std::type_info*, cType->pType);
 
 #undef RVA_TO_VA
+
+    // Honestly, this is pretty sketchy, on multiple levels, but should yield
+    // a bit more information when a std::exception occurs
+    if(std::strstr(type->name(), "class std::") == type->name())
+    {
+        const auto* stdException = reinterpret_cast<const std::exception*>(exr->ExceptionInformation[1]);
+
+        static char stdExceptionText[1024] = {0};
+        strncat(stdExceptionText, type->name(), sizeof(stdExceptionText) - 1);
+        strncat(stdExceptionText, ": ", sizeof(stdExceptionText) - 1);
+        strncat(stdExceptionText, stdException->what(), sizeof(stdExceptionText) - 1);
+
+        return stdExceptionText;
+    }
 
     return type->name();
 }
