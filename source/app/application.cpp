@@ -558,6 +558,13 @@ void Application::crash(int crashType)
         throw TestException();
     }
 
+    case CrashType::StdException:
+    {
+        std::vector<int> v;
+        auto unused = v.at(10000);
+        Q_UNUSED(unused);
+    }
+
     case CrashType::FatalError:
         FATAL_ERROR(FatalErrorTest);
         break;

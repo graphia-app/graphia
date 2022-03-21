@@ -2204,6 +2204,11 @@ ApplicationWindow
                 }
                 MenuItem
                 {
+                    text: qsTr("std::exception");
+                    onTriggered: { application.crash(CrashType.StdException); }
+                }
+                MenuItem
+                {
                     text: qsTr("Fatal Error");
                     onTriggered: { application.crash(CrashType.FatalError); }
                 }
