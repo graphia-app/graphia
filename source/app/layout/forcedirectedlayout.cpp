@@ -174,7 +174,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         if(cancelled())
             return;
 
-        const IEdge& edge = graphComponent().graph().edgeById(edgeId);
+        const auto& edge = graphComponent().graph().edgeById(edgeId);
         if(!edge.isLoop())
         {
             const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
@@ -191,18 +191,16 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     if(cancelled())
         return;
 
+    for(auto edgeId : edgeIds())
+    {
+        const auto& edge = graphComponent().graph().edgeById(edgeId);
+        _displacements->at(edge.targetId())._attractive -= _attractiveForces->at(edgeId);
+        _displacements->at(edge.sourceId())._attractive += _attractiveForces->at(edgeId);
+    }
+
     parallel_for(nodeIds().begin(), nodeIds().end(),
     [this](NodeId nodeId)
     {
-        const INode& node = graphComponent().graph().nodeById(nodeId);
-        auto& attractive = _displacements->at(nodeId)._attractive;
-
-        for(auto edgeId : node.inEdgeIds())
-            attractive -= _attractiveForces->at(edgeId);
-
-        for(auto edgeId : node.outEdgeIds())
-            attractive += _attractiveForces->at(edgeId);
-
         _displacements->at(nodeId).computeAndDamp();
     });
 
