@@ -323,6 +323,9 @@ Rectangle
     SortFilterProxyModel
     {
         id: proxyModel
+
+        property bool _sourceChanging: false
+
         filters:
         [
             ValueFilter
@@ -454,6 +457,10 @@ Rectangle
 
                         onCurrentTextChanged:
                         {
+                            // Prevent spurious changes to currentText
+                            if(proxyModel._sourceChanging)
+                                return;
+
                             if(_visible && findByAttributeRow.visible)
                                 lastFindByAttributeName = currentText;
 
@@ -625,6 +632,10 @@ Rectangle
 
                     onCurrentTextChanged:
                     {
+                        // Prevent spurious changes to currentText
+                        if(proxyModel._sourceChanging)
+                            return;
+
                         if(_visible && advancedRow.visible && enabled)
                             lastAdvancedFindAttributeName = currentText;
                     }
@@ -681,7 +692,9 @@ Rectangle
 
     function refresh()
     {
+        proxyModel._sourceChanging = true;
         proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
+        proxyModel._sourceChanging = false;
 
         if(_type === Find.Advanced)
             attributeComboBox.refresh();
