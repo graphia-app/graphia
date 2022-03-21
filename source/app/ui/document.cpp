@@ -593,11 +593,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         this, &Document::onPreferenceChanged, Qt::DirectConnection);
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
-    {
-        _searchManager->refresh();
-        _graphModel->updateVisuals();
-    });
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this] { _searchManager->refresh(); });
 
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 

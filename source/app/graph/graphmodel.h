@@ -91,6 +91,8 @@ private:
     const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
     const IElementVisual& edgeVisualImpl(EdgeId edgeId) const override;
 
+    void updateVisuals(bool force = false);
+
 public:
     MutableGraph& mutableGraph();
     const MutableGraph& mutableGraph() const;
@@ -185,7 +187,6 @@ public:
     void highlightNodes(const NodeIdSet& nodeIds);
 
     void enableVisualUpdates();
-    void updateVisuals(bool force = false);
 
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
