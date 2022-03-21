@@ -348,12 +348,12 @@ int main(int argc, char *argv[])
     int exitCode = 0;
     Report report;
 
+    QIcon mainIcon;
+    mainIcon.addFile(QStringLiteral(":/icon.svg"));
+    QApplication::setWindowIcon(mainIcon);
+
     if(!p.isSet(QStringLiteral("submit")))
     {
-        QIcon mainIcon;
-        mainIcon.addFile(QStringLiteral(":/icon.svg"));
-        QApplication::setWindowIcon(mainIcon);
-
         QQmlApplicationEngine engine;
 
         engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
