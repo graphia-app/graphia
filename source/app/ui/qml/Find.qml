@@ -349,12 +349,14 @@ Rectangle
         }
     }
 
-    // Sink all wheel events so that they don't get
-    // passed on to underlying controls
+    // Sink all wheel and right click events so that they
+    // don't get passed on to underlying controls
     MouseArea
     {
         anchors.fill: row
         onWheel: { /* NO-OP */ }
+        acceptedButtons: Qt.RightButton
+        onClicked: { mouse.accepted = true; }
     }
 
     RowLayout
