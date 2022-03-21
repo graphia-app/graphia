@@ -85,7 +85,7 @@ Rectangle
                 return "^(" + term + ")$";
             }
             else
-                return "^" + Utils.regexEscape(valueComboBox.currentText) + "$";
+                return "^" + Utils.regexEscape(valueComboBox.currentValue) + "$";
         }
 
         return findField.text;
@@ -273,8 +273,8 @@ Rectangle
 
         onCheckedChanged:
         {
-            if(checked && valueComboBox.currentText.length > 0)
-                _attributeValues = [valueComboBox.currentText];
+            if(checked && valueComboBox.currentValue.length > 0)
+                _attributeValues = [valueComboBox.currentValue];
             else
                 _attributeValues = [];
 
@@ -491,6 +491,18 @@ Rectangle
                         visible: !_selectMultipleMode
                         enabled: valueComboBox.count > 0
 
+                        property bool _modelChanging: false
+                        property string currentValue: ""
+
+                        onCurrentTextChanged:
+                        {
+                            // Prevent spurious changes to currentText
+                            if(_modelChanging)
+                                return;
+
+                            currentValue = currentText;
+                        }
+
                         function refresh()
                         {
                             // Try to keep the same value selected
@@ -501,7 +513,9 @@ Rectangle
                             if(preferences.findByAttributeSortLexically)
                                 attribute.sharedValues.sort(QmlUtils.localeCompareStrings);
 
+                            _modelChanging = true;
                             model = attribute.sharedValues;
+                            _modelChanging = false;
 
                             let rowIndex = find(preUpdateText);
 
@@ -511,6 +525,8 @@ Rectangle
                                 currentIndex = 0;
                             else
                                 currentIndex = -1;
+
+                            currentValue = currentText;
                         }
                     }
                 }
