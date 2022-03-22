@@ -180,7 +180,7 @@ private:
     bool _busy = false;
     std::atomic<bool> _graphChanged;
 
-    mutable std::mutex _currentCommandMutex;
+    mutable std::recursive_mutex _currentCommandMutex;
     ICommand* _currentCommand = nullptr;
     int _commandProgressTimerId = -1;
     int _commandProgress = 0;
