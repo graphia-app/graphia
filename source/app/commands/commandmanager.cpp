@@ -261,7 +261,7 @@ bool CommandManager::canRedo() const
 
 bool CommandManager::commandIsCancellable() const
 {
-    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand != nullptr)
         return _currentCommand->cancellable();
@@ -355,7 +355,7 @@ void CommandManager::clearCurrentCommand()
 {
     // _currentCommand is a raw pointer, so we must ensure it is reset to null
     // when the underlying unique_ptr is destroyed
-    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
     _currentCommand = nullptr;
 
     bool wasCancelling = _cancelling;
@@ -368,7 +368,7 @@ void CommandManager::clearCurrentCommand()
 
 void CommandManager::cancel()
 {
-    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand != nullptr)
     {
@@ -430,7 +430,7 @@ void CommandManager::joinThread()
 
 void CommandManager::timerEvent(QTimerEvent*)
 {
-    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand == nullptr)
         return;
