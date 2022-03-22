@@ -563,6 +563,7 @@ void Application::crash(int crashType)
         std::vector<int> v;
         auto unused = v.at(10000);
         Q_UNUSED(unused);
+        break;
     }
 
     case CrashType::FatalError:
