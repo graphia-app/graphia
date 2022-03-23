@@ -625,10 +625,6 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     int clusterNumber = 1;
     for(const auto& cluster : clusters)
     {
-        // Skip singular clusters
-        if(cluster.size() <= 1)
-            continue;
-
         for(auto index : cluster)
         {
             auto nodeId = indexToNodeMap.at(index);
