@@ -84,14 +84,6 @@ Window
                 showSections: sortRoleName !== "display"
                 sortRoleName: "category"
 
-                Component.onCompleted:
-                {
-                    // The role name used to be called "type", so if the user still
-                    // has that in their preferences, just hack it to "category"
-                    if(sortRoleName === "type")
-                        sortRoleName = "category";
-                }
-
                 onSelectedValueChanged:
                 {
                     if(selectedValue !== undefined)
