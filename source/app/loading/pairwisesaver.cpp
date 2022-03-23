@@ -112,7 +112,7 @@ bool PairwiseSaver::save()
                 .arg(attribute->floatValueOf(edgeId));
         }
         else
-            stream << QStringLiteral(R"(""%1" "%2")""\n").arg(sourceName, targetName);
+            stream << QStringLiteral(R"("%1" "%2")""\n").arg(sourceName, targetName);
 
         runningCount++;
         setProgress(runningCount * 100 / edgeCount);
