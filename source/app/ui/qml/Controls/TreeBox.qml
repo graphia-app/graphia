@@ -59,6 +59,7 @@ Item
     property alias itemDelegate: treeView.itemDelegate
 
     property bool showSections: false
+    property string sectionRoleName: ""
 
     property bool showSearch: false
     property bool showParentGuide: false
@@ -140,7 +141,20 @@ Item
 
             alternatingRowColors: false
 
-            section.property: showSections && root.sortRoleName.length > 0 ? root.sortRoleName : ""
+            section.property:
+            {
+                if(!showSections)
+                    return "";
+
+                if(root.sectionRoleName.length > 0)
+                    return root.sectionRoleName;
+
+                if(root.sortRoleName.length > 0)
+                    return root.sortRoleName;
+
+                return "";
+            }
+
             section.delegate: Component
             {
                 Text
