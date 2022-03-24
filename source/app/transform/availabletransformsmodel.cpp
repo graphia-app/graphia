@@ -36,12 +36,13 @@ AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
 {
     auto updateFavouriteTransforms = [this](const QString& favouriteTransformsString)
     {
-        QStringList favouriteTransforms;
-
         auto jsonArray = parseJsonFrom(favouriteTransformsString.toUtf8());
 
         if(jsonArray.is_null() || !jsonArray.is_array())
             return;
+
+        QStringList favouriteTransforms;
+        favouriteTransforms.reserve(static_cast<int>(jsonArray.size()));
 
         for(const auto& transformName : jsonArray)
             favouriteTransforms.append(QString::fromStdString(transformName));
