@@ -50,10 +50,13 @@ Item
     }
 
     property alias sortRoleName: sortFilterProxyModel.sortRoleName
+    property alias sorters: sortFilterProxyModel.sorters
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
     property alias selectionMode: treeView.selectionMode
     property alias filters: sortFilterProxyModel.filters
+
+    property alias itemDelegate: treeView.itemDelegate
 
     property bool showSections: false
 
