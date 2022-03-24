@@ -22,15 +22,44 @@
 
 #include "application.h"
 #include "graph/graphmodel.h"
+#include "app/preferences.h"
 
 #include "transform/graphtransform.h"
+
+#include <json_helper.h>
 
 AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
                                                    QObject* parent) :
     QAbstractListModel(parent),
     _graphModel(&graphModel),
     _transformNames(graphModel.availableTransformNames())
-{}
+{
+    auto updateFavouriteTransforms = [this](const QString& favouriteTransformsString)
+    {
+        QStringList favouriteTransforms;
+
+        auto jsonArray = parseJsonFrom(favouriteTransformsString.toUtf8());
+
+        if(jsonArray.is_null() || !jsonArray.is_array())
+            return;
+
+        for(const auto& transformName : jsonArray)
+            favouriteTransforms.append(QString::fromStdString(transformName));
+
+        beginResetModel();
+        _favouriteTransforms = favouriteTransforms;
+        endResetModel();
+    };
+
+    updateFavouriteTransforms(u::pref(QStringLiteral("misc/favouriteTransforms")).toString());
+
+    connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
+    [=](const QString& key, const QVariant& value)
+    {
+        if(key == QStringLiteral("misc/favouriteTransforms"))
+            updateFavouriteTransforms(value.toString());
+    });
+}
 
 QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) const
 {
@@ -50,11 +79,19 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
         {
         case Roles::TransformCategoryRole:
         {
-            if(transform->category().isEmpty())
+            if(u::contains(_favouriteTransforms, transformName))
+                return tr("Favourites");
+
+            // Any invalid category names are counted as "uncategorised"
+            if(transform->category().isEmpty() || transform->category() == tr("Favourites"))
                 return tr("Uncategorised");
 
             return transform->category();
         }
+
+        case Roles::TransformFavouriteRole:
+            return u::contains(_favouriteTransforms, transformName);
+
         default:
             return {};
         }
@@ -78,6 +115,7 @@ QHash<int, QByteArray> AvailableTransformsModel::roleNames() const
     auto names = QAbstractItemModel::roleNames();
 
     names[Roles::TransformCategoryRole] = "category";
+    names[Roles::TransformFavouriteRole] = "isFavourite";
 
     return names;
 }

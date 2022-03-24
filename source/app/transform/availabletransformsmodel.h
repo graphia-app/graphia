@@ -19,6 +19,8 @@
 #ifndef AVAILABLETRANSFORMSMODEL_H
 #define AVAILABLETRANSFORMSMODEL_H
 
+#include "app/preferenceswatcher.h"
+
 #include <QStringList>
 #include <QAbstractItemModel>
 #include <QList>
@@ -33,11 +35,15 @@ class AvailableTransformsModel : public QAbstractListModel
 private:
     enum Roles
     {
-        TransformCategoryRole = Qt::UserRole + 1
+        TransformCategoryRole = Qt::UserRole + 1,
+        TransformFavouriteRole
     };
 
     const GraphModel* _graphModel = nullptr;
     QStringList _transformNames;
+
+    PreferencesWatcher _preferencesWatcher;
+    QStringList _favouriteTransforms;
 
 public:
     AvailableTransformsModel() = default;
