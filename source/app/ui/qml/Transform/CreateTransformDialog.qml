@@ -137,6 +137,9 @@ Window
 
             ColumnLayout
             {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
                 RowLayout
                 {
                     visible: _transform !== undefined
@@ -748,6 +751,8 @@ Window
 
                 RowLayout
                 {
+                    Layout.fillWidth: true
+
                     Item { Layout.fillWidth: true }
 
                     Button
