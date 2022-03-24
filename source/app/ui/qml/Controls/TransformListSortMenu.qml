@@ -55,11 +55,11 @@ MouseArea
                     menuItem.exclusiveGroup = sortByExclusiveGroup;
                     menuItem.checked = Qt.binding(function()
                     {
-                        return transformsList.sortRoleName === roleName;
+                        return transformsList.sortBy === roleName;
                     });
                     menuItem.triggered.connect(function()
                     {
-                        return transformsList.sortRoleName = roleName;
+                        return transformsList.sortBy = roleName;
                     });
                 });
             }

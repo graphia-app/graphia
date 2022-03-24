@@ -22,6 +22,8 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
+import SortFilterProxyModel 0.2
+
 import ".."
 import "TransformConfig.js" as TransformConfig
 import "../../../../shared/ui/qml/Constants.js" as Constants
@@ -54,11 +56,45 @@ Window
 
     Preferences
     {
+        id: misc
         section: "misc"
+
         property alias transformSortOrder: transformsList.ascendingSortOrder
-        property alias transformSortBy: transformsList.sortRoleName
+        property alias transformSortBy: transformsList.sortBy
         property alias transformAttributeSortOrder: lhsAttributeList.ascendingSortOrder
         property alias transformAttributeSortBy: lhsAttributeList.sortRoleName
+
+        property string favouriteTransforms
+
+        function favouriteTransformsAsArray()
+        {
+            let a = [];
+
+            if(favouriteTransforms.length > 0)
+            {
+                try { a = JSON.parse(favouriteTransforms); }
+                catch(e) { a = []; }
+            }
+
+            return a;
+        }
+
+        function transformIsFavourite(transform)
+        {
+            return favouriteTransformsAsArray().indexOf(transform) >= 0;
+        }
+
+        function toggleFavouriteTransform(transform)
+        {
+            let a = favouriteTransformsAsArray();
+
+            if(!transformIsFavourite(transform))
+                a.push(transform);
+            else
+                a.splice(a.indexOf(transform), 1);
+
+            favouriteTransforms = JSON.stringify(a);
+        }
     }
 
     ColumnLayout
@@ -75,64 +111,136 @@ Window
             Layout.fillHeight: true
             spacing: Constants.spacing
 
-            TreeBox
+            ColumnLayout
             {
-                id: transformsList
-                Layout.preferredWidth: 192
+                // Using preferredWidth here doesn't seem to constrain sufficiently, for some reason
+                Layout.minimumWidth: 192
+                Layout.maximumWidth: 192
                 Layout.fillHeight: true
 
-                showSections: sortRoleName !== "display"
-                sortRoleName: "category"
-
-                onSelectedValueChanged:
+                TreeBox
                 {
-                    if(selectedValue !== undefined)
+                    id: transformsList
+
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    itemDelegate: Item
                     {
-                        parametersRepeater.model = [];
-                        parameters._values = {};
+                        height: Math.max(16, label.implicitHeight)
+                        property int implicitWidth: label.implicitWidth + 16
 
-                        attributeParametersRepeater.model = [];
-                        attributeParameters._attributeNames = {};
+                        Text
+                        {
+                            id: label
 
-                        visualisationsRepeater.model = [];
-                        visualisations._visualisations = {};
+                            width: parent.width
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            elide: Text.ElideRight
 
-                        root._transform = document.transform(selectedValue);
-                        lhsAttributeList.model = document.availableAttributesModel(
-                            root._transform.elementType, ValueType.All,
-                            AttributeFlag.DisableDuringTransform);
-                        valueRadioButton.checked = true;
-                        rhsAttributeList.model = undefined;
+                            textFormat: Text.StyledText
+                            text:
+                            {
+                                let value = styleData.value !== undefined ? styleData.value : "";
 
-                        if(_transform.parameterNames !== undefined)
-                            parametersRepeater.model = _transform.parameterNames;
+                                if(model && model.isFavourite)
+                                    value = "<font color=\"#F1C40F\">★</font> " + value;
 
-                        if(_transform.attributeParameterNames !== undefined)
-                            attributeParametersRepeater.model = _transform.attributeParameterNames;
-
-                        if(_transform.defaultVisualisations !== undefined)
-                            visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
-
-                        // This is a hack that forces the scrollView to reconsider the size of its
-                        // content and avoid cutting the bottom off after some combination of clicking
-                        // on transforms in the list. It appears to be related to the Layout.margins
-                        // that are enabled when the scrollbar is visible.
-                        // See LAYOUT_MARGINS_HACK comment for the Layout.margins in question.
-                        scrollView.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff;
-                        scrollView.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
+                                return value;
+                            }
+                        }
                     }
 
-                    attributeDescription.clear();
-                    updateTransformExpression();
+                    showSections: sortBy === "category"
+                    sectionRoleName: "category"
+                    property string sortBy: "category"
+
+                    sorters: ExpressionSorter
+                    {
+                        sortOrder: transformsList.ascendingSortOrder ? Qt.AscendingOrder : Qt.DescendingOrder
+                        expression:
+                        {
+                            // Always sort favourites first
+                            if(modelLeft.isFavourite !== modelRight.isFavourite)
+                            {
+                                return transformsList.ascendingSortOrder ?
+                                    modelLeft.isFavourite : modelRight.isFavourite;
+                            }
+
+                            if(transformsList.sortBy !== "category" || modelLeft.category === modelRight.category)
+                                return modelLeft.display < modelRight.display;
+
+                            return modelLeft.category < modelRight.category;
+                        }
+                    }
+
+                    onSelectedValueChanged:
+                    {
+                        if(selectedValue !== undefined)
+                        {
+                            parametersRepeater.model = [];
+                            parameters._values = {};
+
+                            attributeParametersRepeater.model = [];
+                            attributeParameters._attributeNames = {};
+
+                            visualisationsRepeater.model = [];
+                            visualisations._visualisations = {};
+
+                            root._transform = document.transform(selectedValue);
+                            lhsAttributeList.model = document.availableAttributesModel(
+                                root._transform.elementType, ValueType.All,
+                                AttributeFlag.DisableDuringTransform);
+                            valueRadioButton.checked = true;
+                            rhsAttributeList.model = undefined;
+
+                            if(_transform.parameterNames !== undefined)
+                                parametersRepeater.model = _transform.parameterNames;
+
+                            if(_transform.attributeParameterNames !== undefined)
+                                attributeParametersRepeater.model = _transform.attributeParameterNames;
+
+                            if(_transform.defaultVisualisations !== undefined)
+                                visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
+
+                            // This is a hack that forces the scrollView to reconsider the size of its
+                            // content and avoid cutting the bottom off after some combination of clicking
+                            // on transforms in the list. It appears to be related to the Layout.margins
+                            // that are enabled when the scrollbar is visible.
+                            // See LAYOUT_MARGINS_HACK comment for the Layout.margins in question.
+                            scrollView.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff;
+                            scrollView.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
+                        }
+
+                        attributeDescription.clear();
+                        updateTransformExpression();
+                    }
+
+                    onAccepted:
+                    {
+                        if(document.graphTransformIsValid(transformExpression))
+                            root.accept();
+                    }
+
+                    TransformListSortMenu { transformsList: transformsList }
                 }
 
-                onAccepted:
+                Button
                 {
-                    if(document.graphTransformIsValid(transformExpression))
-                        root.accept();
-                }
+                    Layout.fillWidth: true
 
-                TransformListSortMenu { transformsList: transformsList }
+                    text: misc.transformIsFavourite(transformsList.selectedValue) ?
+                        qsTr("Remove Favourite") : qsTr("Add Favourite")
+
+                    onClicked:
+                    {
+                        let index = transformsList.currentIndex;
+                        misc.toggleFavouriteTransform(transformsList.selectedValue);
+                        transformsList.select(index);
+                    }
+                }
             }
 
             ColumnLayout
