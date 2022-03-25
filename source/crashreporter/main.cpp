@@ -56,7 +56,7 @@ using namespace std::chrono_literals;
 
 // clazy:excludeall=lambda-in-connect
 
-static QString crashedModule(const QString& dmpFile)
+static std::string crashedModule(const QString& dmpFile)
 {
     using google_breakpad::Minidump;
     using google_breakpad::MinidumpMemoryList;
@@ -146,7 +146,7 @@ static QString crashedModule(const QString& dmpFile)
     }
 
     std::cerr << "Crashed module: " << module << "\n";
-    return QString::fromStdString(module);
+    return module;
 }
 
 static void uploadReport(const QString& email, const QString& text,
@@ -352,6 +352,12 @@ int main(int argc, char *argv[])
     mainIcon.addFile(QStringLiteral(":/icon.svg"));
     QApplication::setWindowIcon(mainIcon);
 
+    auto module = crashedModule(positional.at(0));
+    auto videoDriverRegex = R"(^(nvoglv|ig\d+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon|iris_dri).*)";
+
+    std::smatch match;
+    bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
+
     if(!p.isSet(QStringLiteral("submit")))
     {
         QQmlApplicationEngine engine;
@@ -360,7 +366,7 @@ int main(int argc, char *argv[])
         engine.rootContext()->setContextProperty(
             QStringLiteral("glVendor"), OpenGLFunctions::vendor());
         engine.rootContext()->setContextProperty(
-            QStringLiteral("crashedModule"), crashedModule(positional.at(0)));
+            QStringLiteral("inVideoDriver"), inVideoDriver);
 
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
