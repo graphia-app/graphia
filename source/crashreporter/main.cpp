@@ -150,21 +150,24 @@ static std::string crashedModule(const QString& dmpFile)
 }
 
 static void uploadReport(const QString& email, const QString& text,
-                         const QString& dmpFile, const QString& attachmentDir)
+    bool inVideoDriver, const QString& module,
+    const QString& dmpFile, const QString& attachmentDir)
 {
     auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     std::map<const char*, QString> fields =
     {
-        {"email",       email},
-        {"text",        text},
-        {"product",     PRODUCT_NAME},
-        {"version",     VERSION},
-        {"os",          QString("%1 %2 %3 %4").arg(QSysInfo::kernelType(),
-                                                   QSysInfo::kernelVersion(),
-                                                   QSysInfo::productType(),
-                                                   QSysInfo::productVersion())},
-        {"gl",          OpenGLFunctions::info()},
+        {"email",           email},
+        {"text",            text},
+        {"inVideoDriver",   QVariant(inVideoDriver).toString()},
+        {"product",         PRODUCT_NAME},
+        {"version",         VERSION},
+        {"crashedModule",   module},
+        {"os",              QString("%1 %2 %3 %4").arg(QSysInfo::kernelType(),
+                                                       QSysInfo::kernelVersion(),
+                                                       QSysInfo::productType(),
+                                                       QSysInfo::productVersion())},
+        {"gl",              OpenGLFunctions::info()},
 #ifdef GIT_BRANCH
         {"git_branch",  GIT_BRANCH},
 #endif
@@ -379,7 +382,10 @@ int main(int argc, char *argv[])
     }
 
     if(exitCode != 127)
-        uploadReport(report._email, report._text, positional.at(0), attachmentsDir);
+    {
+        uploadReport(report._email, report._text, inVideoDriver,
+            QString::fromStdString(module), positional.at(0), attachmentsDir);
+    }
 
     return exitCode;
 }
