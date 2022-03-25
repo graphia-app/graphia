@@ -106,7 +106,7 @@ static QString crashedModule(const QString& dmpFile)
     // or similar; this isn't useful information
     std::vector<std::string> skipModules =
     {
-        R"(^libc-[\d\.]+so$)",
+        R"(^libc(-[\d\.]+)?.so([\d\.]+)?$)",
         R"(^libstdc\+\+\.so[\d\.]+$)",
         R"(^libsystem_[^\.]+\.dylib$)",
         R"(^libc\+\+abi\.dylib$)",
