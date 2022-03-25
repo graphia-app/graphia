@@ -82,20 +82,17 @@ ApplicationWindow
                    "If we need more information, we may use your email address " +
                    "to contact you. Thanks.");
 
-                let videoDriverCrash = "";
-
-                let re = /^(nvoglv|ig\d+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon).*/;
-                if(re.test(crashedModule))
+                if(inVideoDriver)
                 {
                     let vendorLink = "https://www.google.com/search?q=" + glVendor +
                         "+video+driver+download&btnI";
 
-                    videoDriverCrash = qsTr("<font color=\"red\"><b>Please note:</b></font> this crash " +
+                    let videoDriverCrash = qsTr("<font color=\"red\"><b>Please note:</b></font> this crash " +
                         "occurred in your video drivers. While it is possible that ") + Qt.application.name +
                         qsTr(" is still to blame, please also ensure your drivers are " +
                         "<a href=\"") + vendorLink + qsTr("\">up to date</a>, if you have not already done so.");
 
-                    return apology + "<br><br>" + videoDriverCrash;
+                    apology = apology + "<br><br>" + videoDriverCrash;
                 }
 
                 return apology;
