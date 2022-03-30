@@ -40,6 +40,8 @@ Rectangle
     property var highlightedProvider: function(column, row) { return false; }
     property string cellDisplayRole: "display"
 
+    property bool showBorder: true
+
     readonly property int _padding: 4
     readonly property int _minimumColumnWidth: 32
 
@@ -168,12 +170,12 @@ Rectangle
 
     property int _cellDelegateHeight: 0
 
-    border.width: 1
+    border.width: root.showBorder ? 1 : 0
     border.color: systemPalette.dark
 
     ColumnLayout
     {
-        anchors.margins: 1
+        anchors.margins: root.showBorder ? 1 : 0
         anchors.fill: parent
         spacing: 0
 
