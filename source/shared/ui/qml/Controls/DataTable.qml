@@ -38,6 +38,7 @@ Rectangle
     }
 
     property var highlightedProvider: function(column, row) { return false; }
+    property string cellDisplayRole: "display"
 
     readonly property int _padding: 4
     readonly property int _minimumColumnWidth: 32
@@ -223,7 +224,7 @@ Rectangle
                     clip: true
 
                     sourceComponent: root.headerDelegate
-                    readonly property string value: modelData
+                    readonly property string value: model[root.cellDisplayRole]
                     readonly property int modelColumn: model.column
 
                     onLoaded: { headerView.implicitHeight = height; }
@@ -337,7 +338,7 @@ Rectangle
                     anchors.right: parent.right
 
                     sourceComponent: root.cellDelegate
-                    readonly property string value: modelData
+                    readonly property string value: model[root.cellDisplayRole]
                     readonly property int modelColumn: model.column
                     readonly property int modelRow: model.row
 
