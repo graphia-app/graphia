@@ -338,8 +338,7 @@ Rectangle
                 Loader
                 {
                     id: cellDelegateLoader
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                    anchors.fill: parent
 
                     sourceComponent: root.cellDelegate
                     readonly property string value: model[root.cellDisplayRole]
@@ -348,8 +347,8 @@ Rectangle
 
                     onLoaded:
                     {
-                        if(root._cellDelegateHeight === 0 && height !== 0)
-                            root._cellDelegateHeight = height;
+                        if(implicitHeight !== 0)
+                            root._cellDelegateHeight = Math.max(root._cellDelegateHeight, implicitHeight);
                     }
 
                     onImplicitWidthChanged: { root._cellWidths.set(model.column + "," + model.row, Math.max(1, implicitWidth)); }
