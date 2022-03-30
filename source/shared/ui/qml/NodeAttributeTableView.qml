@@ -378,24 +378,12 @@ Item
 
     function selectRows(inStartRow, inEndRow)
     {
-        let less = Math.min(inStartRow, inEndRow);
-        let max = Math.max(inStartRow, inEndRow);
-
-        let range = proxyModel.buildRowSelectionRange(less, max);
-        selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Select)
-
-        root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+        selectionModel.change(inStartRow, inEndRow, ItemSelectionModel.Select);
     }
 
     function deselectRows(inStartRow, inEndRow)
     {
-        let less = Math.min(inStartRow, inEndRow);
-        let max = Math.max(inStartRow, inEndRow);
-
-        let range = proxyModel.buildRowSelectionRange(less, max);
-        selectionModel.select([range], ItemSelectionModel.Rows | ItemSelectionModel.Deselect)
-
-        root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+        selectionModel.change(inStartRow, inEndRow, ItemSelectionModel.Deselect);
     }
 
     ItemSelectionModel
@@ -403,6 +391,17 @@ Item
         id: selectionModel
         model: proxyModel
         onSelectionChanged: { proxyModel.setSubSelection(selectionModel.selection, deselected); }
+
+        function change(inStartRow, inEndRow, action)
+        {
+            let less = Math.min(inStartRow, inEndRow);
+            let max = Math.max(inStartRow, inEndRow);
+
+            let range = proxyModel.buildRowSelectionRange(less, max);
+            selectionModel.select([range], ItemSelectionModel.Rows | action)
+
+            root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+        }
     }
 
     Item
