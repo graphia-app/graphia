@@ -356,9 +356,10 @@ Rectangle
 
                 MouseArea
                 {
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     anchors.fill: parent
-                    onClicked: { root.clicked(model.column, model.row); }
-                    onDoubleClicked: { root.doubleClicked(model.column, model.row); }
+                    onClicked: { root.clicked(model.column, model.row, mouse); }
+                    onDoubleClicked: { root.doubleClicked(model.column, model.row, mouse); }
                 }
 
                 Component.onCompleted:
@@ -446,7 +447,7 @@ Rectangle
             resizeColumnToContents(column);
     }
 
-    signal clicked(var column, var row);
-    signal doubleClicked(var column, var row);
+    signal clicked(var column, var row, var mouse);
+    signal doubleClicked(var column, var row, var mouse);
 }
 
