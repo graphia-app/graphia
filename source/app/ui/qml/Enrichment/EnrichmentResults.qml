@@ -26,6 +26,8 @@ import app.graphia 1.0
 
 import Qt.labs.platform 1.0 as Labs
 
+import "../Controls"
+
 ApplicationWindow
 {
     id: root
@@ -33,7 +35,7 @@ ApplicationWindow
     property var models
     property var wizard
 
-    property var currentTableView: null
+    property var currentTable: null
     property var currentHeatmap: null
 
     onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
@@ -49,8 +51,10 @@ ApplicationWindow
         if(!item)
             return;
 
-        root.currentTableView = item.childTableView;
+        root.currentTable = item.childTable;
         root.currentHeatmap = item.childHeatmap;
+
+        root.currentTable.resizeVisibleColumnsToContents();
     }
 
     onModelsChanged: { root.updateCurrent(); }
@@ -141,14 +145,6 @@ ApplicationWindow
             Repeater
             {
                 model: root.models
-                onItemAdded:
-                {
-                    Qt.callLater(function()
-                    {
-                        let tab = item;
-                        tab.item.childTableView.resizeColumnsToContents();
-                    });
-                }
 
                 Tab
                 {
@@ -159,125 +155,53 @@ ApplicationWindow
                     {
                         id: splitView
 
-                        property alias childTableView: tableView
+                        property alias childTable: table
                         property alias childHeatmap: heatmap
 
-                        TableView
+                        DataTable
                         {
-                            id: tableView
+                            id: table
+
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 100
 
-                            MouseArea
+                            selectionMode: DataTable.SingleSelection
+                            showBorder: false
+
+                            property int rowCount: model ? model.rowCount() : 0
+
+                            onClicked:
                             {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.RightButton
-                                propagateComposedEvents: true
-                                onClicked: { exportTableMenu.popup(); }
+                                if(mouse.button === Qt.RightButton)
+                                    exportTableMenu.popup();
                             }
 
                             Text
                             {
                                 anchors.centerIn: parent
                                 text: qsTr("No Significant Results")
-                                visible: tableView.rowCount === 0
+                                visible: table.rowCount <= 1 // rowCount includes header
                             }
 
-                            sortIndicatorVisible: true
-                            selectionMode: SelectionMode.SingleSelection
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
                                 sourceModel: modelData
 
-                                sorters:
-                                [
-                                    RoleSorter
-                                    {
-                                        enabled: modelData.resultIsNumerical(tableView.sortIndicatorColumn)
-                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
-                                        sortOrder: tableView.sortIndicatorOrder
-                                    },
-                                    StringSorter
-                                    {
-                                        enabled: !modelData.resultIsNumerical(tableView.sortIndicatorColumn)
-                                        roleName: tableView.getColumn(tableView.sortIndicatorColumn).role
-                                        sortOrder: tableView.sortIndicatorOrder
-                                        numericMode: true
-                                    }
-                                ]
-
                                 filters: ExpressionFilter
                                 {
                                     enabled: showOnlyEnrichedButton.checked
-                                    expression:
-                                    {
-                                        return Number(model["OverRep"]) > 1.0 && Number(model["BonferroniAdjusted"]) <= 0.05;
-                                    }
+                                    expression: model.enriched
                                 }
                             }
 
-                            itemDelegate: Item
+                            cellValueProvider: function(value)
                             {
-                                height: Math.max(16, label.implicitHeight)
-                                property int implicitWidth: label.implicitWidth + 16
+                                if(!isNaN(value) && value.length > 0)
+                                    return QmlUtils.formatNumberScientific(value, 1);
 
-                                Text
-                                {
-                                    id: label
-                                    objectName: "label"
-                                    width: parent.width
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                        horizontalAlignment === Text.AlignRight ? 1 : 8
-                                    anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                                         || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                                    horizontalAlignment: styleData.textAlignment
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    elide: styleData.elideMode
-
-                                    text:
-                                    {
-                                        if(styleData.value === undefined || typeof(styleData.value) === 'object')
-                                            return "";
-
-                                        let column = tableView.getColumn(styleData.column);
-
-                                        if(column !== null && !isNaN(styleData.value) && styleData.value !== "")
-                                            return QmlUtils.formatNumberScientific(styleData.value, 1);
-
-                                        return styleData.value;
-                                    }
-
-                                    color: styleData.textColor
-                                    renderType: Text.NativeRendering
-                                }
-                            }
-
-                            TableViewColumn
-                            {
-                                role: modelData.resultToString(EnrichmentRoles.SelectionA)
-                                title: modelData.selectionA.length > 0 ? modelData.selectionA : qsTr("Selection A")
-                            }
-
-                            TableViewColumn
-                            {
-                                role: modelData.resultToString(EnrichmentRoles.SelectionB)
-                                title: modelData.selectionB.length > 0 ? modelData.selectionB : qsTr("Selection B")
-                            }
-
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
-                            TableViewColumn { role: modelData.resultToString(EnrichmentRoles.BonferroniAdjusted); title: qsTr("Bonferroni Adjusted"); }
-
-                            Connections
-                            {
-                                target: modelData
-                                function onDataChanged() { resizeColumnsToContentsBugWorkaround(); }
+                                return value;
                             }
                         }
 
@@ -307,13 +231,15 @@ ApplicationWindow
 
                                 onPlotValueClicked:
                                 {
-                                    let convertedRow = proxyModel.mapFromSource(row);
-                                    if(convertedRow === -1)
+                                    let proxyRow = proxyModel.mapFromSource(row);
+                                    if(proxyRow < 0)
+                                    {
+                                        table.clearSelection();
                                         return;
-                                    tableView.selection.clear();
-                                    tableView.selection.select(convertedRow);
-                                    tableView.positionViewAtRow(convertedRow, ListView.Beginning);
-                                    tableView.forceActiveFocus();
+                                    }
+
+                                    table.selectRow(proxyRow);
+                                    //FIXME scroll into view/indicate selection some way
                                 }
 
                                 scrollXAmount:
@@ -355,7 +281,6 @@ ApplicationWindow
                 }
             }
         }
-
     }
 
     Menu
@@ -388,7 +313,7 @@ ApplicationWindow
     Action
     {
         id: exportTableAction
-        enabled: root.currentTableView && root.currentTableView.rowCount > 0
+        enabled: root.currentTable && root.currentTable.rowCount > 1 // rowCount includes header
         text: qsTr("Export Table…")
         iconName: "document-save"
         onTriggered:
@@ -426,8 +351,8 @@ ApplicationWindow
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            wizard.document.writeTableViewToFile(
-                root.currentTableView, file, defaultSuffix);
+            wizard.document.writeTableModelToFile(
+                root.currentTable.model, file, defaultSuffix);
         }
     }
 

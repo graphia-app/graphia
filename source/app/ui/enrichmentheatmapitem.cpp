@@ -168,7 +168,7 @@ void EnrichmentHeatmapItem::buildPlot()
     _yAxisToFullLabel.clear();
     _colorMapKeyValueToTableIndex.clear();
 
-    for(int i = 0; i < _tableModel->rowCount(); ++i)
+    for(int i = 1; i < _tableModel->rowCount(); ++i)
     {
         attributeValueSetA.insert(_tableModel->data(i, EnrichmentTableModel::Results::SelectionA).toString());
         attributeValueSetB.insert(_tableModel->data(i, EnrichmentTableModel::Results::SelectionB).toString());
@@ -180,7 +180,7 @@ void EnrichmentHeatmapItem::buildPlot()
     std::vector<QString> sortAttributeValueSetA(attributeValueSetA.begin(), attributeValueSetA.end());
     std::vector<QString> sortAttributeValueSetB(attributeValueSetB.begin(), attributeValueSetB.end());
     std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), collator);
-    std::sort(sortAttributeValueSetB.begin(), sortAttributeValueSetB.end(), collator);
+    std::sort(sortAttributeValueSetB.rbegin(), sortAttributeValueSetB.rend(), collator);
 
     QFontMetrics metrics(_defaultFont9Pt);
 
@@ -216,7 +216,7 @@ void EnrichmentHeatmapItem::buildPlot()
     _attributeACount = static_cast<int>(attributeValueSetA.size());
     _attributeBCount = static_cast<int>(attributeValueSetB.size());
 
-    for(int i = 0; i < _tableModel->rowCount(); i++)
+    for(int i = 1; i < _tableModel->rowCount(); i++)
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell

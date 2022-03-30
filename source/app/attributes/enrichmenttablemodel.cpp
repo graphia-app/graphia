@@ -19,8 +19,6 @@
 #include "enrichmenttablemodel.h"
 #include "enrichmentcalculator.h"
 
-#include "shared/utils/static_block.h"
-
 #include <QQmlEngine>
 #include <QDebug>
 
@@ -42,7 +40,7 @@ EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(_data.size());
+    return static_cast<int>(_data.size() + 1 /* header */);
 }
 
 int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
@@ -53,29 +51,53 @@ int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
 
 QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 {
-    if(role < Qt::UserRole)
-        return {};
-
     auto row = static_cast<size_t>(index.row());
-    auto column = static_cast<size_t>(role - Qt::UserRole);
-
     Q_ASSERT(row < static_cast<size_t>(rowCount()));
+
+    if(role == EnrichedRole)
+    {
+        // Ignore header for this role
+        if(row == 0)
+            return true;
+
+        const auto& dataRow = _data.at(row - 1);
+        const auto overRep = dataRow.at(static_cast<int>(Results::OverRep)).toDouble();
+        const auto bonferroni = dataRow.at(static_cast<int>(Results::BonferroniAdjusted)).toDouble();
+
+        return overRep > 1.0 && bonferroni <= 0.05;
+    }
+
+    auto column = static_cast<size_t>(index.column());
     Q_ASSERT(column < static_cast<size_t>(columnCount()));
 
-    const auto& dataRow = _data.at(row);
-    auto value = dataRow.at(column);
+    if(row == 0)
+    {
+        switch(static_cast<Results>(column))
+        {
+        case Results::SelectionA:           return _selectionA.isEmpty() ? QStringLiteral("Selection A") : _selectionA;
+        case Results::SelectionB:           return _selectionB.isEmpty() ? QStringLiteral("Selection B") : _selectionB;
+        case Results::Observed:             return QStringLiteral("Observed");
+        case Results::ExpectedTrial:        return QStringLiteral("Expected");
+        case Results::OverRep:              return QStringLiteral("Representation");
+        case Results::Fishers:              return QStringLiteral("Fishers");
+        case Results::BonferroniAdjusted:   return QStringLiteral("Bonferroni Adjusted");
+        default:
+            return {};
+        }
+    }
 
-    return value;
+    return _data.at(row - 1).at(column);
 }
 
 QVariant EnrichmentTableModel::data(int row, Results result) const
 {
-    return data(index(row, 0), result + static_cast<int>(Qt::UserRole));
+    auto column = static_cast<int>(result);
+    return data(index(row, column), Qt::DisplayRole);
 }
 
 int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
 {
-    for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
+    for(int rowIndex = 1; rowIndex < rowCount(); rowIndex++)
     {
         if(data(rowIndex, Results::SelectionA) == attributeA &&
             data(rowIndex, Results::SelectionB) == attributeB)
@@ -83,7 +105,17 @@ int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const 
             return rowIndex;
         }
     }
+
     return -1;
+}
+
+QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
+{
+    return
+    {
+        {Qt::DisplayRole, "display"},
+        {EnrichedRole, "enriched"}
+    };
 }
 
 void EnrichmentTableModel::setSelectionA(const QString& selectionA)
@@ -111,50 +143,4 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data, QStrin
     _selectionA = std::move(selectionA);
     _selectionB = std::move(selectionB);
     endResetModel();
-}
-
-// NOLINTNEXTLINE readability-convert-member-functions-to-static
-QString EnrichmentTableModel::resultToString(Results result)
-{
-    switch(result)
-    {
-        case Results::SelectionA:
-            return QStringLiteral("SelectionA");
-        case Results::SelectionB:
-            return QStringLiteral("SelectionB");
-        case Results::Observed:
-            return QStringLiteral("Observed");
-        case Results::ExpectedTrial:
-            return QStringLiteral("ExpectedTrial");
-        case Results::OverRep:
-            return QStringLiteral("OverRep");
-        case Results::Fishers:
-            return QStringLiteral("Fishers");
-        case Results::BonferroniAdjusted:
-            return QStringLiteral("BonferroniAdjusted");
-        default:
-            qDebug() << "Unknown roleEnum passed to resultToString";
-        return {};
-    }
-}
-
-bool EnrichmentTableModel::resultIsNumerical(EnrichmentTableModel::Results result)
-{
-    if(_data.empty())
-        return false;
-
-    const auto& firstRow = _data.at(0);
-    if(result > firstRow.size())
-        return false;
-
-    auto variantType = firstRow.at(result).type();
-
-    return variantType == QVariant::Double || variantType == QVariant::Int;
-}
-
-static_block
-{
-    qmlRegisterUncreatableType<EnrichmentTableModel>(
-        APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "EnrichmentRoles",
-        QStringLiteral("Exposed purely for results Enumerator"));
 }

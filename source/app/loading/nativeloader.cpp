@@ -434,6 +434,12 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
             {
                 for(const auto& dataRow : tableModel["data"])
                 {
+                    if(dataRow.is_null())
+                    {
+                        qDebug() << "null dataRow in enrichment table";
+                        continue;
+                    }
+
                     auto& row = data._table.emplace_back();
                     row.reserve(dataRow.size());
 

@@ -43,6 +43,11 @@ public:
     };
     Q_ENUM(Results)
 
+    enum Roles
+    {
+        EnrichedRole = Qt::UserRole + 1
+    };
+
     explicit EnrichmentTableModel(QObject* parent = nullptr);
     using Row = std::vector<QVariant>;
     using Table = std::vector<Row>;
@@ -52,7 +57,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     QVariant data(int row, EnrichmentTableModel::Results result) const;
     int rowFromAttributeSets(const QString& attributeA, const QString& attributeB);
-    QHash<int, QByteArray> roleNames() const override { return _roleNames; }
+    QHash<int, QByteArray> roleNames() const override;
 
     QString selectionA() const { return _selectionA; }
     void setSelectionA(const QString& selectionA);
@@ -60,8 +65,6 @@ public:
     void setSelectionB(const QString& selectionB);
 
     void setTableData(Table data, QString selectionA, QString selectionB);
-    Q_INVOKABLE QString resultToString(EnrichmentTableModel::Results result);
-    Q_INVOKABLE bool resultIsNumerical(EnrichmentTableModel::Results result);
 
 private:
     Table _data;

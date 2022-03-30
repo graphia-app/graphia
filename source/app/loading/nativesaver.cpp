@@ -145,16 +145,16 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
 {
     json jsonObject;
 
-    for(int row = 0; row < table.rowCount(); row++)
+    for(int row = 1; row < table.rowCount(); row++)
     {
         for(int column = 0; column < table.columnCount(); column++)
         {
             const auto& v = table.data(row, static_cast<EnrichmentTableModel::Results>(column));
 
             if(v.type() == QVariant::String)
-                jsonObject["data"][row].push_back(v.toString().toStdString());
+                jsonObject["data"][row - 1].push_back(v.toString().toStdString());
             else if(v.type() == QVariant::Double || v.type() == QVariant::Int)
-                jsonObject["data"][row].push_back(v.toDouble());
+                jsonObject["data"][row - 1].push_back(v.toDouble());
         }
     }
 
