@@ -2642,8 +2642,8 @@ void Document::cancelCommand()
         _commandManager.cancel();
 }
 
-void Document::writeTableModelToFile(QAbstractItemModel* model, const QStringList& columnNames,
-    const QUrl& fileUrl, const QString& extension)
+void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& fileUrl,
+    const QString& extension, const QStringList& columnHeaders)
 {
     QString localFileName = fileUrl.toLocalFile();
     if(!QFile(localFileName).open(QIODevice::ReadWrite))
@@ -2699,17 +2699,21 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QStringLis
             separator = QStringLiteral("\t");
         }
 
-        QString rowString;
-        for(const auto& columnName : columnNames)
-        {
-            if(!rowString.isEmpty())
-                rowString.append(separator);
-
-            rowString.append(escapedString(columnName));
-        }
-
         QTextStream stream(&file);
-        stream << rowString << "\r\n";
+        QString rowString;
+
+        if(!columnHeaders.isEmpty())
+        {
+            for(const auto& columnName : columnHeaders)
+            {
+                if(!rowString.isEmpty())
+                    rowString.append(separator);
+
+                rowString.append(escapedString(columnName));
+            }
+
+            stream << rowString << "\r\n";
+        }
 
         if(model != nullptr)
         {

@@ -237,8 +237,8 @@ Item
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            document.writeTableModelToFile(tableView.model,
-                tableView.visibleColumnNames(), file, defaultSuffix);
+            document.writeTableModelToFile(tableView.model, file,
+                defaultSuffix, tableView.visibleColumnNames());
         }
     }
 
