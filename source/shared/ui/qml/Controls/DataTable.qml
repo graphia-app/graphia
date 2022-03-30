@@ -37,8 +37,37 @@ Rectangle
         root.forceLayout();
     }
 
-    property var highlightedProvider: function(column, row) { return false; }
     property string cellDisplayRole: "display"
+
+    enum DataTableSelectionMode
+    {
+        NoSelection,
+        SingleSelection
+        //TODO: multiple selection
+    }
+
+    property int selectionMode: DataTable.NoSelection
+    property var selectedRows: []
+
+    function selectRow(row) { root.selectedRows = [row]; }
+    function clearSelection() { root.selectedRows = []; }
+
+    onClicked:
+    {
+        if(mouse.button !== Qt.LeftButton)
+            return;
+
+        if(root.selectionMode !== DataTable.NoSelection)
+            selectRow(row);
+    }
+
+    property var highlightedProvider: function(column, row)
+    {
+        if(root.selectionMode !== DataTable.NoSelection)
+            return root.selectedRows.indexOf(row) !== -1;
+
+        return false;
+    }
 
     property bool showBorder: true
 
