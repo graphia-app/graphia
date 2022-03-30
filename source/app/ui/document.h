@@ -520,9 +520,6 @@ public:
 
     Q_INVOKABLE void cancelCommand();
 
-    Q_INVOKABLE void writeTableViewToFile(QObject* tableView, const QUrl& fileUrl,
-        const QString& extension = QStringLiteral("csv"));
-
     Q_INVOKABLE void writeTableModelToFile(QAbstractItemModel* model, const QUrl& fileUrl,
         const QString& extension = QStringLiteral("csv"), const QStringList& columnHeaders = {});
 
