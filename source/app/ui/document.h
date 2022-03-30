@@ -523,8 +523,8 @@ public:
     Q_INVOKABLE void writeTableViewToFile(QObject* tableView, const QUrl& fileUrl,
         const QString& extension = QStringLiteral("csv"));
 
-    Q_INVOKABLE void writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl,
-        const QString& extension = QStringLiteral("csv"));
+    Q_INVOKABLE void writeTableModelToFile(QAbstractItemModel* model, const QStringList& columnNames,
+        const QUrl& fileUrl, const QString& extension = QStringLiteral("csv"));
 
     Q_INVOKABLE void copyTableViewColumnToClipboard(QObject* tableView, int column);
 

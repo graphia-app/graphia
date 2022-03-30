@@ -237,7 +237,8 @@ Item
         onAccepted:
         {
             misc.fileSaveInitialFolder = folder.toString();
-            document.writeTableView2ToFile(tableView, file, defaultSuffix);
+            document.writeTableModelToFile(tableView.model,
+                tableView.visibleColumnNames(), file, defaultSuffix);
         }
     }
 
@@ -868,7 +869,7 @@ Item
                 property var columnWidths: []
                 property int rowHeight: fontMetrics.height + 1
 
-                function visibleColumnNames() // Called from C++ when exporting table
+                function visibleColumnNames()
                 {
                     let columnNames = [];
 
