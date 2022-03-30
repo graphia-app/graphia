@@ -144,10 +144,12 @@ Rectangle
         root.forceLayout();
     }
 
+    property var cellValueProvider: function(value) { return value; }
+
     property Component cellDelegate: Label
     {
         maximumLineCount: 1
-        text: value
+        text: { return root.cellValueProvider(value); }
 
         background: Rectangle { color: parent.backgroundColor }
 
