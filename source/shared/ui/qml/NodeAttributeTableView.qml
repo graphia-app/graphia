@@ -311,7 +311,7 @@ Item
         iconName: "document-save"
         onTriggered:
         {
-            document.copyTableViewCopyToClipboard(tableView, lastClickedColumn);
+            document.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
         }
     }
 

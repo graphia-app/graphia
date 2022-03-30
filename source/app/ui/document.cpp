@@ -2856,20 +2856,20 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
     }, tr("Exporting Table"));
 }
 
-void Document::copyTableViewCopyToClipboard(QObject* tableView, int column)
+void Document::copyTableViewColumnToClipboard(QObject* tableView, int column)
 {
     auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columns")).toInt();
 
     if(column < 0 || column >= columnCount)
     {
-        qDebug() << "Document::copyTableViewCopyToClipboard: requested column exceeds column count";
+        qDebug() << "Document::copyTableViewColumnToClipboard: requested column exceeds column count";
         return;
     }
 
     auto* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
     if(model == nullptr)
     {
-        qDebug() << "Document::copyTableViewCopyToClipboard: null model";
+        qDebug() << "Document::copyTableViewColumnToClipboard: null model";
         return;
     }
 
