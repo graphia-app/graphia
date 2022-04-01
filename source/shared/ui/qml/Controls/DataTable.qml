@@ -75,6 +75,19 @@ Rectangle
         return false;
     }
 
+    function rowIsVisible(row)
+    {
+        return row >= _topLoadedRow && row <= _bottomLoadedRow;
+    }
+
+    function positionViewAt(row)
+    {
+        if(rowIsVisible(row))
+            return;
+
+        tableView.contentY = Math.max(0, (row - 2) * _cellDelegateHeight);
+    }
+
     readonly property int _padding: 4
     readonly property int _minimumColumnWidth: 32
 
