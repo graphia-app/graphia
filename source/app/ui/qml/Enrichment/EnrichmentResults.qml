@@ -169,7 +169,32 @@ ApplicationWindow
                             selectionMode: DataTable.SingleSelection
                             showBorder: false
 
+                            sortIndicatorColumn: 0
+                            sortIndicatorOrder: Qt.AscendingOrder
+
                             property int rowCount: model ? model.rowCount() : 0
+
+                            onHeaderClicked:
+                            {
+                                if(mouse.button !== Qt.LeftButton)
+                                    return;
+
+                                clearSelection();
+
+                                if(sortIndicatorColumn === column)
+                                {
+                                    sortIndicatorOrder = sortIndicatorOrder === Qt.AscendingOrder ?
+                                        Qt.DescendingOrder : Qt.AscendingOrder;
+
+                                    return;
+                                }
+
+                                sortIndicatorColumn = column;
+                                sortIndicatorOrder = Qt.AscendingOrder;
+                            }
+
+                            // For some reason QmlUtils isn't available from directly within the sort expression
+                            property var stringCompare: QmlUtils.localeCompareStrings
 
                             onClicked:
                             {
@@ -193,6 +218,39 @@ ApplicationWindow
                                 {
                                     enabled: showOnlyEnrichedButton.checked
                                     expression: model.enriched
+                                }
+
+                                sorters: ExpressionSorter
+                                {
+                                    enabled: table.sortIndicatorColumn >= 0
+                                    expression:
+                                    {
+                                        let descending = table.sortIndicatorOrder === Qt.DescendingOrder;
+
+                                        if(table.sortIndicatorColumn < 0)
+                                            return true;
+
+                                        let rowA = modelLeft.index;
+                                        let rowB = modelRight.index;
+
+                                        if(rowA < 0 || rowB < 0)
+                                            return true;
+
+                                        // Exclude header row from sort
+                                        if(rowA === 0 || rowB === 0)
+                                            return rowA === 0;
+
+                                        let valueA = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowA, table.sortIndicatorColumn));
+                                        let valueB = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowB, table.sortIndicatorColumn));
+
+                                        if(descending)
+                                            [valueA, valueB] = [valueB, valueA];
+
+                                        if(!isNaN(valueA) && !isNaN(valueB))
+                                            return Number(valueA) < Number(valueB);
+
+                                        return table.stringCompare(valueA, valueB) < 0;
+                                    }
                                 }
                             }
 
