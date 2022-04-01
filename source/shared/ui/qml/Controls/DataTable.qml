@@ -20,6 +20,7 @@ import QtQuick 2.14
 import QtQml 2.12
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.3
+import QtQuick.Shapes 1.13
 
 import app.graphia 1.0
 
@@ -38,6 +39,11 @@ Rectangle
     }
 
     property string cellDisplayRole: "display"
+
+    property int sortIndicatorColumn: -1
+    property int sortIndicatorOrder: Qt.AscendingOrder
+
+    property bool showBorder: true
 
     enum DataTableSelectionMode
     {
@@ -68,8 +74,6 @@ Rectangle
 
         return false;
     }
-
-    property bool showBorder: true
 
     readonly property int _padding: 4
     readonly property int _minimumColumnWidth: 32
@@ -156,15 +160,71 @@ Rectangle
 
     SystemPalette { id: systemPalette }
 
-    property Component headerDelegate: Label
+    property Component headerDelegate: RowLayout
     {
-        maximumLineCount: 1
-        text: value
+        spacing: 0
 
-        background: Rectangle { color: systemPalette.light }
-        color: systemPalette.text
-        padding: root._padding
-        renderType: Text.NativeRendering
+        Label
+        {
+            id: headerLabel
+
+            Layout.fillWidth: true
+
+            maximumLineCount: 1
+            text: value
+
+            background: Rectangle { color: systemPalette.light }
+            color: systemPalette.text
+            padding: root._padding
+            elide: Text.ElideRight
+            renderType: Text.NativeRendering
+
+            MouseArea
+            {
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                anchors.fill: parent
+                onClicked: { root.headerClicked(modelColumn, mouse); }
+                onDoubleClicked: { root.headerDoubleClicked(modelColumn, mouse); }
+            }
+        }
+
+        Shape
+        {
+            id: sortIndicator
+
+            Layout.alignment: Qt.AlignVCenter
+            Layout.rightMargin: 4
+
+            antialiasing: false
+            width: 7
+            height: 4
+            visible: showSortIndicator
+            transform: Rotation
+            {
+                origin.x: sortIndicator.width * 0.5
+                origin.y: sortIndicator.height * 0.5
+                angle: sortIndicatorOrder === Qt.DescendingOrder ? 0 : 180
+            }
+
+            ShapePath
+            {
+                miterLimit: 0
+                strokeColor: systemPalette.mid
+                fillColor: "transparent"
+                strokeWidth: 2
+                startY: sortIndicator.height - 1
+                PathLine { x: Math.round((sortIndicator.width - 1) * 0.5); y: 0 }
+                PathLine { x: sortIndicator.width - 1; y: sortIndicator.height - 1 }
+            }
+
+            MouseArea
+            {
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                anchors.fill: parent
+                onClicked: { root.headerClicked(modelColumn, mouse); }
+                onDoubleClicked: { root.headerDoubleClicked(modelColumn, mouse); }
+            }
+        }
     }
 
     onHeaderDelegateChanged:
@@ -267,7 +327,10 @@ Rectangle
                     sourceComponent: root.headerDelegate
                     readonly property string value: model[root.cellDisplayRole]
                     readonly property int modelColumn: model.column
+                    readonly property bool showSortIndicator: _forceSortIndicator || model.column === root.sortIndicatorColumn
+                    readonly property int sortIndicatorOrder: root.sortIndicatorOrder
 
+                    property bool _forceSortIndicator: false
 
                     onLoaded:
                     {
@@ -449,7 +512,9 @@ Rectangle
         if(loader === undefined)
             return -1;
 
+        loader._forceSortIndicator = true;
         let width = loader.item.implicitWidth;
+        loader._forceSortIndicator = false;
 
         return width;
     }
@@ -496,5 +561,6 @@ Rectangle
     // These signals won't be emitted if the respective delegates are customised
     signal clicked(var column, var row, var mouse);
     signal doubleClicked(var column, var row, var mouse);
+    signal headerClicked(var column, var mouse);
+    signal headerDoubleClicked(var column, var mouse);
 }
-
