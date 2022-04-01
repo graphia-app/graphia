@@ -291,6 +291,8 @@ ApplicationWindow
                                 xAxisLabel: modelData.selectionA
                                 yAxisLabel: modelData.selectionB
 
+                                onShowOnlyEnrichedChanged: { table.clearSelection(); }
+
                                 onPlotValueClicked:
                                 {
                                     let proxyRow = proxyModel.mapFromSource(row);
