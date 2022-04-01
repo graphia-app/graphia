@@ -96,7 +96,7 @@ Rectangle
         root._bottomLoadedRow = -1;
     }
 
-    property var _headerWidths: new Map()
+    property var _headerItems: new Map()
     property var _cellWidths: new Map()
 
     readonly property int leftColumn: _leftLoadedColumn
@@ -197,6 +197,14 @@ Rectangle
         bottomPadding: root._padding * 0.5
         elide: Text.ElideRight
         renderType: Text.NativeRendering
+
+        MouseArea
+        {
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            anchors.fill: parent
+            onClicked: { root.clicked(modelColumn, modelRow, mouse); }
+            onDoubleClicked: { root.doubleClicked(modelColumn, modelRow, mouse); }
+        }
     }
 
     property int _cellDelegateHeight: 0
@@ -234,8 +242,8 @@ Rectangle
             {
                 if(root._columnWidths[column] === undefined)
                 {
-                    let headerWidth = root._headerWidths.get(column);
-                    if(headerWidth === undefined)
+                    let headerWidth = root._headerWidth(column);
+                    if(headerWidth === -1)
                         return -1;
 
                     root._columnWidths[column] = headerWidth;
@@ -260,9 +268,13 @@ Rectangle
                     readonly property string value: model[root.cellDisplayRole]
                     readonly property int modelColumn: model.column
 
-                    onLoaded: { headerView.implicitHeight = height; }
 
-                    onImplicitWidthChanged: { root._headerWidths.set(model.column, Math.max(1, implicitWidth)); }
+                    onLoaded:
+                    {
+                        headerView.implicitHeight = Math.max(headerView.implicitHeight,
+                            Math.max(item.implicitHeight, item.height));
+                        root._headerItems.set(model.column, headerDelegateLoader);
+                    }
                 }
 
                 // Column resize handle
@@ -303,7 +315,7 @@ Rectangle
 
                 TableView.onReused:
                 {
-                    root._headerWidths.set(model.column, Math.max(1, headerDelegateLoader.implicitWidth));
+                    root._headerItems.set(model.column, headerDelegateLoader);
 
                     if(typeof(headerDelegateLoader.item.onReused) === "function")
                         headerDelegateLoader.item.onReused();
@@ -311,7 +323,7 @@ Rectangle
 
                 TableView.onPooled:
                 {
-                    root._headerWidths.delete(model.column);
+                    root._headerItems.delete(model.column);
 
                     if(typeof(headerDelegateLoader.item.onPooled) === "function")
                         headerDelegateLoader.item.onPooled();
@@ -376,19 +388,11 @@ Rectangle
 
                     onLoaded:
                     {
-                        if(implicitHeight !== 0)
-                            root._cellDelegateHeight = Math.max(root._cellDelegateHeight, implicitHeight);
+                        if(item.implicitHeight !== 0)
+                            root._cellDelegateHeight = Math.max(root._cellDelegateHeight, item.implicitHeight);
+
+                        root._cellWidths.set(model.column + "," + model.row, Math.max(1, item.implicitWidth));
                     }
-
-                    onImplicitWidthChanged: { root._cellWidths.set(model.column + "," + model.row, Math.max(1, implicitWidth)); }
-                }
-
-                MouseArea
-                {
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                    anchors.fill: parent
-                    onClicked: { root.clicked(model.column, model.row, mouse); }
-                    onDoubleClicked: { root.doubleClicked(model.column, model.row, mouse); }
                 }
 
                 Component.onCompleted:
@@ -402,7 +406,7 @@ Rectangle
                     root._loadedCells.add({x: model.column, y: model.row});
                     root._updateCellExtents();
 
-                    root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.implicitWidth));
+                    root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.item.implicitWidth));
 
                     if(typeof(cellDelegateLoader.item.onReused) === "function")
                         cellDelegateLoader.item.onReused();
@@ -439,28 +443,41 @@ Rectangle
             row >= root._topLoadedRow && row <= root._bottomLoadedRow;
     }
 
+    function _headerWidth(column)
+    {
+        let loader = root._headerItems.get(column);
+        if(loader === undefined)
+            return -1;
+
+        let width = loader.item.implicitWidth;
+
+        return width;
+    }
+
     function resizeColumnToHeader(column)
     {
-        root._columnWidths[column] = root._headerWidths.get(column);
+        root._columnWidths[column] = root._headerWidth(column);
         root.forceLayout();
     }
 
     function resizeColumnToContents(column)
     {
-        let maxWidth = 0;
+        let maxCellWidth = 0;
         for(let row = root.topRow; row <= root.bottomRow; row++)
         {
             let cellWidth = root._cellWidths.get(column + "," + row);
-            maxWidth = Math.max(maxWidth, cellWidth);
+            maxCellWidth = Math.max(maxCellWidth, cellWidth);
         }
 
-        if(isNaN(maxWidth))
+        if(isNaN(maxCellWidth))
         {
             console.log("DataTable.resizeColumnToContents: maxWidth calculated as NaN");
             return;
         }
 
-        root._columnWidths[column] = Math.max(root._headerWidths.get(column), maxWidth);
+        let headerWidth = root._headerWidth(column);
+
+        root._columnWidths[column] = Math.max(headerWidth, maxCellWidth);
         root.forceLayout();
     }
 
@@ -476,6 +493,7 @@ Rectangle
             resizeColumnToContents(column);
     }
 
+    // These signals won't be emitted if the respective delegates are customised
     signal clicked(var column, var row, var mouse);
     signal doubleClicked(var column, var row, var mouse);
 }
