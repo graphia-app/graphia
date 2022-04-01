@@ -39,7 +39,7 @@ class EnrichmentHeatmapItem : public QCustomPlotQuickItem
     Q_PROPERTY(int yAxisPadding MEMBER _yAxisPadding WRITE setYAxisPadding NOTIFY scrollAmountChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel)
-    Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched)
+    Q_PROPERTY(bool showOnlyEnriched MEMBER _showOnlyEnriched WRITE setShowOnlyEnriched NOTIFY showOnlyEnrichedChanged)
 
 private:
     QCPLayer* _textLayer = nullptr;
@@ -105,6 +105,7 @@ signals:
     void horizontalRangeSizeChanged();
     void verticalRangeSizeChanged();
     void plotValueClicked(int row);
+    void showOnlyEnrichedChanged();
 
 public slots:
     void showTooltip();

@@ -364,6 +364,7 @@ void EnrichmentHeatmapItem::setShowOnlyEnriched(bool showOnlyEnriched)
         _showOnlyEnriched = showOnlyEnriched;
         buildPlot();
         customPlot().replot(QCustomPlot::rpQueuedReplot);
+        emit showOnlyEnrichedChanged();
     }
 }
 
