@@ -303,7 +303,7 @@ ApplicationWindow
                                     }
 
                                     table.selectRow(proxyRow);
-                                    //FIXME scroll into view/indicate selection some way
+                                    table.positionViewAt(proxyRow);
                                 }
 
                                 scrollXAmount:
