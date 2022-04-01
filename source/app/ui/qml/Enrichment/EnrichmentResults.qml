@@ -61,8 +61,12 @@ ApplicationWindow
     onVisibleChanged: { if(visible) root.updateCurrent(); }
 
     title: qsTr("Enrichment Results")
-    minimumHeight: 400
+
     minimumWidth: 800
+    minimumHeight: 400
+
+    width: 1200
+    height: 600
 
     MessageDialog
     {
