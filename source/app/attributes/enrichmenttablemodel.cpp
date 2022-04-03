@@ -95,7 +95,7 @@ QVariant EnrichmentTableModel::data(int row, Results result) const
     return data(index(row, column), Qt::DisplayRole);
 }
 
-int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
+int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB) const
 {
     for(int rowIndex = 1; rowIndex < rowCount(); rowIndex++)
     {
