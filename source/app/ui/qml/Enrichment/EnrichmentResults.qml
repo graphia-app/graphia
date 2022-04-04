@@ -125,6 +125,8 @@ ApplicationWindow
         }
     }
 
+    SystemPalette { id: systemPalette }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -161,6 +163,27 @@ ApplicationWindow
 
                         property alias childTable: table
                         property alias childHeatmap: heatmap
+
+                        handleDelegate: Rectangle
+                        {
+                            width: 8
+                            height: 8
+
+                            color: systemPalette.window
+
+                            Rectangle
+                            {
+                                anchors.centerIn: parent
+
+                                readonly property int maxDimension: 48
+                                readonly property int minDimension: 4
+
+                                width: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
+                                height: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
+                                radius: minDimension * 0.5
+                                color: systemPalette.midlight
+                            }
+                        }
 
                         DataTable
                         {
