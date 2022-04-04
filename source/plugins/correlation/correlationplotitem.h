@@ -379,7 +379,7 @@ private:
     void setHorizontalScrollPosition(double horizontalScrollPosition);
     void setXAxisPadding(int padding);
 
-    void updateSortMap();
+    bool updateSortMap();
     void setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders); // clazy:exclude=qproperty-type-mismatch
 
     QString elideLabel(const QString& label);

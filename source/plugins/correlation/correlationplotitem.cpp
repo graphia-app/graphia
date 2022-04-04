@@ -950,19 +950,22 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
     _rebuildRequired = RebuildRequired::None;
 
-    if(invalidateCache == InvalidateCache::Yes)
+    auto clearLineGraphCache = [this]
     {
-        // Invalidate the line graph cache
         for(auto v : std::as_const(_lineGraphCache))
             _customPlot.removeGraph(v._graph);
 
         _lineGraphCache.clear();
-    }
+    };
+
+    if(invalidateCache == InvalidateCache::Yes)
+        clearLineGraphCache();
 
     QElapsedTimer buildTimer;
     buildTimer.start();
 
-    updateSortMap();
+    if(updateSortMap())
+        clearLineGraphCache();
 
     for(auto v : std::as_const(_lineGraphCache))
     {
@@ -1166,8 +1169,10 @@ void CorrelationPlotItem::setXAxisPadding(int padding)
     }
 }
 
-void CorrelationPlotItem::updateSortMap()
+bool CorrelationPlotItem::updateSortMap()
 {
+    auto previousSortmap = _sortMap;
+
     _sortMap.clear();
 
     for(size_t i = 0U; i < numColumns(); i++)
@@ -1366,6 +1371,8 @@ void CorrelationPlotItem::updateSortMap()
         computeXAxisRange();
         emit numVisibleColumnsChanged();
     }
+
+    return _sortMap != previousSortmap;
 }
 
 void CorrelationPlotItem::sortBy(int type, const QString& text)
