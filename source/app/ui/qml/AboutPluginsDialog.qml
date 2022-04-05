@@ -32,20 +32,21 @@ Window
 
     property var pluginDetails
 
-    // These data members are undocumented, so this could break in future
-    property string pluginDescription: pluginNamesList.contentItem.currentItem ?
-        pluginNamesList.contentItem.currentItem.rowItem.itemModel.description : ""
-    property string pluginImageSource: pluginNamesList.contentItem.currentItem ?
-        pluginNamesList.contentItem.currentItem.rowItem.itemModel.imageSource : ""
+    property string pluginDescription:
+    {
+        return pluginNamesList.modelRoleAt(pluginNamesList.selectedIndex, "description");
+    }
+
+    property string pluginImageSource:
+    {
+        return pluginNamesList.modelRoleAt(pluginNamesList.selectedIndex, "imageSource");
+    }
 
     onVisibleChanged:
     {
         // Force selection of first row
-        if(visible && pluginNamesList.rowCount > 0)
-        {
-            pluginNamesList.currentRow = 0;
-            pluginNamesList.selection.select(0);
-        }
+        if(visible && pluginNamesList.count > 0)
+            pluginNamesList.select(0);
     }
 
     title: qsTr("About Plugins")
@@ -65,15 +66,14 @@ Window
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TableView
+        ListBox
         {
             id: pluginNamesList
 
             Layout.rowSpan: pluginImageSource.length > 0 ? 3 : 2
             Layout.fillHeight: true
 
-            TableViewColumn { role: "name" }
-            headerDelegate: Item {}
+            displayRole: "name"
 
             model: pluginDetails
         }
