@@ -287,6 +287,7 @@ Item
     }
 
     function clear() { root._selectedIndices = []; }
+    function select(index) { root._selectedIndices = [index]; }
     function selectAll()
     {
         if(!root.allowMultipleSelection)
