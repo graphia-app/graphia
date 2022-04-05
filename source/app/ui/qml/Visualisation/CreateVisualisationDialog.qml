@@ -94,7 +94,7 @@ Window
                         channelList.model = document.availableVisualisationChannelNames(
                             attribute.valueType);
                     }
-                    else
+                    else if(channelList.model)
                         channelList.model = null;
 
                     description.update();
