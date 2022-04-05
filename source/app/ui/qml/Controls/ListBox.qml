@@ -17,18 +17,58 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
+
+import "../../../../shared/ui/qml/Utils.js" as Utils
+
+import app.graphia 1.0
 
 Item
 {
     id: root
 
-    property var selectedValue
-    property var selectedValues: []
-    property var selectedIndices: []
-    property var model
+    readonly property var selectedIndices: _selectedIndices
 
-    onModelChanged: { selectedValue = undefined; }
+    readonly property var selectedValues:
+    {
+        if(!root.model)
+            return [];
+
+        let values = [];
+
+        for(const index of root._selectedIndices)
+        {
+            let value;
+            if(typeof root.model.get === 'function')
+                value = root.model.get(index);
+            else if(typeof root.model.data === 'function')
+                value = root.model.data(root.model.index(index, 0));
+            else
+                value = root.model[index];
+
+            values.push(value);
+        }
+
+        return values;
+    }
+
+    readonly property var selectedValue:
+    {
+        return root.selectedValues.length > 0 ?
+            root.selectedValues[root.selectedValues.length - 1] : "";
+    }
+
+    property var model: null
+    property string displayRole: "display"
+
+    property var _selectedIndices: []
+    property int _lastSelectedIndex: -1
+
+    onModelChanged:
+    {
+        root._selectedIndices = [];
+        root._lastSelectedIndex = -1;
+    }
 
     readonly property int count:
     {
@@ -53,110 +93,204 @@ Item
     width: 200
     height: 100
 
-    TableView
+    SystemPalette { id: systemPalette }
+
+    Rectangle
     {
-        id: tableView
+        anchors.fill: parent
+        border.width: 1
+        border.color: systemPalette.mid
+        clip: true
 
-        anchors.fill: root
-        model: root.model
-
-        TableViewColumn { role: "display" }
-
-        // Hide the header
-        headerDelegate: Item {}
-
-        alternatingRowColors: false
-
-        selectionMode: root.allowMultipleSelection ?
-            SelectionMode.ExtendedSelection : SelectionMode.SingleSelection
-
-        Connections
+        ListView
         {
-            target: tableView.selection
+            anchors.margins: 1
 
-            function onSelectionChanged()
+            anchors.fill: parent
+            model: root.model
+
+            delegate: Rectangle
             {
-                root.selectedValues = [];
-                root.selectedIndices = [];
+                width: parent.width
+                height: label.implicitHeight
 
-                if(target.count > 0)
+                color:
                 {
-                    let newSelectedValues = [];
-                    let newSelectedIndices = [];
-                    target.forEach(function(rowIndex)
-                    {
-                        let value;
-                        if(typeof root.model.get === 'function')
-                            value = root.model.get(rowIndex);
-                        else if(typeof root.model.data === 'function')
-                            value = root.model.data(root.model.index(rowIndex, 0));
-                        else
-                            value = root.model[rowIndex];
+                    if(root._selectedIndices.indexOf(index) !== -1)
+                        return systemPalette.highlight;
 
-                        root.selectedValue = value;
-                        newSelectedValues.push(value);
-                        newSelectedIndices.push(rowIndex);
-                    });
-
-                    root.selectedValue = newSelectedValues[newSelectedValues.length - 1];
-                    root.selectedValues = newSelectedValues;
-                    root.selectedIndices = newSelectedIndices;
+                    return "transparent";
                 }
-                else
+
+                Label
                 {
-                    root.selectedValue = undefined;
-                    root.selectedValues = [];
-                    root.selectedIndices = [];
+                    id: label
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 8
+
+                    text:
+                    {
+                        if(model[root.displayRole])
+                            return model[root.displayRole];
+
+                        return modelData;
+                    }
+
+                    color: QmlUtils.contrastingColor(parent.color)
+                    elide: Text.ElideRight
+                    renderType: Text.NativeRendering
                 }
             }
-        }
 
-        onClicked: { root.clicked(row); }
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: ScrollBar { policy: Qt.ScrollBarAsNeeded }
+            interactive: false
 
-        onDoubleClicked:
-        {
-            // See TreeBox for an explanation
-            doubleClickHack.row = row;
-        }
-
-        Connections
-        {
-            id: doubleClickHack
-            property int row: -1
-
-            target: tableView.__mouseArea
-
-            function onPressedChanged()
+            MouseArea
             {
-                if(!tableView.__mouseArea.pressed && row !== -1)
+                anchors.fill: parent
+
+                function setNewSelection(newSelection, index)
                 {
-                    root.doubleClicked(row);
-                    row = -1;
+                    newSelection.sort();
+
+                    root._lastSelectedIndex = newSelection.length > 0 &&
+                        newSelection.indexOf(index) < 0 ?
+                        newSelection[newSelection.length - 1] : index;
+
+                    root._selectedIndices = newSelection;
+                }
+
+                function indexAt(mouse)
+                {
+                    return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
+                }
+
+                onWheel: { parent.flick(0, wheel.angleDelta.y * 5); }
+
+                onPressed:
+                {
+                    root.forceActiveFocus();
+
+                    let newSelectedIndices = [];
+
+                    let index = indexAt(mouse);
+                    if(index < 0)
+                        return;
+
+                    if(root.allowMultipleSelection && (mouse.modifiers & Qt.ShiftModifier) &&
+                        root._lastSelectedIndex !== -1)
+                    {
+                        let min = Math.min(index, root._lastSelectedIndex);
+                        let max = Math.max(index, root._lastSelectedIndex);
+
+                        newSelectedIndices = root._selectedIndices;
+
+                        for(let i = min; i <= max; i++)
+                        {
+                            if(newSelectedIndices.indexOf(i) < 0)
+                                newSelectedIndices.push(i);
+                        }
+                    }
+                    else if(root.allowMultipleSelection && (mouse.modifiers & Qt.ControlModifier))
+                    {
+                        newSelectedIndices = root._selectedIndices;
+                        let metaIndex = newSelectedIndices.indexOf(index);
+
+                        if(metaIndex < 0)
+                            newSelectedIndices.push(index);
+                        else
+                            newSelectedIndices.splice(metaIndex, 1);
+                    }
+                    else
+                        newSelectedIndices = [index];
+
+                    setNewSelection(newSelectedIndices, index);
+                }
+
+                onPositionChanged:
+                {
+                    let newSelectedIndices = [];
+
+                    let index = indexAt(mouse);
+                    if(index < 0)
+                        return;
+
+                    if(root.allowMultipleSelection)
+                    {
+                        newSelectedIndices = root._selectedIndices
+                        let metaIndex = newSelectedIndices.indexOf(index);
+
+                        if(metaIndex < 0)
+                            newSelectedIndices.push(index);
+                    }
+                    else
+                        newSelectedIndices = [index];
+
+                    setNewSelection(newSelectedIndices, index);
+                }
+
+                onClicked:
+                {
+                    root.forceActiveFocus();
+                    root.clicked(indexAt(mouse));
+                }
+
+                onDoubleClicked:
+                {
+                    root.forceActiveFocus();
+                    root.doubleClicked(indexAt(mouse));
 
                     if(root.selectedValue)
                         root.accepted();
                 }
             }
         }
+    }
 
-        Keys.onPressed:
+    Keys.onPressed:
+    {
+        let moveSelection = function(delta)
         {
-            switch(event.key)
+            let newIndex = root._lastSelectedIndex;
+            if(newIndex < 0 && root._selectedIndices.length > 0)
+                newIndex = root._selectedIndices[root._selectedIndices.length - 1];
+
+            newIndex = Utils.clamp(newIndex + delta, 0, root.count - 1);
+
+            root._selectedIndices = [newIndex];
+            root._lastSelectedIndex = newIndex;
+        };
+
+        switch(event.key)
+        {
+        case Qt.Key_Enter:
+        case Qt.Key_Return:
+            if(root.selectedValue)
             {
-            case Qt.Key_Enter:
-            case Qt.Key_Return:
-                if(root.selectedValue)
-                {
-                    event.accepted = true;
-                    root.accepted();
-                }
-                break;
+                event.accepted = true;
+                root.accepted();
             }
+            break;
+
+        case Qt.Key_Up:     moveSelection(-1); break;
+        case Qt.Key_Down:   moveSelection(1);  break;
         }
     }
 
-    function clear() { tableView.selection.clear(); }
-    function selectAll() { if(root.count > 0) tableView.selection.selectAll(); }
+    function clear() { root._selectedIndices = []; }
+    function selectAll()
+    {
+        if(!root.allowMultipleSelection)
+        {
+            console.log("Can't selectAll() when allowMultipleSelection is false.");
+            return;
+        }
+
+        root._selectedIndices = [...Array(root.count).keys()];
+    }
 
     signal accepted()
 
