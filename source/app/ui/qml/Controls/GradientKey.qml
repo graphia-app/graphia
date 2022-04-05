@@ -103,6 +103,8 @@ Item
         updateGradient();
     }
 
+    SystemPalette { id: systemPalette }
+
     Rectangle
     {
         id: button
