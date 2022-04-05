@@ -320,8 +320,10 @@ int AvailableAttributesModel::columnCount(const QModelIndex& /*parent*/) const
 
 QString AvailableAttributesModel::get(const QModelIndex& index) const
 {
-    auto* item = itemForIndex(index);
+    if(!index.isValid())
+        return {};
 
+    auto* item = itemForIndex(index);
     if(item == nullptr)
         return {};
 
