@@ -29,6 +29,12 @@ Item
 
     readonly property var selectedIndices: _selectedIndices
 
+    readonly property int selectedIndex:
+    {
+        return root.selectedIndices.length > 0 ?
+            root.selectedIndices[root.selectedIndices.length - 1] : -1;
+    }
+
     readonly property var selectedValues:
     {
         if(!root.model)
