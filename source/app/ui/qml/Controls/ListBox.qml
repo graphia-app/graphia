@@ -64,6 +64,21 @@ Item
             root.selectedValues[root.selectedValues.length - 1] : "";
     }
 
+    function modelRoleAt(index, roleName)
+    {
+        if(!root.model || index < 0 || roleName.length === 0)
+            return "";
+
+        if(typeof root.model.data !== 'function')
+        {
+            console.log("ListBox.selectedRole: model doesn't implement data(...)");
+            return "";
+        }
+
+        return root.model.data(root.model.index(index, 0),
+            QmlUtils.modelRoleForName(root.model, roleName));
+    }
+
     property var model: null
     property string displayRole: "display"
 
