@@ -174,7 +174,6 @@ class CorrelationPlotItem : public QQuickPaintedItem
 
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
         WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
-    Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
     Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
         WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
     Q_PROPERTY(bool groupByAnnotation MEMBER _groupByAnnotation WRITE setGroupByAnnotation NOTIFY plotOptionsChanged)
@@ -207,7 +206,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool zoomed READ zoomed NOTIFY zoomedChanged)
 
-    Q_PROPERTY(int minimumHeight READ minimumHeight CONSTANT)
+    Q_PROPERTY(int minimumHeight READ minimumHeight NOTIFY minimumHeightChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -366,7 +365,7 @@ private:
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
     bool zoomed() const { return _worker != nullptr ? _worker->zoomed() : false; }
 
-    static int minimumHeight() { return 100; }
+    int minimumHeight() const;
 
     void setPluginInstance(CorrelationPluginInstance* pluginInstance);
 
@@ -395,9 +394,6 @@ private:
     void setContinousYAxisRange(double min, double max);
     void setContinousYAxisRangeForSelection();
     QVector<double> meanAverageData(double& min, double& max, const QVector<int>& rows);
-
-    void updateColumnAnnotationVisibility();
-    bool canShowColumnAnnotationSelection() const;
 
     double visibleHorizontalFraction() const;
     bool isWide() const;
@@ -455,6 +451,7 @@ signals:
     void visibleColumnAnnotationNamesChanged();
     void busyChanged();
     void zoomedChanged();
+    void minimumHeightChanged();
 
     void columnAnnotationSelectionModeEnabledChanged();
 };

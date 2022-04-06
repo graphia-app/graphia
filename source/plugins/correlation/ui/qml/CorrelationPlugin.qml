@@ -20,6 +20,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
+import QtQuick.Controls 2.12 as QQC2
 
 import Qt.labs.platform 1.0 as Labs
 
@@ -63,19 +64,6 @@ PluginContent
         }
     }
 
-    MessageDialog
-    {
-        id: tooManyAnnotationsDialog
-        visible: false
-        title: qsTr("Too Many Annotations")
-        text: qsTr("There is currently not enough physical space to display the " +
-            "column annotations. Please increase the vertical size of the plot and " +
-            "try again.")
-
-        icon: StandardIcon.Critical
-        standardButtons: StandardButton.Ok
-    }
-
     Action
     {
         id: selectColumnAnnotationsAction
@@ -88,13 +76,6 @@ PluginContent
 
         onTriggered:
         {
-            if(!plot.canShowColumnAnnotationSelection)
-            {
-                tooManyAnnotationsDialog.open();
-                checked = false;
-                return;
-            }
-
             plot.columnAnnotationSelectionModeEnabled = !plot.columnAnnotationSelectionModeEnabled;
             checked = plot.columnAnnotationSelectionModeEnabled;
         }
@@ -816,132 +797,148 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        CorrelationPlot
+        QQC2.ScrollView
         {
-            id: plot
+            id: verticalPlotScrollView
 
             Layout.fillWidth: true
             Layout.fillHeight: splitView.orientation !== Qt.Vertical
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? minimumHeight : root.minimumHeight
+            Layout.minimumHeight: 150 // Should be <= the minimum that CorrelationPlot::minimumHeight returns
             Layout.minimumWidth: 200
 
-            model: plugin.model
-            selectedRows: tableView.selectedRows
+            contentHeight: Math.max(height, plot.minimumHeight)
+            clip: true
 
-            onPlotOptionsChanged: { root.saveRequired = true; }
+            QQC2.ScrollBar.vertical.policy: QQC2.ScrollBar.AsNeeded
 
-            onVisibleColumnAnnotationNamesChanged:
+            CorrelationPlot
             {
-                root.saveRequired = true;
+                id: plot
 
-                if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
-                    plot.colorGroupByAnnotationName = "";
-
-                if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
-                    groupByAnnotationAction.trigger();
-
-                updateMenu();
-            }
-
-            onColumnSortOrdersChanged: { root.saveRequired = true; }
-
-            elideLabelWidth:
-            {
-                let newHeight = height * 0.25;
-                let quant = 20;
-                let quantised = Math.floor(newHeight / quant) * quant;
-
-                if(quantised < 40)
-                    quantised = 0;
-
-                return quantised;
-            }
-
-            property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
-            onIqrStyleChanged: { updateMenu(); }
-
-            property bool scrollBarRequired: visibleHorizontalFraction < 1.0
-            xAxisPadding: Constants.padding + (scrollBarRequired ? scrollView.__horizontalScrollBar.height : 0)
-
-            horizontalScrollPosition:
-            {
-                return scrollView.flickableItem.contentX /
-                    (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
-            }
-
-            onRightClick:
-            {
-                if(plotContextMenu.enabled)
-                    plotContextMenu.popup();
-            }
-
-            property bool _timedBusy: false
-
-            Timer
-            {
-                id: busyIndicationTimer
-                interval: 250
-                repeat: false
-                onTriggered:
-                {
-                    if(plot.busy)
-                        plot._timedBusy = true;
-                }
-            }
-
-            onBusyChanged:
-            {
-                if(!plot.busy)
-                {
-                    busyIndicationTimer.stop();
-                    plot._timedBusy = false;
-                }
-                else
-                    busyIndicationTimer.start();
-            }
-
-            BusyIndicator
-            {
-                anchors.centerIn: parent
-                width: 64
-                height: 64
-
-                visible: plot._timedBusy
-            }
-
-            FloatingButton
-            {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.margins: 4
-                visible: plot.columnAnnotationSelectionModeEnabled
-                iconName: "emblem-unreadable"
-
-                onClicked:
-                {
-                    plot.columnAnnotationSelectionModeEnabled =
-                        selectColumnAnnotationsAction.checked = false;
-                }
-            }
-
-            ScrollView
-            {
-                id: scrollView
-                visible: plot.scrollBarRequired
-                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 anchors.fill: parent
-                frameVisible: true
 
-                contentItem: Item
+                model: plugin.model
+                selectedRows: tableView.selectedRows
+
+                onPlotOptionsChanged: { root.saveRequired = true; }
+
+                onVisibleColumnAnnotationNamesChanged:
                 {
-                    // This is a fake item to give the scrollbar the correct range
-                    // The maximum size is to prevent OpenGL texture overflow (2^14 pixels)
-                    width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
+                    root.saveRequired = true;
 
-                    // This needs to match the viewport height, otherwise the plot doesn't
-                    // get vertical mouse wheel events (see the conditions required for
-                    // QQuickWheelArea1::wheelEvent to call QWheelEvent::ignore())
-                    height: scrollView.viewport.height
+                    if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
+                        plot.colorGroupByAnnotationName = "";
+
+                    if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
+                        groupByAnnotationAction.trigger();
+
+                    updateMenu();
+                }
+
+                onColumnSortOrdersChanged: { root.saveRequired = true; }
+
+                elideLabelWidth:
+                {
+                    let newHeight = height * 0.25;
+                    let quant = 20;
+                    let quantised = Math.floor(newHeight / quant) * quant;
+
+                    if(quantised < 40)
+                        quantised = 0;
+
+                    return quantised;
+                }
+
+                property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
+                onIqrStyleChanged: { updateMenu(); }
+
+                property bool scrollBarRequired: visibleHorizontalFraction < 1.0
+                xAxisPadding: Constants.padding + (scrollBarRequired ? horizontalPlotScrollView.__horizontalScrollBar.height : 0)
+
+                horizontalScrollPosition:
+                {
+                    return horizontalPlotScrollView.flickableItem.contentX /
+                        (horizontalPlotScrollView.flickableItem.contentWidth - horizontalPlotScrollView.viewport.width);
+                }
+
+                onRightClick:
+                {
+                    if(plotContextMenu.enabled)
+                        plotContextMenu.popup();
+                }
+
+                property bool _timedBusy: false
+
+                Timer
+                {
+                    id: busyIndicationTimer
+                    interval: 250
+                    repeat: false
+                    onTriggered:
+                    {
+                        if(plot.busy)
+                            plot._timedBusy = true;
+                    }
+                }
+
+                onBusyChanged:
+                {
+                    if(!plot.busy)
+                    {
+                        busyIndicationTimer.stop();
+                        plot._timedBusy = false;
+                    }
+                    else
+                        busyIndicationTimer.start();
+                }
+
+                BusyIndicator
+                {
+                    anchors.centerIn: parent
+                    width: 64
+                    height: 64
+
+                    visible: plot._timedBusy
+                }
+
+                FloatingButton
+                {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+
+                    // Have the button move sync with scrolling, so it's always visible
+                    anchors.topMargin: 4 + verticalPlotScrollView.contentItem.contentY
+                    anchors.margins: 4
+
+                    visible: plot.columnAnnotationSelectionModeEnabled
+                    iconName: "emblem-unreadable"
+
+                    onClicked:
+                    {
+                        plot.columnAnnotationSelectionModeEnabled =
+                            selectColumnAnnotationsAction.checked = false;
+                    }
+                }
+
+                ScrollView
+                {
+                    id: horizontalPlotScrollView
+                    visible: plot.scrollBarRequired
+                    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                    anchors.fill: parent
+                    frameVisible: true
+
+                    contentItem: Item
+                    {
+                        // This is a fake item to give the scrollbar the correct range
+                        // The maximum size is to prevent OpenGL texture overflow (2^14 pixels)
+                        width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
+
+                        // This needs to match the viewport height, otherwise the plot doesn't
+                        // get vertical mouse wheel events (see the conditions required for
+                        // QQuickWheelArea1::wheelEvent to call QWheelEvent::ignore())
+                        height: horizontalPlotScrollView.viewport.height
+                    }
                 }
             }
         }
@@ -1059,6 +1056,6 @@ PluginContent
         }
         else
 
-        if(data.plotColumnSortOrders !== undefined)         plot.columnSortOrders = data.plotColumnSortOrders;
+        if(data.plotColumnSortOrders !== undefined)             plot.columnSortOrders = data.plotColumnSortOrders;
     }
 }

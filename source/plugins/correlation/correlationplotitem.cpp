@@ -359,6 +359,9 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::isWideChanged);
 
     connect(this, &CorrelationPlotItem::numVisibleColumnsChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
+
+    connect(this, &CorrelationPlotItem::visibleColumnAnnotationNamesChanged, this, &CorrelationPlotItem::minimumHeightChanged);
+    connect(this, &CorrelationPlotItem::columnAnnotationSelectionModeEnabledChanged, this, &CorrelationPlotItem::minimumHeightChanged);
 }
 
 CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
@@ -1084,6 +1087,11 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
     }
 }
 
+int CorrelationPlotItem::minimumHeight() const
+{
+    return 150 + columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
+}
+
 void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
 {
     _pluginInstance = pluginInstance;
@@ -1625,7 +1633,6 @@ void CorrelationPlotItem::configureAxisRects()
 void CorrelationPlotItem::updatePlotSize()
 {
     computeXAxisRange();
-    updateColumnAnnotationVisibility();
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 

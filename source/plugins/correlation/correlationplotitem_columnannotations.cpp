@@ -23,29 +23,6 @@
 
 #include "shared/utils/container.h"
 
-void CorrelationPlotItem::updateColumnAnnotationVisibility()
-{
-    auto mainPlotHeight = height() - columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
-    bool showColumnAnnotations = mainPlotHeight >= minimumHeight();
-
-    if(showColumnAnnotations != _showColumnAnnotations)
-    {
-        _showColumnAnnotations = showColumnAnnotations;
-
-        // If we can't show column annotations, we also can't be in selection mode
-        if(!_showColumnAnnotations)
-            setColumnAnnotationSelectionModeEnabled(false);
-
-        rebuildPlot();
-    }
-}
-
-bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
-{
-    auto mainPlotHeight = height() - columnAnnotaionsHeight(true);
-    return mainPlotHeight >= minimumHeight();
-}
-
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
 {
     auto* xAxis = axisRect->axis(QCPAxis::atBottom);
@@ -286,10 +263,6 @@ bool CorrelationPlotItem::columnAnnotationSelectionModeEnabled() const
 
 void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
 {
-    // Don't set it if we can't enter selection mode
-    if(enabled && !canShowColumnAnnotationSelection())
-        return;
-
     if(_columnAnnotationSelectionModeEnabled != enabled)
     {
         _columnAnnotationSelectionModeEnabled = enabled;
