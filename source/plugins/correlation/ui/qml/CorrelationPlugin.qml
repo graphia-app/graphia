@@ -329,7 +329,7 @@ PluginContent
         text: qsTr("Group By Annotation")
         iconName: "group-by"
 
-        enabled: plot.visibleColumnAnnotationNames.length > 0 || plot.columnAnnotationSelectionModeEnabled
+        enabled: plot.visibleColumnAnnotationNames.length > 0
         checkable: true
         checked: plot.groupByAnnotation
 
@@ -827,6 +827,9 @@ PluginContent
 
                 if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
                     plot.colorGroupByAnnotationName = "";
+
+                if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
+                    groupByAnnotationAction.trigger();
 
                 updateMenu();
             }
