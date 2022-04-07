@@ -2497,14 +2497,30 @@ void Document::update(QStringList newGraphTransforms,
         return _graphModel->graphTransformIsValid(transform);
     });
 
-    if(transformsValid && transformsDiffer(_graphTransforms, uiGraphTransforms))
+    if(transformsValid)
     {
-        commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
-            _graphModel.get(), _selectionManager.get(), this,
-            _graphTransforms, uiGraphTransforms));
+        if(transformsDiffer(_graphTransforms, uiGraphTransforms))
+        {
+            commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
+                _graphModel.get(), _selectionManager.get(), this,
+                _graphTransforms, uiGraphTransforms));
+        }
+        else
+        {
+            auto previousGraphTransforms = _graphTransforms;
+
+            commands.emplace_back(std::make_unique<Command>(
+                Command::CommandDescription
+                {
+                    QStringLiteral("Apply Transform Flags"),
+                    QStringLiteral("Applying Transform Flags")
+                },
+                [this, uiGraphTransforms](Command&)         { setTransforms(uiGraphTransforms); },
+                [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));
+        }
     }
     else
-        setTransforms(transformsValid ? uiGraphTransforms : _graphTransforms);
+        setTransforms(_graphTransforms);
 
     auto uiVisualisations = _visualisationsFromUI;
 
