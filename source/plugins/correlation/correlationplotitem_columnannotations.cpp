@@ -90,7 +90,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     auto* caXAxis = columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
     auto* caYAxis = columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
 
-    auto h = static_cast<int>(columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled));
+    auto h = static_cast<int>(columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled));
     columnAnnotationsAxisRect->setMinimumSize(0, h);
     columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 

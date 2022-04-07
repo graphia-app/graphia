@@ -397,7 +397,7 @@ private:
     double labelHeight() const;
     double minColumnWidth() const;
     double columnAxisWidth() const;
-    double columnAnnotaionsHeight(bool allAttributes) const;
+    double columnAnnotationsHeight(bool allAttributes) const;
 
     void createTooltip();
 

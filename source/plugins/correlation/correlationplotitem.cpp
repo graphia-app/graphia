@@ -1089,7 +1089,7 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
 
 int CorrelationPlotItem::minimumHeight() const
 {
-    return 150 + columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
+    return 150 + columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled);
 }
 
 void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
@@ -1517,7 +1517,7 @@ double CorrelationPlotItem::columnAxisWidth() const
     return width() - marginWidth;
 }
 
-double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
+double CorrelationPlotItem::columnAnnotationsHeight(bool allAttributes) const
 {
     if(allAttributes)
         return static_cast<double>(_pluginInstance->columnAnnotations().size()) * labelHeight();
