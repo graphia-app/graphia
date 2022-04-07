@@ -335,7 +335,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::heightChanged, [this]
     {
         QMetaObject::invokeMethod(_worker, "setHeight", Qt::QueuedConnection,
-            Q_ARG(int, std::max(static_cast<int>(height()), minimumHeight())));
+            Q_ARG(int, std::max(static_cast<int>(height()), static_cast<int>(minimumHeight()))));
     });
 
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
@@ -1087,9 +1087,9 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
     }
 }
 
-int CorrelationPlotItem::minimumHeight() const
+double CorrelationPlotItem::minimumHeight() const
 {
-    return 150 + columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled);
+    return 150.0 + columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled);
 }
 
 void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)

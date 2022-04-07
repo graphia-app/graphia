@@ -205,7 +205,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool zoomed READ zoomed NOTIFY zoomedChanged)
 
-    Q_PROPERTY(int minimumHeight READ minimumHeight NOTIFY minimumHeightChanged)
+    Q_PROPERTY(double minimumHeight READ minimumHeight NOTIFY minimumHeightChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -363,7 +363,7 @@ private:
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
     bool zoomed() const { return _worker != nullptr ? _worker->zoomed() : false; }
 
-    int minimumHeight() const;
+    double minimumHeight() const;
 
     void setPluginInstance(CorrelationPluginInstance* pluginInstance);
 
