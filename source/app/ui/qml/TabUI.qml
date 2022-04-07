@@ -2105,7 +2105,12 @@ Item
                     textFormat: Text.StyledText
                     text: qsTr("This concludes our brief introduction of ") + appName + qsTr(" using the London transport network!<br>") +
                           appName + qsTr(" can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
-                          "Utilising Transforms and Visualisations is key to getting the most from your graph.")
+                          "Utilising Transforms and Visualisations is key to getting the most from your graph.<br><br>" +
+                          "If you want to explore some more, please have a look at our ") +
+                          QmlUtils.redirectLink("example_datasets", qsTr("example datasets")) + qsTr(".")
+
+                    PointingCursorOnHoverLink {}
+                    onLinkActivated: { Qt.openUrlExternally(link); }
                 }
             }
         }

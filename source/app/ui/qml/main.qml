@@ -1933,6 +1933,13 @@ ApplicationWindow
 
     Action
     {
+        id: exampleDataSetsAction
+        text: qsTr("Example Datasets")
+        onTriggered: { Qt.openUrlExternally(QmlUtils.redirectUrl("example_datasets")); }
+    }
+
+    Action
+    {
         // A do nothing action that we use when there
         // is no other valid action available
         id: nullAction
@@ -2259,6 +2266,7 @@ ApplicationWindow
             title: qsTr("&Help")
 
             MenuItem { action: onlineHelpAction }
+            MenuItem { action: exampleDataSetsAction }
 
             MenuItem
             {
