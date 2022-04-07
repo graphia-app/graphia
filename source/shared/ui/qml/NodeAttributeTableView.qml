@@ -21,8 +21,6 @@ import QtQuick 2.14
 import QtQml 2.12
 import QtQuick.Controls 2.5 as QQC2
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Private 1.0 // StyleItem
-import QtGraphicalEffects 1.0
 import QtQml.Models 2.13
 import QtQuick.Shapes 1.13
 
@@ -522,35 +520,6 @@ Item
                     contentX = originX + (horizontalTableViewScrollBar.position * contentWidth);
                 }
 
-                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
-                {
-                    parent: horizontalScrollItem
-                    z: 100
-                    anchors.fill: parent
-                    id: horizontalTableViewScrollBar
-                    policy: QQC2.ScrollBar.AsNeeded
-                    contentItem: Rectangle
-                    {
-                        implicitHeight: 5
-                        radius: width / 2
-                        color: sysPalette.dark
-                    }
-                    onPositionChanged:
-                    {
-                        // Sometimes syncViews don't actually sync visibleAreas
-                        // however contentX and contentWidth are synced.
-                        // The only reliable way to position both views is using
-                        // the scrollbar position directly
-                        if(position + size > 1)
-                            position = 1 - size;
-                        if(position < 0)
-                            position = 0;
-                    }
-
-                    minimumSize: 0.1
-                    visible: (size < 1.0 && tableView.columns > 0) || columnSelectionMode
-                }
-
                 readonly property int sortIndicatorWidth: 7
                 readonly property int sortIndicatorHeight: 4
                 readonly property int sortIndicatorMargin: 3
@@ -890,16 +859,6 @@ Item
                 visible: tableView.columns !== 0
                 boundsBehavior: Flickable.StopAtBounds
 
-                layer
-                {
-                    enabled: columnSelectionMode
-                    effect: FastBlur
-                    {
-                        visible: columnSelectionMode
-                        radius: 32
-                    }
-                }
-
                 Canvas
                 {
                     id: backgroundCanvas
@@ -928,19 +887,32 @@ Item
                     }
                 }
 
+                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+                {
+                    id: horizontalTableViewScrollBar
+                    policy: QQC2.ScrollBar.AsNeeded
+                    minimumSize: 0.1
+                    visible: size < 1.0 // So that it's invisible to mouse clicks
+
+                    onPositionChanged:
+                    {
+                        // Sometimes syncViews don't actually sync visibleAreas
+                        // however contentX and contentWidth are synced.
+                        // The only reliable way to position both views is using
+                        // the scrollbar position directly
+                        if(position + size > 1)
+                            position = 1 - size;
+                        if(position < 0)
+                            position = 0;
+                    }
+                }
+
                 QQC2.ScrollBar.vertical: QQC2.ScrollBar
                 {
-                    z: 100
                     id: verticalTableViewScrollBar
                     policy: QQC2.ScrollBar.AsNeeded
-                    contentItem: Rectangle
-                    {
-                        implicitWidth: 5
-                        radius: width / 2
-                        color: sysPalette.dark
-                    }
                     minimumSize: 0.1
-                    visible: size < 1.0 && tableView.rows > 0
+                    visible: size < 1.0 // So that it's invisible to mouse clicks
                 }
 
                 model: TableProxyModel
@@ -1202,7 +1174,11 @@ Item
                 property int endRow: -1
                 property bool deselectDrag: false
                 anchors.fill: parent
-                anchors.rightMargin: verticalTableViewScrollBar.width
+
+                // Bottom/right margin otherwise clicks don't reach the scrollbars
+                anchors.bottomMargin: horizontalTableViewScrollBar.size < 1.0 ? horizontalTableViewScrollBar.height : 0
+                anchors.rightMargin: verticalTableViewScrollBar.size < 1.0 ? verticalTableViewScrollBar.width : 0
+
                 visible: !columnSelectionMode
 
                 cursorShape: tableView.hoveredLink.length > 0 ?
@@ -1325,8 +1301,9 @@ Item
 
                     // Clamp scrollbar to prevent overscrolling
                     // (scrollbar seems to be the only safe way)
-                    let scrollbarMax = 1.0 - verticalTableViewScrollBar.size;
-                    verticalTableViewScrollBar.position = Math.min(Math.max(verticalTableViewScrollBar.position, 0), scrollbarMax);
+                    verticalTableViewScrollBar.position = Utils.clamp(
+                        verticalTableViewScrollBar.position,
+                        0, 1.0 - verticalTableViewScrollBar.size);
 
                     selectionModel.clear();
                     if(modifier & Qt.ShiftModifier)
@@ -1343,14 +1320,6 @@ Item
                     }
                 }
             }
-        }
-
-        Item
-        {
-            id: horizontalScrollItem
-            height: 9
-            Layout.fillWidth: true
-            visible: horizontalTableViewScrollBar.size !== 1.0
         }
     }
 
