@@ -797,9 +797,9 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        QQC2.ScrollView
+        Flickable
         {
-            id: verticalPlotScrollView
+            id: plotFlickable
 
             Layout.fillWidth: true
             Layout.fillHeight: splitView.orientation !== Qt.Vertical
@@ -809,7 +809,7 @@ PluginContent
             contentHeight: Math.max(height, plot.minimumHeight)
             clip: true
 
-            QQC2.ScrollBar.vertical.policy: QQC2.ScrollBar.AsNeeded
+            QQC2.ScrollBar.vertical: QQC2.ScrollBar { policy: QQC2.ScrollBar.AsNeeded }
 
             CorrelationPlot
             {
@@ -852,14 +852,7 @@ PluginContent
                 property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
                 onIqrStyleChanged: { updateMenu(); }
 
-                property bool scrollBarRequired: visibleHorizontalFraction < 1.0
-                xAxisPadding: Constants.padding + (scrollBarRequired ? horizontalPlotScrollView.__horizontalScrollBar.height : 0)
-
-                horizontalScrollPosition:
-                {
-                    return horizontalPlotScrollView.flickableItem.contentX /
-                        (horizontalPlotScrollView.flickableItem.contentWidth - horizontalPlotScrollView.viewport.width);
-                }
+                horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
 
                 onRightClick:
                 {
@@ -907,7 +900,7 @@ PluginContent
                     anchors.top: parent.top
 
                     // Have the button move sync with scrolling, so it's always visible
-                    anchors.topMargin: 4 + verticalPlotScrollView.contentItem.contentY
+                    anchors.topMargin: 4 + plotFlickable.contentY
                     anchors.margins: 4
 
                     visible: plot.columnAnnotationSelectionModeEnabled
@@ -920,25 +913,21 @@ PluginContent
                     }
                 }
 
-                ScrollView
+                QQC2.ScrollBar
                 {
-                    id: horizontalPlotScrollView
-                    visible: plot.scrollBarRequired
-                    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                    anchors.fill: parent
-                    frameVisible: true
+                    id: horizontalPlotScrollBar
+                    parent: plotFlickable
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
 
-                    contentItem: Item
-                    {
-                        // This is a fake item to give the scrollbar the correct range
-                        // The maximum size is to prevent OpenGL texture overflow (2^14 pixels)
-                        width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
+                    policy: plot.visibleHorizontalFraction < 1.0 ?
+                        QQC2.ScrollBar.AsNeeded : QQC2.ScrollBar.AlwaysOff
 
-                        // This needs to match the viewport height, otherwise the plot doesn't
-                        // get vertical mouse wheel events (see the conditions required for
-                        // QQuickWheelArea1::wheelEvent to call QWheelEvent::ignore())
-                        height: horizontalPlotScrollView.viewport.height
-                    }
+                    hoverEnabled: true
+                    active: hovered || pressed
+                    orientation: Qt.Horizontal
+                    size: plot.visibleHorizontalFraction
                 }
             }
         }

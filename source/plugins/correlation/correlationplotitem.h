@@ -197,7 +197,6 @@ class CorrelationPlotItem : public QQuickPaintedItem
         WRITE setColumnSortOrders NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int xAxisPadding MEMBER _xAxisPadding WRITE setXAxisPadding NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showIqrOutliers MEMBER _showIqrOutliers WRITE setShowIqrOutliers NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showAllColumns MEMBER _showAllColumns WRITE setShowAllColumns NOTIFY plotOptionsChanged)
@@ -312,7 +311,6 @@ private:
     bool _includeYZero = false;
     bool _showIqrOutliers = true;
     bool _showAllColumns = false;
-    int _xAxisPadding = 0;
 
     std::vector<size_t> _sortMap;
 
@@ -376,7 +374,6 @@ private:
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
-    void setXAxisPadding(int padding);
 
     bool updateSortMap();
     void setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders); // clazy:exclude=qproperty-type-mismatch

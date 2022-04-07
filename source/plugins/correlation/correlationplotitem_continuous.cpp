@@ -822,8 +822,6 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
         xAxis->setTicker(categoryTicker);
     }
-
-    xAxis->setPadding(_xAxisLabel.isEmpty() ? _xAxisPadding : 0);
 }
 
 bool CorrelationPlotItem::continuousTooltip(const QCPAxisRect* axisRect,

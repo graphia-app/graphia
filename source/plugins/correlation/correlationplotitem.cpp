@@ -815,7 +815,7 @@ void CorrelationPlotItem::configureLegend()
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
-    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize + _xAxisPadding));
+    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize));
 
     // BIGGEST HACK
     // Layouts and sizes aren't done until a replot, and layout is performed on another
@@ -1165,15 +1165,6 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
         _horizontalScrollPosition = newHorizontalScrollPosition;
         computeXAxisRange();
         updatePixmap(CorrelationPlotUpdateType::Render);
-    }
-}
-
-void CorrelationPlotItem::setXAxisPadding(int padding)
-{
-    if(_xAxisPadding != padding)
-    {
-        _xAxisPadding = padding;
-        rebuildPlot();
     }
 }
 
@@ -1617,7 +1608,6 @@ void CorrelationPlotItem::configureAxisRects()
         }
 
         _xAxisLabelTextElement->setText(xAxisLabel);
-        _xAxisLabelTextElement->setMargins({0, 0, 0, _xAxisPadding});
     }
     else if(_xAxisLabelTextElement != nullptr)
     {
