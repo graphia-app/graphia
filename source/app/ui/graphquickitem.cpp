@@ -54,7 +54,12 @@ void GraphQuickItem::initialise(GraphModel* graphModel,
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::graphChanged);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this] { updateVisibleComponentIndex(); });
+
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::metricsChanged);
+    connect(this, &GraphQuickItem::focusedComponentIdChanged, this, &GraphQuickItem::metricsChanged);
+
     emit graphChanged();
+    emit metricsChanged();
 
     // Force an initial update; this will usually occur anyway for other reasons,
     // but it can't hurt to do it unconditionally too
@@ -375,7 +380,11 @@ void GraphQuickItem::wheelEvent(QWheelEvent* e)             { enqueueEvent(e); }
 int GraphQuickItem::numNodes() const
 {
     if(_graphModel != nullptr)
-        return _graphModel->graph().numNodes();
+    {
+        return !_focusedComponentId.isNull() ?
+            _graphModel->graph().componentById(_focusedComponentId)->numNodes() :
+            _graphModel->graph().numNodes();
+    }
 
     return -1;
 }
@@ -384,7 +393,9 @@ int GraphQuickItem::numVisibleNodes() const
 {
     if(_graphModel != nullptr)
     {
-        const auto& nodeIds = _graphModel->graph().nodeIds();
+        const auto& nodeIds = !_focusedComponentId.isNull() ?
+            _graphModel->graph().componentById(_focusedComponentId)->nodeIds() :
+            _graphModel->graph().nodeIds();
 
         return std::count_if(nodeIds.begin(), nodeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](NodeId nodeId)
@@ -399,7 +410,11 @@ int GraphQuickItem::numVisibleNodes() const
 int GraphQuickItem::numEdges() const
 {
     if(_graphModel != nullptr)
-        return _graphModel->graph().numEdges();
+    {
+        return !_focusedComponentId.isNull() ?
+            _graphModel->graph().componentById(_focusedComponentId)->numEdges() :
+            _graphModel->graph().numEdges();
+    }
 
     return -1;
 }
@@ -408,7 +423,9 @@ int GraphQuickItem::numVisibleEdges() const
 {
     if(_graphModel != nullptr)
     {
-        const auto& edgeIds = _graphModel->graph().edgeIds();
+        const auto& edgeIds = !_focusedComponentId.isNull() ?
+            _graphModel->graph().componentById(_focusedComponentId)->edgeIds() :
+            _graphModel->graph().edgeIds();
 
         return std::count_if(edgeIds.begin(), edgeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](EdgeId edgeId)

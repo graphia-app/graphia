@@ -52,11 +52,11 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
     Q_PROPERTY(bool inOverviewMode MEMBER _inOverviewMode NOTIFY inOverviewModeChanged)
 
-    Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
-    Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY graphChanged)
-    Q_PROPERTY(int numEdges READ numEdges NOTIFY graphChanged)
-    Q_PROPERTY(int numVisibleEdges READ numVisibleEdges NOTIFY graphChanged)
-    Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
+    Q_PROPERTY(int numNodes READ numNodes NOTIFY metricsChanged)
+    Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY metricsChanged)
+    Q_PROPERTY(int numEdges READ numEdges NOTIFY metricsChanged)
+    Q_PROPERTY(int numVisibleEdges READ numVisibleEdges NOTIFY metricsChanged)
+    Q_PROPERTY(int numComponents READ numComponents NOTIFY metricsChanged)
 
     Q_PROPERTY(int visibleComponentIndex MEMBER _visibleComponentIndex NOTIFY visibleComponentIndexChanged)
 
@@ -211,6 +211,7 @@ signals:
     void previewComplete(QString previewBase64);
 
     void graphChanged();
+    void metricsChanged();
 
     void fpsChanged();
 

@@ -998,12 +998,14 @@ Item
 
                     Label
                     {
+                        visible: !graph._inComponentMode
                         color: _document.contrastingColor
                         text: qsTr("Components:")
                     }
 
                     Label
                     {
+                        visible: !graph._inComponentMode
                         color: _document.contrastingColor
                         Layout.alignment: Qt.AlignRight
                         text:
