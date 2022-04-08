@@ -82,6 +82,32 @@ Item
     property var model: null
     property string displayRole: "display"
 
+    property var highlightedProvider: function(row)
+    {
+        return root._selectedIndices.indexOf(row) !== -1;
+    }
+
+    property Component delegate: Label
+    {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: -leftInset
+        leftInset: -8
+
+        property var highlightColor: root.highlightedProvider(index) ?
+            systemPalette.highlight : "transparent"
+
+        background: Rectangle { color: parent.highlightColor }
+
+        text: model[root.displayRole] ?
+            model[root.displayRole] : modelData
+
+        color: QmlUtils.contrastingColor(highlightColor)
+        elide: Text.ElideRight
+        renderType: Text.NativeRendering
+    }
+
+
     property var _selectedIndices: []
     property int _lastSelectedIndex: -1
 
@@ -130,40 +156,7 @@ Item
             anchors.fill: parent
             model: root.model
 
-            delegate: Rectangle
-            {
-                width: parent.width
-                height: label.implicitHeight
-
-                color:
-                {
-                    if(root._selectedIndices.indexOf(index) !== -1)
-                        return systemPalette.highlight;
-
-                    return "transparent";
-                }
-
-                Label
-                {
-                    id: label
-
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: 8
-
-                    text:
-                    {
-                        if(model[root.displayRole])
-                            return model[root.displayRole];
-
-                        return modelData;
-                    }
-
-                    color: QmlUtils.contrastingColor(parent.color)
-                    elide: Text.ElideRight
-                    renderType: Text.NativeRendering
-                }
-            }
+            delegate: root.delegate
 
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar { policy: Qt.ScrollBarAsNeeded }
