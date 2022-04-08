@@ -153,7 +153,7 @@ void GraphComponentRenderer::restoreViewData()
     _viewData._autoZooming = _savedViewData._autoZooming;
     _viewData._focusNodeId = _savedViewData._focusNodeId;
 
-    Q_ASSERT(u::contains(_nodeIds, _viewData._focusNodeId));
+    Q_ASSERT(_viewData._focusNodeId.isNull() || u::contains(_nodeIds, _viewData._focusNodeId));
 
     updateCentreAndZoomDistance();
     updateCameraProjection(_viewData.camera());
