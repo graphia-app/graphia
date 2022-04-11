@@ -82,9 +82,9 @@ Item
     property var model: null
     property string displayRole: "display"
 
-    property var highlightedProvider: function(row)
+    property var highlightedProvider: function(index)
     {
-        return root._selectedIndices.indexOf(row) !== -1;
+        return root._selectedIndices.indexOf(index) !== -1;
     }
 
     property Component delegate: Label
@@ -309,7 +309,7 @@ Item
 
     signal accepted()
 
-    signal clicked(var row)
-    signal doubleClicked(var row)
+    signal clicked(var index)
+    signal doubleClicked(var index)
 }
 
