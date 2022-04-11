@@ -59,11 +59,12 @@ else()
     set_target_properties(thirdparty_static PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
-find_package(Qt5 COMPONENTS Core Qml Quick Network Widgets PrintSupport REQUIRED)
+find_package(Qt5 COMPONENTS Core Qml Quick QuickControls2 Network Widgets PrintSupport REQUIRED)
 target_link_libraries(thirdparty
     Qt5::Core
     Qt5::Qml
     Qt5::Quick
+    Qt5::QuickControls2
     Qt5::Network
     Qt5::Widgets
     Qt5::PrintSupport

@@ -21,6 +21,7 @@
 #include <QQmlEngine>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
+#include <QQuickStyle>
 #include <QtGlobal>
 #include <QIcon>
 #include <QMessageBox>
@@ -264,6 +265,11 @@ int start(int argc, char *argv[])
     QApplication::setWindowIcon(mainIcon);
 
     QIcon::setThemeName(QStringLiteral("Tango"));
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#error Update this to handle native themes
+#endif
+    QQuickStyle::setStyle(QStringLiteral("Fusion"));
 
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context

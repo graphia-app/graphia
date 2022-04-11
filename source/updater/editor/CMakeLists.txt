@@ -26,10 +26,11 @@ else()
     add_executable(UpdateEditor ${SOURCES} ${HEADERS} ${RESOURCES})
 endif()
 
-find_package(Qt5 COMPONENTS Qml Quick Xml Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Qml Quick QuickControls2 Xml Widgets REQUIRED)
 target_link_libraries(UpdateEditor
     Qt5::Qml
     Qt5::Quick
+    Qt5::QuickControls2
     Qt5::Xml
     Qt5::Widgets
 )
