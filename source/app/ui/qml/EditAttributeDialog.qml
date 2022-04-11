@@ -16,8 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick.Controls 1.5
-import QtQuick.Controls 2.5 as QQC2
+import QtQuick.Controls 2.12
 import QtQuick 2.14
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
@@ -542,11 +541,11 @@ Window
                     Layout.fillHeight: true
                     Layout.fillWidth: true
 
-                    QQC2.ScrollBar.vertical: QQC2.ScrollBar
+                    ScrollBar.vertical: ScrollBar
                     {
                         z: 100
                         id: verticalTableViewScrollBar
-                        policy: QQC2.ScrollBar.AsNeeded
+                        policy: ScrollBar.AsNeeded
                         contentItem: Rectangle
                         {
                             implicitWidth: 5
