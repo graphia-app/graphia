@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
@@ -38,6 +38,8 @@ Window
 
     minimumWidth: 500
     minimumHeight: 200
+
+    SystemPalette { id: systemPalette }
 
     RowLayout
     {
@@ -85,19 +87,34 @@ Window
                 }
             }
 
-            TextArea
+            ScrollView
             {
-                id: licenseTextArea
-                visible: false
-                readOnly: true
-
-                textFormat: Text.RichText
+                id: scrollView
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                PointingCursorOnHoverLink {}
-                onLinkActivated: Qt.openUrlExternally(link);
+                TextArea
+                {
+                    id: licenseTextArea
+                    visible: false
+                    readOnly: true
+
+                    textFormat: TextEdit.RichText
+                    wrapMode: TextEdit.Wrap
+
+                    PointingCursorOnHoverLink {}
+                    onLinkActivated: Qt.openUrlExternally(link);
+                }
+
+                background: Rectangle
+                {
+                    visible: licenseTextArea.visible
+
+                    color: "white"
+                    border.width: 1
+                    border.color: systemPalette.dark
+                }
             }
 
             Button
