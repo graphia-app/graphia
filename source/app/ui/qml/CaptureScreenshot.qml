@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import Qt.labs.platform 1.0 as Labs
@@ -272,9 +272,9 @@ Window
                     SpinBox
                     {
                         id: pixelWidthSpin
-                        maximumValue: 99999
-                        minimumValue: 1
-                        suffix: "px"
+                        to: 99999
+                        from: 1
+                        textFromValue: function(value, locale) { return qsTr("%1px").arg(value); }
                         onValueChanged:
                         {
                             if(lockAspect.checked)
@@ -296,9 +296,9 @@ Window
                     SpinBox
                     {
                         id: pixelHeightSpin
-                        maximumValue: 99999
-                        minimumValue: 1
-                        suffix: "px"
+                        to: 99999
+                        from: 1
+                        textFromValue: function(value, locale) { return qsTr("%1px").arg(value); }
                         onValueChanged:
                         {
                             if(lockAspect.checked)
@@ -331,8 +331,8 @@ Window
                     SpinBox
                     {
                         id: dpiSpin
-                        maximumValue: 9999
-                        minimumValue: 1
+                        to: 9999
+                        from: 1
                         onValueChanged:
                         {
                             let lockAspectWasChecked = lockAspect.checked;
@@ -346,9 +346,9 @@ Window
                     SpinBox
                     {
                         id: printWidthSpin
-                        maximumValue: 99999
-                        minimumValue: 1
-                        suffix: "mm"
+                        to: 99999
+                        from: 1
+                        textFromValue: function(value, locale) { return qsTr("%1mm").arg(value); }
                         onValueChanged:
                         {
                             // Prevent binding loops + losing value precision
@@ -362,9 +362,9 @@ Window
                     SpinBox
                     {
                         id: printHeightSpin
-                        maximumValue: 99999
-                        minimumValue: 1
-                        suffix: "mm"
+                        to: 99999
+                        from: 1
+                        textFromValue: function(value, locale) { return qsTr("%1mm").arg(value); }
                         onValueChanged:
                         {
                             let pixelPrintSize = Math.round((pixelHeightSpin.value / dpiSpin.value) / _MMTOINCH);
@@ -373,31 +373,27 @@ Window
                         }
                     }
 
-                    ExclusiveGroup
+                    RadioButton
                     {
-                        id: fitGroup
-                        onCurrentChanged:
+                        id: fillSize
+                        text: "Fill Size"
+                        Layout.row: 6
+                        Layout.column: 1
+
+                        checked: true
+                        onCheckedChanged:
                         {
                             preview.visible = false;
                             requestPreview();
                         }
                     }
-                    RadioButton
-                    {
-                        id: fillSize
-                        text: "Fill Size"
-                        exclusiveGroup: fitGroup
-                        Layout.row: 6
-                        Layout.column: 1
-                        checked: true
-                    }
+
                     RadioButton
                     {
                         id: fitSize
                         text: "Fit Size"
                         Layout.row: 7
                         Layout.column: 1
-                        exclusiveGroup: fitGroup
                     }
                 }
             }
@@ -494,6 +490,7 @@ Window
         if(visible)
         {
             presetsListModel.update();
+            presets.currentIndex = 0;
 
             aspectRatio = screenshot.width / screenshot.height;
             pixelWidthSpin.value = screenshot.width;
