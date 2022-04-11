@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
@@ -26,6 +26,8 @@ import QtQuick.Controls.Styles 1.4
 import "../../../shared/ui/qml/Constants.js" as Constants
 
 import "Controls"
+
+import app.graphia 1.0
 
 Window
 {
@@ -36,138 +38,91 @@ Window
     title: qsTr("Manage Bookmarks")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
-    width: 320
+    width: 360
     height: 240
-    minimumWidth: 320
+    minimumWidth: 360
     minimumHeight: 240
+
+    SystemPalette { id: systemPalette }
 
     ColumnLayout
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TableView
+        ListBox
         {
-            id: tableView
+            id: listBox
 
-            implicitWidth: 192
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            property var currentItem:
+            allowMultipleSelection: true
+
+            model: document !== null ? document.bookmarks : null
+
+            delegate: Item
             {
-                // This is gigantic hack that delves deep in TableView in order to get the
-                // currently selected item
-                if(!__currentRowItem)
-                    return null;
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                let item = __currentRowItem.rowItem; // FocusScope (id: rowitem)
-                if(!item)
-                    return null;
+                implicitHeight: label.height
 
-                item = item.children[1]; // Row (id: itemrow)
-                if(!item)
-                    return null;
-
-                let columnIndex = 0;
-                item = item.children[columnIndex]; // Repeater.delegate (TableView.__itemDelegateLoader)
-                if(!item)
-                    return null;
-
-                item = item.item;
-                return item;
-            }
-
-            TableViewColumn { role: "name" }
-            headerDelegate: Item {}
-
-            itemDelegate: Item
-            {
-                id: item
-
-                height: Math.max(16, label.implicitHeight)
-                property int implicitWidth: label.implicitWidth + 16
-
-                Text
+                Label
                 {
                     id: label
                     visible: !editField.visible
 
-                    objectName: "label"
-                    width: parent.width
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                        horizontalAlignment === Text.AlignRight ? 1 : 8
-                    anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                         || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                    horizontalAlignment: styleData.textAlignment
-                    anchors.verticalCenter: parent.verticalCenter
-                    elide: styleData.elideMode
+                    anchors.leftMargin: -leftInset
+                    leftInset: -8
 
-                    text: styleData.value
+                    property var highlightColor: listBox.highlightedProvider(index) ?
+                        systemPalette.highlight : "transparent"
 
-                    color: styleData.textColor
+                    background: Rectangle { color: parent.highlightColor }
+
+                    text: modelData
+
+                    color: QmlUtils.contrastingColor(highlightColor)
+                    elide: Text.ElideRight
                     renderType: Text.NativeRendering
-
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onPressed:
-                        {
-                            if(!(mouse.modifiers & Qt.ControlModifier))
-                                tableView.selection.clear();
-
-                            if((mouse.modifiers & Qt.ShiftModifier) && tableView.currentRow !== -1)
-                            {
-                                for(let i = tableView.currentRow; i < styleData.row; i++)
-                                    tableView.selection.select(i);
-                            }
-
-                            tableView.selection.select(styleData.row);
-                            tableView.currentRow = styleData.row;
-                        }
-
-                        onDoubleClicked: { item.startEditing(); }
-                    }
                 }
 
                 TextField
                 {
                     id: editField
                     visible: false
+
                     anchors.fill: label
+                    padding: 0
+                    background: Item {}
+                    renderType: Text.NativeRendering
 
-                    style: TextFieldStyle
-                    {
-                        padding.left: 0; padding.right: 0
-                        padding.top: 0; padding.bottom: 0
-                        background: Rectangle { color: "transparent" }
-                    }
-
-                    onAccepted: { _finishEditing(); }
+                    onAccepted: { finish(); }
 
                     onActiveFocusChanged:
                     {
                         if(!activeFocus)
-                            _finishEditing();
+                            finish();
                     }
 
-                    function _finishEditing()
+                    function finish()
                     {
                         if(editField.visible)
                         {
                             editField.visible = false;
 
                             if(editField.text !== label.text)
-                                tableView.rowRenamed(label.text, editField.text);
+                                listBox.rowRenamed(label.text, editField.text);
                         }
                     }
                 }
 
-                function startEditing()
+                function edit()
                 {
-                    tableView.selection.clear();
+                    listBox.clearSelection();
 
                     editField.text = label.text;
                     editField.selectAll();
@@ -176,14 +131,17 @@ Window
                 }
             }
 
-            model: document !== null ? document.bookmarks : null
+            function edit(index)
+            {
+                let item = itemAt(index);
+                if(item !== null)
+                    item.edit();
+            }
+
+            onDoubleClicked: { edit(index); }
 
             signal rowRenamed(string from, string to)
-
-            onRowRenamed:
-            {
-                document.renameBookmark(from, to);
-            }
+            onRowRenamed: { document.renameBookmark(from, to); }
         }
 
         RowLayout
@@ -193,24 +151,19 @@ Window
             Button
             {
                 text: qsTr("Rename")
-                enabled: tableView.selection.count > 0
-                onClicked:
-                {
-                    tableView.currentItem.startEditing();
-                }
+                enabled: listBox.selectedIndex >= 0
+                onClicked: { listBox.edit(listBox.selectedIndex); }
             }
 
             Button
             {
                 text: qsTr("Remove")
-                enabled: tableView.selection.count > 0
+                enabled: listBox.selectedIndex >= 0
                 onClicked:
                 {
                     let names = [];
-                    tableView.selection.forEach(function(rowIndex)
-                    {
-                        names.push(document.bookmarks[rowIndex]);
-                    });
+                    for(const index of listBox.selectedIndices)
+                        names.push(document.bookmarks[index]);
 
                     document.removeBookmarks(names);
                 }
