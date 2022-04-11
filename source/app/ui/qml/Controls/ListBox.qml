@@ -151,6 +151,8 @@ Item
 
         ListView
         {
+            id: listView
+
             anchors.margins: 1
 
             anchors.fill: parent
@@ -306,6 +308,8 @@ Item
 
         root._selectedIndices = [...Array(root.count).keys()];
     }
+
+    function itemAt(index) { return listView.itemAtIndex(index); }
 
     signal accepted()
 
