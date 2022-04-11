@@ -294,7 +294,7 @@ Item
         }
     }
 
-    function clear() { root._selectedIndices = []; }
+    function clearSelection() { root._selectedIndices = []; }
     function select(index) { root._selectedIndices = [index]; }
     function selectAll()
     {

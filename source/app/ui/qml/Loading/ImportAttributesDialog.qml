@@ -440,7 +440,7 @@ Window
                         Action
                         {
                             id: selectNoneAction
-                            onTriggered: { headersList.clear(); }
+                            onTriggered: { headersList.clearSelection(); }
                             shortcut: "Ctrl+N"
                         }
                     }
