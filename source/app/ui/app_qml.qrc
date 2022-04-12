@@ -25,7 +25,7 @@
         <file>qml/Controls/PaletteSelector.qml</file>
         <file>qml/Controls/PointingCursorOnHoverLink.qml</file>
         <file>qml/Controls/ToolBarSeparator.qml</file>
-        <file>qml/Controls/ToolTip.qml</file>
+        <file>qml/Controls/ToolTipHack.qml</file>
         <file>qml/Controls/TransformListSortMenu.qml</file>
         <file>qml/Controls/TreeBox.qml</file>
         <file>qml/Controls/TreeBoxSearch.qml</file>

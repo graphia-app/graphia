@@ -45,7 +45,7 @@ Item
             }
         }
 
-        ToolTip { text: root.text }
+        ToolTipHack { text: root.text }
     }
 
 }

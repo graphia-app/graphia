@@ -47,7 +47,7 @@ RowLayout
             onDoubleClicked: { root.reset(); }
         }
 
-        ToolTip { text: root.description }
+        ToolTipHack { text: root.description }
     }
 
     Item { Layout.fillWidth: true }
