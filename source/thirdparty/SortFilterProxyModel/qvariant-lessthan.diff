@@ -1,0 +1,182 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3d3bf2b..7b4e1f9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,6 +12,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON) # This is to find generated *.moc and *.h file
+ 
+ add_library(SortFilterProxyModel OBJECT
+     qqmlsortfilterproxymodel.cpp
++    qvariantlessthan.cpp
+     filters/filter.cpp
+     filters/filtercontainer.cpp
+     filters/rolefilter.cpp
+diff --git a/SortFilterProxyModel.pri b/SortFilterProxyModel.pri
+index 22f7a83..c5c5dd4 100644
+--- a/SortFilterProxyModel.pri
++++ b/SortFilterProxyModel.pri
+@@ -3,6 +3,7 @@
+ INCLUDEPATH += $$PWD
+ 
+ HEADERS += $$PWD/qqmlsortfilterproxymodel.h \
++    $$PWD/qvariantlessthan.h \
+     $$PWD/filters/filter.h \
+     $$PWD/filters/filtercontainer.h \
+     $$PWD/filters/rolefilter.h \
+@@ -30,6 +31,7 @@ HEADERS += $$PWD/qqmlsortfilterproxymodel.h \
+     $$PWD/proxyroles/filterrole.h
+ 
+ SOURCES += $$PWD/qqmlsortfilterproxymodel.cpp \
++    $$PWD/qvariantlessthan.cpp \
+     $$PWD/filters/filter.cpp \
+     $$PWD/filters/filtercontainer.cpp \
+     $$PWD/filters/rolefilter.cpp \
+diff --git a/filters/rangefilter.cpp b/filters/rangefilter.cpp
+index 2a6fde2..ce683a5 100644
+--- a/filters/rangefilter.cpp
++++ b/filters/rangefilter.cpp
+@@ -1,4 +1,5 @@
+ #include "rangefilter.h"
++#include "qvariantlessthan.h"
+ 
+ namespace qqsfpm {
+ 
+@@ -130,9 +131,11 @@ bool RangeFilter::filterRow(const QModelIndex& sourceIndex, const QQmlSortFilter
+ {
+     QVariant value = sourceData(sourceIndex, proxyModel);
+     bool lessThanMin = m_minimumValue.isValid() &&
+-            (m_minimumInclusive ? value < m_minimumValue : value <= m_minimumValue);
++            (m_minimumInclusive ? qqsfpm::lessThan(value, m_minimumValue)
++                                : !qqsfpm::lessThan(m_minimumValue, value));
+     bool moreThanMax = m_maximumValue.isValid() &&
+-            (m_maximumInclusive ? value > m_maximumValue : value >= m_maximumValue);
++            (m_maximumInclusive ? qqsfpm::lessThan(m_maximumValue, value)
++                                : !qqsfpm::lessThan(value, m_maximumValue));
+     return !(lessThanMin || moreThanMax);
+ }
+ 
+diff --git a/qvariantlessthan.cpp b/qvariantlessthan.cpp
+new file mode 100644
+index 0000000..d93b6fe
+--- /dev/null
++++ b/qvariantlessthan.cpp
+@@ -0,0 +1,79 @@
++#include "qvariantlessthan.h"
++
++#include <QDateTime>
++
++namespace qqsfpm {
++
++/*!
++    \brief Less-than operator for generic QVariants
++
++    Since Qt 5.15 deprecated the less-than operator of QVariant, we
++    have to provide our own implementation. On older Qt versions,
++    use the original implementation.
++
++    Includes special implementations for numberic types, char, date and
++    time. Everything else is converted to String and compared then.
++*/
++bool lessThan(const QVariant &lhs, const QVariant &rhs)
++{
++#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
++    return lhs < rhs;
++#else
++    static const auto numericTypes = QVector<QMetaType::Type>{
++        QMetaType::Int,
++        QMetaType::UInt,
++        QMetaType::LongLong,
++        QMetaType::ULongLong,
++        QMetaType::Float,
++        QMetaType::Double,
++    };
++    static const auto unsignedTypes = QVector<QMetaType::Type>{
++        QMetaType::UInt,
++        QMetaType::ULongLong,
++    };
++    static const auto dateTimeTypes = QVector<QMetaType::Type>{
++        QMetaType::QDate,
++        QMetaType::QTime,
++        QMetaType::QDateTime,
++    };
++
++    const auto lt = static_cast<QMetaType::Type>(lhs.type());
++    const auto rt = static_cast<QMetaType::Type>(rhs.type());
++    if (numericTypes.contains(lt) && numericTypes.contains(rt)) {
++        if (lt == QMetaType::Double || lt == QMetaType::Float
++                || rt == QMetaType::Double || rt == QMetaType::Float) {
++            return lhs.toDouble() < rhs.toDouble();
++        } else {
++            const auto ul = unsignedTypes.contains(lt);
++            const auto ur = unsignedTypes.contains(rt);
++            if (ul && ur) {
++                return lhs.toULongLong() < rhs.toULongLong();
++            } else if (!ul && !ur) {
++                return lhs.toLongLong() < rhs.toLongLong();
++            } else if (ul) {
++                const auto r = rhs.toLongLong();
++                return r > 0 &&
++                    lhs.toULongLong() < static_cast<unsigned long long>(r);
++            } else {
++                const auto l = lhs.toLongLong();
++                return l < 0 ||
++                    static_cast<unsigned long long>(l) < rhs.toULongLong();
++            }
++        }
++    } else if (dateTimeTypes.contains(lt) && dateTimeTypes.contains(rt)) {
++        if (lt == QMetaType::QDate && rt == QMetaType::QDate) {
++            return lhs.toDate() < rhs.toDate();
++        } else if (lt == QMetaType::QTime && rt == QMetaType::QTime) {
++            return lhs.toTime() < rhs.toTime();
++        } else {
++            return lhs.toDateTime() < rhs.toDateTime();
++        }
++    } else if (lt == QMetaType::Char && rt == QMetaType::Char) {
++        return lhs.toChar() < rhs.toChar();
++    } else {
++        return lhs.toString() < rhs.toString();
++    }
++#endif
++}
++
++} // namespace qqsfpm
+diff --git a/qvariantlessthan.h b/qvariantlessthan.h
+new file mode 100644
+index 0000000..6f6a572
+--- /dev/null
++++ b/qvariantlessthan.h
+@@ -0,0 +1,12 @@
++#ifndef QVARIANTLESSTHAN_H
++#define QVARIANTLESSTHAN_H
++
++#include <QVariant>
++
++namespace qqsfpm {
++
++bool lessThan(const QVariant &lhs, const QVariant &rhs);
++
++} // namespace qqsfpm
++
++#endif // QVARIANTLESSTHAN_H
+diff --git a/sorters/rolesorter.cpp b/sorters/rolesorter.cpp
+index db2d446..4f6b2c3 100644
+--- a/sorters/rolesorter.cpp
++++ b/sorters/rolesorter.cpp
+@@ -1,5 +1,6 @@
+ #include "rolesorter.h"
+ #include "qqmlsortfilterproxymodel.h"
++#include "qvariantlessthan.h"
+ 
+ namespace qqsfpm {
+ 
+@@ -59,9 +60,9 @@ int RoleSorter::compare(const QModelIndex &sourceLeft, const QModelIndex& source
+     QPair<QVariant, QVariant> pair = sourceData(sourceLeft, sourceRight, proxyModel);
+     QVariant leftValue = pair.first;
+     QVariant rightValue = pair.second;
+-    if (leftValue < rightValue)
++    if (qqsfpm::lessThan(leftValue, rightValue))
+         return -1;
+-    if (leftValue > rightValue)
++    if (qqsfpm::lessThan(rightValue, leftValue))
+         return 1;
+     return 0;
+ }

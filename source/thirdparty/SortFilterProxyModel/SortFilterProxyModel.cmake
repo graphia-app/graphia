@@ -2,6 +2,8 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 list(APPEND SHARED_THIRDPARTY_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/qqmlsortfilterproxymodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/qvariantlessthan.h
+
     ${CMAKE_CURRENT_LIST_DIR}/filters/alloffilter.h
     ${CMAKE_CURRENT_LIST_DIR}/filters/anyoffilter.h
     ${CMAKE_CURRENT_LIST_DIR}/filters/expressionfilter.h
@@ -33,6 +35,8 @@ list(APPEND SHARED_THIRDPARTY_HEADERS
 
 list(APPEND SHARED_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/qqmlsortfilterproxymodel.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/qvariantlessthan.cpp
+
     ${CMAKE_CURRENT_LIST_DIR}/filters/alloffilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/filters/anyoffilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/filters/expressionfilter.cpp
