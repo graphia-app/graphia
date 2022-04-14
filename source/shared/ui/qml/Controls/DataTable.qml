@@ -157,22 +157,20 @@ Rectangle
         root._columnWidths = new Array(root.model.columnCount()).fill(undefined);
     }
 
-    onModelChanged:
+    function _onModelChanged()
     {
         root._resetColumnWidths();
         root._resetLoadedCells();
     }
+
+    onModelChanged: { _onModelChanged(); }
 
     Connections
     {
         target: root.model
 
         // If the underlying data model has been reset, the column widths also need to be reset
-        function onModelReset()
-        {
-            root._resetColumnWidths();
-            root._resetLoadedCells();
-        }
+        function onModelReset() { _onModelChanged(); }
     }
 
     SystemPalette { id: systemPalette }
