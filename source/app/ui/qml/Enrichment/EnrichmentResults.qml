@@ -18,7 +18,7 @@
 
 import QtQuick 2.0
 import QtQuick.Window 2.3
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.3
 import SortFilterProxyModel 0.2
@@ -35,30 +35,16 @@ ApplicationWindow
     property var models
     property var wizard
 
-    property var currentTable: null
-    property var currentHeatmap: null
+    property var _currentModel:
+    {
+        let m = models[tabBar.currentIndex];
+        return m ? m : null;
+    }
+
+    property bool _resultsAvailable: root.models.length > 0
 
     onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
     onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
-
-    function updateCurrent()
-    {
-        let tab = tabView.getTab(tabView.currentIndex);
-        if(!tab)
-            return;
-
-        let item = tabView.getTab(tabView.currentIndex).item;
-        if(!item)
-            return;
-
-        root.currentTable = item.childTable;
-        root.currentHeatmap = item.childHeatmap;
-
-        root.currentTable.resizeVisibleColumnsToContents();
-    }
-
-    onModelsChanged: { root.updateCurrent(); }
-    onVisibleChanged: { if(visible) root.updateCurrent(); }
 
     title: qsTr("Enrichment Results")
 
@@ -77,51 +63,54 @@ ApplicationWindow
         standardButtons: StandardButton.Yes | StandardButton.Cancel
         onYes:
         {
-            root.removeResults(tabView.currentIndex);
+            root.removeResults(tabBar.currentIndex);
         }
     }
 
     signal removeResults(int index)
 
-    toolBar: ToolBar
+    header: ToolBar
     {
+        topPadding: 6
+        bottomPadding: 6
+
         RowLayout
         {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-
-            ToolButton
+            ToolBarButton
             {
                 id: showOnlyEnrichedButton
-                iconName: "utilities-system-monitor"
+                icon.name: "utilities-system-monitor"
                 checkable: true
                 checked: true
-                tooltip: qsTr("Show only significant over-represented results")
+                text: qsTr("Show only significant over-represented results")
             }
-            ToolButton
+
+            ToolBarButton
             {
                 id: showHeatmapButton
-                iconName: "x-office-spreadsheet"
+                icon.name: "x-office-spreadsheet"
                 checkable: true
                 checked: true
-                tooltip: qsTr("Show Heatmap")
+                text: qsTr("Show Heatmap")
             }
-            ToolButton
+
+            ToolBarButton
             {
-                iconName: "edit-delete"
+                icon.name: "edit-delete"
                 onClicked: confirmDelete.open();
-                tooltip: qsTr("Delete result table")
+                text: qsTr("Delete result table")
             }
-            ToolButton
+
+            ToolBarButton
             {
                 id: addEnrichment
-                iconName: "list-add"
-                tooltip: qsTr("New Enrichment")
+                icon.name: "list-add"
+                text: qsTr("New Enrichment")
                 onClicked: wizard.show()
             }
-            ToolButton { action: exportTableAction }
-            ToolButton { action: saveImageAction }
+
+            ToolBarButton { action: exportTableAction }
+            ToolBarButton { action: saveImageAction }
         }
     }
 
@@ -130,242 +119,261 @@ ApplicationWindow
     ColumnLayout
     {
         anchors.fill: parent
+        spacing: 0
 
-        Text
+        TabBar
         {
-            Layout.alignment: Qt.AlignCenter
-            text: qsTr("No Results")
-            visible: tabView.count === 0
-        }
-
-        TabView
-        {
-            id: tabView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: tabView.count > 0
-
-            onCountChanged: { currentIndex = count - 1; }
-            onCurrentIndexChanged: { root.updateCurrent(); }
+            id: tabBar
+            Layout.topMargin: 4
 
             Repeater
             {
                 model: root.models
-
-                Tab
+                TabButton
                 {
-                    id: tab
-                    title: qsTr("Results") + " " + (index + 1)
+                    text: qsTr("Results") + " " + (index + 1)
 
-                    SplitView
+                    leftPadding: 8
+                    rightPadding: 8
+                    topPadding: 4
+                    bottomPadding: 4
+                }
+            }
+        }
+
+        Item
+        {
+            visible: !splitView.visible
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            Text
+            {
+                anchors.centerIn: parent
+                text: qsTr("No Results")
+            }
+        }
+
+        SplitView
+        {
+            id: splitView
+
+            visible: root._resultsAvailable
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            handle: Rectangle
+            {
+                implicitWidth: 8
+                implicitHeight: 8
+
+                color: systemPalette.window
+
+                Rectangle
+                {
+                    anchors.centerIn: parent
+
+                    readonly property int maxDimension: 48
+                    readonly property int minDimension: 4
+
+                    implicitWidth: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
+                    implicitHeight: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
+                    radius: minDimension * 0.5
+                    color: systemPalette.midlight
+                }
+            }
+
+            DataTable
+            {
+                id: table
+
+                SplitView.fillHeight: true
+                SplitView.minimumWidth: 300
+                SplitView.preferredWidth: root.width * 0.5
+
+                selectionMode: DataTable.SingleSelection
+                showBorder: false
+
+                sortIndicatorColumn: 0
+                sortIndicatorOrder: Qt.AscendingOrder
+
+                property int rowCount: proxyModel.count
+
+                onHeaderClicked:
+                {
+                    if(mouse.button !== Qt.LeftButton)
+                        return;
+
+                    clearSelection();
+
+                    if(sortIndicatorColumn === column)
                     {
-                        id: splitView
+                        sortIndicatorOrder = sortIndicatorOrder === Qt.AscendingOrder ?
+                            Qt.DescendingOrder : Qt.AscendingOrder;
 
-                        property alias childTable: table
-                        property alias childHeatmap: heatmap
+                        return;
+                    }
 
-                        handleDelegate: Rectangle
+                    sortIndicatorColumn = column;
+                    sortIndicatorOrder = Qt.AscendingOrder;
+                }
+
+                // For some reason QmlUtils isn't available from directly within the sort expression
+                property var stringCompare: QmlUtils.localeCompareStrings
+
+                onClicked:
+                {
+                    if(mouse.button === Qt.RightButton)
+                        exportTableMenu.popup();
+                }
+
+                property bool columnResizeRequired: false
+
+                onCellExtentsChanged:
+                {
+                    if(columnResizeRequired)
+                    {
+                        resizeVisibleColumnsToContents();
+                        columnResizeRequired = false;
+                    }
+                }
+
+                Text
+                {
+                    anchors.centerIn: parent
+                    text: qsTr("No Significant Results")
+                    visible: table.rowCount <= 1 // rowCount includes header
+                }
+
+                model: SortFilterProxyModel
+                {
+                    id: proxyModel
+                    sourceModel: root._currentModel
+
+                    onSourceModelChanged:
+                    {
+                        table.clearSelection();
+                        table.columnResizeRequired = true;
+                    }
+
+                    filters: ExpressionFilter
+                    {
+                        enabled: showOnlyEnrichedButton.checked
+                        expression: model.enriched
+                    }
+
+                    sorters: ExpressionSorter
+                    {
+                        enabled: table.sortIndicatorColumn >= 0
+                        expression:
                         {
-                            width: 8
-                            height: 8
+                            let descending = table.sortIndicatorOrder === Qt.DescendingOrder;
 
-                            color: systemPalette.window
+                            if(table.sortIndicatorColumn < 0)
+                                return true;
 
-                            Rectangle
-                            {
-                                anchors.centerIn: parent
+                            let rowA = modelLeft.index;
+                            let rowB = modelRight.index;
 
-                                readonly property int maxDimension: 48
-                                readonly property int minDimension: 4
+                            if(rowA < 0 || rowB < 0)
+                                return true;
 
-                                width: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
-                                height: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
-                                radius: minDimension * 0.5
-                                color: systemPalette.midlight
-                            }
-                        }
+                            // Exclude header row from sort
+                            if(rowA === 0 || rowB === 0)
+                                return rowA === 0;
 
-                        DataTable
-                        {
-                            id: table
+                            let valueA = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowA, table.sortIndicatorColumn));
+                            let valueB = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowB, table.sortIndicatorColumn));
 
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.minimumWidth: 100
+                            if(descending)
+                                [valueA, valueB] = [valueB, valueA];
 
-                            selectionMode: DataTable.SingleSelection
-                            showBorder: false
+                            if(!isNaN(valueA) && !isNaN(valueB))
+                                return Number(valueA) < Number(valueB);
 
-                            sortIndicatorColumn: 0
-                            sortIndicatorOrder: Qt.AscendingOrder
-
-                            property int rowCount: model ? model.rowCount() : 0
-
-                            onHeaderClicked:
-                            {
-                                if(mouse.button !== Qt.LeftButton)
-                                    return;
-
-                                clearSelection();
-
-                                if(sortIndicatorColumn === column)
-                                {
-                                    sortIndicatorOrder = sortIndicatorOrder === Qt.AscendingOrder ?
-                                        Qt.DescendingOrder : Qt.AscendingOrder;
-
-                                    return;
-                                }
-
-                                sortIndicatorColumn = column;
-                                sortIndicatorOrder = Qt.AscendingOrder;
-                            }
-
-                            // For some reason QmlUtils isn't available from directly within the sort expression
-                            property var stringCompare: QmlUtils.localeCompareStrings
-
-                            onClicked:
-                            {
-                                if(mouse.button === Qt.RightButton)
-                                    exportTableMenu.popup();
-                            }
-
-                            Text
-                            {
-                                anchors.centerIn: parent
-                                text: qsTr("No Significant Results")
-                                visible: table.rowCount <= 1 // rowCount includes header
-                            }
-
-                            model: SortFilterProxyModel
-                            {
-                                id: proxyModel
-                                sourceModel: modelData
-
-                                filters: ExpressionFilter
-                                {
-                                    enabled: showOnlyEnrichedButton.checked
-                                    expression: model.enriched
-                                }
-
-                                sorters: ExpressionSorter
-                                {
-                                    enabled: table.sortIndicatorColumn >= 0
-                                    expression:
-                                    {
-                                        let descending = table.sortIndicatorOrder === Qt.DescendingOrder;
-
-                                        if(table.sortIndicatorColumn < 0)
-                                            return true;
-
-                                        let rowA = modelLeft.index;
-                                        let rowB = modelRight.index;
-
-                                        if(rowA < 0 || rowB < 0)
-                                            return true;
-
-                                        // Exclude header row from sort
-                                        if(rowA === 0 || rowB === 0)
-                                            return rowA === 0;
-
-                                        let valueA = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowA, table.sortIndicatorColumn));
-                                        let valueB = proxyModel.sourceModel.data(proxyModel.sourceModel.index(rowB, table.sortIndicatorColumn));
-
-                                        if(descending)
-                                            [valueA, valueB] = [valueB, valueA];
-
-                                        if(!isNaN(valueA) && !isNaN(valueB))
-                                            return Number(valueA) < Number(valueB);
-
-                                        return table.stringCompare(valueA, valueB) < 0;
-                                    }
-                                }
-                            }
-
-                            cellValueProvider: function(value)
-                            {
-                                if(!isNaN(value) && value.length > 0)
-                                    return QmlUtils.formatNumberScientific(value);
-
-                                return value;
-                            }
-                        }
-
-                        GridLayout
-                        {
-                            columns: 2
-                            Layout.fillHeight: true
-                            visible: showHeatmapButton.checked
-
-                            EnrichmentHeatmap
-                            {
-                                id: heatmap
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                Layout.minimumHeight: 200
-                                Layout.minimumWidth: 170
-                                Layout.preferredWidth: (tab.width * 0.5) - 5
-                                model: modelData
-                                elideLabelWidth: 100
-                                showOnlyEnriched: showOnlyEnrichedButton.checked
-                                property bool horizontalScrollBarRequired: (heatmap.width / heatmap.horizontalRangeSize) > scrollView.viewport.width;
-                                property bool verticalScrollBarRequired: (heatmap.height / heatmap.verticalRangeSize) > scrollView.viewport.height;
-                                xAxisPadding: horizontalScrollBarRequired ? 20 : 0
-                                yAxisPadding: verticalScrollBarRequired ? 20 : 0
-                                xAxisLabel: modelData.selectionA
-                                yAxisLabel: modelData.selectionB
-
-                                onShowOnlyEnrichedChanged: { table.clearSelection(); }
-
-                                onPlotValueClicked:
-                                {
-                                    let proxyRow = proxyModel.mapFromSource(row);
-                                    if(proxyRow < 0)
-                                    {
-                                        table.clearSelection();
-                                        return;
-                                    }
-
-                                    table.selectRow(proxyRow);
-                                    table.positionViewAt(proxyRow);
-                                }
-
-                                scrollXAmount:
-                                {
-                                    return scrollView.flickableItem.contentX /
-                                            (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
-                                }
-
-                                scrollYAmount:
-                                {
-                                    return scrollView.flickableItem.contentY /
-                                            (scrollView.flickableItem.contentHeight - scrollView.viewport.height);
-                                }
-
-                                onRightClick: { plotContextMenu.popup(); }
-
-                                ScrollView
-                                {
-                                    id: scrollView
-                                    visible: heatmap.horizontalScrollBarRequired || heatmap.verticalScrollBarRequired
-                                    anchors.fill: parent
-                                    Item
-                                    {
-                                        // This is a fake item to make native scrollbars appear
-                                        // Prevent Qt opengl texture overflow (2^14 pixels)
-                                        width: Math.min(heatmap.width / heatmap.horizontalRangeSize, 16383)
-                                        height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
-                                    }
-                                }
-                            }
-                        }
-
-                        Connections
-                        {
-                            target: modelData
-                            function onModelReset() { heatmap.buildPlot(); }
+                            return table.stringCompare(valueA, valueB) < 0;
                         }
                     }
                 }
+
+                cellValueProvider: function(value)
+                {
+                    if(!isNaN(value) && value.length > 0)
+                        return QmlUtils.formatNumberScientific(value);
+
+                    return value;
+                }
+            }
+
+            EnrichmentHeatmap
+            {
+                id: heatmap
+
+                visible: showHeatmapButton.checked
+
+                SplitView.fillHeight: true
+                SplitView.minimumWidth: 300
+
+                model: root._currentModel
+                elideLabelWidth: 100
+                showOnlyEnriched: showOnlyEnrichedButton.checked
+                xAxisLabel: model ? model.selectionA : ""
+                yAxisLabel: model ? model.selectionB : ""
+
+                onShowOnlyEnrichedChanged:
+                {
+                    table.clearSelection();
+                    table.positionViewAt(0);
+                }
+
+                onPlotValueClicked:
+                {
+                    let proxyRow = proxyModel.mapFromSource(row);
+                    if(proxyRow < 0)
+                    {
+                        table.clearSelection();
+                        return;
+                    }
+
+                    table.selectRow(proxyRow);
+                    table.positionViewAt(proxyRow);
+                }
+
+                onRightClick: { plotContextMenu.popup(); }
+
+                scrollXAmount: horizontalScrollBar.position / (1.0 - horizontalScrollBar.size)
+                scrollYAmount: verticalScrollBar.position / (1.0 - verticalScrollBar.size)
+
+                ScrollBar
+                {
+                    id: horizontalScrollBar
+                    hoverEnabled: true
+                    active: hovered || pressed
+                    orientation: Qt.Horizontal
+                    size: heatmap.horizontalRangeSize
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                }
+
+                ScrollBar
+                {
+                    id: verticalScrollBar
+                    hoverEnabled: true
+                    active: hovered || pressed
+                    orientation: Qt.Vertical
+                    size: heatmap.verticalRangeSize
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                }
+            }
+
+            Connections
+            {
+                target: root._currentModel
+                function onModelReset() { heatmap.buildPlot(); }
             }
         }
     }
@@ -373,42 +381,39 @@ ApplicationWindow
     Menu
     {
         id: plotContextMenu
-        MenuItem { action: saveImageAction }
-    }
-
-    Action
-    {
-        id: saveImageAction
-        enabled: root.currentHeatmap
-        text: qsTr("Save As Image…")
-        iconName: "camera-photo"
-        onTriggered:
+        Action
         {
-            heatmapSaveDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                misc.fileSaveInitialFolder : "";
+            id: saveImageAction
+            enabled: root._resultsAvailable && heatmap.visible
+            text: qsTr("Save As Image…")
+            icon.name: "camera-photo"
+            onTriggered:
+            {
+                heatmapSaveDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+                    misc.fileSaveInitialFolder : "";
 
-            heatmapSaveDialog.open();
+                heatmapSaveDialog.open();
+            }
         }
     }
+
 
     Menu
     {
         id: exportTableMenu
-        MenuItem { action: exportTableAction }
-    }
-
-    Action
-    {
-        id: exportTableAction
-        enabled: root.currentTable && root.currentTable.rowCount > 1 // rowCount includes header
-        text: qsTr("Export Table…")
-        iconName: "document-save"
-        onTriggered:
+        Action
         {
-            exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                misc.fileSaveInitialFolder : "";
+            id: exportTableAction
+            enabled: root._resultsAvailable && table.rowCount > 1 // rowCount includes header
+            text: qsTr("Export Table…")
+            icon.name: "document-save"
+            onTriggered:
+            {
+                exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+                    misc.fileSaveInitialFolder : "";
 
-            exportTableDialog.open();
+                exportTableDialog.open();
+            }
         }
     }
 
@@ -423,7 +428,7 @@ ApplicationWindow
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted:
         {
-            currentHeatmap.savePlotImage(file, selectedNameFilter.extensions);
+            heatmap.savePlotImage(file, selectedNameFilter.extensions);
         }
     }
 
@@ -439,7 +444,7 @@ ApplicationWindow
         {
             misc.fileSaveInitialFolder = folder.toString();
             wizard.document.writeTableModelToFile(
-                root.currentTable.model, file, defaultSuffix);
+                table.model, file, defaultSuffix);
         }
     }
 
