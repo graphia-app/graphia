@@ -257,6 +257,8 @@ void EnrichmentHeatmapItem::buildPlot()
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));
+
+    customPlot().replot(QCustomPlot::rpQueuedReplot);
 }
 
 double EnrichmentHeatmapItem::columnAxisWidth()
@@ -312,7 +314,6 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
     {
         updatePlotSize();
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -324,7 +325,6 @@ void EnrichmentHeatmapItem::setXAxisPadding(int padding)
     if(changed)
     {
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -336,7 +336,6 @@ void EnrichmentHeatmapItem::setYAxisPadding(int padding)
     if(changed)
     {
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -346,7 +345,6 @@ void EnrichmentHeatmapItem::setXAxisLabel(const QString& xAxisLabel)
     {
         _xAxisLabel = xAxisLabel;
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -356,7 +354,6 @@ void EnrichmentHeatmapItem::setYAxisLabel(const QString& yAxisLabel)
     {
         _yAxisLabel = yAxisLabel;
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
     }
 }
 
@@ -366,7 +363,6 @@ void EnrichmentHeatmapItem::setShowOnlyEnriched(bool showOnlyEnriched)
     {
         _showOnlyEnriched = showOnlyEnriched;
         buildPlot();
-        customPlot().replot(QCustomPlot::rpQueuedReplot);
         emit showOnlyEnrichedChanged();
     }
 }
