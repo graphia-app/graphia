@@ -121,6 +121,8 @@ Rectangle
     readonly property int topRow: _topLoadedRow
     readonly property int bottomRow: _bottomLoadedRow
 
+    signal cellExtentsChanged(int left, int right, int top, int bottom);
+
     function _updateCellExtents()
     {
         if(root._loadedCells.size === 0)
@@ -143,6 +145,8 @@ Rectangle
         root._rightLoadedColumn = right;
         root._topLoadedRow = top;
         root._bottomLoadedRow = bottom;
+
+        root.cellExtentsChanged(left, right, top, bottom);
     }
 
     function _resetColumnWidths()
@@ -474,18 +478,18 @@ Rectangle
                 Component.onCompleted:
                 {
                     root._loadedCells.add({x: model.column, y: model.row});
-                    root._updateCellExtents();
+                    Qt.callLater(root._updateCellExtents);
                 }
 
                 TableView.onReused:
                 {
                     root._loadedCells.add({x: model.column, y: model.row});
-                    root._updateCellExtents();
-
                     root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.item.implicitWidth));
 
                     if(typeof(cellDelegateLoader.item.onReused) === "function")
                         cellDelegateLoader.item.onReused();
+
+                    Qt.callLater(root._updateCellExtents);
                 }
 
                 TableView.onPooled:
@@ -496,12 +500,12 @@ Rectangle
                             root._loadedCells.delete(cell);
                     });
 
-                    root._updateCellExtents();
-
                     root._cellWidths.delete(model.column + "," + model.row);
 
                     if(typeof(cellDelegateLoader.item.onPooled) === "function")
                         cellDelegateLoader.item.onPooled();
+
+                    Qt.callLater(root._updateCellExtents);
                 }
             }
         }
