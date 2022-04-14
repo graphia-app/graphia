@@ -154,7 +154,7 @@ void EnrichmentHeatmapItem::buildPlot()
     customPlot().xAxis->setTickLabelRotation(90);
     customPlot().yAxis2->setTicker(yCategoryTicker);
 
-    customPlot().plotLayout()->setMargins(QMargins(0, 0, _yAxisPadding, _xAxisPadding));
+    customPlot().plotLayout()->setMargins(QMargins(0, 0, 0, 0));
 
     if(!_xAxisLabel.isEmpty())
         customPlot().xAxis->setLabel(_xAxisLabel);
@@ -317,28 +317,6 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
     }
 }
 
-void EnrichmentHeatmapItem::setXAxisPadding(int padding)
-{
-    bool changed = _xAxisPadding != padding;
-    _xAxisPadding = padding;
-
-    if(changed)
-    {
-        buildPlot();
-    }
-}
-
-void EnrichmentHeatmapItem::setYAxisPadding(int padding)
-{
-    bool changed = _yAxisPadding != padding;
-    _yAxisPadding = padding;
-
-    if(changed)
-    {
-        buildPlot();
-    }
-}
-
 void EnrichmentHeatmapItem::setXAxisLabel(const QString& xAxisLabel)
 {
     if(xAxisLabel != _xAxisLabel)
@@ -435,9 +413,9 @@ void EnrichmentHeatmapItem::showTooltip()
 
     // If it falls out of bounds, clip to bounds and move label above marker
     // yAxisPadding accounts for scrollbar spacing
-    if(hoverLabelRightX > xBounds - _yAxisPadding)
+    if(hoverLabelRightX > xBounds)
     {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0 - _yAxisPadding;
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
 
         // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
         if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
