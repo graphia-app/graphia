@@ -558,7 +558,7 @@ Rectangle
         let headerWidth = root._headerWidth(column);
 
         root._columnWidths[column] = Math.max(headerWidth, maxCellWidth);
-        root.forceLayout();
+        Qt.callLater(root.forceLayout);
     }
 
     function resizeVisibleColumnsToContents()
