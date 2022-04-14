@@ -26,31 +26,33 @@ PREAMBLE="<RCC>\n\
 POSTAMBLE=" \t</qresource>\n\
 </RCC>"
 
-THEME_FILES=$(find * -name "*.theme")
-ICON_NAMES=$(find $(find ../../ -type d -name "qml") -name "*.qml" | \
-  xargs perl -pe 's/\n/\$/g' | \
-  perl -ne 'print "$1\n" while /iconName:[\s\$]*((\{([^{}]|(?2))*\})|([^\$]*))\$/gm' | \
-  perl -pe 's/[^\"]*\"([^\"]*)\"[^\"]*/$1\.\*\n/g' | \
-  sort | uniq)
+QML_CONTENT=$(find $(find ../../ -type d -name "qml") -name "*.qml" | \
+  xargs perl -pe 's/\n/\$/g')
 
-ICON_SOURCES=$(find $(find ../../ -type d -name "qml") -name "*.qml" | \
-  xargs perl -pe 's/\n/\$/g' | \
-  perl -ne 'print "$1\n" while /iconSource:[\s\$]*((\{([^{}]|(?2))*\})|([^\$]*))\$/gm' | \
-  perl -pe 's/[^\"]*\".*\/([^\"]*)\"[^\"]*/$1\n/g' | \
-  sort | uniq)
+ICON_KEYS="iconName iconSource icon\.name"
+for ICON_KEY in ${ICON_KEYS}
+do
+  # Extract the part after the colon (the values), then find quoted strings within that
+  VALUES=$(echo ${QML_CONTENT} | \
+    perl -ne 'print "$1\n" while /\s'"${ICON_KEY}"':[\s\$]*((\{([^{}]|(?2))*\})|([^\$]*))\$/gm' | \
+    perl -pe 's/[^\"]+|([^\"]*\"([^\"]*)\"[^\"]*)/$2\n/g')
+  ICON_NAMES="${ICON_NAMES} ${VALUES}"
+done
 
-ICON_SOURCES="${ICON_NAMES} ${ICON_SOURCES}"
+ICON_NAMES=$(echo ${ICON_NAMES} | xargs -n1 | sort | uniq)
 
 echo -e ${PREAMBLE} > icons.qrc
 
+THEME_FILES=$(find * -name "*.theme")
 for THEME_FILE in ${THEME_FILES}
 do
   echo -e "\t\t<file>${THEME_FILE}</file>" >> icons.qrc
 done
 
-for ICON_SOURCE in ${ICON_SOURCES}
+for ICON_NAME in ${ICON_NAMES}
 do
-  ICON_FILES=$(find * -iname "${ICON_SOURCE}" | sort)
+  # Get the FQ file names (if they exist at all)
+  ICON_FILES=$(find * -iname "${ICON_NAME}.*" | sort)
   for ICON_FILE in ${ICON_FILES}
   do
     if [ -L ${ICON_FILE} ]
