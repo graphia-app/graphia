@@ -88,6 +88,9 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     _hoverLabel->setVisible(false);
 
     connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::buildPlot);
+    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &QQuickPaintedItem::widthChanged);
+    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &QQuickPaintedItem::heightChanged);
+
     connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::horizontalRangeSizeChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::verticalRangeSizeChanged);
     connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::scaleXAxis);
