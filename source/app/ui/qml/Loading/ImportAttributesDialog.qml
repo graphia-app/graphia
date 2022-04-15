@@ -18,9 +18,8 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-import QtGraphicalEffects 1.0
 import app.graphia 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
@@ -65,6 +64,8 @@ Window
 
         root.show();
     }
+
+    SystemPalette { id: systemPalette }
 
     TabularDataParser
     {
@@ -171,16 +172,6 @@ Window
         visible: !loadingInfo.visible
         finishEnabled: root._validParameters
         controlsEnabled: !importAttributesKeyDetection.busy
-
-        layer
-        {
-            enabled: importAttributesKeyDetection.busy
-            effect: FastBlur
-            {
-                visible: importAttributesKeyDetection.busy
-                radius: 32
-            }
-        }
 
         ListTab
         {
@@ -515,6 +506,13 @@ Window
 
                         return summary;
                     }
+
+                    background: Rectangle
+                    {
+                        color: "white"
+                        border.width: 1
+                        border.color: systemPalette.dark
+                    }
                 }
             }
         }
@@ -550,33 +548,48 @@ Window
         onRejected: { root.rejected(); }
     }
 
-    ColumnLayout
+    Rectangle
     {
         anchors.centerIn: parent
         visible: importAttributesKeyDetection.busy
 
-        Text
+        width: 150
+        height: 150
+
+        color: systemPalette.light
+        border.width: 1
+        border.color: systemPalette.dark
+        radius: 5
+
+        ColumnLayout
         {
-            Layout.alignment: Qt.AlignHCenter
-            text: qsTr("Detecting Keys")
-        }
+            anchors.fill: parent
+            anchors.margins: Constants.margin
 
-        BusyIndicator
-        {
-            Layout.alignment: Qt.AlignHCenter
-            width: 256
-            height: 256
-        }
+            Text
+            {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("Detecting Keys")
+            }
 
-        Button
-        {
-            id: cancelButton
-            Layout.alignment: Qt.AlignHCenter
+            BusyIndicator
+            {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                running: true
+            }
 
-            text: qsTr("Cancel")
+            Button
+            {
+                id: cancelButton
+                Layout.alignment: Qt.AlignHCenter
 
-            enabled: importAttributesKeyDetection.busy
-            onClicked: { importAttributesKeyDetection.cancel(); }
+                text: qsTr("Cancel")
+
+                enabled: importAttributesKeyDetection.busy
+                onClicked: { importAttributesKeyDetection.cancel(); }
+            }
         }
     }
 
