@@ -18,8 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -65,16 +64,10 @@ Window
             TextField
             {
                 id: textField
+                Layout.fillWidth: true
 
                 property bool valid: { return textField.length > 0 && QmlUtils.userUrlStringIsValid(text); }
-
-                style: TextFieldStyle
-                {
-                    textColor: textField.length === 0 || textField.valid ?
-                        "black" : "red"
-                }
-
-                Layout.fillWidth: true
+                color: textField.length === 0 || textField.valid ? "black" : "red"
             }
         }
 
