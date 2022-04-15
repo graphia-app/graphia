@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import "../../shared/ui/qml/Constants.js" as Constants
@@ -109,11 +109,11 @@ Item
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
                                 color: index === _currentIndex ? systemPalette.highlightedText : systemPalette.text
-                                text: listTabs[index].title
+                                text: listTabs[index] ? listTabs[index].title : ""
 
                                 TextMetrics
                                 {
-                                    text: listTabs[index].title
+                                    text: listTabs[index] ? listTabs[index].title : ""
                                     onTextChanged:
                                     {
                                         tabSelector._childWidths[index] = width;
