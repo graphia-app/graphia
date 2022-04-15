@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -162,159 +162,167 @@ Item
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: !root.ambiguityInExtensionsOrPlugins
 
             Label
             {
                 anchors.centerIn: parent
-                visible: !root.ambiguityInExtensionsOrPlugins
 
                 font.italic: true
                 text: qsTr("No Ambiguities with Enabled Plugins")
             }
         }
 
-        ScrollView
+        Rectangle
         {
-            id: scrollView
-
-            visible: root.ambiguityInExtensionsOrPlugins
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: root.ambiguityInExtensionsOrPlugins
 
-            frameVisible: __verticalScrollBar.visible
-            horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+            border.width: scrollView.needsFrame ? 1 : 0
+            border.color: systemPalette.dark
 
-            contentItem: RowLayout
+            ScrollView
             {
-                width: scrollView.viewport.width
+                id: scrollView
+                anchors.fill: parent
+                anchors.margins: 1
+                clip: true
 
-                ColumnLayout
+                property bool needsFrame: scrollView.contentHeight > scrollView.availableHeight
+
+                RowLayout
                 {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.margins: scrollView.frameVisible ? Constants.margin : 0
-                    spacing: Constants.spacing
+                    width: scrollView.width
 
-                    Label
-                    {
-                        font.bold: true
-                        text: qsTr("File Types")
-                    }
-
-                    GridLayout
+                    ColumnLayout
                     {
                         Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: Constants.spacing
-                        rowSpacing: Constants.spacing
+                        Layout.fillHeight: true
+                        Layout.margins: scrollView.needsFrame ? Constants.margin : 0
+                        spacing: Constants.spacing
 
-                        Repeater
+                        Label
                         {
-                            model: root.ambiguousExtensions
-
-                            Label
-                            {
-                                Layout.row: index
-                                Layout.column: 0
-
-                                font.italic: true
-                                text: "." + model.display
-                            }
+                            font.bold: true
+                            text: qsTr("File Types")
                         }
 
-                        Repeater
+                        GridLayout
                         {
-                            id: urlTypeSelectors
-                            model: root.ambiguousExtensions
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: Constants.spacing
+                            rowSpacing: Constants.spacing
 
-                            ComboBox
+                            Repeater
                             {
-                                Layout.fillWidth: true
-                                Layout.row: index
-                                Layout.column: 1
+                                model: root.ambiguousExtensions
 
-                                model: [qsTr("Always Ask…"), ...urlTypes.map(
-                                    urlType => application.descriptionForUrlType(urlType))]
-
-                                property string extension: /*model.*/display
-                                property var urlTypes: { return application.urlTypesFor(extension); }
-
-                                onCurrentIndexChanged:
+                                Label
                                 {
-                                    if(count === 0)
-                                        return;
+                                    Layout.row: index
+                                    Layout.column: 0
 
-                                    let extensionsObject = defaults.extensionsAsObject();
+                                    font.italic: true
+                                    text: "." + model.display
+                                }
+                            }
 
-                                    if(currentIndex === 0 && extensionsObject[extension] !== undefined)
-                                        delete extensionsObject[extension];
-                                    else if(currentIndex > 0)
-                                        extensionsObject[extension] = urlTypes[currentIndex - 1];
+                            Repeater
+                            {
+                                id: urlTypeSelectors
+                                model: root.ambiguousExtensions
 
-                                    extensionsObject.store();
+                                ComboBox
+                                {
+                                    Layout.fillWidth: true
+                                    Layout.row: index
+                                    Layout.column: 1
+
+                                    model: [qsTr("Always Ask…"), ...urlTypes.map(
+                                        urlType => application.descriptionForUrlType(urlType))]
+
+                                    property string extension: /*model.*/display
+                                    property var urlTypes: { return application.urlTypesFor(extension); }
+
+                                    onCurrentIndexChanged:
+                                    {
+                                        if(count === 0)
+                                            return;
+
+                                        let extensionsObject = defaults.extensionsAsObject();
+
+                                        if(currentIndex === 0 && extensionsObject[extension] !== undefined)
+                                            delete extensionsObject[extension];
+                                        else if(currentIndex > 0)
+                                            extensionsObject[extension] = urlTypes[currentIndex - 1];
+
+                                        extensionsObject.store();
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Label
-                    {
-                        Layout.topMargin: Constants.margin * 2
-
-                        font.bold: true
-                        text: qsTr("Plugins")
-                    }
-
-                    GridLayout
-                    {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: Constants.spacing
-                        rowSpacing: Constants.spacing
-
-                        Repeater
+                        Label
                         {
-                            model: root.ambiguousUrlTypes
+                            Layout.topMargin: Constants.margin * 2
 
-                            Label
-                            {
-                                Layout.row: index
-                                Layout.column: 0
-
-                                font.italic: true
-                                text: model.collectiveDescription
-                            }
+                            font.bold: true
+                            text: qsTr("Plugins")
                         }
 
-                        Repeater
+                        GridLayout
                         {
-                            id: pluginSelectors
-                            model: root.ambiguousUrlTypes
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: Constants.spacing
+                            rowSpacing: Constants.spacing
 
-                            ComboBox
+                            Repeater
                             {
-                                Layout.fillWidth: true
-                                Layout.row: index
-                                Layout.column: 1
+                                model: root.ambiguousUrlTypes
 
-                                model: [qsTr("Always Ask…"), ...applicablePlugins]
-
-                                property string urlType: /*model.*/name
-                                property var applicablePlugins: { return application.pluginNames(urlType); }
-
-                                onCurrentIndexChanged:
+                                Label
                                 {
-                                    if(count === 0)
-                                        return;
+                                    Layout.row: index
+                                    Layout.column: 0
 
-                                    let pluginsObject = defaults.pluginsAsObject();
+                                    font.italic: true
+                                    text: model.collectiveDescription
+                                }
+                            }
 
-                                    if(currentIndex === 0 && pluginsObject[urlType] !== undefined)
-                                        delete pluginsObject[urlType];
-                                    else if(currentIndex > 0)
-                                        pluginsObject[urlType] = applicablePlugins[currentIndex - 1];
+                            Repeater
+                            {
+                                id: pluginSelectors
+                                model: root.ambiguousUrlTypes
 
-                                    pluginsObject.store();
+                                ComboBox
+                                {
+                                    Layout.fillWidth: true
+                                    Layout.row: index
+                                    Layout.column: 1
+
+                                    model: [qsTr("Always Ask…"), ...applicablePlugins]
+
+                                    property string urlType: /*model.*/name
+                                    property var applicablePlugins: { return application.pluginNames(urlType); }
+
+                                    onCurrentIndexChanged:
+                                    {
+                                        if(count === 0)
+                                            return;
+
+                                        let pluginsObject = defaults.pluginsAsObject();
+
+                                        if(currentIndex === 0 && pluginsObject[urlType] !== undefined)
+                                            delete pluginsObject[urlType];
+                                        else if(currentIndex > 0)
+                                            pluginsObject[urlType] = applicablePlugins[currentIndex - 1];
+
+                                        pluginsObject.store();
+                                    }
                                 }
                             }
                         }

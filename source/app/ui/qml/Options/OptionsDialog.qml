@@ -18,11 +18,12 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
+import "../Controls"
 
 Window
 {
@@ -40,42 +41,50 @@ Window
 
     property bool enabled: true
 
+    SystemPalette { id: systemPalette }
+
     ColumnLayout
     {
         id: column
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TabView
+        ColumnLayout
         {
-            id: tabView
             Layout.fillWidth: true
             Layout.fillHeight: true
-
+            spacing: 0
             enabled: root.enabled
 
-            Tab
+            TabBar
             {
-                title: qsTr("Appearance")
-                OptionsAppearance {}
+                id: tabBar
+
+                TabBarButton { text: qsTr("Appearance") }
+                TabBarButton { text: qsTr("Miscellaneous") }
+                TabBarButton { text: qsTr("Network") }
+                TabBarButton { text: qsTr("Defaults") }
             }
 
-            Tab
+            Rectangle
             {
-                title: qsTr("Misc")
-                OptionsMisc {}
-            }
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-            Tab
-            {
-                title: qsTr("Network")
-                OptionsNetwork {}
-            }
+                color: systemPalette.light
+                border.width: 1
+                border.color: systemPalette.dark
 
-            Tab
-            {
-                title: qsTr("Defaults")
-                OptionsDefaults { application: root.application }
+                StackLayout
+                {
+                    anchors.fill: parent
+                    currentIndex: tabBar.currentIndex
+
+                    OptionsAppearance {}
+                    OptionsMisc {}
+                    OptionsNetwork {}
+                    OptionsDefaults { application: root.application }
+                }
             }
         }
 

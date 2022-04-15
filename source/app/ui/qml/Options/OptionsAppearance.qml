@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -137,8 +137,8 @@ Item
             Slider
             {
                 id: nodeSizeSlider
-                minimumValue: 0.0
-                maximumValue: 1.0
+                from: 0.0
+                to: 1.0
 
                 onValueChanged: { delayedPreferences.update(); }
             }
@@ -147,8 +147,8 @@ Item
             Slider
             {
                 id: edgeSizeSlider
-                minimumValue: 0.0
-                maximumValue: 1.0
+                from: 0.0
+                to: 1.0
 
                 onValueChanged: { delayedPreferences.update(); }
             }
@@ -191,6 +191,8 @@ Item
                     qsTr("Top"),
                     qsTr("Bottom")
                 ]
+
+                onModelChanged: []; //FIXME: This avoid a warning (on 5.15.2)
             }
 
             Label
@@ -206,16 +208,16 @@ Item
             Slider
             {
                 id: transitionTimeSlider
-                minimumValue: limitConstants.minimumTransitionTime
-                maximumValue: limitConstants.maximumTransitionTime
+                from: limitConstants.minimumTransitionTime
+                to: limitConstants.maximumTransitionTime
             }
 
             Label { text: qsTr("Component Radius") }
             Slider
             {
                 id: minimumComponentRadiusSlider
-                minimumValue: limitConstants.minimumMinimumComponentRadius
-                maximumValue: limitConstants.maximumMinimumComponentRadius
+                from: limitConstants.minimumMinimumComponentRadius
+                to: limitConstants.maximumMinimumComponentRadius
 
                 onValueChanged: { delayedPreferences.update(); }
             }

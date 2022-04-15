@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
@@ -180,8 +180,8 @@ Item
                     id: maxUndoSpinBox
 
                     Layout.preferredWidth: 50
-                    minimumValue: 0
-                    maximumValue: 50
+                    from: 0
+                    to: 50
                 }
             }
 

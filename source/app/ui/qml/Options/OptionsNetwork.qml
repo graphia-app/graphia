@@ -18,8 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -85,6 +84,11 @@ Item
             proxyTypeComboBox.currentIndex = proxyTypeComboBox.model.indexOf(qsTr("SOCKS5"));
     }
 
+    ButtonGroup
+    {
+        buttons: [yesTrackingRadioButton, anonTrackingRadioButton, noTrackingRadioButton]
+    }
+
     RowLayout
     {
         anchors.fill: parent
@@ -101,13 +105,11 @@ Item
                 text: qsTr("Allow Tracking")
             }
 
-            ExclusiveGroup { id: trackingGroup }
             RowLayout
             {
                 RadioButton
                 {
                     id: yesTrackingRadioButton
-                    exclusiveGroup: trackingGroup
                     text: qsTr("Yes")
 
                     onCheckedChanged:
@@ -143,7 +145,6 @@ Item
             RadioButton
             {
                 id: anonTrackingRadioButton
-                exclusiveGroup: trackingGroup
                 text: qsTr("Yes, Anonymously")
 
                 onCheckedChanged:
@@ -156,7 +157,6 @@ Item
             RadioButton
             {
                 id: noTrackingRadioButton
-                exclusiveGroup: trackingGroup
                 text: qsTr("No")
 
                 onCheckedChanged:
@@ -184,10 +184,7 @@ Item
 
                     Layout.fillWidth: true
 
-                    style: TextFieldStyle
-                    {
-                        textColor: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
-                    }
+                    color: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
 
                     property string _defaultValue: "https://www.google.com/search?q=%1"
                     function reset() { text = _defaultValue; }
