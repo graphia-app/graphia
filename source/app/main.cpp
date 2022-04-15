@@ -266,11 +266,6 @@ int start(int argc, char *argv[])
 
     QIcon::setThemeName(QStringLiteral("Tango"));
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#error Update this to handle native themes
-#endif
-    QQuickStyle::setStyle(QStringLiteral("Fusion"));
-
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context
     if(qEnvironmentVariableIntValue("OPENGL_DEBUG") > 0)
@@ -364,6 +359,8 @@ int start(int argc, char *argv[])
 
     u::definePref(QStringLiteral("proxy/type"),                             "disabled");
 
+    u::definePref(QStringLiteral("system/uiTheme"),                         "Default");
+
     u::updateOldPrefs();
 
     PreferencesWatcher preferencesWatcher;
@@ -372,6 +369,11 @@ int start(int argc, char *argv[])
         [](const QString& key, const QVariant&) { if(key.startsWith(QStringLiteral("proxy"))) configureProxy(); });
 
     configureProxy();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#error Update this to handle native themes
+#endif
+    QQuickStyle::setStyle(u::pref(QStringLiteral("system/uiTheme")).toString());
 
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml"));
