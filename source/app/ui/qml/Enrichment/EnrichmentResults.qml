@@ -129,15 +129,7 @@ ApplicationWindow
             Repeater
             {
                 model: root.models
-                TabButton
-                {
-                    text: qsTr("Results") + " " + (index + 1)
-
-                    leftPadding: 8
-                    rightPadding: 8
-                    topPadding: 4
-                    bottomPadding: 4
-                }
+                TabBarButton { text: qsTr("Results") + " " + (index + 1) }
             }
         }
 
