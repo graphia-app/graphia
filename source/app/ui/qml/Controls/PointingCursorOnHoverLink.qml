@@ -25,16 +25,31 @@ MouseArea
     id: root
     anchors.fill: parent
 
+    property var _parentWithHoveredLinkProperty: null
+
     cursorShape:
     {
-        if(parent.hoveredLink === undefined)
+        return root._parentWithHoveredLinkProperty &&
+            root._parentWithHoveredLinkProperty.hoveredLink.length > 0 ?
+            Qt.PointingHandCursor : Qt.ArrowCursor;
+    }
+
+    onParentChanged:
+    {
+        let p = parent;
+
+        while(p)
         {
-            console.log("Parent of " + root + " has no 'hoveredLink' property");
-            return Qt.ArrowCursor;
+            if(p.hoveredLink !== undefined)
+            {
+                root._parentWithHoveredLinkProperty = p;
+                return;
+            }
+
+            p = p.parent;
         }
 
-        return parent.hoveredLink.length > 0 ?
-            Qt.PointingHandCursor : Qt.ArrowCursor;
+        console.log("PointingCursorOnHoverLink: Could not find parent with 'hoveredLink' property");
     }
 
     // Ignore and pass through any events
