@@ -179,7 +179,6 @@ Item
                 {
                     id: maxUndoSpinBox
 
-                    Layout.preferredWidth: 50
                     from: 0
                     to: 50
                 }

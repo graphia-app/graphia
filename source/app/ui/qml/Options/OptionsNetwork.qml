@@ -214,6 +214,7 @@ Item
 
         ColumnLayout
         {
+            Layout.minimumWidth: 250
             spacing: Constants.spacing
 
             Label
