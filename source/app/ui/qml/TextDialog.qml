@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
@@ -43,7 +43,7 @@ Window
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TextArea
+        ScrollableTextArea
         {
             id: textArea
 
@@ -52,12 +52,6 @@ Window
 
             readOnly: true
             text: root.text
-
-            onTextChanged:
-            {
-                // Suppress a Qt warning; bug?
-                cursorPosition = 0;
-            }
         }
 
         RowLayout
@@ -71,13 +65,7 @@ Window
                 visible: root.showCopyToClipboard
 
                 text: qsTr("Copy To Clipboard")
-                onClicked:
-                {
-                    textArea.selectAll();
-                    textArea.copy();
-                    textArea.deselect();
-                    textArea.cursorPosition = 0;
-                }
+                onClicked: { textArea.copyToClipboard(); }
             }
 
             Button
