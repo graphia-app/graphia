@@ -37,7 +37,7 @@ Window
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     minimumWidth: 640
-    minimumHeight: 320
+    minimumHeight: 400
 
     property bool _keysSelected: keyAttributeList.selectedValue !== undefined && keyHeaderComboBox.enabled
     property bool _validParameters: _keysSelected && headersList.selectedValues.length > 0 &&
@@ -483,7 +483,7 @@ Window
                     Layout.fillWidth: true
                 }
 
-                TextArea
+                ScrollableTextArea
                 {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -505,13 +505,6 @@ Window
                         }
 
                         return summary;
-                    }
-
-                    background: Rectangle
-                    {
-                        color: "white"
-                        border.width: 1
-                        border.color: systemPalette.dark
                     }
                 }
             }

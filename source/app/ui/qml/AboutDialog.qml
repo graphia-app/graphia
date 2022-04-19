@@ -87,34 +87,21 @@ Window
                 }
             }
 
-            ScrollView
+            ScrollableTextArea
             {
-                id: scrollView
+                id: licenseTextArea
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                TextArea
-                {
-                    id: licenseTextArea
-                    visible: false
-                    readOnly: true
+                visible: false
+                readOnly: true
 
-                    textFormat: TextEdit.RichText
-                    wrapMode: TextEdit.Wrap
+                textFormat: TextEdit.RichText
+                wrapMode: TextEdit.Wrap
 
-                    PointingCursorOnHoverLink {}
-                    onLinkActivated: Qt.openUrlExternally(link);
-                }
-
-                background: Rectangle
-                {
-                    visible: licenseTextArea.visible
-
-                    color: "white"
-                    border.width: 1
-                    border.color: systemPalette.dark
-                }
+                PointingCursorOnHoverLink {}
+                onLinkActivated: Qt.openUrlExternally(link);
             }
 
             Button

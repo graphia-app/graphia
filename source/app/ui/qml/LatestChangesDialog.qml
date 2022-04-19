@@ -22,6 +22,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 import "../../../shared/ui/qml/Constants.js" as Constants
+import "Controls"
 
 Window
 {
@@ -38,31 +39,21 @@ Window
     width: 640
     height: 480
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TextArea
+        ScrollableTextArea
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
+
             readOnly: true
-
             textFormat: TextEdit.MarkdownText
-
             text: root.text
 
             onLinkActivated: Qt.openUrlExternally(link);
-
-            background: Rectangle
-            {
-                color: "white"
-                border.width: 1
-                border.color: systemPalette.dark
-            }
         }
 
         Button
