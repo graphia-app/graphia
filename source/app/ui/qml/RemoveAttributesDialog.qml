@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
@@ -99,7 +99,7 @@ Window
             sortRoleName: "elementType"
             prettifyFunction: AttributeUtils.prettify
 
-            selectionMode: SelectionMode.MultiSelection
+            allowMultiSelection: true
 
             filters:
             [

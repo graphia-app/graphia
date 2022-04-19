@@ -53,7 +53,7 @@ Item
     property alias sorters: sortFilterProxyModel.sorters
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
-    property alias selectionMode: treeView.selectionMode
+    property bool allowMultiSelection: false
     property alias filters: sortFilterProxyModel.filters
 
     property alias itemDelegate: treeView.itemDelegate
@@ -129,6 +129,9 @@ Item
                 id: sortFilterProxyModel
                 sourceModel: root.model !== undefined ? root.model : null
             }
+
+            selectionMode: root.allowMultiSelection ?
+                SelectionMode.MultiSelection : SelectionMode.SingleSelection
 
             // Clear the selection when the model is changed
             selection: ItemSelectionModel { model: sortFilterProxyModel }
