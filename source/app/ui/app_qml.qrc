@@ -68,5 +68,6 @@
         <file>qml/Visualisation/VisualisationUtils.js</file>
         <file>qml/Controls/ToolBarButton.qml</file>
         <file>qml/Controls/TabBarButton.qml</file>
+        <file>qml/Controls/ScrollableTextArea.qml</file>
     </qresource>
 </RCC>
