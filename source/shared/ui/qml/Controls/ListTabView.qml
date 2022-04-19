@@ -57,34 +57,41 @@ Item
     ColumnLayout
     {
         id: containerLayout
+
         Layout.fillWidth: true
         Layout.fillHeight: true
+
         spacing: Constants.spacing
+
         anchors.fill: parent
         anchors.margins: Constants.margin
+
         RowLayout
         {
             anchors.margins: Constants.margin
             Layout.fillHeight: true
             spacing: Constants.spacing
 
-            Rectangle
+            Frame
             {
                 Layout.fillHeight: true
                 Layout.preferredWidth: tabSelector.maxChildWidth + (Constants.padding * 2)
 
-                border.width: 1
-                border.color: systemPalette.mid
-                z: -1
+                topPadding: 0
+                leftPadding: 0
+                rightPadding: 0
+                bottomPadding: 0
+
+                Component.onCompleted: { background.color = "white"; }
 
                 ListView
                 {
                     id: tabSelector
                     enabled: root.controlsEnabled
                     model: listTabs.length
-                    z: 100
+
                     boundsBehavior: Flickable.StopAtBounds
-                    anchors.centerIn: parent
+
                     anchors.margins: 1
                     anchors.fill: parent
                     clip: true
@@ -99,7 +106,7 @@ Item
                         Rectangle
                         {
                             id: delegateRectangle
-                            color: index === _currentIndex ? systemPalette.highlight : "#00000000"
+                            color: index === _currentIndex ? systemPalette.highlight : "transparent"
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)

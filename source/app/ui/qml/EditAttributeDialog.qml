@@ -291,15 +291,17 @@ Window
             text: qsTr("Select an Attribute")
         }
 
-        Rectangle
+        Frame
         {
             visible: root.selectedAttributeName.length > 0
 
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            border.color: sysPalette.midlight
-            border.width: 1
+            topPadding: 0
+            leftPadding: 0
+            rightPadding: 0
+            bottomPadding: 0
 
             ColumnLayout
             {

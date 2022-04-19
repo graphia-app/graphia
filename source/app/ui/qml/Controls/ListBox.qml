@@ -142,12 +142,17 @@ Item
 
     SystemPalette { id: systemPalette }
 
-    Rectangle
+    Frame
     {
         anchors.fill: parent
-        border.width: 1
-        border.color: systemPalette.mid
         clip: true
+
+        topPadding: 0
+        leftPadding: 0
+        rightPadding: 0
+        bottomPadding: 0
+
+        Component.onCompleted: { background.color = "white"; }
 
         ListView
         {

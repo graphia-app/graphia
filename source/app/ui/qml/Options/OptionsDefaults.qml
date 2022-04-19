@@ -173,14 +173,25 @@ Item
             }
         }
 
-        Rectangle
+        Frame
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.ambiguityInExtensionsOrPlugins
 
-            border.width: scrollView.needsFrame ? 1 : 0
-            border.color: systemPalette.dark
+            topPadding: 0
+            leftPadding: 0
+            rightPadding: 0
+            bottomPadding: 0
+
+            Component.onCompleted:
+            {
+                let frameWidth = background.border.width;
+                background.border.width = Qt.binding(function()
+                {
+                    return scrollView.needsFrame ? frameWidth : 0;
+                });
+            }
 
             ScrollView
             {
