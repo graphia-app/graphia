@@ -91,6 +91,13 @@ function printStackTrace()
     console.log(trace);
 }
 
+function callingFunction()
+{
+    let err = new Error();
+    let elements = err.stack.split("\n");
+    return elements[2];
+}
+
 function normaliseWhitespace(text)
 {
     text = text.replace(/\s+/g, " ");
