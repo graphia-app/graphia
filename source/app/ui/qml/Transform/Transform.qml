@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
@@ -154,7 +154,7 @@ Item
                 MenuItem
                 {
                     text: qsTr("Delete")
-                    iconName: "edit-delete"
+                    icon.name: "edit-delete"
 
                     onTriggered:
                     {
