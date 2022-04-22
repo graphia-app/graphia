@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 
 Item
 {
@@ -83,7 +83,7 @@ Item
         onClicked:
         {
             if(menu)
-                menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
+                menu.popup(0, parent.height + 4/*padding*/);
         }
 
         onPressed: { mouse.accepted = !propogatePresses; }
