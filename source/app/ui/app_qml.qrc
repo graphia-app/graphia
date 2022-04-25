@@ -69,5 +69,6 @@
         <file>qml/Controls/ToolBarButton.qml</file>
         <file>qml/Controls/TabBarButton.qml</file>
         <file>qml/Controls/ScrollableTextArea.qml</file>
+        <file>qml/Controls/DoubleSpinBox.qml</file>
     </qresource>
 </RCC>
