@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
@@ -85,24 +85,20 @@ GridLayout
         return n;
     }
 
-    SpinBox
+    DoubleSpinBox
     {
         id: spinBox
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.Int || valueType === ValueType.Float)
+        editable: true
 
         decimals:
         {
-            if(valueType === ValueType.Float)
-            {
-                if(hasRange)
-                    return Utils.decimalPointsForRange(root.minimumValue, root.maximumValue);
+            if(valueType === ValueType.Int)
+                return 0;
 
-                return 3;
-            }
-
-            return 0;
+            return root.hasRange ? Utils.decimalPointsForRange(root.minimumValue, root.maximumValue) : 3;
         }
 
         stepSize:
@@ -110,11 +106,7 @@ GridLayout
             if(hasRange)
             {
                 let incrementSize = Utils.incrementForRange(root.minimumValue, root.maximumValue);
-
-                if(valueType === ValueType.Int && incrementSize < 1.0)
-                    return 1.0;
-
-                return incrementSize;
+                return valueType === ValueType.Int ? Math.round(Math.max(incrementSize, 1.0)) : incrementSize;
             }
 
             return 1.0;
@@ -140,11 +132,13 @@ GridLayout
             ignoreEdits = false;
         }
 
-        onEditingFinished:
+        onValueModified:
         {
             if(!ignoreEdits)
             {
                 updateValue();
+
+                // updateValue() may have set ignoreEdits by altering Slider value
                 ignoreEdits = false;
             }
         }
@@ -283,32 +277,31 @@ GridLayout
             value = typedValue(value);
 
             let floatValue = parseFloat(value);
+            if(isNaN(floatValue))
+                return;
 
-            if(!isNaN(floatValue))
+            if(hasMinimumValue)
             {
-                if(hasMinimumValue)
-                {
-                    if(floatValue < minimumValue)
-                        floatValue = minimumValue;
+                if(floatValue < minimumValue)
+                    floatValue = minimumValue;
 
-                    spinBox.minimumValue = minimumValue;
-                }
-                else
-                    spinBox.minimumValue = Number.NEGATIVE_INFINITY;
-
-                if(hasMaximumValue)
-                {
-                    if(floatValue > maximumValue)
-                        floatValue = maximumValue;
-
-                    spinBox.maximumValue = maximumValue;
-                }
-                else
-                    spinBox.maximumValue = Number.POSITIVE_INFINITY;
-
-                spinBox.value = floatValue;
-                slider.value = Utils.normalise(root.minimumValue, root.maximumValue, floatValue);
+                spinBox.from = minimumValue;
             }
+            else
+                spinBox.from = -0x7FFFFFFF;
+
+            if(hasMaximumValue)
+            {
+                if(floatValue > maximumValue)
+                    floatValue = maximumValue;
+
+                spinBox.to = maximumValue;
+            }
+            else
+                spinBox.to = 0x7FFFFFFF;
+
+            spinBox.value = floatValue;
+            slider.value = Utils.normalise(root.minimumValue, root.maximumValue, floatValue);
             break;
 
         case ValueType.String:

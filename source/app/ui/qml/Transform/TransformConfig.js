@@ -49,7 +49,7 @@ function addLabelTo(text, parent)
 {
     text = text.trim();
     Qt.createQmlObject("import QtQuick 2.7\n" +
-        "import QtQuick.Controls 1.5\n" +
+        "import QtQuick.Controls 2.12\n" +
         "Label { text: \"" +
         Utils.normaliseWhitespace(text) +
         "\"; color: root.textColor }", parent);
