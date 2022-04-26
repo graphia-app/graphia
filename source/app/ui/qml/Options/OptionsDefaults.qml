@@ -200,7 +200,7 @@ Item
                 anchors.margins: 1
                 clip: true
 
-                property bool needsFrame: scrollView.contentHeight > scrollView.availableHeight
+                property bool needsFrame: contentHeight > availableHeight
 
                 RowLayout
                 {
