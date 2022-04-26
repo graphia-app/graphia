@@ -150,6 +150,7 @@ Window
 
                                 return value;
                             }
+                            color: styleData.textColor
                         }
                     }
 
