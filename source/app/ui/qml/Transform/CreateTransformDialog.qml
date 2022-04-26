@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
@@ -205,14 +205,6 @@ Window
 
                             if(_transform.defaultVisualisations !== undefined)
                                 visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
-
-                            // This is a hack that forces the scrollView to reconsider the size of its
-                            // content and avoid cutting the bottom off after some combination of clicking
-                            // on transforms in the list. It appears to be related to the Layout.margins
-                            // that are enabled when the scrollbar is visible.
-                            // See LAYOUT_MARGINS_HACK comment for the Layout.margins in question.
-                            scrollView.verticalScrollBarPolicy = Qt.ScrollBarAlwaysOff;
-                            scrollView.verticalScrollBarPolicy = Qt.ScrollBarAsNeeded;
                         }
 
                         attributeDescription.clear();
@@ -296,248 +288,294 @@ Window
                               qsTr("No Parameters Required") : qsTr("Select A Transform")
                 }
 
-                ScrollView
+                Frame
                 {
-                    id: scrollView
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: parameters.enabled || attributeParameters.enabled ||
+                        visualisations.enabled || condition.enabled
 
-                    frameVisible: (parameters.enabled || attributeParameters.enabled ||
-                                   visualisations.enabled) && scrollView.__verticalScrollBar.visible
+                    topPadding: 0
+                    leftPadding: 0
+                    rightPadding: 0
+                    bottomPadding: 0
 
-                    visible: parameters.enabled || attributeParameters.enabled || visualisations.enabled ||
-                             condition.enabled
-
-                    Layout.fillWidth: visible
-                    Layout.fillHeight: visible
-
-                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                    verticalScrollBarPolicy: Qt.ScrollBarAsNeeded
-
-                    contentItem: RowLayout
+                    Component.onCompleted:
                     {
-                        width: scrollView.viewport.width
-
-                        ColumnLayout
+                        let frameWidth = background.border.width;
+                        background.border.width = Qt.binding(function()
                         {
-                            Layout.fillWidth: true
+                            return scrollView.needsFrame ? frameWidth : 0;
+                        });
+                    }
 
-                            // LAYOUT_MARGINS_HACK
-                            Layout.margins: scrollView.frameVisible ? Constants.margin : 0
+                    ScrollView
+                    {
+                        id: scrollView
 
-                            spacing: 20
+                        anchors.fill: parent
+                        clip: true
 
-                            RowLayout
-                            {
-                                id: condition
-                                enabled: _transform !== undefined && _transform.requiresCondition
-                                visible: enabled
+                        property bool needsFrame: contentHeight > availableHeight
 
-                                Layout.fillWidth: visible
-                                Layout.minimumHeight:
-                                {
-                                    let conditionHeight = scrollView.viewport.height;
+                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                                    if(parameters.enabled || visualisations.enabled)
-                                        conditionHeight *= 0.5;
-
-                                    return Math.max(conditionHeight, 128);
-                                }
-
-                                Label
-                                {
-                                    Layout.topMargin: Constants.margin
-                                    Layout.alignment: Qt.AlignTop
-                                    text: qsTr("where")
-                                }
-
-                                TreeBox
-                                {
-                                    id: lhsAttributeList
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-
-                                    showSections: sortRoleName !== "display"
-                                    showSearch: true
-                                    showParentGuide: true
-                                    sortRoleName: "userDefined"
-                                    prettifyFunction: AttributeUtils.prettify
-
-                                    onSelectedValueChanged:
-                                    {
-                                        let attribute = document.attribute(selectedValue);
-                                        if(currentIndexIsSelectable && attribute.isValid)
-                                        {
-                                            opList.updateModel(attribute.ops);
-
-                                            let parameterData = document.attribute(lhsAttributeList.selectedValue);
-                                            rhs.configure(parameterData);
-                                        }
-                                        else
-                                        {
-                                            opList.updateModel();
-                                            valueParameter.reset();
-                                        }
-
-                                        attributeDescription.updateFor(lhsAttributeList.selectedValue);
-                                        updateTransformExpression();
-                                    }
-
-                                    AttributeListSortMenu { attributeList: lhsAttributeList }
-                                }
-
-                                ListBox
-                                {
-                                    id: opList
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    Layout.preferredWidth: 150
-
-                                    onSelectedValueChanged: { updateTransformExpression(); }
-
-                                    Component { id: modelComponent; ListModel {} }
-
-                                    function updateModel(ops)
-                                    {
-                                        if(ops === undefined)
-                                        {
-                                            opList.model = undefined;
-                                            return;
-                                        }
-
-                                        let newModel = modelComponent.createObject();
-
-                                        for(let i = 0; i < ops.length; i++)
-                                        {
-                                            let item =
-                                            {
-                                                display: TransformConfig.sanitiseOp(ops[i]),
-                                                value: ops[i],
-                                                unary: document.opIsUnary(ops[i])
-                                            };
-
-                                            newModel.append(item);
-                                        }
-
-                                        opList.model = newModel;
-                                    }
-                                }
-
-                                GridLayout
-                                {
-                                    id: rhs
-
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-
-                                    enabled: opList.selectedValue !== undefined &&
-                                             !opList.selectedValue.unary
-
-                                    columns: 2
-                                    ExclusiveGroup { id: rhsGroup }
-
-                                    RadioButton
-                                    {
-                                        id: valueRadioButton
-                                        Layout.alignment: Qt.AlignTop
-
-                                        checked: true
-                                        exclusiveGroup: rhsGroup
-
-                                        // This effectively handles
-                                        // attributeRadioButton::onCheckedChanged too
-                                        onCheckedChanged: { updateTransformExpression(); }
-                                    }
-
-                                    TransformParameter
-                                    {
-                                        id: valueParameter
-                                        Layout.fillWidth: true
-
-                                        enabled: valueRadioButton.checked
-                                        updateValueImmediately: true
-                                        direction: Qt.Vertical
-                                        fillWidth: true
-                                        onValueChanged: { updateTransformExpression(); }
-                                    }
-
-                                    RadioButton
-                                    {
-                                        id: attributeRadioButton
-                                        Layout.alignment: Qt.AlignTop
-
-                                        exclusiveGroup: rhsGroup
-                                    }
-
-                                    TreeBox
-                                    {
-                                        id: rhsAttributeList
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-
-                                        showSections: lhsAttributeList.showSections
-                                        showSearch: true
-                                        showParentGuide: true
-                                        sortRoleName: lhsAttributeList.sortRoleName
-                                        prettifyFunction: AttributeUtils.prettify
-
-                                        enabled: attributeRadioButton.checked
-                                        onSelectedValueChanged:
-                                        {
-                                            attributeDescription.updateFor(rhsAttributeList.selectedValue);
-                                            updateTransformExpression();
-                                        }
-
-                                        AttributeListSortMenu { attributeList: rhsAttributeList }
-                                    }
-
-                                    function configure(parameterData)
-                                    {
-                                        valueParameter.configure(parameterData);
-
-                                        if(parameterData.valueType !== undefined)
-                                        {
-                                            rhsAttributeList.model = document.availableAttributesModel(
-                                                root._transform.elementType, parameterData.valueType,
-                                                AttributeFlag.DisableDuringTransform);
-                                        }
-                                        else
-                                            rhsAttributeList.model = undefined;
-                                    }
-
-                                    function value()
-                                    {
-                                        if(valueRadioButton.checked)
-                                            return valueParameter.value;
-
-                                        if(attributeRadioButton.checked)
-                                        {
-                                            if(!document.attribute(rhsAttributeList.selectedValue).isValid)
-                                                return "";
-
-                                            return "$" + rhsAttributeList.selectedValue;
-                                        }
-
-                                        return "";
-                                    }
-                                }
-                            }
+                        RowLayout
+                        {
+                            width: scrollView.width
 
                             ColumnLayout
                             {
-                                id: attributeParameters
-                                enabled: _transform !== undefined && _numAttributeParameters > 0
-                                visible: enabled
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.margins: scrollView.needsFrame ? Constants.margin : 0
 
-                                Layout.fillWidth: visible
                                 spacing: 20
 
-                                property var _attributeNames
-
-                                Repeater
+                                ColumnLayout
                                 {
-                                    id: attributeParametersRepeater
+                                    id: condition
+                                    enabled: _transform !== undefined && _transform.requiresCondition
+                                    visible: enabled
 
-                                    delegate: Component
+                                    Layout.fillWidth: visible
+                                    Layout.minimumHeight:
                                     {
+                                        let conditionHeight = scrollView.height;
+
+                                        if(parameters.enabled || visualisations.enabled)
+                                            conditionHeight *= 0.5;
+
+                                        return Math.max(conditionHeight, 128);
+                                    }
+
+                                    RowLayout
+                                    {
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+
+                                        Label
+                                        {
+                                            Layout.topMargin: Constants.margin
+                                            Layout.alignment: Qt.AlignTop
+                                            text: qsTr("where")
+                                        }
+
+                                        TreeBox
+                                        {
+                                            id: lhsAttributeList
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+
+                                            showSections: sortRoleName !== "display"
+                                            showSearch: true
+                                            showParentGuide: true
+                                            sortRoleName: "userDefined"
+                                            prettifyFunction: AttributeUtils.prettify
+
+                                            onSelectedValueChanged:
+                                            {
+                                                let attribute = document.attribute(selectedValue);
+                                                if(currentIndexIsSelectable && attribute.isValid)
+                                                {
+                                                    opList.updateModel(attribute.ops);
+
+                                                    let parameterData = document.attribute(lhsAttributeList.selectedValue);
+                                                    rhs.configure(parameterData);
+                                                }
+                                                else
+                                                {
+                                                    opList.updateModel();
+                                                    valueParameter.reset();
+                                                }
+
+                                                attributeDescription.updateFor(lhsAttributeList.selectedValue);
+                                                updateTransformExpression();
+                                            }
+
+                                            AttributeListSortMenu { attributeList: lhsAttributeList }
+                                        }
+
+                                        ListBox
+                                        {
+                                            id: opList
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            Layout.preferredWidth: 150
+
+                                            onSelectedValueChanged: { updateTransformExpression(); }
+
+                                            Component { id: modelComponent; ListModel {} }
+
+                                            function updateModel(ops)
+                                            {
+                                                if(ops === undefined)
+                                                {
+                                                    opList.model = undefined;
+                                                    return;
+                                                }
+
+                                                let newModel = modelComponent.createObject();
+
+                                                for(let i = 0; i < ops.length; i++)
+                                                {
+                                                    let item =
+                                                    {
+                                                        display: TransformConfig.sanitiseOp(ops[i]),
+                                                        value: ops[i],
+                                                        unary: document.opIsUnary(ops[i])
+                                                    };
+
+                                                    newModel.append(item);
+                                                }
+
+                                                opList.model = newModel;
+                                            }
+                                        }
+
+                                        GridLayout
+                                        {
+                                            id: rhs
+
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+
+                                            enabled: opList.selectedValue !== undefined &&
+                                                     !opList.selectedValue.unary
+
+                                            columns: 2
+                                            ButtonGroup { buttons: [valueRadioButton, attributeRadioButton] }
+
+                                            RadioButton
+                                            {
+                                                id: valueRadioButton
+                                                Layout.alignment: Qt.AlignTop
+
+                                                checked: true
+
+                                                // This effectively handles
+                                                // attributeRadioButton::onCheckedChanged too
+                                                onCheckedChanged: { updateTransformExpression(); }
+                                            }
+
+                                            TransformParameter
+                                            {
+                                                id: valueParameter
+                                                Layout.fillWidth: true
+
+                                                enabled: valueRadioButton.checked
+                                                updateValueImmediately: true
+                                                direction: Qt.Vertical
+                                                fillWidth: true
+                                                onValueChanged: { updateTransformExpression(); }
+                                            }
+
+                                            RadioButton
+                                            {
+                                                id: attributeRadioButton
+                                                Layout.alignment: Qt.AlignTop
+                                            }
+
+                                            TreeBox
+                                            {
+                                                id: rhsAttributeList
+                                                Layout.fillWidth: true
+                                                Layout.fillHeight: true
+
+                                                showSections: lhsAttributeList.showSections
+                                                showSearch: true
+                                                showParentGuide: true
+                                                sortRoleName: lhsAttributeList.sortRoleName
+                                                prettifyFunction: AttributeUtils.prettify
+
+                                                enabled: attributeRadioButton.checked
+                                                onSelectedValueChanged:
+                                                {
+                                                    attributeDescription.updateFor(rhsAttributeList.selectedValue);
+                                                    updateTransformExpression();
+                                                }
+
+                                                AttributeListSortMenu { attributeList: rhsAttributeList }
+                                            }
+
+                                            function configure(parameterData)
+                                            {
+                                                valueParameter.configure(parameterData);
+
+                                                if(parameterData.valueType !== undefined)
+                                                {
+                                                    rhsAttributeList.model = document.availableAttributesModel(
+                                                        root._transform.elementType, parameterData.valueType,
+                                                        AttributeFlag.DisableDuringTransform);
+                                                }
+                                                else
+                                                    rhsAttributeList.model = undefined;
+                                            }
+
+                                            function value()
+                                            {
+                                                if(valueRadioButton.checked)
+                                                    return valueParameter.value;
+
+                                                if(attributeRadioButton.checked)
+                                                {
+                                                    if(!document.attribute(rhsAttributeList.selectedValue).isValid)
+                                                        return "";
+
+                                                    return "$" + rhsAttributeList.selectedValue;
+                                                }
+
+                                                return "";
+                                            }
+                                        }
+                                    }
+
+                                    Text
+                                    {
+                                        id: attributeDescription
+                                        visible: text.length > 0
+
+                                        Layout.fillWidth: true
+
+                                        textFormat: Text.StyledText
+                                        wrapMode: Text.WordWrap
+
+                                        PointingCursorOnHoverLink {}
+                                        onLinkActivated: Qt.openUrlExternally(link);
+
+                                        function clear()
+                                        {
+                                            attributeDescription.text = "";
+                                        }
+
+                                        function updateFor(attributeName)
+                                        {
+                                            let parameterData = document.attribute(attributeName);
+
+                                            if(parameterData.isValid && parameterData.description !== undefined)
+                                                attributeDescription.text = parameterData.description;
+                                            else
+                                                attributeDescription.clear();
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout
+                                {
+                                    id: attributeParameters
+                                    enabled: _transform !== undefined && _numAttributeParameters > 0
+                                    visible: enabled
+
+                                    Layout.fillWidth: visible
+                                    spacing: 20
+
+                                    property var _attributeNames
+
+                                    Repeater
+                                    {
+                                        id: attributeParametersRepeater
+
                                         RowLayout
                                         {
                                             property var parameterData:
@@ -609,25 +647,22 @@ Window
                                         }
                                     }
                                 }
-                            }
 
-                            ColumnLayout
-                            {
-                                id: parameters
-                                enabled: _transform !== undefined && _numParameters > 0
-                                visible: enabled
-
-                                Layout.fillWidth: visible
-                                spacing: 20
-
-                                property var _values
-
-                                Repeater
+                                ColumnLayout
                                 {
-                                    id: parametersRepeater
+                                    id: parameters
+                                    enabled: _transform !== undefined && _numParameters > 0
+                                    visible: enabled
 
-                                    delegate: Component
+                                    Layout.fillWidth: visible
+                                    spacing: 20
+
+                                    property var _values
+
+                                    Repeater
                                     {
+                                        id: parametersRepeater
+
                                         RowLayout
                                         {
                                             property var parameterData: _transform.parameters[modelData]
@@ -655,14 +690,11 @@ Window
                                                     PointingCursorOnHoverLink {}
                                                     onLinkActivated: Qt.openUrlExternally(link);
                                                 }
-
-                                                Item { Layout.fillHeight: true }
                                             }
 
                                             Item
                                             {
                                                 id: controlPlaceholder
-                                                Layout.fillHeight: true
 
                                                 implicitWidth: childrenRect.width
                                                 implicitHeight: childrenRect.height
@@ -678,73 +710,70 @@ Window
                                             }
                                         }
                                     }
-                                }
 
-                                function updateValues()
-                                {
-                                    for(let parameterName in _values)
-                                        _values[parameterName].updateValue();
-
-                                    visualisations.update();
-                                }
-
-                                function valueOf(parameterName)
-                                {
-                                    if(_values === undefined)
-                                        return "\"\"";
-
-                                    let transformParameter = _values[parameterName];
-
-                                    if(transformParameter === undefined)
-                                        return "\"\"";
-
-                                    return transformParameter.value;
-                                }
-                            }
-
-                            ColumnLayout
-                            {
-                                id: visualisations
-                                enabled: _transform !== undefined && _numDefaultVisualisations > 0
-                                visible: enabled
-
-                                Layout.fillWidth: visible
-                                spacing: 20
-
-                                property var _visualisations
-
-                                function update()
-                                {
-                                    visualisations._visualisations = {};
-
-                                    for(let i = 0; i < visualisationsRepeater.count; i++)
+                                    function updateValues()
                                     {
-                                        let item = visualisationsRepeater.itemAt(i);
-                                        if(item === null)
-                                        {
-                                            // Not sure why this happens, but it
-                                            // does, so avoid the inevitable warning
-                                            continue;
-                                        }
+                                        for(let parameterName in _values)
+                                            _values[parameterName].updateValue();
 
-                                        visualisations._visualisations[item.attributeName] = item.value;
+                                        visualisations.update();
+                                    }
+
+                                    function valueOf(parameterName)
+                                    {
+                                        if(_values === undefined)
+                                            return "\"\"";
+
+                                        let transformParameter = _values[parameterName];
+
+                                        if(transformParameter === undefined)
+                                            return "\"\"";
+
+                                        return transformParameter.value;
                                     }
                                 }
 
-                                Label
+                                ColumnLayout
                                 {
-                                    Layout.alignment: Qt.AlignTop
-                                    font.italic: true
-                                    font.bold: true
-                                    text: qsTr("Visualisations")
-                                }
+                                    id: visualisations
+                                    enabled: _transform !== undefined && _numDefaultVisualisations > 0
+                                    visible: enabled
 
-                                Repeater
-                                {
-                                    id: visualisationsRepeater
+                                    Layout.fillWidth: visible
+                                    spacing: 20
 
-                                    delegate: Component
+                                    property var _visualisations
+
+                                    function update()
                                     {
+                                        visualisations._visualisations = {};
+
+                                        for(let i = 0; i < visualisationsRepeater.count; i++)
+                                        {
+                                            let item = visualisationsRepeater.itemAt(i);
+                                            if(item === null)
+                                            {
+                                                // Not sure why this happens, but it
+                                                // does, so avoid the inevitable warning
+                                                continue;
+                                            }
+
+                                            visualisations._visualisations[item.attributeName] = item.value;
+                                        }
+                                    }
+
+                                    Label
+                                    {
+                                        Layout.alignment: Qt.AlignTop
+                                        font.italic: true
+                                        font.bold: true
+                                        text: qsTr("Visualisations")
+                                    }
+
+                                    Repeater
+                                    {
+                                        id: visualisationsRepeater
+
                                         ColumnLayout
                                         {
                                             property string attributeName:
@@ -795,66 +824,38 @@ Window
                                             }
                                         }
                                     }
-                                }
 
-                                function resolvedAttributeName(attributeName)
-                                {
-                                    let noQuotesAttributeName = attributeName.replace(/"/g, "");
-                                    if(_transform !== undefined &&
-                                        _transform.parameters.hasOwnProperty(noQuotesAttributeName) &&
-                                        _transform.parameters[noQuotesAttributeName].valueType === ValueType.String)
+                                    function resolvedAttributeName(attributeName)
                                     {
-                                        // If the attribute name matches a parameter name, the parameter
-                                        // is (probably) the name of a new attribute, so use its value
-                                        return parameters.valueOf(noQuotesAttributeName);
+                                        let noQuotesAttributeName = attributeName.replace(/"/g, "");
+                                        if(_transform !== undefined &&
+                                            _transform.parameters.hasOwnProperty(noQuotesAttributeName) &&
+                                            _transform.parameters[noQuotesAttributeName].valueType === ValueType.String)
+                                        {
+                                            // If the attribute name matches a parameter name, the parameter
+                                            // is (probably) the name of a new attribute, so use its value
+                                            return parameters.valueOf(noQuotesAttributeName);
+                                        }
+
+                                        return attributeName;
                                     }
 
-                                    return attributeName;
-                                }
+                                    function selectedVisualisation(attributeName)
+                                    {
+                                        if(_visualisations === undefined)
+                                            return "";
 
-                                function selectedVisualisation(attributeName)
-                                {
-                                    if(_visualisations === undefined)
-                                        return "";
+                                        attributeName = resolvedAttributeName(attributeName);
+                                        let visualisationChannelName = _visualisations[attributeName];
 
-                                    attributeName = resolvedAttributeName(attributeName);
-                                    let visualisationChannelName = _visualisations[attributeName];
+                                        if(visualisationChannelName === undefined)
+                                            return "";
 
-                                    if(visualisationChannelName === undefined)
-                                        return "";
-
-                                    return visualisationChannelName;
+                                        return visualisationChannelName;
+                                    }
                                 }
                             }
                         }
-                    }
-                }
-
-                Text
-                {
-                    id: attributeDescription
-                    visible: text.length > 0
-
-                    Layout.topMargin: Constants.spacing
-                    Layout.fillWidth: true
-
-                    textFormat: Text.StyledText
-                    wrapMode: Text.WordWrap
-
-                    PointingCursorOnHoverLink {}
-                    onLinkActivated: Qt.openUrlExternally(link);
-
-                    function clear()
-                    {
-                        attributeDescription.text = "";
-                    }
-
-                    function updateFor(attributeName)
-                    {
-                        let parameterData = document.attribute(attributeName);
-
-                        if(parameterData.description !== undefined)
-                            attributeDescription.text = parameterData.description;
                     }
                 }
 
