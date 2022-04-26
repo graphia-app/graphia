@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import app.graphia 1.0
 
@@ -339,6 +339,7 @@ Item
                 {
                     text: qsTr("Edit…")
                     visible: gradientKey.visible || paletteKey.visible
+                    height: visible ? implicitHeight : 0
                     enabled: enabledMenuItem.checked && !root._error
 
                     onTriggered:
@@ -356,7 +357,7 @@ Item
                         root.attributeValueType === ValueType.Numerical;
                 }
 
-                MenuSeparator { visible: optionsMenu._showMappingOptions }
+                MenuSeparator { visible: optionsMenu._showMappingOptions; height: visible ? implicitHeight : 0 }
 
                 MenuItem
                 {
@@ -367,6 +368,7 @@ Item
                     enabled: enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
+                    height: visible ? implicitHeight : 0
 
                     onCheckedChanged:
                     {
@@ -375,7 +377,7 @@ Item
                     }
                 }
 
-                ExclusiveGroup { id: mappingExclusiveGroup }
+                ButtonGroup { buttons: [minmaxMenuItem, stddevMenuItem, customMappingMenuItem] }
 
                 function setupMappingMenuItems()
                 {
@@ -411,9 +413,9 @@ Item
                     checked: parameters.mapping === undefined
 
                     checkable: true
-                    exclusiveGroup: mappingExclusiveGroup
 
                     visible: optionsMenu._showMappingOptions
+                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -429,9 +431,9 @@ Item
                     enabled: enabledMenuItem.checked && !root._error
 
                     checkable: true
-                    exclusiveGroup: mappingExclusiveGroup
 
                     visible: optionsMenu._showMappingOptions
+                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -447,10 +449,10 @@ Item
                     text: qsTr("Custom Mapping…")
 
                     checkable: true
-                    exclusiveGroup: mappingExclusiveGroup
 
                     enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showMappingOptions
+                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -467,7 +469,7 @@ Item
                     }
                 }
 
-                MenuSeparator { visible: optionsMenu._showMappingOptions }
+                MenuSeparator { visible: optionsMenu._showMappingOptions; height: visible ? implicitHeight : 0 }
 
                 MenuItem
                 {
@@ -478,6 +480,7 @@ Item
                     enabled: enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
+                    height: visible ? implicitHeight : 0
 
                     onCheckedChanged:
                     {
@@ -494,9 +497,9 @@ Item
                     return root.attributeValueType === ValueType.String;
                 }
 
-                ExclusiveGroup { id: sortByExclusiveGroup }
+                ButtonGroup { buttons: [sortByValueMenuItem, sortBySharedValuesMenuItem] }
 
-                MenuSeparator { visible: optionsMenu._showAssignByOptions }
+                MenuSeparator { visible: optionsMenu._showAssignByOptions; height: visible ? implicitHeight : 0 }
 
                 MenuItem
                 {
@@ -504,10 +507,10 @@ Item
 
                     enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
+                    height: visible ? implicitHeight : 0
 
                     text: qsTr("By Value")
                     checkable: true
-                    exclusiveGroup: sortByExclusiveGroup
                 }
 
                 MenuItem
@@ -516,10 +519,10 @@ Item
 
                     enabled: enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
+                    height: visible ? implicitHeight : 0
 
                     text: qsTr("By Quantity")
                     checkable: true
-                    exclusiveGroup: sortByExclusiveGroup
 
                     onCheckedChanged:
                     {
@@ -528,12 +531,12 @@ Item
                     }
                 }
 
-                MenuSeparator { visible: optionsMenu._showAssignByOptions }
+                MenuSeparator { visible: optionsMenu._showAssignByOptions; height: visible ? implicitHeight : 0 }
 
                 MenuItem
                 {
                     text: qsTr("Delete")
-                    iconName: "edit-delete"
+                    icon.name: "edit-delete"
 
                     onTriggered:
                     {
