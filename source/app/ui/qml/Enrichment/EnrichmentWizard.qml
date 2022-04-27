@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.2
@@ -42,19 +42,20 @@ Wizard
     property string selectedAttributeGroupB: ""
 
     nextEnabled: proxyModel.count > 1
-    finishEnabled: (attributeSelectedAExclusiveGroup.current !== null) && (attributeSelectedBExclusiveGroup.current !== null)
+    finishEnabled: selectedAttributeGroupA.length > 0 && selectedAttributeGroupB.length > 0
 
     function reset()
     {
         // Reset on finish
         goToPage(0);
-        scrollViewA.flickableItem.contentY = 0;
-        scrollViewB.flickableItem.contentY = 0;
+        scrollViewA.ScrollBar.vertical.position = 0;
+        scrollViewB.ScrollBar.vertical.position = 0;
     }
 
     onVisibleChanged:
     {
         reset();
+        root.selectedAttributeGroupA = root.selectedAttributeGroupB = "";
         proxyModel.model = document.availableAttributesModel(ElementType.Node);
     }
 
@@ -131,7 +132,7 @@ Wizard
                             if(proxyModel.count < 2)
                             {
                                 desc += qsTr("<br><font color=\"red\">This dataset does not have enough attribute groups to perform enrichment." +
-                                            " At least two groups are required</font>");
+                                            " At least two groups are required.</font>");
                             }
                             return desc;
                         }
@@ -154,7 +155,6 @@ Wizard
             }
         }
     }
-
 
     Item
     {
@@ -183,54 +183,70 @@ Wizard
                     Layout.fillWidth: true
                 }
 
-                ScrollView
+                Frame
                 {
-                    id: scrollViewA
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    frameVisible: true
-                    ColumnLayout
-                    {
-                        ExclusiveGroup
-                        {
-                            id: attributeSelectedAExclusiveGroup
-                            onCurrentChanged:
-                            {
-                                if(current !== null && root.visible)
-                                {
-                                    selectedAttributeGroupA = current.attributeName;
 
-                                    // Disable analysis on selected
-                                    for(let i = 0; i < attributeSelectBRepeater.count; i++)
+                    topPadding: 0
+                    leftPadding: 0
+                    rightPadding: 0
+                    bottomPadding: 0
+
+                    Component.onCompleted: { scrollViewA.anchors.margins = background.border.width; }
+
+                    ScrollView
+                    {
+                        id: scrollViewA
+                        anchors.fill: parent
+                        clip: true
+
+                        ColumnLayout
+                        {
+                            spacing: 0
+
+                            ButtonGroup
+                            {
+                                id: attributeSelectedAExclusiveGroup
+                                onCheckedButtonChanged:
+                                {
+                                    if(checkedButton !== null && root.visible)
                                     {
-                                        let radioBtn = attributeSelectBRepeater.itemAt(i);
-                                        radioBtn.enabled = radioBtn.attributeName !== current.attributeName;
+                                        selectedAttributeGroupA = checkedButton.attributeName;
+
+                                        // Disable analysis on selected
+                                        for(let i = 0; i < attributeSelectBRepeater.count; i++)
+                                        {
+                                            let radioBtn = attributeSelectBRepeater.itemAt(i);
+                                            radioBtn.enabled = radioBtn.attributeName !== checkedButton.attributeName;
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        Repeater
-                        {
-                            id: attributeSelectARepeater
-                            model: proxyModel
-                            RadioButton
+                            Repeater
                             {
-                                property var attributeName: model.display
+                                id: attributeSelectARepeater
+                                model: proxyModel
 
-                                text:
+                                RadioButton
                                 {
-                                    if(document !== null && model.display.length > 0)
+                                    property var attributeName: model.display
+
+                                    text:
                                     {
-                                        return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries)");
+                                        if(document !== null && model.display.length > 0)
+                                        {
+                                            return model.display + qsTr(" (") +
+                                                document.attribute(model.display).sharedValues.length +
+                                                qsTr(" entries)");
+                                        }
+
+                                        return "";
                                     }
 
-                                    return "";
+                                    ButtonGroup.group: attributeSelectedAExclusiveGroup
                                 }
-
-                                exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
                     }
@@ -238,6 +254,7 @@ Wizard
             }
         }
     }
+
     Item
     {
         Layout.fillHeight: true
@@ -266,45 +283,61 @@ Wizard
                     Layout.fillWidth: true
                 }
 
-                ScrollView
+                Frame
                 {
-                    id: scrollViewB
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    frameVisible: true
-                    ColumnLayout
+
+                    topPadding: 0
+                    leftPadding: 0
+                    rightPadding: 0
+                    bottomPadding: 0
+
+                    Component.onCompleted: { scrollViewB.anchors.margins = background.border.width; }
+
+                    ScrollView
                     {
-                        ExclusiveGroup
-                        {
-                            id: attributeSelectedBExclusiveGroup
-                            onCurrentChanged:
-                            {
-                                if(current !== null && root.visible)
-                                    selectedAttributeGroupB = current.attributeName;
-                            }
-                        }
+                        id: scrollViewB
+                        anchors.fill: parent
+                        clip: true
 
-                        Repeater
+                        ColumnLayout
                         {
-                            id: attributeSelectBRepeater
-                            model: proxyModel
-                            RadioButton
-                            {
-                                property var attributeName: model.display
+                            spacing: 0
 
-                                text:
+                            ButtonGroup
+                            {
+                                id: attributeSelectedBExclusiveGroup
+                                onCheckedButtonChanged:
                                 {
-                                    if(document !== null && model.display.length > 0)
+                                    if(checkedButton !== null && root.visible)
+                                        selectedAttributeGroupB = checkedButton.attributeName;
+                                }
+                            }
+
+                            Repeater
+                            {
+                                id: attributeSelectBRepeater
+                                model: proxyModel
+
+                                RadioButton
+                                {
+                                    property var attributeName: model.display
+
+                                    text:
                                     {
-                                        return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries)");
+                                        if(document !== null && model.display.length > 0)
+                                        {
+                                            return model.display + qsTr(" (") +
+                                                document.attribute(model.display).sharedValues.length +
+                                                qsTr(" entries)");
+                                        }
+
+                                        return "";
                                     }
 
-                                    return "";
+                                    ButtonGroup.group: attributeSelectedBExclusiveGroup
                                 }
-
-                                exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
                         }
                     }
