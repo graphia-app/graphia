@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import "../../shared/ui/qml/Constants.js" as Constants
@@ -196,17 +196,6 @@ BaseParameterDialog
         }
     }
 
-    function indexOf(item)
-    {
-        for(let i = 0; i < listPages.length; i++)
-        {
-            if(listPages[i] === item)
-                return i;
-        }
-
-        return -1;
-    }
-
     NumberAnimation
     {
         id: numberAnimation
@@ -222,9 +211,9 @@ BaseParameterDialog
         for(let i = 0; i < listPages.length; i++)
         {
             listPages[i].parent = content;
-            listPages[i].x = Qt.binding(function() { return indexOf(this) * root.width; });
-            listPages[i].width = Qt.binding(function() { return root.width - (Constants.margin * 2); });
-            listPages[i].height = Qt.binding(function() { return content.height - (Constants.margin * 2); });
+            listPages[i].x = Qt.binding(() => i * root.width);
+            listPages[i].width = Qt.binding(() => root.width - (Constants.margin * 2));
+            listPages[i].height = Qt.binding(() => content.height - (Constants.margin * 2));
         }
     }
 
