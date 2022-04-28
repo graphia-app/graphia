@@ -49,6 +49,8 @@ bool GraphMLSaver::save()
     QXmlStreamWriter stream(&file);
     stream.setAutoFormatting(true);
 
+    stream.writeStartDocument();
+
     stream.writeStartElement(QStringLiteral("graphml"));
     stream.writeStartElement(QStringLiteral("graph"));
     stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
