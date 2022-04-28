@@ -56,8 +56,6 @@ bool GraphMLSaver::save()
     stream.writeAttribute(QStringLiteral("xmlns:xsi"), QStringLiteral("http://www.w3.org/2001/XMLSchema-instance"));
     stream.writeAttribute(QStringLiteral("xsi:schemaLocation"), QStringLiteral("http://graphml.graphdrawing.org/xmlns "
         "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"));
-    stream.writeStartElement(QStringLiteral("graph"));
-    stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
 
     // Add position attribute keys
     stream.writeStartElement(QStringLiteral("key"));
@@ -120,6 +118,9 @@ bool GraphMLSaver::save()
         stream.writeEndElement();
         keyId++;
     }
+
+    stream.writeStartElement(QStringLiteral("graph"));
+    stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
 
     std::unique_lock<NodePositions> lock(graphModel->nodePositions());
 
