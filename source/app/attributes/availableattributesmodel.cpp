@@ -189,7 +189,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     {
         static const QString numericalTr = tr("Numerical");
         static const QString textualTr = tr("Textual");
-        static const QString unknownTypeTr = tr("Numerical");
+        static const QString unknownTypeTr = tr("Unknown Type");
 
         switch(attribute->valueType())
         {
