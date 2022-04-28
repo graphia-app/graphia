@@ -57,6 +57,13 @@ bool GraphMLSaver::save()
     stream.writeAttribute(QStringLiteral("xsi:schemaLocation"), QStringLiteral("http://graphml.graphdrawing.org/xmlns "
         "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"));
 
+    stream.writeStartElement(QStringLiteral("key"));
+    stream.writeAttribute(QStringLiteral("id"), QStringLiteral("desc"));
+    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
+    stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("Description"));
+    stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("string"));
+    stream.writeEndElement();
+
     // Add position attribute keys
     stream.writeStartElement(QStringLiteral("key"));
     stream.writeAttribute(QStringLiteral("id"), QStringLiteral("x"));
@@ -144,7 +151,8 @@ bool GraphMLSaver::save()
             stream.writeEndElement();
         }
 
-        stream.writeStartElement(QStringLiteral("desc"));
+        stream.writeStartElement(QStringLiteral("data"));
+        stream.writeAttribute(QStringLiteral("key"), QStringLiteral("desc"));
         stream.writeCharacters(_graphModel->nodeName(nodeId).toHtmlEscaped());
         stream.writeEndElement();
 
