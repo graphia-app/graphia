@@ -43,9 +43,9 @@ bool GMLSaver::save()
 
     std::map<QString, QString> alphanumAttributeNames;
     _graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
-    for(const auto& nodeAttributeName : _graphModel->attributeNames())
+    for(const auto& attributeName : _graphModel->attributeNames())
     {
-        auto cleanName = nodeAttributeName;
+        auto cleanName = attributeName;
         cleanName.remove(QRegularExpression(QStringLiteral(R"([^a-zA-Z\d])")));
         if(cleanName.isEmpty())
             cleanName = QStringLiteral("Attribute");
@@ -66,7 +66,10 @@ bool GMLSaver::save()
             }
         }
 
-        alphanumAttributeNames[nodeAttributeName] = cleanName;
+        if(cleanName.at(0).isDigit())
+            cleanName = QStringLiteral("Attribute") + cleanName;
+
+        alphanumAttributeNames[attributeName] = cleanName;
 
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / numElements));
@@ -106,7 +109,8 @@ bool GMLSaver::save()
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
         QString nodeName = escape(_graphModel->nodeName(nodeId));
-        stream << indent(level) << "node\n[\n";
+        stream << indent(level) << "node\n";
+        stream << indent(level) << "[\n";
         level++;
         stream << indent(level) << "id " << static_cast<int>(nodeId) << "\n";
         QString labelString = QStringLiteral(R"("%1")").arg(nodeName);
@@ -123,7 +127,8 @@ bool GMLSaver::save()
     {
         const auto& edge = _graphModel->graph().edgeById(edgeId);
 
-        stream << indent(level) << "edge\n[\n";
+        stream << indent(level) << "edge\n";
+        stream << indent(level) << "[\n";
         level++;
         stream << indent(level) << "source " << static_cast<int>(edge.sourceId()) << "\n";
         stream << indent(level) << "target " << static_cast<int>(edge.targetId()) << "\n";
