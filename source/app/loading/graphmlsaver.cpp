@@ -67,23 +67,23 @@ bool GraphMLSaver::save()
     // Add position attribute keys
     stream.writeStartElement(QStringLiteral("key"));
     stream.writeAttribute(QStringLiteral("id"), QStringLiteral("x"));
+    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("x"));
     stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeEndElement();
 
     stream.writeStartElement(QStringLiteral("key"));
     stream.writeAttribute(QStringLiteral("id"), QStringLiteral("y"));
+    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("y"));
     stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeEndElement();
 
     stream.writeStartElement(QStringLiteral("key"));
     stream.writeAttribute(QStringLiteral("id"), QStringLiteral("z"));
+    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("z"));
     stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
     stream.writeEndElement();
 
     // Add attribute keys
