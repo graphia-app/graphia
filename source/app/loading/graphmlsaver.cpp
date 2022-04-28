@@ -109,6 +109,8 @@ bool GraphMLSaver::save()
             stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
         if(attribute->elementType() == ElementType::Edge)
             stream.writeAttribute(QStringLiteral("for"), QStringLiteral("edge"));
+        if(attribute->elementType() == ElementType::Component)
+            stream.writeAttribute(QStringLiteral("for"), QStringLiteral("graph"));
 
         stream.writeAttribute(QStringLiteral("attr.name"), attributeName);
 
