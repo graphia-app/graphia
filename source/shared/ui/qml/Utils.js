@@ -17,7 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import QtQuick.Controls 1.5 as QtQuickControls
+.import QtQuick.Controls 1.5 as QtQuickControls //QQC2PORT
+.import QtQuick.Controls 2.12 as QtQuickControls2
 
 function watchPropertyChanges(object, handler)
 {
@@ -218,9 +219,15 @@ function pluralise(count, singular, plural)
     return count + " " + plural;
 }
 
+function createItem(itemName, parent)
+{
+    return Qt.createQmlObject(
+        "import QtQuick 2.15; import QtQuick.Controls 2.15; " + itemName + " {}", parent);
+}
+
 // Clone one menu into another, such that to is a "proxy" for from that looks
 // identical to from, and uses from's behaviour
-function cloneMenu(from, to)
+function cloneMenu(from, to) //QQC2PORT
 {
     // Clear out any existing items
     while(to.items.length > 0)
@@ -311,6 +318,105 @@ function cloneMenu(from, to)
         fromExclusiveGroup.forEach(function(menuItem)
         {
             menuItem.exclusiveGroup = toExclusiveGroup;
+        });
+    }
+}
+
+function addSeparatorTo(menu)
+{
+    menu.addItem(createItem("MenuSeparator", menu));
+}
+
+function setMenuItemVisibleFunction(menuItem, visibleFunction)
+{
+    menuItem.enabled = Qt.binding(visibleFunction);
+    let visibleHeight = menuItem.height;
+    menuItem.height = Qt.binding(function() { return visibleFunction() ? visibleHeight : 0 });
+}
+
+// Clone one menu into another, such that to is a "proxy" for from that looks
+// identical to from, and uses from's behaviour
+function cloneMenu2(from, to) //QQC2PORT rename to cloneMenu
+{
+    // Clear
+    while(to.count > 0)
+        to.takeItem(0);
+
+    to.title = Qt.binding(function(from) { return function() { return from.title; }; }(from));
+    to.enabled = Qt.binding(function(from) { return function() { return from.enabled; }; }(from));
+
+    let buttonGroups = {};
+
+    for(let i = 0; i < from.count; i++)
+    {
+        let fromItem = from.itemAt(i);
+
+        if(fromItem instanceof QtQuickControls2.MenuItem)
+        {
+            if(fromItem.subMenu !== null)
+            {
+                let toSubMenu = createItem("Menu", to);
+                cloneMenu2(fromItem.subMenu, toSubMenu);
+                to.addMenu(toSubMenu);
+                continue;
+            }
+
+            let toItem = createItem("MenuItem", to);
+            to.addItem(toItem);
+
+            let properties = [// Note "action" is specifcally skipped because
+                              //   a) the properties it proxies are bound anyway
+                              //   b) binding it will cause loops
+                              "checkable", "checked", "enabled",
+                              "icon", "text", "height"];
+
+            properties.forEach(function(prop)
+            {
+                if(fromItem[prop] !== undefined)
+                {
+                    toItem[prop] = Qt.binding(function(fromItem, prop)
+                    {
+                        return function() { return fromItem[prop]; };
+                    }(fromItem, prop));
+                }
+            });
+
+            // Store a list of ButtonGroups so that we can recreate them
+            // in the target menu, later
+            if(fromItem.QtQuickControls2.ButtonGroup.group !== null)
+            {
+                let key = fromItem.QtQuickControls2.ButtonGroup.group.toString();
+
+                if(buttonGroups[key] === undefined)
+                    buttonGroups[key] = [];
+
+                buttonGroups[key].push(toItem);
+            }
+
+            if(toItem.triggered !== undefined)
+            {
+                toItem.triggered.connect(function(fromItem)
+                {
+                    if(fromItem.action !== null)
+                        return function() { fromItem.action.trigger(); }
+
+                    return function() { fromItem.triggered(); };
+                }(fromItem));
+            }
+        }
+        else if(fromItem instanceof QtQuickControls2.MenuSeparator)
+            addSeparatorTo(to);
+    }
+
+    // Create new ButtonGroups which correspond to the source menu's ButtonGroups
+    for(let key in buttonGroups)
+    {
+        let fromButtonGroup = buttonGroups[key];
+        let toButtonGroup = createItem("ButtonGroup", to)
+
+        fromButtonGroup.forEach(function(menuItem)
+        {
+            toButtonGroup.addButton(menuItem);
         });
     }
 }
