@@ -16,10 +16,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick.Controls 1.5
 import QtQuick 2.14
 import QtQml 2.12
-import QtQuick.Controls 2.5 as QQC2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQml.Models 2.13
 import QtQuick.Shapes 1.13
@@ -172,43 +171,40 @@ Item
             return;
 
         // Clear out any existing items
-        while(menu.items.length > 0)
-            menu.removeItem(menu.items[0]);
+        while(menu.count > 0)
+            menu.takeItem(0);
 
         menu.title = qsTr("&Table");
 
-        menu.addItem("").action = resizeColumnsToContentsAction;
-        menu.addItem("").action = selectColumnsAction;
-        menu.addItem("").action = exportTableAction;
-        menu.addSeparator();
-        menu.addItem("").action = selectAllTableAction;
+        menu.addAction(resizeColumnsToContentsAction);
+        menu.addAction(selectColumnsAction);
+        menu.addAction(exportTableAction);
+        Utils.addSeparatorTo(menu);
+        menu.addAction(selectAllTableAction);
 
         tableView._tableMenu = menu;
-        Utils.cloneMenu(menu, contextMenu);
+        Utils.cloneMenu2(menu, contextMenu);
 
-        contextMenu.addSeparator();
-        contextMenu.addItem("").action = copyTableColumnToClipboardAction;
-        contextMenu.addSeparator();
-        contextMenu.addItem("").action = sortAscendingAction;
-        contextMenu.addItem("").action = sortDescendingAction;
-        contextMenu.addSeparator();
+        Utils.addSeparatorTo(contextMenu);
+        contextMenu.addAction(copyTableColumnToClipboardAction);
+        Utils.addSeparatorTo(contextMenu);
+        contextMenu.addAction(sortAscendingAction);
+        contextMenu.addAction(sortDescendingAction);
+        Utils.addSeparatorTo(contextMenu);
 
         let attributeIsEditable = function()
         {
             let attribute = document.attribute(root.lastClickedColumnName);
-
             return attribute.isValid && attribute.editable;
         };
 
-        contextMenu.addItem("").action = cloneSpecificAttributeAction;
+        contextMenu.addAction(cloneSpecificAttributeAction);
 
-        let editItem = contextMenu.addItem("");
-        editItem.action = editSpecificAttributeAction;
-        editItem.visible = Qt.binding(attributeIsEditable);
+        contextMenu.addAction(editSpecificAttributeAction);
+        Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
 
-        let removeItem = contextMenu.addItem("");
-        removeItem.action = removeSpecificAttributeAction;
-        removeItem.visible = Qt.binding(attributeIsEditable);
+        contextMenu.addAction(removeSpecificAttributeAction);
+        Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
     }
 
     function selectAll()
@@ -246,7 +242,7 @@ Item
     {
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
-        iconName: "auto-column-resize"
+        icon.name: "auto-column-resize"
         onTriggered:
         {
             root.resizeColumnsToContents();
@@ -259,7 +255,7 @@ Item
     {
         id: selectColumnsAction
         text: qsTr("&Select Visible Columns")
-        iconName: "column-select"
+        icon.name: "column-select"
         checkable: true
         checked: root.columnSelectionMode
 
@@ -273,7 +269,7 @@ Item
         id: exportTableAction
         enabled: tableView.rows > 0
         text: qsTr("Export…")
-        iconName: "document-save"
+        icon.name: "document-save"
         onTriggered:
         {
             exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
@@ -287,7 +283,7 @@ Item
     {
         id: selectAllTableAction
         text: qsTr("Select All")
-        iconName: "edit-select-all"
+        icon.name: "edit-select-all"
         enabled: tableView.rows > 0
 
         onTriggered: { root.selectAll(); }
@@ -307,14 +303,12 @@ Item
         id: copyTableColumnToClipboardAction
         enabled: tableView.rows > 0
         text: qsTr("Copy Column To Clipboard")
-        iconName: "document-save"
+        icon.name: "document-save"
         onTriggered:
         {
             document.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
         }
     }
-
-    ExclusiveGroup { id: headerSortGroup }
 
     function updateSortActionChecked()
     {
@@ -329,7 +323,6 @@ Item
         id: sortAscendingAction
         text: qsTr("Sort Column Ascending")
         checkable: true
-        exclusiveGroup: headerSortGroup
         onTriggered:
         {
             proxyModel.sortColumn = root.lastClickedColumnName;
@@ -343,7 +336,6 @@ Item
         id: sortDescendingAction
         text: qsTr("Sort Column Descending")
         checkable: true
-        exclusiveGroup: headerSortGroup
         onTriggered:
         {
             proxyModel.sortColumn = root.lastClickedColumnName;
@@ -475,7 +467,7 @@ Item
                         Button
                         {
                             text: qsTr("Done")
-                            iconName: "emblem-unreadable"
+                            icon.name: "emblem-unreadable"
                             onClicked: { columnSelectionMode = false; }
                         }
                     }
@@ -659,7 +651,7 @@ Item
                             }
                         }
 
-                        QQC2.Label
+                        Label
                         {
                             id: headerLabel
                             visible: !columnSelectionMode
@@ -917,10 +909,10 @@ Item
                     }
                 }
 
-                QQC2.ScrollBar.horizontal: QQC2.ScrollBar
+                ScrollBar.horizontal: ScrollBar
                 {
                     id: horizontalTableViewScrollBar
-                    policy: QQC2.ScrollBar.AsNeeded
+                    policy: ScrollBar.AsNeeded
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
 
@@ -937,10 +929,10 @@ Item
                     }
                 }
 
-                QQC2.ScrollBar.vertical: QQC2.ScrollBar
+                ScrollBar.vertical: ScrollBar
                 {
                     id: verticalTableViewScrollBar
-                    policy: QQC2.ScrollBar.AsNeeded
+                    policy: ScrollBar.AsNeeded
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
                 }

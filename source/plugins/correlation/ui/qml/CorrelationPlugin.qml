@@ -449,12 +449,16 @@ PluginContent
         }
     }
 
+    QQC2.Menu { id: dummyTableMenu } //QQC2PORT
+
     function createMenu(index, menu)
     {
         switch(index)
         {
         case 0:
-            tableView.populateTableMenu(menu);
+            //QQC2PORT
+            //tableView.populateTableMenu(menu);
+            tableView.populateTableMenu(dummyTableMenu);
             return true;
 
         case 1:
@@ -718,10 +722,11 @@ PluginContent
 
             ToolButton { action: toggleUiOrientationAction }
             ToolBarSeparator {}
-            ToolButton { action: tableView.resizeColumnsAction }
+            //QQC2PORT
+            /*ToolButton { action: tableView.resizeColumnsAction }
             ToolButton { action: tableView.selectAction }
             ToolButton { action: tableView.exportAction }
-            ToolBarSeparator {}
+            ToolBarSeparator {}*/
             ToolButton { action: toggleColumnNamesAction }
             ToolButton
             {

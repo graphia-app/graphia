@@ -19,6 +19,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import QtQuick.Controls 2.12 as QQC2
 
 import SortFilterProxyModel 0.2
 
@@ -28,12 +29,16 @@ PluginContent
 
     anchors.fill: parent
 
+    QQC2.Menu { id: dummyTableMenu } //QQC2PORT
+
     function createMenu(index, menu)
     {
         switch(index)
         {
         case 0:
-            tableView.populateTableMenu(menu);
+            //QQC2PORT
+            //tableView.populateTableMenu(menu);
+            tableView.populateTableMenu(dummyTableMenu);
             return true;
         }
 
@@ -46,9 +51,10 @@ PluginContent
         {
             anchors.fill: parent
 
-            ToolButton { action: tableView.resizeColumnsAction }
+            //QQC2PORT
+            /*ToolButton { action: tableView.resizeColumnsAction }
             ToolButton { action: tableView.selectAction }
-            ToolButton { action: tableView.exportAction }
+            ToolButton { action: tableView.exportAction }*/
 
             Item { Layout.fillWidth: true }
         }
