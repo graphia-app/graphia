@@ -16,10 +16,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick.Controls 1.5
 import QtQuick 2.14
 import QtQml 2.12
-import QtQuick.Controls 2.4 as QQC2
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
 import app.graphia 1.0
@@ -960,17 +959,17 @@ BaseParameterDialog
 
                         Text { text: qsTr("Minimum:") }
 
-                        SpinBox
+                        DoubleSpinBox
                         {
                             id: minimumCorrelationSpinBox
 
                             implicitWidth: 70
 
-                            minimumValue: 0.0
-                            maximumValue: 1.0
+                            from: 0.0
+                            to: 1.0
 
                             decimals: 3
-                            stepSize: Utils.incrementForRange(minimumValue, maximumValue);
+                            stepSize: Utils.incrementForRange(from, to);
 
                             onValueChanged:
                             {
@@ -979,7 +978,7 @@ BaseParameterDialog
                                 // When the minimum value is increased beyond the initial
                                 // value, the latter can get (visually) lost against the extreme
                                 // left of the plot, so just punt it over a bit
-                                let range = maximumValue - value;
+                                let range = to - value;
                                 let adjustedInitial = value + (range * 0.1);
 
                                 if(initialCorrelationSpinBox.value <= adjustedInitial)
@@ -995,8 +994,8 @@ BaseParameterDialog
                             Layout.minimumWidth: 50
                             Layout.maximumWidth: 150
 
-                            minimumValue: 0.0
-                            maximumValue: 1.0
+                            from: 0.0
+                            to: 1.0
                             value: minimumCorrelationSpinBox.value
                             onValueChanged:
                             {
@@ -1020,13 +1019,13 @@ BaseParameterDialog
 
                         Text { text: qsTr("Initial:") }
 
-                        SpinBox
+                        DoubleSpinBox
                         {
                             id: initialCorrelationSpinBox
 
                             implicitWidth: 70
 
-                            minimumValue:
+                            from:
                             {
                                 if(tabularDataParser.graphSizeEstimate.keys !== undefined)
                                     return tabularDataParser.graphSizeEstimate.keys[0];
@@ -1034,10 +1033,10 @@ BaseParameterDialog
                                 return minimumCorrelationSpinBox.value;
                             }
 
-                            maximumValue: 1.0
+                            to: 1.0
 
                             decimals: 3
-                            stepSize: Utils.incrementForRange(minimumValue, maximumValue);
+                            stepSize: Utils.incrementForRange(from, to);
 
                             onValueChanged:
                             {
@@ -1325,7 +1324,7 @@ BaseParameterDialog
                     Layout.fillWidth: true
                 }
 
-                TextArea
+                ScrollableTextArea
                 {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
