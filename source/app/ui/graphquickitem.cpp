@@ -377,14 +377,16 @@ void GraphQuickItem::mouseMoveEvent(QMouseEvent* e)         { enqueueEvent(e); }
 void GraphQuickItem::mouseDoubleClickEvent(QMouseEvent* e)  { enqueueEvent(e); }
 void GraphQuickItem::wheelEvent(QWheelEvent* e)             { enqueueEvent(e); }
 
+const IGraphComponent* GraphQuickItem::focusedComponent() const
+{
+    return !_focusedComponentId.isNull() && _graphModel->graph().containsComponentId(_focusedComponentId) ?
+        _graphModel->graph().componentById(_focusedComponentId) : nullptr;
+}
+
 int GraphQuickItem::numNodes() const
 {
     if(_graphModel != nullptr)
-    {
-        return !_focusedComponentId.isNull() ?
-            _graphModel->graph().componentById(_focusedComponentId)->numNodes() :
-            _graphModel->graph().numNodes();
-    }
+        return focusedComponent() != nullptr ? focusedComponent()->numNodes() : _graphModel->graph().numNodes();
 
     return -1;
 }
@@ -393,9 +395,7 @@ int GraphQuickItem::numVisibleNodes() const
 {
     if(_graphModel != nullptr)
     {
-        const auto& nodeIds = !_focusedComponentId.isNull() ?
-            _graphModel->graph().componentById(_focusedComponentId)->nodeIds() :
-            _graphModel->graph().nodeIds();
+        const auto& nodeIds = focusedComponent() != nullptr ? focusedComponent()->nodeIds() : _graphModel->graph().nodeIds();
 
         return std::count_if(nodeIds.begin(), nodeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](NodeId nodeId)
@@ -410,11 +410,7 @@ int GraphQuickItem::numVisibleNodes() const
 int GraphQuickItem::numEdges() const
 {
     if(_graphModel != nullptr)
-    {
-        return !_focusedComponentId.isNull() ?
-            _graphModel->graph().componentById(_focusedComponentId)->numEdges() :
-            _graphModel->graph().numEdges();
-    }
+        return focusedComponent() != nullptr ? focusedComponent()->numEdges() : _graphModel->graph().numEdges();
 
     return -1;
 }
@@ -423,9 +419,7 @@ int GraphQuickItem::numVisibleEdges() const
 {
     if(_graphModel != nullptr)
     {
-        const auto& edgeIds = !_focusedComponentId.isNull() ?
-            _graphModel->graph().componentById(_focusedComponentId)->edgeIds() :
-            _graphModel->graph().edgeIds();
+        const auto& edgeIds = focusedComponent() != nullptr ? focusedComponent()->edgeIds() : _graphModel->graph().edgeIds();
 
         return std::count_if(edgeIds.begin(), edgeIds.end(), // NOLINT bugprone-narrowing-conversions
         [this](EdgeId edgeId)

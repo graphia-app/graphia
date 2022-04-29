@@ -39,6 +39,7 @@ class GraphModel;
 class ICommand;
 class CommandManager;
 class SelectionManager;
+class IGraphComponent;
 
 class GraphQuickItem : public QQuickFramebufferObject
 {
@@ -166,6 +167,8 @@ private:
         _eventQueue.emplace(std::make_unique<T>(*event));
         update();
     }
+
+    const IGraphComponent* focusedComponent() const;
 
     int numNodes() const;
     int numVisibleNodes() const;
