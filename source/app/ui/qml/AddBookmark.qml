@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.12
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
@@ -57,8 +57,7 @@ Rectangle
     Action
     {
         id: closeAction
-        text: qsTr("Cancel")
-        iconName: "emblem-unreadable"
+        icon.name: "emblem-unreadable"
 
         onTriggered:
         {
@@ -95,13 +94,10 @@ Rectangle
 
                     onAccepted: { doneAction.trigger(); }
 
-                    style: TextFieldStyle
+                    background: Rectangle
                     {
-                        background: Rectangle
-                        {
-                            implicitWidth: 192
-                            color: "transparent"
-                        }
+                        implicitWidth: 192
+                        color: "transparent"
                     }
 
                     onFocusChanged:
@@ -112,7 +108,7 @@ Rectangle
                 }
 
                 Button { action: doneAction }
-                FloatingButton { action: closeAction }
+                ToolButton { action: closeAction }
             }
         }
     }
