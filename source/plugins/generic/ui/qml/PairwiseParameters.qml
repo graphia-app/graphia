@@ -16,8 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick.Controls 1.5
-import QtQuick.Controls 2.4 as QQC2
+import QtQuick.Controls 2.12
 import QtQuick 2.14
 import QtQml 2.12
 import QtQuick.Layouts 1.3
@@ -225,7 +224,7 @@ BaseParameterDialog
                     attributeNameTextField.text = "";
                 }
 
-                QQC2.Label
+                Label
                 {
                     Layout.fillWidth: true
                     Layout.leftMargin: Constants.padding
@@ -349,7 +348,7 @@ BaseParameterDialog
                         anchors.fill: parent
                         onClicked:
                         {
-                            typeMenu.__popup(parent.mapToItem(null, 0, parent.height + 8/*padding*/, 0, 0), 0);
+                            typeMenu.popup(0, parent.height + 4/*padding*/);
                         }
                     }
 
@@ -364,7 +363,7 @@ BaseParameterDialog
                         visible: false
 
                         validator: RegExpValidator { regExp: new RegExp(QmlUtils.validAttributeNameRegex) }
-                        textColor: acceptableInput ? "black" : "red"
+                        color: acceptableInput ? "black" : "red"
 
                         function activate()
                         {
