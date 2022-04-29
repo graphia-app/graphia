@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQml 2.8
 
 import app.graphia 1.0
@@ -114,7 +114,7 @@ Item
         onClicked:
         {
             if(mouse.button === Qt.LeftButton && menu && !_modelIsUnset)
-                menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
+                menu.popup(0, parent.height + 4/*padding*/);
 
             root.clicked(mouse);
         }
