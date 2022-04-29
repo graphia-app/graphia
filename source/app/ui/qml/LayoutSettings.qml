@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.12
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -206,8 +206,7 @@ Rectangle
     Action
     {
         id: closeAction
-        text: qsTr("Close")
-        iconName: "emblem-unreadable"
+        icon.name: "emblem-unreadable"
 
         onTriggered:
         {
@@ -357,11 +356,11 @@ Rectangle
                     }
                 }
 
-                FloatingButton
+                ToolButton
                 {
                     visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
-                    text: qsTr("Remove Preset")
-                    iconName: "list-remove"
+                    ToolTip { text: qsTr("Remove Preset") }
+                    icon.name: "list-remove"
 
                     onClicked:
                     {
@@ -369,11 +368,11 @@ Rectangle
                     }
                 }
 
-                FloatingButton
+                ToolButton
                 {
                     visible: root.isCustom
-                    text: qsTr("Add Preset")
-                    iconName: "list-add"
+                    ToolTip { text: qsTr("Add Preset") }
+                    icon.name: "list-add"
 
                     onClicked:
                     {
@@ -387,7 +386,7 @@ Rectangle
                     }
                 }
 
-                FloatingButton { action: closeAction }
+                ToolButton { action: closeAction }
             }
 
             Repeater

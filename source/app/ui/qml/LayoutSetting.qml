@@ -17,10 +17,8 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-
-import "Controls"
 
 RowLayout
 {
@@ -47,7 +45,7 @@ RowLayout
             onDoubleClicked: { root.reset(); }
         }
 
-        ToolTipHack { text: root.description }
+        ToolTip { text: root.description }
     }
 
     Item { Layout.fillWidth: true }
@@ -55,8 +53,8 @@ RowLayout
     Slider
     {
         id: slider
-        minimumValue: 0.0
-        maximumValue: 1.0
+        from: 0.0
+        to: 1.0
 
         onValueChanged:
         {
