@@ -17,11 +17,9 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
-
-import app.graphia 1.0
 
 import "../shared/ui/qml/Constants.js" as Constants
 
@@ -110,12 +108,13 @@ ApplicationWindow
         {
             id: email
             enabled: window.enabled
+            text: emailAddress
             placeholderText: qsTr("Email address (optional)")
             validator: RegExpValidator { regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
             Layout.fillWidth: true
         }
 
-        PlaceholderTextArea
+        ScrollableTextArea
         {
             id: description
             enabled: window.enabled
@@ -150,12 +149,6 @@ ApplicationWindow
                 else
                     invalidEmailDialog.open();
             }
-        }
-
-        Preferences
-        {
-            section: "tracking"
-            property alias emailAddress: email.text
         }
     }
 

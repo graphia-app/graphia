@@ -33,6 +33,7 @@
 #include <QTimer>
 #include <QDirIterator>
 #include <QCommandLineParser>
+#include <QQuickStyle>
 
 #include <iostream>
 #include <map>
@@ -42,8 +43,7 @@
 
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
-#include "app/preferences.h"
-#include "shared/utils/static_block.h"
+#include "shared/utils/preferences.h"
 
 #include <google_breakpad/processor/minidump.h>
 #include <google_breakpad/processor/process_state.h>
@@ -220,7 +220,7 @@ static void uploadReport(const QString& email, const QString& text,
         }
     }
 
-    auto queryUrl = QUrl(u::pref(QStringLiteral("servers/crashreports")).toString());
+    auto queryUrl = QUrl(u::getPref(QStringLiteral("servers/crashreports")).toString());
 
     auto doUpload = [&]
     {
@@ -317,8 +317,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
-    execute_static_blocks();
-
     QCommandLineParser p;
 
     p.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
@@ -360,16 +358,18 @@ int main(int argc, char *argv[])
 
     std::smatch match;
     bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
+    auto emailAddress = u::getPref(QStringLiteral("tracking/emailAddress")).toString();
 
     if(!p.isSet(QStringLiteral("submit")))
     {
+        QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
+
         QQmlApplicationEngine engine;
 
         engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
-        engine.rootContext()->setContextProperty(
-            QStringLiteral("glVendor"), OpenGLFunctions::vendor());
-        engine.rootContext()->setContextProperty(
-            QStringLiteral("inVideoDriver"), inVideoDriver);
+        engine.rootContext()->setContextProperty(QStringLiteral("glVendor"), OpenGLFunctions::vendor());
+        engine.rootContext()->setContextProperty(QStringLiteral("inVideoDriver"), inVideoDriver);
+        engine.rootContext()->setContextProperty(QStringLiteral("emailAddress"), emailAddress);
 
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        report._email = u::pref(QStringLiteral("tracking/emailAddress")).toString();
+        report._email = emailAddress;
         report._text = p.value(QStringLiteral("description"));
     }
 
