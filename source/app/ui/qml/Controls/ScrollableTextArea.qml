@@ -47,6 +47,7 @@ Frame
         {
             id: textArea
             wrapMode: TextArea.Wrap
+            selectByMouse: true
 
             onEditingFinished: { root.editingFinished(); }
             onLinkActivated: { root.linkActivated(link); }
