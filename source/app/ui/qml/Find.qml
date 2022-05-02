@@ -17,9 +17,8 @@
  */
 
 import QtQuick 2.12
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Styles 1.4
 
 import SortFilterProxyModel 0.2
 
@@ -85,7 +84,7 @@ Rectangle
                 return "^(" + term + ")$";
             }
             else
-                return "^" + Utils.regexEscape(valueComboBox.currentValue) + "$";
+                return "^" + Utils.regexEscape(valueComboBox.value) + "$";
         }
 
         return findField.text;
@@ -203,7 +202,7 @@ Rectangle
     {
         id: selectAllAction
         text: qsTr("Select All")
-        iconName: "edit-select-all"
+        icon.name: "edit-select-all"
         enabled: document.numNodesFound > 0
         onTriggered: { document.selectAllFound(); }
     }
@@ -212,7 +211,7 @@ Rectangle
     {
         id: _previousAction
         text: qsTr("Find Previous")
-        iconName: "go-previous"
+        icon.name: "go-previous"
         shortcut: _visible ? "Ctrl+Shift+G" : ""
         enabled: _type === Find.ByAttribute || document.numNodesFound > 0
         onTriggered:
@@ -228,7 +227,7 @@ Rectangle
     {
         id: _nextAction
         text: qsTr("Find Next")
-        iconName: "go-next"
+        icon.name: "go-next"
         shortcut: _visible ? "Ctrl+G" : ""
         enabled: _type === Find.ByAttribute || document.numNodesFound > 0
         onTriggered:
@@ -244,7 +243,7 @@ Rectangle
     {
         id: matchCaseAction
         text: qsTr("Match Case")
-        iconName: "font-x-generic"
+        icon.name: "font-x-generic"
         checkable: true
     }
 
@@ -252,7 +251,7 @@ Rectangle
     {
         id: matchWholeWordsAction
         text: qsTr("Match Whole Words")
-        iconName: "text-x-generic"
+        icon.name: "text-x-generic"
         checkable: true
     }
 
@@ -260,7 +259,7 @@ Rectangle
     {
         id: matchUsingRegexAction
         text: qsTr("Match Using Regex")
-        iconName: "list-add"
+        icon.name: "list-add"
         checkable: true
     }
 
@@ -268,13 +267,13 @@ Rectangle
     {
         id: selectMultipleModeAction
         text: qsTr("Select Multiple")
-        iconName: "edit-copy"
+        icon.name: "edit-copy"
         checkable: true
 
         onCheckedChanged:
         {
-            if(checked && valueComboBox.currentValue.length > 0)
-                _attributeValues = [valueComboBox.currentValue];
+            if(checked && valueComboBox.value.length > 0)
+                _attributeValues = [valueComboBox.value];
             else
                 _attributeValues = [];
 
@@ -286,7 +285,7 @@ Rectangle
     {
         id: selectOnlyAction
         text: qsTr("Select Only")
-        iconName: "edit-select-all"
+        icon.name: "edit-select-all"
         checkable: true
 
         onCheckedChanged: { _doFind(); }
@@ -297,7 +296,7 @@ Rectangle
     {
         id: closeAction
         text: qsTr("Close")
-        iconName: "emblem-unreadable"
+        icon.name: "emblem-unreadable"
 
         onTriggered:
         {
@@ -391,13 +390,10 @@ Rectangle
 
                         onAccepted: { selectAllAction.trigger(); }
 
-                        style: TextFieldStyle
+                        background: Rectangle
                         {
-                            background: Rectangle
-                            {
-                                implicitWidth: 192
-                                color: "transparent"
-                            }
+                            implicitWidth: 192
+                            color: "transparent"
                         }
 
                         Keys.onUpPressed: { _previousAction.trigger(); }
@@ -501,7 +497,7 @@ Rectangle
                         enabled: valueComboBox.count > 0
 
                         property bool _modelChanging: false
-                        property string currentValue: ""
+                        property string value: ""
 
                         onCurrentTextChanged:
                         {
@@ -509,7 +505,7 @@ Rectangle
                             if(_modelChanging)
                                 return;
 
-                            currentValue = currentText;
+                            value = currentText;
                         }
 
                         function refresh()
@@ -535,7 +531,7 @@ Rectangle
                             else
                                 currentIndex = -1;
 
-                            currentValue = currentText;
+                            value = currentText;
                         }
                     }
                 }
@@ -555,52 +551,70 @@ Rectangle
                 FloatingButton { action: closeAction }
             }
 
-            ScrollView
+
+            Frame
             {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 128
 
                 visible: _selectMultipleMode
 
-                frameVisible: true
-                clip: true
+                topPadding: 0
+                leftPadding: 0
+                rightPadding: 0
+                bottomPadding: 0
 
-                ListView
+                Component.onCompleted: { scrollView.anchors.margins = background.border.width; }
+
+                ScrollView
                 {
-                    anchors.leftMargin: Constants.padding
+                    id: scrollView
+
                     anchors.fill: parent
+                    clip: true
 
-                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                    model: valueComboBox.model
-                    delegate: Loader
+                    ListView
                     {
-                        sourceComponent: CheckBox
+                        anchors.leftMargin: Constants.padding
+                        anchors.fill: parent
+
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        model: valueComboBox.model
+                        delegate: Loader
                         {
-                            text: modelData
-
-                            function isChecked()
+                            sourceComponent: CheckBox
                             {
-                                return Utils.setContains(_attributeValues, modelData);
+                                text: modelData
+
+                                function isChecked()
+                                {
+                                    return Utils.setContains(_attributeValues, modelData);
+                                }
+
+                                checked: { return isChecked(); }
+
+                                onCheckedChanged:
+                                {
+                                    // Unbind to prevent binding loop
+                                    checked = checked;
+
+                                    if(checked)
+                                        _attributeValues = Utils.setAdd(_attributeValues, modelData);
+                                    else
+                                        _attributeValues = Utils.setRemove(_attributeValues, modelData);
+
+                                    // Rebind so that the delegate doesn't hold the state
+                                    checked = Qt.binding(isChecked);
+                                }
+
+                                ToolTip.visible: hovered
+                                ToolTip.delay: 500
+                                ToolTip.text: modelData
                             }
-
-                            checked: { return isChecked(); }
-
-                            onCheckedChanged:
-                            {
-                                // Unbind to prevent binding loop
-                                checked = checked;
-
-                                if(checked)
-                                    _attributeValues = Utils.setAdd(_attributeValues, modelData);
-                                else
-                                    _attributeValues = Utils.setRemove(_attributeValues, modelData);
-
-                                // Rebind so that the delegate doesn't hold the state
-                                checked = Qt.binding(isChecked);
-                            }
-
-                            tooltip: modelData
                         }
                     }
                 }
