@@ -17,8 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.12
 import QtQml 2.8
 import QtQuick.Dialogs 1.2
 
@@ -47,13 +46,10 @@ Item
         width: root.width
         height: root.height
 
-        style: ButtonStyle
+        contentItem: Rectangle
         {
-            label: Rectangle
-            {
-                color: button.enabled ? root.color : Utils.desaturate(root.color, 0.2)
-                radius: 2
-            }
+            color: button.enabled ? root.color : Utils.desaturate(root.color, 0.2)
+            radius: 2
         }
 
         onClicked:
