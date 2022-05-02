@@ -28,6 +28,7 @@ Frame
     property alias wrapMode: textArea.wrapMode
     property alias textFormat: textArea.textFormat
     property alias hoveredLink: textArea.hoveredLink
+    property alias placeholderText: textArea.placeholderText
 
     topPadding: 0
     leftPadding: 0
