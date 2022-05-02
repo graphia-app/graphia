@@ -17,11 +17,12 @@
  */
 
 import QtQuick 2.12
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Styles 1.4
 
 import app.graphia 1.0
+
+import "Controls"
 
 RowLayout
 {
@@ -79,21 +80,19 @@ RowLayout
         visible: root.waitingForOpen
         implicitWidth: downloadProgressBar.implicitWidth
 
-        style: ButtonStyle
+        contentItem: Text
         {
-            label: Text
-            {
-                anchors.fill: parent
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
 
-                text:
-                {
-                    let filename = QmlUtils.baseFileNameForUrl(root.blockedUrl);
-                    return qsTr("Open ") + (filename.length > 0 ? filename : qsTr("Download"));
-                }
+            text:
+            {
+                let filename = QmlUtils.baseFileNameForUrl(root.blockedUrl);
+                return qsTr("Open ") + (filename.length > 0 ? filename : qsTr("Download"));
             }
         }
+
 
         onClicked:
         {
@@ -110,13 +109,13 @@ RowLayout
         value: !indeterminate ? root.progress / 100.0 : 0.0
     }
 
-    ToolButton
+    FloatingButton
     {
-        implicitHeight: progressBar.implicitHeight * 0.8
+        implicitHeight: progressBar.implicitHeight
         implicitWidth: implicitHeight
 
         iconName: "process-stop"
-        tooltip: qsTr("Cancel")
+        text: qsTr("Cancel")
 
         onClicked:
         {
