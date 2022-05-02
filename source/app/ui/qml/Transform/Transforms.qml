@@ -122,7 +122,7 @@ Item
             {
                 visible: list.count > 0
                 iconName: panel.hidden ? "go-bottom" : "go-top"
-                tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
+                text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
                 onClicked:
                 {

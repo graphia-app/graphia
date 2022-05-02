@@ -161,7 +161,7 @@ ColumnLayout
 
             FloatingButton
             {
-                tooltip: qsTr("Add New Colour")
+                text: qsTr("Add New Colour")
                 iconName: "list-add"
 
                 enabled: root._autoColors.length < root._maxAutoColors
@@ -254,7 +254,7 @@ ColumnLayout
                     Layout.preferredWidth: root._removeButtonSize
                     Layout.preferredHeight: root._removeButtonSize
 
-                    tooltip: qsTr("Remove")
+                    text: qsTr("Remove")
                     iconName: "list-remove"
 
                     onClicked:
@@ -393,7 +393,7 @@ ColumnLayout
 
             FloatingButton
             {
-                tooltip: qsTr("Add New Colour")
+                text: qsTr("Add New Colour")
                 iconName: "list-add"
 
                 enabled: root._fixedColors.length < root._maxFixedColors
@@ -534,7 +534,7 @@ ColumnLayout
                     Layout.preferredWidth: root._removeButtonSize
                     Layout.preferredHeight: root._removeButtonSize
 
-                    tooltip: qsTr("Remove")
+                    text: qsTr("Remove")
                     iconName: "list-remove"
 
                     onClicked:

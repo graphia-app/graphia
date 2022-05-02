@@ -356,11 +356,11 @@ Rectangle
                     }
                 }
 
-                ToolButton
+                FloatingButton
                 {
                     visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
-                    ToolTip { text: qsTr("Remove Preset") }
-                    icon.name: "list-remove"
+                    text: qsTr("Remove Preset")
+                    iconName: "list-remove"
 
                     onClicked:
                     {
@@ -368,11 +368,11 @@ Rectangle
                     }
                 }
 
-                ToolButton
+                FloatingButton
                 {
                     visible: root.isCustom
-                    ToolTip { text: qsTr("Add Preset") }
-                    icon.name: "list-add"
+                    text: qsTr("Add Preset")
+                    iconName: "list-add"
 
                     onClicked:
                     {
@@ -386,7 +386,7 @@ Rectangle
                     }
                 }
 
-                ToolButton { action: closeAction }
+                FloatingButton { action: closeAction }
             }
 
             Repeater

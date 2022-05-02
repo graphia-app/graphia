@@ -842,7 +842,7 @@ Item
                 anchors.margins: 20
 
                 iconName: "go-previous"
-                tooltip: qsTr("Goto Previous Component");
+                text: qsTr("Goto Previous Component");
 
                 onClicked: { _document.gotoPrevComponent(); }
             }
@@ -860,7 +860,7 @@ Item
                 anchors.margins: 20
 
                 iconName: "go-next"
-                tooltip: qsTr("Goto Next Component");
+                text: qsTr("Goto Next Component");
 
                 onClicked: { _document.gotoNextComponent(); }
             }
@@ -876,8 +876,7 @@ Item
                 FloatingButton
                 {
                     iconName: "edit-undo"
-                    text: qsTr("Overview Mode")
-                    tooltip: qsTr("Return to Overview Mode")
+                    text: qsTr("Return to Overview Mode")
                     onClicked: { _document.switchToOverviewMode(); }
                 }
 

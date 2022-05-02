@@ -108,7 +108,7 @@ Rectangle
                 }
 
                 Button { action: doneAction }
-                ToolButton { action: closeAction }
+                FloatingButton { action: closeAction }
             }
         }
     }
