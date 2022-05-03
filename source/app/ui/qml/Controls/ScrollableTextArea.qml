@@ -29,6 +29,8 @@ Frame
     property alias textFormat: textArea.textFormat
     property alias hoveredLink: textArea.hoveredLink
     property alias placeholderText: textArea.placeholderText
+    property alias cursorPosition: textArea.cursorPosition
+    property alias length: textArea.length
 
     topPadding: 0
     leftPadding: 0
@@ -56,6 +58,10 @@ Frame
 
         ScrollBar.vertical: ScrollBar {}
     }
+
+    function append(text)           { textArea.append(text); }
+    function insert(position, text) { textArea.insert(position, text); }
+    function remove(start, end)     { return textArea.remove(start, end); }
 
     function copyToClipboard()
     {
