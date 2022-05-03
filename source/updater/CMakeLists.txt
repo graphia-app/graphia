@@ -8,6 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
     ${CMAKE_CURRENT_LIST_DIR}/installer.h
 )
 

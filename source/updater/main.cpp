@@ -20,6 +20,7 @@
 
 #include "shared/updates/updates.h"
 #include "shared/utils/container.h"
+#include "shared/utils/preferences.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -30,6 +31,7 @@
 #include <QDir>
 #include <QTemporaryDir>
 #include <QRegularExpression>
+#include <QQuickStyle>
 
 #include <QDebug>
 
@@ -90,6 +92,8 @@ QStringList showUpdater(int argc, char *argv[])
         mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
         QApplication::setWindowIcon(mainIcon);
 
+        QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
+
         QQmlApplicationEngine engine;
 
         QString version = u::contains(update, "version") ?
@@ -101,6 +105,9 @@ QStringList showUpdater(int argc, char *argv[])
             QObject::tr("No release notes available.");
 
         QTemporaryDir imagesDir;
+        engine.rootContext()->setContextProperty(
+            QStringLiteral("imagesLocation"), imagesDir.path());
+
         if(u::contains(update, "images") && imagesDir.isValid())
         {
             for(const auto& image : update["images"])
@@ -118,9 +125,6 @@ QStringList showUpdater(int argc, char *argv[])
 
                 imageFile.write(content);
             }
-
-            engine.rootContext()->setContextProperty(
-                QStringLiteral("imagesLocation"), imagesDir.path());
         }
 
         engine.rootContext()->setContextProperty(
