@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>../../shared/ui/qml/Constants.js</file>
+        <file alias="ScrollableTextArea.qml">../../app/ui/qml/Controls/ScrollableTextArea.qml</file>
+        <file alias="TabBarButton.qml">../../app/ui/qml/Controls/TabBarButton.qml</file>
         <file alias="icon.svg">../../app/icon/Installer.svg</file>
         <file alias="Icon16x16.png">../../app/icon/Icon16x16.png</file>
         <file alias="Icon32x32.png">../../app/icon/Icon32x32.png</file>

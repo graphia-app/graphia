@@ -17,6 +17,7 @@
  */
 
 #include "shared/utils/qmlutils.h"
+#include "shared/utils/preferences.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -24,6 +25,7 @@
 #include <QString>
 #include <QSettings>
 #include <QIcon>
+#include <QQuickStyle>
 
 #include <json_helper.h>
 
@@ -33,7 +35,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
-    QCoreApplication::setApplicationName(QStringLiteral("Graphia Update Editor"));
+    QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
     QSettings::setDefaultFormat(QSettings::Format::IniFormat);
 
@@ -48,6 +50,8 @@ int main(int argc, char *argv[])
     mainIcon.addFile(QStringLiteral(":/Icon32x32.png"));
     mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
     QApplication::setWindowIcon(mainIcon);
+
+    QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

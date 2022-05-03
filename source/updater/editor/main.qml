@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
@@ -35,6 +35,7 @@ ApplicationWindow
     Settings
     {
         id: settings
+        category: "updateEditor"
 
         property string operatingSystems: ""
         property string credentials: ""
@@ -136,9 +137,9 @@ ApplicationWindow
                     validateErrorDialog.open();
                     status.text = qsTr("Failed to download");
 
-                    for(let index = 0; index < tabView.count; index++)
+                    for(let index = 0; index < tabBar.count; index++)
                     {
-                        let updateUI = tabView.getTab(index).item;
+                        let updateUI = tabBar.getTab(index);
                         updateUI.highlightUrl(url);
                     }
                 }
@@ -269,8 +270,7 @@ ApplicationWindow
             if(!QmlUtils.copy(originalFilename, targetFilename))
                 console.log("Copy to " + targetFilename + " failed. Already exists?");
 
-            let currentTab = tabView.getTab(tabView.currentIndex).item;
-            currentTab.markdownTextArea.insert(currentTab.markdownTextArea.cursorPosition,
+            tabBar.currentTab.markdownTextArea.insert(tabBar.currentTab.markdownTextArea.cursorPosition,
                 "![" + basename + "](file:" + basename + ")");
         }
     }
@@ -299,14 +299,7 @@ ApplicationWindow
             MenuItem { action: saveAction }
             MenuItem { action: saveAsAction }
 
-            MenuItem
-            {
-                text: qsTr("&Exit")
-                shortcut: "Ctrl+Q"
-                enabled: !root.busy
-
-                onTriggered: { root.close(); }
-            }
+            MenuItem { action: quitAction }
         }
 
         Menu
@@ -360,8 +353,7 @@ ApplicationWindow
             return false;
         }
 
-        while(tabView.count > 0)
-            tabView.removeTab(0);
+        tabBar.clear();
 
         root.updatesArray.sort(function(a, b)
         {
@@ -381,22 +373,22 @@ ApplicationWindow
 
         for(const update of root.updatesArray)
         {
-            let tab = tabView.createTab();
+            let tab = tabBar.createTab();
 
-            tab.item.versionText = update.version;
-            tab.item.targetVersionRegexText = update.targetVersionRegex;
+            tab.versionText = update.version;
+            tab.targetVersionRegexText = update.targetVersionRegex;
 
             if("force" in update)
-                tab.item.forceInstallationChecked = true;
+                tab.forceInstallationChecked = true;
 
-            tab.item.resetOsControls();
+            tab.resetOsControls();
 
             for(const osName in update.payloads)
             {
                 let url = update.payloads[osName].url;
                 let checksum = update.payloads[osName].installerChecksum;
 
-                let item = tab.item.osControlsFor(osName);
+                let item = tab.osControlsFor(osName);
                 item.osEnabledChecked = true;
                 item.urlText = url;
 
@@ -415,7 +407,7 @@ ApplicationWindow
                 }
             }
 
-            tab.item.markdownText = tab.item.previewText = update.changeLog;
+            tab.markdownText = tab.previewText = update.changeLog;
         }
 
         // Newly opened file doesn't need to be saved
@@ -429,12 +421,12 @@ ApplicationWindow
         if(!root.saveRequired)
             return false;
 
-        if(tabView.count === 0)
+        if(tabBar.count === 0)
             return false;
 
-        for(let index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabBar.count; index++)
         {
-            let updateUI = tabView.getTab(index).item;
+            let updateUI = tabBar.getTab(index);
             if(updateUI === null || !updateUI.inputValid)
                 return false;
         }
@@ -458,7 +450,7 @@ ApplicationWindow
         }
 
         root.updatesArray = [];
-        let updatesRemaining = tabView.count;
+        let updatesRemaining = tabBar.count;
         let onComplete = function()
         {
             let updatesString = settings.hexEncodeUpdatesString ?
@@ -494,9 +486,9 @@ ApplicationWindow
                 onSaveComplete();
         };
 
-        for(let index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabBar.count; index++)
         {
-            let updateUI = tabView.getTab(index).item;
+            let updateUI = tabBar.getTab(index);
 
             updateUI.generateJSON(function(updateObject)
             {
@@ -640,349 +632,453 @@ ApplicationWindow
         }
     }
 
+    Action
+    {
+        id: quitAction
+        text: qsTr("&Exit")
+
+        enabled: !root.busy
+        shortcut: "Ctrl+Q"
+
+        onTriggered: { root.close(); }
+    }
+
+    Component { id: tabButtonComponent; TabBarButton {} }
+
+    Component
+    {
+        id: tabComponent
+
+        ColumnLayout
+        {
+            id: updateUI
+
+            property alias versionText: version.text
+            property alias targetVersionRegexText: targetVersionRegex.text
+            property alias markdownText: markdownChangelog.text
+            property alias previewText: preview.text
+            property alias forceInstallationChecked: forceInstallation.checked
+
+            property alias markdownTextArea: markdownChangelog
+
+            function resetOsControls()
+            {
+                for(let i = 0; i < osControls.count; i++)
+                {
+                    let item = osControls.itemAt(i);
+                    item.osEnabledChecked = false;
+                    item.urlText = "";
+                }
+            }
+
+            function osControlsFor(name)
+            {
+                for(let i = 0; i < osControls.count; i++)
+                {
+                    let item = osControls.itemAt(i);
+
+                    if(item.osName === name)
+                        return item;
+                }
+
+                return null;
+            }
+
+            SplitView
+            {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                orientation: Qt.Horizontal
+
+                handle: Item
+                {
+                    implicitWidth: 8
+                    implicitHeight: 8
+
+                    Rectangle
+                    {
+                        anchors.centerIn: parent
+
+                        implicitWidth: 4
+                        implicitHeight: 48
+                        radius: implicitWidth * 0.5
+                        color: "grey"
+                    }
+                }
+
+                Item
+                {
+                    SplitView.minimumWidth: 350
+                    SplitView.fillWidth: true
+                    SplitView.fillHeight: true
+
+                    ColumnLayout
+                    {
+                        anchors.fill: parent
+                        anchors.margins: Constants.margin
+
+                        GridLayout
+                        {
+                            Layout.fillWidth: true
+
+                            columns: 2
+
+                            Label { text: qsTr("Version:") }
+                            TextField
+                            {
+                                id: version
+                                Layout.fillWidth: true
+
+                                onTextChanged: { setSaveRequired(); }
+                            }
+
+                            Label { text: qsTr("Target Regex:") }
+                            TextField
+                            {
+                                id: targetVersionRegex
+                                Layout.fillWidth: true
+
+                                onTextChanged: { setSaveRequired(); }
+                            }
+                        }
+
+                        ScrollableTextArea
+                        {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            id: markdownChangelog
+
+                            Timer
+                            {
+                                id: editTimer
+                                interval: 500
+
+                                onTriggered: { preview.text = markdownChangelog.text; }
+                            }
+
+                            //FIXME: not sure why this is necessary; first click on TextArea
+                            // fires textChanged, even though nothing changed... bug in TextArea?
+                            property string _lastText
+                            onTextChanged:
+                            {
+                                if(text === _lastText)
+                                    return;
+
+                                editTimer.restart();
+                                setSaveRequired();
+
+                                _lastText = text;
+                            }
+                        }
+
+                        RowLayout
+                        {
+                            Item { Layout.fillWidth: true }
+
+                            CheckBox
+                            {
+                                id: forceInstallation
+                                text: qsTr("Force")
+                                checked: false
+
+                                onCheckedChanged: { setSaveRequired(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Add Image")
+                                onClicked:
+                                {
+                                    if(settings.defaultImageOpenFolder !== undefined)
+                                        imageFileDialog.folder = settings.defaultImageOpenFolder;
+
+                                    imageFileDialog.open();
+                                }
+                            }
+                        }
+
+                        Repeater
+                        {
+                            id: osControls
+
+                            model: root.operatingSystems
+
+                            delegate: RowLayout
+                            {
+                                property string osName: modelData.name
+                                property alias osEnabledChecked: osEnabled.checked
+                                property alias urlText: url.text
+                                property alias urlTextField: url
+
+                                CheckBox
+                                {
+                                    id: osEnabled
+
+                                    text: modelData.name
+                                    checked: true
+
+                                    onCheckedChanged: { setSaveRequired(); }
+                                }
+
+                                TextField
+                                {
+                                    id: url
+
+                                    Layout.fillWidth: true
+
+                                    enabled: osEnabled.checked
+
+                                    onTextChanged:
+                                    {
+                                        if(root.checksums[text] !== undefined)
+                                            root.checksums[text] = "";
+
+                                        setSaveRequired();
+                                        url.color = "black";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item
+                {
+                    SplitView.minimumWidth: 400
+                    SplitView.fillHeight: true
+
+                    ScrollableTextArea
+                    {
+                        anchors.fill: parent
+                        anchors.margins: Constants.margin
+
+                        id: preview
+                        readOnly: true
+                        textFormat: TextEdit.MarkdownText
+                    }
+                }
+            }
+
+            property bool inputValid:
+            {
+                let enabledOses = [];
+
+                for(let i = 0; i < osControls.count; i++)
+                {
+                    let item = osControls.itemAt(i);
+
+                    if(!item.osEnabledChecked)
+                        continue;
+
+                    if(item.urlTextField.length === 0)
+                        return false;
+
+                    if(!QmlUtils.urlStringIsValid(item.urlTextField.text))
+                        return false;
+
+                    enabledOses.push(item.osName);
+                }
+
+                return enabledOses.length > 0 &&
+                    version.length > 0 &&
+                    targetVersionRegex.length > 0 &&
+                    markdownChangelog.length > 0;
+            }
+
+            property var updateObject: ({})
+
+            function highlightUrl(url)
+            {
+                for(let i = 0; i < osControls.count; i++)
+                {
+                    let item = osControls.itemAt(i);
+
+                    if(!item.osEnabledChecked)
+                        continue;
+
+                    if(item.urlText === url)
+                        item.urlTextField.textColor = "red";
+                }
+            }
+
+            function generateJSON(onComplete)
+            {
+                updateObject = {};
+                updateObject.version = version.text;
+                updateObject.targetVersionRegex = targetVersionRegex.text;
+                updateObject.changeLog = markdownChangelog.text;
+                updateObject.images = [];
+
+                if(forceInstallation.checked)
+                    updateObject.force = true;
+
+                let mdImageRegex = /\!\[[^\]]*\]\(([^ \)]*)[^\)]*\)/g;
+
+                let match;
+                while((match = mdImageRegex.exec(updateObject.changeLog)) !== null)
+                {
+                    let image = QmlUtils.fileNameForUrl(match[1]);
+                    let encoded = QmlUtils.base64EncodingOf(root._workingDirectory + "/" + image);
+                    let baseImage = image.split('/').pop().split('#')[0].split('?')[0];
+
+                    updateObject.images.push({filename: baseImage, content: encoded});
+                }
+
+                updateObject.payloads = {};
+
+                for(let i = 0; i < osControls.count; i++)
+                {
+                    let item = osControls.itemAt(i);
+
+                    if(!item.osEnabledChecked)
+                        continue;
+
+                    let osName = item.osName;
+                    let url = item.urlText;
+                    let hostname = extractHostname(url);
+                    let filename = url.split('/').pop().split('#')[0].split('?')[0];
+
+                    if(filename.length === 0)
+                        filename = "installer";
+
+                    const foundOS = root.operatingSystems.find(os => os.name === osName);
+                    if(foundOS === undefined)
+                        continue;
+
+                    updateObject.payloads[osName] = {};
+
+                    const foundCredential = root.credentials.find(credential => credential.domain === hostname);
+                    if(foundCredential !== undefined)
+                    {
+                        updateObject.payloads[osName].httpUserName = foundCredential.username;
+                        updateObject.payloads[osName].httpPassword = foundCredential.password;
+                    }
+
+                    updateObject.payloads[osName].url = url;
+                    updateObject.payloads[osName].installerFileName = filename;
+                    updateObject.payloads[osName].installerChecksum = "";
+                    updateObject.payloads[osName].command = foundOS.command;
+                }
+
+                let remainingChecksums = Object.keys(updateObject.payloads).length;
+
+                for(const osName in updateObject.payloads)
+                {
+                    let url = updateObject.payloads[osName].url;
+                    calculateChecksum(url, function(osName) { return function(checksum)
+                    {
+                        updateObject.payloads[osName].installerChecksum = checksum;
+
+                        remainingChecksums--;
+                        if(remainingChecksums === 0)
+                            onComplete(updateObject);
+                    }}(osName));
+                }
+            }
+        }
+    }
 
     ColumnLayout
     {
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        TabView
+        ColumnLayout
         {
-            id: tabView
-            enabled: !root.busy
-
             Layout.fillWidth: true
             Layout.fillHeight: true
+            spacing: 0
 
-            function createTab()
+            TabBar
             {
-                setSaveRequired();
+                id: tabBar
 
-                let tab = tabView.addTab("", tabComponent);
-                tabView.currentIndex = tabView.count - 1;
+                enabled: !root.busy
+                visible: tabBar.count > 0
 
-                tab.title = Qt.binding(function()
+                property var currentTab: stackLayout.count > 0 ? getTab(currentIndex) : null
+
+                function createTab()
                 {
-                    return tab.item.versionText.length > 0 ?
-                        tab.item.versionText : qsTr("New Upgrade");
-                });
+                    setSaveRequired();
 
-                return tab;
+                    let tab = tabComponent.createObject(stackLayout);
+
+                    let button = tabButtonComponent.createObject(tabBar);
+                    tabBar.addItem(button);
+
+                    button.text = Qt.binding(function()
+                    {
+                        return tab.versionText.length > 0 ?
+                            tab.versionText : qsTr("New Upgrade");
+                    });
+
+                    return tab;
+                }
+
+                function removeTab(index)
+                {
+                    if(index >= stackLayout.count)
+                    {
+                        console.log("TabBar.removeTab: index out of range");
+                        return;
+                    }
+
+                    tabBar.removeItem(index);
+                    stackLayout.children[index].destroy();
+                }
+
+                function clear()
+                {
+                    while(stackLayout.count > 0)
+                        removeTab(0);
+                }
+
+                function getTab(index)
+                {
+                    if(index >= stackLayout.count)
+                    {
+                        console.log("TabBar.getTab: index out of range");
+                        return;
+                    }
+
+                    return stackLayout.children[index];
+                }
             }
 
-            Component
+            Frame
             {
-                id: tabComponent
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                enabled: !root.busy
+                visible: tabBar.count > 0
 
-                ColumnLayout
+                topPadding: 0
+                leftPadding: 0
+                rightPadding: 0
+                bottomPadding: 0
+
+                StackLayout
                 {
-                    id: updateUI
-
-                    property alias versionText: version.text
-                    property alias targetVersionRegexText: targetVersionRegex.text
-                    property alias markdownText: markdownChangelog.text
-                    property alias previewText: preview.text
-                    property alias forceInstallationChecked: forceInstallation.checked
-
-                    property alias markdownTextArea: markdownChangelog
-
-                    function resetOsControls()
-                    {
-                        for(let i = 0; i < osControls.count; i++)
-                        {
-                            let item = osControls.itemAt(i);
-                            item.osEnabledChecked = false;
-                            item.urlText = "";
-                        }
-                    }
-
-                    function osControlsFor(name)
-                    {
-                        for(let i = 0; i < osControls.count; i++)
-                        {
-                            let item = osControls.itemAt(i);
-
-                            if(item.osName === name)
-                                return item;
-                        }
-
-                        return null;
-                    }
-
-                    SplitView
-                    {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.margins: Constants.margin
-
-                        orientation: Qt.Horizontal
-
-                        handleDelegate: Item { width: Constants.spacing }
-
-                        ColumnLayout
-                        {
-                            Layout.minimumWidth: 350
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-
-                            GridLayout
-                            {
-                                Layout.fillWidth: true
-
-                                columns: 2
-
-                                Label { text: qsTr("Version:") }
-                                TextField
-                                {
-                                    id: version
-                                    Layout.fillWidth: true
-
-                                    onTextChanged: { setSaveRequired(); }
-                                }
-
-                                Label { text: qsTr("Target Regex:") }
-                                TextField
-                                {
-                                    id: targetVersionRegex
-                                    Layout.fillWidth: true
-
-                                    onTextChanged: { setSaveRequired(); }
-                                }
-                            }
-
-                            TextArea
-                            {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-
-                                id: markdownChangelog
-
-                                Timer
-                                {
-                                    id: editTimer
-                                    interval: 500
-
-                                    onTriggered: { preview.text = markdownChangelog.text; }
-                                }
-
-                                onTextChanged:
-                                {
-                                    editTimer.restart();
-                                    setSaveRequired();
-                                }
-                            }
-
-                            RowLayout
-                            {
-                                Item { Layout.fillWidth: true }
-
-                                CheckBox
-                                {
-                                    id: forceInstallation
-                                    text: qsTr("Force")
-                                    checked: false
-
-                                    onCheckedChanged: { setSaveRequired(); }
-                                }
-
-                                Button
-                                {
-                                    text: qsTr("Add Image")
-                                    onClicked:
-                                    {
-                                        if(settings.defaultImageOpenFolder !== undefined)
-                                            imageFileDialog.folder = settings.defaultImageOpenFolder;
-
-                                        imageFileDialog.open();
-                                    }
-                                }
-                            }
-
-                            Repeater
-                            {
-                                id: osControls
-
-                                model: root.operatingSystems
-
-                                delegate: RowLayout
-                                {
-                                    property string osName: modelData.name
-                                    property alias osEnabledChecked: osEnabled.checked
-                                    property alias urlText: url.text
-                                    property alias urlTextField: url
-
-                                    CheckBox
-                                    {
-                                        id: osEnabled
-
-                                        text: modelData.name
-                                        checked: true
-
-                                        onCheckedChanged: { setSaveRequired(); }
-                                    }
-
-                                    TextField
-                                    {
-                                        id: url
-
-                                        Layout.fillWidth: true
-
-                                        enabled: osEnabled.checked
-
-                                        onTextChanged:
-                                        {
-                                            if(root.checksums[text] !== undefined)
-                                                root.checksums[text] = "";
-
-                                            setSaveRequired();
-                                            textColor = "black";
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        TextArea
-                        {
-                            Layout.minimumWidth: 400
-                            Layout.fillHeight: true
-
-                            id: preview
-
-                            readOnly: true
-
-                            textFormat: TextEdit.MarkdownText
-                        }
-                    }
-
-                    property bool inputValid:
-                    {
-                        let enabledOses = [];
-
-                        for(let i = 0; i < osControls.count; i++)
-                        {
-                            let item = osControls.itemAt(i);
-
-                            if(!item.osEnabledChecked)
-                                continue;
-
-                            if(item.urlTextField.length === 0)
-                                return false;
-
-                            if(!QmlUtils.urlStringIsValid(item.urlTextField.text))
-                                return false;
-
-                            enabledOses.push(item.osName);
-                        }
-
-                        return enabledOses.length > 0 &&
-                            version.length > 0 &&
-                            targetVersionRegex.length > 0 &&
-                            markdownChangelog.length > 0;
-                    }
-
-                    property var updateObject: ({})
-
-                    function highlightUrl(url)
-                    {
-                        for(let i = 0; i < osControls.count; i++)
-                        {
-                            let item = osControls.itemAt(i);
-
-                            if(!item.osEnabledChecked)
-                                continue;
-
-                            if(item.urlText === url)
-                                item.urlTextField.textColor = "red";
-                        }
-                    }
-
-                    function generateJSON(onComplete)
-                    {
-                        updateObject = {};
-                        updateObject.version = version.text;
-                        updateObject.targetVersionRegex = targetVersionRegex.text;
-                        updateObject.changeLog = markdownChangelog.text;
-                        updateObject.images = [];
-
-                        if(forceInstallation.checked)
-                            updateObject.force = true;
-
-                        let mdImageRegex = /\!\[[^\]]*\]\(([^ \)]*)[^\)]*\)/g;
-
-                        let match;
-                        while((match = mdImageRegex.exec(updateObject.changeLog)) !== null)
-                        {
-                            let image = QmlUtils.fileNameForUrl(match[1]);
-                            let encoded = QmlUtils.base64EncodingOf(root._workingDirectory + "/" + image);
-                            let baseImage = image.split('/').pop().split('#')[0].split('?')[0];
-
-                            updateObject.images.push({filename: baseImage, content: encoded});
-                        }
-
-                        updateObject.payloads = {};
-
-                        for(let i = 0; i < osControls.count; i++)
-                        {
-                            let item = osControls.itemAt(i);
-
-                            if(!item.osEnabledChecked)
-                                continue;
-
-                            let osName = item.osName;
-                            let url = item.urlText;
-                            let hostname = extractHostname(url);
-                            let filename = url.split('/').pop().split('#')[0].split('?')[0];
-
-                            if(filename.length === 0)
-                                filename = "installer";
-
-                            const foundOS = root.operatingSystems.find(os => os.name === osName);
-                            if(foundOS === undefined)
-                                continue;
-
-                            updateObject.payloads[osName] = {};
-
-                            const foundCredential = root.credentials.find(credential => credential.domain === hostname);
-                            if(foundCredential !== undefined)
-                            {
-                                updateObject.payloads[osName].httpUserName = foundCredential.username;
-                                updateObject.payloads[osName].httpPassword = foundCredential.password;
-                            }
-
-                            updateObject.payloads[osName].url = url;
-                            updateObject.payloads[osName].installerFileName = filename;
-                            updateObject.payloads[osName].installerChecksum = "";
-                            updateObject.payloads[osName].command = foundOS.command;
-                        }
-
-                        let remainingChecksums = Object.keys(updateObject.payloads).length;
-
-                        for(const osName in updateObject.payloads)
-                        {
-                            let url = updateObject.payloads[osName].url;
-                            calculateChecksum(url, function(osName) { return function(checksum)
-                            {
-                                updateObject.payloads[osName].installerChecksum = checksum;
-
-                                remainingChecksums--;
-                                if(remainingChecksums === 0)
-                                    onComplete(updateObject);
-                            }}(osName));
-                        }
-                    }
+                    id: stackLayout
+                    anchors.fill: parent
+                    currentIndex: tabBar.currentIndex
                 }
             }
         }
 
         RowLayout
         {
+            Layout.topMargin: Constants.spacing
+
             Button
             {
                 enabled: !root.busy
 
                 text: qsTr("Add Upgrade")
-                onClicked: { tabView.createTab(); }
+                onClicked: { tabBar.createTab(); }
             }
 
             Button
@@ -992,7 +1088,7 @@ ApplicationWindow
                 text: qsTr("Remove Upgrade")
                 onClicked:
                 {
-                    tabView.removeTab(tabView.currentIndex);
+                    tabBar.removeTab(tabBar.currentIndex);
                 }
             }
 
