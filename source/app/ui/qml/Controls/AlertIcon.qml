@@ -17,35 +17,31 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.15
 
-Item
+Image
 {
-    id: root
-    width: image.width
-    height: image.height
-    implicitWidth: image.implicitWidth
-    implicitHeight: image.implicitHeight
-
     property string type
     property string text
 
-    Image
+    source:
     {
-        id: image
-
-        source:
+        switch(type)
         {
-            switch(root.type)
-            {
-            case "error": return "error.png";
-            default:
-            case "warning": return "warning.png";
-            }
+        case "error": return "error.png";
+        default:
+        case "warning": return "warning.png";
         }
-
-        ToolTipHack { text: root.text }
     }
 
+    MouseArea
+    {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+    }
+
+    ToolTip.visible: mouseArea.containsMouse
+    ToolTip.delay: 500
+    ToolTip.text: text
 }
