@@ -17,7 +17,6 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
@@ -133,7 +132,7 @@ Item
         width: root.width !== undefined ? root.width - _padding : undefined
         height: root.height !== undefined ? root.height - _padding : undefined
 
-        Label
+        Text
         {
             id: minimumLabel
 
@@ -175,7 +174,7 @@ Item
             }
         }
 
-        Label
+        Text
         {
             id: maximumLabel
 
