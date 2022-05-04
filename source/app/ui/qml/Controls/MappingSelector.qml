@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
@@ -72,7 +72,7 @@ Window
                 stddevRadioButton.checked = true;
         }
 
-        if(typeGroup.current === null)
+        if(typeGroup.checkedButton === null)
             userDefinedRadioButton.checked = true;
 
         mappingPlot.minimum = Utils.clamp(mappingPlot.minimum, root._minimumValue, root._maximumValue);
@@ -173,13 +173,16 @@ Window
 
                 ColumnLayout
                 {
-                    ExclusiveGroup { id: typeGroup }
+                    ButtonGroup
+                    {
+                        id: typeGroup
+                        buttons: [minmaxRadioButton, stddevRadioButton, userDefinedRadioButton]
+                    }
 
                     RadioButton
                     {
                         id: minmaxRadioButton
                         text: qsTr("Minimum/Maximum")
-                        exclusiveGroup: typeGroup
 
                         onCheckedChanged:
                         {
@@ -192,7 +195,6 @@ Window
                     {
                         id: stddevRadioButton
                         text: qsTr("Standard Deviation")
-                        exclusiveGroup: typeGroup
 
                         onCheckedChanged:
                         {
@@ -201,39 +203,44 @@ Window
                         }
                     }
 
+                    RadioButton
+                    {
+                        id: userDefinedRadioButton
+                        text: qsTr("User Defined")
+                    }
+
                     RowLayout
                     {
-                        RadioButton
+                        Layout.leftMargin: Constants.margin * 2
+
+                        DoubleSpinBox
                         {
-                            id: userDefinedRadioButton
-                            text: qsTr("User Defined")
-                            exclusiveGroup: typeGroup
+                            id: minimumSpinBox
+                            Layout.preferredWidth: 90
+
+                            enabled: userDefinedRadioButton.checked
+
+                            from: root._minimumValue
+                            to: root._maximumValue
+                            decimals: { return Utils.decimalPointsForRange(from, to); }
+                            stepSize: { return Utils.incrementForRange(from, to); }
+
+                            onValueModified: { mappingPlot.minimum = value; }
                         }
 
-                        SpinBox
+                        DoubleSpinBox
                         {
+                            id: maximumSpinBox
+                            Layout.preferredWidth: 90
+
                             enabled: userDefinedRadioButton.checked
-                            value: mappingPlot.minimum
 
-                            minimumValue: root._minimumValue
-                            maximumValue: root._maximumValue
-                            decimals: { return Utils.decimalPointsForRange(minimumValue, maximumValue); }
-                            stepSize: { return Utils.incrementForRange(minimumValue, maximumValue); }
+                            from: root._minimumValue
+                            to: root._maximumValue
+                            decimals: { return Utils.decimalPointsForRange(from, to); }
+                            stepSize: { return Utils.incrementForRange(from, to); }
 
-                            onEditingFinished: { mappingPlot.minimum = value; }
-                        }
-
-                        SpinBox
-                        {
-                            enabled: userDefinedRadioButton.checked
-                            value: mappingPlot.maximum
-
-                            minimumValue: root._minimumValue
-                            maximumValue: root._maximumValue
-                            decimals: { return Utils.decimalPointsForRange(minimumValue, maximumValue); }
-                            stepSize: { return Utils.incrementForRange(minimumValue, maximumValue); }
-
-                            onEditingFinished: { mappingPlot.maximum = value; }
+                            onValueModified: { mappingPlot.maximum = value; }
                         }
                     }
                 }
@@ -247,10 +254,9 @@ Window
                 Slider
                 {
                     id: exponentSlider
-                    minimumValue: -4
-                    maximumValue: 4
+                    from: -4
+                    to: 4
                     stepSize: 1
-                    tickmarksEnabled: true
                 }
 
                 Item { Layout.fillHeight: true }
@@ -267,6 +273,8 @@ Window
                 invert: root.invert
                 exponent: root._exponent
 
+                onMinimumChanged: { minimumSpinBox.value = minimum; }
+                onMaximumChanged: { maximumSpinBox.value = maximum; }
                 onManualChangeToMinMax: { userDefinedRadioButton.checked = true; }
             }
         }
