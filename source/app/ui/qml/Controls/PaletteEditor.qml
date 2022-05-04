@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
@@ -305,7 +305,7 @@ ColumnLayout
             }
         }
 
-        ExclusiveGroup { id: defaultColorsGroup }
+        ButtonGroup { id: defaultColorsGroup }
 
         RowLayout
         {
@@ -318,7 +318,7 @@ ColumnLayout
                 Layout.fillWidth: true
 
                 text: qsTr("Fixed")
-                exclusiveGroup: defaultColorsGroup
+                ButtonGroup.group: defaultColorsGroup
             }
 
             ColorPickButton
@@ -343,7 +343,7 @@ ColumnLayout
                 root._fixedColors.length > 0
 
             text: qsTr("Generate")
-            exclusiveGroup: defaultColorsGroup
+            ButtonGroup.group: defaultColorsGroup
         }
     }
 
