@@ -552,69 +552,53 @@ Rectangle
             }
 
 
-            Frame
+            FramedScrollView
             {
+                id: scrollView
+
                 Layout.fillWidth: true
                 Layout.preferredHeight: 128
 
                 visible: _selectMultipleMode
 
-                topPadding: 0
-                leftPadding: 0
-                rightPadding: 0
-                bottomPadding: 0
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-                Component.onCompleted: { scrollView.anchors.margins = background.border.width; }
-
-                ScrollView
+                ListView
                 {
-                    id: scrollView
+                    boundsBehavior: Flickable.StopAtBounds
 
-                    anchors.fill: parent
-                    clip: true
-
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
-                    ListView
+                    model: valueComboBox.model
+                    delegate: Loader
                     {
-                        anchors.leftMargin: Constants.padding
-                        anchors.fill: parent
-
-                        boundsBehavior: Flickable.StopAtBounds
-
-                        model: valueComboBox.model
-                        delegate: Loader
+                        sourceComponent: CheckBox
                         {
-                            sourceComponent: CheckBox
+                            text: modelData
+
+                            function isChecked()
                             {
-                                text: modelData
-
-                                function isChecked()
-                                {
-                                    return Utils.setContains(_attributeValues, modelData);
-                                }
-
-                                checked: { return isChecked(); }
-
-                                onCheckedChanged:
-                                {
-                                    // Unbind to prevent binding loop
-                                    checked = checked;
-
-                                    if(checked)
-                                        _attributeValues = Utils.setAdd(_attributeValues, modelData);
-                                    else
-                                        _attributeValues = Utils.setRemove(_attributeValues, modelData);
-
-                                    // Rebind so that the delegate doesn't hold the state
-                                    checked = Qt.binding(isChecked);
-                                }
-
-                                ToolTip.visible: hovered
-                                ToolTip.delay: 500
-                                ToolTip.text: modelData
+                                return Utils.setContains(_attributeValues, modelData);
                             }
+
+                            checked: { return isChecked(); }
+
+                            onCheckedChanged:
+                            {
+                                // Unbind to prevent binding loop
+                                checked = checked;
+
+                                if(checked)
+                                    _attributeValues = Utils.setAdd(_attributeValues, modelData);
+                                else
+                                    _attributeValues = Utils.setRemove(_attributeValues, modelData);
+
+                                // Rebind so that the delegate doesn't hold the state
+                                checked = Qt.binding(isChecked);
+                            }
+
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: modelData
                         }
                     }
                 }

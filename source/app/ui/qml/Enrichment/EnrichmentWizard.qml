@@ -183,70 +183,58 @@ Wizard
                     Layout.fillWidth: true
                 }
 
-                Frame
+                FramedScrollView
                 {
+                    id: scrollViewA
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    topPadding: 0
-                    leftPadding: 0
-                    rightPadding: 0
-                    bottomPadding: 0
-
-                    Component.onCompleted: { scrollViewA.anchors.margins = background.border.width; }
-
-                    ScrollView
+                    ColumnLayout
                     {
-                        id: scrollViewA
-                        anchors.fill: parent
-                        clip: true
+                        spacing: 0
 
-                        ColumnLayout
+                        ButtonGroup
                         {
-                            spacing: 0
-
-                            ButtonGroup
+                            id: attributeSelectedAExclusiveGroup
+                            onCheckedButtonChanged:
                             {
-                                id: attributeSelectedAExclusiveGroup
-                                onCheckedButtonChanged:
+                                if(checkedButton !== null && root.visible)
                                 {
-                                    if(checkedButton !== null && root.visible)
-                                    {
-                                        selectedAttributeGroupA = checkedButton.attributeName;
+                                    selectedAttributeGroupA = checkedButton.attributeName;
 
-                                        // Disable analysis on selected
-                                        for(let i = 0; i < attributeSelectBRepeater.count; i++)
-                                        {
-                                            let radioBtn = attributeSelectBRepeater.itemAt(i);
-                                            radioBtn.enabled = radioBtn.attributeName !== checkedButton.attributeName;
-                                        }
+                                    // Disable analysis on selected
+                                    for(let i = 0; i < attributeSelectBRepeater.count; i++)
+                                    {
+                                        let radioBtn = attributeSelectBRepeater.itemAt(i);
+                                        radioBtn.enabled = radioBtn.attributeName !== checkedButton.attributeName;
                                     }
                                 }
                             }
+                        }
 
-                            Repeater
+                        Repeater
+                        {
+                            id: attributeSelectARepeater
+                            model: proxyModel
+
+                            RadioButton
                             {
-                                id: attributeSelectARepeater
-                                model: proxyModel
+                                property var attributeName: model.display
 
-                                RadioButton
+                                text:
                                 {
-                                    property var attributeName: model.display
-
-                                    text:
+                                    if(document !== null && model.display.length > 0)
                                     {
-                                        if(document !== null && model.display.length > 0)
-                                        {
-                                            return model.display + qsTr(" (") +
-                                                document.attribute(model.display).sharedValues.length +
-                                                qsTr(" entries)");
-                                        }
-
-                                        return "";
+                                        return model.display + qsTr(" (") +
+                                            document.attribute(model.display).sharedValues.length +
+                                            qsTr(" entries)");
                                     }
 
-                                    ButtonGroup.group: attributeSelectedAExclusiveGroup
+                                    return "";
                                 }
+
+                                ButtonGroup.group: attributeSelectedAExclusiveGroup
                             }
                         }
                     }
@@ -283,61 +271,49 @@ Wizard
                     Layout.fillWidth: true
                 }
 
-                Frame
+                FramedScrollView
                 {
+                    id: scrollViewB
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    topPadding: 0
-                    leftPadding: 0
-                    rightPadding: 0
-                    bottomPadding: 0
-
-                    Component.onCompleted: { scrollViewB.anchors.margins = background.border.width; }
-
-                    ScrollView
+                    ColumnLayout
                     {
-                        id: scrollViewB
-                        anchors.fill: parent
-                        clip: true
+                        spacing: 0
 
-                        ColumnLayout
+                        ButtonGroup
                         {
-                            spacing: 0
-
-                            ButtonGroup
+                            id: attributeSelectedBExclusiveGroup
+                            onCheckedButtonChanged:
                             {
-                                id: attributeSelectedBExclusiveGroup
-                                onCheckedButtonChanged:
-                                {
-                                    if(checkedButton !== null && root.visible)
-                                        selectedAttributeGroupB = checkedButton.attributeName;
-                                }
+                                if(checkedButton !== null && root.visible)
+                                    selectedAttributeGroupB = checkedButton.attributeName;
                             }
+                        }
 
-                            Repeater
+                        Repeater
+                        {
+                            id: attributeSelectBRepeater
+                            model: proxyModel
+
+                            RadioButton
                             {
-                                id: attributeSelectBRepeater
-                                model: proxyModel
+                                property var attributeName: model.display
 
-                                RadioButton
+                                text:
                                 {
-                                    property var attributeName: model.display
-
-                                    text:
+                                    if(document !== null && model.display.length > 0)
                                     {
-                                        if(document !== null && model.display.length > 0)
-                                        {
-                                            return model.display + qsTr(" (") +
-                                                document.attribute(model.display).sharedValues.length +
-                                                qsTr(" entries)");
-                                        }
-
-                                        return "";
+                                        return model.display + qsTr(" (") +
+                                            document.attribute(model.display).sharedValues.length +
+                                            qsTr(" entries)");
                                     }
 
-                                    ButtonGroup.group: attributeSelectedBExclusiveGroup
+                                    return "";
                                 }
+
+                                ButtonGroup.group: attributeSelectedBExclusiveGroup
                             }
                         }
                     }
