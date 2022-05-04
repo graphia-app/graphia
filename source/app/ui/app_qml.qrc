@@ -70,5 +70,6 @@
         <file>qml/Controls/TabBarButton.qml</file>
         <file>qml/Controls/ScrollableTextArea.qml</file>
         <file>qml/Controls/DoubleSpinBox.qml</file>
+        <file>qml/Controls/FramedScrollView.qml</file>
     </qresource>
 </RCC>
