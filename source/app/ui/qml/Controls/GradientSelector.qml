@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
@@ -56,8 +56,6 @@ Window
         colorGroup: SystemPalette.Active
     }
 
-    ExclusiveGroup { id: selectedGroup }
-
     function open(configuration)
     {
         root.applied = false;
@@ -82,20 +80,21 @@ Window
         {
             ColumnLayout
             {
-                ScrollView
+                FramedScrollView
                 {
                     id: gradientListScrollView
 
                     Layout.preferredWidth: 160
                     Layout.fillHeight: true
 
-                    frameVisible: true
-                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                    contentItem: Column
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+                    Column
                     {
                         id: gradientPresets
 
-                        width: gradientListScrollView.viewport.width
+                        width: gradientListScrollView.width
 
                         spacing: 2
 
