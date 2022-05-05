@@ -17,10 +17,12 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 
 MouseArea
 {
+    id: root
+
     property var transformsList
 
     anchors.fill: parent
@@ -35,7 +37,18 @@ MouseArea
         {
             id: sortRoleMenu
             title: qsTr("Sort By")
-            ExclusiveGroup { id: sortByExclusiveGroup }
+            ButtonGroup { id: sortByExclusiveGroup }
+
+            Component
+            {
+                id: sortByComponent
+
+                MenuItem
+                {
+                    checkable: true
+                    ButtonGroup.group: sortByExclusiveGroup
+                }
+            }
 
             Component.onCompleted:
             {
@@ -50,9 +63,8 @@ MouseArea
                     let name = Object.keys(item)[0];
                     let roleName = item[name];
 
-                    let menuItem = sortRoleMenu.addItem(qsTr(name));
-                    menuItem.checkable = true;
-                    menuItem.exclusiveGroup = sortByExclusiveGroup;
+                    let menuItem = sortByComponent.createObject(root);
+                    menuItem.text = qsTr(name);
                     menuItem.checked = Qt.binding(function()
                     {
                         return transformsList.sortBy === roleName;
@@ -61,6 +73,8 @@ MouseArea
                     {
                         return transformsList.sortBy = roleName;
                     });
+
+                    sortRoleMenu.addItem(menuItem);
                 });
             }
         }
@@ -69,7 +83,18 @@ MouseArea
         {
             id: sortAscendingMenu
             title: qsTr("Sort Order")
-            ExclusiveGroup { id: sortOrderExclusiveGroup }
+            ButtonGroup { id: sortOrderExclusiveGroup }
+
+            Component
+            {
+                id: sortAscendingComponent
+
+                MenuItem
+                {
+                    checkable: true
+                    ButtonGroup.group: sortOrderExclusiveGroup
+                }
+            }
 
             Component.onCompleted:
             {
@@ -84,9 +109,8 @@ MouseArea
                     let name = Object.keys(item)[0];
                     let ascendingSortOrder = item[name];
 
-                    let menuItem = sortAscendingMenu.addItem(qsTr(name));
-                    menuItem.checkable = true;
-                    menuItem.exclusiveGroup = sortOrderExclusiveGroup;
+                    let menuItem = sortAscendingComponent.createObject(root);
+                    menuItem.text = qsTr(name);
                     menuItem.checked = Qt.binding(function()
                     {
                         return transformsList.ascendingSortOrder === ascendingSortOrder;
@@ -95,6 +119,8 @@ MouseArea
                     {
                         transformsList.ascendingSortOrder = ascendingSortOrder;
                     });
+
+                    sortAscendingMenu.addItem(menuItem);
                 });
             }
         }
