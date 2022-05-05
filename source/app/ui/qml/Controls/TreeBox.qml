@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 1.5 as QQC1
 import QtQuick.Layouts 1.3
 import QtQml.Models 2.2
 
@@ -117,7 +117,7 @@ Item
             onAccepted: { visible = false; }
         }
 
-        TreeView
+        QQC1.TreeView
         {
             id: treeView
 
@@ -131,13 +131,13 @@ Item
             }
 
             selectionMode: root.allowMultiSelection ?
-                SelectionMode.MultiSelection : SelectionMode.SingleSelection
+                QQC1.SelectionMode.MultiSelection : QQC1.SelectionMode.SingleSelection
 
             // Clear the selection when the model is changed
             selection: ItemSelectionModel { model: sortFilterProxyModel }
             onModelChanged: { selection.clear(); }
 
-            TableViewColumn { role: "display" }
+            QQC1.TableViewColumn { role: "display" }
 
             // Hide the header
             headerDelegate: Item {}

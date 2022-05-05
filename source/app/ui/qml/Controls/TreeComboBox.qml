@@ -17,8 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
-import QtQuick.Controls 2.12 as QQC2
+import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.0
 
 Item
@@ -119,7 +118,7 @@ Item
         onAccepted: { root.accept(); }
     }
 
-    QQC2.Popup
+    Popup
     {
         id: popup
 
@@ -127,7 +126,7 @@ Item
         implicitWidth: root.width
         implicitHeight: Math.min(popupTreeBox.contentHeight, 240)
 
-        closePolicy: QQC2.Popup.CloseOnEscape | QQC2.Popup.CloseOnPressOutsideParent
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 
         padding: 0
         margins: 0

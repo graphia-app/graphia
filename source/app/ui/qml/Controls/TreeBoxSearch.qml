@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQml.Models 2.2
 
 import app.graphia 1.0
