@@ -223,6 +223,8 @@ private:
 
     DoubleBufferedTexture _sdfTexture;
 
+    std::mutex _initialisationMutex;
+
     bool _FBOcomplete = false;
 
     // When elements are added to the scene, it may be that they would lie

@@ -41,6 +41,7 @@
 #include "screenshotrenderer.h"
 
 #include <QObject>
+#include <QCoreApplication>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QOpenGLDebugLogger>
 #include <QColor>
@@ -130,6 +131,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     u::doAsync([this, graph]
     {
+        std::unique_lock<std::mutex> lock(_initialisationMutex);
+
         initialiseFromGraph(graph, *this);
         initialiseFromGraph(graph, *_graphOverviewScene);
         initialiseFromGraph(graph, *_graphComponentScene);
@@ -154,6 +157,11 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
 GraphRenderer::~GraphRenderer()
 {
+    std::unique_lock<std::mutex> lock(_initialisationMutex);
+
+    // Force event processing in case the above .then(...) is still to run (due to a slow init)
+    QCoreApplication::processEvents();
+
     _FBOcomplete = false;
 }
 
