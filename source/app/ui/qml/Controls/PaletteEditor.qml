@@ -118,6 +118,16 @@ ColumnLayout
         return JSON.stringify(o);
     }
 
+    property var _addedItems: new Set()
+    function _itemPositionChanged(item)
+    {
+        if(_addedItems.has(item))
+        {
+            _addedItems.delete(item);
+            root.itemAdded(item);
+        }
+    }
+
     ColumnLayout
     {
         Layout.fillWidth: true
@@ -184,7 +194,7 @@ ColumnLayout
 
                     root._autoColors = paletteAutoColorListRepeater.model = colors;
 
-                    root.autoColorAdded(paletteAutoColorListRepeater.itemAt(
+                    root._addedItems.add(paletteAutoColorListRepeater.itemAt(
                         paletteAutoColorListRepeater.count - 1));
                 }
             }
@@ -204,6 +214,9 @@ ColumnLayout
             RowLayout
             {
                 width: root.width
+
+                onXChanged: { root._itemPositionChanged(this); }
+                onYChanged: { root._itemPositionChanged(this); }
 
                 Text
                 {
@@ -259,8 +272,6 @@ ColumnLayout
 
                     onClicked:
                     {
-                        root.autoColorWillBeRemoved(paletteAutoColorListRepeater.itemAt(index));
-
                         let colors = root._autoColors;
                         colors.splice(index, 1);
                         root._autoColors = colors;
@@ -458,7 +469,7 @@ ColumnLayout
 
                     root._fixedColors = paletteFixedColorListRepeater.model = colors;
 
-                    root.fixedColorAdded(paletteFixedColorListRepeater.itemAt(
+                    root._addedItems.add(paletteFixedColorListRepeater.itemAt(
                         paletteFixedColorListRepeater.count - 1));
                 }
             }
@@ -478,6 +489,9 @@ ColumnLayout
             RowLayout
             {
                 width: root.width
+
+                onXChanged: { root._itemPositionChanged(this); }
+                onYChanged: { root._itemPositionChanged(this); }
 
                 ComboBox
                 {
@@ -539,8 +553,6 @@ ColumnLayout
 
                     onClicked:
                     {
-                        root.fixedColorWillBeRemoved(paletteFixedColorListRepeater.itemAt(index));
-
                         let colors = root._fixedColors;
                         colors.splice(index, 1);
                         root._fixedColors = colors;
@@ -553,9 +565,5 @@ ColumnLayout
         }
     }
 
-    signal autoColorAdded(var item)
-    signal autoColorWillBeRemoved(var item)
-
-    signal fixedColorAdded(var item)
-    signal fixedColorWillBeRemoved(var item)
+    signal itemAdded(var item)
 }

@@ -18,7 +18,7 @@
 
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
@@ -57,7 +57,7 @@ Window
         colorGroup: SystemPalette.Active
     }
 
-    ExclusiveGroup { id: selectedGroup }
+    ButtonGroup { id: selectedGroup }
 
     function open(configuration, stringValues)
     {
@@ -84,20 +84,21 @@ Window
         {
             ColumnLayout
             {
-                ScrollView
+                FramedScrollView
                 {
                     id: paletteListScrollView
 
                     Layout.preferredWidth: 160
                     Layout.fillHeight: true
 
-                    frameVisible: true
-                    horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                    contentItem: Column
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+                    Column
                     {
                         id: palettePresets
 
-                        width: paletteListScrollView.viewport.width
+                        width: paletteListScrollView.width
 
                         spacing: 2
 
@@ -288,34 +289,30 @@ Window
                 }
             }
 
-            ScrollView
+            FramedScrollView
             {
                 id: paletteEditorScrollview
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                frameVisible: true
-                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-
-                contentItem: PaletteEditor
+                PaletteEditor
                 {
                     id: paletteEditor
 
-                    width: paletteEditorScrollview.viewport.width
+                    width: paletteEditorScrollview.width
 
                     function scrollToItem(item)
                     {
-                        let itemPosition = item.mapToItem(paletteEditorScrollview.contentItem, 0, 0);
+                        let itemPosition = item.mapToItem(paletteEditor, 0, 0);
                         let newContentY = (itemPosition.y + item.height) -
-                            paletteEditorScrollview.viewport.height + Constants.margin;
+                            paletteEditorScrollview.height + Constants.margin;
 
-                        if(newContentY > paletteEditorScrollview.flickableItem.contentY)
-                            paletteEditorScrollview.flickableItem.contentY = newContentY;
+                        if(newContentY > paletteEditorScrollview.contentItem.contentY)
+                            paletteEditorScrollview.contentItem.contentY = newContentY;
                     }
 
-                    onAutoColorAdded: { scrollToItem(item); }
-                    onFixedColorAdded: { scrollToItem(item); }
+                    onItemAdded: { scrollToItem(item); }
 
                     onConfigurationChanged:
                     {
