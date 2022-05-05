@@ -145,7 +145,10 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     }).then([this]
     {
         emit initialised();
+
+        // The initial state is disabled, so this has no complement disableSceneUpdate call
         enableSceneUpdate();
+        update();
     });
 }
 
