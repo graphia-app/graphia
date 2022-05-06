@@ -28,7 +28,7 @@ ToolButton
     display: icon.name.length > 0 || icon.source.length > 0 ?
         AbstractButton.IconOnly : AbstractButton.TextOnly
 
-    ToolTip.visible: display === AbstractButton.IconOnly && hovered
+    ToolTip.visible: display === AbstractButton.IconOnly && text.length > 0 && hovered
     ToolTip.delay: 500
     ToolTip.text: display === AbstractButton.IconOnly ? text : ""
 }
