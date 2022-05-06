@@ -30,7 +30,7 @@ Button
 {
     id: root
 
-    property var iconName
+    property string iconName: ""
     property double hoverOpacity: 1.0
 
     implicitHeight: 32
@@ -54,7 +54,7 @@ Button
     {
         spacing: 4
 
-        property string _iconName: root.action !== null ?
+        property string _iconName: root.action !== null && root.action.icon !== null ?
             root.action.icon.name : root.iconName
         property string _text: root.action !== null ?
             root.action.text : root.text
