@@ -340,7 +340,7 @@ Item
                     text: qsTr("Edit…")
                     visible: gradientKey.visible || paletteKey.visible
                     height: visible ? implicitHeight : 0
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
 
                     onTriggered:
                     {
@@ -365,7 +365,7 @@ Item
 
                     text: qsTr("Invert")
                     checkable: true
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
                     height: visible ? implicitHeight : 0
@@ -407,7 +407,7 @@ Item
                 {
                     id: minmaxMenuItem
                     text: qsTr("Min/Max")
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
 
                     // This is the default when there is no mapping
                     checked: parameters.mapping === undefined
@@ -428,7 +428,7 @@ Item
                 {
                     id: stddevMenuItem
                     text: qsTr("Standard Deviation")
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
 
                     checkable: true
 
@@ -450,7 +450,7 @@ Item
 
                     checkable: true
 
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showMappingOptions
                     height: visible ? implicitHeight : 0
 
@@ -477,7 +477,7 @@ Item
 
                     text: qsTr("Apply Per Component")
                     checkable: true
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
                     height: visible ? implicitHeight : 0
@@ -505,7 +505,7 @@ Item
                 {
                     id: sortByValueMenuItem
 
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
                     height: visible ? implicitHeight : 0
 
@@ -517,7 +517,7 @@ Item
                 {
                     id: sortBySharedValuesMenuItem
 
-                    enabled: enabledMenuItem.checked && !root._error
+                    enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
                     height: visible ? implicitHeight : 0
 
