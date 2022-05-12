@@ -296,7 +296,7 @@ Item
             }
             else
             {
-                root.parent = mainWindow.toolBar;
+                root.parent = mainWindow.header;
                 positionBubble();
             }
         }
@@ -308,7 +308,7 @@ Item
         if(hoverTarget.hovered)
         {
             hoverTimer.start();
-            root.parent = mainWindow.toolBar;
+            root.parent = mainWindow.header;
             positionBubble();
         }
         else
