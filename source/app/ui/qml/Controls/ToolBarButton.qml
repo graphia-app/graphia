@@ -28,7 +28,10 @@ ToolButton
     display: icon.name.length > 0 || icon.source.length > 0 ?
         AbstractButton.IconOnly : AbstractButton.TextOnly
 
-    ToolTip.visible: display === AbstractButton.IconOnly && text.length > 0 && hovered
+    // Remove menu hotkey decorations
+    property string _cleansedText: { return text.replace("&", ""); }
+
+    ToolTip.visible: display === AbstractButton.IconOnly && _cleansedText.length > 0 && hovered
     ToolTip.delay: 500
-    ToolTip.text: display === AbstractButton.IconOnly ? text : ""
+    ToolTip.text: display === AbstractButton.IconOnly ? _cleansedText : ""
 }
