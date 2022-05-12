@@ -28,6 +28,8 @@ import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Item
 {
+    id: root
+
     Preferences
     {
         id: misc
@@ -45,6 +47,9 @@ Item
         property string emailAddress
         property string permission
     }
+
+    property bool _trackingPermissionUnresolved: tracking.permission.length === 0 ||
+        tracking.permission === "unresolved"
 
     Preferences
     {
@@ -70,7 +75,7 @@ Item
             yesTrackingRadioButton.checked = true;
             emailField.text = tracking.emailAddress;
         }
-        else
+        else if(!root._trackingPermissionUnresolved)
         {
             anonTrackingRadioButton.checked = true;
             emailField.text = "";
@@ -114,7 +119,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        if(checked)
+                        if(checked && !root._trackingPermissionUnresolved)
                             tracking.permission = "given";
                     }
                 }
@@ -149,7 +154,7 @@ Item
 
                 onCheckedChanged:
                 {
-                    if(checked)
+                    if(checked && !root._trackingPermissionUnresolved)
                         tracking.permission = "anonymous";
                 }
             }
@@ -161,7 +166,7 @@ Item
 
                 onCheckedChanged:
                 {
-                    if(checked)
+                    if(checked && !root._trackingPermissionUnresolved)
                         tracking.permission = "refused";
                 }
             }
