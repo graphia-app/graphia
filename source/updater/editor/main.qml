@@ -165,7 +165,7 @@ ApplicationWindow
                     name: "darwin",
                     command:
                         "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |" +
-                        "    awk 'END {$1=$2=\"\"; print $0}'; exit ${PIPESTATUS[0]}) && " +
+                        "    tail -n1 | cut -f3-; exit ${PIPESTATUS[0]}) && " +
                         "(rsync -av \"$VOLUME\"\/*.app $(dirname EXISTING_INSTALL); SYNCED=$?;" +
                         "    (hdiutil detach -force \"$VOLUME\" || exit $?) && exit \"$SYNCED\")"
                 },
