@@ -729,6 +729,7 @@ ApplicationWindow
                             {
                                 id: version
                                 Layout.fillWidth: true
+                                selectByMouse: true
 
                                 onTextChanged: { setSaveRequired(); }
                             }
@@ -738,6 +739,7 @@ ApplicationWindow
                             {
                                 id: targetVersionRegex
                                 Layout.fillWidth: true
+                                selectByMouse: true
 
                                 onTextChanged: { setSaveRequired(); }
                             }
@@ -827,6 +829,7 @@ ApplicationWindow
                                     id: url
 
                                     Layout.fillWidth: true
+                                    selectByMouse: true
 
                                     enabled: osEnabled.checked
 
