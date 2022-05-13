@@ -26,6 +26,8 @@ import app.graphia 1.0
 
 import Qt.labs.platform 1.0 as Labs
 
+import "../../../../shared/ui/qml/Constants.js" as Constants
+
 import "../Controls"
 
 ApplicationWindow
@@ -71,8 +73,8 @@ ApplicationWindow
 
     header: ToolBar
     {
-        topPadding: 6
-        bottomPadding: 6
+        topPadding: Constants.padding
+        bottomPadding: Constants.padding
 
         RowLayout
         {
