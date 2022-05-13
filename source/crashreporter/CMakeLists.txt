@@ -16,7 +16,6 @@ list(APPEND HEADERS
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.cpp
 )
 
 list(APPEND RESOURCES

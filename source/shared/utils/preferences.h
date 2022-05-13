@@ -20,12 +20,21 @@
 #define SHARED_PREFERENCES_H
 
 #include <QVariant>
+#include <QSettings>
+#include <QCoreApplication>
 
 class QString;
 
 namespace u
 {
-    QVariant getPref(const QString& key);
+    inline QVariant getPref(const QString& key)
+    {
+        QSettings settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
+            QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+        return settings.value(key);
+    }
+
 } // namespace u
 
 #endif // SHARED_PREFERENCES_H

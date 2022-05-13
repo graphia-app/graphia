@@ -156,7 +156,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.cpp
