@@ -9,6 +9,9 @@
         <file>qml/Controls/ListTab.qml</file>
         <file>qml/Controls/HelpTooltip.qml</file>
         <file>qml/Controls/Hubble.qml</file>
+        <file>qml/Controls/PlatformMenu.qml</file>
+        <file>qml/Controls/PlatformMenuItem.qml</file>
+        <file>qml/Controls/PlatformMenuSeparator.qml</file>
         <file>qml/FontPointSize.qml</file>
         <file>qml/qmldir</file>
         <file>qml/Controls/DataTable.qml</file>
