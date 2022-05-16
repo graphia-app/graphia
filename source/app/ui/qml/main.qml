@@ -16,15 +16,14 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQml 2.8
-import QtQuick 2.12
-import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
+import QtQml 2.15
+import QtQml.Models 2.15
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
-import QtQuick.Window 2.2
-
-import Qt.labs.platform 1.0 as Labs
+import QtQuick.Window 2.15
+import Qt.labs.platform 1.1 as Labs
+import QtQuick.Dialogs 1.3 as Dialogs
 
 import app.graphia 1.0
 import "../../../shared/ui/qml/Utils.js" as Utils
@@ -39,22 +38,24 @@ ApplicationWindow
 {
     id: mainWindow
     visible: false
-    property var recentFiles
-    property bool debugMenuUnhidden: false
+
     width: 1024
     height: 768
     minimumWidth: mainToolBar.visible ? mainToolBar.implicitWidth : 640
     minimumHeight: 480
-    property bool maximised: mainWindow.visibility === Window.Maximized
 
-    property TabUI currentTab: tabView.count > 0 && tabView.currentIndex < tabView.count ?
-        tabView.getTab(tabView.currentIndex).item : null
+    readonly property bool maximised: mainWindow.visibility === Window.Maximized
+
+    property TabUI currentTab: tabBar.count > 0 && tabBar.currentIndex < tabLayout.count ?
+        tabLayout.get(tabBar.currentIndex) : null
+
+    property var recentFiles: []
 
     property bool _anyTabsBusy:
     {
-        for(let index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabBar.count; index++)
         {
-            let tab = tabView.getTab(index).item;
+            let tab = tabLayout.get(index);
             if(tab !== null && tab.document.busy)
                 return true;
         }
@@ -90,10 +91,10 @@ ApplicationWindow
 
     Application { id: application }
 
-    MessageDialog
+    Dialogs.MessageDialog
     {
         id: noUpdatesMessageDialog
-        icon: StandardIcon.Information
+        icon: Dialogs.StandardIcon.Information
         title: qsTr("No Updates")
         text: qsTr("There are no updates available at this time.")
     }
@@ -177,15 +178,15 @@ ApplicationWindow
 
     function currentState()
     {
-        let s = tabView.count + " tabs";
+        let s = tabBar.count + " tabs";
 
-        for(let index = 0; index < tabView.count; index++)
+        for(let index = 0; index < tabBar.count; index++)
         {
             if(s.length !== 0)
                 s += "\n\n";
 
             s += "Tab " + index + ": ";
-            let tab = tabView.getTab(index).item;
+            let tab = tabLayout.get(index);
             if(tab === null)
             {
                 s += "null";
@@ -324,14 +325,14 @@ ApplicationWindow
 
     onClosing:
     {
-        if(tabView.count > 0)
+        if(tabBar.count > 0)
         {
             // Capture _restartOnExit so that we can restore its value after a non-cancel exit
             let closeTabFunction = function(restartOnExit)
             {
                 return function()
                 {
-                    tabView.removeTab(0);
+                    tabBar.removeTab(0);
                     _restartOnExit = restartOnExit;
                     mainWindow.close();
                 };
@@ -343,7 +344,7 @@ ApplicationWindow
 
             // If any tabs are open, close the first one and cancel the window close, followed
             // by (recursive) calls to closeTabFunction, assuming the user doesn't cancel
-            tabView.closeTab(0, closeTabFunction);
+            tabBar.closeTab(0, closeTabFunction);
 
             close.accepted = false;
             return;
@@ -367,10 +368,10 @@ ApplicationWindow
             ExitType.Restart);
     }
 
-    MessageDialog
+    Dialogs.MessageDialog
     {
         id: errorOpeningFileMessageDialog
-        icon: StandardIcon.Critical
+        icon: Dialogs.StandardIcon.Critical
         title: qsTr("Error Opening File")
 
         onAccepted:
@@ -841,13 +842,13 @@ ApplicationWindow
     {
         let openInCurrentTab = function()
         {
-            tabView.openInCurrentTab(url, type, pluginName, parameters);
+            tabBar.openInCurrentTab(url, type, pluginName, parameters);
         };
 
         if(currentTab !== null && !inNewTab)
-            tabView.replaceTab(openInCurrentTab);
+            tabBar.replaceTab(openInCurrentTab);
         else
-            tabView.createTab(openInCurrentTab);
+            tabBar.createTab(openInCurrentTab);
     }
 
     Labs.FileDialog
@@ -889,7 +890,7 @@ ApplicationWindow
     Action
     {
         id: fileOpenAction
-        iconName: "document-open"
+        icon.name: "document-open"
         text: qsTr("&Open…")
         shortcut: "Ctrl+O"
         onTriggered:
@@ -908,7 +909,7 @@ ApplicationWindow
     Action
     {
         id: fileOpenInTabAction
-        iconName: "tab-new"
+        icon.name: "tab-new"
         text: qsTr("Open In New &Tab…")
         shortcut: "Ctrl+T"
         onTriggered:
@@ -927,7 +928,7 @@ ApplicationWindow
     Action
     {
         id: urlOpenAction
-        iconName: "network-server"
+        icon.name: "network-server"
         text: qsTr("Open &URL…")
         onTriggered: { openUrlDialog.show(); }
     }
@@ -935,7 +936,7 @@ ApplicationWindow
     Action
     {
         id: fileSaveAction
-        iconName: "document-save"
+        icon.name: "document-save"
         text: qsTr("&Save")
         shortcut: "Ctrl+S"
         enabled: currentTab && !currentTab.document.busy
@@ -951,7 +952,7 @@ ApplicationWindow
     Action
     {
         id: fileSaveAsAction
-        iconName: "document-save-as"
+        icon.name: "document-save-as"
         text: qsTr("&Save As…")
         enabled: currentTab && !currentTab.document.busy
         onTriggered:
@@ -966,7 +967,7 @@ ApplicationWindow
     Action
     {
         id: closeTabAction
-        iconName: "window-close"
+        icon.name: "window-close"
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
         enabled: currentTab !== null
@@ -987,7 +988,7 @@ ApplicationWindow
                         return function()
                         {
                             tab.commandComplete.disconnect(closeTabFunction);
-                            tabView.closeTab(tabView.findTabIndex(tab));
+                            tabBar.closeTab(tabBar.findTabIndex(tab));
                         };
                     }(currentTab);
 
@@ -998,26 +999,26 @@ ApplicationWindow
                     currentTab.document.cancelCommand();
             }
             else
-                tabView.closeTab(tabView.currentIndex);
+                tabBar.closeTab(tabBar.currentIndex);
         }
     }
 
     Action
     {
         id: closeAllTabsAction
-        iconName: "window-close"
+        icon.name: "window-close"
         text: qsTr("Close &All Tabs")
         shortcut: "Ctrl+Shift+W"
         enabled: currentTab !== null
         onTriggered:
         {
-            if(tabView.count > 0)
+            if(tabBar.count > 0)
             {
                 // If any tabs are open, close the first one...
-                tabView.closeTab(0, function()
+                tabBar.closeTab(0, function()
                 {
                     // ...then (recursively) resume closing if the user doesn't cancel
-                    tabView.removeTab(0);
+                    tabBar.removeTab(0);
                     closeAllTabsAction.trigger();
                 });
             }
@@ -1027,7 +1028,7 @@ ApplicationWindow
     Action
     {
         id: quitAction
-        iconName: "application-exit"
+        icon.name: "application-exit"
         text: qsTr("&Quit")
         shortcut: "Ctrl+Q"
         onTriggered: { mainWindow.close(); }
@@ -1036,7 +1037,7 @@ ApplicationWindow
     Action
     {
         id: undoAction
-        iconName: "edit-undo"
+        icon.name: "edit-undo"
         text: currentTab ? currentTab.document.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
         enabled: currentTab ? currentTab.document.canUndo : false
@@ -1050,7 +1051,7 @@ ApplicationWindow
     Action
     {
         id: redoAction
-        iconName: "edit-redo"
+        icon.name: "edit-redo"
         text: currentTab ? currentTab.document.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
         enabled: currentTab ? currentTab.document.canRedo : false
@@ -1064,7 +1065,7 @@ ApplicationWindow
     Action
     {
         id: deleteAction
-        iconName: "edit-delete"
+        icon.name: "edit-delete"
         text: qsTr("&Delete Selection")
         shortcut: "Del"
         property bool visible: currentTab ?
@@ -1076,7 +1077,7 @@ ApplicationWindow
     Action
     {
         id: selectAllAction
-        iconName: "edit-select-all"
+        icon.name: "edit-select-all"
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
         enabled: currentTab ? !currentTab.document.busy : false
@@ -1090,7 +1091,7 @@ ApplicationWindow
     Action
     {
         id: selectAllVisibleAction
-        iconName: "edit-select-all"
+        icon.name: "edit-select-all"
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
         enabled: currentTab ? !currentTab.document.busy : false
@@ -1188,7 +1189,7 @@ ApplicationWindow
     Action
     {
         id: findAction
-        iconName: "edit-find"
+        icon.name: "edit-find"
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
         enabled: currentTab ? !currentTab.document.busy : false
@@ -1202,7 +1203,7 @@ ApplicationWindow
     Action
     {
         id: advancedFindAction
-        iconName: "edit-find"
+        icon.name: "edit-find"
         text: qsTr("Advanced Find")
         shortcut: "Ctrl+Shift+F"
         enabled: currentTab ? !currentTab.document.busy : false
@@ -1216,7 +1217,7 @@ ApplicationWindow
     Action
     {
         id: findByAttributeAction
-        iconName: "edit-find-replace"
+        icon.name: "edit-find-replace"
         text: qsTr("Find By Attribute Value")
         shortcut: "Ctrl+H"
         enabled:
@@ -1264,7 +1265,7 @@ ApplicationWindow
     {
         id: optionsAction
         enabled: !mainWindow._anyDocumentsBusy
-        iconName: "applications-system"
+        icon.name: "applications-system"
         text: qsTr("&Options…")
         onTriggered:
         {
@@ -1431,7 +1432,7 @@ ApplicationWindow
     Action
     {
         id: pauseLayoutAction
-        iconName:
+        icon.name:
         {
             let layoutPauseState = currentTab ? currentTab.document.layoutPauseState : -1;
 
@@ -1458,7 +1459,7 @@ ApplicationWindow
     Action
     {
         id: toggleLayoutSettingsAction
-        iconName: "preferences-desktop"
+        icon.name: "preferences-desktop"
         text: qsTr("Layout Settings…")
         shortcut: "Ctrl+L"
         enabled: currentTab && !currentTab.document.busy
@@ -1486,7 +1487,7 @@ ApplicationWindow
     Action
     {
         id: overviewModeAction
-        iconName: "view-fullscreen"
+        icon.name: "view-fullscreen"
         text: qsTr("&Overview Mode")
         enabled: currentTab ? currentTab.document.canEnterOverviewMode : false
         onTriggered:
@@ -1499,7 +1500,7 @@ ApplicationWindow
     Action
     {
         id: resetViewAction
-        iconName: "view-refresh"
+        icon.name: "view-refresh"
         text: qsTr("&Reset View")
         enabled: currentTab ? currentTab.document.canResetView : false
         onTriggered:
@@ -1531,7 +1532,7 @@ ApplicationWindow
     Action
     {
         id: addBookmarkAction
-        iconName: "list-add"
+        icon.name: "list-add"
         text: qsTr("Add Bookmark…")
         shortcut: "Ctrl+D"
         enabled: currentTab ? !currentTab.document.busy && currentTab.document.numNodesSelected > 0 : false
@@ -1572,7 +1573,7 @@ ApplicationWindow
         }
     }
 
-    ExclusiveGroup
+    ActionGroup
     {
         id: nodeTextDisplay
 
@@ -1586,15 +1587,15 @@ ApplicationWindow
             switch(visuals.showNodeText)
             {
             default:
-            case TextState.Off:      nodeTextDisplay.current = hideNodeTextAction; break;
-            case TextState.Focused:  nodeTextDisplay.current = showFocusedNodeTextAction; break;
-            case TextState.Selected: nodeTextDisplay.current = showSelectedNodeTextAction; break;
-            case TextState.All:      nodeTextDisplay.current = showAllNodeTextAction; break;
+            case TextState.Off:      nodeTextDisplay.checkedAction = hideNodeTextAction; break;
+            case TextState.Focused:  nodeTextDisplay.checkedAction = showFocusedNodeTextAction; break;
+            case TextState.Selected: nodeTextDisplay.checkedAction = showSelectedNodeTextAction; break;
+            case TextState.All:      nodeTextDisplay.checkedAction = showAllNodeTextAction; break;
             }
         }
     }
 
-    ExclusiveGroup
+    ActionGroup
     {
         id: edgeTextDisplay
 
@@ -1607,14 +1608,14 @@ ApplicationWindow
             switch(visuals.showEdgeText)
             {
             default:
-            case TextState.Off:      edgeTextDisplay.current = hideEdgeTextAction; break;
-            case TextState.Selected: edgeTextDisplay.current = showSelectedEdgeTextAction; break;
-            case TextState.All:      edgeTextDisplay.current = showAllEdgeTextAction; break;
+            case TextState.Off:      edgeTextDisplay.checkedAction = hideEdgeTextAction; break;
+            case TextState.Selected: edgeTextDisplay.checkedAction = showSelectedEdgeTextAction; break;
+            case TextState.All:      edgeTextDisplay.checkedAction = showAllEdgeTextAction; break;
             }
         }
     }
 
-    ExclusiveGroup
+    ActionGroup
     {
         id: projection
 
@@ -1667,7 +1668,7 @@ ApplicationWindow
         }
     }
 
-    ExclusiveGroup
+    ActionGroup
     {
         id: shading
 
@@ -1739,10 +1740,10 @@ ApplicationWindow
         onTriggered: { mainWindow.restart(); }
     }
 
-    MessageDialog
+    Dialogs.MessageDialog
     {
         id: commandLineArgumentsMessageDialog
-        icon: StandardIcon.Information
+        icon: Dialogs.StandardIcon.Information
         title: qsTr("Command Line Arguments")
     }
 
@@ -1769,7 +1770,7 @@ ApplicationWindow
     Action
     {
         id: saveImageAction
-        iconName: "camera-photo"
+        icon.name: "camera-photo"
         text: qsTr("Save As Image…")
         enabled: currentTab && !currentTab.document.busy
         onTriggered:
@@ -1797,7 +1798,7 @@ ApplicationWindow
     {
         id: togglePluginMinimiseAction
         shortcut: "Ctrl+M"
-        iconName: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
+        icon.name: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
         text: currentTab ? (currentTab.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
             currentTab.document.pluginName : ""
         enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
@@ -1827,7 +1828,7 @@ ApplicationWindow
     Action
     {
         id: togglePluginWindowAction
-        iconName: "preferences-system-windows"
+        icon.name: "preferences-system-windows"
         text: currentTab ? qsTr("Display ") + currentTab.document.pluginName + qsTr(" In Separate &Window") : ""
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
@@ -1940,40 +1941,21 @@ ApplicationWindow
         onTriggered: { Qt.openUrlExternally(QmlUtils.redirectUrl("example_datasets")); }
     }
 
-    Action
-    {
-        // A do nothing action that we use when there
-        // is no other valid action available
-        id: nullAction
-    }
+    property bool debugMenuUnhidden: false
 
     menuBar: MenuBar
     {
         id: mainMenuBar
 
-        property bool visible: !tracking.visible
+        visible: !tracking.visible
 
-        onVisibleChanged: _updateVisibility();
-        Component.onCompleted: _updateVisibility();
-
-        function _updateVisibility()
-        {
-            if(!visible)
-            {
-                mainWindow.menuBar = null;
-                __contentItem.parent = null;
-            }
-            else
-                mainWindow.menuBar = mainMenuBar;
-        }
-
-        Menu
+        PlatformMenu
         {
             title: qsTr("&File")
-            MenuItem { action: fileOpenAction }
-            MenuItem { action: fileOpenInTabAction }
-            MenuItem { action: urlOpenAction }
-            Menu
+            PlatformMenuItem { action: fileOpenAction }
+            PlatformMenuItem { action: fileOpenInTabAction }
+            PlatformMenuItem { action: urlOpenAction }
+            PlatformMenu
             {
                 id: recentFileMenu
                 title: qsTr("&Recent Files")
@@ -1981,50 +1963,45 @@ ApplicationWindow
                 Instantiator
                 {
                     model: mainWindow.recentFiles
-                    delegate: Component
+                    delegate: PlatformMenuItem
                     {
-                        MenuItem
+                        // FIXME: This fires with a -1 index onOpenFile
+                        text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
+                        onTriggered:
                         {
-                            // FIXME: This fires with a -1 index onOpenFile
-                            // BUG: Text overflows MenuItems on Windows
-                            // https://bugreports.qt.io/browse/QTBUG-50849
-                            text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
-                            onTriggered:
-                            {
-                                openUrl(QmlUtils.urlForFileName(text), true);
-                            }
+                            openUrl(QmlUtils.urlForFileName(text), true);
                         }
                     }
                     onObjectAdded: recentFileMenu.insertItem(index, object)
                     onObjectRemoved: recentFileMenu.removeItem(object)
                 }
             }
-            MenuSeparator {}
-            MenuItem { action: fileSaveAction }
-            MenuItem { action: fileSaveAsAction }
-            MenuItem { action: saveImageAction }
-            MenuSeparator {}
-            MenuItem { action: closeTabAction }
-            MenuItem { action: closeAllTabsAction }
-            MenuSeparator {}
-            MenuItem { action: quitAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: fileSaveAction }
+            PlatformMenuItem { action: fileSaveAsAction }
+            PlatformMenuItem { action: saveImageAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: closeTabAction }
+            PlatformMenuItem { action: closeAllTabsAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: quitAction }
         }
-        Menu
+        PlatformMenu
         {
             title: qsTr("&Edit")
-            MenuItem { action: undoAction }
-            MenuItem { action: redoAction }
-            MenuSeparator {}
-            MenuItem { action: deleteAction }
-            MenuSeparator {}
-            MenuItem { action: selectAllAction }
-            MenuItem { action: selectAllVisibleAction }
-            MenuItem { action: selectNoneAction }
-            MenuItem { action: invertSelectionAction }
-            MenuItem { visible: selectSourcesAction.enabled; action: selectSourcesAction }
-            MenuItem { visible: selectTargetsAction.enabled; action: selectTargetsAction }
-            MenuItem { action: selectNeighboursAction }
-            Menu
+            PlatformMenuItem { action: undoAction }
+            PlatformMenuItem { action: redoAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: deleteAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: selectAllAction }
+            PlatformMenuItem { action: selectAllVisibleAction }
+            PlatformMenuItem { action: selectNoneAction }
+            PlatformMenuItem { action: invertSelectionAction }
+            PlatformMenuItem { visible: selectSourcesAction.enabled; action: selectSourcesAction }
+            PlatformMenuItem { visible: selectTargetsAction.enabled; action: selectTargetsAction }
+            PlatformMenuItem { action: selectNeighboursAction }
+            PlatformMenu
             {
                 id: sharedValuesMenu
                 title: qsTr("Select Shared Values of Selection")
@@ -2034,7 +2011,7 @@ ApplicationWindow
                 Instantiator
                 {
                     model: currentTab !== null ? currentTab.sharedValuesAttributeNames : []
-                    MenuItem
+                    PlatformMenuItem
                     {
                         text: modelData
                         onTriggered: { currentTab.selectBySharedAttributeValue(text); }
@@ -2043,57 +2020,57 @@ ApplicationWindow
                     onObjectRemoved: sharedValuesMenu.removeItem(object)
                 }
             }
-            MenuItem { action: repeatLastSelectionAction }
-            MenuSeparator {}
-            MenuItem { action: findAction }
-            MenuItem { action: advancedFindAction }
-            MenuItem { action: findByAttributeAction }
-            MenuItem
+            PlatformMenuItem { action: repeatLastSelectionAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: findAction }
+            PlatformMenuItem { action: advancedFindAction }
+            PlatformMenuItem { action: findByAttributeAction }
+            PlatformMenuItem
             {
-                action: currentTab ? currentTab.previousAction : nullAction
+                action: currentTab ? currentTab.previousAction : null
                 visible: currentTab
             }
-            MenuItem
+            PlatformMenuItem
             {
-                action: currentTab ? currentTab.nextAction : nullAction
+                action: currentTab ? currentTab.nextAction : null
                 visible: currentTab
             }
-            MenuSeparator {}
-            MenuItem { action: prevComponentAction }
-            MenuItem { action: nextComponentAction }
-            MenuSeparator {}
-            MenuItem { action: optionsAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: prevComponentAction }
+            PlatformMenuItem { action: nextComponentAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: optionsAction }
         }
-        Menu
+        PlatformMenu
         {
             title: qsTr("&View")
-            MenuItem { action: overviewModeAction }
-            MenuItem { action: resetViewAction }
-            MenuItem
+            PlatformMenuItem { action: overviewModeAction }
+            PlatformMenuItem { action: resetViewAction }
+            PlatformMenuItem
             {
                 action: togglePluginWindowAction
                 visible: currentTab && currentTab.document.hasPluginUI
             }
-            MenuItem
+            PlatformMenuItem
             {
                 action: togglePluginMinimiseAction
                 visible: currentTab && currentTab.document.hasPluginUI
             }
-            MenuSeparator {}
-            MenuItem { action: toggleGraphMetricsAction }
-            Menu
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: toggleGraphMetricsAction }
+            PlatformMenu
             {
                 title: qsTr("Show Node Text")
-                MenuItem { action: hideNodeTextAction }
-                MenuItem { action: showFocusedNodeTextAction }
-                MenuItem { action: showSelectedNodeTextAction }
-                MenuItem { action: showAllNodeTextAction }
+                PlatformMenuItem { action: hideNodeTextAction }
+                PlatformMenuItem { action: showFocusedNodeTextAction }
+                PlatformMenuItem { action: showSelectedNodeTextAction }
+                PlatformMenuItem { action: showAllNodeTextAction }
             }
-            Menu
+            PlatformMenu
             {
                 title: qsTr("Show Edge Text")
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: edgeTextWarning
 
@@ -2103,58 +2080,58 @@ ApplicationWindow
                     text: qsTr("⚠ Visualisation Required For Edge Text")
                 }
 
-                MenuSeparator { visible: edgeTextWarning.visible }
+                PlatformMenuSeparator { visible: edgeTextWarning.visible }
 
-                MenuItem { action: hideEdgeTextAction }
-                MenuItem { action: showSelectedEdgeTextAction }
-                MenuItem { action: showAllEdgeTextAction }
+                PlatformMenuItem { action: hideEdgeTextAction }
+                PlatformMenuItem { action: showSelectedEdgeTextAction }
+                PlatformMenuItem { action: showAllEdgeTextAction }
             }
-            MenuItem
+            PlatformMenuItem
             {
                 action: toggleEdgeDirectionAction
                 visible: currentTab && currentTab.document.directed
             }
-            MenuItem { action: toggleMultiElementIndicatorsAction }
-            MenuSeparator {}
-            MenuItem { action: perspecitveProjectionAction }
-            MenuItem { action: orthographicProjectionAction }
-            MenuItem { action: twoDeeProjectionAction }
-            MenuSeparator {}
-            MenuItem { action: smoothShadingAction }
-            MenuItem { action: flatShadingAction }
-            MenuSeparator {}
-            MenuItem { action: copyImageToClipboardAction }
+            PlatformMenuItem { action: toggleMultiElementIndicatorsAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: perspecitveProjectionAction }
+            PlatformMenuItem { action: orthographicProjectionAction }
+            PlatformMenuItem { action: twoDeeProjectionAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: smoothShadingAction }
+            PlatformMenuItem { action: flatShadingAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: copyImageToClipboardAction }
         }
-        Menu
+        PlatformMenu
         {
             title: qsTr("&Layout")
-            MenuItem { action: pauseLayoutAction }
-            MenuItem { action: toggleLayoutSettingsAction }
-            MenuItem { action: exportNodePositionsAction }
+            PlatformMenuItem { action: pauseLayoutAction }
+            PlatformMenuItem { action: toggleLayoutSettingsAction }
+            PlatformMenuItem { action: exportNodePositionsAction }
         }
-        Menu
+        PlatformMenu
         {
             title: qsTr("T&ools")
-            MenuItem { action: enrichmentAction }
-            MenuItem { action: searchWebAction }
-            MenuSeparator {}
-            MenuItem { action: cloneAttributeAction }
-            MenuItem { action: editAttributeAction }
-            MenuItem { action: removeAttributesAction }
-            MenuItem { action: importAttributesAction }
-            MenuSeparator {}
-            MenuItem { action: showProvenanceLogAction }
+            PlatformMenuItem { action: enrichmentAction }
+            PlatformMenuItem { action: searchWebAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: cloneAttributeAction }
+            PlatformMenuItem { action: editAttributeAction }
+            PlatformMenuItem { action: removeAttributesAction }
+            PlatformMenuItem { action: importAttributesAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: showProvenanceLogAction }
         }
-        Menu
+        PlatformMenu
         {
             id: bookmarksMenu
 
             title: qsTr("&Bookmarks")
-            MenuItem { action: addBookmarkAction }
-            MenuItem { action: manageBookmarksAction }
-            MenuSeparator { visible: currentTab ? currentTab.document.bookmarks.length > 0 : false }
+            PlatformMenuItem { action: addBookmarkAction }
+            PlatformMenuItem { action: manageBookmarksAction }
+            PlatformMenuSeparator { visible: currentTab ? currentTab.document.bookmarks.length > 0 : false }
 
-            MenuItem
+            PlatformMenuItem
             {
                 action: activateAllBookmarksAction
                 visible: currentTab ? currentTab.document.bookmarks.length > 1 : false
@@ -2163,11 +2140,14 @@ ApplicationWindow
             Instantiator
             {
                 model: currentTab ? currentTab.document.bookmarks : []
-                delegate: Component
+                delegate: PlatformMenuItem
                 {
-                    MenuItem
+                    id: bookmarkMenuItem
+
+                    text: index > -1 ? currentTab.document.bookmarks[index] : "";
+
+                    action: Action
                     {
-                        text: index > -1 ? currentTab.document.bookmarks[index] : "";
                         shortcut:
                         {
                             if(index >= 0 && index < 10)
@@ -2178,99 +2158,101 @@ ApplicationWindow
                             return "";
                         }
 
-                        enabled: currentTab ? !currentTab.document.busy : false
-                        onTriggered:
-                        {
-                            currentTab.gotoBookmark(text);
-                        }
+                        onTriggered: { currentTab.gotoBookmark(bookmarkMenuItem.text); }
                     }
+
+                    enabled: currentTab ? !currentTab.document.busy : false
                 }
-                onObjectAdded: bookmarksMenu.insertItem(index, object)
+
+                onObjectAdded: bookmarksMenu.insertItem(4/* first menu items */ + index, object)
                 onObjectRemoved: bookmarksMenu.removeItem(object)
             }
         }
-        Menu { id: pluginMenu0; visible: false; enabled: currentTab && !currentTab.document.busy }
-        Menu { id: pluginMenu1; visible: false; enabled: currentTab && !currentTab.document.busy }
-        Menu { id: pluginMenu2; visible: false; enabled: currentTab && !currentTab.document.busy }
-        Menu { id: pluginMenu3; visible: false; enabled: currentTab && !currentTab.document.busy }
-        Menu { id: pluginMenu4; visible: false; enabled: currentTab && !currentTab.document.busy }
-        Menu
+
+        PlatformMenu { id: pluginMenu0; hidden: true; enabled: currentTab && !currentTab.document.busy }
+        PlatformMenu { id: pluginMenu1; hidden: true; enabled: currentTab && !currentTab.document.busy }
+        PlatformMenu { id: pluginMenu2; hidden: true; enabled: currentTab && !currentTab.document.busy }
+        PlatformMenu { id: pluginMenu3; hidden: true; enabled: currentTab && !currentTab.document.busy }
+        PlatformMenu { id: pluginMenu4; hidden: true; enabled: currentTab && !currentTab.document.busy }
+
+        PlatformMenu
         {
             title: qsTr("&Debug")
-            visible: application.debugEnabled || mainWindow.debugMenuUnhidden
-            Menu
+            hidden: !application.debugEnabled && !mainWindow.debugMenuUnhidden
+            PlatformMenu
             {
                 title: qsTr("&Crash")
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Null Pointer Deference");
                     onTriggered: { application.crash(CrashType.NullPtrDereference); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("C++ Exception");
                     onTriggered: { application.crash(CrashType.CppException); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("std::exception");
                     onTriggered: { application.crash(CrashType.StdException); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Fatal Error");
                     onTriggered: { application.crash(CrashType.FatalError); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Infinite Loop");
                     onTriggered: { application.crash(CrashType.InfiniteLoop); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Deadlock");
                     onTriggered: { application.crash(CrashType.Deadlock); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Hitch");
                     onTriggered: { application.crash(CrashType.Hitch); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception");
                     onTriggered: { application.crash(CrashType.Win32Exception); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception Non-Continuable");
                     onTriggered: { application.crash(CrashType.Win32ExceptionNonContinuable); }
                 }
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Silent Submit");
                     onTriggered: { application.crash(CrashType.SilentSubmit); }
                 }
             }
-            MenuItem { action: dumpGraphAction }
-            MenuItem { action: dumpCommandStackAction }
-            MenuItem { action: toggleFpsMeterAction }
-            MenuItem { action: toggleGlyphmapSaveAction }
-            MenuItem { action: reportScopeTimersAction }
-            MenuItem { action: showCommandLineArgumentsAction }
-            MenuItem { action: showEnvironmentAction }
-            MenuItem { action: restartAction }
+            PlatformMenuItem { action: dumpGraphAction }
+            PlatformMenuItem { action: dumpCommandStackAction }
+            PlatformMenuItem { action: toggleFpsMeterAction }
+            PlatformMenuItem { action: toggleGlyphmapSaveAction }
+            PlatformMenuItem { action: reportScopeTimersAction }
+            PlatformMenuItem { action: showCommandLineArgumentsAction }
+            PlatformMenuItem { action: showEnvironmentAction }
+            PlatformMenuItem { action: restartAction }
         }
-        Menu
+
+        PlatformMenu
         {
             title: qsTr("&Help")
 
-            MenuItem { action: onlineHelpAction }
-            MenuItem { action: exampleDataSetsAction }
+            PlatformMenuItem { action: onlineHelpAction }
+            PlatformMenuItem { action: exampleDataSetsAction }
 
-            MenuItem
+            PlatformMenuItem
             {
                 text: qsTr("Show Tutorial…")
                 onTriggered:
@@ -2280,62 +2262,62 @@ ApplicationWindow
 
                     if(QmlUtils.fileUrlExists(exampleFileUrl))
                     {
-                        let tutorialAlreadyOpen = tabView.findAndActivateTab(exampleFileUrl);
+                        let tutorialAlreadyOpen = tabBar.findAndActivateTab(exampleFileUrl);
                         openUrl(exampleFileUrl, !tutorialAlreadyOpen);
                     }
                 }
             }
 
-            MenuSeparator {}
-            MenuItem { action: aboutAction }
-            MenuItem { action: aboutPluginsAction }
-            MenuItem { action: aboutQtAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: aboutAction }
+            PlatformMenuItem { action: aboutPluginsAction }
+            PlatformMenuItem { action: aboutQtAction }
 
-            MenuSeparator {}
-            MenuItem { action: checkForUpdatesAction }
-            MenuItem { action: showLatestChangesAction }
+            PlatformMenuSeparator {}
+            PlatformMenuItem { action: checkForUpdatesAction }
+            PlatformMenuItem { action: showLatestChangesAction }
         }
     }
 
-    function clearMenu(menu)
+    function clearPluginMenu(menu)
     {
-        menu.visible = false;
-        while(menu.items.length > 0)
-            menu.removeItem(menu.items[0]);
+        menu.hidden = true;
+        while(menu.count > 0)
+            menu.takeItem(0);
     }
 
-    function clearMenus()
+    function clearPluginMenus()
     {
         if(currentTab !== null)
         {
-            clearMenu(currentTab.pluginMenu0);
-            clearMenu(currentTab.pluginMenu1);
-            clearMenu(currentTab.pluginMenu2);
-            clearMenu(currentTab.pluginMenu3);
-            clearMenu(currentTab.pluginMenu4);
+            clearPluginMenu(currentTab.pluginMenu0);
+            clearPluginMenu(currentTab.pluginMenu1);
+            clearPluginMenu(currentTab.pluginMenu2);
+            clearPluginMenu(currentTab.pluginMenu3);
+            clearPluginMenu(currentTab.pluginMenu4);
         }
 
-        clearMenu(pluginMenu0);
-        clearMenu(pluginMenu1);
-        clearMenu(pluginMenu2);
-        clearMenu(pluginMenu3);
-        clearMenu(pluginMenu4);
+        clearPluginMenu(pluginMenu0);
+        clearPluginMenu(pluginMenu1);
+        clearPluginMenu(pluginMenu2);
+        clearPluginMenu(pluginMenu3);
+        clearPluginMenu(pluginMenu4);
     }
 
     function updatePluginMenu(index, menu)
     {
-        clearMenu(menu);
+        clearPluginMenu(menu);
 
         if(currentTab !== null)
         {
             if(currentTab.createPluginMenu(index, menu))
-                menu.visible = true;
+                menu.hidden = false;
         }
     }
 
     function updatePluginMenus()
     {
-        clearMenus();
+        clearPluginMenus();
 
         if(currentTab !== null && currentTab.pluginPoppedOut)
         {
@@ -2360,8 +2342,8 @@ ApplicationWindow
         switch(document.shading())
         {
         default:
-        case Shading.Smooth:    shading.current = smoothShadingAction; break;
-        case Shading.Flat:      shading.current = flatShadingAction; break;
+        case Shading.Smooth:    shading.checkedAction = smoothShadingAction; break;
+        case Shading.Flat:      shading.checkedAction = flatShadingAction; break;
         }
     }
 
@@ -2372,9 +2354,9 @@ ApplicationWindow
         switch(document.projection())
         {
         default:
-        case Projection.Perspective:    projection.current = perspecitveProjectionAction; break;
-        case Projection.Orthographic:   projection.current = orthographicProjectionAction; break;
-        case Projection.TwoDee:         projection.current = twoDeeProjectionAction; break;
+        case Projection.Perspective:    projection.checkedAction = perspecitveProjectionAction; break;
+        case Projection.Orthographic:   projection.checkedAction = orthographicProjectionAction; break;
+        case Projection.TwoDee:         projection.checkedAction = twoDeeProjectionAction; break;
         }
 
         updateShadingMode(document);
@@ -2436,9 +2418,11 @@ ApplicationWindow
         function onAttributesChanged() { updatePluginMenus(); }
     }
 
-    toolBar: ToolBar
+    header: ToolBar
     {
         id: mainToolBar
+        topPadding: Constants.padding
+        bottomPadding: Constants.padding
 
         visible: !tracking.visible
 
@@ -2446,26 +2430,26 @@ ApplicationWindow
         {
             anchors.fill: parent
 
-            ToolButton { action: fileOpenAction }
-            ToolButton { action: fileOpenInTabAction }
-            ToolButton { action: fileSaveAction }
+            ToolBarButton { action: fileOpenAction }
+            ToolBarButton { action: fileOpenInTabAction }
+            ToolBarButton { action: fileSaveAction }
             ToolBarSeparator {}
-            ToolButton
+            ToolBarButton
             {
                 id: pauseLayoutButton
                 action: pauseLayoutAction
-                tooltip: ""
+                text: ""
             }
-            ToolButton { action: toggleLayoutSettingsAction }
+            ToolBarButton { action: toggleLayoutSettingsAction }
             ToolBarSeparator {}
-            ToolButton { action: deleteAction }
-            ToolButton { action: findAction }
-            ToolButton { action: findByAttributeAction }
-            ToolButton { action: undoAction }
-            ToolButton { action: redoAction }
+            ToolBarButton { action: deleteAction }
+            ToolBarButton { action: findAction }
+            ToolBarButton { action: findByAttributeAction }
+            ToolBarButton { action: undoAction }
+            ToolBarButton { action: redoAction }
             ToolBarSeparator {}
-            ToolButton { action: resetViewAction }
-            ToolButton { action: optionsAction }
+            ToolBarButton { action: resetViewAction }
+            ToolBarButton { action: optionsAction }
 
             Item { Layout.fillWidth: true }
 
@@ -2521,182 +2505,222 @@ ApplicationWindow
             processArguments(arguments);
         }
 
-        TabView
+        Component { id: tabButtonComponent; TabBarButton {} }
+
+        Component
         {
-            id: tabView
+            id: tabComponent
+
+            TabUI
+            {
+                onLoadComplete:
+                {
+                    if(success)
+                    {
+                        processOnePendingArgument();
+
+                        if(application.isResourceFileUrl(url) &&
+                            QmlUtils.baseFileNameForUrlNoExtension(url) === "Tutorial")
+                        {
+                            // Mild hack: if it looks like the tutorial file,
+                            // it probably is, so start the tutorial
+                            startTutorial();
+                        }
+                        else if(!application.downloaded(url))
+                            addToRecentFiles(url);
+
+                        if(currentTab !== null)
+                            onDocumentShown(currentTab.document);
+                    }
+                    else
+                        tabBar.onLoadFailure(tabBar.findTabIndex(this), url);
+                }
+            }
+        }
+
+        ColumnLayout
+        {
+            anchors.fill: parent
+            spacing: 0
 
             visible: !tracking.visible
 
-            anchors.fill: parent
-            tabsVisible: count > 1
-            frameVisible: count > 1
-
-            onCountChanged:
+            TabBar
             {
-                if(count === 0)
-                    lastTabClosed();
-            }
+                id: tabBar
 
-            function insertTabAtIndex(index)
-            {
-                let tab = insertTab(index, "", tabComponent);
-                tab.active = true;
-                tabView.currentIndex = index;
+                Layout.topMargin: 1
+                visible: count > 1
 
-                // Make the tab title match the document title
-                tab.title = Qt.binding(function() { return tab.item.title });
-
-                return tab;
-            }
-
-            function createTab(onCreateFunction)
-            {
-                let tab = insertTabAtIndex(tabView.count);
-
-                if(typeof(onCreateFunction) !== "undefined")
-                    onCreateFunction();
-
-                return tab;
-            }
-
-            function replaceTab(onReplaceFunction)
-            {
-                let oldIndex = tabView.currentIndex;
-
-                removeTab(oldIndex);
-                insertTabAtIndex(oldIndex);
-
-                if(onReplaceFunction !== "undefined")
-                    onReplaceFunction();
-            }
-
-            // This is called if the file can't be opened immediately, or
-            // if the load has been attempted but it failed later
-            function onLoadFailure(index, url)
-            {
-                let tab = getTab(index).item;
-                let loadWasCancelled = tab.document.commandIsCancelling;
-
-                // Remove the tab that was created but won't be used
-                removeTab(index);
-
-                if(!loadWasCancelled)
+                onCountChanged:
                 {
-                    if(tab.document.failureReason.length > 0)
+                    if(count === 0)
+                        lastTabClosed();
+                }
+
+                function insertTabAtIndex(index)
+                {
+                    let tab = tabComponent.createObject(null);
+                    tabLayout.insert(index, tab);
+
+                    let button = tabButtonComponent.createObject(tabBar);
+                    tabBar.insertItem(index, button);
+                    tabBar.currentIndex = index;
+
+                    // Make the tab title match the document title
+                    button.text = Qt.binding(function() { return tab.title });
+
+                    return tab;
+                }
+
+                function removeTab(index)
+                {
+                    if(index >= tabBar.count)
                     {
-                        errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                            qsTr(" could not be opened:\n\n") + tab.document.failureReason;
-                    }
-                    else
-                    {
-                        errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                            qsTr(" could not be opened due to an unspecified error.");
+                        console.log("removeTab called with out of range index: " + index);
+                        return;
                     }
 
-                    errorOpeningFileMessageDialog.open();
-                }
-            }
+                    tabBar.removeItem(tabBar.itemAt(index));
+                    let tab = tabLayout.get(index);
+                    tabLayout.remove(index);
 
-            function openInCurrentTab(url, type, pluginName, parameters)
-            {
-                let tab = currentTab;
-                tab.application = application;
-                if(!tab.openUrl(url, type, pluginName, parameters))
-                    onLoadFailure(findTabIndex(tab), url);
-            }
-
-            function closeTab(index, onCloseFunction)
-            {
-                if(index < 0 || index >= count)
-                {
-                    console.log("closeTab called with out of range index: " + index);
-                    return false;
+                    // callLater avoids some "hitchiness"
+                    Qt.callLater(tab.destroy);
                 }
 
-                if(typeof(onCloseFunction) === "undefined")
+                function createTab(onCreateFunction)
                 {
-                    onCloseFunction = function()
+                    let tab = insertTabAtIndex(tabBar.count);
+
+                    if(typeof(onCreateFunction) !== "undefined")
+                        onCreateFunction();
+
+                    return tab;
+                }
+
+                function replaceTab(onReplaceFunction)
+                {
+                    let oldIndex = tabBar.currentIndex;
+
+                    removeTab(oldIndex);
+                    let tab = insertTabAtIndex(oldIndex);
+
+                    if(onReplaceFunction !== "undefined")
+                        onReplaceFunction();
+
+                    return tab;
+                }
+
+                // This is called if the file can't be opened immediately, or
+                // if the load has been attempted but it failed later
+                function onLoadFailure(index, url)
+                {
+                    let tab = tabLayout.get(index);
+                    let loadWasCancelled = tab.document.commandIsCancelling;
+
+                    // Remove the tab that was created but won't be used
+                    removeTab(index);
+
+                    if(!loadWasCancelled)
                     {
-                        removeTab(index);
-                    }
-                }
-
-                tabView.currentIndex = index;
-                let tab = getTab(index).item;
-                tab.confirmSave(onCloseFunction);
-            }
-
-            function findTabIndex(tab)
-            {
-                for(let index = 0; index < count; index++)
-                {
-                    if(getTab(index).item === tab)
-                        return index;
-                }
-
-                return -1;
-            }
-
-            function findAndActivateTab(url)
-            {
-                for(let index = 0; index < count; index++)
-                {
-                    let tab = getTab(index);
-                    if(tab.item.url === url)
-                    {
-                        currentIndex = index;
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            Component
-            {
-                id: tabComponent
-
-                TabUI
-                {
-                    id: tab
-
-                    onLoadComplete:
-                    {
-                        if(success)
+                        if(tab.document.failureReason.length > 0)
                         {
-                            processOnePendingArgument();
-
-                            if(application.isResourceFileUrl(url) &&
-                                QmlUtils.baseFileNameForUrlNoExtension(url) === "Tutorial")
-                            {
-                                // Mild hack: if it looks like the tutorial file,
-                                // it probably is, so start the tutorial
-                                startTutorial();
-                            }
-                            else if(!application.downloaded(url))
-                                addToRecentFiles(url);
-
-                            if(currentTab !== null)
-                                onDocumentShown(currentTab.document);
+                            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
+                                qsTr(" could not be opened:\n\n") + tab.document.failureReason;
                         }
                         else
-                            tabView.onLoadFailure(tabView.findTabIndex(tab), url);
+                        {
+                            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
+                                qsTr(" could not be opened due to an unspecified error.");
+                        }
+
+                        errorOpeningFileMessageDialog.open();
                     }
                 }
+
+                function openInCurrentTab(url, type, pluginName, parameters)
+                {
+                    let tab = currentTab;
+                    tab.application = application;
+                    if(!tab.openUrl(url, type, pluginName, parameters))
+                        onLoadFailure(findTabIndex(tab), url);
+                }
+
+                function closeTab(index, onCloseFunction)
+                {
+                    if(index < 0 || index >= tabBar.count)
+                    {
+                        console.log("closeTab called with out of range index: " + index);
+                        return false;
+                    }
+
+                    if(typeof(onCloseFunction) === "undefined")
+                    {
+                        onCloseFunction = function()
+                        {
+                            removeTab(index);
+                        }
+                    }
+
+                    tabBar.currentIndex = index;
+                    let tab = tabLayout.get(index);
+                    tab.confirmSave(onCloseFunction);
+                }
+
+                function findTabIndex(tab)
+                {
+                    for(let index = 0; index < count; index++)
+                    {
+                        if(tabLayout.get(index) === tab)
+                            return index;
+                    }
+
+                    return -1;
+                }
+
+                function findAndActivateTab(url)
+                {
+                    for(let index = 0; index < count; index++)
+                    {
+                        let tab = tabLayout.get(index);
+                        if(tab.url === url)
+                        {
+                            currentIndex = index;
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }
+
+            StackLayout
+            {
+                id: stackLayout
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                currentIndex: tabBar.currentIndex
+
+                Repeater { model: ObjectModel { id: tabLayout } }
             }
         }
     }
 
     signal lastTabClosed()
 
-    statusBar: StatusBar
+    footer: ToolBar
     {
         visible: !tracking.visible
+        topPadding: 3
+        bottomPadding: 2
 
         RowLayout
         {
             id: rowLayout
-            width: parent.width
+            anchors.fill: parent
 
             // Status
             Label
@@ -2767,15 +2791,15 @@ ApplicationWindow
                 }
             }
 
-            ToolButton
+            ToolBarButton
             {
                 id: cancelButton
 
-                implicitHeight: progressBar.implicitHeight * 0.8
+                implicitHeight: progressBar.implicitHeight
                 implicitWidth: implicitHeight
 
-                iconName: "process-stop"
-                tooltip: qsTr("Cancel")
+                icon.name: "process-stop"
+                text: qsTr("Cancel")
 
                 visible: currentTab ? currentTab.document.commandInProgress &&
                     currentTab.document.commandIsCancellable &&
@@ -2829,9 +2853,9 @@ ApplicationWindow
             spacing: Constants.spacing
             Column
             {
-                ToolButton { iconName: "media-playback-start" }
-                ToolButton { iconName: "media-playback-stop" }
-                ToolButton { iconName: "media-playback-pause" }
+                ToolBarButton { icon.name: "media-playback-start" }
+                ToolBarButton { icon.name: "media-playback-stop" }
+                ToolBarButton { icon.name: "media-playback-pause" }
             }
             Text
             {

@@ -176,20 +176,20 @@ Item
 
         menu.title = qsTr("&Table");
 
-        menu.addAction(resizeColumnsToContentsAction);
-        menu.addAction(selectColumnsAction);
-        menu.addAction(exportTableAction);
+        Utils.addActionTo(menu, resizeColumnsToContentsAction);
+        Utils.addActionTo(menu, selectColumnsAction);
+        Utils.addActionTo(menu, exportTableAction);
         Utils.addSeparatorTo(menu);
-        menu.addAction(selectAllTableAction);
+        Utils.addActionTo(menu, selectAllTableAction);
 
         tableView._tableMenu = menu;
-        Utils.cloneMenu2(menu, contextMenu);
+        Utils.cloneMenu(menu, contextMenu);
 
         Utils.addSeparatorTo(contextMenu);
-        contextMenu.addAction(copyTableColumnToClipboardAction);
+        Utils.addActionTo(contextMenu, copyTableColumnToClipboardAction);
         Utils.addSeparatorTo(contextMenu);
-        contextMenu.addAction(sortAscendingAction);
-        contextMenu.addAction(sortDescendingAction);
+        Utils.addActionTo(contextMenu, sortAscendingAction);
+        Utils.addActionTo(contextMenu, sortDescendingAction);
         Utils.addSeparatorTo(contextMenu);
 
         let attributeIsEditable = function()
@@ -198,12 +198,12 @@ Item
             return attribute.isValid && attribute.editable;
         };
 
-        contextMenu.addAction(cloneSpecificAttributeAction);
+        Utils.addActionTo(contextMenu, cloneSpecificAttributeAction);
 
-        contextMenu.addAction(editSpecificAttributeAction);
+        Utils.addActionTo(contextMenu, editSpecificAttributeAction);
         Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
 
-        contextMenu.addAction(removeSpecificAttributeAction);
+        Utils.addActionTo(contextMenu, removeSpecificAttributeAction);
         Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
     }
 

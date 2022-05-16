@@ -17,9 +17,8 @@
  */
 
 import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Controls.Styles 1.4
 import QtWebEngine 1.5
 
 PluginContent
@@ -63,12 +62,12 @@ PluginContent
 
         ProgressBar
         {
-            height: 3
+            Layout.preferredHeight: 3
             Layout.fillWidth: true
-            style: ProgressBarStyle { background: Item {} }
+            background: Item {}
             z: -2
-            minimumValue: 0
-            maximumValue: 100
+            from: 0
+            to: 100
             value: webEngineView.loadProgress < 100 ? webEngineView.loadProgress : 0
         }
 

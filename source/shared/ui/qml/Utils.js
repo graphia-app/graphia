@@ -17,7 +17,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import QtQuick.Controls 1.5 as QtQuickControls //QQC2PORT
 .import QtQuick.Controls 2.12 as QtQuickControls2
 
 function watchPropertyChanges(object, handler)
@@ -225,118 +224,44 @@ function createItem(itemName, parent)
         "import QtQuick 2.15; import QtQuick.Controls 2.15; " + itemName + " {}", parent);
 }
 
-// Clone one menu into another, such that to is a "proxy" for from that looks
-// identical to from, and uses from's behaviour
-function cloneMenu(from, to) //QQC2PORT
-{
-    // Clear out any existing items
-    while(to.items.length > 0)
-        to.removeItem(to.items[0]);
-
-    to.enabled = Qt.binding(function(from)
-    {
-        return function() { return from.enabled; };
-    }(from));
-
-    let exclusiveGroups = {};
-
-    for(let index = 0; index < from.items.length; index++)
-    {
-        let fromItem = from.items[index];
-        let toItem = null;
-
-        switch(fromItem.type)
-        {
-        case QtQuickControls.MenuItemType.Item:
-            toItem = to.addItem(fromItem.text);
-            break;
-
-        case QtQuickControls.MenuItemType.Menu:
-            toItem = to.addMenu(fromItem.title);
-            cloneMenu(fromItem, toItem);
-            break;
-
-        case QtQuickControls.MenuItemType.Separator:
-            to.addSeparator();
-            break;
-        }
-
-        if(toItem === null)
-            continue;
-
-        let properties = [// Note "action" is specifcally skipped because
-                          //   a) the properties it proxies are bound anyway
-                          //   b) binding it will cause loops
-                          "checkable", "checked", "enabled",
-                          "iconName", "iconSource",
-                          "shortcut", "text", "visible"];
-
-        properties.forEach(function(prop)
-        {
-            if(fromItem[prop] !== undefined)
-            {
-                toItem[prop] = Qt.binding(function(fromItem, prop)
-                {
-                    return function()
-                    {
-                        return fromItem[prop];
-                    };
-                }(fromItem, prop));
-            }
-        });
-
-        // Store a list of ExclusiveGroups so that we can recreate them
-        // in the target menu, later
-        if(fromItem.exclusiveGroup !== undefined && fromItem.exclusiveGroup !== null)
-        {
-            let key = fromItem.exclusiveGroup.toString();
-
-            if(exclusiveGroups[key] === undefined)
-                exclusiveGroups[key] = [];
-
-            exclusiveGroups[key].push(toItem);
-        }
-
-        if(toItem.triggered !== undefined)
-        {
-            toItem.triggered.connect(function(fromItem)
-            {
-                return function()
-                {
-                    fromItem.trigger();
-                };
-            }(fromItem));
-        }
-    }
-
-    // Create new ExclusiveGroups which correspond to the source menu's ExclusiveGroups
-    for(let key in exclusiveGroups)
-    {
-        let fromExclusiveGroup = exclusiveGroups[key];
-        let toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.5; ExclusiveGroup {}', to);
-
-        fromExclusiveGroup.forEach(function(menuItem)
-        {
-            menuItem.exclusiveGroup = toExclusiveGroup;
-        });
-    }
-}
-
 function addSeparatorTo(menu)
 {
     menu.addItem(createItem("MenuSeparator", menu));
 }
 
+function addItemTo(menu, text)
+{
+    menu.addItem(createItem("MenuItem", menu));
+    let menuItem = menu.itemAt(menu.count - 1);
+    menuItem.text = text;
+    return menuItem;
+}
+
+function addActionTo(menu, action)
+{
+    let menuItem = addItemTo(menu, undefined);
+    menuItem.action = action;
+    return menuItem;
+}
+
+function addSubMenuTo(menu, title)
+{
+    menu.addMenu(createItem("Menu", menu));
+    let subMenu = menu.menuAt(menu.count - 1);
+    subMenu.title = title;
+    return subMenu;
+}
+
 function setMenuItemVisibleFunction(menuItem, visibleFunction)
 {
+    menuItem.clip = true;
     menuItem.enabled = Qt.binding(visibleFunction);
-    let visibleHeight = menuItem.height;
-    menuItem.height = Qt.binding(function() { return visibleFunction() ? visibleHeight : 0 });
+    menuItem.height = Qt.binding(function() { return visibleFunction() ? menuItem.implicitHeight : 0 });
 }
 
 // Clone one menu into another, such that to is a "proxy" for from that looks
 // identical to from, and uses from's behaviour
-function cloneMenu2(from, to) //QQC2PORT rename to cloneMenu
+function cloneMenu(from, to)
 {
     // Clear
     while(to.count > 0)
@@ -356,7 +281,7 @@ function cloneMenu2(from, to) //QQC2PORT rename to cloneMenu
             if(fromItem.subMenu !== null)
             {
                 let toSubMenu = createItem("Menu", to);
-                cloneMenu2(fromItem.subMenu, toSubMenu);
+                cloneMenu(fromItem.subMenu, toSubMenu);
                 to.addMenu(toSubMenu);
                 continue;
             }

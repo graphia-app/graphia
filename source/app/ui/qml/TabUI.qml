@@ -16,12 +16,12 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQml 2.8
-import QtQuick 2.7
-import QtQuick.Controls 1.5
+import QtQml 2.15
+import QtQml.Models 2.15
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.13
-import QtQml.Models 2.2
+import QtQuick.Window 2.15
 import QtQuick.Dialogs 1.2
 
 import Qt.labs.platform 1.0 as Labs
@@ -612,7 +612,7 @@ Item
     Action
     {
         id: deleteNodeAction
-        iconName: "edit-delete"
+        icon.name: "edit-delete"
         text: qsTr("&Delete '") + contextMenu.clickedNodeName + qsTr("'")
         property bool visible: _document.editable && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
@@ -657,8 +657,8 @@ Item
         {
             id: graphItem
 
-            Layout.fillHeight: true
-            Layout.minimumHeight: 200
+            SplitView.fillHeight: true
+            SplitView.minimumHeight: 200
 
             Graph
             {
@@ -668,7 +668,7 @@ Item
 
                 property bool _inComponentMode: !inOverviewMode && numComponents > 1
 
-                Menu
+                PlatformMenu
                 {
                     id: contextMenu
 
@@ -692,28 +692,28 @@ Item
                             _document.nodeIsSelected(clickedNodeId);
                     }
 
-                    MenuItem { id: delete1; visible: deleteNodeAction.visible; action: deleteNodeAction }
-                    MenuItem { id: delete2; visible: deleteAction.visible && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
-                    MenuSeparator { visible: delete1.visible || delete2.visible }
+                    PlatformMenuItem { id: delete1; visible: deleteNodeAction.visible; action: deleteNodeAction }
+                    PlatformMenuItem { id: delete2; visible: deleteAction.visible && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
+                    PlatformMenuSeparator { visible: delete1.visible || delete2.visible }
 
-                    MenuItem { visible: _document.numNodesSelected < graph.numNodes; action: selectAllAction }
-                    MenuItem { visible: _document.numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
-                    MenuItem { visible: !_document.nodeSelectionEmpty; action: selectNoneAction }
-                    MenuItem { visible: !_document.nodeSelectionEmpty; action: invertSelectionAction }
+                    PlatformMenuItem { visible: _document.numNodesSelected < graph.numNodes; action: selectAllAction }
+                    PlatformMenuItem { visible: _document.numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
+                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty; action: selectNoneAction }
+                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty; action: invertSelectionAction }
 
-                    MenuItem { visible: selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
-                    MenuItem { visible: selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
-                    MenuItem { visible: selectNeighboursOfNodeAction.visible; action: selectNeighboursOfNodeAction }
-                    Menu
+                    PlatformMenuItem { visible: selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
+                    PlatformMenuItem { visible: selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
+                    PlatformMenuItem { visible: selectNeighboursOfNodeAction.visible; action: selectNeighboursOfNodeAction }
+                    PlatformMenu
                     {
                         id: sharedValuesOfNodeContextMenu
-                        enabled: !_document.busy && visible
-                        visible: numAttributesWithSharedValues > 0 && contextMenu.nodeWasClicked
+                        enabled: !_document.busy && !hidden
+                        hidden: numAttributesWithSharedValues === 0 || !contextMenu.nodeWasClicked
                         title: qsTr("Select Shared Values of '") + contextMenu.clickedNodeName + qsTr("'")
                         Instantiator
                         {
                             model: sharedValuesAttributeNames
-                            MenuItem
+                            PlatformMenuItem
                             {
                                 text: modelData
                                 onTriggered: { selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
@@ -723,23 +723,23 @@ Item
                         }
                     }
 
-                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
+                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectSourcesAction.visible; action: selectSourcesAction }
-                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
+                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectTargetsAction.visible; action: selectTargetsAction }
-                    MenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
+                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
                         selectNeighboursAction.visible; action: selectNeighboursAction }
-                    Menu
+                    PlatformMenu
                     {
                         id: sharedValuesSelectionContextMenu
-                        enabled: !_document.busy && visible
-                        visible: numAttributesWithSharedValues > 0 && !_document.nodeSelectionEmpty &&
-                            !contextMenu.clickedNodeIsSameAsSelection
+                        enabled: !_document.busy && !hidden
+                        hidden: numAttributesWithSharedValues === 0 || _document.nodeSelectionEmpty ||
+                            contextMenu.clickedNodeIsSameAsSelection
                         title: qsTr('Select Shared Values of Selection')
                         Instantiator
                         {
                             model: sharedValuesAttributeNames
-                            MenuItem
+                            PlatformMenuItem
                             {
                                 text: modelData
                                 onTriggered: { selectBySharedAttributeValue(text); }
@@ -748,10 +748,10 @@ Item
                             onObjectRemoved: sharedValuesSelectionContextMenu.removeItem(object)
                         }
                     }
-                    MenuItem { visible: repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
+                    PlatformMenuItem { visible: repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
 
-                    MenuSeparator { visible: searchWebMenuItem.visible }
-                    MenuItem
+                    PlatformMenuSeparator { visible: searchWebMenuItem.visible }
+                    PlatformMenuItem
                     {
                         id: searchWebMenuItem
                         visible: contextMenu.nodeWasClicked
@@ -759,8 +759,8 @@ Item
                         onTriggered: { root.searchWebForNode(contextMenu.clickedNodeId); }
                     }
 
-                    MenuSeparator { visible: changeBackgroundColourMenuItem.visible }
-                    MenuItem
+                    PlatformMenuSeparator { visible: changeBackgroundColourMenuItem.visible }
+                    PlatformMenuItem
                     {
                         id: changeBackgroundColourMenuItem
                         visible: !contextMenu.nodeWasClicked
@@ -1147,15 +1147,13 @@ Item
             id: pluginToolBarContainer
             visible: plugin.loaded && !root.pluginPoppedOut
 
-            Layout.fillWidth: true
+            SplitView.fillWidth: true
 
-            Layout.minimumHeight:
+            SplitView.minimumHeight:
             {
                 let minimumHeight = toolBar.height;
 
-                // If we set the minimumHeight to the actual value, while we're
-                // transitioning, it interferes with the transition, so don't
-                if(pluginToolBarContainer.transitioning)
+                if(pluginToolBarContainer.minimisingOrMinimised)
                     return minimumHeight;
 
                 if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
@@ -1166,8 +1164,10 @@ Item
                 return minimumHeight;
             }
 
-            Layout.maximumHeight: root.pluginMinimised && !root.pluginPoppedOut ?
+            SplitView.maximumHeight: root.pluginMinimised && !pluginToolBarContainer.transitioning ?
                 toolBar.height : Number.POSITIVE_INFINITY;
+
+            SplitView.onPreferredHeightChanged: { window.pluginSplitSize = SplitView.preferredHeight; }
 
             property real _lastUnminimisedHeight: 0
 
@@ -1200,7 +1200,7 @@ Item
             property bool minimisingOrMinimised: false
             property bool transitioning: false
 
-            Behavior on height
+            Behavior on SplitView.preferredHeight
             {
                 // Only enable when actually transitioning or this will interfere
                 // when dragging the SplitView manually
@@ -1232,6 +1232,9 @@ Item
                 anchors.left: parent.left
                 anchors.right: parent.right
 
+                topPadding: Constants.padding
+                bottomPadding: Constants.padding
+
                 RowLayout
                 {
                     anchors.fill: parent
@@ -1250,8 +1253,8 @@ Item
                     {
                         enabled: !pluginToolBarContainer.transitioning
 
-                        ToolButton { action: togglePluginMinimiseAction }
-                        ToolButton { action: togglePluginWindowAction }
+                        ToolBarButton { action: togglePluginMinimiseAction }
+                        ToolBarButton { action: togglePluginWindowAction }
                     }
                 }
             }
@@ -1396,15 +1399,8 @@ Item
         }
     }
 
-    property int pluginX: pluginWindow.x
-    property int pluginY: pluginWindow.y
-    property int pluginSplitSize:
-    {
-        if(!pluginPoppedOut)
-            return plugin.height;
-        else
-            return window.pluginSplitSize
-    }
+    readonly property int pluginX: pluginWindow.x
+    readonly property int pluginY: pluginWindow.y
 
     function loadPluginWindowState()
     {
@@ -1475,18 +1471,19 @@ Item
 
         menuBar: MenuBar
         {
-            Menu { id: pluginMenu0; visible: false; enabled: !_document.busy }
-            Menu { id: pluginMenu1; visible: false; enabled: !_document.busy }
-            Menu { id: pluginMenu2; visible: false; enabled: !_document.busy }
-            Menu { id: pluginMenu3; visible: false; enabled: !_document.busy }
-            Menu { id: pluginMenu4; visible: false; enabled: !_document.busy }
+            PlatformMenu { id: pluginMenu0; hidden: true; enabled: !_document.busy }
+            PlatformMenu { id: pluginMenu1; hidden: true; enabled: !_document.busy }
+            PlatformMenu { id: pluginMenu2; hidden: true; enabled: !_document.busy }
+            PlatformMenu { id: pluginMenu3; hidden: true; enabled: !_document.busy }
+            PlatformMenu { id: pluginMenu4; hidden: true; enabled: !_document.busy }
         }
 
-        toolBar: ToolBar
+        header: ToolBar
         {
             id: pluginWindowToolStrip
-            visible: plugin.content !== undefined && plugin.content.toolStrip !== null &&
-                plugin.content.toolStrip !== undefined
+            topPadding: Constants.padding
+            bottomPadding: Constants.padding
+            visible: plugin.content !== undefined && plugin.content.toolStrip
             enabled: !_document.busy
         }
 
@@ -1540,10 +1537,20 @@ Item
 
     function toggleMinimise()
     {
+        if(root.pluginMinimised)
+        {
+            // When un-minimising, ensure the animation starting point of the
+            // SplitView is where it should be as if the user attempts to drag
+            // the handle, it can be peturbed
+            pluginToolBarContainer.SplitView.preferredHeight = toolBar.height;
+        }
+
         root.pluginMinimised = !root.pluginMinimised;
 
         if(!root.pluginMinimised)
-            pluginToolBarContainer.height = pluginToolBarContainer._lastUnminimisedHeight;
+            pluginToolBarContainer.SplitView.preferredHeight = pluginToolBarContainer._lastUnminimisedHeight;
+        else
+            pluginToolBarContainer.SplitView.preferredHeight = toolBar.height;
     }
 
     function popOutPlugin()
@@ -1551,7 +1558,7 @@ Item
         root.pluginPoppedOut = true;
         plugin.parent = pluginWindowContent;
 
-        if(plugin.content.toolStrip !== null && plugin.content.toolStrip !== undefined)
+        if(plugin.content.toolStrip)
             plugin.content.toolStrip.parent = pluginWindowToolStrip.contentItem;
 
         pluginWindow.x = pluginX;
@@ -1562,10 +1569,10 @@ Item
     {
         plugin.parent = pluginContainer;
 
-        if(plugin.content.toolStrip !== null && plugin.content.toolStrip !== undefined)
+        if(plugin.content.toolStrip)
             plugin.content.toolStrip.parent = pluginContainerToolStrip;
 
-        pluginToolBarContainer.height = pluginSplitSize;
+        pluginToolBarContainer.SplitView.preferredHeight = window.pluginSplitSize;
 
         root.pluginPoppedOut = false;
     }
@@ -1674,12 +1681,12 @@ Item
                     return;
                 }
 
-                if(plugin.content.toolStrip !== null)
+                if(plugin.content.toolStrip)
                 {
                     // If the plugin toolstrip is itself a ToolBar, we are actually interested
                     // in its contentItem, otherwise we would be adding a ToolBar to a ToolBar
                     if(plugin.content.toolStrip instanceof ToolBar)
-                        plugin.content.toolStrip = plugin.content.toolStrip.contentItem.layoutItem;
+                        plugin.content.toolStrip = plugin.content.toolStrip.contentChildren[0];
                 }
 
                 plugin.initialise();
@@ -2077,9 +2084,9 @@ Item
                     text: qsTr("To perform a simple search within the graph, click <b>Find</b> on the toolbar above.<br>" +
                           "Try finding <b>Paddington</b>.")
                 }
-                ToolButton
+                ToolBarButton
                 {
-                    iconName: findAction.iconName
+                    icon.name: findAction.icon.name
                 }
             }
         }
@@ -2099,9 +2106,9 @@ Item
                     text: qsTr("If you clustered the graph using MCL, click on " +
                         "<b>Find By Attribute Value</b> to examine individual clusters.<br>")
                 }
-                ToolButton
+                ToolBarButton
                 {
-                    iconName: findByAttributeAction.iconName
+                    icon.name: findByAttributeAction.icon.name
                 }
             }
         }
