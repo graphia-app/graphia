@@ -37,7 +37,7 @@ MouseArea
         {
             id: sortRoleMenu
             title: qsTr("Sort By")
-            ButtonGroup { id: sortByExclusiveGroup }
+            ButtonGroup { id: sortByButtonGroup }
 
             Component
             {
@@ -46,7 +46,7 @@ MouseArea
                 PlatformMenuItem
                 {
                     checkable: true
-                    ButtonGroup.group: sortByExclusiveGroup
+                    ButtonGroup.group: sortByButtonGroup
                 }
             }
 
@@ -86,7 +86,7 @@ MouseArea
         {
             id: sortAscendingMenu
             title: qsTr("Sort Order")
-            ButtonGroup { id: sortOrderExclusiveGroup }
+            ButtonGroup { id: sortOrderButtonGroup }
 
             Component
             {
@@ -95,7 +95,7 @@ MouseArea
                 PlatformMenuItem
                 {
                     checkable: true
-                    ButtonGroup.group: sortOrderExclusiveGroup
+                    ButtonGroup.group: sortOrderButtonGroup
                 }
             }
 

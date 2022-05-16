@@ -196,7 +196,7 @@ Wizard
 
                         ButtonGroup
                         {
-                            id: attributeSelectedAExclusiveGroup
+                            id: attributeSelectedAButtonGroup
                             onCheckedButtonChanged:
                             {
                                 if(checkedButton !== null && root.visible)
@@ -234,7 +234,7 @@ Wizard
                                     return "";
                                 }
 
-                                ButtonGroup.group: attributeSelectedAExclusiveGroup
+                                ButtonGroup.group: attributeSelectedAButtonGroup
                             }
                         }
                     }
@@ -284,7 +284,7 @@ Wizard
 
                         ButtonGroup
                         {
-                            id: attributeSelectedBExclusiveGroup
+                            id: attributeSelectedBButtonGroup
                             onCheckedButtonChanged:
                             {
                                 if(checkedButton !== null && root.visible)
@@ -313,7 +313,7 @@ Wizard
                                     return "";
                                 }
 
-                                ButtonGroup.group: attributeSelectedBExclusiveGroup
+                                ButtonGroup.group: attributeSelectedBButtonGroup
                             }
                         }
                     }
