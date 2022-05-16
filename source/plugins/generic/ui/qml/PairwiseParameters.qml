@@ -286,16 +286,16 @@ BaseParameterDialog
                     color: systemPalette.text
                     padding: Constants.padding
 
-                    Menu
+                    PlatformMenu
                     {
                         id: typeMenu
 
-                        MenuItem { text: qsTr("⨯ Unused");                  onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.Unused); } }
-                        MenuItem { text: qsTr("○ Source Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNode); } }
-                        MenuItem { text: qsTr("● Target Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNode); } }
-                        MenuItem { text: qsTr("► Edge Attribute");          onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.EdgeAttribute); } }
-                        MenuItem { text: qsTr("◇ Source Node Attribute");   onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNodeAttribute); } }
-                        MenuItem { text: qsTr("◆ Target Node Attribute");   onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNodeAttribute); } }
+                        PlatformMenuItem { text: qsTr("⨯ Unused");                onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.Unused); } }
+                        PlatformMenuItem { text: qsTr("○ Source Node");           onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNode); } }
+                        PlatformMenuItem { text: qsTr("● Target Node");           onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNode); } }
+                        PlatformMenuItem { text: qsTr("► Edge Attribute");        onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.EdgeAttribute); } }
+                        PlatformMenuItem { text: qsTr("◇ Source Node Attribute"); onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNodeAttribute); } }
+                        PlatformMenuItem { text: qsTr("◆ Target Node Attribute"); onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNodeAttribute); } }
 
                         function onTypeSelected(selectedType)
                         {

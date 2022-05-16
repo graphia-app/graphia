@@ -101,12 +101,12 @@ Window
         }
     }
 
-    Menu
+    PlatformMenu
     {
         id: contextMenu
         property int resetRow: -1
 
-        MenuItem
+        PlatformMenuItem
         {
             text: qsTr("Reset")
             enabled: { return editAttributeTableModel.rowIsEdited(contextMenu.resetRow); }
@@ -116,7 +116,7 @@ Window
             }
         }
 
-        MenuItem
+        PlatformMenuItem
         {
             text: qsTr("Reset All")
             enabled: editAttributeTableModel.hasEdits

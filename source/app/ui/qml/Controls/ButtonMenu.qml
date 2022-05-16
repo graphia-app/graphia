@@ -51,7 +51,7 @@ Item
     property bool _modelIsUnset: instantiator.model === 1 // wtf?
 
     property bool menuDropped: false
-    Menu
+    PlatformMenu
     {
         id: menu
 
@@ -61,7 +61,7 @@ Item
         Instantiator
         {
             id: instantiator
-            delegate: MenuItem
+            delegate: PlatformMenuItem
             {
                 text: index >= 0 && !_modelIsUnset ? instantiator.model[index] : ""
 

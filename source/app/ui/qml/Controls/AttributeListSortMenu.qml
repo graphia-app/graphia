@@ -29,11 +29,11 @@ MouseArea
     propagateComposedEvents: true
     acceptedButtons: Qt.RightButton
 
-    Menu
+    PlatformMenu
     {
         id: contextMenu
 
-        Menu
+        PlatformMenu
         {
             id: sortRoleMenu
             title: qsTr("Sort By")
@@ -43,7 +43,7 @@ MouseArea
             {
                 id: sortByComponent
 
-                MenuItem
+                PlatformMenuItem
                 {
                     checkable: true
                     ButtonGroup.group: sortByExclusiveGroup
@@ -82,7 +82,7 @@ MouseArea
             }
         }
 
-        Menu
+        PlatformMenu
         {
             id: sortAscendingMenu
             title: qsTr("Sort Order")
@@ -92,7 +92,7 @@ MouseArea
             {
                 id: sortAscendingComponent
 
-                MenuItem
+                PlatformMenuItem
                 {
                     checkable: true
                     ButtonGroup.group: sortOrderExclusiveGroup

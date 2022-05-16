@@ -316,11 +316,11 @@ Item
             hoverColor: enabledTextColor
             propogatePresses: true
 
-            menu: Menu
+            menu: PlatformMenu
             {
                 id: optionsMenu
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: enabledMenuItem
 
@@ -335,11 +335,10 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Edit…")
                     visible: gradientKey.visible || paletteKey.visible
-                    height: visible ? implicitHeight : 0
                     enabled: visible && enabledMenuItem.checked && !root._error
 
                     onTriggered:
@@ -357,9 +356,9 @@ Item
                         root.attributeValueType === ValueType.Numerical;
                 }
 
-                MenuSeparator { visible: optionsMenu._showMappingOptions; height: visible ? implicitHeight : 0 }
+                PlatformMenuSeparator { visible: optionsMenu._showMappingOptions }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: invertMenuItem
 
@@ -368,7 +367,6 @@ Item
                     enabled: visible && enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
-                    height: visible ? implicitHeight : 0
 
                     onCheckedChanged:
                     {
@@ -403,7 +401,7 @@ Item
                         customMappingMenuItem.checked = true;
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: minmaxMenuItem
                     text: qsTr("Min/Max")
@@ -415,7 +413,6 @@ Item
                     checkable: true
 
                     visible: optionsMenu._showMappingOptions
-                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -424,7 +421,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: stddevMenuItem
                     text: qsTr("Standard Deviation")
@@ -433,7 +430,6 @@ Item
                     checkable: true
 
                     visible: optionsMenu._showMappingOptions
-                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -442,7 +438,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: customMappingMenuItem
 
@@ -452,7 +448,6 @@ Item
 
                     enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showMappingOptions
-                    height: visible ? implicitHeight : 0
 
                     onTriggered:
                     {
@@ -469,9 +464,9 @@ Item
                     }
                 }
 
-                MenuSeparator { visible: optionsMenu._showMappingOptions; height: visible ? implicitHeight : 0 }
+                PlatformMenuSeparator { visible: optionsMenu._showMappingOptions }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: perComponentMenuItem
 
@@ -480,7 +475,6 @@ Item
                     enabled: visible && enabledMenuItem.checked && !root._error
 
                     visible: optionsMenu._showMappingOptions
-                    height: visible ? implicitHeight : 0
 
                     onCheckedChanged:
                     {
@@ -499,27 +493,25 @@ Item
 
                 ButtonGroup { buttons: [sortByValueMenuItem, sortBySharedValuesMenuItem] }
 
-                MenuSeparator { visible: optionsMenu._showAssignByOptions; height: visible ? implicitHeight : 0 }
+                PlatformMenuSeparator { visible: optionsMenu._showAssignByOptions }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: sortByValueMenuItem
 
                     enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
-                    height: visible ? implicitHeight : 0
 
                     text: qsTr("By Value")
                     checkable: true
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: sortBySharedValuesMenuItem
 
                     enabled: visible && enabledMenuItem.checked && !root._error
                     visible: optionsMenu._showAssignByOptions
-                    height: visible ? implicitHeight : 0
 
                     text: qsTr("By Quantity")
                     checkable: true
@@ -531,9 +523,9 @@ Item
                     }
                 }
 
-                MenuSeparator { visible: optionsMenu._showAssignByOptions; height: visible ? implicitHeight : 0 }
+                PlatformMenuSeparator { visible: optionsMenu._showAssignByOptions }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Delete")
                     icon.name: "edit-delete"

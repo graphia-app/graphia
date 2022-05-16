@@ -93,9 +93,9 @@ Item
             hoverColor: enabledTextColor
             propogatePresses: true
 
-            menu: Menu
+            menu: PlatformMenu
             {
-                MenuItem
+                PlatformMenuItem
                 {
                     id: enabledMenuItem
 
@@ -109,7 +109,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: lockedMenuItem
 
@@ -123,7 +123,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: repeatingMenuItem
 
@@ -137,7 +137,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     id: pinnedMenuItem
 
@@ -151,7 +151,7 @@ Item
                     }
                 }
 
-                MenuItem
+                PlatformMenuItem
                 {
                     text: qsTr("Delete")
                     icon.name: "edit-delete"

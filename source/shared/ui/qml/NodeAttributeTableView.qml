@@ -1357,7 +1357,7 @@ Item
         }
     }
 
-    Menu
+    PlatformMenu
     {
         id: contextMenu
 

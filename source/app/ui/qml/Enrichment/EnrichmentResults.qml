@@ -372,7 +372,7 @@ ApplicationWindow
         }
     }
 
-    Menu
+    PlatformMenu
     {
         id: plotContextMenu
         Action
@@ -392,7 +392,7 @@ ApplicationWindow
     }
 
 
-    Menu
+    PlatformMenu
     {
         id: exportTableMenu
         Action
