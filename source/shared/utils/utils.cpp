@@ -48,5 +48,4 @@ float u::normaliseAngle(float radians)
 static_block
 {
     Q_INIT_RESOURCE(shared);
-    Q_INIT_RESOURCE(js);
 }

@@ -21,6 +21,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import QtWebEngine 1.5
 
+import app.graphia.Shared 1.0
+
 PluginContent
 {
     id: root

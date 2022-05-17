@@ -23,7 +23,7 @@ import QtQuick.Controls.Styles 1.4
 
 import "Controls"
 
-import "../../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 Rectangle
 {

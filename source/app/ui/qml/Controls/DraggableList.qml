@@ -19,7 +19,7 @@
 import QtQuick 2.7
 import QtQml.Models 2.2
 
-import "../../../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 Column
 {

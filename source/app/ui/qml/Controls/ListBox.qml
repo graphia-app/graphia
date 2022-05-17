@@ -19,7 +19,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.12
 
-import "../../../../shared/ui/qml/Utils.js" as Utils
+import app.graphia.Shared 1.0
 
 import app.graphia 1.0
 

@@ -23,6 +23,8 @@ import QtQuick.Dialogs 1.1
 import QtQuick.Window 2.2
 
 import app.graphia 1.0
+import app.graphia.Shared.Controls 1.0
+
 import "../Controls"
 import "../"
 

@@ -19,9 +19,7 @@
 import QtQuick 2.7
 
 import app.graphia 1.0
-
-import "../../../../shared/ui/qml/Utils.js" as Utils
-import "../../../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 Item
 {

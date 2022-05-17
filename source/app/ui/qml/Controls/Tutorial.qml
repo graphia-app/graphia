@@ -19,13 +19,14 @@
 import QtQuick 2.0
 
 import app.graphia 1.0
+import app.graphia.Shared.Controls 1.0
 
 Item
 {
     property bool activated: false
 
     property int visibleHubbleId: -1
-    property Item currentHubble:
+    property Hubble currentHubble:
     {
         if(visibleHubbleId < 0 || visibleHubbleId >= hubbles.length)
             return null;

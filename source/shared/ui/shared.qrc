@@ -1,19 +1,25 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/NodeAttributeTableView.qml</file>
-        <file>qml/PluginContent.qml</file>
-        <file>qml/Controls/Wizard.qml</file>
-        <file>qml/Controls/BaseParameterDialog.qml</file>
-        <file>qml/Controls/SlidingPanel.qml</file>
-        <file>qml/Controls/ListTabView.qml</file>
-        <file>qml/Controls/ListTab.qml</file>
-        <file>qml/Controls/HelpTooltip.qml</file>
-        <file>qml/Controls/Hubble.qml</file>
-        <file>qml/Controls/PlatformMenu.qml</file>
-        <file>qml/Controls/PlatformMenuItem.qml</file>
-        <file>qml/Controls/PlatformMenuSeparator.qml</file>
-        <file>qml/FontPointSize.qml</file>
-        <file>qml/qmldir</file>
-        <file>qml/Controls/DataTable.qml</file>
+        <file>qml/app/graphia/Shared/Controls/BaseParameterDialog.qml</file>
+        <file>qml/app/graphia/Shared/Controls/DataTable.qml</file>
+        <file>qml/app/graphia/Shared/Controls/FontPointSize.qml</file>
+        <file>qml/app/graphia/Shared/Controls/HelpTooltip.qml</file>
+        <file>qml/app/graphia/Shared/Controls/Hubble.qml</file>
+        <file>qml/app/graphia/Shared/Controls/ListTab.qml</file>
+        <file>qml/app/graphia/Shared/Controls/ListTabView.qml</file>
+        <file>qml/app/graphia/Shared/Controls/NodeAttributeTableView.qml</file>
+        <file>qml/app/graphia/Shared/Controls/PlatformMenuItem.qml</file>
+        <file>qml/app/graphia/Shared/Controls/PlatformMenu.qml</file>
+        <file>qml/app/graphia/Shared/Controls/PlatformMenuSeparator.qml</file>
+        <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
+        <file>qml/app/graphia/Shared/Controls/qmldir</file>
+        <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>
+        <file>qml/app/graphia/Shared/Controls/SlidingPanel.qml</file>
+        <file>qml/app/graphia/Shared/Controls/TabBarButton.qml</file>
+        <file>qml/app/graphia/Shared/Controls/Wizard.qml</file>
+        <file>qml/app/graphia/Shared/PluginContent.qml</file>
+        <file>qml/app/graphia/Shared/Constants.js</file>
+        <file>qml/app/graphia/Shared/Utils.js</file>
+        <file>qml/app/graphia/Shared/qmldir</file>
     </qresource>
 </RCC>

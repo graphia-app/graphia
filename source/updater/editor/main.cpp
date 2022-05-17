@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    Q_INIT_RESOURCE(shared);
+
     QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
@@ -54,6 +56,7 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
 
     QQmlApplicationEngine engine;
+    engine.addImportPath(QStringLiteral("qrc:///qml/"));
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return QCoreApplication::exec();

@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/shared/ui">
-        <file>qml/Utils.js</file>
-        <file>qml/Constants.js</file>
-    </qresource>
-</RCC>

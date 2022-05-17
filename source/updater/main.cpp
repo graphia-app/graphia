@@ -77,6 +77,7 @@ QStringList showUpdater(int argc, char *argv[])
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
 
+    Q_INIT_RESOURCE(shared);
     Q_INIT_RESOURCE(update_keys);
 
     QString status;
@@ -140,6 +141,7 @@ QStringList showUpdater(int argc, char *argv[])
         engine.rootContext()->setContextProperty(
             QStringLiteral("installer"), &installer);
 
+        engine.addImportPath(QStringLiteral("qrc:///qml/"));
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
         QApplication::exec();

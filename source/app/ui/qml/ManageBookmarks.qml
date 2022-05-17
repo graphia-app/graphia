@@ -23,7 +23,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
-import "../../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 import "Controls"
 

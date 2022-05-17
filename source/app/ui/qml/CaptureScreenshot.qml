@@ -24,8 +24,7 @@ import QtQuick.Dialogs 1.2
 import Qt.labs.platform 1.0 as Labs
 
 import app.graphia 1.0
-
-import "../../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 Window
 {

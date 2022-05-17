@@ -169,7 +169,6 @@ list(APPEND SHARED_SOURCES
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/updates/update_keys.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/ui/js.qrc
 )
 
 list(APPEND SOURCES ${SHARED_SOURCES})

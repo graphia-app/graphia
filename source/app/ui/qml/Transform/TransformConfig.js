@@ -17,7 +17,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import "../../../../shared/ui/qml/Utils.js" as Utils
+.import app.graphia.Shared 1.0 as Shared
 .import "../AttributeUtils.js" as AttributeUtils
 .import app.graphia 1.0 as Graphia
 
@@ -51,7 +51,7 @@ function addLabelTo(text, parent)
     Qt.createQmlObject("import QtQuick 2.7\n" +
         "import QtQuick.Controls 2.12\n" +
         "Label { text: \"" +
-        Utils.normaliseWhitespace(text) +
+        Shared.Utils.normaliseWhitespace(text) +
         "\"; color: root.textColor }", parent);
 }
 
@@ -277,7 +277,7 @@ function Create(transformIndex, transform)
                             if(locked)
                             {
                                 if(parameterData.valueType === Graphia.ValueType.String)
-                                    labelText += "\\\"" + Utils.addSlashes(operand) + "\\\"";
+                                    labelText += "\\\"" + Shared.Utils.addSlashes(operand) + "\\\"";
                                 else
                                     labelText += Graphia.QmlUtils.formatNumberScientific(operand);
                             }

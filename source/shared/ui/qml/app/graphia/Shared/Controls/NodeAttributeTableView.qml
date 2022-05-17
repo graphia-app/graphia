@@ -26,10 +26,9 @@ import QtQuick.Shapes 1.13
 import Qt.labs.platform 1.0 as Labs
 
 import app.graphia 1.0
+import app.graphia.Shared 1.0
 
-import "Controls"
-import "../../../shared/ui/qml/Utils.js" as Utils
-import "../../../shared/ui/qml/Constants.js" as Constants
+import "../../../../Controls"
 
 Item
 {

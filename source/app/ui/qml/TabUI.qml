@@ -29,9 +29,8 @@ import Qt.labs.platform 1.0 as Labs
 import SortFilterProxyModel 0.2
 
 import app.graphia 1.0
-
-import "../../../shared/ui/qml/Constants.js" as Constants
-import "../../../shared/ui/qml/Utils.js" as Utils
+import app.graphia.Shared 1.0
+import app.graphia.Shared.Controls 1.0
 
 import "Controls"
 import "Transform"

@@ -19,6 +19,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.15
 
+import app.graphia.Shared.Controls 1.0
+
 MouseArea
 {
     id: root

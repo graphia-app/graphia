@@ -17,6 +17,7 @@ list(APPEND SOURCES
 
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/../../shared/ui/shared.qrc
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

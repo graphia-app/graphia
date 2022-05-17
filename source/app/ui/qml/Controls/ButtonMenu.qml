@@ -21,6 +21,7 @@ import QtQuick.Controls 2.12
 import QtQml 2.8
 
 import app.graphia 1.0
+import app.graphia.Shared.Controls 1.0
 
 Item
 {

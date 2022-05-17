@@ -21,7 +21,7 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
-import "../../shared/ui/qml/Constants.js" as Constants
+import app.graphia.Shared 1.0
 
 // This dialog is conceptually similar to a tabview in a dialog however the user
 // interface consists of a vertical list of tabs with buttons to OPTIONALLY

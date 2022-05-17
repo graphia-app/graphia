@@ -21,7 +21,7 @@ import QtQuick.Controls 2.12
 import QtQml 2.8
 import QtQuick.Dialogs 1.2
 
-import "../../../../shared/ui/qml/Utils.js" as Utils
+import app.graphia.Shared 1.0
 
 Item
 {

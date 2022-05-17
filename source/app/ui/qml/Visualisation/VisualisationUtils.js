@@ -17,7 +17,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import "../../../../shared/ui/qml/Utils.js" as Utils
+.import app.graphia.Shared 1.0 as Utils
 .import app.graphia 1.0 as Graphia
 
 function expressionFor(document, attributeName, flags, type, channelName)

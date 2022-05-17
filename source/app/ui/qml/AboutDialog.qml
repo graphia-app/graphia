@@ -22,8 +22,8 @@ import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
-import "../../../shared/ui/qml/Constants.js" as Constants
-import "../../../shared/ui/qml/Utils.js" as Utils
+import app.graphia.Shared 1.0
+import app.graphia.Shared.Controls 1.0
 
 import "Controls"
 

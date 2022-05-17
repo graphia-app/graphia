@@ -20,8 +20,6 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.3
 
-import "../../shared/ui/qml/Constants.js" as Constants
-
 Window
 {
     modality: Qt.ApplicationModal

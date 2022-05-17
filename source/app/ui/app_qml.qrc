@@ -23,7 +23,6 @@
         <file>qml/Controls/PaletteEditor.qml</file>
         <file>qml/Controls/PaletteKey.qml</file>
         <file>qml/Controls/PaletteSelector.qml</file>
-        <file>qml/Controls/PointingCursorOnHoverLink.qml</file>
         <file>qml/Controls/ToolBarSeparator.qml</file>
         <file>qml/Controls/ToolTipHack.qml</file>
         <file>qml/Controls/TransformListSortMenu.qml</file>
@@ -67,8 +66,6 @@
         <file>qml/Visualisation/Visualisations.qml</file>
         <file>qml/Visualisation/VisualisationUtils.js</file>
         <file>qml/Controls/ToolBarButton.qml</file>
-        <file>qml/Controls/TabBarButton.qml</file>
-        <file>qml/Controls/ScrollableTextArea.qml</file>
         <file>qml/Controls/DoubleSpinBox.qml</file>
         <file>qml/Controls/FramedScrollView.qml</file>
     </qresource>

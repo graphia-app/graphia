@@ -1,9 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>../shared/ui/qml/Constants.js</file>
-        <file alias="PointingCursorOnHoverLink.qml">../app/ui/qml/Controls/PointingCursorOnHoverLink.qml</file>
-        <file alias="ScrollableTextArea.qml">../app/ui/qml/Controls/ScrollableTextArea.qml</file>
         <file>icon.svg</file>
     </qresource>
 </RCC>

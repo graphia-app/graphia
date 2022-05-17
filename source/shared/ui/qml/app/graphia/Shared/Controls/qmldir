@@ -1,0 +1,19 @@
+module app.graphia.Shared.Controls
+
+BaseParameterDialog 1.0 BaseParameterDialog.qml
+DataTable 1.0 DataTable.qml
+HelpTooltip 1.0 HelpTooltip.qml
+Hubble 1.0 Hubble.qml
+ListTab 1.0 ListTab.qml
+ListTabView 1.0 ListTabView.qml
+NodeAttributeTableView 1.0 NodeAttributeTableView.qml
+PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
+PlatformMenuItem 1.0 PlatformMenuItem.qml
+PlatformMenu 1.0 PlatformMenu.qml
+PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
+ScrollableTextArea 1.0 ScrollableTextArea.qml
+SlidingPanel 1.0 SlidingPanel.qml
+TabBarButton 1.0 TabBarButton.qml
+Wizard 1.0 Wizard.qml
+
+singleton FontPointSize 1.0 FontPointSize.qml

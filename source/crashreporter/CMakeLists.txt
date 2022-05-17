@@ -20,6 +20,7 @@ list(APPEND SOURCES
 
 list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/resources.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/ui/shared.qrc
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -53,4 +54,4 @@ if(APPLE)
     target_link_libraries(CrashReporter "-framework CoreFoundation")
 endif()
 
-target_link_libraries(CrashReporter thirdparty_static)
+target_link_libraries(CrashReporter thirdparty_static shared)
