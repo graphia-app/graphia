@@ -28,7 +28,6 @@ import app.graphia.Shared.Controls 1.0
 
 import SortFilterProxyModel 0.2
 
-import ".."
 import "TransformConfig.js" as TransformConfig
 import "../Visualisation/VisualisationUtils.js" as VisualisationUtils
 import "../AttributeUtils.js" as AttributeUtils

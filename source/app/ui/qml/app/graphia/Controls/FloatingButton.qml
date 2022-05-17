@@ -22,8 +22,6 @@ import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
 
-import ".."
-
 // This is basically a substitute for ToolButton,
 // that looks consistent across platforms
 Button

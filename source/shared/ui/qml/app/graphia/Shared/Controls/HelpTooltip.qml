@@ -23,8 +23,6 @@ import QtQuick.Controls 2.12
 
 import app.graphia 1.0
 
-import "../"
-
 NamedIcon
 {
     id: root

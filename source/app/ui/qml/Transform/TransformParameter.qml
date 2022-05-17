@@ -24,7 +24,6 @@ import app.graphia 1.0
 import app.graphia.Controls 1.0
 import app.graphia.Shared 1.0
 
-import ".."
 import "../AttributeUtils.js" as AttributeUtils
 
 GridLayout
