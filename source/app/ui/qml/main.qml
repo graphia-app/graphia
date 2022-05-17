@@ -26,12 +26,12 @@ import Qt.labs.platform 1.1 as Labs
 import QtQuick.Dialogs 1.3 as Dialogs
 
 import app.graphia 1.0
+import app.graphia.Controls 1.0
 import app.graphia.Shared 1.0
 import app.graphia.Shared.Controls 1.0
 
 import "Loading"
 import "Options"
-import "Controls"
 import "Enrichment"
 
 ApplicationWindow

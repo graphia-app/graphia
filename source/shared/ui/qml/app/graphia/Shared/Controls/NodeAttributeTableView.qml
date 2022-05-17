@@ -28,8 +28,6 @@ import Qt.labs.platform 1.0 as Labs
 import app.graphia 1.0
 import app.graphia.Shared 1.0
 
-import "../../../../Controls"
-
 Item
 {
     id: root

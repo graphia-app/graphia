@@ -25,14 +25,13 @@ import Qt.labs.qmlmodels 1.0
 import QtQuick.Shapes 1.13
 
 import app.graphia 1.0
+import app.graphia.Controls 1.0
 import app.graphia.Shared 1.0
 import app.graphia.Shared.Controls 1.0
 
 import SortFilterProxyModel 0.2
 
 import "AttributeUtils.js" as AttributeUtils
-
-import "Controls"
 
 Window
 {

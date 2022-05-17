@@ -23,11 +23,9 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
-import app.graphia.Shared 1.0
-
-import "Controls"
-
 import app.graphia 1.0
+import app.graphia.Controls 1.0
+import app.graphia.Shared 1.0
 
 Window
 {
