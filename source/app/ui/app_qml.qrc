@@ -29,6 +29,7 @@
         <file>qml/app/graphia/Controls/Tutorial.qml</file>
         <file>qml/app/graphia/Controls/warning.png</file>
         <file>qml/app/graphia/Controls/qmldir</file>
+        <file>qml/app/graphia/Utils/qmldir</file>
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>

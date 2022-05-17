@@ -23,14 +23,13 @@ import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
 import app.graphia.Controls 1.0
+import app.graphia.Utils 1.0 as Utils
 import app.graphia.Shared 1.0
 import app.graphia.Shared.Controls 1.0
 
 import SortFilterProxyModel 0.2
 
 import "TransformConfig.js" as TransformConfig
-import "../Visualisation/VisualisationUtils.js" as VisualisationUtils
-import "../AttributeUtils.js" as AttributeUtils
 
 Window
 {
@@ -371,7 +370,7 @@ Window
                                             showSearch: true
                                             showParentGuide: true
                                             sortRoleName: "userDefined"
-                                            prettifyFunction: AttributeUtils.prettify
+                                            prettifyFunction: Utils.Attribute.prettify
 
                                             onSelectedValueChanged:
                                             {
@@ -486,7 +485,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: lhsAttributeList.sortRoleName
-                                                prettifyFunction: AttributeUtils.prettify
+                                                prettifyFunction: Utils.Attribute.prettify
 
                                                 enabled: attributeRadioButton.checked
                                                 onSelectedValueChanged:
@@ -624,7 +623,7 @@ Window
                                                 showSearch: true
                                                 showParentGuide: true
                                                 sortRoleName: "userDefined"
-                                                prettifyFunction: AttributeUtils.prettify
+                                                prettifyFunction: Utils.Attribute.prettify
 
                                                 onSelectedValueChanged:
                                                 {
@@ -791,7 +790,7 @@ Window
                                                 {
                                                     font.italic: attributeName.length === 0
                                                     text: attributeName.length > 0 ?
-                                                        AttributeUtils.prettify(attributeName) :
+                                                        Utils.Attribute.prettify(attributeName) :
                                                         qsTr("Invalid Attribute Name")
                                                 }
 
@@ -990,7 +989,7 @@ Window
 
             if(channelName.length > 0)
             {
-                let expression = VisualisationUtils.expressionFor(document,
+                let expression = Utils.Visualisation.expressionFor(document,
                     attributeName, defaultVisualisation.flags,
                     defaultVisualisation.valueType, channelName);
 

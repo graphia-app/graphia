@@ -17,7 +17,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia.Shared 1.0 as Utils
+.import app.graphia.Shared 1.0 as Shared
 .import app.graphia 1.0 as Graphia
 
 function expressionFor(document, attributeName, flags, type, channelName)
@@ -39,8 +39,8 @@ function expressionFor(document, attributeName, flags, type, channelName)
         for(let key in parameters)
         {
             let parameter = parameters[key];
-            parameter = Utils.sanitiseJson(parameter);
-            parameter = Utils.escapeQuotes(parameter);
+            parameter = Shared.Utils.sanitiseJson(parameter);
+            parameter = Shared.Utils.escapeQuotes(parameter);
 
             expression += " " + key + " = \"" + parameter + "\"";
         }

@@ -22,9 +22,8 @@ import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
 import app.graphia.Controls 1.0
+import app.graphia.Utils 1.0
 import app.graphia.Shared 1.0
-
-import "../AttributeUtils.js" as AttributeUtils
 
 GridLayout
 {
@@ -222,7 +221,7 @@ GridLayout
         visible: valueType === ValueType.Attribute
         enabled: valueType !== ValueType.Unknown && currentIndexIsValid
 
-        prettifyFunction: AttributeUtils.prettify
+        prettifyFunction: Attribute.prettify
 
         onSelectedValueChanged: { root.value = selectedValue ? selectedValue : ""; }
 

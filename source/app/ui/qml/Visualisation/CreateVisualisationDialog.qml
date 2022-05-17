@@ -23,11 +23,9 @@ import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
 import app.graphia.Controls 1.0
+import app.graphia.Utils 1.0 as Utils
 import app.graphia.Shared 1.0
 import app.graphia.Shared.Controls 1.0
-
-import "VisualisationUtils.js" as VisualisationUtils
-import "../AttributeUtils.js" as AttributeUtils
 
 Window
 {
@@ -82,7 +80,7 @@ Window
                 showSearch: true
                 showParentGuide: true
                 sortRoleName: "elementType"
-                prettifyFunction: AttributeUtils.prettify
+                prettifyFunction: Utils.Attribute.prettify
 
                 onSelectedValueChanged:
                 {
@@ -343,7 +341,7 @@ Window
         {
             let attribute = document.attribute(attributeList.selectedValue);
 
-            let expression = VisualisationUtils.expressionFor(
+            let expression = Utils.Visualisation.expressionFor(
                 document, attributeList.selectedValue, attribute.flags,
                 attribute.valueType, channelName);
 

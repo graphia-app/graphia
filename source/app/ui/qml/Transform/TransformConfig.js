@@ -17,9 +17,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia.Shared 1.0 as Shared
-.import "../AttributeUtils.js" as AttributeUtils
 .import app.graphia 1.0 as Graphia
+.import app.graphia.Utils 1.0 as Utils
+.import app.graphia.Shared 1.0 as Shared
 
 function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
@@ -243,7 +243,7 @@ function Create(transformIndex, transform)
                     function addOperand(operand, opposite)
                     {
                         if(operand[0] === '$')
-                            labelText += AttributeUtils.prettify(operand);
+                            labelText += Utils.Attribute.prettify(operand);
                         else
                         {
                             let parameterData = {};
@@ -306,7 +306,7 @@ function Create(transformIndex, transform)
                     // The element is an attribute
 
                     if(locked)
-                        labelText += AttributeUtils.prettify(parameter.attributeName);
+                        labelText += Utils.Attribute.prettify(parameter.attributeName);
 
                     addLabel();
 
