@@ -22,6 +22,11 @@
 #include <map>
 #include <string>
 
+// This allows for the execution of static blocks of code, in a deterministic order,
+// whenever execute_static_blocks() is called. Note that if a static_block is included
+// in a static library, its compilation unit (obviously) must be linked for it to work,
+// but that isn't necessarily the case if the compilation unit is otherwise unreferenced.
+
 inline std::map<std::string, void(*)()> _static_blocks;
 
 void execute_static_blocks();
