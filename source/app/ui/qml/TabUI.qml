@@ -691,18 +691,18 @@ Item
                             _document.nodeIsSelected(clickedNodeId);
                     }
 
-                    PlatformMenuItem { id: delete1; visible: deleteNodeAction.visible; action: deleteNodeAction }
-                    PlatformMenuItem { id: delete2; visible: deleteAction.visible && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
-                    PlatformMenuSeparator { visible: delete1.visible || delete2.visible }
+                    PlatformMenuItem { id: delete1; hidden: !deleteNodeAction.visible; action: deleteNodeAction }
+                    PlatformMenuItem { id: delete2; hidden: !deleteAction.visible || contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
+                    PlatformMenuSeparator { hidden: delete1.hidden && delete2.hidden }
 
-                    PlatformMenuItem { visible: _document.numNodesSelected < graph.numNodes; action: selectAllAction }
-                    PlatformMenuItem { visible: _document.numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
-                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty; action: selectNoneAction }
-                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty; action: invertSelectionAction }
+                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes; action: selectAllAction }
+                    PlatformMenuItem { hidden: _document.numNodesSelected === graph.numNodes || graph.inOverviewMode; action: selectAllVisibleAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: selectNoneAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty; action: invertSelectionAction }
 
-                    PlatformMenuItem { visible: selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
-                    PlatformMenuItem { visible: selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
-                    PlatformMenuItem { visible: selectNeighboursOfNodeAction.visible; action: selectNeighboursOfNodeAction }
+                    PlatformMenuItem { hidden: !selectSourcesOfNodeAction.visible; action: selectSourcesOfNodeAction }
+                    PlatformMenuItem { hidden: !selectTargetsOfNodeAction.visible; action: selectTargetsOfNodeAction }
+                    PlatformMenuItem { hidden: !selectNeighboursOfNodeAction.visible; action: selectNeighboursOfNodeAction }
                     PlatformMenu
                     {
                         id: sharedValuesOfNodeContextMenu
@@ -722,12 +722,12 @@ Item
                         }
                     }
 
-                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
-                        selectSourcesAction.visible; action: selectSourcesAction }
-                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
-                        selectTargetsAction.visible; action: selectTargetsAction }
-                    PlatformMenuItem { visible: !_document.nodeSelectionEmpty && !contextMenu.clickedNodeIsSameAsSelection &&
-                        selectNeighboursAction.visible; action: selectNeighboursAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
+                        !selectSourcesAction.visible; action: selectSourcesAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
+                        !selectTargetsAction.visible; action: selectTargetsAction }
+                    PlatformMenuItem { hidden: _document.nodeSelectionEmpty || contextMenu.clickedNodeIsSameAsSelection ||
+                        !selectNeighboursAction.visible; action: selectNeighboursAction }
                     PlatformMenu
                     {
                         id: sharedValuesSelectionContextMenu
@@ -747,22 +747,22 @@ Item
                             onObjectRemoved: sharedValuesSelectionContextMenu.removeItem(object)
                         }
                     }
-                    PlatformMenuItem { visible: repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
+                    PlatformMenuItem { hidden: !repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
 
-                    PlatformMenuSeparator { visible: searchWebMenuItem.visible }
+                    PlatformMenuSeparator { hidden: searchWebMenuItem.hidden }
                     PlatformMenuItem
                     {
                         id: searchWebMenuItem
-                        visible: contextMenu.nodeWasClicked
+                        hidden: !contextMenu.nodeWasClicked
                         text: qsTr("Search Web for '") + contextMenu.clickedNodeName + qsTr("'")
                         onTriggered: { root.searchWebForNode(contextMenu.clickedNodeId); }
                     }
 
-                    PlatformMenuSeparator { visible: changeBackgroundColourMenuItem.visible }
+                    PlatformMenuSeparator { hidden: changeBackgroundColourMenuItem.hidden }
                     PlatformMenuItem
                     {
                         id: changeBackgroundColourMenuItem
-                        visible: !contextMenu.nodeWasClicked
+                        hidden: contextMenu.nodeWasClicked
                         text: qsTr("Change Background &Colour")
                         onTriggered:
                         {

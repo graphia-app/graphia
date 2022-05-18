@@ -21,6 +21,8 @@ import QtQuick.Controls 2.15
 
 MenuSeparator
 {
+    property bool hidden: false
+
     clip: true
-    height: visible ? implicitHeight : 0
+    height: hidden ? 0 : implicitHeight
 }

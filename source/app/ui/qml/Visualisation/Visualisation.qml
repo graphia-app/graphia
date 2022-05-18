@@ -335,7 +335,7 @@ Item
                 PlatformMenuItem
                 {
                     text: qsTr("Edit…")
-                    visible: gradientKey.visible || paletteKey.visible
+                    hidden: !gradientKey.visible && !paletteKey.visible
                     enabled: visible && enabledMenuItem.checked && !root._error
 
                     onTriggered:
@@ -353,7 +353,7 @@ Item
                         root.attributeValueType === ValueType.Numerical;
                 }
 
-                PlatformMenuSeparator { visible: optionsMenu._showMappingOptions }
+                PlatformMenuSeparator { hidden: !optionsMenu._showMappingOptions }
 
                 PlatformMenuItem
                 {
@@ -363,7 +363,7 @@ Item
                     checkable: true
                     enabled: visible && enabledMenuItem.checked && !root._error
 
-                    visible: optionsMenu._showMappingOptions
+                    hidden: !optionsMenu._showMappingOptions
 
                     onCheckedChanged:
                     {
@@ -409,7 +409,7 @@ Item
 
                     checkable: true
 
-                    visible: optionsMenu._showMappingOptions
+                    hidden: !optionsMenu._showMappingOptions
 
                     onTriggered:
                     {
@@ -426,7 +426,7 @@ Item
 
                     checkable: true
 
-                    visible: optionsMenu._showMappingOptions
+                    hidden: !optionsMenu._showMappingOptions
 
                     onTriggered:
                     {
@@ -444,7 +444,7 @@ Item
                     checkable: true
 
                     enabled: visible && enabledMenuItem.checked && !root._error
-                    visible: optionsMenu._showMappingOptions
+                    hidden: !optionsMenu._showMappingOptions
 
                     onTriggered:
                     {
@@ -461,7 +461,7 @@ Item
                     }
                 }
 
-                PlatformMenuSeparator { visible: optionsMenu._showMappingOptions }
+                PlatformMenuSeparator { hidden: !optionsMenu._showMappingOptions }
 
                 PlatformMenuItem
                 {
@@ -471,7 +471,7 @@ Item
                     checkable: true
                     enabled: visible && enabledMenuItem.checked && !root._error
 
-                    visible: optionsMenu._showMappingOptions
+                    hidden: !optionsMenu._showMappingOptions
 
                     onCheckedChanged:
                     {
@@ -490,14 +490,14 @@ Item
 
                 ButtonGroup { buttons: [sortByValueMenuItem, sortBySharedValuesMenuItem] }
 
-                PlatformMenuSeparator { visible: optionsMenu._showAssignByOptions }
+                PlatformMenuSeparator { hidden: !optionsMenu._showAssignByOptions }
 
                 PlatformMenuItem
                 {
                     id: sortByValueMenuItem
 
                     enabled: visible && enabledMenuItem.checked && !root._error
-                    visible: optionsMenu._showAssignByOptions
+                    hidden: !optionsMenu._showAssignByOptions
 
                     text: qsTr("By Value")
                     checkable: true
@@ -508,7 +508,7 @@ Item
                     id: sortBySharedValuesMenuItem
 
                     enabled: visible && enabledMenuItem.checked && !root._error
-                    visible: optionsMenu._showAssignByOptions
+                    hidden: !optionsMenu._showAssignByOptions
 
                     text: qsTr("By Quantity")
                     checkable: true
@@ -520,7 +520,7 @@ Item
                     }
                 }
 
-                PlatformMenuSeparator { visible: optionsMenu._showAssignByOptions }
+                PlatformMenuSeparator { hidden: !optionsMenu._showAssignByOptions }
 
                 PlatformMenuItem
                 {

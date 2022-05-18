@@ -1998,8 +1998,8 @@ ApplicationWindow
             PlatformMenuItem { action: selectAllVisibleAction }
             PlatformMenuItem { action: selectNoneAction }
             PlatformMenuItem { action: invertSelectionAction }
-            PlatformMenuItem { visible: selectSourcesAction.enabled; action: selectSourcesAction }
-            PlatformMenuItem { visible: selectTargetsAction.enabled; action: selectTargetsAction }
+            PlatformMenuItem { hidden: !selectSourcesAction.enabled; action: selectSourcesAction }
+            PlatformMenuItem { hidden: !selectTargetsAction.enabled; action: selectTargetsAction }
             PlatformMenuItem { action: selectNeighboursAction }
             PlatformMenu
             {
@@ -2028,12 +2028,12 @@ ApplicationWindow
             PlatformMenuItem
             {
                 action: currentTab ? currentTab.previousAction : null
-                visible: currentTab
+                hidden: !currentTab
             }
             PlatformMenuItem
             {
                 action: currentTab ? currentTab.nextAction : null
-                visible: currentTab
+                hidden: !currentTab
             }
             PlatformMenuSeparator {}
             PlatformMenuItem { action: prevComponentAction }
@@ -2049,12 +2049,12 @@ ApplicationWindow
             PlatformMenuItem
             {
                 action: togglePluginWindowAction
-                visible: currentTab && currentTab.document.hasPluginUI
+                hidden: !currentTab || !currentTab.document.hasPluginUI
             }
             PlatformMenuItem
             {
                 action: togglePluginMinimiseAction
-                visible: currentTab && currentTab.document.hasPluginUI
+                hidden: !currentTab || !currentTab.document.hasPluginUI
             }
             PlatformMenuSeparator {}
             PlatformMenuItem { action: toggleGraphMetricsAction }
@@ -2075,12 +2075,12 @@ ApplicationWindow
                     id: edgeTextWarning
 
                     enabled: false
-                    visible: currentTab && !currentTab.document.hasValidEdgeTextVisualisation &&
-                        visuals.showEdgeText !== TextState.Off
+                    hidden: !currentTab || currentTab.document.hasValidEdgeTextVisualisation ||
+                        visuals.showEdgeText === TextState.Off
                     text: qsTr("⚠ Visualisation Required For Edge Text")
                 }
 
-                PlatformMenuSeparator { visible: edgeTextWarning.visible }
+                PlatformMenuSeparator { hidden: edgeTextWarning.hidden }
 
                 PlatformMenuItem { action: hideEdgeTextAction }
                 PlatformMenuItem { action: showSelectedEdgeTextAction }
@@ -2089,7 +2089,7 @@ ApplicationWindow
             PlatformMenuItem
             {
                 action: toggleEdgeDirectionAction
-                visible: currentTab && currentTab.document.directed
+                hidden: !currentTab || !currentTab.document.directed
             }
             PlatformMenuItem { action: toggleMultiElementIndicatorsAction }
             PlatformMenuSeparator {}
@@ -2129,12 +2129,12 @@ ApplicationWindow
             title: qsTr("&Bookmarks")
             PlatformMenuItem { action: addBookmarkAction }
             PlatformMenuItem { action: manageBookmarksAction }
-            PlatformMenuSeparator { visible: currentTab ? currentTab.document.bookmarks.length > 0 : false }
+            PlatformMenuSeparator { hidden: currentTab ? currentTab.document.bookmarks.length === 0 : true }
 
             PlatformMenuItem
             {
                 action: activateAllBookmarksAction
-                visible: currentTab ? currentTab.document.bookmarks.length > 1 : false
+                hidden: currentTab ? currentTab.document.bookmarks.length === 1 : true
             }
 
             Instantiator
@@ -2219,13 +2219,13 @@ ApplicationWindow
                 }
                 PlatformMenuItem
                 {
-                    visible: Qt.platform.os === "windows"
+                    hidden: Qt.platform.os !== "windows"
                     text: qsTr("Windows Exception");
                     onTriggered: { application.crash(CrashType.Win32Exception); }
                 }
                 PlatformMenuItem
                 {
-                    visible: Qt.platform.os === "windows"
+                    hidden: Qt.platform.os !== "windows"
                     text: qsTr("Windows Exception Non-Continuable");
                     onTriggered: { application.crash(CrashType.Win32ExceptionNonContinuable); }
                 }

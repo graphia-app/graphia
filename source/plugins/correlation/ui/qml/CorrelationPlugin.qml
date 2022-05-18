@@ -444,40 +444,40 @@ PluginContent
 
         case 1:
             menu.title = qsTr("&Plot");
-            Utils.addActionTo(menu, toggleColumnNamesAction);
+            MenuUtils.addActionTo(menu, toggleColumnNamesAction);
 
-            let showAllColumnsMenuItem = Utils.addActionTo(menu, toggleShowAllColumns);
-            Utils.setMenuItemVisibleFunction(showAllColumnsMenuItem, () => plot.isWide);
+            let showAllColumnsMenuItem = MenuUtils.addActionTo(menu, toggleShowAllColumns);
+            showAllColumnsMenuItem.hidden = Qt.binding(() => !plot.isWide);
 
             if(plugin.model.columnAnnotationNames.length > 0)
-                Utils.addActionTo(menu, selectColumnAnnotationsAction);
+                MenuUtils.addActionTo(menu, selectColumnAnnotationsAction);
 
-            Utils.addActionTo(menu, toggleGridLines);
-            Utils.addActionTo(menu, togglePlotLegend);
+            MenuUtils.addActionTo(menu, toggleGridLines);
+            MenuUtils.addActionTo(menu, togglePlotLegend);
 
-            let axisLabelsMenu = Utils.addSubMenuTo(menu, qsTr("Axis Labels"));
-            Utils.addActionTo(axisLabelsMenu, setXAxisLabelAction);
-            Utils.addActionTo(axisLabelsMenu, setYAxisLabelAction);
-            Utils.addSeparatorTo(menu);
+            let axisLabelsMenu = MenuUtils.addSubMenuTo(menu, qsTr("Axis Labels"));
+            MenuUtils.addActionTo(axisLabelsMenu, setXAxisLabelAction);
+            MenuUtils.addActionTo(axisLabelsMenu, setYAxisLabelAction);
+            MenuUtils.addSeparatorTo(menu);
 
             if(plugin.model.numContinuousColumns > 0)
             {
-                let scalingMenu = Utils.addSubMenuTo(menu, qsTr("Scaling"));
-                Utils.addActionTo(scalingMenu, rawScaling);
-                Utils.addActionTo(scalingMenu, logScaling);
-                Utils.addActionTo(scalingMenu, meanCentreScaling);
-                Utils.addActionTo(scalingMenu, unitVarianceScaling);
-                Utils.addActionTo(scalingMenu, paretoScaling);
+                let scalingMenu = MenuUtils.addSubMenuTo(menu, qsTr("Scaling"));
+                MenuUtils.addActionTo(scalingMenu, rawScaling);
+                MenuUtils.addActionTo(scalingMenu, logScaling);
+                MenuUtils.addActionTo(scalingMenu, meanCentreScaling);
+                MenuUtils.addActionTo(scalingMenu, unitVarianceScaling);
+                MenuUtils.addActionTo(scalingMenu, paretoScaling);
                 scalingMenu.enabled = Qt.binding(() =>
                     plot.averagingType === PlotAveragingType.Individual || plot.iqrStyle);
 
-                Utils.addSeparatorTo(scalingMenu);
+                MenuUtils.addSeparatorTo(scalingMenu);
 
-                let scaleByAttributeMenu = Utils.addSubMenuTo(scalingMenu, qsTr("By Attribute"));
+                let scaleByAttributeMenu = MenuUtils.addSubMenuTo(scalingMenu, qsTr("By Attribute"));
                 scaleByAttributeMenu.enabled = Qt.binding(() => !plot.iqrStyle);
                 plugin.model.numericalAttributeNames.forEach(function(attributeName)
                 {
-                    let attributeMenuItem = Utils.addItemTo(scaleByAttributeMenu, attributeName);
+                    let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu, attributeName);
 
                     attributeMenuItem.ButtonGroup.group = scaleByAttributeButtonGroup;
                     attributeMenuItem.checkable = true;
@@ -496,22 +496,22 @@ PluginContent
                     });
                 });
 
-                let averagingMenu = Utils.addSubMenuTo(menu, qsTr("Averaging"));
-                Utils.addActionTo(averagingMenu, individualLineAverage);
-                Utils.addActionTo(averagingMenu, meanLineAverage);
-                Utils.addActionTo(averagingMenu, medianLineAverage);
-                Utils.addActionTo(averagingMenu, meanHistogramAverage);
-                Utils.addActionTo(averagingMenu, iqrAverage);
+                let averagingMenu = MenuUtils.addSubMenuTo(menu, qsTr("Averaging"));
+                MenuUtils.addActionTo(averagingMenu, individualLineAverage);
+                MenuUtils.addActionTo(averagingMenu, meanLineAverage);
+                MenuUtils.addActionTo(averagingMenu, medianLineAverage);
+                MenuUtils.addActionTo(averagingMenu, meanHistogramAverage);
+                MenuUtils.addActionTo(averagingMenu, iqrAverage);
                 averagingMenu.enabled = Qt.binding(() => !plot.groupByAnnotation);
 
-                Utils.addSeparatorTo(averagingMenu);
+                MenuUtils.addSeparatorTo(averagingMenu);
 
-                let sharedValuesAttributesMenu = Utils.addSubMenuTo(averagingMenu, qsTr("By Attribute"));
+                let sharedValuesAttributesMenu = MenuUtils.addSubMenuTo(averagingMenu, qsTr("By Attribute"));
                 sharedValuesAttributesMenu.enabled = Qt.binding(() =>
                     plot.averagingType !== PlotAveragingType.Individual &&
                     plot.averagingType !== PlotAveragingType.IQR &&
                     !plot.groupByAnnotation);
-                let allAttributesMenuItem = Utils.addItemTo(sharedValuesAttributesMenu, qsTr("All"));
+                let allAttributesMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, qsTr("All"));
                 allAttributesMenuItem.ButtonGroup.group = sharedValuesAttributeButtonGroup;
                 allAttributesMenuItem.checkable = true;
                 allAttributesMenuItem.checked = Qt.binding(() => plot.averagingAttributeName.length === 0);
@@ -520,11 +520,11 @@ PluginContent
                     plot.averagingAttributeName = "";
                 });
 
-                Utils.addSeparatorTo(sharedValuesAttributesMenu);
+                MenuUtils.addSeparatorTo(sharedValuesAttributesMenu);
 
                 plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
-                    let attributeMenuItem = Utils.addItemTo(sharedValuesAttributesMenu, attributeName);
+                    let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, attributeName);
 
                     attributeMenuItem.ButtonGroup.group = sharedValuesAttributeButtonGroup;
                     attributeMenuItem.checkable = true;
@@ -536,32 +536,32 @@ PluginContent
                     });
                 });
 
-                let dispersionMenu = Utils.addSubMenuTo(menu, qsTr("Dispersion"));
-                Utils.addActionTo(dispersionMenu, noDispersion);
-                Utils.addActionTo(dispersionMenu, stdDeviations);
-                Utils.addActionTo(dispersionMenu, stdErrorDeviations);
-                Utils.addSeparatorTo(dispersionMenu);
-                Utils.addActionTo(dispersionMenu, barDeviationVisual);
-                Utils.addActionTo(dispersionMenu, graphDeviationVisual);
+                let dispersionMenu = MenuUtils.addSubMenuTo(menu, qsTr("Dispersion"));
+                MenuUtils.addActionTo(dispersionMenu, noDispersion);
+                MenuUtils.addActionTo(dispersionMenu, stdDeviations);
+                MenuUtils.addActionTo(dispersionMenu, stdErrorDeviations);
+                MenuUtils.addSeparatorTo(dispersionMenu);
+                MenuUtils.addActionTo(dispersionMenu, barDeviationVisual);
+                MenuUtils.addActionTo(dispersionMenu, graphDeviationVisual);
                 dispersionMenu.enabled = Qt.binding(() =>
                     (plot.averagingType === PlotAveragingType.MeanLine ||
                         plot.averagingType === PlotAveragingType.MeanHistogram) &&
                     !plot.groupByAnnotation);
 
-                Utils.addActionTo(menu, toggleIncludeYZero);
+                MenuUtils.addActionTo(menu, toggleIncludeYZero);
 
                 if(plot.iqrStyle)
-                    Utils.addActionTo(menu, toggleShowOutliers);
+                    MenuUtils.addActionTo(menu, toggleShowOutliers);
 
-                Utils.addActionTo(menu, resetZoom);
+                MenuUtils.addActionTo(menu, resetZoom);
 
-                Utils.addSeparatorTo(menu);
+                MenuUtils.addSeparatorTo(menu);
             }
 
-            let sortByMenu = Utils.addSubMenuTo(menu, qsTr("Sort Columns By"));
+            let sortByMenu = MenuUtils.addSubMenuTo(menu, qsTr("Sort Columns By"));
             root._availableplotColumnSortOptions.forEach(function(sortOption)
             {
-                let sortByMenuItem = Utils.addItemTo(sortByMenu, sortOption.text);
+                let sortByMenuItem = MenuUtils.addItemTo(sortByMenu, sortOption.text);
 
                 sortByMenuItem.ButtonGroup.group = sortByButtonGroup;
                 sortByMenuItem.checkable = true;
@@ -585,7 +585,7 @@ PluginContent
                 });
 
                 if(sortOption.type === PlotColumnSortType.DataValue)
-                    Utils.setMenuItemVisibleFunction(sortByMenuItem, () => !plot.groupByAnnotation);
+                    sortByMenuItem.hidden = Qt.binding(() => plot.groupByAnnotation);
 
                 sortByMenuItem.triggered.connect(function()
                 {
@@ -595,12 +595,12 @@ PluginContent
 
             if(plugin.model.columnAnnotationNames.length > 0)
             {
-                Utils.addActionTo(menu, groupByAnnotationAction);
+                MenuUtils.addActionTo(menu, groupByAnnotationAction);
 
-                let colorGroupsByMenu = Utils.addSubMenuTo(menu, qsTr("Colour Groups By"));
-                colorGroupsByMenu.visible = Qt.binding(() => groupByAnnotationAction.checked);
+                let colorGroupsByMenu = MenuUtils.addSubMenuTo(menu, qsTr("Colour Groups By"));
+                colorGroupsByMenu.hidden = Qt.binding(() => !groupByAnnotationAction.checked);
 
-                let colorByNoGroupMenuItem = Utils.addItemTo(colorGroupsByMenu, qsTr("None"));
+                let colorByNoGroupMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, qsTr("None"));
                 colorByNoGroupMenuItem.ButtonGroup.group = colorByButtonGroup;
                 colorByNoGroupMenuItem.checkable = true;
                 colorByNoGroupMenuItem.checked = Qt.binding(() => plot.colorGroupByAnnotationName.length === 0);
@@ -612,7 +612,7 @@ PluginContent
 
                 plot.visibleColumnAnnotationNames.forEach(function(columnAnnotationName)
                 {
-                    let colorGroupsByMenuItem = Utils.addItemTo(colorGroupsByMenu, columnAnnotationName);
+                    let colorGroupsByMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, columnAnnotationName);
 
                     colorGroupsByMenuItem.ButtonGroup.group = colorByButtonGroup;
                     colorGroupsByMenuItem.checkable = true;
@@ -625,10 +625,10 @@ PluginContent
                 });
             }
 
-            Utils.addSeparatorTo(menu);
-            Utils.addActionTo(menu, savePlotImageAction);
+            MenuUtils.addSeparatorTo(menu);
+            MenuUtils.addActionTo(menu, savePlotImageAction);
 
-            Utils.cloneMenu(menu, plotContextMenu);
+            MenuUtils.clone(menu, plotContextMenu);
             return true;
         }
 

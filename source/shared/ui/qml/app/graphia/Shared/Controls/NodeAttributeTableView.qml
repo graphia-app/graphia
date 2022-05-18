@@ -173,21 +173,21 @@ Item
 
         menu.title = qsTr("&Table");
 
-        Utils.addActionTo(menu, resizeColumnsToContentsAction);
-        Utils.addActionTo(menu, selectColumnsAction);
-        Utils.addActionTo(menu, exportTableAction);
-        Utils.addSeparatorTo(menu);
-        Utils.addActionTo(menu, selectAllTableAction);
+        MenuUtils.addActionTo(menu, resizeColumnsToContentsAction);
+        MenuUtils.addActionTo(menu, selectColumnsAction);
+        MenuUtils.addActionTo(menu, exportTableAction);
+        MenuUtils.addSeparatorTo(menu);
+        MenuUtils.addActionTo(menu, selectAllTableAction);
 
         tableView._tableMenu = menu;
-        Utils.cloneMenu(menu, contextMenu);
+        MenuUtils.clone(menu, contextMenu);
 
-        Utils.addSeparatorTo(contextMenu);
-        Utils.addActionTo(contextMenu, copyTableColumnToClipboardAction);
-        Utils.addSeparatorTo(contextMenu);
-        Utils.addActionTo(contextMenu, sortAscendingAction);
-        Utils.addActionTo(contextMenu, sortDescendingAction);
-        Utils.addSeparatorTo(contextMenu);
+        MenuUtils.addSeparatorTo(contextMenu);
+        MenuUtils.addActionTo(contextMenu, copyTableColumnToClipboardAction);
+        MenuUtils.addSeparatorTo(contextMenu);
+        MenuUtils.addActionTo(contextMenu, sortAscendingAction);
+        MenuUtils.addActionTo(contextMenu, sortDescendingAction);
+        MenuUtils.addSeparatorTo(contextMenu);
 
         let attributeIsEditable = function()
         {
@@ -195,13 +195,13 @@ Item
             return attribute.isValid && attribute.editable;
         };
 
-        Utils.addActionTo(contextMenu, cloneSpecificAttributeAction);
+        MenuUtils.addActionTo(contextMenu, cloneSpecificAttributeAction);
 
-        Utils.addActionTo(contextMenu, editSpecificAttributeAction);
-        Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
+        let editSpecificAttributeMenuItem = MenuUtils.addActionTo(contextMenu, editSpecificAttributeAction);
+        editSpecificAttributeMenuItem.hidden = Qt.binding(() => !attributeIsEditable());
 
-        Utils.addActionTo(contextMenu, removeSpecificAttributeAction);
-        Utils.setMenuItemVisibleFunction(contextMenu.itemAt(contextMenu.count - 1), attributeIsEditable);
+        let removeSpecificAttributeMenuItem = MenuUtils.addActionTo(contextMenu, removeSpecificAttributeAction);
+        removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !attributeIsEditable());
     }
 
     function selectAll()

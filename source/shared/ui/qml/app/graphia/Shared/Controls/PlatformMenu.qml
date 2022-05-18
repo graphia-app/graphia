@@ -26,12 +26,12 @@ Menu
     Component.onCompleted:
     {
         if(parent instanceof MenuBarItem)
-            parent.visible = Qt.binding(function() { return !hidden; });
+            parent.visible = Qt.binding(() => !hidden);
 
-        if(parent instanceof MenuItem)
+        if(parent instanceof PlatformMenuItem)
         {
-            parent.visible = Qt.binding(function() { return !hidden; });
-            parent.height = Qt.binding(function() { return !hidden ? parent.implicitHeight : 0; });
+            parent.hidden = Qt.binding(() => hidden);
+            parent.height = Qt.binding(() => hidden ? 0 : parent.implicitHeight);
         }
     }
 }
