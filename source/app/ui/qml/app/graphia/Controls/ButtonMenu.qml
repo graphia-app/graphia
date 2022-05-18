@@ -16,9 +16,10 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import QtQml 2.15
+import QtQml.Models 2.15
 import QtQuick 2.7
 import QtQuick.Controls 2.12
-import QtQml 2.8
 
 import app.graphia 1.0
 import app.graphia.Shared.Controls 1.0
