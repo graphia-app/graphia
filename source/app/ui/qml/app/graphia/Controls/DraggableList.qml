@@ -260,7 +260,6 @@ Column
         }
     }
 
-    // @disable-check M300
     DelegateModel
     {
         id: delegateModel

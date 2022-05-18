@@ -1033,7 +1033,6 @@ Item
                 anchors.topMargin: -(Constants.margin * 4)
                 anchors.bottomMargin: -(Constants.margin * 4)
 
-                // @disable-check M300
                 SlidingPanel
                 {
                     id: findPanel
@@ -1057,7 +1056,6 @@ Item
                     }
                 }
 
-                // @disable-check M300
                 SlidingPanel
                 {
                     id: bookmarkPanel
@@ -1081,7 +1079,6 @@ Item
                     }
                 }
 
-                // @disable-check M300
                 SlidingPanel
                 {
                     id: layoutSettingsPanel

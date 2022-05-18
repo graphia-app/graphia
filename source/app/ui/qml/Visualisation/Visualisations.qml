@@ -101,7 +101,6 @@ Item
             }
         }
 
-        // @disable-check M300
         SlidingPanel
         {
             id: panel

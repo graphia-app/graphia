@@ -48,7 +48,6 @@ Item
         id: layout
         spacing: 0
 
-        // @disable-check M300
         SlidingPanel
         {
             id: panel
