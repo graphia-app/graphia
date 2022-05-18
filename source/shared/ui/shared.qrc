@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>qml/app/graphia/Shared/Controls/BaseParameterDialog.qml</file>
         <file>qml/app/graphia/Shared/Controls/DataTable.qml</file>
+        <file>qml/app/graphia/Shared/Controls/FloatingButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/FontPointSize.qml</file>
         <file>qml/app/graphia/Shared/Controls/HelpTooltip.qml</file>
         <file>qml/app/graphia/Shared/Controls/Hubble.qml</file>
@@ -12,11 +13,13 @@
         <file>qml/app/graphia/Shared/Controls/PlatformMenu.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenuSeparator.qml</file>
         <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
-        <file>qml/app/graphia/Shared/Controls/qmldir</file>
         <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>
         <file>qml/app/graphia/Shared/Controls/SlidingPanel.qml</file>
         <file>qml/app/graphia/Shared/Controls/TabBarButton.qml</file>
+        <file>qml/app/graphia/Shared/Controls/ToolBarButton.qml</file>
+        <file>qml/app/graphia/Shared/Controls/ToolBarSeparator.qml</file>
         <file>qml/app/graphia/Shared/Controls/Wizard.qml</file>
+        <file>qml/app/graphia/Shared/Controls/qmldir</file>
         <file>qml/app/graphia/Shared/PluginContent.qml</file>
         <file>qml/app/graphia/Shared/Constants.js</file>
         <file>qml/app/graphia/Shared/Utils.js</file>

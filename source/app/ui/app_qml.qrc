@@ -7,7 +7,6 @@
         <file>qml/app/graphia/Controls/DoubleSpinBox.qml</file>
         <file>qml/app/graphia/Controls/DraggableList.qml</file>
         <file>qml/app/graphia/Controls/error.png</file>
-        <file>qml/app/graphia/Controls/FloatingButton.qml</file>
         <file>qml/app/graphia/Controls/FramedScrollView.qml</file>
         <file>qml/app/graphia/Controls/GradientEditor.qml</file>
         <file>qml/app/graphia/Controls/GradientKey.qml</file>
@@ -19,8 +18,6 @@
         <file>qml/app/graphia/Controls/PaletteEditor.qml</file>
         <file>qml/app/graphia/Controls/PaletteKey.qml</file>
         <file>qml/app/graphia/Controls/PaletteSelector.qml</file>
-        <file>qml/app/graphia/Controls/ToolBarButton.qml</file>
-        <file>qml/app/graphia/Controls/ToolBarSeparator.qml</file>
         <file>qml/app/graphia/Controls/ToolTipHack.qml</file>
         <file>qml/app/graphia/Controls/TransformListSortMenu.qml</file>
         <file>qml/app/graphia/Controls/TreeBox.qml</file>

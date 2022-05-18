@@ -6,7 +6,6 @@ ButtonMenu 1.0 ButtonMenu.qml
 ColorPickButton 1.0 ColorPickButton.qml
 DoubleSpinBox 1.0 DoubleSpinBox.qml
 DraggableList 1.0 DraggableList.qml
-FloatingButton 1.0 FloatingButton.qml
 FramedScrollView 1.0 FramedScrollView.qml
 GradientEditor 1.0 GradientEditor.qml
 GradientKey 1.0 GradientKey.qml
@@ -18,8 +17,6 @@ MappingSelector 1.0 MappingSelector.qml
 PaletteEditor 1.0 PaletteEditor.qml
 PaletteKey 1.0 PaletteKey.qml
 PaletteSelector 1.0 PaletteSelector.qml
-ToolBarButton 1.0 ToolBarButton.qml
-ToolBarSeparator 1.0 ToolBarSeparator.qml
 ToolTipHack 1.0 ToolTipHack.qml
 TransformListSortMenu 1.0 TransformListSortMenu.qml
 TreeBox 1.0 TreeBox.qml

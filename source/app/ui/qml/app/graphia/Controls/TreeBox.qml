@@ -23,6 +23,8 @@ import QtQml.Models 2.2
 
 import SortFilterProxyModel 0.2
 
+import app.graphia.Shared.Controls 1.0
+
 Item
 {
     id: root

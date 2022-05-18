@@ -23,6 +23,7 @@ import QtQuick.Layouts 1.3
 import app.graphia 1.0
 import app.graphia.Controls 1.0
 import app.graphia.Shared 1.0
+import app.graphia.Shared.Controls 1.0
 
 Rectangle
 {
