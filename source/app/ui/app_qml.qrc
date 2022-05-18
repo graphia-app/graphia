@@ -18,7 +18,6 @@
         <file>qml/app/graphia/Controls/PaletteEditor.qml</file>
         <file>qml/app/graphia/Controls/PaletteKey.qml</file>
         <file>qml/app/graphia/Controls/PaletteSelector.qml</file>
-        <file>qml/app/graphia/Controls/ToolTipHack.qml</file>
         <file>qml/app/graphia/Controls/TransformListSortMenu.qml</file>
         <file>qml/app/graphia/Controls/TreeBox.qml</file>
         <file>qml/app/graphia/Controls/TreeBoxSearch.qml</file>
