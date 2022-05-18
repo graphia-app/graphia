@@ -65,3 +65,6 @@ add_subdirectory(source/crashreporter)
 add_subdirectory(source/messagebox)
 add_subdirectory(source/updater)
 add_subdirectory(source/updater/editor)
+
+list(REMOVE_DUPLICATES QML_IMPORT_PATH)
+set(QML_IMPORT_PATH ${QML_IMPORT_PATH} CACHE STRING "Qt Creator import paths" FORCE)
