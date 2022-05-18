@@ -1,5 +1,6 @@
 module app.graphia.Shared
 
 PluginContent 1.0 PluginContent.qml
-Utils 1.0 Utils.js
 Constants 1.0 Constants.js
+MenuUtils 1.0 MenuUtils.js
+Utils 1.0 Utils.js
