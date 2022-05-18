@@ -55,13 +55,17 @@ function addSubMenuTo(menu, title)
     return subMenu;
 }
 
+function clear(menu)
+{
+    while(menu.count > 0)
+        menu.takeItem(0);
+}
+
 // Clone one menu into another, such that to is a "proxy" for from that looks
 // identical to from, and uses from's behaviour
 function clone(from, to)
 {
-    // Clear
-    while(to.count > 0)
-        to.takeItem(0);
+    clear(to);
 
     to.title = Qt.binding(function(from) { return function() { return from.title; }; }(from));
     to.enabled = Qt.binding(function(from) { return function() { return from.enabled; }; }(from));

@@ -167,9 +167,7 @@ Item
         if(menu === null)
             return;
 
-        // Clear out any existing items
-        while(menu.count > 0)
-            menu.takeItem(0);
+        MenuUtils.clear(menu);
 
         menu.title = qsTr("&Table");
 

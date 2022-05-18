@@ -2282,8 +2282,7 @@ ApplicationWindow
     function clearPluginMenu(menu)
     {
         menu.hidden = true;
-        while(menu.count > 0)
-            menu.takeItem(0);
+        MenuUtils.clear(menu);
     }
 
     function clearPluginMenus()
