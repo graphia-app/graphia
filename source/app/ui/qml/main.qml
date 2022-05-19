@@ -2548,7 +2548,7 @@ ApplicationWindow
             {
                 id: tabBar
 
-                Layout.topMargin: 1
+                Layout.topMargin: 4
                 visible: count > 1
 
                 onCountChanged:
@@ -2692,6 +2692,15 @@ ApplicationWindow
 
                     return false;
                 }
+            }
+
+            Rectangle
+            {
+                Layout.fillWidth: true
+                visible: tabBar.count > 1
+
+                height: 1
+                color: palette.midlight
             }
 
             StackLayout
