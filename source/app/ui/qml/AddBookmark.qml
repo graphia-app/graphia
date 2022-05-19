@@ -34,8 +34,9 @@ Rectangle
     readonly property bool showing: _visible
     property bool _visible: false
 
-    width: row.width
-    height: row.height
+    implicitWidth: layout.implicitWidth + (Constants.padding * 2)
+    implicitHeight: layout.implicitHeight + (Constants.padding * 2)
+    height: layout.implicitHeight + (Constants.margin * 4)
 
     border.color: document.contrastingColor
     border.width: 1
@@ -73,43 +74,39 @@ Rectangle
         onActivated: { closeAction.trigger(); }
     }
 
-    RowLayout
+    ColumnLayout
     {
-        id: row
+        id: layout
 
-        // The ColumnLayout in a RowLayout is just a hack to get some padding
-        ColumnLayout
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Constants.padding
+
+        RowLayout
         {
-            Layout.topMargin: Constants.padding - root.parent.parent.anchors.topMargin
-            Layout.bottomMargin: Constants.padding
-            Layout.leftMargin: Constants.padding
-            Layout.rightMargin: Constants.padding
-
-            RowLayout
+            TextField
             {
-                TextField
+                id: nameField
+                width: 150
+
+                onAccepted: { doneAction.trigger(); }
+
+                background: Rectangle
                 {
-                    id: nameField
-                    width: 150
-
-                    onAccepted: { doneAction.trigger(); }
-
-                    background: Rectangle
-                    {
-                        implicitWidth: 192
-                        color: "transparent"
-                    }
-
-                    onFocusChanged:
-                    {
-                        if(!focus)
-                            closeAction.trigger();
-                    }
+                    implicitWidth: 192
+                    color: "transparent"
                 }
 
-                Button { action: doneAction }
-                FloatingButton { action: closeAction }
+                onFocusChanged:
+                {
+                    if(!focus)
+                        closeAction.trigger();
+                }
             }
+
+            Button { action: doneAction }
+            FloatingButton { action: closeAction }
         }
     }
 

@@ -390,87 +390,6 @@ Item
         }
     }
 
-    Item
-    {
-        clip: true
-
-        anchors.fill: parent
-        anchors.topMargin: headerView.height
-        z: 10
-
-        SlidingPanel
-        {
-            id: columnSelectionControls
-            visible: tableView.visible
-
-            alignment: Qt.AlignTop|Qt.AlignLeft
-
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.leftMargin: -Constants.margin
-            anchors.topMargin: -Constants.margin
-
-            initiallyOpen: false
-            disableItemWhenClosed: false
-
-            item: Rectangle
-            {
-                width: row.width
-                height: row.height
-
-                border.color: "black"
-                border.width: 1
-                radius: 4
-                color: "white"
-
-                RowLayout
-                {
-                    id: row
-
-                    // The RowLayout in a RowLayout is just a hack to get some padding
-                    RowLayout
-                    {
-                        Layout.topMargin: Constants.padding + Constants.margin - 2
-                        Layout.bottomMargin: Constants.padding
-                        Layout.leftMargin: Constants.padding + Constants.margin - 2
-                        Layout.rightMargin: Constants.padding
-
-                        Button
-                        {
-                            text: qsTr("Show All")
-                            onClicked: { root.showAllColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Hide All")
-                            onClicked: { root.hideAllColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Show Calculated")
-                            onClicked: { root.showAllCalculatedColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Hide Calculated")
-                            onClicked: { root.hideAllCalculatedColumns(); }
-                        }
-
-                        Button
-                        {
-                            text: qsTr("Done")
-                            icon.name: "emblem-unreadable"
-                            onClicked: { columnSelectionMode = false; }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     ColumnLayout
     {
         anchors.fill: parent
@@ -1195,6 +1114,78 @@ Item
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary
                 property Menu _tableMenu
+            }
+
+            SlidingPanel
+            {
+                id: columnSelectionControls
+                visible: tableView.visible
+
+                alignment: Qt.AlignTop|Qt.AlignLeft
+
+                anchors.left: parent.left
+                anchors.top: parent.top
+
+                initiallyOpen: false
+                disableItemWhenClosed: false
+
+                item: Rectangle
+                {
+                    implicitWidth: layout.width
+                    implicitHeight: layout.height
+                    width: implicitWidth + (Constants.margin * 2)
+                    height: implicitHeight + (Constants.margin * 2)
+
+                    border.color: "black"
+                    border.width: 1
+                    radius: 4
+                    color: "white"
+
+                    RowLayout
+                    {
+                        id: layout
+
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+
+                        // The RowLayout in a RowLayout is just a hack to get some padding
+                        RowLayout
+                        {
+                            Layout.margins: Constants.padding
+
+                            Button
+                            {
+                                text: qsTr("Show All")
+                                onClicked: { root.showAllColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Hide All")
+                                onClicked: { root.hideAllColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Show Calculated")
+                                onClicked: { root.showAllCalculatedColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Hide Calculated")
+                                onClicked: { root.hideAllCalculatedColumns(); }
+                            }
+
+                            Button
+                            {
+                                text: qsTr("Done")
+                                icon.name: "emblem-unreadable"
+                                onClicked: { columnSelectionMode = false; }
+                            }
+                        }
+                    }
+                }
             }
 
             MouseArea

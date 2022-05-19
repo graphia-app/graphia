@@ -1023,85 +1023,74 @@ Item
                 }
             }
 
-            Item
+            SlidingPanel
             {
-                clip: true
+                id: findPanel
 
-                anchors.fill: parent
-                anchors.leftMargin: -Constants.margin
-                anchors.rightMargin: -Constants.margin
-                anchors.topMargin: -(Constants.margin * 4)
-                anchors.bottomMargin: -(Constants.margin * 4)
+                alignment: Qt.AlignTop|Qt.AlignLeft
 
-                SlidingPanel
+                anchors.left: parent.left
+                anchors.top: parent.top
+
+                initiallyOpen: false
+                disableItemWhenClosed: false
+
+                item: Find
                 {
-                    id: findPanel
+                    id: find
 
-                    alignment: Qt.AlignTop|Qt.AlignLeft
+                    document: _document
 
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-
-                    initiallyOpen: false
-                    disableItemWhenClosed: false
-
-                    item: Find
-                    {
-                        id: find
-
-                        document: _document
-
-                        onShown: { findPanel.show(); }
-                        onHidden: { findPanel.hide(); }
-                    }
+                    onShown: { findPanel.show(); }
+                    onHidden: { findPanel.hide(); }
                 }
+            }
 
-                SlidingPanel
+            SlidingPanel
+            {
+                id: bookmarkPanel
+
+                alignment: Qt.AlignTop
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+
+                initiallyOpen: false
+                disableItemWhenClosed: false
+
+                item: AddBookmark
                 {
-                    id: bookmarkPanel
+                    id: addBookmark
 
-                    alignment: Qt.AlignTop
+                    document: _document
 
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-
-                    initiallyOpen: false
-                    disableItemWhenClosed: false
-
-                    item: AddBookmark
-                    {
-                        id: addBookmark
-
-                        document: _document
-
-                        onShown: { bookmarkPanel.show(); }
-                        onHidden: { bookmarkPanel.hide(); }
-                    }
+                    onShown: { bookmarkPanel.show(); }
+                    onHidden: { bookmarkPanel.hide(); }
                 }
+            }
 
-                SlidingPanel
+            SlidingPanel
+            {
+                id: layoutSettingsPanel
+
+                alignment: Qt.AlignBottom|Qt.AlignLeft
+
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+
+                initiallyOpen: false
+                disableItemWhenClosed: false
+
+                item: LayoutSettings
                 {
-                    id: layoutSettingsPanel
+                    id: layoutSettings
 
-                    alignment: Qt.AlignBottom|Qt.AlignLeft
+                    document: _document
 
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
+                    onShown: { layoutSettingsPanel.show(); }
+                    onHidden: { layoutSettingsPanel.hide(); }
 
-                    initiallyOpen: false
-                    disableItemWhenClosed: false
-
-                    item: LayoutSettings
-                    {
-                        id: layoutSettings
-
-                        document: _document
-
-                        onShown: { layoutSettingsPanel.show(); }
-                        onHidden: { layoutSettingsPanel.hide(); }
-
-                        onValueChanged: { _document.resumeLayout(); }
-                    }
+                    onValueChanged: { _document.resumeLayout(); }
                 }
             }
 

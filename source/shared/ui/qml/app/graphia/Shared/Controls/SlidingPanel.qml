@@ -26,6 +26,9 @@ Item
     property int alignment: Qt.AlignTop
     property int direction: Qt.Vertical
 
+    implicitWidth: width
+    implicitHeight: height
+
     function _updateAlignment()
     {
         if(item !== null)
@@ -53,34 +56,35 @@ Item
         _updateAlignment();
     }
 
-    property int _expandedDimension:
-    {
-        if(direction === Qt.Vertical)
-            return item.height;
-
-        return item.width;
-    }
-
     property int _currentDimension:
     {
         if(direction === Qt.Vertical)
-            return implicitHeight;
+            return height;
 
-        return implicitWidth;
+        return width;
     }
 
-    function _resetDimensionBindings()
+    property bool _opened: _currentDimension > 0
+
+    function _setSizeToItem()
     {
-        implicitWidth = Qt.binding(function() { return item.width; } );
-        implicitHeight = Qt.binding(function() { return item.height; } );
+        width = item.implicitWidth;
+        height = item.implicitHeight;
     }
 
     onItemChanged:
     {
         item.parent = root;
 
-        _resetDimensionBindings();
+        _setSizeToItem();
         _updateAlignment();
+    }
+
+    Connections
+    {
+        target: item
+        function onImplicitWidthChanged()  { if(!root._hidden) root._setSizeToItem(); }
+        function onImplicitHeightChanged() { if(!root._hidden) root._setSizeToItem(); }
     }
 
     property bool initiallyOpen: true
@@ -104,9 +108,9 @@ Item
 
     function _onAnimationComplete()
     {
-        if(_currentDimension >= _expandedDimension)
+        if(_opened)
         {
-            _resetDimensionBindings();
+            _setSizeToItem();
 
             if(disableItemWhenClosed)
                 item.enabled = true;
@@ -115,7 +119,7 @@ Item
             _hidden = true;
     }
 
-    Behavior on implicitWidth
+    Behavior on width
     {
         id: horizontalDrop
         enabled: false
@@ -131,7 +135,7 @@ Item
         }
     }
 
-    Behavior on implicitHeight
+    Behavior on height
     {
         id: verticalDrop
         enabled: false
@@ -149,6 +153,11 @@ Item
 
     function show(animate)
     {
+        _hidden = false;
+
+        if(_opened)
+            return;
+
         if(animate === undefined)
             animate = true;
 
@@ -164,23 +173,25 @@ Item
             drop = horizontalDrop;
         }
 
-        if(_currentDimension < _expandedDimension)
-        {
-            _hidden = false;
-            animation.easing.type = Easing.OutBack;
+        animation.easing.type = Easing.OutBack;
 
-            if(animate)
-                drop.enabled = true;
+        if(animate)
+            drop.enabled = true;
 
-            _resetDimensionBindings();
+        _setSizeToItem();
 
-            if(animate)
-                drop.enabled = false;
-        }
+        if(animate)
+            drop.enabled = false;
     }
 
     function hide(animate)
     {
+        if(!_opened)
+        {
+            _hidden = true;
+            return;
+        }
+
         if(animate === undefined)
             animate = true;
 
@@ -196,26 +207,23 @@ Item
             drop = horizontalDrop;
         }
 
-        if(_currentDimension >= _expandedDimension)
-        {
-            animation.easing.type = Easing.InBack;
+        animation.easing.type = Easing.InBack;
 
-            if(animate)
-                drop.enabled = true;
+        if(animate)
+            drop.enabled = true;
 
-            if(disableItemWhenClosed)
-                item.enabled = false;
+        if(disableItemWhenClosed)
+            item.enabled = false;
 
-            if(direction === Qt.Vertical)
-                implicitHeight = 0;
-            else
-                implicitWidth = 0;
+        if(direction === Qt.Vertical)
+            height = 0;
+        else
+            width = 0;
 
-            if(animate)
-                drop.enabled = false;
-            else
-                _hidden = true;
-        }
+        if(animate)
+            drop.enabled = false;
+        else
+            _hidden = true;
     }
 
     function toggle(animate)

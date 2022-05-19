@@ -194,8 +194,10 @@ Rectangle
         function onEdgeSizeChanged()        { root.evaluateSettings(); }
     }
 
-    width: row.width
-    height: row.height
+    implicitWidth: layout.implicitWidth + (Constants.padding * 2)
+    implicitHeight: layout.implicitHeight + (Constants.padding * 2)
+    width: implicitWidth + (Constants.margin * 4)
+    height: implicitHeight + (Constants.margin * 4)
 
     border.color: document.contrastingColor
     border.width: 1
@@ -223,247 +225,242 @@ Rectangle
 
     SystemPalette { id: systemPalette }
 
-    RowLayout
+    ColumnLayout
     {
-        id: row
+        id: layout
 
-        // The ColumnLayout in a RowLayout is just a hack to get some padding
-        ColumnLayout
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: Constants.padding
+
+        RowLayout
         {
-            Layout.topMargin: Constants.padding
-            Layout.bottomMargin: Constants.padding - root.parent.parent.anchors.bottomMargin
-            Layout.leftMargin: Constants.padding + Constants.margin
-            Layout.rightMargin: Constants.padding
-
-            RowLayout
+            Item
             {
-                Item
+                // This Item is here to provide a layer of indirection so
+                // that we can get the presetChooser to effectively fillWidth,
+                // but not force the layout wider, as would be the case with
+                // very long names
+                Layout.fillWidth: true
+                implicitHeight: presetChooser.implicitHeight
+
+                ButtonMenu
                 {
-                    // This Item is here to provide a layer of indirection so
-                    // that we can get the presetChooser to effectively fillWidth,
-                    // but not force the layout wider, as would be the case with
-                    // very long names
-                    Layout.fillWidth: true
-                    implicitHeight: presetChooser.implicitHeight
+                    id: presetChooser
+                    visible: !presetNameTextField.visible
+                    anchors.fill: parent
+                    hoverColor: systemPalette.highlight
 
-                    ButtonMenu
+                    text:
                     {
-                        id: presetChooser
-                        visible: !presetNameTextField.visible
-                        anchors.fill: parent
-                        hoverColor: systemPalette.highlight
+                        if(root.isCustom)
+                            return qsTr("Custom");
 
-                        text:
-                        {
-                            if(root.isCustom)
-                                return qsTr("Custom");
+                        if(root.isDefault)
+                            return qsTr("Default");
 
-                            if(root.isDefault)
-                                return qsTr("Default");
-
-                            // In this case selectedValue will take precedence
-                            return "";
-                        }
-
-                        font.italic: root.isCustom
-
-                        textAlignment: Text.AlignLeft
-
-                        model:
-                        {
-                            let presetNames = [];
-
-                            for(let presetName in root.layoutPresets)
-                            {
-                                if(root.layoutPresets[presetName].layoutName !== root.document.layoutName)
-                                    continue;
-
-                                presetNames.push(presetName);
-                            }
-
-                            return [qsTr("Default"), ...presetNames];
-                        }
-
-                        onSelectedValueChanged:
-                        {
-                            if(selectedValue.length === 0)
-                                return;
-
-                            if(!root.layoutPresets.hasOwnProperty(selectedValue))
-                            {
-                                // Reset everything to default
-                                for(let layoutSettingName of root.document.layoutSettingNames)
-                                    root.document.resetLayoutSettingValue(layoutSettingName);
-
-                                root.document.resetNodeSize();
-                                root.document.resetEdgeSize();
-
-                                presetChooser.selectedValue = "";
-                            }
-                            else
-                            {
-                                let preset = root.layoutPresets[selectedValue];
-
-                                for(let layoutSettingName in preset.layoutSettings)
-                                {
-                                    let presetValue = preset.layoutSettings[layoutSettingName];
-                                    root.document.setLayoutSettingValue(layoutSettingName, presetValue);
-                                }
-
-                                root.document.nodeSize = preset.nodeSize;
-                                root.document.edgeSize = preset.edgeSize;
-                            }
-                        }
-
-                        onHeld:
-                        {
-                            if(root.matchingPreset.length > 0)
-                            {
-                                // Configure TextField for renaming
-                                presetNameTextField.text = root.matchingPreset;
-                                presetNameTextField.selectAll();
-                                presetNameTextField.visible = true;
-                                presetNameTextField.forceActiveFocus();
-                            }
-                        }
+                        // In this case selectedValue will take precedence
+                        return "";
                     }
-                }
 
-                TextField
-                {
-                    id: presetNameTextField
-                    visible: false
-                    Layout.fillWidth: true
+                    font.italic: root.isCustom
 
-                    placeholderText: qsTr("Preset Name")
+                    textAlignment: Text.AlignLeft
 
-                    onAccepted:
+                    model:
                     {
-                        if(presetNameTextField.text.length > 0)
+                        let presetNames = [];
+
+                        for(let presetName in root.layoutPresets)
                         {
-                            if(root.matchingPreset.length === 0)
-                                root.addPreset(presetNameTextField.text);
-                            else
-                                root.renamePreset(root.matchingPreset, presetNameTextField.text);
+                            if(root.layoutPresets[presetName].layoutName !== root.document.layoutName)
+                                continue;
+
+                            presetNames.push(presetName);
+                        }
+
+                        return [qsTr("Default"), ...presetNames];
+                    }
+
+                    onSelectedValueChanged:
+                    {
+                        if(selectedValue.length === 0)
+                            return;
+
+                        if(!root.layoutPresets.hasOwnProperty(selectedValue))
+                        {
+                            // Reset everything to default
+                            for(let layoutSettingName of root.document.layoutSettingNames)
+                                root.document.resetLayoutSettingValue(layoutSettingName);
+
+                            root.document.resetNodeSize();
+                            root.document.resetEdgeSize();
+
+                            presetChooser.selectedValue = "";
+                        }
+                        else
+                        {
+                            let preset = root.layoutPresets[selectedValue];
+
+                            for(let layoutSettingName in preset.layoutSettings)
+                            {
+                                let presetValue = preset.layoutSettings[layoutSettingName];
+                                root.document.setLayoutSettingValue(layoutSettingName, presetValue);
+                            }
+
+                            root.document.nodeSize = preset.nodeSize;
+                            root.document.edgeSize = preset.edgeSize;
                         }
                     }
 
-                    function reset()
+                    onHeld:
                     {
-                        visible = false;
-                        text = "";
-                    }
-                }
-
-                FloatingButton
-                {
-                    visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
-                    text: qsTr("Remove Preset")
-                    iconName: "list-remove"
-
-                    onClicked:
-                    {
-                        root.removePreset(root.matchingPreset);
-                    }
-                }
-
-                FloatingButton
-                {
-                    visible: root.isCustom
-                    text: qsTr("Add Preset")
-                    iconName: "list-add"
-
-                    onClicked:
-                    {
-                        if(!presetNameTextField.visible)
+                        if(root.matchingPreset.length > 0)
                         {
+                            // Configure TextField for renaming
+                            presetNameTextField.text = root.matchingPreset;
+                            presetNameTextField.selectAll();
                             presetNameTextField.visible = true;
                             presetNameTextField.forceActiveFocus();
                         }
-                        else
-                            root.addPreset(presetNameTextField.text);
-                    }
-                }
-
-                FloatingButton { action: closeAction }
-            }
-
-            Repeater
-            {
-                model: document.layoutSettingNames
-
-                LayoutSetting
-                {
-                    id: layoutSetting
-
-                    Layout.leftMargin: _buttonMenuOffset
-                    onValueChanged:
-                    {
-                        root.document.setLayoutSettingNormalisedValue(modelData, value);
-                        root.valueChanged();
-                    }
-
-                    onReset:
-                    {
-                        root.document.resetLayoutSettingValue(modelData);
-                        let setting = root.document.layoutSetting(modelData);
-                        value = setting.normalisedValue;
-                    }
-
-                    Component.onCompleted:
-                    {
-                        let setting = root.document.layoutSetting(modelData);
-                        name = setting.displayName;
-                        description = setting.description;
-                        value = setting.normalisedValue;
-                    }
-
-                    Connections
-                    {
-                        target: root.document
-
-                        function onLayoutSettingChanged(name, value)
-                        {
-                            if(name !== modelData)
-                                return;
-
-                            let setting = root.document.layoutSetting(name);
-                            layoutSetting.value = setting.normalisedValue;
-                        }
                     }
                 }
             }
 
-            ToolBarSeparator
+            TextField
             {
+                id: presetNameTextField
+                visible: false
                 Layout.fillWidth: true
-                Layout.leftMargin: _buttonMenuOffset + Constants.margin
-                Layout.rightMargin: Constants.margin
-                orientation: Qt.Horizontal
-                visible: root.document.layoutSettingNames.length > 0
+
+                placeholderText: qsTr("Preset Name")
+
+                onAccepted:
+                {
+                    if(presetNameTextField.text.length > 0)
+                    {
+                        if(root.matchingPreset.length === 0)
+                            root.addPreset(presetNameTextField.text);
+                        else
+                            root.renamePreset(root.matchingPreset, presetNameTextField.text);
+                    }
+                }
+
+                function reset()
+                {
+                    visible = false;
+                    text = "";
+                }
             }
+
+            FloatingButton
+            {
+                visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
+                text: qsTr("Remove Preset")
+                iconName: "list-remove"
+
+                onClicked:
+                {
+                    root.removePreset(root.matchingPreset);
+                }
+            }
+
+            FloatingButton
+            {
+                visible: root.isCustom
+                text: qsTr("Add Preset")
+                iconName: "list-add"
+
+                onClicked:
+                {
+                    if(!presetNameTextField.visible)
+                    {
+                        presetNameTextField.visible = true;
+                        presetNameTextField.forceActiveFocus();
+                    }
+                    else
+                        root.addPreset(presetNameTextField.text);
+                }
+            }
+
+            FloatingButton { action: closeAction }
+        }
+
+        Repeater
+        {
+            model: document.layoutSettingNames
 
             LayoutSetting
             {
-                id: nodeSizeSetting
+                id: layoutSetting
+
                 Layout.leftMargin: _buttonMenuOffset
-                name: qsTr("Nodes")
-                description: qsTr("Node Size")
+                onValueChanged:
+                {
+                    root.document.setLayoutSettingNormalisedValue(modelData, value);
+                    root.valueChanged();
+                }
 
-                onValueChanged: { root.document.nodeSize = value; }
-                onReset: { root.document.resetNodeSize(); }
+                onReset:
+                {
+                    root.document.resetLayoutSettingValue(modelData);
+                    let setting = root.document.layoutSetting(modelData);
+                    value = setting.normalisedValue;
+                }
+
+                Component.onCompleted:
+                {
+                    let setting = root.document.layoutSetting(modelData);
+                    name = setting.displayName;
+                    description = setting.description;
+                    value = setting.normalisedValue;
+                }
+
+                Connections
+                {
+                    target: root.document
+
+                    function onLayoutSettingChanged(name, value)
+                    {
+                        if(name !== modelData)
+                            return;
+
+                        let setting = root.document.layoutSetting(name);
+                        layoutSetting.value = setting.normalisedValue;
+                    }
+                }
             }
+        }
 
-            LayoutSetting
-            {
-                id: edgeSizeSetting
-                Layout.leftMargin: _buttonMenuOffset
-                name: qsTr("Edges")
-                description: qsTr("Edge Size")
+        ToolBarSeparator
+        {
+            Layout.fillWidth: true
+            Layout.leftMargin: _buttonMenuOffset + Constants.margin
+            Layout.rightMargin: Constants.margin
+            orientation: Qt.Horizontal
+            visible: root.document.layoutSettingNames.length > 0
+        }
 
-                onValueChanged: { root.document.edgeSize = value; }
-                onReset: { root.document.resetEdgeSize(); }
-            }
+        LayoutSetting
+        {
+            id: nodeSizeSetting
+            Layout.leftMargin: _buttonMenuOffset
+            name: qsTr("Nodes")
+            description: qsTr("Node Size")
+
+            onValueChanged: { root.document.nodeSize = value; }
+            onReset: { root.document.resetNodeSize(); }
+        }
+
+        LayoutSetting
+        {
+            id: edgeSizeSetting
+            Layout.leftMargin: _buttonMenuOffset
+            name: qsTr("Edges")
+            description: qsTr("Edge Size")
+
+            onValueChanged: { root.document.edgeSize = value; }
+            onReset: { root.document.resetEdgeSize(); }
         }
     }
 

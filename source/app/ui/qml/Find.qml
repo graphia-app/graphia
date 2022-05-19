@@ -189,8 +189,10 @@ Rectangle
         property bool findByAttributeSortLexically
     }
 
-    width: row.width
-    height: row.height
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
+    width: layout.implicitWidth + (Constants.margin * 4)
+    height: layout.implicitHeight + (Constants.margin * 4)
 
     border.color: document.contrastingColor
     border.width: 1
@@ -357,7 +359,7 @@ Rectangle
     // don't get passed on to underlying controls
     MouseArea
     {
-        anchors.fill: row
+        anchors.fill: layout
         onWheel: { /* NO-OP */ }
         acceptedButtons: Qt.RightButton
         onClicked: { mouse.accepted = true; }
@@ -365,15 +367,15 @@ Rectangle
 
     RowLayout
     {
-        id: row
+        id: layout
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
         // The ColumnLayout in a RowLayout is just a hack to get some padding
         ColumnLayout
         {
-            Layout.topMargin: Constants.padding - root.parent.parent.anchors.topMargin
-            Layout.bottomMargin: Constants.padding
-            Layout.leftMargin: Constants.padding - root.parent.parent.anchors.leftMargin
-            Layout.rightMargin: Constants.padding
+            Layout.margins: Constants.padding
 
             RowLayout
             {
@@ -727,7 +729,9 @@ Rectangle
         // Restore find state (if appropriate)
         _doFind();
 
-        shown();
+        // Hack to delay emitting shown() until the implicit
+        // size of the item has had a chance to be resolved
+        Qt.callLater(() => Qt.callLater(() => shown()));
     }
 
     function hide()
