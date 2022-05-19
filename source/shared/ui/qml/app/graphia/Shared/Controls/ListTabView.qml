@@ -52,8 +52,6 @@ Item
     onWidthChanged: { content.x = _currentIndex * -contentContainer.width }
     onHeightChanged: { content.x = _currentIndex * -contentContainer.width }
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         id: containerLayout
@@ -106,7 +104,7 @@ Item
                         Rectangle
                         {
                             id: delegateRectangle
-                            color: index === _currentIndex ? systemPalette.highlight : "transparent"
+                            color: index === _currentIndex ? palette.highlight : "transparent"
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)
@@ -115,7 +113,7 @@ Item
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
-                                color: index === _currentIndex ? systemPalette.highlightedText : systemPalette.text
+                                color: index === _currentIndex ? palette.highlightedText : palette.text
                                 text: listTabs[index] ? listTabs[index].title : ""
 
                                 TextMetrics

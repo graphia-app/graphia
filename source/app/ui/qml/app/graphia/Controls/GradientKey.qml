@@ -100,8 +100,6 @@ Item
         updateGradient();
     }
 
-    SystemPalette { id: systemPalette }
-
     Rectangle
     {
         id: button
@@ -115,7 +113,7 @@ Item
             if(mouseArea.containsMouse && hoverEnabled)
                 return root.hoverColor;
             else if(selected)
-                return systemPalette.highlight;
+                return palette.highlight;
 
             return "transparent";
         }

@@ -32,12 +32,6 @@ Item
 
     signal clicked()
 
-    SystemPalette
-    {
-        id: systemPalette
-        colorGroup: SystemPalette.Active
-    }
-
     property var _markers : []
 
     function setup(configuration)
@@ -252,7 +246,7 @@ Item
                         id: canvas
 
                         property color color: modelData.color
-                        property color borderColor: systemPalette.dark
+                        property color borderColor: palette.dark
 
                         property bool highlighted: picker.selected === marker
 
@@ -269,7 +263,7 @@ Item
                             ctx.lineWidth = 1
                             ctx.strokeStyle = borderColor;
                             if(highlighted)
-                                ctx.strokeStyle = systemPalette.highlight;
+                                ctx.strokeStyle = palette.highlight;
 
                             // Rectangle
                             ctx.beginPath();
@@ -281,9 +275,9 @@ Item
                             ctx.stroke();
                             ctx.restore();
 
-                            ctx.fillStyle = systemPalette.mid;
+                            ctx.fillStyle = palette.mid;
                             if(highlighted)
-                                ctx.fillStyle = systemPalette.light;
+                                ctx.fillStyle = palette.light;
 
                             // Triangle cap
                             ctx.beginPath();
@@ -373,8 +367,8 @@ Item
 
         visible: false
 
-        color: systemPalette.light
-        border.color: systemPalette.midlight
+        color: palette.light
+        border.color: palette.midlight
         border.width: 1
 
         property alias text: toolTipText.text
@@ -383,7 +377,7 @@ Item
         {
             anchors.horizontalCenter: parent.horizontalCenter
             id: toolTipText
-            color: systemPalette.text
+            color: palette.text
         }
     }
 

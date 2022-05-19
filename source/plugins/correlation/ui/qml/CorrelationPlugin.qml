@@ -666,8 +666,6 @@ PluginContent
         return options;
     }
 
-    SystemPalette { id: systemPalette }
-
     toolStrip: ToolBar
     {
         RowLayout
@@ -718,7 +716,7 @@ PluginContent
             implicitWidth: 8
             implicitHeight: 8
 
-            color: systemPalette.window
+            color: palette.window
 
             Rectangle
             {
@@ -730,7 +728,7 @@ PluginContent
                 implicitWidth: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
                 implicitHeight: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
                 radius: minDimension * 0.5
-                color: systemPalette.midlight
+                color: palette.midlight
             }
         }
 

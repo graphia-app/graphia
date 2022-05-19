@@ -65,8 +65,6 @@ Window
         root.show();
     }
 
-    SystemPalette { id: systemPalette }
-
     TabularDataParser
     {
         id: tabularDataParser
@@ -549,9 +547,9 @@ Window
         width: 150
         height: 150
 
-        color: systemPalette.light
+        color: palette.light
         border.width: 1
-        border.color: systemPalette.dark
+        border.color: palette.dark
         radius: 5
 
         ColumnLayout

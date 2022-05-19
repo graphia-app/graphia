@@ -61,8 +61,6 @@ Window
         property var path
     }
 
-    SystemPalette { id: systemPalette }
-
     Timer
     {
         id: refreshTimer
@@ -177,7 +175,7 @@ Window
                     Layout.fillWidth: true
                     width: 200
                     height: 200
-                    border.color: systemPalette.dark
+                    border.color: palette.dark
                     border.width: 1
 
                     Canvas

@@ -223,8 +223,6 @@ Rectangle
         onActivated: { closeAction.trigger(); }
     }
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         id: layout
@@ -249,7 +247,7 @@ Rectangle
                     id: presetChooser
                     visible: !presetNameTextField.visible
                     anchors.fill: parent
-                    hoverColor: systemPalette.highlight
+                    hoverColor: palette.highlight
 
                     text:
                     {

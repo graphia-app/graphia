@@ -42,8 +42,6 @@ Window
 
     property bool enabled: true
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         id: column
@@ -77,7 +75,7 @@ Window
                 rightPadding: 0
                 bottomPadding: 0
 
-                Component.onCompleted: { background.color = systemPalette.light; }
+                Component.onCompleted: { background.color = palette.light; }
 
                 StackLayout
                 {

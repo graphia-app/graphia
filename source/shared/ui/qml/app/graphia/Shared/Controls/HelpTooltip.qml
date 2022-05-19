@@ -89,14 +89,12 @@ NamedIcon
         opacity: visible ? 1.0 : 0.0
         Behavior on opacity { PropertyAnimation { duration: 100 } }
 
-        SystemPalette { id: sysPalette }
-
         Rectangle
         {
             anchors.fill: parent
             color: Qt.rgba(0.96, 0.96, 0.96, 0.96)
             border.width: 1
-            border.color: sysPalette.dark
+            border.color: palette.dark
             radius: 3
         }
 

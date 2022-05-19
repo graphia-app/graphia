@@ -41,8 +41,6 @@ Window
     minimumWidth: 360
     minimumHeight: 240
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         anchors.fill: parent
@@ -77,7 +75,7 @@ Window
                     leftInset: -8
 
                     property var highlightColor: listBox.highlightedProvider(index) ?
-                        systemPalette.highlight : "transparent"
+                        palette.highlight : "transparent"
 
                     background: Rectangle { color: parent.highlightColor }
 

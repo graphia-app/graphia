@@ -46,8 +46,6 @@ BaseParameterDialog
 
     onCurrentIndexChanged: pageIndicator.requestPaint();
 
-    SystemPalette { id: systemPalette }
-
     ColumnLayout
     {
         anchors.margins: Constants.margin
@@ -79,13 +77,13 @@ BaseParameterDialog
 
                     ctx.save();
                     ctx.clearRect(0, 0, width, height);
-                    ctx.strokeStyle = systemPalette.dark;
-                    ctx.fillStyle = systemPalette.dark;
+                    ctx.strokeStyle = palette.dark;
+                    ctx.fillStyle = palette.dark;
 
                     ctx.lineJoin = "round";
                     ctx.lineWidth = 1;
 
-                    ctx.strokeStyle = systemPalette.dark;
+                    ctx.strokeStyle = palette.dark;
 
                     // Draw lines between pips
                     //let pipNum = 0;
@@ -100,8 +98,8 @@ BaseParameterDialog
                     // Draw pips
                     for(let pipNum = 0; pipNum < listPages.length; pipNum++)
                     {
-                        ctx.strokeStyle = systemPalette.dark;
-                        ctx.fillStyle = systemPalette.dark;
+                        ctx.strokeStyle = palette.dark;
+                        ctx.fillStyle = palette.dark;
 
                         let left = _padding + (pipNum * spacing);
                         let top = topPip;
@@ -109,8 +107,8 @@ BaseParameterDialog
                         // Current Pip
                         if(pipNum == currentIndex)
                         {
-                            ctx.strokeStyle = systemPalette.highlight;
-                            ctx.fillStyle = systemPalette.highlight;
+                            ctx.strokeStyle = palette.highlight;
+                            ctx.fillStyle = palette.highlight;
 
                             // Current pips are slightly larger so we need to
                             // reposition them

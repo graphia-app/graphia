@@ -49,12 +49,6 @@ Window
     minimumWidth: 640
     minimumHeight: 480
 
-    SystemPalette
-    {
-        id: systemPalette
-        colorGroup: SystemPalette.Active
-    }
-
     ButtonGroup { id: selectedGroup }
 
     function open(configuration, stringValues)
@@ -156,7 +150,7 @@ Window
                                     return index === palettePresets.selectedIndex;
                                 }
 
-                                color: checked ? systemPalette.highlight : "transparent";
+                                color: checked ? palette.highlight : "transparent";
                                 width: palettePresets.width
                                 height: paletteKey.height + Constants.padding
 

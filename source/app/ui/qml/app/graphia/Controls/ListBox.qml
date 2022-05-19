@@ -95,7 +95,7 @@ Item
         leftInset: -8
 
         property var highlightColor: root.highlightedProvider(index) ?
-            systemPalette.highlight : "transparent"
+            palette.highlight : "transparent"
 
         background: Rectangle { color: parent.highlightColor }
 
@@ -139,8 +139,6 @@ Item
     // Just some semi-sensible defaults
     width: 200
     height: 100
-
-    SystemPalette { id: systemPalette }
 
     Frame
     {

@@ -38,8 +38,6 @@ Window
     minimumWidth: 500
     minimumHeight: 200
 
-    SystemPalette { id: systemPalette }
-
     RowLayout
     {
         anchors.fill: parent

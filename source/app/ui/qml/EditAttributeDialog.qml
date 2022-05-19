@@ -271,7 +271,6 @@ Window
             }
         }
 
-        SystemPalette { id: sysPalette }
         FontMetrics { id: fontMetrics }
 
         Label
@@ -388,7 +387,7 @@ Window
                             {
                                 anchors.fill: parent
                                 color: headerMouseArea.containsMouse && headerMouseArea.cursorShape !== Qt.SizeHorCursor ?
-                                    Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
+                                    Qt.lighter(palette.highlight, 2.0) : palette.light
                             }
 
                             Text
@@ -405,7 +404,7 @@ Window
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
                                 renderType: Text.NativeRendering
-                                color: sysPalette.text
+                                color: palette.text
                                 text: model.display
                             }
 
@@ -429,7 +428,7 @@ Window
                                 ShapePath
                                 {
                                     miterLimit: 0
-                                    strokeColor: sysPalette.mid
+                                    strokeColor: palette.mid
                                     fillColor: "transparent"
                                     strokeWidth: 2
                                     startY: sortIndicator.height - 1
@@ -445,7 +444,7 @@ Window
                                 anchors.right: parent.right
                                 width: 1
                                 height: parent.height
-                                color: sysPalette.midlight
+                                color: palette.midlight
                             }
 
                             Rectangle
@@ -453,7 +452,7 @@ Window
                                 anchors.bottom: parent.bottom
                                 width: parent.width
                                 height: 1
-                                color: sysPalette.midlight
+                                color: palette.midlight
                             }
 
                             MouseArea
@@ -550,7 +549,7 @@ Window
                         {
                             implicitWidth: 5
                             radius: width / 2
-                            color: sysPalette.dark
+                            color: palette.dark
                         }
                         minimumSize: 0.1
                         visible: size < 1.0 && tableView.rows > 0
@@ -603,7 +602,7 @@ Window
                         {
                             anchors.fill: parent
 
-                            color: model.row % 2 ? sysPalette.window : sysPalette.alternateBase
+                            color: model.row % 2 ? palette.window : palette.alternateBase
 
                             Text
                             {

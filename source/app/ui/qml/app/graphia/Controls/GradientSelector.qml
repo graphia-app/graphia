@@ -48,12 +48,6 @@ Window
     minimumWidth: 640
     minimumHeight: 320
 
-    SystemPalette
-    {
-        id: systemPalette
-        colorGroup: SystemPalette.Active
-    }
-
     function open(configuration)
     {
         root.applied = false;
@@ -152,7 +146,7 @@ Window
                                     return index === gradientPresets.selectedIndex;
                                 }
 
-                                color: checked ? systemPalette.highlight : "transparent";
+                                color: checked ? palette.highlight : "transparent";
                                 width: gradientPresets.width
                                 height: gradientKey.height + Constants.padding
 

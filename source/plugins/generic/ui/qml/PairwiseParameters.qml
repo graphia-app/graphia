@@ -52,8 +52,6 @@ BaseParameterDialog
         }
     }
 
-    SystemPalette { id: systemPalette }
-
     function columnTypeRequiresName(type)
     {
         switch(type)
@@ -272,7 +270,7 @@ BaseParameterDialog
                     background: Rectangle
                     {
                         color: headerMouseArea.containsMouse ?
-                            Qt.lighter(systemPalette.highlight, 2.0) : systemPalette.light;
+                            Qt.lighter(palette.highlight, 2.0) : palette.light;
 
                         MouseArea
                         {
@@ -283,7 +281,7 @@ BaseParameterDialog
                         }
                     }
 
-                    color: systemPalette.text
+                    color: palette.text
                     padding: Constants.padding
 
                     PlatformMenu

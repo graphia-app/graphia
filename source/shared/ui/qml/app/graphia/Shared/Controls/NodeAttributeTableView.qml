@@ -360,8 +360,6 @@ Item
         onTriggered: { document.removeAttributes([root.lastClickedColumnName]); }
     }
 
-    SystemPalette { id: sysPalette }
-
     function selectRows(inStartRow, inEndRow)
     {
         selectionModel.change(inStartRow, inEndRow, ItemSelectionModel.Select);
@@ -435,7 +433,7 @@ Item
                 {
                     height: headerView.height
                     width: headerView.width
-                    color: sysPalette.light
+                    color: palette.light
                 }
 
                 delegate: DropArea
@@ -489,7 +487,7 @@ Item
                     {
                         anchors.fill: parent
                         visible: dragHandler.active
-                        color: Qt.lighter(sysPalette.highlight, 1.99)
+                        color: Qt.lighter(palette.highlight, 1.99)
                     }
 
                     Item
@@ -529,7 +527,7 @@ Item
                         {
                             anchors.fill: parent
                             color: headerMouseArea.containsMouse ?
-                                       Qt.lighter(sysPalette.highlight, 2.0) : sysPalette.light
+                                       Qt.lighter(palette.highlight, 2.0) : palette.light
                         }
 
                         Item
@@ -574,7 +572,7 @@ Item
                             maximumLineCount: 1
                             width: parent.width - (headerView.sortIndicatorMargin + headerView.sortIndicatorWidth)
                             text: headerItem.text
-                            color: sysPalette.text
+                            color: palette.text
                             padding: headerView.delegatePadding
                             renderType: Text.NativeRendering
                         }
@@ -599,7 +597,7 @@ Item
                             ShapePath
                             {
                                 miterLimit: 0
-                                strokeColor: sysPalette.mid
+                                strokeColor: palette.mid
                                 fillColor: "transparent"
                                 strokeWidth: 2
                                 startY: sortIndicator.height - 1
@@ -676,7 +674,7 @@ Item
                             anchors.right: parent.right
                             height: parent.height
                             width: 1
-                            color: sysPalette.midlight
+                            color: palette.midlight
                             MouseArea
                             {
                                 id: resizeHandleMouseArea
@@ -711,7 +709,7 @@ Item
                 anchors.bottom: parent.bottom
                 width: parent.width
                 height: 1
-                color: sysPalette.midlight
+                color: palette.midlight
             }
         }
 
@@ -808,7 +806,7 @@ Item
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
                         {
                             let yOffset = (i * tableView.rowHeight);
-                            ctx.fillStyle = i % 2 ? sysPalette.window : sysPalette.alternateBase;
+                            ctx.fillStyle = i % 2 ? palette.window : palette.alternateBase;
                             ctx.fillRect(0, yOffset, width, tableView.rowHeight);
                         }
                     }
@@ -1011,7 +1009,7 @@ Item
                         width: tableView.width - (parent.x + parent.width)
                         height: parent.height
 
-                        color: sysPalette.highlight;
+                        color: palette.highlight;
                         visible: (model.column === (proxyModel.columnCount() - 1)) && model.subSelected
                     }
 
@@ -1022,9 +1020,9 @@ Item
                         color:
                         {
                             if(model.subSelected)
-                                return sysPalette.highlight;
+                                return palette.highlight;
 
-                            return model.row % 2 ? sysPalette.window : sysPalette.alternateBase;
+                            return model.row % 2 ? palette.window : palette.alternateBase;
                         }
 
                         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml

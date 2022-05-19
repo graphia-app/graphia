@@ -173,8 +173,6 @@ Rectangle
         function onModelReset() { _onModelChanged(); }
     }
 
-    SystemPalette { id: systemPalette }
-
     property Component headerDelegate: RowLayout
     {
         spacing: 0
@@ -188,8 +186,8 @@ Rectangle
             maximumLineCount: 1
             text: value
 
-            background: Rectangle { color: systemPalette.light }
-            color: systemPalette.text
+            background: Rectangle { color: palette.light }
+            color: palette.text
             padding: root._padding
             elide: Text.ElideRight
             renderType: Text.NativeRendering
@@ -224,7 +222,7 @@ Rectangle
             ShapePath
             {
                 miterLimit: 0
-                strokeColor: systemPalette.mid
+                strokeColor: palette.mid
                 fillColor: "transparent"
                 strokeWidth: 2
                 startY: sortIndicator.height - 1
@@ -260,9 +258,9 @@ Rectangle
         property var backgroundColor:
         {
             if(root.highlightedProvider(modelColumn, modelRow))
-                return systemPalette.highlight;
+                return palette.highlight;
 
-            return modelRow % 2 ? systemPalette.window : systemPalette.alternateBase;
+            return modelRow % 2 ? palette.window : palette.alternateBase;
         }
 
         color: QmlUtils.contrastingColor(backgroundColor)
@@ -285,7 +283,7 @@ Rectangle
     property int _cellDelegateHeight: 0
 
     border.width: root.showBorder ? 1 : 0
-    border.color: systemPalette.dark
+    border.color: palette.dark
 
     ColumnLayout
     {
@@ -361,7 +359,7 @@ Rectangle
                     anchors.right: parent.right
                     height: parent.height
                     width: 1
-                    color: systemPalette.midlight
+                    color: palette.midlight
 
                     MouseArea
                     {
@@ -414,7 +412,7 @@ Rectangle
         {
             Layout.fillWidth: true
             height: 1
-            color: systemPalette.midlight
+            color: palette.midlight
         }
 
         TableView
