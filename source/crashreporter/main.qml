@@ -110,6 +110,7 @@ ApplicationWindow
             id: email
             enabled: window.enabled
             text: emailAddress
+            selectByMouse: true
             placeholderText: qsTr("Email address (optional)")
             validator: RegExpValidator { regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
             Layout.fillWidth: true

@@ -65,6 +65,8 @@ Window
                 id: textField
                 Layout.fillWidth: true
 
+                selectByMouse: true
+
                 property bool valid: { return textField.length > 0 && QmlUtils.userUrlStringIsValid(text); }
                 color: textField.length === 0 || textField.valid ? "black" : "red"
             }

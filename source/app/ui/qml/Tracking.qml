@@ -65,6 +65,7 @@ Rectangle
 
                 id: emailField
 
+                selectByMouse: true
                 placeholderText: qsTr("Email Address")
                 validator: RegExpValidator
                 {

@@ -174,6 +174,7 @@ GridLayout
         Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
         enabled: valueType !== ValueType.Unknown
+        selectByMouse: true
 
         validator: RegExpValidator { id: textFieldValidator }
 

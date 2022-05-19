@@ -657,6 +657,8 @@ Window
                             {
                                 id: editField
 
+                                selectByMouse: true
+
                                 function cancel()
                                 {
                                     text = model.display;

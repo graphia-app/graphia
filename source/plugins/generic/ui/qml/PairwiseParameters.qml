@@ -358,6 +358,7 @@ BaseParameterDialog
 
                         anchors.fill: parent
 
+                        selectByMouse: true
                         placeholderText: qsTr("Attribute Name")
 
                         visible: false

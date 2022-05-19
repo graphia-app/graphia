@@ -334,6 +334,7 @@ Rectangle
                 Layout.fillWidth: true
 
                 placeholderText: qsTr("Preset Name")
+                selectByMouse: true
 
                 onAccepted:
                 {

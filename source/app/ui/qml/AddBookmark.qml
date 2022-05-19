@@ -90,6 +90,8 @@ Rectangle
                 id: nameField
                 width: 150
 
+                selectByMouse: true
+
                 onAccepted: { doneAction.trigger(); }
 
                 background: Rectangle

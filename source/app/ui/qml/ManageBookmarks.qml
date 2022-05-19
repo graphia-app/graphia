@@ -92,6 +92,7 @@ Window
                 {
                     id: editField
                     visible: false
+                    selectByMouse: true
 
                     anchors.fill: label
                     padding: 0

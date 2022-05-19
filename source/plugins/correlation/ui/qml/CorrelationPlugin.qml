@@ -374,6 +374,7 @@ PluginContent
                 id: xAxisTextField
                 Layout.bottomMargin: 12
                 implicitWidth: 150
+                selectByMouse: true
                 text: plot.xAxisLabel
             }
         }
@@ -402,6 +403,7 @@ PluginContent
                 id: yAxisTextField
                 Layout.bottomMargin: 12
                 implicitWidth: 150
+                selectByMouse: true
                 text: plot.yAxisLabel
             }
         }

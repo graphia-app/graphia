@@ -669,6 +669,7 @@ BaseParameterDialog
                                 {
                                     id: replacementConstantText
                                     visible: missingDataTypeComboBox.currentText === qsTr("Constant")
+                                    selectByMouse: true
 
                                     validator: DoubleValidator{}
 

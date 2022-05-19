@@ -391,6 +391,7 @@ Rectangle
                     id: findField
                     width: 150
                     font.strikeout: root._interrupted
+                    selectByMouse: true
 
                     onAccepted: { selectAllAction.trigger(); }
 

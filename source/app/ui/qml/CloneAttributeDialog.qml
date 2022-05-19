@@ -161,6 +161,7 @@ Window
 
             Layout.fillWidth: true
 
+            selectByMouse: true
             placeholderText: qsTr("New Attribute Name")
 
             function setDefaultName(attributeName)

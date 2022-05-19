@@ -131,6 +131,7 @@ Item
                     Layout.preferredWidth: 250
 
                     enabled: yesTrackingRadioButton.checked
+                    selectByMouse: true
 
                     placeholderText: qsTr("Email Address")
                     validator: RegExpValidator
@@ -189,6 +190,7 @@ Item
 
                     Layout.fillWidth: true
 
+                    selectByMouse: true
                     color: QmlUtils.userUrlStringIsValid(webSearchEngineField.text) ? "black" : "red"
 
                     property string _defaultValue: "https://www.google.com/search?q=%1"
@@ -267,6 +269,7 @@ Item
 
                     Layout.fillWidth: true
 
+                    selectByMouse: true
                     placeholderText: qsTr("Host")
                     validator: RegExpValidator { regExp: /(([a-z0-9]+|([a-z0-9]+[-]+[a-z0-9]+))[.])+/ }
                 }
@@ -277,6 +280,7 @@ Item
 
                     Layout.preferredWidth: 64
 
+                    selectByMouse: true
                     placeholderText: qsTr("Port")
                     validator: IntValidator { bottom: 1; top: 65535 }
                 }
@@ -294,6 +298,7 @@ Item
 
                     Layout.fillWidth: true
 
+                    selectByMouse: true
                     placeholderText: qsTr("Username")
                 }
 
@@ -303,6 +308,7 @@ Item
 
                     Layout.fillWidth: true
 
+                    selectByMouse: true
                     placeholderText: qsTr("Password")
                     echoMode: TextInput.Password
                 }
