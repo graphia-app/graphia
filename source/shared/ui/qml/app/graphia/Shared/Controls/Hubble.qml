@@ -237,6 +237,12 @@ Item
         }
     }
 
+    Component
+    {
+        id: hoverMousePassthroughComponent
+        HoverMousePassthrough {}
+    }
+
     function linkToTarget()
     {
         if(target !== undefined && target !== null)
@@ -254,10 +260,8 @@ Item
                     // shim it with a HoverMousePassthrough item
                     if(_mouseCapture === undefined || _mouseCapture === null)
                     {
-                        _mouseCapture = Qt.createQmlObject("import QtQuick 2.0; import app.graphia 1.0; " +
-                            "HoverMousePassthrough {}",
-                            // root as parent is temporary, until it gets set for real below
-                            root);
+                        // root as parent is temporary, until it gets set for real below
+                        _mouseCapture = hoverMousePassthroughComponent.createObject(root);
                     }
 
                     // Insert the mouse capture shim
