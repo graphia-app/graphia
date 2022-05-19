@@ -67,8 +67,8 @@ Item
 
                         Component.onCompleted:
                         {
-                            enabledTextColor = Qt.binding(function() { return root.enabledTextColor; });
-                            disabledTextColor = Qt.binding(function() { return root.disabledTextColor; });
+                            enabledTextColor = Qt.binding(() => root.enabledTextColor);
+                            disabledTextColor = Qt.binding(() => root.disabledTextColor);
                         }
                     }
                 }

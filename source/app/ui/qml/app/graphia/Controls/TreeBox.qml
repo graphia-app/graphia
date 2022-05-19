@@ -66,7 +66,7 @@ Item
     property bool showSearch: false
     property bool showParentGuide: false
 
-    property var prettifyFunction: function(value) { return value; }
+    property var prettifyFunction: (value) => value
 
     //FIXME: 2 is fudge for frame/margins/something; need to account for it properly
     readonly property double contentHeight: treeView.__listView.contentHeight + 2

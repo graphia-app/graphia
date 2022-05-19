@@ -123,9 +123,9 @@ Item
 
                         Component.onCompleted:
                         {
-                            enabledTextColor = Qt.binding(function() { return root.enabledTextColor; });
-                            disabledTextColor = Qt.binding(function() { return root.disabledTextColor; });
-                            hoverColor = Qt.binding(function() { return root.heldColor; });
+                            enabledTextColor = Qt.binding(() => root.enabledTextColor);
+                            disabledTextColor = Qt.binding(() => root.disabledTextColor);
+                            hoverColor = Qt.binding(() => root.heldColor);
                         }
                     }
                 }

@@ -248,7 +248,7 @@ Rectangle
         root.forceLayout();
     }
 
-    property var cellValueProvider: function(value) { return value; }
+    property var cellValueProvider: (value) => value
 
     property Component cellDelegate: Label
     {

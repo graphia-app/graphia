@@ -67,8 +67,8 @@ function clone(from, to)
 {
     clear(to);
 
-    to.title = Qt.binding(function(from) { return function() { return from.title; }; }(from));
-    to.enabled = Qt.binding(function(from) { return function() { return from.enabled; }; }(from));
+    to.title = Qt.binding(function(from) { return () => from.title; }(from));
+    to.enabled = Qt.binding(function(from) { return () => from.enabled; }(from));
 
     let buttonGroups = {};
 
@@ -99,7 +99,7 @@ function clone(from, to)
                 {
                     toItem[prop] = Qt.binding(function(fromItem, prop)
                     {
-                        return function() { return fromItem[prop]; };
+                        return () => fromItem[prop];
                     }(fromItem, prop));
                 }
             });

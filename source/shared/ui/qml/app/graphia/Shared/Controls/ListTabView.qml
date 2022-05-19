@@ -314,8 +314,8 @@ Item
             {
                 return indexOf(this) * contentContainer.width + tabSelector.implicitWidth;
             });
-            listTabs[i].width = Qt.binding(function() { return contentContainer.width; });
-            listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
+            listTabs[i].width = Qt.binding(() => contentContainer.width);
+            listTabs[i].height = Qt.binding(() => contentContainer.height);
         }
 
         _updateActiveTab();

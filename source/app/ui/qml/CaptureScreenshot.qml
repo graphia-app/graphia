@@ -273,7 +273,7 @@ Window
                         id: pixelWidthSpin
                         to: 99999
                         from: 1
-                        textFromValue: function(value, locale) { return qsTr("%1px").arg(value); }
+                        textFromValue: (value, locale) => qsTr("%1px").arg(value)
                         onValueChanged:
                         {
                             if(lockAspect.checked)
@@ -297,7 +297,7 @@ Window
                         id: pixelHeightSpin
                         to: 99999
                         from: 1
-                        textFromValue: function(value, locale) { return qsTr("%1px").arg(value); }
+                        textFromValue: (value, locale) => qsTr("%1px").arg(value)
                         onValueChanged:
                         {
                             if(lockAspect.checked)
@@ -347,7 +347,7 @@ Window
                         id: printWidthSpin
                         to: 99999
                         from: 1
-                        textFromValue: function(value, locale) { return qsTr("%1mm").arg(value); }
+                        textFromValue: (value, locale) => qsTr("%1mm").arg(value)
                         onValueChanged:
                         {
                             // Prevent binding loops + losing value precision
@@ -363,7 +363,7 @@ Window
                         id: printHeightSpin
                         to: 99999
                         from: 1
-                        textFromValue: function(value, locale) { return qsTr("%1mm").arg(value); }
+                        textFromValue: (value, locale) => qsTr("%1mm").arg(value)
                         onValueChanged:
                         {
                             let pixelPrintSize = Math.round((pixelHeightSpin.value / dpiSpin.value) / _MMTOINCH);

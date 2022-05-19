@@ -448,8 +448,8 @@ Item
 
                     function refreshState()
                     {
-                        sourceColumn = Qt.binding(function() { return proxyModel.mapOrderedToSourceColumn(model.column) } );
-                        implicitWidth =  Qt.binding(function() { return tableView.columnWidthProvider(model.column); });
+                        sourceColumn = Qt.binding(() => proxyModel.mapOrderedToSourceColumn(model.column));
+                        implicitWidth =  Qt.binding(() => tableView.columnWidthProvider(model.column));
                     }
 
                     implicitWidth: tableView.columnWidthProvider(model.column);

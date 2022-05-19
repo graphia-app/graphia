@@ -45,7 +45,7 @@ Item
     implicitHeight: button.implicitHeight
 
     property string placeholderText: ""
-    property var prettifyFunction: function(value) { return value; }
+    property var prettifyFunction: (value) => value
 
     function accept()
     {

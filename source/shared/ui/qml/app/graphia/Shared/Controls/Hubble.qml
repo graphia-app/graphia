@@ -284,7 +284,7 @@ Item
                             { return target.visible ? target.implicitHeight : 1; });
 
                         // If we can't see the target, disable the hubble
-                        _mouseCapture.enabled = Qt.binding(function() { return target.visible; });
+                        _mouseCapture.enabled = Qt.binding(() => target.visible);
 
                         replaceInParent(target, _mouseCapture);
                         target.parent = _mouseCapture;

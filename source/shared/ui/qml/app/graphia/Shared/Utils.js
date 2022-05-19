@@ -86,7 +86,7 @@ function printStackTrace()
     let err = new Error();
     let elements = err.stack.split("\n");
     elements.splice(0, 1);
-    elements = elements.map(function(e) { return "    " + e; });
+    elements = elements.map((e) => "    " + e);
     let trace = "Stack trace:\n" + elements.join("\n");
     console.log(trace);
 }
