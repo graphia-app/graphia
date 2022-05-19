@@ -307,10 +307,10 @@ QString CommandManager::nextUndoAction() const
     {
         const auto& command = _stack.at(_lastExecutedIndex);
         if(!command->description().isEmpty())
-            return QObject::tr("Undo ") + command->description();
+            return QObject::tr("&Undo ") + command->description();
     }
 
-    return tr("Undo");
+    return tr("&Undo");
 }
 
 QString CommandManager::nextRedoAction() const
@@ -321,10 +321,10 @@ QString CommandManager::nextRedoAction() const
     {
         const auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex) + 1);
         if(!command->description().isEmpty())
-            return QObject::tr("Redo ") + command->description();
+            return QObject::tr("&Redo ") + command->description();
     }
 
-    return tr("Redo");
+    return tr("&Redo");
 }
 
 bool CommandManager::busy() const
