@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:///qml/"));
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    Q_ASSERT(!engine.rootObjects().empty());
 
     return QCoreApplication::exec();
 }

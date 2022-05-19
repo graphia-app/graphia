@@ -375,6 +375,7 @@ int main(int argc, char *argv[])
 
         engine.addImportPath(QStringLiteral("qrc:///qml/"));
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        Q_ASSERT(!engine.rootObjects().empty());
 
         exitCode = QCoreApplication::exec();
     }
