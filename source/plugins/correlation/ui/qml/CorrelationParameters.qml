@@ -1458,6 +1458,28 @@ BaseParameterDialog
         onRejected: { root.close(); }
     }
 
+    Component
+    {
+        id: correlationNameComponent
+
+        Text
+        {
+            textFormat: Text.StyledText
+            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+        }
+    }
+
+    Component
+    {
+        id: correlationDescriptionComponent
+
+        Text
+        {
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+        }
+    }
+
     function populateCorrelationAlgorithmTooltip(model, layout)
     {
         for(let i = 0; i < model.count; i++)
@@ -1465,21 +1487,8 @@ BaseParameterDialog
             let item = model.get(i);
             let correlation = root.plugin.correlationInfoFor(item.value);
 
-            Qt.createQmlObject("import QtQuick 2.14; import QtQuick.Layouts 1.3;" +
-            "Text" +
-            "{" +
-                "text: qsTr(\"<b>" + correlation.name + ":</b>\");" +
-                "textFormat: Text.StyledText;" +
-                "Layout.alignment: Qt.AlignTop | Qt.AlignLeft" +
-            "}", layout, "CorrelationParametersToolTipName");
-
-            Qt.createQmlObject("import QtQuick 2.14; import QtQuick.Layouts 1.3;" +
-            "Text" +
-            "{" +
-                "text: qsTr(\"" + correlation.description + "\");" +
-                "wrapMode: Text.WordWrap;" +
-                "Layout.fillWidth: true" +
-            "}", layout, "CorrelationParametersToolTipText");
+            correlationNameComponent.createObject(layout, {text: qsTr("<b>" + correlation.name + ":</b>")});
+            correlationDescriptionComponent.createObject(layout, {text: qsTr(correlation.description)});
         }
     }
 
