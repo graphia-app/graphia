@@ -18,7 +18,6 @@
 
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
 import QtQuick.Controls 2.15
 
 import Qt.labs.platform 1.0 as Labs
@@ -360,7 +359,7 @@ PluginContent
         anchors.centerIn: parent
         title: qsTr("X Axis Label")
 
-        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        standardButtons: Dialog.Ok | Dialog.Cancel
 
         RowLayout
         {
@@ -389,7 +388,7 @@ PluginContent
         anchors.centerIn: parent
         title: qsTr("Y Axis Label")
 
-        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        standardButtons: Dialog.Ok | Dialog.Cancel
 
         RowLayout
         {
