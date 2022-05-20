@@ -601,7 +601,7 @@ Rectangle
                         }
 
                         ToolTip.visible: hovered
-                        ToolTip.delay: 500
+                        ToolTip.delay: Constants.toolTipDelay
                         ToolTip.text: modelData
                     }
                 }

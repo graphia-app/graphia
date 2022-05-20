@@ -21,6 +21,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.3
 
 import app.graphia 1.0
+import app.graphia.Shared 1.0
 
 // This is basically a substitute for ToolButton,
 // that looks consistent across platforms
@@ -87,7 +88,7 @@ Button
         }
 
         ToolTip.visible: icon.valid && _text.length > 0 && hovered
-        ToolTip.delay: 500
+        ToolTip.delay: Constants.toolTipDelay
         ToolTip.text: icon.valid ? _text : ""
     }
 }

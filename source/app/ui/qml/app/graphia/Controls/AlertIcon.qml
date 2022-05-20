@@ -19,6 +19,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.15
 
+import app.graphia.Shared 1.0
+
 Image
 {
     property string type
@@ -42,6 +44,6 @@ Image
     }
 
     ToolTip.visible: mouseArea.containsMouse
-    ToolTip.delay: 500
+    ToolTip.delay: Constants.toolTipDelay
     ToolTip.text: text
 }

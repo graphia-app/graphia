@@ -23,3 +23,5 @@ let margin = 8;
 let spacing = 8;
 let padding = 4;
 
+let toolTipDelay = 750;
+

@@ -19,6 +19,8 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
 
+import app.graphia.Shared 1.0
+
 ToolButton
 {
     icon.width: 24
@@ -32,6 +34,6 @@ ToolButton
     property string _cleansedText: { return text.replace("&", ""); }
 
     ToolTip.visible: display === AbstractButton.IconOnly && _cleansedText.length > 0 && hovered
-    ToolTip.delay: 500
+    ToolTip.delay: Constants.toolTipDelay
     ToolTip.text: display === AbstractButton.IconOnly ? _cleansedText : ""
 }
