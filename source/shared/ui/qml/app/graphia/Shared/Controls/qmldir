@@ -14,6 +14,7 @@ PlatformMenu 1.0 PlatformMenu.qml
 PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
 ScrollableTextArea 1.0 ScrollableTextArea.qml
 SlidingPanel 1.0 SlidingPanel.qml
+SplitViewHandle 1.0 SplitViewHandle.qml
 TabBarButton 1.0 TabBarButton.qml
 ToolBarButton 1.0 ToolBarButton.qml
 ToolBarSeparator 1.0 ToolBarSeparator.qml

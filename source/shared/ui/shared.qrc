@@ -15,6 +15,7 @@
         <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
         <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>
         <file>qml/app/graphia/Shared/Controls/SlidingPanel.qml</file>
+        <file>qml/app/graphia/Shared/Controls/SplitViewHandle.qml</file>
         <file>qml/app/graphia/Shared/Controls/TabBarButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/ToolBarButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/ToolBarSeparator.qml</file>
