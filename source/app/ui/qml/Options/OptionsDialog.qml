@@ -75,7 +75,7 @@ Window
                 rightPadding: 0
                 bottomPadding: 0
 
-                Component.onCompleted: { background.color = palette.light; }
+                Component.onCompleted: { if(background.color !== undefined) background.color = palette.light; }
 
                 StackLayout
                 {

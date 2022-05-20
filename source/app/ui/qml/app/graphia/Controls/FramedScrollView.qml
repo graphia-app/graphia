@@ -23,7 +23,7 @@ ScrollView
 {
     id: root
     clip: true
-    padding: frame.background.border.width
+    padding: frame.background.border ? frame.background.border.width : 0
 
     background: Frame
     {

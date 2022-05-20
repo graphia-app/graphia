@@ -150,7 +150,7 @@ Item
         rightPadding: 0
         bottomPadding: 0
 
-        Component.onCompleted: { background.color = "white"; }
+        Component.onCompleted: { if(background.color !== undefined) background.color = "white"; }
 
         ListView
         {

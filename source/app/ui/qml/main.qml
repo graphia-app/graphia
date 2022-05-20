@@ -2727,7 +2727,7 @@ ApplicationWindow
 
         RowLayout
         {
-            id: rowLayout
+            id: toolbarLayout
             anchors.fill: parent
 
             // Status
@@ -2844,8 +2844,25 @@ ApplicationWindow
                 onCancelClicked: { application.cancelDownload(); }
             }
 
-            // Hack to force the RowLayout height to be the maximum of its children
-            Rectangle { height: rowLayout.childrenRect.height }
+            // Hack to force the RowLayout implicitHeight to be the maximum of its children
+            Item
+            {
+                implicitHeight:
+                {
+                    let maxHeight = 0;
+                    for(let i = 0; i < toolbarLayout.children.length; i++)
+                    {
+                        let child = toolbarLayout.children[i];
+
+                        if(child === this)
+                            continue;
+
+                        maxHeight = Math.max(maxHeight, child.height);
+                    }
+
+                    return  maxHeight;
+                }
+            }
         }
     }
 

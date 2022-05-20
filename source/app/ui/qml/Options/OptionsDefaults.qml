@@ -186,6 +186,9 @@ Item
 
             Component.onCompleted:
             {
+                if(background.border === undefined)
+                    return;
+
                 let frameWidth = background.border.width;
                 background.border.width = Qt.binding(function()
                 {
