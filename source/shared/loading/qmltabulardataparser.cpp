@@ -175,7 +175,8 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
             {QStringLiteral("tsv"),     [&tryToParseUsing]{ return tryToParseUsing(TsvFileParser()); }},
             {QStringLiteral("ssv"),     [&tryToParseUsing]{ return tryToParseUsing(SsvFileParser()); }},
             {QStringLiteral("xlsx"),    [&tryToParseUsing]{ return tryToParseUsing(XlsxTabularDataParser()); }},
-            {QStringLiteral("mat"),     [&tryToParseUsing]{ return tryToParseUsing(MatLabFileParser()); }}
+            {QStringLiteral("mat"),     [&tryToParseUsing]{ return tryToParseUsing(MatLabFileParser()); }},
+            {QStringLiteral("txt"),     [&tryToParseUsing]{ return tryToParseUsing(TxtFileParser()); }}
         };
 
         auto extension = QFileInfo(fileUrl.toLocalFile()).suffix();
