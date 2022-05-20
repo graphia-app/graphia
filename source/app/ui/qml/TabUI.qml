@@ -652,6 +652,8 @@ Item
         anchors.fill: parent
         orientation: Qt.Vertical
 
+        handle: SplitViewHandle {}
+
         Item
         {
             id: graphItem

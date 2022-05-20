@@ -155,26 +155,7 @@ ApplicationWindow
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            handle: Rectangle
-            {
-                implicitWidth: 8
-                implicitHeight: 8
-
-                color: palette.window
-
-                Rectangle
-                {
-                    anchors.centerIn: parent
-
-                    readonly property int maxDimension: 48
-                    readonly property int minDimension: 4
-
-                    implicitWidth: splitView.orientation === Qt.Horizontal ? minDimension : maxDimension
-                    implicitHeight: splitView.orientation === Qt.Horizontal ? maxDimension : minDimension
-                    radius: minDimension * 0.5
-                    color: palette.midlight
-                }
-            }
+            handle: SplitViewHandle {}
 
             DataTable
             {

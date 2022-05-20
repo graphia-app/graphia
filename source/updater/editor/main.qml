@@ -688,24 +688,11 @@ ApplicationWindow
             {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.margins: 1
 
                 orientation: Qt.Horizontal
 
-                handle: Item
-                {
-                    implicitWidth: 8
-                    implicitHeight: 8
-
-                    Rectangle
-                    {
-                        anchors.centerIn: parent
-
-                        implicitWidth: 4
-                        implicitHeight: 48
-                        radius: implicitWidth * 0.5
-                        color: "grey"
-                    }
-                }
+                handle: SplitViewHandle {}
 
                 Item
                 {
