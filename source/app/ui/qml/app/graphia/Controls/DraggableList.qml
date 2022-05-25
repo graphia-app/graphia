@@ -144,8 +144,8 @@ Column
                     verticalCenter: parent.verticalCenter
                 }
 
-                width: loader.item.width + Constants.margin * 2
-                height: loader.item.height + Constants.margin
+                width: loader.item ? loader.item.width + Constants.margin * 2 : 0
+                height: loader.item ? loader.item.height + Constants.margin : 0
 
                 color: Qt.rgba(root.heldColor.r, root.heldColor.g, root.heldColor.b, dragArea.held ? 1.0 : 0.0)
                 Behavior on color { ColorAnimation { duration: 100 } }
