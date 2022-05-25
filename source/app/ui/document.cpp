@@ -1493,7 +1493,7 @@ void Document::highlightNodes(const NodeIdSet& nodeIds)
 
 void Document::reportProblem(const QString& description) const
 {
-    S(CrashHandler)->submitMinidump(description);
+    CrashHandler::instance()->submitMinidump(description);
 }
 
 const QString& Document::log() const

@@ -529,7 +529,7 @@ static void hitch()
 
 static void silentCrashSubmit()
 {
-    S(CrashHandler)->submitMinidump(QStringLiteral("Silent Test Crash Submit"));
+    CrashHandler::instance()->submitMinidump(QStringLiteral("Silent Test Crash Submit"));
 }
 
 // NOLINTNEXTLINE readability-convert-member-functions-to-static

@@ -537,13 +537,13 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 template<typename Fn, typename... Args>
 auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPoolSingleton)->execute_on_threadpool(std::forward<Fn>(f), args...);
+    return ThreadPoolSingleton::instance()->execute_on_threadpool(std::forward<Fn>(f), args...);
 }
 
 template<typename It, typename Fn>
 auto parallel_for(It first, It last, Fn&& f, ThreadPool::ResultsPolicy resultsPolicy = ThreadPool::Blocking)
 {
-    return S(ThreadPoolSingleton)->parallel_for(first, last, std::forward<Fn>(f), resultsPolicy);
+    return ThreadPoolSingleton::instance()->parallel_for(first, last, std::forward<Fn>(f), resultsPolicy);
 }
 
 #endif // THREADPOOL_H
