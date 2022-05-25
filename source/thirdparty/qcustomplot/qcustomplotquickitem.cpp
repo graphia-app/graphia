@@ -99,7 +99,7 @@ void QCustomPlotQuickItem::onReplot()
 
 void QCustomPlotQuickItem::routeMouseEvent(QMouseEvent* event)
 {
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
+    auto* newEvent = new QMouseEvent(event->type(), event->pos(),
         event->button(), event->buttons(), event->modifiers());
     QCoreApplication::postEvent(&customPlot(), newEvent);
 }
