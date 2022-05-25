@@ -284,7 +284,14 @@ private:
     SubVolumeType& subVolumeForPoint(const QVector3D& point)
     {
         size_t i = 0;
-        QVector3D diff = point - _boundingBox.centre();
+
+        QVector3D centre;
+        if constexpr(NumDimensions == 3)
+            centre = _boundingBox.centre();
+        else
+            centre = _boundingBox.centre().toVector3D();
+
+        QVector3D diff = point - centre;
 
         if constexpr(NumDimensions == 3)
         {
