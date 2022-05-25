@@ -271,22 +271,6 @@ function setIntersection(a, b)
     return result;
 }
 
-function readFile(file)
-{
-    let allText = "";
-
-    let rawFile = new XMLHttpRequest();
-    rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function()
-    {
-        if(rawFile.readyState === 4 && rawFile.status === 200 || rawFile.status === 0)
-            allText = rawFile.responseText;
-    }
-    rawFile.send(null);
-
-    return allText;
-}
-
 // Escape a text value so it will match literally in a regex
 function regexEscape(text)
 {

@@ -72,7 +72,7 @@ Window
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link)
                 {
-                    licenseTextArea.text = Utils.readFile("qrc:///licensing/" + link + ".html");
+                    licenseTextArea.text = QmlUtils.readFromFile(":/licensing/" + link + ".html");
 
                     if(root.width < 800)
                         root.width = 800;
