@@ -957,7 +957,7 @@ void GraphRenderer::processEventQueue()
 
         case QEvent::Type::NativeGesture:
             _interactor->nativeGestureEvent(nativeEvent->gestureType(),
-                nativeEvent->pos() * _devicePixelRatio,
+                nativeEvent->position().toPoint() * _devicePixelRatio,
                 static_cast<float>(nativeEvent->value()));
 
             break;

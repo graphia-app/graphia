@@ -79,7 +79,7 @@ private:
         auto minPixel = customPlot().yAxis->coordToPixel(_min);
         auto maxPixel = customPlot().yAxis->coordToPixel(_max);
 
-        auto yPos = static_cast<double>(event->pos().y());
+        auto yPos = static_cast<double>(event->position().y());
 
         double hoverThreshold = 5.0;
         bool overMin = std::abs(minPixel - yPos) < hoverThreshold;

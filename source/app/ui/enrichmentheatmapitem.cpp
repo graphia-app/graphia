@@ -123,9 +123,9 @@ void EnrichmentHeatmapItem::mouseMoveEvent(QMouseEvent* event)
 
 void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
 {
-    _hoverPoint = event->posF();
+    _hoverPoint = event->position();
 
-    auto* currentPlottable = customPlot().plottableAt(event->posF(), true);
+    auto* currentPlottable = customPlot().plottableAt(event->position(), true);
     if(_hoverPlottable != currentPlottable)
     {
         _hoverPlottable = currentPlottable;

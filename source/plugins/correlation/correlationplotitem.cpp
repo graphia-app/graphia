@@ -709,13 +709,13 @@ bool CorrelationPlotItem::updateTooltip()
 
 void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
 {
-    if(event->posF() == _hoverPoint)
+    if(event->position() == _hoverPoint)
         return;
 
-    if(event->posF() == event->oldPosF())
+    if(event->position() == event->oldPosF())
         return;
 
-    _hoverPoint = event->posF();
+    _hoverPoint = event->position();
     updateTooltip();
 }
 
