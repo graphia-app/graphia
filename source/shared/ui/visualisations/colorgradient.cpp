@@ -68,7 +68,7 @@ QColor ColorGradient::get(double value) const
 
         if(value >= from._value && value < to._value)
         {
-            auto nv = u::normalise(from._value, to._value, value);
+            auto nv = static_cast<float>(u::normalise(from._value, to._value, value));
             auto const& fc = from._color;
             auto const& tc = to._color;
 
