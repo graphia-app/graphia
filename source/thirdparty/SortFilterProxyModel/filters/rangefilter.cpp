@@ -1,5 +1,5 @@
 #include "rangefilter.h"
-#include "qvariantlessthan.h"
+#include "../utils/utils.h"
 
 namespace qqsfpm {
 
@@ -129,13 +129,11 @@ void RangeFilter::setMaximumInclusive(bool maximumInclusive)
 
 bool RangeFilter::filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const
 {
-    QVariant value = sourceData(sourceIndex, proxyModel);
+    const QVariant value = sourceData(sourceIndex, proxyModel);
     bool lessThanMin = m_minimumValue.isValid() &&
-            (m_minimumInclusive ? qqsfpm::lessThan(value, m_minimumValue)
-                                : !qqsfpm::lessThan(m_minimumValue, value));
+            (m_minimumInclusive ? value < m_minimumValue : value <= m_minimumValue);
     bool moreThanMax = m_maximumValue.isValid() &&
-            (m_maximumInclusive ? qqsfpm::lessThan(m_maximumValue, value)
-                                : !qqsfpm::lessThan(value, m_maximumValue));
+            (m_maximumInclusive ? value > m_maximumValue : value >= m_maximumValue);
     return !(lessThanMin || moreThanMax);
 }
 

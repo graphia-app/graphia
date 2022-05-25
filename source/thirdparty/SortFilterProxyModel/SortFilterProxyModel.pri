@@ -3,7 +3,6 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/qqmlsortfilterproxymodel.h \
-    $$PWD/qvariantlessthan.h \
     $$PWD/filters/filter.h \
     $$PWD/filters/filtercontainer.h \
     $$PWD/filters/rolefilter.h \
@@ -28,10 +27,10 @@ HEADERS += $$PWD/qqmlsortfilterproxymodel.h \
     $$PWD/proxyroles/singlerole.h \
     $$PWD/proxyroles/regexprole.h \
     $$PWD/sorters/filtersorter.h \
-    $$PWD/proxyroles/filterrole.h
+    $$PWD/proxyroles/filterrole.h \
+    $$PWD/utils/utils.h
 
 SOURCES += $$PWD/qqmlsortfilterproxymodel.cpp \
-    $$PWD/qvariantlessthan.cpp \
     $$PWD/filters/filter.cpp \
     $$PWD/filters/filtercontainer.cpp \
     $$PWD/filters/rolefilter.cpp \
@@ -59,4 +58,5 @@ SOURCES += $$PWD/qqmlsortfilterproxymodel.cpp \
     $$PWD/proxyroles/singlerole.cpp \
     $$PWD/proxyroles/regexprole.cpp \
     $$PWD/sorters/filtersorter.cpp \
-    $$PWD/proxyroles/filterrole.cpp
+    $$PWD/proxyroles/filterrole.cpp \
+    $$PWD/utils/utils.cpp
