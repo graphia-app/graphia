@@ -164,7 +164,7 @@ private:
         if(!isEnabled())
             return;
 
-        _eventQueue.emplace(std::make_unique<T>(*event));
+        _eventQueue.emplace(std::unique_ptr<T>(event->clone()));
         update();
     }
 
