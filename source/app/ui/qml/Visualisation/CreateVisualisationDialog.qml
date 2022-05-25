@@ -145,7 +145,7 @@ Window
                     wrapMode: Text.WordWrap
 
                     PointingCursorOnHoverLink {}
-                    onLinkActivated: Qt.openUrlExternally(link);
+                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
 
                     function update()
                     {
@@ -284,17 +284,17 @@ Window
             {
                 text: qsTr("OK")
                 enabled: root.visualisationExpressionsValid
-                onClicked: { root.accept(); }
+                onClicked: function(mouse) { root.accept(); }
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.reject(); }
+                onClicked: function(mouse) { root.reject(); }
             }
         }
 
-        Keys.onPressed:
+        Keys.onPressed: function(event)
         {
             event.accepted = true;
             switch(event.key)

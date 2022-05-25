@@ -33,7 +33,7 @@ Rectangle
     {
         anchors.fill: parent
 
-        onPaint:
+        onPaint: function(rect)
         {
             let context = getContext("2d");
             context.fillStyle = palette.midlight;

@@ -172,7 +172,7 @@ Item
             Button
             {
                 text: visuals.textFont + " " + visuals.textSize + "pt";
-                onClicked: { fontDialog.visible = true }
+                onClicked: function(mouse) { fontDialog.visible = true }
             }
 
             Label { text: qsTr("Alignment") }

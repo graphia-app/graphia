@@ -82,7 +82,7 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: { createVisualisationDialog.show(); }
+                onClicked: function(mouse) { createVisualisationDialog.show(); }
             }
 
             FloatingButton
@@ -91,7 +91,7 @@ Item
                 iconName: panel.hidden ? "go-top" : "go-bottom"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     if(panel.hidden)
                         panel.show();

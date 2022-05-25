@@ -52,7 +52,7 @@ Item
             radius: 2
         }
 
-        onClicked:
+        onClicked: function(mouse)
         {
             colorDialog.color = root.color;
             colorDialog.open();

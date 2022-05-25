@@ -167,7 +167,7 @@ Item
                 anchors.horizontalCenter: parent.horizontalCenter
                 height: parent.height
                 width: parent.width - picker._markerWidth
-                onClicked:
+                onClicked: function(mouse)
                 {
                     let leftItem = null;
                     let rightItem = null;
@@ -253,7 +253,7 @@ Item
                         width: picker._markerWidth
                         height: parent.height
 
-                        onPaint:
+                        onPaint: function(rect)
                         {
                             let ctx = getContext("2d");
                             ctx.save();
@@ -309,7 +309,7 @@ Item
                         drag.minimumX: 0
                         drag.maximumX: picker.width - picker._markerWidth
 
-                        onReleased:
+                        onReleased: function(mouse)
                         {
                             // Snap X Positions to nearest 100th
                             marker.x = parseFloat(marker.x / (picker.width -
@@ -321,7 +321,7 @@ Item
                             root.alterMarker(index, picker.markerToValue(marker), modelData.color);
                         }
 
-                        onDoubleClicked:
+                        onDoubleClicked: function(mouse)
                         {
                             if(mouse.button & Qt.LeftButton)
                             {
@@ -332,7 +332,7 @@ Item
                             }
                         }
 
-                        onPressed:
+                        onPressed: function(mouse)
                         {
                             if(mouse.button & Qt.LeftButton)
                             {
@@ -343,7 +343,7 @@ Item
                             }
                         }
 
-                        onClicked:
+                        onClicked: function(mouse)
                         {
                             if(mouse.button & Qt.RightButton && root._markers.length > 2)
                                 root.removeMarker(index);

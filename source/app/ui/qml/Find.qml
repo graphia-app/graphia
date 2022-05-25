@@ -219,7 +219,7 @@ Rectangle
         icon.name: "go-previous"
         shortcut: _visible ? "Ctrl+Shift+G" : ""
         enabled: _type === Find.ByAttribute || document.numNodesFound > 0
-        onTriggered:
+        onTriggered: function(source)
         {
             if(_type === Find.ByAttribute)
                 valueComboBox.currentIndex = ((valueComboBox.currentIndex - 1) + valueComboBox.count) % valueComboBox.count;
@@ -235,7 +235,7 @@ Rectangle
         icon.name: "go-next"
         shortcut: _visible ? "Ctrl+G" : ""
         enabled: _type === Find.ByAttribute || document.numNodesFound > 0
-        onTriggered:
+        onTriggered: function(source)
         {
             if(_type === Find.ByAttribute)
                 valueComboBox.currentIndex = (valueComboBox.currentIndex + 1) % valueComboBox.count;
@@ -275,7 +275,7 @@ Rectangle
         icon.name: "edit-copy"
         checkable: true
 
-        onCheckedChanged:
+        onCheckedChanged: function(checked)
         {
             if(checked && valueComboBox.value.length > 0)
                 _attributeValues = [valueComboBox.value];
@@ -293,7 +293,7 @@ Rectangle
         icon.name: "edit-select-all"
         checkable: true
 
-        onCheckedChanged: { _doFind(); }
+        onCheckedChanged: function(checked) { _doFind(); }
     }
 
     property bool _closing: false
@@ -303,7 +303,7 @@ Rectangle
         text: qsTr("Close")
         icon.name: "emblem-unreadable"
 
-        onTriggered:
+        onTriggered: function(source)
         {
             findField.focus = false;
             findField.text = "";
@@ -364,9 +364,9 @@ Rectangle
     MouseArea
     {
         anchors.fill: layout
-        onWheel: { /* NO-OP */ }
+        onWheel: function(wheel) { /* NO-OP */ }
         acceptedButtons: Qt.RightButton
-        onClicked: { mouse.accepted = true; }
+        onClicked: function(mouse) { mouse.accepted = true; }
     }
 
     ColumnLayout
@@ -437,7 +437,7 @@ Rectangle
                     MouseArea
                     {
                         anchors.fill: parent
-                        onClicked: { findField.forceActiveFocus(); }
+                        onClicked: function(mouse) { findField.forceActiveFocus(); }
                     }
                 }
             }

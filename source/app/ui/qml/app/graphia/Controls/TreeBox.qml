@@ -194,8 +194,8 @@ Item
                 }
             }
 
-            onClicked: { root.clicked(index); }
-            onDoubleClicked:
+            onClicked: function(mouse) { root.clicked(index); }
+            onDoubleClicked: function(mouse)
             {
                 // FIXME: There seems to be a bug in TreeView(?) where if it is hidden in
                 // the middle of a click, the mouse release event never gets delivered to
@@ -269,7 +269,7 @@ Item
                 hoverOpacity: 0.7
                 checkable: true
 
-                onClicked: { root.toggleSearch(); }
+                onClicked: function(mouse) { root.toggleSearch(); }
             }
 
             Rectangle
@@ -351,7 +351,7 @@ Item
                 interval: 100
                 repeat: false
 
-                onTriggered:
+                onTriggered: function(source)
                 {
                     if(!root.showParentGuide)
                         return;

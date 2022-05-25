@@ -222,7 +222,7 @@ ApplicationWindow
         resetSaveRequired();
     }
 
-    onClosing:
+    onClosing: function(close)
     {
         let closedImmediately = root.confirmSave(function()
         {
@@ -536,7 +536,7 @@ ApplicationWindow
 
         enabled: !root.busy
 
-        onTriggered:
+        onTriggered: function(source)
         {
             if(settings.defaultOpenFolder !== undefined)
                 openDialog.folder = settings.defaultOpenFolder;
@@ -612,7 +612,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered:
+        onTriggered: function(source)
         {
             root.save();
         }
@@ -625,7 +625,7 @@ ApplicationWindow
 
         enabled: root.canSave
 
-        onTriggered:
+        onTriggered: function(source)
         {
             root.lastUsedFilename = "";
             root.save();
@@ -778,7 +778,7 @@ ApplicationWindow
                             Button
                             {
                                 text: qsTr("Add Image")
-                                onClicked:
+                                onClicked: function(mouse)
                                 {
                                     if(settings.defaultImageOpenFolder !== undefined)
                                         imageFileDialog.folder = settings.defaultImageOpenFolder;
@@ -1068,7 +1068,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Add Upgrade")
-                onClicked: { tabBar.createTab(); }
+                onClicked: function(mouse) { tabBar.createTab(); }
             }
 
             Button
@@ -1076,7 +1076,7 @@ ApplicationWindow
                 enabled: !root.busy
 
                 text: qsTr("Remove Upgrade")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     tabBar.removeTab(tabBar.currentIndex);
                 }

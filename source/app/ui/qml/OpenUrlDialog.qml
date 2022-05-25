@@ -91,7 +91,7 @@ Window
             }
         }
 
-        Keys.onPressed:
+        Keys.onPressed: function(event)
         {
             event.accepted = true;
             switch(event.key)

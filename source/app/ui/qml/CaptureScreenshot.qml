@@ -183,7 +183,7 @@ Window
                         id: underCanvas
                         height: parent.height
                         width: parent.width
-                        onPaint:
+                        onPaint: function(rect)
                         {
                             let ctx = getContext("2d");
 
@@ -232,7 +232,7 @@ Window
                         id: canvas
                         height: parent.height
                         width: parent.width
-                        onPaint:
+                        onPaint: function(rect)
                         {
                             let ctx = getContext("2d");
 
@@ -402,13 +402,13 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
 
             Button
             {
                 text: qsTr("Save…")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     let path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
                         new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");

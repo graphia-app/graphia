@@ -52,8 +52,8 @@ Frame
             selectByMouse: true
 
             onEditingFinished: { root.editingFinished(); }
-            onLinkActivated: { root.linkActivated(link); }
-            onLinkHovered: { root.linkHovered(link); }
+            onLinkActivated: function(link) { root.linkActivated(link); }
+            onLinkHovered: function(link) { root.linkHovered(link); }
         }
 
         ScrollBar.vertical: ScrollBar {}

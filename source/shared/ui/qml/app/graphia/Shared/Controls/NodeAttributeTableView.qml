@@ -238,7 +238,7 @@ Item
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         icon.name: "auto-column-resize"
-        onTriggered:
+        onTriggered: function(source)
         {
             root.resizeColumnsToContents();
         }
@@ -265,7 +265,7 @@ Item
         enabled: tableView.rows > 0
         text: qsTr("Export…")
         icon.name: "document-save"
-        onTriggered:
+        onTriggered: function(source)
         {
             exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
                         misc.fileSaveInitialFolder : "";
@@ -299,7 +299,7 @@ Item
         enabled: tableView.rows > 0
         text: qsTr("Copy Column To Clipboard")
         icon.name: "document-save"
-        onTriggered:
+        onTriggered: function(source)
         {
             document.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
         }
@@ -318,7 +318,7 @@ Item
         id: sortAscendingAction
         text: qsTr("Sort Column Ascending")
         checkable: true
-        onTriggered:
+        onTriggered: function(source)
         {
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.AscendingOrder;
@@ -331,7 +331,7 @@ Item
         id: sortDescendingAction
         text: qsTr("Sort Column Descending")
         checkable: true
-        onTriggered:
+        onTriggered: function(source)
         {
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.DescendingOrder;
@@ -374,7 +374,10 @@ Item
     {
         id: selectionModel
         model: proxyModel
-        onSelectionChanged: { proxyModel.setSubSelection(selectionModel.selection, deselected); }
+        onSelectionChanged: function(selected, deselected)
+        {
+            proxyModel.setSubSelection(selectionModel.selection, deselected);
+        }
 
         function change(inStartRow, inEndRow, action)
         {
@@ -477,7 +480,7 @@ Item
                         }
                     }
 
-                    onEntered:
+                    onEntered: function(drag)
                     {
                         drag.source.target = proxyModel.mapOrderedToSourceColumn(model.column);
                         tableView.forceLayoutSafe();
@@ -647,7 +650,7 @@ Item
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                            onClicked:
+                            onClicked: function(mouse)
                             {
                                 root.lastClickedColumn = headerItem.sourceColumn;
 
@@ -697,7 +700,7 @@ Item
                                     }
                                 }
 
-                                onDoubleClicked: { root.resizeColumnsToContents(); }
+                                onDoubleClicked: function(mouse) { root.resizeColumnsToContents(); }
                             }
                         }
                     }
@@ -800,7 +803,7 @@ Item
                     height: tableView.height + (tableView.rowHeight * 2)
                     x: tableView.contentX
                     y: tableView.contentY - (tableView.contentY % (tableView.rowHeight * 2))
-                    onPaint:
+                    onPaint: function(rect)
                     {
                         let ctx = getContext("2d");
                         for(let i = 0; i < Math.ceil(tableView.height / tableView.rowHeight) + 1; i++)
@@ -828,7 +831,7 @@ Item
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
 
-                    onPositionChanged:
+                    onPositionChanged: function(mouse)
                     {
                         // Sometimes syncViews don't actually sync visibleAreas
                         // however contentX and contentWidth are synced.
@@ -1078,7 +1081,7 @@ Item
                             }
 
                             onLinkHovered: { tableView.hoveredLink = link; }
-                            onLinkActivated: Qt.openUrlExternally(link);
+                            onLinkActivated: function(link) { Qt.openUrlExternally(link); }
                         }
                     }
                 }
@@ -1154,32 +1157,32 @@ Item
                             Button
                             {
                                 text: qsTr("Show All")
-                                onClicked: { root.showAllColumns(); }
+                                onClicked: function(mouse) { root.showAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide All")
-                                onClicked: { root.hideAllColumns(); }
+                                onClicked: function(mouse) { root.hideAllColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Show Calculated")
-                                onClicked: { root.showAllCalculatedColumns(); }
+                                onClicked: function(mouse) { root.showAllCalculatedColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Hide Calculated")
-                                onClicked: { root.hideAllCalculatedColumns(); }
+                                onClicked: function(mouse) { root.hideAllCalculatedColumns(); }
                             }
 
                             Button
                             {
                                 text: qsTr("Done")
                                 icon.name: "emblem-unreadable"
-                                onClicked: { columnSelectionMode = false; }
+                                onClicked: function(mouse) { columnSelectionMode = false; }
                             }
                         }
                     }
@@ -1204,7 +1207,7 @@ Item
                 cursorShape: tableView.hoveredLink.length > 0 ?
                     Qt.PointingHandCursor : Qt.ArrowCursor;
 
-                onDoubleClicked:
+                onDoubleClicked: function(mouse)
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -1217,7 +1220,7 @@ Item
                     root.model.moveFocusToNodeForRowIndex(mappedRow);
                 }
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     root.lastClickedColumn = tableView.columnAt(mouseX);
 
@@ -1225,7 +1228,7 @@ Item
                         root.rightClick();
                 }
 
-                onPressed:
+                onPressed: function(mouse)
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -1265,7 +1268,7 @@ Item
                     previousRow = startRow = endRow = clickedRow;
                 }
 
-                onPositionChanged:
+                onPositionChanged: function(mouse)
                 {
                     if(mouse.buttons !== Qt.LeftButton)
                         return;
@@ -1285,7 +1288,7 @@ Item
                     }
                 }
 
-                onReleased:
+                onReleased: function(mouse)
                 {
                     previousRow = -1;
                     deselectDrag = false;

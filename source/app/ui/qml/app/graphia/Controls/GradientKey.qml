@@ -192,12 +192,12 @@ Item
 
         anchors.fill: root
 
-        onClicked: root.clicked(mouse)
-        onDoubleClicked: root.doubleClicked(mouse)
+        onClicked: function(mouse) { root.clicked(mouse); }
+        onDoubleClicked: function(mouse) { root.doubleClicked(mouse); }
 
         hoverEnabled: true
 
-        onPressed: { mouse.accepted = false; }
+        onPressed: function(mouse) { mouse.accepted = false; }
     }
 
     signal clicked(var mouse)

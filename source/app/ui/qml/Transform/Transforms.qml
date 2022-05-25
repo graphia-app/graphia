@@ -113,7 +113,7 @@ Item
                 textColor: enabled ? enabledTextColor : disabledTextColor
                 hoverColor: heldColor
 
-                onClicked: { createTransformDialog.show(); }
+                onClicked: function(mouse) { createTransformDialog.show(); }
             }
 
             FloatingButton
@@ -122,7 +122,7 @@ Item
                 iconName: panel.hidden ? "go-bottom" : "go-top"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     if(panel.hidden)
                         panel.show();

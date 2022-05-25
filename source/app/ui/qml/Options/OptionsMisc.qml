@@ -159,7 +159,7 @@ Item
                     "then select <b>Open In Low Resolution</b>. Restart ") + application.name + qsTr(".")
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated: { QmlUtils.showAppInFileManager(); }
+                onLinkActivated: function(link) { QmlUtils.showAppInFileManager(); }
             }
 
             Label

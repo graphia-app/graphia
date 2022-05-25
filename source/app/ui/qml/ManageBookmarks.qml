@@ -134,7 +134,7 @@ Window
                     item.edit();
             }
 
-            onDoubleClicked: { edit(index); }
+            onDoubleClicked: function(mouse) { edit(index); }
 
             signal rowRenamed(string from, string to)
             onRowRenamed: { document.renameBookmark(from, to); }
@@ -148,14 +148,14 @@ Window
             {
                 text: qsTr("Rename")
                 enabled: listBox.selectedIndex >= 0
-                onClicked: { listBox.edit(listBox.selectedIndex); }
+                onClicked: function(mouse) { listBox.edit(listBox.selectedIndex); }
             }
 
             Button
             {
                 text: qsTr("Remove")
                 enabled: listBox.selectedIndex >= 0
-                onClicked:
+                onClicked: function(mouse)
                 {
                     let names = [];
                     for(const index of listBox.selectedIndices)

@@ -158,7 +158,7 @@ Window
                                 {
                                     anchors.fill: parent
 
-                                    onClicked:
+                                    onClicked: function(mouse)
                                     {
                                         root.configuration = paletteKey.configuration;
                                         paletteEditor.setup(paletteKey.configuration);
@@ -214,7 +214,7 @@ Window
                     enabled: palettePresets.selectedIndex < 0
                     text: qsTr("Save As New Preset")
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         palettePresets.add(paletteEditor.configuration);
                     }
@@ -252,7 +252,7 @@ Window
                         }
                     }
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         deleteDialog.visible = true;
                     }
@@ -270,7 +270,7 @@ Window
 
                     text: qsTr("Set As Default")
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         // Add a preset too, if it doesn't exist already
                         if(palettePresets.selectedIndex < 0)
@@ -322,7 +322,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     accepted();
                     root.close();
@@ -333,7 +333,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     rejected();
                     root.close();
@@ -344,7 +344,7 @@ Window
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Apply")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     applyClicked(root.applied);
                     root.applied = true;

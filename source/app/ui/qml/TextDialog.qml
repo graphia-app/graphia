@@ -65,13 +65,13 @@ Window
                 visible: root.showCopyToClipboard
 
                 text: qsTr("Copy To Clipboard")
-                onClicked: { textArea.copyToClipboard(); }
+                onClicked: function(mouse) { textArea.copyToClipboard(); }
             }
 
             Button
             {
                 text: qsTr("Close")
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }

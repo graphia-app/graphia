@@ -70,8 +70,8 @@ Item
                 onTriggered: { root.selectedValue = text; }
             }
 
-            onObjectAdded: menu.insertItem(index, object)
-            onObjectRemoved: menu.removeItem(object)
+            onObjectAdded: function(index, object) { menu.insertItem(index, object); }
+            onObjectRemoved: function(index, object) { menu.removeItem(object); }
         }
     }
 
@@ -113,7 +113,7 @@ Item
 
         hoverEnabled: true
         anchors.fill: parent
-        onClicked:
+        onClicked: function(mouse)
         {
             if(mouse.button === Qt.LeftButton && menu && !_modelIsUnset)
                 menu.popup(0, parent.height + 4/*padding*/);
@@ -121,9 +121,9 @@ Item
             root.clicked(mouse);
         }
 
-        onPressed: { mouse.accepted = !propogatePresses; }
+        onPressed: function(mouse) { mouse.accepted = !propogatePresses; }
 
-        onPressAndHold: { root.held(mouse); }
+        onPressAndHold: function(mouse) { root.held(mouse); }
     }
 
     signal clicked(var mouse)

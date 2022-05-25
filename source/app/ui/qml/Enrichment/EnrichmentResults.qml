@@ -173,7 +173,7 @@ ApplicationWindow
 
                 property int rowCount: proxyModel.count
 
-                onHeaderClicked:
+                onHeaderClicked: function(column, mouse)
                 {
                     if(mouse.button !== Qt.LeftButton)
                         return;
@@ -195,7 +195,7 @@ ApplicationWindow
                 // For some reason QmlUtils isn't available from directly within the sort expression
                 property var stringCompare: QmlUtils.localeCompareStrings
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     if(mouse.button === Qt.RightButton)
                         exportTableMenu.popup();
@@ -300,7 +300,7 @@ ApplicationWindow
                     table.positionViewAt(0);
                 }
 
-                onPlotValueClicked:
+                onPlotValueClicked: function(row)
                 {
                     let proxyRow = proxyModel.mapFromSource(row);
                     if(proxyRow < 0)
@@ -360,7 +360,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && heatmap.visible
             text: qsTr("Save As Image…")
             icon.name: "camera-photo"
-            onTriggered:
+            onTriggered: function(source)
             {
                 heatmapSaveDialog.folder = misc.fileSaveInitialFolder !== undefined ?
                     misc.fileSaveInitialFolder : "";
@@ -380,7 +380,7 @@ ApplicationWindow
             enabled: root._resultsAvailable && table.rowCount > 1 // rowCount includes header
             text: qsTr("Export Table…")
             icon.name: "document-save"
-            onTriggered:
+            onTriggered: function(source)
             {
                 exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
                     misc.fileSaveInitialFolder : "";

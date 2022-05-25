@@ -41,7 +41,7 @@ PluginContent
         checkable: true
         checked: true
 
-        onCheckedChanged: { root.saveRequired = true; }
+        onCheckedChanged: function(checked) { root.saveRequired = true; }
     }
 
     Action
@@ -52,7 +52,7 @@ PluginContent
         checkable: true
         checked: plot.showColumnNames
 
-        onTriggered:
+        onTriggered: function(source)
         {
             plot.showAllColumns = false;
             plot.showColumnNames = !plot.showColumnNames;
@@ -69,7 +69,7 @@ PluginContent
 
         checkable: true
 
-        onTriggered:
+        onTriggered: function(source)
         {
             plot.columnAnnotationSelectionModeEnabled = !plot.columnAnnotationSelectionModeEnabled;
             checked = plot.columnAnnotationSelectionModeEnabled;
@@ -142,7 +142,7 @@ PluginContent
         checkable: true
         checked: plot.showAllColumns
 
-        onTriggered:
+        onTriggered: function(source)
         {
             plot.showColumnNames = false;
             plot.showAllColumns = !plot.showAllColumns;
@@ -309,7 +309,7 @@ PluginContent
         checkable: true
         checked: plot.groupByAnnotation
 
-        onTriggered:
+        onTriggered: function(source)
         {
             plot.groupByAnnotation = !plot.groupByAnnotation;
 
@@ -842,7 +842,7 @@ PluginContent
                     visible: plot.columnAnnotationSelectionModeEnabled
                     iconName: "emblem-unreadable"
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         plot.columnAnnotationSelectionModeEnabled =
                             selectColumnAnnotationsAction.checked = false;

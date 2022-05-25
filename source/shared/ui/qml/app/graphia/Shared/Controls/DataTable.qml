@@ -58,7 +58,7 @@ Rectangle
     function selectRow(row) { root.selectedRows = [row]; }
     function clearSelection() { root.selectedRows = []; }
 
-    onClicked:
+    onClicked: function(mouse)
     {
         if(mouse.button !== Qt.LeftButton)
             return;
@@ -196,8 +196,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: { root.headerClicked(modelColumn, mouse); }
-                onDoubleClicked: { root.headerDoubleClicked(modelColumn, mouse); }
+                onClicked: function(mouse) { root.headerClicked(modelColumn, mouse); }
+                onDoubleClicked: function(mouse) { root.headerDoubleClicked(modelColumn, mouse); }
             }
         }
 
@@ -234,8 +234,8 @@ Rectangle
             {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
-                onClicked: { root.headerClicked(modelColumn, mouse); }
-                onDoubleClicked: { root.headerDoubleClicked(modelColumn, mouse); }
+                onClicked: function(mouse) { root.headerClicked(modelColumn, mouse); }
+                onDoubleClicked: function(mouse) { root.headerDoubleClicked(modelColumn, mouse); }
             }
         }
     }
@@ -275,8 +275,8 @@ Rectangle
         {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             anchors.fill: parent
-            onClicked: { root.clicked(modelColumn, modelRow, mouse); }
-            onDoubleClicked: { root.doubleClicked(modelColumn, modelRow, mouse); }
+            onClicked: function(mouse) { root.clicked(modelColumn, modelRow, mouse); }
+            onDoubleClicked: function(mouse) { root.doubleClicked(modelColumn, modelRow, mouse); }
         }
     }
 
@@ -385,7 +385,7 @@ Rectangle
                             }
                         }
 
-                        onDoubleClicked: { root.resizeColumnToContents(model.column); }
+                        onDoubleClicked: function(mouse) { root.resizeColumnToContents(model.column); }
                     }
                 }
 

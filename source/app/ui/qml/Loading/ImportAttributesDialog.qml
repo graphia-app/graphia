@@ -131,7 +131,7 @@ Window
             Button
             {
                 text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
-                onClicked: { root.rejected(); }
+                onClicked: function(mouse) { root.rejected(); }
             }
         }
     }
@@ -305,7 +305,7 @@ Window
                         id: autoDetectButton
 
                         text: qsTr("Auto Detect")
-                        onClicked: { importAttributesKeyDetection.start(); }
+                        onClicked: function(mouse) { importAttributesKeyDetection.start(); }
                     }
 
                     Text
@@ -579,7 +579,7 @@ Window
                 text: qsTr("Cancel")
 
                 enabled: importAttributesKeyDetection.busy
-                onClicked: { importAttributesKeyDetection.cancel(); }
+                onClicked: function(mouse) { importAttributesKeyDetection.cancel(); }
             }
         }
     }

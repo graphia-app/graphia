@@ -170,7 +170,7 @@ Window
             }
 
             property bool manuallyChanged: false
-            Keys.onPressed: { manuallyChanged = true; }
+            Keys.onPressed: function(event) { manuallyChanged = true; }
 
             onFocusChanged:
             {
@@ -190,7 +190,7 @@ Window
                 text: qsTr("OK")
                 enabled: root.selectedAttributeName.length > 0 && newAttributeName.text.length > 0
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     document.cloneAttribute(root.selectedAttributeName, newAttributeName.text);
                     root.close();
@@ -200,7 +200,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }

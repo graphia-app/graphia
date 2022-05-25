@@ -42,7 +42,7 @@ RowLayout
         MouseArea
         {
             anchors.fill: parent
-            onDoubleClicked: { root.reset(); }
+            onDoubleClicked: function(mouse) { root.reset(); }
         }
 
         ToolTip { text: root.description }

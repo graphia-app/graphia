@@ -84,7 +84,7 @@ Item
         {
             anchors.fill: parent
 
-            onClicked:
+            onClicked: function(mouse)
             {
                 popup.open();
                 parent.visible = false;

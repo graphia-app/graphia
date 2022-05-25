@@ -719,8 +719,8 @@ Item
                                 text: modelData
                                 onTriggered: { selectBySharedAttributeValue(text, contextMenu.clickedNodeId); }
                             }
-                            onObjectAdded: sharedValuesOfNodeContextMenu.insertItem(index, object)
-                            onObjectRemoved: sharedValuesOfNodeContextMenu.removeItem(object)
+                            onObjectAdded: function(index, object) { sharedValuesOfNodeContextMenu.insertItem(index, object); }
+                            onObjectRemoved: function(index, object) { sharedValuesOfNodeContextMenu.removeItem(object); }
                         }
                     }
 
@@ -745,8 +745,8 @@ Item
                                 text: modelData
                                 onTriggered: { selectBySharedAttributeValue(text); }
                             }
-                            onObjectAdded: sharedValuesSelectionContextMenu.insertItem(index, object)
-                            onObjectRemoved: sharedValuesSelectionContextMenu.removeItem(object)
+                            onObjectAdded: function(index, object) { sharedValuesSelectionContextMenu.insertItem(index, object); }
+                            onObjectRemoved: function(index, object) { sharedValuesSelectionContextMenu.removeItem(object); }
                         }
                     }
                     PlatformMenuItem { hidden: !repeatLastSelectionAction.enabled; action: repeatLastSelectionAction }
@@ -774,7 +774,7 @@ Item
                     }
                 }
 
-                onClicked:
+                onClicked: function(button, nodeId)
                 {
                     if(button === Qt.RightButton)
                     {
@@ -845,7 +845,7 @@ Item
                 iconName: "go-previous"
                 text: qsTr("Goto Previous Component");
 
-                onClicked: { _document.gotoPrevComponent(); }
+                onClicked: function(mouse) { _document.gotoPrevComponent(); }
             }
 
             FloatingButton
@@ -863,7 +863,7 @@ Item
                 iconName: "go-next"
                 text: qsTr("Goto Next Component");
 
-                onClicked: { _document.gotoNextComponent(); }
+                onClicked: function(mouse) { _document.gotoNextComponent(); }
             }
 
             RowLayout
@@ -878,7 +878,7 @@ Item
                 {
                     iconName: "edit-undo"
                     text: qsTr("Return to Overview Mode")
-                    onClicked: { _document.switchToOverviewMode(); }
+                    onClicked: function(mouse) { _document.switchToOverviewMode(); }
                 }
 
                 ColumnLayout
@@ -1450,7 +1450,7 @@ Item
         onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
         onYChanged: { if(y < 0 || y >= Screen.desktopAvailableHeight) y = 0; }
 
-        onClosing:
+        onClosing: function(close)
         {
             if(visible & !destructing)
                 popInPlugin();
@@ -1632,7 +1632,7 @@ Item
                 setShading3D(_shading);
         }
 
-        onUiDataChanged:
+        onUiDataChanged: function(uiData)
         {
             uiData = JSON.parse(uiData);
 
@@ -1643,7 +1643,7 @@ Item
                 find.lastFindByAttributeName = uiData.lastFindByAttributeName;
         }
 
-        onPluginQmlPathChanged:
+        onPluginQmlPathChanged: function(pluginUiData, pluginUiDataVersion)
         {
             if(_document.pluginQmlPath.length > 0)
             {
@@ -1687,7 +1687,7 @@ Item
             }
         }
 
-        onSaveComplete:
+        onSaveComplete: function(success, fileUrl, saverName)
         {
             if(!success)
             {
@@ -1703,7 +1703,7 @@ Item
             }
         }
 
-        onAttributesChanged:
+        onAttributesChanged: function(addedNames, removedNames, changedValuesNames)
         {
             // If a new attribute has been created and advanced find or FBAV have
             // not yet been used, set the new attribute as the default for both
@@ -1732,7 +1732,7 @@ Item
             _refreshAttributesWithSharedValues();
         }
 
-        onLoadComplete:
+        onLoadComplete: function(url, success)
         {
             if(success)
                 _refreshAttributesWithSharedValues();
@@ -1740,7 +1740,7 @@ Item
             root.loadComplete(url, success);
         }
 
-        onGraphChanged: { root._refreshAttributesWithSharedValues(); }
+        onGraphChanged: function(graph, changeOccurred) { root._refreshAttributesWithSharedValues(); }
 
         property var _comandProgressSamples: []
         property int commandSecondsRemaining
@@ -2120,7 +2120,7 @@ Item
                           QmlUtils.redirectLink("example_datasets", qsTr("example datasets")) + qsTr(".")
 
                     PointingCursorOnHoverLink {}
-                    onLinkActivated: { Qt.openUrlExternally(link); }
+                    onLinkActivated: function(link) { Qt.openUrlExternally(link); }
                 }
             }
         }

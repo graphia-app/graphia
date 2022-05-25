@@ -42,16 +42,16 @@ Item
     {
         anchors.fill: row
 
-        onClicked:
+        onClicked: function(mouse)
         {
             if(mouse.button === Qt.RightButton)
                 hamburger.menu.popup();
         }
 
-        onDoubleClicked: { root.toggle(); }
+        onDoubleClicked: function(mouse) { root.toggle(); }
 
         // Pass presses on to parent (DraggableList)
-        onPressed: { mouse.accepted = false; }
+        onPressed: function(mouse) { mouse.accepted = false; }
     }
 
     RowLayout

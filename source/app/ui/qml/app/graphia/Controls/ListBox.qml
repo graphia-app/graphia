@@ -187,9 +187,9 @@ Item
                     return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
                 }
 
-                onWheel: { parent.flick(0, wheel.angleDelta.y * 5); }
+                onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * 5); }
 
-                onPressed:
+                onPressed: function(mouse)
                 {
                     root.forceActiveFocus();
 
@@ -229,7 +229,7 @@ Item
                     setNewSelection(newSelectedIndices, index);
                 }
 
-                onPositionChanged:
+                onPositionChanged: function(mouse)
                 {
                     let newSelectedIndices = [];
 
@@ -251,13 +251,13 @@ Item
                     setNewSelection(newSelectedIndices, index);
                 }
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     root.forceActiveFocus();
                     root.clicked(indexAt(mouse));
                 }
 
-                onDoubleClicked:
+                onDoubleClicked: function(mouse)
                 {
                     root.forceActiveFocus();
                     root.doubleClicked(indexAt(mouse));
@@ -269,7 +269,7 @@ Item
         }
     }
 
-    Keys.onPressed:
+    Keys.onPressed: function(event)
     {
         let moveSelection = function(delta)
         {

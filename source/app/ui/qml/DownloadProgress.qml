@@ -94,7 +94,7 @@ RowLayout
         }
 
 
-        onClicked:
+        onClicked: function(mouse)
         {
             root.openClicked(root.blockedUrl);
             root.blockedUrl = "";
@@ -117,7 +117,7 @@ RowLayout
         iconName: "process-stop"
         text: qsTr("Cancel")
 
-        onClicked:
+        onClicked: function(mouse)
         {
             root.blockedUrl = "";
             root.cancelClicked();

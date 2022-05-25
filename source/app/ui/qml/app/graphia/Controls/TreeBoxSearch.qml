@@ -73,7 +73,7 @@ TextField
         modelCompleter.startsWith = "";
     }
 
-    Keys.onPressed:
+    Keys.onPressed: function(event)
     {
         switch(event.key)
         {

@@ -144,7 +144,7 @@ Item
                 {
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
-                    onClicked: { skipClicked(); }
+                    onClicked: function(mouse) { skipClicked(); }
                 }
             }
 
@@ -154,21 +154,21 @@ Item
             {
                 visible: displayPrevious
                 text: qsTr("Previous")
-                onClicked: { previousClicked(); }
+                onClicked: function(mouse) { previousClicked(); }
             }
 
             Button
             {
                 visible: displayNext
                 text: qsTr("Next")
-                onClicked: { nextClicked(); }
+                onClicked: function(mouse) { nextClicked(); }
             }
 
             Button
             {
                 visible: displayClose
                 text: qsTr("Close")
-                onClicked: { closeClicked(); }
+                onClicked: function(mouse) { closeClicked(); }
             }
         }
     }

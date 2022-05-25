@@ -69,7 +69,7 @@ BaseParameterDialog
                 width: (listPages.length * spacing) + (_padding * 2)
                 height: pipSize + (_padding  * 2)
 
-                onPaint:
+                onPaint: function(rect)
                 {
                     let ctx = getContext("2d");
                     let currentPipSize = pipSize + 2;
@@ -136,7 +136,7 @@ BaseParameterDialog
             {
                 id: previousButton
                 text: qsTr("Previous")
-                onClicked: { root.previous(); }
+                onClicked: function(mouse) { root.previous(); }
                 enabled: currentIndex > 0
             }
 
@@ -144,7 +144,7 @@ BaseParameterDialog
             {
                 id: nextButton
                 text: qsTr("Next")
-                onClicked: { root.next(); }
+                onClicked: function(mouse) { root.next(); }
                 enabled: (currentIndex < listPages.length - 1) ? nextEnabled : false
             }
 
@@ -152,14 +152,14 @@ BaseParameterDialog
             {
                 id: finishButton
                 text: qsTr("Finish")
-                onClicked: { root.accepted(); }
+                onClicked: function(mouse) { root.accepted(); }
                 enabled: (currentIndex >= enableFinishAtIndex) ? finishEnabled : false
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }

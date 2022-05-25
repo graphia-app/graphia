@@ -175,7 +175,7 @@ ColumnLayout
 
                 enabled: root._autoColors.length < root._maxAutoColors
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     let colors = root._autoColors;
 
@@ -269,7 +269,7 @@ ColumnLayout
                     text: qsTr("Remove")
                     iconName: "list-remove"
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         let colors = root._autoColors;
                         colors.splice(index, 1);
@@ -408,7 +408,7 @@ ColumnLayout
 
                 enabled: root._fixedColors.length < root._maxFixedColors
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     // Start with the first potentially unassigned value
                     let index = Math.min(paletteAutoColorListRepeater.count, root.stringValues.length);
@@ -550,7 +550,7 @@ ColumnLayout
                     text: qsTr("Remove")
                     iconName: "list-remove"
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         let colors = root._fixedColors;
                         colors.splice(index, 1);

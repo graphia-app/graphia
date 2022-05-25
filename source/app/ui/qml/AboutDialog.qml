@@ -70,7 +70,7 @@ Window
                     qsTr("<a href=\"OSS\">Third Party Licenses</a>")
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated:
+                onLinkActivated: function(link)
                 {
                     licenseTextArea.text = Utils.readFile("qrc:///licensing/" + link + ".html");
 
@@ -98,14 +98,14 @@ Window
                 wrapMode: TextEdit.Wrap
 
                 PointingCursorOnHoverLink {}
-                onLinkActivated: Qt.openUrlExternally(link);
+                onLinkActivated: function(link) { Qt.openUrlExternally(link); }
             }
 
             Button
             {
                 text: qsTr("Close")
                 Layout.alignment: Qt.AlignRight
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }

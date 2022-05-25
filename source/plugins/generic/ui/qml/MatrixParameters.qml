@@ -125,7 +125,7 @@ BaseParameterDialog
             Button
             {
                 text: tabularDataParser.failed ? qsTr("Close") : qsTr("Cancel")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     if(!tabularDataParser.failed)
                         tabularDataParser.cancelParse();
@@ -451,7 +451,7 @@ BaseParameterDialog
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("OK")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     parameters.filterEdges = filterEdgesCheckbox.checked && !tabularDataParser.binaryMatrix;
 
@@ -464,7 +464,7 @@ BaseParameterDialog
             {
                 Layout.alignment: Qt.AlignRight
                 text: qsTr("Cancel")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     rejected();
                     root.close();

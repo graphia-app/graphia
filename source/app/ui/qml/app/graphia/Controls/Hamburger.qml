@@ -80,12 +80,12 @@ Item
 
         hoverEnabled: true
         anchors.fill: parent
-        onClicked:
+        onClicked: function(mouse)
         {
             if(menu)
                 menu.popup(0, parent.height + 4/*padding*/);
         }
 
-        onPressed: { mouse.accepted = !propogatePresses; }
+        onPressed: function(mouse) { mouse.accepted = !propogatePresses; }
     }
 }

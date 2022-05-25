@@ -68,14 +68,14 @@ Column
             property int _dragStartIndex: -1
 
             property bool held
-            onPressAndHold: held = true;
-            onReleased: held = false;
+            onPressAndHold: function(mouse) { held = true; }
+            onReleased: function(mouse) { held = false; }
 
             property int _clickX
             property int _clickY
 
             // If the mouse is significantly moved after a click, initiate a drag
-            onPositionChanged:
+            onPositionChanged: function(mouse)
             {
                 let manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
 
@@ -83,7 +83,7 @@ Column
                     held = true;
             }
 
-            onClicked:
+            onClicked: function(mouse)
             {
                 _clickX = mouse.x;
                 _clickY = mouse.y;
@@ -92,7 +92,7 @@ Column
                 forwardEventToItem(mouse, "clicked");
             }
 
-            onDoubleClicked: { forwardEventToItem(mouse, "doubleClicked"); }
+            onDoubleClicked: function(mouse) { forwardEventToItem(mouse, "doubleClicked"); }
 
             function forwardEventToItem(event, eventType)
             {
@@ -229,7 +229,7 @@ Column
                 }
                 width: root.width
 
-                onEntered:
+                onEntered: function(drag)
                 {
                     let sourcePinned = repeater.itemAt(drag.source.DelegateModel.itemsIndex).pinned;
                     let targetPinned = repeater.itemAt(dragArea.DelegateModel.itemsIndex).pinned;
@@ -245,7 +245,7 @@ Column
                     }
                 }
 
-                onDropped:
+                onDropped: function(drag)
                 {
                     if(dragArea._dragStartIndex !== dragArea.DelegateModel.itemsIndex)
                     {

@@ -131,5 +131,5 @@ MouseArea
         }
     }
 
-    onClicked: { contextMenu.popup(); }
+    onClicked: function(mouse) { contextMenu.popup(); }
 }

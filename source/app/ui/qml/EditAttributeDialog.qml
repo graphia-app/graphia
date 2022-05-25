@@ -481,7 +481,7 @@ Window
                                 hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                                onClicked:
+                                onClicked: function(mouse)
                                 {
                                     if(!mouseOverResizeHandle && mouse.button === Qt.LeftButton)
                                     {
@@ -492,7 +492,7 @@ Window
                                     }
                                 }
 
-                                onDoubleClicked:
+                                onDoubleClicked: function(mouse)
                                 {
                                     if(mouseOverResizeHandle)
                                     {
@@ -527,7 +527,7 @@ Window
                                     }
                                 }
 
-                                onReleased: { resizing = false; }
+                                onReleased: function(mouse) { resizing = false; }
                             }
                         }
                     }
@@ -628,7 +628,7 @@ Window
 
                                     acceptedButtons: Qt.LeftButton|Qt.RightButton
 
-                                    onClicked:
+                                    onClicked: function(mouse)
                                     {
                                         if(mouse.button === Qt.RightButton)
                                         {
@@ -641,7 +641,7 @@ Window
                                             tableView.activeEditField.cancel();
                                     }
 
-                                    onDoubleClicked:
+                                    onDoubleClicked: function(mouse)
                                     {
                                         if(model.column !== 1)
                                             return;
@@ -735,7 +735,7 @@ Window
                 text: qsTr("OK")
                 enabled: root.selectedAttributeName.length > 0 && editAttributeTableModel.hasEdits
 
-                onClicked:
+                onClicked: function(mouse)
                 {
                     document.editAttribute(root.selectedAttributeName, editAttributeTableModel.edits);
                     root.close();
@@ -745,7 +745,7 @@ Window
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }

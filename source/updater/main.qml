@@ -93,7 +93,7 @@ ApplicationWindow
                     return adjustedChangeLog;
                 }
 
-                onLinkActivated: Qt.openUrlExternally(link);
+                onLinkActivated: function(link) { Qt.openUrlExternally(link); }
             }
 
             RowLayout
@@ -102,7 +102,7 @@ ApplicationWindow
                 {
                     text: qsTr("Skip This Version")
 
-                    onClicked:
+                    onClicked: function(mouse)
                     {
                         installer.setStatus("skipped");
                         root.close();
@@ -114,13 +114,13 @@ ApplicationWindow
                 Button
                 {
                     text: qsTr("Remind Me Later")
-                    onClicked: { root.close(); }
+                    onClicked: function(mouse) { root.close(); }
                 }
 
                 Button
                 {
                     text: qsTr("Update Now")
-                    onClicked: { installer.start(); }
+                    onClicked: function(mouse) { installer.start(); }
                 }
             }
         }
@@ -189,13 +189,13 @@ ApplicationWindow
                 visible: installer !== null && !installer.success
                 text: qsTr("Retry");
 
-                onClicked: { installer.retry(); }
+                onClicked: function(mouse) { installer.retry(); }
             }
 
             Button
             {
                 text: qsTr("Open " + Qt.application.name);
-                onClicked: { root.close(); }
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }
