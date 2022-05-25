@@ -104,7 +104,7 @@ void QmlPreferences::setProperty(QMetaProperty property, const QVariant& value)
 
     const QVariant previousValue = property.read(this);
 
-    if((previousValue != value && value.canConvert(previousValue.type())) ||
+    if((previousValue != value && QMetaType::canConvert(value.metaType(), previousValue.metaType())) ||
        !previousValue.isValid())
     {
         property.write(this, value);

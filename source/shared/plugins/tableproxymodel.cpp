@@ -305,8 +305,8 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
         if(valueA == valueB)
             continue;
 
-        if(static_cast<QMetaType::Type>(valueA.type()) == QMetaType::QString &&
-            static_cast<QMetaType::Type>(valueB.type()) == QMetaType::QString)
+        if(static_cast<QMetaType::Type>(valueA.typeId()) == QMetaType::QString &&
+            static_cast<QMetaType::Type>(valueB.typeId()) == QMetaType::QString)
         {
             return order == Qt::DescendingOrder ?
                 _collator.compare(valueB.toString(), valueA.toString()) < 0 :

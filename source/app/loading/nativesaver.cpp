@@ -151,9 +151,9 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
         {
             const auto& v = table.data(row, static_cast<EnrichmentTableModel::Results>(column));
 
-            if(v.type() == QVariant::String)
+            if(v.typeId() == QMetaType::QString)
                 jsonObject["data"][row - 1].push_back(v.toString().toStdString());
-            else if(v.type() == QVariant::Double || v.type() == QVariant::Int)
+            else if(v.typeId() == QMetaType::Double || v.typeId() == QMetaType::Int)
                 jsonObject["data"][row - 1].push_back(v.toDouble());
         }
     }

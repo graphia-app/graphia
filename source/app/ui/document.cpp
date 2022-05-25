@@ -2747,7 +2747,7 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
                     auto valueString = value.toString();
 
-                    if(value.type() == QVariant::String)
+                    if(value.typeId() == QMetaType::QString)
                         rowString.append(escapedString(valueString));
                     else
                         rowString.append(valueString);
