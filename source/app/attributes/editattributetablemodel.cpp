@@ -18,7 +18,6 @@
 
 #include "editattributetablemodel.h"
 
-#include "ui/document.h"
 #include "ui/selectionmanager.h"
 
 #include "shared/graph/igraphmodel.h"

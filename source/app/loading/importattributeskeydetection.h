@@ -19,14 +19,13 @@
 #ifndef IMPORTATTRIBUTESKEYDETECTION_H
 #define IMPORTATTRIBUTESKEYDETECTION_H
 
+#include "ui/document.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/utils/cancellable.h"
 
 #include <QObject>
 #include <QFutureWatcher>
 #include <QVariantMap>
-
-class Document;
 
 class ImportAttributesKeyDetection : public QObject, public Cancellable
 {

@@ -19,7 +19,8 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
-class QVariant;
+#include <QVariant>
+
 class QString;
 
 namespace u

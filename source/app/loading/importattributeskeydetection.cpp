@@ -24,8 +24,6 @@
 
 #include "shared/utils/static_block.h"
 
-#include "ui/document.h"
-
 ImportAttributesKeyDetection::ImportAttributesKeyDetection() // NOLINT modernize-use-equals-default
 {
     connect(&_watcher, &QFutureWatcher<void>::started, this, &ImportAttributesKeyDetection::busyChanged);

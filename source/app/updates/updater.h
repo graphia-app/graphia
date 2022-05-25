@@ -25,12 +25,11 @@
 #include <QTimer>
 #include <QNetworkAccessManager>
 #include <QString>
+#include <QStringList>
 
 #include <atomic>
 
-class QString;
 class QByteArray;
-class QStringList;
 class QNetworkReply;
 
 class Updater : public QObject

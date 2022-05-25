@@ -22,6 +22,7 @@
 #include "shared/utils/container.h"
 
 #include <QString>
+#include <QStringList>
 #include <QRegularExpression>
 
 #include <string>
@@ -30,8 +31,6 @@
 #include <sstream>
 #include <iomanip>
 #include <cstddef>
-
-class QStringList;
 
 namespace u
 {

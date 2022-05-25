@@ -19,6 +19,8 @@
 #ifndef CORRELATIONPLOTITEM_H
 #define CORRELATIONPLOTITEM_H
 
+#include "correlationplugin.h"
+
 #include "columnannotation.h"
 
 #include "shared/utils/qmlenum.h"
@@ -42,7 +44,6 @@
 #include <mutex>
 #include <atomic>
 
-class CorrelationPluginInstance;
 class QCPColumnAnnotations;
 
 DEFINE_QML_ENUM(

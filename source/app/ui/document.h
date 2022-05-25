@@ -36,6 +36,7 @@
 #include "app/preferenceswatcher.h"
 #include "transform/availabletransformsmodel.h"
 #include "ui/findoptions.h"
+#include "ui/graphquickitem.h"
 
 #include "attributes/enrichmenttablemodel.h"
 
@@ -53,7 +54,6 @@
 
 class Graph;
 class Application;
-class GraphQuickItem;
 class GraphModel;
 class SearchManager;
 class SelectionManager;

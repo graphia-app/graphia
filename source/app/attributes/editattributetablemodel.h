@@ -21,6 +21,7 @@
 
 #include "attributeedits.h"
 
+#include "ui/document.h"
 #include "shared/graph/elementid.h"
 
 #include <QObject>
@@ -30,7 +31,6 @@
 #include <vector>
 #include <map>
 
-class Document;
 class IAttribute;
 class SelectionManager;
 
