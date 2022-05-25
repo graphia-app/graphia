@@ -28,7 +28,7 @@ void TypeIdentity::updateType(const QString& value)
 
     bool conversionSucceeded = false;
 
-    auto intValue = value.toInt(&conversionSucceeded);
+    auto intValue = value.toLongLong(&conversionSucceeded);
     Q_UNUSED(intValue); // Keep cppcheck happy
     bool isInt = conversionSucceeded;
 
