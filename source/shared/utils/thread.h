@@ -96,7 +96,7 @@ QString u::parentProcessName()
     {
         QTextStream ts(&procFile);
         QString commandLine = ts.readLine();
-        auto tokens = commandLine.split(QRegExp(QString(QChar(0))));
+        auto tokens = commandLine.split(QChar(0));
 
         if(!tokens.empty())
             return tokens.at(0);
