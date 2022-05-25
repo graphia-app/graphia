@@ -1378,7 +1378,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
 {
     auto order = Qt::AscendingOrder;
 
-    const auto* existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
+    auto existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
     [type, &text](const auto& value)
     {
         bool sameType = (value[QStringLiteral("type")].toInt() == type);
@@ -1403,7 +1403,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
                 Qt::DescendingOrder : Qt::AscendingOrder;
         }
 
-        _columnSortOrders.erase(const_cast<QVariantMap*>(existing));
+        _columnSortOrders.erase(existing);
     }
 
     QVariantMap newSortOrder;
