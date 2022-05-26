@@ -334,7 +334,10 @@ ApplicationWindow
                 {
                     tabBar.removeTab(0);
                     _restartOnExit = restartOnExit;
-                    mainWindow.close();
+
+                    // callLater is used because (apparently) ApplicationWindow::close()
+                    // doesn't like to be invoked recursively
+                    Qt.callLater(mainWindow.close);
                 };
             }(_restartOnExit);
 
