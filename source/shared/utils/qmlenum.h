@@ -61,11 +61,12 @@ constexpr bool static_strcmp(char const* a, char const* b)
             if(initialised) \
                 return; \
             initialised = true; \
-            qmlRegisterUncreatableType<_REFLECTOR(ENUM_NAME)>( \
+            qmlRegisterUncreatableMetaObject(_REFLECTOR(ENUM_NAME)::staticMetaObject, \
                 APP_URI, \
                 APP_MAJOR_VERSION, \
                 APP_MINOR_VERSION, \
-                #ENUM_NAME, QString()); \
+                #ENUM_NAME, {}); \
+            qRegisterMetaType<_REFLECTOR(ENUM_NAME)::Enum>(#ENUM_NAME); \
         } \
     }; \
     static void ENUM_NAME ## _initialiser() \
