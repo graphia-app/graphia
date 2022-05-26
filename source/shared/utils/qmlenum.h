@@ -44,10 +44,12 @@ constexpr bool static_strcmp(char const* a, char const* b)
 // Defining an enumeration that's usable in QML is awkward, so
 // here is a macro to make it easier:
 
-#define _REFLECTOR(x) x ## _reflector /* NOLINT cppcoreguidelines-macro-usage */
-#define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum /* NOLINT cppcoreguidelines-macro-usage */
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) /* NOLINT cppcoreguidelines-macro-usage */ \
+#define _REFLECTOR(x) x ## _reflector
+#define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
+
+#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) \
     static_assert(static_strcmp(#_Q_GADGET, "Q_GADGET"), \
         "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
     class _REFLECTOR(ENUM_NAME) \
@@ -94,9 +96,11 @@ constexpr bool static_strcmp(char const* a, char const* b)
     } \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
 
-#define NORMALISE_QML_ENUM(x, v) /* NOLINT cppcoreguidelines-macro-usage */ \
+#define NORMALISE_QML_ENUM(x, v) \
     (static_cast<x>(v) < static_cast<x>(0) || static_cast<x>(v) >= x::Max ? \
     static_cast<x>(0) : static_cast<x>(v))
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 /*
 Example:
