@@ -43,6 +43,7 @@
 #include <QObject>
 #include <QCoreApplication>
 #include <QOpenGLFramebufferObjectFormat>
+#include <QQuickOpenGLUtils>
 #include <QOpenGLDebugLogger>
 #include <QColor>
 #include <QQuickWindow>
@@ -1116,6 +1117,8 @@ void GraphRenderer::render()
         return;
     }
 
+    QQuickOpenGLUtils::resetOpenGLState();
+
     glViewport(0, 0, width(), height());
 
     updateScene();
@@ -1129,29 +1132,13 @@ void GraphRenderer::render()
 
     renderToFramebuffer();
 
-    std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
-    resetOpenGLState();
+    QQuickOpenGLUtils::resetOpenGLState();
 
     _performanceCounter.tick();
 }
 
 void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 {
-    if(!resetOpenGLState)
-    {
-        resetOpenGLState = [item]
-        {
-            if(item->window() != nullptr)
-                item->window()->resetOpenGLState();
-        };
-
-        connect(item, &QObject::destroyed, [this]
-        {
-            std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
-            resetOpenGLState = []{};
-        });
-    }
-
     _devicePixelRatio = item->window()->devicePixelRatio();
 
     auto* graphQuickItem = qobject_cast<GraphQuickItem*>(item);

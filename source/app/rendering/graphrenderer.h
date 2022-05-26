@@ -281,9 +281,6 @@ private:
     void render() override;
     void synchronize(QQuickFramebufferObject* item) override;
 
-    std::mutex _resetOpenGLStateMutex;
-    std::function<void()> resetOpenGLState;
-
     void finishTransitionToOverviewMode(bool doTransition);
     void finishTransitionToOverviewModeOnRendererThread(bool doTransition);
     void finishTransitionToComponentMode(bool doTransition);
