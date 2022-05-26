@@ -752,8 +752,10 @@ ApplicationWindow
                 else
                     openUrlOfTypeWithPlugin(url, type, defaultPlugin, inNewTab);
             }
-            else
+            else if(pluginNames.length === 1)
                 openUrlOfTypeWithPlugin(url, type, pluginNames[0], inNewTab);
+            else
+                openUrlOfTypeWithPlugin(url, type, "", inNewTab);
         };
 
         if(currentTab !== null && !inNewTab)
