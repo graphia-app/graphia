@@ -16,13 +16,13 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.14
-import QtQml 2.12
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.3
-import QtQuick.Shapes 1.13
+import QtQuick
+import QtQml
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Shapes
 
-import app.graphia 1.0
+import app.graphia
 
 Rectangle
 {

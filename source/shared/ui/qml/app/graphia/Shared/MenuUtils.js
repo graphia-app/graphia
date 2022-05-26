@@ -17,13 +17,14 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia.Shared.Controls 1.0 as SharedControls
-.import QtQuick.Controls 2.15 as QtQuickControls
+.import app.graphia.Shared.Controls as SharedControls
+.import QtQuick.Controls as QtQuickControls
 
 function createQmlItem(itemName, parent)
 {
     return Qt.createQmlObject(
-        "import QtQuick.Controls 2.15; import app.graphia.Shared.Controls 1.0; " +
+        "import QtQuick.Controls\n" +
+        "import app.graphia.Shared.Controls\n" +
         itemName + " {}", parent);
 }
 

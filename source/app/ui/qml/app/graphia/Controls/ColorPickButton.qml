@@ -16,12 +16,12 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.12
-import QtQml 2.8
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQml
+import QtQuick.Dialogs
 
-import app.graphia.Shared 1.0
+import app.graphia.Shared
 
 Item
 {

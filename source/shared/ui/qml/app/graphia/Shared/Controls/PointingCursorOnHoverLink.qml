@@ -16,7 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
+import QtQuick
 
 // If this item is inserted as the child of something with a hoveredLink property,
 // it will change the cursor to a pointing finger, whenever said property is non-empty

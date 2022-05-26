@@ -16,17 +16,17 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.14
-import QtQml 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.3
-import QtQml.Models 2.13
-import QtQuick.Shapes 1.13
+import QtQuick
+import QtQml
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQml.Models
+import QtQuick.Shapes
 
-import Qt.labs.platform 1.0 as Labs
+import Qt.labs.platform as Labs
 
-import app.graphia 1.0
-import app.graphia.Shared 1.0
+import app.graphia
+import app.graphia.Shared
 
 Item
 {

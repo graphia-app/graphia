@@ -16,7 +16,7 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
+import QtQuick
 
 // If this is made the child of another control then the activated signal is
 // emitted when the user clicks on it ten times

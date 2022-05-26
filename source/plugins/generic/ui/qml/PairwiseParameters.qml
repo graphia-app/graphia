@@ -16,16 +16,16 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick.Controls 2.12
-import QtQuick 2.14
-import QtQml 2.12
-import QtQuick.Layouts 1.3
-import QtQuick.Window 2.2
+import QtQuick.Controls
+import QtQuick
+import QtQml
+import QtQuick.Layouts
+import QtQuick.Window
 
-import app.graphia 1.0
-import app.graphia.Controls 1.0
-import app.graphia.Shared 1.0
-import app.graphia.Shared.Controls 1.0
+import app.graphia
+import app.graphia.Controls
+import app.graphia.Shared
+import app.graphia.Shared.Controls
 
 BaseParameterDialog
 {

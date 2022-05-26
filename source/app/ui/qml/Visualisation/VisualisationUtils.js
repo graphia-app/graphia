@@ -17,8 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia.Shared 1.0 as Shared
-.import app.graphia 1.0 as Graphia
+.import app.graphia.Shared as Shared
+.import app.graphia as Graphia
 
 function expressionFor(document, attributeName, flags, type, channelName)
 {

@@ -16,12 +16,12 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
-import QtQuick.Window 2.2
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Layouts
 
-import app.graphia.Shared 1.0
+import app.graphia.Shared
 
 // This dialog is conceptually similar to a tabview in a dialog however the user
 // interface consists of a vertical list of tabs with buttons to OPTIONALLY

@@ -17,9 +17,9 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia 1.0 as Graphia
-.import app.graphia.Utils 1.0 as Utils
-.import app.graphia.Shared 1.0 as Shared
+.import app.graphia as Graphia
+.import app.graphia.Utils as Utils
+.import app.graphia.Shared as Shared
 
 function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
@@ -48,8 +48,8 @@ function createTransformParameter(document, parent, parameterData, onParameterCh
 function addLabelTo(text, parent)
 {
     text = text.trim();
-    Qt.createQmlObject("import QtQuick 2.7\n" +
-        "import QtQuick.Controls 2.12\n" +
+    Qt.createQmlObject("import QtQuick\n" +
+        "import QtQuick.Controls\n" +
         "Label { text: \"" +
         Shared.Utils.normaliseWhitespace(text) +
         "\"; color: root.textColor }", parent);

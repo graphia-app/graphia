@@ -16,17 +16,17 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.2
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.1
-import QtQuick.Window 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs
+import QtQuick.Window
 
-import app.graphia 1.0
-import app.graphia.Controls 1.0
-import app.graphia.Shared.Controls 1.0
+import app.graphia
+import app.graphia.Controls
+import app.graphia.Shared.Controls
 
-import SortFilterProxyModel 0.2
+import SortFilterProxyModel
 
 Wizard
 {

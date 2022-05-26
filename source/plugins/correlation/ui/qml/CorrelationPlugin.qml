@@ -16,15 +16,15 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 2.7
-import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 
-import Qt.labs.platform 1.0 as Labs
+import Qt.labs.platform as Labs
 
-import app.graphia 1.0
-import app.graphia.Shared 1.0
-import app.graphia.Shared.Controls 1.0
+import app.graphia
+import app.graphia.Shared
+import app.graphia.Shared.Controls
 
 PluginContent
 {
