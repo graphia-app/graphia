@@ -1,15 +1,15 @@
 name: Build
 on: [push]
 env:
-  QT_VERSION: 5.15.2
-  QT_MODULES: qtwebengine
+  QT_VERSION: 6.3.1
+  QT_MODULES: qtwebengine qtwebchannel qtpositioning
   GCC_VERSION: 11
   CLANG_VERSION: 14
 
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - name: Install Tools
       run: |
@@ -17,14 +17,10 @@ jobs:
         sudo apt-get update
         sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - name: Patch Qt 5 for GCC 11
-      run: |
-        ls ${{ env.Qt5_DIR }}
-        sed -i 's/ThreadEngineStarter<void>(/ThreadEngineStarter(/' ${{ env.Qt5_DIR }}/include/QtConcurrent/qtconcurrentthreadengine.h
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -68,7 +64,7 @@ jobs:
     runs-on: windows-2019
     steps:
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -108,7 +104,7 @@ jobs:
     runs-on: macos-10.15
     steps:
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -164,7 +160,7 @@ jobs:
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -218,7 +214,7 @@ jobs:
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -256,7 +252,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install cppcheck
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -291,7 +287,7 @@ jobs:
         sudo apt install g++ cmake clang llvm-${{ env.CLANG_VERSION }}-dev git-core libclang-${{ env.CLANG_VERSION }}-dev
         sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${{ env.CLANG_VERSION }} 100
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
@@ -332,7 +328,7 @@ jobs:
       - clang-debug
     steps:
     - name: Install Qt
-      uses: jurplel/install-qt-action@v2
+      uses: jurplel/install-qt-action@v3
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}

@@ -32,15 +32,14 @@ else()
     install(TARGETS CrashReporter RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt5 COMPONENTS Qml Quick QuickControls2 OpenGL OpenGLExtensions Xml Network REQUIRED)
+find_package(Qt6 COMPONENTS REQUIRED Qml Quick QuickControls2 OpenGL Xml Network)
 target_link_libraries(CrashReporter
-    Qt5::Qml
-    Qt5::Quick
-    Qt5::QuickControls2
-    Qt5::OpenGL
-    Qt5::OpenGLExtensions
-    Qt5::Xml
-    Qt5::Network
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::OpenGL
+    Qt6::Xml
+    Qt6::Network
 )
 
 find_package(OpenGL REQUIRED)

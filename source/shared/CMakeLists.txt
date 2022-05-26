@@ -177,11 +177,11 @@ list(APPEND SOURCES ${SHARED_SOURCES})
 
 add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
-find_package(Qt5 COMPONENTS Qml Widgets Xml REQUIRED)
+find_package(Qt6 COMPONENTS REQUIRED Qml Widgets Xml)
 target_link_libraries(shared
-    Qt5::Qml
-    Qt5::Widgets
-    Qt5::Xml
+    Qt6::Qml
+    Qt6::Widgets
+    Qt6::Xml
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

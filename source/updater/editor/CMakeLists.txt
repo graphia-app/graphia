@@ -28,13 +28,13 @@ else()
     add_executable(UpdateEditor ${SOURCES} ${HEADERS} ${RESOURCES})
 endif()
 
-find_package(Qt5 COMPONENTS Qml Quick QuickControls2 Xml Widgets REQUIRED)
+find_package(Qt6 COMPONENTS REQUIRED Qml Quick QuickControls2 Xml Widgets)
 target_link_libraries(UpdateEditor
-    Qt5::Qml
-    Qt5::Quick
-    Qt5::QuickControls2
-    Qt5::Xml
-    Qt5::Widgets
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Xml
+    Qt6::Widgets
 )
 
 target_link_libraries(UpdateEditor shared)

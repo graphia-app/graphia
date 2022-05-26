@@ -55,7 +55,7 @@ copy %BUILD_DIR%\MessageBox.exe %INSTALLER_DIR%\
 set QML_DIRS=
 FOR /d /r %%i IN (*) DO @IF EXIST %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
 
-set WINDEPLOYQT_ARGS=--no-angle --no-compiler-runtime --no-opengl-sw
+set WINDEPLOYQT_ARGS=--no-compiler-runtime --no-opengl-sw
 
 echo ------ windeployqt
 windeployqt %QML_DIRS% %WINDEPLOYQT_ARGS% ^

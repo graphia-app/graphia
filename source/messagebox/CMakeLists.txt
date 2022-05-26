@@ -23,5 +23,5 @@ else()
   install(TARGETS MessageBox RUNTIME DESTINATION bin)
 endif()
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-target_link_libraries(MessageBox Qt5::Widgets)
+find_package(Qt6 COMPONENTS REQUIRED Widgets)
+target_link_libraries(MessageBox Qt6::Widgets)
