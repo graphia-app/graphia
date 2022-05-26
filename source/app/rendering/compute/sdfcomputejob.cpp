@@ -22,7 +22,7 @@
 #include "app/preferences.h"
 
 #include <QImage>
-#include <QGLWidget>
+#include <QOpenGLTexture>
 #include <QTime>
 #include <QDir>
 
@@ -35,30 +35,6 @@ void SDFComputeJob::run()
 {
     _glyphMap->update();
     generateSDF();
-}
-
-void SDFComputeJob::prepareGlyphMapTextureLayer(int layer, GLuint& texture)
-{
-    const auto& images = _glyphMap->images();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    if(texture == 0)
-        glGenTextures(1, &texture);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    QImage openGLImage = QGLWidget::convertToGLFormat(images.at(layer));
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                 images.at(layer).width(), images.at(layer).height(),
-                 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 openGLImage.bits());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 static void prepareQuad(QOpenGLVertexArrayObject& screenQuadVAO,
@@ -154,13 +130,11 @@ void SDFComputeJob::generateSDF()
                  renderWidth, renderHeight, numImages,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    // Set initial filtering and wrapping properties (filteiring will be changed to linear later)
+    // Set initial filtering and wrapping properties (filtering will be changed to linear later)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    GLuint glyphTexture = 0;
 
     // Draw SDF texture for each layer of atlas layer
     for(int layer = 0; layer < numImages; ++layer)
@@ -184,10 +158,11 @@ void SDFComputeJob::generateSDF()
         }
 
         // Create and load the glyph texture
-        prepareGlyphMapTextureLayer(layer, glyphTexture);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, glyphTexture);
+        QOpenGLTexture glyphTexture(_glyphMap->images().at(layer).mirrored(),
+            QOpenGLTexture::MipMapGeneration::DontGenerateMipMaps);
+        glyphTexture.setWrapMode(QOpenGLTexture::ClampToEdge);
+        glyphTexture.setMinMagFilters(QOpenGLTexture::Nearest, QOpenGLTexture::Linear);
+        glyphTexture.bind(0);
 
         sdfShader.setUniformValue("tex", 0);
         sdfShader.setUniformValue("projectionMatrix", m);
@@ -222,8 +197,6 @@ void SDFComputeJob::generateSDF()
         qDebug() << "SDF texture memory consumption MB:" <<
             static_cast<float>(memoryConsumption) / (1000.0f * 1000.0f);
     }
-
-    glDeleteTextures(1, &glyphTexture);
 
     screenQuadVAO.release();
     screenQuadDataBuffer.release();

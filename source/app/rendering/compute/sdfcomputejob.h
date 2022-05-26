@@ -38,7 +38,6 @@ private:
 
     std::function<void()> _onCompleteFn;
 
-    void prepareGlyphMapTextureLayer(int layer, GLuint& texture);
     void generateSDF();
 
 public:
