@@ -279,7 +279,7 @@ Item
                             ctx.beginPath();
                             ctx.moveTo(0, (height * 0.6) + 1);
                             ctx.lineTo(0, height);
-                            ctx.lineTo(picker._markerWidth, height );
+                            ctx.lineTo(picker._markerWidth, height);
                             ctx.lineTo(picker._markerWidth, (height * 0.6) + 1);
                             ctx.fill();
                             ctx.stroke();
