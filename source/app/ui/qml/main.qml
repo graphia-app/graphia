@@ -1769,6 +1769,20 @@ ApplicationWindow
 
     Action
     {
+        id: testInfiniteParseAction
+        text: qsTr("Test Infinite Parse")
+        onTriggered:
+        {
+            let infiniteParseUrl = QmlUtils.urlForFileName(application.resourceFile(
+                "debug/infiniteParse.graphia"));
+
+            if(QmlUtils.fileUrlExists(infiniteParseUrl))
+                openUrl(infiniteParseUrl, true);
+        }
+    }
+
+    Action
+    {
         id: saveImageAction
         icon.name: "camera-photo"
         text: qsTr("Save As Image…")
@@ -2242,6 +2256,7 @@ ApplicationWindow
             PlatformMenuItem { action: reportScopeTimersAction }
             PlatformMenuItem { action: showCommandLineArgumentsAction }
             PlatformMenuItem { action: showEnvironmentAction }
+            PlatformMenuItem { action: testInfiniteParseAction }
             PlatformMenuItem { action: restartAction }
         }
 

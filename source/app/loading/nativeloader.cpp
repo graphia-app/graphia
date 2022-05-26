@@ -39,6 +39,8 @@
 #include <QRegularExpression>
 
 #include <vector>
+#include <thread>
+#include <chrono>
 
 #include <json_helper.h>
 
@@ -311,6 +313,17 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         return false;
 
     auto jsonBody = jsonArray.at(1);
+
+    if(u::contains(jsonBody, "infiniteParse"))
+    {
+        while(!cancelled())
+        {
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(1000ms);
+        }
+
+        return false;
+    }
 
     if(!u::contains(jsonBody, "graph") || !jsonBody["graph"].is_object())
         return false;
