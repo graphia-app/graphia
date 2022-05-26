@@ -67,10 +67,10 @@ Rectangle
 
                 selectByMouse: true
                 placeholderText: qsTr("Email Address")
-                validator: RegExpValidator
+                validator: RegularExpressionValidator
                 {
                     // Check it's a valid email address
-                    regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
+                    regularExpression: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/
                 }
             }
 

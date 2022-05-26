@@ -361,7 +361,7 @@ BaseParameterDialog
 
                         visible: false
 
-                        validator: RegExpValidator { regExp: new RegExp(QmlUtils.validAttributeNameRegex) }
+                        validator: RegularExpressionValidator { regularExpression: new RegExp(QmlUtils.validAttributeNameRegex) }
                         color: acceptableInput ? "black" : "red"
 
                         function activate()

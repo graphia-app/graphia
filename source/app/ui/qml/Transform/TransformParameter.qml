@@ -176,7 +176,7 @@ GridLayout
         enabled: valueType !== ValueType.Unknown
         selectByMouse: true
 
-        validator: RegExpValidator { id: textFieldValidator }
+        validator: RegularExpressionValidator { id: textFieldValidator }
 
         function updateValue()
         {
@@ -307,7 +307,7 @@ GridLayout
             textField.text = initialValue;
 
             if(validatorRegex.length > 0)
-                textFieldValidator.regExp = new RegExp(validatorRegex);
+                textFieldValidator.regularExpression = new RegExp(validatorRegex);
 
             value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
             break;

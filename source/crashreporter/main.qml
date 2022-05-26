@@ -112,7 +112,7 @@ ApplicationWindow
             text: emailAddress
             selectByMouse: true
             placeholderText: qsTr("Email address (optional)")
-            validator: RegExpValidator { regExp: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
+            validator: RegularExpressionValidator { regularExpression: /\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
             Layout.fillWidth: true
         }
 

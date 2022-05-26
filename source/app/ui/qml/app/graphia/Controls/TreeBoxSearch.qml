@@ -51,10 +51,10 @@ TextField
         model: treeBox && treeBox.model ? treeBox.model : null
     }
 
-    validator: RegExpValidator
+    validator: RegularExpressionValidator
     {
         // Disallow leading whitespace
-        regExp: /^[^\s]+.*/
+        regularExpression: /^[^\s]+.*/
     }
 
     property bool _allowComplete: false
