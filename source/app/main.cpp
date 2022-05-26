@@ -370,9 +370,6 @@ int start(int argc, char *argv[])
 
     configureProxy();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#error Update this to handle native themes
-#endif
     QQuickStyle::setStyle(u::pref(QStringLiteral("system/uiTheme")).toString());
 
     QQmlApplicationEngine engine;
