@@ -30,9 +30,9 @@ Image
     {
         switch(type)
         {
-        case "error": return "error.png";
+        case "error": return "qrc:///qml/app/graphia/Controls/error.png";
         default:
-        case "warning": return "warning.png";
+        case "warning": return "qrc:///qml/app/graphia/Controls/warning.png";
         }
     }
 
