@@ -549,6 +549,8 @@ public:
     Q_INVOKABLE QString graphSizeSummary() const;
     Q_INVOKABLE QString commandStackSummary() const;
 
+    Q_INVOKABLE void startTestCommand();
+
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);

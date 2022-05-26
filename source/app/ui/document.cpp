@@ -67,6 +67,8 @@
 
 #include <json_helper.h>
 #include <numeric>
+#include <thread>
+#include <chrono>
 
 #include <QQmlProperty>
 #include <QMetaObject>
@@ -3015,6 +3017,29 @@ QString Document::graphSizeSummary() const
 QString Document::commandStackSummary() const
 {
     return _commandManager.commandStackSummary();
+}
+
+void Document::startTestCommand()
+{
+    class TestCommand : public ICommand
+    {
+    public:
+        bool execute() override
+        {
+            while(!cancelled())
+            {
+                using namespace std::chrono_literals;
+                std::this_thread::sleep_for(1000ms);
+            }
+
+            return true;
+        }
+
+        QString description() const override { return QObject::tr("Test Command"); }
+        bool cancellable() const override { return true; }
+    };
+
+    _commandManager.execute(ExecutePolicy::Once, std::make_unique<TestCommand>());
 }
 
 static_block

@@ -1769,6 +1769,17 @@ ApplicationWindow
 
     Action
     {
+        id: testCommandAction
+        text: qsTr("Test Command")
+        onTriggered: function(source)
+        {
+            if(currentTab)
+                currentTab.document.startTestCommand();
+        }
+    }
+
+    Action
+    {
         id: testInfiniteParseAction
         text: qsTr("Test Infinite Parse")
         onTriggered:
@@ -2256,6 +2267,7 @@ ApplicationWindow
             PlatformMenuItem { action: reportScopeTimersAction }
             PlatformMenuItem { action: showCommandLineArgumentsAction }
             PlatformMenuItem { action: showEnvironmentAction }
+            PlatformMenuItem { action: testCommandAction }
             PlatformMenuItem { action: testInfiniteParseAction }
             PlatformMenuItem { action: restartAction }
         }
