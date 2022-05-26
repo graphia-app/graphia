@@ -974,36 +974,7 @@ ApplicationWindow
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
         enabled: currentTab !== null
-        onTriggered: function(source)
-        {
-            // If we're currently busy, cancel and wait before closing
-            if(currentTab.document.commandInProgress)
-            {
-                // If a load is cancelled the tab is closed automatically,
-                // and there is no command involved anyway, so in that case we
-                // don't need to wait for the command to complete
-                if(currentTab.document.loadComplete)
-                {
-                    // Capture the document by value so we can use it to work out
-                    // which tab to close once the command is complete
-                    let closeTabFunction = function(tab)
-                    {
-                        return function()
-                        {
-                            tab.commandComplete.disconnect(closeTabFunction);
-                            tabBar.closeTab(tabBar.findTabIndex(tab));
-                        };
-                    }(currentTab);
-
-                    currentTab.commandComplete.connect(closeTabFunction);
-                }
-
-                if(currentTab.document.commandIsCancellable)
-                    currentTab.document.cancelCommand();
-            }
-            else
-                tabBar.closeTab(tabBar.currentIndex);
-        }
+        onTriggered: function(source) { tabBar.closeTab(tabBar.currentIndex); }
     }
 
     Action
@@ -2562,7 +2533,16 @@ ApplicationWindow
                             onDocumentShown(currentTab.document);
                     }
                     else
+                    {
                         tabBar.onLoadFailure(tabBar.findTabIndex(this), url);
+                        onLoadFailure();
+                    }
+                }
+
+                property var onLoadFailure: function()
+                {
+                    // Remove the tab that was created but won't be used
+                    tabBar.removeTab(tabBar.findTabIndex(this));
                 }
             }
         }
@@ -2646,11 +2626,8 @@ ApplicationWindow
                 function onLoadFailure(index, url)
                 {
                     let tab = tabLayout.get(index);
+
                     let loadWasCancelled = tab.document.commandIsCancelling;
-
-                    // Remove the tab that was created but won't be used
-                    removeTab(index);
-
                     if(!loadWasCancelled)
                     {
                         if(tab.document.failureReason.length > 0)
@@ -2685,16 +2662,39 @@ ApplicationWindow
                     }
 
                     if(typeof(onCloseFunction) === "undefined")
-                    {
-                        onCloseFunction = function()
-                        {
-                            removeTab(index);
-                        }
-                    }
+                        onCloseFunction = function() { removeTab(index); }
 
                     tabBar.currentIndex = index;
                     let tab = tabLayout.get(index);
-                    tab.confirmSave(onCloseFunction);
+
+                    // If we're currently busy, cancel and wait before closing
+                    if(tab.document.commandInProgress)
+                    {
+                        if(!tab.document.loadComplete)
+                        {
+                            tab.onLoadFailure = onCloseFunction;
+
+                            // Still loading, cancel it
+                            tab.document.cancelCommand();
+                        }
+                        else
+                        {
+                            let closeTabFunction = function()
+                            {
+                                tab.commandComplete.disconnect(closeTabFunction);
+
+                                // Invoke the close again, now that the command is cancelled
+                                tabBar.closeTab(index, onCloseFunction);
+                            };
+
+                            tab.commandComplete.connect(closeTabFunction);
+
+                            if(tab.document.commandIsCancellable)
+                                tab.document.cancelCommand();
+                        }
+                    }
+                    else
+                        tab.confirmSave(onCloseFunction);
                 }
 
                 function findTabIndex(tab)
