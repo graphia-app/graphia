@@ -47,13 +47,13 @@ Item
     property url savedFileUrl
     property string savedFileSaver
 
-    property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length > 0; }
+    property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).toString().length > 0; }
 
     property string baseFileName:
     {
         if(hasBeenSaved)
             return QmlUtils.baseFileNameForUrl(root.savedFileUrl);
-        else if(Qt.resolvedUrl(root.url).length > 0)
+        else if(Qt.resolvedUrl(root.url).toString().length > 0)
             return QmlUtils.baseFileNameForUrl(root.url);
 
         return "";
