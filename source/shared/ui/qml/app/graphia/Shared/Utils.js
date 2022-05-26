@@ -17,8 +17,6 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import QtQuick.Controls 2.12 as QtQuickControls2
-
 function watchPropertyChanges(object, handler)
 {
     for(let prop in object)
