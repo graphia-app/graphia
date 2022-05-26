@@ -284,7 +284,7 @@ ApplicationWindow
                             cellValueProvider: function(value)
                             {
                                 if(!isNaN(value) && value.length > 0)
-                                    return QmlUtils.formatNumberScientific(value, 1);
+                                    return QmlUtils.formatNumberScientific(value);
 
                                 return value;
                             }

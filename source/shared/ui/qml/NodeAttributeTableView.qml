@@ -1114,7 +1114,7 @@ Item
 
                                 let columnName = root.model.columnNameFor(sourceColumn);
                                 if(root.model.columnIsNumerical(columnName))
-                                    return QmlUtils.formatNumberScientific(model.display, 1);
+                                    return QmlUtils.formatNumberScientific(model.display);
 
                                 if(typeof(model.display) === "string")
                                 {
