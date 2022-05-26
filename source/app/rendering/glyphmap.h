@@ -67,12 +67,8 @@ public:
 
 private:
     std::vector<QImage> _images;
-
     Results _results;
-
     QString _fontName;
-    int _textureSize = 2048;
-    int _fontSize = 200;
 
     enum class UpdateType
     {
@@ -94,8 +90,6 @@ public:
     const Results& results() const;
 
     const std::vector<QImage>& images() const;
-
-    void setTextureSize(int textureSize);
 
     void setFontName(const QString& fontName);
 
