@@ -19,7 +19,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
+
+import Qt.labs.platform as Labs
 
 import app.graphia.Shared
 import app.graphia.Shared.Controls
@@ -127,10 +128,9 @@ ApplicationWindow
             Layout.columnSpan: 2
         }
 
-        MessageDialog
+        Labs.MessageDialog
         {
             id: invalidEmailDialog
-            icon: StandardIcon.Critical
             title: qsTr("Invalid Email Address")
             text: qsTr("Please enter a valid email address.")
         }
