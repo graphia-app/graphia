@@ -121,11 +121,9 @@ QHash<int, QByteArray> AvailableTransformsModel::roleNames() const
     return names;
 }
 
+Q_DECLARE_INTERFACE(AvailableTransformsModel, APP_URI)
+
 static_block
 {
-    qmlRegisterInterface<AvailableTransformsModel>("AvailableTransformsModel"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        , Application::majorVersion()
-#endif
-        );
+    qmlRegisterInterface<AvailableTransformsModel>("AvailableTransformsModel", Application::majorVersion());
 }

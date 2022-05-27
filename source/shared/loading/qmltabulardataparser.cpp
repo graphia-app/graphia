@@ -283,14 +283,12 @@ void QmlTabularDataParser::onDataLoaded()
     emit completeChanged();
 }
 
+Q_DECLARE_INTERFACE(QmlTabularDataHeaderModel, APP_URI)
+
 static_block
 {
     qmlRegisterType<QmlTabularDataParser>(APP_URI, APP_MAJOR_VERSION,
         APP_MINOR_VERSION, "TabularDataParser");
 
-    qmlRegisterInterface<QmlTabularDataHeaderModel>("TabularDataHeaderModel"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        , APP_MAJOR_VERSION
-#endif
-        );
+    qmlRegisterInterface<QmlTabularDataHeaderModel>("TabularDataHeaderModel", APP_MAJOR_VERSION);
 }

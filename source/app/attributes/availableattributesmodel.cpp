@@ -407,11 +407,9 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
     return names;
 }
 
+Q_DECLARE_INTERFACE(AvailableAttributesModel, APP_URI)
+
 static_block
 {
-    qmlRegisterInterface<AvailableAttributesModel>("AvailableAttributesModel"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        , Application::majorVersion()
-#endif
-        );
+    qmlRegisterInterface<AvailableAttributesModel>("AvailableAttributesModel", Application::majorVersion());
 }
