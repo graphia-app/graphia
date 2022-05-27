@@ -21,6 +21,8 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import Qt.labs.platform as Labs
+
 import app.graphia.Shared
 
 Item
@@ -381,7 +383,7 @@ Item
         }
     }
 
-    ColorDialog
+    Labs.ColorDialog
     {
         id: colorDialog
         title: qsTr("Select a Colour")

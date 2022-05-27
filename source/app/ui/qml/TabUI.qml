@@ -357,7 +357,7 @@ Item
             saveAsNamedFile(root.savedFileUrl, savedFileSaver);
     }
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: saveConfirmDialog
 
@@ -366,19 +366,10 @@ Item
 
         title: qsTr("File Changed")
         text: qsTr("Do you want to save changes to '") + baseFileName + qsTr("'?")
-        icon: StandardIcon.Warning
-        standardButtons: StandardButton.Save | StandardButton.Discard | StandardButton.Cancel
+        buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
 
-        onAccepted:
+        onSaveClicked:
         {
-            if(onSaveConfirmedFunction === null)
-            {
-                // For some reason, onAccepted gets called twice, possibly due to QTBUG-35933?
-                // Anyway, on the second call onSaveConfirmedFunction will have been nulled,
-                // so we can hackily use it to detect the second call and ignore it
-                return;
-            }
-
             // Capture onSaveConfirmedFunction so that it doesn't get overwritten before
             // we use it (though in theory that can't happen)
             let proxyFn = function(fn)
@@ -395,7 +386,7 @@ Item
             saveFile();
         }
 
-        onDiscard:
+        onDiscardClicked:
         {
             onSaveConfirmedFunction();
             onSaveConfirmedFunction = null;
@@ -598,7 +589,7 @@ Item
         application: root.application
     }
 
-    ColorDialog
+    Labs.ColorDialog
     {
         id: backgroundColorDialog
         title: qsTr("Select a Colour")
@@ -1595,10 +1586,9 @@ Item
         layoutSettings.toggle();
     }
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: errorSavingFileMessageDialog
-        icon: StandardIcon.Critical
         title: qsTr("Error Saving File")
     }
 

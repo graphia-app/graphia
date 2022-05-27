@@ -20,9 +20,10 @@ import QtQuick.Controls
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Window
-import QtQuick.Dialogs
 import Qt.labs.qmlmodels
 import QtQuick.Shapes
+
+import Qt.labs.platform as Labs
 
 import app.graphia
 import app.graphia.Controls
@@ -125,13 +126,12 @@ Window
         }
     }
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: confirmDiscard
         title: qsTr("Discard Edits")
         text: qsTr("Are you sure you want to discard existing edits?")
-        icon: StandardIcon.Warning
-        standardButtons: StandardButton.Yes | StandardButton.Cancel
+        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
 
         property string attributeToEdit: ""
         property bool toggleSharedValuesMode: false
@@ -142,7 +142,7 @@ Window
             toggleSharedValuesMode = false;
         }
 
-        onYes:
+        onYesClicked:
         {
             if(attributeToEdit.length > 0)
                 editAttributeTableModel.attributeName = attributeToEdit;
@@ -152,7 +152,7 @@ Window
             resetFlags();
         }
 
-        onRejected:
+        onCancelClicked:
         {
             if(toggleSharedValuesMode)
                 editAllSharedValuesCheckbox.checked = !editAllSharedValuesCheckbox.checked;

@@ -20,7 +20,8 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
+
+import Qt.labs.platform as Labs
 
 import app.graphia
 import app.graphia.Shared
@@ -227,16 +228,15 @@ Window
                     enabled: palettePresets.selectedIndex >= 0
                     text: qsTr("Delete Preset")
 
-                    MessageDialog
+                    Labs.MessageDialog
                     {
                         id: deleteDialog
                         visible: false
                         title: qsTr("Delete")
                         text: qsTr("Are you sure you want to delete this palette preset?")
+                        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.No
 
-                        icon: StandardIcon.Warning
-                        standardButtons: StandardButton.Yes | StandardButton.No
-                        onYes:
+                        onYesClicked:
                         {
                             let defaultDeleted = comparePalettes(visuals.defaultPalette,
                                 paletteEditor.configuration);

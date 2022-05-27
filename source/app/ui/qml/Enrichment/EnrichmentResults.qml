@@ -56,14 +56,13 @@ ApplicationWindow
     width: 1200
     height: 600
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: confirmDelete
         title: qsTr("Delete Enrichment Results?")
         text: qsTr("Are you sure you want to delete this enrichment result?")
-        icon: StandardIcon.Warning
-        standardButtons: StandardButton.Yes | StandardButton.Cancel
-        onYes:
+        buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
+        onYesClicked:
         {
             root.removeResults(tabBar.currentIndex);
         }

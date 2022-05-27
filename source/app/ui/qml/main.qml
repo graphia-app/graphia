@@ -22,8 +22,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+
 import Qt.labs.platform as Labs
-import QtQuick.Dialogs
 
 import app.graphia
 import app.graphia.Controls
@@ -91,10 +91,9 @@ ApplicationWindow
 
     Application { id: application }
 
-    Dialogs.MessageDialog
+    Labs.MessageDialog
     {
         id: noUpdatesMessageDialog
-        icon: Dialogs.StandardIcon.Information
         title: qsTr("No Updates")
         text: qsTr("There are no updates available at this time.")
     }
@@ -371,10 +370,9 @@ ApplicationWindow
             ExitType.Restart);
     }
 
-    Dialogs.MessageDialog
+    Labs.MessageDialog
     {
         id: errorOpeningFileMessageDialog
-        icon: Dialogs.StandardIcon.Critical
         title: qsTr("Error Opening File")
 
         onAccepted:
@@ -1714,10 +1712,9 @@ ApplicationWindow
         onTriggered: function(source) { mainWindow.restart(); }
     }
 
-    Dialogs.MessageDialog
+    Labs.MessageDialog
     {
         id: commandLineArgumentsMessageDialog
-        icon: Dialogs.StandardIcon.Information
         title: qsTr("Command Line Arguments")
     }
 

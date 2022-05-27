@@ -21,6 +21,8 @@ import QtQuick.Controls
 import QtQml
 import QtQuick.Dialogs
 
+import Qt.labs.platform as Labs
+
 import app.graphia.Shared
 
 Item
@@ -33,7 +35,7 @@ Item
     property string color: "#FF00FF" // Obvious default colour
     property string dialogTitle: qsTr("Select a Colour")
 
-    ColorDialog
+    Labs.ColorDialog
     {
         id: colorDialog
         title: root.dialogTitle

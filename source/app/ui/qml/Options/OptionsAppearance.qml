@@ -21,6 +21,8 @@ import QtQuick.Dialogs
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Qt.labs.platform as Labs
+
 import app.graphia
 import app.graphia.Controls
 import app.graphia.Shared
@@ -226,12 +228,13 @@ Item
         Item { Layout.fillWidth: true }
     }
 
-    FontDialog
+    Labs.FontDialog
     {
         id: fontDialog
         title: qsTr("Please choose a font")
         currentFont: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
         font: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
+
         onAccepted:
         {
             visuals.textFont = fontDialog.font.family;
