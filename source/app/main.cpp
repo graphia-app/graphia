@@ -194,6 +194,7 @@ int start(int argc, char *argv[])
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
 
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     OpenGLFunctions::setDefaultFormat();
 
