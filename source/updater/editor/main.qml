@@ -19,9 +19,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import Qt.labs.settings
+import Qt.labs.platform as Labs
 
 import app.graphia
 import app.graphia.Shared
@@ -72,11 +72,9 @@ ApplicationWindow
         root.saveRequired = false;
     }
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: validateErrorDialog
-        icon: StandardIcon.Critical
-        title: "Error"
     }
 
     function extractHostname(url)
@@ -544,7 +542,7 @@ ApplicationWindow
         }
     }
 
-    MessageDialog
+    Labs.MessageDialog
     {
         id: saveConfirmDialog
 
@@ -552,10 +550,9 @@ ApplicationWindow
 
         title: qsTr("File Changed")
         text: qsTr("Do you want to save changes?")
-        icon: StandardIcon.Warning
-        standardButtons: StandardButton.Save | StandardButton.Discard | StandardButton.Cancel
+        buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
 
-        onAccepted:
+        onSaveClicked:
         {
             if(onSaveConfirmedFunction !== undefined && onSaveConfirmedFunction !== null)
                 root.save(onSaveConfirmedFunction);
@@ -563,7 +560,7 @@ ApplicationWindow
             onSaveConfirmedFunction = null;
         }
 
-        onDiscard:
+        onDiscardClicked:
         {
             resetSaveRequired();
 
