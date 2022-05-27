@@ -157,8 +157,8 @@ Item
             id: listView
 
             anchors.margins: 1
-
             anchors.fill: parent
+
             model: root.model
 
             delegate: root.delegate
