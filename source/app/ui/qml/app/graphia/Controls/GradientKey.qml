@@ -43,7 +43,7 @@ Item
     property int _decimalPoints: Utils.decimalPointsForRange(root.minimum, root.maximum)
 
     property color hoverColor
-    property color textColor
+    property color textColor: "black"
 
     property color _contrastingColor:
     {

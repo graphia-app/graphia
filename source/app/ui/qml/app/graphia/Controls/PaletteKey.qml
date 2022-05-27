@@ -67,7 +67,7 @@ Item
     property double highlightSize: 120
 
     property color hoverColor
-    property color textColor
+    property color textColor: "black"
 
     property color _contrastingColor:
     {
