@@ -189,10 +189,14 @@ Rectangle
         property bool findByAttributeSortLexically
     }
 
-    implicitWidth: layout.implicitWidth
-    implicitHeight: layout.implicitHeight
-    width: layout.implicitWidth + (Constants.margin * 4)
-    height: layout.implicitHeight + (Constants.margin * 4)
+    function _updateImplicitSize()
+    {
+        implicitWidth = layout.implicitWidth + (Constants.padding * 2);
+        implicitHeight = layout.implicitHeight + (Constants.padding * 2);
+    }
+
+    width: implicitWidth + (Constants.margin * 4)
+    height: implicitHeight + (Constants.margin * 4)
 
     border.color: document.contrastingColor
     border.width: 1
@@ -365,275 +369,94 @@ Rectangle
         onClicked: { mouse.accepted = true; }
     }
 
-    RowLayout
+    ColumnLayout
     {
         id: layout
 
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.margins: Constants.padding
 
-        // The ColumnLayout in a RowLayout is just a hack to get some padding
-        ColumnLayout
+        onImplicitWidthChanged: { root._updateImplicitSize(); }
+        onImplicitHeightChanged: { root._updateImplicitSize(); }
+
+        RowLayout
         {
-            Layout.margins: Constants.padding
-
             RowLayout
             {
-                RowLayout
+                visible: _type === Find.Simple || _type === Find.Advanced
+
+                TextField
                 {
-                    visible: _type === Find.Simple || _type === Find.Advanced
+                    id: findField
+                    width: 150
+                    font.strikeout: root._interrupted
 
-                    TextField
+                    onAccepted: { selectAllAction.trigger(); }
+
+                    background: Rectangle
                     {
-                        id: findField
-                        width: 150
-                        font.strikeout: root._interrupted
-
-                        onAccepted: { selectAllAction.trigger(); }
-
-                        background: Rectangle
-                        {
-                            implicitWidth: 192
-                            color: "transparent"
-                        }
-
-                        Keys.onUpPressed: { _previousAction.trigger(); }
-                        Keys.onDownPressed: { _nextAction.trigger(); }
+                        implicitWidth: 192
+                        color: "transparent"
                     }
 
-                    Item
-                    {
-                        Layout.fillHeight: true
-                        implicitWidth: 80
-
-                        Text
-                        {
-                            anchors.fill: parent
-
-                            wrapMode: Text.NoWrap
-                            elide: Text.ElideLeft
-                            horizontalAlignment: Text.AlignRight
-                            verticalAlignment: Text.AlignVCenter
-
-                            visible: findField.length > 0
-                            text:
-                            {
-                                let index = document.foundIndex + 1;
-
-                                if(index > 0)
-                                    return index + qsTr(" of ") + document.numNodesFound;
-                                else if(document.numNodesFound > 0)
-                                    return document.numNodesFound + qsTr(" found");
-                                else
-                                    return qsTr("Not Found");
-                            }
-                            color: "grey"
-                        }
-
-                        MouseArea
-                        {
-                            anchors.fill: parent
-                            onClicked: { findField.forceActiveFocus(); }
-                        }
-                    }
+                    Keys.onUpPressed: { _previousAction.trigger(); }
+                    Keys.onDownPressed: { _nextAction.trigger(); }
                 }
 
-                RowLayout
+                Item
                 {
-                    id: findByAttributeRow
+                    Layout.fillHeight: true
+                    implicitWidth: 80
 
-                    visible: _type === Find.ByAttribute
-
-                    ComboBox
+                    Text
                     {
-                        id: selectAttributeComboBox
-                        implicitWidth: 175
+                        anchors.fill: parent
 
-                        enabled: selectAttributeComboBox.count > 0
+                        wrapMode: Text.NoWrap
+                        elide: Text.ElideLeft
+                        horizontalAlignment: Text.AlignRight
+                        verticalAlignment: Text.AlignVCenter
 
-                        textRole: "display"
-
-                        model: proxyModel
-
-                        onCurrentTextChanged:
+                        visible: findField.length > 0
+                        text:
                         {
-                            // Prevent spurious changes to currentText
-                            if(proxyModel._sourceChanging)
-                                return;
+                            let index = document.foundIndex + 1;
 
-                            if(_visible && findByAttributeRow.visible)
-                                lastFindByAttributeName = currentText;
-
-                            valueComboBox.refresh();
-                            _attributeValues = [];
-                        }
-
-                        function refresh()
-                        {
-                            let rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
-
-                            if(rowIndex >= 0)
-                            {
-                                currentIndex = rowIndex;
-                                valueComboBox.refresh();
-                            }
-                            else if(count > 0)
-                            {
-                                currentIndex = 0;
-                                lastFindByAttributeName = currentText;
-                            }
+                            if(index > 0)
+                                return index + qsTr(" of ") + document.numNodesFound;
+                            else if(document.numNodesFound > 0)
+                                return document.numNodesFound + qsTr(" found");
                             else
-                                currentIndex = -1;
+                                return qsTr("Not Found");
                         }
+                        color: "grey"
                     }
 
-                    FloatingButton { action: selectMultipleModeAction }
-
-                    ComboBox
+                    MouseArea
                     {
-                        id: valueComboBox
-                        Layout.preferredWidth: 175
-
-                        visible: !_selectMultipleMode
-                        enabled: valueComboBox.count > 0
-
-                        property bool _modelChanging: false
-                        property string value: ""
-
-                        onCurrentTextChanged:
-                        {
-                            // Prevent spurious changes to currentText
-                            if(_modelChanging)
-                                return;
-
-                            value = currentText;
-                        }
-
-                        function refresh()
-                        {
-                            // Try to keep the same value selected
-                            let preUpdateText = currentText;
-
-                            let attribute = document.attribute(selectAttributeComboBox.currentText);
-
-                            if(preferences.findByAttributeSortLexically)
-                                attribute.sharedValues.sort(QmlUtils.localeCompareStrings);
-
-                            _modelChanging = true;
-                            model = attribute.sharedValues;
-                            _modelChanging = false;
-
-                            let rowIndex = find(preUpdateText);
-
-                            if(rowIndex >= 0)
-                                currentIndex = rowIndex;
-                            else if(count > 0)
-                                currentIndex = 0;
-                            else
-                                currentIndex = -1;
-
-                            value = currentText;
-                        }
-                    }
-                }
-
-                FloatingButton { action: _previousAction; visible: !_selectMultipleMode }
-                FloatingButton { action: _nextAction; visible: !_selectMultipleMode }
-                FloatingButton
-                {
-                    visible: _type === Find.Simple || _type === Find.Advanced
-                    action: selectAllAction
-                }
-                FloatingButton
-                {
-                    visible: _type === Find.ByAttribute
-                    action: selectOnlyAction
-                }
-                FloatingButton { action: closeAction }
-            }
-
-
-            FramedScrollView
-            {
-                id: scrollView
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: 128
-
-                visible: _selectMultipleMode
-
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
-                ListView
-                {
-                    boundsBehavior: Flickable.StopAtBounds
-
-                    model: valueComboBox.model
-                    delegate: Loader
-                    {
-                        sourceComponent: CheckBox
-                        {
-                            text: modelData
-
-                            function isChecked()
-                            {
-                                return Utils.setContains(_attributeValues, modelData);
-                            }
-
-                            checked: { return isChecked(); }
-
-                            onCheckedChanged:
-                            {
-                                // Unbind to prevent binding loop
-                                checked = checked;
-
-                                if(checked)
-                                    _attributeValues = Utils.setAdd(_attributeValues, modelData);
-                                else
-                                    _attributeValues = Utils.setRemove(_attributeValues, modelData);
-
-                                // Rebind so that the delegate doesn't hold the state
-                                checked = Qt.binding(isChecked);
-                            }
-
-                            ToolTip.visible: hovered
-                            ToolTip.delay: 500
-                            ToolTip.text: modelData
-                        }
+                        anchors.fill: parent
+                        onClicked: { findField.forceActiveFocus(); }
                     }
                 }
             }
 
             RowLayout
             {
-                id: advancedRow
+                id: findByAttributeRow
 
-                visible: _type === Find.Advanced
-
-                Rectangle { width: Constants.padding }
-
-                CheckBox
-                {
-                    id: attributeCheckBox
-                    enabled: attributeComboBox.count > 0
-                }
+                visible: _type === Find.ByAttribute
 
                 ComboBox
                 {
-                    id: attributeComboBox
-                    Layout.fillWidth: true
+                    id: selectAttributeComboBox
+                    implicitWidth: 175
 
-                    enabled: attributeCheckBox.checked && attributeComboBox.count > 0
+                    enabled: selectAttributeComboBox.count > 0
+
                     textRole: "display"
 
                     model: proxyModel
-
-                    onEnabledChanged:
-                    {
-                        if(_visible && advancedRow.visible)
-                            lastAdvancedFindAttributeName = enabled ? currentText: "";
-                    }
 
                     onCurrentTextChanged:
                     {
@@ -641,36 +464,214 @@ Rectangle
                         if(proxyModel._sourceChanging)
                             return;
 
-                        if(_visible && advancedRow.visible && enabled)
-                            lastAdvancedFindAttributeName = currentText;
+                        if(_visible && findByAttributeRow.visible)
+                            lastFindByAttributeName = currentText;
+
+                        valueComboBox.refresh();
+                        _attributeValues = [];
                     }
 
                     function refresh()
                     {
-                        let rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+                        let rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
 
                         if(rowIndex >= 0)
                         {
                             currentIndex = rowIndex;
-                            attributeCheckBox.checked = true;
+                            valueComboBox.refresh();
                         }
                         else if(count > 0)
                         {
                             currentIndex = 0;
-                            attributeCheckBox.checked = false;
+                            lastFindByAttributeName = currentText;
                         }
                         else
-                        {
                             currentIndex = -1;
-                            attributeCheckBox.checked = false;
-                        }
                     }
                 }
 
-                FloatingButton { action: matchCaseAction }
-                FloatingButton { action: matchWholeWordsAction }
-                FloatingButton { action: matchUsingRegexAction }
+                FloatingButton { action: selectMultipleModeAction }
+
+                ComboBox
+                {
+                    id: valueComboBox
+                    Layout.preferredWidth: 175
+
+                    visible: !_selectMultipleMode
+                    enabled: valueComboBox.count > 0
+
+                    property bool _modelChanging: false
+                    property string value: ""
+
+                    onCurrentTextChanged:
+                    {
+                        // Prevent spurious changes to currentText
+                        if(_modelChanging)
+                            return;
+
+                        value = currentText;
+                    }
+
+                    function refresh()
+                    {
+                        // Try to keep the same value selected
+                        let preUpdateText = currentText;
+
+                        let attribute = document.attribute(selectAttributeComboBox.currentText);
+
+                        if(preferences.findByAttributeSortLexically)
+                            attribute.sharedValues.sort(QmlUtils.localeCompareStrings);
+
+                        _modelChanging = true;
+                        model = attribute.sharedValues;
+                        _modelChanging = false;
+
+                        let rowIndex = find(preUpdateText);
+
+                        if(rowIndex >= 0)
+                            currentIndex = rowIndex;
+                        else if(count > 0)
+                            currentIndex = 0;
+                        else
+                            currentIndex = -1;
+
+                        value = currentText;
+                    }
+                }
             }
+
+            FloatingButton { action: _previousAction; visible: !_selectMultipleMode }
+            FloatingButton { action: _nextAction; visible: !_selectMultipleMode }
+            FloatingButton
+            {
+                visible: _type === Find.Simple || _type === Find.Advanced
+                action: selectAllAction
+            }
+            FloatingButton
+            {
+                visible: _type === Find.ByAttribute
+                action: selectOnlyAction
+            }
+            FloatingButton { action: closeAction }
+        }
+
+        FramedScrollView
+        {
+            id: scrollView
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 128
+
+            visible: _selectMultipleMode
+
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+            ListView
+            {
+                boundsBehavior: Flickable.StopAtBounds
+
+                model: valueComboBox.model
+                delegate: Loader
+                {
+                    sourceComponent: CheckBox
+                    {
+                        text: modelData
+
+                        function isChecked()
+                        {
+                            return Utils.setContains(_attributeValues, modelData);
+                        }
+
+                        checked: { return isChecked(); }
+
+                        onCheckedChanged:
+                        {
+                            // Unbind to prevent binding loop
+                            checked = checked;
+
+                            if(checked)
+                                _attributeValues = Utils.setAdd(_attributeValues, modelData);
+                            else
+                                _attributeValues = Utils.setRemove(_attributeValues, modelData);
+
+                            // Rebind so that the delegate doesn't hold the state
+                            checked = Qt.binding(isChecked);
+                        }
+
+                        ToolTip.visible: hovered
+                        ToolTip.delay: 500
+                        ToolTip.text: modelData
+                    }
+                }
+            }
+        }
+
+        RowLayout
+        {
+            id: advancedRow
+
+            visible: _type === Find.Advanced
+
+            Rectangle { width: Constants.padding }
+
+            CheckBox
+            {
+                id: attributeCheckBox
+                enabled: attributeComboBox.count > 0
+            }
+
+            ComboBox
+            {
+                id: attributeComboBox
+                Layout.fillWidth: true
+
+                enabled: attributeCheckBox.checked && attributeComboBox.count > 0
+                textRole: "display"
+
+                model: proxyModel
+
+                onEnabledChanged:
+                {
+                    if(_visible && advancedRow.visible)
+                        lastAdvancedFindAttributeName = enabled ? currentText: "";
+                }
+
+                onCurrentTextChanged:
+                {
+                    // Prevent spurious changes to currentText
+                    if(proxyModel._sourceChanging)
+                        return;
+
+                    if(_visible && advancedRow.visible && enabled)
+                        lastAdvancedFindAttributeName = currentText;
+                }
+
+                function refresh()
+                {
+                    let rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+
+                    if(rowIndex >= 0)
+                    {
+                        currentIndex = rowIndex;
+                        attributeCheckBox.checked = true;
+                    }
+                    else if(count > 0)
+                    {
+                        currentIndex = 0;
+                        attributeCheckBox.checked = false;
+                    }
+                    else
+                    {
+                        currentIndex = -1;
+                        attributeCheckBox.checked = false;
+                    }
+                }
+            }
+
+            FloatingButton { action: matchCaseAction }
+            FloatingButton { action: matchWholeWordsAction }
+            FloatingButton { action: matchUsingRegexAction }
         }
     }
 
@@ -709,12 +710,17 @@ Rectangle
 
     function show(findType)
     {
+        if(_visible && findType === _type)
+            return;
+
         _closing = false;
 
         if(findType === undefined)
             _type = Find.Simple;
         else
             _type = findType;
+
+        root._updateImplicitSize();
 
         refresh();
 
