@@ -18,7 +18,7 @@
 
 #include "openglfunctions.h"
 
-#include <QOpenGLFunctions_1_0>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLContext>
 #include <QSurfaceFormat>
 #include <QOffscreenSurface>
@@ -36,8 +36,11 @@ void OpenGLFunctions::resolveOpenGLFunctions()
 
     if(context->hasExtension(QByteArrayLiteral("GL_ARB_sample_shading")))
     {
-        _sampleShadingExtension = std::make_unique<QOpenGLExtension_ARB_sample_shading>();
-        _sampleShadingExtension->initializeOpenGLFunctions();
+        _glMinSampleShadingARBFnPtr = reinterpret_cast<PFNGLMINSAMPLESHADINGARBPROC>(
+            context->getProcAddress("glMinSampleShadingARB"));
+
+        if(_glMinSampleShadingARBFnPtr == nullptr)
+            qDebug() << "Failed to resolve glMinSampleShadingARB";
     }
 }
 
@@ -57,14 +60,13 @@ QSurfaceFormat OpenGLFunctions::defaultFormat()
     return QSurfaceFormat::defaultFormat();
 }
 
-template<typename F>
-class Functions
+class QueryFunctions
 {
 private:
     bool _valid = false;
     QOpenGLContext _context;
     QOffscreenSurface _surface;
-    F* _f;
+    QOpenGLExtraFunctions* _f = nullptr;
 
     QString GLubyteToQString(const GLubyte* bytes) const
     {
@@ -77,7 +79,7 @@ private:
     }
 
 public:
-    explicit Functions(const QSurfaceFormat& surfaceFormat)
+    explicit QueryFunctions(const QSurfaceFormat& surfaceFormat)
     {
         _context.setFormat(surfaceFormat);
         _context.create();
@@ -93,12 +95,9 @@ public:
         if(!_context.isValid())
             return;
 
-        _f = _context.versionFunctions<F>();
+        _f = _context.extraFunctions();
 
         if(_f == nullptr)
-            return;
-
-        if(!_f->initializeOpenGLFunctions())
             return;
 
         _valid = true;
@@ -106,24 +105,13 @@ public:
 
     bool valid() const { return _valid; }
 
-    QString getString(GLenum name) const
-    {
-        return GLubyteToQString(_f->glGetString(name));
-    }
+    QString getString(GLenum name) const { return GLubyteToQString(_f->glGetString(name)); }
+    QString getString(GLenum name, GLuint index) const { return GLubyteToQString(_f->glGetStringi(name, index)); }
 
-    QString getString(GLenum name, GLuint index) const
-    {
-        return GLubyteToQString(_f->glGetStringi(name, index));
-    }
-
-    F* operator->() { return _f; }
+    QOpenGLExtraFunctions* operator->() { return _f; }
 };
 
-bool OpenGLFunctions::hasOpenGLSupport()
-{
-    auto format = OpenGLFunctions::defaultFormat();
-    return Functions<OpenGLFunctions>(format).valid();
-}
+bool OpenGLFunctions::hasOpenGLSupport() { return QueryFunctions(OpenGLFunctions::defaultFormat()).valid(); }
 
 QString OpenGLFunctions::vendor()
 {
@@ -133,7 +121,7 @@ QString OpenGLFunctions::vendor()
     format.setMajorVersion(1);
     format.setMajorVersion(0);
 
-    auto f = Functions<QOpenGLFunctions_1_0>(format);
+    auto f = QueryFunctions(format);
 
     if(!f.valid())
         return {};
@@ -144,7 +132,7 @@ QString OpenGLFunctions::vendor()
 QString OpenGLFunctions::info()
 {
     auto format = OpenGLFunctions::defaultFormat();
-    Functions<OpenGLFunctions> f(format);
+    QueryFunctions f(format);
 
     if(!f.valid())
         return {};

@@ -20,21 +20,31 @@
 #define OPENGLFUNCTIONS_H
 
 #include <QOpenGLFunctions_3_3_Core>
-#include <QOpenGLExtensions>
 #include <QString>
 
 #include <memory>
+
+// MacOS's glext.h is rubbish
+#ifndef GL_ARB_sample_shading
+#define GL_ARB_sample_shading 1 // NOLINT cppcoreguidelines-macro-usage
+#define GL_SAMPLE_SHADING_ARB             0x8C36 // NOLINT cppcoreguidelines-macro-usage
+#define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37 // NOLINT cppcoreguidelines-macro-usage
+typedef void (APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // NOLINT modernize-use-using
+#ifdef GL_GLEXT_PROTOTYPES
+GLAPI void APIENTRY glMinSampleShadingARB (GLfloat value);
+#endif
+#endif /* GL_ARB_sample_shading */
 
 class OpenGLFunctions : public QOpenGLFunctions_3_3_Core
 {
 public:
     void resolveOpenGLFunctions();
 
-    bool hasSampleShading() const { return _sampleShadingExtension != nullptr; }
+    bool hasSampleShading() const { return _glMinSampleShadingARBFnPtr != nullptr; }
     inline void glMinSampleShading(GLfloat value)
     {
         if(hasSampleShading())
-            _sampleShadingExtension->glMinSampleShadingARB(value);
+            _glMinSampleShadingARBFnPtr(value);
     }
 
     static bool hasOpenGLSupport();
@@ -45,18 +55,7 @@ public:
     static QSurfaceFormat defaultFormat();
 
 private:
-    std::unique_ptr<QOpenGLExtension_ARB_sample_shading> _sampleShadingExtension;
+    PFNGLMINSAMPLESHADINGARBPROC _glMinSampleShadingARBFnPtr = nullptr;
 };
-
-// MacOS's glext.h is rubbish (FIXME: check this is still true)
-#ifndef GL_ARB_sample_shading
-#define GL_ARB_sample_shading 1 // NOLINT cppcoreguidelines-macro-usage
-#define GL_SAMPLE_SHADING_ARB             0x8C36 // NOLINT cppcoreguidelines-macro-usage
-#define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37 // NOLINT cppcoreguidelines-macro-usage
-typedef void (APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value); // NOLINT modernize-use-using
-#ifdef GL_GLEXT_PROTOTYPES
-GLAPI void APIENTRY glMinSampleShadingARB (GLfloat value);
-#endif
-#endif /* GL_ARB_sample_shading */
 
 #endif // OPENGLFUNCTIONS_H
