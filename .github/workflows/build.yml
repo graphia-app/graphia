@@ -1,7 +1,7 @@
 name: Build
 on: [push]
 env:
-  QT_VERSION: 5.14.2
+  QT_VERSION: 5.15.2
   QT_MODULES: qtwebengine
   GCC_VERSION: 11
   CLANG_VERSION: 14
