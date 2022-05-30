@@ -704,7 +704,7 @@ ApplicationWindow
                     "values": types
                 });
 
-                urlTypeChooserDialog.show(function(selectedType, remember)
+                urlTypeChooserDialog.open(function(selectedType, remember)
                 {
                     if(remember)
                         defaults.setUrlTypeFor(extension, selectedType);
@@ -743,7 +743,7 @@ ApplicationWindow
                         "values": pluginNames
                     });
 
-                    pluginChooserDialog.show(function(selectedPlugin, remember)
+                    pluginChooserDialog.open(function(selectedPlugin, remember)
                     {
                         if(remember)
                             defaults.setPluginFor(type, selectedPlugin);

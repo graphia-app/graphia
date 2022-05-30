@@ -18,7 +18,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 
 import app.graphia
@@ -26,7 +25,7 @@ import app.graphia.Shared
 
 import SortFilterProxyModel
 
-Dialog
+Window
 {
     id: root
 
@@ -38,6 +37,23 @@ Dialog
 
     property var values: []
 
+    modality: Qt.WindowModal
+    flags: Qt.Dialog
+
+    Component.onCompleted:
+    {
+        if(Qt.platform.os === "osx")
+            root.flags |= Qt.Sheet;
+    }
+
+    width: layout.implicitWidth + (Constants.margin * 2)
+    minimumWidth: width
+    maximumWidth: width
+
+    height: layout.implicitHeight + (Constants.margin * 2)
+    minimumHeight: height
+    maximumHeight: height
+
     onVisibleChanged:
     {
         if(visible)
@@ -46,11 +62,10 @@ Dialog
 
     ColumnLayout
     {
-        spacing: Constants.spacing
+        id: layout
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Constants.margin
+        spacing: Constants.spacing
+        anchors.centerIn: parent
 
         Text
         {
@@ -121,22 +136,34 @@ Dialog
             id: rememberThisChoiceCheckBox
             text: qsTr("Remember This Choice")
         }
-    }
 
-    standardButtons: StandardButton.Ok | StandardButton.Cancel
+        RowLayout
+        {
+            Item { Layout.fillWidth: true }
+
+            Button
+            {
+                text: qsTr("OK")
+                onClicked: { root.close(); root.accepted(); }
+            }
+
+            Button
+            {
+                text: qsTr("Cancel")
+                onClicked: { root.close(); root.rejected(); }
+            }
+        }
+    }
 
     property var _onAcceptedFn: null
 
     onAccepted:
     {
-        //FIXME: macOS seems to need an explicit close, for some reason
-        close();
-
         if(_onAcceptedFn !== null)
             _onAcceptedFn(comboBox.selectedValue, rememberThisChoiceCheckBox.checked);
     }
 
-    function show(onAcceptedFn)
+    function open(onAcceptedFn)
     {
         // Force comboBox.selectedValue to be updated
         comboBox.currentIndex = -1;
@@ -147,7 +174,10 @@ Dialog
         {
             // Delay the opening in case an existing choice is still "in-flight",
             // e.g. when choosing a plugin immediately after choosing file type
-            open();
+            show();
         });
     }
+
+    signal accepted();
+    signal rejected();
 }
