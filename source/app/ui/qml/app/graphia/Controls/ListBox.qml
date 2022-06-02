@@ -305,7 +305,7 @@ Item
     {
         if(!root.allowMultipleSelection)
         {
-            console.log("Can't selectAll() when allowMultipleSelection is false.");
+            console.log("ListBox: Can't selectAll() when allowMultipleSelection is false.");
             return;
         }
 
