@@ -239,9 +239,7 @@ Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
         return Qt::NoItemFlags;
 
     auto flags = QAbstractItemModel::flags(index);
-
-    if(itemForIndex(index)->childCount() == 0)
-        flags.setFlag(Qt::ItemIsSelectable);
+    flags.setFlag(Qt::ItemIsSelectable, itemForIndex(index)->childCount() == 0);
 
     return flags;
 }
