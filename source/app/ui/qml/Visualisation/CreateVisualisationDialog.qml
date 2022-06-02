@@ -120,26 +120,36 @@ Window
                 onAccepted: { root.accept(); }
             }
 
+            Label
+            {
+                visible: !descriptionLayout.visible
+                Layout.minimumWidth: descriptionLayout.Layout.minimumWidth
+                Layout.maximumWidth: descriptionLayout.Layout.maximumWidth
+                Layout.fillHeight: true
+
+                horizontalAlignment: Qt.AlignCenter
+                verticalAlignment: Qt.AlignVCenter
+                font.pixelSize: 16
+                font.italic: true
+                wrapMode: Text.WordWrap
+
+                text: qsTr("Select an Attribute and Channel")
+            }
+
             ColumnLayout
             {
-                Label
-                {
-                    visible: description.text.length === 0
-                    Layout.fillWidth: visible
-                    Layout.fillHeight: visible
+                id: descriptionLayout
 
-                    horizontalAlignment: Qt.AlignCenter
-                    verticalAlignment: Qt.AlignVCenter
-                    font.pixelSize: 16
-                    font.italic: true
+                Layout.minimumWidth: 250
+                Layout.maximumWidth: 250
 
-                    text: qsTr("Select an Attribute and Channel")
-                }
+                visible: description.text.length > 0
 
                 Text
                 {
                     id: description
-                    Layout.preferredWidth: 250
+
+                    Layout.fillWidth: true
 
                     textFormat: Text.StyledText
                     wrapMode: Text.WordWrap
@@ -181,7 +191,6 @@ Window
                     readonly property int _elementSize: 24
 
                     Layout.fillWidth: true
-                    Layout.maximumWidth: description.width
 
                     GradientKey
                     {
