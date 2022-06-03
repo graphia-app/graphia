@@ -89,6 +89,38 @@ function printStackTrace()
     console.log(trace);
 }
 
+function printObjectTree(root, indent, post)
+{
+    if(!indent)
+        indent = 0;
+
+    if(!post)
+        post = "";
+
+    post += " (" + root.x + "x" + root.y + "x" + root.width + "x" + root.height + ")";
+
+    if(root.text)
+        post += " \"" + root.text + "\"";
+
+    let whitespace = " ".repeat(indent > 0 ? indent * 2 : 0);
+    console.log(whitespace + root + post);
+
+    function printChildren(children, post)
+    {
+        if(children.length > 0)
+        {
+            for(let i = 0; i < children.length; i++)
+                printObjectTree(children[i], indent + 1, post);
+        }
+    }
+
+    if(root.children)
+        printChildren(root.children, " (child)");
+
+    if(root.contentChildren)
+        printChildren(root.contentChildren, " (contentChild)");
+}
+
 function callingFunction()
 {
     let err = new Error();
