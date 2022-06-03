@@ -16,13 +16,15 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick
-import QtQuick.Controls 1.5 as QQC1
-import QtQuick.Layouts
 import QtQml.Models
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 
 import SortFilterProxyModel
 
+import app.graphia
+import app.graphia.Shared
 import app.graphia.Shared.Controls
 
 Item
@@ -38,27 +40,32 @@ Item
         if(!model)
             return null;
 
-        return sortFilterProxyModel.mapToSource(treeView.selection.currentIndex);
+        return treeView.selectedIndex;
     }
 
     property bool currentIndexIsValid: currentIndex && currentIndex.valid
 
-    property bool currentIndexIsSelectable:
+    function _indexIsSelectable(index)
     {
-        if(!model || !currentIndexIsValid)
+        if(!model || !index || !index.valid)
             return false;
 
-        return model.flags(currentIndex) & Qt.ItemIsSelectable;
+        return model.flags(index) & Qt.ItemIsSelectable;
+    }
+
+    property bool currentIndexIsSelectable:
+    {
+        return _indexIsSelectable(currentIndex);
     }
 
     property alias sortRoleName: sortFilterProxyModel.sortRoleName
     property alias sorters: sortFilterProxyModel.sorters
     property alias ascendingSortOrder: sortFilterProxyModel.ascendingSortOrder
 
-    property bool allowMultiSelection: false
+    property bool allowMultipleSelection: false
     property alias filters: sortFilterProxyModel.filters
 
-    property alias itemDelegate: treeView.itemDelegate
+    property var itemTextDelegateFunction: (model) => model.display
 
     property bool showSections: false
     property string sectionRoleName: ""
@@ -68,15 +75,14 @@ Item
 
     property var prettifyFunction: (value) => value
 
-    //FIXME: 2 is fudge for frame/margins/something; need to account for it properly
-    readonly property double contentHeight: treeView.__listView.contentHeight + 2
-    readonly property double contentWidth: treeView.__listView.contentWidth + 2
+    readonly property double contentHeight: treeView.contentHeight
+    readonly property double contentWidth: treeView.contentWidth
 
     onModelChanged:
     {
-        selectedValue = undefined;
-        selectedValues = [];
+        treeView.clearSelection();
         treeBoxSearch.visible = false;
+        treeView.positionViewAtRow(0, Qt.AlignLeft|Qt.AlignTop, 0.0);
     }
 
     function textFor(index)
@@ -119,151 +125,313 @@ Item
             onAccepted: { visible = false; }
         }
 
-        QQC1.TreeView
+        Frame
         {
-            id: treeView
-
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            model: SortFilterProxyModel
+            topPadding: 0
+            leftPadding: 0
+            rightPadding: 0
+            bottomPadding: 0
+
+            Component.onCompleted:
             {
-                id: sortFilterProxyModel
-                sourceModel: root.model !== undefined ? root.model : null
+                if(background.color !== undefined)
+                    background.color = "white";
+
+                if(background.border !== undefined)
+                    treeView.anchors.margins = background.border.width;
             }
 
-            selectionMode: root.allowMultiSelection ?
-                QQC1.SelectionMode.MultiSelection : QQC1.SelectionMode.SingleSelection
-
-            // Clear the selection when the model is changed
-            selection: ItemSelectionModel { model: sortFilterProxyModel }
-            onModelChanged: { selection.clear(); }
-
-            QQC1.TableViewColumn { role: "display" }
-
-            // Hide the header
-            headerDelegate: Item {}
-
-            alternatingRowColors: false
-
-            section.property:
+            TreeView
             {
-                if(!showSections)
-                    return "";
+                id: treeView
 
-                if(root.sectionRoleName.length > 0)
-                    return root.sectionRoleName;
+                anchors.fill: parent
+                clip: true
 
-                if(root.sortRoleName.length > 0)
-                    return root.sortRoleName;
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: ScrollBar { policy: Qt.ScrollBarAsNeeded }
+                interactive: false
 
-                return "";
-            }
-
-            section.delegate: Component
-            {
-                Text
+                model: SortFilterProxyModel
                 {
-                    // "Hide" when the section text is empty
-                    height: text.length > 0 ? implicitHeight : 0
-                    text: section
-                    font.italic: true
-                    font.bold: true
+                    id: sortFilterProxyModel
+                    sourceModel: root.model !== undefined ? root.model : null
                 }
-            }
 
-            Connections
-            {
-                target: treeView.selection
-                function onSelectionChanged()
+                readonly property int sectionRole:
+                {
+                    if(!root.model || !root.showSections)
+                        return -1;
+
+                    if(root.sectionRoleName.length > 0)
+                        return QmlUtils.modelRoleForName(root.model, root.sectionRoleName);
+
+                    if(root.sortRoleName.length > 0)
+                        return QmlUtils.modelRoleForName(root.model, root.sortRoleName);
+
+                    return -1;
+                }
+
+                function sectionTextFor(row)
+                {
+                    if(treeView.sectionRole < 0)
+                        return "";
+
+                    return model.data(modelIndex(row, 0), sectionRole);
+                }
+
+                property int lastSelectedRow: -1
+                property var selectedRows: []
+
+                onSelectedRowsChanged:
                 {
                     if(!root.model)
                         return;
 
-                    let sourceIndex = sortFilterProxyModel.mapToSource(target.currentIndex);
-                    root.selectedValue = root.textFor(sourceIndex);
+                    if(lastSelectedRow >= 0)
+                    {
+                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(lastSelectedRow, 0));
+
+                        if(root._indexIsSelectable(sourceIndex))
+                            root.selectedValue = root.textFor(sourceIndex);
+                    }
+                    else
+                        root.selectedValue = undefined;
 
                     let newSelectedValues = [];
-                    for(let index of target.selectedIndexes)
+                    for(let row of selectedRows)
                     {
-                        sourceIndex = sortFilterProxyModel.mapToSource(index);
+                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(row, 0));
+
+                        if(!root._indexIsSelectable(sourceIndex))
+                            continue;
+
                         newSelectedValues.push(root.textFor(sourceIndex));
                     }
 
                     root.selectedValues = newSelectedValues;
                 }
-            }
 
-            onClicked: function(mouse) { root.clicked(index); }
-            onDoubleClicked: function(mouse)
-            {
-                // FIXME: There seems to be a bug in TreeView(?) where if it is hidden in
-                // the middle of a click, the mouse release event never gets delivered to
-                // its MouseArea, and it gets into a state where the mouse button is
-                // considered held down. This results in moving the mouse over the list
-                // selecting the items, without any clicks. So instead we wait until the
-                // mouse button is released, and then trigger the doubleClicked signal.
-
-                doubleClickHack.index = index;
-            }
-
-            Connections
-            {
-                id: doubleClickHack
-                property var index: null
-
-                target: treeView.__mouseArea
-
-                function onPressedChanged()
+                function clearSelection()
                 {
-                    if(!treeView.__mouseArea.pressed && index !== null)
-                    {
-                        root.doubleClicked(index);
-                        index = null;
+                    lastSelectedRow = -1;
+                    selectedRows = [];
+                }
 
+                property var selectedIndex:
+                {
+                    if(lastSelectedRow < 0)
+                        return null;
+
+                    return sortFilterProxyModel.mapToSource(modelIndex(lastSelectedRow, 0));
+                }
+
+                function setSelectedRows(newSelectedRows, row)
+                {
+                    newSelectedRows.sort();
+
+                    lastSelectedRow = newSelectedRows.length > 0 &&
+                        newSelectedRows.indexOf(row) < 0 ?
+                        newSelectedRows[newSelectedRows.length - 1] : row;
+
+                    selectedRows = newSelectedRows;
+                }
+
+                function selectRow(row)
+                {
+                    lastSelectedRow = row;
+                    selectedRows = [row];
+                }
+
+                property int modifiers: 0
+
+                Keys.onPressed: function(event)
+                {
+                    modifiers = event.modifiers;
+
+                    if(root.showSearch)
+                    {
+                        if((event.key === Qt.Key_F && event.modifiers & Qt.ControlModifier) ||
+                            event.key === Qt.Key_Slash)
+                        {
+                            event.accepted = true;
+                            root.toggleSearch();
+                        }
+                    }
+
+                    switch(event.key)
+                    {
+                    case Qt.Key_Enter:
+                    case Qt.Key_Return:
                         if(root.currentIndexIsSelectable)
+                        {
+                            event.accepted = true;
                             root.accepted();
+                        }
+                        break;
                     }
                 }
-            }
 
-            Keys.onPressed:
-            {
-                if(root.showSearch)
+                Keys.onReleased: function(event) { modifiers = event.modifiers; }
+                onActiveFocusChanged: { if(!activeFocus) modifiers = 0; }
+
+                delegate: Item
                 {
-                    if((event.key === Qt.Key_F && event.modifiers & Qt.ControlModifier) ||
-                        event.key === Qt.Key_Slash)
+                    implicitWidth: treeViewDelegate.implicitWidth
+                    implicitHeight: treeViewDelegate.implicitHeight * (hasSectionRow ? 2 : 1)
+
+                    property alias treeView: treeViewDelegate.treeView
+                    property alias isTreeNode: treeViewDelegate.isTreeNode
+                    property alias expanded: treeViewDelegate.expanded
+                    property alias hasChildren: treeViewDelegate.hasChildren
+                    property alias depth: treeViewDelegate.depth
+
+                    property bool hasSectionRow:
                     {
-                        event.accepted = true;
-                        root.toggleSearch();
+                        if(!root.showSections)
+                            return false;
+
+                        if(model.row === 0)
+                            return true;
+
+                        let rowSection = treeView.sectionTextFor(model.row);
+                        let rowMinusOneSection = treeView.sectionTextFor(model.row - 1);
+
+                        if(!rowSection || !rowMinusOneSection)
+                            return false;
+
+                        return rowSection !== rowMinusOneSection;
+                    }
+
+                    Text
+                    {
+                        height: treeViewDelegate.implicitHeight
+                        verticalAlignment: Text.AlignVCenter
+                        leftPadding: 4
+
+                        visible: hasSectionRow
+                        font.bold: true
+                        font.italic: true
+
+                        text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
+                    }
+
+                    TreeViewDelegate
+                    {
+                        id: treeViewDelegate
+
+                        implicitWidth: root.width
+                        y: hasSectionRow ? implicitHeight : 0
+
+                        property bool selected: treeView.selectedRows.indexOf(model.row) >= 0
+                        property var highlightColor: selected ? palette.highlight : "transparent"
+
+                        Component.onCompleted:
+                        {
+                            // Everything thing in here is speculative and relies on the actual internal
+                            // structure of the delegate implementation, so it could break in future
+
+                            let contrastBinding = Qt.binding(() =>
+                                QmlUtils.contrastingColor(treeViewDelegate.highlightColor));
+
+                            if(contentItem instanceof Text)
+                            {
+                                contentItem.color = contrastBinding;
+                                contentItem.textFormat = Text.StyledText;
+                            }
+
+                            if(contentItem.text)
+                                contentItem.text = Qt.binding(() => root.itemTextDelegateFunction(model));
+
+                            if(indicator.color)
+                                indicator.color = contrastBinding;
+
+                            for(let i = 0; i < indicator.children.length; i++)
+                                indicator.children[i].color = contrastBinding;
+                        }
+
+                        background: Rectangle { color: treeViewDelegate.highlightColor }
+
+                        property var sourceIndex:
+                        {
+                            let sfpmIndex = treeView.modelIndex(model.row, model.column);
+                            let index = sortFilterProxyModel.mapToSource(sfpmIndex);
+                            return index;
+                        }
+
+                        onPressed:
+                        {
+                            let newSelectedRows = [];
+
+                            if(!sourceIndex || !sourceIndex.valid)
+                                return;
+
+                            if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier) &&
+                                treeView.lastSelectedRow !== -1)
+                            {
+                                let min = Math.min(model.row, treeView.lastSelectedRow);
+                                let max = Math.max(model.row, treeView.lastSelectedRow);
+
+                                newSelectedRows = treeView.selectedRows;
+
+                                for(let i = min; i <= max; i++)
+                                {
+                                    if(newSelectedRows.indexOf(i) < 0)
+                                        newSelectedRows.push(i);
+                                }
+                            }
+                            else if(root.allowMultipleSelection && (treeView.modifiers & Qt.ControlModifier))
+                            {
+                                newSelectedRows = treeView.selectedRows;
+                                let metaIndex = newSelectedRows.indexOf(model.row);
+
+                                if(metaIndex < 0)
+                                    newSelectedRows.push(model.row);
+                                else
+                                    newSelectedRows.splice(metaIndex, 1);
+                            }
+                            else
+                                newSelectedRows = [model.row];
+
+                            treeView.setSelectedRows(newSelectedRows, model.row);
+                        }
+
+                        onClicked:
+                        {
+                            root.clicked(sourceIndex);
+                        }
+
+                        onDoubleClicked:
+                        {
+                            root.doubleClicked(sourceIndex);
+
+                            if(root.selectedValue)
+                                root.accepted();
+                        }
                     }
                 }
 
-                switch(event.key)
+                MouseArea
                 {
-                case Qt.Key_Enter:
-                case Qt.Key_Return:
-                    if(root.currentIndexIsSelectable)
-                    {
-                        event.accepted = true;
-                        root.accepted();
-                    }
-                    break;
+                    anchors.fill: parent
+                    onWheel: function(wheel) { treeView.flick(0, wheel.angleDelta.y * 5); }
                 }
-            }
 
-            readonly property int _scrollBarWidth: __verticalScrollBar.visible ?
-                __verticalScrollBar.width : 0
+                onContentYChanged: { parentGuideTimer.restart(); }
+            }
 
             FloatingButton
             {
                 id: searchButton
                 visible: root.showSearch && root.enabled
 
-                anchors.rightMargin: treeView._scrollBarWidth + 4
+                anchors.rightMargin: 4
                 anchors.bottomMargin: 4
-                anchors.right: parent !== undefined ? parent.right : undefined
-                anchors.bottom: parent !== undefined ? parent.bottom : undefined
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
 
                 iconName: "edit-find"
                 hoverOpacity: 0.7
@@ -283,14 +451,14 @@ Item
                 readonly property int _internalMargin: 4
                 readonly property int _margin: 6
                 readonly property int _idealWidth: parentGuideText.contentWidth + (_internalMargin * 2)
-                readonly property int _maxWidth: (treeView.width - treeView._scrollBarWidth) - (_margin * 2)
+                readonly property int _maxWidth: treeView.width - (_margin * 2)
 
                 implicitWidth: Math.min(_idealWidth, _maxWidth)
                 implicitHeight: parentGuideText.implicitHeight + (_internalMargin * 2)
 
                 anchors.margins: _margin
-                anchors.top: parent !== undefined ? parent.top : undefined
-                anchors.left: parent !== undefined ? parent.left : undefined
+                anchors.top: parent.top
+                anchors.left: parent.left
 
                 color: "white"
                 border.width: 1
@@ -303,44 +471,16 @@ Item
                 Text
                 {
                     id: parentGuideText
-                    anchors.left: parent !== undefined ? parent.left : undefined
-                    anchors.top: parent !== undefined ? parent.top : undefined
+
+                    anchors.left: parent.left
+                    anchors.top: parent.top
                     anchors.margins: parentGuide._internalMargin
-                    text: root.prettifyFunction(parent.text)
+
                     elide: Text.ElideRight
                     font.italic: true
+
+                    text: root.prettifyFunction(parent.text)
                 }
-            }
-
-            function visibleIndices()
-            {
-                let indices = new Set();
-
-                // This is clearly not a very efficient way of finding visible items,
-                // but on the other hand it doesn't seem particularly slow either
-                for(let y = 0; y < flickableItem.height; y++)
-                {
-                    let index = treeView.indexAt(flickableItem.width * 0.5, y);
-                    let sourceIndex = sortFilterProxyModel.mapToSource(index);
-
-                    if(!sourceIndex.valid)
-                        continue;
-
-                    indices.add(sourceIndex);
-                }
-
-                return indices;
-            }
-
-            function indexIsInSet(index, set)
-            {
-                for(let value of set)
-                {
-                    if(value.row === index.row && value.parent === index.parent)
-                        return true;
-                }
-
-                return false;
             }
 
             // Do the guide update in the timer so that we don't
@@ -351,6 +491,35 @@ Item
                 interval: 100
                 repeat: false
 
+                function visibleIndices()
+                {
+                    let indices = new Set();
+
+                    for(let row = treeView.topRow; row <= treeView.bottomRow; row++)
+                    {
+                        let index = treeView.modelIndex(row, 0);
+                        let sourceIndex = sortFilterProxyModel.mapToSource(index);
+
+                        if(!sourceIndex.valid)
+                            continue;
+
+                        indices.add(sourceIndex);
+                    }
+
+                    return indices;
+                }
+
+                function indexIsInSet(index, set)
+                {
+                    for(let value of set)
+                    {
+                        if(value.row === index.row && value.parent === index.parent)
+                            return true;
+                    }
+
+                    return false;
+                }
+
                 onTriggered: function(source)
                 {
                     if(!root.showParentGuide)
@@ -358,13 +527,13 @@ Item
 
                     if(root.currentIndexIsValid && root.currentIndex.parent.valid)
                     {
-                        let vi = treeView.visibleIndices();
-                        if(treeView.indexIsInSet(root.currentIndex, vi))
+                        let vi = visibleIndices();
+                        if(indexIsInSet(root.currentIndex, vi))
                         {
                             let parentIndex = root.currentIndex.parent;
                             while(parentIndex.valid)
                             {
-                                if(!treeView.indexIsInSet(parentIndex, vi))
+                                if(!indexIsInSet(parentIndex, vi))
                                 {
                                     // At least one ancestor isn't visible
                                     parentGuide.text = root.textFor(root.currentIndex.parent);
@@ -380,12 +549,6 @@ Item
                     parentGuide.show = false;
                 }
             }
-
-            Connections
-            {
-                target: treeView.flickableItem
-                function onContentYChanged() { parentGuideTimer.restart(); }
-            }
         }
     }
 
@@ -399,52 +562,54 @@ Item
         treeBoxSearch.visible = !treeBoxSearch.visible;
     }
 
-    function _mapIndexToRow(index)
-    {
-        // This hideous hack is the only obvious way to get from
-        // a QModelIndex to a row index that corresponds to an item
-        // in the TreeView
-        for(let i = 0; i < treeView.__listView.count; i++)
-        {
-            if(treeView.__model.mapRowToModelIndex(i) === index)
-                return i;
-        }
-
-        return -1;
-    }
-
     function select(modelIndex)
     {
-        if(!modelIndex.valid)
+        if(!modelIndex || !modelIndex.valid)
             return;
 
-        // Do the selection
+        if(!root._indexIsSelectable(modelIndex))
+            return;
+
+
         let index = sortFilterProxyModel.mapFromSource(modelIndex);
-        treeView.selection.setCurrentIndex(index, ItemSelectionModel.NoUpdate);
-        treeView.selection.select(index, ItemSelectionModel.ClearAndSelect);
 
-        // Ensure any containing tree branches are expanded
-        let parentIndex = index.parent;
-        while(parentIndex.valid)
+        function expandAncestorsOf(childIndex)
         {
-            if(!treeView.isExpanded(parentIndex))
-                treeView.expand(parentIndex);
+            let ancestors = [];
 
-            parentIndex = parentIndex.parent;
+            let parentIndex = childIndex.parent;
+            while(parentIndex.valid)
+            {
+                ancestors.unshift(parentIndex);
+                parentIndex = parentIndex.parent;
+            }
+
+            for(let ancestor of ancestors)
+            {
+                let row = treeView.rowAtIndex(ancestor);
+
+                if(!treeView.isExpanded(row))
+                    treeView.expand(row);
+            }
         }
 
+        // Ensure any containing tree branches are expanded
+        expandAncestorsOf(index);
+
+        // Do the selection
+        let row = treeView.rowAtIndex(index);
+        treeView.selectRow(row);
+
         // Scroll so that it's visible
-        let row = _mapIndexToRow(index);
-        treeView.__listView.currentIndex = row;
-        treeView.__listView.positionViewAtIndex(row, ListView.Center);
+        treeView.positionViewAtRow(row, Qt.AlignLeft|Qt.AlignVCenter, 0.0);
     }
 
     function clearSelection()
     {
-        treeView.selection.clearSelection();
+        treeView.clearSelection();
     }
 
-    Keys.forwardTo: [treeView.__mouseArea]
+    Keys.forwardTo: [treeView]
 
     signal accepted()
 

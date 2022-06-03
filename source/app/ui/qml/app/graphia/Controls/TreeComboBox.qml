@@ -18,7 +18,6 @@
 
 import QtQuick
 import QtQuick.Controls
-import QtGraphicalEffects 1.0
 
 Item
 {
@@ -139,15 +138,6 @@ Item
             prettifyFunction: root.prettifyFunction
 
             onAccepted: { root.accept(); }
-        }
-
-        background: DropShadow
-        {
-            source: popup.contentItem
-
-            radius: 12
-            samples: (radius * 2) + 1
-            color: "grey"
         }
 
         onOpened:

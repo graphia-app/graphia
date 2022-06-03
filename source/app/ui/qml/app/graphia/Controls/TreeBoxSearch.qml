@@ -28,6 +28,7 @@ TextField
 
     property var treeBox: null
 
+    selectByMouse: true
     placeholderText: qsTr("Search")
 
     onVisibleChanged:

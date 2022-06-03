@@ -98,7 +98,7 @@ Window
             sortRoleName: "elementType"
             prettifyFunction: Attribute.prettify
 
-            allowMultiSelection: true
+            allowMultipleSelection: true
 
             filters:
             [

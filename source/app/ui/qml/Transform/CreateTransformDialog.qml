@@ -123,33 +123,14 @@ Window
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    itemDelegate: Item
+                    itemTextDelegateFunction: function(model)
                     {
-                        height: Math.max(16, label.implicitHeight)
-                        property int implicitWidth: label.implicitWidth + 16
+                        let value = model.display;
 
-                        Text
-                        {
-                            id: label
+                        if(model.isFavourite)
+                            value = "<font color=\"#F1C40F\">★</font> " + value;
 
-                            width: parent.width
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            elide: Text.ElideRight
-
-                            textFormat: Text.StyledText
-                            text:
-                            {
-                                let value = styleData.value !== undefined ? styleData.value : "";
-
-                                if(model && model.isFavourite)
-                                    value = "<font color=\"#F1C40F\">★</font> " + value;
-
-                                return value;
-                            }
-                            color: styleData.textColor
-                        }
+                        return value;
                     }
 
                     showSections: sortBy === "category"
