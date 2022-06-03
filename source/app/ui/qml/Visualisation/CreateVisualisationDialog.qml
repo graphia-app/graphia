@@ -44,8 +44,16 @@ Window
 
     property bool visualisationExpressionsValid:
     {
-        return visualisationExpressions.length > 0 &&
-            visualisationExpressions.every(document.visualisationIsValid);
+        if(visualisationExpressions.length === 0)
+            return false;
+
+        for(let visualisationExpression of visualisationExpressions)
+        {
+            if(!document.visualisationIsValid(visualisationExpression))
+                return false;
+        }
+
+        return true;
     }
 
     Preferences
