@@ -80,7 +80,14 @@ Item
                 rightPadding: 0
                 bottomPadding: 0
 
-                Component.onCompleted: { if(background.color !== undefined) background.color = "white"; }
+                Component.onCompleted:
+                {
+                    if(background.color !== undefined)
+                        background.color = "white";
+
+                    if(background.border !== undefined)
+                        tabSelector.anchors.margins = background.border.width;
+                }
 
                 ListView
                 {
@@ -90,7 +97,6 @@ Item
 
                     boundsBehavior: Flickable.StopAtBounds
 
-                    anchors.margins: 1
                     anchors.fill: parent
                     clip: true
 

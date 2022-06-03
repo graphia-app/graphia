@@ -143,21 +143,27 @@ Item
     Frame
     {
         anchors.fill: parent
-        clip: true
 
         topPadding: 0
         leftPadding: 0
         rightPadding: 0
         bottomPadding: 0
 
-        Component.onCompleted: { if(background.color !== undefined) background.color = "white"; }
+        Component.onCompleted:
+        {
+            if(background.color !== undefined)
+                background.color = "white";
+
+            if(background.border !== undefined)
+                listView.anchors.margins = background.border.width;
+        }
 
         ListView
         {
             id: listView
 
-            anchors.margins: 1
             anchors.fill: parent
+            clip: true
 
             model: root.model
 
