@@ -70,7 +70,7 @@
 #define H5_HAVE_ALARM 1
 
 /* Define to 1 if you have the `asprintf' function. */
-#define H5_HAVE_ASPRINTF 1
+/*#define H5_HAVE_ASPRINTF 1*/
 
 /* Define if the __attribute__(()) extension is present */
 #define H5_HAVE_ATTRIBUTE 1
@@ -375,7 +375,7 @@
 #define H5_HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the `vasprintf' function. */
-#define H5_HAVE_VASPRINTF 1
+/*#define H5_HAVE_VASPRINTF 1*/
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #define H5_HAVE_VSNPRINTF 1
