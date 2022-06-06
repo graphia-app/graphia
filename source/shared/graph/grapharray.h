@@ -26,6 +26,7 @@
 #include <mutex>
 #include <type_traits>
 #include <cassert>
+#include <algorithm>
 
 struct LockingGraphArray {};
 
