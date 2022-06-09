@@ -19,10 +19,35 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
+import app.graphia 1.0
+
 MenuItem
 {
     property bool hidden: false
 
     clip: true
     height: hidden ? 0 : implicitHeight
+
+    Label
+    {
+        id: shortcutLabel
+
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: action && action.shortcut ? QmlUtils.nativeShortcutSequence(action.shortcut) : ""
+        color: down || highlighted ? QmlUtils.contrastingColor(palette.text) : palette.text
+    }
+
+    Component.onCompleted:
+    {
+        const shortcutLabelSpacing = 10;
+        let defaultRightPadding = rightPadding;
+        shortcutLabel.rightPadding = defaultRightPadding;
+
+        // Make room for the shortcut label, if it exists
+        rightPadding = Qt.binding(() =>
+            (shortcutLabel.text.length > 0 ? shortcutLabelSpacing + shortcutLabel.implicitWidth : 0) +
+            defaultRightPadding);
+    }
 }
