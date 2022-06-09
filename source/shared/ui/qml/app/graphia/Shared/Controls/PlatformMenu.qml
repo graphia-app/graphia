@@ -34,4 +34,25 @@ Menu
             parent.height = Qt.binding(() => hidden ? 0 : parent.implicitHeight);
         }
     }
+
+    implicitWidth:
+    {
+        const maxWidth = 600;
+        let maxChildWidth = 200;
+
+        let menus = contentChildren[0];
+        for(let i = 0; i < menus.children.length; i++)
+        {
+            let menu = menus.children[i];
+            if(!(menu instanceof MenuItem) || !(menu instanceof PlatformMenuItem))
+                continue;
+
+            if(menu.hidden)
+                continue;
+
+            maxChildWidth = Math.max(maxChildWidth, menu.implicitWidth);
+        }
+
+        return Math.min(maxWidth, maxChildWidth) + (this.padding * 2);
+    }
 }
