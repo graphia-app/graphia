@@ -838,6 +838,36 @@ Item
                 property var columnWidths: []
                 property int rowHeight: fontMetrics.height + 1
 
+                property var _loadedCells: new Set()
+                property int _leftLoadedColumn: -1
+                property int _rightLoadedColumn: -1
+                property int _topLoadedRow: -1
+                property int _bottomLoadedRow: -1
+
+                function _updateCellExtents()
+                {
+                    if(_loadedCells.size === 0)
+                        return;
+
+                    let left = Number.MAX_SAFE_INTEGER;
+                    let right = Number.MIN_SAFE_INTEGER;
+                    let top = Number.MAX_SAFE_INTEGER;
+                    let bottom = Number.MIN_SAFE_INTEGER;
+
+                    _loadedCells.forEach((cell) =>
+                    {
+                        left = Math.min(left, cell.x);
+                        right = Math.max(right, cell.x);
+                        top = Math.min(top, cell.y);
+                        bottom = Math.max(bottom, cell.y);
+                    });
+
+                    _leftLoadedColumn = left;
+                    _rightLoadedColumn = right;
+                    _topLoadedRow = top;
+                    _bottomLoadedRow = bottom;
+                }
+
                 function visibleColumnNames()
                 {
                     let columnNames = [];
@@ -1028,16 +1058,30 @@ Item
                     TableView.onReused:
                     {
                         tableView.fetchColumnSizes.connect(updateColumnWidths);
+
+                        tableView._loadedCells.add({x: model.column, y: model.row});
+                        tableView._updateCellExtents();
                     }
 
                     TableView.onPooled:
                     {
                         tableView.fetchColumnSizes.disconnect(updateColumnWidths);
+
+                        tableView._loadedCells.forEach((cell) =>
+                        {
+                            if(cell.x === model.column && cell.y === model.row)
+                                tableView._loadedCells.delete(cell);
+                        });
+
+                        tableView._updateCellExtents();
                     }
 
                     Component.onCompleted:
                     {
                         tableView.fetchColumnSizes.connect(updateColumnWidths);
+
+                        tableView._loadedCells.add({x: model.column, y: model.row});
+                        tableView._updateCellExtents();
                     }
 
                     function updateColumnWidths()
@@ -1291,12 +1335,10 @@ Item
                 function arrowPress(modifier)
                 {
                     // Horrible hack to scroll the view
-                    let topTableVisibleRow = tableView.rowAt(0);
-                    let bottomTableVisibleRow = tableView.rowAt(tableView.height - 1);
                     let diff = 0;
 
-                    diff = Math.max(endRow - (bottomTableVisibleRow - 1) , 0);
-                    diff += Math.min(endRow - (topTableVisibleRow + 1), 0);
+                    diff = Math.max(endRow - (tableView._bottomLoadedRow - 1) , 0);
+                    diff += Math.min(endRow - (tableView._topLoadedRow + 1), 0);
                     tableView.contentY += diff * tableView.rowHeight;
 
                     // Clamp scrollbar to prevent overscrolling
