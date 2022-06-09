@@ -43,6 +43,7 @@
 #include <QCryptographicHash>
 #include <QQmlEngine>
 #include <QAbstractListModel>
+#include <QKeySequence>
 
 class QQmlEngine;
 class QJSEngine;
@@ -311,6 +312,12 @@ public:
             return match.captured();
 
         return {};
+    }
+
+    Q_INVOKABLE QString nativeShortcutSequence(const QString& shortcut)
+    {
+        return QKeySequence(shortcut, QKeySequence::PortableText)
+            .toString(QKeySequence::NativeText);
     }
 
 private:
