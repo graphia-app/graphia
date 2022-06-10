@@ -63,7 +63,7 @@ void ModelCompleter::update()
 
                 if(name.length() < shortestLength)
                 {
-                    shortestLength = name.length();
+                    shortestLength = static_cast<int>(name.length());
                     closestMatch = index;
                 }
             }

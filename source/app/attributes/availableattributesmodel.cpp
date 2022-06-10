@@ -50,7 +50,7 @@ AvailableAttributesModel::Item* AvailableAttributesModel::Item::child(int row) c
 
 int AvailableAttributesModel::Item::childCount() const
 {
-    return _children.count();
+    return static_cast<int>(_children.count());
 }
 
 const QString& AvailableAttributesModel::Item::value() const

@@ -2485,7 +2485,7 @@ void Document::update(QStringList newGraphTransforms,
             else
             {
                 uiGraphTransforms.append(newGraphTransform);
-                index = uiGraphTransforms.size() - 1;
+                index = static_cast<int>(uiGraphTransforms.size()) - 1;
             }
         }
 

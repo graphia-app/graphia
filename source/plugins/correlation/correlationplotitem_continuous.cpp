@@ -211,7 +211,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
             return partial + _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
         });
 
-        yDataAvg.append(runningTotal / rows.length());
+        yDataAvg.append(runningTotal / static_cast<double>(rows.length()));
 
         max = std::max(max, yDataAvg.back());
         min = std::min(min, yDataAvg.back());
@@ -394,7 +394,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
         for(auto* plottable : std::as_const(_meanPlots))
         {
             auto* bars = dynamic_cast<QCPBars*>(plottable);
-            bars->setWidth(bars->width() / _meanPlots.size());
+            bars->setWidth(bars->width() / static_cast<double>(_meanPlots.size()));
             barsGroup->append(bars);
         }
     }

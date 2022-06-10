@@ -296,8 +296,8 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
 
         auto order = sortColumnAndOrder.second;
 
-        auto indexA = sourceModel()->index(rowA, column);
-        auto indexB = sourceModel()->index(rowB, column);
+        auto indexA = sourceModel()->index(rowA, static_cast<int>(column));
+        auto indexB = sourceModel()->index(rowB, static_cast<int>(column));
 
         auto valueA = sourceModel()->data(indexA, Qt::DisplayRole);
         auto valueB = sourceModel()->data(indexB, Qt::DisplayRole);

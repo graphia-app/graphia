@@ -133,7 +133,7 @@ void GlyphMap::layoutStrings(const QFont& font)
         line.setPosition(QPointF(0.0f, 0.0f));
         qTextLayout.endLayout();
 
-        QList<QGlyphRun> glyphRuns = line.glyphRuns(0, text.length());
+        QList<QGlyphRun> glyphRuns = line.glyphRuns(0, static_cast<int>(text.length()));
 
         // No need to continue if there are no glyphruns
         if(!glyphRuns.empty())

@@ -103,7 +103,7 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
 
 int AvailableTransformsModel::rowCount(const QModelIndex& /*parentIndex*/) const
 {
-    return _transformNames.size();
+    return static_cast<int>(_transformNames.size());
 }
 
 QVariant AvailableTransformsModel::get(const QModelIndex& index) const

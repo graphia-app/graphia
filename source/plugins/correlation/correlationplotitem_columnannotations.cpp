@@ -346,7 +346,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
 bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)
 {
-    int numPlottables = axisRect->plottables().size();
+    auto numPlottables = static_cast<int>(axisRect->plottables().size());
 
     if(numPlottables == 0)
         return false;

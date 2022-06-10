@@ -80,7 +80,7 @@ int NodeAttributeTableModel::indexForColumnName(const QString& columnName)
 {
     auto index = _columnNames.indexOf(columnName);
     Q_ASSERT(index >= 0);
-    return index;
+    return static_cast<int>(index);
 }
 
 QVariant NodeAttributeTableModel::dataValue(size_t row, const QString& columnName) const
@@ -318,7 +318,7 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return _columnNames.size();
+    return static_cast<int>(_columnNames.size());
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
