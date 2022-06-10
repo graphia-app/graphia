@@ -237,10 +237,15 @@ ApplicationWindow
 
                     sorters: ExpressionSorter
                     {
+                        id: expressionSorter
+
+                        // Qt. is not available from inside the expression, for some reason 🤷
+                        readonly property int descendingOrder: Qt.DescendingOrder
+
                         enabled: table.sortIndicatorColumn >= 0
                         expression:
                         {
-                            let descending = table.sortIndicatorOrder === Qt.DescendingOrder;
+                            let descending = table.sortIndicatorOrder === expressionSorter.descendingOrder;
 
                             if(table.sortIndicatorColumn < 0)
                                 return true;
