@@ -471,11 +471,11 @@ QStringList Application::linkArgumentsFor(const QUrl& url) const
     auto path = url.path(QUrl::FullyEncoded);
     auto arguments = path.split('/');
 
-    arguments.erase(std::remove_if(arguments.begin(), arguments.end(),
+    arguments.erase(std::remove_if(arguments.begin(), arguments.end(), // clazy:exclude=strict-iterators
     [](const auto& argument)
     {
         return argument.isEmpty();
-    }), arguments.end());
+    }), arguments.end()); // clazy:exclude=strict-iterators
 
     std::transform(arguments.begin(), arguments.end(), arguments.begin(),
     [](const auto& argument)
