@@ -477,8 +477,8 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
     outliers.shrink_to_fit();
 
     auto minmax = std::minmax_element(outliers.begin(), outliers.end());
-    auto minOutlier = *minmax.first;
-    auto maxOutlier = *minmax.second;
+    auto minOutlier = !outliers.empty() ? *minmax.first : minValue;
+    auto maxOutlier = !outliers.empty() ? *minmax.second : maxValue;
 
     const size_t maxOutliers = 100;
     if(static_cast<size_t>(outliers.size()) > maxOutliers)
@@ -494,8 +494,8 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
 
     if(showOutliers)
     {
-        maxValue = std::max(maxValue, maxOutlier);
         minValue = std::min(minValue, minOutlier);
+        maxValue = std::max(maxValue, maxOutlier);
     }
 
     return {minValue, maxValue};
