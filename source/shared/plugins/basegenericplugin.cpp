@@ -263,6 +263,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
         return {};
 
     QStringList result;
+    result.reserve(urlTypes.size());
 
     for(const auto& urlType : urlTypes)
     {
