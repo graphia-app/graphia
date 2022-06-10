@@ -1181,7 +1181,6 @@ Item
                             Button
                             {
                                 text: qsTr("Done")
-                                icon.name: "emblem-unreadable"
                                 onClicked: function(mouse) { columnSelectionMode = false; }
                             }
                         }
