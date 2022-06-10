@@ -1875,7 +1875,15 @@ ApplicationWindow
     {
         id: aboutQtAction
         text: Qt.platform.os === "osx" ? qsTr("Qt…") : qsTr("About Qt…")
-        onTriggered: function(source) { application.aboutQt(); }
+        onTriggered: function(source)
+        {
+            // For some reason calling aboutQt prevents the
+            // menu from closing, so do it in advance
+            if(source instanceof MenuItem)
+                source.menu.dismiss();
+
+            application.aboutQt();
+        }
     }
 
     Action
