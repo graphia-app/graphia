@@ -612,7 +612,9 @@ Window
 
                                 visible: !editField.visible
 
-                                anchors.fill: parent
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.right: parent.right
                                 anchors.leftMargin: 10
 
                                 elide: Text.ElideRight
