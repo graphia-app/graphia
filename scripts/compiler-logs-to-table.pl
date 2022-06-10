@@ -62,13 +62,18 @@ my $msvcRegex = qr/^
     (?<severity>error|warning)|[^\s]+)\s+
     (?<code>\w{1,2}\d+)\s*:\s*
     (?<message>.+)$/xm;
+my $qmllintRegex = qr/^\s*
+    (?<severity>Warning|Info):\s*
+    (?<file>[^\n:]*):(?<line>\d+):((?<column>\d+):)?\s*
+    (?<message>.*)$/xm;
 
 my %matchers = (
     "generic" => $genericRegex,
     "clang-tidy" => $clangTidyRegex,
     "clazy" => $clazyRegex,
     "cppcheck" => $cppCheckRegex,
-    "msvc" => $msvcRegex
+    "msvc" => $msvcRegex,
+    "qmllint" => $qmllintRegex
 );
 
 my $outputStyle = 'csv';
@@ -223,22 +228,49 @@ foreach my $filename (@ARGV)
                 $fileWithPosition .= ":$column";
             }
 
-            my $errorClass = "";
-            if(defined $code)
+            # If there is no code, heuristically make one up by removing
+            # things that look like identifiers from the message
+            if(not defined $code)
             {
-                $errorClass .= "$code";
-                if(defined $severity)
+                $code = "";
+
+                my $tokenCount = 0;
+                my @tokens = split(/\s+/, $message);
+                foreach my $token (@tokens)
                 {
-                    $errorClass .= " ($tool $severity)";
+                    if($token =~ /^[A-Za-z][a-z]+\.?$/)
+                    {
+                        $token =~ s/\.$//;
+
+                        if($code ne "")
+                        {
+                            $code .= "-";
+                        }
+
+                        $code .= lc($token);
+                        $tokenCount++;
+                    }
+
+                    if($tokenCount >= 5)
+                    {
+                        last;
+                    }
                 }
-                else
-                {
-                    $errorClass .= " ($tool)";
-                }
+            }
+
+            if(defined $severity)
+            {
+                $severity = lc($severity);
+            }
+
+            my $errorClass = "$code";
+            if(defined $severity)
+            {
+                $errorClass .= " ($tool $severity)";
             }
             else
             {
-                $code = "unknown";
+                $errorClass .= " ($tool)";
             }
 
             if(not defined $severity)

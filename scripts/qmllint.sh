@@ -29,13 +29,21 @@ cd ${BUILD_DIR}
 
 . variables.sh
 
+INCLUDE_DIRS=$(find ${SOURCE_DIR}/source -type d -name "qml" | \
+    xargs -n1 | sed -e 's/\(.*\)/-I \1/')
+QML_DIRS=$(find ${SOURCE_DIR}/source -type f -name "qmldir" | \
+    xargs dirname | sed -e 's/\(.*\)/--qmldirs \1/')
+
 if [ -z ${QMLLINT} ]
 then
     QMLLINT="qmllint"
 fi
 
 ${QMLLINT} --version
-find \
+
+# Generate a list of commands separately to avoid the problem where xargs stops
+# if the thing it is executing crashes (which qmllint has a tendency to do)
+COMMANDS=$(find \
     ${SOURCE_DIR}/source/app \
     ${SOURCE_DIR}/source/crashreporter \
     ${SOURCE_DIR}/source/messagebox \
@@ -43,5 +51,7 @@ find \
     ${SOURCE_DIR}/source/shared \
     ${SOURCE_DIR}/source/updater \
     -type f -iname "*.qml" | \
-    xargs -n1 -P$(nproc --all) ${QMLLINT} 2>&1 | tee qmllint-${VERSION}.log
+    xargs -n1 echo ${QMLLINT} ${INCLUDE_DIRS} ${QML_DIRS})
+
+echo ${COMMANDS} | /bin/bash 2>&1 | tee qmllint-${VERSION}.log
 
