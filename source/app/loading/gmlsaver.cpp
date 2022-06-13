@@ -32,8 +32,8 @@ bool GMLSaver::save()
     int level = 0;
 
     size_t numElements = _graphModel->attributeNames().size() +
-                       static_cast<size_t>(_graphModel->graph().numNodes()) +
-                       static_cast<size_t>(_graphModel->graph().numEdges());
+        static_cast<size_t>(_graphModel->graph().numNodes()) +
+        static_cast<size_t>(_graphModel->graph().numEdges());
     size_t runningCount = 0;
 
     auto escape = [](const QString& string)
@@ -46,7 +46,8 @@ bool GMLSaver::save()
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         auto cleanName = attributeName;
-        cleanName.remove(QRegularExpression(QStringLiteral(R"([^a-zA-Z\d])")));
+        static const QRegularExpression re(QStringLiteral(R"([^a-zA-Z\d])"));
+        cleanName.remove(re);
         if(cleanName.isEmpty())
             cleanName = QStringLiteral("Attribute");
 

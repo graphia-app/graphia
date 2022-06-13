@@ -513,10 +513,13 @@ Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& no
 
 QString Attribute::prettify(QString name)
 {
+    static const QRegularExpression sourceRe(QStringLiteral("^source"));
+    static const QRegularExpression targetRe(QStringLiteral("^target"));
+
     name = name.replace(QStringLiteral("$"), QLatin1String(""));
     name = name.replace(QStringLiteral(R"(")"), QLatin1String(""));
-    name = name.replace(QRegularExpression(QStringLiteral("^source")), QObject::tr("Source"));
-    name = name.replace(QRegularExpression(QStringLiteral("^target")), QObject::tr("Target"));
+    name = name.replace(sourceRe, QObject::tr("Source"));
+    name = name.replace(targetRe, QObject::tr("Target"));
     name = name.replace(QStringLiteral("."), QStringLiteral(" › "));
 
     return name;

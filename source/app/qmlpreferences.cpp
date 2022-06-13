@@ -81,7 +81,7 @@ QMetaProperty QmlPreferences::propertyByName(const QString& propertyName) const
 
 static QString propertyNameFrom(const QString& preferenceName)
 {
-    auto sepRegex = QRegularExpression(QStringLiteral(R"(\/)"));
+    static const QRegularExpression sepRegex(QStringLiteral(R"(\/)"));
     if(preferenceName.contains(sepRegex))
     {
         auto stringList = preferenceName.split(sepRegex);

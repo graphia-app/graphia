@@ -87,7 +87,7 @@ namespace u
             int number = 1;
 
             // The name is already used, so generate a new one
-            QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
+            static const QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
             auto match = re.match(newName);
             if(match.hasMatch())
             {

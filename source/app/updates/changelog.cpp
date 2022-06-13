@@ -70,7 +70,8 @@ void ChangeLog::refresh()
 
     // Adjust the text so that the images in the text correspond to the files on disk
     auto replacement = QStringLiteral("![\\1](file:///%1/\\2)").arg(_imagesDirectory.path());
-    _text = _text.replace(QRegularExpression(QStringLiteral(R"((?:!\[(.*?)\]\(file:(.*?)\)))")), replacement);
+    static const QRegularExpression re(QStringLiteral(R"((?:!\[(.*?)\]\(file:(.*?)\)))"));
+    _text = _text.replace(re, replacement);
     emit textChanged();
 
     _available = true;

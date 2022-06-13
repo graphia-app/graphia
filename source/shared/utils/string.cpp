@@ -289,8 +289,8 @@ bool u::isHex(const std::string& string)
 
 bool u::isHex(const QString& string)
 {
-    return string.size() % 2 == 0 &&
-        QRegularExpression(QStringLiteral("^[a-fA-F0-9]+$")).match(string).hasMatch();
+    static const QRegularExpression re(QStringLiteral("^[a-fA-F0-9]+$"));
+    return string.size() % 2 == 0 && re.match(string).hasMatch();
 }
 
 std::string u::hexToString(const std::string& string)

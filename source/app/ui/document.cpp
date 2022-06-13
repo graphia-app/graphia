@@ -2686,7 +2686,8 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
         auto csvEscapedString = [](const QString& string)
         {
-            if(string.contains(QRegularExpression(QStringLiteral(R"([",])"))))
+            static const QRegularExpression re(QStringLiteral(R"([",])"));
+            if(string.contains(re))
             {
                 QString escaped = string;
 

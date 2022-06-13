@@ -115,7 +115,7 @@ QColor ColorPalette::get(const QString& value, int index) const
         index = 0;
 
         // Sum up all the sections of digits in the value
-        const QRegularExpression re(QStringLiteral(R"(([^\d]*)(\d*)([^\d]*))"));
+        static const QRegularExpression re(QStringLiteral(R"(([^\d]*)(\d*)([^\d]*))"));
         auto i = re.globalMatch(value);
         while(i.hasNext())
         {
