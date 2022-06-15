@@ -91,8 +91,6 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/Updater \
   -codesign="${APPLE_SIGN_ID}"
 
-macdeployqt ${PRODUCT_NAME}.app ${MACDEPLOYQT_ARGS}
-
 if [ -n "${SIGNING_ENABLED}" ]
 then
   echo "Signing..."
