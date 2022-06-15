@@ -1441,7 +1441,7 @@ Item
                 popInPlugin();
         }
 
-        menuBar: MenuBar
+        PlatformMenuBar
         {
             PlatformMenu { id: pluginMenu0; hidden: true; enabled: !_document.busy }
             PlatformMenu { id: pluginMenu1; hidden: true; enabled: !_document.busy }

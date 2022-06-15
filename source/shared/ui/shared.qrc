@@ -12,6 +12,7 @@
         <file>qml/app/graphia/Shared/Controls/NodeAttributeTableView.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenuItem.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenu.qml</file>
+        <file>qml/app/graphia/Shared/Controls/PlatformMenuBar.qml</file>
         <file>qml/app/graphia/Shared/Controls/PlatformMenuSeparator.qml</file>
         <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
         <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>

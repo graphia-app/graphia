@@ -17,8 +17,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.import app.graphia.Shared.Controls as SharedControls
 .import QtQuick.Controls as QtQuickControls
+.import app.graphia.Shared.Controls as SharedControls
 
 function createQmlItem(itemName, parent)
 {
@@ -35,9 +35,12 @@ function addSeparatorTo(menu)
 
 function addItemTo(menu, text)
 {
-    menu.addItem(createQmlItem("PlatformMenuItem", menu));
-    let menuItem = menu.itemAt(menu.count - 1);
-    menuItem.text = text;
+    let menuItem = createQmlItem("PlatformMenuItem", menu);
+
+    if(text)
+        menuItem.text = text;
+
+    menu.addItem(menuItem);
     return menuItem;
 }
 
@@ -50,9 +53,9 @@ function addActionTo(menu, action)
 
 function addSubMenuTo(menu, title)
 {
-    menu.addMenu(createQmlItem("PlatformMenu", menu));
-    let subMenu = menu.menuAt(menu.count - 1);
+    let subMenu = createQmlItem("PlatformMenu", menu);
     subMenu.title = title;
+    menu.addMenu(subMenu);
     return subMenu;
 }
 
@@ -77,7 +80,7 @@ function clone(from, to)
     {
         let fromItem = from.itemAt(i);
 
-        if(fromItem instanceof QtQuickControls.MenuItem && fromItem.subMenu !== null)
+        if(fromItem.subMenu)
         {
             let toSubMenu = createQmlItem("PlatformMenu", to);
             clone(fromItem.subMenu, toSubMenu);
@@ -128,7 +131,7 @@ function clone(from, to)
                 }(fromItem));
             }
         }
-        else if(fromItem instanceof QtQuickControls.MenuSeparator)
+        else if(fromItem instanceof SharedControls.PlatformMenuSeparator)
             addSeparatorTo(to);
     }
 

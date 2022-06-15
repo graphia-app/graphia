@@ -19,6 +19,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import app.graphia.Shared.Controls
+
 Item
 {
     property real radius: height * 0.1
@@ -33,7 +35,7 @@ Item
     property real _barHeight: (_barToSpaceRatio * height) / _d
     property real _spaceHeight: height / _d
 
-    property Menu menu: null
+    property PlatformMenu menu: null
 
     property bool menuDropped: false
     Connections
@@ -83,7 +85,7 @@ Item
         onClicked: function(mouse)
         {
             if(menu)
-                menu.popup(0, parent.height + 4/*padding*/);
+                menu.popup(parent, 0, parent.height + 8/*padding*/);
         }
 
         onPressed: function(mouse) { mouse.accepted = !propogatePresses; }

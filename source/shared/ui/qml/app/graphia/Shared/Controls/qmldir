@@ -12,6 +12,7 @@ NodeAttributeTableView 1.0 NodeAttributeTableView.qml
 PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
 PlatformMenuItem 1.0 PlatformMenuItem.qml
 PlatformMenu 1.0 PlatformMenu.qml
+PlatformMenuBar 1.0 PlatformMenuBar.qml
 PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
 ScrollableTextArea 1.0 ScrollableTextArea.qml
 SlidingPanel 1.0 SlidingPanel.qml

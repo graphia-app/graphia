@@ -844,7 +844,7 @@ PluginContent
         }
     }
 
-    Menu { id: plotContextMenu }
+    PlatformMenu { id: plotContextMenu }
 
     Labs.FileDialog
     {

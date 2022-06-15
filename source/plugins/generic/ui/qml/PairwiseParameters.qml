@@ -346,7 +346,7 @@ BaseParameterDialog
                         anchors.fill: parent
                         onClicked: function(mouse)
                         {
-                            typeMenu.popup(0, parent.height + 4/*padding*/);
+                            typeMenu.popup(parent, 0, parent.height + 8/*padding*/);
                         }
                     }
 

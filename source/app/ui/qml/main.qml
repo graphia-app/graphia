@@ -1947,7 +1947,7 @@ ApplicationWindow
 
     property bool debugMenuUnhidden: false
 
-    menuBar: MenuBar
+    PlatformMenuBar
     {
         id: mainMenuBar
 

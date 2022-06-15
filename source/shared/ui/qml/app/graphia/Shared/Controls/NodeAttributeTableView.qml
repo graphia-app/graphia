@@ -1114,7 +1114,7 @@ Item
                 }
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary
-                property Menu _tableMenu
+                property PlatformMenu _tableMenu
             }
 
             SlidingPanel

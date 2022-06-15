@@ -116,7 +116,7 @@ Item
         onClicked: function(mouse)
         {
             if(mouse.button === Qt.LeftButton && menu && !_modelIsUnset)
-                menu.popup(0, parent.height + 4/*padding*/);
+                menu.popup(parent, 0, parent.height + 8/*padding*/);
 
             root.clicked(mouse);
         }
