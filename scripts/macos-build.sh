@@ -40,6 +40,17 @@ fi
 GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   source/thirdparty/breakpad/src/tools/mac/dump_syms/dump_syms.xcodeproj
 
+# Hackily copy the Qt.labs.platform versions of the menu components over
+# the top of the implementation that will actually be deployed; the correct
+# way to do this is at the CMake level using qt_add_qml_module to dynamically
+# create the relevant .qrc and qmldir files, but that's a chunk of work that
+# there is no time for at the moment (FIXME)
+for FILE in PlatformMenuBar PlatformMenuItem PlatformMenu PlatformMenuSeparator
+do
+  cp source/shared/ui/qml/app/graphia/Shared/Controls/${FILE}_labs.qml \
+    source/shared/ui/qml/app/graphia/Shared/Controls/${FILE}.qml
+done
+
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
