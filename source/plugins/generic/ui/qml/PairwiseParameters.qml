@@ -292,8 +292,8 @@ BaseParameterDialog
                         id: typeMenu
 
                         MenuItem { text: qsTr("⨯ Unused");                  onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.Unused); } }
-                        MenuItem { text: qsTr("◯ Source Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNode); } }
-                        MenuItem { text: qsTr("⬤ Target Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNode); } }
+                        MenuItem { text: qsTr("○ Source Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNode); } }
+                        MenuItem { text: qsTr("● Target Node");             onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNode); } }
                         MenuItem { text: qsTr("► Edge Attribute");          onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.EdgeAttribute); } }
                         MenuItem { text: qsTr("◇ Source Node Attribute");   onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.SourceNodeAttribute); } }
                         MenuItem { text: qsTr("◆ Target Node Attribute");   onTriggered: { typeMenu.onTypeSelected(PairwiseColumnType.TargetNodeAttribute); } }
