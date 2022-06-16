@@ -183,7 +183,12 @@ Item
                     if(!sortFilterProxyModel.sourceModel)
                         return "";
 
-                    return model.data(modelIndex(row, 0), sectionRole);
+                    let value = model.data(modelIndex(row, 0), sectionRole);
+
+                    if(!value)
+                        return "";
+
+                    return value;
                 }
 
                 property int lastSelectedRow: -1
