@@ -6,6 +6,11 @@ else()
     project("Graphia" LANGUAGES C CXX)
 endif()
 
+find_package(Qt6 COMPONENTS REQUIRED Core)
+if(Qt6Core_VERSION VERSION_LESS 6.3.0)
+    message(FATAL_ERROR "Qt 6.3 or later required")
+endif()
+
 include_directories(source)
 
 # The following sections are only here so that the files are available
