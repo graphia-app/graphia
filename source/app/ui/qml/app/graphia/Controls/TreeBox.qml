@@ -353,7 +353,10 @@ Item
                                 indicator.color = contrastBinding;
 
                             for(let i = 0; i < indicator.children.length; i++)
-                                indicator.children[i].color = contrastBinding;
+                            {
+                                if(indicator.children[i].color !== undefined)
+                                    indicator.children[i].color = contrastBinding;
+                            }
                         }
 
                         background: Rectangle { color: treeViewDelegate.highlightColor }
