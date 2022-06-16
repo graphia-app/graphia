@@ -34,11 +34,6 @@ if(UNIX)
     # work e.g. dynamic_cast to QObject from IGraph, under clang
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 
-    # This is necessary to avoid ODR violations resulting from loading plugins which
-    # statically link libshared; without it said plugins would all export the same
-    # set of symbols
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-
     # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
     find_program(CCACHE_EXECUTABLE ccache)
     mark_as_advanced(CCACHE_EXECUTABLE)
