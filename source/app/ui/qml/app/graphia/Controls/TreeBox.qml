@@ -180,6 +180,9 @@ Item
                     if(treeView.sectionRole < 0)
                         return "";
 
+                    if(!sortFilterProxyModel.sourceModel)
+                        return "";
+
                     return model.data(modelIndex(row, 0), sectionRole);
                 }
 
