@@ -2844,7 +2844,7 @@ ApplicationWindow
                 icon.name: "process-stop"
                 text: qsTr("Cancel")
 
-                visible: currentTab ? currentTab.document.commandInProgress &&
+                visible: currentTab ? currentTab.document.significantCommandInProgress &&
                     currentTab.document.commandIsCancellable &&
                     !currentTab.document.commandIsCancelling : false
 
