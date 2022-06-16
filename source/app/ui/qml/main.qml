@@ -2735,7 +2735,7 @@ ApplicationWindow
                 visible: tabBar.count > 1
 
                 height: 1
-                color: palette.midlight
+                color: palette.mid
             }
 
             StackLayout
