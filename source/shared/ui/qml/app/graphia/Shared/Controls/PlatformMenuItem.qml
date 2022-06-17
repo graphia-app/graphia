@@ -36,7 +36,7 @@ MenuItem
         anchors.verticalCenter: parent.verticalCenter
 
         text: action && action.shortcut ? QmlUtils.nativeShortcutSequence(action.shortcut) : ""
-        color: down || highlighted ? QmlUtils.contrastingColor(palette.text) : palette.text
+        color: highlighted ? palette.highlightedText : palette.text
     }
 
     Component.onCompleted:
