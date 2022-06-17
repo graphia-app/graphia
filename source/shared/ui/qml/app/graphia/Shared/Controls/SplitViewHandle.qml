@@ -29,6 +29,8 @@ Rectangle
 
     Canvas
     {
+        id: canvas
+
         anchors.fill: parent
 
         onPaint: function(rect)
@@ -78,5 +80,13 @@ Rectangle
                     y += separation;
             }
         }
+    }
+
+    onVisibleChanged:
+    {
+        // For some reason on macOS an initial paint doesn't happen, so force one
+        // It's not really clear if this is a bug or some misunderstanding of how Canvas works...
+        if(visible)
+            canvas.requestPaint();
     }
 }
