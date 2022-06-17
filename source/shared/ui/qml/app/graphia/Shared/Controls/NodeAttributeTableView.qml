@@ -1178,9 +1178,9 @@ Item
                                 onClicked: function(mouse) { root.hideAllCalculatedColumns(); }
                             }
 
-                            Button
+                            FloatingButton
                             {
-                                text: qsTr("Done")
+                                iconName: "emblem-unreadable"
                                 onClicked: function(mouse) { columnSelectionMode = false; }
                             }
                         }
