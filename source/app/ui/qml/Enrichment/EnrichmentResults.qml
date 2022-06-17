@@ -201,7 +201,7 @@ ApplicationWindow
                 // For some reason QmlUtils isn't available from directly within the sort expression
                 property var stringCompare: QmlUtils.localeCompareStrings
 
-                onClicked: function(mouse)
+                onClicked: function(column, row, mouse)
                 {
                     if(mouse.button === Qt.RightButton)
                         exportTableMenu.popup();
@@ -209,7 +209,7 @@ ApplicationWindow
 
                 property bool columnResizeRequired: false
 
-                onCellExtentsChanged:
+                onCellExtentsChanged: function(left, right, top, bottom)
                 {
                     if(columnResizeRequired)
                     {

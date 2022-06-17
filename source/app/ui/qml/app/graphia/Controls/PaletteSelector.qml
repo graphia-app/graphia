@@ -304,7 +304,7 @@ Window
                             paletteEditorScrollview.contentItem.contentY = newContentY;
                     }
 
-                    onItemAdded: { scrollToItem(item); }
+                    onItemAdded: function(item) { scrollToItem(item); }
 
                     onConfigurationChanged:
                     {

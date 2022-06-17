@@ -136,7 +136,7 @@ Item
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: { document.moveVisualisation(from, to); }
+                onItemMoved: function(from, to) { document.moveVisualisation(from, to); }
             }
         }
     }

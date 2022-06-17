@@ -199,6 +199,6 @@ TextField
         _select(newIndex);
     }
 
-    Keys.onUpPressed:   { _moveSelection(-1); }
-    Keys.onDownPressed: { _moveSelection( 1); }
+    Keys.onUpPressed:   function(event) { _moveSelection(-1); }
+    Keys.onDownPressed: function(event) { _moveSelection( 1); }
 }

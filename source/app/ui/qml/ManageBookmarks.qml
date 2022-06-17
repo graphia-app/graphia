@@ -134,10 +134,10 @@ Window
                     item.edit();
             }
 
-            onDoubleClicked: function(mouse) { edit(index); }
+            onDoubleClicked: function(index) { edit(index); }
 
             signal rowRenamed(string from, string to)
-            onRowRenamed: { document.renameBookmark(from, to); }
+            onRowRenamed: function(from, to) { document.renameBookmark(from, to); }
         }
 
         RowLayout

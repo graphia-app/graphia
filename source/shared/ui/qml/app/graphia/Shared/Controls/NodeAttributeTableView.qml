@@ -1293,7 +1293,7 @@ Item
                     deselectDrag = false;
                 }
 
-                Keys.onDownPressed:
+                Keys.onDownPressed: function(event)
                 {
                     if(endRow !== -1 && (endRow + 1) < tableView.rows)
                     {
@@ -1301,7 +1301,8 @@ Item
                         arrowPress(event.modifiers);
                     }
                 }
-                Keys.onUpPressed:
+
+                Keys.onUpPressed: function(event)
                 {
                     if(endRow !== -1 && (endRow - 1) >= 0)
                     {

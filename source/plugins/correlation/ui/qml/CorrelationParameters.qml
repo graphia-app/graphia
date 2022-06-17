@@ -381,7 +381,7 @@ BaseParameterDialog
                     model: tabularDataParser.model
 
                     highlightedProvider: (column, row) => isInsideRect(column, row, tabularDataParser.dataRect)
-                    onClicked: function(mouse) { tabularDataParser.setDataRectangle(column, row); }
+                    onClicked: function(column, row, mouse) { tabularDataParser.setDataRectangle(column, row); }
 
                     BusyIndicator
                     {

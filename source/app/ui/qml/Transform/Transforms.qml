@@ -79,7 +79,7 @@ Item
 
                 alignment: Qt.AlignRight
 
-                onItemMoved: { document.moveGraphTransform(from, to); }
+                onItemMoved: function(from, to) { document.moveGraphTransform(from, to); }
             }
         }
 
