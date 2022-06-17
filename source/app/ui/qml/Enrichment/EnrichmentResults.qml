@@ -132,6 +132,13 @@ ApplicationWindow
             }
         }
 
+        Rectangle
+        {
+            Layout.fillWidth: true
+            height: 1
+            color: palette.mid
+        }
+
         Item
         {
             visible: !splitView.visible
