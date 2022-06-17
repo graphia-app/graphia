@@ -392,8 +392,8 @@ Rectangle
             LayoutSetting
             {
                 id: layoutSetting
-
                 Layout.leftMargin: _buttonMenuOffset
+
                 onValueChanged:
                 {
                     root.document.setLayoutSettingNormalisedValue(modelData, value);

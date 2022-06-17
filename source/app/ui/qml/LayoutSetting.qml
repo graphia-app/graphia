@@ -53,6 +53,8 @@ RowLayout
     Slider
     {
         id: slider
+        Layout.preferredWidth: 150
+
         from: 0.0
         to: 1.0
 
