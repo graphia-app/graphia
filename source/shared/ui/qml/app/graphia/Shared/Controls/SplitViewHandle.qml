@@ -22,10 +22,8 @@ Rectangle
 {
     id: root
 
-    implicitWidth: 6
-    implicitHeight: 6
-
-    color: palette.window
+    implicitWidth: 7
+    implicitHeight: 7
 
     readonly property int orientation: parent.orientation
 
@@ -36,11 +34,24 @@ Rectangle
         onPaint: function(rect)
         {
             let context = getContext("2d");
+
+            let gradientFactor = 1.02;
+            let gradient = context.createLinearGradient(0, 0,
+                parent.orientation === Qt.Horizontal ? parent.width  : 0,
+                parent.orientation !== Qt.Horizontal ? parent.height : 0);
+            gradient.addColorStop(0, palette.light);
+            gradient.addColorStop(0.05, Qt.lighter(palette.window, gradientFactor));
+            gradient.addColorStop(0.95, Qt.darker(palette.window, gradientFactor));
+            gradient.addColorStop(1, palette.shadow);
+
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, parent.width, parent.height);
+
             context.fillStyle = palette.midlight;
 
-            const numPips = 5;
-            const pipSize = 1.75;
-            const separation = 6.5;
+            const numPips = 4;
+            const pipSize = 1.5;
+            const separation = 5;
             const halfDimension = ((numPips * separation) - pipSize) * 0.5;
 
             let x = parent.width * 0.5;
@@ -57,8 +68,8 @@ Rectangle
                 context.arc(x, y, pipSize, 0, 2 * Math.PI, false);
 
                 context.fill();
-                context.lineWidth = 0.75;
-                context.strokeStyle = palette.dark;
+                context.lineWidth = 0.7;
+                context.strokeStyle = palette.mid;
                 context.stroke();
 
                 if(parent.orientation === Qt.Vertical)
