@@ -2162,7 +2162,11 @@ ApplicationWindow
                             return "";
                         }
 
-                        onTriggered: function(source) { currentTab.gotoBookmark(bookmarkMenuItem.text); }
+                        onTriggered: function(source)
+                        {
+                            source.menu.dismiss();
+                            currentTab.gotoBookmark(bookmarkMenuItem.text);
+                        }
                     }
 
                     enabled: currentTab ? !currentTab.document.busy : false
