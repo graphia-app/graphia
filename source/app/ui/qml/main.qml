@@ -2154,9 +2154,9 @@ ApplicationWindow
                     {
                         shortcut:
                         {
-                            if(index >= 0 && index < 10)
+                            if(index >= 0 && index < 9)
                                 return "Ctrl+" + (index + 1);
-                            else if(index == 10)
+                            else if(index == 9)
                                 return "Ctrl+0";
 
                             return "";
