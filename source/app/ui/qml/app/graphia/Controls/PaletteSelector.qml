@@ -84,9 +84,6 @@ Window
                     Layout.preferredWidth: 160
                     Layout.fillHeight: true
 
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
                     Column
                     {
                         id: palettePresets
@@ -173,7 +170,7 @@ Window
 
                                     spacing: 0
 
-                                    width: highlightMarker.width - Constants.padding
+                                    width: highlightMarker.width - (Constants.padding + paletteListScrollView.scrollBarWidth)
 
                                     Text
                                     {
@@ -292,7 +289,7 @@ Window
                 {
                     id: paletteEditor
 
-                    width: paletteEditorScrollview.width
+                    width: paletteEditorScrollview.width - paletteEditorScrollview.staticScrollBarWidth
 
                     function scrollToItem(item)
                     {

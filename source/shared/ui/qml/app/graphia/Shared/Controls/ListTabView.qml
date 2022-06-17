@@ -70,24 +70,12 @@ Item
             Layout.fillHeight: true
             spacing: Constants.spacing
 
-            Frame
+            Rectangle
             {
                 Layout.fillHeight: true
                 Layout.preferredWidth: tabSelector.maxChildWidth + (Constants.padding * 2)
 
-                topPadding: 0
-                leftPadding: 0
-                rightPadding: 0
-                bottomPadding: 0
-
-                Component.onCompleted:
-                {
-                    if(background.color !== undefined)
-                        background.color = "white";
-
-                    if(background.border !== undefined)
-                        tabSelector.anchors.margins = background.border.width;
-                }
+                color: "white"
 
                 ListView
                 {
@@ -98,6 +86,7 @@ Item
                     boundsBehavior: Flickable.StopAtBounds
 
                     anchors.fill: parent
+                    anchors.margins: outline.outlineWidth
                     clip: true
 
                     property var _childWidths: []
@@ -145,6 +134,12 @@ Item
                             }
                         }
                     }
+                }
+
+                Outline
+                {
+                    id: outline
+                    anchors.fill: parent
                 }
             }
 

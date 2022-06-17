@@ -288,28 +288,19 @@ Window
             text: qsTr("Select an Attribute")
         }
 
-        Frame
+        Item
         {
             visible: root.selectedAttributeName.length > 0
 
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            topPadding: 0
-            leftPadding: 0
-            rightPadding: 0
-            bottomPadding: 0
-
             ColumnLayout
             {
                 anchors.fill: parent
-                anchors.margins: 1
+                anchors.margins: outline.outlineWidth
 
                 spacing: 0
-
-                //FIXME for reasons not understood, the header and table vanish
-                // if this dummy Item isn't included
-                Item { width: 1 }
 
                 TableView
                 {
@@ -721,6 +712,12 @@ Window
                         }
                     }
                 }
+            }
+
+            Outline
+            {
+                id: outline
+                anchors.fill: parent
             }
         }
 

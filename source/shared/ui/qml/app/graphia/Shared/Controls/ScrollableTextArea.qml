@@ -19,7 +19,9 @@
 import QtQuick
 import QtQuick.Controls
 
-Frame
+import app.graphia.Shared.Controls
+
+Rectangle
 {
     id: root
 
@@ -32,22 +34,21 @@ Frame
     property alias cursorPosition: textArea.cursorPosition
     property alias length: textArea.length
 
-    topPadding: 0
-    leftPadding: 0
-    rightPadding: 0
-    bottomPadding: 0
+    color: "white"
 
-    Component.onCompleted: { if(background.color !== undefined) background.color = "white"; }
-
-    Flickable
+    ScrollView
     {
         anchors.fill: parent
-        clip: true
-        boundsBehavior: Flickable.StopAtBounds
+        anchors.margins: outline.outlineWidth
+        contentWidth: availableWidth
 
-        TextArea.flickable: TextArea
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+        TextArea
         {
             id: textArea
+
             wrapMode: TextArea.Wrap
             selectByMouse: true
 
@@ -55,8 +56,12 @@ Frame
             onLinkActivated: function(link) { root.linkActivated(link); }
             onLinkHovered: function(link) { root.linkHovered(link); }
         }
+    }
 
-        ScrollBar.vertical: ScrollBar {}
+    Outline
+    {
+        id: outline
+        anchors.fill: parent
     }
 
     function append(text)           { textArea.append(text); }

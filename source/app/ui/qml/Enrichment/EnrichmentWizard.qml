@@ -48,8 +48,8 @@ Wizard
     {
         // Reset on finish
         goToPage(0);
-        scrollViewA.ScrollBar.vertical.position = 0;
-        scrollViewB.ScrollBar.vertical.position = 0;
+        scrollViewA.resetScrollPosition();
+        scrollViewB.resetScrollPosition();
     }
 
     onVisibleChanged:
@@ -220,6 +220,8 @@ Wizard
 
                             RadioButton
                             {
+                                rightPadding: scrollViewA.scrollBarWidth
+
                                 property var attributeName: model.display
 
                                 text:
@@ -299,6 +301,8 @@ Wizard
 
                             RadioButton
                             {
+                                rightPadding: scrollViewB.scrollBarWidth
+
                                 property var attributeName: model.display
 
                                 text:

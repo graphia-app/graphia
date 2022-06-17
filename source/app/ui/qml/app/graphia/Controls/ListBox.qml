@@ -19,11 +19,11 @@
 import QtQuick
 import QtQuick.Controls
 
-import app.graphia.Shared
-
 import app.graphia
+import app.graphia.Shared
+import app.graphia.Shared.Controls
 
-Item
+Rectangle
 {
     id: root
 
@@ -87,11 +87,14 @@ Item
         return root._selectedIndices.indexOf(index) !== -1;
     }
 
+    readonly property real scrollBarWidth: scrollBar.size < 1 ? scrollBar.width : 0
+
     property Component delegate: Label
     {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: -leftInset
+        rightPadding: root.scrollBarWidth
         leftInset: -8
 
         property var highlightColor: root.highlightedProvider(index) ?
@@ -106,7 +109,6 @@ Item
         elide: Text.ElideRight
         renderType: Text.NativeRendering
     }
-
 
     property var _selectedIndices: []
     property int _lastSelectedIndex: -1
@@ -139,140 +141,130 @@ Item
     // Just some semi-sensible defaults
     width: 200
     height: 100
+    color: "white"
 
-    Frame
+    ListView
     {
+        id: listView
+
         anchors.fill: parent
+        anchors.margins: outline.outlineWidth
+        clip: true
 
-        topPadding: 0
-        leftPadding: 0
-        rightPadding: 0
-        bottomPadding: 0
+        model: root.model
 
-        Component.onCompleted:
+        delegate: root.delegate
+
+        boundsBehavior: Flickable.StopAtBounds
+        ScrollBar.vertical: ScrollBar { id: scrollBar; policy: Qt.ScrollBarAsNeeded }
+
+        interactive: false
+
+        MouseArea
         {
-            if(background.color !== undefined)
-                background.color = "white";
-
-            if(background.border !== undefined)
-                listView.anchors.margins = background.border.width;
-        }
-
-        ListView
-        {
-            id: listView
-
             anchors.fill: parent
-            clip: true
 
-            model: root.model
-
-            delegate: root.delegate
-
-            boundsBehavior: Flickable.StopAtBounds
-            ScrollBar.vertical: ScrollBar { policy: Qt.ScrollBarAsNeeded }
-            interactive: false
-
-            MouseArea
+            function setNewSelection(newSelection, index)
             {
-                anchors.fill: parent
+                newSelection.sort();
 
-                function setNewSelection(newSelection, index)
+                root._lastSelectedIndex = newSelection.length > 0 &&
+                    newSelection.indexOf(index) < 0 ?
+                    newSelection[newSelection.length - 1] : index;
+
+                root._selectedIndices = newSelection;
+            }
+
+            function indexAt(mouse)
+            {
+                return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
+            }
+
+            onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * 5); }
+
+            onPressed: function(mouse)
+            {
+                root.forceActiveFocus();
+
+                let newSelectedIndices = [];
+
+                let index = indexAt(mouse);
+                if(index < 0)
+                    return;
+
+                if(root.allowMultipleSelection && (mouse.modifiers & Qt.ShiftModifier) &&
+                    root._lastSelectedIndex !== -1)
                 {
-                    newSelection.sort();
+                    let min = Math.min(index, root._lastSelectedIndex);
+                    let max = Math.max(index, root._lastSelectedIndex);
 
-                    root._lastSelectedIndex = newSelection.length > 0 &&
-                        newSelection.indexOf(index) < 0 ?
-                        newSelection[newSelection.length - 1] : index;
+                    newSelectedIndices = root._selectedIndices;
 
-                    root._selectedIndices = newSelection;
-                }
-
-                function indexAt(mouse)
-                {
-                    return parent.indexAt(mouse.x + parent.contentX, mouse.y + parent.contentY);
-                }
-
-                onWheel: function(wheel) { parent.flick(0, wheel.angleDelta.y * 5); }
-
-                onPressed: function(mouse)
-                {
-                    root.forceActiveFocus();
-
-                    let newSelectedIndices = [];
-
-                    let index = indexAt(mouse);
-                    if(index < 0)
-                        return;
-
-                    if(root.allowMultipleSelection && (mouse.modifiers & Qt.ShiftModifier) &&
-                        root._lastSelectedIndex !== -1)
+                    for(let i = min; i <= max; i++)
                     {
-                        let min = Math.min(index, root._lastSelectedIndex);
-                        let max = Math.max(index, root._lastSelectedIndex);
-
-                        newSelectedIndices = root._selectedIndices;
-
-                        for(let i = min; i <= max; i++)
-                        {
-                            if(newSelectedIndices.indexOf(i) < 0)
-                                newSelectedIndices.push(i);
-                        }
+                        if(newSelectedIndices.indexOf(i) < 0)
+                            newSelectedIndices.push(i);
                     }
-                    else if(root.allowMultipleSelection && (mouse.modifiers & Qt.ControlModifier))
-                    {
-                        newSelectedIndices = root._selectedIndices;
-                        let metaIndex = newSelectedIndices.indexOf(index);
+                }
+                else if(root.allowMultipleSelection && (mouse.modifiers & Qt.ControlModifier))
+                {
+                    newSelectedIndices = root._selectedIndices;
+                    let metaIndex = newSelectedIndices.indexOf(index);
 
-                        if(metaIndex < 0)
-                            newSelectedIndices.push(index);
-                        else
-                            newSelectedIndices.splice(metaIndex, 1);
-                    }
+                    if(metaIndex < 0)
+                        newSelectedIndices.push(index);
                     else
-                        newSelectedIndices = [index];
-
-                    setNewSelection(newSelectedIndices, index);
+                        newSelectedIndices.splice(metaIndex, 1);
                 }
+                else
+                    newSelectedIndices = [index];
 
-                onPositionChanged: function(mouse)
+                setNewSelection(newSelectedIndices, index);
+            }
+
+            onPositionChanged: function(mouse)
+            {
+                let newSelectedIndices = [];
+
+                let index = indexAt(mouse);
+                if(index < 0)
+                    return;
+
+                if(root.allowMultipleSelection)
                 {
-                    let newSelectedIndices = [];
+                    newSelectedIndices = root._selectedIndices
+                    let metaIndex = newSelectedIndices.indexOf(index);
 
-                    let index = indexAt(mouse);
-                    if(index < 0)
-                        return;
-
-                    if(root.allowMultipleSelection)
-                    {
-                        newSelectedIndices = root._selectedIndices
-                        let metaIndex = newSelectedIndices.indexOf(index);
-
-                        if(metaIndex < 0)
-                            newSelectedIndices.push(index);
-                    }
-                    else
-                        newSelectedIndices = [index];
-
-                    setNewSelection(newSelectedIndices, index);
+                    if(metaIndex < 0)
+                        newSelectedIndices.push(index);
                 }
+                else
+                    newSelectedIndices = [index];
 
-                onClicked: function(mouse)
-                {
-                    root.forceActiveFocus();
-                    root.clicked(indexAt(mouse));
-                }
+                setNewSelection(newSelectedIndices, index);
+            }
 
-                onDoubleClicked: function(mouse)
-                {
-                    root.forceActiveFocus();
-                    root.doubleClicked(indexAt(mouse));
+            onClicked: function(mouse)
+            {
+                root.forceActiveFocus();
+                root.clicked(indexAt(mouse));
+            }
 
-                    if(root.selectedValue)
-                        root.accepted();
-                }
+            onDoubleClicked: function(mouse)
+            {
+                root.forceActiveFocus();
+                root.doubleClicked(indexAt(mouse));
+
+                if(root.selectedValue)
+                    root.accepted();
             }
         }
+    }
+
+    Outline
+    {
+        id: outline
+        anchors.fill: parent
     }
 
     Keys.onPressed: function(event)

@@ -19,25 +19,36 @@
 import QtQuick
 import QtQuick.Controls
 
-ScrollView
+import app.graphia.Shared.Controls
+
+Item
 {
-    id: root
-    clip: true
-    padding: frame.background.border ? frame.background.border.width : 0
+    property alias contentChildren: scrollView.contentChildren
+    default property alias contentData: scrollView.contentData
 
-    background: Frame
+    ScrollView
     {
-        id: frame
+        id: scrollView
 
-        topPadding: 0
-        leftPadding: 0
-        rightPadding: 0
-        bottomPadding: 0
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-        // Re-parent the actual meat of the Frame to the ScrollView itself, so it
-        // appears above the content; doing this with Frame directly is impossible
-        // as Frame is a Control, and as such it consumes all mouse events
-        background.z: root.z + 1
-        Component.onCompleted: { frame.background.parent = root; }
+        padding: outline.outlineWidth
+        anchors.fill: parent
+    }
+
+    readonly property real staticScrollBarWidth: scrollView.ScrollBar.vertical.width
+    readonly property real scrollBarWidth:
+        scrollView.ScrollBar.vertical.size < 1 ? scrollView.ScrollBar.vertical.width : 0
+
+    Outline
+    {
+        id: outline
+        anchors.fill: parent
+    }
+
+    function resetScrollPosition()
+    {
+        scrollView.ScrollBar.vertical.position = 0;
     }
 }

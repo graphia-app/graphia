@@ -565,9 +565,6 @@ Rectangle
 
             visible: _selectMultipleMode
 
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
             ListView
             {
                 boundsBehavior: Flickable.StopAtBounds
@@ -578,6 +575,7 @@ Rectangle
                     sourceComponent: CheckBox
                     {
                         text: modelData
+                        rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()
                         {

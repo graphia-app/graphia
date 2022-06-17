@@ -65,17 +65,12 @@ Window
                 TabBarButton { text: qsTr("Defaults") }
             }
 
-            Frame
+            Outline
             {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                topPadding: 0
-                leftPadding: 0
-                rightPadding: 0
-                bottomPadding: 0
-
-                Component.onCompleted: { if(background.color !== undefined) background.color = palette.light; }
+                color: palette.light
 
                 StackLayout
                 {

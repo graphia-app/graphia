@@ -1034,17 +1034,12 @@ ApplicationWindow
                 }
             }
 
-            Frame
+            Outline
             {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 enabled: !root.busy
                 visible: tabBar.count > 0
-
-                topPadding: 0
-                leftPadding: 0
-                rightPadding: 0
-                bottomPadding: 0
 
                 StackLayout
                 {

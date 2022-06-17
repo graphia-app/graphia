@@ -71,6 +71,7 @@ Window
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.leftMargin: -leftInset
+                    rightPadding: listBox.scrollBarWidth
                     leftInset: -8
 
                     property var highlightColor: listBox.highlightedProvider(index) ?

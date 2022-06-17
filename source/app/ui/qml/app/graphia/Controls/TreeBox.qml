@@ -125,34 +125,24 @@ Item
             onAccepted: { visible = false; }
         }
 
-        Frame
+        Rectangle
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            topPadding: 0
-            leftPadding: 0
-            rightPadding: 0
-            bottomPadding: 0
-
-            Component.onCompleted:
-            {
-                if(background.color !== undefined)
-                    background.color = "white";
-
-                if(background.border !== undefined)
-                    treeView.anchors.margins = background.border.width;
-            }
+            color: "white"
 
             TreeView
             {
                 id: treeView
 
                 anchors.fill: parent
+                anchors.margins: outline.outlineWidth
                 clip: true
 
                 boundsBehavior: Flickable.StopAtBounds
-                ScrollBar.vertical: ScrollBar { policy: Qt.ScrollBarAsNeeded }
+                ScrollBar.vertical: ScrollBar { id: scrollBar; policy: Qt.ScrollBarAsNeeded }
+                readonly property real scrollBarWidth: scrollBar.size < 1 ? scrollBar.width : 0
                 interactive: false
 
                 model: SortFilterProxyModel
@@ -332,6 +322,7 @@ Item
                         id: treeViewDelegate
 
                         implicitWidth: root.width
+                        rightPadding: treeView.scrollBarWidth
                         y: hasSectionRow ? implicitHeight : 0
 
                         property bool selected: treeView.selectedRows.indexOf(model.row) >= 0
@@ -434,12 +425,18 @@ Item
                 onContentYChanged: { parentGuideTimer.restart(); }
             }
 
+            Outline
+            {
+                id: outline
+                anchors.fill: parent
+            }
+
             FloatingButton
             {
                 id: searchButton
                 visible: root.showSearch && root.enabled
 
-                anchors.rightMargin: 4
+                anchors.rightMargin: 4 + treeView.scrollBarWidth
                 anchors.bottomMargin: 4
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom

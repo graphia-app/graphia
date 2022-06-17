@@ -39,9 +39,9 @@ Window
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     width: 900
-    height: 450
+    height: 475
     minimumWidth: 900
-    minimumHeight: 450
+    minimumHeight: 475
 
     property var document
     property string transformExpression
@@ -267,50 +267,34 @@ Window
                               qsTr("No Parameters Required") : qsTr("Select A Transform")
                 }
 
-                Frame
+                Item
                 {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     visible: parameters.enabled || attributeParameters.enabled ||
                         visualisations.enabled || condition.enabled
 
-                    topPadding: 0
-                    leftPadding: 0
-                    rightPadding: 0
-                    bottomPadding: 0
-
-                    Component.onCompleted:
-                    {
-                        if(background.border === undefined)
-                            return;
-
-                        let frameWidth = background.border.width;
-                        background.border.width = Qt.binding(function()
-                        {
-                            return scrollView.needsFrame ? frameWidth : 0;
-                        });
-                    }
-
                     ScrollView
                     {
                         id: scrollView
 
                         anchors.fill: parent
-                        clip: true
 
                         property bool needsFrame: contentHeight > availableHeight
 
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
+                        readonly property real scrollBarWidth:
+                            ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
+
                         RowLayout
                         {
-                            width: scrollView.width
+                            width: scrollView.width - scrollView.scrollBarWidth
 
                             ColumnLayout
                             {
                                 Layout.fillWidth: true
-                                Layout.fillHeight: true
                                 Layout.margins: scrollView.needsFrame ? Constants.margin : 0
 
                                 spacing: 20
@@ -838,6 +822,12 @@ Window
                                 }
                             }
                         }
+                    }
+
+                    Outline
+                    {
+                        anchors.fill: parent
+                        outlineVisible: scrollView.needsFrame
                     }
                 }
 

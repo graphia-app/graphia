@@ -212,8 +212,6 @@ ColumnLayout
 
             RowLayout
             {
-                width: root.width
-
                 onXChanged: { root._itemPositionChanged(this); }
                 onYChanged: { root._itemPositionChanged(this); }
 
@@ -487,8 +485,6 @@ ColumnLayout
 
             RowLayout
             {
-                width: root.width
-
                 onXChanged: { root._itemPositionChanged(this); }
                 onYChanged: { root._itemPositionChanged(this); }
 

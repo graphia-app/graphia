@@ -22,6 +22,7 @@ import QtQuick.Layouts
 
 import app.graphia
 import app.graphia.Shared
+import app.graphia.Shared.Controls
 
 import SortFilterProxyModel
 
@@ -173,41 +174,28 @@ Item
             }
         }
 
-        Frame
+        Item
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.ambiguityInExtensionsOrPlugins
 
-            topPadding: 0
-            leftPadding: 0
-            rightPadding: 0
-            bottomPadding: 0
-
-            Component.onCompleted:
-            {
-                if(background.border === undefined)
-                    return;
-
-                let frameWidth = background.border.width;
-                background.border.width = Qt.binding(function()
-                {
-                    return scrollView.needsFrame ? frameWidth : 0;
-                });
-            }
-
             ScrollView
             {
                 id: scrollView
                 anchors.fill: parent
-                anchors.margins: 1
-                clip: true
 
                 property bool needsFrame: contentHeight > availableHeight
 
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+                readonly property real scrollBarWidth:
+                    ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
+
                 RowLayout
                 {
-                    width: scrollView.width
+                    width: scrollView.width - scrollView.scrollBarWidth
 
                     ColumnLayout
                     {
@@ -342,6 +330,12 @@ Item
                         }
                     }
                 }
+            }
+
+            Outline
+            {
+                anchors.fill: parent
+                outlineVisible: scrollView.needsFrame
             }
         }
     }
