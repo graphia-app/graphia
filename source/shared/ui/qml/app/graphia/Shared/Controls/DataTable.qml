@@ -415,94 +415,131 @@ Rectangle
             color: palette.midlight
         }
 
-        TableView
+        Item
         {
-            id: tableView
-
-            syncDirection: Qt.Horizontal
-            syncView: headerView
-
-            clip: true
-            pixelAligned: true
-
-            ScrollBar.vertical: ScrollBar {}
-            ScrollBar.horizontal: ScrollBar {}
-            boundsBehavior: Flickable.StopAtBounds
+            // This Item exists solely as a parent for the Flickable's vertical scrollbar
+            // See https://doc.qt.io/qt-6/qml-qtquick-controls2-scrollbar.html#attaching-scrollbar-to-a-flickable
 
             Layout.fillHeight: true
             Layout.fillWidth: true
-            anchors.margins: 1
+            Layout.margins: 1
 
-            rowHeightProvider: function(row)
+            TableView
             {
-                // Hide first row
-                if(root.useFirstRowAsHeader && row === 0)
-                    return 0;
+                id: tableView
+                anchors.fill: parent
 
-                // If the static height is set, use it, otherwise automatically size
-                return root._cellDelegateHeight ? root._cellDelegateHeight : -1;
-            }
+                syncDirection: Qt.Horizontal
+                syncView: headerView
 
-            columnWidthProvider: headerView.columnWidthProvider
-
-            delegate: Item
-            {
                 clip: true
+                pixelAligned: true
 
-                implicitWidth: Math.max(1, cellDelegateLoader.implicitWidth)
-                implicitHeight: Math.max(1, cellDelegateLoader.implicitHeight)
-
-                Loader
+                ScrollBar.vertical: ScrollBar
                 {
-                    id: cellDelegateLoader
-                    anchors.fill: parent
+                    id: verticalTableViewScrollBar
 
-                    sourceComponent: root.cellDelegate
-                    readonly property string value: model[root.cellDisplayRole]
-                    readonly property int modelColumn: model.column
-                    readonly property int modelRow: model.row
+                    parent: tableView.parent
+                    anchors.top: tableView.top
+                    anchors.bottom: tableView.bottom
+                    anchors.bottomMargin: horizontalTableViewScrollBar.size < 1 ? horizontalTableViewScrollBar.height : 0
+                    anchors.right: tableView.right
+                }
 
-                    onLoaded:
+                ScrollBar.horizontal: ScrollBar
+                {
+                    id: horizontalTableViewScrollBar
+
+                    parent: tableView.parent
+                    anchors.left: tableView.left
+                    anchors.right: tableView.right
+                    anchors.rightMargin: verticalTableViewScrollBar.size < 1 ? verticalTableViewScrollBar.width : 0
+                    anchors.bottom: tableView.bottom
+                }
+
+                boundsBehavior: Flickable.StopAtBounds
+
+                rowHeightProvider: function(row)
+                {
+                    // Hide first row
+                    if(root.useFirstRowAsHeader && row === 0)
+                        return 0;
+
+                    // If the static height is set, use it, otherwise automatically size
+                    return root._cellDelegateHeight ? root._cellDelegateHeight : -1;
+                }
+
+                columnWidthProvider: headerView.columnWidthProvider
+
+                delegate: Item
+                {
+                    clip: true
+
+                    implicitWidth: Math.max(1, cellDelegateLoader.implicitWidth)
+                    implicitHeight: Math.max(1, cellDelegateLoader.implicitHeight)
+
+                    Loader
                     {
-                        if(item.implicitHeight !== 0)
-                            root._cellDelegateHeight = Math.max(root._cellDelegateHeight, item.implicitHeight);
+                        id: cellDelegateLoader
+                        anchors.fill: parent
 
-                        root._cellWidths.set(model.column + "," + model.row, Math.max(1, item.implicitWidth));
+                        sourceComponent: root.cellDelegate
+                        readonly property string value: model[root.cellDisplayRole]
+                        readonly property int modelColumn: model.column
+                        readonly property int modelRow: model.row
+
+                        onLoaded:
+                        {
+                            if(item.implicitHeight !== 0)
+                                root._cellDelegateHeight = Math.max(root._cellDelegateHeight, item.implicitHeight);
+
+                            root._cellWidths.set(model.column + "," + model.row, Math.max(1, item.implicitWidth));
+                        }
+                    }
+
+                    Component.onCompleted:
+                    {
+                        root._loadedCells.add({x: model.column, y: model.row});
+                        Qt.callLater(root._updateCellExtents);
+                    }
+
+                    TableView.onReused:
+                    {
+                        root._loadedCells.add({x: model.column, y: model.row});
+                        root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.item.implicitWidth));
+
+                        if(typeof(cellDelegateLoader.item.onReused) === "function")
+                            cellDelegateLoader.item.onReused();
+
+                        Qt.callLater(root._updateCellExtents);
+                    }
+
+                    TableView.onPooled:
+                    {
+                        root._loadedCells.forEach((cell) =>
+                        {
+                            if(cell.x === model.column && cell.y === model.row)
+                                root._loadedCells.delete(cell);
+                        });
+
+                        root._cellWidths.delete(model.column + "," + model.row);
+
+                        if(typeof(cellDelegateLoader.item.onPooled) === "function")
+                            cellDelegateLoader.item.onPooled();
+
+                        Qt.callLater(root._updateCellExtents);
                     }
                 }
+            }
 
-                Component.onCompleted:
-                {
-                    root._loadedCells.add({x: model.column, y: model.row});
-                    Qt.callLater(root._updateCellExtents);
-                }
-
-                TableView.onReused:
-                {
-                    root._loadedCells.add({x: model.column, y: model.row});
-                    root._cellWidths.set(model.column + "," + model.row, Math.max(1, cellDelegateLoader.item.implicitWidth));
-
-                    if(typeof(cellDelegateLoader.item.onReused) === "function")
-                        cellDelegateLoader.item.onReused();
-
-                    Qt.callLater(root._updateCellExtents);
-                }
-
-                TableView.onPooled:
-                {
-                    root._loadedCells.forEach((cell) =>
-                    {
-                        if(cell.x === model.column && cell.y === model.row)
-                            root._loadedCells.delete(cell);
-                    });
-
-                    root._cellWidths.delete(model.column + "," + model.row);
-
-                    if(typeof(cellDelegateLoader.item.onPooled) === "function")
-                        cellDelegateLoader.item.onPooled();
-
-                    Qt.callLater(root._updateCellExtents);
-                }
+            // Filler for when both scroll bars are visible
+            Rectangle
+            {
+                width: horizontalTableViewScrollBar.anchors.rightMargin
+                height: verticalTableViewScrollBar.anchors.bottomMargin
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                color: palette.light
             }
         }
     }

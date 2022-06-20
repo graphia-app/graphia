@@ -290,44 +290,51 @@ ApplicationWindow
                 }
             }
 
-            EnrichmentHeatmap
+            Item
             {
-                id: heatmap
-
-                visible: showHeatmapButton.checked
-
                 SplitView.fillHeight: true
                 SplitView.minimumWidth: 300
 
-                model: root._currentModel
-                elideLabelWidth: 100
-                showOnlyEnriched: showOnlyEnrichedButton.checked
-                xAxisLabel: model ? model.selectionA : ""
-                yAxisLabel: model ? model.selectionB : ""
+                visible: showHeatmapButton.checked
 
-                onShowOnlyEnrichedChanged:
+                EnrichmentHeatmap
                 {
-                    table.clearSelection();
-                    table.positionViewAt(0);
-                }
+                    id: heatmap
 
-                onPlotValueClicked: function(row)
-                {
-                    let proxyRow = proxyModel.mapFromSource(row);
-                    if(proxyRow < 0)
+                    anchors.fill: parent
+                    anchors.rightMargin: verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
+                    anchors.bottomMargin: horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+
+                    model: root._currentModel
+                    elideLabelWidth: 100
+                    showOnlyEnriched: showOnlyEnrichedButton.checked
+                    xAxisLabel: model ? model.selectionA : ""
+                    yAxisLabel: model ? model.selectionB : ""
+
+                    onShowOnlyEnrichedChanged:
                     {
                         table.clearSelection();
-                        return;
+                        table.positionViewAt(0);
                     }
 
-                    table.selectRow(proxyRow);
-                    table.positionViewAt(proxyRow);
+                    onPlotValueClicked: function(row)
+                    {
+                        let proxyRow = proxyModel.mapFromSource(row);
+                        if(proxyRow < 0)
+                        {
+                            table.clearSelection();
+                            return;
+                        }
+
+                        table.selectRow(proxyRow);
+                        table.positionViewAt(proxyRow);
+                    }
+
+                    onRightClick: { plotContextMenu.popup(); }
+
+                    scrollXAmount: horizontalScrollBar.position / (1.0 - horizontalScrollBar.size)
+                    scrollYAmount: verticalScrollBar.position / (1.0 - verticalScrollBar.size)
                 }
-
-                onRightClick: { plotContextMenu.popup(); }
-
-                scrollXAmount: horizontalScrollBar.position / (1.0 - horizontalScrollBar.size)
-                scrollYAmount: verticalScrollBar.position / (1.0 - verticalScrollBar.size)
 
                 ScrollBar
                 {
@@ -338,6 +345,7 @@ ApplicationWindow
                     size: heatmap.horizontalRangeSize
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    anchors.rightMargin: verticalScrollBar.size < 1 ? verticalScrollBar.width : 0
                     anchors.bottom: parent.bottom
                 }
 
@@ -351,6 +359,17 @@ ApplicationWindow
                     anchors.top: parent.top
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
+                    anchors.bottomMargin: horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
+                }
+
+                // Filler for when both scroll bars are visible
+                Rectangle
+                {
+                    width: horizontalScrollBar.anchors.rightMargin
+                    height: verticalScrollBar.anchors.bottomMargin
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    color: palette.light
                 }
             }
 

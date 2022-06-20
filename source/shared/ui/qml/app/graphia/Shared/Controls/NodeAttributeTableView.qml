@@ -706,14 +706,14 @@ Item
                     }
                 }
             }
+        }
 
-            Rectangle
-            {
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: palette.midlight
-            }
+        // Header underline
+        Rectangle
+        {
+            Layout.fillWidth: true
+            height: 1
+            color: palette.midlight
         }
 
         Item
@@ -827,6 +827,13 @@ Item
                 ScrollBar.horizontal: ScrollBar
                 {
                     id: horizontalTableViewScrollBar
+
+                    parent: tableView.parent
+                    anchors.left: tableView.left
+                    anchors.right: tableView.right
+                    anchors.rightMargin: verticalTableViewScrollBar.size < 1 ? verticalTableViewScrollBar.width : 0
+                    anchors.bottom: tableView.bottom
+
                     policy: ScrollBar.AsNeeded
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
@@ -847,6 +854,13 @@ Item
                 ScrollBar.vertical: ScrollBar
                 {
                     id: verticalTableViewScrollBar
+
+                    parent: tableView.parent
+                    anchors.top: tableView.top
+                    anchors.bottom: tableView.bottom
+                    anchors.bottomMargin: horizontalTableViewScrollBar.size < 1 ? horizontalTableViewScrollBar.height : 0
+                    anchors.right: tableView.right
+
                     policy: ScrollBar.AsNeeded
                     minimumSize: 0.1
                     visible: size < 1.0 // So that it's invisible to mouse clicks
@@ -1115,6 +1129,16 @@ Item
 
                 // This is just a reference to the menu, so we can repopulate it later as necessary
                 property PlatformMenu _tableMenu
+            }
+
+            // Filler for when both scroll bars are visible
+            Rectangle
+            {
+                width: horizontalTableViewScrollBar.anchors.rightMargin
+                height: verticalTableViewScrollBar.anchors.bottomMargin
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                color: palette.light
             }
 
             SlidingPanel

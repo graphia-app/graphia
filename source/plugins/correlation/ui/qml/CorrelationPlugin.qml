@@ -733,113 +733,148 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        Flickable
+        Item
         {
-            id: plotFlickable
+            // This Item exists solely as a parent for the Flickable's vertical scrollbar
+            // See https://doc.qt.io/qt-6/qml-qtquick-controls2-scrollbar.html#attaching-scrollbar-to-a-flickable
 
             SplitView.fillWidth: true
             SplitView.fillHeight: splitView.orientation !== Qt.Vertical
             SplitView.minimumHeight: 150 // Should be <= the minimum that CorrelationPlot::minimumHeight returns
             SplitView.minimumWidth: 200
 
-            contentHeight: Math.max(height, plot.minimumHeight)
-            clip: true
-
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-            CorrelationPlot
+            Flickable
             {
-                id: plot
-
+                id: plotFlickable
                 anchors.fill: parent
 
-                model: plugin.model
-                selectedRows: tableView.selectedRows
+                contentHeight: Math.max(height, plot.minimumHeight)
+                clip: true
 
-                onPlotOptionsChanged: { root.saveRequired = true; }
-
-                onVisibleColumnAnnotationNamesChanged:
+                ScrollBar.vertical: ScrollBar
                 {
-                    root.saveRequired = true;
+                    parent: plotFlickable.parent
+                    anchors.top: plotFlickable.top
+                    anchors.bottom: plotFlickable.bottom
+                    anchors.bottomMargin: horizontalPlotScrollBar.size < 1 ? horizontalPlotScrollBar.height : 0
+                    anchors.right: plotFlickable.right
 
-                    if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
-                        plot.colorGroupByAnnotationName = "";
-
-                    if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
-                        groupByAnnotationAction.trigger();
-
-                    updateMenu();
+                    policy: ScrollBar.AsNeeded
                 }
 
-                onColumnSortOrdersChanged: { root.saveRequired = true; }
+                readonly property int horizontalScrollBarHeight:
+                    horizontalPlotScrollBar.size < 1 ? horizontalPlotScrollBar.height : 0
+                readonly property int verticalScrollBarWidth:
+                    ScrollBar.vertical.size < 1 ? ScrollBar.vertical.width : 0
 
-                elideLabelWidth:
+                CorrelationPlot
                 {
-                    let newHeight = height * 0.25;
-                    let quant = 20;
-                    let quantised = Math.floor(newHeight / quant) * quant;
+                    id: plot
 
-                    if(quantised < 40)
-                        quantised = 0;
+                    anchors.fill: parent
+                    anchors.rightMargin: plotFlickable.verticalScrollBarWidth
+                    anchors.bottomMargin: plot.visibleHorizontalFraction < 1.0 ?
+                        horizontalPlotScrollBar.height : 0
 
-                    return quantised;
-                }
+                    model: plugin.model
+                    selectedRows: tableView.selectedRows
 
-                property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
-                onIqrStyleChanged: { updateMenu(); }
+                    onPlotOptionsChanged: { root.saveRequired = true; }
 
-                horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
-
-                onRightClick:
-                {
-                    if(plotContextMenu.enabled)
-                        plotContextMenu.popup();
-                }
-
-                DelayedBusyIndicator
-                {
-                    anchors.centerIn: parent
-                    width: 64
-                    height: 64
-
-                    delayedRunning: plot.busy
-                }
-
-                FloatingButton
-                {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-
-                    // Have the button move sync with scrolling, so it's always visible
-                    anchors.topMargin: 4 + plotFlickable.contentY
-                    anchors.margins: 4
-
-                    visible: plot.columnAnnotationSelectionModeEnabled
-                    iconName: "emblem-unreadable"
-
-                    onClicked: function(mouse)
+                    onVisibleColumnAnnotationNamesChanged:
                     {
-                        plot.columnAnnotationSelectionModeEnabled =
-                            selectColumnAnnotationsAction.checked = false;
+                        root.saveRequired = true;
+
+                        if(plot.visibleColumnAnnotationNames.indexOf(plot.colorGroupByAnnotationName) < 0)
+                            plot.colorGroupByAnnotationName = "";
+
+                        if(plot.groupByAnnotation && plot.visibleColumnAnnotationNames.length === 0)
+                            groupByAnnotationAction.trigger();
+
+                        updateMenu();
+                    }
+
+                    onColumnSortOrdersChanged: { root.saveRequired = true; }
+
+                    elideLabelWidth:
+                    {
+                        let newHeight = height * 0.25;
+                        let quant = 20;
+                        let quantised = Math.floor(newHeight / quant) * quant;
+
+                        if(quantised < 40)
+                            quantised = 0;
+
+                        return quantised;
+                    }
+
+                    property bool iqrStyle: plot.groupByAnnotation || plot.averagingType === PlotAveragingType.IQR
+                    onIqrStyleChanged: { updateMenu(); }
+
+                    horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
+
+                    onRightClick:
+                    {
+                        if(plotContextMenu.enabled)
+                            plotContextMenu.popup();
+                    }
+
+                    DelayedBusyIndicator
+                    {
+                        anchors.centerIn: parent
+                        width: 64
+                        height: 64
+
+                        delayedRunning: plot.busy
+                    }
+
+                    FloatingButton
+                    {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+
+                        // Have the button move sync with scrolling, so it's always visible
+                        anchors.topMargin: 4 + plotFlickable.contentY
+                        anchors.margins: 4
+
+                        visible: plot.columnAnnotationSelectionModeEnabled
+                        iconName: "emblem-unreadable"
+
+                        onClicked: function(mouse)
+                        {
+                            plot.columnAnnotationSelectionModeEnabled =
+                                selectColumnAnnotationsAction.checked = false;
+                        }
+                    }
+
+                    ScrollBar
+                    {
+                        id: horizontalPlotScrollBar
+                        parent: plotFlickable
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.rightMargin: plotFlickable.verticalScrollBarWidth
+                        anchors.bottom: parent.bottom
+
+                        policy: plot.visibleHorizontalFraction < 1.0 ?
+                            ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+
+                        hoverEnabled: true
+                        active: hovered || pressed
+                        orientation: Qt.Horizontal
+                        size: plot.visibleHorizontalFraction
                     }
                 }
+            }
 
-                ScrollBar
-                {
-                    id: horizontalPlotScrollBar
-                    parent: plotFlickable
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-
-                    policy: plot.visibleHorizontalFraction < 1.0 ?
-                        ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-
-                    hoverEnabled: true
-                    active: hovered || pressed
-                    orientation: Qt.Horizontal
-                    size: plot.visibleHorizontalFraction
-                }
+            // Filler for when both scroll bars are visible
+            Rectangle
+            {
+                width: plotFlickable.verticalScrollBarWidth
+                height: plotFlickable.horizontalScrollBarHeight
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                color: palette.light
             }
         }
     }
