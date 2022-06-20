@@ -75,8 +75,8 @@ Item
 
     property var prettifyFunction: (value) => value
 
-    readonly property double contentHeight: treeView.contentHeight
-    readonly property double contentWidth: treeView.contentWidth
+    readonly property double contentWidth: treeView.implicitWidth
+    readonly property double contentHeight: treeView.implicitHeight
 
     onModelChanged:
     {
@@ -135,6 +135,9 @@ Item
             TreeView
             {
                 id: treeView
+
+                implicitWidth: contentWidth + (2 * outline.outlineWidth)
+                implicitHeight: contentHeight + (2 * outline.outlineWidth)
 
                 anchors.fill: parent
                 anchors.margins: outline.outlineWidth
