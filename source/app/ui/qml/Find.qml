@@ -569,12 +569,17 @@ Rectangle
             {
                 boundsBehavior: Flickable.StopAtBounds
 
+                topMargin: 2
+                leftMargin: 2
+
                 model: valueComboBox.model
                 delegate: Loader
                 {
                     sourceComponent: CheckBox
                     {
                         text: modelData
+
+                        bottomPadding: 2
                         rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()

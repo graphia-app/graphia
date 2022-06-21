@@ -33,6 +33,7 @@ Item
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
+        clip: true
         padding: outline.outlineWidth
         anchors.fill: parent
     }
