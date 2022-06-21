@@ -71,6 +71,7 @@ Window
         Text
         {
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
 
             text: explanationText
             wrapMode: Text.WordWrap
@@ -134,13 +135,14 @@ Window
         CheckBox
         {
             id: rememberThisChoiceCheckBox
+            Layout.alignment: Qt.AlignBottom
             text: qsTr("Remember This Choice")
         }
 
-        Item { Layout.fillHeight: true }
-
         RowLayout
         {
+            Layout.alignment: Qt.AlignBottom
+
             Item { Layout.fillWidth: true }
 
             Button
