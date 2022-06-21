@@ -224,8 +224,6 @@ Item
 
             Item { Layout.fillHeight: true }
         }
-
-        Item { Layout.fillWidth: true }
     }
 
     Labs.FontDialog
