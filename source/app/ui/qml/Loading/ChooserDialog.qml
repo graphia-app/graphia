@@ -46,11 +46,11 @@ Window
             root.flags |= Qt.Sheet;
     }
 
-    width: layout.implicitWidth + (Constants.margin * 2)
+    width: 380
     minimumWidth: width
     maximumWidth: width
 
-    height: layout.implicitHeight + (Constants.margin * 2)
+    height: 180
     minimumHeight: height
     maximumHeight: height
 
@@ -65,12 +65,12 @@ Window
         id: layout
 
         spacing: Constants.spacing
-        anchors.centerIn: parent
+        anchors.fill: parent
+        anchors.margins: Constants.margin
 
         Text
         {
             Layout.fillWidth: true
-            Layout.preferredWidth: 350
 
             text: explanationText
             wrapMode: Text.WordWrap
@@ -136,6 +136,8 @@ Window
             id: rememberThisChoiceCheckBox
             text: qsTr("Remember This Choice")
         }
+
+        Item { Layout.fillHeight: true }
 
         RowLayout
         {
