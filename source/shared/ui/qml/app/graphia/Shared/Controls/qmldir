@@ -10,12 +10,13 @@ ListTab 1.0 ListTab.qml
 ListTabView 1.0 ListTabView.qml
 NodeAttributeTableView 1.0 NodeAttributeTableView.qml
 Outline 1.0 Outline.qml
-PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
-PlatformMenuItem 1.0 PlatformMenuItem.qml
 PlatformMenu 1.0 PlatformMenu.qml
 PlatformMenuBar 1.0 PlatformMenuBar.qml
+PlatformMenuItem 1.0 PlatformMenuItem.qml
 PlatformMenuSeparator 1.0 PlatformMenuSeparator.qml
+PointingCursorOnHoverLink 1.0 PointingCursorOnHoverLink.qml
 ScrollableTextArea 1.0 ScrollableTextArea.qml
+ScrollBarCornerFiller 1.0 ScrollBarCornerFiller.qml
 SlidingPanel 1.0 SlidingPanel.qml
 SplitViewHandle 1.0 SplitViewHandle.qml
 TabBarButton 1.0 TabBarButton.qml

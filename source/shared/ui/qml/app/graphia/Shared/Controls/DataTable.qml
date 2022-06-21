@@ -532,14 +532,10 @@ Rectangle
                 }
             }
 
-            // Filler for when both scroll bars are visible
-            Rectangle
+            ScrollBarCornerFiller
             {
-                width: horizontalTableViewScrollBar.anchors.rightMargin
-                height: verticalTableViewScrollBar.anchors.bottomMargin
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                color: palette.light
+                horizontalScrollBar: horizontalTableViewScrollBar
+                verticalScrollBar: verticalTableViewScrollBar
             }
         }
     }

@@ -290,12 +290,13 @@ ApplicationWindow
                 }
             }
 
-            Item
+            Rectangle
             {
                 SplitView.fillHeight: true
                 SplitView.minimumWidth: 300
 
                 visible: showHeatmapButton.checked
+                color: "white"
 
                 EnrichmentHeatmap
                 {
@@ -362,14 +363,10 @@ ApplicationWindow
                     anchors.bottomMargin: horizontalScrollBar.size < 1 ? horizontalScrollBar.height : 0
                 }
 
-                // Filler for when both scroll bars are visible
-                Rectangle
+                ScrollBarCornerFiller
                 {
-                    width: horizontalScrollBar.anchors.rightMargin
-                    height: verticalScrollBar.anchors.bottomMargin
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    color: palette.light
+                    horizontalScrollBar: horizontalScrollBar
+                    verticalScrollBar: verticalScrollBar
                 }
             }
 

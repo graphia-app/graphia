@@ -733,7 +733,7 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        Item
+        Rectangle
         {
             // This Item exists solely as a parent for the Flickable's vertical scrollbar
             // See https://doc.qt.io/qt-6/qml-qtquick-controls2-scrollbar.html#attaching-scrollbar-to-a-flickable
@@ -742,6 +742,8 @@ PluginContent
             SplitView.fillHeight: splitView.orientation !== Qt.Vertical
             SplitView.minimumHeight: 150 // Should be <= the minimum that CorrelationPlot::minimumHeight returns
             SplitView.minimumWidth: 200
+
+            color: "white"
 
             Flickable
             {
@@ -753,10 +755,12 @@ PluginContent
 
                 ScrollBar.vertical: ScrollBar
                 {
+                    id: verticalPlotScrollBar
+
                     parent: plotFlickable.parent
                     anchors.top: plotFlickable.top
                     anchors.bottom: plotFlickable.bottom
-                    anchors.bottomMargin: horizontalPlotScrollBar.size < 1 ? horizontalPlotScrollBar.height : 0
+                    anchors.bottomMargin: plotFlickable.horizontalScrollBarHeight
                     anchors.right: plotFlickable.right
 
                     policy: ScrollBar.AsNeeded
@@ -773,8 +777,7 @@ PluginContent
 
                     anchors.fill: parent
                     anchors.rightMargin: plotFlickable.verticalScrollBarWidth
-                    anchors.bottomMargin: plot.visibleHorizontalFraction < 1.0 ?
-                        horizontalPlotScrollBar.height : 0
+                    anchors.bottomMargin: plotFlickable.horizontalScrollBarHeight
 
                     model: plugin.model
                     selectedRows: tableView.selectedRows
@@ -850,6 +853,7 @@ PluginContent
                     ScrollBar
                     {
                         id: horizontalPlotScrollBar
+
                         parent: plotFlickable
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -867,14 +871,10 @@ PluginContent
                 }
             }
 
-            // Filler for when both scroll bars are visible
-            Rectangle
+            ScrollBarCornerFiller
             {
-                width: plotFlickable.verticalScrollBarWidth
-                height: plotFlickable.horizontalScrollBarHeight
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                color: palette.light
+                horizontalScrollBar: horizontalPlotScrollBar
+                verticalScrollBar: verticalPlotScrollBar
             }
         }
     }
