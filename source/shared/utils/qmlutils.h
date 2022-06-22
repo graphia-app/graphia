@@ -64,7 +64,7 @@ public:
     Q_INVOKABLE QString extensionForUrl(const QUrl& url) const
     {
         auto fi = QFileInfo(url.toLocalFile());
-        return fi.completeSuffix();
+        return fi.suffix();
     }
 
     Q_INVOKABLE QString baseFileNameForUrlNoExtension(const QUrl& url) const
