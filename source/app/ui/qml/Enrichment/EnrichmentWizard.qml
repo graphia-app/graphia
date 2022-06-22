@@ -55,7 +55,7 @@ Wizard
     onVisibleChanged:
     {
         reset();
-        proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
+        proxyModel.model = document.availableAttributesModel(ElementType.Node);
     }
 
     Item
@@ -63,6 +63,10 @@ Wizard
         SortFilterProxyModel
         {
             id: proxyModel
+
+            property var model: null
+            sourceModel: model
+
             filters:
             [
                 ValueFilter
@@ -71,6 +75,7 @@ Wizard
                     value: true
                 }
             ]
+
             sorters: ExpressionSorter
             {
                 expression:

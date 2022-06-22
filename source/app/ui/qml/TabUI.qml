@@ -111,6 +111,10 @@ Item
     SortFilterProxyModel
     {
         id: sharedValuesProxyModel
+
+        property var model: null
+        sourceModel: model
+
         filters:
         [
             ValueFilter
@@ -148,7 +152,7 @@ Item
 
     function _refreshAttributesWithSharedValues()
     {
-        sharedValuesProxyModel.sourceModel =
+        sharedValuesProxyModel.model =
             _document.availableAttributesModel(ElementType.Node);
 
         if(!_document.attributeExists(_lastSharedValueAttributeName))

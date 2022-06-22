@@ -325,6 +325,8 @@ Rectangle
     {
         id: proxyModel
 
+        property var model: null
+        sourceModel: model
         property bool _sourceChanging: false
 
         filters:
@@ -697,7 +699,7 @@ Rectangle
     function refresh()
     {
         proxyModel._sourceChanging = true;
-        proxyModel.sourceModel = document.availableAttributesModel(ElementType.Node);
+        proxyModel.model = document.availableAttributesModel(ElementType.Node);
         proxyModel._sourceChanging = false;
 
         if(_type === Find.Advanced)
