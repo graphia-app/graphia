@@ -23,6 +23,7 @@ import QtQuick.Dialogs
 
 import Qt.labs.platform as Labs
 
+import app.graphia
 import app.graphia.Shared
 
 Item
@@ -42,22 +43,39 @@ Item
         onColorChanged: { root.color = color; }
     }
 
-    Button
+    Rectangle
     {
         id: button
         width: root.width
         height: root.height
 
-        contentItem: Rectangle
+        border.width: 1
+        border.color: mouseArea.containsMouse ? "dimgrey" : "black";
+        radius: 2
+
+        color:
         {
-            color: button.enabled ? root.color : Utils.desaturate(root.color, 0.2)
-            radius: 2
+            if(!root.enabled)
+                return Utils.desaturate(root.color, 0.2);
+
+            if(mouseArea.containsMouse)
+                return Qt.lighter(root.color, 1.35);
+
+            return root.color;
         }
 
-        onClicked: function(mouse)
+        MouseArea
         {
-            colorDialog.color = root.color;
-            colorDialog.open();
+            id: mouseArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+
+            onClicked: function(mouse)
+            {
+                colorDialog.color = root.color;
+                colorDialog.open();
+            }
         }
     }
 }
