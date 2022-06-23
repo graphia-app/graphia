@@ -135,6 +135,18 @@ void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
         renderer->zoom(value, false);
 }
 
+void GraphComponentInteractor::trackpadPanGesture(float dx, float dy, float x, float y)
+{
+    auto* renderer = componentRendererUnderCursor();
+
+    if(renderer != nullptr)
+    {
+        rotateRendererByMouseMove(renderer,
+            {static_cast<int>(x), static_cast<int>(y)},
+            {static_cast<int>(x + dx), static_cast<int>(y + dy)});
+    }
+}
+
 GraphComponentRenderer* GraphComponentInteractor::componentRendererAtPosition(const QPoint&) const
 {
     return _scene->componentRenderer();

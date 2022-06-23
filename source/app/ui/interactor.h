@@ -42,7 +42,8 @@ public:
     virtual void mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
     virtual void mouseDoubleClickEvent(const QPoint& pos, Qt::KeyboardModifiers modifiers, Qt::MouseButton button) = 0;
     virtual void wheelEvent(const QPoint& pos, int angle) = 0;
-    virtual void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) = 0;
+    virtual void zoomGestureEvent(const QPoint& pos, float value) = 0;
+    virtual void panGestureEvent(const QPoint& pos, const QPoint& delta) = 0;
 
 signals:
     void userInteractionStarted();

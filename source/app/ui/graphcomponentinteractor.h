@@ -52,6 +52,7 @@ private:
 
     void wheelMove(float angle, float x, float y) override;
     void trackpadZoomGesture(float value, float x, float y) override;
+    void trackpadPanGesture(float dx, float dy, float x, float y) override;
 
     GraphComponentRenderer* componentRendererAtPosition(const QPoint& position) const override;
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const override;

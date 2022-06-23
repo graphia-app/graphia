@@ -951,15 +951,31 @@ void GraphRenderer::processEventQueue()
             break;
 
         case QEvent::Type::Wheel:
-            _interactor->wheelEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
-                wheelEvent->angleDelta().y());
+            switch(wheelEvent->deviceType())
+            {
+            case QInputDevice::DeviceType::Mouse:
+                _interactor->wheelEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
+                    wheelEvent->angleDelta().y());
+                break;
+
+            case QInputDevice::DeviceType::TouchScreen:
+            case QInputDevice::DeviceType::TouchPad:
+                _interactor->panGestureEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
+                    -wheelEvent->pixelDelta() * _devicePixelRatio);
+                break;
+
+            default: break;
+            }
 
             break;
 
         case QEvent::Type::NativeGesture:
-            _interactor->nativeGestureEvent(nativeEvent->gestureType(),
-                nativeEvent->position().toPoint() * _devicePixelRatio,
-                static_cast<float>(nativeEvent->value()));
+            if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
+            {
+                _interactor->zoomGestureEvent(
+                    nativeEvent->position().toPoint() * _devicePixelRatio,
+                    static_cast<float>(nativeEvent->value()));
+            }
 
             break;
 

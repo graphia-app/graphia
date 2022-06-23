@@ -234,64 +234,6 @@ void GraphCommonInteractor::mouseDoubleClickEvent(const QPoint&, Qt::KeyboardMod
     }
 }
 
-void GraphCommonInteractor::leftMouseDown()
-{
-    _selecting = true;
-
-    if((modifiers() & Qt::ShiftModifier) != 0)
-        _frustumSelectStart = cursorPosition();
-    else
-        _frustumSelectStart = QPoint();
-}
-
-void GraphCommonInteractor::leftMouseUp()
-{
-    if(_graphRenderer->transition().active())
-        return;
-
-    emit userInteractionFinished();
-
-    if(_selecting)
-    {
-        if(_frustumSelecting)
-        {
-            QPoint frustumSelectEnd = cursorPosition();
-            auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
-
-            if(!selection.empty())
-            {
-                _commandManager->execute(ExecutePolicy::Once,
-                    makeSelectNodesCommand(_selectionManager,
-                    selection, SelectNodesClear::None));
-            }
-
-            _frustumSelectStart = QPoint();
-            _frustumSelecting = false;
-            _graphRenderer->clearSelectionRect();
-        }
-        else
-        {
-            bool multiSelect = (modifiers() & Qt::ShiftModifier) != 0;
-
-            if(!_clickedNodeId.isNull())
-            {
-                _commandManager->execute(ExecutePolicy::Once,
-                    makeSelectNodeCommand(_selectionManager, _clickedNodeId,
-                    !multiSelect ? SelectNodesClear::Selection :
-                                   SelectNodesClear::None));
-            }
-            else if(!_selectionManager->selectedNodes().empty() && !multiSelect)
-            {
-                _commandManager->executeOnce(
-                    [this](Command&) { return _selectionManager->clearNodeSelection(); },
-                    tr("Selecting None"));
-            }
-        }
-
-        emit clicked(Qt::LeftButton, _clickedNodeId);
-        _selecting = false;
-    }
-}
 
 // https://www.opengl.org/wiki/Object_Mouse_Trackball
 static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
@@ -384,6 +326,73 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
     return rotation;
 }
 
+void GraphCommonInteractor::rotateRendererByMouseMove(GraphComponentRenderer* renderer,
+    const QPoint& from, const QPoint& to)
+{
+    auto* camera = renderer->camera();
+    auto rotation = mouseMoveToRotation(from, to, renderer);
+    camera->setRotation(rotation);
+}
+
+void GraphCommonInteractor::leftMouseDown()
+{
+    _selecting = true;
+
+    if((modifiers() & Qt::ShiftModifier) != 0)
+        _frustumSelectStart = cursorPosition();
+    else
+        _frustumSelectStart = QPoint();
+}
+
+void GraphCommonInteractor::leftMouseUp()
+{
+    if(_graphRenderer->transition().active())
+        return;
+
+    emit userInteractionFinished();
+
+    if(_selecting)
+    {
+        if(_frustumSelecting)
+        {
+            QPoint frustumSelectEnd = cursorPosition();
+            auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
+
+            if(!selection.empty())
+            {
+                _commandManager->execute(ExecutePolicy::Once,
+                    makeSelectNodesCommand(_selectionManager,
+                    selection, SelectNodesClear::None));
+            }
+
+            _frustumSelectStart = QPoint();
+            _frustumSelecting = false;
+            _graphRenderer->clearSelectionRect();
+        }
+        else
+        {
+            bool multiSelect = (modifiers() & Qt::ShiftModifier) != 0;
+
+            if(!_clickedNodeId.isNull())
+            {
+                _commandManager->execute(ExecutePolicy::Once,
+                    makeSelectNodeCommand(_selectionManager, _clickedNodeId,
+                    !multiSelect ? SelectNodesClear::Selection :
+                                   SelectNodesClear::None));
+            }
+            else if(!_selectionManager->selectedNodes().empty() && !multiSelect)
+            {
+                _commandManager->executeOnce(
+                    [this](Command&) { return _selectionManager->clearNodeSelection(); },
+                    tr("Selecting None"));
+            }
+        }
+
+        emit clicked(Qt::LeftButton, _clickedNodeId);
+        _selecting = false;
+    }
+}
+
 void GraphCommonInteractor::leftDrag()
 {
     auto* renderer = clickedComponentRenderer();
@@ -420,10 +429,8 @@ void GraphCommonInteractor::leftDrag()
         if(!_mouseMoving)
             emit userInteractionStarted();
 
-        Camera* camera = renderer->camera();
-        QQuaternion rotation = mouseMoveToRotation(localPrevCursorPosition(),
-            localCursorPosition(), renderer);
-        camera->setRotation(rotation);
+        rotateRendererByMouseMove(renderer,
+            localPrevCursorPosition(), localCursorPosition());
     }
 }
 
@@ -513,17 +520,28 @@ void GraphCommonInteractor::wheelEvent(const QPoint& pos, int angle)
         static_cast<float>(pos.y()));
 }
 
-void GraphCommonInteractor::nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value)
+void GraphCommonInteractor::zoomGestureEvent(const QPoint& pos, float value)
 {
     if(_graphRenderer->transition().active())
         return;
 
     _componentRendererUnderCursor = componentRendererAtPosition(pos);
 
-    if(type == Qt::ZoomNativeGesture)
-    {
-        trackpadZoomGesture(value,
-            static_cast<float>(pos.x()),
-            static_cast<float>(pos.y()));
-    }
+    trackpadZoomGesture(value,
+        static_cast<float>(pos.x()),
+        static_cast<float>(pos.y()));
+}
+
+void GraphCommonInteractor::panGestureEvent(const QPoint& pos, const QPoint& delta)
+{
+    if(_graphRenderer->transition().active())
+        return;
+
+    _componentRendererUnderCursor = componentRendererAtPosition(pos);
+
+    trackpadPanGesture(
+        static_cast<float>(delta.x()),
+        static_cast<float>(delta.y()),
+        static_cast<float>(pos.x()),
+        static_cast<float>(pos.y()));
 }

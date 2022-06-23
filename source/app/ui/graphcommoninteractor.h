@@ -82,13 +82,16 @@ private:
 
     void wheelEvent(const QPoint& pos, int angle) final;
 
-    void nativeGestureEvent(Qt::NativeGestureType type, const QPoint& pos, float value) override;
+    void zoomGestureEvent(const QPoint& pos, float value) override;
+    void panGestureEvent(const QPoint& pos, const QPoint& delta) override;
 
     virtual GraphComponentRenderer* componentRendererAtPosition(const QPoint& position) const = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;
     virtual NodeIdSet selectionForRect(const QRectF& rect) const = 0;
 
 protected:
+    void rotateRendererByMouseMove(GraphComponentRenderer* renderer, const QPoint& from, const QPoint& to);
+
     virtual void leftMouseDown();
     virtual void leftMouseUp();
     virtual void leftDrag();
@@ -102,6 +105,7 @@ protected:
 
     virtual void wheelMove(float, float, float) {}
     virtual void trackpadZoomGesture(float, float, float) {}
+    virtual void trackpadPanGesture(float, float, float, float) {};
 
     QPoint cursorPosition() const;
     QPoint prevCursorPosition() const;
