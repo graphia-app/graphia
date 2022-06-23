@@ -17,23 +17,10 @@
  */
 
 import QtQuick
-import QtQuick.Controls
 
-import app.graphia.Shared
+import app.graphia.Shared.Controls
 
-ToolButton
+FloatingButton
 {
-    icon.width: 24
-    icon.height: 24
-    icon.color: enabled ? "transparent" : "lightgrey"
-
-    display: icon.name.length > 0 || icon.source.length > 0 ?
-        AbstractButton.IconOnly : AbstractButton.TextOnly
-
-    // Remove menu hotkey decorations
-    property string _cleansedText: { return text.replace("&", ""); }
-
-    ToolTip.visible: display === AbstractButton.IconOnly && _cleansedText.length > 0 && hovered
-    ToolTip.delay: Constants.toolTipDelay
-    ToolTip.text: display === AbstractButton.IconOnly ? _cleansedText : ""
+    implicitHeight: Qt.platform.os === "osx" ? 48 : 32
 }
