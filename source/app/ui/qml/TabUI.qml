@@ -1892,13 +1892,15 @@ Item
 
                         let regularMouse = qsTr("<b>Rotate:</b> Left Click and Drag<br>" +
                           "<b>Zoom:</b> Mouse Scrollwheel<br>" +
-                          "<b>Pan:</b> Right Click and Drag");
+                          "<b>Pan:</b> Right Click and Drag<br>");
 
-                        let macOsTrackpad = qsTr("<b>Rotate:</b> Three Finger Drag <b>or</b> Left Click and Drag<br>" +
-                          "<b>Zoom:</b> Pinch Gesture <b>or</b> Mouse Scrollwheel<br>" +
-                          "<b>Pan:</b> Right Click and Drag");
+                        let macOsTrackpad = qsTr("<b>Rotate:</b> Two Finger Trackpad Drag <b>or</b> Left Mouse Click and Drag<br>" +
+                          "<b>Zoom:</b> Trackpad Pinch <b>or</b> Mouse Scrollwheel<br>" +
+                          "<b>Pan:</b> Two Finger Trackpad Click and Drag <b>or</b> Right Mouse Click Drag<br>");
 
-                        return preamble + (Qt.platform.os === "osx" ? macOsTrackpad : regularMouse);
+                        let postamble = "<b>Focus Node:</b> Double Click"
+
+                        return preamble + (Qt.platform.os === "osx" ? macOsTrackpad : regularMouse) + postamble;
                     }
                 }
             }
@@ -1936,8 +1938,7 @@ Item
                           "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
                           "<b>Select Node:</b> Click a Node<br>" +
                           "<b>Select Additional Nodes:</b> Hold Shift and Click a Node<br>" +
-                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes<br>" +
-                          "<b>Focus Node:</b> Double Click a Node")
+                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes")
                 }
             }
         }
