@@ -1510,13 +1510,17 @@ Item
 
     function toggleMinimise()
     {
-        if(root.pluginMinimised)
+        // Ensure the animation starting point of the SplitView is
+        // where it should be as if the user attempts to drag the
+        // handle past its limits, it can be peturbed
+        if(!root.pluginMinimised)
         {
-            // When un-minimising, ensure the animation starting point of the
-            // SplitView is where it should be as if the user attempts to drag
-            // the handle, it can be peturbed
-            pluginToolBarContainer.SplitView.preferredHeight = toolBar.height;
+            pluginToolBarContainer.SplitView.preferredHeight = Math.max(
+                pluginToolBarContainer.SplitView.preferredHeight,
+                pluginToolBarContainer.SplitView.minimumHeight);
         }
+        else
+            pluginToolBarContainer.SplitView.preferredHeight = toolBar.height;
 
         root.pluginMinimised = !root.pluginMinimised;
 
