@@ -841,7 +841,7 @@ PluginContent
                         anchors.margins: 4
 
                         visible: plot.columnAnnotationSelectionModeEnabled
-                        iconName: "emblem-unreadable"
+                        icon.name: "emblem-unreadable"
 
                         onClicked: function(mouse)
                         {

@@ -444,7 +444,7 @@ Item
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
-                iconName: "edit-find"
+                icon.name: "edit-find"
                 hoverOpacity: 0.7
                 checkable: true
 

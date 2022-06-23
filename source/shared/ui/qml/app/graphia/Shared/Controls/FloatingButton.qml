@@ -25,14 +25,14 @@ import app.graphia.Shared
 
 // This is basically a substitute for ToolButton,
 // that looks consistent across platforms
-Button
+AbstractButton
 {
     id: root
 
-    property string iconName: ""
     property double hoverOpacity: 1.0
 
     implicitHeight: 32
+    padding: 4
 
     background: Rectangle
     {
@@ -54,17 +54,18 @@ Button
         spacing: 4
 
         property string _iconName: root.action !== null && root.action.icon !== null ?
-            root.action.icon.name : root.iconName
+            root.action.icon.name : root.icon.name
         property string _text: root.action !== null ?
             root.action.text : root.text
+        property string _cleansedText: { return _text.replace("&", ""); }
 
         NamedIcon
         {
-            id: icon
+            id: namedIcon
 
             opacity: root.hovered ? 1.0 : root.hoverOpacity
 
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: Qt.AlignVCenter|Qt.AlignHCenter
             visible: valid
             Layout.preferredWidth: height
             Layout.preferredHeight: root.height - (root.topPadding + root.bottomPadding)
@@ -73,22 +74,22 @@ Button
 
         Text
         {
-            Layout.alignment: Qt.AlignVCenter
-            visible: !icon.valid && parent._text.length > 0
-            text: parent._text
+            Layout.alignment: Qt.AlignVCenter|Qt.AlignHCenter
+            visible: !namedIcon.valid && parent._cleansedText.length > 0
+            text: parent._cleansedText
         }
 
         Item
         {
             // Empty placeholder that's shown if there is no
             // valid icon or text available
-            visible: !icon.valid && parent._text.length === 0
-            Layout.preferredWidth: icon.width
-            Layout.preferredHeight: icon.height
+            visible: !namedIcon.valid && parent._cleansedText.length === 0
+            Layout.preferredWidth: namedIcon.width
+            Layout.preferredHeight: namedIcon.height
         }
 
-        ToolTip.visible: icon.valid && _text.length > 0 && hovered
+        ToolTip.visible: namedIcon.valid && _cleansedText.length > 0 && hovered
         ToolTip.delay: Constants.toolTipDelay
-        ToolTip.text: icon.valid ? _text : ""
+        ToolTip.text: namedIcon.valid ? _cleansedText : ""
     }
 }

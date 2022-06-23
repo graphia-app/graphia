@@ -407,7 +407,7 @@ BaseParameterDialog
                         return false;
                     }
 
-                    iconName: "accessories-text-editor"
+                    icon.name: "accessories-text-editor"
 
                     onClicked: function(mouse)
                     {

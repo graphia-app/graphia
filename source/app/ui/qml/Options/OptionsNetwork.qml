@@ -205,7 +205,7 @@ Item
 
                 FloatingButton
                 {
-                    iconName: "view-refresh"
+                    icon.name: "view-refresh"
                     onClicked: function(mouse) { webSearchEngineField.reset(); }
                 }
             }

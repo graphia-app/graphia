@@ -833,7 +833,7 @@ Item
                 anchors.left: graph.left
                 anchors.margins: 20
 
-                iconName: "go-previous"
+                icon.name: "go-previous"
                 text: qsTr("Goto Previous Component");
 
                 onClicked: function(mouse) { _document.gotoPrevComponent(); }
@@ -851,7 +851,7 @@ Item
                 anchors.right: graph.right
                 anchors.margins: 20
 
-                iconName: "go-next"
+                icon.name: "go-next"
                 text: qsTr("Goto Next Component");
 
                 onClicked: function(mouse) { _document.gotoNextComponent(); }
@@ -867,7 +867,7 @@ Item
 
                 FloatingButton
                 {
-                    iconName: "edit-undo"
+                    icon.name: "edit-undo"
                     text: qsTr("Return to Overview Mode")
                     onClicked: function(mouse) { _document.switchToOverviewMode(); }
                 }

@@ -356,7 +356,7 @@ Rectangle
             {
                 visible: root.matchingPreset.length > 0 && !presetNameTextField.visible
                 text: qsTr("Remove Preset")
-                iconName: "list-remove"
+                icon.name: "list-remove"
 
                 onClicked:
                 {
@@ -368,7 +368,7 @@ Rectangle
             {
                 visible: root.isCustom
                 text: qsTr("Add Preset")
-                iconName: "list-add"
+                icon.name: "list-add"
 
                 onClicked:
                 {

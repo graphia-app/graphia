@@ -88,7 +88,7 @@ Item
             FloatingButton
             {
                 visible: list.count > 0
-                iconName: panel.hidden ? "go-top" : "go-bottom"
+                icon.name: panel.hidden ? "go-top" : "go-bottom"
                 text: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
                 onClicked: function(mouse)

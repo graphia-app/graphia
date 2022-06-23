@@ -1200,7 +1200,7 @@ Item
 
                             FloatingButton
                             {
-                                iconName: "emblem-unreadable"
+                                icon.name: "emblem-unreadable"
                                 onClicked: function(mouse) { columnSelectionMode = false; }
                             }
                         }

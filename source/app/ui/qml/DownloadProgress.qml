@@ -114,7 +114,7 @@ RowLayout
         implicitHeight: progressBar.implicitHeight
         implicitWidth: implicitHeight
 
-        iconName: "process-stop"
+        icon.name: "process-stop"
         text: qsTr("Cancel")
 
         onClicked: function(mouse)
