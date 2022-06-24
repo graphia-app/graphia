@@ -30,6 +30,7 @@ AbstractButton
     id: root
 
     property double hoverOpacity: 1.0
+    property alias selected: namedIcon.selected
 
     implicitHeight: 32
     padding: 4

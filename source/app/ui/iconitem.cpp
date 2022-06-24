@@ -31,12 +31,15 @@ IconItem::IconItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     connect(this, &IconItem::enabledChanged, [this] { update(); });
     connect(this, &IconItem::iconNameChanged, [this] { update(); });
     connect(this, &IconItem::onChanged, [this] { update(); });
+    connect(this, &IconItem::selectedChanged, [this] { update(); });
 }
 
 void IconItem::paint(QPainter* painter)
 {
+    auto mode = _selected ? QIcon::Selected : QIcon::Normal;
+
     _icon.paint(painter, boundingRect().toRect(),
-        Qt::AlignCenter, isEnabled() ? QIcon::Normal : QIcon::Disabled,
+        Qt::AlignCenter, isEnabled() ? mode : QIcon::Disabled,
         _on ? QIcon::On : QIcon::Off);
 }
 
