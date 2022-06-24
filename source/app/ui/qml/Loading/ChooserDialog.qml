@@ -38,13 +38,7 @@ Window
     property var values: []
 
     modality: Qt.WindowModal
-    flags: Qt.Dialog
-
-    Component.onCompleted:
-    {
-        if(Qt.platform.os === "osx")
-            root.flags |= Qt.Sheet;
-    }
+    flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
 
     width: 380
     minimumWidth: width
