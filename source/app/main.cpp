@@ -189,6 +189,8 @@ static void captureConsoleOutput()
         std::cerr << "Failed to register stdout/stderr closure callback: " << result << "\n";
 }
 
+static QString qmlError;
+
 int start(int argc, char *argv[])
 {
     if(u::currentThreadName().isEmpty())
@@ -384,13 +386,24 @@ int start(int argc, char *argv[])
     auto* qmlFileSelector = new QQmlFileSelector(&engine);
     qmlFileSelector->setExtraSelectors(selectors);
 
+    // Temporary message handler to capture any error output so that
+    // it can be shown to the user using a graphical message box
+    qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
+    {
+        fprintf(stderr, "%s\n", msg.toLocal8Bit().constData());
+        qmlError += QStringLiteral("%1\n").arg(msg);
+    });
+
     engine.addImportPath(QStringLiteral("qrc:///qml"));
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+
+    qInstallMessageHandler(nullptr);
+
     if(engine.rootObjects().empty())
     {
         QMessageBox::critical(nullptr, QObject::tr("Error"),
-                              QObject::tr("The user interface failed to load."),
-                              QMessageBox::Close);
+            QObject::tr("The user interface failed to load:\n\n%1").arg(qmlError),
+            QMessageBox::Close);
         return 2;
     }
 
