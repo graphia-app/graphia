@@ -22,6 +22,7 @@
         <file>qml/app/graphia/Shared/Controls/SplitViewHandle.qml</file>
         <file>qml/app/graphia/Shared/Controls/TabBarButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/ToolBarButton.qml</file>
+        <file>qml/app/graphia/Shared/Controls/+macos/ToolBarButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/ToolBarSeparator.qml</file>
         <file>qml/app/graphia/Shared/Controls/Wizard.qml</file>
         <file>qml/app/graphia/Shared/Controls/qmldir</file>

@@ -20,4 +20,18 @@ import QtQuick
 
 import app.graphia.Shared.Controls
 
-FloatingButton {}
+FloatingButton
+{
+    id: root
+
+    padding: 5
+    implicitHeight: 42
+    selected: down
+
+    background: Rectangle
+    {
+        visible: root.checked
+        radius: 4
+        color: "#2f000000"
+    }
+}
