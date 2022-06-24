@@ -40,6 +40,7 @@
 #include <QProcess>
 #include <QSettings>
 #include <QNetworkProxy>
+#include <QQmlFileSelector>
 
 #include <iostream>
 #include <fstream>
@@ -373,7 +374,16 @@ int start(int argc, char *argv[])
 
     QQuickStyle::setStyle(u::pref(QStringLiteral("system/uiTheme")).toString());
 
+    QStringList selectors;
+
+#ifdef Q_OS_MACOS
+    selectors += QStringLiteral("nativemenu");
+#endif
+
     QQmlApplicationEngine engine;
+    auto* qmlFileSelector = new QQmlFileSelector(&engine);
+    qmlFileSelector->setExtraSelectors(selectors);
+
     engine.addImportPath(QStringLiteral("qrc:///qml"));
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
     if(engine.rootObjects().empty())
