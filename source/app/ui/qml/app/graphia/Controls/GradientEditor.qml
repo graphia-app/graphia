@@ -235,7 +235,7 @@ Item
                     width: picker._markerWidth
                     height: picker.height
 
-                    property alias color: canvas.color
+                    property alias color: canvas.fillColor
 
                     function setColor(color)
                     {
@@ -247,7 +247,7 @@ Item
                     {
                         id: canvas
 
-                        property color color: modelData.color
+                        property color fillColor: modelData.color
                         property color borderColor: palette.dark
 
                         property bool highlighted: picker.selected === marker
@@ -261,9 +261,9 @@ Item
                             ctx.save();
                             ctx.clearRect(0, 0, picker._markerWidth, height);
 
-                            ctx.fillStyle = color;
+                            ctx.fillStyle = canvas.fillColor;
                             ctx.lineWidth = 1
-                            ctx.strokeStyle = borderColor;
+                            ctx.strokeStyle = canvas.borderColor;
                             if(highlighted)
                                 ctx.strokeStyle = palette.highlight;
 
@@ -292,7 +292,7 @@ Item
 
                             ctx.restore();
                         }
-                        onColorChanged: { requestPaint(); }
+                        onFillColorChanged: { requestPaint(); }
                         onBorderColorChanged: { requestPaint(); }
                         onHighlightedChanged: { requestPaint(); }
                     }
