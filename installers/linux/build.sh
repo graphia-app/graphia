@@ -24,63 +24,65 @@ BUILD_DIR="build/${COMPILER}"
 
 . ${BUILD_DIR}/variables.sh
 
-QML_DIRS=$(find source -name "*.qml" | xargs -n1 realpath | \
-  xargs -n1 dirname | sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
+export QML_SOURCES_PATHS="${PWD}/source"
+export DEPLOY_PLATFORM_THEMES=1 # For platformthemes/libqgtk3.so
+export LD_LIBRARY_PATH="AppDir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 mkdir -p ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
 cp -r source/app/examples \
   ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
 
+curl -L \
+    -O https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+    -O https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage \
+    -O https://github.com/linuxdeploy/linuxdeploy-plugin-checkrt/releases/download/continuous/linuxdeploy-plugin-checkrt-x86_64.sh || exit $?
+chmod +x linuxdeploy*
+
+
+LINUXDEPLOY=${PWD}/linuxdeploy-x86_64.AppImage
+
 # Make an AppImage
-LINUXDEPLOYQT=$(which linuxdeployqt)
+(
+  cd ${BUILD_DIR}
 
-# Look in current directory if not installed in the system
-if [ -z ${LINUXDEPLOYQT} ]
-then
-  if [ -f "${PWD}/linuxdeployqt" ]
-  then
-    LINUXDEPLOYQT="${PWD}/linuxdeployqt"
-  fi
-fi
+  LIBRARIES=$(find AppDir/usr/lib -type f -iname "*.so" | \
+    sed -e 's/\(^.*$\)/--library \1/')
 
-if [ ! -z ${LINUXDEPLOYQT} ]
-then
-  (
-    cd ${BUILD_DIR}
+  ${LINUXDEPLOY} \
+    --desktop-file AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
+    ${LIBRARIES} \
+    --executable AppDir/usr/bin/Graphia \
+    --appdir AppDir \
+    --plugin qt \
+    --plugin checkrt \
+    || exit $?
 
-    # Below -exclude-libs line is a work around for https://github.com/probonopd/linuxdeployqt/issues/35
+  # Manually exclude libnss since linuxdeploy --exclude-library doesn't, for whatever reason
+  # See also: https://github.com/probonopd/linuxdeployqt/issues/35
+  rm AppDir/usr/lib/libnss*
 
-    ${LINUXDEPLOYQT} \
-      AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
-      ${QML_DIRS} \
-      -appimage -no-copy-copyright-files -no-strip \
-      -executable=AppDir/usr/bin/CrashReporter \
-      -executable=AppDir/usr/bin/MessageBox \
-      -executable=AppDir/usr/bin/Updater \
-      -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so \
-      -exclude-libs=libnss3.so,libnssutil3.so \
-      || exit $?
+  ${LINUXDEPLOY} \
+    --desktop-file AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
+    --appdir AppDir \
+    --output appimage \
+    --exclude-library "*libnss*" \
+    || exit $?
 
-    for APPIMAGE_FILENAME in $(find -iname "*.AppImage")
-    do
-      # Remove everything after the dash
-      SIMPLIFIED_FILENAME=$(echo ${APPIMAGE_FILENAME} | \
-        perl -pe 's/([^-]+)(?:[-\.\w]+)+(\.\w+)/$1$2/g')
+  for APPIMAGE_FILENAME in $(find -iname "*.AppImage")
+  do
+    # Remove everything after the dash
+    SIMPLIFIED_FILENAME=$(echo ${APPIMAGE_FILENAME} | \
+      perl -pe 's/([^-]+)(?:[-\.\w]+)+(\.\w+)/$1$2/g')
 
-      echo "${APPIMAGE_FILENAME} -> ${SIMPLIFIED_FILENAME}"
-      mv ${APPIMAGE_FILENAME} ${SIMPLIFIED_FILENAME}
-    done
+    echo "${APPIMAGE_FILENAME} -> ${SIMPLIFIED_FILENAME}"
+    mv ${APPIMAGE_FILENAME} ${SIMPLIFIED_FILENAME}
+  done
 
-    # tar up the AppImage in a file that includes the version in its name
-    tar cvfz ${PRODUCT_NAME}-${VERSION}.tar.gz *.AppImage || exit $?
+  # tar up the AppImage in a file that includes the version in its name
+  tar cvfz ${PRODUCT_NAME}-${VERSION}.tar.gz *.AppImage || exit $?
 
-    rm *.AppImage
-  ) || exit $?
-else
-  echo linuxdeployqt could not be found, please install \
-    it from https://github.com/probonopd/linuxdeployqt
-  exit 1
-fi
+  rm *.AppImage
+) || exit $?
 
 # To get breakpad dump_syms
 (

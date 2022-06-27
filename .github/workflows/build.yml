@@ -20,7 +20,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: ${{ env.QT_VERSION }}
-        modules: ${{ env.QT_MODULES }}
+        modules: ${{ env.QT_MODULES }} qtserialport
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.ref }}
@@ -37,10 +37,6 @@ jobs:
         CXX: g++-${{ env.GCC_VERSION }}
     - name: AppImage
       run: |
-        curl -vL https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -o linuxdeployqt
-        chmod +x linuxdeployqt
-        sudo apt-get update
-        sudo apt-get install -y libxcb-*
         installers/linux/build.sh
       env:
         CC: gcc-${{ env.GCC_VERSION }}
