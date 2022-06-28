@@ -95,134 +95,140 @@ Item
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
-        GridLayout
+        Item
         {
-            columns: 2
-            rowSpacing: Constants.spacing
-            columnSpacing: Constants.spacing
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-            Label
+            GridLayout
             {
-                Layout.columnSpan: 2
+                columns: 2
+                rowSpacing: Constants.spacing
+                columnSpacing: Constants.spacing
 
-                font.bold: true
-                text: qsTr("Default Colours")
+                Label
+                {
+                    Layout.columnSpan: 2
+
+                    font.bold: true
+                    text: qsTr("Default Colours")
+                }
+
+                Label { text: qsTr("Nodes") }
+                ColorPickButton { id: nodeColorPickButton }
+
+                Label { text: qsTr("Edges") }
+                ColorPickButton { id: edgeColorPickButton }
+
+                Label { text: qsTr("Multi Elements") }
+                ColorPickButton { id: multiElementColorPickButton }
+
+                Label { text: qsTr("Background") }
+                ColorPickButton { id: backgroundColorPickButton }
+
+                Label { text: qsTr("Selection") }
+                ColorPickButton { id: highlightColorPickButton }
+
+                Label
+                {
+                    Layout.columnSpan: 2
+                    Layout.topMargin: Constants.margin * 2
+
+                    font.bold: true
+                    text: qsTr("Default Sizes")
+                }
+
+                Label { text: qsTr("Nodes") }
+                Slider
+                {
+                    id: nodeSizeSlider
+                    from: 0.0
+                    to: 1.0
+
+                    onValueChanged: { delayedPreferences.update(); }
+                }
+
+                Label { text: qsTr("Edges") }
+                Slider
+                {
+                    id: edgeSizeSlider
+                    from: 0.0
+                    to: 1.0
+
+                    onValueChanged: { delayedPreferences.update(); }
+                }
             }
-
-            Label { text: qsTr("Nodes") }
-            ColorPickButton { id: nodeColorPickButton }
-
-            Label { text: qsTr("Edges") }
-            ColorPickButton { id: edgeColorPickButton }
-
-            Label { text: qsTr("Multi Elements") }
-            ColorPickButton { id: multiElementColorPickButton }
-
-            Label { text: qsTr("Background") }
-            ColorPickButton { id: backgroundColorPickButton }
-
-            Label { text: qsTr("Selection") }
-            ColorPickButton { id: highlightColorPickButton }
-
-            Label
-            {
-                Layout.columnSpan: 2
-                Layout.topMargin: Constants.margin * 2
-
-                font.bold: true
-                text: qsTr("Default Sizes")
-            }
-
-            Label { text: qsTr("Nodes") }
-            Slider
-            {
-                id: nodeSizeSlider
-                from: 0.0
-                to: 1.0
-
-                onValueChanged: { delayedPreferences.update(); }
-            }
-
-            Label { text: qsTr("Edges") }
-            Slider
-            {
-                id: edgeSizeSlider
-                from: 0.0
-                to: 1.0
-
-                onValueChanged: { delayedPreferences.update(); }
-            }
-
-            Item { Layout.fillHeight: true }
         }
 
-        GridLayout
+        Item
         {
-            columns: 2
-            rowSpacing: Constants.spacing
-            columnSpacing: Constants.spacing
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-            Label
+            GridLayout
             {
-                Layout.columnSpan: 2
+                columns: 2
+                rowSpacing: Constants.spacing
+                columnSpacing: Constants.spacing
 
-                font.bold: true
-                text: qsTr("Text")
+                Label
+                {
+                    Layout.columnSpan: 2
+
+                    font.bold: true
+                    text: qsTr("Text")
+                }
+
+                Label { text: qsTr("Font") }
+                Button
+                {
+                    text: visuals.textFont + " " + visuals.textSize + "pt";
+                    onClicked: function(mouse) { fontDialog.visible = true }
+                }
+
+                Label { text: qsTr("Alignment") }
+                ComboBox
+                {
+                    id: textAlignmentCombobox
+
+                    model:
+                    [
+                        // Must stay synced with TextAlignment in graphrenderer.h
+                        qsTr("Right"),
+                        qsTr("Left"),
+                        qsTr("Centre"),
+                        qsTr("Top"),
+                        qsTr("Bottom")
+                    ]
+                }
+
+                Label
+                {
+                    Layout.columnSpan: 2
+                    Layout.topMargin: Constants.margin * 2
+
+                    font.bold: true
+                    text: qsTr("Miscellaneous")
+                }
+
+                Label { text: qsTr("Transition Time") }
+                Slider
+                {
+                    id: transitionTimeSlider
+                    from: limitConstants.minimumTransitionTime
+                    to: limitConstants.maximumTransitionTime
+                }
+
+                Label { text: qsTr("Component Radius") }
+                Slider
+                {
+                    id: minimumComponentRadiusSlider
+                    from: limitConstants.minimumMinimumComponentRadius
+                    to: limitConstants.maximumMinimumComponentRadius
+
+                    onValueChanged: { delayedPreferences.update(); }
+                }
             }
-
-            Label { text: qsTr("Font") }
-            Button
-            {
-                text: visuals.textFont + " " + visuals.textSize + "pt";
-                onClicked: function(mouse) { fontDialog.visible = true }
-            }
-
-            Label { text: qsTr("Alignment") }
-            ComboBox
-            {
-                id: textAlignmentCombobox
-
-                model:
-                [
-                    // Must stay synced with TextAlignment in graphrenderer.h
-                    qsTr("Right"),
-                    qsTr("Left"),
-                    qsTr("Centre"),
-                    qsTr("Top"),
-                    qsTr("Bottom")
-                ]
-
-                onModelChanged: []; //FIXME: This avoid a warning (on 5.15.2)
-            }
-
-            Label
-            {
-                Layout.columnSpan: 2
-                Layout.topMargin: Constants.margin * 2
-
-                font.bold: true
-                text: qsTr("Miscellaneous")
-            }
-
-            Label { text: qsTr("Transition Time") }
-            Slider
-            {
-                id: transitionTimeSlider
-                from: limitConstants.minimumTransitionTime
-                to: limitConstants.maximumTransitionTime
-            }
-
-            Label { text: qsTr("Component Radius") }
-            Slider
-            {
-                id: minimumComponentRadiusSlider
-                from: limitConstants.minimumMinimumComponentRadius
-                to: limitConstants.maximumMinimumComponentRadius
-
-                onValueChanged: { delayedPreferences.update(); }
-            }
-
-            Item { Layout.fillHeight: true }
         }
     }
 
