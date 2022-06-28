@@ -241,8 +241,6 @@ Item
                     width: picker._markerWidth
                     height: picker.height
 
-                    color: "white"
-
                     property alias color: canvas.color
 
                     function setColor(color)
