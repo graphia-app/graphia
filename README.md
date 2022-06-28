@@ -70,7 +70,7 @@ Graphia uses the [CMake](https://cmake.org/) build system. A full build can be p
 ```
 cmake -B build && cmake --build build --parallel
 ```
-Note however that you will usually also need Qt 5 to be installed and indicate to CMake where it lives:
+Note however that you will usually also need Qt 6 to be installed and indicate to CMake where it lives:
 ```
-CMAKE_PREFIX_PATH=/example/path/to/Qt/5.14.2/gcc_64/ cmake -B build && cmake --build build --parallel
+CMAKE_PREFIX_PATH=/example/path/to/Qt/6.3.1/gcc_64/ cmake -B build && cmake --build build --parallel
 ```
