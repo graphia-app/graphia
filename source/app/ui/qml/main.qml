@@ -2723,37 +2723,35 @@ ApplicationWindow
                     currentTab.document.commandProgress === 100.0 : false
             }
 
+            Connections
+            {
+                target: currentTab && currentTab.document
+
+                function onCommandSecondsRemainingChanged()
+                {
+                    // Only show the time remaining when it's above a threshold value
+                    if(currentTab.document.commandSecondsRemaining > 10)
+                        timerLabel.currentCommandVerb = currentTab.document.commandVerb;
+                }
+
+                function onCommandVerbChanged()
+                {
+                    // If we start a new command, reset the existing one
+                    if(timerLabel.currentCommandVerb !== currentTab.document.commandVerb)
+                        timerLabel.currentCommandVerb = "";
+                }
+            }
+
             Label
             {
-                // This strange thing is essentially a state variable, whose purpose is
-                // made clear by comments below. It's an array containing a string so that
-                // when the string is changed, the property itself does not notify (the
-                // array is still the same array), meaning a binding loop is avoided
-                property var currentCommandVerb: [""]
+                id: timerLabel
 
-                visible:
-                {
-                    if(currentTab === null)
-                        return false;
+                property string currentCommandVerb
 
-                    if(!currentTab.document.significantCommandInProgress)
-                        return false;
-
-                    // Show the time remaining when it's above a threshold value
-                    if(currentTab.document.commandSecondsRemaining > 10)
-                    {
-                        currentCommandVerb[0] = currentTab.document.commandVerb;
-                        return true;
-                    }
-
-                    // We've dropped below the time threshold, but we're still doing the
-                    // same thing, so keep showing the timer
-                    if(currentCommandVerb[0].length > 0 && currentCommandVerb[0] === currentTab.document.commandVerb)
-                        return true;
-
-                    currentCommandVerb[0] = "";
-                    return false;
-                }
+                visible: currentTab !== null &&
+                    currentTab.document.significantCommandInProgress &&
+                    currentTab.document.commandSecondsRemaining > 0 &&
+                    currentCommandVerb.length > 0
 
                 text:
                 {
@@ -2763,9 +2761,9 @@ ApplicationWindow
                     let minutes = Math.floor(currentTab.document.commandSecondsRemaining / 60);
                     let seconds = String(currentTab.document.commandSecondsRemaining % 60);
                     if(seconds.length < 2)
-                        seconds = "0" + seconds;
+                        seconds = qsTr("0") + seconds;
 
-                    return minutes + ":" + seconds;
+                    return minutes + qsTr(":") + seconds;
                 }
             }
 
