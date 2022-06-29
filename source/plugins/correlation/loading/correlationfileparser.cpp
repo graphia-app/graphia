@@ -602,6 +602,8 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
             parseUsing(CsvFileParser());
         else if(fileType == QStringLiteral("CorrelationTSV"))
             parseUsing(TsvFileParser());
+        else if(fileType == QStringLiteral("CorrelationSSV"))
+            parseUsing(SsvFileParser());
         else if(fileType == QStringLiteral("CorrelationXLSX"))
             parseUsing(XlsxTabularDataParser());
 

@@ -605,6 +605,7 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
     {
         QStringLiteral("CorrelationCSV"),
         QStringLiteral("CorrelationTSV"),
+        QStringLiteral("CorrelationSSV"),
         QStringLiteral("CorrelationXLSX")
     };
 
@@ -1101,6 +1102,7 @@ CorrelationPlugin::CorrelationPlugin()
 {
     registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
+    registerUrlType(QStringLiteral("CorrelationSSV"), QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
     registerUrlType(QStringLiteral("CorrelationXLSX"), QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
 
     qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
