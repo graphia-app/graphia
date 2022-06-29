@@ -17,6 +17,7 @@
  */
 
 #include "tabulardata.h"
+#include "xlsxtabulardataparser.h"
 
 #include "shared/utils/progressable.h"
 
@@ -228,4 +229,71 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
         percent = 1;
 
     return percent;
+}
+
+QString TabularData::contentIdentityOf(const QUrl& url)
+{
+    if(XlsxTabularDataParser::canLoad(url))
+        return QStringLiteral("XLSX");
+
+    QString identity;
+
+    std::ifstream file(url.toLocalFile().toStdString());
+
+    if(!file)
+        return identity;
+
+    const int maxLines = 50;
+    int numLinesScanned = 0;
+
+    std::istream* is = nullptr;
+    do
+    {
+        std::string line;
+
+        is = &u::getline(file, line);
+
+        std::map<char, size_t> counts;
+        bool inQuotes = false;
+
+        for(auto character : line)
+        {
+            switch(character)
+            {
+            case '"':
+                inQuotes = !inQuotes;
+                break;
+
+            case ',':
+            case ';':
+            case '\t':
+                if(!inQuotes)
+                    counts[character]++;
+                break;
+
+            default: break;
+            }
+        }
+
+        if(!counts.empty())
+        {
+            auto maxCount = std::max_element(counts.begin(), counts.end(),
+                [](const auto& a, const auto& b) { return a.second < b.second; });
+
+            auto character = maxCount->first;
+
+            switch(character)
+            {
+            case ',':  identity = QStringLiteral("CSV"); break;
+            case ';':  identity = QStringLiteral("SSV"); break;
+            case '\t': identity = QStringLiteral("TSV"); break;
+            }
+        }
+
+        numLinesScanned++;
+    } while(identity.isEmpty() &&
+        !is->fail() && !is->eof() &&
+        numLinesScanned < maxLines);
+
+    return identity;
 }

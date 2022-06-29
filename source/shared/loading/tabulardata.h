@@ -78,6 +78,8 @@ public:
     std::vector<TypeIdentity> typeIdentities(Progressable* progressable = nullptr, size_t rowIndex = 1) const;
 
     int columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const;
+
+    static QString contentIdentityOf(const QUrl& url);
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<TabularData>) // NOLINT performance-no-int-to-ptr
