@@ -1134,64 +1134,15 @@ QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
     return {};
 }
 
-static QString contentIdentityOf(const QUrl& url)
-{
-    if(XlsxTabularDataParser::canLoad(url))
-        return QStringLiteral("CorrelationXLSX");
-
-    QString identity;
-
-    std::ifstream file(url.toLocalFile().toStdString());
-
-    if(!file)
-        return identity;
-
-    const int maxLines = 50;
-    int numLinesScanned = 0;
-
-    std::istream* is = nullptr;
-    do
-    {
-        std::string line;
-
-        is = &u::getline(file, line);
-
-        size_t numCommas = 0;
-        size_t numTabs = 0;
-        bool inQuotes = false;
-
-        for(auto character : line)
-        {
-            switch(character)
-            {
-            case '"': inQuotes = !inQuotes; break;
-            case ',': if(!inQuotes) { numCommas++; } break;
-            case '\t': if(!inQuotes) { numTabs++; } break;
-            default: break;
-            }
-        }
-
-        if(numTabs > numCommas)
-            identity = QStringLiteral("CorrelationTSV");
-        else if(numCommas > numTabs)
-            identity = QStringLiteral("CorrelationCSV");
-
-        numLinesScanned++;
-    } while(identity.isEmpty() &&
-        !is->fail() && !is->eof() &&
-        numLinesScanned < maxLines);
-
-    return identity;
-}
-
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const
 {
     if(!url.isLocalFile())
         return {};
 
     auto urlTypes = identifyByExtension(url);
+    auto contentType = TabularData::contentIdentityOf(url);
 
-    if(urlTypes.isEmpty() || contentIdentityOf(url) != urlTypes.first())
+    if(urlTypes.isEmpty() || !urlTypes.first().endsWith(contentType))
         return {};
 
     return urlTypes;
@@ -1205,7 +1156,7 @@ QString CorrelationPlugin::failureReason(const QUrl& url) const
         return {};
 
     auto extensionIdentity = urlTypes.first();
-    auto contentIdentity = contentIdentityOf(url);
+    auto contentIdentity = TabularData::contentIdentityOf(url);
 
     if(contentIdentity.isEmpty())
     {
@@ -1214,12 +1165,11 @@ QString CorrelationPlugin::failureReason(const QUrl& url) const
             individualDescriptionForUrlTypeName(extensionIdentity));
     }
 
-    if(extensionIdentity != contentIdentity)
+    if(!extensionIdentity.endsWith(contentIdentity))
     {
         return tr("%1 has an extension that indicates it is a '%2', "
-            "however its content resembles a '%3'.").arg(url.fileName(),
-            individualDescriptionForUrlTypeName(extensionIdentity),
-            individualDescriptionForUrlTypeName(contentIdentity));
+            "however its content resembles a '%3' file.").arg(url.fileName(),
+            individualDescriptionForUrlTypeName(extensionIdentity), contentIdentity);
     }
 
     return {};
