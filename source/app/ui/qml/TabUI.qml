@@ -1430,6 +1430,7 @@ Item
         title: application && _document.pluginName.length > 0 ?
                    _document.pluginName + " - " + appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
+        transientParent: null
         property bool maximised: visibility === Window.Maximized
 
         onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
@@ -1480,6 +1481,7 @@ Item
                     plugin.content.onResized();
             }
         }
+
         Component.onCompleted:
         {
             if(x == 0 && y == 0)
@@ -1487,10 +1489,6 @@ Item
                 x = (pluginWindow.screen.width - width) * 0.5
                 y = (pluginWindow.screen.height - height) * 0.5
             }
-
-            //FIXME: For some reason, the runtime complains about versioning if
-            // this property is set statically; possibly that will work in 5.14?
-            pluginWindow.transientParent = null;
         }
     }
 
