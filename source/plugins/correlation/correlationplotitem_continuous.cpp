@@ -117,7 +117,7 @@ void CorrelationPlotItem::setScaleType(int scaleType)
 
 void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
 {
-    if(attributeName.isEmpty() && _scaleType == static_cast<int>(PlotScaleType::ByAttribute))
+    if(attributeName.isEmpty())
     {
         // Don't have an attribute name, so reset to default
         setScaleType(static_cast<int>(PlotScaleType::Raw));
