@@ -529,7 +529,7 @@ Item
         }
     }
 
-    function screenshot() { captureScreenshot.show(); }
+    function screenshot() { captureScreenshotDialog.show(); }
 
     function copyImageToClipboard()
     {
@@ -591,9 +591,9 @@ Item
             Qt.openUrlExternally(QmlUtils.urlFrom(url));
     }
 
-    CaptureScreenshot
+    CaptureScreenshotDialog
     {
-        id: captureScreenshot
+        id: captureScreenshotDialog
         graphView: graph
         application: root.application
     }

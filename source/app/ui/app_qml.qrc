@@ -30,7 +30,7 @@
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>
         <file>qml/AttributeUtils.js</file>
-        <file>qml/CaptureScreenshot.qml</file>
+        <file>qml/CaptureScreenshotDialog.qml</file>
         <file>qml/CloneAttributeDialog.qml</file>
         <file>qml/DebugRectangle.qml</file>
         <file>qml/DownloadProgress.qml</file>
