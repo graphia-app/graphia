@@ -128,7 +128,7 @@ Window
                          printHeight: 420});
 
                         append({text: "A2 Paper Portrait (300DPI)",
-                                 dpi: 72,
+                                 dpi: 300,
                           printWidth: 420,
                          printHeight: 594});
 
