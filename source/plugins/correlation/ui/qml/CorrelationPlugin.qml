@@ -796,38 +796,13 @@ PluginContent
                         plotContextMenu.popup();
                 }
 
-                property bool _timedBusy: false
-
-                Timer
-                {
-                    id: busyIndicationTimer
-                    interval: 250
-                    repeat: false
-                    onTriggered:
-                    {
-                        if(plot.busy)
-                            plot._timedBusy = true;
-                    }
-                }
-
-                onBusyChanged:
-                {
-                    if(!plot.busy)
-                    {
-                        busyIndicationTimer.stop();
-                        plot._timedBusy = false;
-                    }
-                    else
-                        busyIndicationTimer.start();
-                }
-
-                BusyIndicator
+                DelayedBusyIndicator
                 {
                     anchors.centerIn: parent
                     width: 64
                     height: 64
 
-                    visible: plot._timedBusy
+                    delayedRunning: plot.busy
                 }
 
                 FloatingButton

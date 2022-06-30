@@ -25,6 +25,7 @@ import Qt.labs.platform 1.0 as Labs
 
 import app.graphia 1.0
 import app.graphia.Shared 1.0
+import app.graphia.Shared.Controls 1.0
 
 Window
 {
@@ -207,13 +208,13 @@ Window
                     border.width: 1
                 }
 
-                BusyIndicator
+                DelayedBusyIndicator
                 {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     width: 64
                     height: 64
-                    running: root.generatingPreview
+                    delayedRunning: root.generatingPreview
                 }
             }
 
