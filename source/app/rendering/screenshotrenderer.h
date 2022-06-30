@@ -37,9 +37,9 @@ public:
     explicit ScreenshotRenderer(const GraphRenderer& renderer);
     ~ScreenshotRenderer() override;
 
-    void requestPreview(const GraphRenderer& renderer, int width, int height, bool fillSize);
-    void requestScreenshot(const GraphRenderer& renderer, int width, int height, const QString& path, int dpi,
-                           bool fillSize);
+    void requestPreview(const GraphRenderer& renderer, int imageWidth, int imageHeight, bool fillSize);
+    void requestScreenshot(const GraphRenderer& renderer, int imageWidth, int imageHeight,
+        const QString& path, int dpi, bool fillSize);
 
 private:
     GraphModel* _graphModel = nullptr;
@@ -56,7 +56,7 @@ private:
     void render();
     bool copyState(const GraphRenderer& renderer);
     void updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
-        QSize viewportSize, int tileX = 0, int tileY = 0);
+        QPoint offset, float scale, int tileX = 0, int tileY = 0);
 
 signals:
     // Base64 encoded png image for QML...

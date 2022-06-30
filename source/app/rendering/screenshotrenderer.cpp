@@ -55,8 +55,7 @@ static QString fetchPreview(QSize screenshotSize)
     return QString::fromLatin1(byteArray.toBase64().data());
 }
 
-
-static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
+static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoint offset)
 {
     std::vector<GLubyte> pixelBytes(static_cast<size_t>(TILE_SIZE * TILE_SIZE) * 4ul);
     glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixelBytes.data());
@@ -64,7 +63,18 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY)
     QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
     QPainter painter(&fullScreenshot);
-    painter.drawImage(tileX * TILE_SIZE, tileY * TILE_SIZE, screenTile.mirrored(false, true));
+    painter.drawImage((tileX * TILE_SIZE) + offset.x(), (tileY * TILE_SIZE) + offset.y(),
+        screenTile.mirrored(false, true));
+}
+
+static QPoint renderOffsetForFill(int imageWidth, int imageHeight, float aspect)
+{
+    QPoint offset;
+
+    auto fullWidth = static_cast<float>(imageHeight) * aspect;
+    offset.setX(static_cast<int>((fullWidth - static_cast<float>(imageWidth)) * 0.5f));
+
+    return offset;
 }
 
 // NOLINTNEXTLINE modernize-use-equals-default
@@ -83,16 +93,21 @@ ScreenshotRenderer::~ScreenshotRenderer()
     glDeleteFramebuffers(1, &_screenshotFBO);
 }
 
-void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width, int height, bool fillSize)
+void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int imageWidth, int imageHeight, bool fillSize)
 {
     copyState(renderer);
 
-    QSize screenshotSize(width, height);
+    auto viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
-    float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
+    QSize screenshotSize(imageWidth, imageHeight);
+    QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
 
     if(!fillSize)
-        screenshotSize.setHeight(static_cast<int>(static_cast<float>(width) / viewportAspectRatio));
+    {
+        // Only need to deal with one dimension in the preview case since the
+        // padding etc. is applied on the QML/UI side
+        screenshotSize.setHeight(static_cast<int>(static_cast<float>(imageWidth) / viewportAspectRatio));
+    }
 
     if(!resize(screenshotSize.width(), screenshotSize.height()))
     {
@@ -100,8 +115,10 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int width
         return;
     }
 
+    auto scale = static_cast<float>(screenshotSize.height()) / renderer.height();
+
     // Update Scene
-    updateComponentGPUData(ScreenshotType::Preview, screenshotSize, {renderer.width(), renderer.height()});
+    updateComponentGPUData(ScreenshotType::Preview, screenshotSize, renderOffset, scale);
     render();
 
     const QString& base64Image = fetchPreview(screenshotSize);
@@ -130,23 +147,28 @@ void ScreenshotRenderer::render()
     renderToFramebuffer(GraphRendererCore::Type::Color);
 }
 
-void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int width, int height,
+void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int imageWidth, int imageHeight,
                                            const QString& path, int dpi, bool fillSize)
 {
     copyState(renderer);
 
-    float viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
+    auto viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
-    QSize screenshotSize(width, height);
+    QSize screenshotSize(imageWidth, imageHeight);
+    QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
+    QPoint tileOffset;
 
     if(!fillSize)
     {
-        screenshotSize.setHeight(static_cast<int>(static_cast<float>(width) / viewportAspectRatio));
-        if(screenshotSize.height() > height)
+        screenshotSize.setHeight(static_cast<int>(static_cast<float>(imageWidth) / viewportAspectRatio));
+        if(screenshotSize.height() > imageHeight)
         {
-            screenshotSize.setWidth(static_cast<int>(static_cast<float>(height) * viewportAspectRatio));
-            screenshotSize.setHeight(height);
+            screenshotSize.setWidth(static_cast<int>(static_cast<float>(imageHeight) * viewportAspectRatio));
+            screenshotSize.setHeight(imageHeight);
         }
+
+        tileOffset.setX((imageWidth  - screenshotSize.width())  / 2);
+        tileOffset.setY((imageHeight - screenshotSize.height()) / 2);
     }
 
     if(!resize(TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA))
@@ -155,9 +177,12 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
         return;
     }
 
+    auto scale = static_cast<float>(screenshotSize.height()) / renderer.height();
+
     // Need a pixmap to construct the full image
-    auto fullScreenshot = QPixmap(screenshotSize.width(), screenshotSize.height());
-    fullScreenshot.fill(Qt::transparent);
+    auto pixmap = QPixmap(imageWidth, imageHeight);
+    auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
+    pixmap.fill(backgroundColor);
 
     auto tileXCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(TILE_SIZE)));
     auto tileYCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.height()) / static_cast<float>(TILE_SIZE)));
@@ -166,14 +191,14 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
         for(auto tileX = 0; tileX < tileXCount; tileX++)
         {
             updateComponentGPUData(ScreenshotType::Tile, screenshotSize,
-                {renderer.width(), renderer.height()}, tileX, tileY);
+                renderOffset, scale, tileX, tileY);
 
             render();
-            fetchAndDrawTile(fullScreenshot, tileX, tileY);
+            fetchAndDrawTile(pixmap, tileX, tileY, tileOffset);
         }
     }
 
-    auto image = fullScreenshot.toImage();
+    auto image = pixmap.toImage();
 
     const int DOTS_PER_METER = static_cast<int>(dpi * 39.3700787);
     image.setDotsPerMeterX(DOTS_PER_METER);
@@ -182,24 +207,27 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int wi
 }
 
 void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, QSize screenshotSize,
-    QSize viewportSize, int tileX, int tileY)
+    QPoint offset, float scale, int tileX, int tileY)
 {
     resetGPUComponentData();
-
-    // We always scale to the Y axis
-    double scale = static_cast<double>(screenshotSize.height()) / viewportSize.height();
 
     for(const auto& componentCameraAndLighting : _componentCameraAndLightings)
     {
         const Camera& componentCamera = componentCameraAndLighting._camera;
         QRectF componentViewport(
-            componentCamera.viewport().topLeft() * scale,
-            componentCamera.viewport().size() * scale);
+            componentCamera.viewport().topLeft() * static_cast<double>(scale),
+            componentCamera.viewport().size() * static_cast<double>(scale));
 
-        auto viewport = (screenshotType == ScreenshotType::Tile) ?
-            QRect((tileX * TILE_SIZE) - TILE_EXTRA, (tileY * TILE_SIZE) - TILE_EXTRA,
-                TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA) :
-            QRect({0, 0}, screenshotSize);
+        QRect viewport;
+
+        if(screenshotType == ScreenshotType::Tile)
+        {
+            auto tileXOffset = ((tileX * TILE_SIZE) - TILE_EXTRA) + offset.x();
+            auto tileYOffset = ((tileY * TILE_SIZE) - TILE_EXTRA) + offset.y();
+            viewport = {tileXOffset, tileYOffset, TILE_SIZE_PLUS_EXTRA, TILE_SIZE_PLUS_EXTRA};
+        }
+        else
+            viewport = {offset, screenshotSize};
 
         auto projectionMatrix = GraphComponentRenderer::subViewportMatrix(componentViewport, viewport) *
             componentCamera.projectionMatrix();
