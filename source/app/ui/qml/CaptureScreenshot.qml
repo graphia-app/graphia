@@ -35,40 +35,39 @@ Window
     width: 800
     height: 600
 
-    minimumWidth: 400
-    minimumHeight: 300
+    minimumWidth: 600
+    minimumHeight: 400
 
-    // This is used to compare the aspect ratios of the screenshots
     property var graphView
     property var application
 
-    property int screenshotWidth: pixelWidthSpin.value
-    property int screenshotHeight: pixelHeightSpin.value
-    property int dpi: dpiSpin.value
-    property bool fill: fillSize.checked
-    property bool loadingPreset: false;
+    property bool loadingPreset: false
+    property bool generatingPreview: false
 
-    property real aspectRatio: 0
-    readonly property real _MMTOINCH: 0.0393701;
+    property real aspectRatio: 0.0
+    readonly property real _MM_PER_INCH: 25.4
 
     Preferences
     {
         id: screenshot
         section: "screenshot"
-        property alias width: root.screenshotWidth
-        property alias height: root.screenshotHeight
-        property alias dpi: root.dpi
+
+        property alias dpi: dpiSpin.value
         property var path
+    }
+
+    Preferences
+    {
+        id: visuals
+        section: "visuals"
+        property string backgroundColor
     }
 
     Timer
     {
         id: refreshTimer
         interval: 300
-        onTriggered:
-        {
-            requestPreview();
-        }
+        onTriggered: { requestPreview(); }
     }
 
     ColumnLayout
@@ -81,6 +80,7 @@ Window
         RowLayout
         {
             Text { text: qsTr("Preset:") }
+
             ComboBox
             {
                 id: presets
@@ -162,97 +162,58 @@ Window
                 }
             }
         }
+
         RowLayout
         {
             spacing: Constants.spacing * 2
 
-            ColumnLayout
+            Rectangle
             {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                color: palette.midlight
+                border.color: palette.dark
+                border.width: 1
+
                 Rectangle
                 {
-                    id: previewHolder
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    width: 200
-                    height: 200
-                    border.color: palette.dark
+                    anchors.fill: previewImage
+                    color: visuals.backgroundColor
+                }
+
+                Image
+                {
+                    id: previewImage
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    property real w: parent.width - (Constants.margin * 2)
+                    property real h: parent.height - (Constants.margin * 2)
+
+                    width:  { return Math.min(h * aspectRatio, w); }
+                    height: { return Math.min(w / aspectRatio, h); }
+
+                    fillMode: Image.PreserveAspectFit
+                    onWidthChanged: { refreshTimer.restart(); }
+                    onHeightChanged: { refreshTimer.restart(); }
+                }
+
+                Rectangle
+                {
+                    anchors.fill: previewImage
+                    color: "transparent"
+                    border.color: QmlUtils.contrastingColor(visuals.backgroundColor)
                     border.width: 1
+                }
 
-                    Canvas
-                    {
-                        id: underCanvas
-                        height: parent.height
-                        width: parent.width
-                        onPaint: function(rect)
-                        {
-                            let ctx = getContext("2d");
-
-                            ctx.save();
-                            ctx.clearRect(0, 0, width, height);
-
-                            ctx.fillStyle = "white"
-                            let sizedWidth = Math.ceil(aspectRatio * canvas.height);
-                            let sizedHeight = canvas.height;
-                            if(sizedWidth > canvas.width)
-                            {
-                                sizedWidth = canvas.width;
-                                sizedHeight = Math.ceil(canvas.width / aspectRatio);
-                            }
-
-                            ctx.fillRect(Math.ceil((width - sizedWidth) * 0.5),
-                                         Math.ceil((height - sizedHeight) * 0.5),
-                                         sizedWidth, sizedHeight);
-
-                            ctx.restore();
-                        }
-                    }
-                    Image
-                    {
-                        id: preview
-                        visible: false
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: previewWidth()
-                        height: previewHeight()
-                        fillMode: Image.PreserveAspectFit
-                        onWidthChanged: refreshTimer.restart()
-                        onHeightChanged: refreshTimer.restart()
-                    }
-                    BusyIndicator
-                    {
-                        id: previewGenerating
-                        anchors.horizontalCenter: previewHolder.horizontalCenter
-                        anchors.verticalCenter: previewHolder.verticalCenter
-                        width: parent.width / 4.0
-                        height: parent.height / 4.0
-                        running: !preview.visible
-                    }
-                    Canvas
-                    {
-                        id: canvas
-                        height: parent.height
-                        width: parent.width
-                        onPaint: function(rect)
-                        {
-                            let ctx = getContext("2d");
-
-                            ctx.save();
-                            ctx.clearRect(0, 0, width, height);
-
-                            ctx.strokeStyle = "black"
-                            let sizedWidth = Math.ceil(aspectRatio * canvas.height);
-                            let sizedHeight = canvas.height;
-                            if(sizedWidth > canvas.width)
-                            {
-                                sizedWidth = canvas.width;
-                                sizedHeight = Math.ceil(canvas.width / aspectRatio);
-                            }
-                            ctx.strokeRect(Math.ceil((width - sizedWidth) * 0.5),
-                                           Math.ceil((height - sizedHeight) * 0.5) + 1,
-                                           sizedWidth, sizedHeight - 1);
-                            ctx.restore();
-                        }
-                    }
+                BusyIndicator
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 64
+                    height: 64
+                    running: root.generatingPreview
                 }
             }
 
@@ -260,7 +221,8 @@ Window
             {
                 GridLayout
                 {
-                    columns: 2
+                    columns: 3
+
                     Text
                     {
                         text: qsTr("Width:")
@@ -269,20 +231,17 @@ Window
                     SpinBox
                     {
                         id: pixelWidthSpin
-                        to: 99999
                         from: 1
-                        textFromValue: (value, locale) => qsTr("%1px").arg(value)
-                        onValueChanged:
-                        {
-                            if(lockAspect.checked)
-                                pixelHeightSpin.value = pixelWidthSpin.value / aspectRatio;
-                            else
-                                aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
+                        to: 99999
+                        editable: true
+                        Component.onCompleted: { contentItem.selectByMouse = true; }
 
-                            let pixelPrintSize = Math.round(printWidthSpin.value * dpiSpin.value * _MMTOINCH);
-                            if(pixelPrintSize !== value)
-                                printWidthSpin.value = (value / dpiSpin.value) / _MMTOINCH;
-                        }
+                        onValueChanged: { root.updateValues(pixelWidthSpin); }
+                    }
+                    Text
+                    {
+                        text: qsTr("px")
+                        Layout.alignment: Qt.AlignLeft
                     }
 
                     Text
@@ -293,33 +252,31 @@ Window
                     SpinBox
                     {
                         id: pixelHeightSpin
-                        to: 99999
                         from: 1
-                        textFromValue: (value, locale) => qsTr("%1px").arg(value)
-                        onValueChanged:
-                        {
-                            if(lockAspect.checked)
-                                pixelWidthSpin.value = pixelHeightSpin.value * aspectRatio
-                            else
-                                aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
+                        to: 99999
+                        editable: true
+                        Component.onCompleted: { contentItem.selectByMouse = true; }
 
-                            let pixelPrintSize = Math.round(printHeightSpin.value * dpiSpin.value * _MMTOINCH);
-                            if(pixelPrintSize !== value)
-                                printHeightSpin.value = (value / dpiSpin.value) / _MMTOINCH;
-                        }
+                        onValueChanged: { root.updateValues(pixelHeightSpin); }
                     }
+                    Text
+                    {
+                        text: qsTr("px")
+                        Layout.alignment: Qt.AlignLeft
+                    }
+
                     CheckBox
                     {
                         id: lockAspect
                         Layout.column: 1
                         Layout.row: 2
+                        Layout.columnSpan: 2
+
                         text: qsTr("Lock Aspect Ratio")
                         checked: true
-                        onCheckedChanged:
-                        {
-                            aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value
-                        }
+                        onCheckedChanged: { root.updateValues(lockAspect); }
                     }
+
                     Text
                     {
                         text: qsTr("DPI:")
@@ -328,46 +285,55 @@ Window
                     SpinBox
                     {
                         id: dpiSpin
-                        to: 9999
+                        Layout.columnSpan: 2
                         from: 1
-                        onValueChanged:
-                        {
-                            let lockAspectWasChecked = lockAspect.checked;
-                            lockAspect.checked = false;
-                            pixelWidthSpin.value = printWidthSpin.value * _MMTOINCH * value;
-                            pixelHeightSpin.value = printHeightSpin.value * _MMTOINCH * value;
-                            lockAspect.checked = lockAspectWasChecked
-                        }
+                        to: 99999
+                        editable: true
+                        Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                        onValueChanged: { root.updateValues(dpiSpin); }
                     }
-                    Text { text: qsTr("Print Width:") }
+
+                    Text
+                    {
+                        text: qsTr("Print Width:")
+                        Layout.alignment: Qt.AlignRight
+                    }
                     SpinBox
                     {
                         id: printWidthSpin
-                        to: 99999
                         from: 1
-                        textFromValue: (value, locale) => qsTr("%1mm").arg(value)
-                        onValueChanged:
-                        {
-                            // Prevent binding loops + losing value precision
-                            let pixelPrintSize = Math.round((pixelWidthSpin.value / dpiSpin.value) / _MMTOINCH);
-                            if(pixelPrintSize !== value)
-                                pixelWidthSpin.value = value * dpiSpin.value * _MMTOINCH;
-                        }
+                        to: 99999
+                        editable: true
+                        Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                        onValueChanged: { root.updateValues(printWidthSpin); }
+                    }
+                    Text
+                    {
+                        text: qsTr("mm")
+                        Layout.alignment: Qt.AlignLeft
                     }
 
-                    Text { text: "Print Height:" }
+                    Text
+                    {
+                        text: "Print Height:"
+                        Layout.alignment: Qt.AlignRight
+                    }
                     SpinBox
                     {
                         id: printHeightSpin
-                        to: 99999
                         from: 1
-                        textFromValue: (value, locale) => qsTr("%1mm").arg(value)
-                        onValueChanged:
-                        {
-                            let pixelPrintSize = Math.round((pixelHeightSpin.value / dpiSpin.value) / _MMTOINCH);
-                            if(pixelPrintSize !== value)
-                                pixelHeightSpin.value = value * dpiSpin.value * _MMTOINCH;
-                        }
+                        to: 99999
+                        editable: true
+                        Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                        onValueChanged: { root.updateValues(printHeightSpin); }
+                    }
+                    Text
+                    {
+                        text: qsTr("mm")
+                        Layout.alignment: Qt.AlignLeft
                     }
 
                     RadioButton
@@ -376,13 +342,10 @@ Window
                         text: "Fill Size"
                         Layout.row: 6
                         Layout.column: 1
+                        Layout.columnSpan: 2
 
                         checked: true
-                        onCheckedChanged:
-                        {
-                            preview.visible = false;
-                            requestPreview();
-                        }
+                        onCheckedChanged: { requestPreview(); }
                     }
 
                     RadioButton
@@ -391,10 +354,12 @@ Window
                         text: "Fit Size"
                         Layout.row: 7
                         Layout.column: 1
+                        Layout.columnSpan: 2
                     }
                 }
             }
         }
+
         RowLayout
         {
             Item { Layout.fillWidth: true }
@@ -422,6 +387,64 @@ Window
         }
     }
 
+    function setPrintWidthByPrintHeight()  { printWidthSpin.value  = Math.round(printHeightSpin.value * aspectRatio) }
+    function setPrintHeightByPrintWidth()  { printHeightSpin.value = Math.round(printWidthSpin.value / aspectRatio) }
+    function setPixelWidthByPixelHeight()  { pixelWidthSpin.value  = Math.round(pixelHeightSpin.value * aspectRatio) }
+    function setPixelHeightByPixelWidth()  { pixelHeightSpin.value = Math.round(pixelWidthSpin.value / aspectRatio) }
+
+    function setPrintWidthByPixelWidth()   { printWidthSpin.value  = Math.round((pixelWidthSpin.value / dpiSpin.value) * _MM_PER_INCH); }
+    function setPrintHeightByPixelHeight() { printHeightSpin.value = Math.round((pixelHeightSpin.value / dpiSpin.value) * _MM_PER_INCH); }
+    function setPixelWidthByPrintWidth()   { pixelWidthSpin.value  = Math.round((printWidthSpin.value / _MM_PER_INCH) * dpiSpin.value); }
+    function setPixelHeightByPrintHeight() { pixelHeightSpin.value = Math.round((printHeightSpin.value / _MM_PER_INCH) * dpiSpin.value); }
+
+    function syncPrintToPixel()
+    {
+        setPrintWidthByPixelWidth();
+        setPrintHeightByPixelHeight();
+    }
+
+    function syncPixelToPrint()
+    {
+        setPixelWidthByPrintWidth();
+        setPixelHeightByPrintHeight();
+    }
+
+    function updateValues(source)
+    {
+        if(updateValues.recursing || root.loadingPreset)
+            return;
+
+        updateValues.recursing = true;
+
+        if(lockAspect.checked)
+        {
+            if(source !== pixelWidthSpin)  setPixelWidthByPixelHeight();
+            if(source !== pixelHeightSpin) setPixelHeightByPixelWidth();
+
+            if(source !== printWidthSpin)  setPrintWidthByPrintHeight();
+            if(source !== printHeightSpin) setPrintHeightByPrintWidth();
+        }
+
+        switch(source)
+        {
+        case pixelWidthSpin:
+        case pixelHeightSpin:
+            syncPrintToPixel();
+            break;
+
+        case printWidthSpin:
+        case printHeightSpin:
+        case dpiSpin:
+            syncPixelToPrint();
+            break;
+        }
+
+        if(!lockAspect.checked)
+            aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
+
+        updateValues.recursing = false;
+    }
+
     Component
     {
         // We use a Component here because for whatever reason, the Labs FileDialog only seems
@@ -441,7 +464,8 @@ Window
             {
                 root.close();
                 screenshot.path = folder.toString();
-                graphView.captureScreenshot(screenshotWidth, screenshotHeight, file, dpi, fill);
+                graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
+                    file, dpiSpin.value, fillSize.checked);
             }
 
             fileMode: Labs.FileDialog.SaveFile
@@ -475,9 +499,6 @@ Window
 
     onAspectRatioChanged:
     {
-        underCanvas.requestPaint();
-        canvas.requestPaint();
-        preview.visible = false;
         if(!loadingPreset)
             refreshTimer.restart();
     }
@@ -488,14 +509,8 @@ Window
         {
             presetsListModel.update();
             presets.currentIndex = 0;
-
-            aspectRatio = screenshot.width / screenshot.height;
-            pixelWidthSpin.value = screenshot.width;
-            pixelHeightSpin.value = screenshot.height;
-
             loadPreset(presets.currentIndex);
 
-            preview.visible = false;
             requestPreview();
         }
     }
@@ -519,21 +534,11 @@ Window
 
             loadPreset(presets.currentIndex);
         }
-    }
-
-    Connections
-    {
-        target: graphView
 
         function onPreviewComplete(previewBase64)
         {
-            preview.source = "data:image/png;base64," + previewBase64;
-            preview.visible = true;
-        }
-
-        function onHeightChanged()
-        {
-            loadPreset(presets.currentIndex);
+            previewImage.source = "data:image/png;base64," + previewBase64;
+            root.generatingPreview = false;
         }
     }
 
@@ -541,56 +546,45 @@ Window
     {
         if(root.visible)
         {
-            let w = Math.ceil(aspectRatio * canvas.height);
-            let h = canvas.height;
-            if(w > canvas.width)
-            {
-                w = canvas.width;
-                h = Math.ceil(canvas.width / aspectRatio);
-            }
-            graphView.requestPreview(w, h, fillSize.checked);
+            root.generatingPreview = true;
+            graphView.requestPreview(previewImage.width, previewImage.height, fillSize.checked);
         }
-    }
-
-    function previewWidth()
-    {
-        return Math.min(previewHolder.height * aspectRatio, previewHolder.width);
-    }
-
-    function previewHeight()
-    {
-        return Math.min(previewWidth() / aspectRatio, previewHolder.height);
     }
 
     function loadPreset(currentIndex)
     {
-        loadingPreset = true;
-        pixelWidthSpin.enabled = false;
-        pixelHeightSpin.enabled = false;
-        dpiSpin.enabled = false;
-        printHeightSpin.enabled = false;
-        printWidthSpin.enabled = false;
-        lockAspect.enabled = false;
-
-        lockAspect.checked = false;
-
         if(currentIndex < 0)
             return;
+
+        loadingPreset = true;
+
+        lockAspect.checked = false;
 
         let preset = presetsListModel.get(currentIndex);
         if(preset !== undefined && preset.dpi > 0)
         {
+            lockAspect.enabled =
+                pixelWidthSpin.enabled =
+                pixelHeightSpin.enabled =
+                dpiSpin.enabled =
+                printWidthSpin.enabled =
+                printHeightSpin.enabled = false;
+
             dpiSpin.value = preset.dpi;
 
             if(preset.pixelWidth > 0 && preset.pixelHeight > 0)
             {
                 pixelWidthSpin.value = preset.pixelWidth;
                 pixelHeightSpin.value = preset.pixelHeight;
+                setPrintWidthByPixelWidth();
+                setPrintHeightByPixelHeight();
             }
             else if(preset.printWidth > 0 && preset.printHeight > 0)
             {
                 printWidthSpin.value = preset.printWidth;
                 printHeightSpin.value = preset.printHeight;
+                setPixelWidthByPrintWidth();
+                setPixelHeightByPrintHeight();
             }
         }
         else
@@ -599,9 +593,11 @@ Window
                 pixelWidthSpin.enabled =
                 pixelHeightSpin.enabled =
                 dpiSpin.enabled =
-                printHeightSpin.enabled =
-                printWidthSpin.enabled = true;
+                printWidthSpin.enabled =
+                printHeightSpin.enabled = true;
         }
+
+        aspectRatio = pixelWidthSpin.value / pixelHeightSpin.value;
 
         lockAspect.checked = true;
 
