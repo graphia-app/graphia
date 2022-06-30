@@ -2,6 +2,7 @@ module app.graphia.Shared.Controls
 
 BaseParameterDialog 1.0 BaseParameterDialog.qml
 DataTable 1.0 DataTable.qml
+DelayedBusyIndicator 1.0 DelayedBusyIndicator.qml
 FloatingButton 1.0 FloatingButton.qml
 HelpTooltip 1.0 HelpTooltip.qml
 Hubble 1.0 Hubble.qml

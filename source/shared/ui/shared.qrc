@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>qml/app/graphia/Shared/Controls/BaseParameterDialog.qml</file>
         <file>qml/app/graphia/Shared/Controls/DataTable.qml</file>
+        <file>qml/app/graphia/Shared/Controls/DelayedBusyIndicator.qml</file>
         <file>qml/app/graphia/Shared/Controls/FloatingButton.qml</file>
         <file>qml/app/graphia/Shared/Controls/FontPointSize.qml</file>
         <file>qml/app/graphia/Shared/Controls/HelpTooltip.qml</file>
@@ -26,5 +27,6 @@
         <file>qml/app/graphia/Shared/MenuUtils.js</file>
         <file>qml/app/graphia/Shared/Utils.js</file>
         <file>qml/app/graphia/Shared/qmldir</file>
+        <file>qml/app/graphia/Shared/Controls/DelayedBusyIndicator.qml</file>
     </qresource>
 </RCC>
