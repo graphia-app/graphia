@@ -1249,6 +1249,7 @@ Item
             Item
             {
                 id: pluginContainer
+                objectName: "pluginContainer"
 
                 anchors.top: toolBar.bottom
                 // anchors.bottom is not bound, instead the height is set manually
@@ -1295,6 +1296,7 @@ Item
     Item
     {
         id: plugin
+        objectName: _document.pluginName
 
         enabled: !pluginToolBarContainer.minimisingOrMinimised || root.pluginPoppedOut
 
@@ -1477,6 +1479,7 @@ Item
         Item
         {
             id: pluginWindowContent
+            objectName: "pluginWindow"
             anchors.fill: parent
         }
 
