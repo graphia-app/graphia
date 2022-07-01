@@ -1281,13 +1281,13 @@ Item
     {
         id: window
         section: "window"
-        property alias pluginX: pluginWindow.x
-        property alias pluginY: pluginWindow.y
+        property var pluginX
+        property var pluginY
         property var pluginWidth
         property var pluginHeight
         property var pluginMaximised
-        property alias pluginSplitSize: root.pluginSplitSize
-        property alias pluginPoppedOut: root.pluginPoppedOut
+        property int pluginSplitSize
+        property bool pluginPoppedOut: false
     }
 
     Preferences
@@ -1409,12 +1409,19 @@ Item
 
     function loadPluginWindowState()
     {
+        if(window.pluginPoppedOut === undefined)
+            return;
+
+        root.pluginPoppedOut = window.pluginPoppedOut;
+
         if(!window.pluginPoppedOut)
             return;
 
         if(window.pluginWidth !== undefined &&
            window.pluginHeight !== undefined)
         {
+            pluginWindow.x = window.pluginX;
+            pluginWindow.y = window.pluginY;
             pluginWindow.width = window.pluginWidth;
             pluginWindow.height = window.pluginHeight;
         }
@@ -1428,6 +1435,8 @@ Item
 
     function savePluginWindowState()
     {
+        window.pluginPoppedOut = root.pluginPoppedOut;
+
         if(!window.pluginPoppedOut)
             return;
 
@@ -1435,6 +1444,8 @@ Item
 
         if(!pluginWindow.maximised)
         {
+            window.pluginX = pluginWindow.x;
+            window.pluginY = pluginWindow.y;
             window.pluginWidth = pluginWindow.width;
             window.pluginHeight = pluginWindow.height;
         }
@@ -1562,10 +1573,10 @@ Item
 
     function togglePop()
     {
-        if(pluginWindow.visible)
-            popInPlugin();
+        if(root.pluginPoppedOut)
+            root.popInPlugin();
         else
-            popOutPlugin();
+            root.popOutPlugin();
     }
 
     function createPluginMenu(index, menu)
