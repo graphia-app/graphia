@@ -115,7 +115,7 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int image
         return;
     }
 
-    auto scale = static_cast<float>(screenshotSize.height()) / renderer.height();
+    auto scale = static_cast<float>(screenshotSize.height()) / static_cast<float>(renderer.height());
 
     // Update Scene
     updateComponentGPUData(ScreenshotType::Preview, screenshotSize, renderOffset, scale);
@@ -177,7 +177,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int im
         return;
     }
 
-    auto scale = static_cast<float>(screenshotSize.height()) / renderer.height();
+    auto scale = static_cast<float>(screenshotSize.height()) / static_cast<float>(renderer.height());
 
     // Need a pixmap to construct the full image
     auto pixmap = QPixmap(imageWidth, imageHeight);
