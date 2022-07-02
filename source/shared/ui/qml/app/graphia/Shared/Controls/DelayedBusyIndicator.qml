@@ -26,6 +26,8 @@ BusyIndicator
     property alias delay: timer.interval
     property bool delayedRunning: false
 
+    running: false
+
     Timer
     {
         id: timer
