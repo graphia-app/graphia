@@ -116,7 +116,7 @@ Control
             // The function bound to textFromValue is not called when the
             // variables the function references are changed; by momentarily
             // changing the control's locale, a call to textFromValue is forced
-            // It's possible that this is a Qt (5.15) bug
+            // It's possible that this is a Qt bug
             let actualLocale = locale;
             locale = Qt.locale(locale.name + ".dummy");
             locale = actualLocale;
