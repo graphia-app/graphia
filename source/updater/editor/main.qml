@@ -130,7 +130,7 @@ ApplicationWindow
                 }
                 else
                 {
-                    validateErrorDialog.text = "HTTP status " + httpStatus + " while validating " + url + ".";
+                    validateErrorDialog.text = qsTr("HTTP status ") + httpStatus + qsTr(" while validating ") + url + ".";
                     validateErrorDialog.open();
                     status.text = qsTr("Failed to download");
 

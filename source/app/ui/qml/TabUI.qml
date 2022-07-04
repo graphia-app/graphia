@@ -1900,7 +1900,7 @@ Item
                           "<b>Zoom:</b> Trackpad Pinch <b>or</b> Mouse Scrollwheel<br>" +
                           "<b>Pan:</b> Two Finger Trackpad Click and Drag <b>or</b> Right Mouse Click Drag<br>");
 
-                        let postamble = "<b>Focus Node:</b> Double Click"
+                        let postamble = qsTr("<b>Focus Node:</b> Double Click");
 
                         return preamble + (Qt.platform.os === "osx" ? macOsTrackpad : regularMouse) + postamble;
                     }

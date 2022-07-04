@@ -98,62 +98,62 @@ Window
                     {
                         clear();
 
-                        append({text: "Viewport Size (" + graphView.width + "x" + graphView.height + ")",
+                        append({text: qsTr("Viewport Size (") + graphView.width + qsTr("×") + graphView.height + qsTr(")"),
                                  dpi: 72,
                           pixelWidth: graphView.width,
                          pixelHeight: graphView.height});
 
-                        append({text: "2x Viewport Size (" + graphView.width * 2 + "x" + graphView.height * 2 + ")",
+                        append({text: qsTr("2x Viewport Size (") + graphView.width * 2 + qsTr("×") + graphView.height * 2 + qsTr(")"),
                                  dpi: 72,
                           pixelWidth: graphView.width * 2,
                          pixelHeight: graphView.height * 2});
 
-                        append({text: "4x Viewport Size (" + graphView.width * 4 + "x" + graphView.height * 4 + ")",
+                        append({text: qsTr("4x Viewport Size (") + graphView.width * 4 + qsTr("×") + graphView.height * 4 + qsTr(")"),
                                  dpi: 72,
                           pixelWidth: graphView.width * 4,
                          pixelHeight: graphView.height * 4});
 
-                        append({text: "A5 Paper Portrait (300DPI)",
+                        append({text: qsTr("A5 Paper Portrait (300DPI)"),
                                  dpi: 300,
                           printWidth: 148,
                          printHeight: 210});
 
-                        append({text: "A4 Paper Portrait (300DPI)",
+                        append({text: qsTr("A4 Paper Portrait (300DPI)"),
                                  dpi: 300,
                           printWidth: 210,
                          printHeight: 297});
 
-                        append({text: "A3 Paper Portrait (300DPI)",
+                        append({text: qsTr("A3 Paper Portrait (300DPI)"),
                                  dpi: 300,
                           printWidth: 297,
                          printHeight: 420});
 
-                        append({text: "A2 Paper Portrait (300DPI)",
+                        append({text: qsTr("A2 Paper Portrait (300DPI)"),
                                  dpi: 300,
                           printWidth: 420,
                          printHeight: 594});
 
-                        append({text: "A5 Paper Landscape (300DPI)",
+                        append({text: qsTr("A5 Paper Landscape (300DPI)"),
                                  dpi: 300,
                           printWidth: 210,
                          printHeight: 148});
 
-                        append({text: "A4 Paper Landscape (300DPI)",
+                        append({text: qsTr("A4 Paper Landscape (300DPI)"),
                                  dpi: 300,
                           printWidth: 297,
                          printHeight: 210});
 
-                        append({text: "A3 Paper Landscape (300DPI)",
+                        append({text: qsTr("A3 Paper Landscape (300DPI)"),
                                  dpi: 300,
                           printWidth: 420,
                          printHeight: 297});
 
-                        append({text: "A2 Paper Landscape (300DPI)",
+                        append({text: qsTr("A2 Paper Landscape (300DPI)"),
                                  dpi: 300,
                           printWidth: 594,
                          printHeight: 420});
 
-                        append({text: "Custom…"});
+                        append({text: qsTr("Custom…")});
                     }
                 }
 
@@ -318,7 +318,7 @@ Window
 
                     Text
                     {
-                        text: "Print Height:"
+                        text: qsTr("Print Height:")
                         Layout.alignment: Qt.AlignRight
                     }
                     SpinBox
@@ -340,7 +340,7 @@ Window
                     RadioButton
                     {
                         id: fillSize
-                        text: "Fill Size"
+                        text: qsTr("Fill Size")
                         Layout.row: 6
                         Layout.column: 1
                         Layout.columnSpan: 2
@@ -352,7 +352,7 @@ Window
                     RadioButton
                     {
                         id: fitSize
-                        text: "Fit Size"
+                        text: qsTr("Fit Size")
                         Layout.row: 7
                         Layout.column: 1
                         Layout.columnSpan: 2
