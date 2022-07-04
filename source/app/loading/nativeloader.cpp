@@ -279,7 +279,8 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     if(version > NativeSaver::Version)
     {
-        setFailureReason(QObject::tr("Produced using a newer version of %1. Please upgrade.")
+        setFailureReason(QObject::tr("It was saved using a newer version of %1. "
+            "Please visit the %1 website to upgrade.")
             .arg(Application::name()));
         return false;
     }
