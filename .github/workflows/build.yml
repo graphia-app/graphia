@@ -62,6 +62,7 @@ jobs:
       shell: bash
       env:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
+
   windows:
     name: Windows
     runs-on: windows-2019
@@ -201,6 +202,7 @@ jobs:
           build/clang/**/*.c
           build/clang/**/*.cpp
           build/clang/**/*.cxx
+
   clang-tidy:
     name: Clang-Tidy
     runs-on: ubuntu-latest
@@ -237,6 +239,7 @@ jobs:
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
+
   cppcheck:
     name: cppcheck
     runs-on: ubuntu-latest
@@ -274,6 +277,7 @@ jobs:
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
+
   clazy:
     name: Clazy
     runs-on: ubuntu-latest
@@ -320,6 +324,7 @@ jobs:
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
+
   qmllint:
     name: QML Lint
     runs-on: ubuntu-latest
