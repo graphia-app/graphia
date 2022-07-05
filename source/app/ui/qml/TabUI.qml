@@ -58,6 +58,16 @@ Item
         return "";
     }
 
+    property string baseFileNameNoExtension:
+    {
+        if(hasBeenSaved)
+            return QmlUtils.baseFileNameForUrlNoExtension(root.savedFileUrl);
+        else if(Qt.resolvedUrl(root.url).toString().length > 0)
+            return QmlUtils.baseFileNameForUrlNoExtension(root.url);
+
+        return "";
+    }
+
     property string title:
     {
         let text;
@@ -65,7 +75,7 @@ Item
         if(hasBeenSaved)
         {
             // Don't display the file extension when it's a native file
-            text = QmlUtils.baseFileNameForUrlNoExtension(root.savedFileUrl);
+            text = baseFileNameNoExtension;
         }
         else
             text = baseFileName;
@@ -1648,6 +1658,8 @@ Item
 
                 plugin.content = pluginComponent.createObject(plugin);
                 plugin.content._mainWindow = mainWindow;
+                plugin.content.baseFileName = root.baseFileName;
+                plugin.content.baseFileNameNoExtension = root.baseFileNameNoExtension;
 
                 if(plugin.content === null)
                 {

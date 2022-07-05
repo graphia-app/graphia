@@ -23,6 +23,9 @@ Item
     property int minimumHeight: 100
     property var toolStrip: null
 
+    property string baseFileName: ""
+    property string baseFileNameNoExtension: ""
+
     // Don't use this directly, that is naughty
     property var _mainWindow: null
 
