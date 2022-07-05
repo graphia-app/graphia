@@ -193,12 +193,18 @@ void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
 
 void GraphQuickItem::captureScreenshot(int width, int height, const QString& path, int dpi, bool fillSize)
 {
+    if(width <= 0 || height <= 0)
+        return;
+
     emit screenshotRequested(width, height, path, dpi, fillSize);
     update();
 }
 
 void GraphQuickItem::requestPreview(int width, int height, bool fillSize)
 {
+    if(width <= 0 || height <= 0)
+        return;
+
     emit previewRequested(width, height, fillSize);
     update();
 }
