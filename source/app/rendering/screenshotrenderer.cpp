@@ -30,6 +30,7 @@
 
 #include <QBuffer>
 #include <QDir>
+#include <QQuickOpenGLUtils>
 
 static const int TILE_SIZE = 1024;
 
@@ -127,6 +128,8 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int image
 
 void ScreenshotRenderer::render()
 {
+    QQuickOpenGLUtils::resetOpenGLState();
+
     glViewport(0, 0, this->width(), this->height());
 
     glBindTexture(GL_TEXTURE_2D, _screenshotTex);
