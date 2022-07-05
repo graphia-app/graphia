@@ -298,9 +298,9 @@ Item
                 let filters = [];
                 let saverTypes = application.saverFileTypes();
                 for(let i = 0; i < saverTypes.length; i++)
-                    filters.push(saverTypes[i].name + " files (*." + saverTypes[i].extension + ")");
+                    filters.push(saverTypes[i].name + qsTr(" files (*.") + saverTypes[i].extension + qsTr(")"));
 
-                filters.push("All files (*)");
+                filters.push(qsTr("All files (*)"));
                 return filters;
             }
 
