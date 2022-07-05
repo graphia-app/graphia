@@ -389,14 +389,27 @@ ApplicationWindow
             icon.name: "camera-photo"
             onTriggered: function(source)
             {
-                heatmapSaveDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                    misc.fileSaveInitialFolder : "";
+                let folder = screenshot.path !== undefined ? screenshot.path : "";
+                let path = root.saveFileName(folder);
 
-                heatmapSaveDialog.open();
+                let fileDialog = saveFileDialogComponent.createObject(root,
+                {
+                    "title": qsTr("Save Plot As Image"),
+                    "folder": folder,
+                    "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
+                    "currentFile": QmlUtils.urlForFileName(path)
+                });
+
+                fileDialog.accepted.connect(function()
+                {
+                    screenshot.path = fileDialog.folder.toString();
+                    heatmap.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions);
+                });
+
+                fileDialog.open();
             }
         }
     }
-
 
     PlatformMenu
     {
@@ -409,44 +422,47 @@ ApplicationWindow
             icon.name: "document-save"
             onTriggered: function(source)
             {
-                exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                    misc.fileSaveInitialFolder : "";
+                let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
+                let path = root.saveFileName(folder);
 
-                exportTableDialog.open();
+                let fileDialog = saveFileDialogComponent.createObject(root,
+                {
+                    "title": qsTr("Export Table"),
+                    "folder": folder,
+                    "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
+                    "currentFile": QmlUtils.urlForFileName(path)
+                });
+
+                fileDialog.accepted.connect(function()
+                {
+                    misc.fileSaveInitialFolder = fileDialog.folder.toString();
+                    wizard.document.writeTableModelToFile(
+                        table.model, fileDialog.file,
+                        fileDialog.selectedNameFilter.extensions[0]);
+                });
+
+                fileDialog.open();
             }
         }
     }
 
-    Labs.FileDialog
+    function saveFileName(folderUrl)
     {
-        id: heatmapSaveDialog
-        visible: false
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 1
-        title: qsTr("Save Plot As Image")
-        nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
-        onAccepted:
+        function sanitiseAttributeName(attributeName)
         {
-            heatmap.savePlotImage(file, selectedNameFilter.extensions);
+            return attributeName.replace(/\s+/g, "_").toLowerCase();
         }
+
+        let baseName = root.wizard.document.title.replace(/\.[^\.]+$/, "");
+        let attributes = sanitiseAttributeName(root._currentModel.selectionA) +
+            "-vs-" + sanitiseAttributeName(root._currentModel.selectionB);
+        let path = QmlUtils.fileNameForUrl(folderUrl) + "/" + baseName +
+            "-enrichment-" + attributes;
+
+        return path;
     }
 
-    Labs.FileDialog
-    {
-        id: exportTableDialog
-        visible: false
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        title: qsTr("Export Table")
-        nameFilters: ["CSV File (*.csv)", "TSV File (*.tsv)"]
-        onAccepted:
-        {
-            misc.fileSaveInitialFolder = folder.toString();
-            wizard.document.writeTableModelToFile(
-                table.model, file, defaultSuffix);
-        }
-    }
+    SaveFileDialogComponent { id: saveFileDialogComponent }
 
     Preferences
     {
@@ -454,5 +470,13 @@ ApplicationWindow
         section: "misc"
 
         property var fileSaveInitialFolder
+    }
+
+    Preferences
+    {
+        id: screenshot
+        section: "screenshot"
+
+        property var path
     }
 }

@@ -38,6 +38,7 @@ Item
     property alias rowCount: tableView.rows
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
+    property string exportBaseFileName: "attributes"
 
     function initialise()
     {
@@ -215,21 +216,7 @@ Item
         property var fileSaveInitialFolder
     }
 
-    Labs.FileDialog
-    {
-        id: exportTableDialog
-        visible: false
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        title: qsTr("Export Table")
-        nameFilters: ["CSV File (*.csv)", "TSV File (*.tsv)"]
-        onAccepted:
-        {
-            misc.fileSaveInitialFolder = folder.toString();
-            document.writeTableModelToFile(tableView.model, file,
-                defaultSuffix, tableView.visibleColumnNames());
-        }
-    }
+    SaveFileDialogComponent { id: saveFileDialogComponent }
 
     property alias resizeColumnsAction: resizeColumnsToContentsAction
 
@@ -265,12 +252,28 @@ Item
         enabled: tableView.rows > 0
         text: qsTr("Export…")
         icon.name: "document-save"
+
         onTriggered: function(source)
         {
-            exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
-                        misc.fileSaveInitialFolder : "";
+            let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
+            let path = QmlUtils.fileNameForUrl(folder) + "/" + root.exportBaseFileName;
 
-            exportTableDialog.open();
+            let fileDialog = saveFileDialogComponent.createObject(root,
+            {
+                "title": qsTr("Export Table"),
+                "folder": folder,
+                "nameFilters": [qsTr("CSV File (*.csv)"), qsTr("TSV File (*.tsv)")],
+                "currentFile": QmlUtils.urlForFileName(path)
+            });
+
+            fileDialog.accepted.connect(function()
+            {
+                misc.fileSaveInitialFolder = fileDialog.folder.toString();
+                document.writeTableModelToFile(tableView.model, fileDialog.file,
+                    fileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
+            });
+
+            fileDialog.open();
         }
     }
 

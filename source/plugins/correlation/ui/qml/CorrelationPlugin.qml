@@ -334,7 +334,28 @@ PluginContent
         id: savePlotImageAction
         text: qsTr("Save As &Image…")
         icon.name: "camera-photo"
-        onTriggered: { imageSaveDialog.open(); }
+        onTriggered:
+        {
+            let folder = screenshot.path !== undefined ? screenshot.path : "";
+            let path = QmlUtils.fileNameForUrl(folder) + "/" +
+                root.baseFileNameNoExtension + "-correlation-plot";
+
+            let fileDialog = saveFileDialogComponent.createObject(root,
+            {
+                "title": qsTr("Save Plot As Image"),
+                "folder": folder,
+                "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg *.jpeg)"), qsTr("PDF Document (*.pdf)")],
+                "currentFile": QmlUtils.urlForFileName(path)
+            });
+
+            fileDialog.accepted.connect(function()
+            {
+                screenshot.path = fileDialog.folder.toString();
+                plot.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions);
+            });
+
+            fileDialog.open();
+        }
     }
 
     Action
@@ -721,6 +742,8 @@ PluginContent
 
             model: plugin.model.nodeAttributeTableModel
 
+            exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
+
             onSelectedRowsChanged:
             {
                 // If the tableView's selection is less than complete, highlight
@@ -881,16 +904,14 @@ PluginContent
 
     PlatformMenu { id: plotContextMenu }
 
-    Labs.FileDialog
+    SaveFileDialogComponent { id: saveFileDialogComponent }
+
+    Preferences
     {
-        id: imageSaveDialog
-        visible: false
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 1
-        title: qsTr("Save Plot As Image")
-        nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
-        onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
+        id: screenshot
+        section: "screenshot"
+
+        property var path
     }
 
     function initialise()

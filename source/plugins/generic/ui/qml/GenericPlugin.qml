@@ -71,6 +71,8 @@ PluginContent
 
             model: plugin.model.nodeAttributeTableModel
 
+            exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
+
             onSelectedRowsChanged:
             {
                 // If the tableView's selection is less than complete, highlight

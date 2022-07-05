@@ -558,28 +558,30 @@ Item
         _document.gotoAllBookmarks();
     }
 
-    Labs.FileDialog
-    {
-        id: exportNodePositionsFileDialog
-        visible: false
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 1
-        title: qsTr("Export Node Positions")
-        nameFilters: ["JSON File (*.json)"]
-        onAccepted:
-        {
-            misc.fileSaveInitialFolder = folder.toString();
-            _document.saveNodePositionsToFile(file);
-        }
-    }
+    SaveFileDialogComponent { id: exportNodePositionsFileDialogComponent }
 
     function exportNodePositions()
     {
-        exportNodePositionsFileDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+        let folder = misc.fileSaveInitialFolder !== undefined ?
             misc.fileSaveInitialFolder : "";
+        let path = QmlUtils.fileNameForUrl(folder) + "/" +
+            root.baseFileNameNoExtension + "-node-positions";
 
-        exportNodePositionsFileDialog.open();
+        let fileDialog = exportNodePositionsFileDialogComponent.createObject(root,
+        {
+            "title": qsTr("Export Node Positions"),
+            "folder": folder,
+            "nameFilters": [qsTr("JSON File (*.json)")],
+            "currentFile": QmlUtils.urlForFileName(path)
+        });
+
+        fileDialog.accepted.connect(function()
+        {
+            misc.fileSaveInitialFolder = fileDialog.folder.toString();
+            _document.saveNodePositionsToFile(fileDialog.file);
+        });
+
+        fileDialog.open();
     }
 
     function searchWebForNode(nodeId)

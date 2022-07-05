@@ -379,10 +379,23 @@ Window
                     let path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
                         new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
 
-                    let fileDialogObject = fileDialogComponent.createObject(root,
-                        {"folder": screenshot.path, "currentFile": QmlUtils.urlForFileName(path)});
+                    let fileDialog = fileDialogComponent.createObject(root,
+                    {
+                        "title": qsTr("Save As Image"),
+                        "folder": screenshot.path,
+                        "nameFilters": [qsTr("PNG Image (*.png)"), qsTr("JPEG Image (*.jpg)"), qsTr("Bitmap Image (*.bmp)")],
+                        "currentFile": QmlUtils.urlForFileName(path)
+                    });
 
-                    fileDialogObject.open();
+                    fileDialog.accepted.connect(function()
+                    {
+                        root.close();
+                        screenshot.path = fileDialog.folder.toString();
+                        graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
+                            fileDialog.file, dpiSpin.value, fillSize.checked);
+                    });
+
+                    fileDialog.open();
                 }
             }
         }
@@ -446,57 +459,7 @@ Window
         updateValues.recursing = false;
     }
 
-    Component
-    {
-        // We use a Component here because for whatever reason, the Labs FileDialog only seems
-        // to allow you to set currentFile once. From looking at the source code it appears as
-        // if setting currentFile adds to the currently selected files, rather than replaces
-        // the currently selected files with a new one. Until this is fixed, we work around
-        // it by simply recreating the FileDialog everytime we need one.
-
-        id: fileDialogComponent
-
-        Labs.FileDialog
-        {
-            id: fileDialog
-            title: qsTr("Save As Image")
-
-            onAccepted:
-            {
-                root.close();
-                screenshot.path = folder.toString();
-                graphView.captureScreenshot(pixelWidthSpin.value, pixelHeightSpin.value,
-                    file, dpiSpin.value, fillSize.checked);
-            }
-
-            fileMode: Labs.FileDialog.SaveFile
-            defaultSuffix: selectedNameFilter.extensions[0]
-            selectedNameFilter.index: 0
-
-            function updateFileExtension()
-            {
-                currentFile = QmlUtils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
-            }
-
-            Component.onCompleted:
-            {
-                updateFileExtension();
-            }
-
-            Connections
-            {
-                target: fileDialog.selectedNameFilter
-
-                function onIndexChanged()
-                {
-                    if(fileDialog.visible)
-                        fileDialog.updateFileExtension();
-                }
-            }
-
-            nameFilters: ["PNG Image (*.png)" ,"JPEG Image (*.jpg)", "Bitmap Image (*.bmp)"]
-        }
-    }
+    SaveFileDialogComponent { id: fileDialogComponent }
 
     onAspectRatioChanged:
     {
