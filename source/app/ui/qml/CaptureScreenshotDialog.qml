@@ -44,8 +44,10 @@ Window
 
     property bool loadingPreset: false
     property bool generatingPreview: false
+    property bool _previewEnabled: false
+    property bool _previewCompleted: false
 
-    property real aspectRatio: 0.0
+    property real aspectRatio: 1.0
     readonly property real _MM_PER_INCH: 25.4
 
     Preferences
@@ -62,13 +64,6 @@ Window
         id: visuals
         section: "visuals"
         property string backgroundColor
-    }
-
-    Timer
-    {
-        id: refreshTimer
-        interval: 300
-        onTriggered: { requestPreview(); }
     }
 
     ColumnLayout
@@ -196,8 +191,8 @@ Window
                     height: { return Math.min(w / aspectRatio, h); }
 
                     fillMode: Image.PreserveAspectFit
-                    onWidthChanged: { refreshTimer.restart(); }
-                    onHeightChanged: { refreshTimer.restart(); }
+                    onWidthChanged: { requestPreviewDelayed(); }
+                    onHeightChanged: { requestPreviewDelayed(); }
                 }
 
                 Rectangle
@@ -464,7 +459,7 @@ Window
     onAspectRatioChanged:
     {
         if(!loadingPreset)
-            refreshTimer.restart();
+            requestPreviewDelayed();
     }
 
     onVisibleChanged:
@@ -475,8 +470,11 @@ Window
             presets.currentIndex = 0;
             loadPreset(presets.currentIndex);
 
+            root._previewEnabled = true;
             requestPreview();
         }
+        else
+            root._previewEnabled = root._previewCompleted = false;
     }
 
     Connections
@@ -503,16 +501,32 @@ Window
         {
             previewImage.source = "data:image/png;base64," + previewBase64;
             root.generatingPreview = false;
+            root._previewCompleted = true;
         }
     }
 
     function requestPreview()
     {
-        if(root.visible)
+        if(root._previewEnabled)
         {
             root.generatingPreview = true;
             graphView.requestPreview(previewImage.width, previewImage.height, fillSize.checked);
         }
+    }
+
+    Timer
+    {
+        id: refreshTimer
+        interval: 300
+        onTriggered: { requestPreview(); }
+    }
+
+    function requestPreviewDelayed()
+    {
+        if(!root._previewCompleted)
+            requestPreview(); // Immediate if preview is yet to complete
+        else
+            refreshTimer.restart();
     }
 
     function loadPreset(currentIndex)
