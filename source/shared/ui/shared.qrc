@@ -20,6 +20,7 @@
         <file>qml/app/graphia/Shared/Controls/+nativemenu/PlatformMenuBar.qml</file>
         <file>qml/app/graphia/Shared/Controls/+nativemenu/PlatformMenuSeparator.qml</file>
         <file>qml/app/graphia/Shared/Controls/PointingCursorOnHoverLink.qml</file>
+        <file>qml/app/graphia/Shared/Controls/SaveFileDialogComponent.qml</file>
         <file>qml/app/graphia/Shared/Controls/ScrollBarCornerFiller.qml</file>
         <file>qml/app/graphia/Shared/Controls/ScrollableTextArea.qml</file>
         <file>qml/app/graphia/Shared/Controls/SlidingPanel.qml</file>
@@ -35,6 +36,5 @@
         <file>qml/app/graphia/Shared/MenuUtils.js</file>
         <file>qml/app/graphia/Shared/Utils.js</file>
         <file>qml/app/graphia/Shared/qmldir</file>
-        <file>qml/app/graphia/Shared/Controls/DelayedBusyIndicator.qml</file>
     </qresource>
 </RCC>
