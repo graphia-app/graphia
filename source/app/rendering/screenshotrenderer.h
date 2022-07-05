@@ -34,7 +34,6 @@ class ScreenshotRenderer : public QObject, public GraphRendererCore
 
 public:
     ScreenshotRenderer();
-    explicit ScreenshotRenderer(const GraphRenderer& renderer);
     ~ScreenshotRenderer() override;
 
     void requestPreview(const GraphRenderer& renderer, int imageWidth, int imageHeight, bool fillSize);
@@ -43,7 +42,6 @@ public:
 
 private:
     GraphModel* _graphModel = nullptr;
-
 
     GLuint _screenshotFBO = 0;
     GLuint _screenshotTex = 0;
