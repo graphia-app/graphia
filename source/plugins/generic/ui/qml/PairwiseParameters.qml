@@ -504,10 +504,10 @@ BaseParameterDialog
     {
         if(visible)
         {
-            if(QmlUtils.urlIsValid(root.url) && root.type.length !== 0)
-                tabularDataParser.parse(root.url, root.type);
+            if(QmlUtils.urlIsValid(root.url))
+                tabularDataParser.parse(root.url);
             else
-                console.log("ERROR: url or type is empty");
+                console.log("ERROR: url is invalid");
         }
     }
 }
