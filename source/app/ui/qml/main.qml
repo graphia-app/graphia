@@ -2500,7 +2500,11 @@ ApplicationWindow
             let arguments = [];
 
             if(drop.hasText && drop.text.length > 0)
-                arguments.push(drop.text);
+            {
+                let text = drop.text.trim();
+                text = QmlUtils.urlIsValid(text) ? Qt.resolvedUrl(text) : text;
+                arguments.push(text);
+            }
 
             if(drop.hasUrls)
             {
