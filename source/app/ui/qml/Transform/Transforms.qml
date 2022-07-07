@@ -75,7 +75,6 @@ Item
 
                 model: document.transforms
                 heldColor: root.heldColor
-                parentWhenDragging: root
 
                 alignment: Qt.AlignRight
 

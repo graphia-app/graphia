@@ -132,7 +132,6 @@ Item
 
                 model: document.visualisations
                 heldColor: root.heldColor
-                parentWhenDragging: root
 
                 alignment: Qt.AlignRight
 

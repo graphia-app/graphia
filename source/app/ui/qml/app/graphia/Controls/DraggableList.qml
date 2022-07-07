@@ -21,18 +21,20 @@ import QtQml.Models
 
 import app.graphia.Shared
 
-Column
+Item
 {
     id: root
 
     property Component component
     property var model
     property color heldColor
-    property Item parentWhenDragging
     property int alignment
     property int count: repeater.count
 
     signal itemMoved(int from, int to)
+
+    implicitWidth: column.width
+    implicitHeight: column.height
 
     Component
     {
@@ -42,14 +44,14 @@ Column
         {
             id: dragArea
 
-            anchors.left: alignment === Qt.AlignLeft ? parent.left : undefined
-            anchors.right: alignment === Qt.AlignRight ? parent.right : undefined
+            anchors.left: alignment === Qt.AlignLeft ? column.left : undefined
+            anchors.right: alignment === Qt.AlignRight ? column.right : undefined
 
             acceptedButtons: Qt.AllButtons
 
             drag.target: held ? content : undefined
             drag.axis: Drag.YAxis
-            drag.minimumY: root.parent.y
+            drag.minimumY: root.y
             drag.maximumY:
             {
                 let position = 0;
@@ -65,7 +67,8 @@ Column
                 return drag.minimumY + position;
             }
 
-            property int _dragStartIndex: -1
+            property int index: DelegateModel.itemsIndex
+            property real hotspotY: content.y + (content.height * 0.5)
 
             property bool held
             onPressAndHold: function(mouse) { held = true; }
@@ -74,13 +77,33 @@ Column
             property int _clickX
             property int _clickY
 
-            // If the mouse is significantly moved after a click, initiate a drag
             onPositionChanged: function(mouse)
             {
                 let manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
 
+                // If the mouse is significantly moved after a click, initiate a drag
                 if(manhattan > 3)
                     held = true;
+
+                if(!column.dragItem)
+                    return;
+
+                let newDropIndex = -1;
+                for(let i = 0; i < repeater.count; i++)
+                {
+                    if(column.dragItem.hotspotY > repeater.itemAt(i).y)
+                        newDropIndex = i;
+                }
+
+                if(newDropIndex < 0)
+                    return;
+
+                let dragItemPinned = column.dragItem.pinned;
+                let dropItemPinned = repeater.itemAt(newDropIndex).pinned;
+
+                // Must both be pinned or neither pinned
+                if(dragItemPinned === dropItemPinned)
+                    column.dropIndex = newDropIndex;
             }
 
             onClicked: function(mouse)
@@ -153,8 +176,7 @@ Column
                 radius: 2
 
                 Drag.source: dragArea
-                Drag.hotSpot.x: width / 2
-                Drag.hotSpot.y: height / 2
+                Drag.keys: ["DraggableList"]
 
                 // http://stackoverflow.com/a/24729837/2721809
                 Drag.dragType: Drag.Automatic
@@ -175,16 +197,16 @@ Column
 
                 signal dragStarted()
                 signal dragFinished()
-                //
 
-                onDragStarted: { dragArea._dragStartIndex = index; }
-                onDragFinished: { dragArea._dragStartIndex = -1; }
+                onDragStarted: { column.dragItem = repeater.itemAt(dragArea.index); }
+                onDragFinished: { column.dragItem = null; }
+                //
 
                 states: State
                 {
                     when: dragArea.held
 
-                    ParentChange { target: content; parent: parentWhenDragging }
+                    ParentChange { target: content; parent: root }
                     AnchorChanges
                     {
                         target: content
@@ -217,45 +239,6 @@ Column
                 }
             }
 
-            DropArea
-            {
-                id: dropArea
-                anchors
-                {
-                    top: parent.top
-                    bottom: parent.bottom
-                    left: alignment === Qt.AlignLeft ? parent.left : undefined
-                    right: alignment === Qt.AlignRight ? parent.right : undefined
-                }
-                width: root.width
-
-                onEntered: function(drag)
-                {
-                    let sourcePinned = repeater.itemAt(drag.source.DelegateModel.itemsIndex).pinned;
-                    let targetPinned = repeater.itemAt(dragArea.DelegateModel.itemsIndex).pinned;
-
-                    // Must both be pinned or neither pinned
-                    if(sourcePinned === targetPinned)
-                    {
-                        // Do the move in the DelegateModel, so there is a visual change, but leave
-                        // the underlying model alone for now
-                        delegateModel.items.move(
-                                drag.source.DelegateModel.itemsIndex,
-                                dragArea.DelegateModel.itemsIndex, 1);
-                    }
-                }
-
-                onDropped: function(drag)
-                {
-                    if(dragArea._dragStartIndex !== dragArea.DelegateModel.itemsIndex)
-                    {
-                        // Request that the underlying model performs a move
-                        root.itemMoved(dragArea._dragStartIndex,
-                                       dragArea.DelegateModel.itemsIndex);
-                    }
-                }
-            }
-
             property bool pinned: loader.item.pinned !== undefined ? loader.item.pinned : false
         }
     }
@@ -267,9 +250,45 @@ Column
         delegate: dragDelegate
     }
 
-    Repeater
+    Column
     {
-        id: repeater
-        model: delegateModel
+        id: column
+
+        property var dragItem: null
+        property int dropIndex: -1
+
+        Repeater
+        {
+            id: repeater
+            model: delegateModel
+        }
+
+        onDropIndexChanged:
+        {
+            if(dropIndex < 0)
+                return;
+
+            // Do the move in the DelegateModel, so there is a visual change, but leave
+            // the underlying model alone for now
+            delegateModel.items.move(dragItem.index, dropIndex, 1);
+        }
+    }
+
+    DropArea
+    {
+        anchors.fill: column
+
+        keys: ["DraggableList"]
+
+        onDropped: function(drop)
+        {
+            if(column.dragItem.index === column.dropIndex)
+                return;
+
+            // Request that the underlying model performs a move
+            root.itemMoved(column.dragItem.index, column.dropIndex);
+
+            column.dropIndex = -1;
+        }
     }
 }
