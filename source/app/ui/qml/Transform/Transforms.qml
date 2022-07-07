@@ -63,13 +63,9 @@ Item
                 {
                     Transform
                     {
-                        property var document: root.document
-
-                        Component.onCompleted:
-                        {
-                            enabledTextColor = Qt.binding(() => root.enabledTextColor);
-                            disabledTextColor = Qt.binding(() => root.disabledTextColor);
-                        }
+                        document: root.document
+                        enabledTextColor: root.enabledTextColor
+                        disabledTextColor: root.disabledTextColor
                     }
                 }
 

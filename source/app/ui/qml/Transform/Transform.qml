@@ -34,6 +34,8 @@ Item
     width: row.width
     height: row.height
 
+    property var document: null
+
     property color enabledTextColor
     property color disabledTextColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor

@@ -116,17 +116,14 @@ Item
                 {
                     Visualisation
                     {
-                        property var document: root.document
+                        document: root.document
+                        enabledTextColor: root.enabledTextColor
+                        disabledTextColor: root.disabledTextColor
+                        hoverColor: root.heldColor
+
                         gradientSelector: _gradientSelector
                         paletteSelector: _paletteSelector
                         mappingSelector: _mappingSelector
-
-                        Component.onCompleted:
-                        {
-                            enabledTextColor = Qt.binding(() => root.enabledTextColor);
-                            disabledTextColor = Qt.binding(() => root.disabledTextColor);
-                            hoverColor = Qt.binding(() => root.heldColor);
-                        }
                     }
                 }
 
