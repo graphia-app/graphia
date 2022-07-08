@@ -26,5 +26,5 @@ Rectangle
     color: "transparent"
     border.width: outlineVisible ? 1 : 0
     border.color: Qt.platform.os === "osx" ? "#e0e0e0" : palette.mid
-    clip: true
+    clip: outlineVisible
 }
