@@ -103,7 +103,10 @@ Item
     {
         id: treeboxSearch
 
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+
         visible: !button.visible
 
         treeBox: popupTreeBox
@@ -115,48 +118,49 @@ Item
         }
 
         onAccepted: { root.accept(); }
-    }
 
-    Popup
-    {
-        id: popup
-
-        y: root.height
-        implicitWidth: root.width
-        implicitHeight: Math.min(popupTreeBox.contentHeight, 240)
-
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-        padding: 0
-        margins: 0
-
-        TreeBox
+        Popup
         {
-            id: popupTreeBox
-            anchors.fill: parent
-            model: root.model
-            prettifyFunction: root.prettifyFunction
+            id: popup
 
-            onAccepted: { root.accept(); }
-        }
+            y: parent.height
 
-        onOpened:
-        {
-            if(root.currentIndex === null)
-                return;
+            implicitWidth: root.width
+            implicitHeight: Math.min(popupTreeBox.contentHeight, 240)
 
-            // Clone the current index
-            root.previousIndex = root.model.index(root.currentIndex.row,
-                root.currentIndex.column, root.currentIndex.parent);
-        }
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 
-        property bool _valueAccepted: false
-        onClosed:
-        {
-            button.visible = true;
+            padding: 0
+            margins: 0
 
-            if(!_valueAccepted)
-                root.select(root.previousIndex);
+            TreeBox
+            {
+                id: popupTreeBox
+                anchors.fill: parent
+                model: root.model
+                prettifyFunction: root.prettifyFunction
+
+                onAccepted: { root.accept(); }
+            }
+
+            onOpened:
+            {
+                if(root.currentIndex === null)
+                    return;
+
+                // Clone the current index
+                root.previousIndex = root.model.index(root.currentIndex.row,
+                    root.currentIndex.column, root.currentIndex.parent);
+            }
+
+            property bool _valueAccepted: false
+            onClosed:
+            {
+                button.visible = true;
+
+                if(!_valueAccepted)
+                    root.select(root.previousIndex);
+            }
         }
     }
 
