@@ -25,6 +25,7 @@ Item
 {
     id: root
 
+    // It is assumed that the component is always the same height
     property Component component
     property var model
     property color heldColor
@@ -52,20 +53,7 @@ Item
             drag.target: held ? content : undefined
             drag.axis: Drag.YAxis
             drag.minimumY: root.y
-            drag.maximumY:
-            {
-                let position = 0;
-
-                if(repeater.count > 0)
-                {
-                    let item = repeater.itemAt(repeater.count - 1);
-
-                    if(item !== null)
-                        position = item.y;
-                }
-
-                return drag.minimumY + position;
-            }
+            drag.maximumY: drag.minimumY + ((repeater.count - 1) * content.height)
 
             property int index: DelegateModel.itemsIndex
             property real hotspotY: content.y + (content.height * 0.5)
@@ -88,13 +76,7 @@ Item
                 if(!column.dragItem)
                     return;
 
-                let newDropIndex = -1;
-                for(let i = 0; i < repeater.count; i++)
-                {
-                    if(column.dragItem.hotspotY > repeater.itemAt(i).y)
-                        newDropIndex = i;
-                }
-
+                let newDropIndex = Math.floor(column.dragItem.hotspotY / content.height);
                 if(newDropIndex < 0)
                     return;
 
@@ -272,6 +254,8 @@ Item
             // the underlying model alone for now
             delegateModel.items.move(dragItem.index, dropIndex, 1);
         }
+
+        move: Transition { SmoothedAnimation { properties: "y"; duration: 150 } }
     }
 
     DropArea
