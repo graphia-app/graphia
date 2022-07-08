@@ -21,10 +21,6 @@ import Qt.labs.platform as Labs
 
 import app.graphia
 
-// We use a Component here because for whatever reason, the Labs FileDialog only seems
-// to allow you to set currentFile once. From looking at the source code it appears as
-// if setting currentFile adds to the currently selected files, rather than replaces
-// the currently selected files with a new one.
 Component
 {
     Labs.FileDialog
@@ -34,23 +30,5 @@ Component
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
         selectedNameFilter.index: 0
-
-        function updateFileExtension()
-        {
-            currentFile = QmlUtils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
-        }
-
-        Component.onCompleted: { updateFileExtension(); }
-
-        Connections
-        {
-            target: fileDialog.selectedNameFilter
-
-            function onIndexChanged()
-            {
-                if(fileDialog.visible)
-                    fileDialog.updateFileExtension();
-            }
-        }
     }
 }

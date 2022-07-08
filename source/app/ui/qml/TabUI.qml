@@ -288,8 +288,6 @@ Item
 
         Labs.FileDialog
         {
-            id: saveDialog
-
             title: qsTr("Save File…")
             fileMode: Labs.FileDialog.SaveFile
             defaultSuffix: selectedNameFilter.extensions[0]
@@ -318,38 +316,12 @@ Item
                 misc.fileSaveInitialFolder = folder.toString();
                 saveAsNamedFile(file, saverName);
             }
-
-            Connections
-            {
-                target: saveDialog.selectedNameFilter
-
-                function onIndexChanged()
-                {
-                    let saverTypes = application.saverFileTypes();
-
-                    if(QmlUtils.urlIsValid(saveDialog.currentFile) > 0 &&
-                        selectedNameFilter.index < saverTypes.length &&
-                        selectedNameFilter.extensions.length > 0)
-                    {
-                        saveDialog.currentFile = QmlUtils.replaceExtension(
-                            saveDialog.currentFile, selectedNameFilter.extensions[0]);
-                    }
-                }
-            }
         }
     }
 
     function saveAsFile()
     {
-        let initialFileUrl;
-
-        if(!hasBeenSaved)
-        {
-            initialFileUrl = QmlUtils.replaceExtension(root.url,
-                application.nativeExtension);
-        }
-        else
-            initialFileUrl = root.savedFileUrl;
+        let initialFileUrl = QmlUtils.removeExtension(root.hasBeenSaved ? root.savedFileUrl : root.url);
 
         let fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
         {
