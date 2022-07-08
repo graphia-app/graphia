@@ -282,6 +282,12 @@ Window
 
                         property bool needsFrame: contentHeight > availableHeight
 
+                        Component.onCompleted:
+                        {
+                            // contentItem is the Flickable; only clip when required
+                            contentItem.clip = Qt.binding(() => scrollView.needsFrame);
+                        }
+
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
