@@ -2518,7 +2518,23 @@ ApplicationWindow
             processArguments(arguments);
         }
 
-        Component { id: tabButtonComponent; TabBarButton {} }
+        Component
+        {
+            id: tabButtonComponent
+
+            TabBarButton
+            {
+                showCloseButton: true
+                property var tab: null
+
+                onCloseButtonClicked:
+                {
+                    let index = tabBar.findTabIndex(tab);
+                    if(index >= 0)
+                        tabBar.closeTab(index);
+                }
+            }
+        }
 
         Component
         {
@@ -2585,7 +2601,7 @@ ApplicationWindow
                     let tab = tabComponent.createObject(null);
                     tabLayout.insert(index, tab);
 
-                    let button = tabButtonComponent.createObject(tabBar);
+                    let button = tabButtonComponent.createObject(tabBar, {"tab": tab});
                     tabBar.insertItem(index, button);
                     tabBar.currentIndex = index;
 
