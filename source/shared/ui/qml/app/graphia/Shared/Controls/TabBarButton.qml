@@ -21,10 +21,43 @@ import QtQuick.Controls
 
 TabButton
 {
+    id: root
+
+    property bool showCloseButton: false
+
     width: implicitWidth
+    height: implicitHeight
 
     leftPadding: 8
-    rightPadding: 8
+    rightPadding: showCloseButton ? 4 : 8
     topPadding: 4
     bottomPadding: 4
+
+    contentItem: Row
+    {
+        spacing: 4
+
+        Label
+        {
+            anchors.verticalCenter: parent.verticalCenter
+
+            text: root.text
+            font: root.font
+            color: root.palette.buttonText
+        }
+
+        FloatingButton
+        {
+            visible: root.showCloseButton
+
+            anchors.verticalCenter: parent.verticalCenter
+            implicitHeight: 24
+
+            icon.name: "emblem-unreadable"
+
+            onClicked: function(mouse) { root.closeButtonClicked(mouse); }
+        }
+    }
+
+    signal closeButtonClicked(var mouse)
 }
