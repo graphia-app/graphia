@@ -236,6 +236,7 @@ BaseParameterDialog
 
                         decimals: Utils.decimalPointsForRange(from, to);
                         stepSize: Utils.incrementForRange(from, to);
+                        editable: true
 
                         onValueChanged:
                         {
@@ -310,6 +311,7 @@ BaseParameterDialog
 
                         decimals: Utils.decimalPointsForRange(from, to);
                         stepSize: Utils.incrementForRange(from, to);
+                        editable: true
 
                         onValueChanged:
                         {

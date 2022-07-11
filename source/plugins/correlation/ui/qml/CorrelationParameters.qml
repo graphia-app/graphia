@@ -971,6 +971,7 @@ BaseParameterDialog
 
                             decimals: 3
                             stepSize: Utils.incrementForRange(from, to);
+                            editable: true
 
                             onValueChanged:
                             {
@@ -1045,6 +1046,7 @@ BaseParameterDialog
 
                             decimals: 3
                             stepSize: Utils.incrementForRange(from, to);
+                            editable: true
 
                             onValueChanged:
                             {

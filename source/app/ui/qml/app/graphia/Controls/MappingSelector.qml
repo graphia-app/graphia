@@ -215,6 +215,7 @@ Window
                         {
                             id: minimumSpinBox
                             Layout.preferredWidth: 90
+                            editable: true
 
                             enabled: userDefinedRadioButton.checked
 
@@ -230,6 +231,7 @@ Window
                         {
                             id: maximumSpinBox
                             Layout.preferredWidth: 90
+                            editable: true
 
                             enabled: userDefinedRadioButton.checked
 
