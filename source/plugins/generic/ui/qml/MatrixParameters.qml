@@ -253,23 +253,6 @@ BaseParameterDialog
                         }
                     }
 
-                    Slider
-                    {
-                        id: minimumSlider
-
-                        Layout.fillWidth: true
-                        Layout.minimumWidth: 50
-                        Layout.maximumWidth: 175
-
-                        from: initialThresholdSpinBox.from
-                        to: initialThresholdSpinBox.to
-                        value: minimumThresholdSpinBox.value
-                        onValueChanged:
-                        {
-                            minimumThresholdSpinBox.value = value;
-                        }
-                    }
-
                     HelpTooltip
                     {
                         title: qsTr("Minimum Threshold Value")
@@ -279,6 +262,29 @@ BaseParameterDialog
                             text: qsTr("The minimum threshold value above which an edge " +
                                 "will be created in the graph. Using a lower minimum value will " +
                                 "increase the compute and memory requirements.")
+                        }
+                    }
+
+                    RangeSlider
+                    {
+                        id: minimumSlider
+
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 50
+
+                        from: initialThresholdSpinBox.from
+                        to: initialThresholdSpinBox.to
+
+                        first.value: minimumThresholdSpinBox.value
+                        first.onValueChanged:
+                        {
+                            minimumThresholdSpinBox.value = first.value;
+                        }
+
+                        second.value: initialThresholdSpinBox.value
+                        second.onValueChanged:
+                        {
+                            initialThresholdSpinBox.value = second.value;
                         }
                     }
 
