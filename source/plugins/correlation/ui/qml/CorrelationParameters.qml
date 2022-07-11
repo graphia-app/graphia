@@ -987,23 +987,6 @@ BaseParameterDialog
                             }
                         }
 
-                        Slider
-                        {
-                            id: minimumSlider
-
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: 50
-                            Layout.maximumWidth: 150
-
-                            from: 0.0
-                            to: 1.0
-                            value: minimumCorrelationSpinBox.value
-                            onValueChanged:
-                            {
-                                minimumCorrelationSpinBox.value = value;
-                            }
-                        }
-
                         HelpTooltip
                         {
                             Layout.rightMargin: Constants.spacing * 2
@@ -1015,6 +998,30 @@ BaseParameterDialog
                                 text: qsTr("The minimum correlation value above which an edge " +
                                            "will be created in the graph. Using a lower minimum value will " +
                                            "increase the compute and memory requirements.")
+                            }
+                        }
+
+                        RangeSlider
+                        {
+                            id: minimumSlider
+
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 50
+                            Layout.maximumWidth: 250
+
+                            from: 0.0
+                            to: 1.0
+
+                            first.value: minimumCorrelationSpinBox.value
+                            first.onValueChanged:
+                            {
+                                minimumCorrelationSpinBox.value = first.value;
+                            }
+
+                            second.value: initialCorrelationSpinBox.value
+                            second.onValueChanged:
+                            {
+                                initialCorrelationSpinBox.value = second.value;
                             }
                         }
 
