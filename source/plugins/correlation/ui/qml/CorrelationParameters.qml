@@ -1083,43 +1083,13 @@ BaseParameterDialog
                             initialCorrelationSpinBox.value = threshold;
                         }
 
-                        property bool _timedBusy: false
-
-                        Timer
-                        {
-                            id: busyIndicationTimer
-                            interval: 250
-                            repeat: false
-                            onTriggered:
-                            {
-                                if(tabularDataParser.graphSizeEstimateInProgress)
-                                    graphSizeEstimatePlot._timedBusy = true;
-                            }
-                        }
-
-                        Connections
-                        {
-                            target: tabularDataParser
-
-                            function onGraphSizeEstimateInProgressChanged()
-                            {
-                                if(!tabularDataParser.graphSizeEstimateInProgress)
-                                {
-                                    busyIndicationTimer.stop();
-                                    graphSizeEstimatePlot._timedBusy = false;
-                                }
-                                else
-                                    busyIndicationTimer.start();
-                            }
-                        }
-
-                        BusyIndicator
+                        DelayedBusyIndicator
                         {
                             anchors.centerIn: parent
                             width: { return Math.min(64, parent.width); }
                             height: { return Math.min(64, parent.height); }
 
-                            visible: graphSizeEstimatePlot._timedBusy
+                            delayedRunning: tabularDataParser.graphSizeEstimateInProgress
                         }
                     }
 
@@ -1130,7 +1100,7 @@ BaseParameterDialog
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        text: qsTr("Empty Graph")
+                        text: tabularDataParser.graphSizeEstimateInProgress ? qsTr("Working...") : qsTr("Empty Graph")
                         font.italic: true
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
