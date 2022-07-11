@@ -78,6 +78,14 @@ BaseParameterDialog
             tabularDataParser.autoDetectDataRectangle();
             parameters.data = tabularDataParser.data;
         }
+
+        property double minimumInitialCorrelationValue:
+        {
+            if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                return tabularDataParser.graphSizeEstimate.keys[0];
+
+            return minimumCorrelationSpinBox.value;
+        }
     }
 
     ColumnLayout
@@ -1034,19 +1042,19 @@ BaseParameterDialog
 
                             implicitWidth: 70
 
-                            from:
-                            {
-                                if(tabularDataParser.graphSizeEstimate.keys !== undefined)
-                                    return tabularDataParser.graphSizeEstimate.keys[0];
-
-                                return minimumCorrelationSpinBox.value;
-                            }
-
+                            from: tabularDataParser.minimumInitialCorrelationValue
                             to: 1.0
 
                             decimals: 3
                             stepSize: Utils.incrementForRange(from, to);
                             editable: true
+
+                            onFromChanged:
+                            {
+                                // Reset the value if the lower bound changes
+                                if(value < from)
+                                    value = Utils.lerp(from, to, 0.5);
+                            }
 
                             onValueChanged:
                             {
