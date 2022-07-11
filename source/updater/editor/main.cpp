@@ -18,6 +18,7 @@
 
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/static_block.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -34,6 +35,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     Q_INIT_RESOURCE(shared);
+
+    execute_static_blocks();
 
     QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
