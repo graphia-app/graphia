@@ -390,7 +390,7 @@ int start(int argc, char *argv[])
     // it can be shown to the user using a graphical message box
     qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
     {
-        fprintf(stderr, "%s\n", msg.toLocal8Bit().constData());
+        int r = fprintf(stderr, "%s\n", msg.toLocal8Bit().constData()); Q_ASSERT(r >= 0);
         qmlError += QStringLiteral("%1\n").arg(msg);
     });
 
