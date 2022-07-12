@@ -97,7 +97,7 @@ jobs:
         SYM_UPLOAD_URL: ${{ secrets.SYM_UPLOAD_URL }}
   macos:
     name: macOS
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
@@ -127,9 +127,9 @@ jobs:
         APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_NOTARIZATION_PASSWORD }}
-        APPLE_NOTARIZATION_PROVIDER_SHORTNAME: ${{ secrets.APPLE_NOTARIZATION_PROVIDER_SHORTNAME }}
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
         APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     - uses: actions/upload-artifact@v2
       with:
         name: macOS Disk Image

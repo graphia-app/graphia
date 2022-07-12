@@ -136,64 +136,14 @@ then
 fi
 
 # Apple notarization
-echo "Submitting notarization request..."
-NOTARIZE_REQUEST=$(xcrun altool --notarize-app \
-  --primary-bundle-id "app.Graphia.dmg" \
-  --username "${APPLE_NOTARIZATION_USERNAME}" \
+echo "Creating NotarizaionProfile..."
+xcrun notarytool store-credentials --apple-id "${APPLE_NOTARIZATION_USERNAME}" \
   --password "${APPLE_NOTARIZATION_PASSWORD}" \
-  --asc-provider ${APPLE_NOTARIZATION_PROVIDER_SHORTNAME} \
-  --file "${PRODUCT_NAME}-${VERSION}.dmg"
-) || (echo "${NOTARIZE_REQUEST}" && exit 1)
+  --team-id "${APPLE_TEAM_ID}" "NotarizaionProfile" || exit $?
 
-echo "...success"
+echo "Submitting notarization request..."
+xcrun notarytool submit "${PRODUCT_NAME}-${VERSION}.dmg" \
+  --keychain-profile "NotarizaionProfile" --wait || exit $?
 
-NOTARIZE_REQUEST_ID=$(echo "${NOTARIZE_REQUEST}" | grep "^RequestUUID" | \
-  sed -e "s/^RequestUUID = //")
-
-# Poll the notarization server for completion
-echo "Waiting for notarization server response"
-while sleep 5
-do
-  NOTARIZE_INFO=$(xcrun altool --notarization-info ${NOTARIZE_REQUEST_ID} \
-      --username "${APPLE_NOTARIZATION_USERNAME}" \
-      --password "${APPLE_NOTARIZATION_PASSWORD}")
-  NOTARIZE_CHECK_RESULT=$?
-  
-  if [[ ${NOTARIZE_CHECK_RESULT} == 239 ]]
-  then
-    # 239 means the server doesn't recognise the UUID yet
-    continue
-  elif [[ ${NOTARIZE_CHECK_RESULT} != 0 ]]
-  then
-    echo "$? ${NOTARIZE_INFO}"
-    exit ${NOTARIZE_CHECK_RESULT}
-  fi
-
-  NOTARIZE_STATUS=$(echo "${NOTARIZE_INFO}" | \
-    grep "^\s*Status: " | awk '{$1 = ""; print $0}' | xargs)
-  NOTARIZE_LOGFILE_URL=$(echo "${NOTARIZE_INFO}" | \
-    grep "^\s*LogFileURL: " | awk '{$1 = ""; print $0}' | xargs)
-
-  echo "...${NOTARIZE_STATUS}"
-
-  if [[ ! "${NOTARIZE_STATUS}" =~ "in progress" ]] && [[ ! -z "${NOTARIZE_STATUS}" ]]
-  then
-    break
-  fi
-
-  sleep 55
-done
-
-echo "...complete"
-
-curl -s --output notarization-${VERSION}.log "${NOTARIZE_LOGFILE_URL}"
-
-if [[ "${NOTARIZE_STATUS}" =~ "success" ]]
-then
-  echo "Stapling..."
-  xcrun stapler staple "${PRODUCT_NAME}-${VERSION}.dmg" || exit $?
-else
-  echo "Notarization failed!"
-  cat notarization-${VERSION}.log
-  exit 1
-fi
+echo "Stapling..."
+xcrun stapler staple "${PRODUCT_NAME}-${VERSION}.dmg" || exit $?
