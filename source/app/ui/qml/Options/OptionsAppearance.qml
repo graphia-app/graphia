@@ -33,7 +33,7 @@ Item
 
     Preferences
     {
-        id: visuals;
+        id: visuals
         section: "visuals"
 
         property alias defaultNodeColor: nodeColorPickButton.color
@@ -52,11 +52,22 @@ Item
         property alias textAlignment: textAlignmentCombobox.currentIndex
     }
 
+    Preferences
+    {
+        id: system
+        section: "system"
+
+        property string uiTheme
+    }
+
     Component.onCompleted:
     {
         nodeSizeSlider.value = visuals.defaultNormalNodeSize;
         edgeSizeSlider.value = visuals.defaultNormalEdgeSize;
         minimumComponentRadiusSlider.value = visuals.minimumComponentRadius;
+
+        let themeIndex = userInterfaceComboBox.model.indexOf(system.uiTheme);
+        userInterfaceComboBox.currentIndex = themeIndex >= 0 ? themeIndex : 0;
 
         delayedPreferences.enabled = true;
     }
@@ -227,6 +238,30 @@ Item
                     to: limitConstants.maximumMinimumComponentRadius
 
                     onValueChanged: { delayedPreferences.update(); }
+                }
+
+                Label
+                {
+                    Layout.topMargin: Constants.margin * 2
+                    font.bold: true
+                    text: qsTr("System")
+                }
+
+
+                Label
+                {
+                    Layout.topMargin: Constants.margin * 2
+                    font.italic: true
+                    text: qsTr("(Restart Required)")
+                }
+
+                Label { text: qsTr("User Interface Theme") }
+                ComboBox
+                {
+                    id: userInterfaceComboBox
+                    model: ["Default", "Fusion"]
+
+                    onCurrentTextChanged: { system.uiTheme = currentText; }
                 }
             }
         }
