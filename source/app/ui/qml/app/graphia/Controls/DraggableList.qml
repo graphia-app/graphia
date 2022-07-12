@@ -180,8 +180,16 @@ Item
                 signal dragStarted()
                 signal dragFinished()
 
-                onDragStarted: { column.dragItem = repeater.itemAt(dragArea.index); }
-                onDragFinished: { column.dragItem = null; }
+                onDragStarted:
+                {
+                    column.dragItem = repeater.itemAt(dragArea.index);
+                    column.dragFromIndex = dragArea.index;
+                }
+                onDragFinished:
+                {
+                    column.dragItem = null;
+                    column.dragFromIndex = column.dropIndex = -1;
+                }
                 //
 
                 states: State
@@ -236,6 +244,7 @@ Item
     {
         id: column
 
+        property int dragFromIndex: -1
         property var dragItem: null
         property int dropIndex: -1
 
@@ -266,13 +275,11 @@ Item
 
         onDropped: function(drop)
         {
-            if(column.dragItem.index === column.dropIndex)
+            if(column.dragFromIndex === column.dropIndex)
                 return;
 
             // Request that the underlying model performs a move
-            root.itemMoved(column.dragItem.index, column.dropIndex);
-
-            column.dropIndex = -1;
+            root.itemMoved(column.dragFromIndex, column.dropIndex);
         }
     }
 }
