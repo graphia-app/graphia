@@ -114,7 +114,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
 
                 for(const auto& createdAttributeName : createdAttributeNames)
                 {
-                    if(re.match(createdAttributeName).hasMatch())
+                    if(re.match(createdAttributeName).hasMatch()) // clazy:exclude=use-static-qregularexpression
                         visualisationConfig._attributeName = createdAttributeName;
                 }
 
