@@ -475,12 +475,12 @@ ApplicationWindow
         section: "visuals"
         property int edgeVisualType:
         {
-            return toggleEdgeDirectionAction.checked ? EdgeVisualType.Arrow
-                                                     : EdgeVisualType.Cylinder;
+            return toggleEdgeDirectionAction.checkedAction ?
+                EdgeVisualType.Arrow : EdgeVisualType.Cylinder;
         }
         property int showNodeText:
         {
-            switch(nodeTextDisplay.current)
+            switch(nodeTextDisplay.checkedAction)
             {
             default:
             case hideNodeTextAction:         return TextState.Off;
@@ -491,7 +491,7 @@ ApplicationWindow
         }
         property int showEdgeText:
         {
-            switch(edgeTextDisplay.current)
+            switch(edgeTextDisplay.checkedAction)
             {
             default:
             case hideEdgeTextAction:         return TextState.Off;
