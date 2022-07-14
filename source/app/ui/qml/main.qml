@@ -2159,7 +2159,7 @@ ApplicationWindow
                         {
                             if(index >= 0 && index < 9)
                                 return "Ctrl+" + (index + 1);
-                            else if(index == 9)
+                            else if(index === 9)
                                 return "Ctrl+0";
 
                             return "";
