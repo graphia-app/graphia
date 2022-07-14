@@ -884,7 +884,7 @@ ApplicationWindow
                         continue;
 
                     if(item.urlText === url)
-                        item.urlTextField.textColor = "red";
+                        item.urlTextField.color = "red";
                 }
             }
 
