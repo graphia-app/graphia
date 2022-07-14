@@ -1513,10 +1513,15 @@ ApplicationWindow
         }
     }
 
-    ManageBookmarks
+    ManageNamedListDialog
     {
         id: manageBookmarks
-        document: currentTab && currentTab.document
+
+        title: qsTr("Manage Bookmarks")
+        model: currentTab ? currentTab.document.bookmarks : []
+
+        onRemove: function(names) { currentTab.document.removeBookmarks(names); }
+        onRename: function(from, to) { currentTab.document.renameBookmark(from, to); }
     }
 
     Action
@@ -2162,7 +2167,9 @@ ApplicationWindow
 
                         onTriggered: function(source)
                         {
-                            source.menu.dismiss();
+                            if(source && source.menu)
+                                source.menu.dismiss();
+
                             currentTab.gotoBookmark(bookmarkMenuItem.text);
                         }
                     }

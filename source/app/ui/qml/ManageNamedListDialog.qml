@@ -30,9 +30,9 @@ Window
 {
     id: root
 
-    property var document
+    property alias model: listBox.model
 
-    title: qsTr("Manage Bookmarks")
+    title: qsTr("Manage List")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     width: 360
@@ -54,7 +54,7 @@ Window
 
             allowMultipleSelection: true
 
-            model: document !== null ? document.bookmarks : null
+            model: []
 
             delegate: Item
             {
@@ -112,7 +112,7 @@ Window
                             editField.visible = false;
 
                             if(editField.text !== label.text)
-                                listBox.rowRenamed(label.text, editField.text);
+                                root.rename(label.text, editField.text);
                         }
                     }
                 }
@@ -136,9 +136,6 @@ Window
             }
 
             onDoubleClicked: function(index) { edit(index); }
-
-            signal rowRenamed(string from, string to)
-            onRowRenamed: function(from, to) { document.renameBookmark(from, to); }
         }
 
         RowLayout
@@ -160,9 +157,9 @@ Window
                 {
                     let names = [];
                     for(const index of listBox.selectedIndices)
-                        names.push(document.bookmarks[index]);
+                        names.push(root.model[index]);
 
-                    document.removeBookmarks(names);
+                    root.remove(names);
                 }
             }
 
@@ -173,5 +170,8 @@ Window
             }
         }
     }
+
+    signal remove(var names)
+    signal rename(string from, string to)
 }
 

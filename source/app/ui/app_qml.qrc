@@ -44,7 +44,7 @@
         <file>qml/Loading/ChooserDialog.qml</file>
         <file>qml/Loading/ImportAttributesDialog.qml</file>
         <file>qml/main.qml</file>
-        <file>qml/ManageBookmarks.qml</file>
+        <file>qml/ManageNamedListDialog.qml</file>
         <file>qml/NewUpdate.qml</file>
         <file>qml/OpenUrlDialog.qml</file>
         <file>qml/Options/OptionsAppearance.qml</file>
