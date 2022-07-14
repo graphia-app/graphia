@@ -166,7 +166,7 @@ Window
 
             function setDefaultName(attributeName)
             {
-                text = qsTr("Clone of ") + Attribute.prettify(attributeName);
+                text = Utils.format(qsTr("Clone of {0}"), Attribute.prettify(attributeName));
             }
 
             property bool manuallyChanged: false

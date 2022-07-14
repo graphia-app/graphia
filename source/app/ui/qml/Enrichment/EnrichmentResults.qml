@@ -128,7 +128,7 @@ ApplicationWindow
             Repeater
             {
                 model: root.models
-                TabBarButton { text: qsTr("Results") + " " + (index + 1) }
+                TabBarButton { text: Utils.format(qsTr("Results {0}"), index + 1) }
             }
         }
 
@@ -454,10 +454,11 @@ ApplicationWindow
         }
 
         let baseName = root.wizard.document.title.replace(/\.[^\.]+$/, "");
-        let attributes = sanitiseAttributeName(root._currentModel.selectionA) +
-            "-vs-" + sanitiseAttributeName(root._currentModel.selectionB);
-        let path = QmlUtils.fileNameForUrl(folderUrl) + "/" + baseName +
-            "-enrichment-" + attributes;
+        let attributes = Utils.format(qsTr("{0}-vs-{1}"),
+            sanitiseAttributeName(root._currentModel.selectionA),
+            sanitiseAttributeName(root._currentModel.selectionB));
+        let path = Utils.format(qsTr("{0}/{1}-enrichment-{2}"),
+            QmlUtils.fileNameForUrl(folderUrl), baseName, attributes);
 
         return path;
     }

@@ -337,8 +337,9 @@ PluginContent
         onTriggered:
         {
             let folder = screenshot.path !== undefined ? screenshot.path : "";
-            let path = QmlUtils.fileNameForUrl(folder) + "/" +
-                root.baseFileNameNoExtension + "-correlation-plot";
+            let path = Utils.format(qsTr("{0}/{1}-correlation-plot"),
+                QmlUtils.fileNameForUrl(folder),
+                root.baseFileNameNoExtension);
 
             let fileDialog = saveFileDialogComponent.createObject(root,
             {

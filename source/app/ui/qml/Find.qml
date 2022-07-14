@@ -425,9 +425,9 @@ Rectangle
                             let index = document.foundIndex + 1;
 
                             if(index > 0)
-                                return index + qsTr(" of ") + document.numNodesFound;
+                                return Utils.format(qsTr("{0} of {1}"), index, document.numNodesFound);
                             else if(document.numNodesFound > 0)
-                                return document.numNodesFound + qsTr(" found");
+                                return Utils.format(qsTr("{0} found"), document.numNodesFound);
                             else
                                 return qsTr("Not Found");
                         }

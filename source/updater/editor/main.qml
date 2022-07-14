@@ -130,7 +130,7 @@ ApplicationWindow
                 }
                 else
                 {
-                    validateErrorDialog.text = qsTr("HTTP status ") + httpStatus + qsTr(" while validating ") + url + ".";
+                    validateErrorDialog.text = Utils.format(qsTr("HTTP status {0} while validating {1}."), httpStatus, url);
                     validateErrorDialog.open();
                     status.text = qsTr("Failed to download");
 
@@ -241,7 +241,7 @@ ApplicationWindow
     flags: Qt.Window|Qt.Dialog
 
     title: qsTr("Update Editor") + (root.lastUsedFilename.length > 0 ?
-        qsTr(" - ") + QmlUtils.baseFileNameForUrl(root.lastUsedFilename) : "")
+        Utils.format(qsTr(" - {0}"), QmlUtils.baseFileNameForUrl(root.lastUsedFilename)) : "")
 
     width: 800
     height: 600
@@ -306,9 +306,8 @@ ApplicationWindow
             MenuItem
             {
                 text: settings.privateKeyFile.length > 0 ?
-                    (qsTr("Change Private Key (") +
-                        QmlUtils.fileNameForUrl(settings.privateKeyFile) +
-                        qsTr(")")) :
+                    (Utils.format(qsTr("Change Private Key ({0})"),
+                        QmlUtils.fileNameForUrl(settings.privateKeyFile))) :
                     qsTr("Select Private Key");
 
                 onTriggered:
@@ -476,7 +475,7 @@ ApplicationWindow
             else
             {
                 resetSaveRequired();
-                status.text = qsTr("Saved ") + QmlUtils.baseFileNameForUrl(fileUrl);
+                status.text = Utils.format(qsTr("Saved {0}"), QmlUtils.baseFileNameForUrl(fileUrl));
             }
 
             if(onSaveComplete !== undefined && onSaveComplete !== null)

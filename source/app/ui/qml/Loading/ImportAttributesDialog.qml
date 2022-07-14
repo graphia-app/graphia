@@ -112,9 +112,8 @@ Window
 
         Text
         {
-            text: tabularDataParser.failed ?
-                qsTr("Failed to Load ") + loadingInfo.baseFileName + "." :
-                qsTr("Loading ") + loadingInfo.baseFileName + "…"
+            text: Utils.format(tabularDataParser.failed ?
+                qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"), loadingInfo.baseFileName)
         }
 
         RowLayout
@@ -216,10 +215,11 @@ Window
 
                 Text
                 {
-                    text: qsTr("In order to import attribute data, it is necessary to identify an attribute and " +
+                    text: Utils.format(
+                        qsTr("In order to import attribute data, it is necessary to identify an attribute and " +
                         "column pair on the graph and the imported table respectively. These are used to correlate " +
                         "rows in the table with graph elements. Please select these below. Alternatively, click " +
-                        "<i>") + autoDetectButton.text + qsTr("</i> and the best match will be identified automatically.")
+                        "<i>{0}</i> and the best match will be identified automatically."), autoDetectButton.text)
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
@@ -315,7 +315,7 @@ Window
                             if(importAttributesKeyDetection.result.percent !== undefined)
                             {
                                 if(importAttributesKeyDetection.result.percent > 0)
-                                    return qsTr("Found ") + importAttributesKeyDetection.result.percent + qsTr("% Match");
+                                    return Utils.format(qsTr("Found {0}% Match"), importAttributesKeyDetection.result.percent);
 
                                 return qsTr("No Match Found");
                             }
@@ -463,14 +463,15 @@ Window
                     text:
                     {
                         if(importAttributesKeyDetection.busy)
-                            return qsTr("Detecting keys...");
+                            return qsTr("Detecting keys…");
 
                         if(keyAttributeList.selectedValue !== undefined && keyHeaderComboBox.enabled)
                         {
-                            return qsTr("The following <b>" + keyAttributeList.elementType +
-                                qsTr("</b> attribute(s) will be imported using the attribute <b>") +
-                                keyAttributeList.display + qsTr("</b> and the column <b>") +
-                                keyHeaderComboBox.currentText + qsTr("</b> as the keys:"));
+                            return Utils.format(qsTr("The following <b>{0}</b> " +
+                                "attribute(s) will be imported using the attribute <b>{1}</b> " +
+                                "and the column <b>{2}</b> as the keys:"),
+                                keyAttributeList.elementType, keyAttributeList.display,
+                                keyHeaderComboBox.currentText);
                         }
 
                         return qsTr("<font color=\"red\">Attributes cannot be " +

@@ -24,6 +24,7 @@ import QtQuick.Window
 
 import app.graphia
 import app.graphia.Controls
+import app.graphia.Shared
 import app.graphia.Shared.Controls
 
 import SortFilterProxyModel
@@ -228,9 +229,8 @@ Wizard
                                 {
                                     if(document !== null && model.display.length > 0)
                                     {
-                                        return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries)");
+                                        return Utils.format(qsTr("{0} ({1} entries)"), model.display,
+                                            document.attribute(model.display).sharedValues.length);
                                     }
 
                                     return "";
@@ -309,9 +309,8 @@ Wizard
                                 {
                                     if(document !== null && model.display.length > 0)
                                     {
-                                        return model.display + qsTr(" (") +
-                                            document.attribute(model.display).sharedValues.length +
-                                            qsTr(" entries)");
+                                        return Utils.format(qsTr("{0} ({1} entries)"), model.display,
+                                            document.attribute(model.display).sharedValues.length);
                                     }
 
                                     return "";

@@ -146,8 +146,8 @@ ApplicationWindow
 
         function onDownloadError(url, error)
         {
-            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                qsTr(" could not be opened:\n\n") + error;
+            errorOpeningFileMessageDialog.text = Utils.format(
+                qsTr("{0} could not be opened:\n\n{1}"), userTextForUrl(url), error);
             errorOpeningFileMessageDialog.open();
         }
     }
@@ -623,10 +623,8 @@ ApplicationWindow
             else
             {
                 errorOpeningFileMessageDialog.title = qsTr("Unknown URL Scheme");
-                errorOpeningFileMessageDialog.text =
-                    qsTr("The hyperlink is not of a known version. ") +
-                    qsTr("Please upgrade ") + application.name +
-                    qsTr(", or check that the link is well-formed.");
+                errorOpeningFileMessageDialog.text = Utils.format(qsTr("The hyperlink is not of a known version. " +
+                    "Please upgrade {0}, or check that the link is well-formed."), application.name);
                 errorOpeningFileMessageDialog.open();
             }
 
@@ -636,8 +634,8 @@ ApplicationWindow
         if(QmlUtils.urlIsFile(url) && !QmlUtils.fileUrlExists(url))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
-            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(url) +
-                    qsTr(" does not exist.");
+            errorOpeningFileMessageDialog.text =
+                Utils.format(qsTr("{0} does not exist."), QmlUtils.baseFileNameForUrl(url));
             errorOpeningFileMessageDialog.open();
             return;
         }
@@ -660,8 +658,8 @@ ApplicationWindow
             {
                 errorOpeningFileMessageDialog.title = QmlUtils.urlIsFile(url) ?
                     qsTr("Unknown File Type") : qsTr("Unknown URL Type");
-                errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                    qsTr(" cannot be loaded as its type is unknown.");
+                errorOpeningFileMessageDialog.text = Utils.format(
+                    qsTr("{0} cannot be loaded as its type is unknown."), userTextForUrl(url));
             }
             else
             {
@@ -678,8 +676,8 @@ ApplicationWindow
         {
             errorOpeningFileMessageDialog.title = QmlUtils.urlIsFile(url) ?
                 qsTr("Can't Open File") : qsTr("Can't Open URL");
-            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                qsTr(" cannot be loaded."); //FIXME more elaborate error message
+            errorOpeningFileMessageDialog.text = Utils.format(
+                qsTr("{0} cannot be loaded."), userTextForUrl(url)); //FIXME more elaborate error message
 
             errorOpeningFileMessageDialog.open();
             return;
@@ -694,9 +692,9 @@ ApplicationWindow
                 let urlTypeChooserDialog = chooserDialogComponent.createObject(mainWindow,
                 {
                     "title": qsTr("Type Ambiguous"),
-                    "explanationText": userTextForUrl(url) +
-                        qsTr(" may be interpreted as two or more possible formats. ") +
-                        qsTr("Please select how you wish to proceed below."),
+                    "explanationText": Utils.format(
+                        qsTr("{0} may be interpreted as two or more possible formats. " +
+                        "Please select how you wish to proceed below."), userTextForUrl(url)),
                     "choiceLabelText": qsTr("Open As:"),
                     "model": application.urlTypeDetails,
                     "displayRole": "individualDescription",
@@ -733,9 +731,9 @@ ApplicationWindow
                     let pluginChooserDialog = chooserDialogComponent.createObject(mainWindow,
                     {
                         "title": qsTr("Multiple Plugins Applicable"),
-                        "explanationText": userTextForUrl(url) +
-                            qsTr(" may be loaded by two or more plugins. ") +
-                            qsTr("Please select how you wish to proceed below."),
+                        "explanationText": Utils.format(
+                            qsTr("{0} may be loaded by two or more plugins. " +
+                            "Please select how you wish to proceed below."), userTextForUrl(url)),
                         "choiceLabelText": qsTr("Open With Plugin:"),
                         "model": application.pluginDetails,
                         "displayRole": "name",
@@ -1276,7 +1274,7 @@ ApplicationWindow
     Action
     {
         id: searchWebAction
-        text: enabled ? qsTr("Search Web for '") + elidedNodeName.elidedText + qsTr("'…") :
+        text: enabled ? Utils.format(qsTr("Search Web for '{0}'…"), elidedNodeName.elidedText) :
             qsTr("Search Web for Selected Node…")
 
         property var _selectedNodeId:
@@ -1795,8 +1793,8 @@ ApplicationWindow
         id: togglePluginMinimiseAction
         shortcut: "Ctrl+M"
         icon.name: currentTab && currentTab.pluginMinimised ? "go-top" : "go-bottom"
-        text: currentTab ? (currentTab.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
-            currentTab.document.pluginName : ""
+        text: currentTab ? Utils.format(currentTab.pluginMinimised ? qsTr("Restore {0}") : qsTr("Minimise {0}"),
+            currentTab.document.pluginName) : ""
         enabled: currentTab && currentTab.document.hasPluginUI && !currentTab.pluginPoppedOut
 
         onTriggered: function(source)
@@ -1825,7 +1823,7 @@ ApplicationWindow
     {
         id: togglePluginWindowAction
         icon.name: "preferences-system-windows"
-        text: currentTab ? qsTr("Display ") + currentTab.document.pluginName + qsTr(" In Separate &Window") : ""
+        text: currentTab ? Utils.format(qsTr("Display {0} In Separate &Window"), currentTab.document.pluginName) : ""
         checkable: true
         checked: currentTab && currentTab.pluginPoppedOut
         enabled: currentTab && currentTab.document.hasPluginUI && !mainWindow._anyDocumentsBusy
@@ -2661,13 +2659,15 @@ ApplicationWindow
                     {
                         if(tab.document.failureReason.length > 0)
                         {
-                            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                                qsTr(" could not be opened:\n\n") + tab.document.failureReason;
+                            errorOpeningFileMessageDialog.text = Utils.format(
+                                qsTr("{0} could not be opened:\n\n{1}"),
+                                userTextForUrl(url), tab.document.failureReason);
                         }
                         else
                         {
-                            errorOpeningFileMessageDialog.text = userTextForUrl(url) +
-                                qsTr(" could not be opened due to an unspecified error.");
+                            errorOpeningFileMessageDialog.text = Utils.format(
+                                qsTr("{0} could not be opened due to an unspecified error."),
+                                userTextForUrl(url));
                         }
 
                         errorOpeningFileMessageDialog.open();

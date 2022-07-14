@@ -94,13 +94,13 @@ Rectangle
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            text: qsTr("We want to continue improving ") + application.name +
-                qsTr(", and one of the ways in which this is possible is " +
+            text: Utils.format(qsTr("We want to continue improving {0}, " +
+                "and one of the ways in which this is possible is " +
                 "through demonstrating its usage to funding bodies. Leaving us " +
                 "your valid institutional email address helps us do this. " +
                 "You may of course also choose to <a href=\"anonymous\" " +
-                "style=\"color: lightgrey; text-decoration:none\">use ") +
-                application.name + qsTr(" anonymously</a>.")
+                "style=\"color: lightgrey; text-decoration:none\">" +
+                "use {0} anonymously</a>."), application.name)
 
             color: "white"
             textFormat: Text.RichText

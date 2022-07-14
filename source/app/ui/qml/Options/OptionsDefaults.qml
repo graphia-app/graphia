@@ -149,14 +149,14 @@ Item
             wrapMode: Text.Wrap
             textFormat: Text.StyledText
 
-            text: qsTr("The pluggable nature of ") + application.name +
-                qsTr(" means that it may be the case that some ") +
-                qsTr("file types are interpretable in several different ways, ") +
-                qsTr("or can be loaded by more than one plugin.<br><br>") +
-                qsTr("When opening a file of such a type you will be prompted to ") +
-                qsTr("choose how to proceed, when it is necessary to do so. ") +
-                qsTr("Alternatively, you can avoid these prompts by selecting ") +
-                qsTr("default actions, here:")
+            text: Utils.format(qsTr("The pluggable nature of {0} " +
+                "means that it may be the case that some " +
+                "file types are interpretable in several different ways, " +
+                "or can be loaded by more than one plugin.<br><br>" +
+                "When opening a file of such a type you will be prompted to " +
+                "choose how to proceed, when it is necessary to do so. " +
+                "Alternatively, you can avoid these prompts by selecting " +
+                "default actions, here:"), application.name)
         }
 
         Item

@@ -77,20 +77,22 @@ ApplicationWindow
             id: info
             text:
             {
-                let apology = qsTr("<b>Oops!</b> We're sorry, ") + Qt.application.name +
-                   qsTr(" has crashed. Please use the form below to let us know what happened. " +
+                let apology = Utils.format(qsTr("<b>Oops!</b> We're sorry, {0} " +
+                   "has crashed. Please use the form below to let us know what happened. " +
                    "If we need more information, we may use your email address " +
-                   "to contact you. Thanks.");
+                   "to contact you. Thanks."), Qt.application.name);
 
                 if(inVideoDriver)
                 {
-                    let vendorLink = "https://www.google.com/search?q=" + glVendor +
-                        "+video+driver+download&btnI";
+                    let vendorLink = Utils.format(
+                        "https://www.google.com/search?q={0}+video+driver+download&btnI", glVendor);
 
-                    let videoDriverCrash = qsTr("<font color=\"red\"><b>Please note:</b></font> this crash " +
-                        "occurred in your video drivers. While it is possible that ") + Qt.application.name +
-                        qsTr(" is still to blame, please also ensure your drivers are " +
-                        "<a href=\"") + vendorLink + qsTr("\">up to date</a>, if you have not already done so.");
+                    let videoDriverCrash = Utils.format(qsTr(
+                        "<font color=\"red\"><b>Please note:</b></font> this crash " +
+                        "occurred in your video drivers. While it is possible that {0} " +
+                        "is still to blame, please also ensure your drivers are " +
+                        "<a href=\"{1}\">up to date</a>, if you have not already done so."),
+                        Qt.application.name, vendorLink);
 
                     apology = apology + "<br><br>" + videoDriverCrash;
                 }

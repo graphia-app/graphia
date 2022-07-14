@@ -85,17 +85,17 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url);
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), QmlUtils.baseFileNameForUrl(url));
 
                     if(tabularDataParser.failureReason.length > 0)
-                        failureMessage += qsTr(":\n\n") + tabularDataParser.failureReason;
+                        failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
                     else
                         failureMessage += qsTr(".");
 
                     return failureMessage;
                 }
 
-                return qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + qsTr("…");
+                return Utils.format(qsTr("Loading {0}…"), QmlUtils.baseFileNameForUrl(url));
             }
         }
 
@@ -242,19 +242,19 @@ BaseParameterDialog
                         if(column === undefined || column.type === undefined)
                             return qsTr("⨯ <i>Unused</i>");
 
-                        let columnName = column.name ? " " + column.name : "";
+                        let columnName = column.name ? column.name : "";
 
                         if(columnName.length === 0)
-                            columnName = " <b><font color=\"red\">Name Required</font></b>";
+                            columnName = "<b><font color=\"red\">Name Required</font></b>";
 
                         switch(column.type)
                         {
                         case PairwiseColumnType.Unused:                 return qsTr("⨯ <i>Unused</i>");
                         case PairwiseColumnType.SourceNode:             return qsTr("◯ <i>Source Node</i>");
                         case PairwiseColumnType.TargetNode:             return qsTr("⬤ <i>Target Node</i>");
-                        case PairwiseColumnType.EdgeAttribute:          return qsTr("►") + columnName;
-                        case PairwiseColumnType.SourceNodeAttribute:    return qsTr("◇") + columnName;
-                        case PairwiseColumnType.TargetNodeAttribute:    return qsTr("◆") + columnName;
+                        case PairwiseColumnType.EdgeAttribute:          return Utils.format(qsTr("► {0}"), columnName);
+                        case PairwiseColumnType.SourceNodeAttribute:    return Utils.format(qsTr("◇ {0}"), columnName);
+                        case PairwiseColumnType.TargetNodeAttribute:    return Utils.format(qsTr("◆ {0}"), columnName);
                         }
 
                         console.log("PairwiseParameters headerDelegate unable to determine text");

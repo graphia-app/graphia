@@ -148,10 +148,10 @@ ColumnLayout
 
                     Text
                     {
-                        text: qsTr("These are colours that are automatically assigned " +
+                        text: Utils.format(qsTr("These are colours that are automatically assigned " +
                             "to attribute values, in whichever order is specified by the " +
                             "visualisation. Zero or more colours may be added, up to a " +
-                            "maximum of ") + root._maxAutoColors + qsTr(".")
+                            "maximum of {0}."), root._maxAutoColors)
                         wrapMode: Text.WordWrap
                     }
                 }

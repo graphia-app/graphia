@@ -97,17 +97,17 @@ BaseParameterDialog
             {
                 if(tabularDataParser.failed)
                 {
-                    let failureMessage = qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url);
+                    let failureMessage = Utils.format(qsTr("Failed to Load {0}"), QmlUtils.baseFileNameForUrl(url));
 
                     if(tabularDataParser.failureReason.length > 0)
-                        failureMessage += qsTr(":\n\n") + tabularDataParser.failureReason;
+                        failureMessage += Utils.format(qsTr(":\n\n{0}"), tabularDataParser.failureReason);
                     else
                         failureMessage += qsTr(".");
 
                     return failureMessage;
                 }
 
-                return qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + qsTr("…");
+                return Utils.format(qsTr("Loading {0}…"), QmlUtils.baseFileNameForUrl(url));
             }
         }
 
@@ -422,17 +422,15 @@ BaseParameterDialog
                         if(numEdges > warningThreshold)
                             edgesFont = warningFont;
 
-                        summaryString +=
-                            nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
-                            ", " +
-                            edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
+                        summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
+                            QmlUtils.formatNumberSIPostfix(numNodes), QmlUtils.formatNumberSIPostfix(numEdges));
 
                         if(numNodes > warningThreshold || numEdges > warningThreshold)
                         {
-                            summaryString += "<br><br>" + warningFont +
-                                qsTr("WARNING: This is a very large graph which has the potential " +
+                            summaryString += Utils.format(qsTr("<br><br>{0}" +
+                                "WARNING: This is a very large graph which has the potential " +
                                 "to exhaust system resources and lead to instability " +
-                                "or freezes.");
+                                "or freezes."), warningFont);
 
                             if(!tabularDataParser.binaryMatrix)
                             {

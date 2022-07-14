@@ -256,7 +256,7 @@ Item
         onTriggered: function(source)
         {
             let folder = misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder : "";
-            let path = QmlUtils.fileNameForUrl(folder) + "/" + root.exportBaseFileName;
+            let path = Utils.format("{0}/{1}", QmlUtils.fileNameForUrl(folder), root.exportBaseFileName);
 
             let fileDialog = saveFileDialogComponent.createObject(root,
             {

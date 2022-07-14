@@ -305,9 +305,9 @@ Item
                 setAlertIcon(
                 {
                     "alertType": AlertType.Error,
-                    "alertText": qsTr("This transform expression is invalid\n" +
-                        (detail.length > 0 ? "(Reason: " + detail + ")\n" : "") +
-                        "Please send a screenshot to the developers")
+                    "alertText": qsTr("This transform expression is invalid\n") +
+                        (detail.length > 0 ? Utils.format(qsTr("(Reason: {0})\n"), detail) : "") +
+                        qsTr("Please send a screenshot to the developers")
                 });
 
                 flags = [];

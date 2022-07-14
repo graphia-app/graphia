@@ -61,13 +61,12 @@ ApplicationWindow
 
             Text
             {
-                text: qsTr("<b>A new version of ") + Qt.application.name + qsTr(" is available!</b><br>" +
-                    "<br>") +
-                    Qt.application.name + qsTr(" version " ) + version +
-                    qsTr(" is available. You are currently using version ") + Qt.application.version +
-                    qsTr(". Would you like to update now?<br>" +
+                text: Utils.format(qsTr("<b>A new version of {0} is available!</b><br>" +
                     "<br>" +
-                    "<b>Release Notes:</b>")
+                    "{0} version {1} is available. You are currently using version {2}. " +
+                    "Would you like to update now?<br>" +
+                    "<br>" +
+                    "<b>Release Notes:</b>"), Qt.application.name, version, Qt.application.version)
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
@@ -137,7 +136,7 @@ ApplicationWindow
         Text
         {
             Layout.alignment: Qt.AlignHCenter
-            text: qsTr("Updating to Version ") + version + "..."
+            text: Utils.format(qsTr("Updating to Version {0}…"), version)
             font.pointSize: 16
             font.bold: true
         }

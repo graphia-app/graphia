@@ -32,7 +32,7 @@ Window
 
     property var application: null
 
-    title: qsTr("About ") + application.name
+    title: Utils.format(qsTr("About {0}"), application.name)
     flags: Qt.Window|Qt.Dialog
 
     minimumWidth: 500
@@ -61,13 +61,11 @@ Window
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
 
-                text: application.name +
-                    qsTr(" is a tool for the visualisation and analysis of graphs.<br><br>") +
-                    qsTr("Version ") + application.version + qsTr(".<br>") +
-                    application.copyright + qsTr("<br><br>") +
-                    qsTr("<a href=\"LICENSE\">License</a>") +
-                        "&nbsp;&nbsp;&nbsp;" +
-                    qsTr("<a href=\"OSS\">Third Party Licenses</a>")
+                text: Utils.format(
+                    qsTr("{0} is a tool for the visualisation and analysis of graphs.<br><br>" +
+                    "Version {1}.<br>{2}<br><br>" +
+                    "<a href=\"LICENSE\">License</a>&nbsp;&nbsp;&nbsp;<a href=\"OSS\">Third Party Licenses</a>"),
+                    application.name, application.version, application.copyright)
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link)

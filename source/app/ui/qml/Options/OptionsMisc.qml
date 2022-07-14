@@ -153,10 +153,10 @@ Item
                 wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
 
-                text: qsTr("Particularly on older hardware, further performance may " +
-                    "be gained by running the application in Low Resolution: <a href=\"dummy\">Locate ") +
-                    application.name + qsTr(" in Finder</a> and choose <b>Get Info</b> from its context menu, " +
-                    "then select <b>Open In Low Resolution</b>. Restart ") + application.name + qsTr(".")
+                text: Utils.format(qsTr("Particularly on older hardware, further performance may " +
+                    "be gained by running the application in Low Resolution: <a href=\"dummy\">Locate {0} " +
+                    "in Finder</a> and choose <b>Get Info</b> from its context menu, " +
+                    "then select <b>Open In Low Resolution</b>. Restart {0}."), application.name)
 
                 PointingCursorOnHoverLink {}
                 onLinkActivated: function(link) { QmlUtils.showAppInFileManager(); }

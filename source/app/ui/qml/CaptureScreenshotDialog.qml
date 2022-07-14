@@ -93,17 +93,17 @@ Window
                     {
                         clear();
 
-                        append({text: qsTr("Viewport Size (") + graphView.width + qsTr("×") + graphView.height + qsTr(")"),
+                        append({text: Utils.format(qsTr("Viewport Size ({0}×{1})"), graphView.width, graphView.height),
                                  dpi: 72,
                           pixelWidth: graphView.width,
                          pixelHeight: graphView.height});
 
-                        append({text: qsTr("2x Viewport Size (") + graphView.width * 2 + qsTr("×") + graphView.height * 2 + qsTr(")"),
+                        append({text: Utils.format(qsTr("2× Viewport Size ({0}×{1})"), graphView.width * 2, graphView.height * 2),
                                  dpi: 72,
                           pixelWidth: graphView.width * 2,
                          pixelHeight: graphView.height * 2});
 
-                        append({text: qsTr("4x Viewport Size (") + graphView.width * 4 + qsTr("×") + graphView.height * 4 + qsTr(")"),
+                        append({text: Utils.format(qsTr("4× Viewport Size ({0}×{1})"), graphView.width * 4, graphView.height * 4),
                                  dpi: 72,
                           pixelWidth: graphView.width * 4,
                          pixelHeight: graphView.height * 4});
@@ -371,8 +371,9 @@ Window
                 text: qsTr("Save…")
                 onClicked: function(mouse)
                 {
-                    let path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
-                        new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
+                    let path = Utils.format(qsTr("{0}/{1}-capture-{2}"),
+                        QmlUtils.fileNameForUrl(screenshot.path), application.name,
+                        new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
 
                     let fileDialog = fileDialogComponent.createObject(root,
                     {

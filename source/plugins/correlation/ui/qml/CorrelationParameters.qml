@@ -104,9 +104,9 @@ BaseParameterDialog
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
 
-            text: tabularDataParser.failed ?
-                qsTr("Failed to Load ") + QmlUtils.baseFileNameForUrl(url) + "." :
-                qsTr("Loading ") + QmlUtils.baseFileNameForUrl(url) + "…"
+            text: Utils.format(tabularDataParser.failed ?
+                qsTr("Failed to Load {0}.") : qsTr("Loading {0}…"),
+                QmlUtils.baseFileNameForUrl(url))
         }
 
         RowLayout
@@ -168,14 +168,15 @@ BaseParameterDialog
                 {
                     Text
                     {
-                        text: qsTr("The correlation plugin creates graphs based on the similarity between variables in a dataset.<br>" +
-                                   "<br>" +
-                                   "A ") + QmlUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")) + qsTr(" " +
-                                   "provides this similarity metric. " +
-                                   "If specified, the input data can be scaled and normalised, after which correlation scores are " +
-                                   "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +
-                                   "<br>" +
-                                   "The edges may be filtered using transforms once the graph has been created.")
+                        text: Utils.format(qsTr("The correlation plugin creates graphs based on the similarity between variables in a dataset.<br>" +
+                            "<br>" +
+                            "A {0} provides this similarity metric. " +
+                            "If specified, the input data can be scaled and normalised, after which correlation scores are " +
+                            "used to determine whether or not an edge is created between the nodes representing rows of data.<br>" +
+                            "<br>" +
+                            "The edges may be filtered using transforms once the graph has been created."),
+                            QmlUtils.redirectLink("correlation_coef", qsTr("correlation coefficient")))
+
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
@@ -1108,7 +1109,7 @@ BaseParameterDialog
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        text: tabularDataParser.graphSizeEstimateInProgress ? qsTr("Working...") : qsTr("Empty Graph")
+                        text: tabularDataParser.graphSizeEstimateInProgress ? qsTr("Working…") : qsTr("Empty Graph")
                         font.italic: true
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
@@ -1327,57 +1328,55 @@ BaseParameterDialog
                         if(transposeCheckBox.checked)
                             summaryString += qsTr("Transposed<br>");
 
-                        summaryString += qsTr("Data Frame:") +
-                            qsTr(" [ Column: ") + tabularDataParser.dataRect.x +
-                            qsTr(" Row: ") + tabularDataParser.dataRect.y +
-                            qsTr(" Width: ") + tabularDataParser.dataRect.width +
-                            qsTr(" Height: ") + tabularDataParser.dataRect.height + " ]<br>";
+                        summaryString += Utils.format(qsTr("Data Frame: [ Column: {0} Row: {1} Width: {2} Height: {3} ]<br>"),
+                            tabularDataParser.dataRect.x, tabularDataParser.dataRect.y,
+                            tabularDataParser.dataRect.width, tabularDataParser.dataRect.height);
 
                         if(dataTypeComboBox.value === CorrelationDataType.Continuous)
                         {
-                            summaryString += qsTr("Continuous Correlation Metric: ") + continuousAlgorithmComboBox.currentText + "<br>";
-                            summaryString += qsTr("Correlation Polarity: ") + polarityComboBox.currentText + "<br>";
-                            summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
-                            summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
+                            summaryString += Utils.format(qsTr("Continuous Correlation Metric: {0}<br>"), continuousAlgorithmComboBox.currentText);
+                            summaryString += Utils.format(qsTr("Correlation Polarity: {0}<br>"), polarityComboBox.currentText);
+                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), minimumCorrelationSpinBox.value);
+                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), initialCorrelationSpinBox.value);
 
                             if(scalingComboBox.value !== ScalingType.None)
-                                summaryString += qsTr("Scaling: ") + scalingComboBox.currentText + "<br>";
+                                summaryString += Utils.format(qsTr("Scaling: {0}<br>"), scalingComboBox.currentText);
 
                             if(normalisationComboBox.value !== NormaliseType.None)
-                                summaryString += qsTr("Normalisation: ") + normalisationComboBox.currentText + "<br>";
+                                summaryString += Utils.format(qsTr("Normalisation: {0}<br>"), normalisationComboBox.currentText);
 
                             if(tabularDataParser.dataRect.hasMissingValues)
                             {
-                                summaryString += qsTr("Imputation: ") + missingDataTypeComboBox.currentText;
+                                summaryString += Utils.format(qsTr("Imputation: {0}"), missingDataTypeComboBox.currentText);
 
                                 if(missingDataTypeComboBox.value === MissingDataType.Constant)
-                                    summaryString += qsTr(" (") + replacementConstantText.text + qsTr(")");
+                                    summaryString += Utils.format(qsTr(" ({0})"), replacementConstantText.text);
 
                                 summaryString += "<br>";
                             }
                         }
                         else if(dataTypeComboBox.value === CorrelationDataType.Discrete)
                         {
-                            summaryString += qsTr("Discrete Correlation Metric: ") + discreteAlgorithmComboBox.currentText + "<br>";
-                            summaryString += qsTr("Minimum Correlation Value: ") + minimumCorrelationSpinBox.value + "<br>";
-                            summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "<br>";
+                            summaryString += Utils.format(qsTr("Discrete Correlation Metric: {0}<br>"), discreteAlgorithmComboBox.currentText);
+                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), minimumCorrelationSpinBox.value);
+                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), initialCorrelationSpinBox.value);
                         }
 
                         let transformString = ""
                         if(clusteringComboBox.value !== ClusteringType.None)
                         {
-                            transformString += indentString + qsTr("• Clustering (") +
-                                clusteringComboBox.currentText + ")<br>";
+                            transformString += indentString +
+                                Utils.format(qsTr("• Clustering ({0})<br>"), clusteringComboBox.currentText);
                         }
 
                         if(edgeReductionComboBox.value !== EdgeReductionType.None)
                         {
-                            transformString += indentString + qsTr("• Edge Reduction (") +
-                                edgeReductionComboBox.currentText + ")<br>";
+                            transformString += indentString +
+                                Utils.format(qsTr("• Edge Reduction ({0})<br>"), edgeReductionComboBox.currentText);
                         }
 
                         if(transformString.length > 0)
-                            summaryString += qsTr("Initial Transforms:<br>") + transformString;
+                            summaryString += Utils.format(qsTr("Initial Transforms:<br>{0}"), transformString);
 
                         let normalFont = "<font>";
                         let warningFont = "<font color=\"red\">";
@@ -1399,27 +1398,26 @@ BaseParameterDialog
                             if(numEdges > warningThreshold)
                                 edgesFont = warningFont;
 
-                            summaryString +=
-                                nodesFont + QmlUtils.formatNumberSIPostfix(numNodes) + qsTr(" Nodes") + "</font>" +
-                                ", " +
-                                edgesFont + QmlUtils.formatNumberSIPostfix(numEdges) + qsTr(" Edges") + "</font>";
+                            summaryString += Utils.format(qsTr("{0}{3} Nodes{2}, {1}{4} Edges{2}"), nodesFont, edgesFont, "</font>",
+                                QmlUtils.formatNumberSIPostfix(numNodes), QmlUtils.formatNumberSIPostfix(numEdges));
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)
                             {
-                                summaryString += "<br><br>" + warningFont +
-                                    qsTr("WARNING: This is a very large graph which has the potential " +
+                                summaryString += Utils.format(qsTr("<br><br>{0}" +
+                                    "WARNING: This is a very large graph which has the potential " +
                                     "to exhaust system resources and lead to instability " +
                                     "or freezes. Increasing the Minimum Correlation Value will " +
-                                    "usually reduce the graph size.") + "</font>";
+                                    "usually reduce the graph size.{1}"), warningFont, "</font>");
                             }
                         }
                         else if(!tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy)
                         {
-                            summaryString += "<br>" + warningFont +
-                                qsTr("WARNING: It is likely that the generated graph will be empty.") + "</font>";
+                            summaryString += Utils.format(qsTr("<br>{0}" +
+                                "WARNING: It is likely that the generated graph will be empty.{1}"),
+                                warningFont, "</font>");
                         }
                         else
-                            summaryString += "<br>Estimate in progress...";
+                            summaryString += "<br>Estimate in progress…";
 
                         return summaryString;
                     }

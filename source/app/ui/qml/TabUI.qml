@@ -296,7 +296,7 @@ Item
                 let filters = [];
                 let saverTypes = application.saverFileTypes();
                 for(let i = 0; i < saverTypes.length; i++)
-                    filters.push(saverTypes[i].name + qsTr(" files (*.") + saverTypes[i].extension + qsTr(")"));
+                    filters.push(Utils.format(qsTr("{0} files (*.{1})"), saverTypes[i].name, saverTypes[i].extension));
 
                 filters.push(qsTr("All files (*)"));
                 return filters;
@@ -347,7 +347,7 @@ Item
         property var onSaveConfirmedFunction
 
         title: qsTr("File Changed")
-        text: qsTr("Do you want to save changes to '") + baseFileName + qsTr("'?")
+        text: Utils.format(qsTr("Do you want to save changes to '{0}'?"), baseFileName)
         buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
 
         onSaveClicked:
@@ -471,8 +471,8 @@ Item
         case TabUI.LS_BySharedValue:
             if(_lastSharedValueAttributeName.length > 0)
             {
-                return qsTr("Repeat Last Selection (") +
-                    _lastSharedValueAttributeName + qsTr(" Value)");
+                return Utils.format(qsTr("Repeat Last Selection ({0} Value)"),
+                    _lastSharedValueAttributeName);
             }
             break;
         }
@@ -536,8 +536,8 @@ Item
     {
         let folder = misc.fileSaveInitialFolder !== undefined ?
             misc.fileSaveInitialFolder : "";
-        let path = QmlUtils.fileNameForUrl(folder) + "/" +
-            root.baseFileNameNoExtension + "-node-positions";
+        let path = Utils.format(qsTr("{0}/{1}-node-positions"), QmlUtils.fileNameForUrl(folder),
+            root.baseFileNameNoExtension);
 
         let fileDialog = exportNodePositionsFileDialogComponent.createObject(root,
         {
@@ -587,7 +587,7 @@ Item
     {
         id: deleteNodeAction
         icon.name: "edit-delete"
-        text: qsTr("&Delete '") + contextMenu.clickedNodeName + qsTr("'")
+        text: Utils.format(qsTr("&Delete '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.editable && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
         onTriggered: { _document.deleteNode(contextMenu.clickedNodeId); }
@@ -596,7 +596,7 @@ Item
     Action
     {
         id: selectSourcesOfNodeAction
-        text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
+        text: Utils.format(qsTr("Select Sources of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
         onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
@@ -605,7 +605,7 @@ Item
     Action
     {
         id: selectTargetsOfNodeAction
-        text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
+        text: Utils.format(qsTr("Select Targets of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
         onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
@@ -614,7 +614,7 @@ Item
     Action
     {
         id: selectNeighboursOfNodeAction
-        text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
+        text: Utils.format(qsTr("Select Neigh&bours of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
@@ -685,7 +685,7 @@ Item
                         id: sharedValuesOfNodeContextMenu
                         enabled: !_document.busy && !hidden
                         hidden: numAttributesWithSharedValues === 0 || !contextMenu.nodeWasClicked
-                        title: qsTr("Select Shared Values of '") + contextMenu.clickedNodeName + qsTr("'")
+                        title: Utils.format(qsTr("Select Shared Values of '{0}'"), contextMenu.clickedNodeName)
                         Instantiator
                         {
                             model: sharedValuesAttributeNames
@@ -731,7 +731,7 @@ Item
                     {
                         id: searchWebMenuItem
                         hidden: !contextMenu.nodeWasClicked
-                        text: qsTr("Search Web for '") + contextMenu.clickedNodeName + qsTr("'")
+                        text: Utils.format(qsTr("Search Web for '{0}'"), contextMenu.clickedNodeName)
                         onTriggered: { root.searchWebForNode(contextMenu.clickedNodeId); }
                     }
 
@@ -864,8 +864,8 @@ Item
 
                         text:
                         {
-                            return qsTr("Component ") + graph.visibleComponentIndex +
-                                qsTr(" of ") + graph.numComponents;
+                            return Utils.format(qsTr("Component {0} of {1}"),
+                                graph.visibleComponentIndex, graph.numComponents);
                         }
 
                         color: _document.contrastingColor
@@ -880,8 +880,8 @@ Item
                         {
                             let nodeText = _document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
                             let numNodes = QmlUtils.formatNumberSIPostfix(_document.numInvisibleNodesSelected);
-                            return "<i>" + qsTr("(") + numNodes +
-                                qsTr(" selected ") + nodeText + qsTr(" not currently visible)") + "</i>";
+                            return Utils.format(qsTr("<i>({0} selected {1} not currently visible)</i>"), numNodes, nodeText);
+
                         }
 
                         color: _document.contrastingColor
@@ -902,7 +902,7 @@ Item
                 color: _document.contrastingColor
 
                 horizontalAlignment: Text.AlignLeft
-                text: _document.fps.toFixed(1) + qsTr(" fps")
+                text: Utils.format(qsTr("{0} fps"), _document.fps.toFixed(1))
             }
 
             Column
@@ -941,7 +941,7 @@ Item
                             {
                                 s += QmlUtils.formatNumberSIPostfix(numNodes);
                                 if(numVisibleNodes !== numNodes)
-                                    s += " (" + QmlUtils.formatNumberSIPostfix(numVisibleNodes) + ")";
+                                    s += Utils.format(qsTr(" ({0})"), QmlUtils.formatNumberSIPostfix(numVisibleNodes));
                             }
 
                             return s;
@@ -968,7 +968,7 @@ Item
                             {
                                 s += QmlUtils.formatNumberSIPostfix(numEdges);
                                 if(numVisibleEdges !== numEdges)
-                                    s += " (" + QmlUtils.formatNumberSIPostfix(numVisibleEdges) + ")";
+                                    s += Utils.format(qsTr(" ({0})"), QmlUtils.formatNumberSIPostfix(numVisibleEdges));
                             }
 
                             return s;
@@ -1664,8 +1664,8 @@ Item
         {
             if(!success)
             {
-                errorSavingFileMessageDialog.text = QmlUtils.baseFileNameForUrl(root.url) +
-                        qsTr(" could not be saved.");
+                errorSavingFileMessageDialog.text = Utils.format(qsTr("{0} could not be saved."),
+                    QmlUtils.baseFileNameForUrl(root.url));
                 errorSavingFileMessageDialog.open();
             }
             else
@@ -1809,8 +1809,8 @@ Item
 
                     if(!misc.hasSeenTutorial)
                     {
-                        s += qsTr("As this is your first time starting ") + appName +
-                            qsTr(", we have opened an example graph.<br>");
+                        s += Utils.format(qsTr("As this is your first time starting {0}, " +
+                            "we have opened an example graph.<br>"), appName);
                     }
 
                     s += qsTr("This example graph represents the <b>London Tube System and River Buses!</b>");
@@ -1914,8 +1914,8 @@ Item
                     Layout.preferredWidth: 400
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) ") + appName +
-                          qsTr(" opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
+                    text: Utils.format(qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) {0} " +
+                          "opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
                           "left component is the <b>London Tube map</b>, while the right component is the <b>London Riverbus " +
                           "Network</b>.<br><br>" +
                           "To focus on a particular component and hide others, <b>Double Click</b> it. " +
@@ -1926,7 +1926,7 @@ Item
                           "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
                           "<b>Select Node:</b> Click a Node<br>" +
                           "<b>Select Additional Nodes:</b> Hold Shift and Click a Node<br>" +
-                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes")
+                          "<b>Select Multiple Nodes:</b> Hold Shift, Click and Drag a Box Around Nodes"), appName)
                 }
             }
         }
@@ -2087,11 +2087,11 @@ Item
                     Layout.preferredWidth: 600
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("This concludes our brief introduction of ") + appName + qsTr(" using the London transport network!<br>") +
-                          appName + qsTr(" can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
+                    text: Utils.format(qsTr("This concludes our brief introduction of {0} using the London transport network!<br>" +
+                          "{0} can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
                           "Utilising Transforms and Visualisations is key to getting the most from your graph.<br><br>" +
-                          "If you want to explore some more, please have a look at our ") +
-                          QmlUtils.redirectLink("example_datasets", qsTr("example datasets")) + qsTr(".")
+                          "If you want to explore some more, please have a look at our {1}."), appName,
+                          QmlUtils.redirectLink("example_datasets", qsTr("example datasets")))
 
                     PointingCursorOnHoverLink {}
                     onLinkActivated: function(link) { Qt.openUrlExternally(link); }
