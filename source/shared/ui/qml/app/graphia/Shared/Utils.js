@@ -248,6 +248,12 @@ function pluralise(count, singular, plural)
     return count + " " + plural;
 }
 
+function format(string, ...args)
+{
+    return string.replace(/{([0-9]+)}/g, (match, index) =>
+        typeof(args[index]) === "undefined" ? match : args[index]);
+}
+
 function setContains(set, value)
 {
     if(typeof(set) !== "array" && typeof(set) !== "object")
