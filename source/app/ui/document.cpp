@@ -2465,94 +2465,57 @@ void Document::moveVisualisation(int from, int to)
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
-        _visualisations, newVisualisations));
+                                _visualisations, newVisualisations));
 }
 
-void Document::update(QStringList newGraphTransforms,
-    QStringList newVisualisations, // NOLINT performance-unnecessary-value-param
-    bool replaceLatestCommand)
+void Document::apply(QStringList graphTransforms, QStringList visualisations, bool replaceLatestCommand)
 {
     if(_graphModel == nullptr)
         return;
 
     ICommandPtrsVector commands;
 
-    auto uiGraphTransforms = graphTransformConfigurationsFromUI();
+    bool transformsValid = graphTransformsAreValid(graphTransforms);
     int newGraphTransformIndex = -1;
 
-    if(!newGraphTransforms.empty())
+    if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, true))
     {
-        int index = 0;
+        commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
+            _graphModel.get(), _selectionManager.get(), this,
+            _graphTransforms, graphTransforms));
 
-        for(const auto& newGraphTransform : std::as_const(newGraphTransforms))
-        {
-            if(!transformIsPinned(newGraphTransform))
-            {
-                // Insert before any existing pinned transforms
-                index = 0;
-                while(index < uiGraphTransforms.size() && !transformIsPinned(uiGraphTransforms.at(index)))
-                    index++;
-
-                uiGraphTransforms.insert(index, newGraphTransform);
-            }
-            else
-            {
-                uiGraphTransforms.append(newGraphTransform);
-                index = static_cast<int>(uiGraphTransforms.size()) - 1;
-            }
-        }
-
-        if(newGraphTransforms.size() == 1)
-            newGraphTransformIndex = index;
+        // This is necessary for the visualisation patching in ApplyVisualisationsCommand,
+        // see the comments in there for more information
+        auto difference = u::setDifference(graphTransforms, _graphTransforms);
+        if(difference.size() == 1)
+            newGraphTransformIndex = u::indexOf(graphTransforms, difference.at(0));
     }
-
-    bool transformsValid = std::all_of(uiGraphTransforms.begin(), uiGraphTransforms.end(),
-    [this](const auto& transform)
+    else if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, false))
     {
-        return _graphModel->graphTransformIsValid(transform);
-    });
+        auto previousGraphTransforms = _graphTransforms;
 
-    if(transformsValid)
-    {
-        if(transformsDiffer(_graphTransforms, uiGraphTransforms))
-        {
-            commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
-                _graphModel.get(), _selectionManager.get(), this,
-                _graphTransforms, uiGraphTransforms));
-        }
-        else
-        {
-            auto previousGraphTransforms = _graphTransforms;
-
-            commands.emplace_back(std::make_unique<Command>(
-                Command::CommandDescription
-                {
-                    QStringLiteral("Apply Transform Flags"),
-                    QStringLiteral("Applying Transform Flags")
-                },
-                [this, uiGraphTransforms](Command&)         { setTransforms(uiGraphTransforms); },
-                [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));
-        }
+        commands.emplace_back(std::make_unique<Command>(
+            Command::CommandDescription
+            {
+                QStringLiteral("Apply Transform Flags"),
+                QStringLiteral("Applying Transform Flags")
+            },
+            [this, graphTransforms](Command&)           { setTransforms(graphTransforms); },
+            [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));
     }
     else
         setTransforms(_graphTransforms);
 
-    auto uiVisualisations = _visualisationsFromUI;
+    _graphModel->clearVisualisationInfos();
 
-    if(!newVisualisations.empty())
-    {
-        _graphModel->clearVisualisationInfos();
-        uiVisualisations.append(newVisualisations);
-    }
-
-    if(visualisationsDiffer(_visualisations, uiVisualisations))
+    if(visualisationsDiffer(_visualisations, visualisations))
     {
         commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
-            _visualisations, uiVisualisations, newGraphTransformIndex));
+            _visualisations, visualisations, newGraphTransformIndex));
     }
     else
-        setVisualisations(uiVisualisations);
+        setVisualisations(_visualisations);
 
     ExecutePolicy policy = replaceLatestCommand ?
         ExecutePolicy::Replace : ExecutePolicy::Add;
@@ -2567,6 +2530,31 @@ void Document::update(QStringList newGraphTransforms,
     }
     else if(commands.size() == 1)
         _commandManager.execute(policy, std::move(commands.front()));
+}
+
+void Document::update(QStringList newGraphTransforms, QStringList newVisualisations, bool replaceLatestCommand)
+{
+    auto graphTransforms = graphTransformConfigurationsFromUI();
+
+    for(const auto& newGraphTransform : std::as_const(newGraphTransforms))
+    {
+        if(!transformIsPinned(newGraphTransform))
+        {
+            // Insert before any existing pinned transforms
+            int index = 0;
+            while(index < graphTransforms.size() && !transformIsPinned(graphTransforms.at(index)))
+                index++;
+
+            graphTransforms.insert(index, newGraphTransform);
+        }
+        else
+            graphTransforms.append(newGraphTransform);
+    }
+
+    auto visualisations = _visualisationsFromUI;
+    visualisations.append(newVisualisations);
+
+    apply(graphTransforms, visualisations, replaceLatestCommand);
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

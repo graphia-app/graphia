@@ -507,6 +507,10 @@ public:
     Q_INVOKABLE void moveVisualisation(int from, int to);
 
     // Execute commands to apply transform and/or visualisation changes
+    Q_INVOKABLE void apply(QStringList graphTransforms = {},
+        QStringList visualisations = {},
+        bool replaceLatestCommand = false);
+
     Q_INVOKABLE void update(QStringList newGraphTransforms = {},
         QStringList newVisualisations = {},
         bool replaceLatestCommand = false);
