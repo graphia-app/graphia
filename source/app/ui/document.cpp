@@ -2246,7 +2246,8 @@ void Document::removeGraphTransform(int index)
 
 // This tests two transform lists to determine if replacing one with the
 // other would actually result in a different transformation
-static bool transformsDiffer(const QStringList& a, const QStringList& b)
+static bool transformsDiffer(const QStringList& a, const QStringList& b,
+    bool ignoreInertFlags = true)
 {
     if(a.length() != b.length())
         return true;
@@ -2263,7 +2264,7 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(ai != bi)
+        if(!ai.equals(bi, ignoreInertFlags))
             return true;
     }
 

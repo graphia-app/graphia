@@ -418,11 +418,16 @@ std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
     return names;
 }
 
-bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
+bool GraphTransformConfig::equals(const GraphTransformConfig& other, bool ignoreInertFlags) const
 {
-    // These flags do not cause a change in a transform's effect,
-    // so ignore them for comparison purposes
-    const std::vector<QString> flagsToIgnore = {"locked", "pinned"};
+    std::vector<QString> flagsToIgnore;
+
+    if(ignoreInertFlags)
+    {
+        // These flags do not cause a change in a transform's effect,
+        // so ignore them for comparison purposes
+        flagsToIgnore = {"locked", "pinned"};
+    }
 
     auto flags = u::setDifference(_flags, flagsToIgnore);
     auto otherFlags = u::setDifference(other._flags, flagsToIgnore);
@@ -432,11 +437,6 @@ bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
             !u::setsDiffer(flags, otherFlags) &&
             _attributes == other._attributes &&
             _condition == other._condition;
-}
-
-bool GraphTransformConfig::operator!=(const GraphTransformConfig& other) const
-{
-    return !operator==(other);
 }
 
 bool GraphTransformConfig::isFlagSet(const QString& flag) const

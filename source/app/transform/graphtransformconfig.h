@@ -105,8 +105,7 @@ struct GraphTransformConfig
 
     std::vector<QString> referencedAttributeNames() const;
 
-    bool operator==(const GraphTransformConfig& other) const;
-    bool operator!=(const GraphTransformConfig& other) const;
+    bool equals(const GraphTransformConfig& other, bool ignoreInertFlags = true) const;
     bool isFlagSet(const QString& flag) const;
 };
 
