@@ -178,7 +178,7 @@ private:
     mutable std::recursive_mutex _queueMutex;
 
     bool _busy = false;
-    std::atomic<bool> _graphChanged;
+    std::atomic_bool _graphChanged;
 
     mutable std::recursive_mutex _currentCommandMutex;
     ICommand* _currentCommand = nullptr;

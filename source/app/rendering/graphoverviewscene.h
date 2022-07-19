@@ -110,7 +110,7 @@ private:
     ComponentArray<float> _previousComponentAlpha;
     ComponentArray<float> _componentAlpha;
 
-    std::atomic<bool> _nextComponentLayoutDataChanged;
+    std::atomic_bool _nextComponentLayoutDataChanged;
     ComponentLayoutData _nextComponentLayoutData;
     ComponentLayoutData _componentLayoutData;
     ComponentLayoutData _previousZoomedComponentLayoutData;

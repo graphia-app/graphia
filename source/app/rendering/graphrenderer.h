@@ -243,7 +243,7 @@ private:
     int _sceneUpdateDisabled = 1;
     mutable std::recursive_mutex _sceneUpdateMutex;
 
-    std::atomic<bool> _layoutChanged;
+    std::atomic_bool _layoutChanged;
     bool _synchronousLayoutChanged = false;
 
     Transition _transition;
