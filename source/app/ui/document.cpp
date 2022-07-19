@@ -2230,6 +2230,18 @@ bool Document::graphTransformIsValid(const QString& transform) const
     return _graphModel != nullptr ? _graphModel->graphTransformIsValid(transform) : false;
 }
 
+bool Document::graphTransformsAreValid(const QStringList& transforms) const
+{
+    if(_graphModel == nullptr)
+        return false;
+
+    return std::all_of(transforms.begin(), transforms.end(),
+        [this](const auto& transform)
+        {
+            return _graphModel->graphTransformIsValid(transform);
+        });
+}
+
 void Document::setGraphTransform(int index, const QString& transform)
 {
     Q_ASSERT(index >= 0 && index < _graphTransformsFromUI.count());

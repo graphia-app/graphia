@@ -487,6 +487,7 @@ public:
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
+    Q_INVOKABLE bool graphTransformsAreValid(const QStringList& transforms) const;
     Q_INVOKABLE void setGraphTransform(int index, const QString& transform);
     Q_INVOKABLE void removeGraphTransform(int index);
     Q_INVOKABLE void moveGraphTransform(int from, int to);
