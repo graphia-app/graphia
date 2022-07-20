@@ -20,6 +20,8 @@
 
 #include "shared/utils/container.h"
 
+#include <QObject>
+
 bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Parameter& other) const
 {
     return _name == other._name &&
@@ -73,11 +75,11 @@ QVariantMap VisualisationConfig::asVariantMap() const
     return map;
 }
 
-QString VisualisationConfig::asString() const
+QString VisualisationConfig::asString(bool forDisplay) const
 {
     QString s;
 
-    if(!_flags.empty())
+    if(!forDisplay && !_flags.empty())
     {
         s += QStringLiteral("[");
         for(const auto& flag : _flags)
@@ -90,14 +92,39 @@ QString VisualisationConfig::asString() const
         s += QStringLiteral("] ");
     }
 
-    s += QStringLiteral(R"("%1" "%2")").arg(_attributeName, _channelName);
+    auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : QStringLiteral(R"("%1" "%2")");
 
-    if(!_parameters.empty())
+    s += assignmentTemplate.arg(_attributeName, _channelName);
+
+    if(!forDisplay && !_parameters.empty())
     {
         s += QStringLiteral(" with ");
 
         for(const auto& parameter : _parameters)
             s += QStringLiteral(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
+    }
+
+    if(forDisplay && !_flags.empty())
+    {
+        QString flagsString;
+
+        for(const auto& flag : _flags)
+        {
+            if(!flagsString.isEmpty())
+                flagsString += QObject::tr(", ");
+
+            std::map<QString, QString> replacements =
+            {
+                {"assignByQuantity",    QObject::tr("Assigned By Quantity")},
+                {"component",           QObject::tr("Applied Per Component")},
+                {"invert",              QObject::tr("Inverted")}
+            };
+
+            if(u::contains(replacements, flag))
+                flagsString += replacements.at(flag);
+        }
+
+        s += QObject::tr(" (%1)").arg(flagsString);
     }
 
     return s;

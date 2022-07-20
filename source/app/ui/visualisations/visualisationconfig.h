@@ -43,7 +43,7 @@ struct VisualisationConfig
     std::vector<Parameter> _parameters;
 
     QVariantMap asVariantMap() const;
-    QString asString() const;
+    QString asString(bool forDisplay = false) const;
 
     QString parameterValue(const QString& name) const;
 
