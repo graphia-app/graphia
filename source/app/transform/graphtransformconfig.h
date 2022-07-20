@@ -98,10 +98,10 @@ struct GraphTransformConfig
     bool hasCondition() const;
 
     QVariantMap conditionAsVariantMap() const;
-    QString conditionAsString() const;
+    QString conditionAsString(bool forDisplay = false) const;
 
     QVariantMap asVariantMap() const;
-    QString asString() const;
+    QString asString(bool forDisplay = false) const;
 
     std::vector<QString> referencedAttributeNames() const;
 

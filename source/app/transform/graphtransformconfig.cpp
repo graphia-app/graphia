@@ -23,6 +23,7 @@
 
 #include "shared/utils/container.h"
 
+#include <QObject>
 #include <QVariantList>
 
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const
@@ -212,41 +213,83 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
     return boost::apply_visitor(ConditionVisitor(), _condition);
 }
 
-QString GraphTransformConfig::conditionAsString() const
+QString GraphTransformConfig::conditionAsString(bool forDisplay) const
 {
     struct ConditionVisitor
     {
-        static QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue)
+        explicit ConditionVisitor(bool forDisplay) :
+            _forDisplay(forDisplay) {}
+
+        bool _forDisplay;
+
+        QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
         {
             struct Visitor
             {
+                explicit Visitor(bool forDisplay) :
+                    _forDisplay(forDisplay) {}
+
+                bool _forDisplay;
+
                 QString operator()(const double& d) const   { return QString::number(d, 'f'); }
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
+                    const auto attributeWithParameterTemplace = _forDisplay ? QObject::tr("%1%2 › %3") : QStringLiteral(R"($"%1%2"."%3")");
+                    const auto attributeTemplate = _forDisplay ? QObject::tr("%1%2") : QStringLiteral(R"($"%1%2")");
+                    const auto valueTemplate = _forDisplay ? QObject::tr("%1") : QStringLiteral(R"("%1")");
+
                     if(GraphTransformConfigParser::isAttributeName(s))
                     {
                         auto info = Attribute::parseAttributeName(s);
 
-                        const char* prefix = "";
+                        QString prefix;
                         switch(info._type)
                         {
-                        case Attribute::EdgeNodeType::Source: prefix = "source."; break;
-                        case Attribute::EdgeNodeType::Target: prefix = "target."; break;
+                        case Attribute::EdgeNodeType::Source: prefix = _forDisplay ? QObject::tr("Source › ") : QStringLiteral("source."); break;
+                        case Attribute::EdgeNodeType::Target: prefix = _forDisplay ? QObject::tr("Target › ") : QStringLiteral("target."); break;
                         default: break;
                         }
 
                         if(!info._parameter.isEmpty())
-                            return QStringLiteral(R"($"%1%2"."%3")").arg(prefix, info._name, info._parameter);
+                            return attributeWithParameterTemplace.arg(prefix, info._name, info._parameter);
 
-                        return QStringLiteral(R"($"%1%2")").arg(prefix, info._name);
+                        return attributeTemplate.arg(prefix, info._name);
                     }
 
-                    return QStringLiteral(R"("%1")").arg(s);
+                    return valueTemplate.arg(s);
                 }
             };
 
-            return std::visit(Visitor(), terminalValue);
+            return std::visit(Visitor(_forDisplay), terminalValue);
+        }
+
+        QString prettifyOp(const QString& op) const
+        {
+            if(!_forDisplay)
+                return op;
+
+            std::map<QString, QString> replacements =
+            {
+                {"==",                       QObject::tr("=")},
+                {"!=",                       QObject::tr("≠")},
+                {"<=",                       QObject::tr("≤")},
+                {">=",                       QObject::tr("≥")},
+                {"&&",                       QObject::tr("and")},
+                {"||",                       QObject::tr("or")},
+                {"includes",                 QObject::tr("Includes")},
+                {"excludes",                 QObject::tr("Excludes")},
+                {"starts",                   QObject::tr("Starts With")},
+                {"ends",                     QObject::tr("Ends With")},
+                {"matches",                  QObject::tr("Matches Regex")},
+                {"matchesCaseInsensitive",   QObject::tr("Matches Case Insensitive Regex")},
+                {"hasValue",                 QObject::tr("Has Value")}
+            };
+
+            if(u::contains(replacements, op))
+                return replacements.at(op);
+
+            return op;
         }
 
         QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
@@ -254,7 +297,7 @@ QString GraphTransformConfig::conditionAsString() const
         {
             return QStringLiteral("%1 %2 %3").arg(
                 terminalValueAsString(terminalCondition._lhs),
-                terminalCondition.opAsString(),
+                prettifyOp(terminalCondition.opAsString()),
                 terminalValueAsString(terminalCondition._rhs));
         }
 
@@ -262,19 +305,19 @@ QString GraphTransformConfig::conditionAsString() const
         {
             return QStringLiteral("%1 %2").arg(
                 terminalValueAsString(unaryCondition._lhs),
-                unaryCondition.opAsString());
+                prettifyOp(unaryCondition.opAsString()));
         }
 
         QString operator()(const CompoundCondition& compoundCondition) const
         {
-            auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
-            auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
+            auto lhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._lhs);
+            auto rhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._rhs);
 
-            return QStringLiteral("%1 %2 %3").arg(lhs, compoundCondition.opAsString(), rhs);
+            return QStringLiteral("%1 %2 %3").arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
         }
     };
 
-    return boost::apply_visitor(ConditionVisitor(), _condition);
+    return boost::apply_visitor(ConditionVisitor(forDisplay), _condition);
 }
 
 QVariantMap GraphTransformConfig::asVariantMap() const
@@ -311,48 +354,57 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     return map;
 }
 
-QString GraphTransformConfig::asString() const
+QString GraphTransformConfig::asString(bool forDisplay) const
 {
     QString s;
 
     if(!_flags.empty())
     {
-        s += QStringLiteral("[");
-        for(const auto& flag : _flags)
+        if(!forDisplay)
         {
-            if(s[s.length() - 1] != '[')
-                s += QStringLiteral(", ");
+            s += QStringLiteral("[");
+            for(const auto& flag : _flags)
+            {
+                if(s[s.length() - 1] != '[')
+                    s += QStringLiteral(", ");
 
-            s += flag;
+                s += flag;
+            }
+            s += QStringLiteral("] ");
         }
-        s += QStringLiteral("] ");
+        else if(isFlagSet(QStringLiteral("pinned")))
+            s += QObject::tr("📌 ");
     }
 
-    s += QStringLiteral(R"("%1")").arg(_action);
+    const auto actionTemplate = forDisplay ? QObject::tr("%1") : QStringLiteral(R"("%1")");
+    const auto attributeTemplate = forDisplay ? QObject::tr(" %1") : QStringLiteral(R"( $"%1")");
+    const auto parameterTemplate = forDisplay ?  QObject::tr(" %1 = %2") : QStringLiteral(R"( "%1" = %2)");
+
+    s += actionTemplate.arg(_action);
 
     if(!_attributes.empty())
     {
-        s += QStringLiteral(" using");
+        s += forDisplay ? QObject::tr(" using") : QStringLiteral(" using");
 
         for(const auto& attribute : _attributes)
-            s += QStringLiteral(R"( $"%1")").arg(attribute);
+            s += attributeTemplate.arg(attribute);
     }
 
     if(!_parameters.empty())
     {
-        s += QStringLiteral(" with");
+        s += forDisplay ? QObject::tr(" with") : QStringLiteral(" with");
 
         for(const auto& parameter : _parameters)
         {
-            s += QStringLiteral(R"( "%1" = %2)").arg(parameter._name,
-                parameter.valueAsString(true));
+            s += parameterTemplate.arg(parameter._name,
+                parameter.valueAsString(!forDisplay));
         }
     }
 
     if(hasCondition())
     {
-        s += QStringLiteral(" where ");
-        s += conditionAsString();
+        s += forDisplay ? QObject::tr(" where ") : QStringLiteral(" where ");
+        s += conditionAsString(forDisplay);
     }
 
     return s;
