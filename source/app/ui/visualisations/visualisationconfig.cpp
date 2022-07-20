@@ -114,17 +114,12 @@ QString VisualisationConfig::parameterValue(const QString& name) const
     return {};
 }
 
-bool VisualisationConfig::operator==(const VisualisationConfig& other) const
+bool VisualisationConfig::equals(const VisualisationConfig& other) const
 {
     return _attributeName == other._attributeName &&
            _channelName == other._channelName &&
            !u::setsDiffer(_parameters, other._parameters) &&
            !u::setsDiffer(_flags, other._flags);
-}
-
-bool VisualisationConfig::operator!=(const VisualisationConfig& other) const
-{
-    return !operator==(other);
 }
 
 bool VisualisationConfig::isFlagSet(const QString& flag) const

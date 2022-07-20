@@ -2441,7 +2441,7 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(ai != bi)
+        if(!ai.equals(bi))
             return true;
     }
 

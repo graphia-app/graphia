@@ -47,8 +47,7 @@ struct VisualisationConfig
 
     QString parameterValue(const QString& name) const;
 
-    bool operator==(const VisualisationConfig& other) const;
-    bool operator!=(const VisualisationConfig& other) const;
+    bool equals(const VisualisationConfig& other) const;
     bool isFlagSet(const QString& flag) const;
 };
 
