@@ -467,6 +467,75 @@ ApplicationWindow
         property string recentFiles
         property bool hasSeenTutorial
         property string update
+
+        property string templates
+
+        function templatesAsArray()
+        {
+            let a = [];
+
+            if(templates.length > 0)
+            {
+                try { a = JSON.parse(templates); }
+                catch(e) { a = []; }
+            }
+
+            return a;
+        }
+
+        function templateNamesAsArray()
+        {
+            return templatesAsArray().map(e => e.name).sort(QmlUtils.localeCompareStrings);
+        }
+
+        function removeTemplates(names)
+        {
+            let a = templatesAsArray().filter(e => names.indexOf(e.name) < 0);
+            templates = JSON.stringify(a);
+        }
+
+        function renameTemplate(from, to)
+        {
+            let a = templatesAsArray();
+            let foundElement = a.find(e => e.name === from);
+
+            if(!foundElement)
+            {
+                console.log("renameTemplate: could not find template named " + from);
+                return;
+            }
+
+            foundElement.name = to;
+            templates = JSON.stringify(a);
+        }
+
+        function addTemplate(name, method, transforms, visualisations)
+        {
+            let a = templatesAsArray();
+            let element = a.find(e => e.name === name);
+            if(!element)
+                element = a[a.push({}) - 1];
+
+            element.name = name;
+            element.method = method;
+            element.transforms = transforms;
+            element.visualisations = visualisations;
+
+            templates = JSON.stringify(a);
+        }
+
+        function templateFor(name)
+        {
+            let a = [];
+
+            if(templates.length > 0)
+            {
+                try { a = JSON.parse(templates); }
+                catch(e) { a = []; }
+            }
+
+            return a.find(e => e.name === name);
+        }
     }
 
     Preferences
@@ -1548,6 +1617,55 @@ ApplicationWindow
         }
     }
 
+    AddTemplateDialog
+    {
+        id: addTemplateDialog
+        document: currentTab && currentTab.document
+
+        onAccepted: function(name, method, transforms, visualisations)
+        {
+            misc.addTemplate(name, method, transforms, visualisations);
+        }
+    }
+
+    Action
+    {
+        id: addTemplateAction
+        icon.name: "list-add"
+        text: qsTr("Add Template…")
+        enabled: currentTab ? !currentTab.document.busy &&
+            currentTab.document.transforms.length > 0 &&
+            currentTab.document.visualisations.length > 0 : false
+        onTriggered: function(source)
+        {
+            addTemplateDialog.raise();
+            addTemplateDialog.show();
+        }
+    }
+
+    ManageNamedListDialog
+    {
+        id: manageTemplates
+
+        title: qsTr("Manage Templates")
+        model: { return misc.templateNamesAsArray(); }
+
+        onRemove: function(names) { misc.removeTemplates(names); }
+        onRename: function(from, to) { misc.renameTemplate(from, to); }
+    }
+
+    Action
+    {
+        id: manageTemplatesAction
+        text: qsTr("Manage Templates…")
+        enabled: { return misc.templateNamesAsArray().length > 0; }
+        onTriggered: function(source)
+        {
+            manageTemplates.raise();
+            manageTemplates.show();
+        }
+    }
+
     ActionGroup
     {
         id: nodeTextDisplay
@@ -2179,6 +2297,53 @@ ApplicationWindow
 
                 onObjectAdded: function(index, object) { bookmarksMenu.insertItem(4/* first menu items */ + index, object); }
                 onObjectRemoved: function(index, object) { bookmarksMenu.removeItem(object); }
+            }
+        }
+
+        PlatformMenu
+        {
+            id: templatesMenu
+
+            title: qsTr("T&emplates")
+            PlatformMenuItem { action: addTemplateAction }
+            PlatformMenuItem { action: manageTemplatesAction }
+            PlatformMenuSeparator { hidden: { return misc.templateNamesAsArray().length === 0; } }
+
+            Instantiator
+            {
+                id: templatesInstantiator
+                model: { return misc.templateNamesAsArray(); }
+
+                delegate: PlatformMenuItem
+                {
+                    id: templateMenuItem
+
+                    text: templatesInstantiator.model[index]
+
+                    action: Action
+                    {
+                        onTriggered: function(source)
+                        {
+                            if(source && source.menu)
+                                source.menu.dismiss();
+
+                            currentTab.applyTemplate(templateMenuItem.text);
+                        }
+                    }
+
+                    enabled:
+                    {
+                        if(!currentTab || currentTab.document.busy)
+                            return false;
+
+                        let template = misc.templateFor(templateMenuItem.text);
+                        return currentTab.document.graphTransformsAreValid(template.transforms) &&
+                            currentTab.document.visualisationsAreValid(template.visualisations);
+                    }
+                }
+
+                onObjectAdded: function(index, object) { templatesMenu.insertItem(3/* first menu items */ + index, object); }
+                onObjectRemoved: function(index, object) { templatesMenu.removeItem(object); }
             }
         }
 

@@ -1263,6 +1263,21 @@ Item
         property var fileSaveInitialFolder
         property string webSearchEngineUrl
         property bool hasSeenTutorial
+
+        property string templates
+
+        function templateFor(name)
+        {
+            let a = [];
+
+            if(templates.length > 0)
+            {
+                try { a = JSON.parse(templates); }
+                catch(e) { a = []; }
+            }
+
+            return a.find(e => e.name === name);
+        }
     }
 
     // This is only here to get at the default values of its properties
@@ -1576,6 +1591,91 @@ Item
     {
         id: errorSavingFileMessageDialog
         title: qsTr("Error Saving File")
+    }
+
+    Window
+    {
+        id: applyMethodDialog
+
+        title: qsTr("Application Method")
+
+        modality: Qt.WindowModal
+        flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
+
+        width: 380
+        minimumWidth: width
+        maximumWidth: width
+
+        height: 100
+        minimumHeight: height
+        maximumHeight: height
+
+        property string templateName: ""
+
+        ColumnLayout
+        {
+            spacing: Constants.spacing
+            anchors.fill: parent
+            anchors.margins: Constants.margin
+
+            Text
+            {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
+                wrapMode: Text.Wrap
+                text: qsTr("Do you want to apply the template by appending to your existing " +
+                    "configuration, or by replacing it?")
+            }
+
+            RowLayout
+            {
+                Layout.alignment: Qt.AlignBottom|Qt.AlignHCenter
+
+                Button
+                {
+                    text: qsTr("Append")
+                    onClicked:
+                    {
+                        applyMethodDialog.close();
+                        root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Append);
+                    }
+                }
+
+                Button
+                {
+                    text: qsTr("Replace")
+                    onClicked:
+                    {
+                        applyMethodDialog.close();
+                        root.applyTemplate(applyMethodDialog.templateName, AddTemplateDialog.Replace);
+                    }
+                }
+            }
+        }
+    }
+
+    function applyTemplate(name, method)
+    {
+        let template = misc.templateFor(name);
+
+        if(method !== undefined)
+            template.method = method;
+
+        switch(template.method)
+        {
+        case AddTemplateDialog.AlwaysAsk:
+            applyMethodDialog.templateName = name;
+            applyMethodDialog.show();
+            break;
+
+        case AddTemplateDialog.Append:
+            _document.update(template.transforms, template.visualisations);
+            break;
+
+        case AddTemplateDialog.Replace:
+            _document.apply(template.transforms, template.visualisations);
+            break;
+        }
     }
 
     Document
