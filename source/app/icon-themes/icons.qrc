@@ -148,6 +148,9 @@
 		<file>Tango/16x16/actions/view-refresh.png</file>
 		<file>Tango/22x22/actions/view-refresh.png</file>
 		<file>Tango/32x32/actions/view-refresh.png</file>
+		<file>Tango/16x16/mimetypes/x-office-document-template.png</file>
+		<file>Tango/22x22/mimetypes/x-office-document-template.png</file>
+		<file>Tango/32x32/mimetypes/x-office-document-template.png</file>
 		<file>Tango/16x16/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/22x22/mimetypes/x-office-spreadsheet.png</file>
 		<file>Tango/32x32/mimetypes/x-office-spreadsheet.png</file>

@@ -30,6 +30,7 @@
         <file>qml/AboutDialog.qml</file>
         <file>qml/AboutPluginsDialog.qml</file>
         <file>qml/AddBookmark.qml</file>
+        <file>qml/AddTemplateDialog.qml</file>
         <file>qml/AttributeUtils.js</file>
         <file>qml/CaptureScreenshotDialog.qml</file>
         <file>qml/CloneAttributeDialog.qml</file>
