@@ -488,6 +488,7 @@ public:
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
     Q_INVOKABLE bool graphTransformsAreValid(const QStringList& transforms) const;
+    Q_INVOKABLE QString displayTextForGraphTransform(const QString& transform) const;
     Q_INVOKABLE void setGraphTransform(int index, const QString& transform);
     Q_INVOKABLE void removeGraphTransform(int index);
     Q_INVOKABLE void moveGraphTransform(int from, int to);
@@ -503,6 +504,7 @@ public:
     Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType, const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
     Q_INVOKABLE bool visualisationsAreValid(const QStringList& visualisations) const;
+    Q_INVOKABLE QString displayTextForVisualisation(const QString& visualisation) const;
     Q_INVOKABLE void setVisualisation(int index, const QString& visualisation);
     Q_INVOKABLE void removeVisualisation(int index);
     Q_INVOKABLE void moveVisualisation(int from, int to);
