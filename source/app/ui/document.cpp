@@ -2408,6 +2408,18 @@ bool Document::visualisationIsValid(const QString& visualisation) const
     return _graphModel != nullptr ? _graphModel->visualisationIsValid(visualisation) : false;
 }
 
+bool Document::visualisationsAreValid(const QStringList& visualisations) const
+{
+    if(_graphModel == nullptr)
+        return false;
+
+    return std::all_of(visualisations.begin(), visualisations.end(),
+        [this](const auto& visualisation)
+        {
+            return _graphModel->visualisationIsValid(visualisation);
+        });
+}
+
 void Document::setVisualisation(int index, const QString& visualisation)
 {
     Q_ASSERT(index >= 0 && index < _visualisationsFromUI.count());

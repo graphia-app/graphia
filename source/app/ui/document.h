@@ -502,6 +502,7 @@ public:
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
     Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType, const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
+    Q_INVOKABLE bool visualisationsAreValid(const QStringList& visualisations) const;
     Q_INVOKABLE void setVisualisation(int index, const QString& visualisation);
     Q_INVOKABLE void removeVisualisation(int index);
     Q_INVOKABLE void moveVisualisation(int from, int to);
