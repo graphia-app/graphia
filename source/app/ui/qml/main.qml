@@ -526,15 +526,7 @@ ApplicationWindow
 
         function templateFor(name)
         {
-            let a = [];
-
-            if(templates.length > 0)
-            {
-                try { a = JSON.parse(templates); }
-                catch(e) { a = []; }
-            }
-
-            return a.find(e => e.name === name);
+            return templatesAsArray().find(e => e.name === name);
         }
     }
 
@@ -2336,7 +2328,10 @@ ApplicationWindow
                         if(!currentTab || currentTab.document.busy)
                             return false;
 
-                        let template = misc.templateFor(templateMenuItem.text);
+                        let template = misc.templateFor(text);
+                        if(!template)
+                            return false;
+
                         return currentTab.document.graphTransformsAreValid(template.transforms) &&
                             currentTab.document.visualisationsAreValid(template.visualisations);
                     }
