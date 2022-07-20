@@ -643,9 +643,6 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     {
         const auto& visualisationConfig = p.result();
 
-        if(!attributeExists(visualisationConfig._attributeName))
-            return false;
-
         if(!u::contains(_->_visualisationChannels, visualisationConfig._channelName))
             return false;
 
