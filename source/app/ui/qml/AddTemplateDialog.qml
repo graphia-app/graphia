@@ -40,7 +40,7 @@ Window
     property var document: null
 
     modality: Qt.WindowModal
-    flags: Qt.Dialog
+    flags: Qt.Window|Qt.Dialog
 
     width: 640
     minimumWidth: 640
