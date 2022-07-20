@@ -59,19 +59,19 @@ function sanitiseOp(text)
 {
     let replacements =
     [
-        "==",                       "=",
-        "!=",                       "≠",
-        "<=",                       "≤",
-        ">=",                       "≥",
-        "&&",                       "and",
-        "||",                       "or",
-        "includes",                 "Includes",
-        "excludes",                 "Excludes",
-        "starts",                   "Starts With",
-        "ends",                     "Ends With",
-        "matches",                  "Matches Regex",
-        "matchesCaseInsensitive",   "Matches Case Insensitive Regex",
-        "hasValue",                 "Has Value",
+        "==",                       qsTr("="),
+        "!=",                       qsTr("≠"),
+        "<=",                       qsTr("≤"),
+        ">=",                       qsTr("≥"),
+        "&&",                       qsTr("and"),
+        "||",                       qsTr("or"),
+        "includes",                 qsTr("Includes"),
+        "excludes",                 qsTr("Excludes"),
+        "starts",                   qsTr("Starts With"),
+        "ends",                     qsTr("Ends With"),
+        "matches",                  qsTr("Matches Regex"),
+        "matchesCaseInsensitive",   qsTr("Matches Case Insensitive Regex"),
+        "hasValue",                 qsTr("Has Value"),
     ];
 
     for(let i = 0; i < replacements.length; i += 2)
@@ -162,7 +162,7 @@ function Create(transformIndex, transform)
     if(transform.attributes.length > 0)
     {
         this.template += " using";
-        appendToElements(this._elements, " using ");
+        appendToElements(this._elements, qsTr(" using "));
 
         for(let i = 0; i < transform.attributes.length; i++)
         {
@@ -183,7 +183,7 @@ function Create(transformIndex, transform)
     if(transform.parameters.length > 0)
     {
         this.template += " with";
-        appendToElements(this._elements, " with ");
+        appendToElements(this._elements, qsTr(" with "));
 
         let firstParam = true;
 
@@ -209,7 +209,7 @@ function Create(transformIndex, transform)
         let condition = {type: "condition"};
         condition = Object.assign(condition, transform.condition);
 
-        appendToElements(this._elements, " where ");
+        appendToElements(this._elements, qsTr(" where "));
         appendConditionToElements(this._elements, condition);
     }
 
