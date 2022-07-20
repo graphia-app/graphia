@@ -3,6 +3,7 @@ module app.graphia.Controls
 AlertIcon 1.0 AlertIcon.qml
 AttributeListSortMenu 1.0 AttributeListSortMenu.qml
 ButtonMenu 1.0 ButtonMenu.qml
+CheckBoxList 1.0 CheckBoxList.qml
 ColorPickButton 1.0 ColorPickButton.qml
 DoubleSpinBox 1.0 DoubleSpinBox.qml
 DraggableList 1.0 DraggableList.qml

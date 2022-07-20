@@ -3,6 +3,7 @@
         <file>qml/app/graphia/Controls/AlertIcon.qml</file>
         <file>qml/app/graphia/Controls/AttributeListSortMenu.qml</file>
         <file>qml/app/graphia/Controls/ButtonMenu.qml</file>
+        <file>qml/app/graphia/Controls/CheckBoxList.qml</file>
         <file>qml/app/graphia/Controls/ColorPickButton.qml</file>
         <file>qml/app/graphia/Controls/DoubleSpinBox.qml</file>
         <file>qml/app/graphia/Controls/DraggableList.qml</file>
