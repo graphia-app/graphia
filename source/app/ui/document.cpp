@@ -2468,7 +2468,7 @@ void Document::moveVisualisation(int from, int to)
                                 _visualisations, newVisualisations));
 }
 
-void Document::apply(QStringList graphTransforms, QStringList visualisations, bool replaceLatestCommand)
+void Document::apply(const QStringList& graphTransforms, const QStringList& visualisations, bool replaceLatestCommand)
 {
     if(_graphModel == nullptr)
         return;
@@ -2532,7 +2532,7 @@ void Document::apply(QStringList graphTransforms, QStringList visualisations, bo
         _commandManager.execute(policy, std::move(commands.front()));
 }
 
-void Document::update(QStringList newGraphTransforms, QStringList newVisualisations, bool replaceLatestCommand)
+void Document::update(const QStringList& newGraphTransforms, const QStringList& newVisualisations, bool replaceLatestCommand)
 {
     auto graphTransforms = graphTransformConfigurationsFromUI();
 

@@ -507,12 +507,12 @@ public:
     Q_INVOKABLE void moveVisualisation(int from, int to);
 
     // Execute commands to apply transform and/or visualisation changes
-    Q_INVOKABLE void apply(QStringList graphTransforms = {},
-        QStringList visualisations = {},
+    Q_INVOKABLE void apply(const QStringList& graphTransforms = {},
+        const QStringList& visualisations = {},
         bool replaceLatestCommand = false);
 
-    Q_INVOKABLE void update(QStringList newGraphTransforms = {},
-        QStringList newVisualisations = {},
+    Q_INVOKABLE void update(const QStringList& newGraphTransforms = {},
+        const QStringList& newVisualisations = {},
         bool replaceLatestCommand = false);
 
     Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
