@@ -16,36 +16,13 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils.h"
-#include "static_block.h"
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
-int u::smallestPowerOf2GreaterThan(int x)
+namespace Constants
 {
-    if(x < 0)
-        return 0;
+    static constexpr float Pi() { return 3.14159265358979323846f; }
+    static constexpr float TwoPi() { return 2.0f * Pi(); }
+} // namespace Constants
 
-    auto xu = static_cast<uint64_t>(x);
-    xu--;
-    xu |= xu >> 1;
-    xu |= xu >> 2;
-    xu |= xu >> 4;
-    xu |= xu >> 8;
-    xu |= xu >> 16;
-    return static_cast<int>(xu + 1);
-}
-
-float u::normaliseAngle(float radians)
-{
-    while(radians > Constants::Pi())
-        radians -= Constants::TwoPi();
-
-    while(radians <= -Constants::Pi())
-        radians += Constants::TwoPi();
-
-    return radians;
-}
-
-static_block
-{
-    Q_INIT_RESOURCE(shared);
-}
+#endif // CONSTANTS_H

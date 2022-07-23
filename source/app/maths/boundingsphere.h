@@ -22,9 +22,9 @@
 #include <QVector3D>
 
 #include "line.h"
+#include "shared/utils/constants.h"
 
 #include <vector>
-#include <numbers>
 
 class Ray;
 
@@ -46,7 +46,7 @@ public:
     void scale(float s);
     Q_REQUIRED_RESULT BoundingSphere scaled(float s) const;
 
-    float volume() const { return (4.0f * std::numbers::pi_v<float> * _radius * _radius * _radius) / 3.0f; }
+    float volume() const { return (4.0f * Constants::Pi() * _radius * _radius * _radius) / 3.0f; }
 
     void set(QVector3D centre, float radius);
     void expandToInclude(const QVector3D& point);

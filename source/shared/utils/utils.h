@@ -19,6 +19,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "constants.h"
+
 #include <cmath>
 #include <QString>
 

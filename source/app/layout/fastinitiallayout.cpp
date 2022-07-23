@@ -18,11 +18,12 @@
 
 #include "fastinitiallayout.h"
 
+#include "shared/utils/constants.h"
+
 #include <QMatrix4x4>
 #include <QVector4D>
 
 #include <cmath>
-#include <numbers>
 
 void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4& orientationMatrix,
                                      const QVector3D& parentNodePosition, NodeId childNodeId,
@@ -166,7 +167,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
             auto theta = std::acos(h);
             phi = phi + 3.6f / (std::sqrt((static_cast<float>(
                 static_cast<int>(edgeIds.size()) + edgeCountOffset)) * (1.0f - h * h)));
-            phi = std::fmod(phi, 2.0f * static_cast<float>(std::numbers::pi_v<float>));
+            phi = std::fmod(phi, 2.0f * static_cast<float>(Constants::Pi()));
 
             QVector3D offsetPosition(h, std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta));
 

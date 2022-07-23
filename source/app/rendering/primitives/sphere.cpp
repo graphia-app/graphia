@@ -18,9 +18,9 @@
 
 #include "sphere.h"
 
-#include <cmath>
-#include <numbers>
+#include "shared/utils/constants.h"
 
+#include <cmath>
 #include <QOpenGLShaderProgram>
 
 namespace Primitive
@@ -120,8 +120,8 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     texCoords.resize(2 * numVerts);
     indices.resize(6 * faces);
 
-    const float dTheta = (2.0f * std::numbers::pi_v<float>) / static_cast<float>(_slices);
-    const float dPhi = std::numbers::pi_v<float> / static_cast<float>(_rings);
+    const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
+    const float dPhi = Constants::Pi() / static_cast<float>(_rings);
     const float du = 1.0f / static_cast<float>(_slices);
     const float dv = 1.0f / static_cast<float>(_rings);
 
@@ -129,7 +129,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
     for(size_t lat = 0U; lat < _rings + 1; ++lat)
     {
-        const float phi = std::numbers::pi_v<float> / 2.0f - static_cast<float>(lat) * dPhi;
+        const float phi = Constants::Pi() / 2.0f - static_cast<float>(lat) * dPhi;
         const float cosPhi = std::cos(phi);
         const float sinPhi = std::sin(phi);
         const float v = 1.0f - static_cast<float>(lat) * dv;

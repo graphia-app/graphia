@@ -18,9 +18,9 @@
 
 #include "arrow.h"
 
-#include <cmath>
-#include <numbers>
+#include "shared/utils/constants.h"
 
+#include <cmath>
 #include <QOpenGLShaderProgram>
 
 namespace Primitive
@@ -119,7 +119,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
     texCoords.resize(2 * numVerts);
     indices.resize(12 * faces);
 
-    const float dTheta = (2.0f * std::numbers::pi_v<float>) / static_cast<float>(_slices);
+    const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
     const float du = 1.0f / static_cast<float>(_slices);
 
     size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
