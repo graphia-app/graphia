@@ -151,18 +151,6 @@ void GraphOverviewScene::pan(float dx, float dy)
     updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, float y, bool doTransition)
-{
-    const float ZOOM_INCREMENT = 0.2f;
-
-    switch(zoomType)
-    {
-    case ZoomType::In:  zoom( ZOOM_INCREMENT, x, y, doTransition); break;
-    case ZoomType::Out: zoom(-ZOOM_INCREMENT, x, y, doTransition); break;
-    default: break;
-    }
-}
-
 void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
     float oldCentreX = x / _zoomFactor;

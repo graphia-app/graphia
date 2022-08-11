@@ -77,10 +77,9 @@ void GraphOverviewInteractor::leftDoubleClick()
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
-    if(angle > 0.0f)
-        _scene->zoom(GraphOverviewScene::ZoomType::In, x, y, true);
-    else
-        _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, true);
+    const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
+
+    _scene->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, x, y, true);
 }
 
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)

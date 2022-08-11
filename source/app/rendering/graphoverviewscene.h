@@ -74,14 +74,6 @@ public:
     void setProjection(Projection projection) override;
 
     void pan(float dx, float dy);
-
-    enum class ZoomType
-    {
-        In,
-        Out
-    };
-
-    void zoom(ZoomType zoomType, float x, float y, bool doTransition);
     void zoom(float delta, float x, float y, bool doTransition);
 
     Transition& startTransitionFromComponentMode(ComponentId focusComponentId,
