@@ -960,9 +960,20 @@ void GraphRenderer::processEventQueue()
 
             case QInputDevice::DeviceType::TouchScreen:
             case QInputDevice::DeviceType::TouchPad:
-                _interactor->panGestureEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
-                    -wheelEvent->pixelDelta() * _devicePixelRatio);
+            {
+                if(u::pref(QStringLiteral("misc/panGestureZooms")).toBool())
+                {
+                    _interactor->wheelEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
+                        wheelEvent->angleDelta().y());
+                }
+                else
+                {
+                    _interactor->panGestureEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
+                        -wheelEvent->pixelDelta() * _devicePixelRatio);
+                }
+
                 break;
+            }
 
             default: break;
             }

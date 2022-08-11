@@ -38,6 +38,7 @@ Item
         property alias stayInComponentMode: stayInComponentModeCheckbox.checked
         property alias disableHubbles: disableHubblesCheckbox.checked
         property alias maxUndoLevels: maxUndoSpinBox.value
+        property alias panGestureZooms: panGestureZoomsCheckbox.checked
     }
 
     Preferences
@@ -109,6 +110,20 @@ Item
                     onLexicalChanged: { currentIndex = lexical ? 1 : 0; }
                     onCurrentIndexChanged: { lexical = (currentIndex !== 0); }
                 }
+            }
+
+            Label
+            {
+                Layout.topMargin: Constants.margin * 2
+
+                font.bold: true
+                text: qsTr("User Interface")
+            }
+
+            CheckBox
+            {
+                id: panGestureZoomsCheckbox
+                text: qsTr("Trackpad Pan Gesture Zooms")
             }
 
             Label
