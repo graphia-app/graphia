@@ -97,3 +97,8 @@ void u::updateOldPrefs()
         u::removePref(QStringLiteral("visuals/defaultEdgeSize"));
     }
 }
+
+QString u::settingsFileName()
+{
+    return settings().fileName();
+}

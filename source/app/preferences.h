@@ -33,6 +33,8 @@ namespace u
     void setPref(const QString& key, const QVariant& value);
 
     void updateOldPrefs();
+
+    QString settingsFileName();
 } // namespace u
 
 #endif // PREFERENCES_H
