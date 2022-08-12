@@ -470,6 +470,11 @@ int start(int argc, char *argv[])
             QFile::copy(stdoutFilename, QDir(directory).filePath("stdout.txt"));
             QFile::copy(stderrFilename, QDir(directory).filePath("stderr.txt"));
         }
+
+        auto settingsFileName = u::settingsFileName();
+
+        if(!settingsFileName.isEmpty())
+            QFile::copy(settingsFileName, QDir(directory).filePath("settings.txt"));
     });
 #endif
 
