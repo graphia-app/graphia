@@ -363,14 +363,14 @@ Item
         onTriggered: { document.removeAttributes([root.lastClickedColumnName]); }
     }
 
-    function selectRows(inStartRow, inEndRow)
+    function selectRows(startRowInclusive, endRowInclusive)
     {
-        selectionModel.change(inStartRow, inEndRow, ItemSelectionModel.Select);
+        selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Select);
     }
 
-    function deselectRows(inStartRow, inEndRow)
+    function deselectRows(startRowInclusive, endRowInclusive)
     {
-        selectionModel.change(inStartRow, inEndRow, ItemSelectionModel.Deselect);
+        selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Deselect);
     }
 
     ItemSelectionModel
@@ -382,10 +382,10 @@ Item
             proxyModel.setSubSelection(selectionModel.selection, deselected);
         }
 
-        function change(inStartRow, inEndRow, action)
+        function change(startRowInclusive, endRowInclusive, action)
         {
-            let less = Math.min(inStartRow, inEndRow);
-            let max = Math.max(inStartRow, inEndRow);
+            let less = Math.min(startRowInclusive, endRowInclusive);
+            let max = Math.max(startRowInclusive, endRowInclusive);
 
             let range = proxyModel.buildRowSelectionRange(less, max);
             selectionModel.select([range], ItemSelectionModel.Rows | action)
