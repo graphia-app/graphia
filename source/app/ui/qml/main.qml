@@ -536,7 +536,7 @@ ApplicationWindow
         section: "visuals"
         property int edgeVisualType:
         {
-            return toggleEdgeDirectionAction.checkedAction ?
+            return toggleEdgeDirectionAction.checked ?
                 EdgeVisualType.Arrow : EdgeVisualType.Cylinder;
         }
         property int showNodeText:
