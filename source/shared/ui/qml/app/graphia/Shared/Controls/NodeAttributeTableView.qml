@@ -180,6 +180,13 @@ Item
         MenuUtils.addSeparatorTo(menu);
         MenuUtils.addActionTo(menu, selectAllTableAction);
 
+        let selectSourcesMenu = MenuUtils.addActionTo(menu, selectSourcesTableAction);
+        let selectTargetsMenu = MenuUtils.addActionTo(menu, selectTargetsTableAction);
+        selectSourcesMenu.hidden = Qt.binding(() => !pluginContent.directed);
+        selectTargetsMenu.hidden = Qt.binding(() => !pluginContent.directed);
+
+        MenuUtils.addActionTo(menu, selectNeighboursTableAction);
+
         tableView._tableMenu = menu;
         MenuUtils.clone(menu, contextMenu);
 
@@ -199,10 +206,11 @@ Item
         removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
     }
 
-    function selectAll()
-    {
-        selectRows(0, proxyModel.rowCount() - 1);
-    }
+    function selectAll() { selectRows(0, proxyModel.rowCount() - 1); }
+
+    function selectSources()    { selectionModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
+    function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
+    function selectNeighbours() { selectionModel.selectSourceRows(root.model.neighboursOf(root.selectedRows)); }
 
     Preferences
     {
@@ -281,6 +289,33 @@ Item
         enabled: tableView.rows > 0
 
         onTriggered: { root.selectAll(); }
+    }
+
+    Action
+    {
+        id: selectSourcesTableAction
+        text: qsTr("Select Sources")
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.selectSources(); }
+    }
+
+    Action
+    {
+        id: selectTargetsTableAction
+        text: qsTr("Select Targets")
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.selectTargets(); }
+    }
+
+    Action
+    {
+        id: selectNeighboursTableAction
+        text: qsTr("Select Neighbours")
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.selectNeighbours(); }
     }
 
     property int lastClickedColumn: -1
@@ -384,7 +419,23 @@ Item
             let max = Math.max(startRowInclusive, endRowInclusive);
 
             let range = proxyModel.buildRowSelectionRange(less, max);
-            selectionModel.select([range], ItemSelectionModel.Rows | action)
+            selectionModel.select([range], ItemSelectionModel.Rows | action);
+
+            root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+        }
+
+        function selectSourceRows(sourceRows)
+        {
+            let rows = [];
+            for(const sourceRow of sourceRows)
+            {
+                let proxyRow = proxyModel.mapFromSourceRow(sourceRow);
+                if(proxyRow >= 0)
+                    rows.push(proxyRow);
+            }
+
+            let selection = proxyModel.buildRowSelection(rows);
+            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select);
 
             root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
         }
