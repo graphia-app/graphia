@@ -233,6 +233,55 @@ QString NodeAttributeTableModel::columnNameFor(size_t column) const
     return _columnNames.at(static_cast<int>(column));
 }
 
+template<typename RelatedNodesFn>
+static std::vector<size_t> relatedNodes(const IUserNodeData* userNodeData,
+    const std::vector<size_t>& rows, RelatedNodesFn&& relatedNodesFn)
+{
+    NodeIdSet relatedNodeIds;
+
+    for(auto row : rows)
+    {
+        auto nodeId = userNodeData->elementIdForIndex(row);
+        relatedNodeIds.insert(nodeId);
+        auto nodeIds = relatedNodesFn(nodeId);
+        relatedNodeIds.insert(nodeIds.begin(), nodeIds.end());
+    }
+
+    std::vector<size_t> relatedRows;
+
+    for(auto nodeId : relatedNodeIds)
+    {
+        auto row = userNodeData->indexFor(nodeId);
+        relatedRows.push_back(row);
+    }
+
+    return relatedRows;
+}
+
+std::vector<size_t> NodeAttributeTableModel::sourcesOf(const std::vector<size_t>& rows) const
+{
+    return relatedNodes(_userNodeData, rows, [this](auto nodeId)
+    {
+        return _document->graphModel()->graph().sourcesOf(nodeId);
+    });
+}
+
+std::vector<size_t> NodeAttributeTableModel::targetsOf(const std::vector<size_t>& rows) const
+{
+    return relatedNodes(_userNodeData, rows, [this](auto nodeId)
+    {
+        return _document->graphModel()->graph().targetsOf(nodeId);
+    });
+}
+
+std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size_t>& rows) const
+{
+    return relatedNodes(_userNodeData, rows, [this](auto nodeId)
+    {
+        return _document->graphModel()->graph().neighboursOf(nodeId);
+    });
+}
+
 void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
