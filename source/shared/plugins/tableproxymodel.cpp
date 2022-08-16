@@ -82,11 +82,28 @@ QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bott
     return {index(topRow, 0), index(bottomRow, columnCount() - 1)};
 }
 
+QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& rows)
+{
+    QItemSelection selection;
+
+    for(auto row : rows)
+        selection.append({index(row, 0), index(row, columnCount() - 1)});
+
+    return selection;
+}
+
 int TableProxyModel::mapToSourceRow(int proxyRow) const
 {
     QModelIndex proxyIndex = index(proxyRow, 0);
     QModelIndex sourceIndex = mapToSource(proxyIndex);
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
+}
+
+int TableProxyModel::mapFromSourceRow(int sourceRow) const
+{
+    QModelIndex sourceIndex = sourceModel()->index(sourceRow, 0);
+    QModelIndex proxyIndex = mapFromSource(sourceIndex);
+    return proxyIndex.isValid() ? proxyIndex.row() : -1;
 }
 
 int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
