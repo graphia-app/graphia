@@ -1353,6 +1353,15 @@ ApplicationWindow
         }
     }
 
+    function attributeIsEditable(attributeName)
+    {
+        if(!currentTab || currentTab.document.busy)
+            return false;
+
+        let attribute = currentTab.document.attribute(attributeName);
+        return attribute.isValid && attribute.editable;
+    }
+
     ImportAttributesDialog
     {
         id: importAttributesDialog
@@ -1444,6 +1453,14 @@ ApplicationWindow
         text: qsTr("Remove Attributes…")
         enabled: currentTab !== null && !currentTab.document.busy
         onTriggered: function(source) { removeAttributesDialog.show(); }
+    }
+
+    function removeAttributes(attributeNames)
+    {
+        if(!removeAttributesAction.enabled)
+            return;
+
+        currentTab.document.removeAttributes(attributeNames);
     }
 
     Action
@@ -2542,6 +2559,22 @@ ApplicationWindow
 
         if(currentTab !== null)
             onDocumentShown(currentTab.document);
+    }
+
+    function writeTableModelToFile(model, fileName, type, columnNames)
+    {
+        if(!currentTab || currentTab.document.busy)
+            return;
+
+        currentTab.document.writeTableModelToFile(model, fileName, type, columnNames);
+    }
+
+    function copyTableViewColumnToClipboard(tableView, columnName)
+    {
+        if(!currentTab || currentTab.document.busy)
+            return;
+
+        currentTab.document.copyTableViewColumnToClipboard(tableView, columnName);
     }
 
     EnrichmentResults

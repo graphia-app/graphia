@@ -742,6 +742,7 @@ PluginContent
             SplitView.minimumWidth: splitView.orientation === Qt.Horizontal ? 400 : -1
 
             model: plugin.model.nodeAttributeTableModel
+            pluginContent: root
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
 

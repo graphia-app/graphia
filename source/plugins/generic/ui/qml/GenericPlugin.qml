@@ -70,6 +70,7 @@ PluginContent
             Layout.fillHeight: true
 
             model: plugin.model.nodeAttributeTableModel
+            pluginContent: root
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
 

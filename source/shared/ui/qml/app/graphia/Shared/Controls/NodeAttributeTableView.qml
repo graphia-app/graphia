@@ -40,6 +40,8 @@ Item
     property alias sortIndicatorOrder: proxyModel.sortOrder
     property string exportBaseFileName: "attributes"
 
+    property PluginContent pluginContent: null
+
     function initialise()
     {
         root.model.columnNames.forEach(function(columnName)
@@ -188,19 +190,13 @@ Item
         MenuUtils.addActionTo(contextMenu, sortDescendingAction);
         MenuUtils.addSeparatorTo(contextMenu);
 
-        let attributeIsEditable = function()
-        {
-            let attribute = document.attribute(root.lastClickedColumnName);
-            return attribute.isValid && attribute.editable;
-        };
-
         MenuUtils.addActionTo(contextMenu, cloneSpecificAttributeAction);
 
         let editSpecificAttributeMenuItem = MenuUtils.addActionTo(contextMenu, editSpecificAttributeAction);
-        editSpecificAttributeMenuItem.hidden = Qt.binding(() => !attributeIsEditable());
+        editSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
 
         let removeSpecificAttributeMenuItem = MenuUtils.addActionTo(contextMenu, removeSpecificAttributeAction);
-        removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !attributeIsEditable());
+        removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
     }
 
     function selectAll()
@@ -269,7 +265,7 @@ Item
             fileDialog.accepted.connect(function()
             {
                 misc.fileSaveInitialFolder = fileDialog.folder.toString();
-                document.writeTableModelToFile(tableView.model, fileDialog.file,
+                pluginContent.writeTableModelToFile(tableView.model, fileDialog.file,
                     fileDialog.selectedNameFilter.extensions[0], tableView.visibleColumnNames());
             });
 
@@ -304,7 +300,7 @@ Item
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            document.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
+            pluginContent.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
         }
     }
 
@@ -346,21 +342,21 @@ Item
     {
         id: cloneSpecificAttributeAction
         text: qsTr("Clone…")
-        onTriggered: { cloneAttribute(root.lastClickedColumnName); }
+        onTriggered: { pluginContent.cloneAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: editSpecificAttributeAction
         text: qsTr("Edit…")
-        onTriggered: { editAttribute(root.lastClickedColumnName); }
+        onTriggered: { pluginContent.editAttribute(root.lastClickedColumnName); }
     }
 
     Action
     {
         id: removeSpecificAttributeAction
         text: qsTr("Remove")
-        onTriggered: { document.removeAttributes([root.lastClickedColumnName]); }
+        onTriggered: { pluginContent.removeAttributes([root.lastClickedColumnName]); }
     }
 
     function selectRows(startRowInclusive, endRowInclusive)

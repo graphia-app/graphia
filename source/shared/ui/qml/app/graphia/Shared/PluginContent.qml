@@ -30,6 +30,19 @@ Item
     property var _mainWindow: null
 
     function updateMenu() { _mainWindow.updatePluginMenus(); }
+
+    function attributeIsEditable(attributeName) { return _mainWindow.attributeIsEditable(attributeName); }
     function cloneAttribute(attributeName) { _mainWindow.cloneAttribute(attributeName); }
     function editAttribute(attributeName) { _mainWindow.editAttribute(attributeName); }
+    function removeAttributes(attributeNames) { _mainWindow.removeAttributes(attributeNames); }
+
+    function writeTableModelToFile(model, fileName, type, columnNames)
+    {
+        _mainWindow.writeTableModelToFile(model, fileName, type, columnNames);
+    }
+
+    function copyTableViewColumnToClipboard(tableView, columnName)
+    {
+        _mainWindow.copyTableViewColumnToClipboard(tableView, columnName);
+    }
 }
