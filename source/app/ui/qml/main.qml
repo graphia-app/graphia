@@ -49,6 +49,8 @@ ApplicationWindow
     property TabUI currentTab: tabBar.count > 0 && tabBar.currentIndex < tabLayout.count ?
         tabLayout.get(tabBar.currentIndex) : null
 
+    property bool directed: currentTab ? currentTab.document.directed : false
+
     property var recentFiles: []
 
     property bool _anyTabsBusy:

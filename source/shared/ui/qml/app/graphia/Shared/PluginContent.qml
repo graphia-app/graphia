@@ -29,6 +29,8 @@ Item
     // Don't use this directly, that is naughty
     property var _mainWindow: null
 
+    property bool directed: _mainWindow ? _mainWindow.directed : false
+
     function updateMenu() { _mainWindow.updatePluginMenus(); }
 
     function attributeIsEditable(attributeName) { return _mainWindow.attributeIsEditable(attributeName); }
