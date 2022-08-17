@@ -696,20 +696,6 @@ BaseParameterDialog
                                         columns: 2
                                         Text
                                         {
-                                            text: qsTr("<b>None:</b>")
-                                            textFormat: Text.StyledText
-                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                        }
-
-                                        Text
-                                        {
-                                            text: qsTr("All empty or missing values will be treated as zeroes.");
-                                            wrapMode: Text.WordWrap
-                                            Layout.fillWidth: true
-                                        }
-
-                                        Text
-                                        {
                                             text: qsTr("<b>Constant:</b>")
                                             textFormat: Text.StyledText
                                             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
