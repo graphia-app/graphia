@@ -72,8 +72,8 @@ my %matchers = (
     "clang-tidy" => $clangTidyRegex,
     "clazy" => $clazyRegex,
     "cppcheck" => $cppCheckRegex,
-    "msvc" => $msvcRegex,
-    "qmllint" => $qmllintRegex
+    "msvc" => $msvcRegex
+    #"qmllint" => $qmllintRegex
 );
 
 my $outputStyle = 'csv';
