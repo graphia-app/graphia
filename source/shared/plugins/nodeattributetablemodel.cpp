@@ -248,6 +248,7 @@ static std::vector<size_t> relatedNodes(const IUserNodeData* userNodeData,
     }
 
     std::vector<size_t> relatedRows;
+    relatedRows.reserve(relatedNodeIds.size());
 
     for(auto nodeId : relatedNodeIds)
     {

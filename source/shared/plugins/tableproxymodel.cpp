@@ -85,9 +85,13 @@ QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bott
 QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& rows)
 {
     QItemSelection selection;
+    selection.reserve(rows.size());
 
     for(auto row : rows)
-        selection.append({index(row, 0), index(row, columnCount() - 1)});
+    {
+        selection.append({index(static_cast<int>(row), 0),
+            index(static_cast<int>(row), columnCount() - 1)});
+    }
 
     return selection;
 }
