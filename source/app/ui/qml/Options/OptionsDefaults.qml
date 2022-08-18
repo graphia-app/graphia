@@ -33,6 +33,7 @@ Item
     property var application: null
 
     property bool _storingPreference: false
+    property bool _constructed: false
 
     Preferences
     {
@@ -120,6 +121,7 @@ Item
     {
         root.syncControlsToExtensionsPreference();
         root.syncControlsToPluginsPreference();
+        root._constructed = true;
     }
 
     property var ambiguousExtensions: SortFilterProxyModel
@@ -250,7 +252,7 @@ Item
 
                                     onCurrentIndexChanged:
                                     {
-                                        if(count === 0)
+                                        if(count === 0 || !root._constructed)
                                             return;
 
                                         let extensionsObject = defaults.extensionsAsObject();
@@ -313,7 +315,7 @@ Item
 
                                     onCurrentIndexChanged:
                                     {
-                                        if(count === 0)
+                                        if(count === 0 || !root._constructed)
                                             return;
 
                                         let pluginsObject = defaults.pluginsAsObject();
