@@ -145,17 +145,17 @@ void TableProxyModel::calculateOrderedProxySourceMapping()
 
     _orderedProxyToSourceColumn.clear();
 
-    std::map<QString, int> columnNameIndicies;
+    std::map<QString, int> columnNameIndices;
     int index = 0;
     for(const auto& columnName : std::as_const(_columnNames))
-        columnNameIndicies.emplace(columnName, index++);
+        columnNameIndices.emplace(columnName, index++);
 
     for(const auto& sourceColumnName : std::as_const(_sourceColumnOrder))
     {
         if(!u::contains(_hiddenColumns, sourceColumnName))
         {
-            Q_ASSERT(u::contains(columnNameIndicies, sourceColumnName));
-            _orderedProxyToSourceColumn.emplace_back(columnNameIndicies.at(sourceColumnName));
+            Q_ASSERT(u::contains(columnNameIndices, sourceColumnName));
+            _orderedProxyToSourceColumn.emplace_back(columnNameIndices.at(sourceColumnName));
         }
     }
 

@@ -113,7 +113,7 @@ float approxProjectionScaleFor(vec3 position, float extent, mat4 p)
 
 void main()
 {
-    // Make the index negative so that it doesn't overlap with the node indicies
+    // Make the index negative so that it doesn't overlap with the node indices
     element = float(-(gl_InstanceID + 1));
 
     float edgeLength = distance(sourcePosition, targetPosition);
