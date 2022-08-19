@@ -356,11 +356,12 @@ void CorrelationFileParser::clipValues(ClippingType clippingType, double clippin
     case ClippingType::Winsorization:
     {
         auto sortedIndices = u::sortedIndicesOf(data);
-        auto metaIndex = static_cast<size_t>((clippingValue * (sortedIndices.size() - 1)) / 100.0);
+        auto metaIndex = static_cast<size_t>((clippingValue * static_cast<double>(sortedIndices.size() - 1)) / 100.0);
         auto clipIndex = sortedIndices.at(metaIndex);
         auto clipValue = data.at(clipIndex);
 
-        for(auto i = sortedIndices.begin() + (metaIndex + 1); i != sortedIndices.end(); i++)
+        auto begin = sortedIndices.begin() + static_cast<std::vector<double>::difference_type>(metaIndex + 1);
+        for(auto i = begin; i != sortedIndices.end(); i++)
             data.at(*i) = clipValue;
         break;
     }
