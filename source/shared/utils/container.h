@@ -181,17 +181,27 @@ namespace u
     reversing_wrapper<T> reverse(T&& container) { return {container}; }
 
     template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<size_t> rankingOf(const C<T, Args...>& container)
+    std::vector<size_t> sortedIndicesOf(const C<T, Args...>& container)
     {
         std::vector<size_t> index(container.size());
-        std::vector<size_t> ranking(container.size());
-
         std::iota(std::begin(index), std::end(index), 0);
+
         std::sort(std::begin(index), std::end(index),
         [&container](size_t a, size_t b)
         {
-            return container[a] > container[b];
+            return container[a] < container[b];
         });
+
+        return index;
+    }
+
+    template<typename T, template<typename, typename...> typename C, typename... Args>
+    std::vector<size_t> rankingOf(const C<T, Args...>& container)
+    {
+        auto index = sortedIndicesOf(container);
+        std::reverse(std::begin(index), std::end(index));
+
+        std::vector<size_t> ranking(container.size());
 
         size_t rank = 1;
         for(auto i : index)
