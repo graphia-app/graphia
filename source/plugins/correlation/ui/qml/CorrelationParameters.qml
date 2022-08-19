@@ -1325,12 +1325,6 @@ BaseParameterDialog
                             summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), minimumCorrelationSpinBox.value);
                             summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), initialCorrelationSpinBox.value);
 
-                            if(scalingComboBox.value !== ScalingType.None)
-                                summaryString += Utils.format(qsTr("Scaling: {0}<br>"), scalingComboBox.currentText);
-
-                            if(normalisationComboBox.value !== NormaliseType.None)
-                                summaryString += Utils.format(qsTr("Normalisation: {0}<br>"), normalisationComboBox.currentText);
-
                             if(tabularDataParser.dataRect.hasMissingValues)
                             {
                                 summaryString += Utils.format(qsTr("Imputation: {0}"), missingDataTypeComboBox.currentText);
@@ -1340,6 +1334,12 @@ BaseParameterDialog
 
                                 summaryString += "<br>";
                             }
+
+                            if(scalingComboBox.value !== ScalingType.None)
+                                summaryString += Utils.format(qsTr("Scaling: {0}<br>"), scalingComboBox.currentText);
+
+                            if(normalisationComboBox.value !== NormaliseType.None)
+                                summaryString += Utils.format(qsTr("Normalisation: {0}<br>"), normalisationComboBox.currentText);
                         }
                         else if(dataTypeComboBox.value === CorrelationDataType.Discrete)
                         {

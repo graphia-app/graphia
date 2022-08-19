@@ -1060,6 +1060,19 @@ QString CorrelationPluginInstance::log() const
     text.append(tr("\nMinimum Correlation Value: %1").arg(
         u::formatNumberScientific(_minimumCorrelationValue)));
 
+    if(_valuesWereImputed)
+    {
+        text.append(tr("\nImputation: "));
+        switch(_missingDataType)
+        {
+        default:
+        case MissingDataType::Constant: text.append(tr("Constant (%1)")
+            .arg(u::formatNumberScientific(_missingDataReplacementValue))); break;
+        case MissingDataType::ColumnAverage: text.append(tr("Column Mean")); break;
+        case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate")); break;
+        }
+    }
+
     switch(_scalingType)
     {
     default:
@@ -1080,19 +1093,6 @@ QString CorrelationPluginInstance::log() const
     case NormaliseType::Mean: text.append(tr("\nNormalisation: Mean")); break;
     case NormaliseType::Standarisation: text.append(tr("\nNormalisation: Standarisation")); break;
     case NormaliseType::UnitScaling: text.append(tr("\nNormalisation: Unit Scaling")); break;
-    }
-
-    if(_valuesWereImputed)
-    {
-        text.append(tr("\nImputation: "));
-        switch(_missingDataType)
-        {
-        default:
-        case MissingDataType::Constant: text.append(tr("Constant (%1)")
-            .arg(u::formatNumberScientific(_missingDataReplacementValue))); break;
-        case MissingDataType::ColumnAverage: text.append(tr("Column Mean")); break;
-        case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate")); break;
-        }
     }
 
     return text;
