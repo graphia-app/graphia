@@ -41,6 +41,7 @@
 #include <stack>
 #include <set>
 #include <utility>
+#include <limits>
 
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName,
                                              TabularData& tabularData, QRect dataRect) :
@@ -219,6 +220,34 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
     }
 
     return numProbablyDiscreteColumns == 0;
+}
+
+static std::pair<double, double> dataRectMinMax(const TabularData& tabularData, const QRect& dataRect)
+{
+    auto min = std::numeric_limits<double>::max();
+    auto max = std::numeric_limits<double>::lowest();
+
+    for(auto column = dataRect.left(); column <= dataRect.right(); column++)
+    {
+        for(auto row = dataRect.top(); row <= dataRect.bottom(); row++)
+        {
+            const auto& value = tabularData.valueAt(
+                static_cast<size_t>(column), static_cast<size_t>(row));
+
+            if(value.isEmpty())
+                continue;
+
+            // We should only be getting called on numeric dataRects
+            Q_ASSERT(u::isNumeric(value));
+
+            auto number = u::toNumber(value);
+
+            min = std::min(number, min);
+            max = std::max(number, max);
+        }
+    }
+
+    return {min, max};
 }
 
 double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
@@ -523,6 +552,9 @@ QVariantMap CorrelationTabularDataParser::dataRect() const
     m.insert(QStringLiteral("hasDiscreteValues"), _hasDiscreteValues);
     m.insert(QStringLiteral("appearsToBeContinuous"), _appearsToBeContinuous);
 
+    m.insert(QStringLiteral("minValue"), _numericalMinMax.first);
+    m.insert(QStringLiteral("maxValue"), _numericalMinMax.second);
+
     return m;
 }
 
@@ -659,6 +691,7 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
             _dataRect = numericalDataRect;
             _hasDiscreteValues = false;
             _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
+            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect);
         }
 
         _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
@@ -688,9 +721,15 @@ void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
         _hasDiscreteValues = dataRectHasDiscreteValues(*_dataPtr, _dataRect);
 
         if(!_hasDiscreteValues)
+        {
             _appearsToBeContinuous = dataRectAppearsToBeContinuous(*_dataPtr, _dataRect);
+            _numericalMinMax = dataRectMinMax(*_dataPtr, _dataRect);
+        }
         else
+        {
             _appearsToBeContinuous = false;
+            _numericalMinMax = {};
+        }
 
         _hasMissingValues = dataRectHasMissingValues(*_dataPtr, _dataRect);
     });
