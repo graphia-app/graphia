@@ -60,7 +60,7 @@ BaseParameterDialog
         scalingType: scalingComboBox.value
         normaliseType: normalisationComboBox.value
         missingDataType: missingDataTypeComboBox.value
-        replacementValue: replacementConstantText.text
+        replacementValue: replacementConstantText.text.length > 0 ? replacementConstantText.text : 0.0
         treatAsBinary: treatAsBinaryCheckbox.checked
 
         onDataRectChanged:
@@ -677,12 +677,12 @@ BaseParameterDialog
                                 TextField
                                 {
                                     id: replacementConstantText
-                                    visible: missingDataTypeComboBox.currentText === qsTr("Constant")
+                                    visible: missingDataTypeComboBox.value === MissingDataType.Constant
                                     selectByMouse: true
 
                                     validator: DoubleValidator{}
 
-                                    onTextChanged: { parameters.missingDataValue = text; }
+                                    onTextChanged: { if(text.length > 0) parameters.missingDataValue = text; }
 
                                     text: "0.0"
                                 }
