@@ -66,6 +66,12 @@ DEFINE_QML_ENUM(
     ColumnAverage,
     RowInterpolation);
 
+DEFINE_QML_ENUM(
+    Q_GADGET, ClippingType,
+    None,
+    Constant,
+    Winsorization);
+
 // (...although not these ones:)
 
 DEFINE_QML_ENUM(
@@ -96,6 +102,7 @@ public:
 
     static double imputeValue(MissingDataType missingDataType, double replacementValue,
         const TabularData& tabularData, const QRect& dataRect, size_t columnIndex, size_t rowIndex);
+    static void clipValues(ClippingType clippingType, double clippingValue, std::vector<double>& data);
     static double scaleValue(ScalingType scalingType, double value,
         double epsilon = std::nextafter(0.0, 1.0));
     static void normalise(NormaliseType normaliseType,
@@ -138,6 +145,8 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(int normaliseType MEMBER _normaliseType NOTIFY parameterChanged)
     Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
     Q_PROPERTY(double replacementValue MEMBER _replacementValue NOTIFY parameterChanged)
+    Q_PROPERTY(int clippingType MEMBER _clippingType NOTIFY parameterChanged)
+    Q_PROPERTY(double clippingValue MEMBER _clippingValue NOTIFY parameterChanged)
     Q_PROPERTY(bool treatAsBinary MEMBER _treatAsBinary NOTIFY parameterChanged)
 
     Q_PROPERTY(QVariantMap graphSizeEstimate MEMBER _graphSizeEstimate NOTIFY graphSizeEstimateChanged)
@@ -151,6 +160,7 @@ private:
     bool _hasMissingValues = false;
     bool _hasDiscreteValues = false;
     bool _appearsToBeContinuous = false;
+    std::pair<double, double> _numericalMinMax;
     bool _dataHasNumericalRect = false;
     std::shared_ptr<TabularData> _dataPtr = nullptr;
     TabularDataModel _model;
@@ -170,6 +180,8 @@ private:
     int _normaliseType = static_cast<int>(NormaliseType::None);
     int _missingDataType = static_cast<int>(MissingDataType::Constant);
     double _replacementValue = 0.0;
+    int _clippingType = static_cast<int>(ClippingType::None);
+    double _clippingValue = 0.0;
     bool _treatAsBinary = false;
 
     void setProgress(int progress);

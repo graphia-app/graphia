@@ -109,6 +109,8 @@ private:
     NormaliseType _normaliseType = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::Constant;
     double _missingDataReplacementValue = 0.0;
+    ClippingType _clippingType = ClippingType::None;
+    double _clippingValue = 0.0;
     bool _treatAsBinary = false;
     ClusteringType _clusteringType = ClusteringType::None;
     EdgeReductionType _edgeReductionType = EdgeReductionType::None;
@@ -217,7 +219,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 9; }
+    int dataVersion() const override { return 10; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

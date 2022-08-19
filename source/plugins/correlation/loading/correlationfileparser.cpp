@@ -344,6 +344,32 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     return imputedValue;
 }
 
+void CorrelationFileParser::clipValues(ClippingType clippingType, double clippingValue, std::vector<double>& data)
+{
+    switch(clippingType)
+    {
+    case ClippingType::Constant:
+        for(auto& value : data)
+            value = std::min(value, clippingValue);
+        break;
+
+    case ClippingType::Winsorization:
+    {
+        auto sortedIndices = u::sortedIndicesOf(data);
+        auto metaIndex = static_cast<size_t>((clippingValue * (sortedIndices.size() - 1)) / 100.0);
+        auto clipIndex = sortedIndices.at(metaIndex);
+        auto clipValue = data.at(clipIndex);
+
+        for(auto i = sortedIndices.begin() + (metaIndex + 1); i != sortedIndices.end(); i++)
+            data.at(*i) = clipValue;
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
 double CorrelationFileParser::scaleValue(ScalingType scalingType, double value, double epsilon)
 {
     switch(scalingType)
@@ -796,6 +822,8 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
             rowData.emplace_back(transformedValue);
         }
     }
+
+    CorrelationFileParser::clipValues(NORMALISE_QML_ENUM(ClippingType, _clippingType), _clippingValue, rowData);
 
     auto epsilon = CorrelationFileParser::epsilonFor(rowData);
     std::transform(rowData.begin(), rowData.end(), rowData.begin(),

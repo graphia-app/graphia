@@ -182,6 +182,8 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
     parser.setProgress(-1);
 
+    CorrelationFileParser::clipValues(_clippingType, _clippingValue, _continuousData);
+
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
     std::transform(_continuousData.begin(), _continuousData.end(), _continuousData.begin(),
     [this](double value)
@@ -639,6 +641,10 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _missingDataType = NORMALISE_QML_ENUM(MissingDataType, value.toInt());
     else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
+    else if(name == QStringLiteral("clippingType"))
+        _clippingType = NORMALISE_QML_ENUM(ClippingType, value.toInt());
+    else if(name == QStringLiteral("clippingValue"))
+        _clippingValue = value.toDouble();
     else if(name == QStringLiteral("treatAsBinary"))
         _treatAsBinary = value.toBool();
     else if(name == QStringLiteral("dataRect"))
@@ -839,6 +845,8 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["normalisation"] = static_cast<int>(_normaliseType);
     jsonObject["missingDataType"] = static_cast<int>(_missingDataType);
     jsonObject["missingDataReplacementValue"] = _missingDataReplacementValue;
+    jsonObject["clippingType"] = static_cast<int>(_clippingType);
+    jsonObject["clippingValue"] = _clippingValue;
 
     return QByteArray::fromStdString(jsonObject.dump());
 }
@@ -991,6 +999,15 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _missingDataType = NORMALISE_QML_ENUM(MissingDataType, jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
+    if(dataVersion >= 10)
+    {
+        if(!u::containsAllOf(jsonObject, {"clippingType", "clippingValue"}))
+            return false;
+
+        _clippingType = NORMALISE_QML_ENUM(ClippingType, jsonObject["clippingType"]);
+        _clippingValue = jsonObject["clippingValue"];
+    }
+
     if(dataVersion >= 7)
     {
         if(!u::containsAllOf(jsonObject, {"correlationDataType", "continuousCorrelationType",
@@ -1071,6 +1088,16 @@ QString CorrelationPluginInstance::log() const
         case MissingDataType::ColumnAverage: text.append(tr("Column Mean")); break;
         case MissingDataType::RowInterpolation: text.append(tr("Row Interpolate")); break;
         }
+    }
+
+    switch(_clippingType)
+    {
+    default:
+    case ClippingType::None: break;
+    case ClippingType::Constant: text.append(tr("\nClipping: Constant (%1)")
+        .arg(u::formatNumberScientific(_clippingValue))); break;
+    case ClippingType::Winsorization: text.append(tr("\nClipping: Winsorization (%1 percentile)")
+        .arg(static_cast<int>(_clippingValue))); break;
     }
 
     switch(_scalingType)

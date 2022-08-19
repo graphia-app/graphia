@@ -61,6 +61,20 @@ BaseParameterDialog
         normaliseType: normalisationComboBox.value
         missingDataType: missingDataTypeComboBox.value
         replacementValue: replacementConstantText.text.length > 0 ? replacementConstantText.text : 0.0
+        clippingType: clippingTypeComboBox.value
+        clippingValue:
+        {
+            switch(clippingTypeComboBox.value)
+            {
+            case ClippingType.Constant:
+                return clippingValueText.text.length > 0 ? clippingValueText.text : 0.0;
+            case ClippingType.Winsorization:
+                return winsoriztionValueSpinBox.value;
+            }
+
+            return 0.0;
+        }
+
         treatAsBinary: treatAsBinaryCheckbox.checked
 
         onDataRectChanged:
@@ -71,6 +85,8 @@ BaseParameterDialog
                 dataTypeComboBox.setDiscrete();
             else if(dataRect.appearsToBeContinuous)
                 dataTypeComboBox.setContinuous();
+
+            clippingValueText.text = dataRect.maxValue;
         }
 
         onDataLoaded:
@@ -745,6 +761,128 @@ BaseParameterDialog
                             Text
                             {
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                text: qsTr("Clipping:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: clippingTypeComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("None");               value: ClippingType.None }
+                                    ListElement { text: qsTr("Constant");           value: ClippingType.Constant }
+                                    ListElement { text: qsTr("Winsorization");      value: ClippingType.Winsorization }
+                                }
+                                textRole: "text"
+
+                                onCurrentIndexChanged:
+                                {
+                                    parameters.clippingType = model.get(currentIndex).value;
+                                }
+
+                                property int value: { return model.get(currentIndex).value; }
+                            }
+
+                            RowLayout
+                            {
+                                Layout.columnSpan: 4
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+
+                                TextField
+                                {
+                                    id: clippingValueText
+                                    visible: clippingTypeComboBox.value === ClippingType.Constant
+                                    selectByMouse: true
+
+                                    validator: DoubleValidator{}
+
+                                    onVisibleChanged: { update(); }
+                                    onTextChanged: { update(); }
+
+                                    function update()
+                                    {
+                                        if(visible && text.length > 0)
+                                            parameters.clippingValue = text;
+                                    }
+
+                                    text: "0.0"
+                                }
+
+                                SpinBox
+                                {
+                                    id: winsoriztionValueSpinBox
+                                    Layout.preferredWidth: 80
+                                    visible: clippingTypeComboBox.value === ClippingType.Winsorization
+
+                                    editable: true
+                                    Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                                    from: 0
+                                    to: 100
+                                    value: 100
+
+                                    onVisibleChanged: { update(); }
+                                    onValueChanged: { update(); }
+
+                                    function update()
+                                    {
+                                        if(visible)
+                                            parameters.clippingValue = value;
+                                    }
+                                }
+
+                                Text
+                                {
+                                    visible: clippingTypeComboBox.value === ClippingType.Winsorization
+                                    text: qsTr("percentile")
+                                }
+
+                                HelpTooltip
+                                {
+                                    visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                    title: qsTr("Clipping")
+                                    GridLayout
+                                    {
+                                        columns: 2
+                                        Text
+                                        {
+                                            text: qsTr("<b>Constant:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("Limit the maximum data table value to a specified constant.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("<b>Winsorization:</b>")
+                                            textFormat: Text.StyledText
+                                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                        }
+
+                                        Text
+                                        {
+                                            text: qsTr("Limit the maximum data table value to that at a specified " +
+                                                "percentile. For example if the 95th percentile is chosen, the " +
+                                                "top 5th percentile of values will be set to that of the 95th percentile.");
+                                            wrapMode: Text.WordWrap
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text
+                            {
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 text: qsTr("Scaling:")
                                 Layout.alignment: Qt.AlignRight
                             }
@@ -1335,6 +1473,18 @@ BaseParameterDialog
                                 summaryString += "<br>";
                             }
 
+                            if(clippingTypeComboBox.value !== ClippingType.None)
+                            {
+                                summaryString += Utils.format(qsTr("Clipping: {0}"), clippingTypeComboBox.currentText);
+
+                                if(clippingTypeComboBox.value === ClippingType.Constant)
+                                    summaryString += Utils.format(qsTr(" ({0})"), clippingValueText.text);
+                                else if(clippingTypeComboBox.value === ClippingType.Winsorization)
+                                    summaryString += Utils.format(qsTr(" ({0} percentile)"), winsoriztionValueSpinBox.value);
+
+                                summaryString += "<br>";
+                            }
+
                             if(scalingComboBox.value !== ScalingType.None)
                                 summaryString += Utils.format(qsTr("Scaling: {0}<br>"), scalingComboBox.currentText);
 
@@ -1476,7 +1626,8 @@ BaseParameterDialog
             correlationPolarity: CorrelationPolarity.Positive,
             discreteCorrelationType: CorrelationType.Jaccard,
             scaling: ScalingType.None, normalise: NormaliseType.None,
-            missingDataType: MissingDataType.Constant };
+            missingDataType: MissingDataType.Constant,
+            clippingType: ClippingType.None };
 
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
