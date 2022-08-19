@@ -1322,8 +1322,8 @@ BaseParameterDialog
                         {
                             summaryString += Utils.format(qsTr("Continuous Correlation Metric: {0}<br>"), continuousAlgorithmComboBox.currentText);
                             summaryString += Utils.format(qsTr("Correlation Polarity: {0}<br>"), polarityComboBox.currentText);
-                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), minimumCorrelationSpinBox.value);
-                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), initialCorrelationSpinBox.value);
+                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumCorrelationSpinBox.value));
+                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialCorrelationSpinBox.value));
 
                             if(tabularDataParser.dataRect.hasMissingValues)
                             {
@@ -1344,8 +1344,8 @@ BaseParameterDialog
                         else if(dataTypeComboBox.value === CorrelationDataType.Discrete)
                         {
                             summaryString += Utils.format(qsTr("Discrete Correlation Metric: {0}<br>"), discreteAlgorithmComboBox.currentText);
-                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), minimumCorrelationSpinBox.value);
-                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), initialCorrelationSpinBox.value);
+                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumCorrelationSpinBox.value));
+                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialCorrelationSpinBox.value));
                         }
 
                         let transformString = ""
