@@ -31,6 +31,7 @@
 #include "shared/graph/edgelist.h"
 
 #include <vector>
+#include <iterator>
 #include <cmath>
 
 #include <QObject>
@@ -69,14 +70,20 @@ class CovarianceCorrelation : public ContinuousCorrelation
     template<typename A>
     using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
-public:
-    EdgeList edgeList(const ContinuousDataVectors& vectors,
-        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
-        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+private:
+    struct ContinuousDataVectorRelation
     {
-        if(vectors.empty())
-            return {};
+        ContinuousDataVectors::const_iterator _a;
+        ContinuousDataVectors::const_iterator _b;
+        double _r = 0.0;
+    };
 
+    using CorrelationList = std::vector<ContinuousDataVectorRelation>;
+
+    auto process(const ContinuousDataVectors& vectors,
+        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
+    {
         size_t size = vectors.front().size();
 
         if(progressable != nullptr)
@@ -109,10 +116,10 @@ public:
             if constexpr(vectorType == VectorType::Ranking)
                 vectorA = vectorA->ranking();
 
-            EdgeList edges;
+            CorrelationList correlations;
 
             if(cancellable != nullptr && cancellable->cancelled())
-                return edges;
+                return correlations;
 
             for(auto vectorBIt = vectorAIt + 1; vectorBIt != vectors.end(); ++vectorBIt)
             {
@@ -126,18 +133,18 @@ public:
                 if(!std::isfinite(r))
                     continue;
 
-                bool createEdge = false;
+                bool exceedsThreshold = false;
 
                 switch(polarity)
                 {
                 default:
-                case CorrelationPolarity::Positive: createEdge = (r >= minimumThreshold); break;
-                case CorrelationPolarity::Negative: createEdge = (r <= -minimumThreshold); break;
-                case CorrelationPolarity::Both:     createEdge = (std::abs(r) >= minimumThreshold); break;
+                case CorrelationPolarity::Positive: exceedsThreshold = (r >= minimumThreshold); break;
+                case CorrelationPolarity::Negative: exceedsThreshold = (r <= -minimumThreshold); break;
+                case CorrelationPolarity::Both:     exceedsThreshold = (std::abs(r) >= minimumThreshold); break;
                 }
 
-                if(createEdge)
-                    edges.push_back({vectorA->nodeId(), vectorB->nodeId(), r});
+                if(exceedsThreshold)
+                    correlations.emplace_back(vectorAIt, vectorBIt, r);
             }
 
             cost += vectorA->computeCostHint();
@@ -145,7 +152,7 @@ public:
             if(progressable != nullptr)
                 progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
 
-            return edges;
+            return correlations;
         });
 
         if(progressable != nullptr)
@@ -154,10 +161,27 @@ public:
             progressable->setProgress(-1);
         }
 
+        return results;
+    }
+
+public:
+    EdgeList edgeList(const ContinuousDataVectors& vectors,
+        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+    {
+        if(vectors.empty())
+            return {};
+
+        auto results = process(vectors, minimumThreshold, polarity, cancellable, progressable);
+
         EdgeList edges;
         edges.reserve(std::distance(results.begin(), results.end()));
-        edges.insert(edges.end(), std::make_move_iterator(results.begin()),
-            std::make_move_iterator(results.end()));
+
+        std::transform(results.begin(), results.end(), std::back_inserter(edges),
+        [](const auto& result)
+        {
+            return EdgeListEdge{result._a->nodeId(), result._b->nodeId(), result._r};
+        });
 
         return edges;
     }
