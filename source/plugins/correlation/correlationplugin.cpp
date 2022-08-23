@@ -586,12 +586,12 @@ void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progre
     }
 }
 
-const ContinuousDataRow& CorrelationPluginInstance::continuousDataRowForNodeId(NodeId nodeId) const
+const ContinuousDataVector& CorrelationPluginInstance::continuousDataRowForNodeId(NodeId nodeId) const
 {
     return _continuousDataRows.at(_graphModel->userNodeData().indexFor(nodeId));
 }
 
-const DiscreteDataRow& CorrelationPluginInstance::discreteDataRowForNodeId(NodeId nodeId) const
+const DiscreteDataVector& CorrelationPluginInstance::discreteDataRowForNodeId(NodeId nodeId) const
 {
     return _discreteDataRows.at(_graphModel->userNodeData().indexFor(nodeId));
 }

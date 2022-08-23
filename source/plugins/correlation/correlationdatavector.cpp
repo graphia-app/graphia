@@ -16,25 +16,25 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "correlationdatarow.h"
+#include "correlationdatavector.h"
 
 #include "shared/utils/container.h"
 
 #include <algorithm>
 #include <cmath>
 
-void ContinuousDataRow::update()
+void ContinuousDataVector::update()
 {
     _statistics = u::findStatisticsFor(_data);
 }
 
-void ContinuousDataRow::generateRanking() const
+void ContinuousDataVector::generateRanking() const
 {
-    _rankingRow = std::make_shared<ContinuousDataRow>(u::rankingOf(_data), _nodeId, _cost);
-    _rankingRow->update();
+    _rankingVector = std::make_shared<ContinuousDataVector>(u::rankingOf(_data), _nodeId, _cost);
+    _rankingVector->update();
 }
 
-const ContinuousDataRow* ContinuousDataRow::ranking() const
+const ContinuousDataVector* ContinuousDataVector::ranking() const
 {
-    return _rankingRow.get();
+    return _rankingVector.get();
 }

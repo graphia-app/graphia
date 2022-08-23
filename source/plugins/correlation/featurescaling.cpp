@@ -34,13 +34,13 @@ struct StandardNormalisationValues
     std::vector<double>* stddevs = nullptr;
 };
 
-static bool calcStandardValues(const ContinuousDataRows& dataRows,
+static bool calcStandardValues(const ContinuousDataVectors& dataRows,
     const StandardNormalisationValues& values, IParser* parser = nullptr)
 {
     if(dataRows.empty())
         return true;
 
-    auto numColumns = dataRows.at(0).numColumns();
+    auto numColumns = dataRows.at(0).size();
 
     if(values.mins != nullptr)
         values.mins->resize(numColumns, std::numeric_limits<double>::max());
@@ -120,12 +120,12 @@ static bool calcStandardValues(const ContinuousDataRows& dataRows,
     return true;
 }
 
-static bool normalise(ContinuousDataRows& dataRows,
+static bool normalise(ContinuousDataVectors& dataRows,
     const std::vector<double>& subtractors,
     const std::vector<double>& denominators,
     IParser* parser)
 {
-    auto numColumns = dataRows.at(0).numColumns();
+    auto numColumns = dataRows.at(0).size();
 
     uint64_t i = 0;
 
@@ -157,7 +157,7 @@ static bool normalise(ContinuousDataRows& dataRows,
     return true;
 }
 
-bool MinMaxNormaliser::process(ContinuousDataRows& dataRows,
+bool MinMaxNormaliser::process(ContinuousDataVectors& dataRows,
     IParser* parser) const
 {
     if(dataRows.empty())
@@ -173,7 +173,7 @@ bool MinMaxNormaliser::process(ContinuousDataRows& dataRows,
     return normalise(dataRows, mins, ranges, parser);
 }
 
-bool MeanNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
+bool MeanNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;
@@ -189,7 +189,7 @@ bool MeanNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) cons
     return normalise(dataRows, means, ranges, parser);
 }
 
-bool StandardisationNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
+bool StandardisationNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;
@@ -206,9 +206,9 @@ bool StandardisationNormaliser::process(ContinuousDataRows& dataRows, IParser* p
     return normalise(dataRows, means, stddevs, parser);
 }
 
-bool UnitScalingNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
+bool UnitScalingNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {
-    auto numColumns = dataRows.at(0).numColumns();
+    auto numColumns = dataRows.at(0).size();
 
     std::vector<double> vectorLengthColumn(numColumns);
 

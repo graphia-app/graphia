@@ -26,12 +26,12 @@
 
 #include <QtGlobal>
 
-bool QuantileNormaliser::process(ContinuousDataRows& dataRows, IParser* parser) const
+bool QuantileNormaliser::process(ContinuousDataVectors& dataRows, IParser* parser) const
 {
     if(dataRows.empty())
         return true;
 
-    auto numColumns = dataRows.at(0).numColumns();
+    auto numColumns = dataRows.at(0).size();
 
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
     std::vector<size_t> ranking(dataRows.size() * numColumns);

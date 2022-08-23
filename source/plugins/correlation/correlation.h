@@ -19,7 +19,7 @@
 #ifndef CORRELATION_H
 #define CORRELATION_H
 
-#include "correlationdatarow.h"
+#include "correlationdatavector.h"
 #include "correlationtype.h"
 
 #include "shared/utils/progressable.h"
@@ -50,45 +50,45 @@ public:
 class ContinuousCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList process(const ContinuousDataRows& rows, double minimumThreshold,
+    virtual EdgeList process(const ContinuousDataVectors& vectors, double minimumThreshold,
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
 
-enum class RowType
+enum class VectorType
 {
     Raw,
     Ranking
 };
 
-template<typename Algorithm, RowType rowType = RowType::Raw>
+template<typename Algorithm, VectorType vectorType = VectorType::Raw>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
     template<typename A>
-    using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataRows{}));
+    using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
 public:
-    EdgeList process(const ContinuousDataRows& rows,
+    EdgeList process(const ContinuousDataVectors& vectors,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
-        if(rows.empty())
+        if(vectors.empty())
             return {};
 
-        size_t numColumns = rows.front().numColumns();
+        size_t size = vectors.front().size();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);
 
         uint64_t totalCost = 0;
-        for(const auto& row : rows)
+        for(const auto& vector : vectors)
         {
-            totalCost += row.computeCostHint();
+            totalCost += vector.computeCostHint();
 
-            if constexpr(rowType == RowType::Ranking)
-                row.generateRanking();
+            if constexpr(vectorType == VectorType::Ranking)
+                vector.generateRanking();
         }
 
         Algorithm algorithm;
@@ -97,31 +97,31 @@ public:
             std::experimental::is_detected_v<preprocess_t, Algorithm>;
 
         if constexpr(AlgorithmHasPreprocess)
-            algorithm.preprocess(numColumns, rows);
+            algorithm.preprocess(size, vectors);
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(rows.begin(), rows.end(),
-        [&](ContinuousDataRows::const_iterator rowAIt)
+        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(vectors.begin(), vectors.end(),
+        [&](ContinuousDataVectors::const_iterator vectorAIt)
         {
-            const auto* rowA = &(*rowAIt);
+            const auto* vectorA = &(*vectorAIt);
 
-            if constexpr(rowType == RowType::Ranking)
-                rowA = rowA->ranking();
+            if constexpr(vectorType == VectorType::Ranking)
+                vectorA = vectorA->ranking();
 
             EdgeList edges;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return edges;
 
-            for(auto rowBIt = rowAIt + 1; rowBIt != rows.end(); ++rowBIt)
+            for(auto vectorBIt = vectorAIt + 1; vectorBIt != vectors.end(); ++vectorBIt)
             {
-                const auto* rowB = &(*rowBIt);
+                const auto* vectorB = &(*vectorBIt);
 
-                if constexpr(rowType == RowType::Ranking)
-                    rowB = rowB->ranking();
+                if constexpr(vectorType == VectorType::Ranking)
+                    vectorB = vectorB->ranking();
 
-                double r = algorithm.evaluate(numColumns, rowA, rowB);
+                double r = algorithm.evaluate(size, vectorA, vectorB);
 
                 if(!std::isfinite(r))
                     continue;
@@ -137,10 +137,10 @@ public:
                 }
 
                 if(createEdge)
-                    edges.push_back({rowA->nodeId(), rowB->nodeId(), r});
+                    edges.push_back({vectorA->nodeId(), vectorB->nodeId(), r});
             }
 
-            cost += rowA->computeCostHint();
+            cost += vectorA->computeCostHint();
 
             if(progressable != nullptr)
                 progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
@@ -165,7 +165,7 @@ public:
 
 struct PearsonAlgorithm
 {
-    double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB);
+    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
 };
 
 class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm>
@@ -187,7 +187,7 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, RowType::Ranking>
+class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, VectorType::Ranking>
 {
 public:
     QString name() const override { return QObject::tr("Spearman Rank"); }
@@ -211,7 +211,7 @@ public:
 
 struct EuclideanSimilarityAlgorithm
 {
-    double evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
 };
 
 class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm>
@@ -235,7 +235,7 @@ public:
 
 struct CosineSimilarityAlgorithm
 {
-    double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
 };
 
 class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm>
@@ -261,11 +261,11 @@ public:
 
 struct BicorAlgorithm
 {
-    const ContinuousDataRow* _base = nullptr;
-    ContinuousDataRows _processedRows;
+    const ContinuousDataVector* _base = nullptr;
+    ContinuousDataVectors _processedVectors;
 
-    void preprocess(size_t numColumns, const ContinuousDataRows& rows);
-    double evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB);
+    void preprocess(size_t size, const ContinuousDataVectors& vectors);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
 };
 
 class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm>
@@ -290,7 +290,7 @@ public:
 class DiscreteCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
+    virtual EdgeList process(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
@@ -300,27 +300,27 @@ template<int Denominator>
 class MatchingCorrelation : public DiscreteCorrelation
 {
 public:
-    EdgeList process(const DiscreteDataRows& rows, double minimumThreshold, bool treatAsBinary,
+    EdgeList process(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
-        if(rows.empty())
+        if(vectors.empty())
             return {};
 
-        size_t numColumns = rows.front().numColumns();
+        size_t size = vectors.front().size();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);
 
-        const auto tokenisedRows = tokeniseDataRows(rows);
+        const auto tokenisedVectors = tokeniseDataVectors(vectors);
 
         uint64_t totalCost = 0;
-        for(const auto& row : rows)
-            totalCost += row.computeCostHint();
+        for(const auto& vector : vectors)
+            totalCost += vector.computeCostHint();
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(tokenisedRows.begin(), tokenisedRows.end(),
-        [&](TokenisedDataRows::const_iterator rowAIt)
+        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(tokenisedVectors.begin(), tokenisedVectors.end(),
+        [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
             EdgeList edges;
 
@@ -344,45 +344,45 @@ public:
                 operator double() const { return static_cast<double>(_numerator) / _denominator; }
             };
 
-            auto binary = [&](auto rowAValue, auto rowBValue) -> Fraction
+            auto binary = [&](auto vectorAValue, auto vectorBValue) -> Fraction
             {
-                return {rowAValue && rowBValue ? 1 : 0, 1};
+                return {vectorAValue && vectorBValue ? 1 : 0, 1};
             };
 
-            auto nonBinary = [&](auto rowAValue, auto rowBValue) -> Fraction
+            auto nonBinary = [&](auto vectorAValue, auto vectorBValue) -> Fraction
             {
-                return {rowAValue == rowBValue ? 1 : 0, 1};
+                return {vectorAValue == vectorBValue ? 1 : 0, 1};
             };
 
-            auto createEdgesForRowPairs = [&](auto&& f)
+            auto createEdgesForVectorPairs = [&](auto&& f)
             {
-                for(auto rowBIt = rowAIt + 1; rowBIt != tokenisedRows.end(); ++rowBIt)
+                for(auto vectorBIt = vectorAIt + 1; vectorBIt != tokenisedVectors.end(); ++vectorBIt)
                 {
                     Fraction fraction;
-                    for(size_t column = 0; column < numColumns; column++)
+                    for(size_t i = 0; i < size; i++)
                     {
-                        const auto& rowAValue = rowAIt->valueAt(column);
-                        const auto& rowBValue = rowBIt->valueAt(column);
+                        const auto& vectorAValue = vectorAIt->valueAt(i);
+                        const auto& vectorBValue = vectorBIt->valueAt(i);
 
-                        if(!rowAValue && !rowBValue)
+                        if(!vectorAValue && !vectorBValue)
                             fraction += {0, Denominator};
                         else
-                            fraction += f(rowAValue, rowBValue);
+                            fraction += f(vectorAValue, vectorBValue);
                     }
 
                     double r = fraction;
 
                     if(std::isfinite(r) && r >= minimumThreshold)
-                        edges.push_back({rowAIt->nodeId(), rowBIt->nodeId(), r});
+                        edges.push_back({vectorAIt->nodeId(), vectorBIt->nodeId(), r});
                 }
             };
 
             if(treatAsBinary)
-                createEdgesForRowPairs(binary);
+                createEdgesForVectorPairs(binary);
             else
-                createEdgesForRowPairs(nonBinary);
+                createEdgesForVectorPairs(nonBinary);
 
-            cost += rowAIt->computeCostHint();
+            cost += vectorAIt->computeCostHint();
 
             if(progressable != nullptr)
                 progressable->setProgress(static_cast<int>((cost * 100) / totalCost));

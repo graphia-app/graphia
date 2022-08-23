@@ -392,7 +392,7 @@ double CorrelationFileParser::scaleValue(ScalingType scalingType, double value, 
 }
 
 void CorrelationFileParser::normalise(NormaliseType normaliseType,
-    ContinuousDataRows& dataRows, IParser* parser)
+    ContinuousDataVectors& dataRows, IParser* parser)
 {
     switch(normaliseType)
     {
@@ -779,12 +779,12 @@ static std::vector<size_t> randomRowIndices(size_t first, size_t numRows, size_t
     return rowIndices;
 }
 
-ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_t numSampleRows)
+ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(size_t numSampleRows)
 {
     if(_dataRect.isEmpty())
         return {};
 
-    ContinuousDataRows dataRows;
+    ContinuousDataVectors dataRows;
     std::vector<double> rowData;
 
     auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
@@ -850,12 +850,12 @@ ContinuousDataRows CorrelationTabularDataParser::sampledContinuousDataRows(size_
     return dataRows;
 }
 
-DiscreteDataRows CorrelationTabularDataParser::sampledDiscreteDataRows(size_t numSampleRows)
+DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(size_t numSampleRows)
 {
     if(_dataRect.isEmpty())
         return {};
 
-    DiscreteDataRows dataRows;
+    DiscreteDataVectors dataRows;
     std::vector<QString> rowData;
     rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
 

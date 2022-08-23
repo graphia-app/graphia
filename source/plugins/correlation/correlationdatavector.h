@@ -16,8 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORRELATIONDATAROW_H
-#define CORRELATIONDATAROW_H
+#ifndef CORRELATIONDATAVECTOR_H
+#define CORRELATIONDATAVECTOR_H
 
 #include "shared/graph/elementid.h"
 #include "shared/utils/statistics.h"
@@ -33,12 +33,12 @@
 #include <QString>
 
 template<typename T>
-class CorrelationDataRow
+class CorrelationDataVector
 {
 protected:
     std::vector<T> _data;
 
-    size_t _numColumns = 0;
+    size_t _size = 0;
     NodeId _nodeId;
     uint64_t _cost = 0;
 
@@ -47,23 +47,23 @@ public:
     using DataIterator = typename decltype(_data)::iterator;
     using DataOffset = typename decltype(_data)::size_type;
 
-    CorrelationDataRow() = default;
-    CorrelationDataRow(const CorrelationDataRow&) = default;
-    CorrelationDataRow& operator=(const CorrelationDataRow&) = default;
-    virtual ~CorrelationDataRow() = default;
+    CorrelationDataVector() = default;
+    CorrelationDataVector(const CorrelationDataVector&) = default;
+    CorrelationDataVector& operator=(const CorrelationDataVector&) = default;
+    virtual ~CorrelationDataVector() = default;
 
     template<typename U>
-    CorrelationDataRow(const std::vector<U>& data, size_t row, size_t numColumns,
+    CorrelationDataVector(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
         _data({data.cbegin() + (row * numColumns), (data.cbegin() + (row * numColumns)) + numColumns}),
-        _numColumns(std::distance(begin(), end())),
+        _size(std::distance(begin(), end())),
         _nodeId(nodeId), _cost(computeCost)
     {}
 
     template<typename U>
-    CorrelationDataRow(const std::vector<U>& dataRow,
+    CorrelationDataVector(const std::vector<U>& dataVector,
         NodeId nodeId, uint64_t computeCost = 1) :
-        CorrelationDataRow(dataRow, 0, dataRow.size(), nodeId, computeCost)
+        CorrelationDataVector(dataVector, 0, dataVector.size(), nodeId, computeCost)
     {}
 
     DataIterator begin() { return _data.begin(); }
@@ -76,23 +76,23 @@ public:
 
     uint64_t computeCostHint() const { return _cost; }
 
-    size_t numColumns() const { return _numColumns; }
-    const T& valueAt(size_t column) const { return _data.at(column); }
-    void setValueAt(size_t column, const T& value) { _data[column] = value; }
+    size_t size() const { return _size; }
+    const T& valueAt(size_t index) const { return _data.at(index); }
+    void setValueAt(size_t index, const T& value) { _data[index] = value; }
 
     NodeId nodeId() const { return _nodeId; }
 
     virtual void update() {}
 };
 
-class ContinuousDataRow : public CorrelationDataRow<double>
+class ContinuousDataVector : public CorrelationDataVector<double>
 {
 private:
     u::Statistics _statistics;
-    mutable std::shared_ptr<ContinuousDataRow> _rankingRow;
+    mutable std::shared_ptr<ContinuousDataVector> _rankingVector;
 
 public:
-    using CorrelationDataRow::CorrelationDataRow;
+    using CorrelationDataVector::CorrelationDataVector;
 
     double sum() const { return _statistics._sum; }
     double sumSq() const { return _statistics._sumSq; }
@@ -110,31 +110,31 @@ public:
     void update() override;
 
     void generateRanking() const;
-    const ContinuousDataRow* ranking() const;
+    const ContinuousDataVector* ranking() const;
 };
 
-class DiscreteDataRow : public CorrelationDataRow<QString>
+class DiscreteDataVector : public CorrelationDataVector<QString>
 {
 public:
-    using CorrelationDataRow::CorrelationDataRow;
+    using CorrelationDataVector::CorrelationDataVector;
 };
 
-class TokenisedDataRow : public CorrelationDataRow<size_t>
+class TokenisedDataVector : public CorrelationDataVector<size_t>
 {
 public:
-    using CorrelationDataRow::CorrelationDataRow;
+    using CorrelationDataVector::CorrelationDataVector;
 };
 
-using ContinuousDataRows = std::vector<ContinuousDataRow>;
-using DiscreteDataRows = std::vector<DiscreteDataRow>;
-using TokenisedDataRows = std::vector<TokenisedDataRow>;
+using ContinuousDataVectors = std::vector<ContinuousDataVector>;
+using DiscreteDataVectors = std::vector<DiscreteDataVector>;
+using TokenisedDataVectors = std::vector<TokenisedDataVector>;
 
-template<typename DataRows>
-TokenisedDataRows tokeniseDataRows(const DataRows& dataRows)
+template<typename DataVectors>
+TokenisedDataVectors tokeniseDataVectors(const DataVectors& dataVectors)
 {
-    using T = typename DataRows::value_type::ConstDataIterator::value_type;
+    using T = typename DataVectors::value_type::ConstDataIterator::value_type;
 
-    TokenisedDataRows tokenisedDataRows;
+    TokenisedDataVectors tokenisedDataVectors;
 
     size_t token = 1;
     std::map<T, size_t> valueMap;
@@ -145,12 +145,12 @@ TokenisedDataRows tokeniseDataRows(const DataRows& dataRows)
     else
         valueMap[0] = 0;
 
-    for(const auto& dataRow : dataRows)
+    for(const auto& dataVector : dataVectors)
     {
         std::vector<size_t> tokens;
-        tokens.reserve(dataRow.numColumns());
+        tokens.reserve(dataVector.size());
 
-        for(const auto& value : dataRow)
+        for(const auto& value : dataVector)
         {
             if(!u::contains(valueMap, value))
             {
@@ -161,10 +161,10 @@ TokenisedDataRows tokeniseDataRows(const DataRows& dataRows)
             tokens.emplace_back(valueMap.at(value));
         }
 
-        tokenisedDataRows.emplace_back(tokens, dataRow.nodeId(), dataRow.computeCostHint());
+        tokenisedDataVectors.emplace_back(tokens, dataVector.nodeId(), dataVector.computeCostHint());
     }
 
-    return tokenisedDataRows;
+    return tokenisedDataVectors;
 }
 
-#endif // CORRELATIONDATAROW_H
+#endif // CORRELATIONDATAVECTOR_H

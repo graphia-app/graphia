@@ -31,7 +31,7 @@
 #include "loading/correlationfileparser.h"
 
 #include "columnannotation.h"
-#include "correlationdatarow.h"
+#include "correlationdatavector.h"
 #include "correlationnodeattributetablemodel.h"
 
 #include <vector>
@@ -88,8 +88,8 @@ private:
     std::vector<double> _continuousData;
     std::vector<QString> _discreteData;
 
-    ContinuousDataRows _continuousDataRows;
-    DiscreteDataRows _discreteDataRows;
+    ContinuousDataVectors _continuousDataRows;
+    DiscreteDataVectors _discreteDataRows;
 
     std::map<QString, size_t> _discreteDataValueIndex;
 
@@ -138,8 +138,8 @@ private:
     void buildColumnAnnotations();
     void buildDiscreteDataValueIndex(Progressable& progressable);
 
-    const ContinuousDataRow& continuousDataRowForNodeId(NodeId nodeId) const;
-    const DiscreteDataRow& discreteDataRowForNodeId(NodeId nodeId) const;
+    const ContinuousDataVector& continuousDataRowForNodeId(NodeId nodeId) const;
+    const DiscreteDataVector& discreteDataRowForNodeId(NodeId nodeId) const;
 
     void setHighlightedRows(const QVector<int>& highlightedRows);
 

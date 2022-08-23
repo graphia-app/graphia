@@ -45,22 +45,22 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
     return nullptr;
 }
 
-double PearsonAlgorithm::evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+double PearsonAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
 {
-    double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
-    double numerator = (static_cast<double>(numColumns) * productSum) - (rowA->sum() * rowB->sum());
-    double denominator = rowA->variability() * rowB->variability();
+    double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
+    double numerator = (static_cast<double>(size) * productSum) - (vectorA->sum() * vectorB->sum());
+    double denominator = vectorA->variability() * vectorB->variability();
 
     return numerator / denominator;
 }
 
-double EuclideanSimilarityAlgorithm::evaluate(size_t numColumns, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+double EuclideanSimilarityAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
 {
     double sum = 0.0;
 
-    for(size_t i = 0; i < numColumns; i++)
+    for(size_t i = 0; i < size; i++)
     {
-        auto diff = rowA->valueAt(i) - rowB->valueAt(i);
+        auto diff = vectorA->valueAt(i) - vectorB->valueAt(i);
         auto diffSq = diff * diff;
         sum += diffSq;
     }
@@ -70,27 +70,27 @@ double EuclideanSimilarityAlgorithm::evaluate(size_t numColumns, const Continuou
     return 1.0 / (1.0 + sqrtSum);
 }
 
-double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
 {
-    double productSum = std::inner_product(rowA->begin(), rowA->end(), rowB->begin(), 0.0);
-    double magnitudeProduct = rowA->magnitude() * rowB->magnitude();
+    double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
+    double magnitudeProduct = vectorA->magnitude() * vectorB->magnitude();
 
     return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
 }
 
-void BicorAlgorithm::preprocess(size_t numColumns, const ContinuousDataRows& rows)
+void BicorAlgorithm::preprocess(size_t sisze, const ContinuousDataVectors& vectors)
 {
-    _base = &rows.front();
-    _processedRows.resize(rows.size());
+    _base = &vectors.front();
+    _processedVectors.resize(vectors.size());
 
-    for(size_t i = 0; const auto& row : rows)
+    for(size_t i = 0; const auto& vector : vectors)
     {
-        auto median = u::medianOf(row.data());
+        auto median = u::medianOf(vector.data());
 
-        std::vector<double> absDiffs(numColumns);
-        std::vector<double> intermediate(numColumns);
+        std::vector<double> absDiffs(sisze);
+        std::vector<double> intermediate(sisze);
 
-        for(size_t j = 0; auto value : row)
+        for(size_t j = 0; auto value : vector)
         {
             intermediate[j] = value - median;
             absDiffs[j] = std::abs(intermediate[j]);
@@ -108,21 +108,21 @@ void BicorAlgorithm::preprocess(size_t numColumns, const ContinuousDataRows& row
             intermediate[j++] = newValue;
         }
 
-        auto& processedRow = _processedRows.at(i++);
-        processedRow = {intermediate, row.nodeId(), row.computeCostHint()};
-        processedRow.update();
+        auto& processedVector = _processedVectors.at(i++);
+        processedVector = {intermediate, vector.nodeId(), vector.computeCostHint()};
+        processedVector.update();
     }
 }
 
-double BicorAlgorithm::evaluate(size_t, const ContinuousDataRow* rowA, const ContinuousDataRow* rowB)
+double BicorAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
 {
-    auto a = std::distance(_base, rowA);
-    auto b = std::distance(_base, rowB);
-    const auto& processedRowA = _processedRows.at(a);
-    const auto& processedRowB = _processedRows.at(b);
+    auto a = std::distance(_base, vectorA);
+    auto b = std::distance(_base, vectorB);
+    const auto& processedVectorA = _processedVectors.at(a);
+    const auto& processedVectorB = _processedVectors.at(b);
 
-    double productSum = std::inner_product(processedRowA.begin(), processedRowA.end(),
-        processedRowB.begin(), 0.0);
+    double productSum = std::inner_product(processedVectorA.begin(), processedVectorA.end(),
+        processedVectorB.begin(), 0.0);
 
-    return productSum / (processedRowA.magnitude() * processedRowB.magnitude());
+    return productSum / (processedVectorA.magnitude() * processedVectorB.magnitude());
 }

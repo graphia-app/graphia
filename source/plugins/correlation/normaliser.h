@@ -19,7 +19,7 @@
 #ifndef NORMALISER_H
 #define NORMALISER_H
 
-#include "correlationdatarow.h"
+#include "correlationdatavector.h"
 
 #include <vector>
 #include <cstdlib>
@@ -31,7 +31,7 @@ class Normaliser
 {
 public:
     virtual ~Normaliser() = default;
-    virtual bool process(ContinuousDataRows& dataRows, IParser* parser = nullptr) const = 0;
+    virtual bool process(ContinuousDataVectors& dataRows, IParser* parser = nullptr) const = 0;
 };
 
 #endif // NORMALISER_H

@@ -29,7 +29,7 @@
 #include "shared/graph/edgelist.h"
 
 #include "correlationtype.h"
-#include "correlationdatarow.h"
+#include "correlationdatavector.h"
 
 #include <QString>
 #include <QRect>
@@ -106,13 +106,13 @@ public:
     static double scaleValue(ScalingType scalingType, double value,
         double epsilon = std::nextafter(0.0, 1.0));
     static void normalise(NormaliseType normaliseType,
-        ContinuousDataRows& dataRows,
+        ContinuousDataVectors& dataRows,
         IParser* parser = nullptr);
 
     static double epsilonFor(const std::vector<double>& data);
 
     static EdgeList pearsonCorrelation(
-        const ContinuousDataRows& rows,
+        const ContinuousDataVectors& rows,
         double minimumThreshold, IParser* parser = nullptr);
 
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
@@ -194,8 +194,8 @@ private:
 
     QVariantMap dataRect() const;
 
-    ContinuousDataRows sampledContinuousDataRows(size_t numSampleRows);
-    DiscreteDataRows sampledDiscreteDataRows(size_t numSampleRows);
+    ContinuousDataVectors sampledContinuousDataRows(size_t numSampleRows);
+    DiscreteDataVectors sampledDiscreteDataRows(size_t numSampleRows);
 
     void waitForDataRectangleFuture();
 
