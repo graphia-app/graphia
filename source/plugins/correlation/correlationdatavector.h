@@ -38,7 +38,6 @@ class CorrelationDataVector
 protected:
     std::vector<T> _data;
 
-    size_t _size = 0;
     NodeId _nodeId;
     uint64_t _cost = 0;
 
@@ -56,7 +55,6 @@ public:
     CorrelationDataVector(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
         _data({data.cbegin() + (row * numColumns), (data.cbegin() + (row * numColumns)) + numColumns}),
-        _size(std::distance(begin(), end())),
         _nodeId(nodeId), _cost(computeCost)
     {}
 
@@ -76,7 +74,7 @@ public:
 
     uint64_t computeCostHint() const { return _cost; }
 
-    size_t size() const { return _size; }
+    size_t size() const { return _data.size(); }
     const T& valueAt(size_t index) const { return _data.at(index); }
     void setValueAt(size_t index, const T& value) { _data[index] = value; }
 
