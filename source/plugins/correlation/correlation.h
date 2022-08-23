@@ -50,7 +50,7 @@ public:
 class ContinuousCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList process(const ContinuousDataVectors& vectors, double minimumThreshold,
+    virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double minimumThreshold,
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
@@ -70,7 +70,7 @@ class CovarianceCorrelation : public ContinuousCorrelation
     using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
 public:
-    EdgeList process(const ContinuousDataVectors& vectors,
+    EdgeList edgeList(const ContinuousDataVectors& vectors,
         double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
@@ -290,7 +290,7 @@ public:
 class DiscreteCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList process(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
+    virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
@@ -300,7 +300,7 @@ template<int Denominator>
 class MatchingCorrelation : public DiscreteCorrelation
 {
 public:
-    EdgeList process(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
+    EdgeList edgeList(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())

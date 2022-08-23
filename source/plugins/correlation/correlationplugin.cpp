@@ -409,14 +409,14 @@ EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser
     case CorrelationDataType::Continuous:
     {
         auto continuousCorrelation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
-        return continuousCorrelation->process(_continuousDataRows, minimumThreshold,
+        return continuousCorrelation->edgeList(_continuousDataRows, minimumThreshold,
             NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity), &parser, &parser);
     }
 
     case CorrelationDataType::Discrete:
     {
         auto discreteCorrelation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
-        return discreteCorrelation->process(_discreteDataRows, minimumThreshold, _treatAsBinary, &parser, &parser);
+        return discreteCorrelation->edgeList(_discreteDataRows, minimumThreshold, _treatAsBinary, &parser, &parser);
     }
     }
 
