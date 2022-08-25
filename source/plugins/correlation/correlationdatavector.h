@@ -51,6 +51,23 @@ public:
     CorrelationDataVector& operator=(const CorrelationDataVector&) = default;
     virtual ~CorrelationDataVector() = default;
 
+    // Column from row-wise input
+    template<typename U>
+    CorrelationDataVector(const std::vector<U>& data, size_t column,
+        size_t numColumns, size_t numRows,
+        uint64_t computeCost = 1) :
+        _cost(computeCost)
+    {
+        _data.reserve(numRows);
+
+        for(size_t row = 0; row < numRows; row++)
+        {
+            auto index = (row * numColumns) + column;
+            _data.push_back(data.at(index));
+        }
+    }
+
+    // Row from row-wise input
     template<typename U>
     CorrelationDataVector(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
