@@ -178,6 +178,9 @@ public:
 
         auto results = process(vectors, minimumThreshold, polarity, cancellable, progressable);
 
+        if(cancellable != nullptr && cancellable->cancelled())
+            return {};
+
         EdgeList edges;
         edges.reserve(std::distance(results.begin(), results.end()));
 
@@ -446,6 +449,9 @@ public:
             // Returning the results might take time
             progressable->setProgress(-1);
         }
+
+        if(cancellable != nullptr && cancellable->cancelled())
+            return {};
 
         EdgeList edges;
         edges.reserve(std::distance(results.begin(), results.end()));
