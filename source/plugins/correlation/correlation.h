@@ -29,6 +29,7 @@
 #include "shared/utils/is_detected.h"
 
 #include "shared/graph/edgelist.h"
+#include "shared/graph/distancematrix.h"
 
 #include <vector>
 #include <iterator>
@@ -53,6 +54,9 @@ class ContinuousCorrelation : public ICorrelation
 public:
     virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double minimumThreshold,
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
+
+    virtual DistanceMatrix distanceMatrix(const ContinuousDataVectors& vectors,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
@@ -184,6 +188,29 @@ public:
         });
 
         return edges;
+    }
+
+    DistanceMatrix distanceMatrix(const ContinuousDataVectors& vectors,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+    {
+        if(vectors.empty())
+            return {};
+
+        auto results = process(vectors, 0.0, CorrelationPolarity::Both, cancellable, progressable);
+
+        if(cancellable != nullptr && cancellable->cancelled())
+            return {};
+
+        DistanceMatrix distanceMatrix(vectors.size());
+
+        for(const auto& result : results)
+        {
+            auto a = std::distance(vectors.begin(), result._a);
+            auto b = std::distance(vectors.begin(), result._b);
+            distanceMatrix.setValueAt(a, b, result._r);
+        }
+
+        return distanceMatrix;
     }
 };
 
