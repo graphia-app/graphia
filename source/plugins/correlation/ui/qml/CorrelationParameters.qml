@@ -1233,7 +1233,8 @@ BaseParameterDialog
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        text: tabularDataParser.graphSizeEstimateInProgress ? qsTr("Working…") : qsTr("Empty Graph")
+                        text: tabularDataParser.busy || tabularDataParser.graphSizeEstimateInProgress ?
+                            qsTr("Working…") : qsTr("Empty Graph")
                         font.italic: true
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
