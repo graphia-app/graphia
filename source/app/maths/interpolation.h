@@ -21,8 +21,7 @@
 
 #include <cstdlib>
 #include <cmath>
-
-#include "shared/utils/constants.h"
+#include <numbers>
 
 class Interpolation
 {
@@ -34,7 +33,7 @@ public:
 
     static float easeInEaseOut(float a, float b, float f)
     {
-        return a + (0.5f * (1.0f - std::cos(f * Constants::Pi())) * (b - a));
+        return a + (0.5f * (1.0f - std::cos(f * std::numbers::pi_v<float>)) * (b - a));
     }
 
     static float power(float a, float b, float f, int power = 3)

@@ -76,7 +76,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/checksum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.h
-    ${CMAKE_CURRENT_LIST_DIR}/utils/constants.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container_combine.h
