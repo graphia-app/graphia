@@ -16,11 +16,11 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "distancematrix.h"
+#include "covariancematrix.h"
 
 #include <QtGlobal>
 
-DistanceMatrix::DistanceMatrix(size_t size) : _size(size)
+CovarianceMatrix::CovarianceMatrix(size_t size) : _size(size)
 {
     auto square = size * size;
     auto diagonal = size;
@@ -42,7 +42,7 @@ static size_t indexOf(size_t column, size_t row, size_t size)
     return index - tri;
 }
 
-double DistanceMatrix::valueAt(size_t column, size_t row) const
+double CovarianceMatrix::valueAt(size_t column, size_t row) const
 {
     if(column == row)
         return 1.0;
@@ -50,7 +50,7 @@ double DistanceMatrix::valueAt(size_t column, size_t row) const
     return _values.at(indexOf(column, row, _size));
 }
 
-void DistanceMatrix::setValueAt(size_t column, size_t row, double value)
+void CovarianceMatrix::setValueAt(size_t column, size_t row, double value)
 {
     if(column == row)
         return;

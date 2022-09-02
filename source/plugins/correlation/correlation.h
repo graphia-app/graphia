@@ -29,7 +29,7 @@
 #include "shared/utils/is_detected.h"
 
 #include "shared/graph/edgelist.h"
-#include "shared/graph/distancematrix.h"
+#include "shared/graph/covariancematrix.h"
 
 #include <vector>
 #include <iterator>
@@ -56,7 +56,7 @@ public:
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
-    virtual DistanceMatrix distanceMatrix(const ContinuousDataVectors& vectors,
+    virtual CovarianceMatrix matrix(const ContinuousDataVectors& vectors,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
@@ -193,7 +193,7 @@ public:
         return edges;
     }
 
-    DistanceMatrix distanceMatrix(const ContinuousDataVectors& vectors,
+    CovarianceMatrix matrix(const ContinuousDataVectors& vectors,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
@@ -204,16 +204,16 @@ public:
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
 
-        DistanceMatrix distanceMatrix(vectors.size());
+        CovarianceMatrix matrix(vectors.size());
 
         for(const auto& result : results)
         {
             auto a = std::distance(vectors.begin(), result._a);
             auto b = std::distance(vectors.begin(), result._b);
-            distanceMatrix.setValueAt(a, b, result._r);
+            matrix.setValueAt(a, b, result._r);
         }
 
-        return distanceMatrix;
+        return matrix;
     }
 };
 

@@ -16,22 +16,22 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DISTANCEMATRIX_H
-#define DISTANCEMATRIX_H
+#ifndef COVARIANCEMATRIX_H
+#define COVARIANCEMATRIX_H
 
 #include <vector>
 
-class DistanceMatrix
+class CovarianceMatrix
 {
 private:
     size_t _size = 0;
     std::vector<double> _values;
 
 public:
-    DistanceMatrix() = default;
+    CovarianceMatrix() = default;
 
     // By definition a distance matrix is square, so size refers to the dimension of one side
-    DistanceMatrix(size_t size);
+    CovarianceMatrix(size_t size);
 
     double valueAt(size_t column, size_t row) const;
     void setValueAt(size_t column, size_t row, double value);
@@ -39,4 +39,4 @@ public:
     size_t size() const { return _size; }
 };
 
-#endif // DISTANCEMATRIX_H
+#endif // COVARIANCEMATRIX_H

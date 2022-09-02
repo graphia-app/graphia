@@ -15,7 +15,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/commands/compoundcommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/icommand.h
     ${CMAKE_CURRENT_LIST_DIR}/commands/icommandmanager.h
-    ${CMAKE_CURRENT_LIST_DIR}/graph/distancematrix.h
+    ${CMAKE_CURRENT_LIST_DIR}/graph/covariancematrix.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/edgelist.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_containers.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_debug.h
@@ -125,7 +125,7 @@ list(APPEND HEADERS
 )
 
 list(APPEND SHARED_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/graph/distancematrix.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/graph/covariancematrix.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.cpp
