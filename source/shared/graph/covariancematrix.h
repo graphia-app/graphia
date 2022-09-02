@@ -31,7 +31,7 @@ public:
     CovarianceMatrix() = default;
 
     // By definition a distance matrix is square, so size refers to the dimension of one side
-    CovarianceMatrix(size_t size);
+    explicit CovarianceMatrix(size_t size);
 
     double valueAt(size_t column, size_t row) const;
     void setValueAt(size_t column, size_t row, double value);
