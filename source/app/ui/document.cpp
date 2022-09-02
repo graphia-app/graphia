@@ -232,7 +232,8 @@ QString Document::commandVerb() const
     if(_graphModel == nullptr)
         return {};
 
-    auto phase = _graphModel->graph().phase();
+    auto phase = !_commandManager.commandPhase().isEmpty() ?
+        _commandManager.commandPhase() : _graphModel->graph().phase();
 
     if(!_loadComplete)
     {
@@ -884,6 +885,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(this, &Document::busyChanged, this, &Document::onBusyChanged);
 
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
+    connect(&_commandManager, &CommandManager::commandPhaseChanged, this, &Document::commandVerbChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellableChanged, this, &Document::commandIsCancellableChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellingChanged, this, &Document::commandIsCancellingChanged);

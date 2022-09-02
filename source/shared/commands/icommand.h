@@ -63,6 +63,9 @@ public:
 
     virtual int progress() const { return _progress; }
 
+    virtual void setPhase(const QString& phase) { _phase = phase; }
+    virtual QString phase() const { return _phase; }
+
     virtual void initialise()
     {
         _progress = -1;
@@ -73,6 +76,7 @@ public:
 
 private:
     std::atomic<int> _progress{-1};
+    QString _phase;
     bool _notAllowedToChangeGraph = true;
 };
 

@@ -435,12 +435,20 @@ void CommandManager::timerEvent(QTimerEvent*)
     if(_currentCommand == nullptr)
         return;
 
-    int newCommandProgress = _currentCommand->progress();
+    auto newCommandProgress = _currentCommand->progress();
 
     if(newCommandProgress != _commandProgress)
     {
         _commandProgress = newCommandProgress;
         emit commandProgressChanged();
+    }
+
+    auto newCommandPhase = _currentCommand->phase();
+
+    if(newCommandPhase != _commandPhase)
+    {
+        _commandPhase = newCommandPhase;
+        emit commandPhaseChanged();
     }
 }
 

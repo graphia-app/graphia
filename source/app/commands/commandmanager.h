@@ -41,6 +41,7 @@ class CommandManager : public QObject, public ICommandManager
     Q_OBJECT
 
     Q_PROPERTY(int commandProgress MEMBER _commandProgress NOTIFY commandProgressChanged)
+    Q_PROPERTY(QString commandPhase MEMBER _commandPhase NOTIFY commandPhaseChanged)
     Q_PROPERTY(QString commandVerb MEMBER _commandVerb NOTIFY commandVerbChanged)
     Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
     Q_PROPERTY(bool commandIsCancelling MEMBER _cancelling NOTIFY commandIsCancellingChanged)
@@ -64,6 +65,7 @@ public:
     bool canRedo() const;
 
     int commandProgress() const { return _commandProgress; }
+    QString commandPhase() const { return _commandPhase; }
     QString commandVerb() const { return _commandVerb; }
     bool commandIsCancellable() const;
     bool commandIsCancelling() const { return _cancelling; }
@@ -94,8 +96,10 @@ private:
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
+        _commandPhase.clear();
         _threadActive = true;
         emit commandProgressChanged();
+        emit commandPhaseChanged();
         emit commandVerbChanged();
         emit commandIsCancellableChanged();
 
@@ -185,6 +189,7 @@ private:
     int _commandProgressTimerId = -1;
     int _commandProgress = 0;
     QString _commandVerb;
+    QString _commandPhase;
     bool _cancelling = false;
 
     int _debug = 0;
@@ -201,6 +206,7 @@ signals:
 
     void commandProgressChanged();
     void commandVerbChanged();
+    void commandPhaseChanged();
     void commandIsCancellableChanged();
     void commandIsCancellingChanged();
     void commandQueued();
