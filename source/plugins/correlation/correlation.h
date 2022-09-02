@@ -148,7 +148,7 @@ private:
                 }
 
                 if(exceedsThreshold)
-                    correlations.emplace_back(vectorAIt, vectorBIt, r);
+                    correlations.push_back({vectorAIt, vectorBIt, r});
             }
 
             cost += vectorA->computeCostHint();
