@@ -78,7 +78,7 @@ double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataVector* v
     return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
 }
 
-void BicorAlgorithm::preprocess(size_t sisze, const ContinuousDataVectors& vectors)
+void BicorAlgorithm::preprocess(size_t size, const ContinuousDataVectors& vectors)
 {
     _base = &vectors.front();
     _processedVectors.resize(vectors.size());
@@ -87,8 +87,8 @@ void BicorAlgorithm::preprocess(size_t sisze, const ContinuousDataVectors& vecto
     {
         auto median = u::medianOf(vector.data());
 
-        std::vector<double> absDiffs(sisze);
-        std::vector<double> intermediate(sisze);
+        std::vector<double> absDiffs(size);
+        std::vector<double> intermediate(size);
 
         for(size_t j = 0; auto value : vector)
         {
