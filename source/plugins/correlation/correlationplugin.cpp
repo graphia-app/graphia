@@ -924,6 +924,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         if(!u::contains(jsonObject, "discreteData"))
             return false;
 
+        i = 0;
         const auto& jsonDiscreteData = jsonObject["discreteData"];
         for(const auto& value : jsonDiscreteData)
         {
