@@ -1328,6 +1328,10 @@ bool CorrelationPlotItem::updateSortMap()
                     collator.compare(annotationValueB, annotationValueA) < 0;
             }
 
+            case PlotColumnSortType::HierarchicalClustering:
+                return columnSortOrder._order == Qt::AscendingOrder ?
+                    _pluginInstance->hcColumn(a) < _pluginInstance->hcColumn(b) :
+                    _pluginInstance->hcColumn(b) < _pluginInstance->hcColumn(a);
             }
         }
 

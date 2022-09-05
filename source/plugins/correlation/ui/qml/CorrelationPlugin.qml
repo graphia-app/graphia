@@ -622,10 +622,23 @@ PluginContent
                 if(sortOption.type === PlotColumnSortType.DataValue)
                     sortByMenuItem.hidden = Qt.binding(() => plot.groupByAnnotation);
 
-                sortByMenuItem.triggered.connect(function()
+                let sortFn = function() { plot.sortBy(sortOption.type, sortOption.text); };
+
+                if(sortOption.type === PlotColumnSortType.HierarchicalClustering)
                 {
-                    plot.sortBy(sortOption.type, sortOption.text);
-                });
+                    sortByMenuItem.triggered.connect(function()
+                    {
+                        // Reset the menu state (and thus uncheck the clustering item)
+                        // in case the clustering is cancelled by the user
+                        root.updatePlotMenuState();
+
+                        plugin.model.computeHierarchicalClustering();
+                    });
+
+                    plugin.model.hierarchicalClusteringComplete.connect(sortFn);
+                }
+                else
+                    sortByMenuItem.triggered.connect(sortFn);
             });
 
             if(plugin.model.columnAnnotationNames.length > 0)
@@ -691,7 +704,8 @@ PluginContent
         [
             {type: PlotColumnSortType.Natural, text: qsTr("Natural Order")},
             {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")},
-            {type: PlotColumnSortType.DataValue, text: qsTr("Data Value")}
+            {type: PlotColumnSortType.DataValue, text: qsTr("Data Value")},
+            {type: PlotColumnSortType.HierarchicalClustering, text: qsTr("Hierarchical Clustering")}
         ];
 
         root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)

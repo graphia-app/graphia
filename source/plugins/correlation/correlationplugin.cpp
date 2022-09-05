@@ -22,6 +22,8 @@
 #include "correlationplotitem.h"
 #include "graphsizeestimateplotitem.h"
 
+#include "hierarchicalclusteringcommand.h"
+
 #include "shared/graph/grapharray_json.h"
 
 #include "shared/utils/threadpool.h"
@@ -785,6 +787,31 @@ QString CorrelationPluginInstance::attributeValueFor(const QString& attributeNam
     return attribute->stringValueOf(nodeId);
 }
 
+void CorrelationPluginInstance::computeHierarchicalClustering()
+{
+    if(_continuousHcOrder.empty())
+    {
+        commandManager()->execute(ExecutePolicy::Once, std::make_unique<HierarchicalClusteringCommand>(
+            _continuousData, _numContinuousColumns, _numRows, *this));
+    }
+    else
+        emit hierarchicalClusteringComplete();
+}
+
+void CorrelationPluginInstance::setHcOrdering(const std::vector<size_t>& ordering)
+{
+    _continuousHcOrder = ordering;
+    emit hierarchicalClusteringComplete();
+}
+
+size_t CorrelationPluginInstance::hcColumn(size_t column) const
+{
+    if(column >= _continuousHcOrder.size())
+        return 0;
+
+    return _continuousHcOrder.at(column);
+}
+
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
 {
     json jsonObject;
@@ -825,6 +852,22 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
             std::copy(dataRow.begin(), dataRow.end(), std::back_inserter(array));
 
             progressable.setProgress(static_cast<int>((i++) * 100 / graph.nodeIds().size()));
+        }
+
+        progressable.setProgress(-1);
+
+        return array;
+    }();
+
+    jsonObject["hcOrdering"] = [&]
+    {
+        json array = json::array();
+
+        uint64_t i = 0;
+        for(const auto& index : _continuousHcOrder)
+        {
+            array.push_back(index);
+            progressable.setProgress(static_cast<int>((i++) * 100 / _continuousHcOrder.size()));
         }
 
         progressable.setProgress(-1);
@@ -930,6 +973,20 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         {
             _discreteData.emplace_back(QString::fromStdString(value));
             parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
+        }
+    }
+
+    if(dataVersion >= 11)
+    {
+        if(!u::contains(jsonObject, "hcOrdering"))
+            return false;
+
+        i = 0;
+        const auto& jsonHcOrdering = jsonObject["hcOrdering"];
+        for(const auto& value : jsonHcOrdering)
+        {
+            _continuousHcOrder.emplace_back(value);
+            parser.setProgress(static_cast<int>((i++ * 100) / jsonHcOrdering.size()));
         }
     }
 

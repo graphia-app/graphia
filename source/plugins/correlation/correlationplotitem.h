@@ -80,7 +80,8 @@ DEFINE_QML_ENUM(
     Natural,
     ColumnName,
     ColumnAnnotation,
-    DataValue);
+    DataValue,
+    HierarchicalClustering);
 
 enum class CorrelationPlotUpdateType
 {

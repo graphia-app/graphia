@@ -33,7 +33,7 @@ private:
     std::vector<size_t> _unions;
 
 public:
-    Unions(size_t size) : _unions(size)
+    explicit Unions(size_t size) : _unions(size)
     {
         std::iota(_unions.begin(), _unions.end(), 0);
     }

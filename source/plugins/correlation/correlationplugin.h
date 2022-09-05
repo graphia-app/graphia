@@ -95,6 +95,8 @@ private:
 
     double _continuousEpsilon = std::nextafter(0.0, 1.0);
 
+    std::vector<size_t> _continuousHcOrder;
+
     std::unique_ptr<EdgeArray<double>> _correlationValues;
     double _minimumCorrelationValue = 0.7;
     double _initialCorrelationThreshold = 0.85;
@@ -185,6 +187,10 @@ public:
 
     QString attributeValueFor(const QString& attributeName, int row) const;
 
+    Q_INVOKABLE void computeHierarchicalClustering();
+    void setHcOrdering(const std::vector<size_t>& ordering);
+    size_t hcColumn(size_t column) const;
+
     QByteArray save(IMutableGraph& graph, Progressable& progressable) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph, IParser& parser) override;
 
@@ -200,6 +206,7 @@ signals:
     void numericalAttributeNamesChanged();
     void highlightedRowsChanged();
     void numColumnsChanged();
+    void hierarchicalClusteringComplete();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
@@ -219,7 +226,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 10; }
+    int dataVersion() const override { return 11; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;
