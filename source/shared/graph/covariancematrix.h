@@ -19,6 +19,7 @@
 #ifndef COVARIANCEMATRIX_H
 #define COVARIANCEMATRIX_H
 
+#include <cstddef>
 #include <vector>
 
 class CovarianceMatrix
