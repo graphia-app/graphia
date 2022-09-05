@@ -19,6 +19,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationtype.h
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.h
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchicalclusteringcommand.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
@@ -37,6 +38,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hierarchicalclusteringcommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
