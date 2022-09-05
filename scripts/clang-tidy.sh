@@ -36,6 +36,6 @@ fi
 ${CLANGTIDY} --version
 ${CLANGTIDY} -dump-config
 
-parallel -k -n1 -P$(nproc --all) -q \
-  ${CLANGTIDY} -quiet -p . {} \
+parallel -k -n1 -P$(nproc --all) \
+  "echo [{#}/{= \$_=total_jobs() =}] && ${CLANGTIDY} -quiet -p . {}" \
   ::: ${CPP_FILES} 2>&1 | tee clang-tidy-${VERSION}.log
