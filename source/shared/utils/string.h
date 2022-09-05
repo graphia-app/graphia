@@ -82,6 +82,9 @@ namespace u
     template<typename C>
     QString findUniqueName(const C& existingNames, QString newName)
     {
+        if(newName.isEmpty())
+            return newName;
+
         while(u::contains(existingNames, newName))
         {
             int number = 1;
