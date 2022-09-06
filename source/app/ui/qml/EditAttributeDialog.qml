@@ -132,6 +132,7 @@ Window
         title: qsTr("Discard Edits")
         text: qsTr("Are you sure you want to discard existing edits?")
         buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
+        modality: Qt.ApplicationModal
 
         property string attributeToEdit: ""
         property bool toggleSharedValuesMode: false

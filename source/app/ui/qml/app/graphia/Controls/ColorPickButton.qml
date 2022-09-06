@@ -40,6 +40,8 @@ Item
     {
         id: colorDialog
         title: root.dialogTitle
+        modality: Qt.ApplicationModal
+
         onColorChanged: { root.color = color; }
     }
 

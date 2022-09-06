@@ -349,6 +349,7 @@ Item
         title: qsTr("File Changed")
         text: Utils.format(qsTr("Do you want to save changes to '{0}'?"), baseFileName)
         buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
+        modality: Qt.ApplicationModal
 
         onSaveClicked:
         {
@@ -577,6 +578,8 @@ Item
     {
         id: backgroundColorDialog
         title: qsTr("Select a Colour")
+        modality: Qt.ApplicationModal
+
         onColorChanged:
         {
             visuals.backgroundColor = color;
@@ -1591,6 +1594,7 @@ Item
     {
         id: errorSavingFileMessageDialog
         title: qsTr("Error Saving File")
+        modality: Qt.ApplicationModal
     }
 
     Window

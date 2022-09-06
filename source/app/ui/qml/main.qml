@@ -98,6 +98,7 @@ ApplicationWindow
         id: noUpdatesMessageDialog
         title: qsTr("No Updates")
         text: qsTr("There are no updates available at this time.")
+        modality: Qt.ApplicationModal
     }
 
     // Use Connections to avoid an M16 JS lint error
@@ -376,6 +377,7 @@ ApplicationWindow
     {
         id: errorOpeningFileMessageDialog
         title: qsTr("Error Opening File")
+        modality: Qt.ApplicationModal
 
         onAccepted:
         {
@@ -1848,6 +1850,7 @@ ApplicationWindow
     {
         id: commandLineArgumentsMessageDialog
         title: qsTr("Command Line Arguments")
+        modality: Qt.ApplicationModal
     }
 
     Action

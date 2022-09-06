@@ -232,6 +232,7 @@ Window
                         title: qsTr("Delete")
                         text: qsTr("Are you sure you want to delete this palette preset?")
                         buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.No
+                        modality: Qt.ApplicationModal
 
                         onYesClicked:
                         {

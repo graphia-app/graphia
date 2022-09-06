@@ -75,6 +75,7 @@ ApplicationWindow
     Labs.MessageDialog
     {
         id: validateErrorDialog
+        modality: Qt.ApplicationModal
     }
 
     function extractHostname(url)
@@ -550,6 +551,7 @@ ApplicationWindow
         title: qsTr("File Changed")
         text: qsTr("Do you want to save changes?")
         buttons: Labs.MessageDialog.Save | Labs.MessageDialog.Discard | Labs.MessageDialog.Cancel
+        modality: Qt.ApplicationModal
 
         onSaveClicked:
         {

@@ -135,6 +135,7 @@ ApplicationWindow
             id: invalidEmailDialog
             title: qsTr("Invalid Email Address")
             text: qsTr("Please enter a valid email address.")
+            modality: Qt.ApplicationModal
         }
 
         Button

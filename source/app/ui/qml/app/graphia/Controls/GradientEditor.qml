@@ -387,6 +387,8 @@ Item
     {
         id: colorDialog
         title: qsTr("Select a Colour")
+        modality: Qt.ApplicationModal
+
         onAccepted:
         {
             picker.selected.setColor(colorDialog.color);
