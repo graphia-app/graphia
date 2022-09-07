@@ -595,8 +595,16 @@ PluginContent
             }
 
             let sortByMenu = MenuUtils.addSubMenuTo(menu, qsTr("Sort Columns By"));
+            let addedSortBySeparator = false;
+
             root._availableplotColumnSortOptions.forEach(function(sortOption)
             {
+                if(sortOption.type === PlotColumnSortType.ColumnAnnotation && !addedSortBySeparator)
+                {
+                    MenuUtils.addSeparatorTo(sortByMenu);
+                    addedSortBySeparator = true;
+                }
+
                 let sortByMenuItem = MenuUtils.addItemTo(sortByMenu, sortOption.text);
 
                 sortByMenuItem.checkable = true;
