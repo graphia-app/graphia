@@ -19,6 +19,7 @@
 
 .import QtQuick.Controls as QtQuickControls
 .import app.graphia.Shared.Controls as SharedControls
+.import "Utils.js" as Utils
 
 function createQmlItem(itemName, parent)
 {
@@ -85,6 +86,8 @@ function clone(from, to)
             let toSubMenu = createQmlItem("PlatformMenu", to);
             clone(fromItem.subMenu, toSubMenu);
             to.addMenu(toSubMenu);
+
+            Utils.proxyProperties(fromItem, toSubMenu.parent, ["enabled", "height"]);
         }
         else if(fromItem instanceof SharedControls.PlatformMenuItem)
         {
@@ -94,19 +97,8 @@ function clone(from, to)
             // Note "action" is specifcally skipped because
             //   a) the properties it proxies are bound anyway
             //   b) binding it will cause loops
-            let properties = ["checkable", "checked", "enabled",
-                "icon", "text", "hidden"];
-
-            properties.forEach(function(prop)
-            {
-                if(fromItem[prop] !== undefined)
-                {
-                    toItem[prop] = Qt.binding(function(fromItem, prop)
-                    {
-                        return () => fromItem[prop];
-                    }(fromItem, prop));
-                }
-            });
+            Utils.proxyProperties(fromItem, toItem, ["checkable",
+                "checked", "enabled", "icon", "text", "hidden"]);
 
             // Store a list of ButtonGroups so that we can recreate them
             // in the target menu, later
