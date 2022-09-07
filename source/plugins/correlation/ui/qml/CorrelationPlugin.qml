@@ -324,11 +324,6 @@ PluginContent
         }
     }
 
-    ButtonGroup { id: sortByButtonGroup }
-    ButtonGroup { id: colorByButtonGroup }
-    ButtonGroup { id: sharedValuesAttributeButtonGroup }
-    ButtonGroup { id: scaleByAttributeButtonGroup }
-
     Action
     {
         id: savePlotImageAction
@@ -457,6 +452,27 @@ PluginContent
         }
     }
 
+    property var _plotMenuStateUpdateFns: []
+
+    function addCheckedStateFnFor(checkable, isChecked)
+    {
+        _plotMenuStateUpdateFns.push(function()
+        {
+            let checked = isChecked();
+
+            // Toggle the state to resync the visual appearance of the menu item
+            // with the value set on the menu item itself; possible Qt bug?
+            checkable.checked = !checked;
+            checkable.checked = checked;
+        });
+    }
+
+    function updatePlotMenuState()
+    {
+        for(let plotMenuStateUpdateFn of _plotMenuStateUpdateFns)
+            plotMenuStateUpdateFn();
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -466,6 +482,8 @@ PluginContent
             return true;
 
         case 1:
+            root._plotMenuStateUpdateFns = [];
+
             menu.title = qsTr("&Plot");
             MenuUtils.addActionTo(menu, toggleColumnNamesAction);
 
@@ -502,15 +520,10 @@ PluginContent
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(scaleByAttributeMenu, attributeName);
 
-                    attributeMenuItem.ButtonGroup.group = scaleByAttributeButtonGroup;
                     attributeMenuItem.checkable = true;
-                    attributeMenuItem.checked = Qt.binding(function()
-                    {
-                        if(plot.scaleType !== PlotScaleType.ByAttribute)
-                            return false;
-
-                        return attributeName === plot.scaleByAttributeName;
-                    });
+                    root.addCheckedStateFnFor(attributeMenuItem, () =>
+                        plot.scaleType === PlotScaleType.ByAttribute &&
+                        attributeName === plot.scaleByAttributeName);
 
                     attributeMenuItem.triggered.connect(function()
                     {
@@ -535,9 +548,9 @@ PluginContent
                     plot.averagingType !== PlotAveragingType.IQR &&
                     !plot.groupByAnnotation);
                 let allAttributesMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, qsTr("All"));
-                allAttributesMenuItem.ButtonGroup.group = sharedValuesAttributeButtonGroup;
                 allAttributesMenuItem.checkable = true;
-                allAttributesMenuItem.checked = Qt.binding(() => plot.averagingAttributeName.length === 0);
+                root.addCheckedStateFnFor(allAttributesMenuItem, () =>
+                    plot.averagingAttributeName.length === 0);
                 allAttributesMenuItem.triggered.connect(function()
                 {
                     plot.averagingAttributeName = "";
@@ -549,9 +562,9 @@ PluginContent
                 {
                     let attributeMenuItem = MenuUtils.addItemTo(sharedValuesAttributesMenu, attributeName);
 
-                    attributeMenuItem.ButtonGroup.group = sharedValuesAttributeButtonGroup;
                     attributeMenuItem.checkable = true;
-                    attributeMenuItem.checked = Qt.binding(() => attributeName === plot.averagingAttributeName);
+                    root.addCheckedStateFnFor(attributeMenuItem, () =>
+                        attributeName === plot.averagingAttributeName);
 
                     attributeMenuItem.triggered.connect(function()
                     {
@@ -586,9 +599,8 @@ PluginContent
             {
                 let sortByMenuItem = MenuUtils.addItemTo(sortByMenu, sortOption.text);
 
-                sortByMenuItem.ButtonGroup.group = sortByButtonGroup;
                 sortByMenuItem.checkable = true;
-                sortByMenuItem.checked = Qt.binding(function()
+                root.addCheckedStateFnFor(sortByMenuItem, function()
                 {
                     let columnSortType = PlotColumnSortType.Natural;
                     let columnSortAnnotation = "";
@@ -624,9 +636,9 @@ PluginContent
                 colorGroupsByMenu.hidden = Qt.binding(() => !groupByAnnotationAction.checked);
 
                 let colorByNoGroupMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, qsTr("None"));
-                colorByNoGroupMenuItem.ButtonGroup.group = colorByButtonGroup;
                 colorByNoGroupMenuItem.checkable = true;
-                colorByNoGroupMenuItem.checked = Qt.binding(() => plot.colorGroupByAnnotationName.length === 0);
+                root.addCheckedStateFnFor(colorByNoGroupMenuItem, () =>
+                    plot.colorGroupByAnnotationName.length === 0);
 
                 colorByNoGroupMenuItem.triggered.connect(function()
                 {
@@ -637,9 +649,9 @@ PluginContent
                 {
                     let colorGroupsByMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, columnAnnotationName);
 
-                    colorGroupsByMenuItem.ButtonGroup.group = colorByButtonGroup;
                     colorGroupsByMenuItem.checkable = true;
-                    colorGroupsByMenuItem.checked = Qt.binding(() => columnAnnotationName === plot.colorGroupByAnnotationName);
+                    root.addCheckedStateFnFor(colorGroupsByMenuItem, () =>
+                        columnAnnotationName === plot.colorGroupByAnnotationName);
 
                     colorGroupsByMenuItem.triggered.connect(function()
                     {
@@ -650,6 +662,9 @@ PluginContent
 
             MenuUtils.addSeparatorTo(menu);
             MenuUtils.addActionTo(menu, savePlotImageAction);
+
+            // Initial update
+            root.updatePlotMenuState();
 
             MenuUtils.clone(menu, plotContextMenu);
             return true;
@@ -807,7 +822,11 @@ PluginContent
                     model: plugin.model
                     selectedRows: tableView.selectedRows
 
-                    onPlotOptionsChanged: { root.saveRequired = true; }
+                    onPlotOptionsChanged:
+                    {
+                        root.updatePlotMenuState();
+                        root.saveRequired = true;
+                    }
 
                     onVisibleColumnAnnotationNamesChanged:
                     {
