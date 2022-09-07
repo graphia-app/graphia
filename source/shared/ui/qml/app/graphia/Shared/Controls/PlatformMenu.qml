@@ -23,15 +23,22 @@ Menu
 {
     property bool hidden: false
 
-    Component.onCompleted:
+    onParentChanged:
     {
+        if(!parent)
+            return;
+
         if(parent instanceof MenuBarItem)
             parent.visible = Qt.binding(() => !hidden);
-
-        if(parent instanceof PlatformMenuItem)
+        else if(parent instanceof MenuItem) // This happens when .addMenu has been used
+        {
+            parent.clip = true;
+            parent.height = Qt.binding(() => hidden || !parent ? 0 : parent.implicitHeight);
+        }
+        else if(parent instanceof PlatformMenuItem)
         {
             parent.hidden = Qt.binding(() => hidden);
-            parent.height = Qt.binding(() => hidden ? 0 : parent.implicitHeight);
+            parent.height = Qt.binding(() => hidden || !parent ? 0 : parent.implicitHeight);
         }
     }
 
