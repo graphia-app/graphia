@@ -26,6 +26,15 @@ function watchPropertyChanges(object, handler)
     }
 }
 
+function proxyProperties(from, to, properties)
+{
+    properties.forEach(function(prop)
+    {
+        if(from[prop] !== undefined)
+            to[prop] = Qt.binding(((from, prop) => () => from[prop])(from, prop));
+    });
+}
+
 function objectsEquivalent(a, b)
 {
     let aProps = Object.getOwnPropertyNames(a);
