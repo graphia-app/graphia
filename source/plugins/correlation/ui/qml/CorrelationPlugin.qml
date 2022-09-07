@@ -641,7 +641,7 @@ PluginContent
                 MenuUtils.addActionTo(menu, groupByAnnotationAction);
 
                 let colorGroupsByMenu = MenuUtils.addSubMenuTo(menu, qsTr("Colour Groups By"));
-                colorGroupsByMenu.hidden = Qt.binding(() => !groupByAnnotationAction.checked);
+                colorGroupsByMenu.hidden = Qt.binding(() => !plot.groupByAnnotation);
 
                 let colorByNoGroupMenuItem = MenuUtils.addItemTo(colorGroupsByMenu, qsTr("None"));
                 colorByNoGroupMenuItem.checkable = true;
