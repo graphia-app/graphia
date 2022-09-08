@@ -1479,7 +1479,7 @@ Item
 
             onTriggered:
             {
-                if(typeof plugin.content.onResized === "function")
+                if(plugin.content && typeof plugin.content.onResized === "function")
                     plugin.content.onResized();
             }
         }
