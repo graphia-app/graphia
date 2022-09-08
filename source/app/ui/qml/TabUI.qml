@@ -769,10 +769,17 @@ Item
 
                 onClicked: function(button, nodeId)
                 {
-                    if(button === Qt.RightButton)
+                    switch(button)
                     {
+                    case Qt.RightButton:
                         contextMenu.clickedNodeId = nodeId;
                         contextMenu.popup();
+                        break;
+
+                    case Qt.MiddleButton:
+                        if(!nodeId.isNull)
+                            root.repeatLastSelection(nodeId);
+                        break;
                     }
                 }
 
