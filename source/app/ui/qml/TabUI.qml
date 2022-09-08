@@ -396,7 +396,10 @@ Item
     function selectSourcesOf(nodeId)
     {
         _lastSelectType = TabUI.LS_Sources;
-        _document.selectSourcesOf(nodeId);
+        if(typeof(nodeId) !== "undefined")
+            _document.selectSourcesOf(nodeId);
+        else
+            _document.selectSources();
     }
 
     function selectTargets()
@@ -408,7 +411,10 @@ Item
     function selectTargetsOf(nodeId)
     {
         _lastSelectType = TabUI.LS_Targets;
-        _document.selectTargetsOf(nodeId);
+        if(typeof(nodeId) !== "undefined")
+            _document.selectTargetsOf(nodeId);
+        else
+            _document.selectTargets();
     }
 
     function selectNeighbours()
@@ -420,7 +426,11 @@ Item
     function selectNeighboursOf(nodeId)
     {
         _lastSelectType = TabUI.LS_Neighbours;
-        _document.selectNeighboursOf(nodeId);
+
+        if(typeof(nodeId) !== "undefined")
+            _document.selectNeighboursOf(nodeId);
+        else
+            _document.selectNeighbours();
     }
 
     function selectBySharedAttributeValue(attributeName, nodeId)
@@ -481,24 +491,27 @@ Item
         return qsTr("Repeat Last Selection");
     }
 
-    function repeatLastSelection()
+    function repeatLastSelection(nodeId)
     {
+        let clickedNodeId = typeof(nodeId) !== "undefined" ?
+            nodeId : contextMenu.clickedNodeId;
+
         switch(root._lastSelectType)
         {
         default:
         case TabUI.LS_None:
             return;
         case TabUI.LS_Neighbours:
-            selectNeighbours();
+            selectNeighboursOf(clickedNodeId);
             return;
         case TabUI.LS_Sources:
-            selectSources();
+            selectSourcesOf(clickedNodeId);
             return;
         case TabUI.LS_Targets:
-            selectTargets();
+            selectTargetsOf(clickedNodeId);
             return;
         case TabUI.LS_BySharedValue:
-            selectBySharedAttributeValue(_lastSharedValueAttributeName);
+            selectBySharedAttributeValue(_lastSharedValueAttributeName, clickedNodeId);
             return;
         }
     }
@@ -650,6 +663,8 @@ Item
                 PlatformMenu
                 {
                     id: contextMenu
+
+                    onAboutToHide: { contextMenu.clickedNodeId = undefined; }
 
                     TextMetrics
                     {
