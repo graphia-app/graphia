@@ -156,6 +156,11 @@ void GraphCommonInteractor::mousePressEvent(const QPoint& pos, Qt::KeyboardModif
         rightMouseDown();
         break;
 
+    case Qt::MiddleButton:
+        _middleMouseButtonHeld = true;
+        middleMouseDown();
+        break;
+
     default: break;
     }
 }
@@ -177,10 +182,16 @@ void GraphCommonInteractor::mouseReleaseEvent(const QPoint& pos, Qt::KeyboardMod
         rightMouseUp();
         break;
 
+    case Qt::MiddleButton:
+        _middleMouseButtonHeld = false;
+        middleMouseUp();
+        break;
+
+
     default: break;
     }
 
-    if(!_rightMouseButtonHeld && !_leftMouseButtonHeld)
+    if(!_leftMouseButtonHeld && !_rightMouseButtonHeld && !_middleMouseButtonHeld)
         mouseUp();
 }
 
@@ -205,10 +216,12 @@ void GraphCommonInteractor::mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifi
         leftDrag();
     else if(_rightMouseButtonHeld)
         rightDrag();
+    else if(_middleMouseButtonHeld)
+        middleDrag();
 
     _prevCursorPosition = _cursorPosition;
 
-    if(_leftMouseButtonHeld || _rightMouseButtonHeld)
+    if(_leftMouseButtonHeld || _rightMouseButtonHeld || _middleMouseButtonHeld)
         _mouseMoving = true;
 }
 
@@ -228,6 +241,10 @@ void GraphCommonInteractor::mouseDoubleClickEvent(const QPoint&, Qt::KeyboardMod
 
     case Qt::RightButton:
         rightDoubleClick();
+        break;
+
+    case Qt::MiddleButton:
+        middleDoubleClick();
         break;
 
     default: break;
@@ -449,6 +466,25 @@ void GraphCommonInteractor::rightMouseUp()
 }
 
 void GraphCommonInteractor::rightDrag()
+{
+    _selecting = false;
+}
+
+void GraphCommonInteractor::middleMouseDown()
+{
+    _selecting = true;
+}
+
+void GraphCommonInteractor::middleMouseUp()
+{
+    if(_selecting)
+    {
+        emit clicked(Qt::MiddleButton, _clickedNodeId);
+        _selecting = false;
+    }
+}
+
+void GraphCommonInteractor::middleDrag()
 {
     _selecting = false;
 }

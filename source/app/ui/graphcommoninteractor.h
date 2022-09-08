@@ -57,6 +57,7 @@ private:
     QPoint _prevCursorPosition;
     bool _rightMouseButtonHeld = false;
     bool _leftMouseButtonHeld = false;
+    bool _middleMouseButtonHeld = false;
 
     Qt::KeyboardModifiers _modifiers;
 
@@ -100,8 +101,13 @@ protected:
     virtual void rightMouseUp();
     virtual void rightDrag();
 
+    virtual void middleMouseDown();
+    virtual void middleMouseUp();
+    virtual void middleDrag();
+
     virtual void leftDoubleClick() {}
     virtual void rightDoubleClick() {}
+    virtual void middleDoubleClick() {}
 
     virtual void wheelMove(float, float, float) {}
     virtual void trackpadZoomGesture(float, float, float) {}
