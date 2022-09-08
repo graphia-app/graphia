@@ -105,7 +105,7 @@ protected:
 
     virtual void wheelMove(float, float, float) {}
     virtual void trackpadZoomGesture(float, float, float) {}
-    virtual void trackpadPanGesture(float, float, float, float) {};
+    virtual void trackpadPanGesture(float, float, float, float) {}
 
     QPoint cursorPosition() const;
     QPoint prevCursorPosition() const;
