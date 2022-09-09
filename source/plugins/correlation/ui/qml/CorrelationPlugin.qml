@@ -456,15 +456,7 @@ PluginContent
 
     function addCheckedStateFnFor(checkable, isChecked)
     {
-        _plotMenuStateUpdateFns.push(function()
-        {
-            let checked = isChecked();
-
-            // Toggle the state to resync the visual appearance of the menu item
-            // with the value set on the menu item itself; possible Qt bug?
-            checkable.checked = !checked;
-            checkable.checked = checked;
-        });
+        _plotMenuStateUpdateFns.push(function() { checkable.checked = isChecked(); });
     }
 
     function updatePlotMenuState()
