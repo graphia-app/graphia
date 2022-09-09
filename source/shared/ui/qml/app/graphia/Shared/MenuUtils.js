@@ -84,8 +84,8 @@ function clone(from, to)
         if(fromItem.subMenu)
         {
             let toSubMenu = createQmlItem("PlatformMenu", to);
-            clone(fromItem.subMenu, toSubMenu);
             to.addMenu(toSubMenu);
+            clone(fromItem.subMenu, toSubMenu);
 
             if(toSubMenu.parent instanceof QtQuickControls.MenuItem)
                 Utils.proxyProperties(fromItem, toSubMenu.parent, ["enabled", "height"]);
