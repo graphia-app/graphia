@@ -87,7 +87,10 @@ function clone(from, to)
             clone(fromItem.subMenu, toSubMenu);
             to.addMenu(toSubMenu);
 
-            Utils.proxyProperties(fromItem, toSubMenu.parent, ["enabled", "height"]);
+            if(toSubMenu.parent instanceof QtQuickControls.MenuItem)
+                Utils.proxyProperties(fromItem, toSubMenu.parent, ["enabled", "height"]);
+            else if(toSubMenu instanceof SharedControls.PlatformMenu)
+                Utils.proxyProperties(fromItem.subMenu, toSubMenu, ["enabled", "hidden"]);
         }
         else if(fromItem instanceof SharedControls.PlatformMenuItem)
         {
