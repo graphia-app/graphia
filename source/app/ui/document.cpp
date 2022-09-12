@@ -1095,16 +1095,31 @@ void Document::selectNone()
     }
 }
 
-void Document::selectSources()
+static NodeIdSet nodeIdSetFor(QmlNodeId nodeId, bool add, const SelectionManager& selectionManager)
 {
-    if(busy() || _selectionManager == nullptr)
+    NodeIdSet nodeIdSet;
+
+    if(add)
+        nodeIdSet = selectionManager.selectedNodes();
+
+    if(!nodeId.isNull())
+        nodeIdSet.emplace(nodeId);
+
+    return nodeIdSet;
+}
+
+// NOLINTNEXTLINE readability-make-member-function-const
+void Document::selectSources(QmlNodeId qmlNodeId, bool add)
+{
+    if(busy())
         return;
 
-    auto selectedNodeIds = _selectionManager->selectedNodes();
-    Q_ASSERT(!selectedNodeIds.empty());
-    NodeIdSet nodeIds = selectedNodeIds;
+    NodeIdSet nodeIds = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
 
-    for(auto nodeId : selectedNodeIds)
+    if(nodeIds.empty())
+        return;
+
+    for(auto nodeId : nodeIds)
     {
         auto sources = _graphModel->graph().sourcesOf(nodeId);
         nodeIds.insert(sources.begin(), sources.end());
@@ -1116,31 +1131,17 @@ void Document::selectSources()
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
-void Document::selectSourcesOf(QmlNodeId nodeId)
+void Document::selectTargets(QmlNodeId qmlNodeId, bool add)
 {
     if(busy())
         return;
 
-    NodeIdSet nodeIds = {nodeId};
+    NodeIdSet nodeIds = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
 
-    auto sources = _graphModel->graph().sourcesOf(nodeId);
-    nodeIds.insert(sources.begin(), sources.end());
-
-    _commandManager.execute(ExecutePolicy::Once,
-        makeSelectNodesCommand(_selectionManager.get(),
-        nodeIds, SelectNodesClear::SelectionAndMask));
-}
-
-void Document::selectTargets()
-{
-    if(busy() || _selectionManager == nullptr)
+    if(nodeIds.empty())
         return;
 
-    auto selectedNodeIds = _selectionManager->selectedNodes();
-    Q_ASSERT(!selectedNodeIds.empty());
-    NodeIdSet nodeIds = selectedNodeIds;
-
-    for(auto nodeId : selectedNodeIds)
+    for(auto nodeId : nodeIds)
     {
         auto targets = _graphModel->graph().targetsOf(nodeId);
         nodeIds.insert(targets.begin(), targets.end());
@@ -1152,31 +1153,17 @@ void Document::selectTargets()
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
-void Document::selectTargetsOf(QmlNodeId nodeId)
+void Document::selectNeighbours(QmlNodeId qmlNodeId, bool add)
 {
     if(busy())
         return;
 
-    NodeIdSet nodeIds = {nodeId};
+    NodeIdSet nodeIds = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
 
-    auto targets = _graphModel->graph().targetsOf(nodeId);
-    nodeIds.insert(targets.begin(), targets.end());
-
-    _commandManager.execute(ExecutePolicy::Once,
-        makeSelectNodesCommand(_selectionManager.get(),
-        nodeIds, SelectNodesClear::SelectionAndMask));
-}
-
-void Document::selectNeighbours()
-{
-    if(busy() || _selectionManager == nullptr)
+    if(nodeIds.empty())
         return;
 
-    auto selectedNodeIds = _selectionManager->selectedNodes();
-    Q_ASSERT(!selectedNodeIds.empty());
-    NodeIdSet nodeIds = selectedNodeIds;
-
-    for(auto nodeId : selectedNodeIds)
+    for(auto nodeId : nodeIds)
     {
         auto neighbours = _graphModel->graph().neighboursOf(nodeId);
         nodeIds.insert(neighbours.begin(), neighbours.end());
@@ -1187,33 +1174,12 @@ void Document::selectNeighbours()
         nodeIds, SelectNodesClear::SelectionAndMask));
 }
 
-// NOLINTNEXTLINE readability-make-member-function-const
-void Document::selectNeighboursOf(QmlNodeId nodeId)
-{
-    if(busy())
-        return;
-
-    NodeIdSet nodeIds = {nodeId};
-
-    auto neighbours = _graphModel->graph().neighboursOf(nodeId);
-    nodeIds.insert(neighbours.begin(), neighbours.end());
-
-    _commandManager.execute(ExecutePolicy::Once,
-        makeSelectNodesCommand(_selectionManager.get(),
-        nodeIds, SelectNodesClear::SelectionAndMask));
-}
-
-void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNodeId qmlNodeId)
+void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNodeId qmlNodeId, bool add)
 {
     if(busy() || _selectionManager == nullptr)
         return;
 
-    NodeIdSet nodeIdSet;
-
-    if(!qmlNodeId.isNull())
-        nodeIdSet.emplace(qmlNodeId);
-    else
-        nodeIdSet = _selectionManager->selectedNodes();
+    NodeIdSet nodeIdSet = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
 
     if(nodeIdSet.empty())
         return;

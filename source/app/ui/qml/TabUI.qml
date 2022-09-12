@@ -387,59 +387,41 @@ Item
             onSaveConfirmedFunction();
     }
 
-    function selectSources()
+    function selectSources(nodeId, add)
     {
         _lastSelectType = TabUI.LS_Sources;
-        _document.selectSources();
-    }
-
-    function selectSourcesOf(nodeId)
-    {
-        _lastSelectType = TabUI.LS_Sources;
-        if(typeof(nodeId) !== "undefined")
-            _document.selectSourcesOf(nodeId);
+        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+            _document.selectSources(nodeId, add);
         else
             _document.selectSources();
     }
 
-    function selectTargets()
+    function selectTargets(nodeId, add)
     {
         _lastSelectType = TabUI.LS_Targets;
-        _document.selectTargets();
-    }
-
-    function selectTargetsOf(nodeId)
-    {
-        _lastSelectType = TabUI.LS_Targets;
-        if(typeof(nodeId) !== "undefined")
-            _document.selectTargetsOf(nodeId);
+        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+            _document.selectTargets(nodeId, add);
         else
             _document.selectTargets();
     }
 
-    function selectNeighbours()
-    {
-        _lastSelectType = TabUI.LS_Neighbours;
-        _document.selectNeighbours();
-    }
-
-    function selectNeighboursOf(nodeId)
+    function selectNeighbours(nodeId, add)
     {
         _lastSelectType = TabUI.LS_Neighbours;
 
-        if(typeof(nodeId) !== "undefined")
-            _document.selectNeighboursOf(nodeId);
+        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+            _document.selectNeighbours(nodeId, add);
         else
             _document.selectNeighbours();
     }
 
-    function selectBySharedAttributeValue(attributeName, nodeId)
+    function selectBySharedAttributeValue(attributeName, nodeId, add)
     {
         _lastSelectType = TabUI.LS_BySharedValue;
         _lastSharedValueAttributeName = attributeName;
 
-        if(typeof(nodeId) !== "undefined")
-            _document.selectBySharedAttributeValue(attributeName, nodeId);
+        if(typeof(nodeId) !== "undefined" && typeof(add) !== "undefined")
+            _document.selectBySharedAttributeValue(attributeName, nodeId, add);
         else
             _document.selectBySharedAttributeValue(attributeName);
     }
@@ -491,10 +473,13 @@ Item
         return qsTr("Repeat Last Selection");
     }
 
-    function repeatLastSelection(nodeId)
+    function repeatLastSelection(nodeId, add)
     {
         let clickedNodeId = typeof(nodeId) !== "undefined" ?
             nodeId : contextMenu.clickedNodeId;
+
+        let addToSelection = typeof(add) !== "undefined" ?
+            add : undefined;
 
         switch(root._lastSelectType)
         {
@@ -502,16 +487,16 @@ Item
         case TabUI.LS_None:
             return;
         case TabUI.LS_Neighbours:
-            selectNeighboursOf(clickedNodeId);
+            selectNeighbours(clickedNodeId, add);
             return;
         case TabUI.LS_Sources:
-            selectSourcesOf(clickedNodeId);
+            selectSources(clickedNodeId, add);
             return;
         case TabUI.LS_Targets:
-            selectTargetsOf(clickedNodeId);
+            selectTargets(clickedNodeId, add);
             return;
         case TabUI.LS_BySharedValue:
-            selectBySharedAttributeValue(_lastSharedValueAttributeName, clickedNodeId);
+            selectBySharedAttributeValue(_lastSharedValueAttributeName, clickedNodeId, add);
             return;
         }
     }
@@ -615,7 +600,7 @@ Item
         text: Utils.format(qsTr("Select Sources of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
+        onTriggered: { selectSources(contextMenu.clickedNodeId, false); }
     }
 
     Action
@@ -624,7 +609,7 @@ Item
         text: Utils.format(qsTr("Select Targets of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: _document.directed && contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
+        onTriggered: { selectTargets(contextMenu.clickedNodeId, false); }
     }
 
     Action
@@ -633,7 +618,7 @@ Item
         text: Utils.format(qsTr("Select Neigh&bours of '{0}'"), contextMenu.clickedNodeName)
         property bool visible: contextMenu.nodeWasClicked
         enabled: !_document.busy && visible
-        onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
+        onTriggered: { selectNeighbours(contextMenu.clickedNodeId, false); }
     }
 
     SplitView
@@ -778,7 +763,7 @@ Item
 
                     case Qt.MiddleButton:
                         if(!nodeId.isNull)
-                            root.repeatLastSelection(nodeId);
+                            root.repeatLastSelection(nodeId, false);
                         break;
                     }
                 }

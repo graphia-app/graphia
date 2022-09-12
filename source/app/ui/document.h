@@ -419,13 +419,11 @@ public:
     Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
-    Q_INVOKABLE void selectSources();
-    Q_INVOKABLE void selectSourcesOf(QmlNodeId nodeId);
-    Q_INVOKABLE void selectTargets();
-    Q_INVOKABLE void selectTargetsOf(QmlNodeId nodeId);
-    Q_INVOKABLE void selectNeighbours();
-    Q_INVOKABLE void selectNeighboursOf(QmlNodeId nodeId);
-    Q_INVOKABLE void selectBySharedAttributeValue(const QString& attributeName, QmlNodeId qmlNodeId = {});
+    Q_INVOKABLE void selectSources(QmlNodeId qmlNodeId = {}, bool add = true);
+    Q_INVOKABLE void selectTargets(QmlNodeId qmlNodeId = {}, bool add = true);
+    Q_INVOKABLE void selectNeighbours(QmlNodeId qmlNodeId = {}, bool add = true);
+    Q_INVOKABLE void selectBySharedAttributeValue(const QString& attributeName,
+        QmlNodeId qmlNodeId = {}, bool add = true);
     Q_INVOKABLE void invertSelection();
 
     Q_INVOKABLE void undo();
