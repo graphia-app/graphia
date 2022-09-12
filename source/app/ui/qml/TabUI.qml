@@ -763,7 +763,7 @@ Item
 
                     case Qt.MiddleButton:
                         if(!nodeId.isNull)
-                            root.repeatLastSelection(nodeId, false);
+                            root.repeatLastSelection(nodeId, modifiers & Qt.ShiftModifier);
                         break;
                     }
                 }
