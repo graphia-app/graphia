@@ -218,7 +218,7 @@ signals:
 
     void fpsChanged();
 
-    void clicked(int button, QmlNodeId nodeId);
+    void clicked(int button, int modifiers, QmlNodeId nodeId);
 };
 
 #endif // GRAPHQUICKITEM_H

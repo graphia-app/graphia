@@ -752,7 +752,7 @@ Item
                     }
                 }
 
-                onClicked: function(button, nodeId)
+                onClicked: function(button, modifiers, nodeId)
                 {
                     switch(button)
                     {

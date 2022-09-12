@@ -49,7 +49,7 @@ signals:
     void userInteractionStarted();
     void userInteractionFinished();
 
-    void clicked(int button, QmlNodeId nodeId);
+    void clicked(int button, int modifiers, QmlNodeId nodeId);
 };
 
 #endif // INTERACTOR_H

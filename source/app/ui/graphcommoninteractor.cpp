@@ -405,7 +405,7 @@ void GraphCommonInteractor::leftMouseUp()
             }
         }
 
-        emit clicked(Qt::LeftButton, _clickedNodeId);
+        emit clicked(Qt::LeftButton, modifiers(), _clickedNodeId);
         _selecting = false;
     }
 }
@@ -460,7 +460,7 @@ void GraphCommonInteractor::rightMouseUp()
 {
     if(_selecting)
     {
-        emit clicked(Qt::RightButton, _clickedNodeId);
+        emit clicked(Qt::RightButton, modifiers(), _clickedNodeId);
         _selecting = false;
     }
 }
@@ -479,7 +479,7 @@ void GraphCommonInteractor::middleMouseUp()
 {
     if(_selecting)
     {
-        emit clicked(Qt::MiddleButton, _clickedNodeId);
+        emit clicked(Qt::MiddleButton, modifiers(), _clickedNodeId);
         _selecting = false;
     }
 }

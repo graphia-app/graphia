@@ -328,7 +328,7 @@ signals:
 
     void fpsChanged(float fps);
 
-    void clicked(int button, QmlNodeId nodeId);
+    void clicked(int button, int modifiers, QmlNodeId nodeId);
 };
 
 #endif // GRAPHRENDERER_H
