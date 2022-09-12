@@ -45,6 +45,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   cmake --version || exit $?
   cmake -DCMAKE_UNITY_BUILD=${UNITY_BUILD} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+    -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
     -GNinja .. || exit $?
   cat variables.sh
   . variables.sh
@@ -66,12 +67,16 @@ function makeSymFile
   sed -e '1s/\.dsym$//' -e '1s/\.sym$//' -i '' ${TARGET}
 }
 
+echo "Generating sym files..."
+
 makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
 makeSymFile ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib \
-  ${BUILD_DIR}/libthirdparty.dylib.sym
+  ${BUILD_DIR}/libthirdparty.dylib.sym || exit $?
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
   makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
 done
+
+echo "...done"
