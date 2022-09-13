@@ -2283,10 +2283,13 @@ ApplicationWindow
                 {
                     id: bookmarkMenuItem
 
-                    text: index > -1 ? currentTab.document.bookmarks[index] : "";
-
+                    // The Action is used so that a shortcut can be assigned; this is
+                    // functionality that isn't (necessarily) available in a plain MenuItem
                     action: Action
                     {
+                        enabled: currentTab ? !currentTab.document.busy : false
+                        text: index > -1 ? currentTab.document.bookmarks[index] : "";
+
                         shortcut:
                         {
                             if(index >= 0 && index < 9)
@@ -2305,8 +2308,6 @@ ApplicationWindow
                             currentTab.gotoBookmark(bookmarkMenuItem.text);
                         }
                     }
-
-                    enabled: currentTab ? !currentTab.document.busy : false
                 }
 
                 onObjectAdded: function(index, object) { bookmarksMenu.insertItem(4/* first menu items */ + index, object); }
@@ -2334,17 +2335,6 @@ ApplicationWindow
 
                     text: templatesInstantiator.model[index]
 
-                    action: Action
-                    {
-                        onTriggered: function(source)
-                        {
-                            if(source && source.menu)
-                                source.menu.dismiss();
-
-                            currentTab.applyTemplate(templateMenuItem.text);
-                        }
-                    }
-
                     enabled:
                     {
                         if(!currentTab || currentTab.document.busy)
@@ -2356,6 +2346,14 @@ ApplicationWindow
 
                         return currentTab.document.graphTransformsAreValid(template.transforms) &&
                             currentTab.document.visualisationsAreValid(template.visualisations);
+                    }
+
+                    onTriggered: function(source)
+                    {
+                        if(source && source.menu)
+                            source.menu.dismiss();
+
+                        currentTab.applyTemplate(templateMenuItem.text);
                     }
                 }
 
