@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -38,6 +37,8 @@
 #ifndef PROCESSOR_SIMPLE_SERIALIZER_H__
 #define PROCESSOR_SIMPLE_SERIALIZER_H__
 
+#include <stddef.h>
+
 #include "google_breakpad/common/breakpad_types.h"
 
 namespace google_breakpad {
@@ -49,10 +50,10 @@ typedef uint64_t MemAddr;
 template<class Type> class SimpleSerializer {
  public:
   // Calculate and return the size of the 'item'.
-  static size_t SizeOf(const Type &item) { return sizeof(item); }
+  static size_t SizeOf(const Type& item) { return sizeof(item); }
   // Write 'item' to memory location 'dest', and return to the "end" address of
   // data written, i.e., the address after the final byte written.
-  static char *Write(const Type &item, char *dest) {
+  static char* Write(const Type& item, char* dest) {
     new (dest) Type(item);
     return dest + SizeOf(item);
   }

@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -42,21 +41,15 @@
 #include "util/hash/hash.h"
 
 template <class T, class U, class H = __gnu_cxx::hash<T> >
-struct unordered_map : public hash_map<T, U, H> {};
+struct unordered_map : public __gnu_cxx::hash_map<T, U, H> {};
 template <class T, class H = __gnu_cxx::hash<T> >
-struct unordered_set : public hash_set<T, H> {};
+struct unordered_set : public __gnu_cxx::hash_set<T, H> {};
 
-#elif defined(_LIBCPP_VERSION)  // c++11
+#else
 #include <unordered_map>
 #include <unordered_set>
 using std::unordered_map;
 using std::unordered_set;
-
-#else  // Fallback to tr1::unordered
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-using std::tr1::unordered_map;
-using std::tr1::unordered_set;
 #endif
 
 #endif  // COMMON_UNORDERED_H_

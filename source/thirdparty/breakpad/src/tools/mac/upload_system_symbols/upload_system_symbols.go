@@ -1,5 +1,4 @@
-/* Copyright 2014, Google Inc.
-All rights reserved.
+/* Copyright 2014 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@ notice, this list of conditions and the following disclaimer.
 copyright notice, this list of conditions and the following disclaimer
 in the documentation and/or other materials provided with the
 distribution.
- * Neither the name of Google Inc. nor the names of its
+ * Neither the name of Google LLC nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
 
@@ -69,11 +68,16 @@ var (
 var (
 	// pathsToScan are the subpaths in the systemRoot that should be scanned for shared libraries.
 	pathsToScan = []string{
-		"/Library/QuickTime",
 		"/System/Library/Components",
 		"/System/Library/Frameworks",
 		"/System/Library/PrivateFrameworks",
 		"/usr/lib",
+	}
+
+	// optionalPathsToScan is just like pathsToScan, but the paths are permitted to be absent.
+	optionalPathsToScan = []string{
+		// Gone in 10.15.
+		"/Library/QuickTime",
 	}
 
 	// uploadServers are the list of servers to which symbols should be uploaded.
@@ -114,7 +118,7 @@ func main() {
 	if *dumpOnlyPath != "" {
 		// -dump-to specified, so make sure that the path is a directory.
 		if fi, err := os.Stat(*dumpOnlyPath); err != nil {
-			log.Fatal("-dump-to location: %v", err)
+			log.Fatalf("-dump-to location: %v", err)
 		} else if !fi.IsDir() {
 			log.Fatal("-dump-to location is not a directory")
 		}
@@ -127,7 +131,7 @@ func main() {
 		uq = StartUploadQueue()
 
 		if p, err := ioutil.TempDir("", "upload_system_symbols"); err != nil {
-			log.Fatal("Failed to create temporary directory: %v", err)
+			log.Fatalf("Failed to create temporary directory: %v", err)
 		} else {
 			dumpPath = p
 			defer os.RemoveAll(p)
@@ -266,7 +270,7 @@ func (dq *DumpQueue) worker() {
 		symfile := fmt.Sprintf("%s_%s.sym", filebase, req.arch)
 		f, err := os.Create(symfile)
 		if err != nil {
-			log.Fatal("Error creating symbol file:", err)
+			log.Fatalf("Error creating symbol file: %v", err)
 		}
 
 		cmd := exec.Command(dumpSyms, "-a", req.arch, req.path)
@@ -288,13 +292,13 @@ func (dq *DumpQueue) worker() {
 func uploadFromDirectory(directory string, uq *UploadQueue) {
 	d, err := os.Open(directory)
 	if err != nil {
-		log.Fatal("Could not open directory to upload: %v", err)
+		log.Fatalf("Could not open directory to upload: %v", err)
 	}
 	defer d.Close()
 
 	entries, err := d.Readdirnames(0)
 	if err != nil {
-		log.Fatal("Could not read directory: %v", err)
+		log.Fatalf("Could not read directory: %v", err)
 	}
 
 	for _, entry := range entries {
@@ -322,7 +326,11 @@ func findLibsInRoot(root string, dq *DumpQueue) {
 	fq.WorkerPool = StartWorkerPool(12, fq.worker)
 
 	for _, p := range pathsToScan {
-		fq.findLibsInPath(path.Join(root, p))
+		fq.findLibsInPath(path.Join(root, p), true)
+	}
+
+	for _, p := range optionalPathsToScan {
+		fq.findLibsInPath(path.Join(root, p), false)
 	}
 
 	close(fq.queue)
@@ -332,23 +340,26 @@ func findLibsInRoot(root string, dq *DumpQueue) {
 
 // findLibsInPath recursively walks the directory tree, sending file paths to
 // test for being Mach-O to the findQueue.
-func (fq *findQueue) findLibsInPath(loc string) {
+func (fq *findQueue) findLibsInPath(loc string, mustExist bool) {
 	d, err := os.Open(loc)
 	if err != nil {
-		log.Fatal("Could not open %s: %v", loc, err)
+		if !mustExist && os.IsNotExist(err) {
+			return
+		}
+		log.Fatalf("Could not open %s: %v", loc, err)
 	}
 	defer d.Close()
 
 	for {
 		fis, err := d.Readdir(100)
 		if err != nil && err != io.EOF {
-			log.Fatal("Error reading directory %s: %v", loc, err)
+			log.Fatalf("Error reading directory %s: %v", loc, err)
 		}
 
 		for _, fi := range fis {
 			fp := path.Join(loc, fi.Name())
 			if fi.IsDir() {
-				fq.findLibsInPath(fp)
+				fq.findLibsInPath(fp, true)
 				continue
 			} else if fi.Mode()&os.ModeSymlink != 0 {
 				continue

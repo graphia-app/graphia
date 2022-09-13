@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -60,19 +59,19 @@ class FakeMemoryRegion : public MemoryRegion {
  public:
   virtual uint64_t GetBase() const { return 0; }
   virtual uint32_t GetSize() const { return 0; }
-  virtual bool GetMemoryAtAddress(uint64_t address, uint8_t  *value) const {
+  virtual bool GetMemoryAtAddress(uint64_t address, uint8_t*  value) const {
     *value = address + 1;
     return true;
   }
-  virtual bool GetMemoryAtAddress(uint64_t address, uint16_t *value) const {
+  virtual bool GetMemoryAtAddress(uint64_t address, uint16_t* value) const {
     *value = address + 1;
     return true;
   }
-  virtual bool GetMemoryAtAddress(uint64_t address, uint32_t *value) const {
+  virtual bool GetMemoryAtAddress(uint64_t address, uint32_t* value) const {
     *value = address + 1;
     return true;
   }
-  virtual bool GetMemoryAtAddress(uint64_t address, uint64_t *value) const {
+  virtual bool GetMemoryAtAddress(uint64_t address, uint64_t* value) const {
     *value = address + 1;
     return true;
   }
@@ -94,17 +93,17 @@ struct EvaluateTest {
 
 struct EvaluateTestSet {
   // The dictionary used for all tests in the set.
-  PostfixEvaluator<unsigned int>::DictionaryType *dictionary;
+  PostfixEvaluator<unsigned int>::DictionaryType* dictionary;
 
   // The list of tests.
-  const EvaluateTest *evaluate_tests;
+  const EvaluateTest* evaluate_tests;
 
   // The number of tests.
   unsigned int evaluate_test_count;
 
   // Identifiers and their expected values upon completion of the Evaluate
   // tests in the set.
-  map<string, unsigned int> *validate_data;
+  map<string, unsigned int>* validate_data;
 };
 
 
@@ -227,9 +226,9 @@ static bool RunTests() {
   for (unsigned int evaluate_test_set_index = 0;
        evaluate_test_set_index < evaluate_test_set_count;
        ++evaluate_test_set_index) {
-    EvaluateTestSet *evaluate_test_set =
+    EvaluateTestSet* evaluate_test_set =
         &evaluate_test_sets[evaluate_test_set_index];
-    const EvaluateTest *evaluate_tests = evaluate_test_set->evaluate_tests;
+    const EvaluateTest* evaluate_tests = evaluate_test_set->evaluate_tests;
     unsigned int evaluate_test_count = evaluate_test_set->evaluate_test_count;
 
     // The same dictionary will be used for each test in the set.  Earlier
@@ -242,7 +241,7 @@ static bool RunTests() {
     for (unsigned int evaluate_test_index = 0;
          evaluate_test_index < evaluate_test_count;
          ++evaluate_test_index) {
-      const EvaluateTest *evaluate_test = &evaluate_tests[evaluate_test_index];
+      const EvaluateTest* evaluate_test = &evaluate_tests[evaluate_test_index];
 
       // Do the test.
       bool result = postfix_evaluator.Evaluate(evaluate_test->expression,
@@ -344,7 +343,7 @@ static bool RunTests() {
 
   postfix_evaluator.set_dictionary(&dictionary_2);
   for (int i = 0; i < evaluate_for_value_tests_2_size; i++) {
-    const EvaluateForValueTest *test = &evaluate_for_value_tests_2[i];
+    const EvaluateForValueTest* test = &evaluate_for_value_tests_2[i];
     unsigned int result;
     if (postfix_evaluator.EvaluateForValue(test->expression, &result)
         != test->evaluable) {
@@ -396,7 +395,7 @@ static bool RunTests() {
 }  // namespace
 
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   BPLOG_INIT(&argc, &argv);
 
   return RunTests() ? 0 : 1;

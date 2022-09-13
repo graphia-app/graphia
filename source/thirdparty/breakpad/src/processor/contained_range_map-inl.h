@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -55,7 +54,7 @@ ContainedRangeMap<AddressType, EntryType>::~ContainedRangeMap() {
 
 template<typename AddressType, typename EntryType>
 bool ContainedRangeMap<AddressType, EntryType>::StoreRange(
-    const AddressType &base, const AddressType &size, const EntryType &entry) {
+    const AddressType& base, const AddressType& size, const EntryType& entry) {
   AddressType high = base + size - 1;
 
   // Check for undersize or overflow.
@@ -84,10 +83,12 @@ bool ContainedRangeMap<AddressType, EntryType>::StoreRange(
     // range's, it violates the containment rules, and an attempt to store
     // it must fail.  iterator_base->first contains the key, which was the
     // containing child's high address.
-    if (iterator_base->second->base_ == base && iterator_base->first == high) {
+    if (!allow_equal_range_ && iterator_base->second->base_ == base &&
+        iterator_base->first == high) {
       // TODO(nealsid): See the TODO above on why this is commented out.
-//       BPLOG(INFO) << "StoreRange failed, identical range is already "
-//                      "present: " << HexString(base) << "+" << HexString(size);
+      //       BPLOG(INFO) << "StoreRange failed, identical range is already "
+      //                      "present: " << HexString(base) << "+" <<
+      //                      HexString(size);
       return false;
     }
 
@@ -125,7 +126,7 @@ bool ContainedRangeMap<AddressType, EntryType>::StoreRange(
   // Optimization: if the iterators are equal, no child ranges would be
   // moved.  Create the new child range with a NULL map to conserve space
   // in leaf nodes, of which there will be many.
-  AddressToRangeMap *child_map = NULL;
+  AddressToRangeMap* child_map = NULL;
 
   if (iterator_base != iterator_high) {
     // The children of this range that are contained by the new range must
@@ -141,15 +142,17 @@ bool ContainedRangeMap<AddressType, EntryType>::StoreRange(
   // the new child range contains were formerly children of this range but
   // are now this range's grandchildren.  Ownership of these is transferred
   // to the new child range.
-  map_->insert(MapValue(high,
-                        new ContainedRangeMap(base, entry, child_map)));
+  ContainedRangeMap* new_child =
+      new ContainedRangeMap(base, entry, child_map, allow_equal_range_);
+
+  map_->insert(MapValue(high, new_child));
   return true;
 }
 
 
 template<typename AddressType, typename EntryType>
 bool ContainedRangeMap<AddressType, EntryType>::RetrieveRange(
-    const AddressType &address, EntryType *entry) const {
+    const AddressType& address, EntryType* entry) const {
   BPLOG_IF(ERROR, !entry) << "ContainedRangeMap::RetrieveRange requires "
                              "|entry|";
   assert(entry);
@@ -177,6 +180,20 @@ bool ContainedRangeMap<AddressType, EntryType>::RetrieveRange(
   return true;
 }
 
+template <typename AddressType, typename EntryType>
+bool ContainedRangeMap<AddressType, EntryType>::RetrieveRanges(
+    const AddressType& address,
+    std::vector<const EntryType*>& entries) const {
+  // If nothing was ever stored, then there's nothing to retrieve.
+  if (!map_)
+    return false;
+  MapIterator iterator = map_->lower_bound(address);
+  if (iterator == map_->end() || address < iterator->second->base_)
+    return false;
+  iterator->second->RetrieveRanges(address, entries);
+  entries.push_back(&iterator->second->entry_);
+  return true;
+}
 
 template<typename AddressType, typename EntryType>
 void ContainedRangeMap<AddressType, EntryType>::Clear() {

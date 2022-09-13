@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -43,6 +42,7 @@
 #include <asm/reg.h>
 #endif
 
+#include "common/linux/elf_gnu_compat.h"
 #include "common/linux/linux_libc_support.h"
 
 namespace google_breakpad {
@@ -111,8 +111,11 @@ bool LinuxCoreDumper::GetThreadInfoByIndex(size_t index, ThreadInfo* info) {
 #elif defined(__mips__)
   stack_pointer =
       reinterpret_cast<uint8_t*>(info->mcontext.gregs[MD_CONTEXT_MIPS_REG_SP]);
+#elif defined(__riscv)
+    stack_pointer = reinterpret_cast<uint8_t*>(
+        info->mcontext.__gregs[MD_CONTEXT_RISCV_REG_SP]);
 #else
-#error "This code hasn't been ported to your platform yet."
+# error "This code hasn't been ported to your platform yet."
 #endif
   info->stack_pointer = reinterpret_cast<uintptr_t>(stack_pointer);
   return true;
@@ -134,6 +137,16 @@ bool LinuxCoreDumper::EnumerateThreads() {
   if (!mapped_core_file_.Map(core_path_, 0)) {
     fprintf(stderr, "Could not map core dump file into memory\n");
     return false;
+  }
+
+  char proc_mem_path[NAME_MAX];
+  if (BuildProcPath(proc_mem_path, pid_, "mem")) {
+    int fd = open(proc_mem_path, O_RDONLY | O_LARGEFILE | O_CLOEXEC);
+    if (fd != -1) {
+      core_.SetProcMem(fd);
+    } else {
+      fprintf(stderr, "Cannot open %s (%s)\n", proc_mem_path, strerror(errno));
+    }
   }
 
   core_.SetContent(mapped_core_file_.content());
@@ -165,6 +178,7 @@ bool LinuxCoreDumper::EnumerateThreads() {
     //   -------------------------------------------------------------------
     //   1st thread       CORE          NT_PRSTATUS
     //   process-wide     CORE          NT_PRPSINFO
+    //   process-wide     CORE          NT_SIGINFO
     //   process-wide     CORE          NT_AUXV
     //   1st thread       CORE          NT_FPREGSET
     //   1st thread       LINUX         NT_PRXFPREG
@@ -196,19 +210,22 @@ bool LinuxCoreDumper::EnumerateThreads() {
         info.tgid = status->pr_pgrp;
         info.ppid = status->pr_ppid;
 #if defined(__mips__)
-#if defined(__ANDROID__)
+# if defined(__ANDROID__)
         for (int i = EF_R0; i <= EF_R31; i++)
           info.mcontext.gregs[i - EF_R0] = status->pr_reg[i];
-#else  // __ANDROID__
+# else  // __ANDROID__
         for (int i = EF_REG0; i <= EF_REG31; i++)
           info.mcontext.gregs[i - EF_REG0] = status->pr_reg[i];
-#endif  // __ANDROID__
+# endif  // __ANDROID__
         info.mcontext.mdlo = status->pr_reg[EF_LO];
         info.mcontext.mdhi = status->pr_reg[EF_HI];
         info.mcontext.pc = status->pr_reg[EF_CP0_EPC];
-#else  // __mips__
+#elif defined(__riscv)
+        memcpy(&info.mcontext.__gregs, status->pr_reg,
+               sizeof(info.mcontext.__gregs));
+#else  // __riscv
         memcpy(&info.regs, status->pr_reg, sizeof(info.regs));
-#endif  // __mips__
+#endif
         if (first_thread) {
           crash_thread_ = pid;
           crash_signal_ = status->pr_info.si_signo;
@@ -217,6 +234,47 @@ bool LinuxCoreDumper::EnumerateThreads() {
         first_thread = false;
         threads_.push_back(pid);
         thread_infos_.push_back(info);
+        break;
+      }
+      case NT_SIGINFO: {
+        if (description.length() != sizeof(siginfo_t)) {
+          fprintf(stderr, "Found NT_SIGINFO descriptor of unexpected size\n");
+          return false;
+        }
+
+        const siginfo_t* info =
+            reinterpret_cast<const siginfo_t*>(description.data());
+
+        // Set crash_address when si_addr is valid for the signal.
+        switch (info->si_signo) {
+          case MD_EXCEPTION_CODE_LIN_SIGBUS:
+          case MD_EXCEPTION_CODE_LIN_SIGFPE:
+          case MD_EXCEPTION_CODE_LIN_SIGILL:
+          case MD_EXCEPTION_CODE_LIN_SIGSEGV:
+          case MD_EXCEPTION_CODE_LIN_SIGSYS:
+          case MD_EXCEPTION_CODE_LIN_SIGTRAP:
+            crash_address_ = reinterpret_cast<uintptr_t>(info->si_addr);
+            break;
+        }
+
+        // Set crash_exception_info for common signals.  Since exception info is
+        // unsigned, but some of these fields might be signed, we always cast.
+        switch (info->si_signo) {
+          case MD_EXCEPTION_CODE_LIN_SIGKILL:
+            set_crash_exception_info({
+              static_cast<uint64_t>(info->si_pid),
+              static_cast<uint64_t>(info->si_uid),
+            });
+            break;
+          case MD_EXCEPTION_CODE_LIN_SIGSYS:
+#ifdef si_syscall
+            set_crash_exception_info({
+              static_cast<uint64_t>(info->si_syscall),
+              static_cast<uint64_t>(info->si_arch),
+            });
+#endif
+            break;
+        }
         break;
       }
 #if defined(__i386) || defined(__x86_64)

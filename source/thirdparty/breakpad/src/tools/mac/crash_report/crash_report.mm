@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -271,10 +270,15 @@ static void ProcessSingleReport(Options *options, NSString *file_path) {
   int requesting_thread = process_state.requesting_thread();
   if (requesting_thread != -1) {
     printf("\n");
-    printf("Thread %d (%s)\n",
+    printf("Thread %d (%s)",
            requesting_thread,
            process_state.crashed() ? "crashed" :
            "requested dump, did not crash");
+    string requesting_thread_name = process_state.thread_names()->at(requesting_thread);
+    if (!requesting_thread_name.empty()) {
+      printf(" (name: %s)", requesting_thread_name.c_str());
+    }
+    printf("\n");
     PrintStack(process_state.threads()->at(requesting_thread), cpu);
   }
 
@@ -287,7 +291,12 @@ static void ProcessSingleReport(Options *options, NSString *file_path) {
     if (thread_index != requesting_thread) {
       // Don't print the crash thread again, it was already printed.
       printf("\n");
-      printf("Thread %d\n", thread_index);
+      printf("Thread %d", thread_index);
+      string thread_name = process_state.thread_names()->at(thread_index);
+      if (!thread_name.empty()) {
+        printf(" (name: %s)", thread_name.c_str());
+      }
+      printf("\n");
       PrintStack(process_state.threads()->at(thread_index), cpu);
       google_breakpad::MemoryRegion *thread_stack_bytes =
         thread_memory_regions->at(thread_index);

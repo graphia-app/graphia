@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -113,9 +112,9 @@ struct WindowsFrameInfo {
   // otherwise. type, rva and code_size are present in the STACK line,
   // but not the StackFrameInfo structure, so return them as outparams.
   static WindowsFrameInfo *ParseFromString(const string string,
-                                           int &type,
-                                           uint64_t &rva,
-                                           uint64_t &code_size) {
+                                           int& type,
+                                           uint64_t& rva,
+                                           uint64_t& code_size) {
     // The format of a STACK WIN record is documented at:
     //
     // https://chromium.googlesource.com/breakpad/breakpad/+/master/docs/symbol_files.md
@@ -160,7 +159,7 @@ struct WindowsFrameInfo {
   }
 
   // CopyFrom makes "this" WindowsFrameInfo object identical to "that".
-  void CopyFrom(const WindowsFrameInfo &that) {
+  void CopyFrom(const WindowsFrameInfo& that) {
     type_ = that.type_;
     valid = that.valid;
     prolog_size = that.prolog_size;

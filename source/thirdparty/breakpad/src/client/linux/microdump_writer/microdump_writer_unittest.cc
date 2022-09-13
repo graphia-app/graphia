@@ -1,5 +1,4 @@
-// Copyright (c) 2014 Google Inc.
-// All rights reserved.
+// Copyright 2014 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -40,6 +39,7 @@
 #include "client/linux/handler/exception_handler.h"
 #include "client/linux/handler/microdump_extra_info.h"
 #include "client/linux/microdump_writer/microdump_writer.h"
+#include "common/linux/breakpad_getcontext.h"
 #include "common/linux/eintr_wrapper.h"
 #include "common/linux/ignore_ret.h"
 #include "common/scoped_ptr.h"
@@ -209,14 +209,14 @@ void CheckMicrodumpContents(const string& microdump_content,
       string token;
       unsigned crash_reason;
       string crash_reason_str;
-      intptr_t crash_address;
+      uintptr_t crash_address;
       crash_reason_tokens.ignore(2); // Ignore the "R " preamble.
       crash_reason_tokens >> std::hex >> crash_reason >> crash_reason_str >>
           crash_address;
       ASSERT_FALSE(crash_reason_tokens.fail());
       ASSERT_EQ(MD_EXCEPTION_CODE_LIN_DUMP_REQUESTED, crash_reason);
       ASSERT_EQ("DUMP_REQUESTED", crash_reason_str);
-      ASSERT_EQ(0xDEADDEADu, kCrashAddress);
+      ASSERT_EQ(kCrashAddress, crash_address);
       did_find_crash_reason = true;
     } else if (line.find("V ") == 0) {
       if (expected_info.product_info)

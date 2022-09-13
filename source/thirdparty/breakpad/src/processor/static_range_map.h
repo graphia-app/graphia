@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -50,21 +49,21 @@ template<typename AddressType, typename EntryType>
 class StaticRangeMap {
  public:
   StaticRangeMap(): map_() { }
-  explicit StaticRangeMap(const char *memory): map_(memory) { }
+  explicit StaticRangeMap(const char* memory): map_(memory) { }
 
   // Locates the range encompassing the supplied address.  If there is
   // no such range, returns false.  entry_base and entry_size, if non-NULL,
   // are set to the base and size of the entry's range.
-  bool RetrieveRange(const AddressType &address, const EntryType *&entry,
-                     AddressType *entry_base, AddressType *entry_size) const;
+  bool RetrieveRange(const AddressType& address, const EntryType*& entry,
+                     AddressType* entry_base, AddressType* entry_size) const;
 
   // Locates the range encompassing the supplied address, if one exists.
   // If no range encompasses the supplied address, locates the nearest range
   // to the supplied address that is lower than the address.  Returns false
   // if no range meets these criteria.  entry_base and entry_size, if
   // non-NULL, are set to the base and size of the entry's range.
-  bool RetrieveNearestRange(const AddressType &address, const EntryType *&entry,
-                            AddressType *entry_base, AddressType *entry_size)
+  bool RetrieveNearestRange(const AddressType& address, const EntryType*& entry,
+                            AddressType* entry_base, AddressType* entry_size)
                             const;
 
   // Treating all ranges as a list ordered by the address spaces that they
@@ -74,8 +73,8 @@ class StaticRangeMap {
   // range.
   //
   // RetrieveRangeAtIndex is not optimized for speedy operation.
-  bool RetrieveRangeAtIndex(int index, const EntryType *&entry,
-                            AddressType *entry_base, AddressType *entry_size)
+  bool RetrieveRangeAtIndex(int index, const EntryType*& entry,
+                            AddressType* entry_base, AddressType* entry_size)
                             const;
 
   // Returns the number of ranges stored in the RangeMap.

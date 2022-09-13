@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -53,15 +52,15 @@ class AddressMap {
   // Inserts an entry into the map.  Returns false without storing the entry
   // if an entry is already stored in the map at the same address as specified
   // by the address argument.
-  bool Store(const AddressType &address, const EntryType &entry);
+  bool Store(const AddressType& address, const EntryType& entry);
 
   // Locates the entry stored at the highest address less than or equal to
   // the address argument.  If there is no such range, returns false.  The
   // entry is returned in entry, which is a required argument.  If
   // entry_address is not NULL, it will be set to the address that the entry
   // was stored at.
-  bool Retrieve(const AddressType &address,
-                EntryType *entry, AddressType *entry_address) const;
+  bool Retrieve(const AddressType& address,
+                EntryType* entry, AddressType* entry_address) const;
 
   // Empties the address map, restoring it to the same state as when it was
   // initially created.

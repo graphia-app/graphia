@@ -1,4 +1,4 @@
-// Copyright 2005 Google Inc. All Rights Reserved.
+// Copyright 2005 Google LLC
 // Author: chatham@google.com (Andrew Chatham)
 // Author: satorux@google.com (Satoru Takabayashi)
 //
@@ -20,8 +20,8 @@
 // Although most of this code can deal with arbitrary ELF files of
 // either word size, the public ElfReader interface only examines
 // files loaded into the current address space, which must all match
-// __WORDSIZE. This code cannot handle ELF files with a non-native
-// byte ordering.
+// the machine's native word size. This code cannot handle ELF files
+// with a non-native byte ordering.
 //
 // TODO(chatham): It would be nice if we could accomplish this task
 // without using malloc(), so we could use it as the process is dying.
@@ -30,14 +30,16 @@
 #define _GNU_SOURCE  // needed for pread()
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <algorithm>
+#include <cstring>
 #include <map>
 #include <string>
 #include <vector>
@@ -107,7 +109,7 @@ const char kPLTFunctionSuffix[] = "@plt";
 
 }  // namespace
 
-namespace dwarf2reader {
+namespace google_breakpad {
 
 template <class ElfArch> class ElfReaderImpl;
 
@@ -129,11 +131,11 @@ class Elf32 {
   static const int kElfClass = ELFCLASS32;
 
   // Given a symbol pointer, return the binding type (eg STB_WEAK).
-  static char Bind(const Elf32_Sym *sym) {
+  static char Bind(const Elf32_Sym* sym) {
     return ELF32_ST_BIND(sym->st_info);
   }
   // Given a symbol pointer, return the symbol type (eg STT_FUNC).
-  static char Type(const Elf32_Sym *sym) {
+  static char Type(const Elf32_Sym* sym) {
     return ELF32_ST_TYPE(sym->st_info);
   }
 
@@ -157,10 +159,10 @@ class Elf64 {
   // What should be in the EI_CLASS header.
   static const int kElfClass = ELFCLASS64;
 
-  static char Bind(const Elf64_Sym *sym) {
+  static char Bind(const Elf64_Sym* sym) {
     return ELF64_ST_BIND(sym->st_info);
   }
-  static char Type(const Elf64_Sym *sym) {
+  static char Type(const Elf64_Sym* sym) {
     return ELF64_ST_TYPE(sym->st_info);
   }
   static int r_sym(const Elf64_Xword r_info) {
@@ -181,8 +183,8 @@ class Elf64 {
 template<class ElfArch>
 class ElfSectionReader {
  public:
-  ElfSectionReader(const char *name, const string &path, int fd,
-                   const typename ElfArch::Shdr &section_header)
+  ElfSectionReader(const char* name, const string& path, int fd,
+                   const typename ElfArch::Shdr& section_header)
       : contents_aligned_(NULL),
         contents_(NULL),
         header_(section_header) {
@@ -195,10 +197,21 @@ class ElfSectionReader {
     // to process its contents.
     if (header_.sh_type == SHT_NOBITS || header_.sh_size == 0)
       return;
+    // extra sh_type check for string table.
+    if ((std::strcmp(name, ".strtab") == 0 ||
+         std::strcmp(name, ".shstrtab") == 0) &&
+        header_.sh_type != SHT_STRTAB) {
+      fprintf(stderr,
+              "Invalid sh_type for string table section: expected "
+              "SHT_STRTAB or SHT_DYNSYM, but got %d\n",
+              header_.sh_type);
+      return;
+    }
+
     contents_aligned_ = mmap(NULL, size_aligned_, PROT_READ, MAP_SHARED,
                              fd, offset_aligned);
     // Set where the offset really should begin.
-    contents_ = reinterpret_cast<char *>(contents_aligned_) +
+    contents_ = reinterpret_cast<char*>(contents_aligned_) +
                 (header_.sh_offset - offset_aligned);
 
     // Check for and handle any compressed contents.
@@ -216,24 +229,24 @@ class ElfSectionReader {
   }
 
   // Return the section header for this section.
-  typename ElfArch::Shdr const &header() const { return header_; }
+  typename ElfArch::Shdr const& header() const { return header_; }
 
   // Return memory at the given offset within this section.
-  const char *GetOffset(typename ElfArch::Word bytes) const {
+  const char* GetOffset(typename ElfArch::Word bytes) const {
     return contents_ + bytes;
   }
 
-  const char *contents() const { return contents_; }
+  const char* contents() const { return contents_; }
   size_t section_size() const { return section_size_; }
 
  private:
   // page-aligned file contents
-  void *contents_aligned_;
+  void* contents_aligned_;
   // contents as usable by the client. For non-compressed sections,
   // pointer within contents_aligned_ to where the section data
   // begins; for compressed sections, pointer to the decompressed
   // data.
-  char *contents_;
+  char* contents_;
   // size of contents_aligned_
   size_t size_aligned_;
   // size of contents.
@@ -248,7 +261,7 @@ class ElfSectionReader {
 template<class ElfArch>
 class SymbolIterator {
  public:
-  SymbolIterator(ElfReaderImpl<ElfArch> *reader,
+  SymbolIterator(ElfReaderImpl<ElfArch>* reader,
                  typename ElfArch::Word section_type)
       : symbol_section_(reader->GetSectionByType(section_type)),
         string_section_(NULL),
@@ -279,7 +292,7 @@ class SymbolIterator {
 
   // Return a pointer to the current symbol.
   // REQUIRES: !done()
-  const typename ElfArch::Sym *GetSymbol() const {
+  const typename ElfArch::Sym* GetSymbol() const {
     return reinterpret_cast<const typename ElfArch::Sym*>(
         symbol_section_->GetOffset(symbol_within_section_ *
                                    symbol_section_->header().sh_entsize));
@@ -287,7 +300,7 @@ class SymbolIterator {
 
   // Return the name of the current symbol, NULL if it has none.
   // REQUIRES: !done()
-  const char *GetSymbolName() const {
+  const char* GetSymbolName() const {
     int name_offset = GetSymbol()->st_name;
     if (name_offset == 0)
       return NULL;
@@ -299,8 +312,8 @@ class SymbolIterator {
   }
 
  private:
-  const ElfSectionReader<ElfArch> *const symbol_section_;
-  const ElfSectionReader<ElfArch> *string_section_;
+  const ElfSectionReader<ElfArch>* const symbol_section_;
+  const ElfSectionReader<ElfArch>* string_section_;
   int num_symbols_in_section_;
   int symbol_within_section_;
 };
@@ -325,7 +338,7 @@ static inline bool MyHasSuffixString(const string& str, const string& suffix) {
 template<class ElfArch>
 class ElfReaderImpl {
  public:
-  explicit ElfReaderImpl(const string &path, int fd)
+  explicit ElfReaderImpl(const string& path, int fd)
       : path_(path),
         fd_(fd),
         section_headers_(NULL),
@@ -346,7 +359,7 @@ class ElfReaderImpl {
       // "opd_section_" must always be checked for NULL before use.
       opd_section_ = GetSectionInfoByName(".opd", &opd_info_);
       for (unsigned int k = 0u; k < GetNumSections(); ++k) {
-        const char *name = GetSectionName(section_headers_[k].sh_name);
+        const char* name = GetSectionName(section_headers_[k].sh_name);
         if (strncmp(name, ".text", strlen(".text")) == 0) {
           base_for_text_ =
               section_headers_[k].sh_addr - section_headers_[k].sh_offset;
@@ -383,7 +396,7 @@ class ElfReaderImpl {
   // to see if the ELF file appears to match the current
   // architecture. If error is non-NULL, it will be set with a reason
   // in case of failure.
-  static bool IsArchElfFile(int fd, string *error) {
+  static bool IsArchElfFile(int fd, string* error) {
     unsigned char header[EI_NIDENT];
     if (pread(fd, header, sizeof(header), 0) != sizeof(header)) {
       if (error != NULL) *error = "Could not read header";
@@ -414,7 +427,7 @@ class ElfReaderImpl {
   }
 
   // Return true if we can use this symbol in Address-to-Symbol map.
-  bool CanUseSymbol(const char *name, const typename ElfArch::Sym *sym) {
+  bool CanUseSymbol(const char* name, const typename ElfArch::Sym* sym) {
     // For now we only save FUNC and NOTYPE symbols. For now we just
     // care about functions, but some functions written in assembler
     // don't have a proper ELF type attached to them, so we store
@@ -443,19 +456,19 @@ class ElfReaderImpl {
   // Iterate over the symbols in a section, either SHT_DYNSYM or
   // SHT_SYMTAB. Add all symbols to the given SymbolMap.
   /*
-  void GetSymbolPositions(SymbolMap *symbols,
+  void GetSymbolPositions(SymbolMap* symbols,
                           typename ElfArch::Word section_type,
-                          uint64 mem_offset,
-                          uint64 file_offset) {
+                          uint64_t mem_offset,
+                          uint64_t file_offset) {
     // This map is used to filter out "nested" functions.
     // See comment below.
     AddrToSymMap addr_to_sym_map;
     for (SymbolIterator<ElfArch> it(this, section_type);
          !it.done(); it.Next()) {
-      const char *name = it.GetSymbolName();
+      const char* name = it.GetSymbolName();
       if (name == NULL)
         continue;
-      const typename ElfArch::Sym *sym = it.GetSymbol();
+      const typename ElfArch::Sym* sym = it.GetSymbol();
       if (CanUseSymbol(name, sym)) {
         const int sec = sym->st_shndx;
 
@@ -471,20 +484,20 @@ class ElfReaderImpl {
 
         // Adjust for difference between where we expected to mmap
         // this section, and where it was actually mmapped.
-        const int64 expected_base = hdr.sh_addr - hdr.sh_offset;
-        const int64 real_base = mem_offset - file_offset;
-        const int64 adjust = real_base - expected_base;
+        const int64_t expected_base = hdr.sh_addr - hdr.sh_offset;
+        const int64_t real_base = mem_offset - file_offset;
+        const int64_t adjust = real_base - expected_base;
 
-        uint64 start = sym->st_value + adjust;
+        uint64_t start = sym->st_value + adjust;
 
         // Adjust function symbols for PowerPC64 by dereferencing and adjusting
         // the function descriptor to get the function address.
         if (header_.e_machine == EM_PPC64 && ElfArch::Type(sym) == STT_FUNC) {
-          const uint64 opd_addr =
+          const uint64_t opd_addr =
               AdjustPPC64FunctionDescriptorSymbolValue(sym->st_value);
           // Only adjust the returned value if the function address was found.
           if (opd_addr != sym->st_value) {
-            const int64 adjust_function_symbols =
+            const int64_t adjust_function_symbols =
                 real_base - base_for_text_;
             start = opd_addr + adjust_function_symbols;
           }
@@ -518,9 +531,9 @@ class ElfReaderImpl {
     if (addr_to_sym_map.empty()) {
       return;
     }
-    const ElfSectionReader<ElfArch> *const symbol_section =
+    const ElfSectionReader<ElfArch>* const symbol_section =
         this->GetSectionByType(section_type);
-    const ElfSectionReader<ElfArch> *const string_section =
+    const ElfSectionReader<ElfArch>* const string_section =
         this->GetSection(symbol_section->header().sh_link);
 
     typename AddrToSymMap::iterator curr = addr_to_sym_map.begin();
@@ -529,10 +542,10 @@ class ElfReaderImpl {
                        curr->first, curr->second->st_size);
     typename AddrToSymMap::iterator prev = curr++;
     for (; curr != addr_to_sym_map.end(); ++curr) {
-      const uint64 prev_addr = prev->first;
-      const uint64 curr_addr = curr->first;
-      const typename ElfArch::Sym *const prev_sym = prev->second;
-      const typename ElfArch::Sym *const curr_sym = curr->second;
+      const uint64_t prev_addr = prev->first;
+      const uint64_t curr_addr = curr->first;
+      const typename ElfArch::Sym* const prev_sym = prev->second;
+      const typename ElfArch::Sym* const curr_sym = curr->second;
       if (prev_addr + prev_sym->st_size <= curr_addr ||
           // The next condition is true if two symbols overlap like this:
           //
@@ -551,7 +564,7 @@ class ElfReaderImpl {
           // (e.g. 0619e071) will produce the current symbol,
           // which is the desired outcome.
           prev_addr + prev_sym->st_size < curr_addr + curr_sym->st_size) {
-        const char *name = string_section->GetOffset(curr_sym->st_name);
+        const char* name = string_section->GetOffset(curr_sym->st_name);
         symbols->AddSymbol(name, curr_addr, curr_sym->st_size);
         prev = curr;
       } else {
@@ -571,20 +584,20 @@ class ElfReaderImpl {
 */
 
   void VisitSymbols(typename ElfArch::Word section_type,
-                    ElfReader::SymbolSink *sink) {
+                    ElfReader::SymbolSink* sink) {
     VisitSymbols(section_type, sink, -1, -1, false);
   }
 
   void VisitSymbols(typename ElfArch::Word section_type,
-                    ElfReader::SymbolSink *sink,
+                    ElfReader::SymbolSink* sink,
                     int symbol_binding,
                     int symbol_type,
                     bool get_raw_symbol_values) {
     for (SymbolIterator<ElfArch> it(this, section_type);
          !it.done(); it.Next()) {
-      const char *name = it.GetSymbolName();
+      const char* name = it.GetSymbolName();
       if (!name) continue;
-      const typename ElfArch::Sym *sym = it.GetSymbol();
+      const typename ElfArch::Sym* sym = it.GetSymbol();
       if ((symbol_binding < 0 || ElfArch::Bind(sym) == symbol_binding) &&
           (symbol_type < 0 || ElfArch::Type(sym) == symbol_type)) {
         typename ElfArch::Sym symbol = *sym;
@@ -690,7 +703,7 @@ class ElfReaderImpl {
   // Return an ElfSectionReader for the first section of the given
   // type by iterating through all section headers. Returns NULL if
   // the section type is not found.
-  const ElfSectionReader<ElfArch> *GetSectionByType(
+  const ElfSectionReader<ElfArch>* GetSectionByType(
       typename ElfArch::Word section_type) {
     for (unsigned int k = 0u; k < GetNumSections(); ++k) {
       if (section_headers_[k].sh_type == section_type) {
@@ -702,14 +715,14 @@ class ElfReaderImpl {
 
   // Return the name of section "shndx".  Returns NULL if the section
   // is not found.
-  const char *GetSectionNameByIndex(int shndx) {
+  const char* GetSectionNameByIndex(int shndx) {
     return GetSectionName(section_headers_[shndx].sh_name);
   }
 
   // Return a pointer to section "shndx", and store the size in
   // "size".  Returns NULL if the section is not found.
-  const char *GetSectionContentsByIndex(int shndx, size_t *size) {
-    const ElfSectionReader<ElfArch> *section = GetSection(shndx);
+  const char* GetSectionContentsByIndex(int shndx, size_t* size) {
+    const ElfSectionReader<ElfArch>* section = GetSection(shndx);
     if (section != NULL) {
       *size = section->section_size();
       return section->contents();
@@ -720,16 +733,16 @@ class ElfReaderImpl {
   // Return a pointer to the first section of the given name by
   // iterating through all section headers, and store the size in
   // "size".  Returns NULL if the section name is not found.
-  const char *GetSectionContentsByName(const string &section_name,
-                                       size_t *size) {
+  const char* GetSectionContentsByName(const string& section_name,
+                                       size_t* size) {
     for (unsigned int k = 0u; k < GetNumSections(); ++k) {
       // When searching for sections in a .dwp file, the sections
       // we're looking for will always be at the end of the section
       // table, so reverse the direction of iteration.
       int shndx = is_dwp_ ? GetNumSections() - k - 1 : k;
-      const char *name = GetSectionName(section_headers_[shndx].sh_name);
+      const char* name = GetSectionName(section_headers_[shndx].sh_name);
       if (name != NULL && ElfReader::SectionNamesMatch(section_name, name)) {
-        const ElfSectionReader<ElfArch> *section = GetSection(shndx);
+        const ElfSectionReader<ElfArch>* section = GetSection(shndx);
         if (section == NULL) {
           return NULL;
         } else {
@@ -743,16 +756,16 @@ class ElfReaderImpl {
 
   // This is like GetSectionContentsByName() but it returns a lot of extra
   // information about the section.
-  const char *GetSectionInfoByName(const string &section_name,
-                                   ElfReader::SectionInfo *info) {
+  const char* GetSectionInfoByName(const string& section_name,
+                                   ElfReader::SectionInfo* info) {
     for (unsigned int k = 0u; k < GetNumSections(); ++k) {
       // When searching for sections in a .dwp file, the sections
       // we're looking for will always be at the end of the section
       // table, so reverse the direction of iteration.
       int shndx = is_dwp_ ? GetNumSections() - k - 1 : k;
-      const char *name = GetSectionName(section_headers_[shndx].sh_name);
+      const char* name = GetSectionName(section_headers_[shndx].sh_name);
       if (name != NULL && ElfReader::SectionNamesMatch(section_name, name)) {
-        const ElfSectionReader<ElfArch> *section = GetSection(shndx);
+        const ElfSectionReader<ElfArch>* section = GetSection(shndx);
         if (section == NULL) {
           return NULL;
         } else {
@@ -776,7 +789,7 @@ class ElfReaderImpl {
   // segments are present. This is the address an ELF image was linked
   // (by static linker) to be loaded at. Usually (but not always) 0 for
   // shared libraries and position-independent executables.
-  uint64 VaddrOfFirstLoadSegment() const {
+  uint64_t VaddrOfFirstLoadSegment() const {
     // Relocatable objects (of type ET_REL) do not have LOAD segments.
     if (header_.e_type == ET_REL) {
       return 0;
@@ -796,7 +809,7 @@ class ElfReaderImpl {
     // Debug sections are likely to be near the end, so reverse the
     // direction of iteration.
     for (int k = GetNumSections() - 1; k >= 0; --k) {
-      const char *name = GetSectionName(section_headers_[k].sh_name);
+      const char* name = GetSectionName(section_headers_[k].sh_name);
       if (strncmp(name, ".debug", strlen(".debug")) == 0) return true;
       if (strncmp(name, ".zdebug", strlen(".zdebug")) == 0) return true;
     }
@@ -815,7 +828,7 @@ class ElfReaderImpl {
   }
 
  private:
-  typedef vector<pair<uint64, const typename ElfArch::Sym *> > AddrToSymMap;
+  typedef vector<pair<uint64_t, const typename ElfArch::Sym*> > AddrToSymMap;
 
   static bool AddrToSymSorter(const typename AddrToSymMap::value_type& lhs,
                               const typename AddrToSymMap::value_type& rhs) {
@@ -853,8 +866,8 @@ class ElfReaderImpl {
 
   // Given an offset into the section header string table, return the
   // section name.
-  const char *GetSectionName(typename ElfArch::Word sh_name) {
-    const ElfSectionReader<ElfArch> *shstrtab =
+  const char* GetSectionName(typename ElfArch::Word sh_name) {
+    const ElfSectionReader<ElfArch>* shstrtab =
         GetSection(GetStringTableIndex());
     if (shstrtab != NULL) {
       return shstrtab->GetOffset(sh_name);
@@ -864,25 +877,25 @@ class ElfReaderImpl {
 
   // Return an ElfSectionReader for the given section. The reader will
   // be freed when this object is destroyed.
-  const ElfSectionReader<ElfArch> *GetSection(int num) {
-    const char *name;
+  const ElfSectionReader<ElfArch>* GetSection(int num) {
+    const char* name;
     // Hard-coding the name for the section-name string table prevents
     // infinite recursion.
     if (num == GetStringTableIndex())
       name = ".shstrtab";
     else
       name = GetSectionNameByIndex(num);
-    ElfSectionReader<ElfArch> *& reader = sections_[num];
+    ElfSectionReader<ElfArch>*& reader = sections_[num];
     if (reader == NULL)
       reader = new ElfSectionReader<ElfArch>(name, path_, fd_,
                                              section_headers_[num]);
-    return reader;
+    return reader->contents() ? reader : nullptr;
   }
 
   // Parse out the overall header information from the file and assert
   // that it looks sane. This contains information like the magic
   // number and target architecture.
-  bool ParseHeaders(int fd, const string &path) {
+  bool ParseHeaders(int fd, const string& path) {
     // Read in the global ELF header.
     if (pread(fd, &header_, sizeof(header_), 0) != sizeof(header_)) {
       return false;
@@ -934,12 +947,12 @@ class ElfReaderImpl {
 
   // Given the "value" of a function descriptor return the address of the
   // function (i.e. the dereferenced value). Otherwise return "value".
-  uint64 AdjustPPC64FunctionDescriptorSymbolValue(uint64 value) {
+  uint64_t AdjustPPC64FunctionDescriptorSymbolValue(uint64_t value) {
     if (opd_section_ != NULL &&
         opd_info_.addr <= value &&
         value < opd_info_.addr + opd_info_.size) {
-      uint64 offset = value - opd_info_.addr;
-      return (*reinterpret_cast<const uint64*>(opd_section_ + offset));
+      uint64_t offset = value - opd_info_.addr;
+      return (*reinterpret_cast<const uint64_t*>(opd_section_ + offset));
     }
     return value;
   }
@@ -984,11 +997,11 @@ class ElfReaderImpl {
 
   // Array of GetNumSections() section headers, allocated when we read
   // in the global header.
-  typename ElfArch::Shdr *section_headers_;
+  typename ElfArch::Shdr* section_headers_;
 
   // Array of GetNumProgramHeaders() program headers, allocated when we read
   // in the global header.
-  typename ElfArch::Phdr *program_headers_;
+  typename ElfArch::Phdr* program_headers_;
 
   // An array of pointers to ElfSectionReaders. Sections are
   // mmaped as they're needed and not released until this object is
@@ -999,8 +1012,8 @@ class ElfReaderImpl {
   // values for funtion symbols values. Function descriptors are kept in the
   // .opd section and are dereferenced to find the function address.
   ElfReader::SectionInfo opd_info_;
-  const char *opd_section_;  // Must be checked for NULL before use.
-  int64 base_for_text_;
+  const char* opd_section_;  // Must be checked for NULL before use.
+  int64_t base_for_text_;
 
   // Read PLT-related sections for the current architecture.
   bool plts_supported_;
@@ -1013,7 +1026,7 @@ class ElfReaderImpl {
 
   // Maps a dynamic symbol index to a PLT offset.
   // The vector entry index is the dynamic symbol index.
-  std::vector<uint64> symbols_plt_offsets_;
+  std::vector<uint64_t> symbols_plt_offsets_;
 
   // Container for PLT function name strings. These strings are passed by
   // reference to SymbolSink::AddSymbol() so they need to be stored somewhere.
@@ -1025,7 +1038,7 @@ class ElfReaderImpl {
   bool is_dwp_;
 };
 
-ElfReader::ElfReader(const string &path)
+ElfReader::ElfReader(const string& path)
     : path_(path), fd_(-1), impl32_(NULL), impl64_(NULL) {
   // linux 2.6.XX kernel can show deleted files like this:
   //   /var/run/nscd/dbYLJYaE (deleted)
@@ -1053,16 +1066,16 @@ ElfReader::~ElfReader() {
 
 
 // The only word-size specific part of this file is IsNativeElfFile().
-#if __WORDSIZE == 32
+#if ULONG_MAX == 0xffffffff
 #define NATIVE_ELF_ARCH Elf32
-#elif __WORDSIZE == 64
+#elif ULONG_MAX == 0xffffffffffffffff
 #define NATIVE_ELF_ARCH Elf64
 #else
 #error "Invalid word size"
 #endif
 
 template <typename ElfArch>
-static bool IsElfFile(const int fd, const string &path) {
+static bool IsElfFile(const int fd, const string& path) {
   if (fd < 0)
     return false;
   if (!ElfReaderImpl<ElfArch>::IsArchElfFile(fd, NULL)) {
@@ -1085,9 +1098,9 @@ bool ElfReader::IsElf64File() const {
 }
 
 /*
-void ElfReader::AddSymbols(SymbolMap *symbols,
-                           uint64 mem_offset, uint64 file_offset,
-                           uint64 length) {
+void ElfReader::AddSymbols(SymbolMap* symbols,
+                           uint64_t mem_offset, uint64_t file_offset,
+                           uint64_t length) {
   if (fd_ < 0)
     return;
   // TODO(chatham): Actually use the information about file offset and
@@ -1108,17 +1121,17 @@ void ElfReader::AddSymbols(SymbolMap *symbols,
 }
 */
 
-void ElfReader::VisitSymbols(ElfReader::SymbolSink *sink) {
+void ElfReader::VisitSymbols(ElfReader::SymbolSink* sink) {
   VisitSymbols(sink, -1, -1);
 }
 
-void ElfReader::VisitSymbols(ElfReader::SymbolSink *sink,
+void ElfReader::VisitSymbols(ElfReader::SymbolSink* sink,
                              int symbol_binding,
                              int symbol_type) {
   VisitSymbols(sink, symbol_binding, symbol_type, false);
 }
 
-void ElfReader::VisitSymbols(ElfReader::SymbolSink *sink,
+void ElfReader::VisitSymbols(ElfReader::SymbolSink* sink,
                              int symbol_binding,
                              int symbol_type,
                              bool get_raw_symbol_values) {
@@ -1137,7 +1150,7 @@ void ElfReader::VisitSymbols(ElfReader::SymbolSink *sink,
   }
 }
 
-uint64 ElfReader::VaddrOfFirstLoadSegment() {
+uint64_t ElfReader::VaddrOfFirstLoadSegment() {
   if (IsElf32File()) {
     return GetImpl32()->VaddrOfFirstLoadSegment();
   } else if (IsElf64File()) {
@@ -1147,7 +1160,7 @@ uint64 ElfReader::VaddrOfFirstLoadSegment() {
   }
 }
 
-const char *ElfReader::GetSectionName(int shndx) {
+const char* ElfReader::GetSectionName(int shndx) {
   if (shndx < 0 || static_cast<unsigned int>(shndx) >= GetNumSections()) return NULL;
   if (IsElf32File()) {
     return GetImpl32()->GetSectionNameByIndex(shndx);
@@ -1158,7 +1171,7 @@ const char *ElfReader::GetSectionName(int shndx) {
   }
 }
 
-uint64 ElfReader::GetNumSections() {
+uint64_t ElfReader::GetNumSections() {
   if (IsElf32File()) {
     return GetImpl32()->GetNumSections();
   } else if (IsElf64File()) {
@@ -1168,7 +1181,7 @@ uint64 ElfReader::GetNumSections() {
   }
 }
 
-const char *ElfReader::GetSectionByIndex(int shndx, size_t *size) {
+const char* ElfReader::GetSectionByIndex(int shndx, size_t* size) {
   if (IsElf32File()) {
     return GetImpl32()->GetSectionContentsByIndex(shndx, size);
   } else if (IsElf64File()) {
@@ -1178,8 +1191,8 @@ const char *ElfReader::GetSectionByIndex(int shndx, size_t *size) {
   }
 }
 
-const char *ElfReader::GetSectionByName(const string &section_name,
-                                        size_t *size) {
+const char* ElfReader::GetSectionByName(const string& section_name,
+                                        size_t* size) {
   if (IsElf32File()) {
     return GetImpl32()->GetSectionContentsByName(section_name, size);
   } else if (IsElf64File()) {
@@ -1189,8 +1202,8 @@ const char *ElfReader::GetSectionByName(const string &section_name,
   }
 }
 
-const char *ElfReader::GetSectionInfoByName(const string &section_name,
-                                            SectionInfo *info) {
+const char* ElfReader::GetSectionInfoByName(const string& section_name,
+                                            SectionInfo* info) {
   if (IsElf32File()) {
     return GetImpl32()->GetSectionInfoByName(section_name, info);
   } else if (IsElf64File()) {
@@ -1200,7 +1213,7 @@ const char *ElfReader::GetSectionInfoByName(const string &section_name,
   }
 }
 
-bool ElfReader::SectionNamesMatch(const string &name, const string &sh_name) {
+bool ElfReader::SectionNamesMatch(const string& name, const string& sh_name) {
   if ((name.find(".debug_", 0) == 0) && (sh_name.find(".zdebug_", 0) == 0)) {
     const string name_suffix(name, strlen(".debug_"));
     const string sh_name_suffix(sh_name, strlen(".zdebug_"));
@@ -1219,14 +1232,14 @@ bool ElfReader::IsDynamicSharedObject() {
   }
 }
 
-ElfReaderImpl<Elf32> *ElfReader::GetImpl32() {
+ElfReaderImpl<Elf32>* ElfReader::GetImpl32() {
   if (impl32_ == NULL) {
     impl32_ = new ElfReaderImpl<Elf32>(path_, fd_);
   }
   return impl32_;
 }
 
-ElfReaderImpl<Elf64> *ElfReader::GetImpl64() {
+ElfReaderImpl<Elf64>* ElfReader::GetImpl64() {
   if (impl64_ == NULL) {
     impl64_ = new ElfReaderImpl<Elf64>(path_, fd_);
   }
@@ -1237,7 +1250,7 @@ ElfReaderImpl<Elf64> *ElfReader::GetImpl64() {
 // debug info (debug_only=true) or symbol table (debug_only=false).
 // Otherwise, return false.
 template <typename ElfArch>
-static bool IsNonStrippedELFBinaryImpl(const string &path, const int fd,
+static bool IsNonStrippedELFBinaryImpl(const string& path, const int fd,
                                        bool debug_only) {
   if (!ElfReaderImpl<ElfArch>::IsArchElfFile(fd, NULL)) return false;
   ElfReaderImpl<ElfArch> elf_reader(path, fd);
@@ -1247,7 +1260,7 @@ static bool IsNonStrippedELFBinaryImpl(const string &path, const int fd,
 }
 
 // Helper for the IsNon[Debug]StrippedELFBinary functions.
-static bool IsNonStrippedELFBinaryHelper(const string &path,
+static bool IsNonStrippedELFBinaryHelper(const string& path,
                                          bool debug_only) {
   const int fd = open(path.c_str(), O_RDONLY);
   if (fd == -1) {
@@ -1263,11 +1276,11 @@ static bool IsNonStrippedELFBinaryHelper(const string &path,
   return false;
 }
 
-bool ElfReader::IsNonStrippedELFBinary(const string &path) {
+bool ElfReader::IsNonStrippedELFBinary(const string& path) {
   return IsNonStrippedELFBinaryHelper(path, false);
 }
 
-bool ElfReader::IsNonDebugStrippedELFBinary(const string &path) {
+bool ElfReader::IsNonDebugStrippedELFBinary(const string& path) {
   return IsNonStrippedELFBinaryHelper(path, true);
 }
-}  // namespace dwarf2reader
+}  // namespace google_breakpad

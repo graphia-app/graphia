@@ -1,5 +1,4 @@
-// Copyright (c) 2009, Google Inc.
-// All rights reserved.
+// Copyright 2009 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -36,13 +35,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <poll.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
-#include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -63,6 +62,8 @@
 #endif
 
 using namespace google_breakpad;
+using google_breakpad::elf::FileID;
+using google_breakpad::elf::kDefaultBuildIdSize;
 
 namespace {
 
@@ -144,8 +145,8 @@ class LinuxPtraceDumperChildTest : public testing::Test {
     if (child_pid_ == 0) {
       // child process
       RealTestBody();
-      exit(HasFatalFailure() ? kFatalFailure :
-           (HasNonfatalFailure() ? kNonFatalFailure : 0));
+      _exit(HasFatalFailure() ? kFatalFailure :
+            (HasNonfatalFailure() ? kNonFatalFailure : 0));
     }
 
     ASSERT_TRUE(child_pid_ > 0);
@@ -250,7 +251,7 @@ void LinuxPtraceDumperMappingsTest::SetUp() {
   helper_path_ = GetHelperBinary();
   if (helper_path_.empty()) {
     FAIL() << "Couldn't find helper binary";
-    exit(1);
+    _exit(1);
   }
 
   // mmap two segments out of the helper binary, one
@@ -337,7 +338,7 @@ TEST_F(LinuxPtraceDumperChildTest, MappingsIncludeLinuxGate) {
   ASSERT_TRUE(dumper.Init());
 
   void* linux_gate_loc =
-    reinterpret_cast<void *>(dumper.auxv()[AT_SYSINFO_EHDR]);
+    reinterpret_cast<void*>(dumper.auxv()[AT_SYSINFO_EHDR]);
   ASSERT_TRUE(linux_gate_loc);
   bool found_linux_gate = false;
 
@@ -426,7 +427,7 @@ TEST_F(LinuxPtraceDumperChildTest, FileIDsMatch) {
 #undef TestBody
 
 TEST(LinuxPtraceDumperTest, VerifyStackReadWithMultipleThreads) {
-  static const int kNumberOfThreadsInHelperProgram = 5;
+  static const size_t kNumberOfThreadsInHelperProgram = 5;
 
   pid_t child_pid = SetupChildProcess(kNumberOfThreadsInHelperProgram);
   ASSERT_NE(child_pid, -1);
@@ -434,10 +435,15 @@ TEST(LinuxPtraceDumperTest, VerifyStackReadWithMultipleThreads) {
   // Children are ready now.
   LinuxPtraceDumper dumper(child_pid);
   ASSERT_TRUE(dumper.Init());
-  EXPECT_EQ((size_t)kNumberOfThreadsInHelperProgram, dumper.threads().size());
+#if defined(THREAD_SANITIZER)
+  EXPECT_GE(dumper.threads().size(), (size_t)kNumberOfThreadsInHelperProgram);
+#else
+  EXPECT_EQ(dumper.threads().size(), (size_t)kNumberOfThreadsInHelperProgram);
+#endif
   EXPECT_TRUE(dumper.ThreadsSuspend());
 
   ThreadInfo one_thread;
+  size_t matching_threads = 0;
   for (size_t i = 0; i < dumper.threads().size(); ++i) {
     EXPECT_TRUE(dumper.GetThreadInfoByIndex(i, &one_thread));
     const void* stack;
@@ -457,6 +463,9 @@ TEST(LinuxPtraceDumperTest, VerifyStackReadWithMultipleThreads) {
 #elif defined(__mips__)
     pid_t* process_tid_location =
         reinterpret_cast<pid_t*>(one_thread.mcontext.gregs[1]);
+#elif defined(__riscv)
+    pid_t* process_tid_location =
+        reinterpret_cast<pid_t*>(one_thread.mcontext.__gregs[4]);
 #else
 #error This test has not been ported to this platform.
 #endif
@@ -465,8 +474,9 @@ TEST(LinuxPtraceDumperTest, VerifyStackReadWithMultipleThreads) {
                            dumper.threads()[i],
                            process_tid_location,
                            4);
-    EXPECT_EQ(dumper.threads()[i], one_thread_id);
+    matching_threads += (dumper.threads()[i] == one_thread_id) ? 1 : 0;
   }
+  EXPECT_EQ(matching_threads, kNumberOfThreadsInHelperProgram);
   EXPECT_TRUE(dumper.ThreadsResume());
   kill(child_pid, SIGKILL);
 
@@ -478,7 +488,7 @@ TEST(LinuxPtraceDumperTest, VerifyStackReadWithMultipleThreads) {
 }
 
 TEST_F(LinuxPtraceDumperTest, SanitizeStackCopy) {
-  static const int kNumberOfThreadsInHelperProgram = 1;
+  static const size_t kNumberOfThreadsInHelperProgram = 1;
 
   pid_t child_pid = SetupChildProcess(kNumberOfThreadsInHelperProgram);
   ASSERT_NE(child_pid, -1);
@@ -553,6 +563,8 @@ TEST_F(LinuxPtraceDumperTest, SanitizeStackCopy) {
   uintptr_t heap_addr = thread_info.regs.rcx;
 #elif defined(__mips__)
   uintptr_t heap_addr = thread_info.mcontext.gregs[1];
+#elif defined(__riscv)
+  uintptr_t heap_addr = thread_info.mcontext.__gregs[4];
 #else
 #error This test has not been ported to this platform.
 #endif

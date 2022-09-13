@@ -1,4 +1,4 @@
-# Copyright 2013 Google Inc. All rights reserved.
+# Copyright 2013 Google LLC
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 # copyright notice, this list of conditions and the following disclaimer
 # in the documentation and/or other materials provided with the
 # distribution.
-#     * Neither the name of Google Inc. nor the names of its
+#     * Neither the name of Google LLC nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
 #
@@ -77,13 +77,20 @@
         'guid_string.h',
         'http_upload.cc',
         'http_upload.h',
+        'module_info.h',
         'omap.cc',
         'omap.h',
         'omap_internal.h',
         'pdb_source_line_writer.cc',
         'pdb_source_line_writer.h',
+        'pe_source_line_writer.cc',
+        'pe_source_line_writer.h',
+        'pe_util.h',
+        'pe_util.cc',
         'string_utils.cc',
         'string_utils-inl.h',
+        'symbol_collector_client.cc',
+        'symbol_collector_client.h',
       ],
       'dependencies': [
         'dia_sdk',

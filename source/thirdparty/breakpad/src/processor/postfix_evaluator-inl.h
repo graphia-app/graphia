@@ -1,7 +1,6 @@
 // -*- mode: c++ -*-
 
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +12,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -58,19 +57,19 @@ using std::ostringstream;
 // before returning failure.
 class AutoStackClearer {
  public:
-  explicit AutoStackClearer(vector<string> *stack) : stack_(stack) {}
+  explicit AutoStackClearer(vector<string>* stack) : stack_(stack) {}
   ~AutoStackClearer() { stack_->clear(); }
 
  private:
-  vector<string> *stack_;
+  vector<string>* stack_;
 };
 
 
 template<typename ValueType>
 bool PostfixEvaluator<ValueType>::EvaluateToken(
-    const string &token,
-    const string &expression,
-    DictionaryValidityType *assigned) {
+    const string& token,
+    const string& expression,
+    DictionaryValidityType* assigned) {
   // There are enough binary operations that do exactly the same thing
   // (other than the specific operation, of course) that it makes sense
   // to share as much code as possible.
@@ -203,8 +202,8 @@ bool PostfixEvaluator<ValueType>::EvaluateToken(
 
 template<typename ValueType>
 bool PostfixEvaluator<ValueType>::EvaluateInternal(
-    const string &expression,
-    DictionaryValidityType *assigned) {
+    const string& expression,
+    DictionaryValidityType* assigned) {
   // Tokenize, splitting on whitespace.
   istringstream stream(expression);
   string token;
@@ -231,8 +230,8 @@ bool PostfixEvaluator<ValueType>::EvaluateInternal(
 }
 
 template<typename ValueType>
-bool PostfixEvaluator<ValueType>::Evaluate(const string &expression,
-                                           DictionaryValidityType *assigned) {
+bool PostfixEvaluator<ValueType>::Evaluate(const string& expression,
+                                           DictionaryValidityType* assigned) {
   // Ensure that the stack is cleared before returning.
   AutoStackClearer clearer(&stack_);
 
@@ -250,8 +249,8 @@ bool PostfixEvaluator<ValueType>::Evaluate(const string &expression,
 }
 
 template<typename ValueType>
-bool PostfixEvaluator<ValueType>::EvaluateForValue(const string &expression,
-                                                   ValueType *result) {
+bool PostfixEvaluator<ValueType>::EvaluateForValue(const string& expression,
+                                                   ValueType* result) {
   // Ensure that the stack is cleared before returning.
   AutoStackClearer clearer(&stack_);
 
@@ -271,7 +270,7 @@ bool PostfixEvaluator<ValueType>::EvaluateForValue(const string &expression,
 template<typename ValueType>
 typename PostfixEvaluator<ValueType>::PopResult
 PostfixEvaluator<ValueType>::PopValueOrIdentifier(
-    ValueType *value, string *identifier) {
+    ValueType* value, string* identifier) {
   // There needs to be at least one element on the stack to pop.
   if (!stack_.size())
     return POP_RESULT_FAIL;
@@ -314,7 +313,7 @@ PostfixEvaluator<ValueType>::PopValueOrIdentifier(
 
 
 template<typename ValueType>
-bool PostfixEvaluator<ValueType>::PopValue(ValueType *value) {
+bool PostfixEvaluator<ValueType>::PopValue(ValueType* value) {
   ValueType literal = ValueType();
   string token;
   PopResult result;
@@ -343,14 +342,14 @@ bool PostfixEvaluator<ValueType>::PopValue(ValueType *value) {
 
 
 template<typename ValueType>
-bool PostfixEvaluator<ValueType>::PopValues(ValueType *value1,
-                                            ValueType *value2) {
+bool PostfixEvaluator<ValueType>::PopValues(ValueType* value1,
+                                            ValueType* value2) {
   return PopValue(value2) && PopValue(value1);
 }
 
 
 template<typename ValueType>
-void PostfixEvaluator<ValueType>::PushValue(const ValueType &value) {
+void PostfixEvaluator<ValueType>::PushValue(const ValueType& value) {
   ostringstream token_stream;
   token_stream << value;
   stack_.push_back(token_stream.str());

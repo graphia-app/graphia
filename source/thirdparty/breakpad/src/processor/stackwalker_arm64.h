@@ -1,7 +1,6 @@
 // -*- mode: C++ -*-
 
-// Copyright (c) 2013 Google Inc.
-// All rights reserved.
+// Copyright 2013 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +12,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -68,6 +67,9 @@ class StackwalkerARM64 : public Stackwalker {
   }
 
  private:
+  // Strip pointer authentication codes from an address.
+  uint64_t PtrauthStrip(uint64_t ptr);
+
   // Implementation of Stackwalker, using arm64 context and stack conventions.
   virtual StackFrame* GetContextFrame();
   virtual StackFrame* GetCallerFrame(const CallStack* stack,
@@ -76,16 +78,23 @@ class StackwalkerARM64 : public Stackwalker {
   // Use cfi_frame_info (derived from STACK CFI records) to construct
   // the frame that called frames.back(). The caller takes ownership
   // of the returned frame. Return NULL on failure.
-  StackFrameARM64* GetCallerByCFIFrameInfo(const vector<StackFrame*> &frames,
+  StackFrameARM64* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
                                            CFIFrameInfo* cfi_frame_info);
 
   // Use the frame pointer. The caller takes ownership of the returned frame.
   // Return NULL on failure.
-  StackFrameARM64* GetCallerByFramePointer(const vector<StackFrame*> &frames);
+  StackFrameARM64* GetCallerByFramePointer(const vector<StackFrame*>& frames);
 
   // Scan the stack for plausible return addresses. The caller takes ownership
   // of the returned frame. Return NULL on failure.
-  StackFrameARM64* GetCallerByStackScan(const vector<StackFrame*> &frames);
+  StackFrameARM64* GetCallerByStackScan(const vector<StackFrame*>& frames);
+
+  // GetCallerByFramePointer() depends on the previous frame having recovered
+  // x30($LR) which may not have been done when using CFI.
+  // This function recovers $LR in the previous frame by using the frame-pointer
+  // two frames back to read it from the stack.
+  void CorrectRegLRByFramePointer(const vector<StackFrame*>& frames,
+                                  StackFrameARM64* last_frame);
 
   // Stores the CPU context corresponding to the youngest stack frame, to
   // be returned by GetContextFrame.
@@ -95,6 +104,10 @@ class StackwalkerARM64 : public Stackwalker {
   // CONTEXT_VALID_ALL in real use; it is only changeable for the sake of
   // unit tests.
   uint64_t context_frame_validity_;
+
+  // A mask of the valid address bits, determined from the address range of
+  // modules_.
+  uint64_t address_range_mask_;
 };
 
 

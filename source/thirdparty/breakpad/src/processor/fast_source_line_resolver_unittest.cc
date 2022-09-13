@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -64,7 +63,6 @@ using google_breakpad::CodeModule;
 using google_breakpad::MemoryRegion;
 using google_breakpad::StackFrame;
 using google_breakpad::WindowsFrameInfo;
-using google_breakpad::linked_ptr;
 using google_breakpad::scoped_ptr;
 
 class TestCodeModule : public CodeModule {
@@ -94,15 +92,15 @@ class TestCodeModule : public CodeModule {
 class MockMemoryRegion: public MemoryRegion {
   uint64_t GetBase() const { return 0x10000; }
   uint32_t GetSize() const { return 0x01000; }
-  bool GetMemoryAtAddress(uint64_t address, uint8_t *value) const {
+  bool GetMemoryAtAddress(uint64_t address, uint8_t* value) const {
     *value = address & 0xff;
     return true;
   }
-  bool GetMemoryAtAddress(uint64_t address, uint16_t *value) const {
+  bool GetMemoryAtAddress(uint64_t address, uint16_t* value) const {
     *value = address & 0xffff;
     return true;
   }
-  bool GetMemoryAtAddress(uint64_t address, uint32_t *value) const {
+  bool GetMemoryAtAddress(uint64_t address, uint32_t* value) const {
     switch (address) {
       case 0x10008: *value = 0x98ecadc3; break;  // saved %ebx
       case 0x1000c: *value = 0x878f7524; break;  // saved %esi
@@ -113,7 +111,7 @@ class MockMemoryRegion: public MemoryRegion {
     }
     return true;
   }
-  bool GetMemoryAtAddress(uint64_t address, uint64_t *value) const {
+  bool GetMemoryAtAddress(uint64_t address, uint64_t* value) const {
     *value = address;
     return true;
   }
@@ -127,9 +125,9 @@ class MockMemoryRegion: public MemoryRegion {
 // EXPECTED's.) Also verify that ACTUAL has associations for ".ra" and
 // ".cfa".
 static bool VerifyRegisters(
-    const char *file, int line,
-    const CFIFrameInfo::RegisterValueMap<uint32_t> &expected,
-    const CFIFrameInfo::RegisterValueMap<uint32_t> &actual) {
+    const char* file, int line,
+    const CFIFrameInfo::RegisterValueMap<uint32_t>& expected,
+    const CFIFrameInfo::RegisterValueMap<uint32_t>& actual) {
   CFIFrameInfo::RegisterValueMap<uint32_t>::const_iterator a;
   a = actual.find(".cfa");
   if (a == actual.end())
@@ -158,7 +156,7 @@ static bool VerifyRegisters(
   return true;
 }
 
-static bool VerifyEmpty(const StackFrame &frame) {
+static bool VerifyEmpty(const StackFrame& frame) {
   if (frame.function_name.empty() &&
       frame.source_file_name.empty() &&
       frame.source_line == 0)
@@ -166,7 +164,7 @@ static bool VerifyEmpty(const StackFrame &frame) {
   return false;
 }
 
-static void ClearSourceLineInfo(StackFrame *frame) {
+static void ClearSourceLineInfo(StackFrame* frame) {
   frame->function_name.clear();
   frame->module = NULL;
   frame->source_file_name.clear();
@@ -217,16 +215,17 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
   scoped_ptr<CFIFrameInfo> cfi_frame_info;
   frame.instruction = 0x1000;
   frame.module = NULL;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_FALSE(frame.module);
   ASSERT_TRUE(frame.function_name.empty());
   ASSERT_EQ(frame.function_base, 0U);
   ASSERT_TRUE(frame.source_file_name.empty());
   ASSERT_EQ(frame.source_line, 0);
   ASSERT_EQ(frame.source_line_base, 0U);
+  ASSERT_EQ(frame.is_multiple, false);
 
   frame.module = &module1;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Function1_1");
   ASSERT_TRUE(frame.module);
   ASSERT_EQ(frame.module->code_file(), "module1");
@@ -234,6 +233,7 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
   ASSERT_EQ(frame.source_file_name, "file1_1.cc");
   ASSERT_EQ(frame.source_line, 44);
   ASSERT_EQ(frame.source_line_base, 0x1000U);
+  ASSERT_EQ(frame.is_multiple, true);
   windows_frame_info.reset(fast_resolver.FindWindowsFrameInfo(&frame));
   ASSERT_TRUE(windows_frame_info.get());
   ASSERT_FALSE(windows_frame_info->allocates_base_pointer);
@@ -243,13 +243,13 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
   ClearSourceLineInfo(&frame);
   frame.instruction = 0x800;
   frame.module = &module1;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_TRUE(VerifyEmpty(frame));
   windows_frame_info.reset(fast_resolver.FindWindowsFrameInfo(&frame));
   ASSERT_FALSE(windows_frame_info.get());
 
   frame.instruction = 0x1280;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Function1_3");
   ASSERT_TRUE(frame.source_file_name.empty());
   ASSERT_EQ(frame.source_line, 0);
@@ -260,7 +260,7 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
   ASSERT_TRUE(windows_frame_info->program_string.empty());
 
   frame.instruction = 0x1380;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Function1_4");
   ASSERT_TRUE(frame.source_file_name.empty());
   ASSERT_EQ(frame.source_line, 0);
@@ -369,17 +369,18 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
 
   frame.instruction = 0x2900;
   frame.module = &module1;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, string("PublicSymbol"));
+  EXPECT_EQ(frame.is_multiple, true);
 
   frame.instruction = 0x4000;
   frame.module = &module1;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, string("LargeFunction"));
 
   frame.instruction = 0x2181;
   frame.module = &module2;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Function2_2");
   ASSERT_EQ(frame.function_base, 0x2170U);
   ASSERT_TRUE(frame.module);
@@ -387,25 +388,131 @@ TEST_F(TestFastSourceLineResolver, TestLoadAndResolve) {
   ASSERT_EQ(frame.source_file_name, "file2_2.cc");
   ASSERT_EQ(frame.source_line, 21);
   ASSERT_EQ(frame.source_line_base, 0x2180U);
+  ASSERT_EQ(frame.is_multiple, false);
   windows_frame_info.reset(fast_resolver.FindWindowsFrameInfo(&frame));
   ASSERT_TRUE(windows_frame_info.get());
   ASSERT_EQ(windows_frame_info->type_, WindowsFrameInfo::STACK_INFO_FRAME_DATA);
   ASSERT_EQ(windows_frame_info->prolog_size, 1U);
 
   frame.instruction = 0x216f;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Public2_1");
+  EXPECT_EQ(frame.is_multiple, false);
 
   ClearSourceLineInfo(&frame);
   frame.instruction = 0x219f;
   frame.module = &module2;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_TRUE(frame.function_name.empty());
 
   frame.instruction = 0x21a0;
   frame.module = &module2;
-  fast_resolver.FillSourceLineInfo(&frame);
+  fast_resolver.FillSourceLineInfo(&frame, nullptr);
   ASSERT_EQ(frame.function_name, "Public2_2");
+}
+
+// Test adapted from basic_source_line_resolver_unittest.
+TEST_F(TestFastSourceLineResolver, TestLoadAndResolveOldInlines) {
+  TestCodeModule module("linux_inline");
+  ASSERT_TRUE(basic_resolver.LoadModule(
+      &module, testdata_dir +
+                   "/symbols/linux_inline/BBA6FA10B8AAB33D00000000000000000/"
+                   "linux_inline.old.sym"));
+  ASSERT_TRUE(basic_resolver.HasModule(&module));
+  // Convert module1 to fast_module:
+  ASSERT_TRUE(serializer.ConvertOneModule(module.code_file(), &basic_resolver,
+                                          &fast_resolver));
+  ASSERT_TRUE(fast_resolver.HasModule(&module));
+
+  StackFrame frame;
+  std::deque<std::unique_ptr<StackFrame>> inlined_frames;
+  frame.instruction = 0x161b6;
+  frame.module = &module;
+  fast_resolver.FillSourceLineInfo(&frame, &inlined_frames);
+
+  // main frame.
+  ASSERT_EQ(frame.function_name, "main");
+  ASSERT_EQ(frame.function_base, 0x15b30U);
+  ASSERT_EQ(frame.source_file_name, "linux_inline.cpp");
+  ASSERT_EQ(frame.source_line, 42);
+  ASSERT_EQ(frame.source_line_base, 0x161b6U);
+  ASSERT_EQ(frame.is_multiple, false);
+
+  ASSERT_EQ(inlined_frames.size(), 3UL);
+
+  // Inlined frames inside main frame.
+  ASSERT_EQ(inlined_frames[2]->function_name, "foo()");
+  ASSERT_EQ(inlined_frames[2]->function_base, 0x15b45U);
+  ASSERT_EQ(inlined_frames[2]->source_file_name, "linux_inline.cpp");
+  ASSERT_EQ(inlined_frames[2]->source_line, 39);
+  ASSERT_EQ(inlined_frames[2]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[2]->trust, StackFrame::FRAME_TRUST_INLINE);
+
+  ASSERT_EQ(inlined_frames[1]->function_name, "bar()");
+  ASSERT_EQ(inlined_frames[1]->function_base, 0x15b72U);
+  ASSERT_EQ(inlined_frames[1]->source_file_name, "linux_inline.cpp");
+  ASSERT_EQ(inlined_frames[1]->source_line, 32);
+  ASSERT_EQ(inlined_frames[1]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[1]->trust, StackFrame::FRAME_TRUST_INLINE);
+
+  ASSERT_EQ(inlined_frames[0]->function_name, "func()");
+  ASSERT_EQ(inlined_frames[0]->function_base, 0x15b83U);
+  ASSERT_EQ(inlined_frames[0]->source_file_name, "linux_inline.cpp");
+  ASSERT_EQ(inlined_frames[0]->source_line, 27);
+  ASSERT_EQ(inlined_frames[0]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[0]->trust, StackFrame::FRAME_TRUST_INLINE);
+}
+
+// Test adapted from basic_source_line_resolver_unittest.
+TEST_F(TestFastSourceLineResolver, TestLoadAndResolveNewInlines) {
+  TestCodeModule module("linux_inline");
+  ASSERT_TRUE(basic_resolver.LoadModule(
+      &module, testdata_dir +
+                   "/symbols/linux_inline/BBA6FA10B8AAB33D00000000000000000/"
+                   "linux_inline.new.sym"));
+  ASSERT_TRUE(basic_resolver.HasModule(&module));
+  // Convert module1 to fast_module:
+  ASSERT_TRUE(serializer.ConvertOneModule(module.code_file(), &basic_resolver,
+                                          &fast_resolver));
+  ASSERT_TRUE(fast_resolver.HasModule(&module));
+
+  StackFrame frame;
+  std::deque<std::unique_ptr<StackFrame>> inlined_frames;
+  frame.instruction = 0x161b6;
+  frame.module = &module;
+  fast_resolver.FillSourceLineInfo(&frame, &inlined_frames);
+
+  // main frame.
+  ASSERT_EQ(frame.function_name, "main");
+  ASSERT_EQ(frame.function_base, 0x15b30U);
+  ASSERT_EQ(frame.source_file_name, "a.cpp");
+  ASSERT_EQ(frame.source_line, 42);
+  ASSERT_EQ(frame.source_line_base, 0x161b6U);
+  ASSERT_EQ(frame.is_multiple, false);
+
+  ASSERT_EQ(inlined_frames.size(), 3UL);
+
+  // Inlined frames inside main frame.
+  ASSERT_EQ(inlined_frames[2]->function_name, "foo()");
+  ASSERT_EQ(inlined_frames[2]->function_base, 0x15b45U);
+  ASSERT_EQ(inlined_frames[2]->source_file_name, "b.cpp");
+  ASSERT_EQ(inlined_frames[2]->source_line, 39);
+  ASSERT_EQ(inlined_frames[2]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[2]->trust, StackFrame::FRAME_TRUST_INLINE);
+
+  ASSERT_EQ(inlined_frames[1]->function_name, "bar()");
+  ASSERT_EQ(inlined_frames[1]->function_base, 0x15b72U);
+  ASSERT_EQ(inlined_frames[1]->source_file_name, "c.cpp");
+  ASSERT_EQ(inlined_frames[1]->source_line, 32);
+  ASSERT_EQ(inlined_frames[1]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[1]->trust, StackFrame::FRAME_TRUST_INLINE);
+
+  ASSERT_EQ(inlined_frames[0]->function_name, "func()");
+  ASSERT_EQ(inlined_frames[0]->function_base, 0x15b83U);
+  ASSERT_EQ(inlined_frames[0]->source_file_name, "linux_inline.cpp");
+  ASSERT_EQ(inlined_frames[0]->source_line, 27);
+  ASSERT_EQ(inlined_frames[0]->source_line_base, 0x161b6U);
+  ASSERT_EQ(inlined_frames[0]->trust, StackFrame::FRAME_TRUST_INLINE);
 }
 
 TEST_F(TestFastSourceLineResolver, TestInvalidLoads) {
@@ -467,7 +574,7 @@ TEST_F(TestFastSourceLineResolver, TestUnload) {
 }
 
 TEST_F(TestFastSourceLineResolver, CompareModule) {
-  char *symbol_data;
+  char* symbol_data;
   size_t symbol_data_size;
   string symbol_data_string;
   string filename;
@@ -486,7 +593,7 @@ TEST_F(TestFastSourceLineResolver, CompareModule) {
 
 }  // namespace
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

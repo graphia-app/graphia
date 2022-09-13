@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -420,7 +419,7 @@ int main(int argc, char** argv) {
 // Not i386 or ppc or sparc?  We can only test stacks we know how to walk.
 
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   BPLOG_INIT(&argc, &argv);
 
   // "make check" interprets an exit status of 77 to mean that the test is

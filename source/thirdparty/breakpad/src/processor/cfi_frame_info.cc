@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -48,9 +47,9 @@ namespace google_breakpad {
 #endif
 
 template<typename V>
-bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap<V> &registers,
-                                  const MemoryRegion &memory,
-                                  RegisterValueMap<V> *caller_registers) const {
+bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap<V>& registers,
+                                  const MemoryRegion& memory,
+                                  RegisterValueMap<V>* caller_registers) const {
   // If there are not rules for both .ra and .cfa in effect at this address,
   // don't use this CFI data for stack walking.
   if (cfa_rule_.empty() || ra_rule_.empty())
@@ -81,7 +80,7 @@ bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap<V> &registers,
     working = registers;
     working[".cfa"] = cfa;
     if (!evaluator.EvaluateForValue(it->second, &value))
-      return false;
+      continue;
     (*caller_registers)[it->first] = value;
   }
 
@@ -93,13 +92,13 @@ bool CFIFrameInfo::FindCallerRegs(const RegisterValueMap<V> &registers,
 
 // Explicit instantiations for 32-bit and 64-bit architectures.
 template bool CFIFrameInfo::FindCallerRegs<uint32_t>(
-    const RegisterValueMap<uint32_t> &registers,
-    const MemoryRegion &memory,
-    RegisterValueMap<uint32_t> *caller_registers) const;
+    const RegisterValueMap<uint32_t>& registers,
+    const MemoryRegion& memory,
+    RegisterValueMap<uint32_t>* caller_registers) const;
 template bool CFIFrameInfo::FindCallerRegs<uint64_t>(
-    const RegisterValueMap<uint64_t> &registers,
-    const MemoryRegion &memory,
-    RegisterValueMap<uint64_t> *caller_registers) const;
+    const RegisterValueMap<uint64_t>& registers,
+    const MemoryRegion& memory,
+    RegisterValueMap<uint64_t>* caller_registers) const;
 
 string CFIFrameInfo::Serialize() const {
   std::ostringstream stream;
@@ -123,7 +122,7 @@ string CFIFrameInfo::Serialize() const {
   return stream.str();
 }
 
-bool CFIRuleParser::Parse(const string &rule_set) {
+bool CFIRuleParser::Parse(const string& rule_set) {
   size_t rule_set_len = rule_set.size();
   scoped_array<char> working_copy(new char[rule_set_len + 1]);
   memcpy(working_copy.get(), rule_set.data(), rule_set_len);
@@ -132,9 +131,9 @@ bool CFIRuleParser::Parse(const string &rule_set) {
   name_.clear();
   expression_.clear();
 
-  char *cursor;
+  char* cursor;
   static const char token_breaks[] = " \t\r\n";
-  char *token = strtok_r(working_copy.get(), token_breaks, &cursor);
+  char* token = strtok_r(working_copy.get(), token_breaks, &cursor);
 
   for (;;) {
     // End of rule set?
@@ -170,16 +169,16 @@ bool CFIRuleParser::Report() {
   return true;
 }
 
-void CFIFrameInfoParseHandler::CFARule(const string &expression) {
+void CFIFrameInfoParseHandler::CFARule(const string& expression) {
   frame_info_->SetCFARule(expression);
 }
 
-void CFIFrameInfoParseHandler::RARule(const string &expression) {
+void CFIFrameInfoParseHandler::RARule(const string& expression) {
   frame_info_->SetRARule(expression);
 }
 
-void CFIFrameInfoParseHandler::RegisterRule(const string &name,
-                                            const string &expression) {
+void CFIFrameInfoParseHandler::RegisterRule(const string& name,
+                                            const string& expression) {
   frame_info_->SetRegisterRule(name, expression);
 }
 

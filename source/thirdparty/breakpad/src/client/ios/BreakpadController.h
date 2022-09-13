@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -66,6 +65,9 @@
   // The dictionary that contains additional server parameters to send when
   // uploading crash reports.
   NSDictionary* uploadTimeParameters_;
+
+  // The callback to call on report upload completion.
+  BreakpadUploadCompletionCallback uploadCompleteCallback_;
 }
 
 // Singleton.
@@ -95,6 +97,10 @@
 // crash report is generated. See |BreakpadAddUploadParameter|.
 - (void)addUploadParameter:(NSString*)value forKey:(NSString*)key;
 
+// Sets the callback to be called after uploading a crash report to the server.
+// Only the latest callback registered will be called.
+- (void)setUploadCallback:(BreakpadUploadCompletionCallback)callback;
+
 // Remove a previously-added parameter from the upload parameter set. See
 // |BreakpadRemoveUploadParameter|.
 - (void)removeUploadParameterForKey:(NSString*)key;
@@ -111,6 +117,9 @@
 
 // Unregisters the crash handlers.
 - (void)stop;
+
+// Returns whether or not the controller is started.
+- (BOOL)isStarted;
 
 // Enables or disables uploading of crash reports, but does not stop the
 // BreakpadController.
@@ -130,6 +139,9 @@
 //   configuration being next report to upload, or nil if none is pending.
 - (void)getNextReportConfigurationOrSendDelay:
     (void(^)(NSDictionary*, int))callback;
+
+// Get the date of the most recent crash report.
+- (void)getDateOfMostRecentCrashReport:(void(^)(NSDate *))callback;
 
 // Sends synchronously the report specified by |configuration|. This method is
 // NOT thread safe and must be called from the breakpad thread.

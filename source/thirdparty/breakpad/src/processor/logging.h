@@ -1,5 +1,4 @@
-// Copyright (c) 2007, Google Inc.
-// All rights reserved.
+// Copyright 2007 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -67,18 +66,6 @@
 #include BP_LOGGING_INCLUDE
 #endif  // BP_LOGGING_INCLUDE
 
-#ifndef THIRD_PARTY_BREAKPAD_GOOGLE_GLUE_LOGGING_H_
-namespace base_logging {
-
-// The open-source copy of logging.h has diverged from Google's internal copy
-// (temporarily, at least).  To support the transition to structured logging
-// a definition for base_logging::LogMessage is needed, which is a ostream-
-// like object for streaming arguments to construct a log message.
-typedef std::ostream LogMessage;
-
-}  // namespace base_logging
-#endif  // THIRD_PARTY_BREAKPAD_GOOGLE_GLUE_LOGGING_H_
-
 namespace google_breakpad {
 
 // These are defined in Microsoft headers.
@@ -101,22 +88,22 @@ class LogStream {
   // Begin logging a message to the stream identified by |stream|, at the
   // indicated severity.  The file and line parameters should be set so as to
   // identify the line of source code that is producing a message.
-  LogStream(std::ostream &stream, Severity severity,
-            const char *file, int line);
+  LogStream(std::ostream& stream, Severity severity,
+            const char* file, int line);
 
   // Finish logging by printing a newline and flushing the output stream.
   ~LogStream();
 
-  template<typename T> std::ostream& operator<<(const T &t) {
+  template<typename T> std::ostream& operator<<(const T& t) {
     return stream_ << t;
   }
 
  private:
-  std::ostream &stream_;
+  std::ostream& stream_;
 
   // Disallow copy constructor and assignment operator
-  explicit LogStream(const LogStream &that);
-  void operator=(const LogStream &that);
+  explicit LogStream(const LogStream& that);
+  void operator=(const LogStream& that);
 };
 
 // This class is used to explicitly ignore values in the conditional logging
@@ -128,7 +115,7 @@ class LogMessageVoidify {
 
   // This has to be an operator with a precedence lower than << but higher
   // than ?:
-  void operator&(base_logging::LogMessage &) {}
+  void operator&(std::ostream&) {}
 };
 
 // Returns number formatted as a hexadecimal string, such as "0x7b".
@@ -139,7 +126,7 @@ string HexString(int number);
 // Returns the error code as set in the global errno variable, and sets
 // error_string, a required argument, to a string describing that error
 // code.
-int ErrnoString(string *error_string);
+int ErrnoString(string* error_string);
 
 }  // namespace google_breakpad
 
@@ -147,9 +134,11 @@ int ErrnoString(string *error_string);
 #define BPLOG_INIT(pargc, pargv)
 #endif  // BPLOG_INIT
 
+#ifndef BPLOG_LAZY_STREAM
 #define BPLOG_LAZY_STREAM(stream, condition) \
     !(condition) ? (void) 0 : \
                    google_breakpad::LogMessageVoidify() & (BPLOG_ ## stream)
+#endif
 
 #ifndef BPLOG_MINIMUM_SEVERITY
 #define BPLOG_MINIMUM_SEVERITY SEVERITY_INFO
@@ -190,7 +179,9 @@ int ErrnoString(string *error_string);
                         __FILE__, __LINE__)
 #endif  // BPLOG_CRITICAL
 
+#ifndef BPLOG_IF
 #define BPLOG_IF(severity, condition) \
     BPLOG_LAZY_STREAM(severity, ((condition) && BPLOG_LOG_IS_ON(severity)))
+#endif  // BPLOG_IF
 
 #endif  // PROCESSOR_LOGGING_H__

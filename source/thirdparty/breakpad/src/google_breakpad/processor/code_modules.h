@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -101,9 +100,6 @@ class CodeModules {
   // down due to address range conflicts with other modules.
   virtual std::vector<linked_ptr<const CodeModule> >
   GetShrunkRangeModules() const = 0;
-
-  // Returns true, if module address range shrink is enabled.
-  virtual bool IsModuleShrinkEnabled() const = 0;
 };
 
 }  // namespace google_breakpad

@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -43,12 +42,17 @@
 
 namespace google_breakpad {
 
-// Definition of static member variable in SimplerSerializer<Funcion>, which
-// is declared in file "simple_serializer-inl.h"
-RangeMapSerializer< MemAddr, linked_ptr<BasicSourceLineResolver::Line> >
-SimpleSerializer<BasicSourceLineResolver::Function>::range_map_serializer_;
+// Definition of static member variables in SimplerSerializer<Funcion> and
+// SimplerSerializer<Inline>, which are declared in file
+// "simple_serializer-inl.h"
+RangeMapSerializer<MemAddr, linked_ptr<BasicSourceLineResolver::Line>>
+    SimpleSerializer<BasicSourceLineResolver::Function>::range_map_serializer_;
+ContainedRangeMapSerializer<MemAddr,
+                            linked_ptr<BasicSourceLineResolver::Inline>>
+    SimpleSerializer<
+        BasicSourceLineResolver::Function>::inline_range_map_serializer_;
 
-size_t ModuleSerializer::SizeOf(const BasicSourceLineResolver::Module &module) {
+size_t ModuleSerializer::SizeOf(const BasicSourceLineResolver::Module& module) {
   size_t total_size_alloc_ = 0;
 
   // Size of the "is_corrupt" flag.
@@ -66,6 +70,8 @@ size_t ModuleSerializer::SizeOf(const BasicSourceLineResolver::Module &module) {
      module.cfi_initial_rules_);
   map_sizes_[map_index++] = cfi_delta_rules_serializer_.SizeOf(
      module.cfi_delta_rules_);
+  map_sizes_[map_index++] =
+      inline_origin_serializer_.SizeOf(module.inline_origins_);
 
   // Header size.
   total_size_alloc_ += kNumberMaps_ * sizeof(uint32_t);
@@ -80,8 +86,8 @@ size_t ModuleSerializer::SizeOf(const BasicSourceLineResolver::Module &module) {
   return total_size_alloc_;
 }
 
-char *ModuleSerializer::Write(const BasicSourceLineResolver::Module &module,
-                              char *dest) {
+char* ModuleSerializer::Write(const BasicSourceLineResolver::Module& module,
+                              char* dest) {
   // Write the is_corrupt flag.
   dest = SimpleSerializer<bool>::Write(module.is_corrupt_, dest);
   // Write header.
@@ -95,18 +101,19 @@ char *ModuleSerializer::Write(const BasicSourceLineResolver::Module &module,
     dest = wfi_serializer_.Write(&(module.windows_frame_info_[i]), dest);
   dest = cfi_init_rules_serializer_.Write(module.cfi_initial_rules_, dest);
   dest = cfi_delta_rules_serializer_.Write(module.cfi_delta_rules_, dest);
+  dest = inline_origin_serializer_.Write(module.inline_origins_, dest);
   // Write a null terminator.
   dest = SimpleSerializer<char>::Write(0, dest);
   return dest;
 }
 
 char* ModuleSerializer::Serialize(
-    const BasicSourceLineResolver::Module &module, unsigned int *size) {
+    const BasicSourceLineResolver::Module& module, unsigned int* size) {
   // Compute size of memory to allocate.
   unsigned int size_to_alloc = SizeOf(module);
 
   // Allocate memory for serialized data.
-  char *serialized_data = new char[size_to_alloc];
+  char* serialized_data = new char[size_to_alloc];
   if (!serialized_data) {
     BPLOG(ERROR) << "ModuleSerializer: memory allocation failed, "
                  << "size to alloc: " << size_to_alloc;
@@ -115,7 +122,7 @@ char* ModuleSerializer::Serialize(
   }
 
   // Write serialized data to allocated memory chunk.
-  char *end_address = Write(module, serialized_data);
+  char* end_address = Write(module, serialized_data);
   // Verify the allocated memory size is equal to the size of data been written.
   unsigned int size_written =
       static_cast<unsigned int>(end_address - serialized_data);
@@ -131,8 +138,8 @@ char* ModuleSerializer::Serialize(
 }
 
 bool ModuleSerializer::SerializeModuleAndLoadIntoFastResolver(
-    const BasicSourceLineResolver::ModuleMap::const_iterator &iter,
-    FastSourceLineResolver *fast_resolver) {
+    const BasicSourceLineResolver::ModuleMap::const_iterator& iter,
+    FastSourceLineResolver* fast_resolver) {
   BPLOG(INFO) << "Converting symbol " << iter->first.c_str();
 
   // Cast SourceLineResolverBase::Module* to BasicSourceLineResolver::Module*.
@@ -161,8 +168,8 @@ bool ModuleSerializer::SerializeModuleAndLoadIntoFastResolver(
 }
 
 void ModuleSerializer::ConvertAllModules(
-    const BasicSourceLineResolver *basic_resolver,
-    FastSourceLineResolver *fast_resolver) {
+    const BasicSourceLineResolver* basic_resolver,
+    FastSourceLineResolver* fast_resolver) {
   // Check for NULL pointer.
   if (!basic_resolver || !fast_resolver)
     return;
@@ -175,9 +182,9 @@ void ModuleSerializer::ConvertAllModules(
 }
 
 bool ModuleSerializer::ConvertOneModule(
-    const string &moduleid,
-    const BasicSourceLineResolver *basic_resolver,
-    FastSourceLineResolver *fast_resolver) {
+    const string& moduleid,
+    const BasicSourceLineResolver* basic_resolver,
+    FastSourceLineResolver* fast_resolver) {
   // Check for NULL pointer.
   if (!basic_resolver || !fast_resolver)
     return false;
@@ -191,7 +198,7 @@ bool ModuleSerializer::ConvertOneModule(
 }
 
 char* ModuleSerializer::SerializeSymbolFileData(
-    const string &symbol_data, unsigned int *size) {
+    const string& symbol_data, unsigned int* size) {
   scoped_ptr<BasicSourceLineResolver::Module> module(
       new BasicSourceLineResolver::Module("no name"));
   scoped_array<char> buffer(new char[symbol_data.size() + 1]);

@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -52,15 +51,15 @@ template<typename AddressType, typename EntryType>
 class StaticAddressMap {
  public:
   StaticAddressMap(): map_() { }
-  explicit StaticAddressMap(const char *map_data): map_(map_data) { }
+  explicit StaticAddressMap(const char* map_data): map_(map_data) { }
 
   // Locates the entry stored at the highest address less than or equal to
   // the address argument.  If there is no such range, returns false.  The
   // entry is returned in entry, which is a required argument.  If
   // entry_address is not NULL, it will be set to the address that the entry
   // was stored at.
-  bool Retrieve(const AddressType &address,
-                const EntryType *&entry, AddressType *entry_address) const;
+  bool Retrieve(const AddressType& address,
+                const EntryType*& entry, AddressType* entry_address) const;
 
  private:
   friend class ModuleComparer;

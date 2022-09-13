@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -55,6 +54,8 @@
 #include "processor/stackwalker_arm.h"
 #include "processor/stackwalker_arm64.h"
 #include "processor/stackwalker_mips.h"
+#include "processor/stackwalker_riscv.h"
+#include "processor/stackwalker_riscv64.h"
 
 namespace google_breakpad {
 
@@ -138,11 +139,12 @@ bool Stackwalker::Walk(
     // frame_pointer fields.  The frame structure comes from either the
     // context frame (above) or a caller frame (below).
 
+    std::deque<std::unique_ptr<StackFrame>> inlined_frames;
     // Resolve the module information, if a module map was provided.
     StackFrameSymbolizer::SymbolizerResult symbolizer_result =
         frame_symbolizer_->FillSourceLineInfo(modules_, unloaded_modules_,
                                               system_info_,
-                                              frame.get());
+                                              frame.get(), &inlined_frames);
     switch (symbolizer_result) {
       case StackFrameSymbolizer::kInterrupt:
         BPLOG(INFO) << "Stack walk is interrupted.";
@@ -173,7 +175,12 @@ bool Stackwalker::Walk(
       default:
         break;
     }
-
+    // Add all nested inlined frames belonging to this frame from the innermost
+    // frame to the outermost frame.
+    while (!inlined_frames.empty()) {
+      stack->frames_.push_back(inlined_frames.front().release());
+      inlined_frames.pop_front();
+    }
     // Add the frame to the call stack.  Relinquish the ownership claim
     // over the frame, because the stack now owns it.
     stack->frames_.push_back(frame.release());
@@ -265,6 +272,20 @@ Stackwalker* Stackwalker::StackwalkerForCPU(
                                              memory, modules,
                                              frame_symbolizer);
       break;
+
+    case MD_CONTEXT_RISCV:
+      cpu_stackwalker = new StackwalkerRISCV(system_info,
+                                             context->GetContextRISCV(),
+                                             memory, modules,
+                                             frame_symbolizer);
+      break;
+
+    case MD_CONTEXT_RISCV64:
+      cpu_stackwalker = new StackwalkerRISCV64(system_info,
+                                               context->GetContextRISCV64(),
+                                               memory, modules,
+                                               frame_symbolizer);
+      break;
   }
 
   BPLOG_IF(ERROR, !cpu_stackwalker) << "Unknown CPU type " << HexString(cpu) <<
@@ -307,7 +328,7 @@ bool Stackwalker::InstructionAddressSeemsValid(uint64_t address) const {
   frame.instruction = address;
   StackFrameSymbolizer::SymbolizerResult symbolizer_result =
       frame_symbolizer_->FillSourceLineInfo(modules_, unloaded_modules_,
-                                            system_info_, &frame);
+                                            system_info_, &frame, nullptr);
 
   if (!frame.module) {
     // not inside any loaded module

@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -47,7 +46,7 @@
 // for more details.
 #if USE_PROTECTED_ALLOCATIONS
   #include "client/mac/handler/protected_memory_allocator.h"
-  extern ProtectedMemoryAllocator *gBreakpadAllocator;
+  extern ProtectedMemoryAllocator* gBreakpadAllocator;
 #endif
 
 namespace google_breakpad {
@@ -72,10 +71,10 @@ static union {
   char protected_buffer[PAGE_SIZE] __attribute__((aligned(PAGE_SIZE)));
 #endif  // defined PAGE_MAX_SIZE
 #endif  // USE_PROTECTED_ALLOCATIONS
-  google_breakpad::ExceptionHandler *handler;
+  google_breakpad::ExceptionHandler* handler;
 } gProtectedData;
 
-ExceptionHandler::ExceptionHandler(const string &dump_path,
+ExceptionHandler::ExceptionHandler(const string& dump_path,
                                    FilterCallback filter,
                                    MinidumpCallback callback,
                                    void* callback_context,
@@ -198,7 +197,7 @@ void ExceptionHandler::SignalHandler(int sig, siginfo_t* info, void* uc) {
 
 bool ExceptionHandler::InstallHandlers() {
   // If a handler is already installed, something is really wrong.
-  if (gProtectedData.handler != NULL) {
+  if (gProtectedData.handler != NULL)
     return false;
   for (int i = 0; i < kNumHandledSignals; ++i) {
     struct sigaction sa;

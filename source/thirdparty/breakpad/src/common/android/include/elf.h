@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -108,17 +107,6 @@ typedef struct {
   } d_un;
 } Elf64_Dyn;
 
-
-// __WORDSIZE is GLibc-specific and used by Google Breakpad on Linux.
-#ifndef __WORDSIZE
-#if defined(__i386__) ||  defined(__ARM_EABI__) || defined(__mips__)
-#define __WORDSIZE 32
-#elif defined(__x86_64__) || defined(__aarch64__)
-#define __WORDSIZE 64
-#else
-#error "Unsupported Android CPU ABI"
-#endif
-#endif
 
 // The Android headers don't always define this constant.
 #ifndef EM_X86_64

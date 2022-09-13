@@ -9,11 +9,17 @@
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
+/* Define to 1 if you have the `getcontext' function. */
+#undef HAVE_GETCONTEXT
+
 /* Define to 1 if you have the `getrandom' function. */
 #undef HAVE_GETRANDOM
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `memfd_create' function. */
+#undef HAVE_MEMFD_CREATE
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -32,6 +38,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/random.h> header file. */
 #undef HAVE_SYS_RANDOM_H

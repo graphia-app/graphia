@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -49,13 +48,14 @@ namespace google_breakpad {
 
 using std::vector;
 
-BasicCodeModules::BasicCodeModules(const CodeModules *that)
+BasicCodeModules::BasicCodeModules(const CodeModules* that,
+                                   MergeRangeStrategy strategy)
     : main_address_(0), map_() {
   BPLOG_IF(ERROR, !that) << "BasicCodeModules::BasicCodeModules requires "
                             "|that|";
   assert(that);
 
-  map_.SetEnableShrinkDown(that->IsModuleShrinkEnabled());
+  map_.SetMergeStrategy(strategy);
 
   const CodeModule *main_module = that->GetMainModule();
   if (main_module)
@@ -140,16 +140,12 @@ const CodeModule* BasicCodeModules::GetModuleAtIndex(
 }
 
 const CodeModules* BasicCodeModules::Copy() const {
-  return new BasicCodeModules(this);
+  return new BasicCodeModules(this, map_.GetMergeStrategy());
 }
 
 vector<linked_ptr<const CodeModule> >
 BasicCodeModules::GetShrunkRangeModules() const {
   return shrunk_range_modules_;
-}
-
-bool BasicCodeModules::IsModuleShrinkEnabled() const {
-  return map_.IsShrinkDownEnabled();
 }
 
 }  // namespace google_breakpad

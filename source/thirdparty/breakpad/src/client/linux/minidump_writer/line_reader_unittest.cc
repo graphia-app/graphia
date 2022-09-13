@@ -1,5 +1,4 @@
-// Copyright (c) 2009, Google Inc.
-// All rights reserved.
+// Copyright 2009 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -59,7 +58,7 @@ TEST(LineReaderTest, EmptyFile) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_FALSE(reader.GetNextLine(&line, &len));
 }
@@ -69,7 +68,7 @@ TEST(LineReaderTest, OneLineTerminated) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned int len;
   ASSERT_TRUE(reader.GetNextLine(&line, &len));
   ASSERT_EQ((unsigned int)1, len);
@@ -85,7 +84,7 @@ TEST(LineReaderTest, OneLine) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_TRUE(reader.GetNextLine(&line, &len));
   ASSERT_EQ((unsigned)1, len);
@@ -101,7 +100,7 @@ TEST(LineReaderTest, TwoLinesTerminated) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_TRUE(reader.GetNextLine(&line, &len));
   ASSERT_EQ((unsigned)1, len);
@@ -123,7 +122,7 @@ TEST(LineReaderTest, TwoLines) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_TRUE(reader.GetNextLine(&line, &len));
   ASSERT_EQ((unsigned)1, len);
@@ -147,7 +146,7 @@ TEST(LineReaderTest, MaxLength) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_TRUE(reader.GetNextLine(&line, &len));
   ASSERT_EQ(sizeof(l), len);
@@ -163,7 +162,7 @@ TEST(LineReaderTest, TooLong) {
   ASSERT_TRUE(file.IsOk());
   LineReader reader(file.GetFd());
 
-  const char *line;
+  const char* line;
   unsigned len;
   ASSERT_FALSE(reader.GetNextLine(&line, &len));
 }

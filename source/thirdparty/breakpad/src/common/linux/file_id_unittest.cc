@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -30,7 +29,10 @@
 // Unit tests for FileID
 
 #include <elf.h>
+#include <spawn.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <string>
 #include <vector>
@@ -42,10 +44,13 @@
 #include "common/linux/synth_elf.h"
 #include "common/test_assembler.h"
 #include "common/tests/auto_tempdir.h"
+#include "common/tests/file_utils.h"
 #include "common/using_std_string.h"
 #include "breakpad_googletest_includes.h"
 
 using namespace google_breakpad;
+using google_breakpad::elf::FileID;
+using google_breakpad::elf::kDefaultBuildIdSize;
 using google_breakpad::synth_elf::ELF;
 using google_breakpad::synth_elf::Notes;
 using google_breakpad::test_assembler::kLittleEndian;
@@ -80,13 +85,18 @@ TEST(FileIDStripTest, StripSelf) {
   // copy our binary to a temp file, and strip it
   AutoTempDir temp_dir;
   string templ = temp_dir.path() + "/file-id-unittest";
-  char cmdline[4096];
-  sprintf(cmdline, "cp \"%s\" \"%s\"", exe_name, templ.c_str());
-  ASSERT_EQ(0, system(cmdline)) << "Failed to execute: " << cmdline;
-  sprintf(cmdline, "chmod u+w \"%s\"", templ.c_str());
-  ASSERT_EQ(0, system(cmdline)) << "Failed to execute: " << cmdline;
-  sprintf(cmdline, "strip \"%s\"", templ.c_str());
-  ASSERT_EQ(0, system(cmdline)) << "Failed to execute: " << cmdline;
+  ASSERT_TRUE(CopyFile(exe_name, templ));
+  pid_t pid;
+  char* argv[] = {
+      const_cast<char*>("strip"),
+      const_cast<char*>(templ.c_str()),
+      nullptr,
+  };
+  ASSERT_EQ(0, posix_spawnp(&pid, argv[0], nullptr, nullptr, argv, nullptr));
+  int status;
+  ASSERT_EQ(pid, waitpid(pid, &status, 0));
+  ASSERT_TRUE(WIFEXITED(status));
+  ASSERT_EQ(0, WEXITSTATUS(status));
 
   PageAllocator allocator;
   id_vector identifier1(&allocator, kDefaultBuildIdSize);
@@ -138,7 +148,7 @@ public:
 
 typedef Types<ElfClass32, ElfClass64> ElfClasses;
 
-TYPED_TEST_CASE(FileIDTest, ElfClasses);
+TYPED_TEST_SUITE(FileIDTest, ElfClasses);
 
 TYPED_TEST(FileIDTest, ElfClass) {
   const char expected_identifier_string[] =
@@ -261,7 +271,7 @@ TYPED_TEST(FileIDTest, BuildIDPH) {
   elf.AddSection(".text", text, SHT_PROGBITS);
   Notes notes(kLittleEndian);
   notes.AddNote(0, "Linux",
-                reinterpret_cast<const uint8_t *>("\0x42\0x02\0\0"), 4);
+                reinterpret_cast<const uint8_t*>("\0x42\0x02\0\0"), 4);
   notes.AddNote(NT_GNU_BUILD_ID, "GNU", kExpectedIdentifierBytes,
                 sizeof(kExpectedIdentifierBytes));
   int note_idx = elf.AddSection(".note", notes, SHT_NOTE);
@@ -292,7 +302,7 @@ TYPED_TEST(FileIDTest, BuildIDMultiplePH) {
   elf.AddSection(".text", text, SHT_PROGBITS);
   Notes notes1(kLittleEndian);
   notes1.AddNote(0, "Linux",
-                reinterpret_cast<const uint8_t *>("\0x42\0x02\0\0"), 4);
+                reinterpret_cast<const uint8_t*>("\0x42\0x02\0\0"), 4);
   Notes notes2(kLittleEndian);
   notes2.AddNote(NT_GNU_BUILD_ID, "GNU", kExpectedIdentifierBytes,
                  sizeof(kExpectedIdentifierBytes));

@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -190,7 +189,7 @@ const char* my_read_decimal_ptr(uintptr_t* result, const char* s) {
 }
 
 void my_memset(void* ip, char c, size_t len) {
-  char* p = (char *) ip;
+  char* p = (char*) ip;
   while (len--)
     *p++ = c;
 }

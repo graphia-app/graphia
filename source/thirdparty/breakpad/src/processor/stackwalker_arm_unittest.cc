@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -64,6 +63,7 @@ using google_breakpad::test_assembler::Section;
 using std::vector;
 using testing::_;
 using testing::AnyNumber;
+using testing::DoAll;
 using testing::Return;
 using testing::SetArgumentPointee;
 using testing::Test;
@@ -105,7 +105,7 @@ class StackwalkerARMFixture {
 
   // Set the Breakpad symbol information that supplier should return for
   // MODULE to INFO.
-  void SetModuleSymbols(MockCodeModule *module, const string &info) {
+  void SetModuleSymbols(MockCodeModule* module, const string& info) {
     size_t buffer_size;
     char *buffer = supplier.CopySymbolDataAndOwnTheCopy(info, &buffer_size);
     EXPECT_CALL(supplier, GetCStringSymbolData(module, &system_info, _, _, _))
@@ -126,7 +126,7 @@ class StackwalkerARMFixture {
   void BrandContext(MDRawContextARM *raw_context) {
     uint8_t x = 173;
     for (size_t i = 0; i < sizeof(*raw_context); i++)
-      reinterpret_cast<uint8_t *>(raw_context)[i] = (x += 17);
+      reinterpret_cast<uint8_t*>(raw_context)[i] = (x += 17);
   }
 
   SystemInfo system_info;
@@ -139,7 +139,7 @@ class StackwalkerARMFixture {
   MockSymbolSupplier supplier;
   BasicSourceLineResolver resolver;
   CallStack call_stack;
-  const vector<StackFrame *> *frames;
+  const vector<StackFrame*>* frames;
 };
 
 class SanityCheck: public StackwalkerARMFixture, public Test { };
@@ -160,7 +160,7 @@ TEST_F(SanityCheck, NoResolver) {
   ASSERT_EQ(0U, modules_with_corrupt_symbols.size());
   frames = call_stack.frames();
   ASSERT_EQ(1U, frames->size());
-  StackFrameARM *frame = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame = static_cast<StackFrameARM*>(frames->at(0));
   // Check that the values from the original raw context made it
   // through to the context in the stack frame.
   EXPECT_EQ(0, memcmp(&raw_context, &frame->context, sizeof(raw_context)));
@@ -183,7 +183,7 @@ TEST_F(GetContextFrame, Simple) {
   ASSERT_EQ(0U, modules_with_corrupt_symbols.size());
   frames = call_stack.frames();
   ASSERT_EQ(1U, frames->size());
-  StackFrameARM *frame = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame = static_cast<StackFrameARM*>(frames->at(0));
   // Check that the values from the original raw context made it
   // through to the context in the stack frame.
   EXPECT_EQ(0, memcmp(&raw_context, &frame->context, sizeof(raw_context)));
@@ -203,7 +203,7 @@ TEST_F(GetContextFrame, NoStackMemory) {
   ASSERT_EQ(0U, modules_with_corrupt_symbols.size());
   frames = call_stack.frames();
   ASSERT_EQ(1U, frames->size());
-  StackFrameARM *frame = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame = static_cast<StackFrameARM*>(frames->at(0));
   // Check that the values from the original raw context made it
   // through to the context in the stack frame.
   EXPECT_EQ(0, memcmp(&raw_context, &frame->context, sizeof(raw_context)));
@@ -259,12 +259,12 @@ TEST_F(GetCallerFrame, ScanWithoutSymbols) {
   frames = call_stack.frames();
   ASSERT_EQ(3U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
 
-  StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+  StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
   EXPECT_EQ(StackFrame::FRAME_TRUST_SCAN, frame1->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_SP),
@@ -272,7 +272,7 @@ TEST_F(GetCallerFrame, ScanWithoutSymbols) {
   EXPECT_EQ(return_address1, frame1->context.iregs[MD_CONTEXT_ARM_REG_PC]);
   EXPECT_EQ(frame1_sp.Value(), frame1->context.iregs[MD_CONTEXT_ARM_REG_SP]);
 
-  StackFrameARM *frame2 = static_cast<StackFrameARM *>(frames->at(2));
+  StackFrameARM *frame2 = static_cast<StackFrameARM*>(frames->at(2));
   EXPECT_EQ(StackFrame::FRAME_TRUST_SCAN, frame2->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_SP),
@@ -328,14 +328,14 @@ TEST_F(GetCallerFrame, ScanWithFunctionSymbols) {
   frames = call_stack.frames();
   ASSERT_EQ(2U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
   EXPECT_EQ("monotreme", frame0->function_name);
   EXPECT_EQ(0x40000100U, frame0->function_base);
 
-  StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+  StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
   EXPECT_EQ(StackFrame::FRAME_TRUST_SCAN, frame1->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_SP),
@@ -396,12 +396,12 @@ TEST_F(GetCallerFrame, ScanFirstFrame) {
   frames = call_stack.frames();
   ASSERT_EQ(2U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
 
-  StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+  StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
   EXPECT_EQ(StackFrame::FRAME_TRUST_SCAN, frame1->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_SP),
@@ -459,7 +459,7 @@ TEST_F(GetCallerFrame, ScanningNotAllowed) {
   frames = call_stack.frames();
   ASSERT_EQ(1U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
@@ -564,13 +564,13 @@ struct CFIFixture: public StackwalkerARMFixture {
     frames = call_stack.frames();
     ASSERT_EQ(2U, frames->size());
 
-    StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+    StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
     EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
     ASSERT_EQ(context_frame_validity, frame0->context_validity);
     EXPECT_EQ("enchiridion", frame0->function_name);
     EXPECT_EQ(0x40004000U, frame0->function_base);
 
-    StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+    StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
     EXPECT_EQ(StackFrame::FRAME_TRUST_CFI, frame1->trust);
     ASSERT_EQ(expected_validity, frame1->context_validity);
     if (expected_validity & StackFrameARM::CONTEXT_VALID_R1)
@@ -782,8 +782,12 @@ TEST_F(CFI, RejectBadExpressions) {
 class StackwalkerARMFixtureIOS : public StackwalkerARMFixture {
  public:
   StackwalkerARMFixtureIOS() {
-    system_info.os = "iOS";
-    system_info.os_short = "ios";
+    // iOS_test is used instead of iOS because the stackwalker has a check to
+    // avoid using CFI for iOS dumps. This is a workaround for bad CFI being
+    // produced by dump_syms for iOS.
+    // https://bugs.chromium.org/p/google-breakpad/issues/detail?id=764
+    system_info.os = "iOS_test";
+    system_info.os_short = "ios_test";
   }
 };
 
@@ -843,12 +847,12 @@ TEST_F(GetFramesByFramePointer, OnlyFramePointer) {
   frames = call_stack.frames();
   ASSERT_EQ(3U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
 
-  StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+  StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
   EXPECT_EQ(StackFrame::FRAME_TRUST_FP, frame1->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_LR |
@@ -861,7 +865,7 @@ TEST_F(GetFramesByFramePointer, OnlyFramePointer) {
   EXPECT_EQ(frame2_fp.Value(),
             frame1->context.iregs[MD_CONTEXT_ARM_REG_IOS_FP]);
 
-  StackFrameARM *frame2 = static_cast<StackFrameARM *>(frames->at(2));
+  StackFrameARM *frame2 = static_cast<StackFrameARM*>(frames->at(2));
   EXPECT_EQ(StackFrame::FRAME_TRUST_FP, frame2->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_LR |
@@ -939,12 +943,12 @@ TEST_F(GetFramesByFramePointer, FramePointerAndCFI) {
   frames = call_stack.frames();
   ASSERT_EQ(3U, frames->size());
 
-  StackFrameARM *frame0 = static_cast<StackFrameARM *>(frames->at(0));
+  StackFrameARM *frame0 = static_cast<StackFrameARM*>(frames->at(0));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CONTEXT, frame0->trust);
   ASSERT_EQ(StackFrameARM::CONTEXT_VALID_ALL, frame0->context_validity);
   EXPECT_EQ(0, memcmp(&raw_context, &frame0->context, sizeof(raw_context)));
 
-  StackFrameARM *frame1 = static_cast<StackFrameARM *>(frames->at(1));
+  StackFrameARM *frame1 = static_cast<StackFrameARM*>(frames->at(1));
   EXPECT_EQ(StackFrame::FRAME_TRUST_FP, frame1->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_LR |
@@ -960,7 +964,7 @@ TEST_F(GetFramesByFramePointer, FramePointerAndCFI) {
   EXPECT_EQ(0x40004000U, frame1->function_base);
 
 
-  StackFrameARM *frame2 = static_cast<StackFrameARM *>(frames->at(2));
+  StackFrameARM *frame2 = static_cast<StackFrameARM*>(frames->at(2));
   EXPECT_EQ(StackFrame::FRAME_TRUST_CFI, frame2->trust);
   ASSERT_EQ((StackFrameARM::CONTEXT_VALID_PC |
              StackFrameARM::CONTEXT_VALID_LR |

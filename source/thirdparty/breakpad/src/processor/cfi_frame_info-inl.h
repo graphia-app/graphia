@@ -1,7 +1,6 @@
 // -*- mode: C++ -*-
 
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +12,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -42,12 +41,12 @@ namespace google_breakpad {
 
 template <typename RegisterType, class RawContextType>
 bool SimpleCFIWalker<RegisterType, RawContextType>::FindCallerRegisters(
-    const MemoryRegion &memory,
-    const CFIFrameInfo &cfi_frame_info,
-    const RawContextType &callee_context,
+    const MemoryRegion& memory,
+    const CFIFrameInfo& cfi_frame_info,
+    const RawContextType& callee_context,
     int callee_validity,
-    RawContextType *caller_context,
-    int *caller_validity) const {
+    RawContextType* caller_context,
+    int* caller_validity) const {
   typedef CFIFrameInfo::RegisterValueMap<RegisterType> ValueMap;
   ValueMap callee_registers;
   ValueMap caller_registers;
@@ -56,7 +55,7 @@ bool SimpleCFIWalker<RegisterType, RawContextType>::FindCallerRegisters(
 
   // Populate callee_registers with register values from callee_context.
   for (size_t i = 0; i < map_size_; i++) {
-    const RegisterSet &r = register_map_[i];
+    const RegisterSet& r = register_map_[i];
     if (callee_validity & r.validity_flag)
       callee_registers[r.name] = callee_context.*r.context_member;
   }
@@ -71,7 +70,7 @@ bool SimpleCFIWalker<RegisterType, RawContextType>::FindCallerRegisters(
   memset(caller_context, 0xda, sizeof(*caller_context));
   *caller_validity = 0;
   for (size_t i = 0; i < map_size_; i++) {
-    const RegisterSet &r = register_map_[i];
+    const RegisterSet& r = register_map_[i];
     typename ValueMap::const_iterator caller_entry;
 
     // Did the rules provide a value for this register by its name?

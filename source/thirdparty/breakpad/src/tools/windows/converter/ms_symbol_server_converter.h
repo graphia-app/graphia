@@ -1,5 +1,4 @@
-// Copyright (c) 2007, Google Inc.
-// All rights reserved.
+// Copyright 2007 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -101,13 +100,13 @@ class GUIDOrSignatureIdentifier {
   // component fields: either a GUID and age, or signature and age.  If
   // successful, sets the relevant fields in the object, including the type
   // field, and returns true.  On error, returns false.
-  bool InitializeFromString(const string &identifier);
+  bool InitializeFromString(const string& identifier);
 
   GUIDOrSignatureType type() const { return type_; }
   GUID guid() const { return guid_; }
   DWORD signature() const { return signature_; }
   int age() const { return age_; }
-  const void *guid_or_signature_pointer() const { return &guid_; }
+  const void* guid_or_signature_pointer() const { return &guid_; }
 
  private:
   GUIDOrSignatureType type_;
@@ -127,9 +126,10 @@ class MSSymbolServerConverter {
  public:
   enum LocateResult {
     LOCATE_FAILURE = 0,
-    LOCATE_NOT_FOUND,    // Authoritative: the file is not present.
-    LOCATE_RETRY,        // Transient (network?) error, try again later.
-    LOCATE_SUCCESS
+    LOCATE_NOT_FOUND,  // Authoritative: the file is not present.
+    LOCATE_RETRY,      // Transient (network?) error, try again later.
+    LOCATE_SUCCESS,
+    LOCATE_HTTP_HTTPS_REDIR
   };
 
   // Create a new object.  local_cache is the location (pathname) of a local
@@ -141,23 +141,26 @@ class MSSymbolServerConverter {
   // store to try.  The vector must contain at least one string.  None of the
   // strings passed to this constructor may contain asterisk ('*') or semicolon
   // (';') characters, as the symbol engine uses these characters as separators.
-  MSSymbolServerConverter(const string &local_cache,
-                          const vector<string> &symbol_servers);
+  // If |trace_symsrv| is set then callbacks from SymSrv will be logged to
+  // stderr.
+  MSSymbolServerConverter(const string& local_cache,
+                          const vector<string>& symbol_servers,
+                          bool trace_symsrv);
 
   // Locates the PE file (DLL or EXE) specified by the identifying information
   // in |missing|, by checking the symbol stores identified when the object
   // was created.  When returning LOCATE_SUCCESS, pe_file is set to
   // the pathname of the decompressed PE file as it is stored in the
   // local cache.
-  LocateResult LocatePEFile(const MissingSymbolInfo &missing, string *pe_file);
+  LocateResult LocatePEFile(const MissingSymbolInfo& missing, string* pe_file);
 
   // Locates the symbol file specified by the identifying information in
   // |missing|, by checking the symbol stores identified when the object
   // was created.  When returning LOCATE_SUCCESS, symbol_file is set to
   // the pathname of the decompressed symbol file as it is stored in the
   // local cache.
-  LocateResult LocateSymbolFile(const MissingSymbolInfo &missing,
-                                string *symbol_file);
+  LocateResult LocateSymbolFile(const MissingSymbolInfo& missing,
+                                string* symbol_file);
 
   // Calls LocateSymbolFile and converts the returned symbol file to the
   // dumped-symbol format, storing it adjacent to the symbol file.  The
@@ -170,12 +173,28 @@ class MSSymbolServerConverter {
   // is desired, set |keep_symbol_file| and |keep_pe_file| to false to indicate
   // that the original symbol file (pdb) and executable file (exe, dll) should
   // be deleted after conversion.
-  LocateResult LocateAndConvertSymbolFile(const MissingSymbolInfo &missing,
+  LocateResult LocateAndConvertSymbolFile(const MissingSymbolInfo& missing,
                                           bool keep_symbol_file,
                                           bool keep_pe_file,
-                                          string *converted_symbol_file,
-                                          string *symbol_file,
-                                          string *pe_file);
+                                          string* converted_symbol_file,
+                                          string* symbol_file,
+                                          string* pe_file);
+
+  // Calls LocatePEFile and converts the returned PE file to the
+  // dumped-symbol format, storing it adjacent to the PE file. The
+  // only conversion supported is from PE files. Returns the return
+  // value of LocatePEFile, or if LocatePEFile succeeds but
+  // conversion fails, returns LOCATE_FAILURE. The pathname to the
+  // PE file and to the converted symbol file are returned in
+  // |converted_symbol_file| and |pe_file|. |pe_file| is optional and may be
+  // NULL.  If only the converted symbol file is desired, set |keep_pe_file|
+  // to false to indicate that the executable file (exe, dll) should be deleted
+  // after conversion.
+  // NOTE: Currrently only supports x64 PEs.
+  LocateResult LocateAndConvertPEFile(const MissingSymbolInfo& missing,
+                                      bool keep_pe_file,
+                                      string* converted_symbol_file,
+                                      string* pe_file);
 
  private:
   // Locates the PDB or PE file (DLL or EXE) specified by the identifying
@@ -183,9 +202,9 @@ class MSSymbolServerConverter {
   // the symbol stores identified when the object was created.  When
   // returning LOCATE_SUCCESS, file_name is set to the pathname of the
   // decompressed PDB or PE file file as it is stored in the local cache.
-  LocateResult LocateFile(const string &debug_or_code_file,
-                          const string &debug_or_code_id,
-                          const string &version, string *file_name);
+  LocateResult LocateFile(const string& debug_or_code_file,
+                          const string& debug_or_code_id,
+                          const string& version, string* file_name);
 
   // Called by various SymSrv functions to report status as progress is made
   // and to allow the callback to influence processing.  Messages sent to this
@@ -199,8 +218,8 @@ class MSSymbolServerConverter {
   // SymFindFileInPath actually seems to accept NULL for a callback function
   // and behave properly for our needs in that case, but the documentation
   // doesn't mention it, so this little callback is provided.
-  static BOOL CALLBACK SymFindFileInPathCallback(const char *filename,
-                                                 void *context);
+  static BOOL CALLBACK SymFindFileInPathCallback(const char* filename,
+                                                 void* context);
 
   // The search path used by SymSrv, built based on the arguments to the
   // constructor.
@@ -210,8 +229,12 @@ class MSSymbolServerConverter {
   // SymFindFileInPath fails for an expected reason.
   bool fail_dns_;        // DNS failures (fail_not_found_ will also be set).
   bool fail_timeout_;    // Timeouts (fail_not_found_ will also be set).
+  bool fail_http_https_redir_;  // Bad URL-- we should be using HTTPS.
   bool fail_not_found_;  // The file could not be found.  If this is the only
                          // fail_* member set, then it is authoritative.
+
+  // If set then callbacks from SymSrv will be logged to stderr.
+  bool trace_symsrv_;
 };
 
 }  // namespace google_breakpad

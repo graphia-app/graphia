@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -54,28 +53,14 @@
 
 #include "processor/range_map-inl.h"
 
+#include "common/macros.h"
 #include "common/scoped_ptr.h"
 #include "common/stdio_wrapper.h"
 #include "google_breakpad/processor/dump_context.h"
 #include "processor/basic_code_module.h"
 #include "processor/basic_code_modules.h"
+#include "processor/convert_old_arm64_context.h"
 #include "processor/logging.h"
-
-// All intentional fallthroughs in breakpad are in this file, so define
-// this macro locally.
-// If you ever move this to a .h file, make sure it's defined in a
-// private header file: clang suggests the first macro expanding to
-// [[clang::fallthrough]] in its diagnostics, so if BP_FALLTHROUGH
-// is visible in code depending on breakpad, clang would suggest
-// BP_FALLTHROUGH for code depending on breakpad, instead of the
-// client code's own fallthrough macro.
-// TODO(thakis): Once everyone uses C++17, use its [[fallthrough]] instead.
-#if defined(__clang__)
-#define BP_FALLTHROUGH [[clang::fallthrough]]
-#else
-#define BP_FALLTHROUGH
-#endif
-
 
 namespace google_breakpad {
 
@@ -106,7 +91,13 @@ bool IsContextSizeUnique(uint32_t context_size) {
     num_matching_contexts++;
   if (context_size == sizeof(MDRawContextARM64))
     num_matching_contexts++;
+  if (context_size == sizeof(MDRawContextARM64_Old))
+    num_matching_contexts++;
   if (context_size == sizeof(MDRawContextMIPS))
+    num_matching_contexts++;
+  if (context_size == sizeof(MDRawContextRISCV))
+    num_matching_contexts++;
+  if (context_size == sizeof(MDRawContextRISCV64))
     num_matching_contexts++;
   return num_matching_contexts == 1;
 }
@@ -471,8 +462,8 @@ bool MinidumpContext::Read(uint32_t expected_size) {
                  << "other raw context";
     return false;
   }
-  if (!IsContextSizeUnique(sizeof(MDRawContextARM64))) {
-    BPLOG(ERROR) << "sizeof(MDRawContextARM64) cannot match the size of any "
+  if (!IsContextSizeUnique(sizeof(MDRawContextARM64_Old))) {
+    BPLOG(ERROR) << "sizeof(MDRawContextARM64_Old) cannot match the size of any "
                  << "other raw context";
     return false;
   }
@@ -482,7 +473,16 @@ bool MinidumpContext::Read(uint32_t expected_size) {
   // First, figure out what type of CPU this context structure is for.
   // For some reason, the AMD64 Context doesn't have context_flags
   // at the beginning of the structure, so special case it here.
-  if (expected_size == sizeof(MDRawContextAMD64)) {
+
+  uint32_t sysinfo_cpu_type = 0;
+  if (!minidump_->GetContextCPUFlagsFromSystemInfo(&sysinfo_cpu_type)) {
+    BPLOG(ERROR) << "Failed to preserve the current stream position";
+    return false;
+  }
+
+  if (expected_size == sizeof(MDRawContextAMD64) ||
+      (sysinfo_cpu_type == MD_CONTEXT_AMD64 &&
+       expected_size >= sizeof(MDRawContextAMD64))) {
     BPLOG(INFO) << "MinidumpContext: looks like AMD64 context";
 
     scoped_ptr<MDRawContextAMD64> context_amd64(new MDRawContextAMD64());
@@ -492,17 +492,24 @@ bool MinidumpContext::Read(uint32_t expected_size) {
       return false;
     }
 
+    // Context may include xsave registers and so be larger than
+    // sizeof(MDRawContextAMD64). For now we skip this extended data.
+    if (expected_size > sizeof(MDRawContextAMD64)) {
+      size_t bytes_left = expected_size - sizeof(MDRawContextAMD64);
+      std::vector<uint8_t> xstate(bytes_left);
+      if (!minidump_->ReadBytes(xstate.data(),
+                                bytes_left)) {
+        BPLOG(ERROR) << "MinidumpContext could not skip amd64 xstate";
+        return false;
+      }
+    }
+
     if (minidump_->swap())
       Swap(&context_amd64->context_flags);
 
     uint32_t cpu_type = context_amd64->context_flags & MD_CONTEXT_CPU_MASK;
     if (cpu_type == 0) {
-      if (minidump_->GetContextCPUFlagsFromSystemInfo(&cpu_type)) {
-        context_amd64->context_flags |= cpu_type;
-      } else {
-        BPLOG(ERROR) << "Failed to preserve the current stream position";
-        return false;
-      }
+      context_amd64->context_flags |= sysinfo_cpu_type;
     }
 
     if (cpu_type != MD_CONTEXT_AMD64) {
@@ -678,8 +685,8 @@ bool MinidumpContext::Read(uint32_t expected_size) {
     }
 
     SetContextPPC64(context_ppc64.release());
-  } else if (expected_size == sizeof(MDRawContextARM64)) {
-    // |context_flags| of MDRawContextARM64 is 64 bits, but other MDRawContext
+  } else if (expected_size == sizeof(MDRawContextARM64_Old)) {
+    // |context_flags| of MDRawContextARM64_Old is 64 bits, but other MDRawContext
     // in the else case have 32 bits |context_flags|, so special case it here.
     uint64_t context_flags;
 
@@ -692,7 +699,7 @@ bool MinidumpContext::Read(uint32_t expected_size) {
     if (minidump_->swap())
       Swap(&context_flags);
 
-    scoped_ptr<MDRawContextARM64> context_arm64(new MDRawContextARM64());
+    scoped_ptr<MDRawContextARM64_Old> context_arm64(new MDRawContextARM64_Old());
 
     uint32_t cpu_type = context_flags & MD_CONTEXT_CPU_MASK;
     if (cpu_type == 0) {
@@ -704,7 +711,7 @@ bool MinidumpContext::Read(uint32_t expected_size) {
       }
     }
 
-    if (cpu_type != MD_CONTEXT_ARM64) {
+    if (cpu_type != MD_CONTEXT_ARM64_OLD) {
       // TODO: Fall through to switch below.
       // https://bugs.chromium.org/p/google-breakpad/issues/detail?id=550
       BPLOG(ERROR) << "MinidumpContext not actually arm64 context";
@@ -720,7 +727,7 @@ bool MinidumpContext::Read(uint32_t expected_size) {
     uint8_t* context_after_flags =
         reinterpret_cast<uint8_t*>(context_arm64.get()) + flags_size;
     if (!minidump_->ReadBytes(context_after_flags,
-                              sizeof(MDRawContextARM64) - flags_size)) {
+                              sizeof(MDRawContextARM64_Old) - flags_size)) {
       BPLOG(ERROR) << "MinidumpContext could not read arm64 context";
       return false;
     }
@@ -745,24 +752,16 @@ bool MinidumpContext::Read(uint32_t expected_size) {
       for (unsigned int fpr_index = 0;
            fpr_index < MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT;
            ++fpr_index) {
-        // While ARM64 is bi-endian, iOS (currently the only platform
-        // for which ARM64 support has been brought up) uses ARM64 exclusively
-        // in little-endian mode.
-        Normalize128(&context_arm64->float_save.regs[fpr_index], false);
+        Normalize128(&context_arm64->float_save.regs[fpr_index],
+                     minidump_->is_big_endian());
         Swap(&context_arm64->float_save.regs[fpr_index]);
       }
     }
-    SetContextFlags(static_cast<uint32_t>(context_arm64->context_flags));
 
-    // Check for data loss when converting context flags from uint64_t into
-    // uint32_t
-    if (static_cast<uint64_t>(GetContextFlags()) !=
-        context_arm64->context_flags) {
-      BPLOG(ERROR) << "Data loss detected when converting ARM64 context_flags";
-      return false;
-    }
-
-    SetContextARM64(context_arm64.release());
+    scoped_ptr<MDRawContextARM64> new_context(new MDRawContextARM64());
+    ConvertOldARM64Context(*context_arm64.get(), new_context.get());
+    SetContextFlags(new_context->context_flags);
+    SetContextARM64(new_context.release());
   } else {
     uint32_t context_flags;
     if (!minidump_->ReadBytes(&context_flags, sizeof(context_flags))) {
@@ -785,13 +784,10 @@ bool MinidumpContext::Read(uint32_t expected_size) {
       }
     }
 
+    // Fixup if we were not provided a cpu type.
     if (cpu_type == 0) {
-      if (minidump_->GetContextCPUFlagsFromSystemInfo(&cpu_type)) {
-        context_flags |= cpu_type;
-      } else {
-        BPLOG(ERROR) << "Failed to preserve the current stream position";
-        return false;
-      }
+      cpu_type = sysinfo_cpu_type;
+      context_flags |= cpu_type;
     }
 
     // Allocate the context structure for the correct CPU and fill it.  The
@@ -1059,6 +1055,58 @@ bool MinidumpContext::Read(uint32_t expected_size) {
         break;
       }
 
+      case MD_CONTEXT_ARM64: {
+        if (expected_size != sizeof(MDRawContextARM64)) {
+          BPLOG(ERROR) << "MinidumpContext arm64 size mismatch, " <<
+                       expected_size << " != " << sizeof(MDRawContextARM64);
+          return false;
+        }
+
+        scoped_ptr<MDRawContextARM64> context_arm64(new MDRawContextARM64());
+
+        // Set the context_flags member, which has already been read, and
+        // read the rest of the structure beginning with the first member
+        // after context_flags.
+        context_arm64->context_flags = context_flags;
+
+        size_t flags_size = sizeof(context_arm64->context_flags);
+        uint8_t* context_after_flags =
+            reinterpret_cast<uint8_t*>(context_arm64.get()) + flags_size;
+        if (!minidump_->ReadBytes(context_after_flags,
+                                  sizeof(*context_arm64) - flags_size)) {
+          BPLOG(ERROR) << "MinidumpContext could not read arm64 context";
+          return false;
+        }
+
+        // Do this after reading the entire MDRawContext structure because
+        // GetSystemInfo may seek minidump to a new position.
+        if (!CheckAgainstSystemInfo(cpu_type)) {
+          BPLOG(ERROR) << "MinidumpContext arm does not match system info";
+          return false;
+        }
+
+        if (minidump_->swap()) {
+          // context_arm64->context_flags was already swapped.
+          for (unsigned int ireg_index = 0;
+               ireg_index < MD_CONTEXT_ARM64_GPR_COUNT;
+               ++ireg_index) {
+            Swap(&context_arm64->iregs[ireg_index]);
+          }
+          Swap(&context_arm64->cpsr);
+          Swap(&context_arm64->float_save.fpsr);
+          Swap(&context_arm64->float_save.fpcr);
+          for (unsigned int fpr_index = 0;
+               fpr_index < MD_FLOATINGSAVEAREA_ARM64_FPR_COUNT;
+               ++fpr_index) {
+            Normalize128(&context_arm64->float_save.regs[fpr_index],
+                         minidump_->is_big_endian());
+            Swap(&context_arm64->float_save.regs[fpr_index]);
+          }
+        }
+        SetContextARM64(context_arm64.release());
+        break;
+      }
+
       case MD_CONTEXT_MIPS:
       case MD_CONTEXT_MIPS64: {
         if (expected_size != sizeof(MDRawContextMIPS)) {
@@ -1125,13 +1173,169 @@ bool MinidumpContext::Read(uint32_t expected_size) {
         break;
       }
 
+      case MD_CONTEXT_RISCV: {
+        if (expected_size != sizeof(MDRawContextRISCV)) {
+          BPLOG(ERROR) << "MinidumpContext RISCV size mismatch, "
+                       << expected_size
+                       << " != "
+                       << sizeof(MDRawContextRISCV);
+          return false;
+        }
+
+        scoped_ptr<MDRawContextRISCV> context_riscv(new MDRawContextRISCV());
+
+        // Set the context_flags member, which has already been read, and
+        // read the rest of the structure beginning with the first member
+        // after context_flags.
+        context_riscv->context_flags = context_flags;
+
+        size_t flags_size = sizeof(context_riscv->context_flags);
+        uint8_t* context_after_flags =
+            reinterpret_cast<uint8_t*>(context_riscv.get()) + flags_size;
+        if (!minidump_->ReadBytes(context_after_flags,
+                                  sizeof(MDRawContextRISCV) - flags_size)) {
+          BPLOG(ERROR) << "MinidumpContext could not read RISCV context";
+          return false;
+        }
+
+        // Do this after reading the entire MDRawContext structure because
+        // GetSystemInfo may seek minidump to a new position.
+        if (!CheckAgainstSystemInfo(cpu_type)) {
+          BPLOG(ERROR) << "MinidumpContext RISCV does not match system info";
+          return false;
+        }
+
+        if (minidump_->swap()) {
+          Swap(&context_riscv->pc);
+          Swap(&context_riscv->ra);
+          Swap(&context_riscv->sp);
+          Swap(&context_riscv->gp);
+          Swap(&context_riscv->tp);
+          Swap(&context_riscv->t0);
+          Swap(&context_riscv->t1);
+          Swap(&context_riscv->t2);
+          Swap(&context_riscv->s0);
+          Swap(&context_riscv->s1);
+          Swap(&context_riscv->a0);
+          Swap(&context_riscv->a1);
+          Swap(&context_riscv->a2);
+          Swap(&context_riscv->a3);
+          Swap(&context_riscv->a4);
+          Swap(&context_riscv->a5);
+          Swap(&context_riscv->a6);
+          Swap(&context_riscv->a7);
+          Swap(&context_riscv->s2);
+          Swap(&context_riscv->s3);
+          Swap(&context_riscv->s4);
+          Swap(&context_riscv->s5);
+          Swap(&context_riscv->s6);
+          Swap(&context_riscv->s7);
+          Swap(&context_riscv->s8);
+          Swap(&context_riscv->s9);
+          Swap(&context_riscv->s10);
+          Swap(&context_riscv->s11);
+          Swap(&context_riscv->t3);
+          Swap(&context_riscv->t4);
+          Swap(&context_riscv->t5);
+          Swap(&context_riscv->t6);
+
+          for (int fpr_index = 0;
+               fpr_index < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT;
+               ++fpr_index) {
+            Swap(&context_riscv->float_save.regs[fpr_index]);
+          }
+          Swap(&context_riscv->float_save.fpcsr);
+        }
+        SetContextRISCV(context_riscv.release());
+
+        break;
+      }
+
+      case MD_CONTEXT_RISCV64: {
+        if (expected_size != sizeof(MDRawContextRISCV64)) {
+          BPLOG(ERROR) << "MinidumpContext RISCV64 size mismatch, "
+                       << expected_size
+                       << " != "
+                       << sizeof(MDRawContextRISCV64);
+          return false;
+        }
+
+        scoped_ptr<MDRawContextRISCV64> context_riscv64(
+            new MDRawContextRISCV64());
+
+        // Set the context_flags member, which has already been read, and
+        // read the rest of the structure beginning with the first member
+        // after context_flags.
+        context_riscv64->context_flags = context_flags;
+
+        size_t flags_size = sizeof(context_riscv64->context_flags);
+        uint8_t* context_after_flags =
+            reinterpret_cast<uint8_t*>(context_riscv64.get()) + flags_size;
+        if (!minidump_->ReadBytes(context_after_flags,
+                                  sizeof(MDRawContextRISCV64) - flags_size)) {
+          BPLOG(ERROR) << "MinidumpContext could not read RISCV context";
+          return false;
+        }
+
+        // Do this after reading the entire MDRawContext structure because
+        // GetSystemInfo may seek minidump to a new position.
+        if (!CheckAgainstSystemInfo(cpu_type)) {
+          BPLOG(ERROR) << "MinidumpContext RISCV does not match system info";
+          return false;
+        }
+
+        if (minidump_->swap()) {
+          Swap(&context_riscv64->pc);
+          Swap(&context_riscv64->ra);
+          Swap(&context_riscv64->sp);
+          Swap(&context_riscv64->gp);
+          Swap(&context_riscv64->tp);
+          Swap(&context_riscv64->t0);
+          Swap(&context_riscv64->t1);
+          Swap(&context_riscv64->t2);
+          Swap(&context_riscv64->s0);
+          Swap(&context_riscv64->s1);
+          Swap(&context_riscv64->a0);
+          Swap(&context_riscv64->a1);
+          Swap(&context_riscv64->a2);
+          Swap(&context_riscv64->a3);
+          Swap(&context_riscv64->a4);
+          Swap(&context_riscv64->a5);
+          Swap(&context_riscv64->a6);
+          Swap(&context_riscv64->a7);
+          Swap(&context_riscv64->s2);
+          Swap(&context_riscv64->s3);
+          Swap(&context_riscv64->s4);
+          Swap(&context_riscv64->s5);
+          Swap(&context_riscv64->s6);
+          Swap(&context_riscv64->s7);
+          Swap(&context_riscv64->s8);
+          Swap(&context_riscv64->s9);
+          Swap(&context_riscv64->s10);
+          Swap(&context_riscv64->s11);
+          Swap(&context_riscv64->t3);
+          Swap(&context_riscv64->t4);
+          Swap(&context_riscv64->t5);
+          Swap(&context_riscv64->t6);
+
+          for (int fpr_index = 0;
+               fpr_index < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT;
+               ++fpr_index) {
+            Swap(&context_riscv64->float_save.regs[fpr_index]);
+          }
+          Swap(&context_riscv64->float_save.fpcsr);
+        }
+        SetContextRISCV64(context_riscv64.release());
+
+        break;
+      }
+
       default: {
         // Unknown context type - Don't log as an error yet. Let the
         // caller work that out.
         BPLOG(INFO) << "MinidumpContext unknown context type " <<
           HexString(cpu_type);
         return false;
-        break;
       }
     }
     SetContextFlags(context_flags);
@@ -1204,6 +1408,11 @@ bool MinidumpContext::CheckAgainstSystemInfo(uint32_t context_cpu_type) {
         return_value = true;
       break;
 
+    case MD_CONTEXT_ARM64_OLD:
+      if (system_info_cpu_type == MD_CPU_ARCHITECTURE_ARM64_OLD)
+        return_value = true;
+      break;
+
     case MD_CONTEXT_MIPS:
       if (system_info_cpu_type == MD_CPU_ARCHITECTURE_MIPS)
         return_value = true;
@@ -1211,6 +1420,16 @@ bool MinidumpContext::CheckAgainstSystemInfo(uint32_t context_cpu_type) {
 
     case MD_CONTEXT_MIPS64:
       if (system_info_cpu_type == MD_CPU_ARCHITECTURE_MIPS64)
+        return_value = true;
+      break;
+
+    case MD_CONTEXT_RISCV:
+      if (system_info_cpu_type == MD_CPU_ARCHITECTURE_RISCV)
+       return_value = true;
+      break;
+
+    case MD_CONTEXT_RISCV64:
+      if (system_info_cpu_type == MD_CPU_ARCHITECTURE_RISCV64)
         return_value = true;
       break;
   }
@@ -1574,7 +1793,7 @@ MinidumpContext* MinidumpThread::GetContext() {
 }
 
 
-bool MinidumpThread::GetThreadID(uint32_t *thread_id) const {
+bool MinidumpThread::GetThreadID(uint32_t* thread_id) const {
   BPLOG_IF(ERROR, !thread_id) << "MinidumpThread::GetThreadID requires "
                                  "|thread_id|";
   assert(thread_id);
@@ -1794,6 +2013,229 @@ void MinidumpThreadList::Print() {
   }
 }
 
+//
+// MinidumpThreadName
+//
+
+MinidumpThreadName::MinidumpThreadName(Minidump* minidump)
+    : MinidumpObject(minidump),
+      thread_name_valid_(false),
+      thread_name_(),
+      name_(NULL) {}
+
+MinidumpThreadName::~MinidumpThreadName() {
+  delete name_;
+}
+
+bool MinidumpThreadName::Read() {
+  // Invalidate cached data.
+  delete name_;
+  name_ = NULL;
+
+  valid_ = false;
+
+  if (!minidump_->ReadBytes(&thread_name_, sizeof(thread_name_))) {
+    BPLOG(ERROR) << "MinidumpThreadName cannot read thread name";
+    return false;
+  }
+
+  if (minidump_->swap()) {
+    Swap(&thread_name_.thread_id);
+    Swap(&thread_name_.thread_name_rva);
+  }
+
+  thread_name_valid_ = true;
+  return true;
+}
+
+bool MinidumpThreadName::ReadAuxiliaryData() {
+  if (!thread_name_valid_) {
+    BPLOG(ERROR) << "Invalid MinidumpThreadName for ReadAuxiliaryData";
+    return false;
+  }
+
+  // On 32-bit systems, check that the RVA64 is within range (off_t is 32 bits).
+  if (thread_name_.thread_name_rva > numeric_limits<off_t>::max()) {
+    BPLOG(ERROR) << "MinidumpThreadName RVA64 out of range";
+    return false;
+  }
+
+  // Read the thread name.
+  const off_t thread_name_rva_offset =
+      static_cast<off_t>(thread_name_.thread_name_rva);
+  name_ = minidump_->ReadString(thread_name_rva_offset);
+  if (!name_) {
+    BPLOG(ERROR) << "MinidumpThreadName could not read name";
+    return false;
+  }
+
+  // At this point, we have enough info for the thread name to be valid.
+  valid_ = true;
+  return true;
+}
+
+bool MinidumpThreadName::GetThreadID(uint32_t* thread_id) const {
+  BPLOG_IF(ERROR, !thread_id) << "MinidumpThreadName::GetThreadID requires "
+                                 "|thread_id|";
+  assert(thread_id);
+  *thread_id = 0;
+
+  if (!valid_) {
+    BPLOG(ERROR) << "Invalid MinidumpThreadName for GetThreadID";
+    return false;
+  }
+
+  *thread_id = thread_name_.thread_id;
+  return true;
+}
+
+string MinidumpThreadName::GetThreadName() const {
+  if (!valid_) {
+    BPLOG(ERROR) << "Invalid MinidumpThreadName for GetThreadName";
+    return "";
+  }
+
+  return *name_;
+}
+
+void MinidumpThreadName::Print() {
+  if (!valid_) {
+    BPLOG(ERROR) << "MinidumpThreadName cannot print invalid data";
+    return;
+  }
+
+  printf("MDRawThreadName\n");
+  printf("  thread_id                   = 0x%x\n", thread_name_.thread_id);
+  printf("  thread_name_rva             = 0x%" PRIx64 "\n",
+         thread_name_.thread_name_rva);
+  printf("  thread_name                 = \"%s\"\n", GetThreadName().c_str());
+  printf("\n");
+}
+
+//
+// MinidumpThreadNameList
+//
+
+MinidumpThreadNameList::MinidumpThreadNameList(Minidump* minidump)
+    : MinidumpStream(minidump), thread_names_(NULL), thread_name_count_(0) {}
+
+MinidumpThreadNameList::~MinidumpThreadNameList() {
+  delete thread_names_;
+}
+
+bool MinidumpThreadNameList::Read(uint32_t expected_size) {
+  // Invalidate cached data.
+  delete thread_names_;
+  thread_names_ = NULL;
+  thread_name_count_ = 0;
+
+  valid_ = false;
+
+  uint32_t thread_name_count;
+  if (expected_size < sizeof(thread_name_count)) {
+    BPLOG(ERROR) << "MinidumpThreadNameList count size mismatch, "
+                 << expected_size << " < " << sizeof(thread_name_count);
+    return false;
+  }
+  if (!minidump_->ReadBytes(&thread_name_count, sizeof(thread_name_count))) {
+    BPLOG(ERROR) << "MinidumpThreadNameList cannot read thread name count";
+    return false;
+  }
+
+  if (minidump_->swap())
+    Swap(&thread_name_count);
+
+  if (thread_name_count >
+      numeric_limits<uint32_t>::max() / sizeof(MDRawThreadName)) {
+    BPLOG(ERROR) << "MinidumpThreadNameList thread name count "
+                 << thread_name_count << " would cause multiplication overflow";
+    return false;
+  }
+
+  if (expected_size !=
+      sizeof(thread_name_count) + thread_name_count * sizeof(MDRawThreadName)) {
+    BPLOG(ERROR) << "MinidumpThreadNameList size mismatch, " << expected_size
+                 << " != "
+                 << sizeof(thread_name_count) +
+                        thread_name_count * sizeof(MDRawThreadName);
+    return false;
+  }
+
+  if (thread_name_count > MinidumpThreadList::max_threads()) {
+    BPLOG(ERROR) << "MinidumpThreadNameList count " << thread_name_count
+                 << " exceeds maximum " << MinidumpThreadList::max_threads();
+    return false;
+  }
+
+  if (thread_name_count != 0) {
+    scoped_ptr<MinidumpThreadNames> thread_names(new MinidumpThreadNames(
+        thread_name_count, MinidumpThreadName(minidump_)));
+
+    for (unsigned int thread_name_index = 0;
+         thread_name_index < thread_name_count; ++thread_name_index) {
+      MinidumpThreadName* thread_name = &(*thread_names)[thread_name_index];
+
+      // Assume that the file offset is correct after the last read.
+      if (!thread_name->Read()) {
+        BPLOG(ERROR) << "MinidumpThreadNameList cannot read thread name "
+                     << thread_name_index << "/" << thread_name_count;
+        return false;
+      }
+    }
+
+    for (unsigned int thread_name_index = 0;
+         thread_name_index < thread_name_count; ++thread_name_index) {
+      MinidumpThreadName* thread_name = &(*thread_names)[thread_name_index];
+
+      if (!thread_name->ReadAuxiliaryData() && !thread_name->valid()) {
+        BPLOG(ERROR) << "MinidumpThreadNameList cannot read thread name "
+                     << thread_name_index << "/" << thread_name_count;
+        return false;
+      }
+    }
+
+    thread_names_ = thread_names.release();
+  }
+
+  thread_name_count_ = thread_name_count;
+
+  valid_ = true;
+  return true;
+}
+
+MinidumpThreadName* MinidumpThreadNameList::GetThreadNameAtIndex(
+    unsigned int index) const {
+  if (!valid_) {
+    BPLOG(ERROR) << "Invalid MinidumpThreadNameList for GetThreadNameAtIndex";
+    return NULL;
+  }
+
+  if (index >= thread_name_count_) {
+    BPLOG(ERROR) << "MinidumpThreadNameList index out of range: " << index
+                 << "/" << thread_name_count_;
+    return NULL;
+  }
+
+  return &(*thread_names_)[index];
+}
+
+void MinidumpThreadNameList::Print() {
+  if (!valid_) {
+    BPLOG(ERROR) << "MinidumpThreadNameList cannot print invalid data";
+    return;
+  }
+
+  printf("MinidumpThreadNameList\n");
+  printf("  thread_name_count = %d\n", thread_name_count_);
+  printf("\n");
+
+  for (unsigned int thread_name_index = 0;
+       thread_name_index < thread_name_count_; ++thread_name_index) {
+    printf("thread_name[%d]\n", thread_name_index);
+
+    (*thread_names_)[thread_name_index].Print();
+  }
+}
 
 //
 // MinidumpModule
@@ -1936,14 +2378,14 @@ string MinidumpModule::code_identifier() const {
   if (!has_debug_info_)
     return "";
 
-  MinidumpSystemInfo *minidump_system_info = minidump_->GetSystemInfo();
+  MinidumpSystemInfo* minidump_system_info = minidump_->GetSystemInfo();
   if (!minidump_system_info) {
     BPLOG(ERROR) << "MinidumpModule code_identifier requires "
                     "MinidumpSystemInfo";
     return "";
   }
 
-  const MDRawSystemInfo *raw_system_info = minidump_system_info->system_info();
+  const MDRawSystemInfo* raw_system_info = minidump_system_info->system_info();
   if (!raw_system_info) {
     BPLOG(ERROR) << "MinidumpModule code_identifier requires MDRawSystemInfo";
     return "";
@@ -1964,6 +2406,7 @@ string MinidumpModule::code_identifier() const {
     }
 
     case MD_OS_ANDROID:
+    case MD_OS_FUCHSIA:
     case MD_OS_LINUX: {
       // If ELF CodeView data is present, return the debug id.
       if (cv_record_ && cv_record_signature_ == MD_CVINFOELF_SIGNATURE) {
@@ -2055,7 +2498,7 @@ string MinidumpModule::debug_file() const {
     // No usable CodeView record.  Try the miscellaneous debug record.
     if (misc_record_) {
       const MDImageDebugMisc* misc_record =
-          reinterpret_cast<const MDImageDebugMisc *>(&(*misc_record_)[0]);
+          reinterpret_cast<const MDImageDebugMisc*>(&(*misc_record_)[0]);
       if (!misc_record->unicode) {
         // If it's not Unicode, just stuff it into the string.  It's unclear
         // if misc_record->data is 0-terminated, so use an explicit size.
@@ -2347,7 +2790,11 @@ const uint8_t* MinidumpModule::GetCVRecord(uint32_t* size) {
                         module_.cv_record.data_size;
         return NULL;
       }
-      // There's nothing to swap in CVInfoELF, it's just raw bytes.
+      if (minidump_->swap()) {
+        MDCVInfoELF* cv_record_elf =
+            reinterpret_cast<MDCVInfoELF*>(&(*cv_record)[0]);
+        Swap(&cv_record_elf->cv_signature);
+      }
     }
 
     // If the signature doesn't match something above, it's not something
@@ -2507,7 +2954,7 @@ void MinidumpModule::Print() {
          code_identifier().c_str());
 
   uint32_t cv_record_size;
-  const uint8_t *cv_record = GetCVRecord(&cv_record_size);
+  const uint8_t* cv_record = GetCVRecord(&cv_record_size);
   if (cv_record) {
     if (cv_record_signature_ == MD_CVINFOPDB70_SIGNATURE) {
       const MDCVInfoPDB70* cv_record_70 =
@@ -2611,7 +3058,11 @@ MinidumpModuleList::MinidumpModuleList(Minidump* minidump)
       range_map_(new RangeMap<uint64_t, unsigned int>()),
       modules_(NULL),
       module_count_(0) {
-  range_map_->SetEnableShrinkDown(minidump_->IsAndroid());
+  MDOSPlatform platform;
+  if (minidump_->GetPlatform(&platform) &&
+      (platform == MD_OS_ANDROID || platform == MD_OS_LINUX)) {
+    range_map_->SetMergeStrategy(MergeRangeStrategy::kTruncateLower);
+  }
 }
 
 
@@ -2875,16 +3326,12 @@ const MinidumpModule* MinidumpModuleList::GetModuleAtIndex(
 
 
 const CodeModules* MinidumpModuleList::Copy() const {
-  return new BasicCodeModules(this);
+  return new BasicCodeModules(this, range_map_->GetMergeStrategy());
 }
 
 vector<linked_ptr<const CodeModule> >
 MinidumpModuleList::GetShrunkRangeModules() const {
   return vector<linked_ptr<const CodeModule> >();
-}
-
-bool MinidumpModuleList::IsModuleShrinkEnabled() const {
-  return range_map_->IsShrinkDownEnabled();
 }
 
 void MinidumpModuleList::Print() {
@@ -3173,7 +3620,7 @@ bool MinidumpException::Read(uint32_t expected_size) {
 }
 
 
-bool MinidumpException::GetThreadID(uint32_t *thread_id) const {
+bool MinidumpException::GetThreadID(uint32_t* thread_id) const {
   BPLOG_IF(ERROR, !thread_id) << "MinidumpException::GetThreadID requires "
                                  "|thread_id|";
   assert(thread_id);
@@ -3443,6 +3890,10 @@ string MinidumpSystemInfo::GetOS() {
       os = "nacl";
       break;
 
+    case MD_OS_FUCHSIA:
+      os = "fuchsia";
+      break;
+
     default:
       BPLOG(ERROR) << "MinidumpSystemInfo unknown OS for platform " <<
                       HexString(system_info_.platform_id);
@@ -3488,7 +3939,16 @@ string MinidumpSystemInfo::GetCPU() {
       break;
 
     case MD_CPU_ARCHITECTURE_ARM64:
+    case MD_CPU_ARCHITECTURE_ARM64_OLD:
       cpu = "arm64";
+      break;
+
+    case MD_CPU_ARCHITECTURE_RISCV:
+      cpu = "riscv";
+      break;
+
+    case MD_CPU_ARCHITECTURE_RISCV64:
+      cpu = "riscv64";
       break;
 
     default:
@@ -3556,8 +4016,8 @@ void MinidumpSystemInfo::Print() {
   }
 
   printf("MDRawSystemInfo\n");
-  printf("  processor_architecture                     = 0x%x\n",
-         system_info_.processor_architecture);
+  printf("  processor_architecture                     = 0x%x (%s)\n",
+         system_info_.processor_architecture, GetCPU().c_str());
   printf("  processor_level                            = %d\n",
          system_info_.processor_level);
   printf("  processor_revision                         = 0x%x\n",
@@ -3572,8 +4032,8 @@ void MinidumpSystemInfo::Print() {
          system_info_.minor_version);
   printf("  build_number                               = %d\n",
          system_info_.build_number);
-  printf("  platform_id                                = 0x%x\n",
-         system_info_.platform_id);
+  printf("  platform_id                                = 0x%x (%s)\n",
+         system_info_.platform_id, GetOS().c_str());
   printf("  csd_version_rva                            = 0x%x\n",
          system_info_.csd_version_rva);
   printf("  suite_mask                                 = 0x%x\n",
@@ -3652,14 +4112,14 @@ string MinidumpUnloadedModule::code_identifier() const {
     return "";
   }
 
-  MinidumpSystemInfo *minidump_system_info = minidump_->GetSystemInfo();
+  MinidumpSystemInfo* minidump_system_info = minidump_->GetSystemInfo();
   if (!minidump_system_info) {
     BPLOG(ERROR) << "MinidumpUnloadedModule code_identifier requires "
                     "MinidumpSystemInfo";
     return "";
   }
 
-  const MDRawSystemInfo *raw_system_info = minidump_system_info->system_info();
+  const MDRawSystemInfo* raw_system_info = minidump_system_info->system_info();
   if (!raw_system_info) {
     BPLOG(ERROR) << "MinidumpUnloadedModule code_identifier requires "
                  << "MDRawSystemInfo";
@@ -3813,7 +4273,7 @@ MinidumpUnloadedModuleList::MinidumpUnloadedModuleList(Minidump* minidump)
     range_map_(new RangeMap<uint64_t, unsigned int>()),
     unloaded_modules_(NULL),
     module_count_(0) {
-  range_map_->SetEnableShrinkDown(true);
+  range_map_->SetMergeStrategy(MergeRangeStrategy::kTruncateLower);
 }
 
 MinidumpUnloadedModuleList::~MinidumpUnloadedModuleList() {
@@ -3991,16 +4451,12 @@ MinidumpUnloadedModuleList::GetModuleAtIndex(
 }
 
 const CodeModules* MinidumpUnloadedModuleList::Copy() const {
-  return new BasicCodeModules(this);
+  return new BasicCodeModules(this, range_map_->GetMergeStrategy());
 }
 
 vector<linked_ptr<const CodeModule>>
 MinidumpUnloadedModuleList::GetShrunkRangeModules() const {
   return vector<linked_ptr<const CodeModule> >();
-}
-
-bool MinidumpUnloadedModuleList::IsModuleShrinkEnabled() const {
-  return range_map_->IsShrinkDownEnabled();
 }
 
 
@@ -4313,7 +4769,7 @@ bool MinidumpBreakpadInfo::Read(uint32_t expected_size) {
 }
 
 
-bool MinidumpBreakpadInfo::GetDumpThreadID(uint32_t *thread_id) const {
+bool MinidumpBreakpadInfo::GetDumpThreadID(uint32_t* thread_id) const {
   BPLOG_IF(ERROR, !thread_id) << "MinidumpBreakpadInfo::GetDumpThreadID "
                                  "requires |thread_id|";
   assert(thread_id);
@@ -4334,7 +4790,7 @@ bool MinidumpBreakpadInfo::GetDumpThreadID(uint32_t *thread_id) const {
 }
 
 
-bool MinidumpBreakpadInfo::GetRequestingThreadID(uint32_t *thread_id)
+bool MinidumpBreakpadInfo::GetRequestingThreadID(uint32_t* thread_id)
     const {
   BPLOG_IF(ERROR, !thread_id) << "MinidumpBreakpadInfo::GetRequestingThreadID "
                                  "requires |thread_id|";
@@ -4652,7 +5108,7 @@ void MinidumpMemoryInfoList::Print() {
 // MinidumpLinuxMaps
 //
 
-MinidumpLinuxMaps::MinidumpLinuxMaps(Minidump *minidump)
+MinidumpLinuxMaps::MinidumpLinuxMaps(Minidump* minidump)
     : MinidumpObject(minidump) {
 }
 
@@ -4668,7 +5124,7 @@ void MinidumpLinuxMaps::Print() const {
 // MinidumpLinuxMapsList
 //
 
-MinidumpLinuxMapsList::MinidumpLinuxMapsList(Minidump *minidump)
+MinidumpLinuxMapsList::MinidumpLinuxMapsList(Minidump* minidump)
     : MinidumpStream(minidump),
       maps_(NULL),
       maps_count_(0) {
@@ -4683,7 +5139,7 @@ MinidumpLinuxMapsList::~MinidumpLinuxMapsList() {
   }
 }
 
-const MinidumpLinuxMaps *MinidumpLinuxMapsList::GetLinuxMapsForAddress(
+const MinidumpLinuxMaps* MinidumpLinuxMapsList::GetLinuxMapsForAddress(
     uint64_t address) const {
   if (!valid_ || (maps_ == NULL)) {
     BPLOG(ERROR) << "Invalid MinidumpLinuxMapsList for GetLinuxMapsForAddress";
@@ -4705,7 +5161,7 @@ const MinidumpLinuxMaps *MinidumpLinuxMapsList::GetLinuxMapsForAddress(
   return NULL;
 }
 
-const MinidumpLinuxMaps *MinidumpLinuxMapsList::GetLinuxMapsAtIndex(
+const MinidumpLinuxMaps* MinidumpLinuxMapsList::GetLinuxMapsAtIndex(
     unsigned int index) const {
   if (!valid_ || (maps_ == NULL)) {
     BPLOG(ERROR) << "Invalid MinidumpLinuxMapsList for GetLinuxMapsAtIndex";
@@ -4940,12 +5396,9 @@ void MinidumpCrashpadInfo::Print() {
          MDGUIDToString(crashpad_info_.report_id).c_str());
   printf("  client_id = %s\n",
          MDGUIDToString(crashpad_info_.client_id).c_str());
-  for (std::map<std::string, std::string>::const_iterator iterator =
-           simple_annotations_.begin();
-       iterator != simple_annotations_.end();
-       ++iterator) {
-    printf("  simple_annotations[\"%s\"] = %s\n",
-           iterator->first.c_str(), iterator->second.c_str());
+  for (const auto& annot : simple_annotations_) {
+    printf("  simple_annotations[\"%s\"] = %s\n", annot.first.c_str(),
+           annot.second.c_str());
   }
   for (uint32_t module_index = 0;
        module_index < module_crashpad_info_links_.size();
@@ -4954,23 +5407,18 @@ void MinidumpCrashpadInfo::Print() {
            module_index, module_crashpad_info_links_[module_index]);
     printf("  module_list[%d].version = %d\n",
            module_index, module_crashpad_info_[module_index].version);
-    for (uint32_t annotation_index = 0;
-         annotation_index <
-             module_crashpad_info_list_annotations_[module_index].size();
+    const auto& list_annots =
+        module_crashpad_info_list_annotations_[module_index];
+    for (uint32_t annotation_index = 0; annotation_index < list_annots.size();
          ++annotation_index) {
-      printf("  module_list[%d].list_annotations[%d] = %s\n",
-             module_index,
-             annotation_index,
-             module_crashpad_info_list_annotations_
-                 [module_index][annotation_index].c_str());
+      printf("  module_list[%d].list_annotations[%d] = %s\n", module_index,
+             annotation_index, list_annots[annotation_index].c_str());
     }
-    for (std::map<std::string, std::string>::const_iterator iterator =
-             module_crashpad_info_simple_annotations_[module_index].begin();
-         iterator !=
-             module_crashpad_info_simple_annotations_[module_index].end();
-         ++iterator) {
+    const auto& simple_annots =
+        module_crashpad_info_simple_annotations_[module_index];
+    for (const auto& annot : simple_annots) {
       printf("  module_list[%d].simple_annotations[\"%s\"] = %s\n",
-             module_index, iterator->first.c_str(), iterator->second.c_str());
+             module_index, annot.first.c_str(), annot.second.c_str());
     }
   }
 
@@ -4994,6 +5442,7 @@ Minidump::Minidump(const string& path, bool hexdump, unsigned int hexdump_width)
       path_(path),
       stream_(NULL),
       swap_(false),
+      is_big_endian_(false),
       valid_(false),
       hexdump_(hexdump),
       hexdump_width_(hexdump_width) {
@@ -5006,6 +5455,7 @@ Minidump::Minidump(istream& stream)
       path_(),
       stream_(&stream),
       swap_(false),
+      is_big_endian_(false),
       valid_(false),
       hexdump_(false),
       hexdump_width_(0) {
@@ -5045,7 +5495,7 @@ bool Minidump::Open() {
   return true;
 }
 
-bool Minidump::GetContextCPUFlagsFromSystemInfo(uint32_t *context_cpu_flags) {
+bool Minidump::GetContextCPUFlagsFromSystemInfo(uint32_t* context_cpu_flags) {
   // Initialize output parameters
   *context_cpu_flags = 0;
 
@@ -5089,6 +5539,9 @@ bool Minidump::GetContextCPUFlagsFromSystemInfo(uint32_t *context_cpu_flags) {
       case MD_CPU_ARCHITECTURE_ARM64:
         *context_cpu_flags = MD_CONTEXT_ARM64;
         break;
+      case MD_CPU_ARCHITECTURE_ARM64_OLD:
+        *context_cpu_flags = MD_CONTEXT_ARM64_OLD;
+        break;
       case MD_CPU_ARCHITECTURE_IA64:
         *context_cpu_flags = MD_CONTEXT_IA64;
         break;
@@ -5106,6 +5559,12 @@ bool Minidump::GetContextCPUFlagsFromSystemInfo(uint32_t *context_cpu_flags) {
         break;
       case MD_CPU_ARCHITECTURE_SPARC:
         *context_cpu_flags = MD_CONTEXT_SPARC;
+        break;
+      case MD_CPU_ARCHITECTURE_RISCV:
+        *context_cpu_flags = MD_CONTEXT_RISCV;
+        break;
+      case MD_CPU_ARCHITECTURE_RISCV64:
+        *context_cpu_flags = MD_CONTEXT_RISCV64;
         break;
       case MD_CPU_ARCHITECTURE_UNKNOWN:
         *context_cpu_flags = 0;
@@ -5160,6 +5619,13 @@ bool Minidump::Read() {
     // if the object is being reused?)
     swap_ = false;
   }
+
+#if defined(__BIG_ENDIAN__) || \
+  (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+  is_big_endian_ = !swap_;
+#else
+  is_big_endian_ = swap_;
+#endif
 
   BPLOG(INFO) << "Minidump " << (swap_ ? "" : "not ") <<
                  "byte-swapping minidump";
@@ -5221,6 +5687,7 @@ bool Minidump::Read() {
       unsigned int stream_type = directory_entry->stream_type;
       switch (stream_type) {
         case MD_THREAD_LIST_STREAM:
+        case MD_THREAD_NAME_LIST_STREAM:
         case MD_MODULE_LIST_STREAM:
         case MD_MEMORY_LIST_STREAM:
         case MD_EXCEPTION_STREAM:
@@ -5259,6 +5726,10 @@ MinidumpThreadList* Minidump::GetThreadList() {
   return GetStream(&thread_list);
 }
 
+MinidumpThreadNameList* Minidump::GetThreadNameList() {
+  MinidumpThreadNameList* thread_name_list;
+  return GetStream(&thread_name_list);
+}
 
 MinidumpModuleList* Minidump::GetModuleList() {
   MinidumpModuleList* module_list;
@@ -5311,12 +5782,17 @@ MinidumpMemoryInfoList* Minidump::GetMemoryInfoList() {
   return GetStream(&memory_info_list);
 }
 
-MinidumpLinuxMapsList *Minidump::GetLinuxMapsList() {
-  MinidumpLinuxMapsList *linux_maps_list;
+MinidumpLinuxMapsList* Minidump::GetLinuxMapsList() {
+  MinidumpLinuxMapsList* linux_maps_list;
   return GetStream(&linux_maps_list);
 }
 
 bool Minidump::IsAndroid() {
+  MDOSPlatform platform;
+  return GetPlatform(&platform) && platform == MD_OS_ANDROID;
+}
+
+bool Minidump::GetPlatform(MDOSPlatform* platform) {
   // Save the current stream position
   off_t saved_position = Tell();
   if (saved_position == -1) {
@@ -5331,7 +5807,11 @@ bool Minidump::IsAndroid() {
     return false;
   }
 
-  return system_info && system_info->platform_id == MD_OS_ANDROID;
+  if (!system_info) {
+    return false;
+  }
+  *platform = static_cast<MDOSPlatform>(system_info->platform_id);
+  return true;
 }
 
 MinidumpCrashpadInfo* Minidump::GetCrashpadInfo() {
@@ -5349,6 +5829,8 @@ static const char* get_stream_name(uint32_t stream_type) {
     return "MD_RESERVED_STREAM_1";
   case MD_THREAD_LIST_STREAM:
     return "MD_THREAD_LIST_STREAM";
+  case MD_THREAD_NAME_LIST_STREAM:
+    return "MD_THREAD_NAME_LIST_STREAM";
   case MD_MODULE_LIST_STREAM:
     return "MD_MODULE_LIST_STREAM";
   case MD_MEMORY_LIST_STREAM:

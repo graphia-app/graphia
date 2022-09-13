@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -46,15 +45,31 @@
 #define CPU_SUBTYPE_ARM64_ALL (static_cast<cpu_subtype_t>(0))
 #endif  // CPU_SUBTYPE_ARM64_ALL
 
+#ifndef CPU_SUBTYPE_ARM64_E
+#define CPU_SUBTYPE_ARM64_E (static_cast<cpu_subtype_t>(2))
+#endif  // CPU_SUBTYPE_ARM64_E
+
 namespace {
 
-const NXArchInfo* ArchInfo_arm64() {
+const NXArchInfo* ArchInfo_arm64(cpu_subtype_t cpu_subtype) {
+  const char* name = NULL;
+  switch (cpu_subtype) {
+    case CPU_SUBTYPE_ARM64_ALL:
+      name = "arm64";
+      break;
+    case CPU_SUBTYPE_ARM64_E:
+      name = "arm64e";
+      break;
+    default:
+      return NULL;
+  }
+
   NXArchInfo* arm64 = new NXArchInfo;
   *arm64 = *NXGetArchInfoFromCpuType(CPU_TYPE_ARM,
                                      CPU_SUBTYPE_ARM_V7);
-  arm64->name = "arm64";
+  arm64->name = name;
   arm64->cputype = CPU_TYPE_ARM64;
-  arm64->cpusubtype = CPU_SUBTYPE_ARM64_ALL;
+  arm64->cpusubtype = cpu_subtype;
   arm64->description = "arm 64";
   return arm64;
 }
@@ -79,6 +94,10 @@ const NXArchInfo* BreakpadGetArchInfoFromName(const char* arch_name) {
     return BreakpadGetArchInfoFromCpuType(CPU_TYPE_ARM64,
                                           CPU_SUBTYPE_ARM64_ALL);
 
+  if (!strcmp("arm64e", arch_name))
+    return BreakpadGetArchInfoFromCpuType(CPU_TYPE_ARM64,
+                                          CPU_SUBTYPE_ARM64_E);
+
   // TODO: Remove this when the OS knows about armv7s.
   if (!strcmp("armv7s", arch_name))
     return BreakpadGetArchInfoFromCpuType(CPU_TYPE_ARM, CPU_SUBTYPE_ARM_V7S);
@@ -90,8 +109,13 @@ const NXArchInfo* BreakpadGetArchInfoFromCpuType(cpu_type_t cpu_type,
                                                  cpu_subtype_t cpu_subtype) {
   // TODO: Remove this when the OS knows about arm64.
   if (cpu_type == CPU_TYPE_ARM64 && cpu_subtype == CPU_SUBTYPE_ARM64_ALL) {
-    static const NXArchInfo* arm64 = ArchInfo_arm64();
+    static const NXArchInfo* arm64 = ArchInfo_arm64(cpu_subtype);
     return arm64;
+  }
+
+  if (cpu_type == CPU_TYPE_ARM64 && cpu_subtype == CPU_SUBTYPE_ARM64_E) {
+    static const NXArchInfo* arm64e = ArchInfo_arm64(cpu_subtype);
+    return arm64e;
   }
 
   // TODO: Remove this when the OS knows about armv7s.
@@ -105,7 +129,10 @@ const NXArchInfo* BreakpadGetArchInfoFromCpuType(cpu_type_t cpu_type,
 
 }  // namespace google_breakpad
 
-#ifndef __APPLE__
+// TODO(crbug.com/1242776): The "#ifndef __APPLE__" should be here, but the
+// system version of NXGetLocalArchInfo returns incorrect information on
+// x86_64 machines (treating them as just x86), so use the Breakpad version
+// all the time for now.
 namespace {
 
 enum Architecture {
@@ -114,6 +141,7 @@ enum Architecture {
   kArch_x86_64h,
   kArch_arm,
   kArch_arm64,
+  kArch_arm64e,
   kArch_ppc,
   // This must be last.
   kNumArchitectures
@@ -158,6 +186,13 @@ const NXArchInfo kKnownArchitectures[] = {
     "ARM64"
   },
   {
+    "arm64e",
+    CPU_TYPE_ARM64,
+    CPU_SUBTYPE_ARM64_E,
+    NX_LittleEndian,
+    "ARM64e"
+  },
+  {
     "ppc",
     CPU_TYPE_POWERPC,
     CPU_SUBTYPE_POWERPC_ALL,
@@ -185,6 +220,8 @@ const NXArchInfo *NXGetLocalArchInfo(void) {
 #endif
   return &kKnownArchitectures[arch];
 }
+
+#ifndef __APPLE__
 
 const NXArchInfo *NXGetArchInfoFromName(const char *name) {
   for (int arch = 0; arch < kNumArchitectures; ++arch) {

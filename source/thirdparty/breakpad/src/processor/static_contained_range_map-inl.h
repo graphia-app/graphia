@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -47,7 +46,7 @@ StaticContainedRangeMap<AddressType, EntryType>::StaticContainedRangeMap(
     const char *base)
     : base_(*(reinterpret_cast<const AddressType*>(base))),
       entry_size_(*(reinterpret_cast<const uint32_t*>(base + sizeof(base_)))),
-      entry_ptr_(reinterpret_cast<const EntryType *>(
+      entry_ptr_(reinterpret_cast<const EntryType*>(
           base + sizeof(base_) + sizeof(entry_size_))),
       map_(base + sizeof(base_) + sizeof(entry_size_) + entry_size_) {
   if (entry_size_ == 0)
@@ -57,7 +56,7 @@ StaticContainedRangeMap<AddressType, EntryType>::StaticContainedRangeMap(
 
 template<typename AddressType, typename EntryType>
 bool StaticContainedRangeMap<AddressType, EntryType>::RetrieveRange(
-    const AddressType &address, const EntryType *&entry) const {
+    const AddressType& address, const EntryType*& entry) const {
 
   // Get an iterator to the child range whose high address is equal to or
   // greater than the supplied address.  If the supplied address is higher
@@ -84,6 +83,23 @@ bool StaticContainedRangeMap<AddressType, EntryType>::RetrieveRange(
   if (!child_map.RetrieveRange(address, entry))
     entry = child_map.entry_ptr_;
 
+  return true;
+}
+
+template <typename AddressType, typename EntryType>
+bool StaticContainedRangeMap<AddressType, EntryType>::RetrieveRanges(
+    const AddressType& address,
+    std::vector<const EntryType*>& entries) const {
+  MapConstIterator iterator = map_.lower_bound(address);
+  if (iterator == map_.end())
+    return false;
+  const char* memory_child =
+      reinterpret_cast<const char*>(iterator.GetValuePtr());
+  StaticContainedRangeMap child_map(memory_child);
+  if (address < child_map.base_)
+    return false;
+  child_map.RetrieveRanges(address, entries);
+  entries.push_back(child_map.entry_ptr_);
   return true;
 }
 

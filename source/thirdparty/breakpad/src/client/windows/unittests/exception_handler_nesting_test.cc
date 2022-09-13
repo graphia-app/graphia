@@ -1,5 +1,4 @@
-// Copyright 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -49,7 +48,7 @@ const char kFilterReturnsFalse[] = "filter_returns_false";
 const char kCallbackReturnsTrue[] = "callback_returns_true";
 const char kCallbackReturnsFalse[] = "callback_returns_false";
 
-bool DoesPathExist(const wchar_t *path_name) {
+bool DoesPathExist(const wchar_t* path_name) {
   DWORD flags = GetFileAttributes(path_name);
   if (flags == INVALID_FILE_ATTRIBUTES) {
     return false;
@@ -128,12 +127,12 @@ bool MinidumpWrittenCallback(const wchar_t* dump_path,
 }
 
 
-void DoCrash(const char *message) {
+void DoCrash(const char* message) {
   if (message) {
     fprintf(stderr, "%s", message);
     fflush(stderr);
   }
-  int *i = NULL;
+  int* i = NULL;
   (*i)++;
 
   ASSERT_TRUE(false);

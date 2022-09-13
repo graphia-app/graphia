@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -127,8 +126,8 @@ size_t DumpAnalysis::GetStreamImpl(ULONG stream_number, void** stream) const {
   return ret ? memory_list_size : 0;
 }
 
-bool DumpAnalysis::HasMemoryImpl(const void *addr_in, size_t structuresize,
-                                 void **structure) const {
+bool DumpAnalysis::HasMemoryImpl(const void* addr_in, size_t structuresize,
+                                 void** structure) const {
   uintptr_t address = reinterpret_cast<uintptr_t>(addr_in);
   MINIDUMP_MEMORY_LIST* memory_list = NULL;
   size_t memory_list_size = GetStream(MemoryListStream, &memory_list);

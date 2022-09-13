@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -52,7 +51,7 @@ const uintptr_t kExpectedFinalSp = 0;
 
 // Append the given value to the sp position of the stack represented
 // by memory.
-void AppendToMemory(uint8_t *memory, uintptr_t sp, uintptr_t data) {
+void AppendToMemory(uint8_t* memory, uintptr_t sp, uintptr_t data) {
   memcpy(memory + sp, &data, sizeof(data));
 }
 #endif
@@ -62,7 +61,7 @@ void AppendToMemory(uint8_t *memory, uintptr_t sp, uintptr_t data) {
 namespace google_breakpad {
 
 IosExceptionMinidumpGenerator::IosExceptionMinidumpGenerator(
-    NSException *exception)
+    NSException* exception)
     : MinidumpGenerator(mach_task_self(), 0) {
   return_addresses_ = [[exception callStackReturnAddresses] retain];
   SetExceptionInformation(kExceptionType,
@@ -76,7 +75,7 @@ IosExceptionMinidumpGenerator::~IosExceptionMinidumpGenerator() {
 }
 
 bool IosExceptionMinidumpGenerator::WriteCrashingContext(
-    MDLocationDescriptor *register_location) {
+    MDLocationDescriptor* register_location) {
 #ifdef HAS_ARM_SUPPORT
   return WriteCrashingContextARM(register_location);
 #elif defined(HAS_ARM64_SUPPORT)
@@ -89,12 +88,12 @@ bool IosExceptionMinidumpGenerator::WriteCrashingContext(
 
 #ifdef HAS_ARM_SUPPORT
 bool IosExceptionMinidumpGenerator::WriteCrashingContextARM(
-    MDLocationDescriptor *register_location) {
+    MDLocationDescriptor* register_location) {
   TypedMDRVA<MDRawContextARM> context(&writer_);
   if (!context.Allocate())
     return false;
   *register_location = context.location();
-  MDRawContextARM *context_ptr = context.get();
+  MDRawContextARM* context_ptr = context.get();
   memset(context_ptr, 0, sizeof(MDRawContextARM));
   context_ptr->context_flags = MD_CONTEXT_ARM_FULL;
   context_ptr->iregs[MD_CONTEXT_ARM_REG_IOS_FP] = kExpectedFinalFp;  // FP
@@ -107,14 +106,14 @@ bool IosExceptionMinidumpGenerator::WriteCrashingContextARM(
 
 #ifdef HAS_ARM64_SUPPORT
 bool IosExceptionMinidumpGenerator::WriteCrashingContextARM64(
-    MDLocationDescriptor *register_location) {
-  TypedMDRVA<MDRawContextARM64> context(&writer_);
+    MDLocationDescriptor* register_location) {
+  TypedMDRVA<MDRawContextARM64_Old> context(&writer_);
   if (!context.Allocate())
     return false;
   *register_location = context.location();
-  MDRawContextARM64 *context_ptr = context.get();
+  MDRawContextARM64_Old* context_ptr = context.get();
   memset(context_ptr, 0, sizeof(*context_ptr));
-  context_ptr->context_flags = MD_CONTEXT_ARM64_FULL;
+  context_ptr->context_flags = MD_CONTEXT_ARM64_FULL_OLD;
   context_ptr->iregs[MD_CONTEXT_ARM64_REG_FP] = kExpectedFinalFp;      // FP
   context_ptr->iregs[MD_CONTEXT_ARM64_REG_SP] = kExpectedFinalSp;      // SP
   context_ptr->iregs[MD_CONTEXT_ARM64_REG_LR] = GetLRFromException();  // LR
@@ -132,7 +131,7 @@ uintptr_t IosExceptionMinidumpGenerator::GetLRFromException() {
 }
 
 bool IosExceptionMinidumpGenerator::WriteExceptionStream(
-    MDRawDirectory *exception_stream) {
+    MDRawDirectory* exception_stream) {
 #if defined(HAS_ARM_SUPPORT) || defined(HAS_ARM64_SUPPORT)
   TypedMDRVA<MDRawExceptionStream> exception(&writer_);
 
@@ -141,7 +140,7 @@ bool IosExceptionMinidumpGenerator::WriteExceptionStream(
 
   exception_stream->stream_type = MD_EXCEPTION_STREAM;
   exception_stream->location = exception.location();
-  MDRawExceptionStream *exception_ptr = exception.get();
+  MDRawExceptionStream* exception_ptr = exception.get();
   exception_ptr->thread_id = pthread_mach_thread_np(pthread_self());
 
   // This naming is confusing, but it is the proper translation from
@@ -160,7 +159,7 @@ bool IosExceptionMinidumpGenerator::WriteExceptionStream(
 }
 
 bool IosExceptionMinidumpGenerator::WriteThreadStream(mach_port_t thread_id,
-                                                      MDRawThread *thread) {
+                                                      MDRawThread* thread) {
 #if defined(HAS_ARM_SUPPORT) || defined(HAS_ARM64_SUPPORT)
   if (pthread_mach_thread_np(pthread_self()) != thread_id)
     return MinidumpGenerator::WriteThreadStream(thread_id, thread);

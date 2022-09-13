@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -35,7 +34,7 @@
 namespace google_breakpad {
 
 // static
-wstring WindowsStringUtils::GetBaseName(const wstring &filename) {
+wstring WindowsStringUtils::GetBaseName(const wstring& filename) {
   wstring base_name(filename);
   size_t slash_pos = base_name.find_last_of(L"/\\");
   if (slash_pos != wstring::npos) {
@@ -45,7 +44,7 @@ wstring WindowsStringUtils::GetBaseName(const wstring &filename) {
 }
 
 // static
-bool WindowsStringUtils::safe_mbstowcs(const string &mbs, wstring *wcs) {
+bool WindowsStringUtils::safe_mbstowcs(const string& mbs, wstring* wcs) {
   assert(wcs);
 
   // First, determine the length of the destination buffer.
@@ -88,7 +87,7 @@ bool WindowsStringUtils::safe_mbstowcs(const string &mbs, wstring *wcs) {
 }
 
 // static
-bool WindowsStringUtils::safe_wcstombs(const wstring &wcs, string *mbs) {
+bool WindowsStringUtils::safe_wcstombs(const wstring& wcs, string* mbs) {
   assert(mbs);
 
   // First, determine the length of the destination buffer.

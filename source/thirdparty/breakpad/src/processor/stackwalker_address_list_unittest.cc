@@ -1,5 +1,4 @@
-// Copyright (c) 2013, Google Inc.
-// All rights reserved.
+// Copyright 2013 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -56,6 +55,7 @@ using google_breakpad::StackwalkerAddressList;
 using std::vector;
 using testing::_;
 using testing::AnyNumber;
+using testing::DoAll;
 using testing::Return;
 using testing::SetArgumentPointee;
 
@@ -94,9 +94,9 @@ class StackwalkerAddressListTest : public testing::Test {
 
   // Set the Breakpad symbol information that supplier should return for
   // MODULE to INFO.
-  void SetModuleSymbols(MockCodeModule *module, const string &info) {
+  void SetModuleSymbols(MockCodeModule* module, const string& info) {
     size_t buffer_size;
-    char *buffer = supplier.CopySymbolDataAndOwnTheCopy(info, &buffer_size);
+    char* buffer = supplier.CopySymbolDataAndOwnTheCopy(info, &buffer_size);
     EXPECT_CALL(supplier, GetCStringSymbolData(module, NULL, _, _, _))
       .WillRepeatedly(DoAll(SetArgumentPointee<3>(buffer),
                             SetArgumentPointee<4>(buffer_size),

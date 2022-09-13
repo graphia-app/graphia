@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -101,7 +100,7 @@ MinidumpFileWriter::~MinidumpFileWriter() {
     Close();
 }
 
-bool MinidumpFileWriter::Open(const char *path) {
+bool MinidumpFileWriter::Open(const char* path) {
   assert(file_ == -1);
 #if defined(__linux__) && __linux__
   file_ = sys_open(path, O_WRONLY | O_CREAT | O_EXCL, 0600);
@@ -145,9 +144,9 @@ bool MinidumpFileWriter::Close() {
   return result;
 }
 
-bool MinidumpFileWriter::CopyStringToMDString(const wchar_t *str,
+bool MinidumpFileWriter::CopyStringToMDString(const wchar_t* str,
                                               unsigned int length,
-                                              TypedMDRVA<MDString> *mdstring) {
+                                              TypedMDRVA<MDString>* mdstring) {
   bool result = true;
   if (sizeof(wchar_t) == sizeof(uint16_t)) {
     // Shortcut if wchar_t is the same size as MDString's buffer
@@ -178,9 +177,9 @@ bool MinidumpFileWriter::CopyStringToMDString(const wchar_t *str,
   return result;
 }
 
-bool MinidumpFileWriter::CopyStringToMDString(const char *str,
+bool MinidumpFileWriter::CopyStringToMDString(const char* str,
                                               unsigned int length,
-                                              TypedMDRVA<MDString> *mdstring) {
+                                              TypedMDRVA<MDString>* mdstring) {
   bool result = true;
   uint16_t out[2];
   int out_idx = 0;
@@ -205,9 +204,9 @@ bool MinidumpFileWriter::CopyStringToMDString(const char *str,
 }
 
 template <typename CharType>
-bool MinidumpFileWriter::WriteStringCore(const CharType *str,
+bool MinidumpFileWriter::WriteStringCore(const CharType* str,
                                          unsigned int length,
-                                         MDLocationDescriptor *location) {
+                                         MDLocationDescriptor* location) {
   assert(str);
   assert(location);
   // Calculate the mdstring length by either limiting to |length| as passed in
@@ -240,18 +239,18 @@ bool MinidumpFileWriter::WriteStringCore(const CharType *str,
   return result;
 }
 
-bool MinidumpFileWriter::WriteString(const wchar_t *str, unsigned int length,
-                 MDLocationDescriptor *location) {
+bool MinidumpFileWriter::WriteString(const wchar_t* str, unsigned int length,
+                                     MDLocationDescriptor* location) {
   return WriteStringCore(str, length, location);
 }
 
-bool MinidumpFileWriter::WriteString(const char *str, unsigned int length,
-                 MDLocationDescriptor *location) {
+bool MinidumpFileWriter::WriteString(const char* str, unsigned int length,
+                                     MDLocationDescriptor* location) {
   return WriteStringCore(str, length, location);
 }
 
-bool MinidumpFileWriter::WriteMemory(const void *src, size_t size,
-                                     MDMemoryDescriptor *output) {
+bool MinidumpFileWriter::WriteMemory(const void* src, size_t size,
+                                     MDMemoryDescriptor* output) {
   assert(src);
   assert(output);
   UntypedMDRVA mem(this);
@@ -307,7 +306,7 @@ MDRVA MinidumpFileWriter::Allocate(size_t size) {
   return current_position;
 }
 
-bool MinidumpFileWriter::Copy(MDRVA position, const void *src, ssize_t size) {
+bool MinidumpFileWriter::Copy(MDRVA position, const void* src, ssize_t size) {
   assert(src);
   assert(size);
   assert(file_ != -1);
@@ -340,7 +339,7 @@ bool UntypedMDRVA::Allocate(size_t size) {
   return position_ != MinidumpFileWriter::kInvalidMDRVA;
 }
 
-bool UntypedMDRVA::Copy(MDRVA pos, const void *src, size_t size) {
+bool UntypedMDRVA::Copy(MDRVA pos, const void* src, size_t size) {
   assert(src);
   assert(size);
   assert(pos + size <= position_ + size_);

@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -43,6 +42,15 @@
 #include "common/scoped_ptr.h"
 #include "common/using_std_string.h"
 #include "google_breakpad/common/minidump_format.h"
+
+#if !defined(__ARM_EABI__) && !defined(__mips__) && !defined(__riscv)
+// FP state is not part of user ABI for Linux ARM.
+// In case of MIPS and RISCV Linux FP state is already part of ucontext_t
+// so 'float_state' is not required.
+# define GOOGLE_BREAKPAD_CRASH_CONTEXT_HAS_FLOAT_STATE 1
+#else
+# define GOOGLE_BREAKPAD_CRASH_CONTEXT_HAS_FLOAT_STATE 0
+#endif
 
 namespace google_breakpad {
 
@@ -82,7 +90,7 @@ class ExceptionHandler {
   // attempting to write a minidump.  If a FilterCallback returns false,
   // Breakpad  will immediately report the exception as unhandled without
   // writing a minidump, allowing another handler the opportunity to handle it.
-  typedef bool (*FilterCallback)(void *context);
+  typedef bool (*FilterCallback)(void* context);
 
   // A callback function to run after the minidump has been written.
   // |descriptor| contains the file descriptor or file path containing the
@@ -192,10 +200,7 @@ class ExceptionHandler {
     siginfo_t siginfo;
     pid_t tid;  // the crashing thread.
     ucontext_t context;
-#if !defined(__ARM_EABI__) && !defined(__mips__)
-    // #ifdef this out because FP state is not part of user ABI for Linux ARM.
-    // In case of MIPS Linux FP state is already part of ucontext_t so
-    // 'float_state' is not required.
+#if GOOGLE_BREAKPAD_CRASH_CONTEXT_HAS_FLOAT_STATE
     fpstate_t float_state;
 #endif
   };
@@ -234,7 +239,7 @@ class ExceptionHandler {
   static void RestoreHandlersLocked();
 
   void PreresolveSymbols();
-  bool GenerateDump(CrashContext *context);
+  bool GenerateDump(CrashContext* context);
   void SendContinueSignalToChild();
   void WaitForContinueSignal();
 
@@ -273,8 +278,7 @@ class ExceptionHandler {
   AppMemoryList app_memory_list_;
 };
 
-
-typedef bool (*FirstChanceHandler)(int, void*, void*);
+typedef bool (*FirstChanceHandler)(int, siginfo_t*, void*);
 void SetFirstChanceExceptionHandler(FirstChanceHandler callback);
 
 }  // namespace google_breakpad

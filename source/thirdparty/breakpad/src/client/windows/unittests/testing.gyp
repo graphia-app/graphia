@@ -1,4 +1,4 @@
-# Copyright 2010 Google Inc. All rights reserved.
+# Copyright 2010 Google LLC
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 # copyright notice, this list of conditions and the following disclaimer
 # in the documentation and/or other materials provided with the
 # distribution.
-#     * Neither the name of Google Inc. nor the names of its
+#     * Neither the name of Google LLC nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
 #
@@ -53,9 +53,9 @@
         # Visual C++ implements variadic templates strangely, and
         # VC++2012 broke Google Test by lowering this value. See
         # http://stackoverflow.com/questions/12558327/google-test-in-visual-studio-2012
-        'defines': ['_VARIADIC_MAX=10'],
+        'defines': ['_VARIADIC_MAX=10', '_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING'],
       },
-      'defines': ['_VARIADIC_MAX=10'],
+      'defines': ['_VARIADIC_MAX=10', '_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING'],
     },
     {
       'target_name': 'gmock',
@@ -81,9 +81,9 @@
           '<(DEPTH)/testing/googlemock',
           '<(DEPTH)/testing',
         ],
-        'defines': ['_VARIADIC_MAX=10'],
+        'defines': ['_VARIADIC_MAX=10', '_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING'],
       },
-      'defines': ['_VARIADIC_MAX=10'],
+      'defines': ['_VARIADIC_MAX=10', '_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING'],
     },
 
   ],

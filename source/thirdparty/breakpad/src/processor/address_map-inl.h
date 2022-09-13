@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -45,8 +44,8 @@
 namespace google_breakpad {
 
 template<typename AddressType, typename EntryType>
-bool AddressMap<AddressType, EntryType>::Store(const AddressType &address,
-                                               const EntryType &entry) {
+bool AddressMap<AddressType, EntryType>::Store(const AddressType& address,
+                                               const EntryType& entry) {
   // Ensure that the specified address doesn't conflict with something already
   // in the map.
   if (map_.find(address) != map_.end()) {
@@ -61,8 +60,8 @@ bool AddressMap<AddressType, EntryType>::Store(const AddressType &address,
 
 template<typename AddressType, typename EntryType>
 bool AddressMap<AddressType, EntryType>::Retrieve(
-    const AddressType &address,
-    EntryType *entry, AddressType *entry_address) const {
+    const AddressType& address,
+    EntryType* entry, AddressType* entry_address) const {
   BPLOG_IF(ERROR, !entry) << "AddressMap::Retrieve requires |entry|";
   assert(entry);
 

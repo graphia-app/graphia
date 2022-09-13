@@ -1,4 +1,4 @@
-// Copyright 2010 Google Inc. All Rights Reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -72,7 +72,7 @@ namespace google_breakpad {
 template<typename Key>
 class DefaultCompare {
  public:
-  int operator()(const Key &k1, const Key &k2) const {
+  int operator()(const Key& k1, const Key& k2) const {
     if (k1 < k2) return -1;
     if (k1 == k2) return 0;
     return 1;
@@ -104,15 +104,15 @@ class StaticMap {
   }
 
   // Lookup operations.
-  iterator find(const Key &k) const;
+  iterator find(const Key& k) const;
 
   // lower_bound(k) searches in a sorted range for the first element that has a
   // key not less than the argument k.
-  iterator lower_bound(const Key &k) const;
+  iterator lower_bound(const Key& k) const;
 
   // upper_bound(k) searches in a sorted range for the first element that has a
   // key greater than the argument k.
-  iterator upper_bound(const Key &k) const;
+  iterator upper_bound(const Key& k) const;
 
   // Checks if the underlying memory data conforms to the predefined pattern:
   // first check the number of nodes is non-negative,

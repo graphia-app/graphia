@@ -1,5 +1,4 @@
-// Copyright (c) 2007, Google Inc.
-// All rights reserved.
+// Copyright 2007 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -41,7 +40,7 @@ class C {
 
   void f() { member_ = g(); }
   virtual int g() { return 2; }
-  static char* h(const C &that) { return 0; }
+  static char* h(const C& that) { return 0; }
 
  private:
   int member_;
@@ -53,12 +52,12 @@ static int i() {
 
 }  // namespace google_breakpad
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   google_breakpad::C object;
   object.set_member(google_breakpad::i());
   object.f();
   int value = object.g();
-  char *nothing = object.h(object);
+  char* nothing = object.h(object);
 
   return 0;
 }

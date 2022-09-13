@@ -1,5 +1,4 @@
-/* Copyright 2014, Google Inc.
-All rights reserved.
+/* Copyright 2014 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@ notice, this list of conditions and the following disclaimer.
 copyright notice, this list of conditions and the following disclaimer
 in the documentation and/or other materials provided with the
 distribution.
- * Neither the name of Google Inc. nor the names of its
+ * Neither the name of Google LLC nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
 
@@ -43,10 +42,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_SUBTYPE_ARM64_ALL 0
 #endif
 
+#ifndef CPU_SUBTYPE_ARM64_E
+#define CPU_SUBTYPE_ARM64_E 2
+#endif
+
 const cpu_type_t kCPU_TYPE_ARM = CPU_TYPE_ARM;
 const cpu_type_t kCPU_TYPE_ARM64 = CPU_TYPE_ARM64;
 
 const cpu_subtype_t kCPU_SUBTYPE_ARM64_ALL = CPU_SUBTYPE_ARM64_ALL;
+const cpu_subtype_t kCPU_SUBTYPE_ARM64_E = CPU_SUBTYPE_ARM64_E;
 const cpu_subtype_t kCPU_SUBTYPE_ARM_V7S = CPU_SUBTYPE_ARM_V7S;
 
 const char* GetNXArchInfoName(cpu_type_t cpu_type, cpu_subtype_t cpu_subtype) {

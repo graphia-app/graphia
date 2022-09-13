@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -49,6 +48,7 @@
 #include "third_party/lss/linux_syscall_support.h"
 
 namespace google_breakpad {
+namespace elf {
 
 // Used in a few places for backwards-compatibility.
 const size_t kMDGUIDSize = sizeof(MDGUID);
@@ -61,7 +61,7 @@ FileID::FileID(const char* path) : path_(path) {}
 // These functions are also used inside the crashed process, so be safe
 // and use the syscall/libc wrappers instead of direct syscalls or libc.
 
-static bool ElfClassBuildIDNoteIdentifier(const void *section, size_t length,
+static bool ElfClassBuildIDNoteIdentifier(const void* section, size_t length,
                                           wasteful_vector<uint8_t>& identifier) {
   static_assert(sizeof(ElfClass32::Nhdr) == sizeof(ElfClass64::Nhdr),
                 "Elf32_Nhdr and Elf64_Nhdr should be the same");
@@ -69,7 +69,7 @@ static bool ElfClassBuildIDNoteIdentifier(const void *section, size_t length,
 
   const void* section_end = reinterpret_cast<const char*>(section) + length;
   const Nhdr* note_header = reinterpret_cast<const Nhdr*>(section);
-  while (reinterpret_cast<const void *>(note_header) < section_end) {
+  while (reinterpret_cast<const void*>(note_header) < section_end) {
     if (note_header->n_type == NT_GNU_BUILD_ID)
       break;
     note_header = reinterpret_cast<const Nhdr*>(
@@ -77,7 +77,7 @@ static bool ElfClassBuildIDNoteIdentifier(const void *section, size_t length,
                   NOTE_PADDING(note_header->n_namesz) +
                   NOTE_PADDING(note_header->n_descsz));
   }
-  if (reinterpret_cast<const void *>(note_header) >= section_end ||
+  if (reinterpret_cast<const void*>(note_header) >= section_end ||
       note_header->n_descsz == 0) {
     return false;
   }
@@ -198,4 +198,5 @@ string FileID::ConvertIdentifierToString(
   return bytes_to_hex_string(&identifier[0], identifier.size());
 }
 
+}  // elf
 }  // namespace google_breakpad

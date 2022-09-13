@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -45,6 +44,7 @@ namespace google_breakpad {
 // with specific ELF bits.
 struct ElfClass32 {
   typedef Elf32_Addr Addr;
+  typedef Elf32_Dyn Dyn;
   typedef Elf32_Ehdr Ehdr;
   typedef Elf32_Nhdr Nhdr;
   typedef Elf32_Phdr Phdr;
@@ -62,6 +62,7 @@ struct ElfClass32 {
 
 struct ElfClass64 {
   typedef Elf64_Addr Addr;
+  typedef Elf64_Dyn Dyn;
   typedef Elf64_Ehdr Ehdr;
   typedef Elf64_Nhdr Nhdr;
   typedef Elf64_Phdr Phdr;
@@ -84,11 +85,11 @@ int ElfClass(const void* elf_base);
 // in the ELF binary data at |elf_mapped_base|. On success, returns true
 // and sets |*section_start| to point to the start of the section data,
 // and |*section_size| to the size of the section's data.
-bool FindElfSection(const void *elf_mapped_base,
-                    const char *section_name,
+bool FindElfSection(const void* elf_mapped_base,
+                    const char* section_name,
                     uint32_t section_type,
-                    const void **section_start,
-                    size_t *section_size);
+                    const void** section_start,
+                    size_t* section_size);
 
 // Internal helper method, exposed for convenience for callers
 // that already have more info.
@@ -121,6 +122,12 @@ template<typename ElfClass, typename T>
 const T*
 GetOffset(const typename ElfClass::Ehdr* elf_header,
           typename ElfClass::Off offset);
+
+// Read the value of DT_SONAME from the elf file mapped at |elf_base|. Returns
+// true and fills |soname| with the result if found.
+bool ElfFileSoNameFromMappedFile(const void* elf_base,
+                                 char* soname,
+                                 size_t soname_size);
 
 }  // namespace google_breakpad
 

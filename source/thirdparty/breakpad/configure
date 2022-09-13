@@ -628,16 +628,14 @@ LTLIBOBJS
 LIBOBJS
 TESTS_AS_ROOT_FALSE
 TESTS_AS_ROOT_TRUE
-RUST_DEMANGLE_LIBS
-RUST_DEMANGLE_CFLAGS
+RUSTC_DEMANGLE_LIBS
+RUSTC_DEMANGLE_CFLAGS
 SELFTEST_FALSE
 SELFTEST_TRUE
 GTEST_LIBS
 GTEST_CFLAGS
-GTEST_CONFIG
 GMOCK_LIBS
 GMOCK_CFLAGS
-GMOCK_CONFIG
 SYSTEM_TEST_LIBS_FALSE
 SYSTEM_TEST_LIBS_TRUE
 DISABLE_TOOLS_FALSE
@@ -652,6 +650,10 @@ LINUX_HOST_FALSE
 LINUX_HOST_TRUE
 WARN_CXXFLAGS
 HAVE_CXX11
+HAVE_MEMFD_CREATE_FALSE
+HAVE_MEMFD_CREATE_TRUE
+HAVE_GETCONTEXT_FALSE
+HAVE_GETCONTEXT_TRUE
 PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
@@ -678,7 +680,6 @@ am__nodep
 AMDEPBACKSLASH
 AMDEP_FALSE
 AMDEP_TRUE
-am__quote
 am__include
 DEPDIR
 OBJEXT
@@ -697,6 +698,9 @@ AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
 AM_V
+CSCOPE
+ETAGS
+CTAGS
 am__untar
 am__tar
 AMTAR
@@ -747,6 +751,7 @@ infodir
 docdir
 oldincludedir
 includedir
+runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -765,7 +770,8 @@ PACKAGE_VERSION
 PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
-SHELL'
+SHELL
+am__quote'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
@@ -778,7 +784,8 @@ enable_processor
 enable_tools
 enable_system_test_libs
 enable_selftest
-with_rust_demangle
+with_rustc_demangle
+enable_system_rustc_demangle
 with_tests_as_root
 '
       ac_precious_vars='build_alias
@@ -795,14 +802,12 @@ CPP
 CXX
 CXXFLAGS
 CCC
-GMOCK_CONFIG
 GMOCK_CFLAGS
 GMOCK_LIBS
-GTEST_CONFIG
 GTEST_CFLAGS
 GTEST_LIBS
-RUST_DEMANGLE_CFLAGS
-RUST_DEMANGLE_LIBS'
+RUSTC_DEMANGLE_CFLAGS
+RUSTC_DEMANGLE_LIBS'
 
 
 # Initialize some variables set by options.
@@ -841,6 +846,7 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
+runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1093,6 +1099,15 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
+  -runstatedir | --runstatedir | --runstatedi | --runstated \
+  | --runstate | --runstat | --runsta | --runst | --runs \
+  | --run | --ru | --r)
+    ac_prev=runstatedir ;;
+  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+  | --run=* | --ru=* | --r=*)
+    runstatedir=$ac_optarg ;;
+
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1230,7 +1245,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir
+		libdir localedir mandir runstatedir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1383,6 +1398,7 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1439,12 +1455,18 @@ Optional Features:
                           the local copies (default is local)
   --enable-selftest       Run extra tests with "make check" (may conflict with
                           optimizations) (default is no)
+  --enable-system-rustc-demangle
+                          Link against the rustc-demangle library to demangle
+                          Rust language symbols during symbol dumping (default
+                          is no). This assumes that rustc-demangle is
+                          installed in your sysroot, and all headers from it
+                          are available in your standard include path
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-rust-demangle=/path/to/rust-demangle-capi
-                          Link against the rust-demangle library to demangle
+  --with-rustc-demangle=/path/to/rustc-demangle
+                          Link against the rustc-demangle library to demangle
                           Rust language symbols during symbol dumping (default
                           is no) Pass the path to the crate root.
   --with-tests-as-root    Run the tests as root. Use this on platforms like
@@ -1464,20 +1486,16 @@ Some influential environment variables:
   CPP         C preprocessor
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
-  GMOCK_CONFIG
-              Path to gmock-config script
   GMOCK_CFLAGS
               Compiler flags for gmock
   GMOCK_LIBS  Linker flags for gmock
-  GTEST_CONFIG
-              Path to gtest-config script
   GTEST_CFLAGS
               Compiler flags for gtest
   GTEST_LIBS  Linker flags for gtest
-  RUST_DEMANGLE_CFLAGS
-              Compiler flags for rust-demangle
-  RUST_DEMANGLE_LIBS
-              Linker flags for rust-demangle
+  RUSTC_DEMANGLE_CFLAGS
+              Compiler flags for rustc-demangle
+  RUSTC_DEMANGLE_LIBS
+              Linker flags for rustc-demangle
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -2403,7 +2421,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
-am__api_version='1.15'
+am__api_version='1.16'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -2579,12 +2597,7 @@ program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 am_aux_dir=`cd "$ac_aux_dir" && pwd`
 
 if test x"${MISSING+set}" != xset; then
-  case $am_aux_dir in
-  *\ * | *\	*)
-    MISSING="\${SHELL} \"$am_aux_dir/missing\"" ;;
-  *)
-    MISSING="\${SHELL} $am_aux_dir/missing" ;;
-  esac
+  MISSING="\${SHELL} '$am_aux_dir/missing'"
 fi
 # Use eval to expand $SHELL
 if eval "$MISSING --is-lightweight"; then
@@ -2919,8 +2932,8 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 
 # For better backward compatibility.  To be removed once Automake 1.9.x
 # dies out for good.  For more background, see:
-# <http://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
-# <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
+# <https://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
+# <https://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 mkdir_p='$(MKDIR_P)'
 
 # We need awk for the "check" target (and possibly the TAP driver).  The
@@ -3055,6 +3068,20 @@ $as_echo "$am_cv_prog_tar_ustar" >&6; }
 
 
 
+# Variables for tags utilities; see am/tags.am
+if test -z "$CTAGS"; then
+  CTAGS=ctags
+fi
+
+if test -z "$ETAGS"; then
+  ETAGS=etags
+fi
+
+if test -z "$CSCOPE"; then
+  CSCOPE=cscope
+fi
+
+
 
 # POSIX will say in a future version that running "rm -f" with no argument
 # is OK; and we want to be able to make that assumption in our Makefile
@@ -3087,7 +3114,7 @@ END
 Aborting the configuration process, to ensure you take notice of the issue.
 
 You can download and install GNU coreutils to get an 'rm' implementation
-that behaves properly: <http://www.gnu.org/software/coreutils/>.
+that behaves properly: <https://www.gnu.org/software/coreutils/>.
 
 If you want to complete the configuration process using your problematic
 'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
@@ -3128,45 +3155,45 @@ DEPDIR="${am__leading_dot}deps"
 
 ac_config_commands="$ac_config_commands depfiles"
 
-
-am_make=${MAKE-make}
-cat > confinc << 'END'
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${MAKE-make} supports the include directive" >&5
+$as_echo_n "checking whether ${MAKE-make} supports the include directive... " >&6; }
+cat > confinc.mk << 'END'
 am__doit:
-	@echo this is the am__doit target
+	@echo this is the am__doit target >confinc.out
 .PHONY: am__doit
 END
-# If we don't find an include directive, just comment out the code.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for style of include used by $am_make" >&5
-$as_echo_n "checking for style of include used by $am_make... " >&6; }
 am__include="#"
 am__quote=
-_am_result=none
-# First try GNU make style include.
-echo "include confinc" > confmf
-# Ignore all kinds of additional output from 'make'.
-case `$am_make -s -f confmf 2> /dev/null` in #(
-*the\ am__doit\ target*)
-  am__include=include
-  am__quote=
-  _am_result=GNU
-  ;;
-esac
-# Now try BSD make style include.
-if test "$am__include" = "#"; then
-   echo '.include "confinc"' > confmf
-   case `$am_make -s -f confmf 2> /dev/null` in #(
-   *the\ am__doit\ target*)
-     am__include=.include
-     am__quote="\""
-     _am_result=BSD
+# BSD make does it like this.
+echo '.include "confinc.mk" # ignored' > confmf.BSD
+# Other make implementations (GNU, Solaris 10, AIX) do it like this.
+echo 'include confinc.mk # ignored' > confmf.GNU
+_am_result=no
+for s in GNU BSD; do
+  { echo "$as_me:$LINENO: ${MAKE-make} -f confmf.$s && cat confinc.out" >&5
+   (${MAKE-make} -f confmf.$s && cat confinc.out) >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }
+  case $?:`cat confinc.out 2>/dev/null` in #(
+  '0:this is the am__doit target') :
+    case $s in #(
+  BSD) :
+    am__include='.include' am__quote='"' ;; #(
+  *) :
+    am__include='include' am__quote='' ;;
+esac ;; #(
+  *) :
      ;;
-   esac
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $_am_result" >&5
-$as_echo "$_am_result" >&6; }
-rm -f confinc confmf
+esac
+  if test "$am__include" != "#"; then
+    _am_result="yes ($s style)"
+    break
+  fi
+done
+rm -f confinc.* confmf.*
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${_am_result}" >&5
+$as_echo "${_am_result}" >&6; }
 
 # Check whether --enable-dependency-tracking was given.
 if test "${enable_dependency_tracking+set}" = set; then :
@@ -5812,23 +5839,15 @@ fi
 
 # Check whether --enable-m32 was given.
 if test "${enable_m32+set}" = set; then :
-  enableval=$enable_m32; case "${enableval}" in
-                 yes)
-                   CFLAGS="${CFLAGS} -m32"
-                   CXXFLAGS="${CXXFLAGS} -m32"
-                   usem32=true
-                   ;;
-                 no)
-                   usem32=false
-                   ;;
-                 *)
-                   as_fn_error $? "bad value ${enableval} for --enable-m32" "$LINENO" 5
-                   ;;
-               esac
+  enableval=$enable_m32;
 else
-  usem32=false
+  enable_m32=no
 fi
 
+if test "x$enable_m32" = xyes; then
+  CFLAGS="${CFLAGS} -m32"
+  CXXFLAGS="${CXXFLAGS} -m32"
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
@@ -6645,7 +6664,7 @@ fi
 done
 
 
-for ac_header in a.out.h sys/random.h
+for ac_header in a.out.h sys/mman.h sys/random.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6658,7 +6677,7 @@ fi
 
 done
 
-for ac_func in arc4random getrandom
+for ac_func in arc4random getcontext getrandom memfd_create
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -6669,6 +6688,22 @@ _ACEOF
 
 fi
 done
+
+ if test "x$ac_cv_func_getcontext" = xyes; then
+  HAVE_GETCONTEXT_TRUE=
+  HAVE_GETCONTEXT_FALSE='#'
+else
+  HAVE_GETCONTEXT_TRUE='#'
+  HAVE_GETCONTEXT_FALSE=
+fi
+
+ if test "x$ac_cv_func_memfd_create" = xyes; then
+  HAVE_MEMFD_CREATE_TRUE=
+  HAVE_MEMFD_CREATE_FALSE='#'
+else
+  HAVE_MEMFD_CREATE_TRUE='#'
+  HAVE_MEMFD_CREATE_FALSE=
+fi
 
 
 
@@ -7548,22 +7583,12 @@ fi
 
 # Check whether --enable-processor was given.
 if test "${enable_processor+set}" = set; then :
-  enableval=$enable_processor; case "${enableval}" in
-                 yes)
-                   disable_processor=false
-                   ;;
-                 no)
-                   disable_processor=true
-                   ;;
-                 *)
-                   as_fn_error $? "bad value ${enableval} for --disable-processor" "$LINENO" 5
-                   ;;
-               esac
+  enableval=$enable_processor;
 else
-  disable_processor=false
+  enable_processor=yes
 fi
 
- if test x$disable_processor = xtrue; then
+ if test "x$enable_processor" != xyes; then
   DISABLE_PROCESSOR_TRUE=
   DISABLE_PROCESSOR_FALSE='#'
 else
@@ -7574,22 +7599,12 @@ fi
 
 # Check whether --enable-tools was given.
 if test "${enable_tools+set}" = set; then :
-  enableval=$enable_tools; case "${enableval}" in
-                 yes)
-                   disable_tools=false
-                   ;;
-                 no)
-                   disable_tools=true
-                   ;;
-                 *)
-                   as_fn_error $? "bad value ${enableval} for --disable-tools" "$LINENO" 5
-                   ;;
-               esac
+  enableval=$enable_tools;
 else
-  disable_tools=false
+  enable_tools=yes
 fi
 
- if test x$disable_tools = xtrue; then
+ if test "x$enable_tools" != xyes; then
   DISABLE_TOOLS_TRUE=
   DISABLE_TOOLS_FALSE='#'
 else
@@ -7598,28 +7613,18 @@ else
 fi
 
 
-if test x$LINUX_HOST = xfalse -a x$disable_processor = xtrue -a x$disable_tools = xtrue; then
-   as_fn_error $? "--disable-processor and --disable-tools were specified, and not building for Linux. Nothing to build!" "$LINENO" 5
+if test x$LINUX_HOST = xfalse -a "x$enable_processor" != xyes -a "x$enable_tools" != xyes; then
+  as_fn_error $? "--disable-processor and --disable-tools were specified, and not building for Linux. Nothing to build!" "$LINENO" 5
 fi
 
 # Check whether --enable-system-test-libs was given.
 if test "${enable_system_test_libs+set}" = set; then :
-  enableval=$enable_system_test_libs; case "${enableval}" in
-                 yes)
-                   system_test_libs=true
-                   ;;
-                 no)
-                   system_test_libs=false
-                   ;;
-                 *)
-                   as_fn_error $? "bad value ${enableval} for --enable-system-test-libs" "$LINENO" 5
-                   ;;
-               esac
+  enableval=$enable_system_test_libs;
 else
-  system_test_libs=false
+  enable_system_test_libs=no
 fi
 
- if test x$system_test_libs = xtrue; then
+ if test "x$enable_system_test_libs" = xyes; then
   SYSTEM_TEST_LIBS_TRUE=
   SYSTEM_TEST_LIBS_FALSE='#'
 else
@@ -7632,217 +7637,21 @@ fi
 
 
 
-
-
-if test x$system_test_libs = xtrue; then
-  if test -n "$ac_tool_prefix"; then
-  # Extract the first word of "${ac_tool_prefix}gmock-config", so it can be a program name with args.
-set dummy ${ac_tool_prefix}gmock-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_GMOCK_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$GMOCK_CONFIG"; then
-  ac_cv_prog_GMOCK_CONFIG="$GMOCK_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_GMOCK_CONFIG="${ac_tool_prefix}gmock-config"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-GMOCK_CONFIG=$ac_cv_prog_GMOCK_CONFIG
-if test -n "$GMOCK_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GMOCK_CONFIG" >&5
-$as_echo "$GMOCK_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-fi
-if test -z "$ac_cv_prog_GMOCK_CONFIG"; then
-  ac_ct_GMOCK_CONFIG=$GMOCK_CONFIG
-  # Extract the first word of "gmock-config", so it can be a program name with args.
-set dummy gmock-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_ac_ct_GMOCK_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$ac_ct_GMOCK_CONFIG"; then
-  ac_cv_prog_ac_ct_GMOCK_CONFIG="$ac_ct_GMOCK_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_ac_ct_GMOCK_CONFIG="gmock-config"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-ac_ct_GMOCK_CONFIG=$ac_cv_prog_ac_ct_GMOCK_CONFIG
-if test -n "$ac_ct_GMOCK_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ct_GMOCK_CONFIG" >&5
-$as_echo "$ac_ct_GMOCK_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-  if test "x$ac_ct_GMOCK_CONFIG" = x; then
-    GMOCK_CONFIG=""
-  else
-    case $cross_compiling:$ac_tool_warned in
-yes:)
-{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
-$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
-ac_tool_warned=yes ;;
-esac
-    GMOCK_CONFIG=$ac_ct_GMOCK_CONFIG
-  fi
-else
-  GMOCK_CONFIG="$ac_cv_prog_GMOCK_CONFIG"
-fi
-
-  if test -n "$ac_tool_prefix"; then
-  # Extract the first word of "${ac_tool_prefix}gtest-config", so it can be a program name with args.
-set dummy ${ac_tool_prefix}gtest-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_GTEST_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$GTEST_CONFIG"; then
-  ac_cv_prog_GTEST_CONFIG="$GTEST_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_GTEST_CONFIG="${ac_tool_prefix}gtest-config"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-GTEST_CONFIG=$ac_cv_prog_GTEST_CONFIG
-if test -n "$GTEST_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GTEST_CONFIG" >&5
-$as_echo "$GTEST_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-fi
-if test -z "$ac_cv_prog_GTEST_CONFIG"; then
-  ac_ct_GTEST_CONFIG=$GTEST_CONFIG
-  # Extract the first word of "gtest-config", so it can be a program name with args.
-set dummy gtest-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_ac_ct_GTEST_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$ac_ct_GTEST_CONFIG"; then
-  ac_cv_prog_ac_ct_GTEST_CONFIG="$ac_ct_GTEST_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_ac_ct_GTEST_CONFIG="gtest-config"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-ac_ct_GTEST_CONFIG=$ac_cv_prog_ac_ct_GTEST_CONFIG
-if test -n "$ac_ct_GTEST_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ct_GTEST_CONFIG" >&5
-$as_echo "$ac_ct_GTEST_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-  if test "x$ac_ct_GTEST_CONFIG" = x; then
-    GTEST_CONFIG=""
-  else
-    case $cross_compiling:$ac_tool_warned in
-yes:)
-{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
-$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
-ac_tool_warned=yes ;;
-esac
-    GTEST_CONFIG=$ac_ct_GTEST_CONFIG
-  fi
-else
-  GTEST_CONFIG="$ac_cv_prog_GTEST_CONFIG"
-fi
-
-  GMOCK_CFLAGS=`$GMOCK_CONFIG --cppflags --cxxflags`
-  GMOCK_LIBS=`$GMOCK_CONFIG --ldflags --libs`
-  GTEST_CFLAGS=`$GTEST_CONFIG --cppflags --cxxflags`
-  GTEST_LIBS=`$GTEST_CONFIG --ldflags --libs`
+if test "x$enable_system_test_libs" = xyes; then
+  : "${GMOCK_CFLAGS:=-pthread}"
+  : "${GMOCK_LIBS:=-lgmock -lgtest -pthread -lpthread}"
+  : "${GTEST_CFLAGS:=-pthread}"
+  : "${GTEST_LIBS:=-lgtest -pthread -lpthread}"
 fi
 
 # Check whether --enable-selftest was given.
 if test "${enable_selftest+set}" = set; then :
-  enableval=$enable_selftest; case "${enableval}" in
-                 yes)
-                   selftest=true
-                   ;;
-                 no)
-                   selftest=false
-                   ;;
-                 *)
-                   as_fn_error $? "bad value ${enableval} for --enable-selftest" "$LINENO" 5
-                   ;;
-               esac
+  enableval=$enable_selftest;
 else
-  selftest=false
+  enable_selftest=no
 fi
 
- if test x$selftest = xtrue; then
+ if test "x$enable_selftest" = xyes; then
   SELFTEST_TRUE=
   SELFTEST_FALSE='#'
 else
@@ -7852,25 +7661,102 @@ fi
 
 
 
-# Check whether --with-rust-demangle was given.
-if test "${with_rust_demangle+set}" = set; then :
-  withval=$with_rust_demangle; case "${withval}" in
-               yes)
-                 as_fn_error $? "You must pass the path to the rust-demangle-capi crate for --with-rust-demangle" "$LINENO" 5
-                 ;;
-               no)
-                 rust_demangle=false
-                 ;;
-               *)
-                 if ! test -f "${withval}/Cargo.toml"; then
-                   as_fn_error $? "You must pass the path to the rust-demangle-capi crate for --with-rust-demangle" "$LINENO" 5
-                 fi
-                 RUST_DEMANGLE_CFLAGS="-DHAVE_RUST_DEMANGLE -I${withval}/target/include"
-                 RUST_DEMANGLE_LIBS="-L${withval}/target/release -lrust_demangle -lpthread -ldl"
-                 ;;
-             esac
+# Check whether --with-rustc-demangle was given.
+if test "${with_rustc_demangle+set}" = set; then :
+  withval=$with_rustc_demangle;
 else
-  rust_demangle=false
+  with_rustc_demangle=no
+fi
+
+
+RUSTC_DEMANGLE_BASE_CFLAGS="-DHAVE_RUSTC_DEMANGLE"
+RUSTC_DEMANGLE_BASE_LIBS="-lrustc_demangle -lpthread -ldl"
+
+if test "x${with_rustc_demangle}" != xno; then
+  if ! test -f "${with_rustc_demangle}/Cargo.toml"; then
+    as_fn_error $? "You must pass the path to the rustc-demangle crate for --with-rustc-demangle" "$LINENO" 5
+  fi
+  RUSTC_DEMANGLE_CFLAGS="-I${with_rustc_demangle}/crates/capi/include ${RUSTC_DEMANGLE_BASE_CFLAGS}"
+  RUSTC_DEMANGLE_LIBS="-L${with_rustc_demangle}/target/release ${RUSTC_DEMANGLE_BASE_LIBS}"
+fi
+
+# Check whether --enable-system-rustc-demangle was given.
+if test "${enable_system_rustc_demangle+set}" = set; then :
+  enableval=$enable_system_rustc_demangle;
+else
+  enable_system_rustc_demangle=no
+fi
+
+
+if test "x${enable_system_rustc_demangle}" != xno; then
+  if test "x${with_rustc_demangle}" != xno; then
+    as_fn_error $? "--enable-system-rustc-demangle and --with-rustc-demangle are mutually exclusive." "$LINENO" 5
+  fi
+
+  RUSTC_DEMANGLE_CFLAGS="${RUSTC_DEMANGLE_BASE_CFLAGS}"
+  RUSTC_DEMANGLE_LIBS="${RUSTC_DEMANGLE_BASE_LIBS}"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for rustc_demangle in -lrustc_demangle" >&5
+$as_echo_n "checking for rustc_demangle in -lrustc_demangle... " >&6; }
+if ${ac_cv_lib_rustc_demangle_rustc_demangle+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lrustc_demangle $RUSTC_DEMANGLE_LIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char rustc_demangle ();
+int
+main ()
+{
+return rustc_demangle ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_rustc_demangle_rustc_demangle=yes
+else
+  ac_cv_lib_rustc_demangle_rustc_demangle=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_rustc_demangle_rustc_demangle" >&5
+$as_echo "$ac_cv_lib_rustc_demangle_rustc_demangle" >&6; }
+if test "x$ac_cv_lib_rustc_demangle_rustc_demangle" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBRUSTC_DEMANGLE 1
+_ACEOF
+
+  LIBS="-lrustc_demangle $LIBS"
+
+else
+  as_fn_error $? "librustc_demangle.a must be present when --enable-system-rustc-demangle is specified" "$LINENO" 5
+fi
+
+  for ac_header in rustc_demangle.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "rustc_demangle.h" "ac_cv_header_rustc_demangle_h" "$ac_includes_default"
+if test "x$ac_cv_header_rustc_demangle_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_RUSTC_DEMANGLE_H 1
+_ACEOF
+
+else
+  as_fn_error $? "rustc_demangle.h must be present when --enable-system-rustc-demangle is specified" "$LINENO" 5
+fi
+
+done
+
 fi
 
 
@@ -7879,22 +7765,12 @@ fi
 
 # Check whether --with-tests-as-root was given.
 if test "${with_tests_as_root+set}" = set; then :
-  withval=$with_tests_as_root; case "${withval}" in
-               yes)
-                 tests_as_root=true
-                 ;;
-               no)
-                 tests_as_root=false
-                 ;;
-               *)
-                 as_fn_error $? "--with-tests-as-root can only be \"yes\" or \"no\"" "$LINENO" 5
-                 ;;
-             esac
+  withval=$with_tests_as_root;
 else
-  tests_as_root=false
+  with_tests_as_root=no
 fi
 
- if test x$tests_as_root = xtrue; then
+ if test "x$with_tests_as_root" = xyes; then
   TESTS_AS_ROOT_TRUE=
   TESTS_AS_ROOT_FALSE='#'
 else
@@ -8052,6 +7928,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_GETCONTEXT_TRUE}" && test -z "${HAVE_GETCONTEXT_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_GETCONTEXT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_MEMFD_CREATE_TRUE}" && test -z "${HAVE_MEMFD_CREATE_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_MEMFD_CREATE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${LINUX_HOST_TRUE}" && test -z "${LINUX_HOST_FALSE}"; then
@@ -8668,7 +8552,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 #
 # INIT-COMMANDS
 #
-AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
+AMDEP_TRUE="$AMDEP_TRUE" MAKE="${MAKE-make}"
 
 _ACEOF
 
@@ -9282,29 +9166,35 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
   # Older Autoconf quotes --file arguments for eval, but not when files
   # are listed without --file.  Let's play safe and only enable the eval
   # if we detect the quoting.
-  case $CONFIG_FILES in
-  *\'*) eval set x "$CONFIG_FILES" ;;
-  *)   set x $CONFIG_FILES ;;
-  esac
+  # TODO: see whether this extra hack can be removed once we start
+  # requiring Autoconf 2.70 or later.
+  case $CONFIG_FILES in #(
+  *\'*) :
+    eval set x "$CONFIG_FILES" ;; #(
+  *) :
+    set x $CONFIG_FILES ;; #(
+  *) :
+     ;;
+esac
   shift
-  for mf
+  # Used to flag and report bootstrapping failures.
+  am_rc=0
+  for am_mf
   do
     # Strip MF so we end up with the name of the file.
-    mf=`echo "$mf" | sed -e 's/:.*$//'`
-    # Check whether this is an Automake generated Makefile or not.
-    # We used to match only the files named 'Makefile.in', but
-    # some people rename them; so instead we look at the file content.
-    # Grep'ing the first line is not enough: some people post-process
-    # each Makefile.in and add a new line on top of each file to say so.
-    # Grep'ing the whole file is not good either: AIX grep has a line
+    am_mf=`$as_echo "$am_mf" | sed -e 's/:.*$//'`
+    # Check whether this is an Automake generated Makefile which includes
+    # dependency-tracking related rules and includes.
+    # Grep'ing the whole file directly is not great: AIX grep has a line
     # limit of 2048, but all sed's we know have understand at least 4000.
-    if sed -n 's,^#.*generated by automake.*,X,p' "$mf" | grep X >/dev/null 2>&1; then
-      dirpart=`$as_dirname -- "$mf" ||
-$as_expr X"$mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$mf" : 'X\(//\)[^/]' \| \
-	 X"$mf" : 'X\(//\)$' \| \
-	 X"$mf" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"$mf" |
+    sed -n 's,^am--depfiles:.*,X,p' "$am_mf" | grep X >/dev/null 2>&1 \
+      || continue
+    am_dirpart=`$as_dirname -- "$am_mf" ||
+$as_expr X"$am_mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$am_mf" : 'X\(//\)[^/]' \| \
+	 X"$am_mf" : 'X\(//\)$' \| \
+	 X"$am_mf" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"$am_mf" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -9322,53 +9212,50 @@ $as_echo X"$mf" |
 	    q
 	  }
 	  s/.*/./; q'`
-    else
-      continue
-    fi
-    # Extract the definition of DEPDIR, am__include, and am__quote
-    # from the Makefile without running 'make'.
-    DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
-    test -z "$DEPDIR" && continue
-    am__include=`sed -n 's/^am__include = //p' < "$mf"`
-    test -z "$am__include" && continue
-    am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
-    # Find all dependency output files, they are included files with
-    # $(DEPDIR) in their names.  We invoke sed twice because it is the
-    # simplest approach to changing $(DEPDIR) to its actual value in the
-    # expansion.
-    for file in `sed -n "
-      s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
-	 sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g'`; do
-      # Make sure the directory exists.
-      test -f "$dirpart/$file" && continue
-      fdir=`$as_dirname -- "$file" ||
-$as_expr X"$file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$file" : 'X\(//\)[^/]' \| \
-	 X"$file" : 'X\(//\)$' \| \
-	 X"$file" : 'X\(/\)' \| . 2>/dev/null ||
-$as_echo X"$file" |
-    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+    am_filepart=`$as_basename -- "$am_mf" ||
+$as_expr X/"$am_mf" : '.*/\([^/][^/]*\)/*$' \| \
+	 X"$am_mf" : 'X\(//\)$' \| \
+	 X"$am_mf" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X/"$am_mf" |
+    sed '/^.*\/\([^/][^/]*\)\/*$/{
 	    s//\1/
 	    q
 	  }
-	  /^X\(\/\/\)[^/].*/{
+	  /^X\/\(\/\/\)$/{
 	    s//\1/
 	    q
 	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
+	  /^X\/\(\/\).*/{
 	    s//\1/
 	    q
 	  }
 	  s/.*/./; q'`
-      as_dir=$dirpart/$fdir; as_fn_mkdir_p
-      # echo "creating $dirpart/$file"
-      echo '# dummy' > "$dirpart/$file"
-    done
+    { echo "$as_me:$LINENO: cd "$am_dirpart" \
+      && sed -e '/# am--include-marker/d' "$am_filepart" \
+        | $MAKE -f - am--depfiles" >&5
+   (cd "$am_dirpart" \
+      && sed -e '/# am--include-marker/d' "$am_filepart" \
+        | $MAKE -f - am--depfiles) >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); } || am_rc=$?
   done
+  if test $am_rc -ne 0; then
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "Something went wrong bootstrapping makefile fragments
+    for automatic dependency tracking.  If GNU make was not used, consider
+    re-running the configure script with MAKE=\"gmake\" (or whatever is
+    necessary).  You can also try re-running configure with the
+    '--disable-dependency-tracking' option to at least be able to build
+    the package (albeit without support for automatic dependency tracking).
+See \`config.log' for more details" "$LINENO" 5; }
+  fi
+  { am_dirpart=; unset am_dirpart;}
+  { am_filepart=; unset am_filepart;}
+  { am_mf=; unset am_mf;}
+  { am_rc=; unset am_rc;}
+  rm -f conftest-deps.mk
 }
  ;;
 

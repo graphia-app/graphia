@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -46,7 +45,7 @@ typedef std::map< KeyType, ValueType > StdMap;
 template<typename Key, typename Value>
 class SimpleMapSerializer {
  public:
-  static char* Serialize(const std::map<Key, Value> &stdmap,
+  static char* Serialize(const std::map<Key, Value>& stdmap,
                    unsigned int* size = NULL) {
     unsigned int size_per_node =
         sizeof(uint32_t) + sizeof(Key) + sizeof(Value);
@@ -237,19 +236,19 @@ class TestValidMap : public ::testing::Test {
     }
   }
 
-  void FindTester(int test_case, const KeyType &key) {
+  void FindTester(int test_case, const KeyType& key) {
     iter_test = test_map[test_case].find(key);
     iter_std = std_map[test_case].find(key);
     CompareLookupResult(test_case);
   }
 
-  void LowerBoundTester(int test_case, const KeyType &key) {
+  void LowerBoundTester(int test_case, const KeyType& key) {
     iter_test = test_map[test_case].lower_bound(key);
     iter_std = std_map[test_case].lower_bound(key);
     CompareLookupResult(test_case);
   }
 
-  void UpperBoundTester(int test_case, const KeyType &key) {
+  void UpperBoundTester(int test_case, const KeyType& key) {
     iter_test = test_map[test_case].upper_bound(key);
     iter_std = std_map[test_case].upper_bound(key);
     CompareLookupResult(test_case);

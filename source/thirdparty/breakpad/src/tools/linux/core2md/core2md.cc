@@ -1,5 +1,4 @@
-// Copyright (c) 2012, Google Inc.
-// All rights reserved.
+// Copyright 2012 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -33,13 +32,15 @@
 
 #include "client/linux/minidump_writer/minidump_writer.h"
 #include "client/linux/minidump_writer/linux_core_dumper.h"
+#include "common/path_helper.h"
 
 using google_breakpad::AppMemoryList;
 using google_breakpad::MappingList;
 using google_breakpad::LinuxCoreDumper;
 
 static int ShowUsage(const char* argv0) {
-  fprintf(stderr, "Usage: %s <core file> <procfs dir> <output>\n", argv0);
+  fprintf(stderr, "Usage: %s <core file> <procfs dir> <output>\n",
+          google_breakpad::BaseName(argv0).c_str());
   return 1;
 }
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
   if (!WriteMinidumpFromCore(minidump_file,
                              core_file,
                              procfs_dir)) {
-    fprintf(stderr, "Unable to generate minidump.\n");
+    perror("core2md: Unable to generate minidump");
     return 1;
   }
 

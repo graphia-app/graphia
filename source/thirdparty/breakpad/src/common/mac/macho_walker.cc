@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -47,8 +46,8 @@
 
 namespace MacFileUtilities {
 
-MachoWalker::MachoWalker(const char *path, LoadCommandCallback callback,
-                         void *context)
+MachoWalker::MachoWalker(const char* path, LoadCommandCallback callback,
+                         void* context)
     : file_(-1),
       memory_(NULL),
       memory_size_(0),
@@ -60,8 +59,8 @@ MachoWalker::MachoWalker(const char *path, LoadCommandCallback callback,
   file_ = open(path, O_RDONLY);
 }
 
-MachoWalker::MachoWalker(void *memory, size_t size,
-                         LoadCommandCallback callback, void *context)
+MachoWalker::MachoWalker(void* memory, size_t size,
+                         LoadCommandCallback callback, void* context)
     : file_(-1),
       memory_(memory),
       memory_size_(size),
@@ -82,7 +81,7 @@ bool MachoWalker::WalkHeader(cpu_type_t cpu_type, cpu_subtype_t cpu_subtype) {
   cpu_subtype_t valid_cpu_subtype = cpu_subtype;
   // if |cpu_type| is 0, use the native cpu type.
   if (cpu_type == 0) {
-    const NXArchInfo *arch = NXGetLocalArchInfo();
+    const NXArchInfo* arch = NXGetLocalArchInfo();
     assert(arch);
     valid_cpu_type = arch->cputype;
     valid_cpu_subtype = CPU_SUBTYPE_MULTIPLE;
@@ -98,7 +97,7 @@ bool MachoWalker::WalkHeader(cpu_type_t cpu_type, cpu_subtype_t cpu_subtype) {
   return false;
 }
 
-bool MachoWalker::ReadBytes(void *buffer, size_t size, off_t offset) {
+bool MachoWalker::ReadBytes(void* buffer, size_t size, off_t offset) {
   if (memory_) {
     if (offset < 0)
       return false;
@@ -109,14 +108,14 @@ bool MachoWalker::ReadBytes(void *buffer, size_t size, off_t offset) {
       size = memory_size_ - static_cast<size_t>(offset);
       result = false;
     }
-    memcpy(buffer, static_cast<char *>(memory_) + offset, size);
+    memcpy(buffer, static_cast<char*>(memory_) + offset, size);
     return result;
   } else {
     return pread(file_, buffer, size, offset) == (ssize_t)size;
   }
 }
 
-bool MachoWalker::CurrentHeader(struct mach_header_64 *header, off_t *offset) {
+bool MachoWalker::CurrentHeader(struct mach_header_64* header, off_t* offset) {
   if (current_header_) {
     memcpy(header, current_header_, sizeof(mach_header_64));
     *offset = current_header_offset_;
@@ -128,7 +127,7 @@ bool MachoWalker::CurrentHeader(struct mach_header_64 *header, off_t *offset) {
 
 bool MachoWalker::FindHeader(cpu_type_t cpu_type,
                              cpu_subtype_t cpu_subtype,
-                             off_t &offset) {
+                             off_t& offset) {
   // Read the magic bytes that's common amongst all mach-o files
   uint32_t magic;
   if (!ReadBytes(&magic, sizeof(magic), 0))
@@ -211,7 +210,7 @@ bool MachoWalker::WalkHeaderAtOffset(off_t offset) {
   // Copy the data into the mach_header_64 structure.  Since the 32-bit and
   // 64-bit only differ in the last field (reserved), this is safe to do.
   struct mach_header_64 header64;
-  memcpy((void *)&header64, (const void *)&header, sizeof(header));
+  memcpy((void*)&header64, (const void*)&header, sizeof(header));
   header64.reserved = 0;
 
   current_header_ = &header64;

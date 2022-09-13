@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -56,19 +55,23 @@
 
 #include "common/windows/http_upload.h"
 #include "common/windows/pdb_source_line_writer.h"
+#include "common/windows/sym_upload_v2_protocol.h"
+#include "common/windows/symbol_collector_client.h"
 
-using std::string;
-using std::wstring;
-using std::vector;
-using std::map;
 using google_breakpad::HTTPUpload;
 using google_breakpad::PDBModuleInfo;
 using google_breakpad::PDBSourceLineWriter;
 using google_breakpad::WindowsStringUtils;
+using std::map;
+using std::string;
+using std::vector;
+using std::wstring;
+
+const wchar_t* kSymbolUploadTypeBreakpad = L"BREAKPAD";
 
 // Extracts the file version information for the given filename,
 // as a string, for example, "1.2.3.4".  Returns true on success.
-static bool GetFileVersionString(const wchar_t *filename, wstring *version) {
+static bool GetFileVersionString(const wchar_t* filename, wstring* version) {
   DWORD handle;
   DWORD version_size = GetFileVersionInfoSize(filename, &handle);
   if (version_size < sizeof(VS_FIXEDFILEINFO)) {
@@ -80,7 +83,7 @@ static bool GetFileVersionString(const wchar_t *filename, wstring *version) {
     return false;
   }
 
-  void *file_info_buffer = NULL;
+  void* file_info_buffer = NULL;
   unsigned int file_info_length;
   if (!VerQueryValue(&version_info[0], L"\\",
                      &file_info_buffer, &file_info_length)) {
@@ -90,7 +93,7 @@ static bool GetFileVersionString(const wchar_t *filename, wstring *version) {
   // The maximum value of each version component is 65535 (0xffff),
   // so the max length is 24, including the terminating null.
   wchar_t ver_string[24];
-  VS_FIXEDFILEINFO *file_info =
+  VS_FIXEDFILEINFO* file_info =
     reinterpret_cast<VS_FIXEDFILEINFO*>(file_info_buffer);
   swprintf(ver_string, sizeof(ver_string) / sizeof(ver_string[0]),
            L"%d.%d.%d.%d",
@@ -109,10 +112,11 @@ static bool GetFileVersionString(const wchar_t *filename, wstring *version) {
 // Creates a new temporary file and writes the symbol data from the given
 // exe/dll file to it.  Returns the path to the temp file in temp_file_path
 // and information about the pdb in pdb_info.
-static bool DumpSymbolsToTempFile(const wchar_t *file,
-                                  wstring *temp_file_path,
-                                  PDBModuleInfo *pdb_info) {
-  google_breakpad::PDBSourceLineWriter writer;
+static bool DumpSymbolsToTempFile(const wchar_t* file,
+                                  wstring* temp_file_path,
+                                  PDBModuleInfo* pdb_info,
+                                  bool handle_inline) {
+  google_breakpad::PDBSourceLineWriter writer(handle_inline);
   // Use EXE_FILE to get information out of the exe/dll in addition to the
   // pdb.  The name and version number of the exe/dll are of value, and
   // there's no way to locate an exe/dll given a pdb.
@@ -130,7 +134,7 @@ static bool DumpSymbolsToTempFile(const wchar_t *file,
     return false;
   }
 
-  FILE *temp_file = NULL;
+  FILE* temp_file = NULL;
 #if _MSC_VER >= 1400  // MSVC 2005/8
   if (_wfopen_s(&temp_file, temp_filename, L"w") != 0)
 #else  // _MSC_VER >= 1400
@@ -142,7 +146,7 @@ static bool DumpSymbolsToTempFile(const wchar_t *file,
     return false;
   }
 
-  bool success = writer.WriteMap(temp_file);
+  bool success = writer.WriteSymbols(temp_file);
   fclose(temp_file);
   if (!success) {
     _wunlink(temp_filename);
@@ -156,9 +160,10 @@ static bool DumpSymbolsToTempFile(const wchar_t *file,
 
 __declspec(noreturn) void printUsageAndExit() {
   wprintf(L"Usage:\n\n"
-          L"    symupload [--timeout NN] [--product product_name] ^\n"
+          L"    symupload [--i] [--timeout NN] [--product product_name] ^\n"
           L"              <file.exe|file.dll> <symbol upload URL> ^\n"
           L"              [...<symbol upload URLs>]\n\n");
+  wprintf(L"  - i: Extract inline information from pdb.\n");
   wprintf(L"  - Timeout is in milliseconds, or can be 0 to be unlimited.\n");
   wprintf(L"  - product_name is an HTTP-friendly product name. It must only\n"
           L"    contain an ascii subset: alphanumeric and punctuation.\n"
@@ -166,14 +171,35 @@ __declspec(noreturn) void printUsageAndExit() {
   wprintf(L"Example:\n\n"
           L"    symupload.exe --timeout 0 --product Chrome ^\n"
           L"        chrome.dll http://no.free.symbol.server.for.you\n");
+  wprintf(L"\n");
+  wprintf(L"sym-upload-v2 usage:\n"
+          L"    symupload -p [-f] <file.exe|file.dll> <API-URL> <API-key>\n");
+  wprintf(L"\n");
+  wprintf(L"sym_upload_v2 Options:\n");
+  wprintf(L"    <API-URL> is the sym_upload_v2 API URL.\n");
+  wprintf(L"    <API-key> is a secret used to authenticate with the API.\n");
+  wprintf(L"    -p:\t Use sym_upload_v2 protocol.\n");
+  wprintf(L"    -f:\t Force symbol upload if already exists.\n");
+
   exit(0);
 }
-int wmain(int argc, wchar_t *argv[]) {
-  const wchar_t *module;
-  const wchar_t *product = nullptr;
+
+int wmain(int argc, wchar_t* argv[]) {
+  const wchar_t* module;
+  const wchar_t* product = nullptr;
+  bool handle_inline = false;
   int timeout = -1;
   int currentarg = 1;
+  bool use_sym_upload_v2 = false;
+  bool force = false;
+  const wchar_t* api_url = nullptr;
+  const wchar_t* api_key = nullptr;
   while (argc > currentarg + 1) {
+    if (!wcscmp(L"--i", argv[currentarg])) {
+      handle_inline = true;
+      ++currentarg;
+      continue;
+    }
     if (!wcscmp(L"--timeout", argv[currentarg])) {
       timeout = _wtoi(argv[currentarg + 1]);
       currentarg += 2;
@@ -182,6 +208,16 @@ int wmain(int argc, wchar_t *argv[]) {
     if (!wcscmp(L"--product", argv[currentarg])) {
       product = argv[currentarg + 1];
       currentarg += 2;
+      continue;
+    }
+    if (!wcscmp(L"-p", argv[currentarg])) {
+      use_sym_upload_v2 = true;
+      ++currentarg;
+      continue;
+    }
+    if (!wcscmp(L"-f", argv[currentarg])) {
+      force = true;
+      ++currentarg;
       continue;
     }
     break;
@@ -194,56 +230,73 @@ int wmain(int argc, wchar_t *argv[]) {
 
   wstring symbol_file;
   PDBModuleInfo pdb_info;
-  if (!DumpSymbolsToTempFile(module, &symbol_file, &pdb_info)) {
+  if (!DumpSymbolsToTempFile(module, &symbol_file, &pdb_info, handle_inline)) {
     fwprintf(stderr, L"Could not get symbol data from %s\n", module);
     return 1;
   }
 
   wstring code_file = WindowsStringUtils::GetBaseName(wstring(module));
-
-  map<wstring, wstring> parameters;
-  parameters[L"code_file"] = code_file;
-  parameters[L"debug_file"] = pdb_info.debug_file;
-  parameters[L"debug_identifier"] = pdb_info.debug_identifier;
-  parameters[L"os"] = L"windows";  // This version of symupload is Windows-only
-  parameters[L"cpu"] = pdb_info.cpu;
-  
-  // Don't make a missing product name a hard error.  Issue a warning and let
-  // the server decide whether to reject files without product name.
-  if (product) {
-    parameters[L"product"] = product;
-  } else {
-    fwprintf(
-        stderr,
-        L"Warning: No product name (flag --product) was specified for %s\n",
-        module);
-  }
-
+  wstring file_version;
   // Don't make a missing version a hard error.  Issue a warning, and let the
   // server decide whether to reject files without versions.
-  wstring file_version;
-  if (GetFileVersionString(module, &file_version)) {
-    parameters[L"version"] = file_version;
-  } else {
+  if (!GetFileVersionString(module, &file_version)) {
     fwprintf(stderr, L"Warning: Could not get file version for %s\n", module);
   }
 
-  map<wstring, wstring> files;
-  files[L"symbol_file"] = symbol_file;
-
   bool success = true;
 
-  while (currentarg < argc) {
-    int response_code;
-    if (!HTTPUpload::SendRequest(argv[currentarg], parameters, files,
-                                 timeout == -1 ? NULL : &timeout,
-                                 nullptr, &response_code)) {
-      success = false;
-      fwprintf(stderr,
-               L"Symbol file upload to %s failed. Response code = %ld\n",
-               argv[currentarg], response_code);
+  if (use_sym_upload_v2) {
+    if (argc >= currentarg + 2) {
+      api_url = argv[currentarg++];
+      api_key = argv[currentarg++];
+      wstring product_name = product ? wstring(product) : L"";
+
+      success = google_breakpad::SymUploadV2ProtocolSend(
+          api_url, api_key, timeout == -1 ? nullptr : &timeout,
+          pdb_info.debug_file, pdb_info.debug_identifier, symbol_file,
+          kSymbolUploadTypeBreakpad, product_name, force);
+    } else {
+      printUsageAndExit();
     }
-    currentarg++;
+  } else {
+    map<wstring, wstring> parameters;
+    parameters[L"code_file"] = code_file;
+    parameters[L"debug_file"] = pdb_info.debug_file;
+    parameters[L"debug_identifier"] = pdb_info.debug_identifier;
+    parameters[L"os"] = L"windows";  // This version of symupload is Windows-only
+    parameters[L"cpu"] = pdb_info.cpu;
+
+    map<wstring, wstring> files;
+    files[L"symbol_file"] = symbol_file;
+
+    if (!file_version.empty()) {
+      parameters[L"version"] = file_version;
+    }
+
+    // Don't make a missing product name a hard error.  Issue a warning and let
+    // the server decide whether to reject files without product name.
+    if (product) {
+      parameters[L"product"] = product;
+    }
+    else {
+      fwprintf(
+        stderr,
+        L"Warning: No product name (flag --product) was specified for %s\n",
+        module);
+    }
+
+    while (currentarg < argc) {
+      int response_code;
+      if (!HTTPUpload::SendMultipartPostRequest(argv[currentarg], parameters, files,
+          timeout == -1 ? NULL : &timeout,
+          nullptr, &response_code)) {
+        success = false;
+        fwprintf(stderr,
+          L"Symbol file upload to %s failed. Response code = %ld\n",
+          argv[currentarg], response_code);
+      }
+      currentarg++;
+    }
   }
 
   _wunlink(symbol_file.c_str());

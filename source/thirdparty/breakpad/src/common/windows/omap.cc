@@ -1,4 +1,4 @@
-// Copyright 2013 Google Inc. All rights reserved.
+// Copyright 2013 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -449,11 +449,11 @@ void BuildEndpointIndexMap(ImageMap* image_map) {
   }
 }
 
-void BuildSubsequentRVAMap(const OmapData &omap_data,
-                           std::map<DWORD, DWORD> *subsequent) {
+void BuildSubsequentRVAMap(const OmapData& omap_data,
+                           std::map<DWORD, DWORD>* subsequent) {
   assert(subsequent->empty());
-  const OmapFromTable &orig2tran =
-      reinterpret_cast<const OmapFromTable &>(omap_data.omap_from);
+  const OmapFromTable& orig2tran =
+      reinterpret_cast<const OmapFromTable&>(omap_data.omap_from);
 
   if (orig2tran.empty())
     return;

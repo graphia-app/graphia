@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
 if(NOT "$ENV{PRODUCT_NAME}" STREQUAL "")
-    project($ENV{PRODUCT_NAME} LANGUAGES C CXX)
+    project($ENV{PRODUCT_NAME} LANGUAGES C CXX ASM)
 else()
-    project("Graphia" LANGUAGES C CXX)
+    project("Graphia" LANGUAGES C CXX ASM)
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Core)

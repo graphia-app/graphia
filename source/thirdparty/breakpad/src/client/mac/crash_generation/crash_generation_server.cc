@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -38,15 +37,15 @@
 namespace google_breakpad {
 
 CrashGenerationServer::CrashGenerationServer(
-    const char *mach_port_name,
+    const char* mach_port_name,
     FilterCallback filter,
-    void *filter_context,
+    void* filter_context,
     OnClientDumpRequestCallback dump_callback,
-    void *dump_context,
+    void* dump_context,
     OnClientExitingCallback exit_callback,
-    void *exit_context,
+    void* exit_context,
     bool generate_dumps,
-    const std::string &dump_path)
+    const std::string& dump_path)
     : filter_(filter),
       filter_context_(filter_context),
       dump_callback_(dump_callback),
@@ -90,8 +89,8 @@ bool CrashGenerationServer::Stop() {
 }
 
 // static
-void *CrashGenerationServer::WaitForMessages(void *server) {
-  CrashGenerationServer *self =
+void* CrashGenerationServer::WaitForMessages(void* server) {
+  CrashGenerationServer* self =
       reinterpret_cast<CrashGenerationServer*>(server);
   while (self->WaitForOneMessage()) {}
   return NULL;
@@ -104,7 +103,7 @@ bool CrashGenerationServer::WaitForOneMessage() {
   if (result == KERN_SUCCESS) {
     switch (message.GetMessageID()) {
       case kDumpRequestMessage: {
-        ExceptionInfo &info = (ExceptionInfo &)*message.GetData();
+        ExceptionInfo& info = (ExceptionInfo&)*message.GetData();
       
         mach_port_t remote_task = message.GetTranslatedPort(0);
         mach_port_t crashing_thread = message.GetTranslatedPort(1);

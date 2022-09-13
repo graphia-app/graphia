@@ -1,4 +1,4 @@
-// Copyright 2010 Google Inc. All Rights Reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -43,7 +43,7 @@ namespace google_breakpad {
 
 template<typename Key, typename Value, typename Compare>
 StaticMapIterator<Key, Value, Compare>::StaticMapIterator(const char* base,
-                                                            const int &index):
+                                                            const int& index):
       index_(index), base_(base) {
   // See static_map.h for documentation on
   // bytes format of serialized StaticMap data.

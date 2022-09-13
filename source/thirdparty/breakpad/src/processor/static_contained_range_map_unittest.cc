@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -271,6 +270,25 @@ TEST_F(TestStaticCRMMap, TestSingleElementMap) {
   ASSERT_EQ(*entry_test, entry);
   ASSERT_TRUE(test_map->RetrieveRange(13, entry_test));
   ASSERT_EQ(*entry_test, entry);
+}
+
+TEST_F(TestStaticCRMMap, TestRetrieveRangeEntries) {
+  CRMMap crm_map;
+
+  crm_map.StoreRange(2, 5, 0);
+  crm_map.StoreRange(2, 6, 1);
+  crm_map.StoreRange(2, 7, 2);
+
+  unsigned int size;
+  scoped_array<char> serialized_data;
+  serialized_data.reset(serializer_.Serialize(&crm_map, &size));
+  scoped_ptr<TestMap> test_map(new TestMap(serialized_data.get()));
+
+  std::vector<const int*> entry_tests;
+  ASSERT_TRUE(test_map->RetrieveRanges(3, entry_tests));
+  ASSERT_EQ(*entry_tests[0], 0);
+  ASSERT_EQ(*entry_tests[1], 1);
+  ASSERT_EQ(*entry_tests[2], 2);
 }
 
 TEST_F(TestStaticCRMMap, RunTestData) {

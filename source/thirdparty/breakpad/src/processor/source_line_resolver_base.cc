@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -42,16 +41,16 @@
 #include <utility>
 
 #include "google_breakpad/processor/source_line_resolver_base.h"
-#include "processor/source_line_resolver_base_types.h"
+#include "processor/logging.h"
 #include "processor/module_factory.h"
+#include "processor/source_line_resolver_base_types.h"
 
-using std::map;
 using std::make_pair;
 
 namespace google_breakpad {
 
 SourceLineResolverBase::SourceLineResolverBase(
-    ModuleFactory *module_factory)
+    ModuleFactory* module_factory)
   : modules_(new ModuleMap),
     corrupt_modules_(new ModuleSet),
     memory_buffers_(new MemoryMap),
@@ -85,9 +84,9 @@ SourceLineResolverBase::~SourceLineResolverBase() {
   module_factory_ = NULL;
 }
 
-bool SourceLineResolverBase::ReadSymbolFile(const string &map_file,
-                                            char **symbol_data,
-                                            size_t *symbol_data_size) {
+bool SourceLineResolverBase::ReadSymbolFile(const string& map_file,
+                                            char** symbol_data,
+                                            size_t* symbol_data_size) {
   if (symbol_data == NULL || symbol_data_size == NULL) {
     BPLOG(ERROR) << "Could not Read file into Null memory pointer";
     return false;
@@ -117,7 +116,7 @@ bool SourceLineResolverBase::ReadSymbolFile(const string &map_file,
 
   BPLOG(INFO) << "Opening " << map_file;
 
-  FILE *f = fopen(map_file.c_str(), "rt");
+  FILE* f = fopen(map_file.c_str(), "rt");
   if (!f) {
     string error_string;
     error_code = ErrnoString(&error_string);
@@ -148,8 +147,8 @@ bool SourceLineResolverBase::ReadSymbolFile(const string &map_file,
   return true;
 }
 
-bool SourceLineResolverBase::LoadModule(const CodeModule *module,
-                                        const string &map_file) {
+bool SourceLineResolverBase::LoadModule(const CodeModule* module,
+                                        const string& map_file) {
   if (module == NULL)
     return false;
 
@@ -163,12 +162,14 @@ bool SourceLineResolverBase::LoadModule(const CodeModule *module,
   BPLOG(INFO) << "Loading symbols for module " << module->code_file()
               << " from " << map_file;
 
-  char *memory_buffer;
+  char* memory_buffer;
   size_t memory_buffer_size;
   if (!ReadSymbolFile(map_file, &memory_buffer, &memory_buffer_size))
     return false;
 
-  BPLOG(INFO) << "Read symbol file " << map_file << " succeeded";
+  BPLOG(INFO) << "Read symbol file " << map_file << " succeeded. "
+              << "module = " << module->code_file()
+              << ", memory_buffer_size = " << memory_buffer_size;
 
   bool load_result = LoadModuleUsingMemoryBuffer(module, memory_buffer,
                                                  memory_buffer_size);
@@ -184,7 +185,10 @@ bool SourceLineResolverBase::LoadModule(const CodeModule *module,
 }
 
 bool SourceLineResolverBase::LoadModuleUsingMapBuffer(
-    const CodeModule *module, const string &map_buffer) {
+    const CodeModule* module, const string& map_buffer) {
+  BPLOG(INFO) << "SourceLineResolverBase::LoadModuleUsingMapBuffer(module = "
+              << module->code_file()
+              << ", map_buffer.size() = " << map_buffer.size() << ")";
   if (module == NULL)
     return false;
 
@@ -196,7 +200,7 @@ bool SourceLineResolverBase::LoadModuleUsingMapBuffer(
   }
 
   size_t memory_buffer_size = map_buffer.size() + 1;
-  char *memory_buffer = new char[memory_buffer_size];
+  char* memory_buffer = new char[memory_buffer_size];
   if (memory_buffer == NULL) {
     BPLOG(ERROR) << "Could not allocate memory for " << module->code_file();
     return false;
@@ -220,8 +224,8 @@ bool SourceLineResolverBase::LoadModuleUsingMapBuffer(
 }
 
 bool SourceLineResolverBase::LoadModuleUsingMemoryBuffer(
-    const CodeModule *module,
-    char *memory_buffer,
+    const CodeModule* module,
+    char* memory_buffer,
     size_t memory_buffer_size) {
   if (!module)
     return false;
@@ -234,9 +238,9 @@ bool SourceLineResolverBase::LoadModuleUsingMemoryBuffer(
   }
 
   BPLOG(INFO) << "Loading symbols for module " << module->code_file()
-             << " from memory buffer";
+              << " from memory buffer, size: " << memory_buffer_size;
 
-  Module *basic_module = module_factory_->CreateModule(module->code_file());
+  Module* basic_module = module_factory_->CreateModule(module->code_file());
 
   // Ownership of memory is NOT transfered to Module::LoadMapFromMemory().
   if (!basic_module->LoadMapFromMemory(memory_buffer, memory_buffer_size)) {
@@ -259,13 +263,13 @@ bool SourceLineResolverBase::ShouldDeleteMemoryBufferAfterLoadModule() {
   return true;
 }
 
-void SourceLineResolverBase::UnloadModule(const CodeModule *code_module) {
+void SourceLineResolverBase::UnloadModule(const CodeModule* code_module) {
   if (!code_module)
     return;
 
   ModuleMap::iterator mod_iter = modules_->find(code_module->code_file());
   if (mod_iter != modules_->end()) {
-    Module *symbol_module = mod_iter->second;
+    Module* symbol_module = mod_iter->second;
     delete symbol_module;
     corrupt_modules_->erase(mod_iter->first);
     modules_->erase(mod_iter);
@@ -283,29 +287,31 @@ void SourceLineResolverBase::UnloadModule(const CodeModule *code_module) {
   }
 }
 
-bool SourceLineResolverBase::HasModule(const CodeModule *module) {
+bool SourceLineResolverBase::HasModule(const CodeModule* module) {
   if (!module)
     return false;
   return modules_->find(module->code_file()) != modules_->end();
 }
 
-bool SourceLineResolverBase::IsModuleCorrupt(const CodeModule *module) {
+bool SourceLineResolverBase::IsModuleCorrupt(const CodeModule* module) {
   if (!module)
     return false;
   return corrupt_modules_->find(module->code_file()) != corrupt_modules_->end();
 }
 
-void SourceLineResolverBase::FillSourceLineInfo(StackFrame *frame) {
+void SourceLineResolverBase::FillSourceLineInfo(
+    StackFrame* frame,
+    std::deque<std::unique_ptr<StackFrame>>* inlined_frames) {
   if (frame->module) {
     ModuleMap::const_iterator it = modules_->find(frame->module->code_file());
     if (it != modules_->end()) {
-      it->second->LookupAddress(frame);
+      it->second->LookupAddress(frame, inlined_frames);
     }
   }
 }
 
-WindowsFrameInfo *SourceLineResolverBase::FindWindowsFrameInfo(
-    const StackFrame *frame) {
+WindowsFrameInfo* SourceLineResolverBase::FindWindowsFrameInfo(
+    const StackFrame* frame) {
   if (frame->module) {
     ModuleMap::const_iterator it = modules_->find(frame->module->code_file());
     if (it != modules_->end()) {
@@ -315,8 +321,8 @@ WindowsFrameInfo *SourceLineResolverBase::FindWindowsFrameInfo(
   return NULL;
 }
 
-CFIFrameInfo *SourceLineResolverBase::FindCFIFrameInfo(
-    const StackFrame *frame) {
+CFIFrameInfo* SourceLineResolverBase::FindCFIFrameInfo(
+    const StackFrame* frame) {
   if (frame->module) {
     ModuleMap::const_iterator it = modules_->find(frame->module->code_file());
     if (it != modules_->end()) {
@@ -327,12 +333,12 @@ CFIFrameInfo *SourceLineResolverBase::FindCFIFrameInfo(
 }
 
 bool SourceLineResolverBase::CompareString::operator()(
-    const string &s1, const string &s2) const {
+    const string& s1, const string& s2) const {
   return strcmp(s1.c_str(), s2.c_str()) < 0;
 }
 
 bool SourceLineResolverBase::Module::ParseCFIRuleSet(
-    const string &rule_set, CFIFrameInfo *frame_info) const {
+    const string& rule_set, CFIFrameInfo* frame_info) const {
   CFIFrameInfoParseHandler handler(frame_info);
   CFIRuleParser parser(&handler);
   return parser.Parse(rule_set);

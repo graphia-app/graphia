@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -52,6 +51,8 @@
 #include "common/linux/safe_readlink.h"
 #include "google_breakpad/common/minidump_exception_linux.h"
 #include "third_party/lss/linux_syscall_support.h"
+
+using google_breakpad::elf::FileID;
 
 #if defined(__ANDROID__)
 
@@ -135,7 +136,7 @@ const size_t kHpageMask = (~(kHpageSize - 1));
 //   next is backed by some file.
 //   curr and next are contiguous.
 //   offset(next) == sizeof(curr)
-void TryRecoverMappings(MappingInfo *curr, MappingInfo *next) {
+void TryRecoverMappings(MappingInfo* curr, MappingInfo* next) {
   // Merged segments are marked with size = 0.
   if (curr->size == 0 || next->size == 0)
     return;
@@ -167,8 +168,8 @@ void TryRecoverMappings(MappingInfo *curr, MappingInfo *next) {
 //   next and prev are backed by the same file.
 //   prev, curr and next are contiguous.
 //   offset(next) == offset(prev) + sizeof(prev) + sizeof(curr)
-void TryRecoverMappings(MappingInfo *prev, MappingInfo *curr,
-    MappingInfo *next) {
+void TryRecoverMappings(MappingInfo* prev, MappingInfo* curr,
+                        MappingInfo* next) {
   // Merged segments are marked with size = 0.
   if (prev->size == 0 || curr->size == 0 || next->size == 0)
     return;
@@ -439,49 +440,6 @@ bool LinuxDumper::GetMappingAbsolutePath(const MappingInfo& mapping,
 }
 
 namespace {
-bool ElfFileSoNameFromMappedFile(
-    const void* elf_base, char* soname, size_t soname_size) {
-  if (!IsValidElf(elf_base)) {
-    // Not ELF
-    return false;
-  }
-
-  const void* segment_start;
-  size_t segment_size;
-  if (!FindElfSection(elf_base, ".dynamic", SHT_DYNAMIC, &segment_start,
-                      &segment_size)) {
-    // No dynamic section
-    return false;
-  }
-
-  const void* dynstr_start;
-  size_t dynstr_size;
-  if (!FindElfSection(elf_base, ".dynstr", SHT_STRTAB, &dynstr_start,
-                      &dynstr_size)) {
-    // No dynstr section
-    return false;
-  }
-
-  const ElfW(Dyn)* dynamic = static_cast<const ElfW(Dyn)*>(segment_start);
-  size_t dcount = segment_size / sizeof(ElfW(Dyn));
-  for (const ElfW(Dyn)* dyn = dynamic; dyn < dynamic + dcount; ++dyn) {
-    if (dyn->d_tag == DT_SONAME) {
-      const char* dynstr = static_cast<const char*>(dynstr_start);
-      if (dyn->d_un.d_val >= dynstr_size) {
-        // Beyond the end of the dynstr section
-        return false;
-      }
-      const char* str = dynstr + dyn->d_un.d_val;
-      const size_t maxsize = dynstr_size - dyn->d_un.d_val;
-      my_strlcpy(soname, str, maxsize < soname_size ? maxsize : soname_size);
-      return true;
-    }
-  }
-
-  // Did not find SONAME
-  return false;
-}
-
 // Find the shared object name (SONAME) by examining the ELF information
 // for |mapping|. If the SONAME is found copy it into the passed buffer
 // |soname| and return true. The size of the buffer is |soname_size|.
@@ -516,19 +474,26 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
                                                  size_t file_name_size) {
   my_strlcpy(file_path, mapping.name, file_path_size);
 
-  // If an executable is mapped from a non-zero offset, this is likely because
-  // the executable was loaded directly from inside an archive file (e.g., an
-  // apk on Android). We try to find the name of the shared object (SONAME) by
-  // looking in the file for ELF sections.
-  bool mapped_from_archive = false;
-  if (mapping.exec && mapping.offset != 0) {
-    mapped_from_archive =
-        ElfFileSoName(*this, mapping, file_name, file_name_size);
+  // Tools such as minidump_stackwalk use the name of the module to look up
+  // symbols produced by dump_syms. dump_syms will prefer to use a module's
+  // DT_SONAME as the module name, if one exists, and will fall back to the
+  // filesystem name of the module.
+
+  // Just use the filesystem name if no SONAME is present.
+  if (!ElfFileSoName(*this, mapping, file_name, file_name_size)) {
+    //   file_path := /path/to/libname.so
+    //   file_name := libname.so
+    const char* basename = my_strrchr(file_path, '/');
+    basename = basename == NULL ? file_path : (basename + 1);
+    my_strlcpy(file_name, basename, file_name_size);
+    return;
   }
 
-  if (mapped_from_archive) {
-    // Some tools (e.g., stackwalk) extract the basename from the pathname. In
-    // this case, we append the file_name to the mapped archive path as follows:
+  if (mapping.exec && mapping.offset != 0) {
+    // If an executable is mapped from a non-zero offset, this is likely because
+    // the executable was loaded directly from inside an archive file (e.g., an
+    // apk on Android).
+    // In this case, we append the file_name to the mapped archive path:
     //   file_name := libname.so
     //   file_path := /path/to/ARCHIVE.APK/libname.so
     if (my_strlen(file_path) + 1 + my_strlen(file_name) < file_path_size) {
@@ -536,12 +501,15 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
       my_strlcat(file_path, file_name, file_path_size);
     }
   } else {
-    // Common case:
-    //   file_path := /path/to/libname.so
-    //   file_name := libname.so
-    const char* basename = my_strrchr(file_path, '/');
-    basename = basename == NULL ? file_path : (basename + 1);
-    my_strlcpy(file_name, basename, file_name_size);
+    // Otherwise, replace the basename with the SONAME.
+    char* basename = const_cast<char*>(my_strrchr(file_path, '/'));
+    if (basename) {
+      my_strlcpy(basename + 1, file_name,
+                 file_path_size - my_strlen(file_path) +
+                     my_strlen(basename + 1));
+    } else {
+      my_strlcpy(file_path, file_name, file_path_size);
+    }
   }
 }
 
@@ -584,11 +552,11 @@ bool LinuxDumper::EnumerateMappings() {
   // See http://www.trilithium.com/johan/2005/08/linux-gate/ for more
   // information.
   const void* linux_gate_loc =
-      reinterpret_cast<void *>(auxv_[AT_SYSINFO_EHDR]);
+      reinterpret_cast<void*>(auxv_[AT_SYSINFO_EHDR]);
   // Although the initial executable is usually the first mapping, it's not
   // guaranteed (see http://crosbug.com/25355); therefore, try to use the
   // actual entry point to find the mapping.
-  const void* entry_point_loc = reinterpret_cast<void *>(auxv_[AT_ENTRY]);
+  const void* entry_point_loc = reinterpret_cast<void*>(auxv_[AT_ENTRY]);
 
   const int fd = sys_open(maps_path, O_RDONLY, 0);
   if (fd < 0)

@@ -1,5 +1,4 @@
-// Copyright (c) 2013, Google Inc.
-// All rights reserved.
+// Copyright 2013 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -65,7 +64,7 @@ TEST(ProcCpuInfoReaderTest, EmptyFile) {
   ASSERT_TRUE(file.IsOk());
   ProcCpuInfoReader reader(file.GetFd());
 
-  const char *field;
+  const char* field;
   ASSERT_FALSE(reader.GetNextField(&field));
 }
 
@@ -74,7 +73,7 @@ TEST(ProcCpuInfoReaderTest, OneLineTerminated) {
   ASSERT_TRUE(file.IsOk());
   ProcCpuInfoReader reader(file.GetFd());
 
-  const char *field;
+  const char* field;
   ASSERT_TRUE(reader.GetNextField(&field));
   ASSERT_STREQ("foo", field);
   ASSERT_STREQ("bar", reader.GetValue());
@@ -87,7 +86,7 @@ TEST(ProcCpuInfoReaderTest, OneLine) {
   ASSERT_TRUE(file.IsOk());
   ProcCpuInfoReader reader(file.GetFd());
 
-  const char *field;
+  const char* field;
   size_t value_len;
   ASSERT_TRUE(reader.GetNextField(&field));
   ASSERT_STREQ("foo", field);

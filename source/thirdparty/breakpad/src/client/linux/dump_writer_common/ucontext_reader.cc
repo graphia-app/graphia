@@ -1,5 +1,4 @@
-// Copyright (c) 2014, Google Inc.
-// All rights reserved.
+// Copyright 2014 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -48,8 +47,8 @@ uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
   return uc->uc_mcontext.gregs[REG_EIP];
 }
 
-void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc,
-                                    const struct _libc_fpstate* fp) {
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
+                                    const fpstate_t* fp) {
   const greg_t* regs = uc->uc_mcontext.gregs;
 
   out->context_flags = MD_CONTEXT_X86_FULL |
@@ -96,8 +95,8 @@ uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
   return uc->uc_mcontext.gregs[REG_RIP];
 }
 
-void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc,
-                                    const struct _libc_fpstate* fpregs) {
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
+                                    const fpstate_t* fpregs) {
   const greg_t* regs = uc->uc_mcontext.gregs;
 
   out->context_flags = MD_CONTEXT_AMD64_FULL;
@@ -153,7 +152,7 @@ uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
   return uc->uc_mcontext.arm_pc;
 }
 
-void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc) {
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc) {
   out->context_flags = MD_CONTEXT_ARM_FULL;
 
   out->iregs[0] = uc->uc_mcontext.arm_r0;
@@ -192,9 +191,9 @@ uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
   return uc->uc_mcontext.pc;
 }
 
-void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc,
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc,
                                     const struct fpsimd_context* fpregs) {
-  out->context_flags = MD_CONTEXT_ARM64_FULL;
+  out->context_flags = MD_CONTEXT_ARM64_FULL_OLD;
 
   out->cpsr = static_cast<uint32_t>(uc->uc_mcontext.pstate);
   for (int i = 0; i < MD_CONTEXT_ARM64_REG_SP; ++i)
@@ -218,7 +217,7 @@ uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
   return uc->uc_mcontext.pc;
 }
 
-void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc) {
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc) {
 #if _MIPS_SIM == _ABI64
   out->context_flags = MD_CONTEXT_MIPS64_FULL;
 #elif _MIPS_SIM == _ABIO32
@@ -253,6 +252,75 @@ void UContextReader::FillCPUContext(RawContextCPU *out, const ucontext_t *uc) {
 #if _MIPS_SIM == _ABIO32
   out->float_save.fir = uc->uc_mcontext.fpc_eir;  // Unused.
 #endif
+}
+
+#elif defined(__riscv)
+
+uintptr_t UContextReader::GetStackPointer(const ucontext_t* uc) {
+  return uc->uc_mcontext.__gregs[MD_CONTEXT_RISCV_REG_SP];
+}
+
+uintptr_t UContextReader::GetInstructionPointer(const ucontext_t* uc) {
+  return uc->uc_mcontext.__gregs[MD_CONTEXT_RISCV_REG_PC];
+}
+
+void UContextReader::FillCPUContext(RawContextCPU* out, const ucontext_t* uc) {
+# if __riscv__xlen == 32
+  out->context_flags = MD_CONTEXT_RISCV_FULL;
+# elif __riscv_xlen == 64
+  out->context_flags = MD_CONTEXT_RISCV64_FULL;
+# else
+#  error "Unexpected __riscv_xlen"
+# endif
+
+  out->pc  = uc->uc_mcontext.__gregs[0];
+  out->ra  = uc->uc_mcontext.__gregs[1];
+  out->sp  = uc->uc_mcontext.__gregs[2];
+  out->gp  = uc->uc_mcontext.__gregs[3];
+  out->tp  = uc->uc_mcontext.__gregs[4];
+  out->t0  = uc->uc_mcontext.__gregs[5];
+  out->t1  = uc->uc_mcontext.__gregs[6];
+  out->t2  = uc->uc_mcontext.__gregs[7];
+  out->s0  = uc->uc_mcontext.__gregs[8];
+  out->s1  = uc->uc_mcontext.__gregs[9];
+  out->a0  = uc->uc_mcontext.__gregs[10];
+  out->a1  = uc->uc_mcontext.__gregs[11];
+  out->a2  = uc->uc_mcontext.__gregs[12];
+  out->a3  = uc->uc_mcontext.__gregs[13];
+  out->a4  = uc->uc_mcontext.__gregs[14];
+  out->a5  = uc->uc_mcontext.__gregs[15];
+  out->a6  = uc->uc_mcontext.__gregs[16];
+  out->a7  = uc->uc_mcontext.__gregs[17];
+  out->s2  = uc->uc_mcontext.__gregs[18];
+  out->s3  = uc->uc_mcontext.__gregs[19];
+  out->s4  = uc->uc_mcontext.__gregs[20];
+  out->s5  = uc->uc_mcontext.__gregs[21];
+  out->s6  = uc->uc_mcontext.__gregs[22];
+  out->s7  = uc->uc_mcontext.__gregs[23];
+  out->s8  = uc->uc_mcontext.__gregs[24];
+  out->s9  = uc->uc_mcontext.__gregs[25];
+  out->s10 = uc->uc_mcontext.__gregs[26];
+  out->s11 = uc->uc_mcontext.__gregs[27];
+  out->t3  = uc->uc_mcontext.__gregs[28];
+  out->t4  = uc->uc_mcontext.__gregs[29];
+  out->t5  = uc->uc_mcontext.__gregs[30];
+  out->t6  = uc->uc_mcontext.__gregs[31];
+
+# if __riscv_flen == 32
+  for(int i = 0; i < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT; i++)
+    out->float_save.regs[i] = uc->uc_mcontext.__fpregs.__f.__f[i];
+  out->float_save.fpcsr = uc->uc_mcontext.__fpregs.__f.__fcsr;
+# elif __riscv_flen == 64
+  for(int i = 0; i < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT; i++)
+    out->float_save.regs[i] = uc->uc_mcontext.__fpregs.__d.__f[i];
+  out->float_save.fpcsr = uc->uc_mcontext.__fpregs.__d.__fcsr;
+# elif __riscv_flen == 128
+  for(int i = 0; i < MD_FLOATINGSAVEAREA_RISCV_FPR_COUNT; i++) {
+    out->float_save.regs[i].high = uc->uc_mcontext.__fpregs.__q.__f[2*i];
+    out->float_save.regs[i].low  = uc->uc_mcontext.__fpregs.__q.__f[2*i+1];
+  }
+  out->float_save.fpcsr = uc->uc_mcontext.__fpregs.__q.__fcsr;
+# endif
 }
 #endif
 

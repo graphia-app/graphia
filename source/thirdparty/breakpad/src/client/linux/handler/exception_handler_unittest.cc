@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -27,12 +26,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <poll.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/mman.h>
-#include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
@@ -201,7 +200,7 @@ static bool DoneCallback(const MinidumpDescriptor& descriptor,
 // optimize them out. In the case of ExceptionHandlerTest::ExternalDumper,
 // GCC-4.9 optimized out the entire set up of ExceptionHandler, causing
 // test failure.
-volatile int *p_null;  // external linkage, so GCC can't tell that it
+volatile int* p_null;  // external linkage, so GCC can't tell that it
                        // remains NULL. Volatile just for a good measure.
 static void DoNullPointerDereference() {
   *p_null = 1;
@@ -306,8 +305,22 @@ TEST(ExceptionHandlerTest, ParallelChildCrashesDontHang) {
     }
   }
 
-  // Wait a while until the child should have crashed.
-  usleep(1000000);
+  // Poll the child to see if it crashed.
+  int status, wp_pid;
+  for (int i = 0; i < 100; i++) {
+    wp_pid = HANDLE_EINTR(waitpid(child, &status, WNOHANG));
+    ASSERT_NE(-1, wp_pid);
+    if (wp_pid > 0) {
+      ASSERT_TRUE(WIFSIGNALED(status));
+      // If the child process terminated by itself,
+      // it will have returned SIGSEGV.
+      ASSERT_EQ(SIGSEGV, WTERMSIG(status));
+      return;
+    } else {
+      usleep(100000);
+    }
+  }
+
   // Kill the child if it is still running.
   kill(child, SIGKILL);
 
@@ -421,6 +434,10 @@ TEST(ExceptionHandlerTest, RedeliveryToDefaultHandler) {
 
   const pid_t child = fork();
   if (child == 0) {
+    // Custom signal handlers, which may have been installed by a test launcher,
+    // are undesirable in this child.
+    signal(SIGSEGV, SIG_DFL);
+
     CrashWithCallbacks(FilterCallbackReturnFalse, NULL, temp_dir.path());
   }
 
@@ -528,7 +545,7 @@ TEST(ExceptionHandlerTest, StackedHandlersUnhandledToBottom) {
 
 namespace {
 const int kSimpleFirstChanceReturnStatus = 42;
-bool SimpleFirstChanceHandler(int, void*, void*) {
+bool SimpleFirstChanceHandler(int, siginfo_t*, void*) {
   _exit(kSimpleFirstChanceReturnStatus);
 }
 }
@@ -869,17 +886,37 @@ TEST(ExceptionHandlerTest, InstructionPointerMemoryNullPointer) {
   ASSERT_GT(st.st_size, 0);
 
   // Read the minidump. Locate the exception record and the
-  // memory list, and then ensure that there is a memory region
+  // memory list, and then ensure that there is no memory region
   // in the memory list that covers the instruction pointer from
   // the exception record.
   Minidump minidump(minidump_path);
   ASSERT_TRUE(minidump.Read());
 
   MinidumpException* exception = minidump.GetException();
-  MinidumpMemoryList* memory_list = minidump.GetMemoryList();
   ASSERT_TRUE(exception);
+
+  MinidumpContext* exception_context = exception->GetContext();
+  ASSERT_TRUE(exception_context);
+
+  uint64_t instruction_pointer;
+  ASSERT_TRUE(exception_context->GetInstructionPointer(&instruction_pointer));
+  EXPECT_EQ(instruction_pointer, 0u);
+
+  MinidumpMemoryList* memory_list = minidump.GetMemoryList();
   ASSERT_TRUE(memory_list);
-  ASSERT_EQ(static_cast<unsigned int>(1), memory_list->region_count());
+
+  unsigned int region_count = memory_list->region_count();
+  ASSERT_GE(region_count, 1u);
+
+  for (unsigned int region_index = 0;
+       region_index < region_count;
+       ++region_index) {
+    MinidumpMemoryRegion* region =
+        memory_list->GetMemoryRegionAtIndex(region_index);
+    uint64_t region_base = region->GetBase();
+    EXPECT_FALSE(instruction_pointer >= region_base &&
+                 instruction_pointer < region_base + region->GetSize());
+  }
 
   unlink(minidump_path.c_str());
 }
@@ -970,7 +1007,7 @@ CrashHandler(const void* crash_context, size_t crash_context_size,
   msg.msg_control = cmsg;
   msg.msg_controllen = sizeof(cmsg);
 
-  struct cmsghdr *hdr = CMSG_FIRSTHDR(&msg);
+  struct cmsghdr* hdr = CMSG_FIRSTHDR(&msg);
   hdr->cmsg_level = SOL_SOCKET;
   hdr->cmsg_type = SCM_RIGHTS;
   hdr->cmsg_len = CMSG_LEN(sizeof(int));
@@ -979,7 +1016,7 @@ CrashHandler(const void* crash_context, size_t crash_context_size,
   hdr->cmsg_level = SOL_SOCKET;
   hdr->cmsg_type = SCM_CREDENTIALS;
   hdr->cmsg_len = CMSG_LEN(sizeof(struct ucred));
-  struct ucred *cred = reinterpret_cast<struct ucred*>(CMSG_DATA(hdr));
+  struct ucred* cred = reinterpret_cast<struct ucred*>(CMSG_DATA(hdr));
   cred->uid = getuid();
   cred->gid = getgid();
   cred->pid = getpid();
@@ -1032,7 +1069,7 @@ TEST(ExceptionHandlerTest, ExternalDumper) {
 
   pid_t crashing_pid = -1;
   int signal_fd = -1;
-  for (struct cmsghdr *hdr = CMSG_FIRSTHDR(&msg); hdr;
+  for (struct cmsghdr* hdr = CMSG_FIRSTHDR(&msg); hdr;
        hdr = CMSG_NXTHDR(&msg, hdr)) {
     if (hdr->cmsg_level != SOL_SOCKET)
       continue;
@@ -1042,7 +1079,7 @@ TEST(ExceptionHandlerTest, ExternalDumper) {
       ASSERT_EQ(sizeof(int), len);
       signal_fd = *(reinterpret_cast<int*>(CMSG_DATA(hdr)));
     } else if (hdr->cmsg_type == SCM_CREDENTIALS) {
-      const struct ucred *cred =
+      const struct ucred* cred =
           reinterpret_cast<struct ucred*>(CMSG_DATA(hdr));
       crashing_pid = cred->pid;
     }

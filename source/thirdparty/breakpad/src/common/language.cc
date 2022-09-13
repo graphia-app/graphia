@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -35,13 +34,14 @@
 #include "common/language.h"
 
 #include <stdlib.h>
+#include <array>
 
 #if !defined(__ANDROID__)
 #include <cxxabi.h>
 #endif
 
-#if defined(HAVE_RUST_DEMANGLE)
-#include <rust_demangle.h>
+#if defined(HAVE_RUSTC_DEMANGLE)
+#include <rustc_demangle.h>
 #endif
 
 #include <limits>
@@ -67,8 +67,8 @@ class CPPLanguage: public Language {
  public:
   CPPLanguage() {}
 
-  string MakeQualifiedName(const string &parent_name,
-                           const string &name) const {
+  string MakeQualifiedName(const string& parent_name,
+                           const string& name) const {
     return MakeQualifiedNameWithSeparator(parent_name, "::", name);
   }
 
@@ -79,6 +79,13 @@ class CPPLanguage: public Language {
     demangled->clear();
     return kDontDemangle;
 #else
+    // Attempting to demangle non-C++ symbols with the C++ demangler would print
+    // warnings and fail, so return kDontDemangle for these.
+    if (!IsMangledName(mangled)) {
+      demangled->clear();
+      return kDontDemangle;
+    }
+
     int status;
     char* demangled_c =
         abi::__cxa_demangle(mangled.c_str(), NULL, NULL, &status);
@@ -99,6 +106,21 @@ class CPPLanguage: public Language {
     return result;
 #endif
   }
+
+ private:
+  static bool IsMangledName(const string& name) {
+    // NOTE: For proper cross-compilation support, this should depend on target
+    // binary's platform, not current build platform.
+#if defined(__APPLE__)
+    // Mac C++ symbols can have up to 4 underscores, followed by a "Z".
+    // Non-C++ symbols are not coded that way, but may have leading underscores.
+    size_t i = name.find_first_not_of('_');
+    return i > 0 && i != string::npos && i <= 4 && name[i] == 'Z';
+#else
+    // Linux C++ symbols always start with "_Z".
+    return name.size() > 2 && name[0] == '_' && name[1] == 'Z';
+#endif
+  }
 };
 
 CPPLanguage CPPLanguageSingleton;
@@ -108,8 +130,8 @@ class JavaLanguage: public Language {
  public:
   JavaLanguage() {}
 
-  string MakeQualifiedName(const string &parent_name,
-                           const string &name) const {
+  string MakeQualifiedName(const string& parent_name,
+                           const string& name) const {
     return MakeQualifiedNameWithSeparator(parent_name, ".", name);
   }
 };
@@ -121,8 +143,8 @@ class SwiftLanguage: public Language {
  public:
   SwiftLanguage() {}
 
-  string MakeQualifiedName(const string &parent_name,
-                           const string &name) const {
+  string MakeQualifiedName(const string& parent_name,
+                           const string& name) const {
     return MakeQualifiedNameWithSeparator(parent_name, ".", name);
   }
 
@@ -145,8 +167,8 @@ class RustLanguage: public Language {
  public:
   RustLanguage() {}
 
-  string MakeQualifiedName(const string &parent_name,
-                           const string &name) const {
+  string MakeQualifiedName(const string& parent_name,
+                           const string& name) const {
     return MakeQualifiedNameWithSeparator(parent_name, ".", name);
   }
 
@@ -156,13 +178,13 @@ class RustLanguage: public Language {
     // abi_demangle doesn't produce stellar results due to them having
     // another layer of encoding.
     // If callers provide rustc-demangle, use that.
-#if defined(HAVE_RUST_DEMANGLE)
-    char* rust_demangled = rust_demangle(mangled.c_str());
-    if (rust_demangled == nullptr) {
+#if defined(HAVE_RUSTC_DEMANGLE)
+    std::array<char, 1 * 1024 * 1024> rustc_demangled;
+    if (rustc_demangle(mangled.c_str(), rustc_demangled.data(),
+                       rustc_demangled.size()) == 0) {
       return kDemangleFailure;
     }
-    demangled->assign(rust_demangled);
-    free_rust_demangled_name(rust_demangled);
+    demangled->assign(rustc_demangled.data());
 #else
     // Otherwise, pass through the mangled name so callers can demangle
     // after the fact.
@@ -180,8 +202,8 @@ class AssemblerLanguage: public Language {
   AssemblerLanguage() {}
 
   bool HasFunctions() const { return false; }
-  string MakeQualifiedName(const string &parent_name,
-                           const string &name) const {
+  string MakeQualifiedName(const string& parent_name,
+                           const string& name) const {
     return name;
   }
 };

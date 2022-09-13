@@ -1,7 +1,6 @@
 // -*- mode: c++ -*-
 
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,7 +12,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -81,14 +80,14 @@ class StackwalkerX86 : public Stackwalker {
   // to construct the frame that called frames.back(). The caller
   // takes ownership of the returned frame. Return NULL on failure.
   StackFrameX86* GetCallerByWindowsFrameInfo(
-      const vector<StackFrame*> &frames,
+      const vector<StackFrame*>& frames,
       WindowsFrameInfo* windows_frame_info,
       bool stack_scan_allowed);
 
   // Use cfi_frame_info (derived from STACK CFI records) to construct
   // the frame that called frames.back(). The caller takes ownership
   // of the returned frame. Return NULL on failure.
-  StackFrameX86* GetCallerByCFIFrameInfo(const vector<StackFrame*> &frames,
+  StackFrameX86* GetCallerByCFIFrameInfo(const vector<StackFrame*>& frames,
                                          CFIFrameInfo* cfi_frame_info);
 
   // Assuming a traditional frame layout --- where the caller's %ebp
@@ -96,7 +95,7 @@ class StackwalkerX86 : public Stackwalker {
   // %ebp points to the saved %ebp --- construct the frame that called
   // frames.back(). The caller takes ownership of the returned frame.
   // Return NULL on failure.
-  StackFrameX86* GetCallerByEBPAtBase(const vector<StackFrame*> &frames,
+  StackFrameX86* GetCallerByEBPAtBase(const vector<StackFrame*>& frames,
                                       bool stack_scan_allowed);
 
   // Stores the CPU context corresponding to the innermost stack frame to

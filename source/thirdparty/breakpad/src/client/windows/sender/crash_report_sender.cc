@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -45,12 +44,12 @@ namespace google_breakpad {
 
 static const char kCheckpointSignature[] = "GBP1\n";
 
-CrashReportSender::CrashReportSender(const wstring &checkpoint_file)
+CrashReportSender::CrashReportSender(const wstring& checkpoint_file)
     : checkpoint_file_(checkpoint_file),
       max_reports_per_day_(-1),
       last_sent_date_(-1),
       reports_sent_(0) {
-  FILE *fd;
+  FILE* fd;
   if (OpenCheckpointFile(L"r", &fd) == 0) {
     ReadCheckpoint(fd);
     fclose(fd);
@@ -58,8 +57,8 @@ CrashReportSender::CrashReportSender(const wstring &checkpoint_file)
 }
 
 ReportResult CrashReportSender::SendCrashReport(
-    const wstring &url, const map<wstring, wstring> &parameters,
-    const map<wstring, wstring> &files, wstring *report_code) {
+    const wstring& url, const map<wstring, wstring>& parameters,
+    const map<wstring, wstring>& files, wstring* report_code) {
   int today = GetCurrentDate();
   if (today == last_sent_date_ &&
       max_reports_per_day_ != -1 &&
@@ -68,7 +67,7 @@ ReportResult CrashReportSender::SendCrashReport(
   }
 
   int http_response = 0;
-  bool result = HTTPUpload::SendRequest(
+  bool result = HTTPUpload::SendMultipartPostRequest(
     url, parameters, files, NULL, report_code,
     &http_response);
 
@@ -82,7 +81,7 @@ ReportResult CrashReportSender::SendCrashReport(
   }
 }
 
-void CrashReportSender::ReadCheckpoint(FILE *fd) {
+void CrashReportSender::ReadCheckpoint(FILE* fd) {
   char buf[128];
   if (!fgets(buf, sizeof(buf), fd) ||
       strcmp(buf, kCheckpointSignature) != 0) {
@@ -108,7 +107,7 @@ void CrashReportSender::ReportSent(int today) {
   ++reports_sent_;
 
   // Update the checkpoint file
-  FILE *fd;
+  FILE* fd;
   if (OpenCheckpointFile(L"w", &fd) == 0) {
     fputs(kCheckpointSignature, fd);
     fprintf(fd, "%d\n", last_sent_date_);
@@ -124,7 +123,7 @@ int CrashReportSender::GetCurrentDate() const {
       system_time.wDay;
 }
 
-int CrashReportSender::OpenCheckpointFile(const wchar_t *mode, FILE **fd) {
+int CrashReportSender::OpenCheckpointFile(const wchar_t* mode, FILE** fd) {
   if (checkpoint_file_.empty()) {
     return ENOENT;
   }

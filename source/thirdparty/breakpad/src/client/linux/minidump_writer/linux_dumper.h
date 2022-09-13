@@ -1,5 +1,4 @@
-// Copyright (c) 2010, Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -38,6 +37,7 @@
 #ifndef CLIENT_LINUX_MINIDUMP_WRITER_LINUX_DUMPER_H_
 #define CLIENT_LINUX_MINIDUMP_WRITER_LINUX_DUMPER_H_
 
+#include <assert.h>
 #include <elf.h>
 #if defined(__ANDROID__)
 #include <link.h>
@@ -46,6 +46,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/user.h>
+
+#include <vector>
 
 #include "client/linux/dump_writer_common/mapping_info.h"
 #include "client/linux/dump_writer_common/thread_info.h"
@@ -57,10 +59,12 @@ namespace google_breakpad {
 
 // Typedef for our parsing of the auxv variables in /proc/pid/auxv.
 #if defined(__i386) || defined(__ARM_EABI__) || \
- (defined(__mips__) && _MIPS_SIM == _ABIO32)
+     (defined(__mips__) && _MIPS_SIM == _ABIO32) || \
+     (defined(__riscv) && __riscv_xlen == 32)
 typedef Elf32_auxv_t elf_aux_entry;
 #elif defined(__x86_64) || defined(__aarch64__) || \
-     (defined(__mips__) && _MIPS_SIM != _ABIO32)
+     (defined(__mips__) && _MIPS_SIM != _ABIO32) || \
+     (defined(__riscv) && __riscv_xlen == 64)
 typedef Elf64_auxv_t elf_aux_entry;
 #endif
 
@@ -107,8 +111,8 @@ class LinuxDumper {
   }
 
   // These are only valid after a call to |Init|.
-  const wasteful_vector<pid_t> &threads() { return threads_; }
-  const wasteful_vector<MappingInfo*> &mappings() { return mappings_; }
+  const wasteful_vector<pid_t>& threads() { return threads_; }
+  const wasteful_vector<MappingInfo*>& mappings() { return mappings_; }
   const MappingInfo* FindMapping(const void* address) const;
   // Find the mapping which the given memory address falls in. Unlike
   // FindMapping, this method uses the unadjusted mapping address
@@ -184,6 +188,14 @@ class LinuxDumper {
   void set_crash_signal_code(int code) { crash_signal_code_ = code; }
   int crash_signal_code() const { return crash_signal_code_; }
 
+  void set_crash_exception_info(const std::vector<uint64_t>& exception_info) {
+    assert(exception_info.size() <= MD_EXCEPTION_MAXIMUM_PARAMETERS);
+    crash_exception_info_ = exception_info;
+  }
+  const std::vector<uint64_t>& crash_exception_info() const {
+    return crash_exception_info_;
+  }
+
   pid_t crash_thread() const { return crash_thread_; }
   void set_crash_thread(pid_t crash_thread) { crash_thread_ = crash_thread; }
 
@@ -235,6 +247,9 @@ class LinuxDumper {
 
   // The code associated with |crash_signal_|.
   int crash_signal_code_;
+
+  // The additional fields associated with |crash_signal_|.
+  std::vector<uint64_t> crash_exception_info_;
 
   // ID of the crashed thread.
   pid_t crash_thread_;

@@ -1,5 +1,4 @@
-// Copyright (c) 2010 Google Inc.
-// All rights reserved.
+// Copyright 2010 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -132,10 +131,9 @@ StackFrame* StackwalkerPPC::GetCallerFrame(const CallStack* stack,
   frame->trust = StackFrame::FRAME_TRUST_FP;
 
   // Should we terminate the stack walk? (end-of-stack or broken invariant)
-  if (TerminateWalk(instruction,
-                    stack_pointer,
-                    last_frame->context.gpr[1],
-                    stack->frames()->size() == 1)) {
+  if (TerminateWalk(instruction, stack_pointer, last_frame->context.gpr[1],
+                    /*first_unwind=*/last_frame->trust ==
+                        StackFrame::FRAME_TRUST_CONTEXT)) {
     return NULL;
   }
 

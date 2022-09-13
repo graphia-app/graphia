@@ -1,5 +1,4 @@
-// Copyright (c) 2006, Google Inc.
-// All rights reserved.
+// Copyright 2006 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -118,7 +117,7 @@ ExceptionHandler::ExceptionHandler(
              NULL);                    // custom_info - not used
 }
 
-ExceptionHandler::ExceptionHandler(const wstring &dump_path,
+ExceptionHandler::ExceptionHandler(const wstring& dump_path,
                                    FilterCallback filter,
                                    MinidumpCallback callback,
                                    void* callback_context,
@@ -277,12 +276,8 @@ void ExceptionHandler::Initialize(
     }
     handler_stack_->push_back(this);
 
-    if (handler_types & HANDLER_EXCEPTION) {
-#if defined(_WIN64)
-      AddVectoredExceptionHandler(/*first=*/0, PreExceptionVectoredHandler);
-#endif // WIN64
+    if (handler_types & HANDLER_EXCEPTION)
       previous_filter_ = SetUnhandledExceptionFilter(HandleException);
-    }
 
 #if _MSC_VER >= 1400  // MSVC 2005/8
     if (handler_types & HANDLER_INVALID_PARAMETER)
@@ -308,10 +303,8 @@ ExceptionHandler::~ExceptionHandler() {
   if (handler_types_ != HANDLER_NONE) {
     EnterCriticalSection(&handler_stack_critical_section_);
 
-    if (handler_types_ & HANDLER_EXCEPTION) {
-      RemoveVectoredExceptionHandler(PreExceptionVectoredHandler);
+    if (handler_types_ & HANDLER_EXCEPTION)
       SetUnhandledExceptionFilter(previous_filter_);
-    }
 
 #if _MSC_VER >= 1400  // MSVC 2005/8
     if (handler_types_ & HANDLER_INVALID_PARAMETER)
@@ -389,12 +382,12 @@ bool ExceptionHandler::RequestUpload(DWORD crash_id) {
 
 // static
 DWORD ExceptionHandler::ExceptionHandlerThreadMain(void* lpParameter) {
-  ExceptionHandler* self = reinterpret_cast<ExceptionHandler *>(lpParameter);
+  ExceptionHandler* self = reinterpret_cast<ExceptionHandler*>(lpParameter);
   assert(self);
   assert(self->handler_start_semaphore_ != NULL);
   assert(self->handler_finish_semaphore_ != NULL);
 
-  while (true) {
+  for (;;) {
     if (WaitForSingleObject(self->handler_start_semaphore_, INFINITE) ==
         WAIT_OBJECT_0) {
       // Perform the requested action.
@@ -474,53 +467,47 @@ class AutoExceptionHandler {
   ExceptionHandler* handler_;
 };
 
-bool ExceptionHandler::AttemptToWriteCrashReport(EXCEPTION_POINTERS* exinfo) {
+// static
+LONG ExceptionHandler::HandleException(EXCEPTION_POINTERS* exinfo) {
+  AutoExceptionHandler auto_exception_handler;
+  ExceptionHandler* current_handler = auto_exception_handler.get_handler();
+
   // Ignore EXCEPTION_BREAKPOINT and EXCEPTION_SINGLE_STEP exceptions.  This
   // logic will short-circuit before calling WriteMinidumpOnHandlerThread,
   // allowing something else to handle the breakpoint without incurring the
   // overhead transitioning to and from the handler thread.  This behavior
   // can be overridden by calling ExceptionHandler::set_handle_debug_exceptions.
   DWORD code = exinfo->ExceptionRecord->ExceptionCode;
+  LONG action;
   bool is_debug_exception = (code == EXCEPTION_BREAKPOINT) ||
                             (code == EXCEPTION_SINGLE_STEP) ||
                             (code == DBG_PRINTEXCEPTION_C) ||
                             (code == DBG_PRINTEXCEPTION_WIDE_C);
 
   if (code == EXCEPTION_INVALID_HANDLE &&
-      consume_invalid_handle_exceptions_) {
+      current_handler->consume_invalid_handle_exceptions_) {
     return EXCEPTION_CONTINUE_EXECUTION;
   }
 
   bool success = false;
 
   if (!is_debug_exception ||
-      get_handle_debug_exceptions()) {
+      current_handler->get_handle_debug_exceptions()) {
     // If out-of-proc crash handler client is available, we have to use that
     // to generate dump and we cannot fall back on in-proc dump generation
     // because we never prepared for an in-proc dump generation
 
     // In case of out-of-process dump generation, directly call
     // WriteMinidumpWithException since there is no separate thread running.
-    if (IsOutOfProcess()) {
-      success = WriteMinidumpWithException(
+    if (current_handler->IsOutOfProcess()) {
+      success = current_handler->WriteMinidumpWithException(
           GetCurrentThreadId(),
           exinfo,
           NULL);
     } else {
-      success = WriteMinidumpOnHandlerThread(exinfo, NULL);
+      success = current_handler->WriteMinidumpOnHandlerThread(exinfo, NULL);
     }
   }
-
-  return success;
-}
-
-// static
-LONG ExceptionHandler::HandleException(EXCEPTION_POINTERS* exinfo) {
-  AutoExceptionHandler auto_exception_handler;
-  ExceptionHandler* current_handler = auto_exception_handler.get_handler();
-
-  LONG action;
-  bool success = current_handler->AttemptToWriteCrashReport(exinfo);
 
   // The handler fully handled the exception.  Returning
   // EXCEPTION_EXECUTE_HANDLER indicates this to the system, and usually
@@ -549,109 +536,6 @@ LONG ExceptionHandler::HandleException(EXCEPTION_POINTERS* exinfo) {
 
   return action;
 }
-
-#if defined(_WIN64)
-// static
-LONG ExceptionHandler::PreExceptionVectoredHandler(EXCEPTION_POINTERS* exinfo) {
-  // This function is called when an exception has occurred, but
-  // before the SEH unwinding mechanism takes over.
-  //
-  // We have a problem with the JIT on Win64; it doesn't follow the
-  // platform's conventions for exposing unwind information.
-  // Dynamically-generated code should record unwind tables for all
-  // such code by means of RtlInstallFunctionTableCallback or
-  // RtlAddFunctionTable.  Since the JIT doesn't do this, the
-  // unwinding mechanism can't find unwind information for any PC
-  // which lies within JIT'd code.  Therefore, it assumes--per
-  // platform conventions--that such a PC represents a leaf function,
-  // which can be walked via a simple scheme of finding the return
-  // address at [rsp] and continuing.  Doing this for JIT'd code
-  // results in random walks through the address space, eventually
-  // leading to errors while unwinding, which causes crashes that
-  // completely bypass the crash reporter.
-  //
-  // This situation is undesirable.
-  //
-  // As a stopgap, we employ a heuristic here.  We manually unwind the
-  // stack outrselves, simulating what RtlUnwindEx and friends would
-  // do.  But if we encounter a leaf function in the middle of the
-  // call stack, then we know that actual stack unwinding is going to
-  // cause nested errors.  Therefore, we go ahead and dump a crash
-  // report in that case.
-  //
-  // If we don't walk through too many leaf functions, and thereby
-  // unwind all the way back to the beginning of the program, then we
-  // do not dump a crash report.
-  //
-  // In either scenario, we will return EXCEPTION_CONTINUE_SEARCH from
-  // this handler; there's no way we could possibly resume execution.
-  // This handler, then, simply acts as a heuristic filter to continue
-  // to get crash reports in the presence of JIT code that doesn't
-  // follow platform conventions.
-  //
-  // Credit is due to http://www.nynaeve.net/?p=113 and associated
-  // links for describing everything we need for this routine.
-  CONTEXT context = *exinfo->ContextRecord;
-  UNWIND_HISTORY_TABLE unwind_history_table;
-  RtlZeroMemory(&unwind_history_table, sizeof(unwind_history_table));
-
-  bool first_time = true;
-
-  while (true) {
-    KNONVOLATILE_CONTEXT_POINTERS nv_context;
-    RtlZeroMemory(&nv_context, sizeof(nv_context));
-    ULONG64 image_base, establisher_frame;
-    PVOID handler_data;
-
-    PRUNTIME_FUNCTION rtfunc = RtlLookupFunctionEntry(context.Rip,
-						      &image_base,
-						      &unwind_history_table);
-
-    if (!rtfunc) {
-      // context.Rip was a "leaf function" without any unwind data.
-
-      // Check to see whether we are encountering a leaf function in
-      // the middle of our unwind.  Such a function violates the
-      // platform convenctions, and we will assume that such a
-      // function is generated by the JIT.
-      if (!first_time) {
-	// Attempt to write out a crash report.  This writing might
-	// fail, because we have a debug exception or because we
-	// cannot write a crash report, for instance.  Whatever the
-	// case, we cannot usefully recover from that failure here, so
-	// ignore the return value.
-	AutoExceptionHandler auto_exception_handler;
-	ExceptionHandler* current_handler =
-	  auto_exception_handler.get_handler();
-	(void) current_handler->AttemptToWriteCrashReport(exinfo);
-	break;
-      }
-      // Leaf functions are unwound by following return addresses at the
-      // current stack pointer.
-      context.Rip = *reinterpret_cast<ULONG64*>(context.Rsp);
-      context.Rsp += sizeof(ULONG64);
-    } else {
-      // Let the system do the hard work of unwinding for us.
-      RtlVirtualUnwind(UNW_FLAG_NHANDLER,
-		       image_base,
-		       context.Rip,
-		       rtfunc,
-		       &context,
-		       &handler_data,
-		       &establisher_frame,
-		       &nv_context);
-    }
-
-    // A RIP of zero means that we have finished walking the call stack.
-    if (!context.Rip) {
-      break;
-    }
-    first_time = false;
-  }
-
-  return EXCEPTION_CONTINUE_SEARCH;
-}
-#endif // _WIN64
 
 #if _MSC_VER >= 1400  // MSVC 2005/8
 // static
@@ -880,7 +764,7 @@ bool ExceptionHandler::WriteMinidumpForException(EXCEPTION_POINTERS* exinfo) {
 }
 
 // static
-bool ExceptionHandler::WriteMinidump(const wstring &dump_path,
+bool ExceptionHandler::WriteMinidump(const wstring& dump_path,
                                      MinidumpCallback callback,
                                      void* callback_context,
                                      MINIDUMP_TYPE dump_type) {
@@ -1091,7 +975,9 @@ bool ExceptionHandler::WriteMinidumpWithExceptionForProcess(
 #if defined(_M_IX86)
           exinfo->ContextRecord->Eip;
 #elif defined(_M_AMD64)
-        exinfo->ContextRecord->Rip;
+          exinfo->ContextRecord->Rip;
+#elif defined(_M_ARM64)
+          exinfo->ContextRecord->Pc;
 #else
 #error Unsupported platform
 #endif

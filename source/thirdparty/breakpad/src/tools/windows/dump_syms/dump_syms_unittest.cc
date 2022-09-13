@@ -1,4 +1,4 @@
-// Copyright 2003 Google Inc. All rights reserved.
+// Copyright 2003 Google LLC
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -10,7 +10,7 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
+//     * Neither the name of Google LLC nor the names of its
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -55,9 +55,13 @@ const wchar_t* kRootNames[] = {
   // without source data.
   L"omap_stretched",
   // A PDB file with OMAP data for an image that has been basic block reordered.
-  L"omap_reorder_bbs",  
+  L"omap_reorder_bbs",
   // A 64bit PDB file with no OMAP data.
   L"dump_syms_regtest64",
+};
+
+const wchar_t* kPEOnlyRootNames[] = {
+  L"pe_only_symbol_test",
 };
 
 void TrimLastComponent(const std::wstring& path,
@@ -162,8 +166,23 @@ void GetFileContents(const std::wstring& path, std::string* content) {
   }
 }
 
-class DumpSymsRegressionTest : public testing::TestWithParam<const wchar_t *> {
+class DumpSymsRegressionTest : public testing::TestWithParam<const wchar_t*> {
  public:
+  virtual void SetUp() {
+    std::wstring self_dir;
+    ASSERT_TRUE(GetSelfDirectory(&self_dir));
+    dump_syms_exe = self_dir + L"\\dump_syms.exe";
+
+    TrimLastComponent(self_dir, &testdata_dir, NULL);
+    testdata_dir += L"\\testdata";
+  }
+
+  std::wstring dump_syms_exe;
+  std::wstring testdata_dir;
+};
+
+class DumpSymsPEOnlyRegressionTest : public testing::TestWithParam<const wchar_t*> {
+public:
   virtual void SetUp() {
     std::wstring self_dir;
     ASSERT_TRUE(GetSelfDirectory(&self_dir));
@@ -180,24 +199,44 @@ class DumpSymsRegressionTest : public testing::TestWithParam<const wchar_t *> {
 }  //namespace
 
 TEST_P(DumpSymsRegressionTest, EnsureDumpedSymbolsMatch) {
-    const wchar_t* root_name = GetParam();
-    std::wstring root_path = testdata_dir + L"\\" + root_name;
+  const wchar_t* root_name = GetParam();
+  std::wstring root_path = testdata_dir + L"\\" + root_name;
 
-    std::wstring sym_path = root_path + L".sym";
-    std::string expected_symbols;
-    ASSERT_NO_FATAL_FAILURE(GetFileContents(sym_path, &expected_symbols));
+  std::wstring sym_path = root_path + L".sym";
+  std::string expected_symbols;
+  ASSERT_NO_FATAL_FAILURE(GetFileContents(sym_path, &expected_symbols));
 
-    std::wstring pdb_path = root_path + L".pdb";
-    std::wstring command_line = L"\"" + dump_syms_exe + L"\" \"" +
-        pdb_path + L"\"";
-    std::string symbols;
-    ASSERT_NO_FATAL_FAILURE(RunCommand(command_line, &symbols));
+  std::wstring pdb_path = root_path + L".pdb";
+  std::wstring command_line = L"\"" + dump_syms_exe + L"\" \"" +
+    pdb_path + L"\"";
+  std::string symbols;
+  ASSERT_NO_FATAL_FAILURE(RunCommand(command_line, &symbols));
 
-    EXPECT_EQ(expected_symbols, symbols);
+  EXPECT_EQ(expected_symbols, symbols);
 }
 
-INSTANTIATE_TEST_CASE_P(DumpSyms, DumpSymsRegressionTest,
-                        testing::ValuesIn(kRootNames));
+INSTANTIATE_TEST_SUITE_P(DumpSyms, DumpSymsRegressionTest,
+  testing::ValuesIn(kRootNames));
+
+TEST_P(DumpSymsPEOnlyRegressionTest, EnsurePEOnlyDumpedSymbolsMatch) {
+  const wchar_t* root_name = GetParam();
+  std::wstring root_path = testdata_dir + L"\\" + root_name;
+
+  std::wstring sym_path = root_path + L".sym";
+  std::string expected_symbols;
+  ASSERT_NO_FATAL_FAILURE(GetFileContents(sym_path, &expected_symbols));
+
+  std::wstring dll_path = root_path + L".dll";
+  std::wstring command_line = L"\"" + dump_syms_exe + L"\" --pe \"" +
+    dll_path + L"\"";
+  std::string symbols;
+  ASSERT_NO_FATAL_FAILURE(RunCommand(command_line, &symbols));
+
+  EXPECT_EQ(expected_symbols, symbols);
+}
+
+INSTANTIATE_TEST_SUITE_P(PEOnlyDumpSyms, DumpSymsPEOnlyRegressionTest,
+  testing::ValuesIn(kPEOnlyRootNames));
 
 
 }  // namespace dump_syms

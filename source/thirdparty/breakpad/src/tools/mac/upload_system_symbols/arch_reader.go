@@ -1,5 +1,4 @@
-/* Copyright 2014, Google Inc.
-All rights reserved.
+/* Copyright 2014 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -11,7 +10,7 @@ notice, this list of conditions and the following disclaimer.
 copyright notice, this list of conditions and the following disclaimer
 in the documentation and/or other materials provided with the
 distribution.
- * Neither the name of Google Inc. nor the names of its
+ * Neither the name of Google LLC nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
 
@@ -46,6 +45,9 @@ func getArchStringFromHeader(header macho.FileHeader) string {
 	// TODO(rsesek): As of 10.9.4, OS X doesn't list these in /usr/include/mach/machine.h.
 	if header.Cpu == C.kCPU_TYPE_ARM64 && header.SubCpu == C.kCPU_SUBTYPE_ARM64_ALL {
 		return "arm64"
+	}
+	if header.Cpu == C.kCPU_TYPE_ARM64 && header.SubCpu == C.kCPU_SUBTYPE_ARM64_E {
+		return "arm64e"
 	}
 	if header.Cpu == C.kCPU_TYPE_ARM && header.SubCpu == C.kCPU_SUBTYPE_ARM_V7S {
 		return "armv7s"
