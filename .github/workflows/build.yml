@@ -1,5 +1,5 @@
 name: Build
-on: [push]
+on: [push, pull_request]
 env:
   QT_VERSION: 6.3.2
   QT_MODULES: qtwebengine qtwebchannel qtpositioning
