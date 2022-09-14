@@ -42,14 +42,17 @@ jobs:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Linux AppImage
         path: build/gcc/Graphia-*.tar.gz
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Linux Logs
         path: build/gcc/*.log
     - name: Upload Symbols
+      if: github.event_name != 'pull_request'
       run: scripts/upload-symbols.sh
       shell: bash
       env:
@@ -83,14 +86,17 @@ jobs:
         WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
         WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Windows Installer
         path: build/Graphia-*-installer.exe
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Windows Logs
         path: build/*.log
     - name: Upload Symbols
+      if: github.event_name != 'pull_request'
       run: scripts/upload-symbols.sh
       shell: bash
       env:
@@ -131,14 +137,17 @@ jobs:
         APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: macOS Disk Image
         path: build/Graphia-*.dmg
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: macOS Logs
         path: build/*.log
     - name: Upload Symbols
+      if: github.event_name != 'pull_request'
       run: scripts/upload-symbols.sh
       shell: bash
       env:
@@ -179,6 +188,7 @@ jobs:
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -228,6 +238,7 @@ jobs:
         CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -266,6 +277,7 @@ jobs:
         CPPCHECK: cppcheck
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -313,6 +325,7 @@ jobs:
         CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -341,11 +354,13 @@ jobs:
       env:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
+      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
 
   check-is-release:
+    if: github.event_name != 'pull_request'
     name: Check For Release Tag
     runs-on: ubuntu-latest
     outputs:
@@ -375,7 +390,7 @@ jobs:
 
   release:
     name: GitHub Release
-    if: needs.check-is-release.outputs.is-release == 'true'
+    if: github.event_name != 'pull_request' && needs.check-is-release.outputs.is-release == 'true'
     runs-on: ubuntu-latest
     needs:
       - check-is-release
@@ -412,6 +427,7 @@ jobs:
         file_glob: true
 
   prereleasebuilds:
+    if: github.event_name != 'pull_request'
     name: Upload Builds to graphia.dev
     runs-on: ubuntu-latest
     needs:
@@ -452,6 +468,7 @@ jobs:
         remote: ${{ secrets.PRERELEASE_DIR }}
 
   prereleasestaticanalysislogs:
+    if: github.event_name != 'pull_request'
     name: Upload Logs to graphia.dev
     runs-on: ubuntu-latest
     needs:
