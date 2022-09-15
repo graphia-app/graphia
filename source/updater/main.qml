@@ -143,6 +143,7 @@ ApplicationWindow
 
         BusyIndicator
         {
+            visible: parent.visible
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 96
             Layout.preferredHeight: 96

@@ -566,6 +566,8 @@ Window
 
             BusyIndicator
             {
+                visible: parent.visible
+
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillWidth: true
                 Layout.fillHeight: true

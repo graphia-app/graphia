@@ -23,6 +23,8 @@ BusyIndicator
 {
     id: root
 
+    visible: parent ? parent.visible : true
+
     property alias delay: timer.interval
     property bool delayedRunning: false
 

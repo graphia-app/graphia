@@ -882,6 +882,7 @@ PluginContent
 
                     DelayedBusyIndicator
                     {
+                        visible: parent.visible
                         anchors.centerIn: parent
                         width: 64
                         height: 64

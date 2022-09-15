@@ -411,7 +411,7 @@ BaseParameterDialog
                     BusyIndicator
                     {
                         anchors.centerIn: parent
-                        running: dataRectPage._busy
+                        visible: dataRectPage._busy
                     }
 
                     NamedIcon
@@ -1218,6 +1218,7 @@ BaseParameterDialog
 
                         DelayedBusyIndicator
                         {
+                            visible: parent.visible
                             anchors.centerIn: parent
                             width: { return Math.min(64, parent.width); }
                             height: { return Math.min(64, parent.height); }
@@ -1562,6 +1563,7 @@ BaseParameterDialog
                     enabled: !tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy
                     BusyIndicator
                     {
+                        visible: parent.visible
                         anchors.centerIn: parent
                         running: tabularDataParser.graphSizeEstimateInProgress || dataRectPage._busy
                     }
