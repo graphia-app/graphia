@@ -36,6 +36,7 @@ then
 
   rm -rf ${CERTIFICATE_P12_FILE}
   SIGNING_ENABLED=true
+  echo Signing enabled...
 fi
 
 BUILD_DIR=build
