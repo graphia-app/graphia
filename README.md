@@ -1,4 +1,4 @@
-# [Graphia](https://graphia.app/)
+# [Graphia](https://graphia.app/) Test PR
 
 [![Build Status](https://github.com/graphia-app/graphia/workflows/Build/badge.svg)](https://github.com/graphia-app/graphia/actions?query=workflow%3ABuild)
 ![Release](https://img.shields.io/github/v/release/graphia-app/graphia)
