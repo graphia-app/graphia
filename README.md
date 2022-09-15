@@ -1,3 +1,4 @@
+# Arbitrary change
 # [Graphia](https://graphia.app/)
 
 [![Build Status](https://github.com/graphia-app/graphia/workflows/Build/badge.svg)](https://github.com/graphia-app/graphia/actions?query=workflow%3ABuild)
