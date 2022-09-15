@@ -47,7 +47,6 @@ jobs:
         name: Linux AppImage
         path: build/gcc/Graphia-*.tar.gz
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Linux Logs
         path: build/gcc/*.log
@@ -91,7 +90,6 @@ jobs:
         name: Windows Installer
         path: build/Graphia-*-installer.exe
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Windows Logs
         path: build/*.log
@@ -142,7 +140,6 @@ jobs:
         name: macOS Disk Image
         path: build/Graphia-*.dmg
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: macOS Logs
         path: build/*.log
@@ -188,7 +185,6 @@ jobs:
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -238,7 +234,6 @@ jobs:
         CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -277,7 +272,6 @@ jobs:
         CPPCHECK: cppcheck
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -325,7 +319,6 @@ jobs:
         CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -354,7 +347,6 @@ jobs:
       env:
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request'
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
