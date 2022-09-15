@@ -24,24 +24,24 @@ IF EXIST %BUILD_DIR% rmdir /s /q %BUILD_DIR%
 mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
-cmake --version || EXIT /B 1
-cmake -DCMAKE_UNITY_BUILD=%UNITY_BUILD% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -GNinja ^
-    -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" ^
-    .. || EXIT /B 1
-type variables.bat
-call variables.bat
-cmake --build . --target all | tee compiler-%VERSION%.log || EXIT /B 1
+:: cmake --version || EXIT /B 1
+:: cmake -DCMAKE_UNITY_BUILD=%UNITY_BUILD% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -GNinja ^
+::     -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" ^
+::     .. || EXIT /B 1
+:: type variables.bat
+:: call variables.bat
+:: cmake --build . --target all | tee compiler-%VERSION%.log || EXIT /B 1
 
 cd ..
 
 setlocal EnableDelayedExpansion
 
-source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
-	%BUILD_DIR%\%PRODUCT_NAME%.exe > %BUILD_DIR%\%PRODUCT_NAME%.sym || EXIT /B 1
-source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
-	%BUILD_DIR%\thirdparty.dll > %BUILD_DIR%\thirdparty.dll.sym || EXIT /B 1
+:: source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
+:: 	%BUILD_DIR%\%PRODUCT_NAME%.exe > %BUILD_DIR%\%PRODUCT_NAME%.sym || EXIT /B 1
+:: source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
+:: 	%BUILD_DIR%\thirdparty.dll > %BUILD_DIR%\thirdparty.dll.sym || EXIT /B 1
 
-FOR %%f IN (%BUILD_DIR%\plugins\*.dll) DO (
-	source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
-		%%f > %%~df%%~pf%%~nf.sym || EXIT /B 1
-)
+:: FOR %%f IN (%BUILD_DIR%\plugins\*.dll) DO (
+:: 	source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
+:: 		%%f > %%~df%%~pf%%~nf.sym || EXIT /B 1
+:: )
