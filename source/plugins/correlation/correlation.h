@@ -489,7 +489,7 @@ public:
     {
         return QObject::tr("The Simple Matching Coefficient is a statistic used for "
             "gauging the similarity and diversity of sample sets. It is identical "
-            "to Jaccard, except that it counts mutual abscence.");
+            "to Jaccard, except that it counts mutual absence.");
     }
 
     QString attributeName() const override { return QObject::tr("Simple Matching Coefficient"); }
