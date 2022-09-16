@@ -537,8 +537,9 @@ BaseParameterDialog
 
                             ComboBox
                             {
-                                visible: dataTypeComboBox.value === CorrelationDataType.Discrete
                                 id: discreteAlgorithmComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Discrete
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -577,8 +578,9 @@ BaseParameterDialog
 
                             ComboBox
                             {
-                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 id: continuousAlgorithmComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -620,8 +622,9 @@ BaseParameterDialog
 
                             ComboBox
                             {
-                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 id: polarityComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -667,6 +670,7 @@ BaseParameterDialog
                                 id: missingDataTypeComboBox
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous &&
                                     tabularDataParser.dataRect.hasMissingValues
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -769,6 +773,7 @@ BaseParameterDialog
                             {
                                 id: clippingTypeComboBox
                                 visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -889,8 +894,9 @@ BaseParameterDialog
 
                             ComboBox
                             {
-                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 id: scalingComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
@@ -976,8 +982,9 @@ BaseParameterDialog
 
                             ComboBox
                             {
-                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
                                 id: normalisationComboBox
+                                visible: dataTypeComboBox.value === CorrelationDataType.Continuous
+                                Layout.preferredWidth: 160
 
                                 model: ListModel
                                 {
