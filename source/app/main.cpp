@@ -198,6 +198,7 @@ int start(int argc, char *argv[])
 
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    QQuickWindow::setDefaultAlphaBuffer(true);
 
     OpenGLFunctions::setDefaultFormat();
 
