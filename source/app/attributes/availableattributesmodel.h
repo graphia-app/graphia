@@ -42,13 +42,13 @@ private:
     private:
         // Either the attribute name, or a parameter to the parent attribute
         QString _value;
-        const Attribute* _attribute = nullptr;
+        QString _attributeName;
 
         QList<Item*> _children;
         Item* _parent = nullptr;
 
     public:
-        explicit Item(const QString& value, const Attribute* attribute = nullptr);
+        explicit Item(const QString& value, const QString& attributeName = {});
         virtual ~Item();
 
         void addChild(Item* child);
@@ -59,7 +59,7 @@ private:
         int row() const;
         Item* parent() const;
         bool hasAncestor(Item* potentialAncestor) const;
-        const Attribute* attribute() const;
+        QString attributeName() const;
     };
 
     Item* _root = nullptr;

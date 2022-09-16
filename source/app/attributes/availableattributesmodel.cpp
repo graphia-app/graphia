@@ -28,8 +28,8 @@
 #include "shared/utils/container.h"
 #include "shared/utils/static_block.h"
 
-AvailableAttributesModel::Item::Item(const QString& value, const Attribute* attribute) :
-    _value(value), _attribute(attribute)
+AvailableAttributesModel::Item::Item(const QString& value, const QString& attributeName) :
+    _value(value), _attributeName(attributeName)
 {}
 
 AvailableAttributesModel::Item::~Item() // NOLINT modernize-use-equals-default
@@ -85,9 +85,9 @@ bool AvailableAttributesModel::Item::hasAncestor(AvailableAttributesModel::Item*
     return _parent->hasAncestor(potentialAncestor);
 }
 
-const Attribute* AvailableAttributesModel::Item::attribute() const
+QString AvailableAttributesModel::Item::attributeName() const
 {
-    return _attribute;
+    return _attributeName;
 }
 
 AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
@@ -102,12 +102,12 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     auto attributeList = graphModel.availableAttributeNames(
         elementTypes, valueTypes, skipFlags, skipAttributeNames);
 
-    auto addItem = [this, &graphModel](Item* parentItem, const QString& name)
+    auto addItem = [this, &graphModel](Item* parentItem, const QString& attributeName)
     {
-        const auto* attribute = graphModel.attributeByName(name);
+        const auto* attribute = graphModel.attributeByName(attributeName);
         Q_ASSERT(attribute != nullptr);
 
-        auto* attributeItem = new AvailableAttributesModel::Item(name, attribute);
+        auto* attributeItem = new AvailableAttributesModel::Item(attributeName, attributeName);
         parentItem->addChild(attributeItem);
 
         if(attribute->hasParameter())
@@ -117,7 +117,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
             const auto& validValues = attribute->validParameterValues();
             for(const auto& validValue : validValues)
             {
-                auto* parameterItem = new AvailableAttributesModel::Item(validValue, attribute);
+                auto* parameterItem = new AvailableAttributesModel::Item(validValue, attributeName);
                 attributeItem->addChild(parameterItem);
             }
         }
@@ -173,7 +173,8 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(role == Roles::ElementTypeRole && (item->hasAncestor(_sourceNode) || item->hasAncestor(_targetNode)))
         return elementTypeAsString(ElementType::Edge);
 
-    const auto* attribute = item->attribute();
+    const auto* attribute = !item->attributeName().isEmpty() ?
+        _graphModel->attributeByName(item->attributeName()) : nullptr;
 
     if(attribute == nullptr || !attribute->isValid())
         return {};
