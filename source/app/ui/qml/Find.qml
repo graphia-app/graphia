@@ -747,6 +747,7 @@ Rectangle
     function hide()
     {
         closeAction.trigger();
+        proxyModel.model = null;
     }
 
     signal shown();

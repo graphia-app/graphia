@@ -83,7 +83,10 @@ Window
     onVisibleChanged:
     {
         if(!visible)
+        {
             root.attributeName = "";
+            attributeList.model = null;
+        }
 
         root.initialise();
     }

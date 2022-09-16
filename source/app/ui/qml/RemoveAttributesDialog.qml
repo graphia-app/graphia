@@ -45,6 +45,8 @@ Window
     {
         if(visible)
             attributeList.model = document.availableAttributesModel();
+        else
+            attributeList.model = null;
     }
 
     Preferences

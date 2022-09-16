@@ -57,7 +57,7 @@ Wizard
     {
         reset();
         root.selectedAttributeGroupA = root.selectedAttributeGroupB = "";
-        proxyModel.model = document.availableAttributesModel(ElementType.Node);
+        proxyModel.model = visible ? document.availableAttributesModel(ElementType.Node) : null;
     }
 
     Item
