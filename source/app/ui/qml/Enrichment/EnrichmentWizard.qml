@@ -55,7 +55,7 @@ Wizard
     onVisibleChanged:
     {
         reset();
-        proxyModel.model = document.availableAttributesModel(ElementType.Node);
+        proxyModel.model = visible ? document.availableAttributesModel(ElementType.Node) : null;
     }
 
     Item

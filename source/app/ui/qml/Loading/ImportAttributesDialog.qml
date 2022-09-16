@@ -44,6 +44,12 @@ Window
     property bool _validParameters: _keysSelected && headersList.selectedValues.length > 0 &&
         !importAttributesKeyDetection.busy
 
+    onVisibleChanged:
+    {
+        if(!visible)
+            keyAttributeList.model = null;
+    }
+
     function open(fileUrl)
     {
         let attributeNames = document.availableAttributeNames(
