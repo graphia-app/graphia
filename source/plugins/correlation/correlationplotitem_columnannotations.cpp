@@ -163,7 +163,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
                 if(type == PlotColumnSortType::ColumnAnnotation && text == columnAnnotation.name())
                 {
                     prefix += order == Qt::AscendingOrder ?
-                        QStringLiteral(u"▻ ") : QStringLiteral(u"◅ ");
+                        QStringLiteral(u"▷ ") : QStringLiteral(u"◁ ");
                 }
             }
 
