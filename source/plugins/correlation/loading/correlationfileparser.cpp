@@ -639,10 +639,6 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
             _cancellableParser = &parser;
             auto atExit = std::experimental::make_scope_exit([this] { _cancellableParser = nullptr; });
 
-            // This should already have been tested for, but check anyway
-            if(!parser.canLoad(fileUrl))
-                return;
-
             parser.setProgressFn([this](int progress) { setProgress(progress); });
 
             if(!parser.parse(fileUrl))
