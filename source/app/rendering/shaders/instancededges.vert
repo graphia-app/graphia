@@ -133,13 +133,16 @@ void main()
 
     vec3 edgeVertexPosition = vec3(0.0);
 
+    const int EdgeVisualTypeCylinder = 0;
+    const int EdgeVisualTypeArrow = 1;
+
     // Cylinder Edge
-    if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
+    if(edgeType == EdgeVisualTypeCylinder && !equals(length(vertexPosition.xz), 1.0))
     {
         // These vertices form the cone of the arrow mesh, which we
         // don't want to render at all, when in cylinder mode
     }
-    else if(edgeType == 0 && vertexPosition.y > 0.0)
+    else if(edgeType == EdgeVisualTypeCylinder && vertexPosition.y > 0.0)
     {
         // Reposition the top of the cylinder to the target
         vec3 scaledVertexPosition = vertexPosition;
@@ -150,7 +153,7 @@ void main()
         edgeVertexPosition = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz + midpoint;
     }
     // Arrow Head Edge
-    else if(edgeType == 1 && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
+    else if(edgeType == EdgeVisualTypeArrow && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
     {
         vec3 conePosition = vertexPosition;
         // Position so it points to origin

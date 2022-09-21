@@ -134,61 +134,63 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         const float sinTheta = std::sin(theta);
         const float u = static_cast<float>(slice) * du;
 
-        vertices[index+0] = _radius * cosTheta;
-        vertices[index+1] = _length * 0.25f;
-        vertices[index+2] = _radius * sinTheta;
+        // End of cylinder (target end)
+        vertices[index + 0] = _radius * cosTheta;
+        vertices[index + 1] = _length * 0.25f;
+        vertices[index + 2] = _radius * sinTheta;
 
-        normals[index+0] = cosTheta;
-        normals[index+1] = 0.0f;
-        normals[index+2] = sinTheta;
+        normals[index + 0] = cosTheta;
+        normals[index + 1] = 0.0f;
+        normals[index + 2] = sinTheta;
 
         index += 3;
 
-        tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex + 0] = sinTheta;
         tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
         tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
-        texCoords[texCoordIndex] = u;
-        texCoords[texCoordIndex+1] = 0.0f;
+        texCoords[texCoordIndex + 0] = u;
+        texCoords[texCoordIndex + 1] = 0.0f;
 
         texCoordIndex += 2;
 
-        vertices[index+0] = _radius * cosTheta;
-        vertices[index+1] = _length * -0.5f;
-        vertices[index+2] = _radius * sinTheta;
+        // Start of cylinder (source end)
+        vertices[index + 0] = _radius * cosTheta;
+        vertices[index + 1] = _length * -0.5f;
+        vertices[index + 2] = _radius * sinTheta;
 
-        normals[index+0] = cosTheta;
-        normals[index+1] = 0.0f;
-        normals[index+2] = sinTheta;
+        normals[index + 0] = cosTheta;
+        normals[index + 1] = 0.0f;
+        normals[index + 2] = sinTheta;
 
         index += 3;
 
-        tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex + 0] = sinTheta;
         tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
         tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
-        texCoords[texCoordIndex+1] = 1.0f;
+        texCoords[texCoordIndex + 1] = 1.0f;
 
         texCoordIndex += 2;
 
         // Make a cone for "arrow" mesh
         // This is closely coupled to the instancedEdges Shader
         // Bottom rim of cone (circle)
-        vertices[index+0] = (_radius * 2) * cosTheta;
-        vertices[index+1] = _length * 0.25f;
-        vertices[index+2] = (_radius * 2) * sinTheta;
-        QVector3D bottom(vertices[index+0],
-                         vertices[index+1],
-                         vertices[index+2]);
+        vertices[index + 0] = (_radius * 2.0f) * cosTheta;
+        vertices[index + 1] = _length * 0.25f;
+        vertices[index + 2] = (_radius * 2.0f) * sinTheta;
+        QVector3D bottom(vertices[index + 0],
+                         vertices[index + 1],
+                         vertices[index + 2]);
 
         // Base to tip
         QVector3D baseToTipTangent = coneTip - bottom;
-        bottom.setY(0);
+        bottom.setY(0.0f);
 
         QVector3D baseTangent = QVector3D::crossProduct(baseToTipTangent, bottom);
         baseTangent.normalize();
@@ -196,84 +198,84 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         baseNormal.normalize();
 
         // Cone surface normals
-        normals[index+0] = baseNormal.x();
-        normals[index+1] = baseNormal.y();
-        normals[index+2] = baseNormal.z();
+        normals[index + 0] = baseNormal.x();
+        normals[index + 1] = baseNormal.y();
+        normals[index + 2] = baseNormal.z();
 
         index += 3;
 
-        tangents[tangentIndex] = baseTangent.x();
+        tangents[tangentIndex + 0] = baseTangent.x();
         tangents[tangentIndex + 1] = baseTangent.y();
         tangents[tangentIndex + 2] = baseTangent.z();
         tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
-        texCoords[texCoordIndex] = u;
-        texCoords[texCoordIndex+1] = 0.0f;
+        texCoords[texCoordIndex + 0] = u;
+        texCoords[texCoordIndex + 1] = 0.0f;
 
         texCoordIndex += 2;
 
         // Bottom rim of cone (for cap only)
-        vertices[index+0] = (_radius * 2.0f) * cosTheta;
-        vertices[index+1] = _length * 0.25f;
-        vertices[index+2] = (_radius * 2.0f) * sinTheta;
+        vertices[index + 0] = (_radius * 2.0f) * cosTheta;
+        vertices[index + 1] = _length * 0.25f;
+        vertices[index + 2] = (_radius * 2.0f) * sinTheta;
 
-        normals[index+0] = 0.0f;
-        normals[index+1] = -1.0f;
-        normals[index+2] = 0.0f;
+        normals[index + 0] = 0.0f;
+        normals[index + 1] = -1.0f;
+        normals[index + 2] = 0.0f;
 
         index += 3;
 
-        tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex + 0] = sinTheta;
         tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
         tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
-        texCoords[texCoordIndex] = u;
-        texCoords[texCoordIndex+1] = 1.0f;
+        texCoords[texCoordIndex + 0] = u;
+        texCoords[texCoordIndex + 1] = 1.0f;
 
         texCoordIndex += 2;
     }
 
     // Bottom of cone - top of edge (tail)
     auto capIndex = index / 3;
-    vertices[index+0] = 0.0f;
-    vertices[index+1] = _length * 0.25f;
-    vertices[index+2] = 0.0f;
+    vertices[index + 0] = 0.0f;
+    vertices[index + 1] = _length * 0.25f;
+    vertices[index + 2] = 0.0f;
 
-    normals[index+0] = 0.0f;
-    normals[index+1] = -1.0f;
-    normals[index+2] = 0.0f;
+    normals[index + 0] = 0.0f;
+    normals[index + 1] = -1.0f;
+    normals[index + 2] = 0.0f;
 
-    tangents[tangentIndex] = 1.0f;
+    tangents[tangentIndex + 0] = 1.0f;
     tangents[tangentIndex + 1] = 0.0f;
     tangents[tangentIndex + 2] = 0.0f;
     tangents[tangentIndex + 3] = 1.0f;
 
-    texCoords[texCoordIndex] = 0.0f;
-    texCoords[texCoordIndex+1] = 0.0f;
+    texCoords[texCoordIndex + 0] = 0.0f;
+    texCoords[texCoordIndex + 1] = 0.0f;
 
     index += 3;
 
     auto tipIndex = index / 3;
-    vertices[index+0] = coneTip.x();
-    vertices[index+1] = coneTip.y();
-    vertices[index+2] = coneTip.z();
+    vertices[index + 0] = coneTip.x();
+    vertices[index + 1] = coneTip.y();
+    vertices[index + 2] = coneTip.z();
 
     // Tip normals (Clever hack. All 0's, allows blending with cone base normals
     // which is then normalised to create a smoothly blended normal)
-    normals[index+0] = 0.0f;
-    normals[index+1] = 0.0f;
-    normals[index+2] = 0.0f;
+    normals[index + 0] = 0.0f;
+    normals[index + 1] = 0.0f;
+    normals[index + 2] = 0.0f;
 
-    tangents[tangentIndex] = 0.0f;
+    tangents[tangentIndex + 0] = 0.0f;
     tangents[tangentIndex + 1] = 0.0f;
     tangents[tangentIndex + 2] = 0.0f;
     tangents[tangentIndex + 3] = 1.0f;
 
-    texCoords[texCoordIndex] = 0.0f;
-    texCoords[texCoordIndex+1] = 0.0f;
+    texCoords[texCoordIndex + 0] = 0.0f;
+    texCoords[texCoordIndex + 1] = 0.0f;
 
     index = 0;
 
@@ -282,23 +284,23 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         auto baseIndex = slice * 4;
 
         // Tail (edge) indices
-        indices[index+0] = baseIndex + 5;
-        indices[index+1] = baseIndex + 1;
-        indices[index+2] = baseIndex + 0;
+        indices[index + 0] = baseIndex + 5;
+        indices[index + 1] = baseIndex + 1;
+        indices[index + 2] = baseIndex + 0;
 
-        indices[index+3] = baseIndex + 0;
-        indices[index+4] = baseIndex + 4;
-        indices[index+5] = baseIndex + 5;
+        indices[index + 3] = baseIndex + 0;
+        indices[index + 4] = baseIndex + 4;
+        indices[index + 5] = baseIndex + 5;
 
         // Cone Indices
-        indices[index+6] = baseIndex + 2;
-        indices[index+7] = static_cast<unsigned int>(tipIndex);
-        indices[index+8] = baseIndex + 6;
+        indices[index + 6] = baseIndex + 2;
+        indices[index + 7] = static_cast<unsigned int>(tipIndex);
+        indices[index + 8] = baseIndex + 6;
 
         // Cap
-        indices[index+9] = baseIndex + 7;
-        indices[index+10] = static_cast<unsigned int>(capIndex);
-        indices[index+11] = baseIndex + 3;
+        indices[index + 9 ] = baseIndex + 7;
+        indices[index + 10] = static_cast<unsigned int>(capIndex);
+        indices[index + 11] = baseIndex + 3;
 
         index += 12;
     }
