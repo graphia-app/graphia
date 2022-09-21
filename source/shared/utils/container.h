@@ -24,11 +24,28 @@
 #include <algorithm>
 #include <vector>
 #include <numeric>
+#include <concepts>
 
 #include <QtGlobal>
 
 namespace u
 {
+    template<typename T>
+    concept Container = requires(T c)
+    {
+        requires std::swappable<T>;
+        requires std::destructible<typename T::value_type>;
+        requires std::same_as<typename T::reference, typename T::value_type &>;
+        requires std::same_as<typename T::const_reference, const typename T::value_type &>;
+        requires std::forward_iterator<typename T::iterator>;
+        requires std::signed_integral<typename T::difference_type>;
+        requires std::same_as<typename T::difference_type, typename std::iterator_traits<typename T::iterator>::difference_type>;
+        { c.begin() } -> std::same_as<typename T::iterator>;
+        { c.end() } -> std::same_as<typename T::iterator>;
+        { c.size() } -> std::same_as<typename T::size_type>;
+        { c.empty() } -> std::same_as<bool>;
+    };
+
     template<typename C, typename T> void removeByValue(C& container, const T& value)
     {
         container.erase(std::remove(container.begin(), container.end(), value), container.end());
@@ -92,12 +109,12 @@ namespace u
         return contains(make_value_wrapper(container), value, 0);
     }
 
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    std::vector<T> setDifference(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    template<Container C1, Container C2>
+    std::vector<typename C1::value_type> setDifference(const C1& a, const C2& b)
     {
-        std::vector<T> result;
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
+        std::vector<typename C1::value_type> result;
 
         std::copy_if(a.begin(), a.end(), std::back_inserter(result),
         [&b](const auto& value)
@@ -108,11 +125,11 @@ namespace u
         return result;
     }
 
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    bool setsDiffer(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    template<Container C1, Container C2>
+    bool setsDiffer(const C1& a, const C2& b)
     {
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
         if(a.size() != b.size())
             return true;
 
@@ -123,20 +140,20 @@ namespace u
         });
     }
 
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    bool setsEqual(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    template<Container C1, Container C2>
+    bool setsEqual(const C1& a, const C2& b)
     {
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
         return !setsDiffer(a, b);
     }
 
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    std::vector<T> setIntersection(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    template<Container C1, Container C2>
+    std::vector<typename C1::value_type> setIntersection(const C1& a, const C2& b)
     {
-        std::vector<T> result;
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
+        std::vector<typename C1::value_type> result;
 
         std::copy_if(a.begin(), a.end(), std::back_inserter(result),
         [&b](const auto& value)
@@ -147,28 +164,28 @@ namespace u
         return result;
     }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<T> keysFor(const C<T, Args...>& container)
+    template<Container C>
+    std::vector<typename C::key_type> keysFor(const C& container)
     {
-        std::vector<T> keys;
+        std::vector<typename C::key_type> keys;
         auto keyWrapper = make_key_wrapper(container);
         std::copy(keyWrapper.begin(), keyWrapper.end(), std::back_inserter(keys));
         return keys;
     }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<T> valuesFor(const C<T, Args...>& container)
+    template<Container C>
+    std::vector<typename C::value_type> valuesFor(const C& container)
     {
-        std::vector<T> values;
+        std::vector<typename C::value_type> values;
         auto valueWrapper = make_value_wrapper(container);
         std::copy(valueWrapper.begin(), valueWrapper.end(), std::back_inserter(values));
         return values;
     }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<T> vectorFrom(const C<T, Args...>& container)
+    template<Container C>
+    std::vector<typename C::value_type> vectorFrom(const C& container)
     {
-        std::vector<T> values;
+        std::vector<typename C::value_type> values;
         std::copy(container.begin(), container.end(), std::back_inserter(values));
         return values;
     }
@@ -180,8 +197,8 @@ namespace u
     template<typename T>
     reversing_wrapper<T> reverse(T&& container) { return {container}; }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<size_t> sortedIndicesOf(const C<T, Args...>& container)
+    template<Container C>
+    std::vector<size_t> sortedIndicesOf(const C& container)
     {
         std::vector<size_t> index(container.size());
         std::iota(std::begin(index), std::end(index), 0);
@@ -195,8 +212,8 @@ namespace u
         return index;
     }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    std::vector<size_t> rankingOf(const C<T, Args...>& container)
+    template<Container C>
+    std::vector<size_t> rankingOf(const C& container)
     {
         auto index = sortedIndicesOf(container);
         std::reverse(std::begin(index), std::end(index));
@@ -221,8 +238,8 @@ namespace u
         return ranking;
     }
 
-    template<typename T, template<typename, typename...> typename C, typename... Args>
-    bool hasUniqueValues(C<T, Args...> container)
+    template<Container C>
+    bool hasUniqueValues(C container)
     {
         std::sort(container.begin(), container.end());
         return std::unique(container.begin(), container.end()) == container.end();
