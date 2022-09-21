@@ -875,8 +875,8 @@ BaseParameterDialog
 
                                         Text
                                         {
-                                            text: qsTr("Limit the maximum data table value to that at a specified " +
-                                                "percentile. For example if the 95th percentile is chosen, the " +
+                                            text: qsTr("Limit the maximum data value to that at a specified percentile, " +
+                                                "on a per-row basis. For example if the 95th percentile is chosen, the " +
                                                 "top 5th percentile of values will be set to that of the 95th percentile.");
                                             wrapMode: Text.WordWrap
                                             Layout.fillWidth: true

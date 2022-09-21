@@ -42,6 +42,7 @@
 #include <set>
 #include <utility>
 #include <limits>
+#include <span>
 
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName,
                                              TabularData& tabularData, QRect dataRect) :
@@ -344,8 +345,11 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
     return imputedValue;
 }
 
-void CorrelationFileParser::clipValues(ClippingType clippingType, double clippingValue, std::vector<double>& data)
+void CorrelationFileParser::clipValues(ClippingType clippingType, double clippingValue,
+    size_t width, std::vector<double>& data)
 {
+    Q_ASSERT(data.size() % width == 0);
+
     switch(clippingType)
     {
     case ClippingType::Constant:
@@ -355,14 +359,23 @@ void CorrelationFileParser::clipValues(ClippingType clippingType, double clippin
 
     case ClippingType::Winsorization:
     {
-        auto sortedIndices = u::sortedIndicesOf(data);
-        auto metaIndex = static_cast<size_t>((clippingValue * static_cast<double>(sortedIndices.size() - 1)) / 100.0);
-        auto clipIndex = sortedIndices.at(metaIndex);
-        auto clipValue = data.at(clipIndex);
+        auto it = data.begin();
+        while(it != data.end())
+        {
+            auto end = it + width;
 
-        auto begin = sortedIndices.begin() + static_cast<std::vector<double>::difference_type>(metaIndex + 1);
-        for(auto i = begin; i != sortedIndices.end(); i++)
-            data.at(*i) = clipValue;
+            auto sortedIndices = u::sortedIndicesOf(std::span(it, end));
+            auto metaIndex = static_cast<size_t>((clippingValue * static_cast<double>(width - 1)) / 100.0);
+            auto clipIndex = sortedIndices.at(metaIndex);
+            auto clipValue = *(it + clipIndex);
+
+            auto begin = sortedIndices.begin() + static_cast<std::vector<double>::difference_type>(metaIndex + 1);
+            for(auto i = begin; i != sortedIndices.end(); i++)
+                *(it + *i) = clipValue;
+
+            it += width;
+        }
+
         break;
     }
 
@@ -820,7 +833,9 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
         }
     }
 
-    CorrelationFileParser::clipValues(NORMALISE_QML_ENUM(ClippingType, _clippingType), _clippingValue, rowData);
+    CorrelationFileParser::clipValues(
+        NORMALISE_QML_ENUM(ClippingType, _clippingType), _clippingValue,
+        static_cast<size_t>(_dataRect.width()), rowData);
 
     auto epsilon = CorrelationFileParser::epsilonFor(rowData);
     std::transform(rowData.begin(), rowData.end(), rowData.begin(),

@@ -184,7 +184,8 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
     parser.setProgress(-1);
 
-    CorrelationFileParser::clipValues(_clippingType, _clippingValue, _continuousData);
+    CorrelationFileParser::clipValues(_clippingType, _clippingValue,
+        static_cast<size_t>(dataRect.width()), _continuousData);
 
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
     std::transform(_continuousData.begin(), _continuousData.end(), _continuousData.begin(),
