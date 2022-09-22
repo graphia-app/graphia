@@ -40,11 +40,11 @@ Window
     modality: Qt.WindowModal
     flags: Qt.Dialog | (Qt.platform.os === "osx" ? Qt.Sheet : 0)
 
-    width: 380
+    width: 420
     minimumWidth: width
     maximumWidth: width
 
-    height: 180
+    height: 220
     minimumHeight: height
     maximumHeight: height
 
