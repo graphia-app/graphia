@@ -362,20 +362,21 @@ void CorrelationFileParser::clipValues(ClippingType clippingType, double clippin
         auto it = data.begin();
         while(it != data.end())
         {
-            auto end = it + width;
+            using dt = std::vector<double>::difference_type;
+            auto end = it + static_cast<dt>(width);
 
             //FIXME: pointers are passed to span here because Apple libc++
             // doesn't implement the generalised iterator constructor
             auto sortedIndices = u::sortedIndicesOf(std::span(&*it, &*end));
             auto metaIndex = static_cast<size_t>((clippingValue * static_cast<double>(width - 1)) / 100.0);
             auto clipIndex = sortedIndices.at(metaIndex);
-            auto clipValue = *(it + clipIndex);
+            auto clipValue = *(it + static_cast<dt>(clipIndex));
 
-            auto begin = sortedIndices.begin() + static_cast<std::vector<double>::difference_type>(metaIndex + 1);
+            auto begin = sortedIndices.begin() + static_cast<dt>(metaIndex + 1);
             for(auto i = begin; i != sortedIndices.end(); i++)
-                *(it + *i) = clipValue;
+                *(it + static_cast<dt>(*i)) = clipValue;
 
-            it += width;
+            it += static_cast<dt>(width);
         }
 
         break;
