@@ -1647,8 +1647,8 @@ ApplicationWindow
         icon.name: "list-add"
         text: qsTr("Add Template…")
         enabled: currentTab ? !currentTab.document.busy &&
-            currentTab.document.transforms.length > 0 &&
-            currentTab.document.visualisations.length > 0 : false
+            (currentTab.document.transforms.length > 0 ||
+            currentTab.document.visualisations.length > 0) : false
         onTriggered: function(source)
         {
             addTemplateDialog.raise();
