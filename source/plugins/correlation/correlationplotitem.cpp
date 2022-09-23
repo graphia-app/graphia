@@ -925,15 +925,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
         else
             sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
     }
-    else if(!CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
-    {
-        if(point.x() < 0)
-        {
-            // Click is to the left of the main axis
-            sortBy(static_cast<int>(PlotColumnSortType::DataValue));
-        }
-    }
-    else
+    else if(CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
         onLeftClickColumnAnnotation(axisRect, point);
 }
 
