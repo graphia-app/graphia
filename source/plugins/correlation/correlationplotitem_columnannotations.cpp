@@ -442,7 +442,7 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
 
         emit visibleColumnAnnotationNamesChanged();
     }
-    else
+    else if(_columnAnnotationSelectionModeEnabled || pos.x() < 0)
     {
         // ...or selects it as the sort annotation otherwise
         sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
