@@ -1439,7 +1439,6 @@ Item
         title: application && _document.pluginName.length > 0 ?
                    _document.pluginName + " - " + appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
-        transientParent: null
         property bool maximised: visibility === Window.Maximized
 
         onXChanged: { if(x < 0 || x >= Screen.desktopAvailableWidth)  x = 0; }
@@ -1539,6 +1538,11 @@ Item
 
     function popOutPlugin()
     {
+        // This must be set before the window is made visible, otherwise
+        // it is created as an MDI sub-window and doesn't minimise to the
+        // Task Bar (on Windows)
+        pluginWindow.transientParent = null;
+
         root.pluginPoppedOut = true;
         plugin.parent = pluginWindowContent;
 
