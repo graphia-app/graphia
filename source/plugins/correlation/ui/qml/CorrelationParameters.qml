@@ -67,7 +67,7 @@ BaseParameterDialog
             switch(clippingTypeComboBox.value)
             {
             case ClippingType.Constant:
-                return clippingValueText.text.length > 0 ? clippingValueText.text : 0.0;
+                return clippingValueText.text.length > 0 ? parseFloat(clippingValueText.text) : 0.0;
             case ClippingType.Winsorization:
                 return winsoriztionValueSpinBox.value;
             }
@@ -86,7 +86,7 @@ BaseParameterDialog
             else if(dataRect.appearsToBeContinuous)
                 dataTypeComboBox.setContinuous();
 
-            clippingValueText.text = dataRect.maxValue;
+            clippingValueText.text = QmlUtils.formatNumber(dataRect.maxValue);
         }
 
         onDataLoaded:
