@@ -1,7 +1,7 @@
 name: Build
 on: [push, pull_request]
 env:
-  QT_VERSION: 6.3.2
+  QT_VERSION: 6.4.1
   QT_MODULES: qtwebengine qtwebchannel qtpositioning
   GCC_VERSION: 11
   CLANG_VERSION: 14
