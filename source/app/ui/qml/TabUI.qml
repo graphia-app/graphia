@@ -1492,7 +1492,7 @@ Item
 
         Component.onCompleted:
         {
-            if(x == 0 && y == 0)
+            if(x === 0 && y === 0)
             {
                 x = (pluginWindow.screen.width - width) * 0.5
                 y = (pluginWindow.screen.height - height) * 0.5
