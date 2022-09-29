@@ -193,6 +193,28 @@ static QString stripZeroes(QString value)
     return value;
 }
 
+static int maxDecimalPlacesFor(double value)
+{
+    auto absValue = std::abs(value);
+
+    if(absValue <= 0.001)   return 5;
+    if(absValue <= 0.01)    return 4;
+    if(absValue <= 1.0)     return 3;
+    if(absValue <= 100.0)   return 2;
+    if(absValue <= 1000.0)  return 1;
+
+    return 0;
+}
+
+QString u::formatNumber(double value)
+{
+    QString formattedString = QLocale::system().toString(value, 'f', maxDecimalPlacesFor(value));
+    formattedString = stripZeroes(formattedString);
+
+    formattedString.replace(QStringLiteral("+"), QString());
+    return formattedString;
+}
+
 QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDecimalPlaces,
                                   int minScientificFormattedStringDigitsThreshold,
                                   int maxScientificFormattedStringDigitsThreshold)
@@ -205,18 +227,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
     auto absValue = std::abs(value);
 
     if(maxDecimalPlaces == 0)
-    {
-        if(absValue <= 0.001)
-            maxDecimalPlaces = 5;
-        else if(absValue <= 0.01)
-            maxDecimalPlaces = 4;
-        else if(absValue <= 1.0)
-            maxDecimalPlaces = 3;
-        else if(absValue <= 100.0)
-            maxDecimalPlaces = 2;
-        else if(absValue <= 1000.0)
-            maxDecimalPlaces = 1;
-    }
+        maxDecimalPlaces = maxDecimalPlacesFor(value);
 
     if(maxDecimalPlaces < minDecimalPlaces)
         maxDecimalPlaces = minDecimalPlaces;

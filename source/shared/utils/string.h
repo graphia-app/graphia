@@ -48,6 +48,7 @@ namespace u
 
     std::istream& getline(std::istream& is, std::string& t);
 
+    QString formatNumber(double value);
     QString formatNumberScientific(double value, int minDecimalPlaces = 0, int maxDecimalPlaces = 0,
                                    int minScientificFormattedStringDigitsThreshold = 4,
                                    int maxScientificFormattedStringDigitsThreshold = 5);
