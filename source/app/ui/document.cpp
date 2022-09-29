@@ -1119,7 +1119,7 @@ void Document::selectSources(QmlNodeId qmlNodeId, bool add)
     if(nodeIds.empty())
         return;
 
-    for(auto nodeId : nodeIds)
+    for(auto nodeId : NodeIdSet(nodeIds))
     {
         auto sources = _graphModel->graph().sourcesOf(nodeId);
         nodeIds.insert(sources.begin(), sources.end());
@@ -1141,7 +1141,7 @@ void Document::selectTargets(QmlNodeId qmlNodeId, bool add)
     if(nodeIds.empty())
         return;
 
-    for(auto nodeId : nodeIds)
+    for(auto nodeId : NodeIdSet(nodeIds))
     {
         auto targets = _graphModel->graph().targetsOf(nodeId);
         nodeIds.insert(targets.begin(), targets.end());
@@ -1163,7 +1163,7 @@ void Document::selectNeighbours(QmlNodeId qmlNodeId, bool add)
     if(nodeIds.empty())
         return;
 
-    for(auto nodeId : nodeIds)
+    for(auto nodeId : NodeIdSet(nodeIds))
     {
         auto neighbours = _graphModel->graph().neighboursOf(nodeId);
         nodeIds.insert(neighbours.begin(), neighbours.end());
