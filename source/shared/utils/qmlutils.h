@@ -144,6 +144,11 @@ public:
         return new QmlUtils;
     }
 
+    Q_INVOKABLE QString formatNumber(double value) const
+    {
+        return u::formatNumber(value);
+    }
+
     Q_INVOKABLE QString formatNumberScientific(double value) const
     {
         return u::formatNumberScientific(value);
