@@ -328,8 +328,8 @@ Item
                         rightPadding: treeView.scrollBarWidth
                         y: hasSectionRow ? implicitHeight : 0
 
-                        property bool selected: treeView.selectedRows.indexOf(model.row) >= 0
-                        property var highlightColor: selected ? palette.highlight : "transparent"
+                        property bool _selected: treeView.selectedRows.indexOf(model.row) >= 0
+                        property var highlightColor: _selected ? palette.highlight : "transparent"
 
                         Component.onCompleted:
                         {
