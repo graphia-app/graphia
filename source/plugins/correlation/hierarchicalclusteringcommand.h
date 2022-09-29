@@ -21,6 +21,8 @@
 
 #include "shared/commands/icommand.h"
 
+#include <QObject>
+
 class CorrelationPluginInstance;
 
 class HierarchicalClusteringCommand : public ICommand
