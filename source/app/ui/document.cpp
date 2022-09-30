@@ -2465,7 +2465,7 @@ void Document::moveVisualisation(int from, int to)
     _commandManager.execute(ExecutePolicy::Add,
         std::make_unique<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
-                                _visualisations, newVisualisations));
+        _visualisations, newVisualisations));
 }
 
 void Document::apply(const QStringList& graphTransforms, const QStringList& visualisations, bool replaceLatestCommand)
