@@ -94,10 +94,15 @@ public:
             execute(policy, makeCommand(std::forward<Command>(command)));
     }
 
-    void executeOnce(CommandFn&& executeFn, const QString& commandDescription = {})
+    void executeOnce(CommandFn&& executeFn, const QString& commandDescription)
     {
         execute(ExecutePolicy::Once, std::make_unique<Command>(Command::CommandDescription{commandDescription,
             commandDescription, commandDescription}, executeFn));
+    }
+
+    void executeOnce(CommandFn&& executeFn, const Command::CommandDescription& commandDescription = {})
+    {
+        execute(ExecutePolicy::Once, std::make_unique<Command>(commandDescription, executeFn));
     }
 };
 
