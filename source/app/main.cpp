@@ -202,7 +202,6 @@ int start(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
-    OpenGLFunctions::setDefaultFormat();
 
     QtWebEngineQuick::initialize();
 
