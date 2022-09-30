@@ -418,7 +418,11 @@ void GraphCommonInteractor::leftDrag()
     {
         if(!_frustumSelecting)
         {
-            emit userInteractionStarted();
+            // If we're not selecting already, something else will have emitted UIS
+            if(_selecting)
+                emit userInteractionStarted();
+
+            _selecting = true;
             _frustumSelecting = true;
             _clickedNodeId.setToNull();
             _nearClickNodeId.setToNull();
