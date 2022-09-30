@@ -366,7 +366,7 @@ void GraphQuickItem::onScreenshotComplete(const QImage& screenshot, const QStrin
         // Ensure local filesystem path
         screenshot.save(QUrl(path).toLocalFile());
         QDesktopServices::openUrl(QUrl(path).toLocalFile());
-    }, tr("Saving Screenshot"));
+    }, {tr("Save Screenshot"), tr("Saving Screenshot"), tr("Screenshot Saved")});
 }
 
 void GraphQuickItem::mousePressEvent(QMouseEvent* e)

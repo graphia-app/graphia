@@ -753,7 +753,11 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
             emit saveComplete(success, fileUrl, saverName);
             return success;
         },
-        tr("Saving %1").arg(fileUrl.fileName()));
+        {
+            tr("Save %1").arg(fileUrl.fileName()),
+            tr("Saving %1").arg(fileUrl.fileName()),
+            tr("Saved %1").arg(fileUrl.fileName())
+        });
 
         _saveRequired = false;
         emit saveRequiredChanged();
@@ -1052,7 +1056,7 @@ void Document::selectAll()
         bool nodesSelected = _selectionManager->selectAllNodes();
         command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
         return nodesSelected;
-    }, tr("Selecting All"));
+    }, {tr("Select All"), tr("Selecting All"), tr("Selected All")});
 }
 
 void Document::selectAllFound()
@@ -1091,7 +1095,7 @@ void Document::selectNone()
     {
         _commandManager.executeOnce(
             [this](Command&) { return _selectionManager->clearNodeSelection(); },
-            tr("Selecting None"));
+            {tr("Select None"), tr("Selecting None"), tr("Selected None")});
     }
 }
 
@@ -1233,7 +1237,7 @@ void Document::invertSelection()
         _selectionManager->clearNodesMask();
         _selectionManager->invertNodeSelection();
         command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-    }, tr("Inverting Selection"));
+    }, {tr("Invert Selection"), tr("Inverting Selection"), tr("Inverted Selection")});
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
@@ -2758,7 +2762,7 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
                 stream << rowString << "\r\n";
             }
         }
-    }, tr("Exporting Table"));
+    }, {tr("Export Table"), tr("Exporting Table"), tr("Exported Table")});
 }
 
 void Document::copyTableViewColumnToClipboard(QObject* tableView, int column)
@@ -2951,7 +2955,7 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
         }
 
         file.write(QByteArray::fromStdString(positions.dump()));
-    }, tr("Exporting Node Positions"));
+    }, {tr("Export Node Positions"), tr("Exporting Node Positions"), tr("Exported Node Positions")});
 }
 
 // NOLINTNEXTLINE readability-make-member-function-const
