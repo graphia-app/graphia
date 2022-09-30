@@ -197,14 +197,12 @@ int start(int argc, char *argv[])
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
 
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
     QQuickWindow::setDefaultAlphaBuffer(true);
     OpenGLFunctions::setDefaultFormat();
 
-    if(qEnvironmentVariableIsSet("VOGL_CMD_LINE"))
-        qDebug() << "Vogl detected; disabling shared OpenGL context (QtWebEngine will not function!)";
-    else
-        SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
     // Without this setting, rendering artefacts appear on systems with
     // non-integral scaling factors (e.g. using high DPI monitors on Windows)
