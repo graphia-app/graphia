@@ -163,6 +163,8 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         xAxis->setTicker(categoryTicker);
     }
+
+    xAxis->setPadding(_xAxisLabel.isEmpty() ? _bottomPadding : 0);
 }
 
 bool CorrelationPlotItem::discreteTooltip(const QCPAxisRect* axisRect,

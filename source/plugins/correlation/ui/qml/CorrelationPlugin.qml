@@ -830,8 +830,9 @@ PluginContent
                     id: plot
 
                     anchors.fill: parent
-                    anchors.rightMargin: plotFlickable.verticalScrollBarWidth
-                    anchors.bottomMargin: plotFlickable.horizontalScrollBarHeight
+
+                    rightPadding: plotFlickable.verticalScrollBarWidth
+                    bottomPadding: plotFlickable.horizontalScrollBarHeight
 
                     model: plugin.model
                     selectedRows: tableView.selectedRows

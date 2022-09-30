@@ -815,7 +815,7 @@ void CorrelationPlotItem::configureLegend()
 
     const int marginSize = 5;
     legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
-    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize));
+    _legendLayoutGrid->setMargins(QMargins(0, marginSize, marginSize, marginSize + _bottomPadding));
 
     // BIGGEST HACK
     // Layouts and sizes aren't done until a replot, and layout is performed on another
@@ -931,6 +931,9 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 
 void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 {
+    if(_pluginInstance == nullptr)
+        return;
+
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(!lock.owns_lock())
@@ -986,6 +989,8 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
     _meanPlots.clear();
 
     configureAxisRects();
+
+    _customPlot.plotLayout()->setMargins(QMargins(0, 0, _rightPadding, 0));
 
     if(_debug)
         qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
@@ -1157,6 +1162,24 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
         _horizontalScrollPosition = newHorizontalScrollPosition;
         computeXAxisRange();
         updatePixmap(CorrelationPlotUpdateType::Render);
+    }
+}
+
+void CorrelationPlotItem::setRightPadding(int padding)
+{
+    if(_rightPadding != padding)
+    {
+        _rightPadding = padding;
+        rebuildPlot();
+    }
+}
+
+void CorrelationPlotItem::setBottomPadding(int padding)
+{
+    if(_bottomPadding != padding)
+    {
+        _bottomPadding = padding;
+        rebuildPlot();
     }
 }
 
@@ -1604,6 +1627,7 @@ void CorrelationPlotItem::configureAxisRects()
         }
 
         _xAxisLabelTextElement->setText(xAxisLabel);
+        _xAxisLabelTextElement->setMargins({0, 0, 0, _bottomPadding});
     }
     else if(_xAxisLabelTextElement != nullptr)
     {
