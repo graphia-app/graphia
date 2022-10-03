@@ -196,7 +196,7 @@ public slots:
 private slots:
     void onMutableGraphChanged(const Graph* graph);
     void onTransformedGraphWillChange(const Graph* graph);
-    void onTransformedGraphChanged(const Graph* graph);
+    void onTransformedGraphChanged(const Graph* graph, bool changeOccurred);
 
     void onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
         const QStringList& changedValuesNames);
@@ -205,7 +205,7 @@ signals:
     void visualsWillChange();
     void visualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags edgeChange);
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
-        const QStringList& changedValuesNames);
+        const QStringList& changedValuesNames, bool graphChanged);
 
     void rebuildRequired(bool transforms, bool visualisations);
 };

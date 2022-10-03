@@ -1288,7 +1288,7 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     _transformedGraphIsChanging = true;
 }
 
-void GraphModel::onTransformedGraphChanged(const Graph*)
+void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 {
     auto attributeIdentities = _->currentAttributeIdentities();
 
@@ -1326,7 +1326,8 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
         updateSharedAttributeValues(attribute);
     }
 
-    emit attributesChanged(addedAttributeNames, removedAttributeNames, changedAttributeNames);
+    emit attributesChanged(addedAttributeNames, removedAttributeNames,
+        changedAttributeNames, changeOccurred);
 
     _transformedGraphIsChanging = false;
 }
@@ -1430,5 +1431,5 @@ void AttributeChangesTracker::emitAttributesChanged()
     if(_added.empty() && _removed.empty() && _changed.empty())
         return;
 
-    emit _graphModel->attributesChanged(added(), removed(), changed());
+    emit _graphModel->attributesChanged(added(), removed(), changed(), false);
 }

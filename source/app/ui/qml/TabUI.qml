@@ -1791,7 +1791,7 @@ Item
             }
         }
 
-        onAttributesChanged: function(addedNames, removedNames, changedValuesNames)
+        onAttributesChanged: function(addedNames, removedNames, changedValuesNames, graphChanged)
         {
             // If a new attribute has been created and advanced find or FBAV have
             // not yet been used, set the new attribute as the default for both

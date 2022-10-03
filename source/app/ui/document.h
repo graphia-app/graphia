@@ -387,7 +387,7 @@ signals:
     void saveComplete(bool success, QUrl fileUrl, const QString& saverName);
 
     void attributesChanged(const QStringList& addedNames, const QStringList& removedNames,
-        const QStringList& changedValuesNames);
+        const QStringList& changedValuesNames, bool graphChanged);
 
     void hasValidEdgeTextVisualisationChanged();
 

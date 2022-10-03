@@ -61,9 +61,9 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     _correlationValues = std::make_unique<EdgeArray<double>>(_graphModel->mutableGraph());
 
     const auto* modelQObject = dynamic_cast<const QObject*>(_graphModel);
-    connect(modelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList)),
+    connect(modelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)),
             this, SIGNAL(sharedValuesAttributeNamesChanged()));
-    connect(modelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList)),
+    connect(modelQObject, SIGNAL(attributesChanged(QStringList,QStringList,QStringList,bool)),
             this, SIGNAL(numericalAttributeNamesChanged()));
 }
 
