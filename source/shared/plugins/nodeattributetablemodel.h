@@ -107,7 +107,7 @@ public:
     void updateColumnNames();
 
 public slots:
-    void onAttributesChanged(QStringList added, QStringList removed, QStringList changed);
+    void onAttributesChanged(QStringList added, QStringList removed, QStringList changed, bool graphChanged);
 
 signals:
     void columnNamesChanged();

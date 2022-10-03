@@ -283,7 +283,7 @@ std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size
     });
 }
 
-void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed)
+void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed, bool graphChanged)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
@@ -357,7 +357,7 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
         updateColumn(Qt::DisplayRole, column, columnName);
     }
 
-    if(!addedIndices.empty() || !removedIndices.empty() || !changedIndices.empty())
+    if(!graphChanged && (!addedIndices.empty() || !removedIndices.empty() || !changedIndices.empty()))
         QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
