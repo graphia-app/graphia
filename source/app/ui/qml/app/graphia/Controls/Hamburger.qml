@@ -23,6 +23,8 @@ import app.graphia.Shared.Controls
 
 Item
 {
+    id: root
+
     property real radius: height * 0.1
     property color color: "white"
     property color hoverColor: color
@@ -36,6 +38,11 @@ Item
     property real _spaceHeight: height / _d
 
     property PlatformMenu menu: null
+    onMenuChanged:
+    {
+        if(root.menu instanceof Menu)
+            root.menu.closePolicy = Popup.CloseOnEscape|Popup.CloseOnReleaseOutside;
+    }
 
     property bool menuDropped: false
     Connections
@@ -82,12 +89,32 @@ Item
 
         hoverEnabled: true
         anchors.fill: parent
+
+        // If there is a menu and it's dropped, clicking on
+        // the hamburger will retrigger the menu which is
+        // fairly unintuitive behaviour, so instead we ignore
+        // the click if it was placed when the menu was already
+        // showing
+        property bool _ignoreClick: false
+
         onClicked: function(mouse)
         {
+            if(mouseArea._ignoreClick)
+            {
+                mouseArea._ignoreClick = false;
+                return;
+            }
+
             if(menu)
                 menu.popup(parent, 0, parent.height + 8/*padding*/);
         }
 
-        onPressed: function(mouse) { mouse.accepted = !propogatePresses; }
+        onPressed: function(mouse)
+        {
+            if(root.menu instanceof Menu && root.menuDropped)
+                mouseArea._ignoreClick = true;
+
+            mouse.accepted = !propogatePresses;
+        }
     }
 }
