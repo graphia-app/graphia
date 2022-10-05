@@ -602,10 +602,8 @@ void Application::testConsoleOutput()
     std::cout << "std::cout\n";
     std::cerr << "std::cerr\n";
 
-    int bytes = 0;
-    bytes = fprintf(stdout, "stdout\n"); fflush(stdout);
-    bytes = fprintf(stderr, "stderr\n"); fflush(stderr);
-    Q_UNUSED(bytes);
+    fprintf(stdout, "stdout\n"); fflush(stdout); // NOLINT cert-err33-c
+    fprintf(stderr, "stderr\n"); fflush(stderr); // NOLINT cert-err33-c
 
     qInfo() << "qInfo()";
     qWarning() << "qWarning()";
