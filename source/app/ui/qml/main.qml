@@ -1816,7 +1816,6 @@ ApplicationWindow
     {
         id: testConsoleOutputAction
         text: qsTr("Test Console Output")
-        enabled: application.debugEnabled
         onTriggered: application.testConsoleOutput()
     }
 
