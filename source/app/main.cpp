@@ -46,8 +46,10 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <memory>
 
 #include "application.h"
+#include "consolecapture.h"
 #include "preferences.h"
 #include "preferenceswatcher.h"
 
@@ -163,33 +165,6 @@ static void configureProxy()
     QNetworkProxy::setApplicationProxy(proxy);
 }
 
-std::ofstream stdoutFile;
-std::ofstream stderrFile;
-static QString stdoutFilename;
-static QString stderrFilename;
-
-static void captureConsoleOutput()
-{
-    auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-    stdoutFilename = QStringLiteral("%1/stdout.txt").arg(appDataLocation);
-    stderrFilename = QStringLiteral("%1/stderr.txt").arg(appDataLocation);
-
-    stdoutFile.open(stdoutFilename.toLocal8Bit().constData());
-    std::cout.rdbuf(stdoutFile.rdbuf());
-
-    stderrFile.open(stderrFilename.toLocal8Bit().constData());
-    std::cerr.rdbuf(stderrFile.rdbuf());
-
-    auto result = std::atexit([]
-    {
-        stdoutFile.close();
-        stderrFile.close();
-    });
-
-    if(result != 0)
-        std::cerr << "Failed to register stdout/stderr closure callback: " << result << "\n";
-}
-
 static QString qmlError;
 
 int start(int argc, char *argv[])
@@ -233,8 +208,20 @@ int start(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
+    std::vector<std::shared_ptr<IConsoleCapture>> consoleOutputFiles;
+
     if(!u::isDebuggerPresent())
-        captureConsoleOutput();
+    {
+        auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+
+        consoleOutputFiles =
+        {
+            std::make_shared<IoStreamCapture>(QStringLiteral("%1/cout.txt").arg(appDataLocation), std::cout),
+            std::make_shared<IoStreamCapture>(QStringLiteral("%1/cerr.txt").arg(appDataLocation), std::cerr),
+            std::make_shared<CStreamCapture>(QStringLiteral("%1/stdout.txt").arg(appDataLocation), stdout),
+            std::make_shared<CStreamCapture>(QStringLiteral("%1/stderr.txt").arg(appDataLocation), stderr),
+        };
+    }
 
     QCommandLineParser commandLineParser;
 
@@ -443,7 +430,7 @@ int start(int argc, char *argv[])
 
 #ifndef _DEBUG
     CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));
-    c.onCrash([mainWindow](const QString& directory)
+    c.onCrash([mainWindow, &consoleOutputFiles](const QString& directory)
     {
         QVariant state;
 
@@ -466,13 +453,11 @@ int start(int argc, char *argv[])
             std::cerr << "Failed to invoke 'currentState' (" << index << ")\n";
         }
 
-        if(!stdoutFilename.isEmpty() && !stderrFilename.isEmpty())
+        for(auto consoleOutputFile : consoleOutputFiles)
         {
-            stdoutFile.close();
-            stderrFile.close();
-
-            QFile::copy(stdoutFilename, QDir(directory).filePath("stdout.txt"));
-            QFile::copy(stderrFilename, QDir(directory).filePath("stderr.txt"));
+            consoleOutputFile->close();
+            auto baseName = QFileInfo(consoleOutputFile->filename()).fileName();
+            QFile::copy(consoleOutputFile->filename(), QDir(directory).filePath(baseName));
         }
 
         auto settingsFileName = u::settingsFileName();
