@@ -1814,6 +1814,14 @@ ApplicationWindow
 
     Action
     {
+        id: testConsoleOutputAction
+        text: qsTr("Test Console Output")
+        enabled: application.debugEnabled
+        onTriggered: application.testConsoleOutput()
+    }
+
+    Action
+    {
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
         enabled: application.debugEnabled
@@ -2428,6 +2436,7 @@ ApplicationWindow
                     onTriggered: { application.crash(CrashType.SilentSubmit); }
                 }
             }
+            PlatformMenuItem { action: testConsoleOutputAction }
             PlatformMenuItem { action: dumpGraphAction }
             PlatformMenuItem { action: dumpCommandStackAction }
             PlatformMenuItem { action: toggleFpsMeterAction }

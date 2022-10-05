@@ -597,6 +597,24 @@ void Application::crash(int crashType)
     }
 }
 
+void Application::testConsoleOutput()
+{
+    std::cout << "std::cout\n";
+    std::cerr << "std::cerr\n";
+
+    fprintf(stdout, "stdout\n"); fflush(stdout);
+    fprintf(stderr, "stderr\n"); fflush(stderr);
+
+    qInfo() << "qInfo()";
+    qWarning() << "qWarning()";
+    qDebug() << "qDebug()";
+    qCritical() << "qCritical()";
+
+#if defined(Q_OS_WIN32)
+    OutputDebugString(L"OutputDebugString\n");
+#endif
+}
+
 // NOLINTNEXTLINE readability-convert-member-functions-to-static
 void Application::reportScopeTimers()
 {

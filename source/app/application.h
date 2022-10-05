@@ -207,6 +207,7 @@ public:
     Q_INVOKABLE QStringList linkArgumentsFor(const QUrl& url) const;
 
     Q_INVOKABLE void crash(int crashType);
+    Q_INVOKABLE void testConsoleOutput();
 
     Q_INVOKABLE void reportScopeTimers();
 
