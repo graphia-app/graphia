@@ -602,8 +602,10 @@ void Application::testConsoleOutput()
     std::cout << "std::cout\n";
     std::cerr << "std::cerr\n";
 
-    fprintf(stdout, "stdout\n"); fflush(stdout);
-    fprintf(stderr, "stderr\n"); fflush(stderr);
+    int bytes = 0;
+    bytes = fprintf(stdout, "stdout\n"); fflush(stdout);
+    bytes = fprintf(stderr, "stderr\n"); fflush(stderr);
+    Q_UNUSED(bytes);
 
     qInfo() << "qInfo()";
     qWarning() << "qWarning()";
