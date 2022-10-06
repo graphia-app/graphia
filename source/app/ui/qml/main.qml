@@ -1299,7 +1299,7 @@ ApplicationWindow
     Action
     {
         id: optionsAction
-        enabled: !mainWindow._anyDocumentsBusy
+        enabled: !mainWindow._anyDocumentsBusy && !tracking.visible
         icon.name: "applications-system"
         text: qsTr("&Options…")
         onTriggered: function(source)
