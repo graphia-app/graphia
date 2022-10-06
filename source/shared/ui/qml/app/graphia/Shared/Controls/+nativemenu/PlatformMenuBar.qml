@@ -23,39 +23,5 @@ import Qt.labs.platform as Labs
 
 Labs.MenuBar
 {
-    property var _hiddenMenus: []
-
     property bool visible: true
-    onVisibleChanged:
-    {
-        for(let i = 0; i < menus.length; i++)
-        {
-            let menu = menus[i];
-
-            if(visible)
-            {
-                // Showing
-                let wasHidden = _hiddenMenus.indexOf(i) >= 0;
-
-                if(menu instanceof PlatformMenu)
-                    menu.hidden = wasHidden;
-                else if(menu instanceof Labs.Menu)
-                    menu.visible = !wasHidden;
-            }
-            else
-            {
-                // Hiding
-                if(!menu.visible)
-                    _hiddenMenus.push(i);
-
-                if(menu instanceof PlatformMenu)
-                    menu.hidden = true;
-                else if(menu instanceof Labs.Menu)
-                    menu.visible = false;
-            }
-        }
-
-        if(visible)
-            _hiddenMenus = [];
-    }
 }

@@ -26,7 +26,7 @@ Labs.Menu
     id: menu
 
     property bool hidden: false
-    visible: !hidden
+    visible: !hidden && (menuBar ? menuBar.visible : true)
 
     readonly property int count: items.length
 
