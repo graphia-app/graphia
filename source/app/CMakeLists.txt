@@ -315,6 +315,9 @@ if(APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/misc/MacOSXBundleInfo.plist.in)
 elseif(MSVC)
+    list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/odsconsolecapture.h)
+    list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/odsconsolecapture.cpp)
+
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})

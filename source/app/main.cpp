@@ -50,6 +50,7 @@
 
 #include "application.h"
 #include "consolecapture.h"
+#include "odsconsolecapture.h"
 #include "preferences.h"
 #include "preferenceswatcher.h"
 
@@ -220,6 +221,9 @@ int start(int argc, char *argv[])
             std::make_shared<IoStreamCapture>(QStringLiteral("%1/cerr.txt").arg(appDataLocation), std::cerr),
             std::make_shared<CStreamCapture>(QStringLiteral("%1/stdout.txt").arg(appDataLocation), stdout),
             std::make_shared<CStreamCapture>(QStringLiteral("%1/stderr.txt").arg(appDataLocation), stderr),
+#ifdef Q_OS_WIN
+            std::make_shared<ODSCapture>(QStringLiteral("%1/outputdebugstring.txt").arg(appDataLocation)),
+#endif
         };
     }
 
