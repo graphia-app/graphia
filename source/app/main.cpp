@@ -457,11 +457,16 @@ int start(int argc, char *argv[])
             std::cerr << "Failed to invoke 'currentState' (" << index << ")\n";
         }
 
-        for(auto consoleOutputFile : consoleOutputFiles)
+        for(const auto& consoleOutputFile : consoleOutputFiles)
         {
             consoleOutputFile->close();
-            auto baseName = QFileInfo(consoleOutputFile->filename()).fileName();
-            QFile::copy(consoleOutputFile->filename(), QDir(directory).filePath(baseName));
+            auto fileInfo = QFileInfo(consoleOutputFile->filename());
+
+            // No point in submitting it if it's empty
+            if(fileInfo.size() == 0)
+                continue;
+
+            QFile::copy(consoleOutputFile->filename(), QDir(directory).filePath(fileInfo.fileName()));
         }
 
         auto settingsFileName = u::settingsFileName();
