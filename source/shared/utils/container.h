@@ -164,6 +164,18 @@ namespace u
         return result;
     }
 
+    template<Container C1, Container C2>
+    bool setsIntersect(const C1& a, const C2& b)
+    {
+        static_assert(std::is_same_v<typename C1::value_type, typename C2::value_type>);
+
+        return std::any_of(a.begin(), a.end(),
+        [&b](const auto& value)
+        {
+            return contains(b, value);
+        });
+    }
+
     template<Container C>
     std::vector<typename C::key_type> keysFor(const C& container)
     {
