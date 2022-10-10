@@ -72,6 +72,7 @@
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/flags.h"
 #include "shared/utils/string.h"
+#include "shared/utils/scopetimer.h"
 
 #include "shared/loading/userelementdata.h"
 
@@ -654,6 +655,8 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
 
 void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
+    SCOPE_TIMER_MULTISAMPLES(50)
+
     _->_mappedNodeVisuals.resetElements();
     _->_mappedEdgeVisuals.resetElements();
     clearVisualisationInfos();

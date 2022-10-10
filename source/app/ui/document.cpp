@@ -29,6 +29,7 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 #include "shared/utils/static_block.h"
+#include "shared/utils/scopetimer.h"
 
 #include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
@@ -410,6 +411,8 @@ void Document::setTransforms(const QStringList& transforms)
 
 void Document::setVisualisations(const QStringList& visualisations)
 {
+    SCOPE_TIMER_MULTISAMPLES(50)
+
     _visualisations = visualisations;
     _graphModel->buildVisualisations(_visualisations);
 
