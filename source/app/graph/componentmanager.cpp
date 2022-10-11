@@ -191,8 +191,15 @@ void ComponentManager::update(const Graph* graph)
         componentArray->resize(componentArrayCapacity());
 
     // Search for added or removed components
-    auto componentIdsToBeAdded = u::setDifference(componentIds, _componentIdsSet);
-    auto componentIdsToBeRemoved = u::setDifference(_componentIdsSet, componentIds);
+    ComponentIdSet componentIdsToBeAdded;
+    ComponentIdSet componentIdsToBeRemoved;
+
+    std::set_difference(componentIds.begin(), componentIds.end(),
+        _componentIdsSet.begin(), _componentIdsSet.end(),
+        std::inserter(componentIdsToBeAdded, componentIdsToBeAdded.begin()));
+    std::set_difference(_componentIdsSet.begin(), _componentIdsSet.end(),
+        componentIds.begin(), componentIds.end(),
+        std::inserter(componentIdsToBeRemoved, componentIdsToBeRemoved.begin()));
 
     // Find nodes and edges that have been added or removed
     ComponentIdMap<std::vector<NodeId>> nodeIdAdds;
