@@ -344,7 +344,7 @@ void ComponentManager::update(const Graph* graph)
             emit edgeRemovedFromComponent(graph, edgeId, edgeIdRemove.first);
     }
 
-    if(_debug) qDebug() << "ComponentManager::update ends" << this;
+    if(_debug) qDebug() << "ComponentManager::update ends" << this << _componentIdsSet;
 }
 
 ComponentId ComponentManager::generateComponentId()
