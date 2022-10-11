@@ -425,7 +425,6 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
             if(array.is_array())
             {
                 NodeIdSet nodeIds;
-                nodeIds.reserve(array.size());
 
                 for(const auto& nodeId : array)
                     nodeIds.insert(nodeId.get<int>());

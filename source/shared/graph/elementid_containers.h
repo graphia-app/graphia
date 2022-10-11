@@ -21,8 +21,12 @@
 
 #include "elementid.h"
 
+#include <set>
+#include <map>
+
 #include <unordered_set>
 #include <unordered_map>
+
 #include <functional>
 
 template<typename T> struct ElementIdHash
@@ -33,8 +37,8 @@ template<typename T> struct ElementIdHash
     }
 };
 
-template<typename T> using ElementIdSet = std::unordered_set<T, ElementIdHash<T>>;
-template<typename K, typename V> using ElementIdMap = std::unordered_map<K, V, ElementIdHash<K>>;
+template<typename T> using ElementIdSet = std::set<T>;
+template<typename K, typename V> using ElementIdMap = std::map<K, V>;
 
 using NodeIdSet = ElementIdSet<NodeId>;
 using EdgeIdSet = ElementIdSet<EdgeId>;
