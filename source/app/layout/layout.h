@@ -20,6 +20,7 @@
 #define LAYOUT_H
 
 #include "shared/graph/igraphcomponent.h"
+#include "shared/graph/elementid_containers.h"
 #include "graph/componentmanager.h"
 #include "nodepositions.h"
 
@@ -186,7 +187,7 @@ private:
     std::condition_variable _waitForResume;
 
     std::unique_ptr<LayoutFactory> _layoutFactory;
-    std::map<ComponentId, std::unique_ptr<Layout>> _layouts;
+    ComponentIdMap<std::unique_ptr<Layout>> _layouts;
     ComponentArray<bool> _executedAtLeastOnce;
 
     Layout::Dimensionality _dimensionalityMode =

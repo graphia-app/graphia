@@ -20,6 +20,7 @@
 #define COMPONENTMANAGER_H
 
 #include "shared/graph/grapharray.h"
+#include "shared/graph/elementid_containers.h"
 
 #include "graphfilter.h"
 

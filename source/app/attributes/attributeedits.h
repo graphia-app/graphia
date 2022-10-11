@@ -20,6 +20,7 @@
 #define ATTRIBUTEEDITS_H
 
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
 
 #include "shared/utils/static_block.h"
 
@@ -36,8 +37,8 @@ class AttributeEdits
     friend class EditAttributeCommand;
 
 private:
-    std::map<NodeId, QString> _nodeValues;
-    std::map<EdgeId, QString> _edgeValues;
+    NodeIdMap<QString> _nodeValues;
+    EdgeIdMap<QString> _edgeValues;
 
 public:
     auto nodeValues() const { return _nodeValues; }

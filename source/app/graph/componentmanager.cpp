@@ -119,9 +119,9 @@ void ComponentManager::update(const Graph* graph)
 
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    std::map<ComponentId, ComponentIdSet> splitComponents;
+    ComponentIdMap<ComponentIdSet> splitComponents;
     ComponentIdSet splitComponentIds;
-    std::map<ComponentId, ComponentIdSet> mergedComponents;
+    ComponentIdMap<ComponentIdSet> mergedComponents;
     ComponentIdSet mergedComponentIds;
     ComponentIdSet componentIds;
 
@@ -195,10 +195,10 @@ void ComponentManager::update(const Graph* graph)
     auto componentIdsToBeRemoved = u::setDifference(_componentIdsSet, componentIds);
 
     // Find nodes and edges that have been added or removed
-    std::map<ComponentId, std::vector<NodeId>> nodeIdAdds;
-    std::map<ComponentId, std::vector<EdgeId>> edgeIdAdds;
-    std::map<ComponentId, std::vector<NodeId>> nodeIdRemoves;
-    std::map<ComponentId, std::vector<EdgeId>> edgeIdRemoves;
+    ComponentIdMap<std::vector<NodeId>> nodeIdAdds;
+    ComponentIdMap<std::vector<EdgeId>> edgeIdAdds;
+    ComponentIdMap<std::vector<NodeId>> nodeIdRemoves;
+    ComponentIdMap<std::vector<EdgeId>> edgeIdRemoves;
 
     auto maxNumNodes = std::max(_nodesComponentId.size(), newNodesComponentId.size());
     for(NodeId nodeId(0); nodeId < maxNumNodes; ++nodeId)
