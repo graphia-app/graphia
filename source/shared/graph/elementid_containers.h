@@ -40,13 +40,24 @@ template<typename T> struct ElementIdHash
 template<typename T> using ElementIdSet = std::set<T>;
 template<typename K, typename V> using ElementIdMap = std::map<K, V>;
 
+template<typename T> using ElementIdHashSet = std::unordered_set<T, ElementIdHash<T>>;
+template<typename K, typename V> using ElementIdHashMap = std::unordered_map<K, V, ElementIdHash<K>>;
+
 using NodeIdSet = ElementIdSet<NodeId>;
 using EdgeIdSet = ElementIdSet<EdgeId>;
 using ComponentIdSet = ElementIdSet<ComponentId>;
 
+using NodeIdHashSet = ElementIdHashSet<NodeId>;
+using EdgeIdHashSet = ElementIdHashSet<EdgeId>;
+using ComponentIdHashSet = ElementIdHashSet<ComponentId>;
+
 template<typename V> using NodeIdMap = ElementIdMap<NodeId, V>;
 template<typename V> using EdgeIdMap = ElementIdMap<EdgeId, V>;
 template<typename V> using ComponentIdMap = ElementIdMap<ComponentId, V>;
+
+template<typename V> using NodeIdHashMap = ElementIdHashMap<NodeId, V>;
+template<typename V> using EdgeIdHashMap = ElementIdHashMap<EdgeId, V>;
+template<typename V> using ComponentIdHashMap = ElementIdHashMap<ComponentId, V>;
 
 template<typename Element> using ElementConditionFn = std::function<bool(const Element)>;
 using NodeConditionFn = ElementConditionFn<NodeId>;
