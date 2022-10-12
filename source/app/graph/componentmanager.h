@@ -102,7 +102,7 @@ private:
     std::unordered_set<IGraphArray*> _componentArrays;
 
     bool _enabled = true;
-    bool _debug = false;
+    int _debug = 0;
 
     ComponentId generateComponentId();
     void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
@@ -137,9 +137,6 @@ public:
     void enable() { _enabled = true; }
     void disable() { _enabled = false; }
     bool enabled() const { return _enabled; }
-
-    void enableDebug() { _debug = true; }
-    void disbleDebug() { _debug = false; }
 
 signals:
     void componentAdded(const Graph*, ComponentId, bool);
