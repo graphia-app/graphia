@@ -469,7 +469,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
         return;
 
     const auto& mergers = componentMergeSet.mergers();
-    if(mergers.find(_componentId) == mergers.end())
+    if(!mergers.contains(_componentId))
         return;
 
     auto newComponentId = componentMergeSet.newComponentId();

@@ -139,7 +139,7 @@ void ComponentManager::update(const Graph* graph)
 
         if(newNodesComponentId[nodeId].isNull() && !oldComponentId.isNull())
         {
-            if(u::contains(componentIds, oldComponentId))
+            if(componentIds.contains(oldComponentId))
             {
                 // We have already used this ID so this is a component that has split
                 auto newComponentId = generateComponentId();
@@ -253,7 +253,7 @@ void ComponentManager::update(const Graph* graph)
     {
         Q_ASSERT(!componentId.isNull());
         if(_debug > 0) qDebug() << "componentWillBeRemoved" << componentId;
-        bool hasMerged = u::contains(mergedComponentIds, componentId);
+        bool hasMerged = mergedComponentIds.contains(componentId);
         emit componentWillBeRemoved(graph, componentId, hasMerged);
 
         if(!hasMerged)
@@ -303,7 +303,7 @@ void ComponentManager::update(const Graph* graph)
     {
         Q_ASSERT(!componentId.isNull());
         if(_debug > 0) qDebug() << "componentAdded" << componentId;
-        bool hasSplit = u::contains(splitComponentIds, componentId);
+        bool hasSplit = splitComponentIds.contains(componentId);
         emit componentAdded(graph, componentId, hasSplit);
 
         if(!hasSplit)
@@ -386,7 +386,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 {
     for(auto componentId : _componentIds)
     {
-        if(u::contains(_updatesRequired, componentId))
+        if(_updatesRequired.contains(componentId))
         {
             auto* graphComponent = componentFor(componentId);
 
@@ -402,7 +402,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 
         auto componentId = _nodesComponentId[nodeId];
 
-        if(u::contains(_updatesRequired, componentId))
+        if(_updatesRequired.contains(componentId))
             componentFor(componentId)->_nodeIds.push_back(nodeId);
     }
 
@@ -413,7 +413,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 
         auto componentId = _edgesComponentId[edgeId];
 
-        if(u::contains(_updatesRequired, componentId))
+        if(_updatesRequired.contains(componentId))
             componentFor(componentId)->_edgeIds.push_back(edgeId);
     }
 }
@@ -542,7 +542,7 @@ bool ComponentManager::containsComponentId(ComponentId componentId) const
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
-    return u::contains(_componentIdsSet, componentId);
+    return _componentIdsSet.contains(componentId);
 }
 
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
@@ -563,7 +563,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
-    if(u::contains(_componentIdsSet, componentId))
+    if(_componentIdsSet.contains(componentId))
         return componentId;
 
     if(_debug > 0) qDebug() << "Can't find componentId of nodeId" << nodeId;
@@ -578,7 +578,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
-    if(u::contains(_componentIdsSet, componentId))
+    if(_componentIdsSet.contains(componentId))
         return componentId;
 
     if(_debug > 0) qDebug() << "Can't find componentId of edgeId" << edgeId;
