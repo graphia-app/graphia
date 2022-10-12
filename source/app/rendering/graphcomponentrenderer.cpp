@@ -261,8 +261,16 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius, Projection pro
 float GraphComponentRenderer::maxDistanceFor(NodeId nodeId,
     const std::vector<NodeId>* nodeIds) const
 {
+    if(nodeIds == nullptr && componentIsValid())
+    {
+        Q_ASSERT(!_frozen);
+        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
+    }
+
+    // If we don't have any nodeIds to work with (normally because the
+    // component is frozen) we can't go any futher
     if(nodeIds == nullptr)
-        nodeIds = &_nodeIds;
+        return -1.0f;
 
     QVector3D position = !nodeId.isNull() ?
         _graphModel->nodePositions().get(nodeId) :
@@ -280,8 +288,14 @@ float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
 
 void GraphComponentRenderer::updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds)
 {
+    if(nodeIds == nullptr && componentIsValid())
+    {
+        Q_ASSERT(!_frozen);
+        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
+    }
+
     if(nodeIds == nullptr)
-        nodeIds = &_nodeIds;
+        return;
 
     _viewData._componentCentre = _graphModel->nodePositions().centreOfMass(*nodeIds);
 
