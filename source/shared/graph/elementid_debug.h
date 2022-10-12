@@ -45,12 +45,12 @@ template<typename T> QDebug qDebugIdCollection(QDebug d, const T& collection)
     return d;
 }
 
-template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& set)        { return qDebugIdCollection(d, set); }
-template<typename T> QDebug operator<<(QDebug d, const ElementIdHashSet<T>& set)    { return qDebugIdCollection(d, set); }
+template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& set)        { return qDebugIdCollection(std::move(d), set); }
+template<typename T> QDebug operator<<(QDebug d, const ElementIdHashSet<T>& set)    { return qDebugIdCollection(std::move(d), set); }
 
-inline QDebug operator<<(QDebug d, const std::vector<NodeId>& v)        { return qDebugIdCollection(d, v); }
-inline QDebug operator<<(QDebug d, const std::vector<EdgeId>& v)        { return qDebugIdCollection(d, v); }
-inline QDebug operator<<(QDebug d, const std::vector<ComponentId>& v)   { return qDebugIdCollection(d, v); }
+inline QDebug operator<<(QDebug d, const std::vector<NodeId>& v)        { return qDebugIdCollection(std::move(d), v); }
+inline QDebug operator<<(QDebug d, const std::vector<EdgeId>& v)        { return qDebugIdCollection(std::move(d), v); }
+inline QDebug operator<<(QDebug d, const std::vector<ComponentId>& v)   { return qDebugIdCollection(std::move(d), v); }
 
 template<typename T> QDebug qDebugIdMap(QDebug d, const T& map)
 {
@@ -60,7 +60,7 @@ template<typename T> QDebug qDebugIdMap(QDebug d, const T& map)
     return d;
 }
 
-template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdMap<K, V>& map)     { return qDebugIdMap(d, map); }
-template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdHashMap<K, V>& map) { return qDebugIdMap(d, map); }
+template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdMap<K, V>& map)     { return qDebugIdMap(std::move(d), map); }
+template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdHashMap<K, V>& map) { return qDebugIdMap(std::move(d), map); }
 
 #endif // ELEMENTID_DEBUG_H
