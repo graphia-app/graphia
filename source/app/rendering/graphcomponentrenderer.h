@@ -93,7 +93,6 @@ public:
     void moveSavedFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
-    void moveFocusToNodes(const std::vector<NodeId>& nodeIds, const QQuaternion& rotation);
     void moveFocusTo(const QVector3D& position, float radius, const QQuaternion& rotation);
     void doProjectionTransition();
 

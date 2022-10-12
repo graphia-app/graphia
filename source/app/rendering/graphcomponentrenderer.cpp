@@ -660,16 +660,6 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
         moveFocusToNode(closestNodeId);
 }
 
-void GraphComponentRenderer::moveFocusToNodes(const std::vector<NodeId>& nodeIds,
-    const QQuaternion& rotation)
-{
-    _viewData._focusNodeId.setToNull();
-    updateCentreAndZoomDistance(&nodeIds);
-    zoomToDistance(_entireComponentZoomDistance);
-
-    centrePositionInViewport(_viewData._componentCentre, _viewData._zoomDistance, rotation);
-}
-
 void GraphComponentRenderer::moveFocusTo(const QVector3D& position, float radius, const QQuaternion& rotation)
 {
     _viewData._focusNodeId.setToNull();
