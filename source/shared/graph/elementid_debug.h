@@ -35,14 +35,32 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
     return d;
 }
 
-template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& idSet)
+template<typename T> QDebug qDebugIdCollection(QDebug d, const T& collection)
 {
     d << "[";
-    for(auto id : idSet)
+    for(auto id : collection)
         d << id;
     d << "]";
 
     return d;
 }
+
+template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& set)        { return qDebugIdCollection(d, set); }
+template<typename T> QDebug operator<<(QDebug d, const ElementIdHashSet<T>& set)    { return qDebugIdCollection(d, set); }
+
+inline QDebug operator<<(QDebug d, const std::vector<NodeId>& v)        { return qDebugIdCollection(d, v); }
+inline QDebug operator<<(QDebug d, const std::vector<EdgeId>& v)        { return qDebugIdCollection(d, v); }
+inline QDebug operator<<(QDebug d, const std::vector<ComponentId>& v)   { return qDebugIdCollection(d, v); }
+
+template<typename T> QDebug qDebugIdMap(QDebug d, const T& map)
+{
+    for(const auto& [id, value] : map)
+        d << id << ":" << value;
+
+    return d;
+}
+
+template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdMap<K, V>& map)     { return qDebugIdMap(d, map); }
+template<typename K, typename V> QDebug operator<<(QDebug d, const ElementIdHashMap<K, V>& map) { return qDebugIdMap(d, map); }
 
 #endif // ELEMENTID_DEBUG_H
