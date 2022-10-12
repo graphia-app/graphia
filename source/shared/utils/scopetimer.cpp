@@ -86,7 +86,7 @@ void ScopeTimerManager::reportToQDebug() const
             auto max = static_cast<double>(*minMax.second) / 1000000.0;
             stdDev /= 1000000.0;
 
-            auto last = samples.back() / 1000000.0;
+            auto last = static_cast<double>(samples.back()) / 1000000.0;
 
             qDebug() << name << QStringLiteral("%1/%2/%3/%4/%5 ms (mean/min/max/stddev/last)")
                 .arg(mean).arg(min).arg(max).arg(stdDev).arg(last);
