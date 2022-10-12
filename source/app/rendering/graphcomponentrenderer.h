@@ -215,13 +215,10 @@ private:
         QQuaternion rotation = nullQuaternion());
 
     float zoomDistanceForRadius(float radius, Projection projection = Projection::Unset) const;
-    float maxDistanceFor(NodeId nodeId,
-        const std::vector<NodeId>* nodeIds = nullptr) const;
-    float entireComponentZoomDistanceFor(NodeId nodeId,
-        const std::vector<NodeId>* nodeIds = nullptr,
-        Projection projection = Projection::Unset) const;
+    float maxDistanceFor(NodeId nodeId) const;
+    float entireComponentZoomDistanceFor(NodeId nodeId) const;
 
-    void updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds = nullptr);
+    void updateCentreAndZoomDistance();
 };
 
 #endif // GRAPHCOMPONENTRENDERER_H

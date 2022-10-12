@@ -258,48 +258,38 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius, Projection pro
     return std::max(radius, MINIMUM_ZOOM_DISTANCE);
 }
 
-float GraphComponentRenderer::maxDistanceFor(NodeId nodeId,
-    const std::vector<NodeId>* nodeIds) const
+float GraphComponentRenderer::maxDistanceFor(NodeId nodeId) const
 {
-    if(nodeIds == nullptr && componentIsValid())
-    {
-        Q_ASSERT(!_frozen);
-        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
-    }
-
-    // If we don't have any nodeIds to work with (normally because the
-    // component is frozen) we can't go any futher
-    if(nodeIds == nullptr)
+    if(!componentIsValid())
         return -1.0f;
+
+    Q_ASSERT(!_frozen);
+    const auto& nodeIds = _graphModel->graph().componentById(_componentId)->nodeIds();
 
     QVector3D position = !nodeId.isNull() ?
         _graphModel->nodePositions().get(nodeId) :
         _viewData._componentCentre;
 
-    return maxNodeDistanceFromPoint(*_graphModel, position, *nodeIds);
+    return maxNodeDistanceFromPoint(*_graphModel, position, nodeIds);
 }
 
-float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId,
-    const std::vector<NodeId>* nodeIds, Projection projection) const
+float GraphComponentRenderer::entireComponentZoomDistanceFor(NodeId nodeId) const
 {
-    auto maxDistance = maxDistanceFor(nodeId, nodeIds);
-    return zoomDistanceForRadius(maxDistance, projection);
+    auto maxDistance = maxDistanceFor(nodeId);
+    return zoomDistanceForRadius(maxDistance);
 }
 
-void GraphComponentRenderer::updateCentreAndZoomDistance(const std::vector<NodeId>* nodeIds)
+void GraphComponentRenderer::updateCentreAndZoomDistance()
 {
-    if(nodeIds == nullptr && componentIsValid())
-    {
-        Q_ASSERT(!_frozen);
-        nodeIds = &_graphModel->graph().componentById(_componentId)->nodeIds();
-    }
-
-    if(nodeIds == nullptr)
+    if(!componentIsValid())
         return;
 
-    _viewData._componentCentre = _graphModel->nodePositions().centreOfMass(*nodeIds);
+    Q_ASSERT(!_frozen);
+    const auto& nodeIds = _graphModel->graph().componentById(_componentId)->nodeIds();
 
-    auto maxDistance = maxDistanceFor(_viewData._focusNodeId, nodeIds);
+    _viewData._componentCentre = _graphModel->nodePositions().centreOfMass(nodeIds);
+
+    auto maxDistance = maxDistanceFor(_viewData._focusNodeId);
     if(maxDistance >= 0.0f)
     {
         _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
