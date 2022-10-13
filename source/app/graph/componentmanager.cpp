@@ -211,19 +211,25 @@ void ComponentManager::update(const Graph* graph)
     auto maxNumNodes = std::max(_nodesComponentId.size(), newNodesComponentId.size());
     for(NodeId nodeId(0); nodeId < maxNumNodes; ++nodeId)
     {
-        if(_nodesComponentId[nodeId].isNull() && !newNodesComponentId[nodeId].isNull())
-            nodeIdAdds[newNodesComponentId[nodeId]].emplace_back(nodeId);
-        else if(!_nodesComponentId[nodeId].isNull() && newNodesComponentId[nodeId].isNull())
-            nodeIdRemoves[_nodesComponentId[nodeId]].emplace_back(nodeId);
+        auto oldComponentId = _nodesComponentId[nodeId];
+        auto newComponentId = newNodesComponentId[nodeId];
+
+        if(oldComponentId.isNull() && !newComponentId.isNull())
+            nodeIdAdds[newComponentId].emplace_back(nodeId);
+        else if(!oldComponentId.isNull() && newComponentId.isNull())
+            nodeIdRemoves[oldComponentId].emplace_back(nodeId);
     }
 
     auto maxNumEdges = std::max(_edgesComponentId.size(), newEdgesComponentId.size());
     for(EdgeId edgeId(0); edgeId < maxNumEdges; ++edgeId)
     {
-        if(_edgesComponentId[edgeId].isNull() && !newEdgesComponentId[edgeId].isNull())
-            edgeIdAdds[newEdgesComponentId[edgeId]].emplace_back(edgeId);
-        else if(!_edgesComponentId[edgeId].isNull() && newEdgesComponentId[edgeId].isNull())
-            edgeIdRemoves[_edgesComponentId[edgeId]].emplace_back(edgeId);
+        auto oldComponentId = _edgesComponentId[edgeId];
+        auto newComponentId = newEdgesComponentId[edgeId];
+
+        if(oldComponentId.isNull() && !newComponentId.isNull())
+            edgeIdAdds[newComponentId].emplace_back(edgeId);
+        else if(!oldComponentId.isNull() && newComponentId.isNull())
+            edgeIdRemoves[oldComponentId].emplace_back(edgeId);
     }
 
     // In the case where nodes move from one component to another, a merge
