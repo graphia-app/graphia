@@ -202,12 +202,6 @@ void ComponentManager::update(const Graph* graph)
         componentIds.begin(), componentIds.end(),
         std::inserter(componentIdsToBeRemoved, componentIdsToBeRemoved.begin()));
 
-    auto componentIsNotBeingRemoved = [&](const auto& componentId)
-    {
-        return !componentIdsToBeRemoved.contains(componentId) &&
-            !mergedComponents.contains(componentId);
-    };
-
     // Find nodes and edges that have been added or removed
     ComponentIdMap<std::vector<NodeId>> nodeIdAdds;
     ComponentIdMap<std::vector<EdgeId>> edgeIdAdds;
@@ -236,10 +230,18 @@ void ComponentManager::update(const Graph* graph)
     // is potentially falsely detected, so check that the merges have
     // corresponding removes, erasing them if they don't
     for(auto& [merger, mergees] : mergedComponents)
-        std::erase_if(mergees, componentIsNotBeingRemoved);
+    {
+        std::erase_if(mergees, [&](const auto& componentId)
+        {
+            return !componentIdsToBeRemoved.contains(componentId) && componentId != merger;
+        });
+    }
 
     std::erase_if(mergedComponents, [](const auto& m) { return m.second.size() <= 1; });
-    std::erase_if(mergedComponentIds, componentIsNotBeingRemoved);
+    std::erase_if(mergedComponentIds, [&](const auto& componentId)
+    {
+        return !componentIdsToBeRemoved.contains(componentId);
+    });
 
     // Notify all the merges
     for(auto& mergee : mergedComponents)
