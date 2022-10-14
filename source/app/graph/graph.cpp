@@ -122,15 +122,17 @@ void Graph::enableComponentManagement()
     {
         _componentManager = std::make_unique<ComponentManager>(*this);
 
-        connect(_componentManager.get(), &ComponentManager::componentAdded,             this, &Graph::componentAdded,           Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::componentWillBeRemoved,     this, &Graph::componentWillBeRemoved,   Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::componentSplit,             this, &Graph::componentSplit,           Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::componentsWillMerge,        this, &Graph::componentsWillMerge,      Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentAdded,             this, &Graph::componentAdded,               Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentWillBeRemoved,     this, &Graph::componentWillBeRemoved,       Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentSplit,             this, &Graph::componentSplit,               Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentsWillMerge,        this, &Graph::componentsWillMerge,          Qt::DirectConnection);
 
-        connect(_componentManager.get(), &ComponentManager::nodeAddedToComponent,       this, &Graph::nodeAddedToComponent,     Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::nodeRemovedFromComponent,   this, &Graph::nodeRemovedFromComponent, Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::edgeAddedToComponent,       this, &Graph::edgeAddedToComponent,     Qt::DirectConnection);
-        connect(_componentManager.get(), &ComponentManager::edgeRemovedFromComponent,   this, &Graph::edgeRemovedFromComponent, Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::nodeAddedToComponent,       this, &Graph::nodeAddedToComponent,         Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::nodeRemovedFromComponent,   this, &Graph::nodeRemovedFromComponent,     Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::edgeAddedToComponent,       this, &Graph::edgeAddedToComponent,         Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::edgeRemovedFromComponent,   this, &Graph::edgeRemovedFromComponent,     Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::nodeMovedBetweenComponents, this, &Graph::nodeMovedBetweenComponents,   Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::edgeMovedBetweenComponents, this, &Graph::edgeMovedBetweenComponents,   Qt::DirectConnection);
     }
 
     _componentManager->enable();

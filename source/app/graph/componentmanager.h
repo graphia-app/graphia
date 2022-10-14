@@ -148,6 +148,8 @@ signals:
     void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId);
     void nodeAddedToComponent(const Graph*, NodeId, ComponentId);
     void edgeAddedToComponent(const Graph*, EdgeId, ComponentId);
+    void nodeMovedBetweenComponents(const Graph*, NodeId, ComponentId, ComponentId);
+    void edgeMovedBetweenComponents(const Graph*, EdgeId, ComponentId, ComponentId);
 };
 
 #endif // COMPONENTMANAGER_H
