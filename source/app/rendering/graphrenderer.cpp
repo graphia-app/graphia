@@ -90,6 +90,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     connect(graph, &Graph::edgeAdded, this, &GraphRenderer::onEdgeAdded, Qt::DirectConnection);
     connect(graph, &Graph::nodeAddedToComponent, this, &GraphRenderer::onNodeAddedToComponent, Qt::DirectConnection);
     connect(graph, &Graph::edgeAddedToComponent, this, &GraphRenderer::onEdgeAddedToComponent, Qt::DirectConnection);
+    connect(graph, &Graph::nodeMovedBetweenComponents, this, &GraphRenderer::onNodeMovedBetweenComponents, Qt::DirectConnection);
+    connect(graph, &Graph::edgeMovedBetweenComponents, this, &GraphRenderer::onEdgeMovedBetweenComponents, Qt::DirectConnection);
 
     connect(graph, &Graph::graphWillChange, this, &GraphRenderer::onGraphWillChange, Qt::DirectConnection);
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
@@ -609,6 +611,16 @@ void GraphRenderer::onNodeAddedToComponent(const Graph*, NodeId nodeId, Componen
 }
 
 void GraphRenderer::onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId)
+{
+    _hiddenEdges.set(edgeId, true);
+}
+
+void GraphRenderer::onNodeMovedBetweenComponents(const Graph*, NodeId nodeId, ComponentId, ComponentId)
+{
+    _hiddenNodes.set(nodeId, true);
+}
+
+void GraphRenderer::onEdgeMovedBetweenComponents(const Graph*, EdgeId edgeId, ComponentId, ComponentId)
 {
     _hiddenEdges.set(edgeId, true);
 }

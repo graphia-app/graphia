@@ -150,6 +150,8 @@ private slots:
     void onEdgeAdded(const Graph*, EdgeId edgeId);
     void onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId);
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
+    void onNodeMovedBetweenComponents(const Graph*, NodeId nodeId, ComponentId, ComponentId);
+    void onEdgeMovedBetweenComponents(const Graph*, EdgeId edgeId, ComponentId, ComponentId);
 
     void onGraphWillChange(const Graph* graph);
     void onGraphChanged(const Graph* graph, bool changed);
