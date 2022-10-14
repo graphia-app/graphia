@@ -1336,7 +1336,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
 }
 
 void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
-    const QStringList& changedValuesNames, bool graphChanged)
+    const QStringList& changedValuesNames)
 {
     for(const auto& attributeName : u::combine(addedNames, changedValuesNames))
     {
@@ -1353,7 +1353,7 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
         updateSharedAttributeValues(attribute);
     }
 
-    if(!graphChanged)
+    if(!_transformedGraphIsChanging)
     {
         // If the attribute change isn't as a result of a graph transform, any change
         // may actually require a graph transform or visualisation to be rebuilt, so check for this
