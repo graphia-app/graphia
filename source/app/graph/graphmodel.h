@@ -75,7 +75,7 @@ private:
     // we don't want to do many visual updates, so disable them
     bool _visualUpdatesEnabled = false;
 
-    std::atomic_bool _transformedGraphIsChanging;
+    std::atomic_bool _graphTransformsAreChanging;
     QString _name;
     IPlugin* _plugin;
 

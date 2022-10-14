@@ -191,7 +191,7 @@ private:
 
 GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _(std::make_unique<GraphModelImpl>(*this)),
-    _transformedGraphIsChanging(false),
+    _graphTransformsAreChanging(false),
     _name(name),
     _plugin(plugin)
 {
@@ -893,7 +893,7 @@ Attribute& GraphModel::createAttribute(QString name, QString* assignedName)
     // If we're creating an attribute during the graph transform, it's
     // a dynamically created attribute rather than a persistent one,
     // so mark it as such
-    if(_transformedGraphIsChanging)
+    if(_graphTransformsAreChanging)
         attribute.setFlag(AttributeFlag::Dynamic);
 
     for(auto* tracker : _->_attributeChangesTrackers)
@@ -956,7 +956,7 @@ bool GraphModel::attributeIsValid(const QString& name) const
     auto attributeName = Attribute::parseAttributeName(name);
     const auto* attribute = &_->_attributes.at(attributeName._name);
 
-    bool attributeDisabled = _transformedGraphIsChanging &&
+    bool attributeDisabled = _graphTransformsAreChanging &&
         attribute->testFlag(AttributeFlag::DisableDuringTransform);
 
     return !attributeDisabled;
@@ -1288,7 +1288,7 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
 
     removeDynamicAttributes();
 
-    _transformedGraphIsChanging = true;
+    _graphTransformsAreChanging = true;
 }
 
 void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
@@ -1332,7 +1332,7 @@ void GraphModel::onTransformedGraphChanged(const Graph*, bool changeOccurred)
     emit attributesChanged(addedAttributeNames, removedAttributeNames,
         changedAttributeNames, changeOccurred);
 
-    _transformedGraphIsChanging = false;
+    _graphTransformsAreChanging = false;
 }
 
 void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames,
@@ -1353,7 +1353,7 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
         updateSharedAttributeValues(attribute);
     }
 
-    if(!_transformedGraphIsChanging)
+    if(!_graphTransformsAreChanging)
     {
         // If the attribute change isn't as a result of a graph transform, any change
         // may actually require a graph transform or visualisation to be rebuilt, so check for this
