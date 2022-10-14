@@ -237,9 +237,10 @@ void ComponentManager::update(const Graph* graph)
     // corresponding removes, erasing them if they don't
     for(auto& [merger, mergees] : mergedComponents)
     {
+        auto mergerCapture = merger; //FIXME work around for patchy clang C++20 support
         std::erase_if(mergees, [&](const auto& componentId)
         {
-            return !componentIdsToBeRemoved.contains(componentId) && componentId != merger;
+            return !componentIdsToBeRemoved.contains(componentId) && componentId != mergerCapture;
         });
     }
 
