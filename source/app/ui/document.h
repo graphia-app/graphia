@@ -526,7 +526,7 @@ public:
     Q_INVOKABLE void writeTableView2ToFile(QObject* tableView, const QUrl& fileUrl,
         const QString& extension = QStringLiteral("csv"));
 
-    Q_INVOKABLE void copyTableViewCopyToClipboard(QObject* tableView, int column);
+    Q_INVOKABLE void copyTableModelColumnToClipboard(QAbstractItemModel* model, int column);
 
     Q_INVOKABLE void addBookmark(const QString& name);
     Q_INVOKABLE void removeBookmarks(const QStringList& names);
