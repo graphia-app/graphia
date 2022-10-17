@@ -529,7 +529,7 @@ public:
     Q_INVOKABLE void writeTableModelToFile(QAbstractItemModel* model, const QUrl& fileUrl,
         const QString& extension = QStringLiteral("csv"), const QStringList& columnHeaders = {});
 
-    Q_INVOKABLE void copyTableViewColumnToClipboard(QObject* tableView, int column);
+    Q_INVOKABLE void copyTableModelColumnToClipboard(QAbstractItemModel* model, int column);
 
     Q_INVOKABLE void addBookmark(const QString& name);
     Q_INVOKABLE void removeBookmarks(const QStringList& names);

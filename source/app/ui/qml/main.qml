@@ -2580,12 +2580,12 @@ ApplicationWindow
         currentTab.document.writeTableModelToFile(model, fileName, type, columnNames);
     }
 
-    function copyTableViewColumnToClipboard(tableView, columnName)
+    function copyTableModelColumnToClipboard(model, columnName)
     {
         if(!currentTab || currentTab.document.busy)
             return;
 
-        currentTab.document.copyTableViewColumnToClipboard(tableView, columnName);
+        currentTab.document.copyTableModelColumnToClipboard(model, columnName);
     }
 
     EnrichmentResults

@@ -335,7 +335,7 @@ Item
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            pluginContent.copyTableViewColumnToClipboard(tableView, lastClickedColumn);
+            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn);
         }
     }
 

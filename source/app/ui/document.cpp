@@ -2768,28 +2768,17 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
     }, {tr("Export Table"), tr("Exporting Table"), tr("Exported Table")});
 }
 
-void Document::copyTableViewColumnToClipboard(QObject* tableView, int column)
+void Document::copyTableModelColumnToClipboard(QAbstractItemModel* model, int column)
 {
-    auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columns")).toInt();
-
-    if(column < 0 || column >= columnCount)
+    if(column < 0 || column >= model->columnCount())
     {
-        qDebug() << "Document::copyTableViewColumnToClipboard: requested column exceeds column count";
+        qDebug() << "Document::copyTableModelColumnToClipboard: requested column exceeds column count";
         return;
     }
-
-    auto* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
-    if(model == nullptr)
-    {
-        qDebug() << "Document::copyTableViewColumnToClipboard: null model";
-        return;
-    }
-
-    auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rows")).toInt();
 
     QString text;
 
-    for(int row = 0; row < rowCount; row++)
+    for(int row = 0; row < model->rowCount(); row++)
     {
         auto value = model->data(model->index(row, column));
         text.append(QStringLiteral("%1\n").arg(value.toString()));
