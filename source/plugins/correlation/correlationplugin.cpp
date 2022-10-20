@@ -403,7 +403,7 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
     return u::toQStringList(attributeNames);
 }
 
-EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser& parser)
+EdgeList CorrelationPluginInstance::correlation(double threshold, IParser& parser)
 {
     auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType);
     switch(correlationDataType)
@@ -412,14 +412,14 @@ EdgeList CorrelationPluginInstance::correlation(double minimumThreshold, IParser
     case CorrelationDataType::Continuous:
     {
         auto continuousCorrelation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
-        return continuousCorrelation->edgeList(_continuousDataRows, minimumThreshold,
+        return continuousCorrelation->edgeList(_continuousDataRows, threshold,
             NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity), &parser, &parser);
     }
 
     case CorrelationDataType::Discrete:
     {
         auto discreteCorrelation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
-        return discreteCorrelation->edgeList(_discreteDataRows, minimumThreshold, _treatAsBinary, &parser, &parser);
+        return discreteCorrelation->edgeList(_discreteDataRows, threshold, _treatAsBinary, &parser, &parser);
     }
     }
 

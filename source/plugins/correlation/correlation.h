@@ -52,7 +52,7 @@ public:
 class ContinuousCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double minimumThreshold,
+    virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double threshold,
         CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
@@ -85,7 +85,7 @@ private:
     using CorrelationList = std::vector<ContinuousDataVectorRelation>;
 
     auto process(const ContinuousDataVectors& vectors,
-        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         size_t size = vectors.front().size();
@@ -142,9 +142,9 @@ private:
                 switch(polarity)
                 {
                 default:
-                case CorrelationPolarity::Positive: exceedsThreshold = (r >= minimumThreshold); break;
-                case CorrelationPolarity::Negative: exceedsThreshold = (r <= -minimumThreshold); break;
-                case CorrelationPolarity::Both:     exceedsThreshold = (std::abs(r) >= minimumThreshold); break;
+                case CorrelationPolarity::Positive: exceedsThreshold = (r >= threshold); break;
+                case CorrelationPolarity::Negative: exceedsThreshold = (r <= -threshold); break;
+                case CorrelationPolarity::Both:     exceedsThreshold = (std::abs(r) >= threshold); break;
                 }
 
                 if(exceedsThreshold)
@@ -170,13 +170,13 @@ private:
 
 public:
     EdgeList edgeList(const ContinuousDataVectors& vectors,
-        double minimumThreshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+        double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
             return {};
 
-        auto results = process(vectors, minimumThreshold, polarity, cancellable, progressable);
+        auto results = process(vectors, threshold, polarity, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
@@ -344,7 +344,7 @@ public:
 class DiscreteCorrelation : public ICorrelation
 {
 public:
-    virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
+    virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
@@ -354,7 +354,7 @@ template<int Denominator>
 class MatchingCorrelation : public DiscreteCorrelation
 {
 public:
-    EdgeList edgeList(const DiscreteDataVectors& vectors, double minimumThreshold, bool treatAsBinary,
+    EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
@@ -426,7 +426,7 @@ public:
 
                     double r = fraction;
 
-                    if(std::isfinite(r) && r >= minimumThreshold)
+                    if(std::isfinite(r) && r >= threshold)
                         edges.push_back({vectorAIt->nodeId(), vectorBIt->nodeId(), r});
                 }
             };

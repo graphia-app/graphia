@@ -156,7 +156,7 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    EdgeList correlation(double minimumThreshold, IParser& parser);
+    EdgeList correlation(double threshold, IParser& parser);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
