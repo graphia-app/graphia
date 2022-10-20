@@ -111,10 +111,6 @@ public:
 
     static double epsilonFor(const std::vector<double>& data);
 
-    static EdgeList pearsonCorrelation(
-        const ContinuousDataVectors& rows,
-        double minimumThreshold, IParser* parser = nullptr);
-
     bool parse(const QUrl& url, IGraphModel* graphModel) override;
     QString log() const override;
 
