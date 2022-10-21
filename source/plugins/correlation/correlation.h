@@ -62,6 +62,19 @@ public:
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
 
+static bool exceedsThreshold(CorrelationPolarity polarity, double r, double threshold)
+{
+    switch(polarity)
+    {
+    default:
+    case CorrelationPolarity::Positive: return (r >= threshold); break;
+    case CorrelationPolarity::Negative: return (r <= -threshold); break;
+    case CorrelationPolarity::Both:     return (std::abs(r) >= threshold); break;
+    }
+
+    return false;
+}
+
 enum class VectorType
 {
     Raw,
@@ -137,17 +150,7 @@ private:
                 if(!std::isfinite(r))
                     continue;
 
-                bool exceedsThreshold = false;
-
-                switch(polarity)
-                {
-                default:
-                case CorrelationPolarity::Positive: exceedsThreshold = (r >= threshold); break;
-                case CorrelationPolarity::Negative: exceedsThreshold = (r <= -threshold); break;
-                case CorrelationPolarity::Both:     exceedsThreshold = (std::abs(r) >= threshold); break;
-                }
-
-                if(exceedsThreshold)
+                if(exceedsThreshold(polarity, r, threshold))
                     correlations.push_back({vectorAIt, vectorBIt, r});
             }
 
