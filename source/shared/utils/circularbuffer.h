@@ -24,6 +24,19 @@
 
 #include <QtGlobal>
 
+// Test if there is an operator* for T and Arg
+namespace Test
+{
+    struct NotFound {};
+    template<typename T, typename Arg> NotFound operator*(const T&, const Arg&);
+
+    template<typename T, typename Arg = T>
+    struct MultiplyExists
+    {
+        enum { value = !std::is_same<decltype(std::declval<T>() * std::declval<Arg>()), NotFound>::value };
+    };
+} // namespace Test
+
 template<typename T, size_t Size> class CircularBuffer
 {
 private:
@@ -86,7 +99,9 @@ public:
         samples = std::min(samples, _size);
 
         T result = T();
-        auto reciprocal = 1.0 / static_cast<double>(samples);
+
+        using Reciprocal = std::conditional_t<Test::MultiplyExists<T, float>::value, float, double>;
+        auto reciprocal = static_cast<Reciprocal>(1.0 / static_cast<double>(samples));
 
         for(auto i = _size - samples; i < _size; i++)
             result += at(i) * reciprocal;
