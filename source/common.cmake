@@ -24,7 +24,7 @@ if(UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
         -Wdisabled-optimization -Wformat=2 -Winit-self \
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
-        -Wnon-virtual-dtor -Wredundant-decls -Wshadow")
+        -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wconversion")
 
     # Surprisingly, this actually makes a difference to the pearson correlation code
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
