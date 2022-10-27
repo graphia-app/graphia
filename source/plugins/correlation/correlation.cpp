@@ -116,8 +116,8 @@ void BicorAlgorithm::preprocess(size_t size, const ContinuousDataVectors& vector
 
 double BicorAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
 {
-    auto a = std::distance(_base, vectorA);
-    auto b = std::distance(_base, vectorB);
+    auto a = static_cast<size_t>(std::distance(_base, vectorA));
+    auto b = static_cast<size_t>(std::distance(_base, vectorB));
     const auto& processedVectorA = _processedVectors.at(a);
     const auto& processedVectorB = _processedVectors.at(b);
 

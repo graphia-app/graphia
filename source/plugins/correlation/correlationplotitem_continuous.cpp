@@ -54,7 +54,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
     {
         for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
+            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
 
             if(_scaleType == static_cast<int>(PlotScaleType::Log))
                 value = logScale(value, _pluginInstance->continuousEpsilon());
@@ -208,7 +208,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
         double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
-            return partial + _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
+            return partial + _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
         });
 
         yDataAvg.append(runningTotal / static_cast<double>(rows.length()));
@@ -228,7 +228,7 @@ void addPlotPerAttributeValue(const CorrelationPluginInstance* pluginInstance,
     QMap<QString, QVector<int>> map;
     for(auto selectedRow : selectedRows)
     {
-        const auto value = pluginInstance->attributeValueFor(attributeName, selectedRow);
+        const auto value = pluginInstance->attributeValueFor(attributeName, static_cast<size_t>(selectedRow));
         map[value].append(selectedRow); // clazy:exclude=reserve-candidates
     }
 
@@ -306,21 +306,21 @@ void CorrelationPlotItem::populateMedianLinePlot()
         QVector<double> rowsEntries(rows.length());
         QVector<double> yDataAvg(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-        for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
+        for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
         {
             rowsEntries.clear();
             std::transform(rows.begin(), rows.end(), std::back_inserter(rowsEntries),
             [this, col](auto row)
             {
-                return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
+                return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
             });
 
             if(!rows.empty())
             {
-                yDataAvg[col] = u::medianOf(rowsEntries);
+                yDataAvg[static_cast<int>(col)] = u::medianOf(rowsEntries);
 
-                maxY = std::max(maxY, yDataAvg[col]);
-                minY = std::min(minY, yDataAvg[col]);
+                maxY = std::max(maxY, yDataAvg.at(static_cast<int>(col)));
+                minY = std::min(minY, yDataAvg.at(static_cast<int>(col)));
             }
         }
 
@@ -506,7 +506,7 @@ void CorrelationPlotItem::populateIQRPlot()
     auto minY = std::numeric_limits<double>::max();
     auto maxY = std::numeric_limits<double>::lowest();
 
-    for(int column = 0; column < static_cast<int>(_pluginInstance->numContinuousColumns()); column++)
+    for(size_t column = 0; column < _pluginInstance->numContinuousColumns(); column++)
     {
         QVector<double> values;
 
@@ -514,7 +514,7 @@ void CorrelationPlotItem::populateIQRPlot()
         std::transform(selectedRows.begin(), selectedRows.end(), std::back_inserter(values),
         [this, column](auto row)
         {
-            return _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(column)));
+            return _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(column));
         });
 
         if(_scaleType == static_cast<int>(PlotScaleType::Log))
@@ -593,18 +593,19 @@ void CorrelationPlotItem::populateStdDevPlot(QCPAbstractPlottable* meanPlot,
 {
     QVector<double> stdDevs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
+    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
     {
         double stdDev = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col)) -
+                means.at(static_cast<int>(col));
             stdDev += (value * value);
         }
 
         stdDev /= static_cast<double>(_pluginInstance->numContinuousColumns());
         stdDev = std::sqrt(stdDev);
-        stdDevs[col] = stdDev;
+        stdDevs[static_cast<int>(col)] = stdDev;
     }
 
     plotDispersion(meanPlot, minY, maxY, stdDevs, tr("Std Dev"));
@@ -616,18 +617,19 @@ void CorrelationPlotItem::populateStdErrorPlot(QCPAbstractPlottable* meanPlot,
 {
     QVector<double> stdErrs(static_cast<int>(_pluginInstance->numContinuousColumns()));
 
-    for(int col = 0; col < static_cast<int>(_pluginInstance->numContinuousColumns()); col++)
+    for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
     {
         double stdErr = 0.0;
         for(auto row : rows)
         {
-            auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - means.at(col);
+            auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col)) -
+                means.at(static_cast<int>(col));
             stdErr += (value * value);
         }
 
         stdErr /= static_cast<double>(_pluginInstance->numContinuousColumns());
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(rows.length()));
-        stdErrs[col] = stdErr;
+        stdErrs[static_cast<int>(col)] = stdErr;
     }
 
     plotDispersion(meanPlot, minY, maxY, stdErrs, tr("Std Err"));
@@ -674,14 +676,14 @@ void CorrelationPlotItem::populateLinePlot()
 
             double rowSum = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
-                rowSum += _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
+                rowSum += _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
 
             double rowMean = rowSum / static_cast<double>(_pluginInstance->numContinuousColumns());
 
             double variance = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
-                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col))) - rowMean;
+                auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col)) - rowMean;
                 variance += (value * value);
             }
 
@@ -693,7 +695,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             if(NORMALISE_QML_ENUM(PlotScaleType, _scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
             {
-                attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, row));
+                attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, static_cast<size_t>(row)));
 
                 if(attributeValue == 0.0 || !std::isfinite(attributeValue))
                     attributeValue = 1.0;
@@ -704,7 +706,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
             {
-                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(_sortMap.at(col)));
+                auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
 
                 switch(NORMALISE_QML_ENUM(PlotScaleType, _scaleType))
                 {
@@ -754,8 +756,8 @@ void CorrelationPlotItem::populateLinePlot()
         graph->setVisible(true);
         graph->setSelectable(QCP::SelectionType::stWhole);
 
-        graph->setPen(_pluginInstance->nodeColorForRow(row));
-        graph->setName(_pluginInstance->rowName(row));
+        graph->setPen(_pluginInstance->nodeColorForRow(static_cast<size_t>(row)));
+        graph->setName(_pluginInstance->rowName(static_cast<size_t>(row)));
     }
 
     setContinousYAxisRange(minY, maxY);
@@ -816,7 +818,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
         for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
         {
-            auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
+            auto labelName = elideLabel(_pluginInstance->columnName(_sortMap.at(x)));
             categoryTicker->addTick(static_cast<double>(x), labelName);
         }
 

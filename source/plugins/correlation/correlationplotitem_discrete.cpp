@@ -63,7 +63,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
             for(auto index : indices)
             {
-                const auto& value = _pluginInstance->discreteDataAt(row, static_cast<int>(index));
+                const auto& value = _pluginInstance->discreteDataAt(static_cast<size_t>(row), index);
 
                 if(value.isEmpty())
                     continue;
@@ -157,7 +157,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
         {
-            auto labelName = elideLabel(_pluginInstance->columnName(static_cast<int>(_sortMap.at(x))));
+            auto labelName = elideLabel(_pluginInstance->columnName(_sortMap.at(x)));
             categoryTicker->addTick(static_cast<double>(x), labelName);
         }
 

@@ -646,7 +646,7 @@ bool CorrelationPlotItem::updateTooltip()
 
                 auto columnName = _groupByAnnotation ?
                     u::pluralise(_annotationGroupMap.at(index).size(), tr("column"), tr("columns")) :
-                    _pluginInstance->columnName(static_cast<int>(_sortMap.at(index)));
+                    _pluginInstance->columnName(_sortMap.at(index));
 
                 _hoverLabel->setText(tr("%1, %2: %3")
                     .arg(plottableUnderCursor->name(),
@@ -758,12 +758,12 @@ QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* plugin
     if(rows.isEmpty())
         return {};
 
-    auto color = pluginInstance->nodeColorForRow(rows.at(0));
+    auto color = pluginInstance->nodeColorForRow(static_cast<size_t>(rows.at(0)));
 
     auto colorsInconsistent = std::any_of(rows.begin(), rows.end(),
     [pluginInstance, &color](auto row)
     {
-        return pluginInstance->nodeColorForRow(row) != color;
+        return pluginInstance->nodeColorForRow(static_cast<size_t>(row)) != color;
     });
 
     if(colorsInconsistent)
@@ -832,7 +832,7 @@ void CorrelationPlotItem::configureLegend()
     const auto totalInternalMargins = legend->margins().top() + legend->margins().bottom();
     const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
 
-    int maxNumberOfElementsToDraw = 0;
+    size_t maxNumberOfElementsToDraw = 0;
     int accumulatedHeight = legendElementHeight;
     while(accumulatedHeight < maxLegendHeight)
     {
@@ -869,7 +869,7 @@ void CorrelationPlotItem::configureLegend()
 
     size_t numTruncated = 0;
 
-    if(static_cast<int>(plottables.size()) > maxNumberOfElementsToDraw)
+    if(plottables.size() > maxNumberOfElementsToDraw)
     {
         auto maxMinusOne = maxNumberOfElementsToDraw - 1;
         numTruncated = plottables.size() - maxMinusOne;
@@ -1205,7 +1205,7 @@ bool CorrelationPlotItem::updateSortMap()
     };
 
     std::vector<ColumnSortOrder> columnSortOrders;
-    columnSortOrders.reserve(_columnSortOrders.size());
+    columnSortOrders.reserve(static_cast<size_t>(_columnSortOrders.size()));
 
     for(const auto& qmlColumnSortOrder : std::as_const(_columnSortOrders))
     {
@@ -1240,7 +1240,7 @@ bool CorrelationPlotItem::updateSortMap()
 
             for(auto row : std::as_const(_selectedRows))
             {
-                if(!_pluginInstance->discreteDataAt(row, static_cast<int>(col)).isEmpty())
+                if(!_pluginInstance->discreteDataAt(static_cast<size_t>(row), col).isEmpty())
                     columnValues.at(col) += 1.0;
             }
         }
@@ -1252,11 +1252,11 @@ bool CorrelationPlotItem::updateSortMap()
         {
             double total = 0.0;
             std::vector<double> values;
-            values.reserve(_selectedRows.size());
+            values.reserve(static_cast<size_t>(_selectedRows.size()));
 
             for(auto row : std::as_const(_selectedRows))
             {
-                auto value = _pluginInstance->continuousDataAt(row, static_cast<int>(col));
+                auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), col);
 
                 switch(plotAveragingType)
                 {
@@ -1308,8 +1308,8 @@ bool CorrelationPlotItem::updateSortMap()
 
             case PlotColumnSortType::ColumnName:
             {
-                auto columnNameA = _pluginInstance->columnName(static_cast<int>(a));
-                auto columnNameB = _pluginInstance->columnName(static_cast<int>(b));
+                auto columnNameA = _pluginInstance->columnName(a);
+                auto columnNameB = _pluginInstance->columnName(b);
 
                 if(columnNameA == columnNameB)
                     continue;
@@ -1325,8 +1325,8 @@ bool CorrelationPlotItem::updateSortMap()
 
             case PlotColumnSortType::ColumnAnnotation:
             {
-                auto annotationValueA = columnSortOrder._annotation->valueAt(static_cast<int>(a));
-                auto annotationValueB = columnSortOrder._annotation->valueAt(static_cast<int>(b));
+                auto annotationValueA = columnSortOrder._annotation->valueAt(a);
+                auto annotationValueB = columnSortOrder._annotation->valueAt(b);
 
                 if(annotationValueA == annotationValueB)
                     continue;
@@ -1371,7 +1371,7 @@ bool CorrelationPlotItem::updateSortMap()
             for(const auto& name : _visibleColumnAnnotationNames)
             {
                 const auto* annotation = _pluginInstance->columnAnnotationByName(name);
-                valueColumn.emplace_back(annotation->valueAt(static_cast<int>(column)));
+                valueColumn.emplace_back(annotation->valueAt(column));
             }
 
             if(valueColumn != lastValueColumn || lastValueColumn.empty())

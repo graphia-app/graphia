@@ -170,22 +170,22 @@ public:
     QStringList defaultVisualisations() const override;
 
     size_t numContinuousColumns() const { return _numContinuousColumns; }
-    double continuousDataAt(int row, int column) const;
+    double continuousDataAt(size_t row, size_t column) const;
     double continuousEpsilon() const { return _continuousEpsilon; }
 
     size_t numDiscreteColumns() const { return _numDiscreteColumns; }
-    QString discreteDataAt(int row, int column) const;
+    QString discreteDataAt(size_t row, size_t column) const;
 
     int discreteDataValueIndex(const QString& value) const;
 
-    QString rowName(int row) const;
-    QString columnName(int column) const;
-    QColor nodeColorForRow(int row) const;
+    QString rowName(size_t row) const;
+    QString columnName(size_t column) const;
+    QColor nodeColorForRow(size_t row) const;
 
     const std::vector<ColumnAnnotation>& columnAnnotations() const { return _columnAnnotations; }
     const ColumnAnnotation* columnAnnotationByName(const QString& name) const;
 
-    QString attributeValueFor(const QString& attributeName, int row) const;
+    QString attributeValueFor(const QString& attributeName, size_t row) const;
 
     Q_INVOKABLE void computeHierarchicalClustering();
     void setHcOrdering(const std::vector<size_t>& ordering);

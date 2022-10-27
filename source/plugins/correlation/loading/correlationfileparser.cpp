@@ -212,7 +212,7 @@ static bool dataRectAppearsToBeContinuous(const TabularData& tabularData, const 
         }
 
         auto percentOfValuesInColumnThatAreUnique =
-            (uniqueValues.size() * 100) / dataRect.height();
+            (uniqueValues.size() * 100) / static_cast<size_t>(dataRect.height());
 
         // If we have few values relative to the size of the column,
         // assume it's discrete data
@@ -257,8 +257,8 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
 {
     double imputedValue = 0.0;
 
-    size_t left = dataRect.x();
-    size_t right = dataRect.x() + dataRect.width();
+    auto left = static_cast<size_t>(dataRect.x());
+    auto right = static_cast<size_t>(dataRect.x()) + static_cast<size_t>(dataRect.width());
 
     switch(missingDataType)
     {
@@ -487,15 +487,15 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     {
     default:
     case CorrelationDataType::Continuous:
-        numContinuousColumns = _dataRect.width();
+        numContinuousColumns = static_cast<size_t>(_dataRect.width());
         break;
 
     case CorrelationDataType::Discrete:
-        numDiscreteColumns = _dataRect.width();
+        numDiscreteColumns = static_cast<size_t>(_dataRect.width());
         break;
     }
 
-    _plugin->setDimensions(numContinuousColumns, numDiscreteColumns, _dataRect.height());
+    _plugin->setDimensions(numContinuousColumns, numDiscreteColumns, static_cast<size_t>(_dataRect.height()));
 
     graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
     if(!_plugin->loadUserData(_tabularData, _dataRect, *this))
@@ -799,13 +799,13 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
     ContinuousDataVectors dataRows;
     std::vector<double> rowData;
 
-    auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
-    rowData.reserve(rowIndices.size() * _dataRect.width());
+    auto rowIndices = randomRowIndices(static_cast<size_t>(_dataRect.y()), _dataPtr->numRows(), numSampleRows);
+    rowData.reserve(rowIndices.size() * static_cast<size_t>(_dataRect.width()));
 
     for(size_t rowIndex : rowIndices)
     {
         auto startColumn = static_cast<size_t>(_dataRect.x());
-        auto finishColumn = startColumn + _dataRect.width();
+        auto finishColumn = startColumn + static_cast<size_t>(_dataRect.width());
         for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
         {
             if(_graphSizeEstimateCancellable.cancelled())
@@ -871,17 +871,17 @@ DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(size_t
 
     DiscreteDataVectors dataRows;
     std::vector<QString> rowData;
-    rowData.reserve(_dataPtr->numColumns() - _dataRect.x());
+    rowData.reserve(_dataPtr->numColumns() - static_cast<size_t>(_dataRect.x()));
 
     NodeId nodeId(0);
 
-    auto rowIndices = randomRowIndices(_dataRect.y(), _dataPtr->numRows(), numSampleRows);
+    auto rowIndices = randomRowIndices(static_cast<size_t>(_dataRect.y()), _dataPtr->numRows(), numSampleRows);
     for(size_t rowIndex : rowIndices)
     {
         rowData.clear();
 
         auto startColumn = static_cast<size_t>(_dataRect.x());
-        auto finishColumn = startColumn + _dataRect.width();
+        auto finishColumn = startColumn + static_cast<size_t>(_dataRect.width());
         for(auto columnIndex = startColumn; columnIndex < finishColumn; columnIndex++)
         {
             if(_graphSizeEstimateCancellable.cancelled())

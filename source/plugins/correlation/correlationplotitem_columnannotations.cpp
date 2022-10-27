@@ -208,7 +208,7 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
         for(auto row : std::as_const(_selectedRows))
         {
             for(size_t groupedColumn : _annotationGroupMap.at(column))
-                values.append(_pluginInstance->continuousDataAt(row, static_cast<int>(groupedColumn)));
+                values.append(_pluginInstance->continuousDataAt(static_cast<size_t>(row), groupedColumn));
         }
 
         if(_scaleType == static_cast<int>(PlotScaleType::Log))
@@ -323,7 +323,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
             std::set<QString> uniqueValues;
 
             for(auto groupColumn : _annotationGroupMap.at(x))
-                uniqueValues.emplace(columnAnnotation.valueAt(static_cast<int>(groupColumn)));
+                uniqueValues.emplace(columnAnnotation.valueAt(groupColumn));
 
             if(uniqueValues.size() == 1)
                 return *uniqueValues.begin();
@@ -341,7 +341,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
         column = _sortMap.at(x);
     }
 
-    return columnAnnotation.valueAt(static_cast<int>(column));
+    return columnAnnotation.valueAt(column);
 }
 
 bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRect)
@@ -389,7 +389,7 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
     if(x < 0 || y < 0)
         return false;
 
-    auto text = columnAnnotationValueAt(x, y);
+    auto text = columnAnnotationValueAt(static_cast<size_t>(x), static_cast<size_t>(y));
     if(text.isEmpty())
         return false;
 
@@ -402,7 +402,8 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
 void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRect, const QPoint& pos)
 {
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-    auto index = (pos.y() * numVisibleColumnAnnotations()) / (axisRect->height());
+    auto index = (static_cast<size_t>(pos.y()) * numVisibleColumnAnnotations()) /
+        static_cast<size_t>(axisRect->height());
     if(index >= columnAnnotations.size())
         return;
 

@@ -198,8 +198,8 @@ public:
 
         for(const auto& result : results)
         {
-            auto a = std::distance(vectors.begin(), result._a);
-            auto b = std::distance(vectors.begin(), result._b);
+            auto a = static_cast<size_t>(std::distance(vectors.begin(), result._a));
+            auto b = static_cast<size_t>(std::distance(vectors.begin(), result._b));
             matrix.setValueAt(a, b, result._r);
         }
 

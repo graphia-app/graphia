@@ -572,7 +572,7 @@ void CorrelationPluginInstance::buildDiscreteDataValueIndex(Progressable& progre
         std::set<QString> values;
 
         for(size_t rowIndex = 0; rowIndex < _numRows; rowIndex++)
-            values.emplace(discreteDataAt(static_cast<int>(rowIndex), static_cast<int>(columnIndex)));
+            values.emplace(discreteDataAt(rowIndex, columnIndex));
 
         std::vector<QString> sortedValues;
         sortedValues.reserve(values.size());
@@ -727,12 +727,12 @@ QStringList CorrelationPluginInstance::defaultVisualisations() const
     return {};
 }
 
-double CorrelationPluginInstance::continuousDataAt(int row, int column) const
+double CorrelationPluginInstance::continuousDataAt(size_t row, size_t column) const
 {
     return _continuousData.at((row * _numContinuousColumns) + column);
 }
 
-QString CorrelationPluginInstance::discreteDataAt(int row, int column) const
+QString CorrelationPluginInstance::discreteDataAt(size_t row, size_t column) const
 {
     return _discreteData.at((row * _numDiscreteColumns) + column);
 }
@@ -745,18 +745,18 @@ int CorrelationPluginInstance::discreteDataValueIndex(const QString& value) cons
     return static_cast<int>(_discreteDataValueIndex.at(value));
 }
 
-QString CorrelationPluginInstance::rowName(int row) const
+QString CorrelationPluginInstance::rowName(size_t row) const
 {
     return _graphModel->userNodeData().value(row,
         _graphModel->userNodeData().firstVectorName()).toString();
 }
 
-QString CorrelationPluginInstance::columnName(int column) const
+QString CorrelationPluginInstance::columnName(size_t column) const
 {
     return _dataColumnNames.at(static_cast<size_t>(column));
 }
 
-QColor CorrelationPluginInstance::nodeColorForRow(int row) const
+QColor CorrelationPluginInstance::nodeColorForRow(size_t row) const
 {
     auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
 
@@ -777,7 +777,7 @@ const ColumnAnnotation* CorrelationPluginInstance::columnAnnotationByName(const 
     return nullptr;
 }
 
-QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, int row) const
+QString CorrelationPluginInstance::attributeValueFor(const QString& attributeName, size_t row) const
 {
     const auto* attribute = _graphModel->attributeByName(attributeName);
     auto nodeId = _graphModel->userNodeData().elementIdForIndex(row);
