@@ -178,7 +178,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 MSVC_WARNING_SUPPRESS_NEXTLINE(6262)
 std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, double expectedFrequency)
 {
-    const int NUMBER_OF_TRIALS = 1000;
+    const size_t NUMBER_OF_TRIALS = 1000;
     std::array<double, NUMBER_OF_TRIALS> observed{};
     std::array<double, NUMBER_OF_TRIALS> overRepresentation{};
     double observationAvg = 0.0;
@@ -190,7 +190,7 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, doub
     auto seededGenerator = std::mt19937(rd());
     auto distribution = std::uniform_real_distribution<>(0.0f, 1.0f);
 
-    for(int i = 0; i < NUMBER_OF_TRIALS; i++)
+    for(size_t i = 0; i < NUMBER_OF_TRIALS; i++)
     {
         int hits = 0;
         for(int j = 0; j < sampleCount; j++)
@@ -208,7 +208,7 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, doub
     observationAvg = observationAvg / static_cast<double>(NUMBER_OF_TRIALS);
     overRepresentationAvg = overRepresentationAvg / static_cast<double>(NUMBER_OF_TRIALS);
 
-    for(int i = 0; i < NUMBER_OF_TRIALS; i++)
+    for(size_t i = 0; i < NUMBER_OF_TRIALS; i++)
     {
         observationStdDev += (observed.at(i) - observationAvg) * (observed.at(i) - observationAvg);
         overRepresentationStdDev += (overRepresentation.at(i) - overRepresentationAvg) * (overRepresentation.at(i) - overRepresentationAvg);
