@@ -50,12 +50,12 @@ private:
     const float FINETUNE_STDDEV_DELTA = 0.000005f;
     const float OSCILLATE_STDDEV_DELTA_PERCENT = 1.0f;
     const float MAXIMUM_AVG_FORCE_FOR_STOP = 1.0f;
-    static const int OSCILLATE_DELTA_SAMPLE_SIZE = 500;
-    static const int OSCILLATE_RUN_COUNT = 5;
-    static const int STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
-    static const int FINETUNE_DELTA_SAMPLE_SIZE = 50;
-    static const int FINETUNE_SMOOTHING_SIZE = 10;
-    static const int INITIAL_SMOOTHING_SIZE = 50;
+    static const size_t OSCILLATE_DELTA_SAMPLE_SIZE = 500;
+    static const size_t OSCILLATE_RUN_COUNT = 5;
+    static const size_t STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
+    static const size_t FINETUNE_DELTA_SAMPLE_SIZE = 50;
+    static const size_t FINETUNE_SMOOTHING_SIZE = 10;
+    static const size_t INITIAL_SMOOTHING_SIZE = 50;
 
     CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevStdDevs;
     CircularBuffer<float, FINETUNE_DELTA_SAMPLE_SIZE> _prevAvgForces;
@@ -72,8 +72,8 @@ private:
     float _forceMean = 0;
     float _prevUnstableStdDev = 0;
 
-    int _unstableIterationCount = 0;
-    int _increasingStdDevIterationCount = 0;
+    size_t _unstableIterationCount = 0;
+    size_t _increasingStdDevIterationCount = 0;
 
     bool _hasBeenFlattened = false;
 

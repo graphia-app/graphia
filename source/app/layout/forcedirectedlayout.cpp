@@ -30,14 +30,14 @@
 
 #include <cmath>
 
-template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
+template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const T& buffer)
 {
     float average = 0.0f;
-    float size = static_cast<float>(end) - static_cast<float>(start);
+    auto size = static_cast<float>(end - start);
     float gaussSum = (size * (size + 1)) / 2.0f;
 
-    for(int i = start; i < end; ++i)
-        average += buffer.at(i) * ((i - start) + 1) / gaussSum;
+    for(size_t i = start; i < end; ++i)
+        average += buffer.at(i) * static_cast<float>((i - start) + 1) / gaussSum;
 
     return average / std::abs(size);
 }
@@ -272,13 +272,15 @@ void ForceDirectedLayout::initialChangeDetection()
 
     if(_prevCaptureStdDevs.full())
     {
-        float currentSmoothedStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevCaptureStdDevs.size()) - INITIAL_SMOOTHING_SIZE,
-                                                    static_cast<int>(_prevCaptureStdDevs.size()),
-                                                    _prevCaptureStdDevs);
+        float currentSmoothedStdDev = meanWeightedAvgBuffer(
+            _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
+            _prevCaptureStdDevs.size(),
+            _prevCaptureStdDevs);
 
-        float previousSmoothedStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevCaptureStdDevs.size()) - (2 * INITIAL_SMOOTHING_SIZE),
-                                                     static_cast<int>(_prevCaptureStdDevs.size()) - INITIAL_SMOOTHING_SIZE,
-                                                     _prevCaptureStdDevs);
+        float previousSmoothedStdDev = meanWeightedAvgBuffer(
+            _prevCaptureStdDevs.size() - (2 * INITIAL_SMOOTHING_SIZE),
+            _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
+            _prevCaptureStdDevs);
 
         // Long step sample (For unstable graphs)
         if(_increasingStdDevIterationCount >= STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE)
@@ -312,13 +314,15 @@ void ForceDirectedLayout::fineTuneChangeDetection()
 {
     if(_prevAvgForces.full() && _prevStdDevs.full())
     {
-        float prevAvgStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevStdDevs.size()) - 2 * FINETUNE_SMOOTHING_SIZE,
-                                            static_cast<int>(_prevStdDevs.size()) - FINETUNE_SMOOTHING_SIZE,
-                                            _prevStdDevs);
+        float prevAvgStdDev = meanWeightedAvgBuffer(
+            _prevStdDevs.size() - (2 * FINETUNE_SMOOTHING_SIZE),
+            _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
+            _prevStdDevs);
 
-        float curAvgStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevStdDevs.size()) - FINETUNE_SMOOTHING_SIZE,
-                                           static_cast<int>(_prevStdDevs.size()),
-                                           _prevStdDevs);
+        float curAvgStdDev = meanWeightedAvgBuffer(
+            _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
+            _prevStdDevs.size(),
+            _prevStdDevs);
 
         float delta = (prevAvgStdDev - curAvgStdDev);
         if(delta < FINETUNE_STDDEV_DELTA && delta >= 0.0f)
