@@ -33,7 +33,7 @@ private:
     std::condition_variable _cv;
     bool _swapped = true;
 
-    int _currentIndex = 0;
+    size_t _currentIndex = 0;
     std::array<GLuint, 2> _textures = {};
 
 public:

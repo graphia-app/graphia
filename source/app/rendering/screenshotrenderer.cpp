@@ -43,8 +43,8 @@ static const int TILE_SIZE_PLUS_EXTRA = TILE_SIZE + (2 * TILE_EXTRA);
 
 static QString fetchPreview(QSize screenshotSize)
 {
-    int pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
-    std::vector<GLubyte> pixels(pixelCount);
+    auto pixelCount = screenshotSize.width() * screenshotSize.height() * 4;
+    std::vector<GLubyte> pixels(static_cast<size_t>(pixelCount));
     glReadPixels(0, 0, screenshotSize.width(), screenshotSize.height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
     QImage screenTile(pixels.data(), screenshotSize.width(), screenshotSize.height(), QImage::Format_RGBA8888);

@@ -126,9 +126,9 @@ QString OpenGLFunctions::info()
     QString extensions;
     GLint numExtensions = 0;
     f->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-    for(int i = 0; i < numExtensions; i++)
+    for(GLint i = 0; i < numExtensions; i++)
     {
-        extensions.append(f.getString(GL_EXTENSIONS, i));
+        extensions.append(f.getString(GL_EXTENSIONS, static_cast<GLuint>(i)));
         extensions.append(" ");
     }
 

@@ -127,23 +127,22 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("glyphSize");
     shader.enableAttributeArray("color");
 
-    glVertexAttribIPointer(shader.attributeLocation("component"),                                 1, GL_INT, sizeof(GlyphData),
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),              1, GL_INT,  sizeof(GlyphData),
                              reinterpret_cast<const void*>(offsetof(GlyphData, _component))); // NOLINT
-    shader.setAttributeBuffer("textureCoord",    GL_FLOAT, offsetof(GlyphData, _textureCoord),    2, sizeof(GlyphData));
-    glVertexAttribIPointer(shader.attributeLocation("textureLayer"),                              1, GL_INT, sizeof(GlyphData),
+    shader.setAttributeBuffer("textureCoord",    GL_FLOAT, offsetof(GlyphData, _textureCoord),      2,          sizeof(GlyphData));
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("textureLayer")),           1, GL_INT,  sizeof(GlyphData),
                              reinterpret_cast<const void*>(offsetof(GlyphData, _textureLayer))); // NOLINT
-    shader.setAttributeBuffer("basePosition",    GL_FLOAT, offsetof(GlyphData, _basePosition),    3, sizeof(GlyphData));
-    shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),     2, sizeof(GlyphData));
-    shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),       2, sizeof(GlyphData));
-    shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),           3, sizeof(GlyphData));
-
-    glVertexAttribDivisor(shader.attributeLocation("component"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("textureCoord"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("textureLayer"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("basePosition"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("glyphOffset"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("glyphSize"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("color"), 1);
+    shader.setAttributeBuffer("basePosition",    GL_FLOAT, offsetof(GlyphData, _basePosition),      3,          sizeof(GlyphData));
+    shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),       2,          sizeof(GlyphData));
+    shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),         2,          sizeof(GlyphData));
+    shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),             3,          sizeof(GlyphData));
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),               1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureCoord")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("textureLayer")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("basePosition")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphOffset")),             1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("glyphSize")),               1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("color")),                   1);
 
     _textVBO.release();
     shader.release();
@@ -162,19 +161,19 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("selected");
-    shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),     3,         sizeof(NodeData));
-    glVertexAttribIPointer(shader.attributeLocation("component"),                          1, GL_INT, sizeof(NodeData),
+    shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),      3,          sizeof(NodeData));
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),      1, GL_INT,  sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component))); // NOLINT
-    shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),         1,         sizeof(NodeData));
-    shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),   3,         sizeof(NodeData));
-    shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),   3,         sizeof(NodeData));
-    shader.setAttributeBuffer("selected",     GL_FLOAT, offsetof(NodeData, _selected),     1,         sizeof(NodeData));
-    glVertexAttribDivisor(shader.attributeLocation("nodePosition"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("component"),    1);
-    glVertexAttribDivisor(shader.attributeLocation("size"),         1);
-    glVertexAttribDivisor(shader.attributeLocation("innerColor"),   1);
-    glVertexAttribDivisor(shader.attributeLocation("outerColor"),   1);
-    glVertexAttribDivisor(shader.attributeLocation("selected"),     1);
+    shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),          1,          sizeof(NodeData));
+    shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),    3,          sizeof(NodeData));
+    shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),    3,          sizeof(NodeData));
+    shader.setAttributeBuffer("selected",     GL_FLOAT, offsetof(NodeData, _selected),      1,          sizeof(NodeData));
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("nodePosition")),    1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),       1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("size")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("innerColor")),      1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("outerColor")),      1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("selected")),        1);
     _nodeVBO.release();
 
     shader.release();
@@ -197,28 +196,28 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("outerColor");
     shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("selected");
-    shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition),  3,         sizeof(EdgeData));
-    shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition),  3,         sizeof(EdgeData));
-    shader.setAttributeBuffer("sourceSize",     GL_FLOAT, offsetof(EdgeData, _sourceSize),      1,         sizeof(EdgeData));
-    shader.setAttributeBuffer("targetSize",     GL_FLOAT, offsetof(EdgeData, _targetSize),      1,         sizeof(EdgeData));
-    glVertexAttribIPointer(shader.attributeLocation("edgeType"),                                1, GL_INT, sizeof(EdgeData),
+    shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition),  3,          sizeof(EdgeData));
+    shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition),  3,          sizeof(EdgeData));
+    shader.setAttributeBuffer("sourceSize",     GL_FLOAT, offsetof(EdgeData, _sourceSize),      1,          sizeof(EdgeData));
+    shader.setAttributeBuffer("targetSize",     GL_FLOAT, offsetof(EdgeData, _targetSize),      1,          sizeof(EdgeData));
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("edgeType")),           1, GL_INT,  sizeof(EdgeData),
                             reinterpret_cast<const void*>(offsetof(EdgeData, _edgeType))); // NOLINT
-    glVertexAttribIPointer(shader.attributeLocation("component"),                               1, GL_INT, sizeof(EdgeData),
+    glVertexAttribIPointer(static_cast<GLuint>(shader.attributeLocation("component")),          1, GL_INT,  sizeof(EdgeData),
                            reinterpret_cast<const void*>(offsetof(EdgeData, _component))); // NOLINT
-    shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),            1,         sizeof(EdgeData));
-    shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,         sizeof(EdgeData));
-    shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,         sizeof(EdgeData));
-    shader.setAttributeBuffer("selected",       GL_FLOAT, offsetof(EdgeData, _selected),        1,         sizeof(EdgeData));
-    glVertexAttribDivisor(shader.attributeLocation("sourcePosition"),   1);
-    glVertexAttribDivisor(shader.attributeLocation("targetPosition"),   1);
-    glVertexAttribDivisor(shader.attributeLocation("sourceSize"),       1);
-    glVertexAttribDivisor(shader.attributeLocation("targetSize"),       1);
-    glVertexAttribDivisor(shader.attributeLocation("edgeType"),         1);
-    glVertexAttribDivisor(shader.attributeLocation("component"),        1);
-    glVertexAttribDivisor(shader.attributeLocation("size"),             1);
-    glVertexAttribDivisor(shader.attributeLocation("outerColor"),       1);
-    glVertexAttribDivisor(shader.attributeLocation("innerColor"),       1);
-    glVertexAttribDivisor(shader.attributeLocation("selected"),         1);
+    shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),            1,          sizeof(EdgeData));
+    shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,          sizeof(EdgeData));
+    shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,          sizeof(EdgeData));
+    shader.setAttributeBuffer("selected",       GL_FLOAT, offsetof(EdgeData, _selected),        1,          sizeof(EdgeData));
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourcePosition")),      1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetPosition")),      1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("sourceSize")),          1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("targetSize")),          1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("edgeType")),            1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("component")),           1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("size")),                1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("outerColor")),          1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("innerColor")),          1);
+    glVertexAttribDivisor(static_cast<GLuint>(shader.attributeLocation("selected")),            1);
     _edgeVBO.release();
 
     shader.release();
@@ -459,17 +458,17 @@ static void setShaderLightingParameters(QOpenGLShaderProgram& program)
     lights.push_back({{ 0.0f,    0.0f,    1.0f  }, {150, 150, 150}});
     lights.push_back({{ 0.707f, -0.707f,  0.0f  }, {100, 100, 100}});
 
-    auto numberOfLights = static_cast<int>(lights.size());
+    auto numberOfLights = lights.size();
 
-    program.setUniformValue("numberOfLights", numberOfLights);
+    program.setUniformValue("numberOfLights", static_cast<GLuint>(numberOfLights));
 
-    for(int i = 0; i < numberOfLights; i++)
+    for(size_t i = 0; i < numberOfLights; i++)
     {
         QByteArray positionId = QStringLiteral("lights[%1].position").arg(i).toLatin1();
-        program.setUniformValue(positionId.data(), lights[i].position);
+        program.setUniformValue(positionId.data(), lights.at(i).position);
 
         QByteArray colorId = QStringLiteral("lights[%1].color").arg(i).toLatin1();
-        program.setUniformValue(colorId.data(), lights[i].color);
+        program.setUniformValue(colorId.data(), lights.at(i).color);
     }
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
@@ -735,12 +734,12 @@ bool GraphRendererCore::resize(int width, int height)
     return FBOcomplete;
 }
 
-std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
+std::vector<size_t> GraphRendererCore::gpuGraphDataRenderOrder() const
 {
-    std::vector<int> renderOrder;
+    std::vector<size_t> renderOrder;
     renderOrder.reserve(_gpuGraphData.size());
 
-    for(int i = 0; i < static_cast<int>(_gpuGraphData.size()); i++)
+    for(size_t i = 0; i < _gpuGraphData.size(); i++)
         renderOrder.push_back(i);
 
     std::sort(renderOrder.begin(), renderOrder.end(), [this](auto a, auto b)
@@ -759,7 +758,7 @@ std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
 
     // Filter out any invisible layers
     renderOrder.erase(std::remove_if(renderOrder.begin(), renderOrder.end(),
-    [this](int index)
+    [this](auto index)
     {
         return _gpuGraphData.at(index).invisible();
     }), renderOrder.end());

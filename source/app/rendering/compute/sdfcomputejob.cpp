@@ -95,13 +95,13 @@ void SDFComputeJob::generateSDF()
     ShaderTools::loadShaderProgram(sdfShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/sdf.frag"));
     prepareQuad(screenQuadVAO, screenQuadDataBuffer, sdfShader);
 
-    const int scaleFactor = 4;
+    const auto scaleFactor = 4;
     // TEXTURE_2D_ARRAY has a fixed height and width
-    const int sourceWidth = _glyphMap->images().at(0).width();
-    const int sourceHeight = _glyphMap->images().at(0).height();
-    const int renderWidth = _glyphMap->images().at(0).width() / scaleFactor;
-    const int renderHeight = _glyphMap->images().at(0).height() / scaleFactor;
-    const auto numImages = static_cast<int>(_glyphMap->images().size());
+    const auto sourceWidth = _glyphMap->images().at(0).width();
+    const auto sourceHeight = _glyphMap->images().at(0).height();
+    const auto renderWidth = _glyphMap->images().at(0).width() / scaleFactor;
+    const auto renderHeight = _glyphMap->images().at(0).height() / scaleFactor;
+    const auto numImages = _glyphMap->images().size();
 
     prepareScreenQuadDataBuffer(screenQuadDataBuffer, renderWidth, renderHeight);
 
@@ -127,7 +127,7 @@ void SDFComputeJob::generateSDF()
 
     // Generate FBO texture
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
-                 renderWidth, renderHeight, numImages,
+                 renderWidth, renderHeight, static_cast<GLsizei>(numImages),
                  0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     // Set initial filtering and wrapping properties (filtering will be changed to linear later)
@@ -137,10 +137,10 @@ void SDFComputeJob::generateSDF()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Draw SDF texture for each layer of atlas layer
-    for(int layer = 0; layer < numImages; ++layer)
+    for(size_t layer = 0; layer < numImages; ++layer)
     {
         // Can only render to one texture layer per draw call :(
-        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sdfTexture, 0, layer);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sdfTexture, 0, static_cast<GLint>(layer));
 
         // Set Frame draw buffers
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -177,23 +177,23 @@ void SDFComputeJob::generateSDF()
     // Debug code to pull out the SDF texture
     if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
     {
-        auto pixelCount = static_cast<int>((static_cast<int>(_glyphMap->images().at(0).sizeInBytes()) /
-            (scaleFactor * scaleFactor)) * _glyphMap->images().size());
+        auto pixelCount = static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
+            static_cast<size_t>(scaleFactor * scaleFactor) * _glyphMap->images().size();
         std::vector<uchar> pixels(pixelCount);
         glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
         // Save each layer as its own image for debug
-        for(int layer = 0; layer < numImages; ++layer)
+        for(size_t layer = 0; layer < numImages; ++layer)
         {
-            int offset = (static_cast<int>(_glyphMap->images().at(0).sizeInBytes()) /
-                (scaleFactor * scaleFactor)) * layer;
+            auto offset = (static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
+                static_cast<size_t>(scaleFactor * scaleFactor)) * layer;
             QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
             sdfImage.save(QDir::currentPath() + "/SDF" + QString::number(layer) + ".png");
         }
 
         // Print Memory consumption
-        int memoryConsumption = (renderWidth * renderHeight * 4) * numImages;
+        auto memoryConsumption = static_cast<size_t>(renderWidth * renderHeight * 4) * numImages;
         qDebug() << "SDF texture memory consumption MB:" <<
             static_cast<float>(memoryConsumption) / (1000.0f * 1000.0f);
     }

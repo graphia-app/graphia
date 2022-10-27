@@ -184,7 +184,7 @@ private:
     void prepareSelectionMarkerVAO();
     void prepareQuad();
 
-    std::vector<int> gpuGraphDataRenderOrder() const;
+    std::vector<size_t> gpuGraphDataRenderOrder() const;
 
     void prepare();
 

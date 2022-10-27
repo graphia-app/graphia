@@ -41,8 +41,8 @@ public:
 
 public slots:
     void setRadius(float radius) { _radius = radius; }
-    void setRings(int rings) { _rings = rings; }
-    void setSlices(int slices) { _slices = slices; }
+    void setRings(size_t rings) { _rings = rings; }
+    void setSlices(size_t slices) { _slices = slices; }
 
     void create(QOpenGLShaderProgram& shader);
 
