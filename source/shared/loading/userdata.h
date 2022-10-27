@@ -42,13 +42,13 @@ class UserData : public QObject, public virtual IUserData
 private:
     std::map<QString, UserDataVector> _userDataVectors;
     std::vector<QString> _vectorNames;
-    int _numValues = 0;
+    size_t _numValues = 0;
 
 public:
     QString firstVectorName() const override;
 
-    int numUserDataVectors() const override;
-    int numValues() const override;
+    size_t numUserDataVectors() const override;
+    size_t numValues() const override;
 
     bool empty() const { return _userDataVectors.empty(); }
 

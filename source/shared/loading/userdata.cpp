@@ -30,12 +30,12 @@ QString UserData::firstVectorName() const
     return {};
 }
 
-int UserData::numUserDataVectors() const
+size_t UserData::numUserDataVectors() const
 {
-    return static_cast<int>(_userDataVectors.size());
+    return _userDataVectors.size();
 }
 
-int UserData::numValues() const
+size_t UserData::numValues() const
 {
     return _numValues;
 }
