@@ -31,7 +31,7 @@ private:
     QString _name;
 
     std::vector<QString> _values;
-    std::map<QString, int> _uniqueValues;
+    std::map<QString, size_t> _uniqueValues;
 
     bool _hasOnlyNumericValues = true; // Assume until proved otherwise
     double _minValue = std::numeric_limits<double>::max();
@@ -46,7 +46,7 @@ public:
     const QString& name() const { return _name; }
 
     const QString& valueAt(size_t index) const { return _values.at(index); }
-    int uniqueIndexOf(const QString& value) const;
+    size_t uniqueIndexOf(const QString& value) const;
 
     bool isNumeric() const { return _hasOnlyNumericValues; }
     double normalisedNumericValueAt(size_t index) const;

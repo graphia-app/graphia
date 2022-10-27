@@ -54,12 +54,13 @@ ColumnAnnotation::ColumnAnnotation(const QString& name,
     ColumnAnnotation(name, {begin, end})
 {}
 
-int ColumnAnnotation::uniqueIndexOf(const QString& value) const
+size_t ColumnAnnotation::uniqueIndexOf(const QString& value) const
 {
     if(u::contains(_uniqueValues, value))
         return _uniqueValues.at(value);
 
-    return -1;
+    qDebug() << "ColumnAnnotation::uniqueIndexOf: unique value" << value << "not found";
+    return 0;
 }
 
 double ColumnAnnotation::normalisedNumericValueAt(size_t index) const
