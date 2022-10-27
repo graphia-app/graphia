@@ -306,7 +306,7 @@ bool Graph::containsComponentId(ComponentId componentId) const
     if(componentManagementEnabled())
         return _componentManager->containsComponentId(componentId);
 
-    Q_ASSERT(!"Graph::containsComponentId called with component management disabled");
+    qFatal("Graph::containsComponentId called with component management disabled");
     return false;
 }
 
@@ -317,7 +317,7 @@ const IGraphComponent* Graph::componentById(ComponentId componentId) const
     if(componentManagementEnabled())
         return _componentManager->componentById(componentId);
 
-    Q_ASSERT(!"Graph::componentById called with component management disabled");
+    qFatal("Graph::componentById called with component management disabled");
     return nullptr;
 }
 

@@ -36,8 +36,8 @@ class VisualisationChannel
 public:
     virtual ~VisualisationChannel() = default;
 
-    virtual void apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
-    virtual void apply(const QString&, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
+    virtual void apply(double, ElementVisual&) const { qFatal("apply not implemented"); }
+    virtual void apply(const QString&, ElementVisual&) const { qFatal("apply not implemented"); }
 
     virtual bool supports(ValueType) const = 0;
     virtual bool requiresRange() const { return true; }

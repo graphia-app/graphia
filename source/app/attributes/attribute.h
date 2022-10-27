@@ -179,7 +179,7 @@ private:
             explicit Visitor(E elementId_, const IAttribute* attribute) :
                 _elementId(elementId_), _attribute(attribute) {}
 
-            T operator()(void*) const { Q_ASSERT(!"valueFn is null"); return {}; }
+            T operator()(void*) const { qFatal("valueFn is null"); return {}; }
 
             T operator()(const std::function<T(E)>& valueFn) const
             {

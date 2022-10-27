@@ -95,7 +95,7 @@ public:
             // cppcheck-suppress passedByValue
             CommandFn executeFn,
             // cppcheck-suppress passedByValue
-            CommandFn undoFn = [](Command&) { Q_ASSERT(!"undoFn not implemented"); }) :
+            CommandFn undoFn = [](Command&) { qFatal("undoFn not implemented"); }) :
         _description(commandDescription._description),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),

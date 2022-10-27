@@ -114,7 +114,7 @@ void AverageAttributeTransform::apply(TransformedGraph& target) const
     {
     case ElementType::Node: setAverageFunction(target.nodeIds()); break;
     case ElementType::Edge: setAverageFunction(target.edgeIds()); break;
-    default: Q_ASSERT(!"Unhandled ElementType"); break;
+    default: qFatal("Unhandled ElementType"); break;
     }
 }
 

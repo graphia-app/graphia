@@ -47,13 +47,13 @@ public:
 
     // Return false if the command failed, or did nothing
     virtual bool execute() = 0;
-    virtual void undo() { Q_ASSERT(!"undo() not implemented for this ICommand"); }
+    virtual void undo() { qFatal("undo() not implemented for this ICommand"); }
 
     // ICommandManager has an interface that allows for the most recently executed
     // command to be replaced by another. When this happens it will normally be
     // necessary that some state is transferred from the replacee command. Most
     // commands will not need to implement this.
-    virtual void replaces(const ICommand*) { Q_ASSERT(!"replaces() not implemented for this ICommand"); }
+    virtual void replaces(const ICommand*) { qFatal("replaces() not implemented for this ICommand"); }
 
     void setProgress(int progress) override
     {

@@ -98,7 +98,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
         case ValueType::Int:    attribute.setIntValueFn(AttributeProxyFunctor<E, int>{proxiedAttribute, headMap});        break;
         case ValueType::Float:  attribute.setFloatValueFn(AttributeProxyFunctor<E, double>{proxiedAttribute, headMap});   break;
         case ValueType::String: attribute.setStringValueFn(AttributeProxyFunctor<E, QString>{proxiedAttribute, headMap}); break;
-        default: Q_ASSERT(!"Unhandled ValueType"); break;
+        default: qFatal("Unhandled ValueType"); break;
         }
 
         if(proxiedAttribute.hasMissingValues())
@@ -117,7 +117,7 @@ void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) cons
     {
     case ElementType::Node: setProxyFunctor(target.nodeIds(), &Graph::mergedNodeIdsForNodeId); break;
     case ElementType::Edge: setProxyFunctor(target.edgeIds(), &Graph::mergedEdgeIdsForEdgeId); break;
-    default: Q_ASSERT(!"Unhandled ElementType"); break;
+    default: qFatal("Unhandled ElementType"); break;
     }
 }
 

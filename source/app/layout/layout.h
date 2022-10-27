@@ -113,7 +113,7 @@ public:
     virtual bool finished() const { return false; }
 
     // Resets the state of the algorithm such that finished() no longer returns true
-    virtual void unfinish() { Q_ASSERT(!"unfinish not implemented"); }
+    virtual void unfinish() { qFatal("unfinish not implemented"); }
 
     virtual bool iterative() const { return _iterative == Iterative::Yes; }
     virtual Dimensionality dimensionality() const { return _dimensionality; }

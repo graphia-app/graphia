@@ -94,7 +94,7 @@ const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(con
     if(it != _parameters.end())
         return &(*it);
 
-    Q_ASSERT(!"Parameter not found");
+    qFatal("Parameter not found");
     return nullptr;
 }
 
