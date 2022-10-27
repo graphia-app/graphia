@@ -175,7 +175,7 @@ void CommandManager::undoReal(bool rollback)
     if(!canUndoNoLocking())
         return;
 
-    auto* command = _stack.at(_lastExecutedIndex).get();
+    auto* command = _stack.at(static_cast<size_t>(_lastExecutedIndex)).get();
 
     QString undoVerb = !command->description().isEmpty() ?
                 QObject::tr("Undoing ") + command->description() :
@@ -216,7 +216,7 @@ void CommandManager::redoReal()
     if(!canRedoNoLocking())
         return;
 
-    auto* command = _stack.at(++_lastExecutedIndex).get();
+    auto* command = _stack.at(static_cast<size_t>(++_lastExecutedIndex)).get();
 
     QString redoVerb = !command->description().isEmpty() ?
                 QObject::tr("Redoing ") + command->description() :
@@ -273,12 +273,12 @@ std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
-    commandDescriptions.reserve(_lastExecutedIndex);
+    commandDescriptions.reserve(static_cast<size_t>(_lastExecutedIndex));
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
         for(int index = _lastExecutedIndex; index >= 0; index--)
-            commandDescriptions.push_back(_stack.at(index)->description());
+            commandDescriptions.push_back(_stack.at(static_cast<size_t>(index))->description());
     }
 
     return commandDescriptions;
@@ -292,7 +292,7 @@ std::vector<QString> CommandManager::redoableCommandDescriptions() const
 
     if(lock.owns_lock() && canRedoNoLocking())
     {
-        for(int index = _lastExecutedIndex + 1; index < static_cast<int>(_stack.size()); index++)
+        for(size_t index = static_cast<size_t>(_lastExecutedIndex) + 1; index < _stack.size(); index++)
             commandDescriptions.push_back(_stack.at(index)->description());
     }
 
@@ -305,7 +305,7 @@ QString CommandManager::nextUndoAction() const
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
-        const auto& command = _stack.at(_lastExecutedIndex);
+        const auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex));
         if(!command->description().isEmpty())
             return QObject::tr("&Undo ") + command->description();
     }
@@ -467,7 +467,7 @@ const ICommand* CommandManager::lastExecutedCommand() const
     if(_stack.empty() || _lastExecutedIndex < 0)
         return nullptr;
 
-    return _stack.at(_lastExecutedIndex).get();
+    return _stack.at(static_cast<size_t>(_lastExecutedIndex)).get();
 }
 
 bool CommandManager::commandsArePending() const
