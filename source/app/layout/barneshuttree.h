@@ -117,7 +117,7 @@ public:
         {
             const BarnesHutTree* subTree = stack.pop();
 
-            for(int i = 0; i < subTree->_numInternalNodes; i++)
+            for(size_t i = 0; i < subTree->_numInternalNodes; i++)
             {
                 auto subVolume = subTree->_internalNodes.at(i);
 
@@ -139,7 +139,7 @@ public:
                     result += kernel(subVolume->_subTree->_mass, difference, distanceSq);
             }
 
-            for(int i = 0; i < subTree->_numNonEmptyLeaves; i++)
+            for(size_t i = 0; i < subTree->_numNonEmptyLeaves; i++)
             {
                 auto subVolume = subTree->_nonEmptyLeaves.at(i);
 

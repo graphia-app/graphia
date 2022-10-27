@@ -109,10 +109,10 @@ protected:
     std::array<SubVolumeType, NumSubVolumes()> _subVolumes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
     std::array<const SubVolumeType*, NumSubVolumes()> _nonEmptyLeaves = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    int _numNonEmptyLeaves = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    size_t _numNonEmptyLeaves = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
     std::array<const SubVolumeType*, NumSubVolumes()> _internalNodes = {}; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
-    int _numInternalNodes = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
+    size_t _numInternalNodes = 0; // NOLINT cppcoreguidelines-non-private-member-variables-in-classes
 
 private:
     unsigned int _maxNodesPerLeaf = 1;
@@ -245,7 +245,7 @@ private:
                 subTree->distributeNodesOverSubVolumes(nodePositions, nodeIdsToDistribute);
 
                 std::vector<NewTree> newChildTrees;
-                for(int i = 0; i < subTree->_numInternalNodes; i++)
+                for(size_t i = 0; i < subTree->_numInternalNodes; i++)
                 {
                     const auto* subVolume = subTree->_internalNodes.at(i);
                     newChildTrees.emplace_back(subVolume->_subTree.get(),
@@ -271,7 +271,7 @@ private:
             const SpatialTree* subTree = stack.top();
             stack.pop();
 
-            for(int i = 0; i < subTree->_numInternalNodes; i++)
+            for(size_t i = 0; i < subTree->_numInternalNodes; i++)
             {
                 const auto* subVolume = subTree->_internalNodes.at(i);
                 stack.push(subVolume->_subTree.get());
