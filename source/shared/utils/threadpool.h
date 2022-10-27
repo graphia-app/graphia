@@ -374,7 +374,7 @@ private:
         static ResultsVectorOrVoid execute(It it, It last, size_t index, Fn& f)
         {
             ResultsVectorOrVoid values;
-            values.reserve(std::distance(it, last));
+            values.reserve(static_cast<size_t>(std::distance(it, last)));
 
             for(; it != last; ++it)
                 values.emplace_back(std::move(IteratorExecutor<It, Fn>::execute(f, it, index)));
@@ -432,7 +432,7 @@ private:
                 return n;
             }
             else
-                return std::distance(this->_first, this->_last);
+                return static_cast<uint64_t>(std::distance(this->_first, this->_last));
         }
 
         uint64_t operator()(It it)
@@ -477,7 +477,7 @@ public:
         Coster<It> coster(first, last);
 
         const auto totalCost = coster.total(); Q_ASSERT(totalCost > 0);
-        const auto numThreads = static_cast<int>(_threads.size());
+        const auto numThreads = _threads.size();
         const auto costPerThread = totalCost / numThreads +
                 ((totalCost % numThreads) ? 1 : 0);
 

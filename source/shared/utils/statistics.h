@@ -62,9 +62,10 @@ Statistics findStatisticsFor(const C& container,
 
     size_t column = 0u;
     double largestValue = 0.0;
+    auto n = static_cast<double>(container.size());
 
     std::vector<double> values;
-    values.reserve(std::distance(std::begin(container), std::end(container)));
+    values.reserve(static_cast<size_t>(std::distance(std::begin(container), std::end(container))));
     for(const auto& element : container)
         values.emplace_back(fn(element));
 
@@ -74,7 +75,7 @@ Statistics findStatisticsFor(const C& container,
 
         s._sum += value;
         s._sumSq += value * value;
-        s._mean += value / container.size();
+        s._mean += value / n;
         s._min = std::min(s._min, value);
         s._max = std::max(s._max, value);
 
@@ -89,7 +90,7 @@ Statistics findStatisticsFor(const C& container,
 
     s._range = s._max - s._min;
     s._sumAllSq = s._sum * s._sum;
-    s._variability = std::sqrt((container.size() * s._sumSq) - s._sumAllSq);
+    s._variability = std::sqrt((n * s._sumSq) - s._sumAllSq);
     s._magnitude = std::sqrt(s._sumSq);
 
     double sum = 0.0;
@@ -100,7 +101,7 @@ Statistics findStatisticsFor(const C& container,
         sum += x;
     }
 
-    s._variance = sum / container.size();
+    s._variance = sum / n;
     s._stddev = std::sqrt(s._variance);
     s._coefVar = (allPositive && s._mean > 0.0) ? s._stddev / s._mean : std::nan("1");
 

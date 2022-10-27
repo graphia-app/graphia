@@ -38,15 +38,15 @@ public:
     void push(const T& t)
     {
         if(_top + 1 < static_cast<int>(_size))
-            _vector[++_top] = t;
+            _vector[static_cast<size_t>(++_top)] = t;
         else
             std::abort(); // Top of stack breached
     }
 
-    T& top() { return _vector.at(_top); }
-    const T& top() const { return _vector.at(_top); }
+    T& top() { return _vector.at(static_cast<size_t>(_top)); }
+    const T& top() const { return _vector.at(static_cast<size_t>(_top)); }
 
-    T pop() { return _vector.at(_top--); }
+    T pop() { assert(_top >= 0); return _vector.at(static_cast<size_t>(_top--)); }
 
     size_t size() const { return _size; }
     bool empty() const { return _top < 0; }

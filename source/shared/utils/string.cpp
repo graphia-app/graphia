@@ -104,7 +104,7 @@ double u::toNumber(const QString& string)
 std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
     std::vector<QString> v;
-    v.reserve(stringList.size());
+    v.reserve(static_cast<size_t>(stringList.size()));
     std::copy(stringList.begin(), stringList.end(), std::back_inserter(v));
     return v;
 }

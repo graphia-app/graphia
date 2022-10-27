@@ -33,9 +33,10 @@ C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
 
     auto sample = container;
 
-    std::default_random_engine dre(static_cast<int>(container.front()));
+    using result_type = std::default_random_engine::result_type;
+    std::default_random_engine dre(static_cast<result_type>(container.front()));
 
-    for(size_t i = 0; i < numSamples; i++)
+    for(size_type i = 0; i < static_cast<size_type>(numSamples); i++)
     {
         int high = static_cast<int>(sample.size() - i) - 1;
         std::uniform_int_distribution uid(0, high);

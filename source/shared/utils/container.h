@@ -61,7 +61,7 @@ namespace u
     template<typename C, typename T> int indexOf(C& container, const T& value)
     {
         auto it = std::find(container.begin(), container.end(), value);
-        return it != container.end() ? std::distance(container.begin(), it) : -1;
+        return it != container.end() ? static_cast<int>(std::distance(container.begin(), it)) : -1;
     }
 
     template<typename C, typename T>

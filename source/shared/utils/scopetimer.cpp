@@ -73,7 +73,7 @@ void ScopeTimerManager::reportToQDebug() const
             auto minMax = std::minmax_element(samples.begin(), samples.end());
 
             double stdDev = std::accumulate(samples.begin(), samples.end(), 0.0,
-            [mean](auto partial, auto value)
+            [mean](auto partial, double value)
             {
                 return partial + ((value - mean) * (value - mean));
             });

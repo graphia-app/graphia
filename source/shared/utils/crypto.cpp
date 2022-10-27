@@ -108,7 +108,7 @@ Key loadKey(const std::string& fileName)
     byteArray = decodeFromPem(byteArray);
 
     CryptoPP::ArraySource arraySource(reinterpret_cast<const CryptoPP::byte*>(byteArray.constData()), // NOLINT
-        byteArray.size(), true);
+        static_cast<size_t>(byteArray.size()), true);
 
     Key key;
     key.Load(arraySource);
