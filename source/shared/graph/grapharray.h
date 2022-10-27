@@ -59,14 +59,14 @@ protected:
 
     const Element& elementFor(Index index) const
     {
-        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
-        return _array[static_cast<int>(index)];
+        assert(!index.isNull() && static_cast<size_t>(index) < size());
+        return _array[static_cast<size_t>(index)];
     }
 
     Element& elementFor(Index index)
     {
-        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
-        return _array[static_cast<int>(index)];
+        assert(!index.isNull() && static_cast<size_t>(index) < size());
+        return _array[static_cast<size_t>(index)];
     }
 
 public:
@@ -144,15 +144,15 @@ public:
     Element get(Index index) const
     {
         MaybeLock lock(_mutex);
-        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
-        return _array[static_cast<int>(index)];
+        assert(!index.isNull() && static_cast<size_t>(index) < size());
+        return _array[static_cast<size_t>(index)];
     }
 
     void set(Index index, const Element& value)
     {
         MaybeLock lock(_mutex);
-        assert(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
-        _array[static_cast<int>(index)] = value;
+        assert(!index.isNull() && static_cast<size_t>(index) < size());
+        _array[static_cast<size_t>(index)] = value;
     }
 
     bool operator==(const GenericGraphArray& other) const
@@ -167,10 +167,10 @@ public:
         return !operator==(other);
     }
 
-    int size() const
+    size_t size() const
     {
         MaybeLock lock(_mutex);
-        return static_cast<int>(_array.size());
+        return _array.size();
     }
 
     bool empty() const
@@ -202,7 +202,7 @@ public:
     }
 
 protected:
-    void resize(int size) override
+    void resize(size_t size) override
     {
         MaybeLock lock(_mutex);
 
@@ -226,14 +226,14 @@ public:
     explicit NodeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
-        this->resize(static_cast<int>(graph.nextNodeId()));
+        this->resize(static_cast<size_t>(graph.nextNodeId()));
         graph.insertNodeArray(this);
     }
 
     NodeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
-        this->resize(static_cast<int>(graph.nextNodeId()));
+        this->resize(static_cast<size_t>(graph.nextNodeId()));
         graph.insertNodeArray(this);
     }
 
@@ -289,14 +289,14 @@ public:
     explicit EdgeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
-        this->resize(static_cast<int>(graph.nextEdgeId()));
+        this->resize(static_cast<size_t>(graph.nextEdgeId()));
         graph.insertEdgeArray(this);
     }
 
     EdgeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
     {
-        this->resize(static_cast<int>(graph.nextEdgeId()));
+        this->resize(static_cast<size_t>(graph.nextEdgeId()));
         graph.insertEdgeArray(this);
     }
 
@@ -353,7 +353,7 @@ public:
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
         assert(graph.isComponentManaged());
-        this->resize(graph.numComponentArrays());
+        this->resize(static_cast<size_t>(graph.numComponentArrays()));
         graph.insertComponentArray(this);
     }
 
@@ -361,7 +361,7 @@ public:
         GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
         assert(graph.isComponentManaged());
-        this->resize(graph.numComponentArrays());
+        this->resize(static_cast<size_t>(graph.numComponentArrays()));
         graph.insertComponentArray(this);
     }
 

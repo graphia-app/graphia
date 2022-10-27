@@ -260,7 +260,7 @@ void Graph::reserveNodeId(NodeId nodeId)
     _nextNodeId = nodeId + 1;
 
     for(auto* nodeArray : _nodeArrays)
-        nodeArray->resize(static_cast<int>(_nextNodeId));
+        nodeArray->resize(static_cast<size_t>(_nextNodeId));
 }
 
 void Graph::reserveEdgeId(EdgeId edgeId)
@@ -271,7 +271,7 @@ void Graph::reserveEdgeId(EdgeId edgeId)
     _nextEdgeId = edgeId + 1;
 
     for(auto* edgeArray : _edgeArrays)
-        edgeArray->resize(static_cast<int>(_nextEdgeId));
+        edgeArray->resize(static_cast<size_t>(_nextEdgeId));
 }
 
 void Graph::clear()

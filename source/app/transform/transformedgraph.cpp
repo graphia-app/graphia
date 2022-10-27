@@ -274,7 +274,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
     // Let everything know what changed; note the signals won't necessarily happen in the order
     // in which the changes originally occurred, but adding nodes and edges, then removing edges
     // and nodes ensures that the receivers get a sane view at all times
-    for(NodeId nodeId(0); nodeId < _nodesState.size(); ++nodeId)
+    for(NodeId nodeId(0); nodeId < static_cast<int>(_nodesState.size()); ++nodeId)
     {
         if(!_previousNodesState[nodeId].added() && _nodesState[nodeId].added())
         {
@@ -283,7 +283,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         }
     }
 
-    for(EdgeId edgeId(0); edgeId < _edgesState.size(); ++edgeId)
+    for(EdgeId edgeId(0); edgeId < static_cast<int>(_edgesState.size()); ++edgeId)
     {
         if(!_previousEdgesState[edgeId].added() && _edgesState[edgeId].added())
         {
@@ -297,7 +297,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         }
     }
 
-    for(NodeId nodeId(0); nodeId < _nodesState.size(); ++nodeId)
+    for(NodeId nodeId(0); nodeId < static_cast<int>(_nodesState.size()); ++nodeId)
     {
         if(!_previousNodesState[nodeId].removed() && _nodesState[nodeId].removed())
         {

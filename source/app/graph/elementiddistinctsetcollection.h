@@ -77,13 +77,13 @@ private:
     const ListNode& listNodeFor(T elementId) const
     {
         assert(!elementId.isNull());
-        return _list.at(static_cast<int>(elementId));
+        return _list.at(static_cast<size_t>(elementId));
     }
 
     ListNode& listNodeFor(T elementId)
     {
         assert(!elementId.isNull());
-        return _list.at(static_cast<int>(elementId));
+        return _list.at(static_cast<size_t>(elementId));
     }
 
 public:
@@ -456,7 +456,7 @@ public:
     std::vector<T> copy() const
     {
         std::vector<T> v;
-        v.reserve(_size);
+        v.reserve(static_cast<size_t>(_size));
 
         std::copy(begin(), end(), std::back_inserter(v));
 
@@ -612,7 +612,7 @@ public:
     std::vector<typename T::value_type> copy() const
     {
         std::vector<typename T::value_type> v;
-        v.reserve(_size);
+        v.reserve(static_cast<size_t>(_size));
 
         std::copy(begin(), end(), std::back_inserter(v));
 

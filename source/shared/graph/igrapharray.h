@@ -19,6 +19,8 @@
 #ifndef IGRAPHARRAY_H
 #define IGRAPHARRAY_H
 
+#include <cstddef>
+
 // This is the required interface from the application's point
 // of view; how it actually stores the data is not important
 class IGraphArray
@@ -26,7 +28,7 @@ class IGraphArray
 public:
     virtual ~IGraphArray() = default;
 
-    virtual void resize(int size) = 0;
+    virtual void resize(size_t size) = 0;
     virtual void invalidate() = 0;
 };
 
