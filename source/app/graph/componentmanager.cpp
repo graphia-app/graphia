@@ -73,7 +73,7 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
     {
         auto nodeId = nodeIds.front();
         nodeIds.pop();
-        oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
+        oldComponentIdsAffected.insert(_nodesComponentId.at(nodeId));
         for(auto mergedNodeId : graph->mergedNodeIdsForNodeId(nodeId))
             nodesComponentId[mergedNodeId] = componentId;
 
@@ -210,7 +210,7 @@ void ComponentManager::update(const Graph* graph)
     NodeIdMap<std::pair<ComponentId, ComponentId>> nodeIdMoves;
     EdgeIdMap<std::pair<ComponentId, ComponentId>> edgeIdMoves;
 
-    auto maxNumNodes = std::max(_nodesComponentId.size(), newNodesComponentId.size());
+    auto maxNumNodes = static_cast<int>(std::max(_nodesComponentId.size(), newNodesComponentId.size()));
     for(NodeId nodeId(0); nodeId < maxNumNodes; ++nodeId)
     {
         auto oldComponentId = _nodesComponentId[nodeId];
@@ -232,7 +232,7 @@ void ComponentManager::update(const Graph* graph)
         }
     }
 
-    auto maxNumEdges = std::max(_edgesComponentId.size(), newEdgesComponentId.size());
+    auto maxNumEdges = static_cast<int>(std::max(_edgesComponentId.size(), newEdgesComponentId.size()));
     for(EdgeId edgeId(0); edgeId < maxNumEdges; ++edgeId)
     {
         auto oldComponentId = _edgesComponentId[edgeId];
@@ -457,9 +457,9 @@ GraphComponent* ComponentManager::componentFor(ComponentId componentId)
 {
     Q_ASSERT(!componentId.isNull());
 
-    auto index = static_cast<int>(componentId);
+    auto index = static_cast<size_t>(componentId);
 
-    if(static_cast<size_t>(index) >= _components.size())
+    if(index >= _components.size())
         return nullptr;
 
     return _components.at(index).get();
@@ -469,9 +469,9 @@ const GraphComponent* ComponentManager::componentFor(ComponentId componentId) co
 {
     Q_ASSERT(!componentId.isNull());
 
-    auto index = static_cast<int>(componentId);
+    auto index = static_cast<size_t>(componentId);
 
-    if(static_cast<size_t>(index) >= _components.size())
+    if(index >= _components.size())
         return nullptr;
 
     return _components.at(index).get();
@@ -481,10 +481,10 @@ void ComponentManager::setComponentFor(ComponentId componentId, std::unique_ptr<
 {
     Q_ASSERT(!componentId.isNull());
 
-    auto index = static_cast<int>(componentId);
-    if(graphComponent != nullptr && static_cast<size_t>(index) >= _components.size())
+    auto index = static_cast<size_t>(componentId);
+    if(graphComponent != nullptr && index >= _components.size())
     {
-        auto newSize = static_cast<size_t>(std::max(index * 2, 1));
+        size_t newSize = index > 0 ? index * 2 : 1;
         _components.resize(newSize);
     }
 

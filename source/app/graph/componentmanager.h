@@ -115,7 +115,7 @@ private:
     void shrinkComponentsArrayToFit();
 
     void update(const Graph* graph);
-    int componentArrayCapacity() const { return static_cast<int>(_nextComponentId); }
+    size_t componentArrayCapacity() const { return static_cast<size_t>(_nextComponentId); }
     ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
                                                       NodeArray<ComponentId>& nodesComponentId,
                                                       EdgeArray<ComponentId>& edgesComponentId);

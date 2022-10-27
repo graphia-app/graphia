@@ -209,7 +209,7 @@ void Graph::eraseEdgeArray(IGraphArray* edgeArray) const
 int Graph::numComponentArrays() const
 {
     if(_componentManager != nullptr)
-        return _componentManager->componentArrayCapacity();
+        return static_cast<int>(_componentManager->componentArrayCapacity());
 
     return 0;
 }
