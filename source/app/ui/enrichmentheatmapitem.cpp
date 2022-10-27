@@ -264,7 +264,7 @@ void EnrichmentHeatmapItem::buildPlot()
 double EnrichmentHeatmapItem::columnAxisWidth()
 {
     const auto& margins = customPlot().axisRect()->margins();
-    const unsigned int axisWidth = margins.left() + margins.right();
+    const auto axisWidth = margins.left() + margins.right();
 
     return width() - axisWidth;
 }
@@ -272,7 +272,7 @@ double EnrichmentHeatmapItem::columnAxisWidth()
 double EnrichmentHeatmapItem::columnAxisHeight()
 {
     const auto& margins = customPlot().axisRect()->margins();
-    const unsigned int axisHeight = margins.top() + margins.bottom();
+    const auto axisHeight = margins.top() + margins.bottom();
 
     return height() - axisHeight;
 }
@@ -363,7 +363,7 @@ void EnrichmentHeatmapItem::setScrollYAmount(double scrollAmount)
 double EnrichmentHeatmapItem::columnLabelSize()
 {
     QFontMetrics metrics(_defaultFont9Pt);
-    const unsigned int columnPadding = 1;
+    const auto columnPadding = 1;
     return metrics.height() + columnPadding;
 }
 
