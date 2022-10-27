@@ -38,7 +38,7 @@ private:
 
     QString _keyAttributeName;
     TabularData _data;
-    int _keyColumnIndex;
+    size_t _keyColumnIndex;
     std::vector<int> _importColumnIndices;
 
     bool _replace = false;

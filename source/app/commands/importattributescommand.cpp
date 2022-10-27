@@ -27,7 +27,7 @@
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
     TabularData* data, int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
-    _keyColumnIndex(keyColumnIndex), _importColumnIndices(importColumnIndices),
+    _keyColumnIndex(static_cast<size_t>(keyColumnIndex)), _importColumnIndices(importColumnIndices),
     _replace(replace)
 {}
 
@@ -119,11 +119,11 @@ bool ImportAttributesCommand::execute()
 
         for(auto columnIndex : _importColumnIndices)
         {
-            auto name = _data.valueAt(columnIndex, 0);
+            auto name = _data.valueAt(static_cast<size_t>(columnIndex), 0);
             auto* existingVector = userData->vector(name);
 
             bool replace = _replace && existingVector != nullptr &&
-                existingVector->type() == _data.typeIdentity(columnIndex).type();
+                existingVector->type() == _data.typeIdentity(static_cast<size_t>(columnIndex)).type();
 
             if(replace)
                 _replacedUserDataVectors.emplace_back(*existingVector);
@@ -136,7 +136,7 @@ bool ImportAttributesCommand::execute()
             for(auto elementId : elementIds)
             {
                 auto value = u::contains(map, elementId) ?
-                    _data.valueAt(columnIndex, map.at(elementId)) : QString{};
+                    _data.valueAt(static_cast<size_t>(columnIndex), map.at(elementId)) : QString{};
                 userData->setValueBy(elementId, name, value);
             }
         }
