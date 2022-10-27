@@ -57,7 +57,7 @@ public:
 
 private:
     std::vector<QString> _values;
-    std::map<QString, int> _valueIndexMap;
+    std::map<QString, size_t> _valueIndexMap;
 };
 
 #endif // VISUALISATIONCHANNEL_H

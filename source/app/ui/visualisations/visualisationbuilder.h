@@ -49,9 +49,9 @@ public:
 private:
     const Graph* _graph;
     ElementIdArray<ElementId, ElementVisual>* _visuals;
-    int _numAppliedVisualisations = 0;
+    size_t _numAppliedVisualisations = 0;
 
-    static const int NumChannels = 3;
+    static const size_t NumChannels = 3;
 
     struct Applied
     {
@@ -67,13 +67,13 @@ private:
 
     template<typename T>
     void apply(T value, const VisualisationChannel& channel,
-               ElementId elementId, int index)
+               ElementId elementId, size_t index)
     {
         auto& visual = (*_visuals)[elementId];
         auto oldVisual = visual;
         channel.apply(value, visual);
 
-        Q_ASSERT(index < static_cast<int>(_applications[0].size()));
+        Q_ASSERT(index < _applications[0].size());
 
         // Must not exceed NumChannels
         _applications[0].at(index)._array.set(elementId, oldVisual._size  != visual._size);
@@ -102,13 +102,16 @@ private:
 public:
     void findOverrideAlerts(VisualisationInfosMap& infos)
     {
-        for(int c = 0; c < NumChannels; c++)
+        if(_numAppliedVisualisations < 2)
+            return;
+
+        for(size_t c = 0; c < NumChannels; c++)
         {
-            for(int i = 0; i < _numAppliedVisualisations - 1; i++)
+            for(size_t i = 0; i < _numAppliedVisualisations - 1; i++)
             {
                 const auto& iv = _applications.at(c).at(i);
 
-                for(int j = i + 1; j < _numAppliedVisualisations; j++)
+                for(size_t j = i + 1; j < _numAppliedVisualisations; j++)
                 {
                     const auto& jv = _applications.at(c).at(j);
                     int bothSet = 0, sourceSet = 0;
@@ -147,7 +150,7 @@ public:
                const VisualisationConfig& config,
                int index, VisualisationInfo& visualisationInfo)
     {
-        for(int c = 0; c < NumChannels; c++)
+        for(size_t c = 0; c < NumChannels; c++)
             _applications.at(c).emplace_back(index, *_graph);
 
         if(elementIds().empty())
