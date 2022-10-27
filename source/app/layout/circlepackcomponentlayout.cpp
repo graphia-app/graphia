@@ -100,7 +100,7 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
     if(componentIds.empty())
         return;
 
-    auto numComponents = static_cast<int>(componentIds.size());
+    auto numComponents = componentIds.size();
 
     ComponentId a = componentIds[0];
     ComponentId b;
@@ -128,7 +128,7 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
         b = links[a]._next;
     }
 
-    for(int i = 3; i < numComponents; i++)
+    for(size_t i = 3; i < numComponents; i++)
     {
         c = componentIds[i];
         placeThirdCircleTangentially(componentLayoutData[a],
