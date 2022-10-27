@@ -54,7 +54,7 @@ template<typename Fn>
 static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
     size_t startColumn = 0, size_t startRow = 0)
 {
-    std::vector<int> heightHistogram(tabularData.numColumns());
+    std::vector<size_t> heightHistogram(tabularData.numColumns());
 
     for(size_t column = startColumn; column < tabularData.numColumns(); column++)
     {
@@ -68,11 +68,11 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
         }
     }
 
-    std::stack<int> heights;
-    std::stack<int> indexes;
+    std::stack<size_t> heights;
+    std::stack<size_t> indexes;
     QRect dataRect;
 
-    for(int index = 0; index < static_cast<int>(heightHistogram.size()); index++)
+    for(size_t index = 0; index < heightHistogram.size(); index++)
     {
         if(heights.empty() || heightHistogram[index] > heights.top())
         {
@@ -81,20 +81,20 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
         }
         else if(heightHistogram[index] < heights.top())
         {
-            int lastIndex = 0;
+            size_t lastIndex = 0;
 
             while(!heights.empty() && heightHistogram[index] < heights.top())
             {
                 lastIndex = indexes.top(); indexes.pop();
-                int height = heights.top(); heights.pop();
-                int width = (index - lastIndex);
-                int area = width * height;
-                if(area > (dataRect.width() * dataRect.height()))
+                auto height = heights.top(); heights.pop();
+                auto width = (index - lastIndex);
+                auto area = width * height;
+                if(area > (static_cast<size_t>(dataRect.width()) * static_cast<size_t>(dataRect.height())))
                 {
-                    dataRect.setLeft(lastIndex);
-                    dataRect.setTop(static_cast<int>(tabularData.numRows()) - height);
-                    dataRect.setWidth(width);
-                    dataRect.setHeight(height);
+                    dataRect.setLeft(static_cast<int>(lastIndex));
+                    dataRect.setTop(static_cast<int>(tabularData.numRows() - height));
+                    dataRect.setWidth(static_cast<int>(width));
+                    dataRect.setHeight(static_cast<int>(height));
                 }
             }
 
@@ -105,16 +105,16 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
 
     while(!heights.empty())
     {
-        int lastIndex = indexes.top(); indexes.pop();
-        int height = heights.top(); heights.pop();
-        int width = (static_cast<int>(heightHistogram.size()) - lastIndex);
-        int area = width * height;
-        if(area > (dataRect.width() * dataRect.height()))
+        auto lastIndex = indexes.top(); indexes.pop();
+        auto height = heights.top(); heights.pop();
+        auto width = heightHistogram.size() - lastIndex;
+        auto area = width * height;
+        if(area > (static_cast<size_t>(dataRect.width()) * static_cast<size_t>(dataRect.height())))
         {
-            dataRect.setLeft(lastIndex);
-            dataRect.setTop(static_cast<int>(tabularData.numRows()) - height);
-            dataRect.setWidth(width);
-            dataRect.setHeight(height);
+            dataRect.setLeft(static_cast<int>(lastIndex));
+            dataRect.setTop(static_cast<int>(tabularData.numRows() - height));
+            dataRect.setWidth(static_cast<int>(width));
+            dataRect.setHeight(static_cast<int>(height));
         }
     }
 
