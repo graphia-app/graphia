@@ -140,7 +140,8 @@ void LouvainTransform::apply(TransformedGraph& target) const
             // pair of connected communities in the base graph
             for(auto edgeId : graph.edgeIds())
             {
-                target.setProgress(static_cast<int>((edgeIndex++ * 100) / graph.numEdges()));
+                target.setProgress(static_cast<int>((edgeIndex++ * 100) /
+                    static_cast<uint64_t>(graph.numEdges())));
 
                 if(cancelled())
                     break;
@@ -193,7 +194,8 @@ void LouvainTransform::apply(TransformedGraph& target) const
 
             for(auto nodeId : graph.nodeIds())
             {
-                target.setProgress(static_cast<int>((nodeIndex++ * 100) / graph.numNodes()));
+                target.setProgress(static_cast<int>((nodeIndex++ * 100) /
+                    static_cast<uint64_t>(graph.numNodes())));
 
                 if(graph.typeOf(nodeId) == MultiElementType::Tail)
                     continue;

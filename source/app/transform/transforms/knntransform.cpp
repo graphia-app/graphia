@@ -72,7 +72,7 @@ void KNNTransform::apply(TransformedGraph& target) const
 
         for(auto it = edgeIds.begin(); it != kthPlus1; ++it)
         {
-            auto position = std::distance(edgeIds.begin(), it) + 1;
+            auto position = static_cast<size_t>(std::distance(edgeIds.begin(), it) + 1);
 
             if(target.edgeById(*it).sourceId() == nodeId)
                 ranks[*it]._source = position;

@@ -56,13 +56,13 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     for(auto componentId : componentManager.componentIds())
     {        
         const IGraphComponent* component = componentManager.componentById(componentId);
-        auto componentNodeCount = static_cast<int>(component->nodeIds().size());
+        auto componentNodeCount = component->nodeIds().size();
 
         // Map NodeIds to Matrix index
-        NodeIdMap<int> nodeToIndexMap;
+        NodeIdMap<size_t> nodeToIndexMap;
         for(auto nodeId : component->nodeIds())
         {
-            auto index = static_cast<int>(nodeToIndexMap.size());
+            auto index = nodeToIndexMap.size();
             nodeToIndexMap[nodeId] = index;
         }
 

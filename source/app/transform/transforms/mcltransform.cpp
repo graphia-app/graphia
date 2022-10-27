@@ -31,8 +31,8 @@
 #include <thread>
 #include <algorithm>
 
-using MatrixType = blaze::CompressedMatrix<float,blaze::columnMajor>;
-using VectorType = blaze::DynamicVector<float,blaze::columnVector>;
+using MatrixType = blaze::CompressedMatrix<float, blaze::columnMajor>;
+using VectorType = blaze::DynamicVector<float, blaze::columnVector>;
 
 static void normaliseColumnsColumnMajor(MatrixType &mclMatrix)
 {
@@ -334,7 +334,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 {
     target.setPhase(QStringLiteral("MCL Initialising"));
 
-    int nodeCount = target.numNodes();
+    auto nodeCount = static_cast<size_t>(target.numNodes());
 
     // Map NodeIds to Matrix index
     NodeIdMap<size_t> nodeToIndexMap;
@@ -349,7 +349,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     MatrixType clusterMatrix(nodeCount, nodeCount);
     blaze::setNumThreads(std::thread::hardware_concurrency());
 
-    clusterMatrix.reserve((target.numEdges() * 2) + nodeCount);
+    clusterMatrix.reserve(static_cast<size_t>(target.numEdges() * 2) + nodeCount);
 
     // Populate the Matrix
     for(NodeId nodeId : target.nodeIds())
@@ -471,7 +471,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
         MatrixType dstMatrix(clusterMatrix.rows(), clusterMatrix.rows());
         dstMatrix.reserve(newNNZCount);
-        int row = 0;
+        size_t row = 0;
         for(const auto& matrixRow : matrixStorage)
         {
             for(auto matrixEntry: matrixRow)
