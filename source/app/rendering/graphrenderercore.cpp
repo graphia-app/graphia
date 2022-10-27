@@ -307,19 +307,19 @@ void GPUGraphData::upload()
     _textVBO.release();
 }
 
-int GPUGraphData::numNodes() const
+size_t GPUGraphData::numNodes() const
 {
-    return static_cast<int>(_nodeData.size());
+    return _nodeData.size();
 }
 
-int GPUGraphData::numEdges() const
+size_t GPUGraphData::numEdges() const
 {
-    return static_cast<int>(_edgeData.size());
+    return _edgeData.size();
 }
 
-int GPUGraphData::numGlyphs() const
+size_t GPUGraphData::numGlyphs() const
 {
-    return static_cast<int>(_glyphData.size());
+    return _glyphData.size();
 }
 
 float GPUGraphData::alpha() const
@@ -496,7 +496,7 @@ void GraphRendererCore::renderNodes(GPUGraphData& gpuGraphData)
 
     gpuGraphData._sphere.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
+                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numNodes()));
     gpuGraphData._sphere.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);
@@ -524,7 +524,7 @@ void GraphRendererCore::renderEdges(GPUGraphData& gpuGraphData)
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numEdges());
+                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numEdges()));
     gpuGraphData._arrow.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);
@@ -563,7 +563,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, Primitive::Rectangle::glIndexCount(),
-                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numGlyphs());
+                            GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(gpuGraphData.numGlyphs()));
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);

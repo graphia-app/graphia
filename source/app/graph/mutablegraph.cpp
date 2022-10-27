@@ -62,9 +62,9 @@ const std::vector<NodeId>& MutableGraph::nodeIds() const
     return _nodeIds;
 }
 
-int MutableGraph::numNodes() const
+size_t MutableGraph::numNodes() const
 {
-    return static_cast<int>(_nodeIds.size());
+    return _nodeIds.size();
 }
 
 const Node& MutableGraph::nodeById(NodeId nodeId) const
@@ -259,9 +259,9 @@ const std::vector<EdgeId>& MutableGraph::edgeIds() const
     return _edgeIds;
 }
 
-int MutableGraph::numEdges() const
+size_t MutableGraph::numEdges() const
 {
-    return static_cast<int>(_edgeIds.size());
+    return _edgeIds.size();
 }
 
 const Edge& MutableGraph::edgeById(EdgeId edgeId) const

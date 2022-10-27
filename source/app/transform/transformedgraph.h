@@ -52,14 +52,14 @@ public:
     void cancelRebuild();
     void addTransform(std::unique_ptr<GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
     void clearTransforms() { _transforms.clear(); }
-    int numTransforms() const { return static_cast<int>(_transforms.size()); }
+    size_t numTransforms() const { return _transforms.size(); }
 
     bool onAttributeValuesChangedExternally(const QStringList& changedAttributeNames);
 
     void setCommand(ICommand* command) { _command = command; }
 
     const std::vector<NodeId>& nodeIds() const override { return _target.nodeIds(); }
-    int numNodes() const override { return _target.numNodes(); }
+    size_t numNodes() const override { return _target.numNodes(); }
     const INode& nodeById(NodeId nodeId) const override { return _target.nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const override { return _target.containsNodeId(nodeId); }
     MultiElementType typeOf(NodeId nodeId) const override { return _target.typeOf(nodeId); }
@@ -67,7 +67,7 @@ public:
     int multiplicityOf(NodeId nodeId) const override { return _target.multiplicityOf(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const override { return _target.edgeIds(); }
-    int numEdges() const override { return _target.numEdges(); }
+    size_t numEdges() const override { return _target.numEdges(); }
     const IEdge& edgeById(EdgeId edgeId) const override { return _target.edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const override { return _target.containsEdgeId(edgeId); }
     MultiElementType typeOf(EdgeId edgeId) const override { return _target.typeOf(edgeId); }

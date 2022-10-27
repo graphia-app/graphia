@@ -81,8 +81,8 @@ bool PairwiseSaver::save()
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     QTextStream stream(&file);
-    int edgeCount = _graphModel->graph().numEdges();
-    int runningCount = 0;
+    size_t edgeCount = _graphModel->graph().numEdges();
+    size_t runningCount = 0;
 
     auto escape = [](QString string)
     {
@@ -115,7 +115,7 @@ bool PairwiseSaver::save()
             stream << QStringLiteral(R"("%1" "%2")""\n").arg(sourceName, targetName);
 
         runningCount++;
-        setProgress(runningCount * 100 / edgeCount);
+        setProgress(static_cast<int>(runningCount * 100 / edgeCount));
     }
 
     return true;

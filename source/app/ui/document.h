@@ -117,11 +117,11 @@ class Document : public QObject, public IDocument, public FailureReason
     Q_PROPERTY(bool saveRequired MEMBER _saveRequired NOTIFY saveRequiredChanged)
 
     Q_PROPERTY(int foundIndex READ foundIndex NOTIFY foundIndexChanged)
-    Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
+    Q_PROPERTY(size_t numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
-    Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
-    Q_PROPERTY(int numHeadNodesSelected READ numHeadNodesSelected NOTIFY numHeadNodesSelectedChanged)
-    Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
+    Q_PROPERTY(size_t numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
+    Q_PROPERTY(size_t numHeadNodesSelected READ numHeadNodesSelected NOTIFY numHeadNodesSelectedChanged)
+    Q_PROPERTY(size_t numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
     Q_PROPERTY(bool nodesMaskActive READ nodesMaskActive NOTIFY nodesMaskActiveChanged)
 
     Q_PROPERTY(QVariantList selectedNodeIds READ selectedNodeIds NOTIFY selectedNodeIdsChanged)
@@ -294,7 +294,7 @@ private:
     void maybeEmitBusyChanged();
 
     int foundIndex() const;
-    int numNodesFound() const;
+    size_t numNodesFound() const;
     bool nodesMaskActive() const;
     void setFoundIt(std::vector<NodeId>::const_iterator foundIt);
     NodeId incrementFoundIt();
@@ -306,9 +306,9 @@ private:
 
     void setSaveRequired();
 
-    int numNodesSelected() const;
-    int numHeadNodesSelected() const;
-    int numInvisibleNodesSelected() const;
+    size_t numNodesSelected() const;
+    size_t numHeadNodesSelected() const;
+    size_t numInvisibleNodesSelected() const;
 
     QVariantList selectedNodeIds() const;
     QVariantList selectedHeadNodeIds() const;

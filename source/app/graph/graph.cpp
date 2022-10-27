@@ -206,10 +206,10 @@ void Graph::eraseEdgeArray(IGraphArray* edgeArray) const
     _edgeArrays.erase(edgeArray);
 }
 
-int Graph::numComponentArrays() const
+size_t Graph::numComponentArrays() const
 {
     if(_componentManager != nullptr)
-        return static_cast<int>(_componentManager->componentArrayCapacity());
+        return _componentManager->componentArrayCapacity();
 
     return 0;
 }
@@ -292,11 +292,11 @@ const std::vector<ComponentId>& Graph::componentIds() const
     return emptyComponentIdList;
 }
 
-int Graph::numComponents() const
+size_t Graph::numComponents() const
 {
     Q_ASSERT(componentManagementEnabled());
 
-    return static_cast<int>(componentIds().size());
+    return componentIds().size();
 }
 
 bool Graph::containsComponentId(ComponentId componentId) const

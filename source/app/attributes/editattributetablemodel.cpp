@@ -84,9 +84,9 @@ int EditAttributeTableModel::rowCount(const QModelIndex&) const
     {
     case ElementType::Node:
         return !_selectedNodes.empty() ? static_cast<int>(_selectedNodes.size()) :
-            _document->graphModel()->graph().numNodes();
+            static_cast<int>(_document->graphModel()->graph().numNodes());
 
-    case ElementType::Edge: return _document->graphModel()->graph().numEdges();
+    case ElementType::Edge: return static_cast<int>(_document->graphModel()->graph().numEdges());
     default: return 0;
     }
 }

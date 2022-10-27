@@ -42,8 +42,8 @@ bool GraphMLSaver::save()
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     size_t numElements = _graphModel->attributeNames().size() +
-                       static_cast<size_t>(_graphModel->graph().numNodes()) +
-                       static_cast<size_t>(_graphModel->graph().numEdges());
+        _graphModel->graph().numNodes() +
+        _graphModel->graph().numEdges();
     size_t runningCount = 0;
 
     QXmlStreamWriter stream(&file);

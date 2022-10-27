@@ -193,7 +193,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     // Find the number of nodes in the largest component
     auto largestComponentId = graph.componentIdOfLargestComponent();
-    int maxNumNodes = graph.componentById(largestComponentId)->numNodes();
+    size_t maxNumNodes = graph.componentById(largestComponentId)->numNodes();
 
     for(auto componentId : componentIds)
     {

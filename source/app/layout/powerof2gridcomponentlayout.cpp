@@ -37,15 +37,16 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
 
     // Find the number of nodes in the largest component
     auto largestComponentId = graph.componentIdOfLargestComponent();
-    int maxNumNodes = graph.componentById(largestComponentId)->numNodes();
+    size_t maxNumNodes = graph.componentById(largestComponentId)->numNodes();
 
-    ComponentArray<int> renderSizeDivisors(graph);
+    ComponentArray<size_t> renderSizeDivisors(graph);
 
     for(auto componentId : componentIds)
     {
         const auto* component = graph.componentById(componentId);
-        int divisor = maxNumNodes / component->numNodes();
-        renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
+        size_t divisor = maxNumNodes / component->numNodes();
+        renderSizeDivisors[componentId] = static_cast<size_t>(
+            u::smallestPowerOf2GreaterThan(static_cast<int>(divisor)));
     }
 
     auto sortedComponentIds = componentIds;
@@ -62,10 +63,10 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
         auto coord = coords.top();
         coords.pop();
 
-        const int MAX_SIZE = 1024;
-        const int MINIMUM_SIZE = 32;
-        int divisor = renderSizeDivisors[componentId];
-        int dividedSize = MAX_SIZE / (divisor * 2);
+        const size_t MAX_SIZE = 1024;
+        const size_t MINIMUM_SIZE = 32;
+        size_t divisor = renderSizeDivisors[componentId];
+        size_t dividedSize = MAX_SIZE / (divisor * 2);
 
         while(dividedSize < MINIMUM_SIZE && divisor > 1)
         {
@@ -73,8 +74,8 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
             dividedSize = MAX_SIZE / (divisor * 2);
         }
 
-        if(!coords.empty() && (coord.x() + dividedSize > coords.top().x() ||
-            coord.y() + dividedSize > MAX_SIZE))
+        if(!coords.empty() && (coord.x() + static_cast<qreal>(dividedSize) > coords.top().x() ||
+            coord.y() + static_cast<qreal>(dividedSize) > MAX_SIZE))
         {
             coord = coords.top();
             coords.pop();
@@ -84,8 +85,8 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
         componentLayoutData[componentId].set(static_cast<float>(coord.x()) + radius,
                                              static_cast<float>(coord.y()) + radius, radius);
 
-        QPointF right(coord.x() + dividedSize, coord.y());
-        QPointF down(coord.x(), coord.y() + dividedSize);
+        QPointF right(coord.x() + static_cast<qreal>(dividedSize), coord.y());
+        QPointF down(coord.x(), coord.y() + static_cast<qreal>(dividedSize));
 
         if(coords.empty() || right.x() < coords.top().x())
             coords.emplace(right);

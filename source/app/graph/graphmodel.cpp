@@ -620,7 +620,7 @@ std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndexOrLater(in
 {
     std::vector<QString> attributeNames;
 
-    for(int index = firstIndex; index < _->_transformedGraph.numTransforms(); index++)
+    for(int index = firstIndex; index < static_cast<int>(_->_transformedGraph.numTransforms()); index++)
     {
         auto createdAttributeNames = createdAttributeNamesAtTransformIndex(index);
         attributeNames.insert(attributeNames.end(),

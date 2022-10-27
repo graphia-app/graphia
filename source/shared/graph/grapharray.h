@@ -353,7 +353,7 @@ public:
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
         assert(graph.isComponentManaged());
-        this->resize(static_cast<size_t>(graph.numComponentArrays()));
+        this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
 
@@ -361,7 +361,7 @@ public:
         GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
         assert(graph.isComponentManaged());
-        this->resize(static_cast<size_t>(graph.numComponentArrays()));
+        this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
 

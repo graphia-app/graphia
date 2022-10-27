@@ -30,10 +30,10 @@ public:
     virtual ~IGraphComponent() = default;
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
-    int numNodes() const { return static_cast<int>(nodeIds().size()); }
+    size_t numNodes() const { return nodeIds().size(); }
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
-    int numEdges() const { return static_cast<int>(edgeIds().size()); }
+    size_t numEdges() const { return edgeIds().size(); }
 
     virtual const IGraph& graph() const = 0;
 };

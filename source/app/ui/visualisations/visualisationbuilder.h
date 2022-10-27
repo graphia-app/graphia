@@ -170,7 +170,7 @@ public:
             // This is only here to avoid an internal compiler error
             const auto& mappingValue = QStringLiteral("mapping");
 
-            int numApplications = 0;
+            size_t numApplications = 0;
 
             auto applyTo = [&](const auto& graph, const u::Statistics& statistics)
             {

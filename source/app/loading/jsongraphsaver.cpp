@@ -36,8 +36,8 @@ bool JSONGraphSaver::save()
     fileObject["graph"] = graphAsJson(_graphModel->graph(), *this);
     setProgress(-1);
 
-    int numElements = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
-    int runningCount = 0;
+    size_t numElements = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
+    size_t runningCount = 0;
 
     // Node Attributes
     _graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
@@ -62,7 +62,7 @@ bool JSONGraphSaver::save()
         }
 
         runningCount++;
-        setProgress(runningCount * 100 / numElements);
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
     // Edge Attributes
@@ -88,7 +88,7 @@ bool JSONGraphSaver::save()
         }
 
         runningCount++;
-        setProgress(runningCount * 100 / numElements);
+        setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
     QFile file(_url.toLocalFile());
@@ -115,7 +115,8 @@ json JSONGraphSaver::graphAsJson(const IGraph& graph, Progressable& progressable
         node["id"] = std::to_string(static_cast<int>(nodeId));
 
         nodes.emplace_back(node);
-        progressable.setProgress((i++ * 100) / graph.numNodes());
+        progressable.setProgress((i++ * 100) /
+            static_cast<int>(graph.numNodes()));
     }
 
     progressable.setProgress(-1);
@@ -135,7 +136,8 @@ json JSONGraphSaver::graphAsJson(const IGraph& graph, Progressable& progressable
         jsonEdge["target"] = std::to_string(static_cast<int>(edge.targetId()));
 
         edges.emplace_back(jsonEdge);
-        progressable.setProgress((i++ * 100) / graph.numEdges());
+        progressable.setProgress((i++ * 100) /
+            static_cast<int>(graph.numEdges()));
     }
 
     progressable.setProgress(-1);

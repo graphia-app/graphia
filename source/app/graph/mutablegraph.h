@@ -127,7 +127,7 @@ public:
     void clear() override;
 
     const std::vector<NodeId>& nodeIds() const override;
-    int numNodes() const override;
+    size_t numNodes() const override;
     const Node& nodeById(NodeId nodeId) const override;
     bool containsNodeId(NodeId nodeId) const override;
     MultiElementType typeOf(NodeId nodeId) const override;
@@ -146,7 +146,7 @@ public:
     void removeNode(NodeId nodeId) override;
 
     const std::vector<EdgeId>& edgeIds() const override;
-    int numEdges() const override;
+    size_t numEdges() const override;
     const Edge& edgeById(EdgeId edgeId) const override;
     bool containsEdgeId(EdgeId edgeId) const override;
     MultiElementType typeOf(EdgeId edgeId) const override;

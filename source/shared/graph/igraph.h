@@ -75,17 +75,17 @@ public:
     ~IGraph() override = default;
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
-    virtual int numNodes() const = 0;
+    virtual size_t numNodes() const = 0;
     virtual const INode& nodeById(NodeId nodeId) const = 0;
     virtual bool containsNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
-    virtual int numEdges() const = 0;
+    virtual size_t numEdges() const = 0;
     virtual const IEdge& edgeById(EdgeId edgeId) const = 0;
     virtual bool containsEdgeId(EdgeId edgeId) const = 0;
 
     virtual const std::vector<ComponentId>& componentIds() const = 0;
-    virtual int numComponents() const = 0;
+    virtual size_t numComponents() const = 0;
     virtual const IGraphComponent* componentById(ComponentId componentId) const = 0;
     virtual bool containsComponentId(ComponentId componentId) const = 0;
 

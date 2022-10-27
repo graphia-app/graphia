@@ -1497,7 +1497,7 @@ void Document::setSaveRequired()
     emit saveRequiredChanged();
 }
 
-int Document::numNodesSelected() const
+size_t Document::numNodesSelected() const
 {
     if(_selectionManager != nullptr)
         return _selectionManager->numNodesSelected();
@@ -1505,9 +1505,9 @@ int Document::numNodesSelected() const
     return 0;
 }
 
-int Document::numHeadNodesSelected() const
+size_t Document::numHeadNodesSelected() const
 {
-    int numNodes = 0;
+    size_t numNodes = 0;
 
     if(_selectionManager != nullptr)
     {
@@ -1521,7 +1521,7 @@ int Document::numHeadNodesSelected() const
     return numNodes;
 }
 
-int Document::numInvisibleNodesSelected() const
+size_t Document::numInvisibleNodesSelected() const
 {
     if(_selectionManager != nullptr)
     {
@@ -1536,7 +1536,7 @@ int Document::numInvisibleNodesSelected() const
                 ++it;
         }
 
-        return static_cast<int>(selectedNodes.size());
+        return selectedNodes.size();
     }
 
     return 0;
@@ -1748,10 +1748,10 @@ int Document::foundIndex() const
     return -1;
 }
 
-int Document::numNodesFound() const
+size_t Document::numNodesFound() const
 {
     if(_searchManager != nullptr)
-        return static_cast<int>(_searchManager->foundNodeIds().size());
+        return _searchManager->foundNodeIds().size();
 
     return 0;
 }
@@ -2169,14 +2169,14 @@ QStringList Document::allAttributeValues(const QString& attributeName) const
 
     if(attribute->elementType() == ElementType::Node)
     {
-        attributeValues.reserve(_graphModel->mutableGraph().numNodes());
+        attributeValues.reserve(static_cast<int>(_graphModel->mutableGraph().numNodes()));
 
         for(auto nodeId : _graphModel->mutableGraph().nodeIds())
             attributeValues.append(attribute->stringValueOf(nodeId));
     }
     else if(attribute->elementType() == ElementType::Edge)
     {
-        attributeValues.reserve(_graphModel->mutableGraph().numEdges());
+        attributeValues.reserve(static_cast<int>(_graphModel->mutableGraph().numEdges()));
 
         for(auto edgeId : _graphModel->mutableGraph().edgeIds())
             attributeValues.append(attribute->stringValueOf(edgeId));
@@ -2336,7 +2336,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     map.insert(QStringLiteral("mappedMinimumNumericValue"), visualisationInfo.mappedMinimum());
     map.insert(QStringLiteral("mappedMaximumNumericValue"), visualisationInfo.mappedMaximum());
     map.insert(QStringLiteral("hasNumericRange"), visualisationInfo.statistics()._range > 0.0);
-    map.insert(QStringLiteral("numApplications"), visualisationInfo.numApplications());
+    map.insert(QStringLiteral("numApplications"), static_cast<int>(visualisationInfo.numApplications()));
 
     const auto& numericValuesVector = visualisationInfo.statistics()._values;
     numericValues.reserve(static_cast<int>(numericValuesVector.size()));

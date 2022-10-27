@@ -51,12 +51,12 @@ static double hyperGeometricProb(double x, double r1, double r2, double c1, doub
  *  C: Selected NOT In Category
  *  D: Not Selected NOT In Category
  */
-double EnrichmentCalculator::fishers(int a, int b, int c, int d)
+double EnrichmentCalculator::fishers(size_t a, size_t b, size_t c, size_t d)
 {
-    double ab = a + b;
-    double cd = c + d;
-    double ac = a + c;
-    double bd = b + d;
+    auto ab = static_cast<double>(a + b);
+    auto cd = static_cast<double>(c + d);
+    auto ac = static_cast<double>(a + c);
+    auto bd = static_cast<double>(b + d);
 
     double twoPval = 0.0;
 
@@ -65,11 +65,11 @@ double EnrichmentCalculator::fishers(int a, int b, int c, int d)
     double um = (ac < ab) ? ac  : ab;
 
     // Fisher's exact test
-    double crit = hyperGeometricProb(a, ab, cd, ac, bd);
+    double crit = hyperGeometricProb(static_cast<double>(a), ab, cd, ac, bd);
 
     for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
-        double prob = hyperGeometricProb(x, ab, cd, ac, bd);
+        double prob = hyperGeometricProb(static_cast<double>(x), ab, cd, ac, bd);
 
         if(prob <= crit)
             twoPval += prob;
@@ -83,8 +83,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
     IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
-    std::map<QString, int> attributeValueEntryCountATotal;
-    std::map<QString, int> attributeValueEntryCountBTotal;
+    std::map<QString, size_t> attributeValueEntryCountATotal;
+    std::map<QString, size_t> attributeValueEntryCountBTotal;
     EnrichmentTableModel::Table tableModel;
 
     for(auto nodeId : graphModel->graph().nodeIds())
@@ -133,22 +133,23 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
             auto n = graphModel->graph().numNodes();
 
-            int selectedInCategory = 0;
+            size_t selectedInCategory = 0;
             for(auto nodeId : selectedNodes)
             {
                 if(attributeB->stringValueOf(nodeId) == attributeValueB)
                     selectedInCategory++;
             }
 
-            int r1 = attributeValueEntryCountBTotal[attributeValueB];
+            auto r1 = attributeValueEntryCountBTotal[attributeValueB];
             auto fexp = static_cast<double>(r1) / static_cast<double>(n);
             auto stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-            auto expectedNo = (static_cast<double>(r1) / n) * static_cast<double>(selectedNodes.size());
+            auto expectedNo = (static_cast<double>(r1) / static_cast<double>(n)) *
+                static_cast<double>(selectedNodes.size());
             auto expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
-            auto c1 = static_cast<int>(selectedNodes.size());
+            auto c1 = selectedNodes.size();
             auto selectedNotInCategory = c1 - selectedInCategory;
             auto c2 = n - c1;
             auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
@@ -163,7 +164,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
                 .arg(QString::number(expectedNo, 'f', 2),
                 QString::number(expectedDev, 'f', 2),
                 QString::number(selectedNodes.size()));
-            row[EnrichmentTableModel::Results::OverRep] = selectedInCategory / expectedNo;
+            row[EnrichmentTableModel::Results::OverRep] = static_cast<double>(selectedInCategory) / expectedNo;
             row[EnrichmentTableModel::Results::Fishers] = f;
             row[EnrichmentTableModel::Results::BonferroniAdjusted] =
                 std::min(1.0, f * static_cast<double>(attributeValueEntryCountBTotal.size()));

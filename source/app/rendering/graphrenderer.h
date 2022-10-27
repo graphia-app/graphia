@@ -172,7 +172,7 @@ public slots:
 
 private:
     GraphModel* _graphModel = nullptr;
-    int _numComponents = 0;
+    size_t _numComponents = 0;
 
     SelectionManager* _selectionManager = nullptr;
 

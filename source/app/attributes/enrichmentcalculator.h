@@ -29,7 +29,7 @@ class ICommand;
 class EnrichmentCalculator
 {
 public:
-    static double fishers(int a, int b, int c, int d);
+    static double fishers(size_t a, size_t b, size_t c, size_t d);
     static std::vector<double> doRandomSampling(int sampleCount, double expectedFrequency);
     static EnrichmentTableModel::Table overRepAgainstEachAttribute(const QString& attributeAName,
         const QString& attributeBName, IGraphModel* graphModel, ICommand& command);

@@ -55,7 +55,7 @@ private:
         if(haveIndexFor(elementId))
             return;
 
-        _indexes->set(elementId, {true, static_cast<size_t>(numValues())});
+        _indexes->set(elementId, {true, numValues()});
         _indexToElementIdMap[numValues()] = elementId;
     }
 

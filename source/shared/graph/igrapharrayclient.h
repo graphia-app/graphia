@@ -42,7 +42,7 @@ public:
     virtual void insertEdgeArray(IGraphArray* edgeArray) const = 0;
     virtual void eraseEdgeArray(IGraphArray* edgeArray) const = 0;
 
-    virtual int numComponentArrays() const = 0;
+    virtual size_t numComponentArrays() const = 0;
     virtual void insertComponentArray(IGraphArray* componentArray) const = 0;
     virtual void eraseComponentArray(IGraphArray* componentArray) const = 0;
 

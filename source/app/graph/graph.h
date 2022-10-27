@@ -200,7 +200,7 @@ public:
     void disableComponentManagement();
 
     const std::vector<ComponentId>& componentIds() const override;
-    int numComponents() const override;
+    size_t numComponents() const override;
     bool containsComponentId(ComponentId componentId) const override;
     const IGraphComponent* componentById(ComponentId componentId) const override;
     ComponentId componentIdOfNode(NodeId nodeId) const;
@@ -215,7 +215,7 @@ public:
             return {};
 
         ComponentId largestComponentId;
-        int maxNumNodes = 0;
+        size_t maxNumNodes = 0;
         for(auto componentId : componentIds)
         {
             auto component = componentById(componentId);
@@ -276,7 +276,7 @@ private:
     void insertEdgeArray(IGraphArray* edgeArray) const override;
     void eraseEdgeArray(IGraphArray* edgeArray) const override;
 
-    int numComponentArrays() const override;
+    size_t numComponentArrays() const override;
     void insertComponentArray(IGraphArray* componentArray) const override;
     void eraseComponentArray(IGraphArray* componentArray) const override;
 

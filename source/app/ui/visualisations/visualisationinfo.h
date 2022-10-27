@@ -36,7 +36,7 @@ private:
     double _mappedMinimum = std::numeric_limits<double>::max();
     double _mappedMaximum = std::numeric_limits<double>::lowest();
     std::vector<QString> _stringValues;
-    int _numApplications = 0;
+    size_t _numApplications = 0;
 
 public:
     template<typename... Args>
@@ -59,8 +59,8 @@ public:
     void addStringValue(const QString& value) { _stringValues.emplace_back(value); }
     auto stringValues() const { return _stringValues; }
 
-    void setNumApplications(int numApplications) { _numApplications = numApplications; }
-    int numApplications() const { return _numApplications; }
+    void setNumApplications(size_t numApplications) { _numApplications = numApplications; }
+    size_t numApplications() const { return _numApplications; }
 };
 
 using VisualisationInfosMap = std::map<int, VisualisationInfo>;

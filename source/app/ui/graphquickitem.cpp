@@ -389,60 +389,60 @@ const IGraphComponent* GraphQuickItem::focusedComponent() const
         _graphModel->graph().componentById(_focusedComponentId) : nullptr;
 }
 
-int GraphQuickItem::numNodes() const
+size_t GraphQuickItem::numNodes() const
 {
     if(_graphModel != nullptr)
         return focusedComponent() != nullptr ? focusedComponent()->numNodes() : _graphModel->graph().numNodes();
 
-    return -1;
+    return 0;
 }
 
-int GraphQuickItem::numVisibleNodes() const
+size_t GraphQuickItem::numVisibleNodes() const
 {
     if(_graphModel != nullptr)
     {
         const auto& nodeIds = focusedComponent() != nullptr ? focusedComponent()->nodeIds() : _graphModel->graph().nodeIds();
 
-        return static_cast<int>(std::count_if(nodeIds.begin(), nodeIds.end(),
+        return static_cast<size_t>(std::count_if(nodeIds.begin(), nodeIds.end(),
         [this](NodeId nodeId)
         {
             return _graphModel->graph().typeOf(nodeId) != MultiElementType::Tail;
         }));
     }
 
-    return -1;
+    return 0;
 }
 
-int GraphQuickItem::numEdges() const
+size_t GraphQuickItem::numEdges() const
 {
     if(_graphModel != nullptr)
         return focusedComponent() != nullptr ? focusedComponent()->numEdges() : _graphModel->graph().numEdges();
 
-    return -1;
+    return 0;
 }
 
-int GraphQuickItem::numVisibleEdges() const
+size_t GraphQuickItem::numVisibleEdges() const
 {
     if(_graphModel != nullptr)
     {
         const auto& edgeIds = focusedComponent() != nullptr ? focusedComponent()->edgeIds() : _graphModel->graph().edgeIds();
 
-        return static_cast<int>(std::count_if(edgeIds.begin(), edgeIds.end(),
+        return static_cast<size_t>(std::count_if(edgeIds.begin(), edgeIds.end(),
         [this](EdgeId edgeId)
         {
             return _graphModel->graph().typeOf(edgeId) != MultiElementType::Tail;
         }));
     }
 
-    return -1;
+    return 0;
 }
 
-int GraphQuickItem::numComponents() const
+size_t GraphQuickItem::numComponents() const
 {
     if(_graphModel != nullptr)
         return _graphModel->graph().numComponents();
 
-    return -1;
+    return 0;
 }
 
 void GraphQuickItem::updateVisibleComponentIndex()

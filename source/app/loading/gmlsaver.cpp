@@ -32,8 +32,8 @@ bool GMLSaver::save()
     int level = 0;
 
     size_t numElements = _graphModel->attributeNames().size() +
-        static_cast<size_t>(_graphModel->graph().numNodes()) +
-        static_cast<size_t>(_graphModel->graph().numEdges());
+        _graphModel->graph().numNodes() +
+        _graphModel->graph().numEdges();
     size_t runningCount = 0;
 
     auto escape = [](const QString& string)

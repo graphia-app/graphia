@@ -59,7 +59,7 @@ public:
     void clearNodesMask() { _nodeIdsMask.clear(); emit nodesMaskChanged(); } // NOLINT readability-make-member-function-const
     bool nodesMaskActive() const { return !_nodeIdsMask.empty(); }
 
-    int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }
+    size_t numNodesSelected() const { return _selectedNodeIds.size(); }
     QString numNodesSelectedAsString() const;
 
     void suppressSignals();

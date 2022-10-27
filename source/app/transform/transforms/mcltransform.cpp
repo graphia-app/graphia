@@ -334,7 +334,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 {
     target.setPhase(QStringLiteral("MCL Initialising"));
 
-    auto nodeCount = static_cast<size_t>(target.numNodes());
+    auto nodeCount = target.numNodes();
 
     // Map NodeIds to Matrix index
     NodeIdMap<size_t> nodeToIndexMap;
@@ -349,7 +349,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     MatrixType clusterMatrix(nodeCount, nodeCount);
     blaze::setNumThreads(std::thread::hardware_concurrency());
 
-    clusterMatrix.reserve(static_cast<size_t>(target.numEdges() * 2) + nodeCount);
+    clusterMatrix.reserve((target.numEdges() * 2) + nodeCount);
 
     // Populate the Matrix
     for(NodeId nodeId : target.nodeIds())
