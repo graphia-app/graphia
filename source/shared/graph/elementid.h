@@ -20,6 +20,7 @@
 #define ELEMENTID_H
 
 #include <cassert>
+#include <cstddef>
 #include <type_traits>
 #include <compare>
 
@@ -45,6 +46,7 @@ public:
     explicit ElementId(U value) : ElementId(static_cast<int>(value)) {}
 
     explicit operator int() const { return _value; }
+    explicit operator size_t() const { assert(_value >= 0); return static_cast<size_t>(_value); }
 
     ElementId(const ElementId<T>& other) = default;
     ElementId(ElementId<T>&& other) noexcept = default;
