@@ -50,7 +50,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
     if(!file.open(QIODevice::WriteOnly))
         return false;
 
-    uint64_t totalBytes = byteArray.size();
+    auto totalBytes = static_cast<uint64_t>(byteArray.size());
     uint64_t bytePosition = 0;
     QDataStream input(byteArray);
     QDataStream output(&file);
@@ -74,10 +74,10 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, Progr
 
         auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
-        bytePosition += numBytes;
+        bytePosition += static_cast<uint64_t>(numBytes);
         progressable.setProgress(static_cast<int>((bytePosition * 100u) / totalBytes));
 
-        zstream.avail_in = numBytes;
+        zstream.avail_in = static_cast<uInt>(numBytes);
         zstream.next_in = static_cast<z_const Bytef*>(inBuffer.data());
         flush = input.atEnd() ? Z_FINISH : Z_NO_FLUSH;
 
@@ -152,9 +152,9 @@ static json enrichmentTableModelAsJson(const EnrichmentTableModel& table)
             const auto& v = table.data(row, static_cast<EnrichmentTableModel::Results>(column));
 
             if(v.typeId() == QMetaType::QString)
-                jsonObject["data"][row - 1].push_back(v.toString().toStdString());
+                jsonObject["data"][static_cast<size_t>(row - 1)].push_back(v.toString().toStdString());
             else if(v.typeId() == QMetaType::Double || v.typeId() == QMetaType::Int)
-                jsonObject["data"][row - 1].push_back(v.toDouble());
+                jsonObject["data"][static_cast<size_t>(row - 1)].push_back(v.toDouble());
         }
     }
 

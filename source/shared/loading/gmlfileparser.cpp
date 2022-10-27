@@ -323,7 +323,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     it.onPositionChanged(
     [this, &fileSize](size_t position)
     {
-        setProgress(static_cast<int>((position * 100) / fileSize));
+        setProgress(static_cast<int>((position * 100) / static_cast<size_t>(fileSize)));
     });
 
     auto cancelledFn = [this] { return cancelled(); };

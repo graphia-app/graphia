@@ -41,7 +41,7 @@ private:
         {
             auto* sparseMatrix = reinterpret_cast<mat_sparse_t*>(v->data);
 
-            _tabularData.reserve(3, sparseMatrix->njc);
+            _tabularData.reserve(3, static_cast<size_t>(sparseMatrix->njc));
             size_t tabularDataRow = 0;
 
             auto* dataPtr = reinterpret_cast<T*>(sparseMatrix->data);

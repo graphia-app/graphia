@@ -71,7 +71,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
     if(!file.open(QIODevice::ReadOnly))
         return false;
 
-    uint64_t totalBytes = file.size();
+    auto totalBytes = static_cast<uint64_t>(file.size());
 
     if(totalBytes == 0)
         return false;
@@ -98,12 +98,12 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
         auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
-        bytesRead += numBytes;
+        bytesRead += static_cast<uint64_t>(numBytes);
 
         if(loader != nullptr)
             loader->setProgress(static_cast<int>((bytesRead * 100u) / totalBytes));
 
-        zstream.avail_in = numBytes;
+        zstream.avail_in = static_cast<uInt>(numBytes);
         if(zstream.avail_in == 0)
             break;
 
@@ -127,7 +127,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
             }
 
             numBytes = ChunkSize - static_cast<int>(zstream.avail_out);
-            bytesDecompressed += numBytes;
+            bytesDecompressed += static_cast<uint64_t>(numBytes);
             byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes); // NOLINT
 
             // Check if we've read more than we've been asked to
