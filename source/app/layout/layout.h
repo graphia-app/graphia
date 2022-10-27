@@ -74,7 +74,7 @@ private:
     Iterative _iterative;
     Dimensionality _dimensionality;
     float _scaling;
-    int _smoothing;
+    size_t _smoothing;
     const IGraphComponent* _graphComponent;
     NodeLayoutPositions* _positions;
 
@@ -90,7 +90,7 @@ public:
            Iterative iterative = Iterative::No,
            Dimensionality dimensionality = Dimensionality::TwoOrThreeDee,
            float scaling = 1.0f,
-           int smoothing = 1) :
+           size_t smoothing = 1) :
         _iterative(iterative),
         _dimensionality(dimensionality),
         _scaling(scaling),
@@ -101,7 +101,7 @@ public:
     {}
 
     float scaling() const { return _scaling; }
-    int smoothing() const { return _smoothing; }
+    size_t smoothing() const { return _smoothing; }
 
     const IGraphComponent& graphComponent() const { return *_graphComponent; }
     const std::vector<NodeId>& nodeIds() const { return _graphComponent->nodeIds(); }
