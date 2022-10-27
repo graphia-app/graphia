@@ -120,7 +120,7 @@ void TabularData::setValueAt(size_t column, size_t row, QString&& value, int pro
             // is on the small side. Otherwise, when we hit 100, we would default to
             // reallocating for each new element -- exactly what we're trying to avoid
             const auto extraFudgeFactor = 2;
-            auto estimate = ((100 + extraFudgeFactor) * newSize) / progressHint;
+            auto estimate = ((100 + extraFudgeFactor) * newSize) / static_cast<size_t>(progressHint);
 
             reserveSize = std::max(reserveSize, estimate);
         }
@@ -221,7 +221,8 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
         columnValues.begin(), columnValues.end(),
         std::inserter(intersection, intersection.begin()));
 
-    auto percent = static_cast<int>((intersection.size() * 100) / referenceValues.size());
+    auto percent = static_cast<int>((intersection.size() * 100) /
+        static_cast<size_t>(referenceValues.size()));
 
     // In the case where the intersection is very small, but non-zero,
     // don't report a 0% match

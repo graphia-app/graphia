@@ -48,7 +48,7 @@ QVariant TableProxyModel::data(const QModelIndex& index, int role) const
     if(_orderedProxyToSourceColumn.size() == static_cast<size_t>(columnCount()))
     {
         auto mappedIndex = sourceModel()->index(unorderedSourceIndex.row(),
-            _orderedProxyToSourceColumn.at(index.column()));
+            _orderedProxyToSourceColumn.at(static_cast<size_t>(index.column())));
         return sourceModel()->data(mappedIndex, role);
     }
 

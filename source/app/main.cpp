@@ -158,7 +158,7 @@ static void configureProxy()
     if(type != QNetworkProxy::DefaultProxy)
     {
         proxy.setHostName(u::pref(QStringLiteral("proxy/host")).toString());
-        proxy.setPort(u::pref(QStringLiteral("proxy/port")).toInt());
+        proxy.setPort(static_cast<quint16>(u::pref(QStringLiteral("proxy/port")).toUInt()));
         proxy.setUser(u::pref(QStringLiteral("proxy/username")).toString());
         proxy.setPassword(u::pref(QStringLiteral("proxy/password")).toString());
     }

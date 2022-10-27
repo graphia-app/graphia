@@ -329,7 +329,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &QQuickPaintedItem::widthChanged, [this]
     {
         QMetaObject::invokeMethod(_worker, "setWidth", Qt::QueuedConnection,
-            Q_ARG(int, width()));
+            Q_ARG(int, static_cast<int>(width())));
     });
 
     connect(this, &QQuickPaintedItem::heightChanged, [this]

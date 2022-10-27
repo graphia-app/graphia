@@ -61,7 +61,7 @@ const QString& AvailableAttributesModel::Item::value() const
 int AvailableAttributesModel::Item::row() const
 {
     if(_parent != nullptr)
-        return _parent->_children.indexOf(const_cast<Item*>(this)); // NOLINT
+        return static_cast<int>(_parent->_children.indexOf(const_cast<Item*>(this)));
 
     return 0;
 }

@@ -71,7 +71,8 @@ public:
     template<typename U>
     CorrelationDataVector(const std::vector<U>& data, size_t row, size_t numColumns,
         NodeId nodeId, uint64_t computeCost = 1) :
-        _data({data.cbegin() + (row * numColumns), (data.cbegin() + (row * numColumns)) + numColumns}),
+        _data({data.cbegin() + static_cast<typename std::vector<U>::difference_type>(row * numColumns),
+            data.cbegin() + static_cast<typename std::vector<U>::difference_type>((row * numColumns) + numColumns)}),
         _nodeId(nodeId), _cost(computeCost)
     {}
 

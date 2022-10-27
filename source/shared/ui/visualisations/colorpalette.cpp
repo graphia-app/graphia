@@ -146,7 +146,7 @@ QColor ColorPalette::get(const QString& value, int index) const
 
     if(!_colors.empty())
     {
-        auto colorIndex = index % static_cast<int>(_colors.size());
+        auto colorIndex = static_cast<size_t>(index) % _colors.size();
         auto color = _colors.at(colorIndex);
         auto h = color.hue();
         auto s = color.saturation();

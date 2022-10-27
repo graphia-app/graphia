@@ -879,7 +879,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
     if(row < 0 || row >= static_cast<int>(urlTypes.size()))
         return {};
 
-    auto& urlType = urlTypes.at(row);
+    auto& urlType = urlTypes.at(static_cast<size_t>(row));
 
     switch(role)
     {
@@ -914,7 +914,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
     if(row < 0 || row >= rowCount(index))
         return {};
 
-    auto* plugin = _loadedPlugins->at(row)._interface;
+    auto* plugin = _loadedPlugins->at(static_cast<size_t>(row))._interface;
 
     switch(role)
     {
