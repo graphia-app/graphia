@@ -43,8 +43,8 @@ Item
         _mainWindow.writeTableModelToFile(model, fileName, type, columnNames);
     }
 
-    function copyTableModelColumnToClipboard(model, columnName)
+    function copyTableModelColumnToClipboard(model, column, rows)
     {
-        _mainWindow.copyTableModelColumnToClipboard(model, columnName);
+        _mainWindow.copyTableModelColumnToClipboard(model, column, rows);
     }
 }
