@@ -335,7 +335,9 @@ Item
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, root.selectedRows);
+            let sourceRows = [...Array(tableView.rows).keys()];
+            let visibleRows = sourceRows.map(row => proxyModel.mapToSourceRow(row));
+            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, visibleRows);
         }
     }
 
