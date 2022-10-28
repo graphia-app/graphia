@@ -36,6 +36,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_continuous.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_columnannotations.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hierarchicalclusteringcommand.cpp

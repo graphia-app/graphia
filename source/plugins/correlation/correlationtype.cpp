@@ -16,35 +16,19 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CORRELATIONTYPE_H
-#define CORRELATIONTYPE_H
+#include "correlationtype.h"
 
-#include "shared/utils/qmlenum.h"
+#include <cmath>
 
-// Note: the ordering of these enums is important from a save
-// file point of view; i.e. only append, don't reorder
+bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold)
+{
+    switch(polarity)
+    {
+    default:
+    case CorrelationPolarity::Positive: return (r >= threshold); break;
+    case CorrelationPolarity::Negative: return (r <= -threshold); break;
+    case CorrelationPolarity::Both:     return (std::abs(r) >= threshold); break;
+    }
 
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationType,
-    Pearson,
-    SpearmanRank,
-    Jaccard,
-    SMC,
-    EuclideanSimilarity,
-    CosineSimilarity,
-    Bicor);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationDataType,
-    Continuous,
-    Discrete);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, CorrelationPolarity,
-    Positive,
-    Negative,
-    Both);
-
-bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold);
-
-#endif // CORRELATIONTYPE_H
+    return false;
+}
