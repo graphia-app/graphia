@@ -112,7 +112,7 @@ private:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(vectors.begin(), vectors.end(),
+        auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
         [&](ContinuousDataVectors::const_iterator vectorAIt)
         {
             const auto* vectorA = &(*vectorAIt);
@@ -363,7 +363,7 @@ public:
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(QStringLiteral("Correlation")).parallel_for(tokenisedVectors.begin(), tokenisedVectors.end(),
+        auto results = ThreadPool(name()).parallel_for(tokenisedVectors.begin(), tokenisedVectors.end(),
         [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
             EdgeList edges;
