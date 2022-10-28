@@ -2872,7 +2872,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl, con
     }, tr("Exporting Table"));
 }
 
-void Document::copyTableModelColumnToClipboard(QAbstractItemModel* model, int column)
+void Document::copyTableModelColumnToClipboard(QAbstractItemModel* model, int column, const QVector<int>& rows)
 {
     if(column < 0 || column >= model->columnCount())
     {
@@ -2882,7 +2882,7 @@ void Document::copyTableModelColumnToClipboard(QAbstractItemModel* model, int co
 
     QString text;
 
-    for(int row = 0; row < model->rowCount(); row++)
+    for(auto row : rows)
     {
         auto value = model->data(model->index(row, column));
         text.append(QStringLiteral("%1\n").arg(value.toString()));

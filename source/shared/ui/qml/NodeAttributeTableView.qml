@@ -311,7 +311,7 @@ Item
         iconName: "document-save"
         onTriggered:
         {
-            document.copyTableModelColumnToClipboard(root.model, lastClickedColumn);
+            document.copyTableModelColumnToClipboard(root.model, lastClickedColumn, root.selectedRows);
         }
     }
 
