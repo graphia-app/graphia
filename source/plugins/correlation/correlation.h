@@ -99,15 +99,9 @@ public:
     ProtoGraph&& results() { return std::move(_protoGraph); }
 };
 
-enum class VectorType
-{
-    Raw,
-    Ranking
-};
+struct RequiresRanking {};
 
-template<typename Algorithm,
-    VectorType vectorType = VectorType::Raw,
-    typename ThresholdMethod = SimpleThreshold>
+template<typename Algorithm, typename ThresholdMethod = SimpleThreshold>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
@@ -131,7 +125,7 @@ private:
         {
             totalCost += vector.computeCostHint();
 
-            if constexpr(vectorType == VectorType::Ranking)
+            if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                 vector.generateRanking();
         }
 
@@ -152,7 +146,7 @@ private:
         {
             const auto* vectorA = &(*vectorAIt);
 
-            if constexpr(vectorType == VectorType::Ranking)
+            if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                 vectorA = vectorA->ranking();
 
             typename ThresholdMethod::Results threadResults;
@@ -164,7 +158,7 @@ private:
             {
                 const auto* vectorB = &(*vectorBIt);
 
-                if constexpr(vectorType == VectorType::Ranking)
+                if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                     vectorB = vectorB->ranking();
 
                 double r = algorithm.evaluate(size, vectorA, vectorB);
@@ -276,7 +270,7 @@ public:
 
 class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm> {};
 
-class SpearmanRankAlgorithm : public PearsonAlgorithm
+class SpearmanRankAlgorithm : public PearsonAlgorithm, RequiresRanking
 {
 public:
     QString name() const override { return QObject::tr("Spearman Rank"); }
@@ -298,7 +292,7 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm, VectorType::Ranking> {};
+class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm> {};
 
 class EuclideanSimilarityAlgorithm : public ICorrelationInfo
 {
