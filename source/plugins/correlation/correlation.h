@@ -101,7 +101,7 @@ public:
 
 struct RequiresRanking {};
 
-template<typename Algorithm, typename ThresholdMethod = SimpleThreshold>
+template<typename Algorithm, typename ThresholdMethod>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
@@ -268,7 +268,8 @@ public:
     }
 };
 
-class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm> {};
+class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm, SimpleThreshold> {};
+class PearsonCorrelationKnn : public CovarianceCorrelation<PearsonAlgorithm, KnnThreshold> {};
 
 class SpearmanRankAlgorithm : public PearsonAlgorithm, RequiresRanking
 {
@@ -292,7 +293,8 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm> {};
+class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm, SimpleThreshold> {};
+class SpearmanRankCorrelationKnn : public CovarianceCorrelation<SpearmanRankAlgorithm, KnnThreshold> {};
 
 class EuclideanSimilarityAlgorithm : public ICorrelationInfo
 {
@@ -315,7 +317,8 @@ public:
     }
 };
 
-class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm> {};
+class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, SimpleThreshold> {};
+class EuclideanSimilarityCorrelationKnn : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnThreshold> {};
 
 class CosineSimilarityAlgorithm : public ICorrelationInfo
 {
@@ -340,7 +343,8 @@ public:
     }
 };
 
-class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm> {};
+class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm, SimpleThreshold> {};
+class CosineSimilarityCorrelationKnn : public CovarianceCorrelation<CosineSimilarityAlgorithm, KnnThreshold> {};
 
 class BicorAlgorithm : public ICorrelationInfo
 {
@@ -368,7 +372,8 @@ public:
     }
 };
 
-class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm> {};
+class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm, SimpleThreshold> {};
+class BicorCorrelationKnn : public CovarianceCorrelation<BicorAlgorithm, KnnThreshold> {};
 
 class DiscreteCorrelation : public ICorrelationInfo
 {
