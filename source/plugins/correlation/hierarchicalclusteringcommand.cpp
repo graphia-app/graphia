@@ -65,8 +65,9 @@ struct Link
     size_t _pi;
 };
 
-struct EuclideanDistanceAlgorithm
+class EuclideanDistanceAlgorithm : public ICorrelationInfo
 {
+public:
     double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
     {
         double sum = 0.0;
@@ -80,16 +81,14 @@ struct EuclideanDistanceAlgorithm
 
         return sum != 0.0 ? std::sqrt(sum) : 0.0;
     }
-};
 
-class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm>
-{
-public:
     QString name() const override { return {}; }
     QString description() const override { return {}; }
     QString attributeName() const override { return {}; }
     QString attributeDescription() const override { return {}; }
 };
+
+class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm> {};
 
 HierarchicalClusteringCommand::HierarchicalClusteringCommand(const std::vector<double>& data,
     size_t numColumns, size_t numRows, CorrelationPluginInstance& correlationPluginInstance) :

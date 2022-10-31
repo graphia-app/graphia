@@ -39,10 +39,10 @@
 #include <QObject>
 #include <QString>
 
-class ICorrelation
+class ICorrelationInfo
 {
 public:
-    virtual ~ICorrelation() = default;
+    virtual ~ICorrelationInfo() = default;
 
     virtual QString name() const = 0;
     virtual QString description() const = 0;
@@ -50,7 +50,7 @@ public:
     virtual QString attributeDescription() const = 0;
 };
 
-class ContinuousCorrelation : public ICorrelation
+class ContinuousCorrelation : public ICorrelationInfo
 {
 public:
     virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double threshold,
@@ -245,16 +245,19 @@ public:
 
         return matrix;
     }
+
+    QString name() const override                   { return Algorithm().name(); }
+    QString description() const override            { return Algorithm().description(); }
+
+    QString attributeName() const override          { return Algorithm().attributeName(); }
+    QString attributeDescription() const override   { return Algorithm().attributeDescription(); }
 };
 
-struct PearsonAlgorithm
-{
-    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
-};
-
-class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm>
+class PearsonAlgorithm : public ICorrelationInfo
 {
 public:
+    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+
     QString name() const override { return QObject::tr("Pearson"); }
     QString description() const override
     {
@@ -271,7 +274,9 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<PearsonAlgorithm, VectorType::Ranking>
+class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm> {};
+
+class SpearmanRankAlgorithm : public PearsonAlgorithm
 {
 public:
     QString name() const override { return QObject::tr("Spearman Rank"); }
@@ -293,14 +298,13 @@ public:
     }
 };
 
-struct EuclideanSimilarityAlgorithm
-{
-    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
-};
+class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm, VectorType::Ranking> {};
 
-class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm>
+class EuclideanSimilarityAlgorithm : public ICorrelationInfo
 {
 public:
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+
     QString name() const override { return QObject::tr("Euclidean Similarity"); }
     QString description() const override
     {
@@ -317,14 +321,13 @@ public:
     }
 };
 
-struct CosineSimilarityAlgorithm
-{
-    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
-};
+class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm> {};
 
-class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm>
+class CosineSimilarityAlgorithm : public ICorrelationInfo
 {
 public:
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+
     QString name() const override { return QObject::tr("Cosine Similarity"); }
     QString description() const override
     {
@@ -343,18 +346,18 @@ public:
     }
 };
 
-struct BicorAlgorithm
+class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm> {};
+
+class BicorAlgorithm : public ICorrelationInfo
 {
+private:
     const ContinuousDataVector* _base = nullptr;
     ContinuousDataVectors _processedVectors;
 
+public:
     void preprocess(size_t size, const ContinuousDataVectors& vectors);
     double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
-};
 
-class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm>
-{
-public:
     QString name() const override { return QObject::tr("Bicor"); }
     QString description() const override
     {
@@ -371,7 +374,9 @@ public:
     }
 };
 
-class DiscreteCorrelation : public ICorrelation
+class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm> {};
+
+class DiscreteCorrelation : public ICorrelationInfo
 {
 public:
     virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
