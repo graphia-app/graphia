@@ -142,6 +142,17 @@ public:
 };
 
 using ContinuousDataVectors = std::vector<ContinuousDataVector>;
+using CDVIt = ContinuousDataVectors::const_iterator;
+
+struct ContinuousDataVectorRelation
+{
+    CDVIt _a;
+    CDVIt _b;
+    double _r = 0.0;
+};
+
+using CorrelationVector = std::vector<ContinuousDataVectorRelation>;
+
 using DiscreteDataVectors = std::vector<DiscreteDataVector>;
 using TokenisedDataVectors = std::vector<TokenisedDataVector>;
 

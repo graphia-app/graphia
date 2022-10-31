@@ -75,14 +75,6 @@ class CovarianceCorrelation : public ContinuousCorrelation
     using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
 private:
-    struct ContinuousDataVectorRelation
-    {
-        ContinuousDataVectors::const_iterator _a;
-        ContinuousDataVectors::const_iterator _b;
-        double _r = 0.0;
-    };
-
-    using CorrelationList = std::vector<ContinuousDataVectorRelation>;
 
     auto process(const ContinuousDataVectors& vectors,
         double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
@@ -113,14 +105,14 @@ private:
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
-        [&](ContinuousDataVectors::const_iterator vectorAIt)
+        [&](CDVIt vectorAIt)
         {
             const auto* vectorA = &(*vectorAIt);
 
             if constexpr(vectorType == VectorType::Ranking)
                 vectorA = vectorA->ranking();
 
-            CorrelationList correlations;
+            CorrelationVector correlations;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return correlations;
