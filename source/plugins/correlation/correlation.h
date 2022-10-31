@@ -21,6 +21,7 @@
 
 #include "correlationdatavector.h"
 #include "correlationtype.h"
+#include "protograph.h"
 
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
@@ -80,6 +81,22 @@ public:
         if(correlationExceedsThreshold(_polarity, r, _threshold))
             results->push_back({a, b, r});
     }
+};
+
+class KnnThreshold
+{
+private:
+    ProtoGraph _protoGraph;
+
+public:
+    KnnThreshold(const ContinuousDataVectors& vectors, CorrelationPolarity polarity, double threshold) :
+        _protoGraph(vectors, polarity, static_cast<size_t>(threshold))
+    {}
+
+    using Results = std::monostate;
+
+    void add(Results*, CDVIt a, CDVIt b, double r) { _protoGraph.add(a, b, r); }
+    ProtoGraph&& results() { return std::move(_protoGraph); }
 };
 
 enum class VectorType
