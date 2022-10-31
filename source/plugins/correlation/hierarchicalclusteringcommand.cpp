@@ -68,7 +68,7 @@ struct Link
 class EuclideanDistanceAlgorithm : public ICorrelationInfo
 {
 public:
-    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
+    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
     {
         double sum = 0.0;
 

@@ -256,7 +256,7 @@ public:
 class PearsonAlgorithm : public ICorrelationInfo
 {
 public:
-    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+    double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
     QString name() const override { return QObject::tr("Pearson"); }
     QString description() const override
@@ -303,7 +303,7 @@ class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorit
 class EuclideanSimilarityAlgorithm : public ICorrelationInfo
 {
 public:
-    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
     QString name() const override { return QObject::tr("Euclidean Similarity"); }
     QString description() const override
@@ -326,7 +326,7 @@ class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSim
 class CosineSimilarityAlgorithm : public ICorrelationInfo
 {
 public:
-    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
     QString name() const override { return QObject::tr("Cosine Similarity"); }
     QString description() const override
@@ -356,7 +356,7 @@ private:
 
 public:
     void preprocess(size_t size, const ContinuousDataVectors& vectors);
-    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB);
+    double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
     QString name() const override { return QObject::tr("Bicor"); }
     QString description() const override

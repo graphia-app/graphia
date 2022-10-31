@@ -45,7 +45,7 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
     return nullptr;
 }
 
-double PearsonAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
+double PearsonAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
     double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
     double numerator = (static_cast<double>(size) * productSum) - (vectorA->sum() * vectorB->sum());
@@ -54,7 +54,7 @@ double PearsonAlgorithm::evaluate(size_t size, const ContinuousDataVector* vecto
     return numerator / denominator;
 }
 
-double EuclideanSimilarityAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
+double EuclideanSimilarityAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
     double sum = 0.0;
 
@@ -70,7 +70,7 @@ double EuclideanSimilarityAlgorithm::evaluate(size_t size, const ContinuousDataV
     return 1.0 / (1.0 + sqrtSum);
 }
 
-double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
+double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
     double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
     double magnitudeProduct = vectorA->magnitude() * vectorB->magnitude();
@@ -114,7 +114,7 @@ void BicorAlgorithm::preprocess(size_t size, const ContinuousDataVectors& vector
     }
 }
 
-double BicorAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB)
+double BicorAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
     auto a = static_cast<size_t>(std::distance(_base, vectorA));
     auto b = static_cast<size_t>(std::distance(_base, vectorB));
