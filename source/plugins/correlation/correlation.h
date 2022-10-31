@@ -62,19 +62,43 @@ public:
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
 
+class SimpleThreshold
+{
+private:
+    CorrelationPolarity _polarity = CorrelationPolarity::Positive;
+    double _threshold = 0.0;
+
+public:
+    SimpleThreshold(const ContinuousDataVectors&, CorrelationPolarity polarity, double threshold) :
+        _polarity(polarity), _threshold(threshold)
+    {}
+
+    using Results = CorrelationVector;
+
+    void add(Results* results, CDVIt a, CDVIt b, double r)
+    {
+        if(correlationExceedsThreshold(_polarity, r, _threshold))
+            results->push_back({a, b, r});
+    }
+};
+
 enum class VectorType
 {
     Raw,
     Ranking
 };
 
-template<typename Algorithm, VectorType vectorType = VectorType::Raw>
+template<typename Algorithm,
+    VectorType vectorType = VectorType::Raw,
+    typename ThresholdMethod = SimpleThreshold>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
+private:
     template<typename A>
     using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
-private:
+    template<typename T>
+    using results_t = decltype(std::declval<T>().results());
 
     auto process(const ContinuousDataVectors& vectors,
         double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
@@ -102,6 +126,8 @@ private:
         if constexpr(AlgorithmHasPreprocess)
             algorithm.preprocess(size, vectors);
 
+        ThresholdMethod thresholdMethod(vectors, polarity, threshold);
+
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
@@ -112,10 +138,10 @@ private:
             if constexpr(vectorType == VectorType::Ranking)
                 vectorA = vectorA->ranking();
 
-            CorrelationVector correlations;
+            typename ThresholdMethod::Results threadResults;
 
             if(cancellable != nullptr && cancellable->cancelled())
-                return correlations;
+                return threadResults;
 
             for(auto vectorBIt = vectorAIt + 1; vectorBIt != vectors.end(); ++vectorBIt)
             {
@@ -129,8 +155,7 @@ private:
                 if(!std::isfinite(r))
                     continue;
 
-                if(correlationExceedsThreshold(polarity, r, threshold))
-                    correlations.push_back({vectorAIt, vectorBIt, r});
+                thresholdMethod.add(&threadResults, vectorAIt, vectorBIt, r);
             }
 
             cost += vectorA->computeCostHint();
@@ -138,7 +163,7 @@ private:
             if(progressable != nullptr)
                 progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
 
-            return correlations;
+            return threadResults;
         });
 
         if(progressable != nullptr)
@@ -147,7 +172,13 @@ private:
             progressable->setProgress(-1);
         }
 
-        return results;
+        constexpr bool ThresholdHasResults =
+            std::experimental::is_detected_v<results_t, ThresholdMethod>;
+
+        if constexpr(ThresholdHasResults)
+            return thresholdMethod.results();
+        else
+            return results;
     }
 
 public:
