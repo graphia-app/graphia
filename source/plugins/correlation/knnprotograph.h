@@ -16,8 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROTOGRAPH_H
-#define PROTOGRAPH_H
+#ifndef KNNPROTOGRAPH_H
+#define KNNPROTOGRAPH_H
 
 #include "correlationtype.h"
 #include "correlationdatavector.h"
@@ -28,13 +28,13 @@
 #include <compare>
 
 template<typename DataVectors>
-class ProtoGraph
+class KnnProtoGraph
 {
 private:
     struct ProtoNode
     {
         std::mutex _mutex;
-        const ProtoGraph* _protoGraph = nullptr;
+        const KnnProtoGraph* _protoGraph = nullptr;
 
         struct ProtoEdge
         {
@@ -69,7 +69,7 @@ private:
     size_t _k = 0;
 
 public:
-    ProtoGraph(const DataVectors& vectors, CorrelationPolarity polarity, size_t k) :
+    KnnProtoGraph(const DataVectors& vectors, CorrelationPolarity polarity, size_t k) :
         _protoNodes(vectors.size()), _begin(vectors.begin()), _polarity(polarity), _k(k)
     {
         for(auto& protoNode : _protoNodes)
@@ -79,7 +79,7 @@ public:
     class iterator
     {
     private:
-        const ProtoGraph* _protoGraph = nullptr;
+        const KnnProtoGraph* _protoGraph = nullptr;
         typename std::vector<ProtoNode>::const_iterator _protoNodeIt;
         typename std::vector<typename ProtoNode::ProtoEdge>::const_iterator _protoEdgeIt;
 
@@ -91,7 +91,7 @@ public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = size_t;
 
-        iterator(const ProtoGraph* protoGraph, bool end) :
+        iterator(const KnnProtoGraph* protoGraph, bool end) :
             _protoGraph(protoGraph)
         {
             if(!end)
@@ -165,4 +165,4 @@ public:
     }
 };
 
-#endif // PROTOGRAPH_H
+#endif // KNNPROTOGRAPH_H

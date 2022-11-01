@@ -20,9 +20,9 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.h
     ${CMAKE_CURRENT_LIST_DIR}/graphsizeestimateplotitem.h
     ${CMAKE_CURRENT_LIST_DIR}/hierarchicalclusteringcommand.h
+    ${CMAKE_CURRENT_LIST_DIR}/knnprotograph.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
-    ${CMAKE_CURRENT_LIST_DIR}/protograph.h
     ${CMAKE_CURRENT_LIST_DIR}/qcpcolumnannotations.h
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
 )

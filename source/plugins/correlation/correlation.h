@@ -21,7 +21,7 @@
 
 #include "correlationdatavector.h"
 #include "correlationtype.h"
-#include "protograph.h"
+#include "knnprotograph.h"
 
 #include "shared/utils/progressable.h"
 #include "shared/utils/cancellable.h"
@@ -91,7 +91,7 @@ template<typename DataVectors>
 class KnnThreshold
 {
 private:
-    ProtoGraph<DataVectors> _protoGraph;
+    KnnProtoGraph<DataVectors> _protoGraph;
 
 public:
     KnnThreshold(const DataVectors& vectors, CorrelationPolarity polarity, double threshold) :
@@ -108,7 +108,7 @@ public:
         _protoGraph.add(a, b, r);
     }
 
-    ProtoGraph<DataVectors>&& results() { return std::move(_protoGraph); }
+    KnnProtoGraph<DataVectors>&& results() { return std::move(_protoGraph); }
 };
 
 struct RequiresRanking {};
