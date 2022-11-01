@@ -65,7 +65,7 @@ struct Link
     size_t _pi;
 };
 
-class EuclideanDistanceAlgorithm : public ICorrelationInfo
+class EuclideanDistanceAlgorithm
 {
 public:
     double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
@@ -82,10 +82,10 @@ public:
         return sum != 0.0 ? std::sqrt(sum) : 0.0;
     }
 
-    QString name() const override { return {}; }
-    QString description() const override { return {}; }
-    QString attributeName() const override { return {}; }
-    QString attributeDescription() const override { return {}; }
+    static QString name() { return {}; }
+    static QString description() { return {}; }
+    static QString attributeName() { return {}; }
+    static QString attributeDescription() { return {}; }
 };
 
 class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm, SimpleThreshold> {};

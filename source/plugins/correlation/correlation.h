@@ -253,27 +253,27 @@ public:
         return matrix;
     }
 
-    QString name() const override                   { return Algorithm().name(); }
-    QString description() const override            { return Algorithm().description(); }
+    QString name() const override                   { return Algorithm::name(); }
+    QString description() const override            { return Algorithm::description(); }
 
-    QString attributeName() const override          { return Algorithm().attributeName(); }
-    QString attributeDescription() const override   { return Algorithm().attributeDescription(); }
+    QString attributeName() const override          { return Algorithm::attributeName(); }
+    QString attributeDescription() const override   { return Algorithm::attributeDescription(); }
 };
 
-class PearsonAlgorithm : public ICorrelationInfo
+class PearsonAlgorithm
 {
 public:
     double evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
-    QString name() const override { return QObject::tr("Pearson"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Pearson"); }
+    static QString description()
     {
         return QObject::tr("The Pearson Correlation Coefficient is an indication "
             "of the linear correlation between two variables.");
     }
 
-    QString attributeName() const override { return QObject::tr("Pearson Correlation Value"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Pearson Correlation Value"); }
+    static QString attributeDescription()
     {
         return QObject::tr("The %1 is an indication of "
             "the linear relationship between two variables.")
@@ -287,8 +287,8 @@ class PearsonCorrelationKnn : public CovarianceCorrelation<PearsonAlgorithm, Knn
 class SpearmanRankAlgorithm : public PearsonAlgorithm, RequiresRanking
 {
 public:
-    QString name() const override { return QObject::tr("Spearman Rank"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Spearman Rank"); }
+    static QString description()
     {
         return QObject::tr("Spearman's rank correlation coefficient is a "
             "nonparametric measure of the statistical dependence between "
@@ -297,8 +297,8 @@ public:
             "monotonic function.");
     }
 
-    QString attributeName() const override { return QObject::tr("Spearman Rank Correlation Value"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Spearman Rank Correlation Value"); }
+    static QString attributeDescription()
     {
         return QObject::tr("The %1 is an indication of "
             "the monotomic relationship between two variables.")
@@ -309,20 +309,20 @@ public:
 class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm, SimpleThreshold> {};
 class SpearmanRankCorrelationKnn : public CovarianceCorrelation<SpearmanRankAlgorithm, KnnThreshold> {};
 
-class EuclideanSimilarityAlgorithm : public ICorrelationInfo
+class EuclideanSimilarityAlgorithm
 {
 public:
     double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
-    QString name() const override { return QObject::tr("Euclidean Similarity"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Euclidean Similarity"); }
+    static QString description()
     {
         return QObject::tr("Euclidean Similarity is essentially the inverse "
             "of the Euclidean distance between two vectors.");
     }
 
-    QString attributeName() const override { return QObject::tr("Euclidean Similarity"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Euclidean Similarity"); }
+    static QString attributeDescription()
     {
         return QObject::tr("%1 is essentially the inverse "
             "of the Euclidean distance between two vectors.")
@@ -333,13 +333,13 @@ public:
 class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, SimpleThreshold> {};
 class EuclideanSimilarityCorrelationKnn : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnThreshold> {};
 
-class CosineSimilarityAlgorithm : public ICorrelationInfo
+class CosineSimilarityAlgorithm
 {
 public:
     double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
-    QString name() const override { return QObject::tr("Cosine Similarity"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Cosine Similarity"); }
+    static QString description()
     {
         return QObject::tr("Cosine Similarity is a measure of similarity between two "
             "non-zero vectors of an inner product space. It is defined to equal "
@@ -347,8 +347,8 @@ public:
             "inner product of the same vectors normalized to both have length 1.");
     }
 
-    QString attributeName() const override { return QObject::tr("Cosine Similarity"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Cosine Similarity"); }
+    static QString attributeDescription()
     {
         return QObject::tr("%1 is a measure of similarity between two "
             "non-zero vectors of an inner product space.")
@@ -359,7 +359,7 @@ public:
 class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm, SimpleThreshold> {};
 class CosineSimilarityCorrelationKnn : public CovarianceCorrelation<CosineSimilarityAlgorithm, KnnThreshold> {};
 
-class BicorAlgorithm : public ICorrelationInfo
+class BicorAlgorithm
 {
 private:
     const ContinuousDataVector* _base = nullptr;
@@ -369,16 +369,16 @@ public:
     void preprocess(size_t size, const ContinuousDataVectors& vectors);
     double evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const;
 
-    QString name() const override { return QObject::tr("Bicor"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Bicor"); }
+    static QString description()
     {
         return QObject::tr("Biweight Midcorrelation (also called Bicor) is a "
             "measure of similarity between samples. It is median-based, rather "
             "than mean-based, thus is less sensitive to outliers.");
     }
 
-    QString attributeName() const override { return QObject::tr("Bicor Correlation Value"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Bicor Correlation Value"); }
+    static QString attributeDescription()
     {
         return QObject::tr("%1 is a median-based measure of similarity between samples.")
             .arg(u::redirectLink("bicor", QObject::tr("Bicor")));
