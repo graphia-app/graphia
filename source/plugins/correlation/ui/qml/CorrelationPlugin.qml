@@ -704,9 +704,16 @@ PluginContent
         [
             {type: PlotColumnSortType.Natural, text: qsTr("Natural Order")},
             {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")},
+        ];
+
+        let continuousOptions =
+        [
             {type: PlotColumnSortType.DataValue, text: qsTr("Data Value")},
             {type: PlotColumnSortType.HierarchicalClustering, text: qsTr("Hierarchical Clustering")}
         ];
+
+        if(plugin.model.numContinuousColumns > 0)
+            options = options.concat(continuousOptions);
 
         root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)
         {

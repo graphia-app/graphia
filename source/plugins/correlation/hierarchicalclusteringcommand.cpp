@@ -95,7 +95,9 @@ HierarchicalClusteringCommand::HierarchicalClusteringCommand(const std::vector<d
     size_t numColumns, size_t numRows, CorrelationPluginInstance& correlationPluginInstance) :
     _data(&data), _numColumns(numColumns), _numRows(numRows),
     _correlationPluginInstance(&correlationPluginInstance)
-{}
+{
+    Q_ASSERT(_numColumns > 0 && _numRows > 0);
+}
 
 bool HierarchicalClusteringCommand::execute()
 {
