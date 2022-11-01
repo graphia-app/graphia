@@ -397,16 +397,16 @@ public:
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
 };
 
-template<int Denominator>
+template<int Denominator, typename AlgorithmInfo, template<typename> class ThresholdMethod>
 class MatchingCorrelation : public DiscreteCorrelation
 {
-public:
-    EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
-        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
-    {
-        if(vectors.empty())
-            return {};
+private:
+    template<typename T>
+    using results_t = decltype(std::declval<T>().results());
 
+    auto process(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
+    {
         size_t size = vectors.front().size();
 
         if(progressable != nullptr)
@@ -418,15 +418,18 @@ public:
         for(const auto& vector : vectors)
             totalCost += vector.computeCostHint();
 
+        using TM = ThresholdMethod<TokenisedDataVectors>;
+        TM thresholdMethod(tokenisedVectors, CorrelationPolarity::Positive, threshold);
+
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(name()).parallel_for(tokenisedVectors.begin(), tokenisedVectors.end(),
         [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
-            EdgeList edges;
+            typename TM::Results threadResults;
 
             if(cancellable != nullptr && cancellable->cancelled())
-                return edges;
+                return threadResults;
 
             struct Fraction
             {
@@ -473,8 +476,10 @@ public:
 
                     double r = fraction;
 
-                    if(std::isfinite(r) && r >= threshold)
-                        edges.push_back({vectorAIt->nodeId(), vectorBIt->nodeId(), r});
+                    if(!std::isfinite(r))
+                        continue;
+
+                    thresholdMethod.add(&threadResults, vectorAIt, vectorBIt, r);
                 }
             };
 
@@ -488,7 +493,7 @@ public:
             if(progressable != nullptr)
                 progressable->setProgress(static_cast<int>((cost * 100) / totalCost));
 
-            return edges;
+            return threadResults;
         });
 
         if(progressable != nullptr)
@@ -497,30 +502,57 @@ public:
             progressable->setProgress(-1);
         }
 
+        constexpr bool ThresholdHasResults =
+            std::experimental::is_detected_v<results_t, TM>;
+
+        if constexpr(ThresholdHasResults)
+            return thresholdMethod.results();
+        else
+            return results;
+    }
+
+public:
+    EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+    {
+        if(vectors.empty())
+            return {};
+
+        auto results = process(vectors, threshold, treatAsBinary, cancellable, progressable);
+
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
 
         EdgeList edges;
         edges.reserve(std::distance(results.begin(), results.end()));
-        edges.insert(edges.end(), std::make_move_iterator(results.begin()),
-            std::make_move_iterator(results.end()));
+
+        std::transform(results.begin(), results.end(), std::back_inserter(edges),
+        [](const auto& result)
+        {
+            return EdgeListEdge{result._a->nodeId(), result._b->nodeId(), result._r};
+        });
 
         return edges;
     }
+
+    QString name() const override                   { return AlgorithmInfo::name(); }
+    QString description() const override            { return AlgorithmInfo::description(); }
+
+    QString attributeName() const override          { return AlgorithmInfo::attributeName(); }
+    QString attributeDescription() const override   { return AlgorithmInfo::attributeDescription(); }
 };
 
-class JaccardCorrelation : public MatchingCorrelation<0>
+struct JaccardCorrelationInfo
 {
-public:
-    QString name() const override { return QObject::tr("Jaccard"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Jaccard"); }
+    static QString description()
     {
         return QObject::tr("The Jaccard Index is a statistic used for "
             "gauging the similarity and diversity of sample sets.");
     }
 
-    QString attributeName() const override { return QObject::tr("Jaccard Correlation Value"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Jaccard Correlation Value"); }
+    static QString attributeDescription()
     {
         return QObject::tr("The %1 is a statistic used for gauging "
             "the similarity and diversity of sample sets.")
@@ -528,24 +560,29 @@ public:
     }
 };
 
-class SMCCorrelation : public MatchingCorrelation<1>
+class JaccardCorrelation : public MatchingCorrelation<0, JaccardCorrelationInfo, SimpleThreshold> {};
+class JaccardCorrelationKnn : public MatchingCorrelation<0, JaccardCorrelationInfo, KnnThreshold> {};
+
+struct SMCCorrelationInfo
 {
-public:
-    QString name() const override { return QObject::tr("Simple Matching Coefficient"); }
-    QString description() const override
+    static QString name() { return QObject::tr("Simple Matching Coefficient"); }
+    static QString description()
     {
         return QObject::tr("The Simple Matching Coefficient is a statistic used for "
             "gauging the similarity and diversity of sample sets. It is identical "
             "to Jaccard, except that it counts mutual absence.");
     }
 
-    QString attributeName() const override { return QObject::tr("Simple Matching Coefficient"); }
-    QString attributeDescription() const override
+    static QString attributeName() { return QObject::tr("Simple Matching Coefficient"); }
+    static QString attributeDescription()
     {
         return QObject::tr("The %1 is a statistic used for gauging "
             "the similarity and diversity of sample sets.")
             .arg(u::redirectLink("smc", QObject::tr("Simple Matching Coefficient (SMC)")));
     }
 };
+
+class SMCCorrelation : public MatchingCorrelation<1, SMCCorrelationInfo, SimpleThreshold> {};
+class SMCCorrelationKnn : public MatchingCorrelation<1, SMCCorrelationInfo, KnnThreshold> {};
 
 #endif // CORRELATION_H
