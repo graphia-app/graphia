@@ -281,8 +281,8 @@ public:
     }
 };
 
-class PearsonCorrelation : public CovarianceCorrelation<PearsonAlgorithm, SimpleThreshold> {};
-class PearsonCorrelationKnn : public CovarianceCorrelation<PearsonAlgorithm, KnnThreshold> {};
+using PearsonCorrelation = CovarianceCorrelation<PearsonAlgorithm, SimpleThreshold>;
+using PearsonCorrelationKnn = CovarianceCorrelation<PearsonAlgorithm, KnnThreshold>;
 
 class SpearmanRankAlgorithm : public PearsonAlgorithm, RequiresRanking
 {
@@ -306,8 +306,8 @@ public:
     }
 };
 
-class SpearmanRankCorrelation : public CovarianceCorrelation<SpearmanRankAlgorithm, SimpleThreshold> {};
-class SpearmanRankCorrelationKnn : public CovarianceCorrelation<SpearmanRankAlgorithm, KnnThreshold> {};
+using SpearmanRankCorrelation = CovarianceCorrelation<SpearmanRankAlgorithm, SimpleThreshold>;
+using SpearmanRankCorrelationKnn = CovarianceCorrelation<SpearmanRankAlgorithm, KnnThreshold>;
 
 class EuclideanSimilarityAlgorithm
 {
@@ -330,8 +330,8 @@ public:
     }
 };
 
-class EuclideanSimilarityCorrelation : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, SimpleThreshold> {};
-class EuclideanSimilarityCorrelationKnn : public CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnThreshold> {};
+using EuclideanSimilarityCorrelation = CovarianceCorrelation<EuclideanSimilarityAlgorithm, SimpleThreshold>;
+using EuclideanSimilarityCorrelationKnn = CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnThreshold>;
 
 class CosineSimilarityAlgorithm
 {
@@ -356,8 +356,8 @@ public:
     }
 };
 
-class CosineSimilarityCorrelation : public CovarianceCorrelation<CosineSimilarityAlgorithm, SimpleThreshold> {};
-class CosineSimilarityCorrelationKnn : public CovarianceCorrelation<CosineSimilarityAlgorithm, KnnThreshold> {};
+using CosineSimilarityCorrelation = CovarianceCorrelation<CosineSimilarityAlgorithm, SimpleThreshold>;
+using CosineSimilarityCorrelationKnn = CovarianceCorrelation<CosineSimilarityAlgorithm, KnnThreshold>;
 
 class BicorAlgorithm
 {
@@ -385,8 +385,8 @@ public:
     }
 };
 
-class BicorCorrelation : public CovarianceCorrelation<BicorAlgorithm, SimpleThreshold> {};
-class BicorCorrelationKnn : public CovarianceCorrelation<BicorAlgorithm, KnnThreshold> {};
+using BicorCorrelation = CovarianceCorrelation<BicorAlgorithm, SimpleThreshold>;
+using BicorCorrelationKnn = CovarianceCorrelation<BicorAlgorithm, KnnThreshold>;
 
 class DiscreteCorrelation : public ICorrelationInfo
 {
@@ -586,8 +586,8 @@ struct JaccardCorrelationInfo
     }
 };
 
-class JaccardCorrelation : public MatchingCorrelation<0, JaccardCorrelationInfo, SimpleThreshold> {};
-class JaccardCorrelationKnn : public MatchingCorrelation<0, JaccardCorrelationInfo, KnnThreshold> {};
+using JaccardCorrelation = MatchingCorrelation<0, JaccardCorrelationInfo, SimpleThreshold>;
+using JaccardCorrelationKnn = MatchingCorrelation<0, JaccardCorrelationInfo, KnnThreshold>;
 
 struct SMCCorrelationInfo
 {
@@ -608,7 +608,7 @@ struct SMCCorrelationInfo
     }
 };
 
-class SMCCorrelation : public MatchingCorrelation<1, SMCCorrelationInfo, SimpleThreshold> {};
-class SMCCorrelationKnn : public MatchingCorrelation<1, SMCCorrelationInfo, KnnThreshold> {};
+using SMCCorrelation = MatchingCorrelation<1, SMCCorrelationInfo, SimpleThreshold>;
+using SMCCorrelationKnn = MatchingCorrelation<1, SMCCorrelationInfo, KnnThreshold>;
 
 #endif // CORRELATION_H
