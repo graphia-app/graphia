@@ -404,7 +404,7 @@ private:
     template<typename T>
     using results_t = decltype(std::declval<T>().results());
 
-    auto process(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
+    auto process(const TokenisedDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         size_t size = vectors.front().size();
@@ -412,18 +412,16 @@ private:
         if(progressable != nullptr)
             progressable->setProgress(-1);
 
-        const auto tokenisedVectors = tokeniseDataVectors(vectors);
-
         uint64_t totalCost = 0;
         for(const auto& vector : vectors)
             totalCost += vector.computeCostHint();
 
         using TM = ThresholdMethod<TokenisedDataVectors>;
-        TM thresholdMethod(tokenisedVectors, CorrelationPolarity::Positive, threshold);
+        TM thresholdMethod(vectors, CorrelationPolarity::Positive, threshold);
 
         std::atomic<uint64_t> cost(0);
 
-        auto results = ThreadPool(name()).parallel_for(tokenisedVectors.begin(), tokenisedVectors.end(),
+        auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
         [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
             typename TM::Results threadResults;
@@ -460,7 +458,7 @@ private:
 
             auto createEdgesForVectorPairs = [&](auto&& f)
             {
-                for(auto vectorBIt = vectorAIt + 1; vectorBIt != tokenisedVectors.end(); ++vectorBIt)
+                for(auto vectorBIt = vectorAIt + 1; vectorBIt != vectors.end(); ++vectorBIt)
                 {
                     Fraction fraction;
                     for(size_t i = 0; i < size; i++)
@@ -518,7 +516,8 @@ public:
         if(vectors.empty())
             return {};
 
-        auto results = process(vectors, threshold, treatAsBinary, cancellable, progressable);
+        const auto tokenisedVectors = tokeniseDataVectors(vectors);
+        auto results = process(tokenisedVectors, threshold, treatAsBinary, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
