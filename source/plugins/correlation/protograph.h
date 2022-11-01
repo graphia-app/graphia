@@ -27,6 +27,7 @@
 #include <vector>
 #include <compare>
 
+template<typename DataVectors>
 class ProtoGraph
 {
 private:
@@ -37,7 +38,7 @@ private:
 
         struct ProtoEdge
         {
-            CDVIt _it;
+            typename DataVectors::const_iterator _it;
             double _r = 0.0;
 
             auto operator<=>(const ProtoEdge& other) const { return _r <=> other._r; }
@@ -45,38 +46,100 @@ private:
 
         std::vector<ProtoEdge> _protoEdges;
 
-        void add(CDVIt it, double r);
+        void add(typename DataVectors::const_iterator it, double r)
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+
+            auto minR = !_protoEdges.empty() ? _protoEdges.back()._r : 0.0;
+
+            if(!correlationExceedsThreshold(_protoGraph->_polarity, r,  minR))
+                return;
+
+            _protoEdges.push_back({it, r});
+            std::inplace_merge(_protoEdges.begin(), std::prev(_protoEdges.end()),
+                _protoEdges.end(), std::greater());
+            _protoEdges.resize(std::min(_protoEdges.size(), _protoGraph->_k));
+        }
     };
 
     std::vector<ProtoNode> _protoNodes;
 
-    CDVIt _begin;
+    typename DataVectors::const_iterator _begin;
     CorrelationPolarity _polarity = CorrelationPolarity::Positive;
     size_t _k = 0;
 
 public:
-    ProtoGraph(const ContinuousDataVectors& vectors, CorrelationPolarity polarity, size_t k);
+    ProtoGraph(const DataVectors& vectors, CorrelationPolarity polarity, size_t k) :
+        _protoNodes(vectors.size()), _begin(vectors.begin()), _polarity(polarity), _k(k)
+    {
+        for(auto& protoNode : _protoNodes)
+            protoNode._protoGraph = this;
+    }
 
     class iterator
     {
     private:
         const ProtoGraph* _protoGraph = nullptr;
-        std::vector<ProtoNode>::const_iterator _protoNodeIt;
-        std::vector<ProtoNode::ProtoEdge>::const_iterator _protoEdgeIt;
+        typename std::vector<ProtoNode>::const_iterator _protoNodeIt;
+        typename std::vector<typename ProtoNode::ProtoEdge>::const_iterator _protoEdgeIt;
 
     public:
         using self_type = iterator;
-        using value_type = ContinuousDataVectorRelation;
+        using value_type = CorrelationDataVectorRelation<DataVectors>;
         using reference = value_type&;
         using pointer = value_type*;
         using iterator_category = std::forward_iterator_tag;
         using difference_type = size_t;
 
-        iterator(const ProtoGraph* protoGraph, bool end);
+        iterator(const ProtoGraph* protoGraph, bool end) :
+            _protoGraph(protoGraph)
+        {
+            if(!end)
+            {
+                _protoNodeIt = _protoGraph->_protoNodes.begin();
 
-        self_type operator++();
+                if(!_protoGraph->_protoNodes.empty())
+                    _protoEdgeIt = _protoNodeIt->_protoEdges.begin();
+            }
+            else
+                _protoNodeIt = _protoGraph->_protoNodes.end();
+        }
 
-        ContinuousDataVectorRelation operator*() const;
+        self_type operator++()
+        {
+            self_type i = *this;
+
+            do
+            {
+                if(_protoEdgeIt != _protoNodeIt->_protoEdges.end())
+                    _protoEdgeIt++;
+
+                while(_protoEdgeIt == _protoNodeIt->_protoEdges.end())
+                {
+                    _protoNodeIt++;
+                    if(_protoNodeIt == _protoGraph->_protoNodes.end())
+                        return i;
+
+                    _protoEdgeIt = _protoNodeIt->_protoEdges.begin();
+                }
+            }
+            // Skip edges we've already iterated over (in the other direction)
+            while((**this)._a > (**this)._b);
+
+            return i;
+        }
+
+        value_type operator*() const
+        {
+            Q_ASSERT(_protoNodeIt != _protoGraph->_protoNodes.end());
+
+            auto nodeOffset = (_protoNodeIt - _protoGraph->_protoNodes.begin());
+            auto a = _protoGraph->_begin + nodeOffset;
+            auto b = _protoEdgeIt->_it;
+            double r = _protoEdgeIt->_r;
+
+            return {a, b, r};
+        }
 
         bool operator!=(const self_type& other) const { return !operator==(other); }
         bool operator==(const self_type& other) const { return _protoNodeIt == other._protoNodeIt; }
@@ -85,7 +148,21 @@ public:
     iterator begin() const { return {this, false}; }
     iterator end() const   { return {this, true}; }
 
-    void add(CDVIt a, CDVIt b, double r);
+    void add(typename DataVectors::const_iterator a, typename DataVectors::const_iterator b, double r)
+    {
+        auto aOffset = static_cast<size_t>(a - _begin);
+        auto bOffset = static_cast<size_t>(b - _begin);
+
+        Q_ASSERT(aOffset < _protoNodes.size() && bOffset < _protoNodes.size());
+        if(aOffset >= _protoNodes.size() || bOffset >= _protoNodes.size())
+        {
+            qDebug() << "ProtoGraph source or target out of range";
+            return;
+        }
+
+        _protoNodes.at(aOffset).add(b, r);
+        _protoNodes.at(bOffset).add(a, r);
+    }
 };
 
 #endif // PROTOGRAPH_H

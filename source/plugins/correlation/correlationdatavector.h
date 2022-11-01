@@ -142,19 +142,19 @@ public:
 };
 
 using ContinuousDataVectors = std::vector<ContinuousDataVector>;
-using CDVIt = ContinuousDataVectors::const_iterator;
+using DiscreteDataVectors = std::vector<DiscreteDataVector>;
+using TokenisedDataVectors = std::vector<TokenisedDataVector>;
 
-struct ContinuousDataVectorRelation
+template<typename CDVType>
+struct CorrelationDataVectorRelation
 {
-    CDVIt _a;
-    CDVIt _b;
+    typename CDVType::const_iterator _a;
+    typename CDVType::const_iterator _b;
     double _r = 0.0;
 };
 
-using CorrelationVector = std::vector<ContinuousDataVectorRelation>;
-
-using DiscreteDataVectors = std::vector<DiscreteDataVector>;
-using TokenisedDataVectors = std::vector<TokenisedDataVector>;
+template<typename CDVType>
+using CorrelationVector = std::vector<CorrelationDataVectorRelation<CDVType>>;
 
 template<typename DataVectors>
 TokenisedDataVectors tokeniseDataVectors(const DataVectors& dataVectors)

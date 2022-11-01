@@ -63,6 +63,7 @@ public:
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
 };
 
+template<typename DataVectors>
 class SimpleThreshold
 {
 private:
@@ -70,38 +71,49 @@ private:
     double _threshold = 0.0;
 
 public:
-    SimpleThreshold(const ContinuousDataVectors&, CorrelationPolarity polarity, double threshold) :
+    SimpleThreshold(const DataVectors&, CorrelationPolarity polarity, double threshold) :
         _polarity(polarity), _threshold(threshold)
     {}
 
-    using Results = CorrelationVector;
+    using Results = CorrelationVector<DataVectors>;
 
-    void add(Results* results, CDVIt a, CDVIt b, double r)
+    void add(Results* results,
+        typename DataVectors::const_iterator a,
+        typename DataVectors::const_iterator b,
+        double r)
     {
         if(correlationExceedsThreshold(_polarity, r, _threshold))
             results->push_back({a, b, r});
     }
 };
 
+template<typename DataVectors>
 class KnnThreshold
 {
 private:
-    ProtoGraph _protoGraph;
+    ProtoGraph<DataVectors> _protoGraph;
 
 public:
-    KnnThreshold(const ContinuousDataVectors& vectors, CorrelationPolarity polarity, double threshold) :
+    KnnThreshold(const DataVectors& vectors, CorrelationPolarity polarity, double threshold) :
         _protoGraph(vectors, polarity, static_cast<size_t>(threshold))
     {}
 
     using Results = std::monostate;
 
-    void add(Results*, CDVIt a, CDVIt b, double r) { _protoGraph.add(a, b, r); }
-    ProtoGraph&& results() { return std::move(_protoGraph); }
+    void add(Results*,
+        typename DataVectors::const_iterator a,
+        typename DataVectors::const_iterator b,
+        double r)
+    {
+        _protoGraph.add(a, b, r);
+    }
+
+    ProtoGraph<DataVectors>&& results() { return std::move(_protoGraph); }
 };
 
 struct RequiresRanking {};
 
-template<typename Algorithm, typename ThresholdMethod>
+template<typename Algorithm, template<typename> class ThresholdMethod>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
@@ -137,19 +149,20 @@ private:
         if constexpr(AlgorithmHasPreprocess)
             algorithm.preprocess(size, vectors);
 
-        ThresholdMethod thresholdMethod(vectors, polarity, threshold);
+        using TM = ThresholdMethod<ContinuousDataVectors>;
+        TM thresholdMethod(vectors, polarity, threshold);
 
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
-        [&](CDVIt vectorAIt)
+        [&](ContinuousDataVectors::const_iterator vectorAIt)
         {
             const auto* vectorA = &(*vectorAIt);
 
             if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                 vectorA = vectorA->ranking();
 
-            typename ThresholdMethod::Results threadResults;
+            typename TM::Results threadResults;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return threadResults;
@@ -184,7 +197,7 @@ private:
         }
 
         constexpr bool ThresholdHasResults =
-            std::experimental::is_detected_v<results_t, ThresholdMethod>;
+            std::experimental::is_detected_v<results_t, TM>;
 
         if constexpr(ThresholdHasResults)
             return thresholdMethod.results();
