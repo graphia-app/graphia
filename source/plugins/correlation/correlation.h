@@ -394,6 +394,9 @@ public:
     virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
+    virtual CovarianceMatrix matrix(const DiscreteDataVectors& vectors, bool treatAsBinary,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
+
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
 };
 
@@ -532,6 +535,30 @@ public:
         });
 
         return edges;
+    }
+
+    CovarianceMatrix matrix(const DiscreteDataVectors& vectors, bool treatAsBinary,
+        Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
+    {
+        if(vectors.empty())
+            return {};
+
+        const auto tokenisedVectors = tokeniseDataVectors(vectors);
+        auto results = process(tokenisedVectors, 0.0, treatAsBinary, cancellable, progressable);
+
+        if(cancellable != nullptr && cancellable->cancelled())
+            return {};
+
+        CovarianceMatrix matrix(tokenisedVectors.size());
+
+        for(const auto& result : results)
+        {
+            auto a = static_cast<size_t>(std::distance(tokenisedVectors.begin(), result._a));
+            auto b = static_cast<size_t>(std::distance(tokenisedVectors.begin(), result._b));
+            matrix.setValueAt(a, b, result._r);
+        }
+
+        return matrix;
     }
 
     QString name() const override                   { return AlgorithmInfo::name(); }
