@@ -133,6 +133,7 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(bool failed MEMBER _failed NOTIFY failedChanged)
 
     Q_PROPERTY(double threshold MEMBER _threshold NOTIFY parameterChanged)
+    Q_PROPERTY(int correlationFilterType MEMBER _correlationFilterType NOTIFY parameterChanged)
     Q_PROPERTY(int correlationDataType MEMBER _correlationDataType NOTIFY parameterChanged)
     Q_PROPERTY(int continuousCorrelationType MEMBER _continuousCorrelationType NOTIFY parameterChanged)
     Q_PROPERTY(int discreteCorrelationType MEMBER _discreteCorrelationType NOTIFY parameterChanged)
@@ -168,6 +169,7 @@ private:
     bool _failed = false;
 
     double _threshold = 0.0;
+    int _correlationFilterType = static_cast<int>(CorrelationFilterType::Threshold);
     int _continuousCorrelationType = static_cast<int>(CorrelationType::Pearson);
     int _discreteCorrelationType = static_cast<int>(CorrelationType::Jaccard);
     int _correlationDataType = static_cast<int>(CorrelationDataType::Continuous);

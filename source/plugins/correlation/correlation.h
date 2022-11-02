@@ -60,7 +60,8 @@ public:
     virtual CovarianceMatrix matrix(const ContinuousDataVectors& vectors,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
-    static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType);
+    static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType,
+        CorrelationFilterType correlationFilterType);
 };
 
 template<typename DataVectors>
@@ -397,7 +398,8 @@ public:
     virtual CovarianceMatrix matrix(const DiscreteDataVectors& vectors, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
-    static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType);
+    static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType,
+        CorrelationFilterType correlationFilterType);
 };
 
 template<int Denominator, typename AlgorithmInfo, template<typename> class ThresholdMethod>

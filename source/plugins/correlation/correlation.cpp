@@ -18,27 +18,64 @@
 
 #include "correlation.h"
 
-std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(CorrelationType correlationType)
+std::unique_ptr<ContinuousCorrelation> ContinuousCorrelation::create(CorrelationType correlationType,
+    CorrelationFilterType correlationFilterType)
 {
-    switch(correlationType)
+    switch(correlationFilterType)
     {
-    case CorrelationType::Pearson:              return std::make_unique<PearsonCorrelation>();
-    case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelation>();
-    case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelation>();
-    case CorrelationType::CosineSimilarity:     return std::make_unique<CosineSimilarityCorrelation>();
-    case CorrelationType::Bicor:                return std::make_unique<BicorCorrelation>();
+    case CorrelationFilterType::Threshold:
+        switch(correlationType)
+        {
+        case CorrelationType::Pearson:              return std::make_unique<PearsonCorrelation>();
+        case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelation>();
+        case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelation>();
+        case CorrelationType::CosineSimilarity:     return std::make_unique<CosineSimilarityCorrelation>();
+        case CorrelationType::Bicor:                return std::make_unique<BicorCorrelation>();
+        default: break;
+        }
+        break;
+
+    case CorrelationFilterType::Knn:
+        switch(correlationType)
+        {
+        case CorrelationType::Pearson:              return std::make_unique<PearsonCorrelationKnn>();
+        case CorrelationType::SpearmanRank:         return std::make_unique<SpearmanRankCorrelationKnn>();
+        case CorrelationType::EuclideanSimilarity:  return std::make_unique<EuclideanSimilarityCorrelationKnn>();
+        case CorrelationType::CosineSimilarity:     return std::make_unique<CosineSimilarityCorrelationKnn>();
+        case CorrelationType::Bicor:                return std::make_unique<BicorCorrelationKnn>();
+        default: break;
+        }
+        break;
+
     default: break;
     }
 
     return nullptr;
 }
 
-std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType correlationType)
+std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType correlationType,
+    CorrelationFilterType correlationFilterType)
 {
-    switch(correlationType)
+    switch(correlationFilterType)
     {
-    case CorrelationType::Jaccard:              return std::make_unique<JaccardCorrelation>();
-    case CorrelationType::SMC:                  return std::make_unique<SMCCorrelation>();
+    case CorrelationFilterType::Threshold:
+        switch(correlationType)
+        {
+        case CorrelationType::Jaccard:              return std::make_unique<JaccardCorrelation>();
+        case CorrelationType::SMC:                  return std::make_unique<SMCCorrelation>();
+        default: break;
+        }
+        break;
+
+    case CorrelationFilterType::Knn:
+        switch(correlationType)
+        {
+        case CorrelationType::Jaccard:              return std::make_unique<JaccardCorrelationKnn>();
+        case CorrelationType::SMC:                  return std::make_unique<SMCCorrelationKnn>();
+        default: break;
+        }
+        break;
+
     default: break;
     }
 

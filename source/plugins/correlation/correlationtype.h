@@ -45,6 +45,11 @@ DEFINE_QML_ENUM(
     Negative,
     Both);
 
+DEFINE_QML_ENUM(
+    Q_GADGET, CorrelationFilterType,
+    Threshold,
+    Knn);
+
 bool correlationExceedsThreshold(CorrelationPolarity polarity, double r, double threshold);
 
 #endif // CORRELATIONTYPE_H

@@ -103,6 +103,7 @@ private:
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
+    CorrelationFilterType _correlationFilterType = CorrelationFilterType::Threshold;
     CorrelationDataType _correlationDataType = CorrelationDataType::Continuous;
     CorrelationType _continuousCorrelationType = CorrelationType::Pearson;
     CorrelationType _discreteCorrelationType = CorrelationType::Jaccard;

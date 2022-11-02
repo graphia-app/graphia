@@ -309,7 +309,7 @@ void CorrelationPluginInstance::createAttributes()
                 "with the node. It is defined as the standard deviation divided by the mean.")
                 .arg(u::redirectLink("coef_variation", tr("Coefficient of Variation"))));
 
-        auto continuousCorrelation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
+        auto continuousCorrelation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
         _correlationAttributeName = continuousCorrelation->attributeName();
         correlationAttributeDescription = continuousCorrelation->attributeDescription();
         break;
@@ -328,7 +328,7 @@ void CorrelationPluginInstance::createAttributes()
                 return discreteDataRowForNodeId(nodeId).valueAt(column);
             });
 
-        auto discreteCorrelation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
+        auto discreteCorrelation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
         _correlationAttributeName = discreteCorrelation->attributeName();
         correlationAttributeDescription = discreteCorrelation->attributeDescription();
         break;
@@ -411,14 +411,14 @@ EdgeList CorrelationPluginInstance::correlation(double threshold, IParser& parse
     default:
     case CorrelationDataType::Continuous:
     {
-        auto continuousCorrelation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
+        auto continuousCorrelation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
         return continuousCorrelation->edgeList(_continuousDataRows, threshold,
             NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity), &parser, &parser);
     }
 
     case CorrelationDataType::Discrete:
     {
-        auto discreteCorrelation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
+        auto discreteCorrelation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
         return discreteCorrelation->edgeList(_discreteDataRows, threshold, _treatAsBinary, &parser, &parser);
     }
     }
@@ -1112,8 +1112,7 @@ QString CorrelationPluginInstance::log() const
     if(_transpose)
         text.append(tr("\nTransposed"));
 
-    auto correlation = ContinuousCorrelation::create(
-        NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
+    auto correlation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
 
     switch(_correlationDataType)
     {
@@ -1214,11 +1213,15 @@ QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
         return m;
     };
 
-    auto discreteCorrelation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, correlationType));
+    auto discreteCorrelation = DiscreteCorrelation::create(
+        NORMALISE_QML_ENUM(CorrelationType, correlationType),
+        CorrelationFilterType::Threshold);
     if(discreteCorrelation != nullptr)
         return makeVariantMap(discreteCorrelation);
 
-    auto continuousCorrelation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, correlationType));
+    auto continuousCorrelation = ContinuousCorrelation::create(
+        NORMALISE_QML_ENUM(CorrelationType, correlationType),
+        CorrelationFilterType::Threshold);
     if(continuousCorrelation != nullptr)
         return makeVariantMap(continuousCorrelation);
 

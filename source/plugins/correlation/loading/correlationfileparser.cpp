@@ -932,7 +932,9 @@ void CorrelationTabularDataParser::estimateGraphSize()
         default:
         case CorrelationDataType::Continuous:
         {
-            auto correlation = ContinuousCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType));
+            auto correlation = ContinuousCorrelation::create(
+                NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType),
+                NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType));
             auto dataRows = sampledContinuousDataRows(numSampleRows);
 
             if(correlation == nullptr || dataRows.empty())
@@ -947,7 +949,9 @@ void CorrelationTabularDataParser::estimateGraphSize()
 
         case CorrelationDataType::Discrete:
         {
-            auto correlation = DiscreteCorrelation::create(NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType));
+            auto correlation = DiscreteCorrelation::create(
+                NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType),
+                NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType));
             auto dataRows = sampledDiscreteDataRows(numSampleRows);
 
             if(correlation == nullptr || dataRows.empty())
