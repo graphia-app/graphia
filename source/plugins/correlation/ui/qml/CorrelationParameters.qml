@@ -1629,15 +1629,19 @@ BaseParameterDialog
         let DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
                 ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
 
-        parameters = { threshold: DEFAULT_MINIMUM_CORRELATION,
-            initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
+        parameters =
+        {
+            threshold: DEFAULT_MINIMUM_CORRELATION,
+            initialThreshold: DEFAULT_INITIAL_CORRELATION,
+            transpose: false,
             correlationDataType: CorrelationDataType.Continuous,
             continuousCorrelationType: CorrelationType.Pearson,
             correlationPolarity: CorrelationPolarity.Positive,
             discreteCorrelationType: CorrelationType.Jaccard,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.Constant,
-            clippingType: ClippingType.None };
+            clippingType: ClippingType.None
+        };
 
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
         initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
