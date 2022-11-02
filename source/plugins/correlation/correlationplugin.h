@@ -98,8 +98,8 @@ private:
     std::vector<size_t> _continuousHcOrder;
 
     std::unique_ptr<EdgeArray<double>> _correlationValues;
-    double _minimumCorrelationValue = 0.7;
-    double _initialCorrelationThreshold = 0.85;
+    double _threshold = 0.7;
+    double _initialThreshold = 0.85;
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
@@ -158,7 +158,7 @@ public:
 
     EdgeList correlation(double threshold, IParser& parser);
 
-    double minimumCorrelation() const { return _minimumCorrelationValue; }
+    double threshold() const { return _threshold; }
     bool transpose() const { return _transpose; }
     CorrelationDataType dataType() const { return _correlationDataType; }
 
@@ -226,7 +226,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 11; }
+    int dataVersion() const override { return 12; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;

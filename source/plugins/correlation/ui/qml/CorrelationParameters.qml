@@ -52,7 +52,7 @@ BaseParameterDialog
     {
         id: tabularDataParser
 
-        minimumCorrelation: minimumCorrelationSpinBox.value
+        threshold: minimumCorrelationSpinBox.value
         correlationDataType: dataTypeComboBox.value
         continuousCorrelationType: continuousAlgorithmComboBox.value
         correlationPolarity: polarityComboBox.value
@@ -1115,7 +1115,7 @@ BaseParameterDialog
 
                             onValueChanged:
                             {
-                                parameters.minimumCorrelation = value;
+                                parameters.threshold = value;
 
                                 // When the minimum value is increased beyond the initial
                                 // value, the latter can get (visually) lost against the extreme
@@ -1629,7 +1629,7 @@ BaseParameterDialog
         let DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
                 ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
 
-        parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION,
+        parameters = { threshold: DEFAULT_MINIMUM_CORRELATION,
             initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
             correlationDataType: CorrelationDataType.Continuous,
             continuousCorrelationType: CorrelationType.Pearson,

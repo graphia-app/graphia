@@ -622,10 +622,10 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 
 void CorrelationPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QStringLiteral("minimumCorrelation"))
-        _minimumCorrelationValue = value.toDouble();
+    if(name == QStringLiteral("threshold"))
+        _threshold = value.toDouble();
     else if(name == QStringLiteral("initialThreshold"))
-        _initialCorrelationThreshold = value.toDouble();
+        _initialThreshold = value.toDouble();
     else if(name == QStringLiteral("transpose"))
         _transpose = (value == QStringLiteral("true"));
     else if(name == QStringLiteral("correlationDataType"))
@@ -677,21 +677,21 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
         defaultTransforms.append(
             QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
             .arg(_correlationAttributeName)
-            .arg(_initialCorrelationThreshold));
+            .arg(_initialThreshold));
         break;
 
     case CorrelationPolarity::Negative:
         defaultTransforms.append(
             QStringLiteral(R"("Remove Edges" where $"%1" > %2)")
             .arg(_correlationAttributeName)
-            .arg(-_initialCorrelationThreshold));
+            .arg(-_initialThreshold));
         break;
 
     case CorrelationPolarity::Both:
         defaultTransforms.append(
             QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
             .arg(_correlationAbsAttributeName)
-            .arg(_initialCorrelationThreshold));
+            .arg(_initialThreshold));
         break;
     }
 
@@ -879,7 +879,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     graph.setPhase(QObject::tr("Correlation Values"));
     jsonObject["correlationValues"] = u::graphArrayAsJson(*_correlationValues, graph.edgeIds(), &progressable);
 
-    jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
+    jsonObject["threshold"] = _threshold;
     jsonObject["transpose"] = _transpose;
     jsonObject["correlationDataType"] = static_cast<int>(_correlationDataType);
     jsonObject["continuousCorrelationType"] = static_cast<int>(_continuousCorrelationType);
@@ -1045,13 +1045,16 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     parser.setProgress(-1);
 
-    if(!u::containsAllOf(jsonObject, {"minimumCorrelationValue", "transpose", "scaling",
+    const char* correlationThresholdKey =
+        dataVersion >= 12 ? "threshold" : "minimumCorrelationValue";
+
+    if(!u::containsAllOf(jsonObject, {correlationThresholdKey, "transpose", "scaling",
         "normalisation", "missingDataType", "missingDataReplacementValue"}))
     {
         return false;
     }
 
-    _minimumCorrelationValue = jsonObject["minimumCorrelationValue"];
+    _threshold = jsonObject[correlationThresholdKey];
     _transpose = jsonObject["transpose"];
     _scalingType = NORMALISE_QML_ENUM(ScalingType, jsonObject["scaling"]);
     _normaliseType = NORMALISE_QML_ENUM(NormaliseType, jsonObject["normalisation"]);
@@ -1134,7 +1137,7 @@ QString CorrelationPluginInstance::log() const
     }
 
     text.append(tr("\nMinimum Correlation Value: %1").arg(
-        u::formatNumberScientific(_minimumCorrelationValue)));
+        u::formatNumberScientific(_threshold)));
 
     if(_valuesWereImputed)
     {

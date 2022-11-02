@@ -519,7 +519,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     setProgress(-1);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Correlation"));
-    auto edges = _plugin->correlation(_plugin->minimumCorrelation(), *this);
+    auto edges = _plugin->correlation(_plugin->threshold(), *this);
 
     if(cancelled())
         return false;
@@ -938,7 +938,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, _minimumCorrelation,
+            sampleEdges = correlation->edgeList(dataRows, _threshold,
                 static_cast<CorrelationPolarity>(_correlationPolarity),
                 &_graphSizeEstimateCancellable);
 
@@ -953,7 +953,7 @@ void CorrelationTabularDataParser::estimateGraphSize()
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, _minimumCorrelation, _treatAsBinary,
+            sampleEdges = correlation->edgeList(dataRows, _threshold, _treatAsBinary,
                 &_graphSizeEstimateCancellable);
 
             break;
