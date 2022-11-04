@@ -88,7 +88,7 @@ public:
     static QString attributeDescription() { return {}; }
 };
 
-class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm, SimpleThreshold> {};
+class EuclideanDistanceCorrelation : public CovarianceCorrelation<EuclideanDistanceAlgorithm, ThresholdFilter> {};
 
 HierarchicalClusteringCommand::HierarchicalClusteringCommand(const std::vector<double>& data,
     size_t numColumns, size_t numRows, CorrelationPluginInstance& correlationPluginInstance) :

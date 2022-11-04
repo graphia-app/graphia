@@ -65,14 +65,14 @@ public:
 };
 
 template<typename DataVectors>
-class SimpleThreshold
+class ThresholdFilter
 {
 private:
     CorrelationPolarity _polarity = CorrelationPolarity::Positive;
     double _threshold = 0.0;
 
 public:
-    SimpleThreshold(const DataVectors&, CorrelationPolarity polarity, double threshold) :
+    ThresholdFilter(const DataVectors&, CorrelationPolarity polarity, double threshold) :
         _polarity(polarity), _threshold(threshold)
     {}
 
@@ -89,13 +89,13 @@ public:
 };
 
 template<typename DataVectors>
-class KnnThreshold
+class KnnFilter
 {
 private:
     KnnProtoGraph<DataVectors> _protoGraph;
 
 public:
-    KnnThreshold(const DataVectors& vectors, CorrelationPolarity polarity, double threshold) :
+    KnnFilter(const DataVectors& vectors, CorrelationPolarity polarity, double threshold) :
         _protoGraph(vectors, polarity, static_cast<size_t>(threshold))
     {}
 
@@ -114,15 +114,15 @@ public:
 
 struct RequiresRanking {};
 
-template<typename Algorithm, template<typename> class ThresholdMethod>
+template<typename Algorithm, template<typename> class FilterMethod>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
     template<typename A>
     using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
 
-    template<typename T>
-    using results_t = decltype(std::declval<T>().results());
+    template<typename F>
+    using results_t = decltype(std::declval<F>().results());
 
     auto process(const ContinuousDataVectors& vectors,
         double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
@@ -150,8 +150,8 @@ private:
         if constexpr(AlgorithmHasPreprocess)
             algorithm.preprocess(size, vectors);
 
-        using TM = ThresholdMethod<ContinuousDataVectors>;
-        TM thresholdMethod(vectors, polarity, threshold);
+        using FM = FilterMethod<ContinuousDataVectors>;
+        FM filterMethod(vectors, polarity, threshold);
 
         std::atomic<uint64_t> cost(0);
 
@@ -163,7 +163,7 @@ private:
             if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                 vectorA = vectorA->ranking();
 
-            typename TM::Results threadResults;
+            typename FM::Results threadResults;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return threadResults;
@@ -180,7 +180,7 @@ private:
                 if(!std::isfinite(r))
                     continue;
 
-                thresholdMethod.add(&threadResults, vectorAIt, vectorBIt, r);
+                filterMethod.add(&threadResults, vectorAIt, vectorBIt, r);
             }
 
             cost += vectorA->computeCostHint();
@@ -197,11 +197,11 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool ThresholdHasResults =
-            std::experimental::is_detected_v<results_t, TM>;
+        constexpr bool FilterHasResults =
+            std::experimental::is_detected_v<results_t, FM>;
 
-        if constexpr(ThresholdHasResults)
-            return thresholdMethod.results();
+        if constexpr(FilterHasResults)
+            return filterMethod.results();
         else
             return results;
     }
@@ -282,8 +282,8 @@ public:
     }
 };
 
-using PearsonCorrelation = CovarianceCorrelation<PearsonAlgorithm, SimpleThreshold>;
-using PearsonCorrelationKnn = CovarianceCorrelation<PearsonAlgorithm, KnnThreshold>;
+using PearsonCorrelation = CovarianceCorrelation<PearsonAlgorithm, ThresholdFilter>;
+using PearsonCorrelationKnn = CovarianceCorrelation<PearsonAlgorithm, KnnFilter>;
 
 class SpearmanRankAlgorithm : public PearsonAlgorithm, RequiresRanking
 {
@@ -307,8 +307,8 @@ public:
     }
 };
 
-using SpearmanRankCorrelation = CovarianceCorrelation<SpearmanRankAlgorithm, SimpleThreshold>;
-using SpearmanRankCorrelationKnn = CovarianceCorrelation<SpearmanRankAlgorithm, KnnThreshold>;
+using SpearmanRankCorrelation = CovarianceCorrelation<SpearmanRankAlgorithm, ThresholdFilter>;
+using SpearmanRankCorrelationKnn = CovarianceCorrelation<SpearmanRankAlgorithm, KnnFilter>;
 
 class EuclideanSimilarityAlgorithm
 {
@@ -331,8 +331,8 @@ public:
     }
 };
 
-using EuclideanSimilarityCorrelation = CovarianceCorrelation<EuclideanSimilarityAlgorithm, SimpleThreshold>;
-using EuclideanSimilarityCorrelationKnn = CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnThreshold>;
+using EuclideanSimilarityCorrelation = CovarianceCorrelation<EuclideanSimilarityAlgorithm, ThresholdFilter>;
+using EuclideanSimilarityCorrelationKnn = CovarianceCorrelation<EuclideanSimilarityAlgorithm, KnnFilter>;
 
 class CosineSimilarityAlgorithm
 {
@@ -357,8 +357,8 @@ public:
     }
 };
 
-using CosineSimilarityCorrelation = CovarianceCorrelation<CosineSimilarityAlgorithm, SimpleThreshold>;
-using CosineSimilarityCorrelationKnn = CovarianceCorrelation<CosineSimilarityAlgorithm, KnnThreshold>;
+using CosineSimilarityCorrelation = CovarianceCorrelation<CosineSimilarityAlgorithm, ThresholdFilter>;
+using CosineSimilarityCorrelationKnn = CovarianceCorrelation<CosineSimilarityAlgorithm, KnnFilter>;
 
 class BicorAlgorithm
 {
@@ -386,8 +386,8 @@ public:
     }
 };
 
-using BicorCorrelation = CovarianceCorrelation<BicorAlgorithm, SimpleThreshold>;
-using BicorCorrelationKnn = CovarianceCorrelation<BicorAlgorithm, KnnThreshold>;
+using BicorCorrelation = CovarianceCorrelation<BicorAlgorithm, ThresholdFilter>;
+using BicorCorrelationKnn = CovarianceCorrelation<BicorAlgorithm, KnnFilter>;
 
 class DiscreteCorrelation : public ICorrelationInfo
 {
@@ -402,12 +402,12 @@ public:
         CorrelationFilterType correlationFilterType);
 };
 
-template<int Denominator, typename AlgorithmInfo, template<typename> class ThresholdMethod>
+template<int Denominator, typename AlgorithmInfo, template<typename> class FilterMethod>
 class MatchingCorrelation : public DiscreteCorrelation
 {
 private:
-    template<typename T>
-    using results_t = decltype(std::declval<T>().results());
+    template<typename F>
+    using results_t = decltype(std::declval<F>().results());
 
     auto process(const TokenisedDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
@@ -421,8 +421,8 @@ private:
         for(const auto& vector : vectors)
             totalCost += vector.computeCostHint();
 
-        using TM = ThresholdMethod<TokenisedDataVectors>;
-        TM thresholdMethod(vectors, CorrelationPolarity::Positive, threshold);
+        using TM = FilterMethod<TokenisedDataVectors>;
+        TM filterMethod(vectors, CorrelationPolarity::Positive, threshold);
 
         std::atomic<uint64_t> cost(0);
 
@@ -482,7 +482,7 @@ private:
                     if(!std::isfinite(r))
                         continue;
 
-                    thresholdMethod.add(&threadResults, vectorAIt, vectorBIt, r);
+                    filterMethod.add(&threadResults, vectorAIt, vectorBIt, r);
                 }
             };
 
@@ -505,11 +505,11 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool ThresholdHasResults =
+        constexpr bool FilterHasResults =
             std::experimental::is_detected_v<results_t, TM>;
 
-        if constexpr(ThresholdHasResults)
-            return thresholdMethod.results();
+        if constexpr(FilterHasResults)
+            return filterMethod.results();
         else
             return results;
     }
@@ -588,8 +588,8 @@ struct JaccardCorrelationInfo
     }
 };
 
-using JaccardCorrelation = MatchingCorrelation<0, JaccardCorrelationInfo, SimpleThreshold>;
-using JaccardCorrelationKnn = MatchingCorrelation<0, JaccardCorrelationInfo, KnnThreshold>;
+using JaccardCorrelation = MatchingCorrelation<0, JaccardCorrelationInfo, ThresholdFilter>;
+using JaccardCorrelationKnn = MatchingCorrelation<0, JaccardCorrelationInfo, KnnFilter>;
 
 struct SMCCorrelationInfo
 {
@@ -610,7 +610,7 @@ struct SMCCorrelationInfo
     }
 };
 
-using SMCCorrelation = MatchingCorrelation<1, SMCCorrelationInfo, SimpleThreshold>;
-using SMCCorrelationKnn = MatchingCorrelation<1, SMCCorrelationInfo, KnnThreshold>;
+using SMCCorrelation = MatchingCorrelation<1, SMCCorrelationInfo, ThresholdFilter>;
+using SMCCorrelationKnn = MatchingCorrelation<1, SMCCorrelationInfo, KnnFilter>;
 
 #endif // CORRELATION_H
