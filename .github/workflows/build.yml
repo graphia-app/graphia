@@ -220,6 +220,26 @@ jobs:
         sudo apt-get install libc++-${{ env.CLANG_VERSION }}-dev libc++1-${{ env.CLANG_VERSION }} libc++abi-${{ env.CLANG_VERSION }}-dev libc++abi1-${{ env.CLANG_VERSION }}
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
+    - name: Checkout ctcache
+      uses: actions/checkout@v2
+      with:
+        repository: timangus/ctcache
+        path: ctcache
+    - name: Install ctcache
+      run: |
+        sudo mv ctcache /opt/ctcache
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Store ctcache
+      uses: actions/cache@v3
+      with:
+        key: ctcache-${{ steps.get-date.outputs.date }}
+        path: /tmp/clang-tidy-cache
+        restore-keys: |
+          ctcache-
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
@@ -236,7 +256,9 @@ jobs:
     - name: Analyse
       run: scripts/clang-tidy.sh
       env:
-        CLANGTIDY: clang-tidy-${{ env.CLANG_VERSION }}
+        CLANGTIDY: /opt/ctcache/clang-tidy
+        CTCACHE_DIR: /tmp/clang-tidy-cache
+        CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         BUILD_DIR: build/clang/
     - uses: actions/upload-artifact@v2
       with:
