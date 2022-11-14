@@ -9,13 +9,13 @@ env:
 jobs:
   linux:
     name: Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Install Tools
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
+        sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} fuse
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
