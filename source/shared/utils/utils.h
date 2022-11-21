@@ -20,6 +20,8 @@
 #define UTILS_H
 
 #include <cmath>
+#include <vector>
+
 #include <QString>
 
 namespace u
@@ -51,6 +53,38 @@ namespace u
     bool exclusiveOr(T a, T b)
     {
         return !a != !b;
+    }
+
+    template<typename T>
+    std::vector<T> evenDivisionOf(T n, size_t d)
+    {
+        if(d == 0)
+            return {};
+
+        const auto q = static_cast<T>(n / d);
+        const auto r = n % d;
+        const auto c = d - r;
+
+        std::vector<T> out(d);
+        size_t a = 1;
+        size_t b = 1;
+
+        for(size_t i = 0; i < d; i++)
+        {
+            // Make the ratio a/b tend towards c/r
+            if((a * r) < (b * c))
+            {
+                a++;
+                out[i] = q;
+            }
+            else
+            {
+                b++;
+                out[i] = q + 1;
+            }
+        }
+
+        return out;
     }
 
     float normaliseAngle(float radians);
