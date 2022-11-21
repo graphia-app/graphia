@@ -132,20 +132,6 @@ class CorrelationTabularDataParser : public QObject, public Cancellable
     Q_PROPERTY(bool complete MEMBER _complete NOTIFY completeChanged)
     Q_PROPERTY(bool failed MEMBER _failed NOTIFY failedChanged)
 
-    Q_PROPERTY(double threshold MEMBER _threshold NOTIFY parameterChanged)
-    Q_PROPERTY(int correlationFilterType MEMBER _correlationFilterType NOTIFY parameterChanged)
-    Q_PROPERTY(int correlationDataType MEMBER _correlationDataType NOTIFY parameterChanged)
-    Q_PROPERTY(int continuousCorrelationType MEMBER _continuousCorrelationType NOTIFY parameterChanged)
-    Q_PROPERTY(int discreteCorrelationType MEMBER _discreteCorrelationType NOTIFY parameterChanged)
-    Q_PROPERTY(int correlationPolarity MEMBER _correlationPolarity NOTIFY parameterChanged)
-    Q_PROPERTY(int scalingType MEMBER _scalingType NOTIFY parameterChanged)
-    Q_PROPERTY(int normaliseType MEMBER _normaliseType NOTIFY parameterChanged)
-    Q_PROPERTY(int missingDataType MEMBER _missingDataType NOTIFY parameterChanged)
-    Q_PROPERTY(double replacementValue MEMBER _replacementValue NOTIFY parameterChanged)
-    Q_PROPERTY(int clippingType MEMBER _clippingType NOTIFY parameterChanged)
-    Q_PROPERTY(double clippingValue MEMBER _clippingValue NOTIFY parameterChanged)
-    Q_PROPERTY(bool treatAsBinary MEMBER _treatAsBinary NOTIFY parameterChanged)
-
     Q_PROPERTY(QVariantMap graphSizeEstimate MEMBER _graphSizeEstimate NOTIFY graphSizeEstimateChanged)
     Q_PROPERTY(bool graphSizeEstimateInProgress READ graphSizeEstimateInProgress
         NOTIFY graphSizeEstimateInProgressChanged)
@@ -168,23 +154,9 @@ private:
     bool _complete = false;
     bool _failed = false;
 
-    double _threshold = 0.0;
-    int _correlationFilterType = static_cast<int>(CorrelationFilterType::Threshold);
-    int _continuousCorrelationType = static_cast<int>(CorrelationType::Pearson);
-    int _discreteCorrelationType = static_cast<int>(CorrelationType::Jaccard);
-    int _correlationDataType = static_cast<int>(CorrelationDataType::Continuous);
-    int _correlationPolarity = static_cast<int>(CorrelationPolarity::Positive);
-    int _scalingType = static_cast<int>(ScalingType::None);
-    int _normaliseType = static_cast<int>(NormaliseType::None);
-    int _missingDataType = static_cast<int>(MissingDataType::Constant);
-    double _replacementValue = 0.0;
-    int _clippingType = static_cast<int>(ClippingType::None);
-    double _clippingValue = 0.0;
-    bool _treatAsBinary = false;
-
     void setProgress(int progress);
 
-    bool _graphSizeEstimateQueued = false;
+    QVariantMap _graphSizeEstimateQueuedParameters;
 
     Cancellable _graphSizeEstimateCancellable;
     QFutureWatcher<QVariantMap> _graphSizeEstimateFutureWatcher;
@@ -192,8 +164,8 @@ private:
 
     QVariantMap dataRect() const;
 
-    ContinuousDataVectors sampledContinuousDataRows(size_t numSampleRows);
-    DiscreteDataVectors sampledDiscreteDataRows(size_t numSampleRows);
+    ContinuousDataVectors sampledContinuousDataRows(size_t numSampleRows, const QVariantMap& parameters);
+    DiscreteDataVectors sampledDiscreteDataRows(size_t numSampleRows, const QVariantMap& parameters);
 
     void waitForDataRectangleFuture();
 
@@ -208,7 +180,7 @@ public:
 
     Q_INVOKABLE void clearData();
 
-    void estimateGraphSize();
+    Q_INVOKABLE void estimateGraphSize(const QVariantMap& parameters);
     bool graphSizeEstimateInProgress() const { return _graphSizeEstimateFutureWatcher.isRunning(); }
 
     QAbstractTableModel* tableModel();
@@ -228,7 +200,6 @@ signals:
     void completeChanged();
     void failedChanged();
 
-    void parameterChanged();
     void graphSizeEstimateChanged();
     void graphSizeEstimateInProgressChanged();
 

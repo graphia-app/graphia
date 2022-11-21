@@ -609,16 +609,13 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
     connect(&_dataRectangleFutureWatcher, &QFutureWatcher<void>::finished, [this]
     {
         // An estimate was started while the data rectangle was being calculated
-        if(_graphSizeEstimateQueued)
-            estimateGraphSize();
+        if(!_graphSizeEstimateQueuedParameters.isEmpty())
+            estimateGraphSize(_graphSizeEstimateQueuedParameters);
     });
 
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::busyChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationTabularDataParser::onDataLoaded);
-
-    connect(this, &CorrelationTabularDataParser::dataRectChanged, this, [this] { estimateGraphSize(); });
-    connect(this, &CorrelationTabularDataParser::parameterChanged, this, [this] { estimateGraphSize(); });
 
     connect(&_graphSizeEstimateFutureWatcher, &QFutureWatcher<QVariantMap>::started,
         this, &CorrelationTabularDataParser::graphSizeEstimateInProgressChanged);
@@ -631,8 +628,8 @@ CorrelationTabularDataParser::CorrelationTabularDataParser()
         emit graphSizeEstimateChanged();
 
         // Another estimate was queued while we were busy
-        if(_graphSizeEstimateQueued)
-            estimateGraphSize();
+        if(!_graphSizeEstimateQueuedParameters.isEmpty())
+            estimateGraphSize(_graphSizeEstimateQueuedParameters);
     });
 }
 
@@ -791,10 +788,18 @@ static std::vector<size_t> randomRowIndices(size_t first, size_t numRows, size_t
     return rowIndices;
 }
 
-ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(size_t numSampleRows)
+ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
+    size_t numSampleRows, const QVariantMap& parameters)
 {
     if(_dataRect.isEmpty())
         return {};
+
+    auto missingDataType = NORMALISE_QML_ENUM(MissingDataType, parameters[QStringLiteral("missingDataType")].toInt());
+    auto replacementValue = parameters[QStringLiteral("missingDataValue")].toDouble();
+    auto scalingType = NORMALISE_QML_ENUM(ScalingType, parameters[QStringLiteral("scaling")].toInt());
+    auto normaliseType = NORMALISE_QML_ENUM(NormaliseType, parameters[QStringLiteral("normalise")].toInt());
+    auto clippingType = NORMALISE_QML_ENUM(ClippingType, parameters[QStringLiteral("clippingType")].toInt());
+    auto clippingValue = parameters[QStringLiteral("clippingValue")].toDouble();
 
     ContinuousDataVectors dataRows;
     std::vector<double> rowData;
@@ -828,7 +833,7 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
             else
             {
                 transformedValue = CorrelationFileParser::imputeValue(
-                    NORMALISE_QML_ENUM(MissingDataType, _missingDataType), _replacementValue,
+                    missingDataType, replacementValue,
                     *_dataPtr, _dataRect, columnIndex, rowIndex);
             }
 
@@ -836,16 +841,14 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
         }
     }
 
-    CorrelationFileParser::clipValues(
-        NORMALISE_QML_ENUM(ClippingType, _clippingType), _clippingValue,
+    CorrelationFileParser::clipValues(clippingType, clippingValue,
         static_cast<size_t>(_dataRect.width()), rowData);
 
     auto epsilon = CorrelationFileParser::epsilonFor(rowData);
     std::transform(rowData.begin(), rowData.end(), rowData.begin(),
-    [this, epsilon](double value)
+    [scalingType, epsilon](double value)
     {
-        return CorrelationFileParser::scaleValue(
-            NORMALISE_QML_ENUM(ScalingType, _scalingType), value, epsilon);
+        return CorrelationFileParser::scaleValue(scalingType, value, epsilon);
     });
 
     NodeId nodeId(0);
@@ -856,7 +859,7 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
         ++nodeId;
     }
 
-    CorrelationFileParser::normalise(NORMALISE_QML_ENUM(NormaliseType, _normaliseType), dataRows);
+    CorrelationFileParser::normalise(normaliseType, dataRows);
 
     for(auto& dataRow : dataRows)
         dataRow.update();
@@ -864,7 +867,8 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(si
     return dataRows;
 }
 
-DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(size_t numSampleRows)
+DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(
+    size_t numSampleRows, const QVariantMap&)
 {
     if(_dataRect.isEmpty())
         return {};
@@ -901,22 +905,30 @@ DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(size_t
     return dataRows;
 }
 
-void CorrelationTabularDataParser::estimateGraphSize()
+void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& parameters)
 {
     if(_dataPtr == nullptr)
         return;
 
     if(_graphSizeEstimateFutureWatcher.isRunning() || _dataRectangleFutureWatcher.isRunning())
     {
-        _graphSizeEstimateQueued = true;
+        _graphSizeEstimateQueuedParameters = parameters;
         return;
     }
 
-    _graphSizeEstimateQueued = false;
+    _graphSizeEstimateQueuedParameters.clear();
     _graphSizeEstimateCancellable.uncancel();
 
-    QFuture<QVariantMap> future = QtConcurrent::run([this]
+    QFuture<QVariantMap> future = QtConcurrent::run([this, parameters]
     {
+        auto threshold = parameters[QStringLiteral("threshold")].toDouble();
+        auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());
+        auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, parameters[QStringLiteral("correlationDataType")].toInt());
+        auto continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("continuousCorrelationType")].toInt());
+        auto correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
+        auto discreteCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("discreteCorrelationType")].toInt());
+        auto treatAsBinary = parameters[QStringLiteral("treatAsBinary")].toBool();
+
         if(_dataPtr->numRows() == 0)
             return QVariantMap();
 
@@ -927,21 +939,18 @@ void CorrelationTabularDataParser::estimateGraphSize()
         const auto numSampleRows = std::min(maxSampleRows, _dataPtr->numRows());
         EdgeList sampleEdges;
 
-        switch(NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType))
+        switch(correlationDataType)
         {
         default:
         case CorrelationDataType::Continuous:
         {
-            auto correlation = ContinuousCorrelation::create(
-                NORMALISE_QML_ENUM(CorrelationType, _continuousCorrelationType),
-                NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType));
-            auto dataRows = sampledContinuousDataRows(numSampleRows);
+            auto correlation = ContinuousCorrelation::create(continuousCorrelationType, correlationFilterType);
+            auto dataRows = sampledContinuousDataRows(numSampleRows, parameters);
 
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, _threshold,
-                static_cast<CorrelationPolarity>(_correlationPolarity),
+            sampleEdges = correlation->edgeList(dataRows, threshold, correlationPolarity,
                 &_graphSizeEstimateCancellable);
 
             break;
@@ -949,15 +958,13 @@ void CorrelationTabularDataParser::estimateGraphSize()
 
         case CorrelationDataType::Discrete:
         {
-            auto correlation = DiscreteCorrelation::create(
-                NORMALISE_QML_ENUM(CorrelationType, _discreteCorrelationType),
-                NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType));
-            auto dataRows = sampledDiscreteDataRows(numSampleRows);
+            auto correlation = DiscreteCorrelation::create(discreteCorrelationType, correlationFilterType);
+            auto dataRows = sampledDiscreteDataRows(numSampleRows, parameters);
 
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, _threshold, _treatAsBinary,
+            sampleEdges = correlation->edgeList(dataRows, threshold, treatAsBinary,
                 &_graphSizeEstimateCancellable);
 
             break;

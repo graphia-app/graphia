@@ -34,6 +34,8 @@ BaseParameterDialog
     minimumWidth: 750
     minimumHeight: 500
 
+    property bool _suppressAutoUpdates: false
+
     Preferences
     {
         section: "correlation"
@@ -52,30 +54,13 @@ BaseParameterDialog
     {
         id: tabularDataParser
 
-        threshold: minimumCorrelationSpinBox.value
-        correlationDataType: dataTypeComboBox.value
-        continuousCorrelationType: continuousAlgorithmComboBox.value
-        correlationPolarity: polarityComboBox.value
-        discreteCorrelationType: discreteAlgorithmComboBox.value
-        scalingType: scalingComboBox.value
-        normaliseType: normalisationComboBox.value
-        missingDataType: missingDataTypeComboBox.value
-        replacementValue: replacementConstantText.text.length > 0 ? replacementConstantText.text : 0.0
-        clippingType: clippingTypeComboBox.value
-        clippingValue:
+        function updateGraphSizeEstimate()
         {
-            switch(clippingTypeComboBox.value)
-            {
-            case ClippingType.Constant:
-                return clippingValueText.text.length > 0 ? parseFloat(clippingValueText.text) : 0.0;
-            case ClippingType.Winsorization:
-                return winsoriztionValueSpinBox.value;
-            }
+            if(_suppressAutoUpdates)
+                return;
 
-            return 0.0;
+            estimateGraphSize(parameters);
         }
-
-        treatAsBinary: treatAsBinaryCheckbox.checked
 
         onDataRectChanged:
         {
@@ -87,12 +72,29 @@ BaseParameterDialog
                 dataTypeComboBox.setContinuous();
 
             clippingValueText.text = QmlUtils.formatNumber(dataRect.maxValue);
+
+            estimateGraphSize(parameters);
         }
 
         onDataLoaded:
         {
             tabularDataParser.autoDetectDataRectangle();
             parameters.data = tabularDataParser.data;
+
+            estimateGraphSize(parameters);
+        }
+
+        onGraphSizeEstimateChanged:
+        {
+            graphSizeEstimatePlot.graphSizeEstimate = tabularDataParser.graphSizeEstimate;
+
+            if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                initialCorrelationSpinBox.from = tabularDataParser.graphSizeEstimate.keys[0];
+            else
+                initialCorrelationSpinBox.from = minimumCorrelationSpinBox.value;
+
+            graphSizeEstimatePlot.integralThreshold = false;
+            graphSizeEstimatePlot.threshold = initialCorrelationSpinBox.value;
         }
 
         property double minimumInitialCorrelationValue:
@@ -289,6 +291,7 @@ BaseParameterDialog
                         onCurrentIndexChanged:
                         {
                             parameters.correlationDataType = model.get(currentIndex).value;
+                            tabularDataParser.updateGraphSizeEstimate();
 
                             if(_setting)
                                 return;
@@ -379,6 +382,7 @@ BaseParameterDialog
                         onCheckedChanged:
                         {
                             parameters.treatAsBinary = checked;
+                            tabularDataParser.updateGraphSizeEstimate();
                         }
                     }
 
@@ -551,6 +555,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.discreteCorrelationType = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -595,6 +600,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.continuousCorrelationType = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -637,6 +643,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.correlationPolarity = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -683,6 +690,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.missingDataType = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -702,7 +710,14 @@ BaseParameterDialog
 
                                     validator: DoubleValidator{}
 
-                                    onTextChanged: { if(text.length > 0) parameters.missingDataValue = text; }
+                                    onTextChanged:
+                                    {
+                                        if(text.length > 0)
+                                        {
+                                            parameters.missingDataValue = text;
+                                            tabularDataParser.updateGraphSizeEstimate();
+                                        }
+                                    }
 
                                     text: "0.0"
                                 }
@@ -786,6 +801,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.clippingType = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -810,7 +826,10 @@ BaseParameterDialog
                                     function update()
                                     {
                                         if(visible && text.length > 0)
-                                            parameters.clippingValue = text;
+                                        {
+                                            parameters.clippingValue = parseFloat(text);
+                                            tabularDataParser.updateGraphSizeEstimate();
+                                        }
                                     }
 
                                     text: "0.0"
@@ -835,7 +854,10 @@ BaseParameterDialog
                                     function update()
                                     {
                                         if(visible)
+                                        {
                                             parameters.clippingValue = value;
+                                            tabularDataParser.updateGraphSizeEstimate();
+                                        }
                                     }
                                 }
 
@@ -912,6 +934,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.scaling = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -1000,6 +1023,7 @@ BaseParameterDialog
                                 onCurrentIndexChanged:
                                 {
                                     parameters.normalise = model.get(currentIndex).value;
+                                    tabularDataParser.updateGraphSizeEstimate();
                                 }
 
                                 property int value: { return model.get(currentIndex).value; }
@@ -1116,6 +1140,10 @@ BaseParameterDialog
                             onValueChanged:
                             {
                                 parameters.threshold = value;
+                                tabularDataParser.updateGraphSizeEstimate();
+
+                                if(root._suppressAutoUpdates)
+                                    return;
 
                                 // When the minimum value is increased beyond the initial
                                 // value, the latter can get (visually) lost against the extreme
@@ -1191,6 +1219,10 @@ BaseParameterDialog
                             onValueChanged:
                             {
                                 parameters.initialThreshold = value;
+
+                                if(root._suppressAutoUpdates)
+                                    return;
+
                                 graphSizeEstimatePlot.threshold = value;
                             }
                         }
@@ -1213,7 +1245,6 @@ BaseParameterDialog
                         id: graphSizeEstimatePlot
 
                         visible: tabularDataParser.graphSizeEstimate.keys !== undefined
-                        graphSizeEstimate: tabularDataParser.graphSizeEstimate
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -1639,8 +1670,9 @@ BaseParameterDialog
             correlationPolarity: CorrelationPolarity.Positive,
             discreteCorrelationType: CorrelationType.Jaccard,
             scaling: ScalingType.None, normalise: NormaliseType.None,
-            missingDataType: MissingDataType.Constant,
-            clippingType: ClippingType.None
+            missingDataType: MissingDataType.Constant, missingDataValue: 0.0,
+            clippingType: ClippingType.None, clippingValue: 0.0,
+            treatAsBinary: false
         };
 
         minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
