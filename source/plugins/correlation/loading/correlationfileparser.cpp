@@ -971,7 +971,14 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
         }
         }
 
-        return graphSizeEstimateThreshold(sampleEdges, numSampleRows, _dataPtr->numRows());
+        switch(correlationFilterType)
+        {
+        default:
+        case CorrelationFilterType::Threshold:
+            return graphSizeEstimateThreshold(sampleEdges, numSampleRows, _dataPtr->numRows());
+        case CorrelationFilterType::Knn:
+            return graphSizeEstimateKnn(sampleEdges, static_cast<size_t>(threshold), numSampleRows, _dataPtr->numRows());
+        }
     });
 
     _graphSizeEstimateFutureWatcher.setFuture(future);

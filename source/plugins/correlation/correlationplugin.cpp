@@ -628,6 +628,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _initialThreshold = value.toDouble();
     else if(name == QStringLiteral("transpose"))
         _transpose = (value == QStringLiteral("true"));
+    else if(name == QStringLiteral("correlationFilterType"))
+        _correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, value.toInt());
     else if(name == QStringLiteral("correlationDataType"))
         _correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, value.toInt());
     else if(name == QStringLiteral("continuousCorrelationType"))
@@ -669,43 +671,64 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
         R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
 
+    auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType);
     auto correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity);
-    switch(correlationPolarity)
+
+    switch(correlationFilterType)
     {
-    default:
-    case CorrelationPolarity::Positive:
-        defaultTransforms.append(
-            QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
-            .arg(_correlationAttributeName)
-            .arg(_initialThreshold));
-        break;
+    case CorrelationFilterType::Threshold:
+    {
+        switch(correlationPolarity)
+        {
+        default:
+        case CorrelationPolarity::Positive:
+            defaultTransforms.append(
+                QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
+                .arg(_correlationAttributeName)
+                .arg(_initialThreshold));
+            break;
 
-    case CorrelationPolarity::Negative:
-        defaultTransforms.append(
-            QStringLiteral(R"("Remove Edges" where $"%1" > %2)")
-            .arg(_correlationAttributeName)
-            .arg(-_initialThreshold));
-        break;
+        case CorrelationPolarity::Negative:
+            defaultTransforms.append(
+                QStringLiteral(R"("Remove Edges" where $"%1" > %2)")
+                .arg(_correlationAttributeName)
+                .arg(-_initialThreshold));
+            break;
 
-    case CorrelationPolarity::Both:
-        defaultTransforms.append(
-            QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
-            .arg(_correlationAbsAttributeName)
-            .arg(_initialThreshold));
+        case CorrelationPolarity::Both:
+            defaultTransforms.append(
+                QStringLiteral(R"("Remove Edges" where $"%1" < %2)")
+                .arg(_correlationAbsAttributeName)
+                .arg(_initialThreshold));
+            break;
+        }
+
+        if(_edgeReductionType == EdgeReductionType::KNN)
+        {
+            defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1")")
+                .arg(correlationPolarity == CorrelationPolarity::Positive ?
+                _correlationAttributeName : _correlationAbsAttributeName));
+        }
+        else if(_edgeReductionType == EdgeReductionType::PercentNN)
+        {
+            defaultTransforms.append(QStringLiteral(R"("%-NN" using $"%1")")
+                .arg(correlationPolarity == CorrelationPolarity::Positive ?
+                _correlationAttributeName : _correlationAbsAttributeName));
+        }
         break;
     }
 
-    if(_edgeReductionType == EdgeReductionType::KNN)
+    case CorrelationFilterType::Knn:
     {
-        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1")")
+        defaultTransforms.append(
+            QStringLiteral(R"("k-NN" using $"%1" with "k" = %2)")
             .arg(correlationPolarity == CorrelationPolarity::Positive ?
-            _correlationAttributeName : _correlationAbsAttributeName));
+            _correlationAttributeName : _correlationAbsAttributeName)
+            .arg(static_cast<size_t>(_initialThreshold)));
+        break;
     }
-    else if(_edgeReductionType == EdgeReductionType::PercentNN)
-    {
-        defaultTransforms.append(QStringLiteral(R"("%-NN" using $"%1")")
-            .arg(correlationPolarity == CorrelationPolarity::Positive ?
-            _correlationAttributeName : _correlationAbsAttributeName));
+
+    default: break;
     }
 
     if(_clusteringType == ClusteringType::MCL)
@@ -1135,8 +1158,20 @@ QString CorrelationPluginInstance::log() const
         break;
     }
 
-    text.append(tr("\nMinimum Correlation Value: %1").arg(
-        u::formatNumberScientific(_threshold)));
+    switch(_correlationFilterType)
+    {
+    case CorrelationFilterType::Threshold:
+        text.append(tr("\nMinimum Correlation Value: %1").arg(
+            u::formatNumberScientific(_threshold)));
+        break;
+
+    case CorrelationFilterType::Knn:
+        text.append(tr("\nMaximum k Value: %1").arg(
+            static_cast<size_t>(_threshold)));
+        break;
+
+    default: break;
+    }
 
     if(_valuesWereImputed)
     {

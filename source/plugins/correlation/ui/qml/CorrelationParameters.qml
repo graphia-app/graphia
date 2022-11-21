@@ -88,21 +88,26 @@ BaseParameterDialog
         {
             graphSizeEstimatePlot.graphSizeEstimate = tabularDataParser.graphSizeEstimate;
 
-            if(tabularDataParser.graphSizeEstimate.keys !== undefined)
-                initialCorrelationSpinBox.from = tabularDataParser.graphSizeEstimate.keys[0];
-            else
-                initialCorrelationSpinBox.from = minimumCorrelationSpinBox.value;
+            if(filterTypeComboBox.value === CorrelationFilterType.Threshold)
+            {
+                if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                    initialThresholdSpinBox.from = tabularDataParser.graphSizeEstimate.keys[0];
+                else
+                    initialThresholdSpinBox.from = minimumThresholdSpinBox.value;
 
-            graphSizeEstimatePlot.integralThreshold = false;
-            graphSizeEstimatePlot.threshold = initialCorrelationSpinBox.value;
-        }
+                graphSizeEstimatePlot.integralThreshold = false;
+                graphSizeEstimatePlot.threshold = initialThresholdSpinBox.value;
+            }
+            else if(filterTypeComboBox.value === CorrelationFilterType.Knn)
+            {
+                if(tabularDataParser.graphSizeEstimate.keys !== undefined)
+                    initialKnnSpinBox.to = tabularDataParser.graphSizeEstimate.keys[0];
+                else
+                    initialKnnSpinBox.to = maximumKnnSpinBox.value;
 
-        property double minimumInitialCorrelationValue:
-        {
-            if(tabularDataParser.graphSizeEstimate.keys !== undefined)
-                return tabularDataParser.graphSizeEstimate.keys[0];
-
-            return minimumCorrelationSpinBox.value;
+                graphSizeEstimatePlot.integralThreshold = true;
+                graphSizeEstimatePlot.threshold = initialKnnSpinBox.value;
+            }
         }
     }
 
@@ -495,6 +500,20 @@ BaseParameterDialog
 
                         Layout.alignment: Qt.AlignTop
                         text: qsTr("Advanced")
+
+                        onCheckedChanged:
+                        {
+                            if(!checked)
+                            {
+                                // Reset to default
+                                discreteAlgorithmComboBox.currentIndex = 0;
+                                continuousAlgorithmComboBox.currentIndex = 0;
+                                clippingTypeComboBox.currentIndex = 0;
+                                scalingComboBox.currentIndex = 0;
+                                normalisationComboBox.currentIndex = 0;
+                                filterTypeComboBox.currentIndex = 0;
+                            }
+                        }
                     }
                 }
 
@@ -1115,6 +1134,73 @@ BaseParameterDialog
                                     }
                                 }
                             }
+
+                            Text
+                            {
+                                text: qsTr("Filtering:")
+                                Layout.alignment: Qt.AlignRight
+                            }
+
+                            ComboBox
+                            {
+                                id: filterTypeComboBox
+                                Layout.preferredWidth: 160
+
+                                model: ListModel
+                                {
+                                    ListElement { text: qsTr("Threshold");  value: CorrelationFilterType.Threshold }
+                                    ListElement { text: qsTr("k-NN");       value: CorrelationFilterType.Knn }
+                                }
+                                textRole: "text"
+
+                                property int value: { return model.get(currentIndex).value; }
+
+                                onValueChanged:
+                                {
+                                    parameters.correlationFilterType = value;
+
+                                    resetFilterControls();
+                                    tabularDataParser.updateGraphSizeEstimate();
+                                }
+                            }
+
+                            HelpTooltip
+                            {
+                                title: qsTr("Filtering")
+                                GridLayout
+                                {
+                                    columns: 2
+                                    Text
+                                    {
+                                        text: qsTr("<b>Threshold:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Simple filter where correlations below " +
+                                            "a selected threshold are discarded.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text
+                                    {
+                                        text: qsTr("<b>k-NN:</b>")
+                                        textFormat: Text.StyledText
+                                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                    }
+                                    Text
+                                    {
+                                        text: qsTr("Track correlations found between row pairs, " +
+                                            "discarding those that don't lie in the top <i>k</i> " +
+                                            "correlations for each row. This is most useful for " +
+                                            "datasets that are extremely highly correlated.");
+                                        wrapMode: Text.WordWrap
+                                        Layout.fillWidth: true
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1122,11 +1208,16 @@ BaseParameterDialog
                     {
                         Layout.fillWidth: true
 
-                        Text { text: qsTr("Minimum:") }
+                        Text
+                        {
+                            text: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                qsTr("Minimum:") : qsTr("Maximum:")
+                        }
 
                         DoubleSpinBox
                         {
-                            id: minimumCorrelationSpinBox
+                            id: minimumThresholdSpinBox
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
 
                             implicitWidth: 70
 
@@ -1139,6 +1230,9 @@ BaseParameterDialog
 
                             onValueChanged:
                             {
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Threshold)
+                                    return;
+
                                 parameters.threshold = value;
                                 tabularDataParser.updateGraphSizeEstimate();
 
@@ -1151,8 +1245,41 @@ BaseParameterDialog
                                 let range = to - value;
                                 let adjustedInitial = value + (range * 0.1);
 
-                                if(initialCorrelationSpinBox.value <= adjustedInitial)
-                                    initialCorrelationSpinBox.value = adjustedInitial;
+                                if(initialThresholdSpinBox.value <= adjustedInitial)
+                                    initialThresholdSpinBox.value = adjustedInitial;
+                            }
+                        }
+
+                        SpinBox
+                        {
+                            id: maximumKnnSpinBox
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Knn
+
+                            Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                            implicitWidth: 70
+
+                            from: 1
+                            to: 9999
+
+                            editable: true
+
+                            onValueChanged:
+                            {
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Knn)
+                                    return;
+
+                                parameters.threshold = value;
+                                tabularDataParser.updateGraphSizeEstimate();
+
+                                if(root._suppressAutoUpdates)
+                                    return;
+
+                                // When the maximum value is increased beyond the initial
+                                // value, the latter can get (visually) lost against the extreme
+                                // left of the plot, so just punt it over a bit
+                                if(initialKnnSpinBox.value >= value)
+                                    initialKnnSpinBox.value = Math.max(value - 1, from);
                             }
                         }
 
@@ -1160,19 +1287,26 @@ BaseParameterDialog
                         {
                             Layout.rightMargin: Constants.spacing * 2
 
-                            title: qsTr("Minimum Correlation Value")
+                            title: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                qsTr("Minimum Correlation Value") : qsTr("Maximum Correlation <i>k</i>")
+
                             Text
                             {
                                 wrapMode: Text.WordWrap
-                                text: qsTr("The minimum correlation value above which an edge " +
-                                           "will be created in the graph. Using a lower minimum value will " +
-                                           "increase the compute and memory requirements.")
+                                text: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                    qsTr("The minimum correlation value above which an edge " +
+                                        "will be created in the graph. Using a lower minimum value will " +
+                                        "increase the compute and memory requirements.") :
+                                    qsTr("The maximum number of correlations to retain per data row, " +
+                                        "ultimately limiting the number of edges that will be created " +
+                                        "in the graph. Using a larger maximum value will " +
+                                        "increase the compute and memory requirements.")
                             }
                         }
 
                         RangeSlider
                         {
-                            id: minimumSlider
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
 
                             Layout.fillWidth: true
                             Layout.minimumWidth: 50
@@ -1181,16 +1315,43 @@ BaseParameterDialog
                             from: 0.0
                             to: 1.0
 
-                            first.value: minimumCorrelationSpinBox.value
-                            first.onValueChanged:
+                            first.value: minimumThresholdSpinBox.value
+                            first.onMoved:
                             {
-                                minimumCorrelationSpinBox.value = first.value;
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Threshold)
+                                    return;
+
+                                minimumThresholdSpinBox.value = first.value;
                             }
 
-                            second.value: initialCorrelationSpinBox.value
-                            second.onValueChanged:
+                            second.value: initialThresholdSpinBox.value
+                            second.onMoved:
                             {
-                                initialCorrelationSpinBox.value = second.value;
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Threshold)
+                                    return;
+
+                                initialThresholdSpinBox.value = second.value;
+                            }
+                        }
+
+                        Slider
+                        {
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Knn
+
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 50
+                            Layout.maximumWidth: 250
+
+                            from: maximumKnnSpinBox.value
+                            to: 1
+
+                            value: initialKnnSpinBox.value
+                            onMoved:
+                            {
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Knn)
+                                    return;
+
+                                initialKnnSpinBox.value = value;
                             }
                         }
 
@@ -1198,11 +1359,11 @@ BaseParameterDialog
 
                         DoubleSpinBox
                         {
-                            id: initialCorrelationSpinBox
+                            id: initialThresholdSpinBox
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
 
                             implicitWidth: 70
 
-                            from: tabularDataParser.minimumInitialCorrelationValue
                             to: 1.0
 
                             decimals: 3
@@ -1218,24 +1379,69 @@ BaseParameterDialog
 
                             onValueChanged:
                             {
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Threshold)
+                                    return;
+
                                 parameters.initialThreshold = value;
 
                                 if(root._suppressAutoUpdates)
                                     return;
 
+                                graphSizeEstimatePlot.integralThreshold = false;
+                                graphSizeEstimatePlot.threshold = value;
+                            }
+                        }
+
+                        SpinBox
+                        {
+                            id: initialKnnSpinBox
+                            visible: filterTypeComboBox.value === CorrelationFilterType.Knn
+
+                            Component.onCompleted: { contentItem.selectByMouse = true; }
+
+                            implicitWidth: 70
+
+                            from: 1
+
+                            editable: true
+
+                            onFromChanged:
+                            {
+                                // Reset the value if the upper bound changes
+                                if(value > to)
+                                    value = Utils.lerp(from, to, 0.5);
+                            }
+
+                            onValueChanged:
+                            {
+                                if(filterTypeComboBox.value !== CorrelationFilterType.Knn)
+                                    return;
+
+                                parameters.initialThreshold = value;
+
+                                if(root._suppressAutoUpdates)
+                                    return;
+
+                                graphSizeEstimatePlot.integralThreshold = true;
                                 graphSizeEstimatePlot.threshold = value;
                             }
                         }
 
                         HelpTooltip
                         {
-                            title: qsTr("Correlation Threshold")
+                            title: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                qsTr("Correlation Threshold") : qsTr("Correlation <i>k</i>")
+
                             Text
                             {
                                 wrapMode: Text.WordWrap
-                                text: qsTr("The initial correlation threshold determines the size of the resultant graph. " +
-                                           "A lower value filters fewer edges, and results in a larger graph. " +
-                                           "This value can be changed later, after the graph has been created.")
+                                text: filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                    qsTr("The initial correlation threshold determines the size of the resultant graph. " +
+                                        "A lower value filters fewer edges, and results in a larger graph. " +
+                                        "This value can be changed later, after the graph has been created.") :
+                                    qsTr("The initial k value determines the size of the resultant graph. " +
+                                        "A higher value filters fewer edges, and results in a larger graph. " +
+                                        "This value can be changed later, after the graph has been created.")
                             }
                         }
                     }
@@ -1251,7 +1457,10 @@ BaseParameterDialog
 
                         onThresholdChanged:
                         {
-                            initialCorrelationSpinBox.value = threshold;
+                            if(filterTypeComboBox.value === CorrelationFilterType.Threshold)
+                                initialThresholdSpinBox.value = threshold;
+                            else if(filterTypeComboBox.value === CorrelationFilterType.Knn)
+                                initialKnnSpinBox.value = threshold;
                         }
 
                         DelayedBusyIndicator
@@ -1382,12 +1591,15 @@ BaseParameterDialog
                     Text
                     {
                         text: qsTr("Edge Reduction:")
+                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
                         Layout.alignment: Qt.AlignLeft
                     }
 
                     ComboBox
                     {
                         id: edgeReductionComboBox
+                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
+
                         model: ListModel
                         {
                             ListElement { text: qsTr("None");   value: EdgeReductionType.None }
@@ -1407,6 +1619,7 @@ BaseParameterDialog
                     HelpTooltip
                     {
                         title: qsTr("Edge Reduction")
+                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
                         ColumnLayout
                         {
                             Text
@@ -1500,8 +1713,17 @@ BaseParameterDialog
                         {
                             summaryString += Utils.format(qsTr("Continuous Correlation Metric: {0}<br>"), continuousAlgorithmComboBox.currentText);
                             summaryString += Utils.format(qsTr("Correlation Polarity: {0}<br>"), polarityComboBox.currentText);
-                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumCorrelationSpinBox.value));
-                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialCorrelationSpinBox.value));
+
+                            if(filterTypeComboBox.value === CorrelationFilterType.Threshold)
+                            {
+                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumThresholdSpinBox.value));
+                                summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialThresholdSpinBox.value));
+                            }
+                            else if(filterTypeComboBox.value === CorrelationFilterType.Knn)
+                            {
+                                summaryString += Utils.format(qsTr("Maximum k Value: {0}<br>"), maximumKnnSpinBox.value);
+                                summaryString += Utils.format(qsTr("Initial k Value: {0}<br>"), initialKnnSpinBox.value);
+                            }
 
                             if(tabularDataParser.dataRect.hasMissingValues)
                             {
@@ -1534,8 +1756,17 @@ BaseParameterDialog
                         else if(dataTypeComboBox.value === CorrelationDataType.Discrete)
                         {
                             summaryString += Utils.format(qsTr("Discrete Correlation Metric: {0}<br>"), discreteAlgorithmComboBox.currentText);
-                            summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumCorrelationSpinBox.value));
-                            summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialCorrelationSpinBox.value));
+
+                            if(filterTypeComboBox.value === CorrelationFilterType.Threshold)
+                            {
+                                summaryString += Utils.format(qsTr("Minimum Correlation Value: {0}<br>"), QmlUtils.formatNumberScientific(minimumThresholdSpinBox.value));
+                                summaryString += Utils.format(qsTr("Initial Correlation Threshold: {0}<br>"), QmlUtils.formatNumberScientific(initialThresholdSpinBox.value));
+                            }
+                            else if(filterTypeComboBox.value === CorrelationFilterType.Knn)
+                            {
+                                summaryString += Utils.format(qsTr("Maximum k Value: {0}<br>"), maximumKnnSpinBox.value);
+                                summaryString += Utils.format(qsTr("Initial k Value: {0}<br>"), initialKnnSpinBox.value);
+                            }
                         }
 
                         let transformString = ""
@@ -1579,11 +1810,16 @@ BaseParameterDialog
 
                             if(numNodes > warningThreshold || numEdges > warningThreshold)
                             {
+                                let thresholdAdvice = filterTypeComboBox.value === CorrelationFilterType.Threshold ?
+                                    qsTr("Increasing the Minimum Correlation Value " +
+                                    "will usually reduce the graph size.") :
+                                    qsTr("Decreasing the Maximum <i>k</i> " +
+                                    "will usually reduce the graph size.");
+
                                 summaryString += Utils.format(qsTr("<br><br>{0}" +
                                     "WARNING: This is a very large graph which has the potential " +
                                     "to exhaust system resources and lead to instability " +
-                                    "or freezes. Increasing the Minimum Correlation Value will " +
-                                    "usually reduce the graph size.{1}"), warningFont, "</font>");
+                                    "or freezes. {1}{2}"), warningFont, thresholdAdvice, "</font>");
                             }
                         }
                         else if(!tabularDataParser.graphSizeEstimateInProgress && !dataRectPage._busy)
@@ -1654,17 +1890,46 @@ BaseParameterDialog
         }
     }
 
+    function resetFilterControls()
+    {
+        root._suppressAutoUpdates = true;
+
+        if(parameters.correlationFilterType === CorrelationFilterType.Threshold)
+        {
+            const DEFAULT_MINIMUM_CORRELATION = 0.7;
+            const DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
+                    ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
+
+            initialThresholdSpinBox.value = DEFAULT_INITIAL_CORRELATION;
+            minimumThresholdSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
+            initialThresholdSpinBox.from = minimumThresholdSpinBox.value;
+            parameters.threshold = DEFAULT_MINIMUM_CORRELATION;
+        }
+        else if(parameters.correlationFilterType === CorrelationFilterType.Knn)
+        {
+            const DEFAULT_MAXIMUM_K = 50;
+            const DEFAULT_INITIAL_K = Math.round(DEFAULT_MAXIMUM_K * 0.5);
+
+            maximumKnnSpinBox.value = DEFAULT_MAXIMUM_K;
+            initialKnnSpinBox.value = DEFAULT_INITIAL_K;
+            initialKnnSpinBox.to = maximumKnnSpinBox.value;
+            parameters.threshold = DEFAULT_MAXIMUM_K;
+
+            // If k-NN correlation is selected, we don't want an additional k-NN transforn
+            edgeReductionComboBox.currentIndex = 0;
+        }
+
+        root._suppressAutoUpdates = false;
+    }
+
     onInitialised:
     {
-        let DEFAULT_MINIMUM_CORRELATION = 0.7;
-        let DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
-                ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
-
         parameters =
         {
-            threshold: DEFAULT_MINIMUM_CORRELATION,
-            initialThreshold: DEFAULT_INITIAL_CORRELATION,
+            threshold: 0.0,
+            initialThreshold: 0.0,
             transpose: false,
+            correlationFilterType: CorrelationFilterType.Threshold,
             correlationDataType: CorrelationDataType.Continuous,
             continuousCorrelationType: CorrelationType.Pearson,
             correlationPolarity: CorrelationPolarity.Positive,
@@ -1675,10 +1940,9 @@ BaseParameterDialog
             treatAsBinary: false
         };
 
-        minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
-        initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
+        resetFilterControls();
+
         transposeCheckBox.checked = false;
-        dataTypeComboBox.currentIndex = 0;
 
         populateCorrelationAlgorithmTooltip(discreteAlgorithmComboBox.model, discreteAlgorithmTooltip);
         populateCorrelationAlgorithmTooltip(continuousAlgorithmComboBox.model, continuousAlgorithmTooltip);
