@@ -283,7 +283,7 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParse
 
     emit binaryMatrixChanged();
 
-    _graphSizeEstimate = graphSizeEstimate(edgeList);
+    _graphSizeEstimate = graphSizeEstimateThreshold(edgeList);
     emit graphSizeEstimateChanged();
 
     return result;
