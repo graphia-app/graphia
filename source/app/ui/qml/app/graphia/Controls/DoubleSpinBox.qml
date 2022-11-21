@@ -39,19 +39,24 @@ Control
     function decrease() { spinBox.decrease(); }
     function increase() { spinBox.increase(); }
 
-    onValueChanged:
+    function _update()
     {
-        if(spinBox._setting)
-            return;
-
         spinBox._setting = true;
         spinBox.value = spinBox.intValue(root.value);
         spinBox._setting = false;
     }
 
+    onValueChanged:
+    {
+        if(spinBox._setting)
+            return;
+
+        root._update();
+    }
+
     // See comment below on forceTextFromValueUpdateHack()
-    onFromChanged: { spinBox.forceTextFromValueUpdateHack(); }
-    onToChanged:   { spinBox.forceTextFromValueUpdateHack(); }
+    onFromChanged: { root._update(); spinBox.forceTextFromValueUpdateHack(); }
+    onToChanged:   { root._update(); spinBox.forceTextFromValueUpdateHack(); }
 
     contentItem: SpinBox
     {
