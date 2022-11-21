@@ -29,5 +29,8 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     size_t numSampleNodes = std::numeric_limits<size_t>::max(),
     size_t maxNodes = std::numeric_limits<size_t>::max());
 
+QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t k,
+     size_t numSampleNodes = std::numeric_limits<size_t>::max(),
+     size_t maxNodes = std::numeric_limits<size_t>::max());
 
 #endif // GRAPHSIZEESTIMATE_H
