@@ -40,15 +40,11 @@ double GraphSizeEstimatePlotItem::threshold() const
 
 void GraphSizeEstimatePlotItem::setThreshold(double threshold)
 {
+    if(_integralThreshold)
+        threshold = std::round(threshold);
+
     if(threshold != _threshold)
     {
-        if(!_keys.isEmpty())
-        {
-            threshold = std::clamp(threshold,
-                std::as_const(_keys).first(),
-                std::as_const(_keys).last());
-        }
-
         _threshold = threshold;
         emit thresholdChanged();
 
@@ -86,20 +82,32 @@ void GraphSizeEstimatePlotItem::updateThresholdIndicator()
 
     // Clamp the indicator x coordinate to within the bounds of the
     // plot by a small margin, so that it's always visible
-    auto smallestWeight = std::as_const(_keys).first();
-    auto largestWeight = std::as_const(_keys).last();
-    const double keepVisibleOffset = (largestWeight - smallestWeight) * 0.002;
+    auto bounds = std::minmax(
+        std::as_const(_keys).first(),
+        std::as_const(_keys).last());
+
+    auto smallestKey = bounds.first;
+    auto largestKey = bounds.second;
+    const double keepVisibleOffset = (largestKey - smallestKey) * 0.002;
 
     auto x = std::clamp(_threshold,
-        smallestWeight + keepVisibleOffset,
-        largestWeight - keepVisibleOffset);
+        smallestKey + keepVisibleOffset,
+        largestKey - keepVisibleOffset);
 
     _thresholdIndicator->point1->setCoords(x, 0.0);
     _thresholdIndicator->point2->setCoords(x, 1.0);
 
     int index = 0;
-    while(_keys.at(index) < _threshold && index < _keys.size() - 1)
-        index++;
+    double minDiff = std::numeric_limits<double>::max();
+    for(int i = 0; i < _keys.size(); i++)
+    {
+        auto diff = std::abs(_keys.at(i) - _threshold);
+        if(diff < minDiff)
+        {
+            minDiff = diff;
+            index = i;
+        }
+    }
 
     size_t numNodes = 0;
     size_t numEdges = 0;
@@ -152,10 +160,11 @@ void GraphSizeEstimatePlotItem::buildPlot()
     customPlot().yAxis->setNumberPrecision(0);
     customPlot().yAxis->grid()->setSubGridVisible(true);
 
-    auto smallestWeight = std::as_const(_keys).first();
-    auto largestWeight = std::as_const(_keys).last();
+    auto smallestKey = std::as_const(_keys).first();
+    auto largestKey = std::as_const(_keys).last();
 
-    customPlot().xAxis->setRange(smallestWeight, largestWeight);
+    customPlot().xAxis->setRange(smallestKey, largestKey);
+    customPlot().xAxis->setRangeReversed(largestKey < smallestKey);
 
     customPlot().yAxis->rescale();
 

@@ -31,6 +31,7 @@ class GraphSizeEstimatePlotItem : public QCustomPlotQuickItem
     Q_PROPERTY(QVariantMap graphSizeEstimate READ graphSizeEstimate WRITE setGraphSizeEstimate) // clazy:exclude=qproperty-without-notify
     Q_PROPERTY(double threshold READ threshold WRITE setThreshold NOTIFY thresholdChanged)
     Q_PROPERTY(bool uniqueEdgesOnly MEMBER _uniqueEdgesOnly NOTIFY uniqueEdgesOnlyChanged)
+    Q_PROPERTY(bool integralThreshold MEMBER _integralThreshold)
 
 public:
     explicit GraphSizeEstimatePlotItem(QQuickItem* parent = nullptr);
@@ -45,6 +46,7 @@ private:
 
     double _threshold = 0.0;
     bool _uniqueEdgesOnly = false;
+    bool _integralThreshold = false;
     bool _dragging = false;
 
     double threshold() const;
