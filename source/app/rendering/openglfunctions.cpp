@@ -33,14 +33,23 @@ void OpenGLFunctions::resolveOpenGLFunctions()
         // This should never happen if hasOpenGLSupport has returned true
         qFatal("Could not obtain required OpenGL context version");
     }
+
+    if(context->hasExtension(QByteArrayLiteral("GL_ARB_sample_shading")))
+    {
+        _glMinSampleShadingARBFnPtr = reinterpret_cast<PFNGLMINSAMPLESHADINGARBPROC>(
+            context->getProcAddress("glMinSampleShadingARB"));
+
+        if(_glMinSampleShadingARBFnPtr == nullptr)
+            qDebug() << "Failed to resolve glMinSampleShadingARB";
+    }
 }
 
 QSurfaceFormat OpenGLFunctions::minimumFormat()
 {
     QSurfaceFormat format;
 
-    format.setMajorVersion(4);
-    format.setMinorVersion(0);
+    format.setMajorVersion(3);
+    format.setMinorVersion(3);
     format.setProfile(QSurfaceFormat::CoreProfile);
 
     return format;
