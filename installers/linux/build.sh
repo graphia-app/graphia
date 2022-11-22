@@ -26,6 +26,7 @@ BUILD_DIR="build/${COMPILER}"
 
 export QML_SOURCES_PATHS="${PWD}/source"
 export DEPLOY_PLATFORM_THEMES=1 # For platformthemes/libqgtk3.so
+export DEPLOY_GTK_VERSION=3
 export LD_LIBRARY_PATH="AppDir/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 mkdir -p ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
@@ -35,9 +36,9 @@ cp -r source/app/examples \
 curl -L \
     -O https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
     -O https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage \
-    -O https://github.com/linuxdeploy/linuxdeploy-plugin-checkrt/releases/download/continuous/linuxdeploy-plugin-checkrt-x86_64.sh || exit $?
+    -O https://github.com/linuxdeploy/linuxdeploy-plugin-checkrt/releases/download/continuous/linuxdeploy-plugin-checkrt-x86_64.sh \
+    -O https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh || exit $?
 chmod +x linuxdeploy*
-
 
 LINUXDEPLOY=${PWD}/linuxdeploy-x86_64.AppImage
 
@@ -55,6 +56,7 @@ LINUXDEPLOY=${PWD}/linuxdeploy-x86_64.AppImage
     --appdir AppDir \
     --plugin qt \
     --plugin checkrt \
+    --plugin gtk \
     || exit $?
 
   # Manually exclude libnss since linuxdeploy --exclude-library doesn't, for whatever reason
