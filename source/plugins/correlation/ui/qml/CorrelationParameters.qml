@@ -528,12 +528,12 @@ BaseParameterDialog
                         Layout.fillWidth: true
                         visible: !advancedCheckBox.checked
 
-                        text: qsTr("Correlation values of 1 represent perfectly correlated rows whereas " +
-                            "0 indicates no correlation. " +
+                        text: qsTr("On the horizontal axis of the plot below, values of 1 represent " +
+                            "perfectly correlated rows whereas 0 indicates no correlation. " +
                             "All absolute values below the selected minimum correlation threshold are " +
                             "discarded and will not be used to create edges. " +
                             "By default a transform is added which will remove edges for all " +
-                            "absolute values below the initial correlation threshold." +
+                            "absolute values below the specified initial correlation threshold." +
                             "<br><br>" +
                             "For more control over the parameters used, check the <b>Advanced</b> option " +
                             "on the top right.")
