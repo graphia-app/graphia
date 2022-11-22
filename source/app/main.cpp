@@ -16,6 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "build_defines.h"
+
 #include <QObject>
 #include <QQmlComponent>
 #include <QQmlEngine>

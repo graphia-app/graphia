@@ -16,6 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "build_defines.h"
+
 #include "application.h"
 #include "crashtype.h"
 #include "../crashhandler.h"
@@ -147,6 +149,8 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
 
     return nullptr;
 }
+
+QString Application::copyright() { return QStringLiteral(COPYRIGHT).replace(QStringLiteral("(c)"), QStringLiteral(u"©")); }
 
 #ifdef Q_OS_MACOS
 #include <corefoundation/CFBundle.h>

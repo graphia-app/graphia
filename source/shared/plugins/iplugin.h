@@ -19,6 +19,8 @@
 #ifndef IPLUGIN_H
 #define IPLUGIN_H
 
+#include "build_defines.h"
+
 #include "shared/loading/iurltypes.h"
 #include "shared/loading/iparser.h"
 

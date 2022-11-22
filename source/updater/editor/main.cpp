@@ -16,6 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "build_defines.h"
+
 #include "shared/utils/qmlutils.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/static_block.h"

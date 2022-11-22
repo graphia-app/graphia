@@ -16,6 +16,8 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "build_defines.h"
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -169,7 +171,7 @@ static void uploadReport(const QString& email, const QString& text,
                                                        QSysInfo::productVersion())},
         {"gl",              OpenGLFunctions::info()},
 #ifdef GIT_BRANCH
-        {"git_branch",  GIT_BRANCH},
+        {"git_branch",      GIT_BRANCH},
 #endif
     };
 
