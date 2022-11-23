@@ -24,6 +24,8 @@
 #include "shared/utils/string.h"
 #include "shared/loading/userelementdata.h"
 
+#include "../crashhandler.h"
+
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
     TabularData* data, int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
@@ -78,6 +80,15 @@ bool ImportAttributesCommand::execute()
 
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
+
+    if(keyAttribute == nullptr)
+    {
+        auto description = QStringLiteral("ImportAttributesCommand: attribute %1 not found in %2")
+            .arg(_keyAttributeName, _graphModel->availableAttributeNames().join(' '));
+        CrashHandler::instance()->submitMinidump(description);
+
+        return false;
+    }
 
     auto createAttributes = [&](const auto& elementIds)
     {
