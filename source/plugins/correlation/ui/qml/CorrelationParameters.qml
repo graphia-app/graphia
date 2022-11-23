@@ -1186,7 +1186,7 @@ BaseParameterDialog
 
                                     Text
                                     {
-                                        text: qsTr("<b>k-NN:</b>")
+                                        text: qsTr("<b>k-Nearest Neighbours:</b>")
                                         textFormat: Text.StyledText
                                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                                     }
