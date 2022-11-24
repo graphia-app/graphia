@@ -781,6 +781,7 @@ void Application::loadPlugins()
 
 void Application::initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader)
 {
+    plugin->initialise(this);
     _loadedPlugins.emplace_back(plugin, std::move(pluginLoader));
     _urlTypeDetails.update();
     _pluginDetails.update();

@@ -21,6 +21,8 @@
 
 #include "build_defines.h"
 
+#include "shared/iapplication.h"
+
 #include "shared/loading/iurltypes.h"
 #include "shared/loading/iparser.h"
 
@@ -74,6 +76,8 @@ class IPlugin : public virtual IUrlTypes, public virtual IPluginInstanceProvider
 public:
     ~IPlugin() override = default;
 
+    virtual void initialise(const IApplication* application) = 0;
+
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QString imageSource() const = 0; // Displayed in the about dialog
@@ -88,6 +92,8 @@ public:
 
     virtual QString parametersQmlPath(const QString& urlType) const = 0;
     virtual QString qmlPath() const = 0;
+
+    virtual const IApplication* application() const = 0;
 
     virtual QObject* ptr() = 0;
 };

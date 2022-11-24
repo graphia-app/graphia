@@ -164,6 +164,15 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
     Q_OBJECT
     Q_INTERFACES(IPlugin)
 
+private:
+    const IApplication* _application = nullptr;
+
+public:
+    void initialise(const IApplication* application) override
+    {
+        _application = application;
+    }
+
     // Default empty image
     QString imageSource() const override { return {}; }
 
@@ -175,6 +184,8 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
 
     // Default to directed graphs
     bool directed() const override { return true; }
+
+    const IApplication* application() const override { return _application; }
 
     QObject* ptr() override { return this; }
 };
