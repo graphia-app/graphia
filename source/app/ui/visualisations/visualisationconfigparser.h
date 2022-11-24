@@ -36,6 +36,8 @@ public:
     const VisualisationConfig& result() const { return _result; }
     bool success() const { return _success; }
     const QString& failedInput() const { return _failedInput; }
+
+    static QString parseForDisplay(const QString& text);
 };
 
 #endif // VISUALISATIONCONFIGPARSER_H

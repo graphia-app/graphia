@@ -2219,12 +2219,7 @@ bool Document::graphTransformsAreValid(const QStringList& transforms) const
 
 QString Document::displayTextForGraphTransform(const QString& transform) const
 {
-    GraphTransformConfigParser parser;
-
-    if(parser.parse(transform))
-        return parser.result().asString(true);
-
-    return {};
+    return GraphTransformConfigParser::parseForDisplay(transform);
 }
 
 void Document::setGraphTransform(int index, const QString& transform)
@@ -2407,12 +2402,7 @@ bool Document::visualisationsAreValid(const QStringList& visualisations) const
 
 QString Document::displayTextForVisualisation(const QString& visualisation) const
 {
-    VisualisationConfigParser parser;
-
-    if(parser.parse(visualisation))
-        return parser.result().asString(true);
-
-    return {};
+    return VisualisationConfigParser::parseForDisplay(visualisation);
 }
 
 void Document::setVisualisation(int index, const QString& visualisation)

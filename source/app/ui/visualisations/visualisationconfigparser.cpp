@@ -101,3 +101,13 @@ bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
 
     return _success;
 }
+
+QString VisualisationConfigParser::parseForDisplay(const QString& text)
+{
+    VisualisationConfigParser parser;
+
+    if(parser.parse(text))
+        return parser.result().asString(true);
+
+    return {};
+}

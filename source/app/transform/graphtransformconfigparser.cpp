@@ -319,3 +319,13 @@ bool GraphTransformConfigParser::isAttributeName(const QString& variable)
 {
     return !variable.isEmpty() && variable[0] == '$';
 }
+
+QString GraphTransformConfigParser::parseForDisplay(const QString& text)
+{
+    GraphTransformConfigParser parser;
+
+    if(parser.parse(text))
+        return parser.result().asString(true);
+
+    return {};
+}
