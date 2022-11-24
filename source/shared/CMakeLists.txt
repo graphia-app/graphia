@@ -30,6 +30,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/igraphmodel.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/imutablegraph.h
     ${CMAKE_CURRENT_LIST_DIR}/graph/undirectededge.h
+    ${CMAKE_CURRENT_LIST_DIR}/iapplication.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/biopaxfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/cxparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/dotfileparser.h

@@ -21,6 +21,7 @@
 
 #include "updates/updater.h"
 
+#include "shared/iapplication.h"
 #include "shared/utils/qmlenum.h"
 #include "shared/utils/downloadqueue.h"
 
@@ -122,7 +123,7 @@ private:
     const std::vector<LoadedPlugin>* _loadedPlugins;
 };
 
-class Application : public QObject
+class Application : public QObject, public IApplication
 {
     Q_OBJECT
 
