@@ -168,26 +168,14 @@ private:
     const IApplication* _application = nullptr;
 
 public:
-    void initialise(const IApplication* application) override
-    {
-        _application = application;
-    }
+    void initialise(const IApplication* application) override;
 
-    // Default empty image
-    QString imageSource() const override { return {}; }
-
-    // Default to no settings UI
-    QString parametersQmlPath(const QString&) const override { return {}; }
-
-    // Default to no UI
-    QString qmlPath() const override { return {}; }
-
-    // Default to directed graphs
-    bool directed() const override { return true; }
-
-    const IApplication* application() const override { return _application; }
-
-    QObject* ptr() override { return this; }
+    QString imageSource() const override;
+    QString parametersQmlPath(const QString&) const override;
+    QString qmlPath() const override;
+    bool directed() const override;
+    const IApplication* application() const override;
+    QObject* ptr() override;
 };
 
 #endif // BASEPLUGIN_H
