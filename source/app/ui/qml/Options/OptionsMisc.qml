@@ -193,6 +193,9 @@ Item
                 {
                     id: maxUndoSpinBox
 
+                    editable: true
+                    Component.onCompleted: { contentItem.selectByMouse = true; }
+
                     from: 0
                     to: 50
                 }
