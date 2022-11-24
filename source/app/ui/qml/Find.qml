@@ -579,7 +579,6 @@ Rectangle
                     {
                         text: modelData
 
-                        bottomPadding: 2
                         rightPadding: scrollView.scrollBarWidth
 
                         function isChecked()
