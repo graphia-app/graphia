@@ -471,68 +471,9 @@ ApplicationWindow
         property string recentFiles
         property bool hasSeenTutorial
         property string update
-
-        property string templates
-
-        function templatesAsArray()
-        {
-            let a = [];
-
-            if(templates.length > 0)
-            {
-                try { a = JSON.parse(templates); }
-                catch(e) { a = []; }
-            }
-
-            return a;
-        }
-
-        function templateNamesAsArray()
-        {
-            return templatesAsArray().map(e => e.name).sort(QmlUtils.localeCompareStrings);
-        }
-
-        function removeTemplates(names)
-        {
-            let a = templatesAsArray().filter(e => names.indexOf(e.name) < 0);
-            templates = JSON.stringify(a);
-        }
-
-        function renameTemplate(from, to)
-        {
-            let a = templatesAsArray();
-            let foundElement = a.find(e => e.name === from);
-
-            if(!foundElement)
-            {
-                console.log("renameTemplate: could not find template named " + from);
-                return;
-            }
-
-            foundElement.name = to;
-            templates = JSON.stringify(a);
-        }
-
-        function addTemplate(name, method, transforms, visualisations)
-        {
-            let a = templatesAsArray();
-            let element = a.find(e => e.name === name);
-            if(!element)
-                element = a[a.push({}) - 1];
-
-            element.name = name;
-            element.method = method;
-            element.transforms = transforms;
-            element.visualisations = visualisations;
-
-            templates = JSON.stringify(a);
-        }
-
-        function templateFor(name)
-        {
-            return templatesAsArray().find(e => e.name === name);
-        }
     }
+
+    Templates { id: templates }
 
     Preferences
     {
@@ -1637,7 +1578,7 @@ ApplicationWindow
 
         onAccepted: function(name, method, transforms, visualisations)
         {
-            misc.addTemplate(name, method, transforms, visualisations);
+            templates.add(name, method, transforms, visualisations);
         }
     }
 
@@ -1661,17 +1602,17 @@ ApplicationWindow
         id: manageTemplates
 
         title: qsTr("Manage Templates")
-        model: { return misc.templateNamesAsArray(); }
+        model: { return templates.namesAsArray(); }
 
-        onRemove: function(names) { misc.removeTemplates(names); }
-        onRename: function(from, to) { misc.renameTemplate(from, to); }
+        onRemove: function(names) { templates.remove(names); }
+        onRename: function(from, to) { templates.rename(from, to); }
     }
 
     Action
     {
         id: manageTemplatesAction
         text: qsTr("Manage Templates…")
-        enabled: { return misc.templateNamesAsArray().length > 0; }
+        enabled: { return templates.namesAsArray().length > 0; }
         onTriggered: function(source)
         {
             manageTemplates.raise();
@@ -2329,12 +2270,12 @@ ApplicationWindow
             title: qsTr("T&emplates")
             PlatformMenuItem { action: addTemplateAction }
             PlatformMenuItem { action: manageTemplatesAction }
-            PlatformMenuSeparator { hidden: { return misc.templateNamesAsArray().length === 0; } }
+            PlatformMenuSeparator { hidden: { return templates.namesAsArray().length === 0; } }
 
             Instantiator
             {
                 id: templatesInstantiator
-                model: { return misc.templateNamesAsArray(); }
+                model: { return templates.namesAsArray(); }
 
                 delegate: PlatformMenuItem
                 {
@@ -2347,7 +2288,7 @@ ApplicationWindow
                         if(!currentTab || currentTab.document.busy)
                             return false;
 
-                        let template = misc.templateFor(text);
+                        let template = templates.templateFor(text);
                         if(!template)
                             return false;
 
