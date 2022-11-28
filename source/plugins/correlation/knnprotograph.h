@@ -97,12 +97,26 @@ public:
             if(!end)
             {
                 _protoNodeIt = _protoGraph->_protoNodes.begin();
+                _protoEdgeIt = _protoNodeIt->_protoEdges.begin();
 
-                if(!_protoGraph->_protoNodes.empty())
+                while(_protoEdgeIt == _protoNodeIt->_protoEdges.end())
+                {
+                    _protoNodeIt++;
+
+                    if(_protoNodeIt == _protoGraph->_protoNodes.end())
+                    {
+                        _protoEdgeIt = {};
+                        break;
+                    }
+
                     _protoEdgeIt = _protoNodeIt->_protoEdges.begin();
+                }
             }
             else
+            {
                 _protoNodeIt = _protoGraph->_protoNodes.end();
+                _protoEdgeIt = {};
+            }
         }
 
         self_type operator++()
