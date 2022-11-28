@@ -56,3 +56,13 @@ QObject* BasePlugin::ptr()
 {
     return this;
 }
+
+QString BasePlugin::displayTextForTransform(const QString& transform) const
+{
+    return application()->displayTextForTransform(transform);
+}
+
+QString BasePlugin::displayTextForVisualisation(const QString& visualisation) const
+{
+    return application()->displayTextForVisualisation(visualisation);
+}

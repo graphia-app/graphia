@@ -176,6 +176,9 @@ public:
     bool directed() const override;
     const IApplication* application() const override;
     QObject* ptr() override;
+
+    Q_INVOKABLE QString displayTextForTransform(const QString& transform) const;
+    Q_INVOKABLE QString displayTextForVisualisation(const QString& visualisation) const;
 };
 
 #endif // BASEPLUGIN_H
