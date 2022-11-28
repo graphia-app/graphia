@@ -169,6 +169,11 @@ public:
         return u::colorForString(string);
     }
 
+    Q_INVOKABLE QString htmlEscape(const QString& string) const
+    {
+        return string.toHtmlEscaped();
+    }
+
     Q_INVOKABLE QString base64EncodingOf(const QString& filename) const
     {
         QFile file(filename);
