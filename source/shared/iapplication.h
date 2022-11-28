@@ -19,10 +19,15 @@
 #ifndef IAPPLICATION_H
 #define IAPPLICATION_H
 
+#include <QString>
+
 class IApplication
 {
 public:
     virtual ~IApplication() = default;
+
+    virtual QString displayTextForTransform(const QString& transform) const = 0;
+    virtual QString displayTextForVisualisation(const QString& visualisation) const = 0;
 };
 
 #endif // IAPPLICATION_H

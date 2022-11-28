@@ -39,6 +39,9 @@
 #include "loading/nativesaver.h"
 #include "loading/nativeloader.h"
 
+#include "transform/graphtransformconfigparser.h"
+#include "ui/visualisations/visualisationconfigparser.h"
+
 #include <QString>
 #include <QStringList>
 #include <QDir>
@@ -637,6 +640,16 @@ void Application::submitTrackingData() const
 #ifndef _DEBUG
     Tracking::submit();
 #endif
+}
+
+QString Application::displayTextForTransform(const QString& transform) const
+{
+    return GraphTransformConfigParser::parseForDisplay(transform);
+}
+
+QString Application::displayTextForVisualisation(const QString& visualisation) const
+{
+    return VisualisationConfigParser::parseForDisplay(visualisation);
 }
 
 QString Application::resolvedExe(const QString& exe)

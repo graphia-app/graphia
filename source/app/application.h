@@ -216,6 +216,9 @@ public:
 
     Q_INVOKABLE void submitTrackingData() const;
 
+    QString displayTextForTransform(const QString& transform) const override;
+    QString displayTextForVisualisation(const QString& visualisation) const override;
+
     static QString resolvedExe(const QString& exe);
 
 signals:
