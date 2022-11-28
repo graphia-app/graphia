@@ -708,6 +708,10 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 bool success = p.parse(visualisation);
                 Q_ASSERT(success);
 
+                if(!p.result()._parameters.empty())
+                    continue;
+
+                // If the visualisation was not supplied with parameters, apply the defaults
                 const auto& attributeName = p.result()._attributeName;
                 auto valueType = _graphModel->attributeValueByName(attributeName).valueType();
                 const auto& channelName = p.result()._channelName;
