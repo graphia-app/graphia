@@ -154,6 +154,7 @@ private:
     auto currentAttributeIdentities() const
     {
         std::vector<AttributeIdentity> attributeIdentities;
+        attributeIdentities.reserve(_attributes.size());
 
         for(const auto& attribute : _attributes)
         {
