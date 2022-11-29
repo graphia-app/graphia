@@ -23,7 +23,7 @@
 
 // modeled slightly after Andrescu’s talk and article(s)
 namespace std{ // NOLINT
-namespace experimental{
+namespace experimental{ // NOLINT
 template <typename EF>
 struct scope_exit {
     // construction

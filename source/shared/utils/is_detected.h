@@ -22,7 +22,7 @@
 #include <type_traits>
 
 namespace std{ // NOLINT
-namespace experimental{
+namespace experimental{ // NOLINT
 
 // Copy and pasted from https://en.cppreference.com/w/cpp/experimental/is_detected
 namespace detail {
