@@ -719,6 +719,8 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     default: break;
     }
 
+    defaultTransforms.reserve(defaultTransforms.size() + _additionalTransforms.size());
+
     for(const auto& additionalTransform : _additionalTransforms)
         defaultTransforms.append(additionalTransform);
 
@@ -728,6 +730,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 QStringList CorrelationPluginInstance::defaultVisualisations() const
 {
     QStringList defaultVisualisations;
+    defaultVisualisations.reserve(_additionalVisualisations.size());
 
     for(const auto& additionalVisualisation : _additionalVisualisations)
         defaultVisualisations.append(additionalVisualisation);
