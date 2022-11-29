@@ -25,6 +25,8 @@
 #include "shared/utils/progressable.h"
 #include "shared/utils/container.h"
 
+#include <QDebug>
+
 namespace u
 {
     template<typename GraphArray, typename C, typename ElementToJsonFn>

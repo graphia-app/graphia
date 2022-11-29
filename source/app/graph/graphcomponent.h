@@ -20,6 +20,7 @@
 #define GRAPHCOMPONENT_H
 
 #include "shared/graph/igraphcomponent.h"
+#include "graph.h"
 
 class GraphComponent : public IGraphComponent
 {

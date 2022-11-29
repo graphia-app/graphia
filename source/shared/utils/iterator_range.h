@@ -19,6 +19,7 @@
 #ifndef ITERATOR_RANGE_H
 #define ITERATOR_RANGE_H
 
+#include <iterator>
 #include <type_traits>
 #include <utility>
 

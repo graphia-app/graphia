@@ -19,6 +19,7 @@
 #ifndef FUNCTION_TRAITS_H
 #define FUNCTION_TRAITS_H
 
+#include <cstddef>
 #include <tuple>
 
 // http://stackoverflow.com/questions/7943525/

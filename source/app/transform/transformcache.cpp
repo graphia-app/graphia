@@ -19,7 +19,6 @@
 #include "transformcache.h"
 
 #include "graph/graphmodel.h"
-#include "graph/mutablegraph.h"
 #include "transform/transformedgraph.h"
 
 #include "shared/utils/iterator_range.h"

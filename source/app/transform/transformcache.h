@@ -20,11 +20,11 @@
 #define TRANSFORMCACHE_H
 
 #include "graphtransformconfig.h"
+#include "graph/mutablegraph.h"
 #include "attributes/attribute.h"
 
 #include <vector>
 
-class MutableGraph;
 class TransformedGraph;
 class GraphModel;
 

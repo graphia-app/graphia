@@ -19,6 +19,8 @@
 #ifndef SCOPE_EXIT_H
 #define SCOPE_EXIT_H
 
+#include <utility>
+
 // This is more or less directly lifted from N4189
 
 // modeled slightly after Andrescu’s talk and article(s)

@@ -19,8 +19,10 @@
 #ifndef FIXEDSIZESTACK_H
 #define FIXEDSIZESTACK_H
 
-#include <array>
+#include <vector>
+
 #include <cstdlib>
+#include <cassert>
 
 template<typename T> class FixedSizeStack
 {
