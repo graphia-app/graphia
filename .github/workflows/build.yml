@@ -323,7 +323,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         repository: KDE/clazy
-        ref: 1.11
         path: clazy
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build clazy
