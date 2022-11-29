@@ -98,15 +98,15 @@ QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& row
 
 int TableProxyModel::mapToSourceRow(int proxyRow) const
 {
-    QModelIndex proxyIndex = index(proxyRow, 0);
-    QModelIndex sourceIndex = mapToSource(proxyIndex);
+    const QModelIndex proxyIndex = index(proxyRow, 0);
+    const QModelIndex sourceIndex = mapToSource(proxyIndex);
     return sourceIndex.isValid() ? sourceIndex.row() : -1;
 }
 
 int TableProxyModel::mapFromSourceRow(int sourceRow) const
 {
-    QModelIndex sourceIndex = sourceModel()->index(sourceRow, 0);
-    QModelIndex proxyIndex = mapFromSource(sourceIndex);
+    const QModelIndex sourceIndex = sourceModel()->index(sourceRow, 0);
+    const QModelIndex proxyIndex = mapFromSource(sourceIndex);
     return proxyIndex.isValid() ? proxyIndex.row() : -1;
 }
 

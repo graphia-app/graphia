@@ -83,8 +83,8 @@ size_t TabularData::numRows() const
 
 void TabularData::setValueAt(size_t column, size_t row, QString&& value, int progressHint)
 {
-    size_t columns = column >= _columns ? column + 1 : _columns;
-    size_t rows = row >= _rows ? row + 1 : _rows;
+    const size_t columns = column >= _columns ? column + 1 : _columns;
+    const size_t rows = row >= _rows ? row + 1 : _rows;
     auto newSize = columns * rows;
 
     // If the column count is increasing, jiggle all the existing rows around,
@@ -209,7 +209,7 @@ std::vector<TypeIdentity> TabularData::typeIdentities(Progressable* progressable
 
 int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& referenceValues) const
 {
-    std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
+    const std::set<QString> referenceSet(referenceValues.begin(), referenceValues.end());
 
     std::set<QString> columnValues;
     std::set<QString> intersection;

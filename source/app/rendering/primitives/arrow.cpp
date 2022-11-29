@@ -124,7 +124,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
 
-    QVector3D coneTip(0.0f, _length * 0.5f, 0.0f);
+    const QVector3D coneTip(0.0f, _length * 0.5f, 0.0f);
 
     // Iterate over longitudes (slices)
     for(size_t slice = 0U; slice < _slices + 1; slice++)
@@ -189,7 +189,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
                          vertices[index + 2]);
 
         // Base to tip
-        QVector3D baseToTipTangent = coneTip - bottom;
+        const QVector3D baseToTipTangent = coneTip - bottom;
         bottom.setY(0.0f);
 
         QVector3D baseTangent = QVector3D::crossProduct(baseToTipTangent, bottom);

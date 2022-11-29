@@ -331,7 +331,7 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))
     {
-        QString parentText = get(index.parent());
+        const QString parentText = get(index.parent());
         text = QStringLiteral("%1.%2").arg(parentText, text);
     }
     else if(parent == _sourceNode)

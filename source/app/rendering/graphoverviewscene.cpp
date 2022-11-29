@@ -142,8 +142,8 @@ bool GraphOverviewScene::viewIsReset() const
 
 void GraphOverviewScene::pan(float dx, float dy)
 {
-    float scaledDx = dx / (_zoomFactor);
-    float scaledDy = dy / (_zoomFactor);
+    const float scaledDx = dx / (_zoomFactor);
+    const float scaledDy = dy / (_zoomFactor);
 
     setOffset(static_cast<float>(_offset.x()) - scaledDx,
               static_cast<float>(_offset.y()) - scaledDy);
@@ -153,14 +153,14 @@ void GraphOverviewScene::pan(float dx, float dy)
 
 void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
-    float oldCentreX = x / _zoomFactor;
-    float oldCentreY = y / _zoomFactor;
+    const float oldCentreX = x / _zoomFactor;
+    const float oldCentreY = y / _zoomFactor;
 
     if(!setZoomFactor(_zoomFactor + (delta * _zoomFactor)))
         return;
 
-    float newCentreX = x / _zoomFactor;
-    float newCentreY = y / _zoomFactor;
+    const float newCentreX = x / _zoomFactor;
+    const float newCentreY = y / _zoomFactor;
 
     setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
               static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
@@ -190,8 +190,8 @@ float GraphOverviewScene::minZoomFactor() const
     if(_componentLayout->boundingWidth() <= 0.0f && _componentLayout->boundingHeight() <= 0.0f)
         return 1.0f;
 
-    float minWidthZoomFactor = static_cast<float>(_width) / _componentLayout->boundingWidth();
-    float minHeightZoomFactor = static_cast<float>(_height) / _componentLayout->boundingHeight();
+    const float minWidthZoomFactor = static_cast<float>(_width) / _componentLayout->boundingWidth();
+    const float minHeightZoomFactor = static_cast<float>(_height) / _componentLayout->boundingHeight();
 
     return std::min(minWidthZoomFactor, minHeightZoomFactor);
 }
@@ -199,7 +199,7 @@ float GraphOverviewScene::minZoomFactor() const
 bool GraphOverviewScene::setZoomFactor(float zoomFactor)
 {
     zoomFactor = std::max(minZoomFactor(), zoomFactor);
-    bool changed = _zoomFactor != zoomFactor;
+    const bool changed = _zoomFactor != zoomFactor;
     _zoomFactor = zoomFactor;
     _autoZooming = (_zoomFactor == minZoomFactor());
 
@@ -209,21 +209,21 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
 // NOLINTNEXTLINE readability-make-member-function-const
 void GraphOverviewScene::setOffset(float x, float y)
 {
-    float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
-    float scaledBoundingHeight = _componentLayout->boundingHeight() * _zoomFactor;
+    const float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
+    const float scaledBoundingHeight = _componentLayout->boundingHeight() * _zoomFactor;
 
-    float xDiff = (scaledBoundingWidth - static_cast<float>(_width)) / _zoomFactor;
-    float xMin = std::min(xDiff, 0.0f);
-    float xMax = std::max(xDiff, 0.0f);
+    const float xDiff = (scaledBoundingWidth - static_cast<float>(_width)) / _zoomFactor;
+    const float xMin = std::min(xDiff, 0.0f);
+    const float xMax = std::max(xDiff, 0.0f);
 
     if(scaledBoundingWidth > static_cast<float>(_width))
         x = std::clamp(x, xMin, xMax);
     else
         x = (xMin + xMax) * 0.5f;
 
-    float yDiff = (scaledBoundingHeight - static_cast<float>(_height)) / _zoomFactor;
-    float yMin = std::min(yDiff, 0.0f);
-    float yMax = std::max(yDiff, 0.0f);
+    const float yDiff = (scaledBoundingHeight - static_cast<float>(_height)) / _zoomFactor;
+    const float yMin = std::min(yDiff, 0.0f);
+    const float yMax = std::max(yDiff, 0.0f);
 
     if(scaledBoundingHeight > static_cast<float>(_height))
         y = std::clamp(y, yMin, yMax);
@@ -240,9 +240,9 @@ Transition& GraphOverviewScene::startTransitionFromComponentMode(ComponentId foc
 {
     Q_ASSERT(!focusComponentId.isNull());
 
-    float halfWidth = static_cast<float>(_width) * 0.5f;
-    float halfHeight = static_cast<float>(_height) * 0.5f;
-    Circle focusComponentLayout(halfWidth, halfHeight, std::min(halfWidth, halfHeight));
+    const float halfWidth = static_cast<float>(_width) * 0.5f;
+    const float halfHeight = static_cast<float>(_height) * 0.5f;
+    const Circle focusComponentLayout(halfWidth, halfHeight, std::min(halfWidth, halfHeight));
 
     // If the component that has focus isn't in the overview scene's component list then it's
     // going away, in which case we need to deal with it
@@ -288,8 +288,8 @@ Transition& GraphOverviewScene::startTransitionToComponentMode(ComponentId focus
             _componentAlpha[componentId] = 0.0f;
     }
 
-    float halfWidth = static_cast<float>(_width) * 0.5f;
-    float halfHeight = static_cast<float>(_height) * 0.5f;
+    const float halfWidth = static_cast<float>(_width) * 0.5f;
+    const float halfHeight = static_cast<float>(_height) * 0.5f;
     _zoomedComponentLayoutData[focusComponentId].set(
         halfWidth, halfHeight, std::min(halfWidth, halfHeight));
 
@@ -450,7 +450,7 @@ Transition& GraphOverviewScene::startTransition(float duration, Transition::Type
 
         // Use the rotation of the new component
         auto* renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
-        QQuaternion rotation = renderer->camera()->rotation();
+        const QQuaternion rotation = renderer->camera()->rotation();
 
         for(auto merger : componentMergeSet.mergers())
         {
@@ -586,8 +586,8 @@ void GraphOverviewScene::startComponentLayoutTransition()
 {
     if(visible())
     {
-        bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
-        float duration = !componentLayoutDataChanged ? 0.0f : u::pref(QStringLiteral("visuals/transitionTime")).toFloat();
+        const bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
+        const float duration = !componentLayoutDataChanged ? 0.0f : u::pref(QStringLiteral("visuals/transitionTime")).toFloat();
 
         setVisible(true); // Show new components
         setViewportSize(_width, _height);

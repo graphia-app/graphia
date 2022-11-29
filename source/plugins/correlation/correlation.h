@@ -175,7 +175,7 @@ private:
                 if constexpr(std::is_base_of_v<RequiresRanking, Algorithm>)
                     vectorB = vectorB->ranking();
 
-                double r = algorithm.evaluate(size, vectorA, vectorB);
+                const double r = algorithm.evaluate(size, vectorA, vectorB);
 
                 if(!std::isfinite(r))
                     continue;
@@ -412,7 +412,7 @@ private:
     auto process(const TokenisedDataVectors& vectors, double threshold, bool treatAsBinary,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
-        size_t size = vectors.front().size();
+        const size_t size = vectors.front().size();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);
@@ -477,7 +477,7 @@ private:
                             fraction += f(vectorAValue, vectorBValue);
                     }
 
-                    double r = fraction;
+                    const double r = fraction;
 
                     if(!std::isfinite(r))
                         continue;

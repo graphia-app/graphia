@@ -27,7 +27,7 @@
 
 static void removeLeaves(TransformedGraph& target, size_t limit = 0)
 {
-    bool unlimited = (limit == 0);
+    const bool unlimited = (limit == 0);
 
     // Hoist this out of the main loop, to avoid the alloc cost between passes
     std::vector<NodeId> removees;

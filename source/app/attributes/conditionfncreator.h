@@ -208,7 +208,7 @@ private:
 
                 return [lhs, valueOfFn, rhs, reOption](E elementId)
                 {
-                    QRegularExpression re((rhs.*valueOfFn)(elementId), reOption);
+                    const QRegularExpression re((rhs.*valueOfFn)(elementId), reOption);
                     if(!re.isValid())
                         return false; // Regex isn't valid
 
@@ -348,7 +348,7 @@ private:
                             QRegularExpression::CaseInsensitiveOption :
                             QRegularExpression::NoPatternOption;
 
-                QRegularExpression re(value, reOption);
+                const QRegularExpression re(value, reOption);
                 if(!re.isValid())
                     return nullptr; // Regex isn't valid
 
@@ -420,8 +420,8 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::String op) const
         {
-            QString lhs = _lhs.toString();
-            QString rhs = _rhs.toString();
+            const QString lhs = _lhs.toString();
+            const QString rhs = _rhs.toString();
 
             switch(op)
             {
@@ -436,7 +436,7 @@ private:
                             QRegularExpression::CaseInsensitiveOption :
                             QRegularExpression::NoPatternOption;
 
-                QRegularExpression re(rhs, reOption);
+                const QRegularExpression re(rhs, reOption);
                 if(!re.isValid())
                     return nullptr; // Regex isn't valid
 
@@ -551,7 +551,7 @@ private:
                     return nullptr; // Types do not match
 
                 auto validOps = GraphTransformConfigParser::ops(lhsType);
-                bool opIsValid = std::any_of(validOps.begin(), validOps.end(),
+                const bool opIsValid = std::any_of(validOps.begin(), validOps.end(),
                 [&terminalCondition](const auto& validOp)
                 {
                     return terminalCondition._op == GraphTransformConfigParser::stringToOp(validOp);
@@ -573,28 +573,28 @@ private:
             if(lhsAttribute.isValid() && rhsAttribute.isValid())
             {
                 // Both sides are attributes
-                AttributesOpVistor<E> visitor(lhsAttribute, rhsAttribute);
+                const AttributesOpVistor<E> visitor(lhsAttribute, rhsAttribute);
                 return std::visit(visitor, terminalCondition._op);
             }
 
             if(!lhsAttribute.isValid() && !rhsAttribute.isValid())
             {
                 // Neither side is an attribute
-                ValuesOpVistor<E> visitor(terminalCondition._lhs, terminalCondition._rhs);
+                const ValuesOpVistor<E> visitor(terminalCondition._lhs, terminalCondition._rhs);
                 return std::visit(visitor, terminalCondition._op);
             }
 
             if(lhsAttribute.isValid())
             {
                 // Left hand side is an attribute
-                AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
+                const AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
                 return std::visit(visitor, terminalCondition._op);
             }
 
             if(rhsAttribute.isValid())
             {
                 // Right hand side is an attribute
-                AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);
+                const AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);
                 return std::visit(visitor, terminalCondition._op);
             }
 
@@ -688,24 +688,24 @@ public:
     template<typename Op, typename Value>
     static auto node(const Attribute& attribute, Op op, Value value)
     {
-        GraphTransformConfig::TerminalOp terminalOp = op;
-        AttributeValueOpVistor<NodeId> visitor(attribute, TerminalValueWrapper(value), false);
+        const GraphTransformConfig::TerminalOp terminalOp = op;
+        const AttributeValueOpVistor<NodeId> visitor(attribute, TerminalValueWrapper(value), false);
         return std::visit(visitor, terminalOp);
     }
 
     template<typename Op, typename Value>
     static auto edge(const Attribute& attribute, Op op, Value value)
     {
-        GraphTransformConfig::TerminalOp terminalOp = op;
-        AttributeValueOpVistor<EdgeId> visitor(attribute, TerminalValueWrapper(value), false);
+        const GraphTransformConfig::TerminalOp terminalOp = op;
+        const AttributeValueOpVistor<EdgeId> visitor(attribute, TerminalValueWrapper(value), false);
         return std::visit(visitor, terminalOp);
     }
 
     template<typename Op, typename Value>
     static auto component(const Attribute& attribute, Op op, Value value)
     {
-        GraphTransformConfig::TerminalOp terminalOp = op;
-        AttributeValueOpVistor<const IGraphComponent&> visitor(attribute, TerminalValueWrapper(value), false);
+        const GraphTransformConfig::TerminalOp terminalOp = op;
+        const AttributeValueOpVistor<const IGraphComponent&> visitor(attribute, TerminalValueWrapper(value), false);
         return std::visit(visitor, terminalOp);
     }
 

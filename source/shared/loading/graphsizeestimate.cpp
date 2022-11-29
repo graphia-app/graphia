@@ -162,7 +162,7 @@ QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
                 edges.insert(index);
 
                 const auto& edge = edgeList.at(index);
-                NodeId opposite = (nodeId == edge._source) ? edge._target : edge._source;
+                const NodeId opposite = (nodeId == edge._source) ? edge._target : edge._source;
 
                 uniqueEdges.emplace(nodeId, opposite);
             }

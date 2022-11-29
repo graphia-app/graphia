@@ -112,7 +112,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         for(const auto* relem = mclMatrix.cbegin(lelem->index()); relem != rend; ++relem)
         {
             // For each column starting at left column index (right)
-            float mult = lelem->value() * relem->value();
+            const float mult = lelem->value() * relem->value();
 
             if(!rowData.valid[relem->index()])
             {
@@ -140,11 +140,11 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         size_t remainCount = nonzeros;
         float rowPruneSum = 0.0f;
         // Mass is always normalised!
-        float targetMass = 0.9f;
+        const float targetMass = 0.9f;
 
         for(size_t i = 0UL; i < nonzeros; ++i)
         {
-            size_t index = rowData.indices[i];
+            const size_t index = rowData.indices[i];
             if(std::abs(rowData.values[index]) <= minValueCutoff)
             {
                 // Remove from the remainCount;
@@ -339,7 +339,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     // Map NodeIds to Matrix index
     NodeIdMap<size_t> nodeToIndexMap;
     std::map<size_t, NodeId> indexToNodeMap;
-    for(NodeId nodeId : target.nodeIds())
+    for(const NodeId nodeId : target.nodeIds())
     {
         auto index = nodeToIndexMap.size();
         nodeToIndexMap[nodeId] = index;
@@ -352,7 +352,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     clusterMatrix.reserve((target.numEdges() * 2) + nodeCount);
 
     // Populate the Matrix
-    for(NodeId nodeId : target.nodeIds())
+    for(const NodeId nodeId : target.nodeIds())
     {
         auto nodeIndex = nodeToIndexMap[nodeId];
         auto connectedEdgeIds = target.edgeIdsForNodeId(nodeId);

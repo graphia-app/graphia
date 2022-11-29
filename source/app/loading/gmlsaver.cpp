@@ -31,7 +31,7 @@ bool GMLSaver::save()
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     int level = 0;
 
-    size_t numElements = _graphModel->attributeNames().size() +
+    const size_t numElements = _graphModel->attributeNames().size() +
         _graphModel->graph().numNodes() +
         _graphModel->graph().numEdges();
     size_t runningCount = 0;
@@ -90,7 +90,7 @@ bool GMLSaver::save()
 
             if(attribute->valueType() == ValueType::String)
             {
-                QString escapedValue = escape(attribute->stringValueOf(elementId));
+                const QString escapedValue = escape(attribute->stringValueOf(elementId));
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
                        << QStringLiteral(R"("%1")").arg(escapedValue) << "\n";
             }
@@ -109,12 +109,12 @@ bool GMLSaver::save()
     _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
-        QString nodeName = escape(_graphModel->nodeName(nodeId));
+        const QString nodeName = escape(_graphModel->nodeName(nodeId));
         stream << indent(level) << "node\n";
         stream << indent(level) << "[\n";
         level++;
         stream << indent(level) << "id " << static_cast<int>(nodeId) << "\n";
-        QString labelString = QStringLiteral(R"("%1")").arg(nodeName);
+        const QString labelString = QStringLiteral(R"("%1")").arg(nodeName);
         stream << indent(level) << "label " << labelString << "\n";
         attributes(nodeId, _graphModel->attributeNames(ElementType::Node));
         stream << indent(--level) << "]\n"; // node

@@ -94,9 +94,9 @@ void GraphOverviewInteractor::trackpadPanGesture(float dx, float dy, float x, fl
     if(renderer == nullptr)
         return;
 
-    QPoint from = componentLocalCursorPosition(renderer->componentId(),
+    const QPoint from = componentLocalCursorPosition(renderer->componentId(),
         {static_cast<int>(x), static_cast<int>(y)});
-    QPoint to = componentLocalCursorPosition(renderer->componentId(),
+    const QPoint to = componentLocalCursorPosition(renderer->componentId(),
         {static_cast<int>(x + dx), static_cast<int>(y + dy)});
 
     rotateRendererByMouseMove(renderer, from, to);

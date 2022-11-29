@@ -103,7 +103,7 @@ void FilterTransform::apply(TransformedGraph& target) const
             return;
         }
 
-        ComponentManager componentManager(target);
+        const ComponentManager componentManager(target);
         std::vector<NodeId> removees;
 
         for(auto componentId : componentManager.componentIds())

@@ -93,7 +93,7 @@ json updateStringToJson(const QString& updateString, QString* status)
         if(!u::contains(update, "targetVersionRegex"))
             return true;
 
-        std::string targetVersionRegex = update["targetVersionRegex"];
+        const std::string targetVersionRegex = update["targetVersionRegex"];
 
         return !std::regex_match(VERSION, std::regex{targetVersionRegex});
     }), updates.end());

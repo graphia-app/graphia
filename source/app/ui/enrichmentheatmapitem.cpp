@@ -147,8 +147,8 @@ void EnrichmentHeatmapItem::buildPlot()
     if(_tableModel == nullptr)
         return;
 
-    QSharedPointer<QCPAxisTickerText> xCategoryTicker(new QCPAxisTickerText);
-    QSharedPointer<QCPAxisTickerText> yCategoryTicker(new QCPAxisTickerText);
+    const QSharedPointer<QCPAxisTickerText> xCategoryTicker(new QCPAxisTickerText);
+    const QSharedPointer<QCPAxisTickerText> yCategoryTicker(new QCPAxisTickerText);
 
     customPlot().xAxis->setTicker(xCategoryTicker);
     customPlot().xAxis->setTickLabelRotation(90);
@@ -185,7 +185,7 @@ void EnrichmentHeatmapItem::buildPlot()
     std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), collator);
     std::sort(sortAttributeValueSetB.rbegin(), sortAttributeValueSetB.rend(), collator);
 
-    QFontMetrics metrics(_defaultFont9Pt);
+    const QFontMetrics metrics(_defaultFont9Pt);
 
     int column = 0;
     for(const auto& labelName: sortAttributeValueSetA)
@@ -280,10 +280,10 @@ double EnrichmentHeatmapItem::columnAxisHeight()
 void EnrichmentHeatmapItem::scaleXAxis()
 {
     auto maxX = static_cast<double>(_attributeACount);
-    double visiblePlotWidth = columnAxisWidth();
-    double textHeight = columnLabelSize();
+    const double visiblePlotWidth = columnAxisWidth();
+    const double textHeight = columnLabelSize();
 
-    double position = (_attributeACount - (visiblePlotWidth / textHeight)) * _scrollXAmount;
+    const double position = (_attributeACount - (visiblePlotWidth / textHeight)) * _scrollXAmount;
 
     if(position + (visiblePlotWidth / textHeight) <= maxX)
         customPlot().xAxis->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - _HEATMAP_OFFSET);
@@ -294,10 +294,10 @@ void EnrichmentHeatmapItem::scaleXAxis()
 void EnrichmentHeatmapItem::scaleYAxis()
 {
     auto maxY = static_cast<double>(_attributeBCount);
-    double visiblePlotHeight = columnAxisHeight();
-    double textHeight = columnLabelSize();
+    const double visiblePlotHeight = columnAxisHeight();
+    const double textHeight = columnLabelSize();
 
-    double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
+    const double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
 
     if((visiblePlotHeight / textHeight) <= maxY)
         customPlot().yAxis2->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - _HEATMAP_OFFSET);
@@ -307,7 +307,7 @@ void EnrichmentHeatmapItem::scaleYAxis()
 
 void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
 {
-    bool changed = (_elideLabelWidth != elideLabelWidth);
+    const bool changed = (_elideLabelWidth != elideLabelWidth);
     _elideLabelWidth = elideLabelWidth;
 
     if(changed)
@@ -362,7 +362,7 @@ void EnrichmentHeatmapItem::setScrollYAmount(double scrollAmount)
 
 double EnrichmentHeatmapItem::columnLabelSize()
 {
-    QFontMetrics metrics(_defaultFont9Pt);
+    const QFontMetrics metrics(_defaultFont9Pt);
     const auto columnPadding = 1;
     return metrics.height() + columnPadding;
 }
@@ -382,7 +382,7 @@ void EnrichmentHeatmapItem::showTooltip()
     double key = 0.0, value = 0.0;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
 
-    std::pair<int, int> colorMapIndexPair = {std::round(key), std::round(value)};
+    const std::pair<int, int> colorMapIndexPair = {std::round(key), std::round(value)};
     if(!u::containsKey(_colorMapKeyValueToTableIndex, colorMapIndexPair))
         return;
 

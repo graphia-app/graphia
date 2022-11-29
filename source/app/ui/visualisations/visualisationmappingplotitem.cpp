@@ -118,9 +118,9 @@ void VisualisationMappingPlotItem::buildPlot()
     auto* mainXAxis = mainAxisRect->axis(QCPAxis::atBottom);
     auto* mainYAxis = mainAxisRect->axis(QCPAxis::atLeft);
 
-    double rangeMargin = _statistics._range * 0.05;
-    double min = _statistics._min - rangeMargin;
-    double max = _statistics._max + rangeMargin;
+    const double rangeMargin = _statistics._range * 0.05;
+    const double min = _statistics._min - rangeMargin;
+    const double max = _statistics._max + rangeMargin;
 
     mainXAxis->setRange(0.0, 1.0);
     mainYAxis->setRange(min, max);

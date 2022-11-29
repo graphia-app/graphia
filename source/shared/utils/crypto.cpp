@@ -125,9 +125,9 @@ std::string u::rsaSignString(const std::string& string, const std::string& priva
         auto privateKey = loadKey<CryptoPP::RSA::PrivateKey>(privateKeyFileName);
 
         CryptoPP::AutoSeededRandomPool rng;
-        CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
+        const CryptoPP::RSASSA_PKCS1v15_SHA_Signer signer(privateKey);
 
-        CryptoPP::StringSource ss(string, true,
+        const CryptoPP::StringSource ss(string, true,
             new CryptoPP::SignerFilter(rng, signer,
                 new CryptoPP::StringSink(signature)
            ) // SignerFilter
@@ -153,12 +153,12 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
 {
     auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
 
-    CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
+    const CryptoPP::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
     std::string recoveredMessage;
 
     try
     {
-        CryptoPP::StringSource ss(signaturePlusString, true,
+        const CryptoPP::StringSource ss(signaturePlusString, true,
             new CryptoPP::SignatureVerificationFilter(
                 rsaVerifier, new CryptoPP::StringSink(recoveredMessage),
                 CryptoPP::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
@@ -182,12 +182,12 @@ bool u::rsaVerifySignature(const std::string& signaturePlusString,
 std::string u::rsaEncryptString(const std::string& string, const std::string& publicKeyFileName)
 {
     auto publicKey = loadKey<CryptoPP::RSA::PublicKey>(publicKeyFileName);
-    CryptoPP::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
+    const CryptoPP::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
 
     CryptoPP::AutoSeededRandomPool rng;
     std::vector<CryptoPP::byte> cipher(rsaEncryptor.FixedCiphertextLength());
 
-    CryptoPP::StringSource ss(string, true,
+    const CryptoPP::StringSource ss(string, true,
         new CryptoPP::PK_EncryptorFilter(rng, rsaEncryptor,
             new CryptoPP::ArraySink(cipher.data(), cipher.size())
         ) // PK_EncryptorFilter

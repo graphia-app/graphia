@@ -108,7 +108,7 @@ static QString anonymousIdentity()
     auto anonUser = QStringLiteral("anon");
     QString hostName = QHostInfo::localDomainName();
 
-    json ipRequestJson = {{"action", "getip"}};
+    const json ipRequestJson = {{"action", "getip"}};
     auto ipAddress = postToTrackingServer(QString::fromStdString(ipRequestJson.dump()));
 
     auto hostInfo = QHostInfo::fromName(ipAddress);
@@ -163,7 +163,7 @@ void Tracking::submit()
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
             QSysInfo::productType(), QSysInfo::productVersion());
 
-        json trackingJson =
+        const json trackingJson =
         {
             {"action",          "submit"},
             {"payload",

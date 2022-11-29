@@ -267,7 +267,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
 
     for(const auto& urlType : urlTypes)
     {
-        bool canLoad =
+        const bool canLoad =
             (urlType == QStringLiteral("GML") && GmlFileParser::canLoad(url)) ||
             (urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url)) ||
             (urlType == QStringLiteral("DOT") && DotFileParser::canLoad(url)) ||

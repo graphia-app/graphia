@@ -31,14 +31,14 @@ MutableGraph::MutableGraph(const MutableGraph& other) // NOLINT bugprone-copy-co
 MutableGraph::~MutableGraph() // NOLINT modernize-use-equals-default
 {
     // Ensure no transactions are in progress
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 }
 
 void MutableGraph::clear()
 {
     beginTransaction();
 
-    bool changed = numNodes() > 0;
+    const bool changed = numNodes() > 0;
 
     for(auto nodeId : nodeIds())
         removeNode(nodeId);
@@ -445,7 +445,7 @@ template<typename C> static void moveEdgesTo(MutableGraph& graph, NodeId nodeId,
                                              const C& outEdgeIds)
 {
     // Don't bother emitting signals for edges that are moving
-    bool wasBlocked = graph.blockSignals(true);
+    const bool wasBlocked = graph.blockSignals(true);
 
     for(auto edgeIdToMove : inEdgeIds)
     {
@@ -494,7 +494,7 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
 
     // Divide into components, but ignore any edges that aren't being contracted,
     // so that each component represents a set of nodes that will be merged
-    ComponentManager componentManager(*this, nullptr,
+    const ComponentManager componentManager(*this, nullptr,
     [&edgeIds](EdgeId edgeId)
     {
         return !u::contains(edgeIds, edgeId);
@@ -554,16 +554,16 @@ MutableGraph& MutableGraph::clone(const MutableGraph& other)
         connection.second.setCollection(&_e._mergedEdgeIds);
 
     // Signal all the changes based on the diff before we cloned
-    for(NodeId nodeId : diff._nodesAdded)
+    for(const NodeId nodeId : diff._nodesAdded)
         emit nodeAdded(this, nodeId);
 
-    for(EdgeId edgeId : diff._edgesAdded)
+    for(const EdgeId edgeId : diff._edgesAdded)
         emit edgeAdded(this, edgeId);
 
-    for(EdgeId edgeId : diff._edgesRemoved)
+    for(const EdgeId edgeId : diff._edgesRemoved)
         emit edgeRemoved(this, edgeId);
 
-    for(NodeId nodeId : diff._nodesRemoved)
+    for(const NodeId nodeId : diff._nodesRemoved)
         emit nodeRemoved(this, nodeId);
 
     _updateRequired = true;

@@ -78,8 +78,8 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
 
     parser.setProgress(-1);
 
-    uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
-    size_t numColumns = _numContinuousColumns + _numDiscreteColumns;
+    const uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
+    const size_t numColumns = _numContinuousColumns + _numDiscreteColumns;
     auto left = static_cast<size_t>(dataRect.x());
     auto right = static_cast<size_t>(dataRect.x()) + static_cast<size_t>(dataRect.width());
     auto top = static_cast<size_t>(dataRect.y());
@@ -101,19 +101,19 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
             if(parser.cancelled())
                 return false;
 
-            uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
-            uint64_t dataPoint = columnIndex + rowOffset;
+            const uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
+            const uint64_t dataPoint = columnIndex + rowOffset;
             parser.setProgress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
             const auto& value = tabularData.valueAt(columnIndex, rowIndex);
 
             //FIXME: If there are continuous and discrete columns, dataColumnIndex will need to change
-            size_t dataColumnIndex = columnIndex - static_cast<size_t>(dataRect.x());
-            size_t dataRowIndex = rowIndex - static_cast<size_t>(dataRect.y());
-            bool isColumnInDataRect = left <= columnIndex && columnIndex < right;
-            bool isRowInDataRect = top <= rowIndex && rowIndex < bottom;
-            bool isColumnAnnotation = rowIndex < top;
-            bool isRowAttribute = columnIndex < left;
+            const size_t dataColumnIndex = columnIndex - static_cast<size_t>(dataRect.x());
+            const size_t dataRowIndex = rowIndex - static_cast<size_t>(dataRect.y());
+            const bool isColumnInDataRect = left <= columnIndex && columnIndex < right;
+            const bool isRowInDataRect = top <= rowIndex && rowIndex < bottom;
+            const bool isColumnAnnotation = rowIndex < top;
+            const bool isRowAttribute = columnIndex < left;
 
             if((isColumnInDataRect && dataColumnIndex >= numColumns) ||
                 (isRowInDataRect && dataRowIndex >= _numRows))
@@ -606,7 +606,7 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    std::vector<QString> urlTypes =
+    const std::vector<QString> urlTypes =
     {
         QStringLiteral("CorrelationCSV"),
         QStringLiteral("CorrelationTSV"),

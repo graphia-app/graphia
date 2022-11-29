@@ -238,8 +238,8 @@ bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTextu
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    bool fboValid = (status == GL_FRAMEBUFFER_COMPLETE);
+    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const bool fboValid = (status == GL_FRAMEBUFFER_COMPLETE);
     Q_ASSERT(fboValid);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -937,7 +937,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
         if(type.test(GraphRendererCore::Type::Color))
         {
-            bool disableAlphaBlending =
+            const bool disableAlphaBlending =
                 _shading == Shading::Flat && !graphData._isOverlay;
 
             render2DComposite(*this, _screenShader,

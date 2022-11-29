@@ -61,15 +61,15 @@ double EnrichmentCalculator::fishers(size_t a, size_t b, size_t c, size_t d)
     double twoPval = 0.0;
 
     // range of variation
-    double lm = (ac < cd) ? 0.0 : ac - cd;
-    double um = (ac < ab) ? ac  : ab;
+    const double lm = (ac < cd) ? 0.0 : ac - cd;
+    const double um = (ac < ab) ? ac  : ab;
 
     // Fisher's exact test
-    double crit = hyperGeometricProb(static_cast<double>(a), ab, cd, ac, bd);
+    const double crit = hyperGeometricProb(static_cast<double>(a), ab, cd, ac, bd);
 
     for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
-        double prob = hyperGeometricProb(static_cast<double>(x), ab, cd, ac, bd);
+        const double prob = hyperGeometricProb(static_cast<double>(x), ab, cd, ac, bd);
 
         if(prob <= crit)
             twoPval += prob;

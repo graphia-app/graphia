@@ -56,8 +56,8 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(size_t row, const QString
 {
     if(!_dataColumnIndexes.empty() && u::contains(_dataColumnIndexes, columnName))
     {
-        size_t column = _dataColumnIndexes.at(columnName);
-        size_t index = (row * _dataColumnIndexes.size()) + column;
+        const size_t column = _dataColumnIndexes.at(columnName);
+        const size_t index = (row * _dataColumnIndexes.size()) + column;
 
         if(_continuousDataValues != nullptr)
         {

@@ -134,7 +134,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     u::doAsync([this, graph]
     {
-        std::unique_lock<std::mutex> lock(_initialisationMutex);
+        const std::unique_lock<std::mutex> lock(_initialisationMutex);
 
         initialiseFromGraph(graph, *this);
         initialiseFromGraph(graph, *_graphOverviewScene);
@@ -160,7 +160,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
 GraphRenderer::~GraphRenderer()
 {
-    std::unique_lock<std::mutex> lock(_initialisationMutex);
+    const std::unique_lock<std::mutex> lock(_initialisationMutex);
 
     // Force event processing in case the above .then(...) is still to run (due to a slow init)
     QCoreApplication::processEvents();
@@ -231,8 +231,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     _gpuDataRequiresUpdate = false;
 
-    std::unique_lock<NodePositions> nodePositionsLock(_graphModel->nodePositions());
-    std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
+    const std::unique_lock<NodePositions> nodePositionsLock(_graphModel->nodePositions());
+    const std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     int componentIndex = 0;
 
@@ -242,7 +242,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
-    float textScale = u::pref(QStringLiteral("visuals/textSize")).toFloat();
+    const float textScale = u::pref(QStringLiteral("visuals/textSize")).toFloat();
     auto textAlignment = NORMALISE_QML_ENUM(TextAlignment, u::pref(QStringLiteral("visuals/textAlignment")).toInt());
     auto textColor = Document::contrastingColorForBackground();
     auto showNodeText = NORMALISE_QML_ENUM(TextState, u::pref(QStringLiteral("visuals/showNodeText")).toInt());
@@ -383,7 +383,7 @@ void GraphRenderer::updateGPUDataIfRequired()
                 if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
                     continue;
 
-                QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
+                const QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
                 createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
                     edgeVisual._size, midPoint, componentIndex,
                     gpuGraphDataForOverlay(componentRenderer->alpha()));
@@ -499,8 +499,8 @@ void GraphRenderer::resetTime()
 
 float GraphRenderer::secondsElapsed()
 {
-    float time = static_cast<float>(_time.elapsed()) / 1000.0f;
-    float dTime = time - _lastTime;
+    const float time = static_cast<float>(_time.elapsed()) / 1000.0f;
+    const float dTime = time - _lastTime;
     _lastTime = time;
 
     return dTime;
@@ -766,13 +766,13 @@ void GraphRenderer::onGraphWillChange(const Graph* graph)
     // Hide any graph elements that are merged; they aren't displayed normally,
     // but during scene transitions they may become unmerged, and we don't want
     // to show them until the scene transition is over
-    for(NodeId nodeId : graph->nodeIds())
+    for(const NodeId nodeId : graph->nodeIds())
     {
         if(graph->typeOf(nodeId) == MultiElementType::Tail)
             _hiddenNodes.set(nodeId, true);
     }
 
-    for(EdgeId edgeId : graph->edgeIds())
+    for(const EdgeId edgeId : graph->edgeIds())
     {
         if(graph->typeOf(edgeId) == MultiElementType::Tail)
             _hiddenEdges.set(edgeId, true);
@@ -795,7 +795,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
 
     executeOnRendererThread([this]
     {
-        for(ComponentId componentId : _graphModel->graph().componentIds())
+        for(const ComponentId componentId : _graphModel->graph().componentIds())
         {
             componentRendererForId(componentId)->initialise(_graphModel, componentId,
                                                             _selectionManager, this);
@@ -810,9 +810,9 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
 
     // If the component is entirely new, we shouldn't be hiding any of it
     const auto* component = _graphModel->graph().componentById(componentId);
-    for(NodeId nodeId : component->nodeIds())
+    for(const NodeId nodeId : component->nodeIds())
         _hiddenNodes.set(nodeId, false);
-    for(EdgeId edgeId : component->edgeIds())
+    for(const EdgeId edgeId : component->edgeIds())
         _hiddenEdges.set(edgeId, false);
 
     executeOnRendererThread([this, componentId]
@@ -1035,7 +1035,7 @@ void GraphRenderer::updateScene()
         if(transitionActive())
             update(); // QQuickFramebufferObject::Renderer::update
 
-        float dTime = secondsElapsed();
+        const float dTime = secondsElapsed();
         _transition.update(dTime);
         _scene->update(dTime);
 
@@ -1116,14 +1116,14 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
         points.at(i++) = nodePosition;
     }
 
-    BoundingSphere boundingSphere(points);
-    QVector3D centre = boundingSphere.centre();
+    const BoundingSphere boundingSphere(points);
+    const QVector3D centre = boundingSphere.centre();
     float minDistance = std::numeric_limits<float>::max();
     NodeId closestToCentreNodeId;
     for(auto nodeId : nodeIds)
     {
         auto nodePosition = _graphModel->nodePositions().get(nodeId);
-        float distance = (centre - nodePosition).length();
+        const float distance = (centre - nodePosition).length();
 
         if(distance < minDistance)
         {
@@ -1195,7 +1195,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
     NodeId focusNodeId;
     auto targetMode = bestFocusParameters(graphQuickItem, focusNodeId, radius);
-    ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
+    const ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
     if(mode() == Mode::Component && targetMode == Mode::Overview)
         switchToOverviewMode();
@@ -1224,7 +1224,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
     graphQuickItem->setInOverviewMode(mode() == Mode::Overview);
 
-    ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
+    const ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
     graphQuickItem->setFocusedComponentId(focusedComponentId);
 
     emit synchronizeComplete();
@@ -1242,7 +1242,7 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
 
 void GraphRenderer::enableSceneUpdate()
 {
-    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     Q_ASSERT(_sceneUpdateDisabled > 0);
     _sceneUpdateDisabled--;
     resetTime();
@@ -1250,13 +1250,13 @@ void GraphRenderer::enableSceneUpdate()
 
 void GraphRenderer::disableSceneUpdate()
 {
-    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     _sceneUpdateDisabled++;
 }
 
 void GraphRenderer::ifSceneUpdateEnabled(const std::function<void()>& f) const
 {
-    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     if(_sceneUpdateDisabled == 0)
         f();
 }

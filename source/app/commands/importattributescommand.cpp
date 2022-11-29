@@ -76,7 +76,7 @@ QString ImportAttributesCommand::debugDescription() const
 
 bool ImportAttributesCommand::execute()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     const auto* keyAttribute = _graphModel->attributeByName(_keyAttributeName);
     Q_ASSERT(keyAttribute != nullptr);
@@ -133,7 +133,7 @@ bool ImportAttributesCommand::execute()
             auto name = _data.valueAt(static_cast<size_t>(columnIndex), 0);
             auto* existingVector = userData->vector(name);
 
-            bool replace = _replace && existingVector != nullptr &&
+            const bool replace = _replace && existingVector != nullptr &&
                 existingVector->type() == _data.typeIdentity(static_cast<size_t>(columnIndex)).type();
 
             if(replace)
@@ -165,7 +165,7 @@ bool ImportAttributesCommand::execute()
 
 void ImportAttributesCommand::undo()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     for(const auto& attributeName : _createdAttributeNames)
         _graphModel->removeAttribute(attributeName);

@@ -96,8 +96,8 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
         }
     }
 
-    size_t dataStartRow = hasColumnHeaders ? 1 : 0;
-    size_t dataStartColumn = hasRowHeaders ? 1 : 0;
+    const size_t dataStartRow = hasColumnHeaders ? 1 : 0;
+    const size_t dataStartColumn = hasRowHeaders ? 1 : 0;
 
     // Check datarect is square
     auto dataHeight = tabularData.numRows() - dataStartRow;
@@ -115,11 +115,11 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
 
     for(size_t rowIndex = dataStartRow; rowIndex < tabularData.numRows(); rowIndex++)
     {
-        QString rowHeader = hasRowHeaders ? tabularData.valueAt(0, rowIndex) : QString();
+        const QString rowHeader = hasRowHeaders ? tabularData.valueAt(0, rowIndex) : QString();
 
         for(size_t columnIndex = dataStartColumn; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            QString columnHeader = hasColumnHeaders ? tabularData.valueAt(columnIndex, 0) : QString();
+            const QString columnHeader = hasColumnHeaders ? tabularData.valueAt(columnIndex, 0) : QString();
 
             const auto& value = tabularData.valueAt(columnIndex, rowIndex);
             double edgeWeight = u::toNumber(value);
@@ -147,8 +147,8 @@ bool parseAdjacencyMatrix(const TabularData& tabularData,
                 return nodeId;
             };
 
-            NodeId sourceNodeId = addNode(columnIndex, columnHeader);
-            NodeId targetNodeId = addNode(rowIndex, rowHeader);
+            const NodeId sourceNodeId = addNode(columnIndex, columnHeader);
+            const NodeId targetNodeId = addNode(rowIndex, rowHeader);
             addEdge(graphModel, userEdgeData, sourceNodeId, targetNodeId, edgeWeight, absEdgeWeight, skipDuplicates);
 
             progressable.setProgress(static_cast<int>((progress++ * 100) / totalIterations));
@@ -236,10 +236,10 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParse
     {
         for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
         {
-            NodeId source = data.valueAt(0, rowIndex).toInt();
-            NodeId target = data.valueAt(1, rowIndex).toInt();
-            double weight = data.valueAt(2, rowIndex).toDouble();
-            EdgeListEdge edge{source, target, weight};
+            const NodeId source = data.valueAt(0, rowIndex).toInt();
+            const NodeId target = data.valueAt(1, rowIndex).toInt();
+            const double weight = data.valueAt(2, rowIndex).toDouble();
+            const EdgeListEdge edge{source, target, weight};
 
             edgeList.emplace_back(edge);
 
@@ -252,7 +252,7 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParse
         {
             for(auto columnIndex = static_cast<size_t>(topLeft.x()); columnIndex < data.numColumns(); columnIndex++)
             {
-                double weight = data.valueAt(columnIndex, rowIndex).toDouble();
+                const double weight = data.valueAt(columnIndex, rowIndex).toDouble();
 
                 if(weight == 0.0)
                     continue;

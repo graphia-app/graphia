@@ -125,8 +125,8 @@ static QRect findLargestDataRect(const TabularData& tabularData, Fn predicate,
     if(dataRect.height() >= 2 && dataRect.top() == 0)
         dataRect.setTop(1);
 
-    int bottomMargin = dataRect.top() - (static_cast<int>(tabularData.numRows()) - dataRect.height());
-    int rightMargin = dataRect.left() - (static_cast<int>(tabularData.numColumns()) - dataRect.width());
+    const int bottomMargin = dataRect.top() - (static_cast<int>(tabularData.numRows()) - dataRect.height());
+    const int rightMargin = dataRect.left() - (static_cast<int>(tabularData.numColumns()) - dataRect.width());
 
     if(bottomMargin != 0 || rightMargin != 0)
         return {};
@@ -325,9 +325,9 @@ double CorrelationFileParser::imputeValue(MissingDataType missingDataType,
         // Lerp the result if possible, otherwise just set to found value
         if(leftValueFound && rightValueFound)
         {
-            double tween = static_cast<double>(leftDistance) / static_cast<double>(leftDistance + rightDistance);
+            const double tween = static_cast<double>(leftDistance) / static_cast<double>(leftDistance + rightDistance);
             // https://devblogs.nvidia.com/lerp-faster-cuda/
-            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
+            const double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
             imputedValue = lerpedValue;
         }
         else if(leftValueFound && !rightValueFound)
@@ -414,31 +414,31 @@ void CorrelationFileParser::normalise(NormaliseType normaliseType,
     {
     case NormaliseType::MinMax:
     {
-        MinMaxNormaliser normaliser;
+        const MinMaxNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Mean:
     {
-        MeanNormaliser normaliser;
+        const MeanNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Standarisation:
     {
-        StandardisationNormaliser normaliser;
+        const StandardisationNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::UnitScaling:
     {
-        UnitScalingNormaliser normaliser;
+        const UnitScalingNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }
     case NormaliseType::Quantile:
     {
-        QuantileNormaliser normaliser;
+        const QuantileNormaliser normaliser;
         normaliser.process(dataRows, parser);
         break;
     }
@@ -642,7 +642,7 @@ CorrelationTabularDataParser::~CorrelationTabularDataParser() // NOLINT moderniz
 
 bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fileType)
 {
-    QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
+    const QFuture<void> future = QtConcurrent::run([this, fileUrl, fileType]()
     {
         if(fileUrl.isEmpty() || fileType.isEmpty())
             return;
@@ -708,7 +708,7 @@ void CorrelationTabularDataParser::autoDetectDataRectangle()
 
     waitForDataRectangleFuture();
 
-    QFuture<void> future = QtConcurrent::run([this]()
+    const QFuture<void> future = QtConcurrent::run([this]()
     {
         auto numericalDataRect = findLargestNumericalDataRect(*_dataPtr);
 
@@ -745,7 +745,7 @@ void CorrelationTabularDataParser::setDataRectangle(size_t column, size_t row)
 
     column = std::max(size_t{1}, column);
 
-    QFuture<void> future = QtConcurrent::run([column, row, this]()
+    const QFuture<void> future = QtConcurrent::run([column, row, this]()
     {
         _dataRect =
         {
@@ -807,7 +807,7 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
     auto rowIndices = randomRowIndices(static_cast<size_t>(_dataRect.y()), _dataPtr->numRows(), numSampleRows);
     rowData.reserve(rowIndices.size() * static_cast<size_t>(_dataRect.width()));
 
-    for(size_t rowIndex : rowIndices)
+    for(const size_t rowIndex : rowIndices)
     {
         auto startColumn = static_cast<size_t>(_dataRect.x());
         auto finishColumn = startColumn + static_cast<size_t>(_dataRect.width());
@@ -880,7 +880,7 @@ DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(
     NodeId nodeId(0);
 
     auto rowIndices = randomRowIndices(static_cast<size_t>(_dataRect.y()), _dataPtr->numRows(), numSampleRows);
-    for(size_t rowIndex : rowIndices)
+    for(const size_t rowIndex : rowIndices)
     {
         rowData.clear();
 
@@ -919,7 +919,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
     _graphSizeEstimateQueuedParameters.clear();
     _graphSizeEstimateCancellable.uncancel();
 
-    QFuture<QVariantMap> future = QtConcurrent::run([this, parameters]
+    const QFuture<QVariantMap> future = QtConcurrent::run([this, parameters]
     {
         auto threshold = parameters[QStringLiteral("threshold")].toDouble();
         auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());

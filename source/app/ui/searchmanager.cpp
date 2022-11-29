@@ -93,7 +93,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
             reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);
     }
 
-    QRegularExpression re(term, reOptions);
+    const QRegularExpression re(term, reOptions);
 
     if(re.isValid())
     {
@@ -147,9 +147,9 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
         }
     }
 
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    bool changed = u::setsDiffer(_foundNodeIds, foundNodeIds);
+    const bool changed = u::setsDiffer(_foundNodeIds, foundNodeIds);
 
     _foundNodeIds = std::move(foundNodeIds);
 
@@ -159,9 +159,9 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
 
 void SearchManager::clearFoundNodeIds()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    bool changed = !_foundNodeIds.empty();
+    const bool changed = !_foundNodeIds.empty();
     _foundNodeIds.clear();
 
     if(changed)
@@ -175,7 +175,7 @@ void SearchManager::refresh()
 
 NodeIdSet SearchManager::foundNodeIds() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     return _foundNodeIds;
 }

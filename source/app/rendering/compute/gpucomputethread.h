@@ -56,7 +56,7 @@ public:
     template<typename T> typename std::enable_if<std::is_base_of_v<GPUComputeJob, T>, void>::type
     enqueue(std::unique_ptr<T>& computeJob)
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
         _jobs.push_back(std::move(computeJob));
         _jobsPending.notify_one();
     }

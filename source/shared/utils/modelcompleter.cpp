@@ -40,7 +40,7 @@ void ModelCompleter::update()
     {
         for(int row = 0; row < _model->rowCount(parent); row++)
         {
-            QModelIndex index = _model->index(row, 0, parent);
+            const QModelIndex index = _model->index(row, 0, parent);
             auto name = _model->data(index).toString();
 
             if(name.startsWith(_term, Qt::CaseInsensitive))

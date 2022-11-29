@@ -36,14 +36,14 @@ bool JSONGraphSaver::save()
     fileObject["graph"] = graphAsJson(_graphModel->graph(), *this);
     setProgress(-1);
 
-    size_t numElements = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
+    const size_t numElements = _graphModel->graph().numNodes() + _graphModel->graph().numEdges();
     size_t runningCount = 0;
 
     // Node Attributes
     _graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
     for(auto& node : fileObject["graph"]["nodes"])
     {
-        NodeId nodeId = std::stoi(node["id"].get<std::string>());
+        const NodeId nodeId = std::stoi(node["id"].get<std::string>());
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
@@ -69,7 +69,7 @@ bool JSONGraphSaver::save()
     _graphModel->mutableGraph().setPhase(QObject::tr("Edge Attributes"));
     for(auto& edge : fileObject["graph"]["edges"])
     {
-        EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
+        const EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);

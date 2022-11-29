@@ -57,7 +57,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::graphChanged,
     [this]
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
         _layoutPotentiallyRequired = true;
     });
 
@@ -69,7 +69,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
     [this]
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
 
         _layoutPotentiallyRequired = true;
         unfinish();
@@ -111,7 +111,7 @@ void LayoutThread::pauseAndWait()
 
 bool LayoutThread::paused() const
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     return _paused;
 }
 
@@ -153,7 +153,7 @@ void LayoutThread::start()
 
 void LayoutThread::stop()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _stop = true;
     _pause = false;
 
@@ -165,7 +165,7 @@ void LayoutThread::stop()
 
 bool LayoutThread::finished() const
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 
     return !workToDo();
 }
@@ -230,10 +230,10 @@ void LayoutThread::run()
         }
 
         {
-            std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
+            const std::unique_lock<NodePositions> lock(_graphModel->nodePositions());
             _graphModel->nodePositions().update(_nodeLayoutPositions);
 
-            bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
+            const bool requiresFlattening = _dimensionalityMode == Layout::Dimensionality::TwoDee &&
                 std::any_of(_layouts.begin(), _layouts.end(),
                 [](const auto& layout)
                 {
@@ -283,7 +283,7 @@ void LayoutThread::run()
     }
     while(iterative() || _repeating || allLayoutsFinished());
 
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
     _started = false;
     _paused = true;
@@ -296,7 +296,7 @@ void LayoutThread::addComponent(ComponentId componentId)
 {
     if(!u::contains(_layouts, componentId))
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
 
         auto layout = _layoutFactory->create(componentId,
             _nodeLayoutPositions, _dimensionalityMode);
@@ -309,7 +309,7 @@ void LayoutThread::addComponent(ComponentId componentId)
 
 void LayoutThread::addAllComponents()
 {
-    for(ComponentId componentId : _graphModel->graph().componentIds())
+    for(const ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
 }
 
@@ -360,7 +360,7 @@ void LayoutThread::removeComponent(ComponentId componentId)
 
     if(u::contains(_layouts, componentId))
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
         _layouts.erase(componentId);
     }
 

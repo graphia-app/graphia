@@ -202,9 +202,9 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
 
     for(size_t i = 0; i < nodeIds.size(); i++)
     {
-        QVector3D nodePosition = nodePositions.at(i);
+        const QVector3D nodePosition = nodePositions.at(i);
         const auto& nodeVisual = nodeVisuals.at(i);
-        float distance = (centre - nodePosition).length() + nodeVisual._size;
+        const float distance = (centre - nodePosition).length() + nodeVisual._size;
 
         if(distance > maxDistance)
             maxDistance = distance;
@@ -246,7 +246,7 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius, Projection pro
 
     if(projection == Projection::Perspective)
     {
-        float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
+        const float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
         if(minHalfFov > 0.0f)
             return std::max(radius / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
@@ -266,7 +266,7 @@ float GraphComponentRenderer::maxDistanceFor(NodeId nodeId) const
     Q_ASSERT(!_frozen);
     const auto& nodeIds = _graphModel->graph().componentById(_componentId)->nodeIds();
 
-    QVector3D position = !nodeId.isNull() ?
+    const QVector3D position = !nodeId.isNull() ?
         _graphModel->nodePositions().get(nodeId) :
         _viewData._componentCentre;
 
@@ -455,7 +455,7 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
             _viewData._autoZooming = true;
     }
 
-    float startZoomDistance = _viewData._zoomDistance;
+    const float startZoomDistance = _viewData._zoomDistance;
 
     // Don't do anything if there would be no change
     if(qFuzzyCompare(startZoomDistance, _targetZoomDistance))
@@ -503,14 +503,14 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
                 const QVector3D& oldPosition = _viewData.camera().position();
                 QVector3D newPosition;
-                Plane translationPlane(focus, _viewData.camera().viewVector());
+                const Plane translationPlane(focus, _viewData.camera().viewVector());
 
                 if(translationPlane.sideForPoint(oldPosition) == Plane::Side::Back)
                 {
                     // We're behind the translation plane, so move along it
-                    QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
+                    const QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
                                 Ray(oldPosition, _viewData.camera().viewVector()));
-                    QVector3D translation = focus - cameraPlaneIntersection;
+                    const QVector3D translation = focus - cameraPlaneIntersection;
 
                     newPosition = oldPosition + translation;
                 }
@@ -645,7 +645,7 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 
     Collision collision(*_graphModel, _componentId);
     //FIXME closestNodeToCylinder/Cone?
-    NodeId closestNodeId = collision.nodeClosestToLine(_viewData.camera().position(), _viewData.camera().viewVector());
+    const NodeId closestNodeId = collision.nodeClosestToLine(_viewData.camera().position(), _viewData.camera().viewVector());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId);
 }
@@ -782,7 +782,7 @@ QVector3D GraphComponentRenderer::focusPosition() const
 
 bool GraphComponentRenderer::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
 {
-    bool zoomMatchesRadius = qFuzzyCompare(zoomDistanceForRadius(radius),
+    const bool zoomMatchesRadius = qFuzzyCompare(zoomDistanceForRadius(radius),
         _projection == Projection::Perspective ? camera()->distance() : _viewData._zoomDistance);
 
     return focusNodeId() == nodeId && zoomMatchesRadius;

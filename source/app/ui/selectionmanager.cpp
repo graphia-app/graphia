@@ -49,7 +49,7 @@ SelectionManager::SelectionManager(const GraphModel& graphModel) :
 
 NodeIdSet SelectionManager::selectedNodes() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
 #ifdef EXPENSIVE_DEBUG_CHECKS
     // Assertion that our selection doesn't contain things that aren't in the graph
@@ -66,7 +66,7 @@ NodeIdSet SelectionManager::selectedNodes() const
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     const auto& nodeIds = _graphModel->graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
@@ -216,7 +216,7 @@ bool SelectionManager::toggleNode(NodeId nodeId)
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
 #ifdef EXPENSIVE_DEBUG_CHECKS
     Q_ASSERT(u::contains(_graphModel->graph().nodeIds(), nodeId));
@@ -252,7 +252,7 @@ bool SelectionManager::clearNodeSelection()
 {
     return callFnAndMaybeEmit([this]
     {
-        bool selectionWillChange = !_selectedNodeIds.empty();
+        const bool selectionWillChange = !_selectedNodeIds.empty();
         _selectedNodeIds.clear();
         return selectionWillChange;
     });
@@ -260,7 +260,7 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     _toggleNodes(_selectedNodeIds, _nodeIdsMask, _graphModel->graph().nodeIds());
 
@@ -295,7 +295,7 @@ void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool app
 
 QString SelectionManager::numNodesSelectedAsString() const
 {
-    int selectionSize = static_cast<int>(selectedNodes().size());
+    const int selectionSize = static_cast<int>(selectedNodes().size());
 
     if(selectionSize == 1)
     {
@@ -321,7 +321,7 @@ void SelectionManager::suppressSignals()
 
 bool SelectionManager::signalsSuppressed()
 {
-    bool suppressSignals = _suppressSignals;
+    const bool suppressSignals = _suppressSignals;
     _suppressSignals = false;
     return suppressSignals;
 }

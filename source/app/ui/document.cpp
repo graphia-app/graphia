@@ -486,8 +486,8 @@ static QStringList sortedTransforms(QStringList transforms)
     std::stable_sort(transforms.begin(), transforms.end(),
     [](const QString& a, const QString& b)
     {
-        bool aPinned = transformIsPinned(a);
-        bool bPinned = transformIsPinned(b);
+        const bool aPinned = transformIsPinned(a);
+        const bool bPinned = transformIsPinned(b);
 
         if(aPinned && !bPinned)
             return false;
@@ -587,7 +587,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     if(pluginInstanceQObject != nullptr)
     {
         auto signature = QMetaObject::normalizedSignature("saveRequired()");
-        bool hasSignal = pluginInstanceQObject->metaObject()->indexOfSignal(signature) >= 0;
+        const bool hasSignal = pluginInstanceQObject->metaObject()->indexOfSignal(signature) >= 0;
 
         if(hasSignal)
         {
@@ -705,7 +705,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
             for(auto& visualisation : _visualisations)
             {
                 VisualisationConfigParser p;
-                bool success = p.parse(visualisation);
+                const bool success = p.parse(visualisation);
                 Q_ASSERT(success);
 
                 if(!p.result()._parameters.empty())
@@ -756,7 +756,7 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
         {
             auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
             saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
-            bool success = saver->save();
+            const bool success = saver->save();
             emit saveComplete(success, fileUrl, saverName);
             return success;
         },
@@ -973,7 +973,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, [this]
     {
-        bool graphChangingWillChange = !_graphChanging;
+        const bool graphChangingWillChange = !_graphChanging;
         _graphChanging = true;
 
         if(graphChangingWillChange)
@@ -985,7 +985,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     (const Graph*, bool changeOccurred)
     {
-        bool graphChangingWillChange = _graphChanging;
+        const bool graphChangingWillChange = _graphChanging;
         _graphChanging = false;
 
         if(graphChangingWillChange)
@@ -1060,7 +1060,7 @@ void Document::selectAll()
     _commandManager.executeOnce(
     [this](Command& command)
     {
-        bool nodesSelected = _selectionManager->selectAllNodes();
+        const bool nodesSelected = _selectionManager->selectAllNodes();
         command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
         return nodesSelected;
     }, {tr("Select All"), tr("Selecting All"), tr("Selected All")});
@@ -1190,7 +1190,7 @@ void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNod
     if(busy() || _selectionManager == nullptr)
         return;
 
-    NodeIdSet nodeIdSet = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
+    const NodeIdSet nodeIdSet = nodeIdSetFor(qmlNodeId, add, *_selectionManager);
 
     if(nodeIdSet.empty())
         return;
@@ -1695,7 +1695,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
     if(searchManager->foundNodeIds().empty())
     {
-        bool nodesWereFound = _foundItValid || searchManager->selectStyle() == FindSelectStyle::All;
+        const bool nodesWereFound = _foundItValid || searchManager->selectStyle() == FindSelectStyle::All;
         if(nodesWereFound && searchManager->active())
             _selectionManager->clearNodeSelection();
 
@@ -1774,7 +1774,7 @@ void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
     bool changed = !_foundItValid || (_foundIt != foundIt);
     _foundIt = foundIt;
 
-    bool oldFoundItValid = _foundItValid;
+    const bool oldFoundItValid = _foundItValid;
     _foundItValid = (_foundIt != _foundNodeIds.end());
 
     if(!changed)
@@ -1923,7 +1923,7 @@ QVariantMap Document::transform(const QString& transformName) const
         QVariantList attributeParameters;
         for(const auto& attributeParameter : transformFactory->attributeParameters())
         {
-            QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.name());
+            const QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.name());
             attributeParameterNames.append(attributeParameter.name());
             attributeParameters.append(attributeParameterMap);
         }
@@ -1934,7 +1934,7 @@ QVariantMap Document::transform(const QString& transformName) const
         QVariantMap parameters;
         for(const auto& parameter : transformFactory->parameters())
         {
-            QVariantMap parameterMap = transformParameter(transformName, parameter.name());
+            const QVariantMap parameterMap = transformParameter(transformName, parameter.name());
             parameterNames.append(parameter.name());
             parameters.insert(parameter.name(), parameterMap);
         }
@@ -2085,7 +2085,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
         map.insert(QStringLiteral("name"), QStringLiteral("%1%2")
             .arg(prefix, parsedAttributeName._name));
 
-        bool hasParameter = attribute.hasParameter();
+        const bool hasParameter = attribute.hasParameter();
         map.insert(QStringLiteral("hasParameter"), hasParameter);
 
         if(hasParameter)
@@ -2476,7 +2476,7 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
 
     ICommandPtrsVector commands;
 
-    bool transformsValid = graphTransformsAreValid(graphTransforms);
+    const bool transformsValid = graphTransformsAreValid(graphTransforms);
     int newGraphTransformIndex = -1;
 
     if(transformsValid && transformsDiffer(_graphTransforms, graphTransforms, true))
@@ -2518,7 +2518,7 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
     else
         setVisualisations(_visualisations);
 
-    ExecutePolicy policy = replaceLatestCommand ?
+    const ExecutePolicy policy = replaceLatestCommand ?
         ExecutePolicy::Replace : ExecutePolicy::Add;
 
     if(commands.size() > 1)
@@ -2665,7 +2665,7 @@ void Document::cancelCommand()
 void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& fileUrl,
     const QString& extension, const QStringList& columnHeaders)
 {
-    QString localFileName = fileUrl.toLocalFile();
+    const QString localFileName = fileUrl.toLocalFile();
     if(!QFile(localFileName).open(QIODevice::ReadWrite))
     {
         QMessageBox::critical(nullptr, tr("File Error"),
@@ -2898,7 +2898,7 @@ void Document::removeEnrichmentResults(int index)
 
 void Document::saveNodePositionsToFile(const QUrl& fileUrl)
 {
-    QString localFileName = fileUrl.toLocalFile();
+    const QString localFileName = fileUrl.toLocalFile();
     if(!QFile(localFileName).open(QIODevice::ReadWrite))
     {
         QMessageBox::critical(nullptr, tr("File Error"),

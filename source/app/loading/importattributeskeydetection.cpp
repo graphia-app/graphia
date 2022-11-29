@@ -39,7 +39,7 @@ void ImportAttributesKeyDetection::start()
 {
     uncancel();
 
-    QFuture<void> future = QtConcurrent::run([this]
+    const QFuture<void> future = QtConcurrent::run([this]
     {
         QString bestAttributeName;
         size_t bestColumnIndex = 0;

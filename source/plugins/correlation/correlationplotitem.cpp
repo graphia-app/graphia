@@ -253,7 +253,7 @@ void CorrelationPlotWorker::renderPixmap()
         if(axisRect != nullptr)
         {
             auto numVisibleColumns = (_xAxisMax - _xAxisMin);
-            bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.3);
+            const bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.3);
 
             auto* xAxis = axisRect->axis(QCPAxis::atBottom);
             xAxis->setRange(_xAxisMin, _xAxisMax);
@@ -281,7 +281,7 @@ void CorrelationPlotWorker::renderPixmap()
 
     // This assumes that the Qt platform has the QPlatformIntegration::ThreadedPixmaps capability,
     // which should be true on the desktop, but a console warning will be shown if it isn't
-    QPixmap pixmap = _customPlot->toPixmap();
+    const QPixmap pixmap = _customPlot->toPixmap();
 
     if(_debug)
         qDebug() << "render" << _pixmapTimer.elapsed() << "ms";
@@ -384,7 +384,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
     // Render the plot in the bottom left; that way when its container
     // is resized, it doesn't hop around vertically, as it would if
     // it had been rendered from the top left
-    int yDest = static_cast<int>(height()) - _pixmap.height();
+    const int yDest = static_cast<int>(height()) - _pixmap.height();
 
     if(!isEnabled())
     {
@@ -531,7 +531,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
             {
                 double posKeyMin = 0.0, posKeyMax = 0.0, dummy = 0.0;
 
-                QPointF tolerancePoint(_customPlot.selectionTolerance(),
+                const QPointF tolerancePoint(_customPlot.selectionTolerance(),
                     _customPlot.selectionTolerance());
 
                 plottable->pixelsToCoords(_hoverPoint - tolerancePoint, posKeyMin, dummy);
@@ -540,8 +540,8 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
                 if(posKeyMin > posKeyMax)
                     std::swap(posKeyMin, posKeyMax);
 
-                QCPGraphDataContainer::const_iterator begin = graph->data()->findBegin(posKeyMin, true);
-                QCPGraphDataContainer::const_iterator end = graph->data()->findEnd(posKeyMax, true);
+                const QCPGraphDataContainer::const_iterator begin = graph->data()->findBegin(posKeyMin, true);
+                const QCPGraphDataContainer::const_iterator end = graph->data()->findEnd(posKeyMax, true);
 
                 for(QCPGraphDataContainer::const_iterator it = begin; it != end; ++it)
                 {
@@ -572,7 +572,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
             }
         }
 
-        double toleranceSq = _customPlot.selectionTolerance() * _customPlot.selectionTolerance();
+        const double toleranceSq = _customPlot.selectionTolerance() * _customPlot.selectionTolerance();
         if(minDistanceSq > toleranceSq)
             return nullptr;
     }
@@ -582,7 +582,7 @@ QCPAbstractPlottable* CorrelationPlotItem::abstractPlottableUnderCursor(double& 
 
 bool CorrelationPlotItem::updateTooltip()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(!lock.owns_lock())
     {
@@ -680,7 +680,7 @@ bool CorrelationPlotItem::updateTooltip()
         {
             _hoverColorRect->setVisible(true);
 
-            QColor color = plottableUnderCursor->brush().color();
+            const QColor color = plottableUnderCursor->brush().color();
 
             _hoverColorRect->setBrush(QBrush(color));
             _hoverColorRect->bottomRight->setPixelPosition(
@@ -934,7 +934,7 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
     if(_pluginInstance == nullptr)
         return;
 
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(!lock.owns_lock())
     {
@@ -1029,7 +1029,7 @@ void CorrelationPlotItem::computeXAxisRange()
 
     if(numHiddenColumns > 0.0)
     {
-        double position = numHiddenColumns * _horizontalScrollPosition;
+        const double position = numHiddenColumns * _horizontalScrollPosition;
         min = position;
         max = position + maxVisibleColumns;
     }
@@ -1109,7 +1109,7 @@ void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 
 void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
 {
-    bool changed = (_elideLabelWidth != elideLabelWidth);
+    const bool changed = (_elideLabelWidth != elideLabelWidth);
     _elideLabelWidth = elideLabelWidth;
 
     if(changed && showColumnNames())
@@ -1354,7 +1354,7 @@ bool CorrelationPlotItem::updateSortMap()
         return a < b;
     });
 
-    size_t oldSize = _annotationGroupMap.size();
+    const size_t oldSize = _annotationGroupMap.size();
     _annotationGroupMap.clear();
 
     if(_groupByAnnotation)
@@ -1400,9 +1400,9 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     auto existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
     [type, &text](const auto& value)
     {
-        bool sameType = (value[QStringLiteral("type")].toInt() == type);
-        bool sameText = (value[QStringLiteral("text")].toString() == text);
-        bool typeIsColumnAnnotation =
+        const bool sameType = (value[QStringLiteral("type")].toInt() == type);
+        const bool sameText = (value[QStringLiteral("text")].toString() == text);
+        const bool typeIsColumnAnnotation =
             (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
 
         return sameType && (!typeIsColumnAnnotation || sameText);
@@ -1648,7 +1648,7 @@ void CorrelationPlotItem::updatePlotSize()
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     if(extensions.contains(QStringLiteral("png")))
         _customPlot.savePng(url.toLocalFile());

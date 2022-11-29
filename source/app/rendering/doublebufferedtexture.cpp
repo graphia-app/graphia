@@ -51,7 +51,7 @@ GLuint DoubleBufferedTexture::back()
 
 GLuint DoubleBufferedTexture::swap()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _currentIndex = 1 - _currentIndex;
 
     // Notify any other users that the texture has been swapped

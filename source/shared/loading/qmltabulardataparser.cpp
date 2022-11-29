@@ -143,7 +143,7 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
 {
     reset();
 
-    QFuture<void> future = QtConcurrent::run([this, fileUrl]
+    const QFuture<void> future = QtConcurrent::run([this, fileUrl]
     {
         if(fileUrl.isEmpty())
             return;

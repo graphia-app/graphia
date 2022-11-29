@@ -188,7 +188,7 @@ void SDFComputeJob::generateSDF()
         {
             auto offset = (static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
                 static_cast<size_t>(scaleFactor * scaleFactor)) * layer;
-            QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
+            const QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
             sdfImage.save(QDir::currentPath() + "/SDF" + QString::number(layer) + ".png");
         }
 

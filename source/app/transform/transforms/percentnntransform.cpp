@@ -42,7 +42,7 @@ void PercentNNTransform::apply(TransformedGraph& target) const
     auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
-    bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
+    const bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 
     struct PercentNNRank
     {

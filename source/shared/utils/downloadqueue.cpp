@@ -99,7 +99,7 @@ bool DownloadQueue::downloaded(const QUrl& url) const
         auto downloadedFilename =
             QFileInfo(deletee.first).canonicalFilePath();
 
-        bool match = deletee.second == IsDir::Yes ?
+        const bool match = deletee.second == IsDir::Yes ?
             (dirname == downloadedFilename) :
             (filename == downloadedFilename);
 
@@ -123,10 +123,10 @@ void DownloadQueue::start(const QUrl& url)
     _reply = _networkManager.get(request);
 
     _timeoutTimer.setSingleShot(true);
-    /*const*/ int HTTP_TIMEOUT = 60000; // When const the capture below can be omitted, but MSVC currently fails at this
+    const int HTTP_TIMEOUT = 60000;
     _timeoutTimer.start(HTTP_TIMEOUT);
 
-    connect(_reply, &QNetworkReply::downloadProgress, [this, HTTP_TIMEOUT]
+    connect(_reply, &QNetworkReply::downloadProgress, [this]
     (qint64 bytesReceived, qint64 bytesTotal)
     {
         _timeoutTimer.start(HTTP_TIMEOUT);

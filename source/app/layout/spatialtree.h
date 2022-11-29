@@ -183,7 +183,7 @@ private:
         QVector3D lastPosition = nodePositions.get(nodeIds[0]);
 
         // Distribute NodeIds over SubVolumes
-        for(NodeId nodeId : nodeIds)
+        for(const NodeId nodeId : nodeIds)
         {
             const QVector3D& nodePosition = nodePositions.get(nodeId);
             SubVolumeType& subVolume = subVolumeForPoint(nodePosition);
@@ -291,7 +291,7 @@ private:
         else
             centre = _boundingBox.centre().toVector3D();
 
-        QVector3D diff = point - centre;
+        const QVector3D diff = point - centre;
 
         if constexpr(NumDimensions == 3)
         {

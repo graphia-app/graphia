@@ -55,7 +55,7 @@ NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
     const auto* component = graphModel.graph().componentById(componentId);
     Q_ASSERT(component != nullptr);
 
-    for(NodeId nodeId : component->nodeIds())
+    for(const NodeId nodeId : component->nodeIds())
     {
         if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
             continue;
@@ -83,9 +83,9 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
         if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::Unhighlighted))
             continue;
 
-        float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);
-        float distanceToPoint = graphModel.nodePositions().get(nodeId).distanceToPoint(point);
-        float distance = distanceToCentre + distanceToPoint;
+        const float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);
+        const float distanceToPoint = graphModel.nodePositions().get(nodeId).distanceToPoint(point);
+        const float distance = distanceToCentre + distanceToPoint;
 
         if(distance < minimumDistance)
         {
@@ -207,7 +207,7 @@ void GraphCommonInteractor::mouseMoveEvent(const QPoint& pos, Qt::KeyboardModifi
     if(!_mouseMoving)
     {
         const int MIN_MANHATTAN_MOVE = 3;
-        QPoint p = _cursorPosition - _clickPosition;
+        const QPoint p = _cursorPosition - _clickPosition;
         if(p.manhattanLength() <= MIN_MANHATTAN_MOVE)
             return;
     }
@@ -273,7 +273,7 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
     else
     {
         // Hyperbolic sheet
-        float t = RADIUS / ROOT2;
+        const float t = RADIUS / ROOT2;
         z = t * t / d;
     }
 
@@ -283,16 +283,16 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
 static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
                                        const GraphComponentRenderer* renderer)
 {
-    int w = renderer->width();
-    int h = renderer->height();
+    const int w = renderer->width();
+    const int h = renderer->height();
 
     QQuaternion rotation;
 
     if(renderer->projection() == Projection::TwoDee)
     {
-        QPoint centre(w / 2, h / 2);
-        QVector2D previous(prev - centre);
-        QVector2D current(cur - centre);
+        const QPoint centre(w / 2, h / 2);
+        const QVector2D previous(prev - centre);
+        const QVector2D current(cur - centre);
 
         auto distanceFromCentre = current.length();
 
@@ -316,22 +316,22 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
             angle *= dampingFactor;
         }
 
-        float currentAngle = renderer->camera()->rotation().toEulerAngles().z();
+        const float currentAngle = renderer->camera()->rotation().toEulerAngles().z();
 
         rotation = QQuaternion::fromAxisAndAngle({0.0f, 0.0f, 1.0f}, currentAngle - angle);
     }
     else
     {
-        QVector3D previous = virtualTrackballVector(w, h, prev);
-        QVector3D current = virtualTrackballVector(w, h, cur);
+        const QVector3D previous = virtualTrackballVector(w, h, prev);
+        const QVector3D current = virtualTrackballVector(w, h, cur);
 
-        QVector3D axis = QVector3D::crossProduct(current, previous).normalized();
+        const QVector3D axis = QVector3D::crossProduct(current, previous).normalized();
 
-        float dot = QVector3D::dotProduct(previous, current);
+        const float dot = QVector3D::dotProduct(previous, current);
         float value = dot / (previous.length() * current.length());
         value = std::clamp(value, -1.0f, 1.0f);
-        float radians = std::acos(value);
-        float angle = qRadiansToDegrees(radians);
+        const float radians = std::acos(value);
+        const float angle = qRadiansToDegrees(radians);
 
         auto m = renderer->camera()->viewMatrix();
         m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
@@ -372,7 +372,7 @@ void GraphCommonInteractor::leftMouseUp()
     {
         if(_frustumSelecting)
         {
-            QPoint frustumSelectEnd = cursorPosition();
+            const QPoint frustumSelectEnd = cursorPosition();
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
             if(!selection.empty())
@@ -388,7 +388,7 @@ void GraphCommonInteractor::leftMouseUp()
         }
         else
         {
-            bool multiSelect = (modifiers() & Qt::ShiftModifier) != 0;
+            const bool multiSelect = (modifiers() & Qt::ShiftModifier) != 0;
 
             if(!_clickedNodeId.isNull())
             {

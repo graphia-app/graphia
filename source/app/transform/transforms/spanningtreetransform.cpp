@@ -30,7 +30,7 @@
 
 void SpanningTreeTransform::apply(TransformedGraph& target) const
 {
-    bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
+    const bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
 
     target.setPhase(QObject::tr("Spanning Tree"));
     target.setProgress(-1);
@@ -38,7 +38,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target) const
     EdgeArray<bool> removees(target, true);
     NodeArray<bool> visitedNodes(target, false);
 
-    ComponentManager componentManager(target);
+    const ComponentManager componentManager(target);
 
     for(auto componentId : componentManager.componentIds())
     {

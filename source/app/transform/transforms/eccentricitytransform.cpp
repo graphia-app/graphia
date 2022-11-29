@@ -78,9 +78,9 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
             visited.set(nodeId, true);
 
             auto nodeWeight = distance[nodeId];
-            for(EdgeId edgeId : target.edgeIdsForNodeId(nodeId))
+            for(const EdgeId edgeId : target.edgeIdsForNodeId(nodeId))
             {
-                NodeId adjacentNodeId = target.edgeById(edgeId).oppositeId(nodeId);
+                const NodeId adjacentNodeId = target.edgeById(edgeId).oppositeId(nodeId);
                 const int adjacentNodeWeight = 1;
                 if(!visited.get(adjacentNodeId) && (nodeWeight + adjacentNodeWeight < distance[adjacentNodeId]))
                 {

@@ -429,7 +429,7 @@ public:
 
             if(!value.isEmpty())
             {
-                int numValues = ++values[value];
+                const int numValues = ++values[value];
                 if(numValues > 1)
                     hasSharedValues = true;
             }

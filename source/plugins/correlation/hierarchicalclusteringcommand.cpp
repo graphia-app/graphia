@@ -108,7 +108,7 @@ bool HierarchicalClusteringCommand::execute()
     for(auto& dataColumn : dataColumns)
         dataColumn.update();
 
-    EuclideanDistanceCorrelation correlation;
+    const EuclideanDistanceCorrelation correlation;
 
     setPhase(QObject::tr("Correlating"));
     auto matrix = correlation.matrix(dataColumns, this, this);
@@ -126,7 +126,7 @@ bool HierarchicalClusteringCommand::execute()
     ls[0] = std::numeric_limits<double>::infinity();
 
     uint64_t progress = 0;
-    uint64_t total = (dataColumns.size() * (dataColumns.size() - 1)) / 2;
+    const uint64_t total = (dataColumns.size() * (dataColumns.size() - 1)) / 2;
 
     for(size_t i = 1; i < dataColumns.size(); i++)
     {

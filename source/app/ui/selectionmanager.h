@@ -82,9 +82,9 @@ private:
     template<typename Fn>
     bool callFnAndMaybeEmit(Fn&& fn)
     {
-        std::unique_lock<std::recursive_mutex> lock(_mutex);
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        bool selectionWillChange = fn();
+        const bool selectionWillChange = fn();
 
         if(!signalsSuppressed() && selectionWillChange)
             emit selectionChanged(this);

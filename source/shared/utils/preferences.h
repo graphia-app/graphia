@@ -29,7 +29,7 @@ namespace u
 {
     inline QVariant getPref(const QString& key)
     {
-        QSettings settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
+        const QSettings settings(QSettings::Format::IniFormat, QSettings::Scope::UserScope,
             QCoreApplication::organizationName(), QCoreApplication::applicationName());
 
         return settings.value(key);

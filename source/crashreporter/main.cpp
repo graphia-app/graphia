@@ -84,7 +84,7 @@ static std::string crashedModule(const QString& dmpFile)
       return {};
     }
 
-    int requestingThread = process_state.requesting_thread();
+    const int requestingThread = process_state.requesting_thread();
     if(requestingThread == -1 || !process_state.crashed())
     {
         std::cerr << "Process has not crashed\n";
@@ -130,7 +130,7 @@ static std::string crashedModule(const QString& dmpFile)
             module.clear();
 
         std::smatch match;
-        bool skip = std::any_of(skipModules.begin(), skipModules.end(),
+        const bool skip = std::any_of(skipModules.begin(), skipModules.end(),
         [&module, &match](const auto& skipModuleRe)
         {
             return std::regex_match(module, match, std::regex(skipModuleRe));
@@ -157,7 +157,7 @@ static void uploadReport(const QString& email, const QString& text,
 {
     auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    std::map<const char*, QString> fields =
+    std::map<const char*, QString> const fields =
     {
         {"email",           email},
         {"text",            text},
@@ -175,7 +175,7 @@ static void uploadReport(const QString& email, const QString& text,
 #endif
     };
 
-    for(auto& field : fields)
+    for(const auto& field : fields)
     {
         QHttpPart part;
         part.setHeader(QNetworkRequest::ContentDispositionHeader,
@@ -197,13 +197,13 @@ static void uploadReport(const QString& email, const QString& text,
 
     if(!attachmentDir.isEmpty())
     {
-        QString fingerPrint = QFileInfo(dmpFile).baseName();
+        const QString fingerPrint = QFileInfo(dmpFile).baseName();
 
         QDirIterator dirIterator(attachmentDir);
         while(dirIterator.hasNext())
         {
-            QString fileName = dirIterator.next();
-            QFileInfo fileInfo(fileName);
+            const QString fileName = dirIterator.next();
+            const QFileInfo fileInfo(fileName);
 
             // Skip . and ..
             if(!fileInfo.exists() || !fileInfo.isFile())
@@ -244,7 +244,7 @@ static void uploadReport(const QString& email, const QString& text,
         {
             if(reply->error() == QNetworkReply::NetworkError::NoError)
             {
-                QString urlString = reply->readAll();
+                const QString urlString = reply->readAll();
                 auto submissionUrl = QUrl(urlString.trimmed());
 
                 // ...and if we get one back, we use it to actually submit the crash report
@@ -312,7 +312,7 @@ static void uploadReport(const QString& email, const QString& text,
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    const QApplication app(argc, argv);
 
     Q_INIT_RESOURCE(shared);
 
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
     const auto* videoDriverRegex = R"(^(nvoglv|ig\d+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon|iris_dri).*)";
 
     std::smatch match;
-    bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
+    const bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
     auto emailAddress = u::getPref(QStringLiteral("tracking/emailAddress")).toString();
 
     if(!p.isSet(QStringLiteral("submit")))

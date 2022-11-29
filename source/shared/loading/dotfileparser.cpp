@@ -322,7 +322,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
                 {
                     for(const auto& attribute : edge._attributeList)
                     {
-                        QString attributeName = QObject::tr("Edge ") + attribute._key;
+                        const QString attributeName = QObject::tr("Edge ") + attribute._key;
                         userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
                     }
                 }
@@ -335,7 +335,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
 
                 for(const auto& attribute : node._attributeList)
                 {
-                    QString attributeName = QObject::tr("Node ") + attribute._key;
+                    const QString attributeName = QObject::tr("Node ") + attribute._key;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
 
@@ -357,7 +357,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
             {
                 for(auto nodeId : nodeIds)
                 {
-                    QString attributeName = QObject::tr("Node ") + attribute._key;
+                    const QString attributeName = QObject::tr("Node ") + attribute._key;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
             }
@@ -368,7 +368,7 @@ bool build(DotFileParser& parser, const DotGraph& dot, IGraphModel& graphModel,
             {
                 for(auto edgeId : edgeIds)
                 {
-                    QString attributeName = QObject::tr("Edge ") + attribute._key;
+                    const QString attributeName = QObject::tr("Edge ") + attribute._key;
                     userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
                 }
             }
@@ -393,8 +393,8 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(graphModel == nullptr)
         return false;
 
-    QString localFile = url.toLocalFile();
-    QFileInfo fileInfo(localFile);
+    const QString localFile = url.toLocalFile();
+    const QFileInfo fileInfo(localFile);
 
     if(!fileInfo.exists())
         return false;
@@ -411,10 +411,10 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     std::ifstream stream(localFile.toStdString());
     stream.unsetf(std::ios::skipws);
 
-    boost::spirit::istream_iterator istreamIt(stream);
+    boost::spirit::istream_iterator istreamIt(stream); // NOLINT misc-const-correctness
     using DotIterator = progress_iterator<decltype(istreamIt)>;
     DotIterator it(istreamIt);
-    DotIterator end;
+    const DotIterator end;
 
     it.onPositionChanged(
     [this, &fileSize](size_t position)

@@ -205,7 +205,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max, c
 
     for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
     {
-        double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
+        const double runningTotal = std::accumulate(rows.begin(), rows.end(), 0.0,
         [this, col](auto partial, auto row)
         {
             return partial + _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
@@ -424,15 +424,15 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
         statisticalBox->setBrush(color);
 
     // Partial (efficient) sort which is suitable for IQR calculation
-    auto const Q1 = values.size() / 4;
-    auto const Q2 = values.size() / 2;
-    auto const Q3 = Q1 + Q2;
+    const auto Q1 = values.size() / 4;
+    const auto Q2 = values.size() / 2;
+    const auto Q3 = Q1 + Q2;
 
     std::nth_element(values.begin(),          values.begin() + Q1, values.end());
     std::nth_element(values.begin() + Q1 + 1, values.begin() + Q2, values.end());
     std::nth_element(values.begin() + Q2 + 1, values.begin() + Q3, values.end());
 
-    double secondQuartile = u::medianOf(values);
+    const double secondQuartile = u::medianOf(values);
     double firstQuartile = secondQuartile;
     double thirdQuartile = secondQuartile;
 
@@ -451,7 +451,7 @@ std::pair<double, double> CorrelationPlotItem::addIQRBoxPlotTo(QCPAxis* keyAxis,
         }
     }
 
-    double iqr = thirdQuartile - firstQuartile;
+    const double iqr = thirdQuartile - firstQuartile;
     double minValue = secondQuartile;
     double maxValue = secondQuartile;
     QVector<double> outliers;
@@ -678,7 +678,7 @@ void CorrelationPlotItem::populateLinePlot()
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
                 rowSum += _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
 
-            double rowMean = rowSum / static_cast<double>(_pluginInstance->numContinuousColumns());
+            const double rowMean = rowSum / static_cast<double>(_pluginInstance->numContinuousColumns());
 
             double variance = 0.0;
             for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
@@ -688,8 +688,8 @@ void CorrelationPlotItem::populateLinePlot()
             }
 
             variance /= static_cast<double>(_pluginInstance->numContinuousColumns());
-            double stdDev = std::sqrt(variance);
-            double pareto = std::sqrt(stdDev);
+            const double stdDev = std::sqrt(variance);
+            const double pareto = std::sqrt(stdDev);
 
             double attributeValue = 1.0;
 
@@ -814,7 +814,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
     if(xAxis->tickLabels())
     {
-        QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+        const QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
 
         for(size_t x = 0U; x < _pluginInstance->numContinuousColumns(); x++)
         {

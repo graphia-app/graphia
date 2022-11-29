@@ -50,7 +50,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
 
     // We must do our own componentisation as the graph's set of components
     // won't necessarily be up-to-date
-    ComponentManager componentManager(target);
+    const ComponentManager componentManager(target);
 
     int totalIterationCount = 0;
     for(auto componentId : componentManager.componentIds())
@@ -142,7 +142,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
         if(_debug && iterationCount == PAGERANK_ITERATION_LIMIT)
             qDebug() << "HIT ITERATION LIMIT ON PAGERANK. LIKELY UNSTABLE PAGERANK VECTOR";
 
-        float maxValue = blaze::max(blaze::abs(pageRankVector) );
+        const float maxValue = blaze::max(blaze::abs(pageRankVector) );
         pageRankVector = pageRankVector / maxValue;
 
         for(auto nodeId : component->nodeIds())

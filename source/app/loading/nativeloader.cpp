@@ -237,7 +237,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
             break;
     }
 
-    QString headerString = fragment.left(position);
+    const QString headerString = fragment.left(position);
     auto headerByteArray = headerString.toUtf8();
     json jsonHeader = json::parse(headerByteArray.begin(), headerByteArray.end(), nullptr, false);
 
@@ -419,7 +419,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         const auto bookmarks = jsonBody["bookmarks"];
         for(auto bookmarkIt = bookmarks.begin(); bookmarkIt != bookmarks.end(); ++bookmarkIt)
         {
-            QString name = QString::fromStdString(bookmarkIt.key());
+            const QString name = QString::fromStdString(bookmarkIt.key());
             const auto& array = bookmarkIt.value();
 
             if(array.is_array())
@@ -487,7 +487,7 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
             const auto settings = jsonLayout["settings"];
             for(auto settingsIt = settings.begin(); settingsIt != settings.end(); ++settingsIt)
             {
-                QString name = QString::fromStdString(settingsIt.key());
+                const QString name = QString::fromStdString(settingsIt.key());
                 const auto& value = settingsIt.value();
 
                 if(value.is_number())

@@ -84,7 +84,7 @@ BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
 bool VisualisationConfigParser::parse(const QString& text, bool warnOnFailure)
 {
     QStringSpiritUnicodeConstIterator begin(text.begin());
-    QStringSpiritUnicodeConstIterator end(text.end());
+    const QStringSpiritUnicodeConstIterator end(text.end());
     _result = {};
     _success = SpiritVisualisationParser::x3::phrase_parse(begin, end,
                     SpiritVisualisationParser::visualisation,

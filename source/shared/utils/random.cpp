@@ -47,9 +47,9 @@ QVector3D u::randQVector3D(float low, float high)
 
 QColor u::randQColor()
 {
-    int r = rand(0, 255);
-    int g = rand(0, 255);
-    int b = rand(0, 255);
+    const int r = rand(0, 255);
+    const int g = rand(0, 255);
+    const int b = rand(0, 255);
 
     return {r, g, b};
 }

@@ -45,7 +45,7 @@ QColor u::colorForString(const QString& string)
 
     for(int i = 0; i < result.size(); i++)
     {
-        int byte = result.at(i) + 128;
+        const int byte = result.at(i) + 128;
         if(i < result.size() / 2)
             hue = (hue + byte) % 255;
         else

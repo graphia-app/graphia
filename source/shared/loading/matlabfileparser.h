@@ -72,8 +72,8 @@ private:
         {
             Q_ASSERT(v->class_type >= MAT_C_DOUBLE && v->class_type <= MAT_C_UINT64);
 
-            size_t numColumns = v->dims[0];
-            size_t numRows = v->dims[1];
+            const size_t numColumns = v->dims[0];
+            const size_t numRows = v->dims[1];
             auto totalIterations = static_cast<uint64_t>(numColumns * numRows);
 
             _tabularData.reserve(numColumns, numRows);
@@ -82,7 +82,7 @@ private:
 
             for(size_t row = 0; row < numRows; row++)
             {
-                size_t rowOffset = row * numColumns;
+                const size_t rowOffset = row * numColumns;
 
                 for(size_t column = 0; column < numColumns; column++)
                 {

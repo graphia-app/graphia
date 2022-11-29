@@ -152,7 +152,7 @@ QMatrix4x4 Camera::viewMatrix() const
 
         auto viewVector = -QVector3D(_viewMatrix.row(2));
 
-        QVector3D eye = _focus - (viewVector * _distance);
+        const QVector3D eye = _focus - (viewVector * _distance);
         _viewMatrix.translate(-eye);
 
         _viewMatrixDirty = false;
@@ -185,10 +185,10 @@ QMatrix4x4 Camera::viewProjectionMatrix() const
 
 bool Camera::unproject(int x, int y, int z, QVector3D& result) const
 {
-    QMatrix4x4 A = projectionMatrix() * viewMatrix();
+    const QMatrix4x4 A = projectionMatrix() * viewMatrix();
 
     bool invertable = false;
-    QMatrix4x4 m = A.inverted(&invertable);
+    const QMatrix4x4 m = A.inverted(&invertable);
     if(!invertable)
         return false;
 
@@ -237,7 +237,7 @@ void Camera::updateOrthogonalProjection()
 
 Ray Camera::rayForViewportCoordinates(int x, int y) const
 {
-    Line3D line = lineForViewportCoordinates(x, y);
+    const Line3D line = lineForViewportCoordinates(x, y);
 
     return {line.start(), line.dir()};
 }
@@ -280,18 +280,18 @@ Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2) co
     }
 
     // Lines in clockwise order around view vector
-    Line3D line1 = lineForViewportCoordinates(minX, minY);
-    Line3D line2 = lineForViewportCoordinates(maxX, minY);
-    Line3D line3 = lineForViewportCoordinates(maxX, maxY);
-    Line3D line4 = lineForViewportCoordinates(minX, maxY);
+    const Line3D line1 = lineForViewportCoordinates(minX, minY);
+    const Line3D line2 = lineForViewportCoordinates(maxX, minY);
+    const Line3D line3 = lineForViewportCoordinates(maxX, maxY);
+    const Line3D line4 = lineForViewportCoordinates(minX, maxY);
 
     return {line1, line2, line3, line4};
 }
 
 ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int radius) const
 {
-    Line3D centreLine = lineForViewportCoordinates(x, y);
-    Line3D surfaceLine = lineForViewportCoordinates(x + radius, y);
+    const Line3D centreLine = lineForViewportCoordinates(x, y);
+    const Line3D surfaceLine = lineForViewportCoordinates(x + radius, y);
 
     return {centreLine, surfaceLine};
 }

@@ -30,11 +30,11 @@ void TypeIdentity::updateType(const QString& value)
 
     auto intValue = value.toLongLong(&conversionSucceeded);
     Q_UNUSED(intValue); // Keep cppcheck happy
-    bool isInt = conversionSucceeded;
+    const bool isInt = conversionSucceeded;
 
     auto doubleValue = value.toDouble(&conversionSucceeded);
     Q_UNUSED(doubleValue); // Keep cppcheck happy
-    bool isFloat = conversionSucceeded;
+    const bool isFloat = conversionSucceeded;
 
     switch(_type)
     {

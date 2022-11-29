@@ -88,7 +88,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
         auto urlTypeNames = plugin._interface->loadableUrlTypeNames();
         for(const auto& urlTypeName : urlTypeNames)
         {
-            UrlType fileType =
+            const UrlType fileType =
             {
                 urlTypeName,
                 plugin._interface->individualDescriptionForUrlTypeName(urlTypeName),
@@ -367,7 +367,7 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     for(const auto& loadedPlugin : _loadedPlugins)
     {
         auto urlTypeNames = loadedPlugin._interface->loadableUrlTypeNames();
-        bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+        const bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
         [&urlTypeName](const QString& loadableUrlTypeName)
         {
             return loadableUrlTypeName.compare(urlTypeName) == 0;
@@ -433,7 +433,7 @@ bool Application::isResourceFile(const QString& path) const
 
     return std::any_of(dirs.begin(), dirs.end(), [&canonicalPath](const auto& resourceDirectory)
     {
-        QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
+        const QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
         return canonicalPath.startsWith(canonicalResourceDirectory);
     });
 }
@@ -516,14 +516,14 @@ static void deadlock()
     {
         u::setCurrentThreadName(QStringLiteral("DeadlockThread"));
 
-        std::unique_lock<std::mutex> lockA(a);
+        const std::unique_lock<std::mutex> lockA(a);
         std::this_thread::sleep_for(1s);
-        std::unique_lock<std::mutex> lockB(b);
+        const std::unique_lock<std::mutex> lockB(b);
     });
 
-    std::unique_lock<std::mutex> lockB(b);
+    const std::unique_lock<std::mutex> lockB(b);
     std::this_thread::sleep_for(1s);
-    std::unique_lock<std::mutex> lockA(a);
+    const std::unique_lock<std::mutex> lockA(a);
 
     t.join();
 }
@@ -721,7 +721,7 @@ void Application::loadPlugins()
 
         std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
 
-        QDir pluginsQDir(pluginsDir);
+        const QDir pluginsQDir(pluginsDir);
         auto fileNames = pluginsQDir.entryList(QDir::Files);
 
         if(fileNames.empty())
@@ -758,7 +758,7 @@ void Application::loadPlugins()
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
                 if(iplugin != nullptr)
                 {
-                    bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
+                    const bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
                     [pluginName = iplugin->name()](const auto& loadedPlugin)
                     {
                         return loadedPlugin._interface->name().compare(pluginName, Qt::CaseInsensitive) == 0;
@@ -892,7 +892,7 @@ QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
 {
     auto urlTypes = urlTypesForPlugins(*_loadedPlugins);
 
-    int row = index.row();
+    const int row = index.row();
 
     if(row < 0 || row >= static_cast<int>(urlTypes.size()))
         return {};
@@ -927,7 +927,7 @@ int PluginDetailsModel::rowCount(const QModelIndex&) const
 
 QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
 {
-    int row = index.row();
+    const int row = index.row();
 
     if(row < 0 || row >= rowCount(index))
         return {};

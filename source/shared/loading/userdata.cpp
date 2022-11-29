@@ -59,7 +59,7 @@ const std::vector<QString>& UserData::vectorNames() const
 
 void UserData::add(const QString& name)
 {
-    QString normalisedName = normalise(name);
+    const QString normalisedName = normalise(name);
     if(u::contains(_vectorNames, normalisedName))
         return;
 
@@ -81,7 +81,7 @@ bool UserData::setValue(size_t index, const QString& name, const QString& value)
 
     auto& userDataVector = it->second;
 
-    bool changed = userDataVector.set(index, value);
+    const bool changed = userDataVector.set(index, value);
     _numValues = std::max(_numValues, userDataVector.numValues());
 
     if(changed)
@@ -133,14 +133,14 @@ UserDataVector* UserData::vector(const QString& name)
 
 void UserData::setVector(UserDataVector&& other)
 {
-    QString normalisedName = normalise(other.name());
+    const QString normalisedName = normalise(other.name());
     add(normalisedName);
     *vector(normalisedName) = std::move(other);
 }
 
 void UserData::remove(const QString& name)
 {
-    QString normalisedName = normalise(name);
+    const QString normalisedName = normalise(name);
     _userDataVectors.erase(normalisedName);
     u::removeByValue(_vectorNames, normalisedName);
 }

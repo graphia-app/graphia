@@ -131,13 +131,13 @@ std::istream& u::getline(std::istream& is, std::string& t)
     // The sentry object performs various tasks,
     // such as thread synchronization and updating the stream state.
 
-    std::istream::sentry se(is, true);
+    const std::istream::sentry se(is, true);
     Q_UNUSED(se);
     std::streambuf* sb = is.rdbuf();
 
     while(true)
     {
-        int c = sb->sbumpc();
+        const int c = sb->sbumpc();
         switch(c)
         {
         case '\n':
@@ -221,8 +221,8 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
 {
     QString formattedString;
 
-    double smallThreshold = std::pow(10, -minScientificFormattedStringDigitsThreshold);
-    double largeThreshold = std::pow(10, maxScientificFormattedStringDigitsThreshold);
+    const double smallThreshold = std::pow(10, -minScientificFormattedStringDigitsThreshold);
+    const double largeThreshold = std::pow(10, maxScientificFormattedStringDigitsThreshold);
     auto exponentChar = QLocale::system().exponential();
     auto absValue = std::abs(value);
 
@@ -273,7 +273,7 @@ QString u::formatNumberSIPostfix(double value)
         char _symbol;
     };
 
-    std::vector<Postfix> postfixes =
+    const std::vector<Postfix> postfixes =
     {
         {1e9, 1e9, 'B'},
         {1e6, 1e6, 'M'},

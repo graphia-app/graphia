@@ -43,7 +43,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     auto* layoutElement = layoutGrid->hasElement(1, layoutColumn) ? layoutGrid->element(1, layoutColumn) : nullptr;
 
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-    bool invisible = !_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty();
+    const bool invisible = !_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty();
 
     if(columnAnnotations.empty() || !_showColumnAnnotations || invisible)
     {
@@ -94,7 +94,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     columnAnnotationsAxisRect->setMinimumSize(0, h);
     columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 
-    size_t numColumnAnnotations = numVisibleColumnAnnotations();
+    const size_t numColumnAnnotations = numVisibleColumnAnnotations();
 
     auto forEachColumnAnnotation = [this, numColumnAnnotations, &columnAnnotations](auto&& fn)
     {
@@ -104,7 +104,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
         for(const auto& columnAnnotation : columnAnnotations)
         {
             auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
-            bool visible = selected || _columnAnnotationSelectionModeEnabled;
+            const bool visible = selected || _columnAnnotationSelectionModeEnabled;
 
             if(visible)
             {
@@ -170,7 +170,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
             if(_columnAnnotationSelectionModeEnabled)
                 postfix += selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
 
-            double tickPosition = static_cast<double>(y) + 0.5;
+            const double tickPosition = static_cast<double>(y) + 0.5;
             columnAnnotationTicker->addTick(tickPosition, prefix + columnAnnotation.name() + postfix);
         });
 
@@ -207,7 +207,7 @@ void CorrelationPlotItem::populateIQRAnnotationPlot(const QCPColumnAnnotations* 
 
         for(auto row : std::as_const(_selectedRows))
         {
-            for(size_t groupedColumn : _annotationGroupMap.at(column))
+            for(const size_t groupedColumn : _annotationGroupMap.at(column))
                 values.append(_pluginInstance->continuousDataAt(static_cast<size_t>(row), groupedColumn));
         }
 
@@ -247,7 +247,7 @@ QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
 
 void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
 {
-    std::set<QString> newVisibleColumnAnnotationNames(columnAnnotations.begin(), columnAnnotations.end());
+    const std::set<QString> newVisibleColumnAnnotationNames(columnAnnotations.begin(), columnAnnotations.end());
 
     if(_visibleColumnAnnotationNames != newVisibleColumnAnnotationNames)
     {
@@ -383,7 +383,7 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
         (static_cast<double>(rectPoint.x() * bottomSize) / axisRect->width());
 
     auto x = static_cast<int>(xf);
-    int y = static_cast<int>((rectPoint.y() * static_cast<double>(numVisibleColumnAnnotations())) /
+    const int y = static_cast<int>((rectPoint.y() * static_cast<double>(numVisibleColumnAnnotations())) /
         static_cast<double>(axisRect->height()));
 
     if(x < 0 || y < 0)

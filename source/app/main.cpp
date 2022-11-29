@@ -280,7 +280,7 @@ int start(int argc, char *argv[])
         if(!vendor.isEmpty())
         {
             vendor.replace(QStringLiteral(" "), QStringLiteral("+"));
-            QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+            const QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
             message = QObject::tr("The installed version of OpenGL is insufficient to run %1. "
                 R"(Please install the latest <a href="%2">video drivers</a> available from )"
                 "your vendor and try again.").arg(Application::name(), driversUrl);
@@ -302,8 +302,8 @@ int start(int argc, char *argv[])
 
     execute_static_blocks();
 
-    ThreadPoolSingleton threadPool;
-    ScopeTimerManager scopeTimerManager;
+    const ThreadPoolSingleton threadPool;
+    const ScopeTimerManager scopeTimerManager;
 
     u::definePref(QStringLiteral("visuals/defaultNodeColor"),               "#0000FF");
     u::definePref(QStringLiteral("visuals/defaultEdgeColor"),               "#FFFFFF");
@@ -364,7 +364,7 @@ int start(int argc, char *argv[])
 
     u::updateOldPrefs();
 
-    PreferencesWatcher preferencesWatcher;
+    const PreferencesWatcher preferencesWatcher;
 
     QObject::connect(&preferencesWatcher, &PreferencesWatcher::preferenceChanged,
         [](const QString& key, const QVariant&) { if(key.startsWith(QStringLiteral("proxy"))) configureProxy(); });
@@ -373,7 +373,7 @@ int start(int argc, char *argv[])
 
     QQuickStyle::setStyle(u::pref(QStringLiteral("system/uiTheme")).toString());
 
-    QStringList selectors;
+    QStringList selectors; // NOLINT misc-const-correctness
 
 #ifdef Q_OS_MACOS
     selectors += QStringLiteral("nativemenu");
@@ -387,7 +387,7 @@ int start(int argc, char *argv[])
     // it can be shown to the user using a graphical message box
     qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
     {
-        int r = fprintf(stderr, "%s\n", msg.toLocal8Bit().constData()); Q_ASSERT(r >= 0);
+        const int r = fprintf(stderr, "%s\n", msg.toLocal8Bit().constData()); Q_ASSERT(r >= 0);
         qmlError += QStringLiteral("%1\n").arg(msg);
     });
 
@@ -427,7 +427,7 @@ int start(int argc, char *argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::exit,
         [&qmlExitCode](int code) { qmlExitCode = code; });
 
-    Watchdog watchDog;
+    const Watchdog watchDog;
 
     // Poke the watch dog every now and again so that it doesn't break/crash us
     QTimer keepAliveTimer;

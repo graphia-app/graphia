@@ -81,7 +81,7 @@ bool PairwiseSaver::save()
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     QTextStream stream(&file);
-    size_t edgeCount = _graphModel->graph().numEdges();
+    const size_t edgeCount = _graphModel->graph().numEdges();
     size_t runningCount = 0;
 
     auto escape = [](QString string)

@@ -116,7 +116,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 
     for(size_t row = 0; row < static_cast<size_t>(rowCount()); row++)
     {
-        NodeId nodeId = _userNodeData->elementIdForIndex(row);
+        const NodeId nodeId = _userNodeData->elementIdForIndex(row);
 
         if(nodeId.isNull() || !_document->graphModel()->graph().containsNodeId(nodeId))
         {
@@ -135,7 +135,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 
 void NodeAttributeTableModel::update()
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     _pendingData.clear();
 
@@ -153,7 +153,7 @@ void NodeAttributeTableModel::update()
 
 void NodeAttributeTableModel::onUpdateComplete()
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     //FIXME this could probably be made more targetted; in the general case only
     // a subset of _data will actually be updated, in which case we don't need
@@ -285,7 +285,7 @@ std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size
 
 void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed, bool graphChanged)
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     auto attributeIneligible = [this](const auto& name)
     {
@@ -326,16 +326,16 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
         return indices;
     };
 
-    std::vector<size_t> changedIndices = indicesForColumnNames(changedSet, std::less<>());
-    for(size_t index : changedIndices)
+    const std::vector<size_t> changedIndices = indicesForColumnNames(changedSet, std::less<>());
+    for(const size_t index : changedIndices)
     {
         const auto& columnName = _columnNames.at(static_cast<int>(index));
         auto& column = _pendingData.at(index);
         updateColumn(Qt::DisplayRole, column, columnName);
     }
 
-    std::vector<size_t> removedIndices = indicesForColumnNames(removedSet, std::greater<>());
-    for(size_t index : removedIndices)
+    const std::vector<size_t> removedIndices = indicesForColumnNames(removedSet, std::greater<>());
+    for(const size_t index : removedIndices)
     {
         Q_ASSERT(index < _pendingData.size());
         _pendingData.erase(_pendingData.begin() + static_cast<int>(index));
@@ -343,8 +343,8 @@ void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList
 
     updateColumnNames();
 
-    std::vector<size_t> addedIndices = indicesForColumnNames(addedSet, std::less<>());
-    for(size_t index : addedIndices)
+    const std::vector<size_t> addedIndices = indicesForColumnNames(addedSet, std::less<>());
+    for(const size_t index : addedIndices)
     {
         const auto& columnName = _columnNames.at(static_cast<int>(index));
 

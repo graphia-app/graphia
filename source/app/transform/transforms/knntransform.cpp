@@ -41,7 +41,7 @@ void KNNTransform::apply(TransformedGraph& target) const
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
     auto k = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
-    bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
+    const bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 
     struct KnnRank
     {

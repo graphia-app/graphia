@@ -54,13 +54,13 @@ void GPUComputeThread::start()
 
 void GPUComputeThread::stop()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _shouldStop = true;
 }
 
 void GPUComputeThread::destroySurface()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _shouldStop = true;
     _jobs.clear();
     _surface.reset();
@@ -69,7 +69,7 @@ void GPUComputeThread::destroySurface()
 
 void GPUComputeThread::clearJobs()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
     _jobs.clear();
 }
 

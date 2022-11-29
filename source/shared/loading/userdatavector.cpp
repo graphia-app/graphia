@@ -59,13 +59,13 @@ bool UserDataVector::set(size_t index, const QString& newValue)
 
     if(type() == Type::Int)
     {
-        int intValue = value.toInt();
+        const int intValue = value.toInt();
         _intMin = std::min(_intMin, intValue);
         _intMax = std::max(_intMax, intValue);
     }
     else if(type() == Type::Float)
     {
-        double floatValue = value.toDouble();
+        const double floatValue = value.toDouble();
         _floatMin = std::min(_floatMin, floatValue);
         _floatMax = std::max(_floatMax, floatValue);
     }

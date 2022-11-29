@@ -41,7 +41,7 @@ bool GraphMLSaver::save()
     QFile file(_url.toLocalFile());
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
-    size_t numElements = _graphModel->attributeNames().size() +
+    const size_t numElements = _graphModel->attributeNames().size() +
         _graphModel->graph().numNodes() +
         _graphModel->graph().numEdges();
     size_t runningCount = 0;
@@ -131,7 +131,7 @@ bool GraphMLSaver::save()
     stream.writeStartElement(QStringLiteral("graph"));
     stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
 
-    std::unique_lock<NodePositions> lock(graphModel->nodePositions());
+    const std::unique_lock<NodePositions> lock(graphModel->nodePositions());
 
     _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())

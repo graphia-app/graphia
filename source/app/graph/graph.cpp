@@ -184,25 +184,25 @@ void Graph::dumpToQDebug(int detail) const
 
 void Graph::insertNodeArray(IGraphArray* nodeArray) const
 {
-    std::unique_lock<std::mutex> lock(_nodeArraysMutex);
+    const std::unique_lock<std::mutex> lock(_nodeArraysMutex);
     _nodeArrays.insert(nodeArray);
 }
 
 void Graph::eraseNodeArray(IGraphArray* nodeArray) const
 {
-    std::unique_lock<std::mutex> lock(_nodeArraysMutex);
+    const std::unique_lock<std::mutex> lock(_nodeArraysMutex);
     _nodeArrays.erase(nodeArray);
 }
 
 void Graph::insertEdgeArray(IGraphArray* edgeArray) const
 {
-    std::unique_lock<std::mutex> lock(_edgeArraysMutex);
+    const std::unique_lock<std::mutex> lock(_edgeArraysMutex);
     _edgeArrays.insert(edgeArray);
 }
 
 void Graph::eraseEdgeArray(IGraphArray* edgeArray) const
 {
-    std::unique_lock<std::mutex> lock(_edgeArraysMutex);
+    const std::unique_lock<std::mutex> lock(_edgeArraysMutex);
     _edgeArrays.erase(edgeArray);
 }
 
@@ -287,7 +287,7 @@ const std::vector<ComponentId>& Graph::componentIds() const
     if(componentManagementEnabled())
         return _componentManager->componentIds();
 
-    static std::vector<ComponentId> emptyComponentIdList;
+    static const std::vector<ComponentId> emptyComponentIdList;
 
     return emptyComponentIdList;
 }
@@ -400,7 +400,7 @@ std::vector<NodeId> Graph::neighboursOf(NodeId nodeId) const
 
 void Graph::setPhase(const QString& phase) const
 {
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
 
     if(phase != _phase)
     {
@@ -411,13 +411,13 @@ void Graph::setPhase(const QString& phase) const
 
 void Graph::clearPhase() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
 
     setPhase({});
 }
 
 QString Graph::phase() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
     return _phase;
 }

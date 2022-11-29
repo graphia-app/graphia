@@ -331,13 +331,13 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
     else
         pointOnTranslationPlane = componentRenderer()->focusPosition();
 
-    Plane translationPlane(pointOnTranslationPlane, camera->viewVector());
+    const Plane translationPlane(pointOnTranslationPlane, camera->viewVector());
 
-    QVector3D prevPoint = translationPlane.rayIntersection(
+    const QVector3D prevPoint = translationPlane.rayIntersection(
                 camera->rayForViewportCoordinates(start.x(), start.y()));
-    QVector3D curPoint = translationPlane.rayIntersection(
+    const QVector3D curPoint = translationPlane.rayIntersection(
                 camera->rayForViewportCoordinates(end.x(), end.y()));
-    QVector3D newFocus = camera->focus() + (prevPoint - curPoint);
+    const QVector3D newFocus = camera->focus() + (prevPoint - curPoint);
 
     camera->setFocus(newFocus);
 }
@@ -356,9 +356,9 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
     if(focusedOnNodeAtRadius(nodeId, radius))
         return;
 
-    ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
+    const ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
     Q_ASSERT(!componentId.isNull());
-    bool componentTransitionRequired = (componentId != _componentId);
+    const bool componentTransitionRequired = (componentId != _componentId);
 
     if(componentTransitionRequired && !transitionActive())
     {
@@ -415,8 +415,8 @@ void GraphComponentScene::updateRendererVisibility()
                 if(!componentRenderer->initialised())
                     continue;
 
-                bool isTransitioningRenderer = componentRenderer->componentId() == _transitioningComponentId;
-                bool isMainRenderer = componentRenderer->componentId() == _componentId;
+                const bool isTransitioningRenderer = componentRenderer->componentId() == _transitioningComponentId;
+                const bool isMainRenderer = componentRenderer->componentId() == _componentId;
 
                 componentRenderer->setVisible(isTransitioningRenderer || isMainRenderer);
             }
@@ -593,7 +593,7 @@ void GraphComponentScene::setProjection(Projection projection)
 
     for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
     {
-        bool isRendererForThisComponent = componentRenderer->componentId() == _componentId;
+        const bool isRendererForThisComponent = componentRenderer->componentId() == _componentId;
 
         if(!isRendererForThisComponent)
         {

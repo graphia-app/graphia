@@ -277,7 +277,7 @@ bool Attribute::isValid() const
 
 QString Attribute::parameterValue() const
 {
-    int numValidValues = static_cast<int>(_.validParameterValues.size());
+    const int numValidValues = static_cast<int>(_.validParameterValues.size());
 
     // Parameter not yet set
     if(_.parameterIndex < 0 || _.parameterIndex >= numValidValues)

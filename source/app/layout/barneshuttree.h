@@ -143,7 +143,7 @@ public:
             {
                 auto subVolume = subTree->_nonEmptyLeaves.at(i);
 
-                NodeId otherNodeId = subVolume->_nodeIds.front();
+                const NodeId otherNodeId = subVolume->_nodeIds.front();
                 if(otherNodeId != nodeId)
                 {
                     const QVector3D& otherNodePosition = nodePositions.get(otherNodeId);

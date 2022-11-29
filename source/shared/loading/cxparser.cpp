@@ -414,11 +414,11 @@ bool CxParser::parseJson(const json& jsonArray, IGraphModel* graphModel)
         return false;
     }
 
-    bool version1 = u::contains(jsonArray.at(0), "numberVerification");
+    const bool version1 = u::contains(jsonArray.at(0), "numberVerification");
     if(version1)
         return parseCx1(jsonArray, graphModel, this, _userNodeData, _userEdgeData);
 
-    bool version2 = u::contains(jsonArray.at(0), "CXVersion") &&
+    const bool version2 = u::contains(jsonArray.at(0), "CXVersion") &&
         jsonArray.at(0).at("CXVersion").get<std::string>().front() == '2';
     if(version2)
         return parseCx2(jsonArray, graphModel, this, _userNodeData, _userEdgeData);;

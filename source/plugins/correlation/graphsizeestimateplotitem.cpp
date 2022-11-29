@@ -152,7 +152,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     updateThresholdIndicator();
 
     customPlot().yAxis->setScaleType(QCPAxis::stLogarithmic);
-    QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
+    const QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
     logTicker->setLogBase(10);
     logTicker->setSubTickCount(3);
     customPlot().yAxis->setTicker(logTicker);

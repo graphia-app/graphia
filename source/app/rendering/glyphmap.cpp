@@ -39,7 +39,7 @@ GlyphMap::GlyphMap(QString fontName) :
 
 void GlyphMap::addText(const QString& text)
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     if(!text.isEmpty() && !u::contains(_results._layouts, text))
     {
@@ -52,7 +52,7 @@ void GlyphMap::addText(const QString& text)
 
 void GlyphMap::update()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     if(!updateRequired())
         return;
@@ -81,7 +81,7 @@ void GlyphMap::update()
 
 bool GlyphMap::updateRequired() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     return _updateTypeRequired != UpdateType::None;
 }
@@ -98,7 +98,7 @@ const std::vector<QImage>& GlyphMap::images() const
 
 void GlyphMap::setFontName(const QString& fontName)
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     if(_fontName != fontName && _updateTypeRequired < UpdateType::Images)
         _updateTypeRequired = UpdateType::Images;
@@ -108,9 +108,9 @@ void GlyphMap::setFontName(const QString& fontName)
 
 void GlyphMap::layoutStrings(const QFont& font)
 {
-    QFontMetrics fontMetrics(font);
+    const QFontMetrics fontMetrics(font);
 
-    bool relayoutAllStrings = (_updateTypeRequired >= UpdateType::Images);
+    const bool relayoutAllStrings = (_updateTypeRequired >= UpdateType::Images);
 
     if(relayoutAllStrings)
         _results._glyphs.clear();
@@ -120,7 +120,7 @@ void GlyphMap::layoutStrings(const QFont& font)
         if(!relayoutAllStrings && textLayoutPair.second._initialised)
             continue;
 
-        QString text = textLayoutPair.first;
+        const QString text = textLayoutPair.first;
 
         QTextLayout qTextLayout(text, font);
         QTextOption qTextOption;
@@ -197,7 +197,7 @@ void GlyphMap::renderImages(const QFont &font)
 
     // Render Glyphs
     float maxGlyphHeight = 0.0f;
-    float padding = std::max(static_cast<float>(QFontMetrics(font).height()) * 0.1f, 1.0f);
+    const float padding = std::max(static_cast<float>(QFontMetrics(font).height()) * 0.1f, 1.0f);
     float x = padding;
     float y = padding;
     int layer = 0;
@@ -232,7 +232,7 @@ void GlyphMap::renderImages(const QFont &font)
             x = padding;
             maxGlyphHeight = glyphHeight;
 
-            float bottom = y + maxGlyphHeight + padding;
+            const float bottom = y + maxGlyphHeight + padding;
 
             if(bottom >= static_cast<float>(TextureSize))
             {
@@ -281,11 +281,11 @@ void GlyphMap::renderImages(const QFont &font)
             debugPainter.drawLine(xi,      yi + hi, xi + wi, yi + hi);
         }
 
-        float u = x / static_cast<float>(TextureSize);
-        float v = (y + glyphHeight) / static_cast<float>(TextureSize);
-        float w = glyphWidth / static_cast<float>(TextureSize);
-        float h = glyphHeight / static_cast<float>(TextureSize);
-        float a = glyphAscent / static_cast<float>(TextureSize);
+        const float u = x / static_cast<float>(TextureSize);
+        const float v = (y + glyphHeight) / static_cast<float>(TextureSize);
+        const float w = glyphWidth / static_cast<float>(TextureSize);
+        const float h = glyphHeight / static_cast<float>(TextureSize);
+        const float a = glyphAscent / static_cast<float>(TextureSize);
 
         auto& textureGlyph = _results._glyphs[glyph];
         textureGlyph._layer = layer;

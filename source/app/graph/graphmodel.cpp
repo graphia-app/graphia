@@ -439,7 +439,7 @@ QString GraphModel::pluginQmlPath() const { return _plugin->qmlPath(); }
 bool GraphModel::graphTransformIsValid(const QString& transform) const
 {
     GraphTransformConfigParser p;
-    bool parsed = p.parse(transform, false);
+    const bool parsed = p.parse(transform, false);
 
     if(parsed)
     {
@@ -538,7 +538,7 @@ QStringList GraphModel::availableTransformNames() const
     for(auto& t : _->_graphTransformFactories)
     {
         auto elementType = _->_graphTransformFactories.at(t.first)->elementType();
-        bool attributesAvailable = !availableAttributeNames(elementType, ValueType::All).isEmpty();
+        const bool attributesAvailable = !availableAttributeNames(elementType, ValueType::All).isEmpty();
 
         if(elementType == ElementType::None || attributesAvailable)
             stringList.append(t.first);
@@ -604,7 +604,7 @@ bool GraphModel::hasTransformInfo() const
 
 const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
 {
-    static TransformInfo nullTransformInfo;
+    static const TransformInfo nullTransformInfo;
 
     if(u::contains(_->_transformInfos, index))
         return _->_transformInfos.at(index);
@@ -639,7 +639,7 @@ bool GraphModel::opIsUnary(const QString& op)
 bool GraphModel::visualisationIsValid(const QString& visualisation) const
 {
     VisualisationConfigParser p;
-    bool parsed = p.parse(visualisation, false);
+    const bool parsed = p.parse(visualisation, false);
 
     if(parsed)
     {
@@ -851,7 +851,7 @@ bool GraphModel::hasVisualisationInfo() const
 
 const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const
 {
-    static VisualisationInfo nullVisualisationInfo;
+    static const VisualisationInfo nullVisualisationInfo;
 
     if(u::contains(_->_visualisationInfos, index))
         return _->_visualisationInfos.at(index);
@@ -957,7 +957,7 @@ bool GraphModel::attributeIsValid(const QString& name) const
     auto attributeName = Attribute::parseAttributeName(name);
     const auto* attribute = &_->_attributes.at(attributeName._name);
 
-    bool attributeDisabled = _graphTransformsAreChanging &&
+    const bool attributeDisabled = _graphTransformsAreChanging &&
         attribute->testFlag(AttributeFlag::DisableDuringTransform);
 
     return !attributeDisabled;
@@ -1238,8 +1238,8 @@ void GraphModel::updateVisuals(bool force)
         return *change;
     };
 
-    VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
-    VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
+    const VisualChangeFlags nodeChange = findChange(graph().nodeIds(), _->_nodeVisuals, newNodeVisuals);
+    const VisualChangeFlags edgeChange = findChange(graph().edgeIds(), _->_edgeVisuals, newEdgeVisuals);
 
     if(force || nodeChange != VisualChangeFlags::None || edgeChange != VisualChangeFlags::None)
     {
@@ -1271,7 +1271,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
     if(!name.startsWith(QStringLiteral("visuals")))
         return;
 
-    bool force = name.endsWith(QStringLiteral("showNodeText")) ||
+    const bool force = name.endsWith(QStringLiteral("showNodeText")) ||
         name.endsWith(QStringLiteral("showEdgeText"));
 
     updateVisuals(force);
@@ -1362,10 +1362,10 @@ void GraphModel::onAttributesChanged(const QStringList& addedNames, const QStrin
         changed << addedNames << removedNames << changedValuesNames;
         u::removeDuplicates(changed);
 
-        bool transformRebuildRequired =
+        const bool transformRebuildRequired =
             _->_transformedGraph.onAttributeValuesChangedExternally(changed);
 
-        bool visualisationRebuildRequired = !u::setIntersection(
+        const bool visualisationRebuildRequired = !u::setIntersection(
             static_cast<const QList<QString>&>(_->_visualisedAttributeNames),
             static_cast<const QList<QString>&>(changed)).empty();
 

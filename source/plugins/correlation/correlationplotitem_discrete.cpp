@@ -58,7 +58,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         for(auto row : std::as_const(_selectedRows))
         {
-            std::vector<size_t> indices = _groupByAnnotation ?
+            const std::vector<size_t> indices = _groupByAnnotation ?
                 _annotationGroupMap.at(column) : std::vector<size_t>{_sortMap.at(column)};
 
             for(auto index : indices)
@@ -153,7 +153,7 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
     if(xAxis->tickLabels())
     {
-        QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+        const QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
 
         for(size_t x = 0U; x < _pluginInstance->numDiscreteColumns(); x++)
         {

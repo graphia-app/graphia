@@ -37,7 +37,7 @@ static Alert attributeSynthesisTransformConfigIsValid(const GraphTransformConfig
     if(!GraphModel::attributeNameIsValid(newAttributeName))
         return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
 
-    QRegularExpression regex(config.parameterByName(QStringLiteral("Regular Expression"))->valueAsString());
+    const QRegularExpression regex(config.parameterByName(QStringLiteral("Regular Expression"))->valueAsString());
     if(!regex.isValid())
         return {AlertType::Error, QObject::tr("Invalid Regular Expression: %1").arg(regex.errorString())};
 

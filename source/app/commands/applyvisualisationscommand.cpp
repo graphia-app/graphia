@@ -109,7 +109,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
                 auto visualisationConfig = p.result();
 
                 // c.f. u::findUniqueName
-                QRegularExpression re(QStringLiteral(R"(^%1\(\d+\))")
+                const QRegularExpression re(QStringLiteral(R"(^%1\(\d+\))")
                     .arg(visualisationConfig._attributeName));
 
                 for(const auto& createdAttributeName : createdAttributeNames)

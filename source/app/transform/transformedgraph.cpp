@@ -65,7 +65,7 @@ TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& s
 
 void TransformedGraph::cancelRebuild()
 {
-    std::unique_lock<std::mutex> lock(_currentTransformMutex);
+    const std::unique_lock<std::mutex> lock(_currentTransformMutex);
     _cancelled = true;
 
     if(_currentTransform != nullptr)
@@ -187,7 +187,7 @@ void TransformedGraph::rebuild()
                 continue;
             }
 
-            AttributeChangesTracker tracker(_graphModel, false);
+            const AttributeChangesTracker tracker(_graphModel, false);
 
             setCurrentTransform(transform.get());
             transform->uncancel();
@@ -265,7 +265,7 @@ void TransformedGraph::rebuild()
 
 void TransformedGraph::setCurrentTransform(GraphTransform* currentTransform)
 {
-    std::unique_lock<std::mutex> lock(_currentTransformMutex);
+    const std::unique_lock<std::mutex> lock(_currentTransformMutex);
     _currentTransform = currentTransform;
 }
 

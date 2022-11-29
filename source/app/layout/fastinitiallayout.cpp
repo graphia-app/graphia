@@ -55,11 +55,11 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
         nodeQueue.pop();
 
         auto edgeIds = graph.nodeById(parentNodeId).edgeIds();
-        QVector3D parentNodePosition = positions().get(parentNodeId);
+        const QVector3D parentNodePosition = positions().get(parentNodeId);
 
         QMatrix4x4 orientationMatrix;
         orientationMatrix.setToIdentity();
-        QVector3D forward = directionNodeVectors.at(parentNodeId);
+        const QVector3D forward = directionNodeVectors.at(parentNodeId);
         // All except initial node, calculate an orientation matrix. This makes
         // the tree grow outwards from parent nodes
         if(parentNodeId != nodeIds().front())
@@ -70,7 +70,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
             up -= (dot * forward);
             up.normalize();
 
-            QVector3D right = QVector3D::crossProduct(up, forward);
+            const QVector3D right = QVector3D::crossProduct(up, forward);
             orientationMatrix.setRow(0, QVector4D(right));
             orientationMatrix.setRow(1, QVector4D(up));
             orientationMatrix.setRow(2, QVector4D(forward));
@@ -88,7 +88,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
             const auto& edge = graph.edgeById(*edgeIdIterator);
             auto childNodeId = edge.oppositeId(parentNodeId);
 
-            bool visited = visitedNodes.get(childNodeId);
+            const bool visited = visitedNodes.get(childNodeId);
             if(!visited)
             {
                 QVector3D offsetPosition(1.0, 0.0, 0.0);

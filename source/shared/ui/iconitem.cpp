@@ -45,7 +45,7 @@ void IconItem::paint(QPainter* painter)
 
 void IconItem::setIconName(const QString& iconName)
 {
-    bool wasValid = valid();
+    const bool wasValid = valid();
 
     _iconName = iconName;
     _icon = QIcon::fromTheme(iconName);

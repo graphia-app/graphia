@@ -67,21 +67,21 @@ static void join(ComponentArray<Links>& links, ComponentId a, ComponentId b)
 static void placeThirdCircleTangentially(const Circle& a, const Circle& b, Circle& c)
 {
     float db = a.radius() + c.radius();
-    float dx = b.x() - a.x();
-    float dy = b.y() - a.y();
+    const float dx = b.x() - a.x();
+    const float dy = b.y() - a.y();
 
     if(db != 0.0f && (dx != 0.0f || dy != 0.0f))
     {
         float da = b.radius() + c.radius();
-        float dc = dx * dx + dy * dy;
+        const float dc = dx * dx + dy * dy;
 
         da *= da;
         db *= db;
 
-        float x = 0.5f + (db - da) / (2.0f * dc);
-        float value = (2 * da * (db + dc)) - ((db - dc) * (db - dc)) - (da * da);
+        const float x = 0.5f + (db - da) / (2.0f * dc);
+        const float value = (2 * da * (db + dc)) - ((db - dc) * (db - dc)) - (da * da);
 
-        float y = std::sqrt(std::max(0.0f, value)) / (2.0f * dc);
+        const float y = std::sqrt(std::max(0.0f, value)) / (2.0f * dc);
 
         c.setX(a.x() + x * dx + y * dy);
         c.setY(a.y() + x * dy - y * dx);
@@ -193,12 +193,12 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     // Find the number of nodes in the largest component
     auto largestComponentId = graph.componentIdOfLargestComponent();
-    size_t maxNumNodes = graph.componentById(largestComponentId)->numNodes();
+    const size_t maxNumNodes = graph.componentById(largestComponentId)->numNodes();
 
     for(auto componentId : componentIds)
     {
         const auto* component = graph.componentById(componentId);
-        float size = (static_cast<float>(component->numNodes()) * 100.0f) /
+        const float size = (static_cast<float>(component->numNodes()) * 100.0f) /
             static_cast<float>(maxNumNodes);
         componentLayoutData[componentId].setRadius(size);
     }

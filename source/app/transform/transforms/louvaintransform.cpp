@@ -149,7 +149,7 @@ void LouvainTransform::apply(TransformedGraph& target) const
                 const auto& edge = graph.edgeById(edgeId);
                 auto sourceId = communities.at(edge.sourceId());
                 auto targetId = communities.at(edge.targetId());
-                double newWeight = weights[edgeId];
+                const double newWeight = weights[edgeId];
 
                 auto newEdgeId = coarseGraph.firstEdgeIdBetween(sourceId, targetId);
                 if(newEdgeId.isNull())

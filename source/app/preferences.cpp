@@ -67,7 +67,7 @@ bool u::removePref(const QString& key)
 void u::setPref(const QString& key, const QVariant& value)
 {
     auto s = settings();
-    bool changed = (value != s.value(key));
+    const bool changed = (value != s.value(key));
 
     s.setValue(key, value);
 

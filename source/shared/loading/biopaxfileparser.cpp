@@ -38,7 +38,7 @@ namespace
 {
 bool isNodeElementName(const QString& name)
 {
-    QStringList nodeElementNames =
+    const QStringList nodeElementNames =
     {
         "Entity",
         "Interaction",
@@ -75,7 +75,7 @@ bool isEdgeElementName(const QString& name)
     // Edges are participant object members subclasses
     // http://www.biopax.org/owldoc/Level3/objectproperties/participant___-1675119396.html
     // Complex and Pathway components are linked by edges too
-    QStringList edgeElementNames =
+    const QStringList edgeElementNames =
     {
         "pathwayComponent",
         "memberPhysicalEntity",

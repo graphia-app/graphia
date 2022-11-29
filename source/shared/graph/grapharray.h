@@ -118,39 +118,39 @@ public:
 
     Element& operator[](Index index)
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return elementFor(index);
     }
 
     const Element& operator[](Index index) const
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return elementFor(index);
     }
 
     Element& at(Index index)
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return elementFor(index);
     }
 
     const Element& at(Index index) const
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return elementFor(index);
     }
 
     // get and set have to be implemented without elementFor because of std::vector<bool>
     Element get(Index index) const
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         assert(!index.isNull() && static_cast<size_t>(index) < size());
         return _array[static_cast<size_t>(index)];
     }
 
     void set(Index index, const Element& value)
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         assert(!index.isNull() && static_cast<size_t>(index) < size());
         _array[static_cast<size_t>(index)] = value;
     }
@@ -169,26 +169,26 @@ public:
 
     size_t size() const
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return _array.size();
     }
 
     bool empty() const
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         return _array.empty();
     }
 
     void fill(const Element& value)
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         std::fill(_array.begin(), _array.end(), value);
     }
 
     template<typename Generator>
     void generate(Generator&& generator)
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
 
         for(size_t i = 0; i < _array.size(); i++)
             _array[i] = generator(static_cast<int>(i));
@@ -197,14 +197,14 @@ public:
 
     void resetElements()
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         fill(_defaultValue);
     }
 
 protected:
     void resize(size_t size) override
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
 
         if constexpr(std::is_copy_constructible_v<Element>)
             _array.resize(size, _defaultValue);
@@ -214,7 +214,7 @@ protected:
 
     void invalidate() override
     {
-        MaybeLock lock(_mutex);
+        const MaybeLock lock(_mutex);
         _graph = nullptr;
     }
 };

@@ -58,28 +58,28 @@ void CommandManager::execute(ExecutePolicy policy, ICommandPtr command)
     case ExecutePolicy::Once:       action = CommandAction::ExecuteOnce; break;
     }
 
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(action, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::undo()
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Undo);
     emit commandQueued();
 }
 
 void CommandManager::redo()
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Redo);
     emit commandQueued();
 }
 
 void CommandManager::rollback()
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
     _pendingCommands.emplace_back(CommandAction::Rollback);
     emit commandQueued();
 }
@@ -110,9 +110,9 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
     auto verb = command->verb();
     doCommand(commandPtr, verb, [this, command = std::move(command), action]() mutable
     {
-        std::unique_lock<std::recursive_mutex> lock(_mutex);
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        QString commandName = command->description().length() > 0 ?
+        const QString commandName = command->description().length() > 0 ?
             command->description() : QStringLiteral("Anon Command");
         u::setCurrentThreadName(commandName);
 
@@ -191,7 +191,7 @@ void CommandManager::undoReal(bool rollback)
 
     doCommand(command, undoVerb, [this, command, rollback]
     {
-        std::unique_lock<std::recursive_mutex> lock(_mutex);
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
         u::setCurrentThreadName("(u) " + command->description());
         auto description = QObject::tr("Undo %1").arg(command->description());
@@ -218,7 +218,7 @@ void CommandManager::redoReal()
 
     auto* command = _stack.at(static_cast<size_t>(++_lastExecutedIndex)).get();
 
-    QString redoVerb = !command->description().isEmpty() ?
+    const QString redoVerb = !command->description().isEmpty() ?
                 QObject::tr("Redoing ") + command->description() :
                 QObject::tr("Redoing");
 
@@ -226,7 +226,7 @@ void CommandManager::redoReal()
 
     doCommand(command, redoVerb, [this, command]
     {
-        std::unique_lock<std::recursive_mutex> lock(_mutex);
+        const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
         u::setCurrentThreadName("(r) " + command->description());
         auto description = QObject::tr("Redo %1").arg(command->description());
@@ -241,7 +241,7 @@ void CommandManager::redoReal()
 
 bool CommandManager::canUndo() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock())
         return canUndoNoLocking();
@@ -251,7 +251,7 @@ bool CommandManager::canUndo() const
 
 bool CommandManager::canRedo() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock())
         return canRedoNoLocking();
@@ -261,7 +261,7 @@ bool CommandManager::canRedo() const
 
 bool CommandManager::commandIsCancellable() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand != nullptr)
         return _currentCommand->cancellable();
@@ -271,7 +271,7 @@ bool CommandManager::commandIsCancellable() const
 
 std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
     commandDescriptions.reserve(static_cast<size_t>(_lastExecutedIndex));
 
@@ -286,7 +286,7 @@ std::vector<QString> CommandManager::undoableCommandDescriptions() const
 
 std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
     commandDescriptions.reserve(_stack.size());
 
@@ -301,7 +301,7 @@ std::vector<QString> CommandManager::redoableCommandDescriptions() const
 
 QString CommandManager::nextUndoAction() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
@@ -315,7 +315,7 @@ QString CommandManager::nextUndoAction() const
 
 QString CommandManager::nextRedoAction() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock() && canRedoNoLocking())
     {
@@ -334,7 +334,7 @@ bool CommandManager::busy() const
 
 void CommandManager::clearCommandStack()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     // If a command is still in progress, wait until it's finished
     joinThread();
@@ -355,10 +355,10 @@ void CommandManager::clearCurrentCommand()
 {
     // _currentCommand is a raw pointer, so we must ensure it is reset to null
     // when the underlying unique_ptr is destroyed
-    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
     _currentCommand = nullptr;
 
-    bool wasCancelling = _cancelling;
+    const bool wasCancelling = _cancelling;
     _cancelling = false;
 
     if(wasCancelling)
@@ -368,7 +368,7 @@ void CommandManager::clearCurrentCommand()
 
 void CommandManager::cancel()
 {
-    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand != nullptr)
     {
@@ -430,7 +430,7 @@ void CommandManager::joinThread()
 
 void CommandManager::timerEvent(QTimerEvent*)
 {
-    std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
 
     if(_currentCommand == nullptr)
         return;
@@ -472,14 +472,14 @@ const ICommand* CommandManager::lastExecutedCommand() const
 
 bool CommandManager::commandsArePending() const
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
 
     return !_pendingCommands.empty();
 }
 
 CommandManager::PendingCommand CommandManager::nextPendingCommand()
 {
-    std::unique_lock<std::recursive_mutex> lock(_queueMutex);
+    const std::unique_lock<std::recursive_mutex> lock(_queueMutex);
 
     if(_pendingCommands.empty())
         return {};

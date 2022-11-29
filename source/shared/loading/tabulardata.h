@@ -151,7 +151,7 @@ public:
             auto end = validatedLine.end();
             while(it < end)
             {
-                uint32_t codePoint = utf8::next(it, end);
+                const uint32_t codePoint = utf8::next(it, end);
 
                 if(codePoint == '"')
                 {

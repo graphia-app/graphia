@@ -73,7 +73,7 @@ QString EditAttributeCommand::debugDescription() const
 
 bool EditAttributeCommand::execute()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     const auto* attribute = _graphModel->attributeByName(_attributeName);
 
@@ -100,7 +100,7 @@ bool EditAttributeCommand::execute()
 
 void EditAttributeCommand::undo()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     const auto* attribute = _graphModel->attributeByName(_attributeName);
 

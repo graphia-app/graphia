@@ -120,8 +120,8 @@ float BoundingBox3D::maxLength() const
 
 void BoundingBox3D::scale(float s)
 {
-    QVector3D newMin = ((_min - centre()) * s) + centre();
-    QVector3D newMax = ((_max - centre()) * s) + centre();
+    const QVector3D newMin = ((_min - centre()) * s) + centre();
+    const QVector3D newMax = ((_max - centre()) * s) + centre();
 
     _min = newMin;
     _max = newMax;

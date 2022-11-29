@@ -99,12 +99,12 @@ public:
 
         if(_nodeIds.size() > 1)
         {
-            bool nodesSelected = _selectionManager->selectNodes(_nodeIds);
+            const bool nodesSelected = _selectionManager->selectNodes(_nodeIds);
             _pastParticiple = _selectionManager->numNodesSelectedAsString();
             return nodesSelected;
         }
 
-        bool nodeSelected = _selectionManager->toggleNode(nodeId());
+        const bool nodeSelected = _selectionManager->toggleNode(nodeId());
         if(nodeSelected)
             _pastParticiple = _selectionManager->numNodesSelectedAsString();
 
@@ -122,7 +122,7 @@ auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds,
 inline auto makeSelectNodeCommand(SelectionManager* selectionManager, NodeId nodeId,
     Flags<SelectNodesClear> clearType = SelectNodesClear::Selection)
 {
-    std::vector<NodeId> nodeIds{{nodeId}};
+    const std::vector<NodeId> nodeIds{{nodeId}};
     return makeSelectNodesCommand(selectionManager, nodeIds, clearType);
 }
 

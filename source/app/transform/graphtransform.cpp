@@ -44,7 +44,7 @@ static bool hasUnknownAttributes(const std::vector<QString>& attributeNames,
 static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
     const GraphModel& graphModel, const GraphTransform& transform)
 {
-    bool invalidAttributes =
+    const bool invalidAttributes =
     std::any_of(attributeNames.begin(), attributeNames.end(),
     [&graphModel](const auto& attributeName)
     {

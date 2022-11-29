@@ -37,7 +37,7 @@ QStringList UrlTypes::identifyByExtension(const QUrl& url) const
 
     if(url.isLocalFile())
     {
-        QString extension = QFileInfo(url.toLocalFile()).suffix();
+        const QString extension = QFileInfo(url.toLocalFile()).suffix();
 
         for(const auto& urlType : _urlTypes)
         {

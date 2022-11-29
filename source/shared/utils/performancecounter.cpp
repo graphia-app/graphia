@@ -24,7 +24,7 @@ PerformanceCounter::PerformanceCounter(std::chrono::seconds interval) :
 
 void PerformanceCounter::tick()
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> now =
+    const std::chrono::time_point<std::chrono::high_resolution_clock> now =
             std::chrono::high_resolution_clock::now();
 
     _samples.emplace_back(now);
@@ -42,14 +42,14 @@ void PerformanceCounter::tick()
 float PerformanceCounter::ticksPerSecond()
 {
     float mean = 0.0f;
-    size_t numSamples = _samples.size();
+    const size_t numSamples = _samples.size();
 
     for(size_t index = 0; index < numSamples - 1; index++)
     {
         auto start = _samples.at(index);
         auto end = _samples.at(index + 1);
 
-        std::chrono::duration<float> duration = end - start;
+        const std::chrono::duration<float> duration = end - start;
 
         mean += duration.count() / static_cast<float>(numSamples);
     }

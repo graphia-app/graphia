@@ -69,7 +69,7 @@ private:
 #define SCOPE_TIMER_INSTANCE_NAME SCOPE_TIMER_CONCAT(_scopeTimer, __COUNTER__) /* NOLINT cppcoreguidelines-macro-usage */
 #define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__ /* NOLINT cppcoreguidelines-macro-usage */
 #define SCOPE_TIMER_MULTISAMPLES(samples) /* NOLINT cppcoreguidelines-macro-usage */ \
-    ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
+    const ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
         QStringLiteral("%1:%2 %3") \
             .arg(SCOPE_TIMER_FILENAME) \
             .arg(__LINE__) \

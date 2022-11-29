@@ -48,7 +48,7 @@ private:
 
         void add(typename DataVectors::const_iterator it, double r)
         {
-            std::unique_lock<std::mutex> lock(_mutex);
+            const std::unique_lock<std::mutex> lock(_mutex);
 
             auto minR = !_protoEdges.empty() ? _protoEdges.back()._r : 0.0;
 
@@ -150,7 +150,7 @@ public:
             auto nodeOffset = (_protoNodeIt - _protoGraph->_protoNodes.begin());
             auto a = _protoGraph->_begin + nodeOffset;
             auto b = _protoEdgeIt->_it;
-            double r = _protoEdgeIt->_r;
+            const double r = _protoEdgeIt->_r;
 
             return {a, b, r};
         }

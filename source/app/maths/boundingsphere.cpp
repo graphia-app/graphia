@@ -35,7 +35,7 @@ static float maxDistanceFromCentre(const QVector3D& centre, const std::vector<QV
 
     for(const auto& point : points)
     {
-        float lengthSquared = (centre - point).lengthSquared();
+        const float lengthSquared = (centre - point).lengthSquared();
         if(lengthSquared > radius)
             radius = lengthSquared;
     }
@@ -75,19 +75,19 @@ void BoundingSphere::set(QVector3D centre, float radius)
 
 void BoundingSphere::expandToInclude(const QVector3D& point)
 {
-    float d = point.distanceToPoint(_centre);
+    const float d = point.distanceToPoint(_centre);
     _radius = std::max(d, _radius);
 }
 
 void BoundingSphere::expandToInclude(const BoundingSphere& other)
 {
-    float d = other.centre().distanceToPoint(_centre) + other.radius();
+    const float d = other.centre().distanceToPoint(_centre) + other.radius();
     _radius = std::max(d, _radius);
 }
 
 bool BoundingSphere::containsPoint(const QVector3D& point) const
 {
-    float d = point.distanceToPoint(_centre);
+    const float d = point.distanceToPoint(_centre);
     return d <= _radius;
 }
 
@@ -98,7 +98,7 @@ bool BoundingSphere::containsLine(const Line3D& line) const
 
 bool BoundingSphere::containsSphere(const BoundingSphere& other) const
 {
-    float d = other.centre().distanceToPoint(_centre) + other.radius();
+    const float d = other.centre().distanceToPoint(_centre) + other.radius();
     return d <= _radius;
 }
 
@@ -107,36 +107,36 @@ std::vector<QVector3D> BoundingSphere::rayIntersection(const Ray& ray) const
     std::vector<QVector3D> result;
     const QVector3D& origin = ray.origin();
     const QVector3D& dir = ray.dir();
-    QVector3D oc = _centre - origin;
+    const QVector3D oc = _centre - origin;
 
     if(QVector3D::dotProduct(oc, dir) < 0.0f)
     {
         // Ray starts behind sphere
-        float ocLength = oc.length();
+        const float ocLength = oc.length();
 
         if(ocLength == _radius)
             result.push_back(origin);
         else if(ocLength < _radius)
         {
-            QVector3D centreProjectedOnRay = ray.closestPointTo(_centre);
-            float rayDistFromCentre = (centreProjectedOnRay - _centre).length();
-            float d = std::sqrt((_radius * _radius) - (rayDistFromCentre * rayDistFromCentre));
-            float di1 = d - (centreProjectedOnRay - origin).length();
+            const QVector3D centreProjectedOnRay = ray.closestPointTo(_centre);
+            const float rayDistFromCentre = (centreProjectedOnRay - _centre).length();
+            const float d = std::sqrt((_radius * _radius) - (rayDistFromCentre * rayDistFromCentre));
+            const float di1 = d - (centreProjectedOnRay - origin).length();
             result.push_back(origin + (dir * di1));
         }
     }
     else
     {
         // Ray starts in front of sphere
-        QVector3D centreProjectedOnRay = ray.closestPointTo(_centre);
-        float rayDistFromCentre = (centreProjectedOnRay - _centre).length();
+        const QVector3D centreProjectedOnRay = ray.closestPointTo(_centre);
+        const float rayDistFromCentre = (centreProjectedOnRay - _centre).length();
 
         if(rayDistFromCentre <= _radius)
         {
-            float d = std::sqrt((_radius * _radius) - (rayDistFromCentre * rayDistFromCentre));
-            float di1 = (centreProjectedOnRay - origin).length() - d;
-            float di2 = (centreProjectedOnRay - origin).length() + d;
-            float ocLength = oc.length();
+            const float d = std::sqrt((_radius * _radius) - (rayDistFromCentre * rayDistFromCentre));
+            const float di1 = (centreProjectedOnRay - origin).length() - d;
+            const float di2 = (centreProjectedOnRay - origin).length() + d;
+            const float ocLength = oc.length();
 
             if(ocLength >= _radius)
             {

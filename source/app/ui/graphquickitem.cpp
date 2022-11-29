@@ -74,7 +74,7 @@ void GraphQuickItem::resetView()
 
 bool GraphQuickItem::viewResetPending()
 {
-    bool b = _viewResetPending;
+    const bool b = _viewResetPending;
     _viewResetPending = false;
     return b;
 }
@@ -217,7 +217,7 @@ void GraphQuickItem::switchToOverviewMode(bool)
 
 bool GraphQuickItem::overviewModeSwitchPending()
 {
-    bool b = _overviewModeSwitchPending;
+    const bool b = _overviewModeSwitchPending;
     _overviewModeSwitchPending = false;
     return b;
 }
@@ -317,7 +317,7 @@ void GraphQuickItem::onRendererInitialised()
 
 void GraphQuickItem::onSynchronizeComplete()
 {
-    bool changed = _updating;
+    const bool changed = _updating;
 
     _updating = false;
 
@@ -456,7 +456,7 @@ void GraphQuickItem::updateVisibleComponentIndex()
 
 void GraphQuickItem::updateRenderer()
 {
-    bool changed = !_updating;
+    const bool changed = !_updating;
     _updating = true;
 
     if(changed)

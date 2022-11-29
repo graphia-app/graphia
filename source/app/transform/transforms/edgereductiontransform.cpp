@@ -45,7 +45,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target) const
         std::mt19937 generator(static_cast<std::mt19937::result_type>(static_cast<size_t>(nodeId)));
         std::uniform_int_distribution<size_t> distribution(0, edgeIds.size() - 1);
 
-        size_t numEdgesToRetain = std::max(minimum, (edgeIds.size() * percentage) / 100);
+        const size_t numEdgesToRetain = std::max(minimum, (edgeIds.size() * percentage) / 100);
 
         for(size_t i = 0u; i < numEdgesToRetain; i++)
         {

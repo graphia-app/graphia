@@ -47,7 +47,7 @@ static QString fetchPreview(QSize screenshotSize)
     std::vector<GLubyte> pixels(static_cast<size_t>(pixelCount));
     glReadPixels(0, 0, screenshotSize.width(), screenshotSize.height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
-    QImage screenTile(pixels.data(), screenshotSize.width(), screenshotSize.height(), QImage::Format_RGBA8888);
+    const QImage screenTile(pixels.data(), screenshotSize.width(), screenshotSize.height(), QImage::Format_RGBA8888);
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
     screenTile.mirrored().save(&buffer, "PNG");
@@ -61,7 +61,7 @@ static void fetchAndDrawTile(QPixmap& fullScreenshot, int tileX, int tileY, QPoi
     std::vector<GLubyte> pixelBytes(static_cast<size_t>(TILE_SIZE * TILE_SIZE) * 4ul);
     glReadPixels(TILE_EXTRA, TILE_EXTRA, TILE_SIZE, TILE_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, pixelBytes.data());
 
-    QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
+    const QImage screenTile(pixelBytes.data(), TILE_SIZE, TILE_SIZE, QImage::Format_RGBA8888);
 
     QPainter painter(&fullScreenshot);
     painter.drawImage((tileX * TILE_SIZE) + offset.x(), (tileY * TILE_SIZE) + offset.y(),
@@ -101,7 +101,7 @@ void ScreenshotRenderer::requestPreview(const GraphRenderer& renderer, int image
     auto viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
     QSize screenshotSize(imageWidth, imageHeight);
-    QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
+    const QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
 
     if(!fillSize)
     {
@@ -158,7 +158,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int im
     auto viewportAspectRatio = static_cast<float>(renderer.width()) / static_cast<float>(renderer.height());
 
     QSize screenshotSize(imageWidth, imageHeight);
-    QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
+    const QPoint renderOffset = fillSize ? renderOffsetForFill(imageWidth, imageHeight, viewportAspectRatio) : QPoint();
     QPoint tileOffset;
 
     if(!fillSize)
@@ -217,7 +217,7 @@ void ScreenshotRenderer::updateComponentGPUData(ScreenshotType screenshotType, Q
     for(const auto& componentCameraAndLighting : _componentCameraAndLightings)
     {
         const Camera& componentCamera = componentCameraAndLighting._camera;
-        QRectF componentViewport(
+        const QRectF componentViewport(
             componentCamera.viewport().topLeft() * static_cast<double>(scale),
             componentCamera.viewport().size() * static_cast<double>(scale));
 

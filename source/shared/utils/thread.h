@@ -95,7 +95,7 @@ QString u::parentProcessName()
     if(procFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream ts(&procFile);
-        QString commandLine = ts.readLine();
+        const QString commandLine = ts.readLine();
         auto tokens = commandLine.split(QChar(0));
 
         if(!tokens.empty())

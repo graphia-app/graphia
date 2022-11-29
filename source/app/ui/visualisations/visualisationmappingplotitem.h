@@ -81,9 +81,9 @@ private:
 
         auto yPos = static_cast<double>(event->position().y());
 
-        double hoverThreshold = 5.0;
-        bool overMin = std::abs(minPixel - yPos) < hoverThreshold;
-        bool overMax = std::abs(maxPixel - yPos) < hoverThreshold;
+        const double hoverThreshold = 5.0;
+        const bool overMin = std::abs(minPixel - yPos) < hoverThreshold;
+        const bool overMax = std::abs(maxPixel - yPos) < hoverThreshold;
 
         if(overMin)
             return DragType::Min;

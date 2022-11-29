@@ -34,7 +34,7 @@ template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const
 {
     float average = 0.0f;
     auto size = static_cast<float>(end - start);
-    float gaussSum = (size * (size + 1)) / 2.0f;
+    const float gaussSum = (size * (size + 1)) / 2.0f;
 
     for(size_t i = start; i < end; ++i)
         average += buffer.at(i) * static_cast<float>((i - start) + 1) / gaussSum;
@@ -44,7 +44,7 @@ template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const
 
 static QVector3D normalized(const QVector3D& v)
 {
-    float lengthSq = v.lengthSquared();
+    const float lengthSq = v.lengthSquared();
     if(qFuzzyIsNull(lengthSq - 1.0f))
         return v;
 
@@ -111,7 +111,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         FastInitialLayout initialLayout(graphComponent(), positions());
         initialLayout.execute(firstIteration, dimensionality);
 
-        for(NodeId nodeId : nodeIds())
+        for(const NodeId nodeId : nodeIds())
             _displacements->at(nodeId)._previous = {};
     }
 
@@ -178,7 +178,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
         if(!edge.isLoop())
         {
             const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
-            float distanceSq = difference.lengthSquared();
+            const float distanceSq = difference.lengthSquared();
             const float force = distanceSq * 0.001f;
 
             _attractiveForces->at(edgeId) = force * difference;
@@ -234,7 +234,7 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
     float variance = 0.0f;
     for(auto nodeId : nodeIds())
     {
-        float d = _displacements->at(nodeId)._nextLength - _forceMean;
+        const float d = _displacements->at(nodeId)._nextLength - _forceMean;
         variance += (d * d);
     }
 
@@ -272,12 +272,12 @@ void ForceDirectedLayout::initialChangeDetection()
 
     if(_prevCaptureStdDevs.full())
     {
-        float currentSmoothedStdDev = meanWeightedAvgBuffer(
+        const float currentSmoothedStdDev = meanWeightedAvgBuffer(
             _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
             _prevCaptureStdDevs.size(),
             _prevCaptureStdDevs);
 
-        float previousSmoothedStdDev = meanWeightedAvgBuffer(
+        const float previousSmoothedStdDev = meanWeightedAvgBuffer(
             _prevCaptureStdDevs.size() - (2 * INITIAL_SMOOTHING_SIZE),
             _prevCaptureStdDevs.size() - INITIAL_SMOOTHING_SIZE,
             _prevCaptureStdDevs);
@@ -314,17 +314,17 @@ void ForceDirectedLayout::fineTuneChangeDetection()
 {
     if(_prevAvgForces.full() && _prevStdDevs.full())
     {
-        float prevAvgStdDev = meanWeightedAvgBuffer(
+        const float prevAvgStdDev = meanWeightedAvgBuffer(
             _prevStdDevs.size() - (2 * FINETUNE_SMOOTHING_SIZE),
             _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
             _prevStdDevs);
 
-        float curAvgStdDev = meanWeightedAvgBuffer(
+        const float curAvgStdDev = meanWeightedAvgBuffer(
             _prevStdDevs.size() - FINETUNE_SMOOTHING_SIZE,
             _prevStdDevs.size(),
             _prevStdDevs);
 
-        float delta = (prevAvgStdDev - curAvgStdDev);
+        const float delta = (prevAvgStdDev - curAvgStdDev);
         if(delta < FINETUNE_STDDEV_DELTA && delta >= 0.0f)
             finishChangeDetection();
     }
@@ -337,7 +337,7 @@ void ForceDirectedLayout::oscillateChangeDetection()
 {
     if(_prevCaptureStdDevs.full())
     {
-        float averageCap = meanWeightedAvgBuffer(0, OSCILLATE_DELTA_SAMPLE_SIZE, _prevCaptureStdDevs);
+        const float averageCap = meanWeightedAvgBuffer(0, OSCILLATE_DELTA_SAMPLE_SIZE, _prevCaptureStdDevs);
 
         auto deltaStdDev = _prevUnstableStdDev - averageCap;
         auto percentDelta = OSCILLATE_STDDEV_DELTA_PERCENT;

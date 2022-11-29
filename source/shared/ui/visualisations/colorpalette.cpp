@@ -45,8 +45,8 @@ ColorPalette::ColorPalette(const QString& descriptor)
         return;
     }
 
-    bool hasAutoColors = u::contains(jsonDocument, "autoColors");
-    bool hasFixedColors = u::contains(jsonDocument, "fixedColors");
+    const bool hasAutoColors = u::contains(jsonDocument, "autoColors");
+    const bool hasFixedColors = u::contains(jsonDocument, "fixedColors");
 
     if(!hasAutoColors && !hasFixedColors)
     {

@@ -76,7 +76,7 @@ Installer::Installer(const json& details, const QString& version,
     connect(&_process, &QProcess::errorOccurred,
     [this](QProcess::ProcessError processError)
     {
-        QString error = tr("Process error %1:\n%2")
+        const QString error = tr("Process error %1:\n%2")
             .arg(processError).arg(_process.errorString());
 
         if(error != _error)

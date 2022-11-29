@@ -61,7 +61,7 @@ MatLabMatrix findBiggestMatrix(matvar_t* v, MatLabMatrix& m)
         if(v->rank != 2)
             break;
 
-        MatLabMatrix candidate{v, v->dims[0], v->dims[1]};
+        const MatLabMatrix candidate{v, v->dims[0], v->dims[1]};
         if(candidate > m)
             m = candidate;
 
@@ -98,7 +98,7 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
         return false;
 
     matvar_t* matVar = nullptr;
-    bool result = false;
+    const bool result = false;
 
     MatLabMatrix biggestMatrix;
 

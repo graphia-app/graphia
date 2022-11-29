@@ -181,7 +181,7 @@ public:
                     return;
                 }
 
-                VisualisationMapping mapping(statistics, config.parameterValue(mappingValue));
+                const VisualisationMapping mapping(statistics, config.parameterValue(mappingValue));
 
                 visualisationInfo.setMappedMinimum(mapping.min());
                 visualisationInfo.setMappedMaximum(mapping.max());

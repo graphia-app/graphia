@@ -60,7 +60,7 @@ namespace is_std_container_impl
 
 template<typename T> struct is_std_container
 {
-    static constexpr bool const value = is_std_container_impl::is_std_container<std::decay_t<T>>::value;
+    static constexpr const bool value = is_std_container_impl::is_std_container<std::decay_t<T>>::value;
 };
 
 template<typename T>
@@ -79,7 +79,7 @@ namespace is_std_sequence_container_impl
 
 template<typename T> struct is_std_sequence_container
 {
-    static constexpr bool const value = is_std_sequence_container_impl::is_std_sequence_container<std::decay_t<T>>::value;
+    static constexpr const bool value = is_std_sequence_container_impl::is_std_sequence_container<std::decay_t<T>>::value;
 };
 
 template<typename T>

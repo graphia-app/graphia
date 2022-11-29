@@ -38,7 +38,7 @@ ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
     _transformations(std::move(transformations)),
     _selectedNodeIds(_selectionManager->selectedNodes())
 {
-    bool transformsValid = std::all_of(_transformations.begin(), _transformations.end(), // clazy:exclude=detaching-member
+    const bool transformsValid = std::all_of(_transformations.begin(), _transformations.end(), // clazy:exclude=detaching-member
     [graphModel](const auto& transform)
     {
         return graphModel->graphTransformIsValid(transform);

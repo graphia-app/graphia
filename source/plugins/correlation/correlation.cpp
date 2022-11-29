@@ -84,9 +84,9 @@ std::unique_ptr<DiscreteCorrelation> DiscreteCorrelation::create(CorrelationType
 
 double PearsonAlgorithm::evaluate(size_t size, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
-    double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
-    double numerator = (static_cast<double>(size) * productSum) - (vectorA->sum() * vectorB->sum());
-    double denominator = vectorA->variability() * vectorB->variability();
+    const double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
+    const double numerator = (static_cast<double>(size) * productSum) - (vectorA->sum() * vectorB->sum());
+    const double denominator = vectorA->variability() * vectorB->variability();
 
     return numerator / denominator;
 }
@@ -109,8 +109,8 @@ double EuclideanSimilarityAlgorithm::evaluate(size_t size, const ContinuousDataV
 
 double CosineSimilarityAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, const ContinuousDataVector* vectorB) const
 {
-    double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
-    double magnitudeProduct = vectorA->magnitude() * vectorB->magnitude();
+    const double productSum = std::inner_product(vectorA->begin(), vectorA->end(), vectorB->begin(), 0.0);
+    const double magnitudeProduct = vectorA->magnitude() * vectorB->magnitude();
 
     return magnitudeProduct > 0.0 ? productSum / magnitudeProduct : 0.0;
 }
@@ -158,7 +158,7 @@ double BicorAlgorithm::evaluate(size_t, const ContinuousDataVector* vectorA, con
     const auto& processedVectorA = _processedVectors.at(a);
     const auto& processedVectorB = _processedVectors.at(b);
 
-    double productSum = std::inner_product(processedVectorA.begin(), processedVectorA.end(),
+    const double productSum = std::inner_product(processedVectorA.begin(), processedVectorA.end(),
         processedVectorB.begin(), 0.0);
 
     return productSum / (processedVectorA.magnitude() * processedVectorB.magnitude());

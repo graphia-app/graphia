@@ -47,7 +47,7 @@ void ScopeTimer::stop()
 
 void ScopeTimerManager::submit(const QString& name, qint64 elapsed, size_t numSamples)
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 
     auto& result = _results[name];
 
@@ -59,7 +59,7 @@ void ScopeTimerManager::submit(const QString& name, qint64 elapsed, size_t numSa
 
 void ScopeTimerManager::reportToQDebug() const
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    const std::unique_lock<std::mutex> lock(_mutex);
 
     for(const auto& result : _results)
     {

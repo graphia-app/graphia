@@ -125,7 +125,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
 
                 for(const auto& childAttribute : childAttributes)
                 {
-                    QString subName = _name + "." + childAttribute._name;
+                    const QString subName = _name + "." + childAttribute._name;
                     result.emplace_back(subName, childAttribute._value);
                 }
             }
@@ -185,7 +185,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
                 for(const auto& attribute : attributes)
                 {
-                    QString attributeName = QObject::tr("Node ") + attribute._name;
+                    const QString attributeName = QObject::tr("Node ") + attribute._name;
                     userNodeData.setValueBy(nodeId, attributeName, attribute._value);
                 }
             }
@@ -222,7 +222,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
             for(const auto& attribute : attributes)
             {
-                QString attributeName = QObject::tr("Edge ") + attribute._name;
+                const QString attributeName = QObject::tr("Edge ") + attribute._name;
                 userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
             }
         }
@@ -293,8 +293,8 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(graphModel == nullptr)
         return false;
 
-    QString localFile = url.toLocalFile();
-    QFileInfo fileInfo(localFile);
+    const QString localFile = url.toLocalFile();
+    const QFileInfo fileInfo(localFile);
 
     if(!fileInfo.exists())
         return false;
@@ -315,10 +315,10 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
     stream.unsetf(std::ios::skipws);
 
-    boost::spirit::istream_iterator istreamIt(stream);
+    boost::spirit::istream_iterator istreamIt(stream); // NOLINT misc-const-correctness
     using GmlIterator = progress_iterator<decltype(istreamIt)>;
     GmlIterator it(istreamIt);
-    GmlIterator end;
+    const GmlIterator end;
 
     it.onPositionChanged(
     [this, &fileSize](size_t position)

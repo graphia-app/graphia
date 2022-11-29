@@ -54,7 +54,7 @@ Watchdog::~Watchdog()
 
 void WatchdogWorker::showWarning()
 {
-    QString messageBoxExe = Application::resolvedExe(QStringLiteral("MessageBox"));
+    const QString messageBoxExe = Application::resolvedExe(QStringLiteral("MessageBox"));
 
     if(messageBoxExe.isEmpty())
     {

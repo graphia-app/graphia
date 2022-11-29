@@ -187,7 +187,7 @@ BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeParameter, attributeName,
 bool GraphTransformConfigParser::parse(const QString& text, bool warnOnFailure)
 {
     QStringSpiritUnicodeConstIterator begin(text.begin());
-    QStringSpiritUnicodeConstIterator end(text.end());
+    const QStringSpiritUnicodeConstIterator end(text.end());
     _result = {};
     _success = SpiritGraphTranformConfigParser::x3::phrase_parse(begin, end,
                     SpiritGraphTranformConfigParser::transform,

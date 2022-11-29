@@ -57,7 +57,7 @@ QString CloneAttributeCommand::debugDescription() const
 
 bool CloneAttributeCommand::execute()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     auto sourceAttribute = _graphModel->attributeValueByName(_sourceAttributeName);
     Q_ASSERT(sourceAttribute.isValid());
@@ -94,7 +94,7 @@ bool CloneAttributeCommand::execute()
 
 void CloneAttributeCommand::undo()
 {
-    AttributeChangesTracker tracker(_graphModel);
+    const AttributeChangesTracker tracker(_graphModel);
 
     for(const auto& attributeName : _createdAttributeNames)
         _graphModel->removeAttribute(attributeName);

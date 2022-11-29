@@ -62,7 +62,7 @@ static QString existingInstallation(const QString& exe)
 
 QStringList showUpdater(int argc, char *argv[])
 {
-    SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
+    const SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
 
     auto arguments = QApplication::arguments();
 
@@ -99,15 +99,15 @@ QStringList showUpdater(int argc, char *argv[])
 
         QQmlApplicationEngine engine;
 
-        QString version = u::contains(update, "version") ?
+        const QString version = u::contains(update, "version") ?
             QString::fromStdString(update["version"]) :
             QObject::tr("Unknown");
 
-        QString changeLog = u::contains(update, "changeLog") ?
+        const QString changeLog = u::contains(update, "changeLog") ?
             QString::fromStdString(update["changeLog"]) :
             QObject::tr("No release notes available.");
 
-        QTemporaryDir imagesDir;
+        const QTemporaryDir imagesDir;
         engine.rootContext()->setContextProperty(
             QStringLiteral("imagesLocation"), imagesDir.path());
 

@@ -141,8 +141,8 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
         }
 
         EdgeId edgeId;
-        NodeId sourceId = stringNodeIdToNodeId.at(sourceIdString);
-        NodeId targetId = stringNodeIdToNodeId.at(targetIdString);
+        const NodeId sourceId = stringNodeIdToNodeId.at(sourceIdString);
+        const NodeId targetId = stringNodeIdToNodeId.at(targetIdString);
 
         if(useElementIdsLiterally && u::contains(jsonEdge, "id") && jsonEdge["id"].is_string())
         {
@@ -159,7 +159,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
             auto metadata = jsonEdge["metadata"];
             for(auto it = metadata.begin(); it != metadata.end(); ++it)
             {
-                QString key = QString::fromStdString(it.key());
+                const QString key = QString::fromStdString(it.key());
                 QString value;
 
                 if(it.value().is_string())

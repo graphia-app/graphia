@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < argc; i++)
         arguments << QString::fromLocal8Bit(argv[i]);
 
-    QApplication app(argc, argv);
+    const QApplication app(argc, argv);
 
     QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));

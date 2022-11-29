@@ -104,13 +104,13 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
 
 void ComponentManager::insertComponentArray(IGraphArray* componentArray)
 {
-    std::unique_lock<std::mutex> lock(_componentArraysMutex);
+    const std::unique_lock<std::mutex> lock(_componentArraysMutex);
     _componentArrays.insert(componentArray);
 }
 
 void ComponentManager::eraseComponentArray(IGraphArray* componentArray)
 {
-    std::unique_lock<std::mutex> lock(_componentArraysMutex);
+    const std::unique_lock<std::mutex> lock(_componentArraysMutex);
     _componentArrays.erase(componentArray);
 }
 
@@ -284,7 +284,7 @@ void ComponentManager::update(const Graph* graph)
     {
         Q_ASSERT(!componentId.isNull());
         if(_debug > 0) qDebug() << "componentWillBeRemoved" << componentId;
-        bool hasMerged = mergedComponentIds.contains(componentId);
+        const bool hasMerged = mergedComponentIds.contains(componentId);
         emit componentWillBeRemoved(graph, componentId, hasMerged);
 
         if(!hasMerged)
@@ -334,7 +334,7 @@ void ComponentManager::update(const Graph* graph)
     {
         Q_ASSERT(!componentId.isNull());
         if(_debug > 0) qDebug() << "componentAdded" << componentId;
-        bool hasSplit = splitComponentIds.contains(componentId);
+        const bool hasSplit = splitComponentIds.contains(componentId);
         emit componentAdded(graph, componentId, hasSplit);
 
         if(!hasSplit)
@@ -484,7 +484,7 @@ void ComponentManager::setComponentFor(ComponentId componentId, std::unique_ptr<
     auto index = static_cast<size_t>(componentId);
     if(graphComponent != nullptr && index >= _components.size())
     {
-        size_t newSize = index > 0 ? index * 2 : 1;
+        const size_t newSize = index > 0 ? index * 2 : 1;
         _components.resize(newSize);
     }
 
@@ -529,13 +529,13 @@ public:
         _lock(mutex, std::defer_lock)
     {
         const int MIN_WARNING_MILLISECONDS = 100;
-        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+        const std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 
         if(!_lock.try_lock())
         {
             _lock.lock();
 
-            std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+            const std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
             auto timeToAcquireLock = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
             if(timeToAcquireLock > MIN_WARNING_MILLISECONDS)
@@ -558,21 +558,21 @@ private:
 
 const std::vector<ComponentId>& ComponentManager::componentIds() const
 {
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+    const unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     return _componentIds;
 }
 
 bool ComponentManager::containsComponentId(ComponentId componentId) const
 {
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+    const unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     return _componentIdsSet.contains(componentId);
 }
 
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
 {
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+    const unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     const auto* component = componentFor(componentId);
     Q_ASSERT(component != nullptr);
@@ -585,7 +585,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     if(nodeId.isNull())
         return {};
 
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+    const unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
     if(_componentIdsSet.contains(componentId))
@@ -600,7 +600,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     if(edgeId.isNull())
         return {};
 
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+    const unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
     if(_componentIdsSet.contains(componentId))

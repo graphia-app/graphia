@@ -122,13 +122,13 @@ public:
 
     Q_INVOKABLE bool userUrlStringIsValid(const QString& urlString) const
     {
-        QUrl url = QUrl::fromUserInput(urlString);
+        const QUrl url = QUrl::fromUserInput(urlString);
         return url.isValid();
     }
 
     Q_INVOKABLE QString urlFrom(const QString& userUrlString) const
     {
-        QUrl url = QUrl::fromUserInput(userUrlString);
+        const QUrl url = QUrl::fromUserInput(userUrlString);
         return url.toString();
     }
 
@@ -314,7 +314,7 @@ public:
         // Strip off the ^ and $
         QString partialRegex(IAttribute::ValidNameRegex);
         partialRegex = partialRegex.mid(1, partialRegex.length() - 2);
-        QRegularExpression re(partialRegex);
+        const QRegularExpression re(partialRegex);
 
         auto match = re.match(attributeName, 0, QRegularExpression::PartialPreferCompleteMatch);
         if(match.hasMatch())

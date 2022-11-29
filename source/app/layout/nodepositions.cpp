@@ -50,14 +50,14 @@ bool NodePositions::unlocked() const
 
 QVector3D NodePositions::get(NodeId nodeId) const
 {
-    std::unique_lock<const NodePositions> lock(*this);
+    const std::unique_lock<const NodePositions> lock(*this);
 
     return getNoLocking(nodeId);
 }
 
 std::vector<QVector3D> NodePositions::get(const std::vector<NodeId>& nodeIds) const
 {
-    std::unique_lock<const NodePositions> lock(*this);
+    const std::unique_lock<const NodePositions> lock(*this);
 
     std::vector<QVector3D> positions;
     positions.reserve(nodeIds.size());
@@ -70,7 +70,7 @@ std::vector<QVector3D> NodePositions::get(const std::vector<NodeId>& nodeIds) co
 
 void NodePositions::flatten()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     generate([this](NodeId nodeId)
     {
@@ -85,7 +85,7 @@ void NodePositions::flatten()
 
 void NodePositions::update(const NodePositions& other)
 {
-    std::unique_lock<const NodePositions> lock(*this);
+    const std::unique_lock<const NodePositions> lock(*this);
 
     _array = other._array;
 }
@@ -104,14 +104,14 @@ static QVector3D centreOfMassWithFn(const std::vector<NodeId>& nodeIds, GetFn&& 
 
 QVector3D NodePositions::centreOfMass(const std::vector<NodeId>& nodeIds) const
 {
-    std::unique_lock<const NodePositions> lock(*this);
+    const std::unique_lock<const NodePositions> lock(*this);
 
     return centreOfMassWithFn(nodeIds, [this](NodeId nodeId) { return getNoLocking(nodeId); });
 }
 
 const QVector3D& NodePositions::at(NodeId nodeId) const
 {
-    std::unique_lock<const NodePositions> lock(*this);
+    const std::unique_lock<const NodePositions> lock(*this);
 
     return getNewestNoLocking(nodeId);
 }
@@ -163,7 +163,7 @@ BoundingBox3D NodeLayoutPositions::boundingBox(const std::vector<NodeId>& nodeId
     auto firstPosition = getNewestNoLocking(nodeIds.front());
     BoundingBox3D boundingBox(firstPosition, firstPosition);
 
-    for(NodeId nodeId : nodeIds)
+    for(const NodeId nodeId : nodeIds)
         boundingBox.expandToInclude(get(nodeId));
 
     return boundingBox;

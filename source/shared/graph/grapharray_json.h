@@ -92,7 +92,7 @@ namespace u
 
         for(const auto& element : jsonArray)
         {
-            int elementId = element["id"];
+            const int elementId = element["id"];
             fn(elementId, element["value"]);
         }
     }

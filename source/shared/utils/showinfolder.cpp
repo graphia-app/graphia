@@ -34,7 +34,7 @@ void u::showInFolder(const QString& path)
         QStringLiteral("tell application \"Finder\" to reveal POSIX file \"%1\"").arg(path)});
     QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to activate"});
 #elif defined(Q_OS_UNIX)
-    QFileInfo fileInfo(path);
+    const QFileInfo fileInfo(path);
 
     // AFAICT, the best we can do on *nix is to open the folder itself
     QProcess::execute(QStringLiteral("xdg-open"), {fileInfo.absolutePath()});

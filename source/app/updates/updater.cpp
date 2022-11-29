@@ -179,7 +179,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         bool urlIsValid = false;
         if(u::contains(update, "url"))
         {
-            QUrl url = update["url"];
+            const QUrl url = update["url"];
             urlIsValid = url.isValid();
         }
 
@@ -202,14 +202,14 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         QString status;
         auto oldUpdate = latestUpdateJson(&status);
 
-        bool alreadyHaveUpdate = oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
+        const bool alreadyHaveUpdate = oldUpdate.is_object() && u::contains(oldUpdate, "version") &&
             oldUpdate["version"] == update["version"];
 
         // We've got an update marked as installed, but it doesn't match the running version
-        bool runningVersionDoesntMatchInstalledVersion = (status == QStringLiteral("installed")) &&
+        const bool runningVersionDoesntMatchInstalledVersion = (status == QStringLiteral("installed")) &&
             VERSION != oldUpdate["version"];
 
-        bool previousAttemptFailed = (status == QStringLiteral("failed"));
+        const bool previousAttemptFailed = (status == QStringLiteral("failed"));
 
         if(alreadyHaveUpdate && !previousAttemptFailed && !runningVersionDoesntMatchInstalledVersion)
         {
@@ -240,24 +240,24 @@ void Updater::downloadUpdate(QNetworkReply* reply)
 
         if(u::contains(update, "error"))
         {
-            QString error = update["error"];
+            const QString error = update["error"];
             emit noNewUpdateAvailable(error ==
                 QStringLiteral("existing"));
             _state = State::Idle;
             return;
         }
 
-        QUrl url = update["url"];
+        const QUrl url = update["url"];
         QNetworkRequest request(url);
 
         if(u::contains(update, "httpUserName") && u::contains(update, "httpPassword"))
         {
-            QString concatenatedCredentials = QStringLiteral("%1:%2")
+            const QString concatenatedCredentials = QStringLiteral("%1:%2")
                 .arg(QString::fromStdString(update["httpUserName"]),
                 QString::fromStdString(update["httpPassword"]));
 
-            QByteArray data = concatenatedCredentials.toLocal8Bit().toBase64();
-            QString headerData = "Basic " + data;
+            const QByteArray data = concatenatedCredentials.toLocal8Bit().toBase64();
+            const QString headerData = "Basic " + data;
             request.setRawHeader("Authorization", headerData.toLocal8Bit());
         }
 
@@ -292,13 +292,13 @@ void Updater::saveUpdate(QNetworkReply* reply)
         auto location = updatesLocation();
         if(!location.isEmpty())
         {
-            QDir dir(location);
+            const QDir dir(location);
             if(dir.exists())
             {
                 const auto& subFileNames = dir.entryList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot);
                 for(const auto& subFileName : subFileNames)
                 {
-                    QFileInfo info(QStringLiteral("%1/%2").arg(location, subFileName));
+                    const QFileInfo info(QStringLiteral("%1/%2").arg(location, subFileName));
 
                     if(info.isDir())
                         QDir(info.absoluteFilePath()).removeRecursively();
