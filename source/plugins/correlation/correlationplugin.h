@@ -115,8 +115,8 @@ private:
     ClippingType _clippingType = ClippingType::None;
     double _clippingValue = 0.0;
     bool _treatAsBinary = false;
-    ClusteringType _clusteringType = ClusteringType::None;
-    EdgeReductionType _edgeReductionType = EdgeReductionType::None;
+    QStringList _additionalTransforms;
+    QStringList _additionalVisualisations;
 
     bool _valuesWereImputed = false;
 

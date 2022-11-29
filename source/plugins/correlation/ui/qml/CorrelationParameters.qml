@@ -42,6 +42,8 @@ BaseParameterDialog
         property alias advancedParameters: advancedCheckBox.checked
     }
 
+    Templates { id: templates }
+
     function isInsideRect(x, y, rect)
     {
         return  x >= rect.x &&
@@ -1493,176 +1495,108 @@ BaseParameterDialog
 
         ListTab
         {
-            title: qsTr("Initial Transforms")
+            title: qsTr("Template")
             ColumnLayout
             {
                 enabled: !dataRectPage._busy
+                anchors.fill: parent
 
-                spacing: Constants.spacing * 2
-
-                anchors.left: parent.left
-                anchors.right: parent.right
                 Text
                 {
-                    text: qsTr("<h2>Graph Transforms</h2>")
+                    text: qsTr("<h2>Template</h2>")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                 }
 
-                Text
+                ColumnLayout
                 {
-                    text: qsTr("Commonly used transforms can be automatically added to " +
-                               "the graph here.")
-                    Layout.alignment: Qt.AlignLeft
-                    wrapMode: Text.WordWrap
-                }
-
-                GridLayout
-                {
-                    columns: 3
-                    Text
-                    {
-                        text: qsTr("Clustering:")
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                    ComboBox
-                    {
-                        id: clusteringComboBox
-                        model: ListModel
-                        {
-                            ListElement { text: qsTr("None");       value: ClusteringType.None }
-                            ListElement { text: qsTr("Louvain");    value: ClusteringType.Louvain }
-                            ListElement { text: qsTr("MCL");        value: ClusteringType.MCL }
-                        }
-                        textRole: "text"
-
-                        onCurrentIndexChanged:
-                        {
-                            parameters.clusteringType = model.get(currentIndex).value;
-                        }
-
-                        property int value: { return model.get(currentIndex).value; }
-                    }
-
-                    HelpTooltip
-                    {
-                        title: qsTr("Clustering")
-                        GridLayout
-                        {
-                            columns: 2
-
-                            Text
-                            {
-                                text: qsTr("<b>Louvain:</b>")
-                                textFormat: Text.StyledText
-                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                            }
-
-                            Text
-                            {
-                                text: qsTr("Louvain modularity is a method for finding clusters " +
-                                           "by measuring edge density from within communities to " +
-                                           "neighbouring communities. It is often a good choice " +
-                                           "when used in conjunction with an edge reduction " +
-                                           "transform.");
-                                wrapMode: Text.WordWrap
-                                Layout.fillWidth: true
-                            }
-
-                            Text
-                            {
-                                text: qsTr("<b>MCL:</b>")
-                                textFormat: Text.StyledText
-                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                            }
-
-                            Text
-                            {
-                                text: qsTr("The Markov Clustering Algorithm simulates stochastic " +
-                                           "flow within the generated graph to identify distinct " +
-                                           "clusters of potentially related data points.");
-                                wrapMode: Text.WordWrap
-                                Layout.fillWidth: true
-                            }
-                        }
-                    }
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: Constants.spacing
 
                     Text
                     {
-                        text: qsTr("Edge Reduction:")
-                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
-                        Layout.alignment: Qt.AlignLeft
+                        text: qsTr("A template is a named set of transforms and visualisations " +
+                            "that can be applied to the graph after it is created. Please select " +
+                            "a template to apply. <b>Note:</b> transforms applied here will always " +
+                            "be appended unconditionally, regardless of the template's " +
+                            "specific application method.")
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
 
-                    ComboBox
+                    RowLayout
                     {
-                        id: edgeReductionComboBox
-                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
+                        Label { text: qsTr("Name:") }
 
-                        model: ListModel
+                        ComboBox
                         {
-                            ListElement { text: qsTr("None");   value: EdgeReductionType.None }
-                            ListElement { text: qsTr("k-NN");   value: EdgeReductionType.KNN }
-                            ListElement { text: qsTr("%-NN");   value: EdgeReductionType.PercentNN }
-                        }
-                        textRole: "text"
+                            id: templateComboBox
+                            Layout.preferredWidth: 200
 
-                        onCurrentIndexChanged:
-                        {
-                            parameters.edgeReductionType = model.get(currentIndex).value;
-                        }
+                            model:
+                            {
+                                let a = [qsTr("None")];
+                                a.push(...templates.namesAsArray());
+                                return a;
+                            }
 
-                        property int value: { return model.get(currentIndex).value; }
+                            property var value:
+                            {
+                                if(currentIndex === 0)
+                                    return {};
+
+                                return templates.templateFor(templateComboBox.currentText);
+                            }
+
+                            property var transforms: value && value.transforms ? value.transforms : []
+                            onTransformsChanged: { parameters.additionalTransforms = transforms; }
+                            property var visualisations: value && value.visualisations ? value.visualisations : []
+                            onVisualisationsChanged: { parameters.additionalVisualisations = visualisations; }
+                        }
                     }
 
-                    HelpTooltip
+                    ScrollableTextArea
                     {
-                        title: qsTr("Edge Reduction")
-                        visible: filterTypeComboBox.value === CorrelationFilterType.Threshold
-                        ColumnLayout
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        readOnly: true
+
+                        textFormat: TextEdit.RichText
+                        wrapMode: TextEdit.Wrap
+                        outlineVisible: templateComboBox.transforms.length > 0 ||
+                            templateComboBox.visualisations.length > 0
+
+                        text:
                         {
-                            Text
+                            let s = "";
+                            let indentString = "&nbsp;&nbsp;&nbsp;";
+
+                            if(templateComboBox.transforms.length > 0)
+                                s += "<b>Transforms:</b><br>";
+
+                            for(const transform of templateComboBox.transforms)
                             {
-                                text: qsTr("Edge-reduction attempts to reduce unnecessary or non-useful edges")
-                                textFormat: Text.StyledText
-                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                                let transformText = root.plugin.displayTextForTransform(transform);
+                                transformText = QmlUtils.htmlEscape(transformText);
+                                s += indentString + transformText + "<br>";
                             }
 
-                            GridLayout
+                            if(s.length > 0)
+                                s += "<br>";
+
+                            if(templateComboBox.visualisations.length > 0)
+                                s += "<b>Visualisations:</b><br>";
+
+                            for(const visualisation of templateComboBox.visualisations)
                             {
-                                columns: 2
-                                Text
-                                {
-                                    text: qsTr("<b>k-NN:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("k-nearest neighbours ranks node edges and only " +
-                                        "keeps <i>k</i> number of edges per node.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("<b>%-NN:</b>")
-                                    textFormat: Text.StyledText
-                                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Like k-nearest neighbours, but instead of choosing " +
-                                        "the top <i>k</i> edges, choose a percentage of the highest " +
-                                        "ranking edges.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
+                                let visualisationText = root.plugin.displayTextForVisualisation(visualisation);
+                                visualisationText = QmlUtils.htmlEscape(visualisationText);
+                                s += indentString + visualisationText + "<br>";
                             }
+
+                            return s;
                         }
                     }
                 }
@@ -1769,21 +1703,8 @@ BaseParameterDialog
                             }
                         }
 
-                        let transformString = ""
-                        if(clusteringComboBox.value !== ClusteringType.None)
-                        {
-                            transformString += indentString +
-                                Utils.format(qsTr("• Clustering ({0})<br>"), clusteringComboBox.currentText);
-                        }
-
-                        if(edgeReductionComboBox.value !== EdgeReductionType.None)
-                        {
-                            transformString += indentString +
-                                Utils.format(qsTr("• Edge Reduction ({0})<br>"), edgeReductionComboBox.currentText);
-                        }
-
-                        if(transformString.length > 0)
-                            summaryString += Utils.format(qsTr("Initial Transforms:<br>{0}"), transformString);
+                        if(templateComboBox.currentIndex > 0)
+                            summaryString += Utils.format(qsTr("Template: {0}<br>"), templateComboBox.currentText);
 
                         let normalFont = "<font>";
                         let warningFont = "<font color=\"red\">";
@@ -1914,9 +1835,6 @@ BaseParameterDialog
             initialKnnSpinBox.value = DEFAULT_INITIAL_K;
             initialKnnSpinBox.to = maximumKnnSpinBox.value;
             parameters.threshold = DEFAULT_MAXIMUM_K;
-
-            // If k-NN correlation is selected, we don't want an additional k-NN transforn
-            edgeReductionComboBox.currentIndex = 0;
         }
 
         root._suppressAutoUpdates = false;
@@ -1937,7 +1855,8 @@ BaseParameterDialog
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.Constant, missingDataValue: 0.0,
             clippingType: ClippingType.None, clippingValue: 0.0,
-            treatAsBinary: false
+            treatAsBinary: false,
+            additionalTransforms: [], additionalVisualisations: []
         };
 
         resetFilterControls();

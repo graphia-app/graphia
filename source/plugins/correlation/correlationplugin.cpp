@@ -654,10 +654,10 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _treatAsBinary = value.toBool();
     else if(name == QStringLiteral("dataRect"))
         _dataRect = value.toRect();
-    else if(name == QStringLiteral("clusteringType"))
-        _clusteringType = NORMALISE_QML_ENUM(ClusteringType, value.toInt());
-    else if(name == QStringLiteral("edgeReductionType"))
-        _edgeReductionType = NORMALISE_QML_ENUM(EdgeReductionType, value.toInt());
+    else if(name == QStringLiteral("additionalTransforms"))
+        _additionalTransforms = value.toStringList();
+    else if(name == QStringLiteral("additionalVisualisations"))
+        _additionalVisualisations = value.toStringList();
     else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
         _tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
     else
@@ -703,18 +703,6 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
             break;
         }
 
-        if(_edgeReductionType == EdgeReductionType::KNN)
-        {
-            defaultTransforms.append(QStringLiteral(R"("k-NN" using $"%1")")
-                .arg(correlationPolarity == CorrelationPolarity::Positive ?
-                _correlationAttributeName : _correlationAbsAttributeName));
-        }
-        else if(_edgeReductionType == EdgeReductionType::PercentNN)
-        {
-            defaultTransforms.append(QStringLiteral(R"("%-NN" using $"%1")")
-                .arg(correlationPolarity == CorrelationPolarity::Positive ?
-                _correlationAttributeName : _correlationAbsAttributeName));
-        }
         break;
     }
 
@@ -731,23 +719,20 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     default: break;
     }
 
-    if(_clusteringType == ClusteringType::MCL)
-        defaultTransforms.append(QStringLiteral(R"("MCL Cluster")"));
-    else if(_clusteringType == ClusteringType::Louvain)
-        defaultTransforms.append(QStringLiteral(R"("Louvain Cluster")"));
+    for(const auto& additionalTransform : _additionalTransforms)
+        defaultTransforms.append(additionalTransform);
 
     return defaultTransforms;
 }
 
 QStringList CorrelationPluginInstance::defaultVisualisations() const
 {
-    if(_clusteringType == ClusteringType::MCL)
-        return { R"("MCL Cluster" "Colour")" };
+    QStringList defaultVisualisations;
 
-    if(_clusteringType == ClusteringType::Louvain)
-        return { R"("Louvain Cluster" "Colour")" };
+    for(const auto& additionalVisualisation : _additionalVisualisations)
+        defaultVisualisations.append(additionalVisualisation);
 
-    return {};
+    return defaultVisualisations;
 }
 
 double CorrelationPluginInstance::continuousDataAt(size_t row, size_t column) const
