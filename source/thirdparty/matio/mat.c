@@ -1003,13 +1003,6 @@ mat_copy(const char* src, const char* dst)
     return 0;
 }
 
-// Using mktemp causes GCC to complain, but mkstemp doesn't exist on Windows
-#ifdef _MSC_VER
-#define MKTEMP mktemp
-#else
-#define MKTEMP mkstemp
-#endif
-
 /** @brief Deletes a variable from a file
  *
  * @ingroup MAT
@@ -1027,7 +1020,7 @@ Mat_VarDelete(mat_t *mat, const char *name)
     if ( NULL == mat || NULL == name )
         return err;
 
-    if ( (tmp_name = MKTEMP(temp)) != NULL ) {
+    if ( (tmp_name = mktemp(temp)) != NULL ) {
         enum mat_ft mat_file_ver;
         mat_t *tmp;
 
