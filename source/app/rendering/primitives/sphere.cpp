@@ -107,7 +107,7 @@ void Sphere::create(QOpenGLShaderProgram& shader)
 
 void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                 std::vector<float>& texCoords, std::vector<float>& tangents,
-                                std::vector<unsigned int>& indices)
+                                std::vector<unsigned int>& indices) const
 {
     auto faces = (_slices - 2) * _rings + // Number of "rectangular" faces
             (_rings * 2); // and one ring for the top and bottom caps
