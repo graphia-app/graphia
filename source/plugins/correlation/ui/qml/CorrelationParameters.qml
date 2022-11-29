@@ -38,8 +38,11 @@ BaseParameterDialog
 
     Preferences
     {
+        id: correlation
         section: "correlation"
+
         property alias advancedParameters: advancedCheckBox.checked
+        property string defaultTemplate
     }
 
     Templates { id: templates }
@@ -1554,6 +1557,25 @@ BaseParameterDialog
                             property var visualisations: value && value.visualisations ? value.visualisations : []
                             onVisualisationsChanged: { parameters.additionalVisualisations = visualisations; }
                         }
+
+                        Button
+                        {
+                            enabled:
+                            {
+                                if(templateComboBox.currentIndex === 0)
+                                    return correlation.defaultTemplate.length > 0;
+
+                                return correlation.defaultTemplate !== templateComboBox.currentText;
+                            }
+
+                            text: qsTr("Set As Default")
+
+                            onClicked:
+                            {
+                                correlation.defaultTemplate = templateComboBox.currentIndex !== 0 ?
+                                    templateComboBox.currentText : "";
+                            }
+                        }
                     }
 
                     ScrollableTextArea
@@ -1862,6 +1884,12 @@ BaseParameterDialog
         resetFilterControls();
 
         transposeCheckBox.checked = false;
+
+        if(correlation.defaultTemplate.length > 0)
+        {
+            const newIndex = templateComboBox.find(correlation.defaultTemplate);
+            templateComboBox.currentIndex = newIndex > 0 ? newIndex : 0;
+        }
 
         populateCorrelationAlgorithmTooltip(discreteAlgorithmComboBox.model, discreteAlgorithmTooltip);
         populateCorrelationAlgorithmTooltip(continuousAlgorithmComboBox.model, continuousAlgorithmTooltip);
