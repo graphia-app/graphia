@@ -232,7 +232,7 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParse
 
     MatrixTypeResult result;
 
-    if((result = isEdgeList(data)))
+    if((result = isEdgeList(data))) // NOLINT bugprone-assignment-in-if-condition
     {
         for(size_t rowIndex = 0; rowIndex < data.numRows(); rowIndex++)
         {
@@ -246,7 +246,7 @@ QmlTabularDataParser::MatrixTypeResult AdjacencyMatrixTabularDataParser::onParse
             setProgress(static_cast<int>((rowIndex * 100) / data.numRows()));
         }
     }
-    else if((result = isAdjacencyMatrix(data, &topLeft)))
+    else if((result = isAdjacencyMatrix(data, &topLeft))) // NOLINT bugprone-assignment-in-if-condition
     {
         for(auto rowIndex = static_cast<size_t>(topLeft.y()); rowIndex < data.numRows(); rowIndex++)
         {

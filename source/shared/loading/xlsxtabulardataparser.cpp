@@ -52,10 +52,10 @@ bool XlsxTabularDataParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(graphModel != nullptr)
         graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
 
-    xlsxioreader xlsxioread = nullptr;
-
     auto filename = url.toLocalFile().toUtf8();
-    if((xlsxioread = xlsxioread_open(filename.constData())) == nullptr)
+    xlsxioreader xlsxioread = xlsxioread_open(filename.constData());
+
+    if(xlsxioread == nullptr)
         return false;
 
     xlsxioread_process(xlsxioread, nullptr, XLSXIOREAD_SKIP_NONE,
@@ -70,10 +70,10 @@ bool XlsxTabularDataParser::parse(const QUrl& url, IGraphModel* graphModel)
 
 bool XlsxTabularDataParser::canLoad(const QUrl& url)
 {
-    xlsxioreader xlsxioread = nullptr;
-
     auto filename = url.toLocalFile().toUtf8();
-    if((xlsxioread = xlsxioread_open(filename.constData())) == nullptr)
+    xlsxioreader xlsxioread = xlsxioread_open(filename.constData());
+
+    if(xlsxioread == nullptr)
         return false;
 
     xlsxioread_close(xlsxioread);
