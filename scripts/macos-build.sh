@@ -56,27 +56,34 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
 function makeSymFile
 {
   SOURCE=$1
-  TARGET=$2
+  TARGET_DIR=$2
+  BASENAME=$(basename ${SOURCE})
 
-  dsymutil ${SOURCE} -flat -o ${TARGET}.dsym || exit $?
-  source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
-    ${TARGET}.dsym > ${TARGET} 2> /dev/null || exit $?
-  rm ${TARGET}.dsym
+  for ARCH in x86_64 arm64
+  do
+    INTERMEDIATE=${TARGET_DIR}/${BASENAME}.dsym
+    TARGET=${TARGET_DIR}/${BASENAME}-${ARCH}.sym
 
-  # Remove .sym.dsym from the MODULE name
-  sed -e '1s/\.dsym$//' -e '1s/\.sym$//' -i '' ${TARGET}
+    dsymutil ${SOURCE} --arch=${ARCH} --flat -o ${INTERMEDIATE} || exit $?
+    source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
+      ${INTERMEDIATE} > ${TARGET} 2> /dev/null || exit $?
+    rm ${INTERMEDIATE}
+
+    # Remove .sym and .dsym from the MODULE name
+    sed -e '1s/\.dsym$//' -e '1s/\.sym$//' -i '' ${TARGET}
+
+    head -n1 ${TARGET}
+  done
 }
 
 echo "Generating sym files..."
 
-makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
-makeSymFile ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib \
-  ${BUILD_DIR}/libthirdparty.dylib.sym || exit $?
+makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} ${BUILD_DIR} || exit $?
+makeSymFile ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib ${BUILD_DIR} || exit $?
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
-  makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
+  makeSymFile ${PLUGIN} ${BUILD_DIR} || exit $?
 done
 
 echo "...done"
