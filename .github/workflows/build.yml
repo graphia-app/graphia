@@ -324,6 +324,10 @@ jobs:
       with:
         repository: KDE/clazy
         path: clazy
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: clazy
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Build clazy
       run: |
