@@ -830,7 +830,6 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
 
     jsonObject["numContinuousColumns"] = static_cast<int>(_numContinuousColumns);
     jsonObject["numDiscreteColumns"] = static_cast<int>(_numDiscreteColumns);
-    jsonObject["numRows"] = static_cast<int>(_numRows);
     jsonObject["userColumnData"] =_userColumnData.save(progressable);
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
@@ -849,6 +848,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         }
 
         progressable.setProgress(-1);
+        Q_ASSERT(_numContinuousColumns == 0 || (array.size() % _numContinuousColumns) == 0);
 
         return array;
     }();
@@ -867,6 +867,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         }
 
         progressable.setProgress(-1);
+        Q_ASSERT(_numDiscreteColumns == 0 || (array.size() % _numDiscreteColumns) == 0);
 
         return array;
     }();
