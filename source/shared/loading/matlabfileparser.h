@@ -46,14 +46,14 @@ private:
 
             auto* dataPtr = reinterpret_cast<T*>(sparseMatrix->data);
 
-            for(int i = 0; i < sparseMatrix->njc - 1; i++ )
+            for(mat_uint32_t i = 0; i < sparseMatrix->njc - 1; i++ )
             {
                 if(cancelled())
                     return false;
 
                 auto row = static_cast<size_t>(i);
 
-                for(int j = sparseMatrix->jc[i]; j < sparseMatrix->jc[i + 1] && j < sparseMatrix->ndata; j++ )
+                for(mat_uint32_t j = sparseMatrix->jc[i]; j < sparseMatrix->jc[i + 1] && j < sparseMatrix->ndata; j++ )
                 {
                     auto column = static_cast<size_t>(sparseMatrix->ir[j]);
 
