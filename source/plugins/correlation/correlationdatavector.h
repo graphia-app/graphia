@@ -58,6 +58,8 @@ public:
         uint64_t computeCost = 1) :
         _cost(computeCost)
     {
+        Q_ASSERT((numColumns * numRows) == data.size());
+
         _data.reserve(numRows);
 
         for(size_t row = 0; row < numRows; row++)
@@ -74,7 +76,9 @@ public:
         _data({data.cbegin() + static_cast<typename std::vector<U>::difference_type>(row * numColumns),
             data.cbegin() + static_cast<typename std::vector<U>::difference_type>((row * numColumns) + numColumns)}),
         _nodeId(nodeId), _cost(computeCost)
-    {}
+    {
+        Q_ASSERT((numColumns * (row + 1)) <= data.size());
+    }
 
     template<typename U>
     CorrelationDataVector(const std::vector<U>& dataVector,
