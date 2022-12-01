@@ -932,11 +932,6 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _numContinuousColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
     }
 
-    if(!u::contains(jsonObject, "numRows"))
-        return false;
-
-    _numRows = static_cast<size_t>(jsonObject["numRows"].get<int>());
-
     if(!u::contains(jsonObject, "userColumnData"))
         return false;
 
@@ -972,9 +967,14 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
     }
 
-    Q_ASSERT((_numContinuousColumns * _numRows) == _continuousData.size());
-    if((_numContinuousColumns * _numRows) != _continuousData.size())
-        return false;
+    if(_numContinuousColumns > 0)
+    {
+        Q_ASSERT((_continuousData.size() % _numContinuousColumns) == 0);
+        if((_continuousData.size() % _numContinuousColumns) != 0)
+            return false;
+
+        _numRows = _continuousData.size() / _numContinuousColumns;
+    }
 
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
 
@@ -991,9 +991,14 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
             parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
         }
 
-        Q_ASSERT((_numDiscreteColumns * _numRows) == _discreteData.size());
-        if((_numDiscreteColumns * _numRows) != _discreteData.size())
-            return false;
+        if(_numDiscreteColumns > 0)
+        {
+            Q_ASSERT((_discreteData.size() % _numDiscreteColumns) == 0);
+            if((_discreteData.size() % _numDiscreteColumns) != 0)
+                return false;
+
+            _numRows = _discreteData.size() / _numDiscreteColumns;
+        }
     }
 
     if(dataVersion >= 11)
