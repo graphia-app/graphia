@@ -972,6 +972,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         parser.setProgress(static_cast<int>((i++ * 100) / jsonContinuousData.size()));
     }
 
+    Q_ASSERT((_numContinuousColumns * _numRows) == _continuousData.size());
+    if((_numContinuousColumns * _numRows) != _continuousData.size())
+        return false;
+
     _continuousEpsilon = CorrelationFileParser::epsilonFor(_continuousData);
 
     if(dataVersion >= 7)
@@ -986,6 +990,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
             _discreteData.emplace_back(QString::fromStdString(value));
             parser.setProgress(static_cast<int>((i++ * 100) / jsonDiscreteData.size()));
         }
+
+        Q_ASSERT((_numDiscreteColumns * _numRows) == _discreteData.size());
+        if((_numDiscreteColumns * _numRows) != _discreteData.size())
+            return false;
     }
 
     if(dataVersion >= 11)
