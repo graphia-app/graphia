@@ -38,9 +38,17 @@
 #include <stdarg.h>
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
+#   ifdef _MSC_VER
+#       define EXTERN extern "C" __declspec(dllexport)
+#   else
+#       define EXTERN extern "C"
+#   endif
 #else
-#define EXTERN extern
+#   ifdef _MSC_VER
+#       define EXTERN extern __declspec(dllexport)
+#   else
+#       define EXTERN extern
+#   endif
 #endif
 
 /** @defgroup MAT Matlab MAT File I/O Library */

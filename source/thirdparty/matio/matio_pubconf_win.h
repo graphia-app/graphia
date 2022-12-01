@@ -163,7 +163,7 @@ typedef _mat_uint8_t mat_uint8_t;
 #if __STDC_VERSION__ >= 201112L
 #define MATIO_NORETURN _Noreturn
 #elif __cplusplus >= 201103L
-#define MATIO_NORETURN [[noreturn]]
+#define MATIO_NORETURN //[[noreturn]] // Doesn't cooperate with __declspec(dllexport)
 #elif defined(_MSC_VER) && _MSC_VER >= 1200
 #define MATIO_NORETURN __declspec(noreturn)
 #else
