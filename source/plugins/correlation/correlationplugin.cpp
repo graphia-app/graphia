@@ -1002,6 +1002,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         }
     }
 
+    Q_ASSERT(_numRows > 0);
+    if(_numRows == 0)
+        return false;
+
     if(dataVersion >= 11)
     {
         if(!u::contains(jsonObject, "hcOrdering"))
