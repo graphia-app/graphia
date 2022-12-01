@@ -282,7 +282,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
 
     // NOLINTNEXTLINE clang-analyzer-optin.cplusplus.VirtualCall
     createAttribute(tr("Component Size"))
-        .setIntValueFn([](const IGraphComponent& component) { return component.numNodes(); })
+        .setIntValueFn([](const IGraphComponent& component) { return static_cast<int>(component.numNodes()); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
