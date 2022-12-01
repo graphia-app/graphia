@@ -17,7 +17,6 @@
  */
 
 #include "graphmodel.h"
-#include "componentmanager.h"
 
 #include "limitconstants.h"
 #include "preferences.h"
@@ -67,7 +66,6 @@
 #include "shared/commands/icommand.h"
 
 #include "shared/utils/container_combine.h"
-#include "shared/utils/enumreflection.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/flags.h"
