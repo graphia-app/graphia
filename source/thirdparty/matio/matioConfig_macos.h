@@ -1,6 +1,7 @@
 /* src/matioConfig.h.  Generated from matioConfig.h.in by configure.  */
 /*
- * Copyright (c) 2012-2018, Christopher C. Hulbert
+ * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2012-2014, Christopher C. Hulbert
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +46,30 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 /* #undef FC_FUNC_ */
 
+/* Define to 1 if you have the `fseeko' function. */
+#define HAVE_FSEEKO 1
+
+/* Define to 1 if you have the `ftello' function. */
+#define HAVE_FTELLO 1
+
+/* Define to 1 if you have the `fseeko64' function. */
+/* #undef HAVE_FSEEKO64 */
+
+/* Define to 1 if you have the `ftello64' function. */
+/* #undef HAVE_FTELLO64 */
+
+/* Define to 1 if you have the `_fseeki64' function. */
+/* #undef HAVE__FSEEKI64 */
+
+/* Define to 1 if you have the `_ftelli64' function. */
+/* #undef HAVE__FTELLI64 */
+
+/* Define if 64-bit file address support in 32-bit OS. */
+#define _FILE_OFFSET_BITS 64
+
+/* Define if 64-bit file address support in 32-bit OS. */
+#define _LARGEFILE64_SOURCE 1
+
 /* Define to 1 if you have the `asprintf' function. */
 #define HAVE_ASPRINTF 1
 
@@ -59,6 +84,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
+
+/* Define to 1 if you have the <intsafe.h> header file. */
+/* #undef HAVE_INTSAFE_H */
 
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
@@ -179,10 +207,13 @@
 /* #undef MAT73 */
 
 /* Platform */
-#define MATIO_PLATFORM "x86_64-apple-darwin17.7.0"
+#define MATIO_PLATFORM "x86_64-apple-darwin21.6.0"
 
 /* Debug disabled */
 #define NODEBUG /**/
+
+/* Fixed types in safe-math.h disabled */
+#define PSNIP_SAFE_NO_FIXED 1
 
 /* Name of package */
 #define PACKAGE "matio"
@@ -194,16 +225,16 @@
 #define PACKAGE_NAME "MATIO"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "MATIO 1.5.12"
+#define PACKAGE_STRING "MATIO 1.5.23"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "matio"
 
 /* Define to the home page for this package. */
-#define PACKAGE_URL "http://sourceforge.net/projects/matio"
+#define PACKAGE_URL "https://sourceforge.net/projects/matio"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.5.12"
+#define PACKAGE_VERSION "1.5.23"
 
 /* The size of `char', as computed by sizeof. */
 #define SIZEOF_CHAR 1
@@ -239,7 +270,7 @@
 /* #undef SUN */
 
 /* Version number of package */
-#define VERSION "1.5.12"
+#define VERSION "1.5.23"
 
 /* Z prefix */
 /* #undef Z_PREFIX */

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2012-2018, Christopher C. Hulbert
+ * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2012-2014, Christopher C. Hulbert
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,38 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
+/* Define to 1 if you have the `fseeko' function. */
+#undef HAVE_FSEEKO
+
+/* Define to 1 if you have the `ftello' function. */
+#undef HAVE_FTELLO
+
+/* Define to 1 if you have the `fseeko64' function. */
+#undef HAVE_FSEEKO64
+
+/* Define to 1 if you have the `ftello64' function. */
+#undef HAVE_FTELLO64
+
+/* Define to 1 if you have the `_fseeki64' function. */
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#define HAVE__FSEEKI64 1
+#else
+#undef HAVE__FSEEKI64
+#endif
+
+/* Define to 1 if you have the `_ftelli64' function. */
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#define HAVE__FTELLI64 1
+#else
+#undef HAVE__FTELLI64
+#endif
+
+/* Define if 64-bit file address support in 32-bit OS. */
+#undef _FILE_OFFSET_BITS
+
+/* Define if 64-bit file address support in 32-bit OS. */
+#undef _LARGEFILE64_SOURCE
+
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
@@ -62,6 +95,13 @@
 #define HAVE_INTTYPES_H 1
 #else
 #undef HAVE_INTTYPES_H
+#endif
+
+/* Define to 1 if you have the <intsafe.h> header file. */
+#if defined(_MSC_VER) && _MSC_VER >= 1600
+#define HAVE_INTSAFE_H 1
+#else
+#undef HAVE_INTSAFE_H
 #endif
 
 /* Define to 1 if you have the `m' library (-lm). */
@@ -210,15 +250,16 @@
 
 /* Platform */
 #if defined(_WIN64)
-#   define MATIO_PLATFORM "x86_64-pc-windows"
+#define MATIO_PLATFORM "x86_64-pc-windows"
 #elif defined(_WIN32)
-#   define MATIO_PLATFORM "i686-pc-windows"
-#elif (__linux__)
-#   define MATIO_PLATFORM "linux"
+#define MATIO_PLATFORM "i686-pc-windows"
 #endif
 
 /* Debug disabled */
 #undef NODEBUG
+
+/* Fixed types in safe-math.h disabled */
+#define PSNIP_SAFE_NO_FIXED 1
 
 /* Name of package */
 #define PACKAGE "matio"
@@ -230,16 +271,16 @@
 #define PACKAGE_NAME "MATIO"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "MATIO 1.5.12"
+#define PACKAGE_STRING "MATIO 1.5.23"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "matio"
 
 /* Define to the home page for this package. */
-#define PACKAGE_URL "http://sourceforge.net/projects/matio"
+#define PACKAGE_URL "https://sourceforge.net/projects/matio"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.5.12"
+#define PACKAGE_VERSION "1.5.23"
 
 /* The size of `char', as computed by sizeof. */
 #define SIZEOF_CHAR 1
@@ -263,22 +304,22 @@
 #define SIZEOF_SHORT 2
 
 #if defined(_WIN64)
-    /* The size of `void *', as computed by sizeof. */
-#   define SIZEOF_VOID_P 8
-    /* The size of `size_t', as computed by sizeof. */
-#    define SIZEOF_SIZE_T 8
+/* The size of `void *', as computed by sizeof. */
+#define SIZEOF_VOID_P 8
+/* The size of `size_t', as computed by sizeof. */
+#define SIZEOF_SIZE_T 8
 #elif defined(_WIN32)
-    /* The size of `void *', as computed by sizeof. */
-#   define SIZEOF_VOID_P 4
-    /* The size of `size_t', as computed by sizeof. */
-#    define SIZEOF_SIZE_T 4
+/* The size of `void *', as computed by sizeof. */
+#define SIZEOF_VOID_P 4
+/* The size of `size_t', as computed by sizeof. */
+#define SIZEOF_SIZE_T 4
 #endif
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Version number of package */
-#define VERSION "1.5.12"
+#define VERSION "1.5.23"
 
 /* Z prefix */
 #undef Z_PREFIX

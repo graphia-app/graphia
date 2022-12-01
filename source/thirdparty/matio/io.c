@@ -2,7 +2,8 @@
  * MAT File I/O Utility Functions
  */
 /*
- * Copyright (c) 2005-2018, Christopher C. Hulbert
+ * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2005-2014, Christopher C. Hulbert
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,20 +28,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "matio_private.h"
+#if defined(_WIN32) && defined(_MSC_VER)
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+#include <Windows.h>
+#endif
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include "matio_private.h"
 
 #if !defined(HAVE_VA_COPY) && defined(HAVE___VA_COPY)
-#    define va_copy(d,s) __va_copy(d,s)
+#define va_copy(d, s) __va_copy(d, s)
 #elif !defined(HAVE_VA_COPY)
-#    define va_copy(d,s) memcpy(&(d),&(s),sizeof(va_list))
+#define va_copy(d, s) memcpy(&(d), &(s), sizeof(va_list))
 #endif
 
-static void (*logfunc)(int log_level, char *message ) = NULL;
+static void (*logfunc)(int log_level, char *message) = NULL;
 static const char *progname = NULL;
+static char *strdup_vprintf(const char *format, va_list ap) MATIO_FORMATATTR_VPRINTF;
 
 /** @brief Allocates and prints to a new string
  *
@@ -49,18 +56,18 @@ static const char *progname = NULL;
  * @param ap variable argument list
  * @return Newly allocated string with format printed to it
  */
-char *
-strdup_vprintf(const char* format, va_list ap)
+static char *
+strdup_vprintf(const char *format, va_list ap)
 {
     va_list ap2;
     int size;
-    char* buffer;
+    char *buffer;
 
     va_copy(ap2, ap);
-    size = mat_vsnprintf(NULL, 0, format, ap2)+1;
+    size = mat_vsnprintf(NULL, 0, format, ap2) + 1;
     va_end(ap2);
 
-    buffer = (char*)malloc(size+1);
+    buffer = (char *)malloc(size + 1);
     if ( !buffer )
         return NULL;
 
@@ -68,22 +75,43 @@ strdup_vprintf(const char* format, va_list ap)
     return buffer;
 }
 
-/** @brief Allocates and prints to a new string using printf format
+#if defined(_WIN32) && defined(_MSC_VER)
+/** @brief Convert from narrow UTF-8 string to wide string
  *
  * @ingroup mat_util
- * @param format format string
- * @return Pointer to resulting string, or NULL if there was an error
+ * @param src narrow string
+ * @return Pointer to resulting wide string, or NULL if there was an error
  */
-char *
-strdup_printf(const char* format, ...)
+wchar_t *
+utf82u(const char *src)
 {
-    char* buffer;
-    va_list ap;
-    va_start(ap, format);
-    buffer = strdup_vprintf(format, ap);
-    va_end(ap);
-    return buffer;
+    if ( NULL != src ) {
+        int srcLen = (int)strlen(src);
+        if ( 0 != srcLen ) {
+            int rc = MultiByteToWideChar(CP_UTF8, 0, src, srcLen, 0, 0);
+            if ( 0 != rc ) {
+                wchar_t *w = (wchar_t *)malloc(sizeof(wchar_t) * (rc + 1));
+                if ( NULL != w ) {
+                    w[rc] = L'\0';
+                    rc = MultiByteToWideChar(CP_UTF8, 0, src, srcLen, w, rc);
+                    if ( 0 != rc ) {
+                        return w;
+                    } else {
+                        free(w);
+                    }
+                }
+            }
+        } else {
+            wchar_t *w = (wchar_t *)malloc(sizeof(wchar_t));
+            if ( NULL != w ) {
+                w[0] = L'\0';
+                return w;
+            }
+        }
+    }
+    return NULL;
 }
+#endif
 
 /** @brief Default logging function
  *
@@ -94,42 +122,42 @@ strdup_printf(const char* format, ...)
  * @param message logging message
  */
 static void
-mat_logfunc( int log_level, char *message )
+mat_logfunc(int log_level, char *message)
 {
     if ( progname ) {
-        if ( log_level & MATIO_LOG_LEVEL_CRITICAL) {
-            fprintf(stderr,"-E- %s: %s\n", progname, message);
+        if ( log_level & MATIO_LOG_LEVEL_CRITICAL ) {
+            fprintf(stderr, "-E- %s: %s\n", progname, message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_ERROR ) {
-            fprintf(stderr,"-E- %s: %s\n", progname, message);
+            fprintf(stderr, "-E- %s: %s\n", progname, message);
             fflush(stderr);
             abort();
         } else if ( log_level & MATIO_LOG_LEVEL_WARNING ) {
-            fprintf(stderr,"-W- %s: %s\n", progname, message);
+            fprintf(stderr, "-W- %s: %s\n", progname, message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_DEBUG ) {
-            fprintf(stderr,"-D- %s: %s\n", progname, message);
+            fprintf(stderr, "-D- %s: %s\n", progname, message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_MESSAGE ) {
-            fprintf(stdout,"%s\n", message);
+            fprintf(stdout, "%s\n", message);
             fflush(stdout);
         }
     } else {
-        if ( log_level & MATIO_LOG_LEVEL_CRITICAL) {
-            fprintf(stderr,"-E- : %s\n", message);
+        if ( log_level & MATIO_LOG_LEVEL_CRITICAL ) {
+            fprintf(stderr, "-E- : %s\n", message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_ERROR ) {
-            fprintf(stderr,"-E- : %s\n", message);
+            fprintf(stderr, "-E- : %s\n", message);
             fflush(stderr);
             abort();
         } else if ( log_level & MATIO_LOG_LEVEL_WARNING ) {
-            fprintf(stderr,"-W- : %s\n", message);
+            fprintf(stderr, "-W- : %s\n", message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_DEBUG ) {
-            fprintf(stderr,"-D- : %s\n", message);
+            fprintf(stderr, "-D- : %s\n", message);
             fflush(stderr);
         } else if ( log_level & MATIO_LOG_LEVEL_MESSAGE ) {
-            fprintf(stdout,"%s\n", message);
+            fprintf(stdout, "%s\n", message);
             fflush(stdout);
         }
     }
@@ -148,13 +176,13 @@ mat_logfunc( int log_level, char *message )
 static void
 mat_log(int loglevel, const char *format, va_list ap)
 {
-    char* buffer;
+    char *buffer;
 
-    if ( !logfunc ) return;
+    if ( !logfunc )
+        return;
     buffer = strdup_vprintf(format, ap);
-    (*logfunc)(loglevel,buffer);
+    (*logfunc)(loglevel, buffer);
     free(buffer);
-    return;
 }
 
 #if defined(MAT73) && MAT73
@@ -183,14 +211,14 @@ mat_h5_log_func(unsigned n, const H5E_error_t *err_desc, void *client_data)
     if ( H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0 )
         return -1;
 
-    Mat_Critical("%s error #%03u in %s()\n"
+    Mat_Critical(
+        "%s error #%03u in %s()\n"
         "      file : %s:%u\n"
         "      major: %s\n"
         "      minor: %s",
-        cls, n, err_desc->func_name, err_desc->file_name, err_desc->line,
-        maj, min);
+        cls, n, err_desc->func_name, err_desc->file_name, err_desc->line, maj, min);
 
-   return 0;
+    return 0;
 }
 
 /** @brief HDF5 Error logging function callback
@@ -241,10 +269,10 @@ static int silent = 0;
  *  @param s sets logging silent level
  */
 int
-Mat_SetVerbose( int verb, int s )
+Mat_SetVerbose(int verb, int s)
 {
     verbose = verb;
-    silent  = s;
+    silent = s;
 
     return 0;
 }
@@ -257,7 +285,7 @@ Mat_SetVerbose( int verb, int s )
  *  @param d sets logging debug level
  */
 int
-Mat_SetDebug( int d )
+Mat_SetDebug(int d)
 {
     debug = d;
     return 0;
@@ -270,15 +298,18 @@ Mat_SetDebug( int d )
  * @ingroup mat_util
  * @param format message format
  */
-int Mat_Message( const char *format, ... )
+int
+Mat_Message(const char *format, ...)
 {
     va_list ap;
 
-    if ( silent ) return 0;
-    if ( !logfunc ) return 0;
+    if ( silent )
+        return 0;
+    if ( !logfunc )
+        return 0;
 
-    va_start(ap, format );
-    mat_log(MATIO_LOG_LEVEL_MESSAGE, format, ap );
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_MESSAGE, format, ap);
     va_end(ap);
     return 0;
 }
@@ -292,15 +323,18 @@ int Mat_Message( const char *format, ... )
  *  @param level debug level
  *  @param format message format
  */
-int Mat_DebugMessage( int level, const char *format, ... )
+int
+Mat_DebugMessage(int level, const char *format, ...)
 {
     va_list ap;
 
-    if ( silent ) return 0;
-    if ( level > debug ) return 0;
+    if ( silent )
+        return 0;
+    if ( level > debug )
+        return 0;
 
-    va_start(ap, format );
-    mat_log(MATIO_LOG_LEVEL_DEBUG, format, ap );
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_DEBUG, format, ap);
     va_end(ap);
     return 0;
 }
@@ -314,15 +348,18 @@ int Mat_DebugMessage( int level, const char *format, ... )
  *  @param level verbose level
  *  @param format message format
  */
-int Mat_VerbMessage( int level, const char *format, ... )
+int
+Mat_VerbMessage(int level, const char *format, ...)
 {
     va_list ap;
 
-    if ( silent ) return 0;
-    if ( level > verbose ) return 0;
+    if ( silent )
+        return 0;
+    if ( level > verbose )
+        return 0;
 
-    va_start(ap, format );
-    mat_log(MATIO_LOG_LEVEL_MESSAGE, format, ap );
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_MESSAGE, format, ap);
     va_end(ap);
     return 0;
 }
@@ -335,12 +372,13 @@ int Mat_VerbMessage( int level, const char *format, ... )
  * @param format format string identical to printf format
  * @param ... arguments to the format string
  */
-void Mat_Critical( const char *format, ... )
+void
+Mat_Critical(const char *format, ...)
 {
     va_list ap;
 
-    va_start(ap, format );
-    mat_log(MATIO_LOG_LEVEL_CRITICAL, format, ap );
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_CRITICAL, format, ap);
     va_end(ap);
 }
 
@@ -351,12 +389,13 @@ void Mat_Critical( const char *format, ... )
  * @param format format string identical to printf format
  * @param ... arguments to the format string
  */
-void Mat_Error( const char *format, ... )
+void
+Mat_Error(const char *format, ...)
 {
     va_list ap;
 
-    va_start(ap, format );
-    mat_log( MATIO_LOG_LEVEL_ERROR, format, ap ); /* Shall never return to the calling function */
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_ERROR, format, ap); /* Shall never return to the calling function */
     va_end(ap);
     abort(); /* Always abort */
 }
@@ -372,11 +411,12 @@ void Mat_Error( const char *format, ... )
  * @ingroup mat_util
  * @param helpstr array of strings with NULL as its last element
  */
-void Mat_Help( const char *helpstr[] )
+void
+Mat_Help(const char *helpstr[])
 {
     int i;
-    for (i = 0; helpstr[i] != NULL; i++)
-        printf("%s\n",helpstr[i]);
+    for ( i = 0; helpstr[i] != NULL; i++ )
+        printf("%s\n", helpstr[i]);
     exit(EXIT_SUCCESS);
 }
 
@@ -386,7 +426,7 @@ void Mat_Help( const char *helpstr[] )
  * @retval 1
  */
 int
-Mat_LogClose( void )
+Mat_LogClose(void)
 {
     logfunc = NULL;
 #if defined(MAT73) && MAT73
@@ -402,14 +442,15 @@ Mat_LogClose( void )
  * @return 0 on success
  */
 int
-Mat_LogInit( const char *prog_name )
+Mat_LogInit(const char *prog_name)
 {
     logfunc = &mat_logfunc;
+    progname = prog_name;
 #if defined(MAT73) && MAT73
     H5Eset_auto(H5E_DEFAULT, mat_h5_log_cb, NULL);
 #endif
     verbose = 0;
-    silent  = 0;
+    silent = 0;
 
     return 0;
 }
@@ -422,8 +463,7 @@ Mat_LogInit( const char *prog_name )
  * @return 0 on success
  */
 int
-Mat_LogInitFunc(const char *prog_name,
-    void (*log_func)(int log_level,char *message))
+Mat_LogInitFunc(const char *prog_name, void (*log_func)(int log_level, char *message))
 {
     logfunc = log_func;
     progname = prog_name;
@@ -431,7 +471,7 @@ Mat_LogInitFunc(const char *prog_name,
     H5Eset_auto(H5E_DEFAULT, mat_h5_log_cb, NULL);
 #endif
     verbose = 0;
-    silent  = 0;
+    silent = 0;
     return 0;
 }
 
@@ -443,12 +483,12 @@ Mat_LogInitFunc(const char *prog_name,
  * @param ... arguments to the format string
  */
 void
-Mat_Warning( const char *format, ... )
+Mat_Warning(const char *format, ...)
 {
     va_list ap;
 
-    va_start(ap, format );
-    mat_log(MATIO_LOG_LEVEL_WARNING, format, ap );
+    va_start(ap, format);
+    mat_log(MATIO_LOG_LEVEL_WARNING, format, ap);
     va_end(ap);
 }
 
@@ -461,7 +501,7 @@ Mat_Warning( const char *format, ... )
 size_t
 Mat_SizeOf(enum matio_types data_type)
 {
-    switch (data_type) {
+    switch ( data_type ) {
         case MAT_T_DOUBLE:
             return sizeof(double);
         case MAT_T_SINGLE:

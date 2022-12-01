@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2012-2018, Christopher C. Hulbert
+ * Copyright (c) 2015-2022, The matio contributors
+ * Copyright (c) 2012-2014, Christopher C. Hulbert
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,9 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "matio_private.h"
 #include <stdlib.h>
 #include <string.h>
-#include "matio_private.h"
 
 /** @brief Returns a pointer to the Cell array at a specific index
  *
@@ -38,18 +39,20 @@
  * @return Pointer to the Cell Array Field on success, NULL on error
  */
 matvar_t *
-Mat_VarGetCell(matvar_t *matvar,int index)
+Mat_VarGetCell(matvar_t *matvar, int index)
 {
-    int       nmemb = 1, i;
+    size_t nelems = 1;
     matvar_t *cell = NULL;
+    int err;
 
     if ( matvar == NULL )
         return NULL;
 
-    for ( i = 0; i < matvar->rank; i++ )
-        nmemb *= matvar->dims[i];
+    err = Mat_MulDims(matvar, &nelems);
+    if ( err )
+        return NULL;
 
-    if ( index < nmemb )
+    if ( 0 <= index && (size_t)index < nelems )
         cell = *((matvar_t **)matvar->data + index);
 
     return cell;
@@ -75,14 +78,23 @@ Mat_VarGetCell(matvar_t *matvar,int index)
  * @returns an array of pointers to the cells
  */
 matvar_t **
-Mat_VarGetCells(matvar_t *matvar,int *start,int *stride,int *edge)
+Mat_VarGetCells(matvar_t *matvar, int *start, int *stride, int *edge)
 {
     int i, j, N, I;
-    size_t idx[10] = {0,}, cnt[10] = {0,}, dimp[10] = {0,};
+    size_t idx[10] =
+        {
+            0,
+        },
+           cnt[10] =
+               {
+                   0,
+               },
+           dimp[10] = {
+               0,
+           };
     matvar_t **cells;
 
-    if ( (matvar == NULL) || (start == NULL) || (stride == NULL) ||
-        (edge == NULL) ) {
+    if ( matvar == NULL || start == NULL || stride == NULL || edge == NULL ) {
         return NULL;
     } else if ( matvar->rank > 9 ) {
         return NULL;
@@ -93,15 +105,15 @@ Mat_VarGetCells(matvar_t *matvar,int *start,int *stride,int *edge)
     I = start[0];
     idx[0] = start[0];
     for ( i = 1; i < matvar->rank; i++ ) {
-        idx[i]  = start[i];
-        dimp[i] = dimp[i-1]*matvar->dims[i];
+        idx[i] = start[i];
+        dimp[i] = dimp[i - 1] * matvar->dims[i];
         N *= edge[i];
-        I += start[i]*dimp[i-1];
+        I += start[i] * dimp[i - 1];
     }
-    cells = (matvar_t**)malloc(N*sizeof(matvar_t *));
-    for ( i = 0; i < N; i+=edge[0] ) {
+    cells = (matvar_t **)malloc(N * sizeof(matvar_t *));
+    for ( i = 0; i < N; i += edge[0] ) {
         for ( j = 0; j < edge[0]; j++ ) {
-            cells[i+j] = *((matvar_t **)matvar->data + I);
+            cells[i + j] = *((matvar_t **)matvar->data + I);
             I += stride[0];
         }
         idx[0] = start[0];
@@ -109,15 +121,15 @@ Mat_VarGetCells(matvar_t *matvar,int *start,int *stride,int *edge)
         cnt[1]++;
         idx[1] += stride[1];
         for ( j = 1; j < matvar->rank; j++ ) {
-            if ( cnt[j] == edge[j] ) {
+            if ( cnt[j] == (size_t)edge[j] ) {
                 cnt[j] = 0;
                 idx[j] = start[j];
                 if ( j < matvar->rank - 1 ) {
-                    cnt[j+1]++;
-                    idx[j+1] += stride[j+1];
+                    cnt[j + 1]++;
+                    idx[j + 1] += stride[j + 1];
                 }
             }
-            I += idx[j]*dimp[j-1];
+            I += idx[j] * dimp[j - 1];
         }
     }
     return cells;
@@ -138,13 +150,13 @@ Mat_VarGetCells(matvar_t *matvar,int *start,int *stride,int *edge)
  * @returns an array of pointers to the cells
  */
 matvar_t **
-Mat_VarGetCellsLinear(matvar_t *matvar,int start,int stride,int edge)
+Mat_VarGetCellsLinear(matvar_t *matvar, int start, int stride, int edge)
 {
     matvar_t **cells = NULL;
 
     if ( matvar != NULL ) {
         int i, I;
-        cells = (matvar_t**)malloc(edge*sizeof(matvar_t *));
+        cells = (matvar_t **)malloc(edge * sizeof(matvar_t *));
         I = start;
         for ( i = 0; i < edge; i++ ) {
             cells[i] = *((matvar_t **)matvar->data + I);
@@ -165,19 +177,21 @@ Mat_VarGetCellsLinear(matvar_t *matvar,int start,int stride,int edge)
 *          previous cell element or error.
  */
 matvar_t *
-Mat_VarSetCell(matvar_t *matvar,int index,matvar_t *cell)
+Mat_VarSetCell(matvar_t *matvar, int index, matvar_t *cell)
 {
-    int nmemb = 1, i;
+    size_t nelems = 1;
     matvar_t **cells, *old_cell = NULL;
+    int err;
 
     if ( matvar == NULL || matvar->rank < 1 )
         return NULL;
 
-    for ( i = 0; i < matvar->rank; i++ )
-        nmemb *= matvar->dims[i];
+    err = Mat_MulDims(matvar, &nelems);
+    if ( err )
+        return NULL;
 
-    cells = (matvar_t**)matvar->data;
-    if ( index < nmemb ) {
+    cells = (matvar_t **)matvar->data;
+    if ( 0 <= index && (size_t)index < nelems ) {
         old_cell = cells[index];
         cells[index] = cell;
     }
