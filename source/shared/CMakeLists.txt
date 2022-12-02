@@ -158,6 +158,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/failurereason.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/macosfileopeneventfilter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/modelcompleter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp

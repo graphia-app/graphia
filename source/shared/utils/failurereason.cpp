@@ -16,25 +16,25 @@
  * along with Graphia.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FAILUREREASON_H
-#define FAILUREREASON_H
+#include "failurereason.h"
 
-#include <QString>
+#include "build_defines.h"
 
-#include <source_location>
-
-class FailureReason
+void FailureReason::setFailureReason(const QString& failureReason)
 {
-private:
-    QString _failureReason;
+    _failureReason = failureReason;
+}
 
-public:
-    virtual ~FailureReason() = default;
+const QString& FailureReason::failureReason() const
+{
+    return _failureReason;
+}
 
-    void setFailureReason(const QString& failureReason);
-    const QString& failureReason() const;
-
-    void setGenericFailureReason(const std::source_location location = std::source_location::current());
-};
-
-#endif // FAILUREREASON_H
+void FailureReason::setGenericFailureReason(const std::source_location location)
+{
+    _failureReason = QStringLiteral("Failure at %1:%2\n%3\nBuild %4")
+        .arg(location.file_name())
+        .arg(location.line())
+        .arg(location.function_name())
+        .arg(GIT_SHA);
+}
