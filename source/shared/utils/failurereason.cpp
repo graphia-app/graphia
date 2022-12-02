@@ -17,6 +17,7 @@
  */
 
 #include "failurereason.h"
+#include "source_location.h"
 
 #include "build_defines.h"
 
@@ -30,7 +31,7 @@ const QString& FailureReason::failureReason() const
     return _failureReason;
 }
 
-void FailureReason::setGenericFailureReason(const std::source_location location)
+void FailureReason::setGenericFailureReason(const source_location& location)
 {
     _failureReason = QStringLiteral("Failure at %1:%2\n%3\nBuild %4")
         .arg(location.file_name())

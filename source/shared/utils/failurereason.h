@@ -21,7 +21,7 @@
 
 #include <QString>
 
-#include <source_location>
+struct source_location;
 
 class FailureReason
 {
@@ -34,7 +34,7 @@ public:
     void setFailureReason(const QString& failureReason);
     const QString& failureReason() const;
 
-    void setGenericFailureReason(const std::source_location location = std::source_location::current());
+    void setGenericFailureReason(const source_location& location);
 };
 
 #endif // FAILUREREASON_H
