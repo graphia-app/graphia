@@ -573,7 +573,11 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel->mutableGraph(), *this))
     {
-        setFailureReason(_pluginInstance->failureReason());
+        if(!_pluginInstance->failureReason().isEmpty())
+            setFailureReason(_pluginInstance->failureReason());
+        else if(!failureReason().isEmpty())
+            setFailureReason(failureReason());
+
         return false;
     }
 
