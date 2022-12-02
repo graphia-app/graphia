@@ -128,13 +128,16 @@ elseif(GIT)
         OUTPUT_VARIABLE GIT_COMMIT_COUNT OUTPUT_STRIP_TRAILING_WHITESPACE)
     execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
         OUTPUT_VARIABLE GIT_BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${GIT} -C ${CMAKE_SOURCE_DIR} rev-parse --short HEAD
+        OUTPUT_VARIABLE GIT_SHA OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    file(APPEND ${PROJECT_BINARY_DIR}/build_defines.h "#define GIT_DESCRIBE \"${GIT_DESCRIBE}\"\n")
+    file(APPEND ${PROJECT_BINARY_DIR}/build_defines.h "#define GIT_SHA \"${GIT_SHA}\"\n")
 
     if("${GIT_COMMIT_COUNT}" EQUAL 0 OR "${GIT_BRANCH}" MATCHES "^master|HEAD$")
         set(Version "${GIT_DESCRIBE}")
-        file(APPEND ${PROJECT_BINARY_DIR}/build_defines.h "#define GIT_DESCRIBE \"${GIT_DESCRIBE}\"\n")
     else()
         set(Version "${GIT_DESCRIBE}-${GIT_BRANCH}")
-        file(APPEND ${PROJECT_BINARY_DIR}/build_defines.h "#define GIT_DESCRIBE \"${GIT_DESCRIBE}\"\n")
         file(APPEND ${PROJECT_BINARY_DIR}/build_defines.h "#define GIT_BRANCH \"${GIT_BRANCH}\"\n")
     endif()
 else()
