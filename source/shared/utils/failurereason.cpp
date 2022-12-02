@@ -36,6 +36,5 @@ void FailureReason::setGenericFailureReason(const source_location& location)
     _failureReason = QStringLiteral("Failure at %1:%2\n%3\nBuild %4")
         .arg(location.file_name())
         .arg(location.line())
-        .arg(location.function_name())
-        .arg(GIT_SHA);
+        .arg(location.function_name(), QStringLiteral(GIT_SHA));
 }
