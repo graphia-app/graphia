@@ -168,7 +168,7 @@ ApplicationWindow
                     command:
                         "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |" +
                         "    tail -n1 | cut -f3-; exit ${PIPESTATUS[0]}) && " +
-                        "(rsync -av \"$VOLUME\"\/*.app $(dirname EXISTING_INSTALL); SYNCED=$?;" +
+                        "(rsync -av \"$VOLUME\"\/Graphia.app/* EXISTING_INSTALL; SYNCED=$?;" +
                         "    (hdiutil detach -force \"$VOLUME\" || exit $?) && exit \"$SYNCED\")"
                 },
                 {
