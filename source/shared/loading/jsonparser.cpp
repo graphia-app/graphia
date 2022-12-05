@@ -18,6 +18,8 @@
 
 #include "jsonparser.h"
 
+#include "shared/utils/source_location.h"
+
 #include <QFile>
 #include <QUrl>
 #include <QByteArray>
@@ -31,12 +33,18 @@ bool JsonParser::parse(const QUrl& url, IGraphModel* graphModel)
     QByteArray byteArray;
 
     if(!file.open(QIODevice::ReadOnly))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     auto totalBytes = file.size();
 
     if(totalBytes == 0)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     qint64 bytesRead = 0;
     QDataStream input(&file);
@@ -57,7 +65,10 @@ bool JsonParser::parse(const QUrl& url, IGraphModel* graphModel)
     auto jsonBody = parseJsonFrom(byteArray, this);
 
     if(jsonBody.is_null() || jsonBody.is_discarded())
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(cancelled())
         return false;

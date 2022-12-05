@@ -32,6 +32,7 @@
 #include "shared/utils/random.h"
 #include "shared/utils/string.h"
 #include "shared/utils/redirects.h"
+#include "shared/utils/source_location.h"
 
 #include "shared/attributes/iattribute.h"
 
@@ -915,12 +916,18 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         return false;
 
     if(jsonObject.is_null() || !jsonObject.is_object())
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(dataVersion >= 7)
     {
         if(!u::contains(jsonObject, "numContinuousColumns") || !u::contains(jsonObject, "numDiscreteColumns"))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _numContinuousColumns = static_cast<size_t>(jsonObject["numContinuousColumns"].get<int>());
         _numDiscreteColumns = static_cast<size_t>(jsonObject["numDiscreteColumns"].get<int>());
@@ -928,21 +935,33 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     else
     {
         if(!u::contains(jsonObject, "numColumns"))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _numContinuousColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
     }
 
     if(!u::contains(jsonObject, "userColumnData"))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(!_userColumnData.load(jsonObject["userColumnData"], parser))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     parser.setProgress(-1);
 
     if(!u::contains(jsonObject, "dataColumnNames"))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     const auto& dataColumnNames = jsonObject["dataColumnNames"];
     std::transform(dataColumnNames.begin(), dataColumnNames.end(), std::back_inserter(_dataColumnNames),
@@ -959,7 +978,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         dataVersion >= 7 ? "continuousData" : "data";
 
     if(!u::contains(jsonObject, continuousDataKey))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     const auto& jsonContinuousData = jsonObject[continuousDataKey];
     for(const auto& value : jsonContinuousData)
@@ -972,7 +994,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     {
         Q_ASSERT((_continuousData.size() % _numContinuousColumns) == 0);
         if((_continuousData.size() % _numContinuousColumns) != 0)
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _numRows = _continuousData.size() / _numContinuousColumns;
     }
@@ -982,7 +1007,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(dataVersion >= 7)
     {
         if(!u::contains(jsonObject, "discreteData"))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         i = 0;
         const auto& jsonDiscreteData = jsonObject["discreteData"];
@@ -996,7 +1024,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         {
             Q_ASSERT((_discreteData.size() % _numDiscreteColumns) == 0);
             if((_discreteData.size() % _numDiscreteColumns) != 0)
+            {
+                setGenericFailureReason(CURRENT_SOURCE_LOCATION);
                 return false;
+            }
 
             _numRows = _discreteData.size() / _numDiscreteColumns;
         }
@@ -1004,12 +1035,18 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     Q_ASSERT(_numRows > 0);
     if(_numRows == 0)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(dataVersion >= 11)
     {
         if(!u::contains(jsonObject, "hcOrdering"))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         i = 0;
         const auto& jsonHcOrdering = jsonObject["hcOrdering"];
@@ -1080,6 +1117,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(!u::containsAllOf(jsonObject, {correlationThresholdKey, "transpose", "scaling",
         "normalisation", "missingDataType", "missingDataReplacementValue"}))
     {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
     }
 
@@ -1093,7 +1131,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(dataVersion >= 10)
     {
         if(!u::containsAllOf(jsonObject, {"clippingType", "clippingValue"}))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _clippingType = NORMALISE_QML_ENUM(ClippingType, jsonObject["clippingType"]);
         _clippingValue = jsonObject["clippingValue"];
@@ -1104,6 +1145,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         if(!u::containsAllOf(jsonObject, {"correlationDataType", "continuousCorrelationType",
             "discreteCorrelationType", "correlationPolarity"}))
         {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
         }
 
@@ -1115,7 +1157,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     else if(dataVersion >= 3)
     {
         if(!u::contains(jsonObject, "correlationType") || !u::contains(jsonObject, "correlationPolarity"))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _correlationDataType = CorrelationDataType::Continuous;
         _continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, jsonObject["correlationType"]);

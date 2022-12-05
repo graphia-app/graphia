@@ -24,6 +24,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
 #include "shared/utils/typeidentity.h"
+#include "shared/utils/source_location.h"
 
 #include <utf8.h>
 
@@ -113,7 +114,10 @@ public:
         std::ifstream file(url.toLocalFile().toStdString());
 
         if(!file)
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         auto fileSize = file.tellg();
         file.seekg(0, std::ios::end);

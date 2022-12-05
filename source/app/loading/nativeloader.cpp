@@ -29,6 +29,7 @@
 
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
+#include "shared/utils/source_location.h"
 
 #include "shared/loading/userelementdata.h"
 #include "shared/loading/progress_iterator.h"
@@ -273,7 +274,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     Header header;
     if(!parseHeader(url, &header))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     auto version = header._version;
 
@@ -288,7 +292,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     QByteArray byteArray;
 
     if(!load(url.toLocalFile(), byteArray, -1, &graphModel->mutableGraph(), this))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     setProgress(-1);
 
@@ -300,10 +307,16 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         return false;
 
     if(jsonArray.is_null() || !jsonArray.is_array())
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(jsonArray.size() != 2)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     auto allObjects = std::all_of(jsonArray.begin(), jsonArray.end(),
     [](const auto& i)
@@ -312,7 +325,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     });
 
     if(!allObjects)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     auto jsonBody = jsonArray.at(1);
 
@@ -328,7 +344,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     }
 
     if(!u::contains(jsonBody, "graph") || !jsonBody["graph"].is_object())
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     const auto& jsonGraph = jsonBody["graph"];
 
@@ -370,13 +389,19 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
             if(u::contains(pluginData, "userNodeData") && pluginData["userNodeData"].is_object())
             {
                 if(!graphModel->userNodeData().load(pluginData["userNodeData"], *this))
+                {
+                    setGenericFailureReason(CURRENT_SOURCE_LOCATION);
                     return false;
+                }
             }
 
             if(u::contains(pluginData, "userEdgeData") && pluginData["userEdgeData"].is_object())
             {
                 if(!graphModel->userEdgeData().load(pluginData["userEdgeData"], *this))
+                {
+                    setGenericFailureReason(CURRENT_SOURCE_LOCATION);
                     return false;
+                }
             }
         }
     }
@@ -384,13 +409,19 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     if(u::contains(jsonBody, "userNodeData") && jsonBody["userNodeData"].is_object())
     {
         if(!graphModel->userNodeData().load(jsonBody["userNodeData"], *this))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
     }
 
     if(u::contains(jsonBody, "userEdgeData") && jsonBody["userEdgeData"].is_object())
     {
         if(!graphModel->userEdgeData().load(jsonBody["userEdgeData"], *this))
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
     }
 
     if(u::contains(jsonBody, "transforms"))
@@ -547,11 +578,17 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         if(jsonUiDataJsonValue.is_object() || jsonUiDataJsonValue.is_array())
             _uiData = QByteArray::fromStdString(jsonUiDataJsonValue.dump());
         else
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
     }
 
     if(!u::contains(jsonBody, "pluginData"))
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     const auto& pluginDataJsonValue = jsonBody["pluginData"];
 
@@ -562,7 +599,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
     else if(pluginDataJsonValue.is_string())
         pluginData = QByteArray::fromHex(QByteArray::fromStdString(pluginDataJsonValue));
     else
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     if(header._pluginDataVersion > _pluginInstance->plugin()->dataVersion())
     {
@@ -591,7 +631,10 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
         else if(pluginUiDataJsonValue.is_string())
             _pluginUiData = QByteArray::fromHex(QByteArray::fromStdString(pluginUiDataJsonValue));
         else
+        {
+            setGenericFailureReason(CURRENT_SOURCE_LOCATION);
             return false;
+        }
 
         _pluginUiDataVersion = header._pluginDataVersion;
     }

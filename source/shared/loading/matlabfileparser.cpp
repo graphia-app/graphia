@@ -18,6 +18,8 @@
 
 #include "matlabfileparser.h"
 
+#include "shared/utils/source_location.h"
+
 #include <QUrl>
 
 struct MatLabMatrix
@@ -95,7 +97,10 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
     auto* matFile = Mat_Open(url.toLocalFile().toUtf8().data(), MAT_ACC_RDONLY);
 
     if(matFile == nullptr)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     matvar_t* matVar = nullptr;
     const bool result = false;
@@ -123,7 +128,9 @@ bool MatLabFileParser::parse(const QUrl& url, IGraphModel*)
             case MAT_T_UINT16:  return storeMatVarAsTabularData<mat_uint16_t>(v);
             case MAT_T_INT8:    return storeMatVarAsTabularData<mat_int8_t>(v);
             case MAT_T_UINT8:   return storeMatVarAsTabularData<mat_uint8_t>(v);
-            default:            return false;
+            default:
+                setGenericFailureReason(CURRENT_SOURCE_LOCATION);
+                return false;
             }
         }
 

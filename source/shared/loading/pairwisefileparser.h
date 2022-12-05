@@ -71,7 +71,10 @@ public:
             TabularDataParser parser(this);
 
             if(!parser.parse(url, graphModel))
+            {
+                setFailureReason(parser.failureReason());
                 return false;
+            }
 
             _tabularData = std::move(parser.tabularData());
         }

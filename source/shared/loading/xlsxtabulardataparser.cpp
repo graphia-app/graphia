@@ -18,6 +18,8 @@
 
 #include "xlsxtabulardataparser.h"
 
+#include "shared/utils/source_location.h"
+
 #include <xlsxio/include/xlsxio_read.h>
 
 XlsxTabularDataParser::XlsxTabularDataParser(IParser* parent)
@@ -56,7 +58,10 @@ bool XlsxTabularDataParser::parse(const QUrl& url, IGraphModel* graphModel)
     xlsxioreader xlsxioread = xlsxioread_open(filename.constData());
 
     if(xlsxioread == nullptr)
+    {
+        setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
+    }
 
     xlsxioread_process(xlsxioread, nullptr, XLSXIOREAD_SKIP_NONE,
         cellCallback, nullptr, this);
