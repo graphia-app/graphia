@@ -197,10 +197,10 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool FilterHasResults =
+        constexpr bool FilterMethodHasResults =
             std::experimental::is_detected_v<results_t, FM>;
 
-        if constexpr(FilterHasResults)
+        if constexpr(FilterMethodHasResults)
             return filterMethod.results();
         else
             return results;
@@ -421,15 +421,15 @@ private:
         for(const auto& vector : vectors)
             totalCost += vector.computeCostHint();
 
-        using TM = FilterMethod<TokenisedDataVectors>;
-        TM filterMethod(vectors, CorrelationPolarity::Positive, threshold);
+        using FM = FilterMethod<TokenisedDataVectors>;
+        FM filterMethod(vectors, CorrelationPolarity::Positive, threshold);
 
         std::atomic<uint64_t> cost(0);
 
         auto results = ThreadPool(name()).parallel_for(vectors.begin(), vectors.end(),
         [&](TokenisedDataVectors::const_iterator vectorAIt)
         {
-            typename TM::Results threadResults;
+            typename FM::Results threadResults;
 
             if(cancellable != nullptr && cancellable->cancelled())
                 return threadResults;
@@ -505,10 +505,10 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool FilterHasResults =
-            std::experimental::is_detected_v<results_t, TM>;
+        constexpr bool FilterMethodHasResults =
+            std::experimental::is_detected_v<results_t, FM>;
 
-        if constexpr(FilterHasResults)
+        if constexpr(FilterMethodHasResults)
             return filterMethod.results();
         else
             return results;
