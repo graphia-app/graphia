@@ -38,6 +38,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QVariantMap>
 
 class ICorrelationInfo
 {
@@ -53,11 +54,10 @@ public:
 class ContinuousCorrelation : public ICorrelationInfo
 {
 public:
-    virtual EdgeList edgeList(const ContinuousDataVectors& vectors, double threshold,
-        CorrelationPolarity polarity = CorrelationPolarity::Positive,
+    virtual EdgeList edgeList(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
-    virtual CovarianceMatrix matrix(const ContinuousDataVectors& vectors,
+    virtual CovarianceMatrix matrix(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<ContinuousCorrelation> create(CorrelationType correlationType,
@@ -72,9 +72,11 @@ private:
     double _threshold = 0.0;
 
 public:
-    ThresholdFilter(const DataVectors&, CorrelationPolarity polarity, double threshold) :
-        _polarity(polarity), _threshold(threshold)
-    {}
+    ThresholdFilter(const DataVectors&, const QVariantMap& parameters)
+    {
+        _threshold = parameters[QStringLiteral("threshold")].toDouble();
+        _polarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
+    }
 
     using Results = CorrelationVector<DataVectors>;
 
@@ -95,8 +97,8 @@ private:
     KnnProtoGraph<DataVectors> _protoGraph;
 
 public:
-    KnnFilter(const DataVectors& vectors, CorrelationPolarity polarity, double threshold) :
-        _protoGraph(vectors, polarity, static_cast<size_t>(threshold))
+    KnnFilter(const DataVectors& vectors, const QVariantMap& parameters) :
+        _protoGraph(vectors, parameters)
     {}
 
     using Results = std::monostate;
@@ -124,8 +126,7 @@ private:
     template<typename F>
     using results_t = decltype(std::declval<F>().results());
 
-    auto process(const ContinuousDataVectors& vectors,
-        double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+    auto process(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         size_t size = vectors.front().size();
@@ -151,7 +152,7 @@ private:
             algorithm.preprocess(size, vectors);
 
         using FM = FilterMethod<ContinuousDataVectors>;
-        FM filterMethod(vectors, polarity, threshold);
+        FM filterMethod(vectors, parameters);
 
         std::atomic<uint64_t> cost(0);
 
@@ -207,14 +208,13 @@ private:
     }
 
 public:
-    EdgeList edgeList(const ContinuousDataVectors& vectors,
-        double threshold, CorrelationPolarity polarity = CorrelationPolarity::Positive,
+    EdgeList edgeList(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
             return {};
 
-        auto results = process(vectors, threshold, polarity, cancellable, progressable);
+        auto results = process(vectors, parameters, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
@@ -231,13 +231,13 @@ public:
         return edges;
     }
 
-    CovarianceMatrix matrix(const ContinuousDataVectors& vectors,
+    CovarianceMatrix matrix(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
             return {};
 
-        auto results = process(vectors, 0.0, CorrelationPolarity::Both, cancellable, progressable);
+        auto results = process(vectors, parameters, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
@@ -392,10 +392,10 @@ using BicorCorrelationKnn = CovarianceCorrelation<BicorAlgorithm, KnnFilter>;
 class DiscreteCorrelation : public ICorrelationInfo
 {
 public:
-    virtual EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
+    virtual EdgeList edgeList(const DiscreteDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
-    virtual CovarianceMatrix matrix(const DiscreteDataVectors& vectors, bool treatAsBinary,
+    virtual CovarianceMatrix matrix(const DiscreteDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const = 0;
 
     static std::unique_ptr<DiscreteCorrelation> create(CorrelationType correlationType,
@@ -409,10 +409,11 @@ private:
     template<typename F>
     using results_t = decltype(std::declval<F>().results());
 
-    auto process(const TokenisedDataVectors& vectors, double threshold, bool treatAsBinary,
+    auto process(const TokenisedDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         const size_t size = vectors.front().size();
+        auto treatAsBinary = parameters[QStringLiteral("treatAsBinary")].toBool();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);
@@ -422,7 +423,7 @@ private:
             totalCost += vector.computeCostHint();
 
         using FM = FilterMethod<TokenisedDataVectors>;
-        FM filterMethod(vectors, CorrelationPolarity::Positive, threshold);
+        FM filterMethod(vectors, parameters);
 
         std::atomic<uint64_t> cost(0);
 
@@ -515,14 +516,14 @@ private:
     }
 
 public:
-    EdgeList edgeList(const DiscreteDataVectors& vectors, double threshold, bool treatAsBinary,
+    EdgeList edgeList(const DiscreteDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
             return {};
 
         const auto tokenisedVectors = tokeniseDataVectors(vectors);
-        auto results = process(tokenisedVectors, threshold, treatAsBinary, cancellable, progressable);
+        auto results = process(tokenisedVectors, parameters, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};
@@ -539,14 +540,14 @@ public:
         return edges;
     }
 
-    CovarianceMatrix matrix(const DiscreteDataVectors& vectors, bool treatAsBinary,
+    CovarianceMatrix matrix(const DiscreteDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const final
     {
         if(vectors.empty())
             return {};
 
         const auto tokenisedVectors = tokeniseDataVectors(vectors);
-        auto results = process(tokenisedVectors, 0.0, treatAsBinary, cancellable, progressable);
+        auto results = process(tokenisedVectors, parameters, cancellable, progressable);
 
         if(cancellable != nullptr && cancellable->cancelled())
             return {};

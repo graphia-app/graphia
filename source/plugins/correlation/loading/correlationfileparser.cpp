@@ -519,7 +519,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
     setProgress(-1);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Correlation"));
-    auto edges = _plugin->correlation(_plugin->threshold(), *this);
+    auto edges = _plugin->correlation(*this);
 
     if(cancelled())
         return false;
@@ -925,9 +925,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
         auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());
         auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, parameters[QStringLiteral("correlationDataType")].toInt());
         auto continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("continuousCorrelationType")].toInt());
-        auto correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
         auto discreteCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("discreteCorrelationType")].toInt());
-        auto treatAsBinary = parameters[QStringLiteral("treatAsBinary")].toBool();
 
         if(_dataPtr->numRows() == 0)
             return QVariantMap();
@@ -950,9 +948,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, threshold, correlationPolarity,
-                &_graphSizeEstimateCancellable);
-
+            sampleEdges = correlation->edgeList(dataRows, parameters, &_graphSizeEstimateCancellable);
             break;
         }
 
@@ -964,9 +960,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
             if(correlation == nullptr || dataRows.empty())
                 return QVariantMap();
 
-            sampleEdges = correlation->edgeList(dataRows, threshold, treatAsBinary,
-                &_graphSizeEstimateCancellable);
-
+            sampleEdges = correlation->edgeList(dataRows, parameters, &_graphSizeEstimateCancellable);
             break;
         }
         }

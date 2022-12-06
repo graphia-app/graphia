@@ -157,9 +157,8 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    EdgeList correlation(double threshold, IParser& parser);
+    EdgeList correlation(IParser& parser);
 
-    double threshold() const { return _threshold; }
     bool transpose() const { return _transpose; }
     CorrelationDataType dataType() const { return _correlationDataType; }
 

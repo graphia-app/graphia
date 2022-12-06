@@ -27,6 +27,8 @@
 #include <vector>
 #include <compare>
 
+#include <QVariantMap>
+
 template<typename DataVectors>
 class KnnProtoGraph
 {
@@ -69,9 +71,12 @@ private:
     size_t _k = 0;
 
 public:
-    KnnProtoGraph(const DataVectors& vectors, CorrelationPolarity polarity, size_t k) :
-        _protoNodes(vectors.size()), _begin(vectors.begin()), _polarity(polarity), _k(k)
+    KnnProtoGraph(const DataVectors& vectors, const QVariantMap& parameters) :
+        _protoNodes(vectors.size()), _begin(vectors.begin())
     {
+        _k = static_cast<size_t>(parameters[QStringLiteral("threshold")].toInt());
+        _polarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
+
         for(auto& protoNode : _protoNodes)
             protoNode._protoGraph = this;
     }

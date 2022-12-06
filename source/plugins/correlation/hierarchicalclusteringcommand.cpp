@@ -111,7 +111,7 @@ bool HierarchicalClusteringCommand::execute()
     const EuclideanDistanceCorrelation correlation;
 
     setPhase(QObject::tr("Correlating"));
-    auto matrix = correlation.matrix(dataColumns, this, this);
+    auto matrix = correlation.matrix(dataColumns, {}, this, this);
 
     if(cancelled())
         return false;

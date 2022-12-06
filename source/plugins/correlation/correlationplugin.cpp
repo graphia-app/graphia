@@ -404,7 +404,7 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
     return u::toQStringList(attributeNames);
 }
 
-EdgeList CorrelationPluginInstance::correlation(double threshold, IParser& parser)
+EdgeList CorrelationPluginInstance::correlation(IParser& parser)
 {
     auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType);
     switch(correlationDataType)
@@ -413,14 +413,15 @@ EdgeList CorrelationPluginInstance::correlation(double threshold, IParser& parse
     case CorrelationDataType::Continuous:
     {
         auto continuousCorrelation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
-        return continuousCorrelation->edgeList(_continuousDataRows, threshold,
-            NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity), &parser, &parser);
+        return continuousCorrelation->edgeList(_continuousDataRows, {{QStringLiteral("threshold"), _threshold},
+            {QStringLiteral("correlationPolarity"), static_cast<int>(_correlationPolarity)}}, &parser, &parser);
     }
 
     case CorrelationDataType::Discrete:
     {
         auto discreteCorrelation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
-        return discreteCorrelation->edgeList(_discreteDataRows, threshold, _treatAsBinary, &parser, &parser);
+        return discreteCorrelation->edgeList(_discreteDataRows, {{QStringLiteral("threshold"), _threshold},
+            {QStringLiteral("treatAsBinary"), _treatAsBinary}}, &parser, &parser);
     }
     }
 
