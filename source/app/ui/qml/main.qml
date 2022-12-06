@@ -3055,7 +3055,7 @@ ApplicationWindow
                 implicitWidth: cancelButton.implicitWidth
                 implicitHeight: cancelButton.implicitHeight
 
-                id: cancelledIndicator
+                enabled: visible
                 visible: currentTab ? currentTab.document.commandIsCancelling : false
             }
 
