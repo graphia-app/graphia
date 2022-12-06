@@ -907,6 +907,8 @@ DiscreteDataVectors CorrelationTabularDataParser::sampledDiscreteDataRows(
 
 void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& parameters)
 {
+    Q_ASSERT(!parameters.isEmpty());
+
     if(_dataPtr == nullptr)
         return;
 
@@ -916,11 +918,10 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
         return;
     }
 
-    _graphSizeEstimateQueuedParameters.clear();
-    _graphSizeEstimateCancellable.uncancel();
-
     const QFuture<QVariantMap> future = QtConcurrent::run([this, parameters]
     {
+        Q_ASSERT(!parameters.isEmpty());
+
         auto threshold = parameters[QStringLiteral("threshold")].toDouble();
         auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());
         auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, parameters[QStringLiteral("correlationDataType")].toInt());
@@ -974,6 +975,9 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
             return graphSizeEstimateKnn(sampleEdges, static_cast<size_t>(threshold), numSampleRows, _dataPtr->numRows());
         }
     });
+
+    _graphSizeEstimateQueuedParameters.clear();
+    _graphSizeEstimateCancellable.uncancel();
 
     _graphSizeEstimateFutureWatcher.setFuture(future);
 }
