@@ -54,7 +54,7 @@ private:
 
             auto minR = !_protoEdges.empty() ? _protoEdges.back()._r : 0.0;
 
-            if(!correlationExceedsThreshold(_protoGraph->_polarity, r,  minR))
+            if(!correlationExceedsThreshold(_protoGraph->_polarity, r, minR))
                 return;
 
             _protoEdges.push_back({it, r});
