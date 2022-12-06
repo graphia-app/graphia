@@ -1847,6 +1847,7 @@ BaseParameterDialog
             minimumThresholdSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
             initialThresholdSpinBox.from = minimumThresholdSpinBox.value;
             parameters.threshold = DEFAULT_MINIMUM_CORRELATION;
+            parameters.initialThreshold = DEFAULT_INITIAL_CORRELATION;
         }
         else if(parameters.correlationFilterType === CorrelationFilterType.Knn)
         {
@@ -1857,6 +1858,7 @@ BaseParameterDialog
             initialKnnSpinBox.value = DEFAULT_INITIAL_K;
             initialKnnSpinBox.to = maximumKnnSpinBox.value;
             parameters.threshold = DEFAULT_MAXIMUM_K;
+            parameters.initialThreshold = DEFAULT_INITIAL_K;
         }
 
         root._suppressAutoUpdates = false;
