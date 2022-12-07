@@ -922,7 +922,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
     {
         Q_ASSERT(!parameters.isEmpty());
 
-        auto threshold = parameters[QStringLiteral("threshold")].toDouble();
+        auto maximumK = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toUInt());
         auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());
         auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, parameters[QStringLiteral("correlationDataType")].toInt());
         auto continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("continuousCorrelationType")].toInt());
@@ -972,7 +972,7 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
         case CorrelationFilterType::Threshold:
             return graphSizeEstimateThreshold(sampleEdges, numSampleRows, _dataPtr->numRows());
         case CorrelationFilterType::Knn:
-            return graphSizeEstimateKnn(sampleEdges, static_cast<size_t>(threshold), numSampleRows, _dataPtr->numRows());
+            return graphSizeEstimateKnn(sampleEdges, maximumK, numSampleRows, _dataPtr->numRows());
         }
     });
 

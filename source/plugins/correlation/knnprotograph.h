@@ -52,7 +52,9 @@ private:
         {
             const std::unique_lock<std::mutex> lock(_mutex);
 
-            auto minR = !_protoEdges.empty() ? _protoEdges.back()._r : 0.0;
+            auto minR = !_protoEdges.empty() ?
+                std::max(_protoEdges.back()._r, _protoGraph->_threshold) :
+                _protoGraph->_threshold;
 
             if(!correlationExceedsThreshold(_protoGraph->_polarity, r, minR))
                 return;
@@ -69,12 +71,15 @@ private:
     typename DataVectors::const_iterator _begin;
     CorrelationPolarity _polarity = CorrelationPolarity::Positive;
     size_t _k = 0;
+    double _threshold = 0.0;
 
 public:
     KnnProtoGraph(const DataVectors& vectors, const QVariantMap& parameters) :
         _protoNodes(vectors.size()), _begin(vectors.begin())
     {
-        _k = static_cast<size_t>(parameters[QStringLiteral("threshold")].toInt());
+        _k = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toInt());
+        Q_ASSERT(_k > 0);
+        _threshold = parameters[QStringLiteral("minimumThreshold")].toDouble();
         _polarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
 
         for(auto& protoNode : _protoNodes)

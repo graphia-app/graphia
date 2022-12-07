@@ -98,8 +98,10 @@ private:
     std::vector<size_t> _continuousHcOrder;
 
     std::unique_ptr<EdgeArray<double>> _correlationValues;
-    double _threshold = 0.7;
+    double _minimumThreshold = 0.7;
     double _initialThreshold = 0.85;
+    size_t _maximumK = 50;
+    size_t _initialK = 25;
     bool _transpose = false;
     TabularData _tabularData;
     QRect _dataRect;
@@ -226,7 +228,7 @@ public:
 
     QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const override { return 13; }
+    int dataVersion() const override { return 14; }
 
     QStringList identifyUrl(const QUrl& url) const override;
     QString failureReason(const QUrl& url) const override;
