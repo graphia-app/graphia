@@ -716,8 +716,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     {
         defaultTransforms.append(
             QStringLiteral(R"("Remove Edges" where $"%1" %2 %3)")
-            .arg(*filterAttribute)
-            .arg(filterOperator)
+            .arg(*filterAttribute, filterOperator)
             .arg(_initialThreshold));
 
         break;
@@ -733,8 +732,7 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
         defaultTransforms.append(
             QStringLiteral(R"("Remove Edges" where $"%1" %2 %3)")
-            .arg(*filterAttribute)
-            .arg(filterOperator)
+            .arg(*filterAttribute, filterOperator)
             .arg(_minimumThreshold));
 
         break;
