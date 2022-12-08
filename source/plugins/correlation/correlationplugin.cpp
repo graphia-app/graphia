@@ -1146,7 +1146,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     }
 
     _minimumThreshold = jsonObject[correlationThresholdKey];
-    _maximumK = jsonObject["maximumK"];
+
+    if(dataVersion >= 14)
+        _maximumK = jsonObject["maximumK"];
+
     _transpose = jsonObject["transpose"];
     _scalingType = NORMALISE_QML_ENUM(ScalingType, jsonObject["scaling"]);
     _normaliseType = NORMALISE_QML_ENUM(NormaliseType, jsonObject["normalisation"]);
