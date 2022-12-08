@@ -36,6 +36,9 @@ Rectangle
 
     readonly property int _buttonMenuOffset: 4
 
+    // Don't pass clicks through
+    MouseArea { anchors.fill: parent }
+
     Preferences
     {
         id: visuals
