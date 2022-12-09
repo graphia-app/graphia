@@ -174,6 +174,8 @@ ApplicationWindow
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 400
             readOnly: true
+            wrapMode: TextArea.Wrap
+            selectByMouse: true
 
             text: installer !== null && installer.error
             font.family: "monospace"
