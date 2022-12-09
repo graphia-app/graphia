@@ -166,6 +166,8 @@ ApplicationWindow
                 {
                     name: "darwin",
                     command:
+                        "test -w EXISTING_INSTALL || " +
+                        "{ echo EXISTING_INSTALL is not writeable - admin permissions may be required; exit 1; }; " +
                         "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |" +
                         "    tail -n1 | cut -f3-; exit ${PIPESTATUS[0]}) && " +
                         "(rsync -av \"$VOLUME\"\/Graphia.app/* EXISTING_INSTALL; SYNCED=$?;" +
