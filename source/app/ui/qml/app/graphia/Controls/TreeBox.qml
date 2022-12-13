@@ -143,10 +143,20 @@ Item
                 anchors.margins: outline.outlineWidth
                 clip: true
 
+                alternatingRows: false
+
                 boundsBehavior: Flickable.StopAtBounds
                 ScrollBar.vertical: ScrollBar { id: scrollBar; policy: Qt.ScrollBarAsNeeded }
                 readonly property real scrollBarWidth: scrollBar.size < 1 ? scrollBar.width : 0
                 interactive: false
+
+                keyNavigationEnabled: false
+                pointerNavigationEnabled: false
+
+                // This might be the way to go in future if ItemSelectionModel allows
+                // for multiple selection, but for the time being (6.4.x) it doesn't
+                //selectionBehavior: TableView.SelectRows
+                //selectionModel: ItemSelectionModel {}
 
                 model: SortFilterProxyModel
                 {
@@ -176,7 +186,7 @@ Item
                     if(!sortFilterProxyModel.sourceModel)
                         return "";
 
-                    let value = model.data(modelIndex(row, 0), sectionRole);
+                    let value = model.data(modelIndex(0, row), treeView.sectionRole);
 
                     if(!value)
                         return "";
@@ -194,7 +204,7 @@ Item
 
                     if(lastSelectedRow >= 0)
                     {
-                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(lastSelectedRow, 0));
+                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(0, lastSelectedRow));
 
                         if(root._indexIsSelectable(sourceIndex))
                             root.selectedValue = root.textFor(sourceIndex);
@@ -205,7 +215,7 @@ Item
                     let newSelectedValues = [];
                     for(let row of selectedRows)
                     {
-                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(row, 0));
+                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(0, row));
 
                         if(!root._indexIsSelectable(sourceIndex))
                             continue;
@@ -227,7 +237,7 @@ Item
                     if(lastSelectedRow < 0)
                         return null;
 
-                    return sortFilterProxyModel.mapToSource(modelIndex(lastSelectedRow, 0));
+                    return sortFilterProxyModel.mapToSource(modelIndex(0, lastSelectedRow));
                 }
 
                 function setSelectedRows(newSelectedRows, row)
@@ -279,7 +289,7 @@ Item
                 Keys.onReleased: function(event) { modifiers = event.modifiers; }
                 onActiveFocusChanged: { if(!activeFocus) modifiers = 0; }
 
-                delegate: Item
+                delegate: Rectangle
                 {
                     implicitWidth: treeViewDelegate.implicitWidth
                     implicitHeight: treeViewDelegate.implicitHeight * (hasSectionRow ? 2 : 1)
@@ -289,6 +299,11 @@ Item
                     property alias expanded: treeViewDelegate.expanded
                     property alias hasChildren: treeViewDelegate.hasChildren
                     property alias depth: treeViewDelegate.depth
+                    property alias current: treeViewDelegate.current
+                    property alias selected: treeViewDelegate.selected
+
+                    required property int row
+                    required property var model
 
                     property bool hasSectionRow:
                     {
@@ -316,9 +331,12 @@ Item
                         visible: hasSectionRow
                         font.bold: true
                         font.italic: true
+                        color: palette.text
 
                         text: { return hasSectionRow ? treeView.sectionTextFor(model.row) : ""; }
                     }
+
+                    color: enabled ? "transparent" : palette.window
 
                     TreeViewDelegate
                     {
@@ -328,8 +346,10 @@ Item
                         rightPadding: treeView.scrollBarWidth
                         y: hasSectionRow ? implicitHeight : 0
 
-                        property bool _selected: treeView.selectedRows.indexOf(model.row) >= 0
-                        property var highlightColor: _selected ? palette.highlight : "transparent"
+                        selected: treeView.selectedRows.indexOf(model.row) >= 0
+
+                        model: parent.model
+                        row: parent.row
 
                         Component.onCompleted:
                         {
@@ -337,7 +357,7 @@ Item
                             // structure of the delegate implementation, so it could break in future
 
                             let contrastBinding = Qt.binding(() =>
-                                QmlUtils.contrastingColor(treeViewDelegate.highlightColor));
+                                selected ? palette.highlightedText : palette.text);
 
                             if(contentItem instanceof Text)
                             {
@@ -358,17 +378,17 @@ Item
                             }
                         }
 
-                        background: Rectangle { color: treeViewDelegate.highlightColor }
-
                         property var sourceIndex:
                         {
-                            let sfpmIndex = treeView.modelIndex(model.row, model.column);
+                            let sfpmIndex = treeView.modelIndex(model.column, model.row);
                             let index = sortFilterProxyModel.mapToSource(sfpmIndex);
                             return index;
                         }
 
                         onPressed:
                         {
+                            treeView.toggleExpanded(row);
+
                             let newSelectedRows = [];
 
                             if(!sourceIndex || !sourceIndex.valid)
@@ -508,7 +528,7 @@ Item
 
                     for(let row = treeView.topRow; row <= treeView.bottomRow; row++)
                     {
-                        let index = treeView.modelIndex(row, 0);
+                        let index = treeView.modelIndex(0, row);
                         let sourceIndex = sortFilterProxyModel.mapToSource(index);
 
                         if(!sourceIndex.valid)
@@ -584,28 +604,7 @@ Item
 
         let index = sortFilterProxyModel.mapFromSource(modelIndex);
 
-        function expandAncestorsOf(childIndex)
-        {
-            let ancestors = [];
-
-            let parentIndex = childIndex.parent;
-            while(parentIndex.valid)
-            {
-                ancestors.unshift(parentIndex);
-                parentIndex = parentIndex.parent;
-            }
-
-            for(let ancestor of ancestors)
-            {
-                let row = treeView.rowAtIndex(ancestor);
-
-                if(!treeView.isExpanded(row))
-                    treeView.expand(row);
-            }
-        }
-
-        // Ensure any containing tree branches are expanded
-        expandAncestorsOf(index);
+        treeView.expandToIndex(index);
 
         // Do the selection
         let row = treeView.rowAtIndex(index);
