@@ -33,6 +33,13 @@ Item
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
+        Component.onCompleted:
+        {
+            // Make the scrolling behaviour more desktop-y
+            contentItem.boundsBehavior = Flickable.StopAtBounds;
+            contentItem.flickableDirection = Flickable.VerticalFlick;
+        }
+
         clip: true
         padding: outline.outlineWidth
         anchors.fill: parent
