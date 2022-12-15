@@ -58,6 +58,9 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     std::vector<Attribute> attributes;
     for(auto& attributeName : _attributeNames)
     {
+        if(!_graphModel->attributeExists(attributeName))
+            continue;
+
         auto attribute = _graphModel->attributeValueByName(attributeName);
 
         if(attribute.testFlag(AttributeFlag::Searchable) &&
