@@ -130,7 +130,7 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            color: "white"
+            color: enabled ? "white" : palette.window
 
             TreeView
             {
