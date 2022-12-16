@@ -74,5 +74,5 @@ cmake -B build && cmake --build build --parallel
 ```
 Note however that you will usually also need Qt 6 to be installed and indicate to CMake where it lives:
 ```
-CMAKE_PREFIX_PATH=/example/path/to/Qt/6.4.1/gcc_64/ cmake -B build && cmake --build build --parallel
+CMAKE_PREFIX_PATH=/example/path/to/Qt/6.4.0/gcc_64/ cmake -B build && cmake --build build --parallel
 ```
