@@ -45,6 +45,8 @@ Item
         anchors.fill: parent
     }
 
+    readonly property real size: scrollView.ScrollBar.vertical.size
+
     readonly property real position: scrollView.ScrollBar.vertical.position
     function setPosition(p) { scrollView.ScrollBar.vertical.position = p; }
 
