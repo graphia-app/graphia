@@ -286,6 +286,17 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                property Item _itemToScrollTo: null
+
+                onSizeChanged:
+                {
+                    if(_itemToScrollTo)
+                    {
+                        paletteEditor.scrollToItem(_itemToScrollTo);
+                        _itemToScrollTo = null;
+                    }
+                }
+
                 PaletteEditor
                 {
                     id: paletteEditor
@@ -294,15 +305,28 @@ Window
 
                     function scrollToItem(item)
                     {
-                        let itemPosition = item.mapToItem(paletteEditor, 0, 0);
-                        let newContentY = (itemPosition.y + item.height) -
-                            paletteEditorScrollview.height + Constants.margin;
+                        const itemPositionInScrollview = item.mapToItem(paletteEditorScrollview, 0, 0);
+                        const topEdge = itemPositionInScrollview.y;
+                        const bottomEdge = itemPositionInScrollview.y + item.height + Constants.margin;
 
-                        if(newContentY > paletteEditorScrollview.contentItem.contentY)
-                            paletteEditorScrollview.contentItem.contentY = newContentY;
+                        const itemPositionInEditor = item.mapToItem(paletteEditor, 0, 0);
+
+                        let f = 0.0;
+
+                        if(bottomEdge > paletteEditorScrollview.height)
+                        {
+                            f = ((itemPositionInEditor.y - paletteEditorScrollview.height) + (item.height + Constants.margin)) /
+                                (paletteEditor.height - paletteEditorScrollview.height);
+                        }
+                        else if(topEdge < 0)
+                            f = (itemPositionInEditor.y - Constants.margin) / paletteEditor.height;
+                        else
+                            return;
+
+                        paletteEditorScrollview.setPosition(f * (1.0 - paletteEditorScrollview.size));
                     }
 
-                    onItemAdded: function(item) { scrollToItem(item); }
+                    onItemAdded: function(item) { paletteEditorScrollview._itemToScrollTo = item; }
 
                     onConfigurationChanged:
                     {
