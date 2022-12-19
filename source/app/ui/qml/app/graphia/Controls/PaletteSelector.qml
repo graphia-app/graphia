@@ -355,6 +355,7 @@ Window
     Component.onCompleted:
     {
         palettePresets.initialise();
+        paletteEditorScrollview.setPosition(0);
     }
 
     function savedPalettesFromPreferences()
