@@ -290,6 +290,7 @@ private:
 
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
+    bool _groupByAnnotation = false;
     QString _colorGroupByAnnotationName;
 
     QCPTextElement* _xAxisLabelTextElement = nullptr;
@@ -305,7 +306,6 @@ private:
     QString _scaleByAttributeName;
     int _averagingType = static_cast<int>(PlotAveragingType::Individual);
     QString _averagingAttributeName;
-    bool _groupByAnnotation = false;
     int _dispersionType = static_cast<int>(PlotDispersionType::None);
     int _dispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     QVector<QVariantMap> _columnSortOrders;
