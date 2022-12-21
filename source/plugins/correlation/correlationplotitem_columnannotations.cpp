@@ -45,7 +45,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
     const bool invisible = !_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty();
 
-    if(columnAnnotations.empty() || !_showColumnAnnotations || invisible)
+    if(columnAnnotations.empty() || invisible)
     {
         if(layoutElement != nullptr)
         {

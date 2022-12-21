@@ -1604,7 +1604,7 @@ void CorrelationPlotItem::configureAxisRects()
         // There is no room to display labels, so show a warning instead
         QString warning;
 
-        if(!_showColumnAnnotations && !_visibleColumnAnnotationNames.empty())
+        if(!_visibleColumnAnnotationNames.empty())
             warning = tr("Resize To Expose Column Information");
         else if(_showColumnNames)
             warning = tr("Resize To Expose Column Names");

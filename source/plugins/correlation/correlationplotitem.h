@@ -322,7 +322,6 @@ private:
 
     std::set<QString> _visibleColumnAnnotationNames;
     std::vector<std::vector<size_t>> _annotationGroupMap;
-    bool _showColumnAnnotations = true;
 
     QCPLayer* _lineGraphLayer = nullptr;
 
