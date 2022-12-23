@@ -221,6 +221,7 @@ public:
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
     Q_INVOKABLE void resetZoom();
 
+    void setSelectedRows(const QVector<int>& selectedRows);
     void setScaleType(int scaleType);
     void setScaleByAttributeName(const QString& attributeName);
     void setDispersionType(int dispersionType);
@@ -374,7 +375,6 @@ private:
 
     void setPluginInstance(CorrelationPluginInstance* pluginInstance);
 
-    void setSelectedRows(const QVector<int>& selectedRows);
     void setElideLabelWidth(int elideLabelWidth);
     bool showColumnNames() const;
     void setShowColumnNames(bool showColumnNames);
