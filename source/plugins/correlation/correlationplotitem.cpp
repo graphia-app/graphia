@@ -195,6 +195,15 @@ void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
     _updateQueued = true;
 }
 
+void CorrelationPlotWorker::clone(CorrelationPlotWorker& target) const
+{
+    target._width           = _width;
+    target._height          = _height;
+    target._xAxisMin        = _xAxisMin;
+    target._xAxisMax        = _xAxisMax;
+    target._showGridLines   = _showGridLines;
+}
+
 void CorrelationPlotWorker::renderPixmap()
 {
     _updateQueued = false;
@@ -1645,6 +1654,41 @@ void CorrelationPlotItem::updatePlotSize()
 {
     computeXAxisRange();
     updatePixmap(CorrelationPlotUpdateType::Render);
+}
+
+void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
+{
+    target._pluginInstance                  = _pluginInstance;
+    target._horizontalScrollPosition        = _horizontalScrollPosition;
+    target._selectedRows                    = _selectedRows;
+
+    target._groupByAnnotation               = _groupByAnnotation;
+    target._colorGroupByAnnotationName      = _colorGroupByAnnotationName;
+
+    target._elideLabelWidth                 = _elideLabelWidth;
+    target._showColumnNames                 = _showColumnNames;
+    target._showGridLines                   = _showGridLines;
+    target._showLegend                      = _showLegend;
+    target._scaleType                       = _scaleType;
+    target._scaleByAttributeName            = _scaleByAttributeName;
+    target._averagingType                   = _averagingType;
+    target._averagingAttributeName          = _averagingAttributeName;
+    target._dispersionType                  = _dispersionType;
+    target._dispersionVisualType            = _dispersionVisualType;
+    target._columnSortOrders                = _columnSortOrders;
+    target._xAxisLabel                      = _xAxisLabel;
+    target._yAxisLabel                      = _yAxisLabel;
+    target._rightPadding                    = _rightPadding;
+    target._bottomPadding                   = _bottomPadding;
+    target._includeYZero                    = _includeYZero;
+    target._showIqrOutliers                 = _showIqrOutliers;
+    target._showAllColumns                  = _showAllColumns;
+
+    target._sortMap                         = _sortMap;
+    target._visibleColumnAnnotationNames    = _visibleColumnAnnotationNames;
+    target._annotationGroupMap              = _annotationGroupMap;
+
+    _worker->clone(*target._worker);
 }
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)

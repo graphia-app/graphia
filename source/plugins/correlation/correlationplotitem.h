@@ -114,6 +114,8 @@ public:
     Q_INVOKABLE void pan(QCPAxis* axis, double delta);
     Q_INVOKABLE void updatePixmap(CorrelationPlotUpdateType updateType);
 
+    void clone(CorrelationPlotWorker& target) const;
+
 private:
     bool _debug = false;
     QElapsedTimer _replotTimer;
@@ -240,6 +242,7 @@ public:
     static QColor colorForRows(const CorrelationPluginInstance* pluginInstance,
         const QVector<int>& rows);
 
+    void clone(CorrelationPlotItem& target) const;
     void savePlotImage(const QString& filename);
 
 protected:
