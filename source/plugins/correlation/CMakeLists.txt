@@ -15,6 +15,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationdatavector.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationnodeattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotsaveimagecommand.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationtype.h
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.h
@@ -36,6 +37,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_discrete.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_continuous.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem_columnannotations.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/correlationplotsaveimagecommand.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.cpp
     ${CMAKE_CURRENT_LIST_DIR}/correlationtype.cpp
     ${CMAKE_CURRENT_LIST_DIR}/featurescaling.cpp
