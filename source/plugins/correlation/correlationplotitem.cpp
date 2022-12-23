@@ -339,6 +339,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     });
 
     connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
+    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::pixmapUpdated);
     connect(this, &CorrelationPlotItem::enabledChanged, [this] { update(); });
     connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
     connect(_worker, &CorrelationPlotWorker::zoomedChanged, this, &CorrelationPlotItem::zoomedChanged);

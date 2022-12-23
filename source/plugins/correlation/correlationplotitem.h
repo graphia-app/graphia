@@ -456,6 +456,7 @@ signals:
     void busyChanged();
     void zoomedChanged();
     void minimumHeightChanged();
+    void pixmapUpdated();
 
     void columnAnnotationSelectionModeEnabledChanged();
 };
