@@ -19,6 +19,7 @@
 #include "correlationplotitem.h"
 
 #include "correlationplugin.h"
+#include "correlationplotsaveimagecommand.h"
 
 #include "qcpcolumnannotations.h"
 
@@ -1693,16 +1694,16 @@ void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
+    Q_ASSERT(extensions.size() > 0);
+
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    if(extensions.contains(QStringLiteral("png")))
-        _customPlot.savePng(url.toLocalFile());
-    else if(extensions.contains(QStringLiteral("pdf")))
-        _customPlot.savePdf(url.toLocalFile());
-    else if(extensions.contains(QStringLiteral("jpg")))
-        _customPlot.saveJpg(url.toLocalFile());
+    auto cpsic = std::make_unique<CorrelationPlotSaveImageCommand>(*this,
+        url.toLocalFile(), extensions.at(0));
 
-    QDesktopServices::openUrl(url);
+    cpsic->addImageConfiguration({}, _selectedRows);
+
+    _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
 }
 
 void CorrelationPlotItem::savePlotImage(const QString& filename)
