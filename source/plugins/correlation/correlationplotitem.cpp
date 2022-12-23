@@ -1660,3 +1660,15 @@ void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& exte
 
     QDesktopServices::openUrl(url);
 }
+
+void CorrelationPlotItem::savePlotImage(const QString& filename)
+{
+    QFileInfo fileInfo(filename);
+
+    if(fileInfo.completeSuffix() == QStringLiteral("png"))
+        _customPlot.savePng(filename);
+    else if(fileInfo.completeSuffix() == QStringLiteral("pdf"))
+        _customPlot.savePdf(filename);
+    else if(fileInfo.completeSuffix() == QStringLiteral("jpg"))
+        _customPlot.saveJpg(filename);
+}

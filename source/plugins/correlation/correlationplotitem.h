@@ -239,6 +239,8 @@ public:
     static QColor colorForRows(const CorrelationPluginInstance* pluginInstance,
         const QVector<int>& rows);
 
+    void savePlotImage(const QString& filename);
+
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
