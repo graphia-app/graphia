@@ -327,6 +327,8 @@ PluginContent
     Action
     {
         id: savePlotImageAction
+        enabled: plot.selectedRows.length > 0
+
         text: qsTr("Save As &Image…")
         icon.name: "camera-photo"
         onTriggered:

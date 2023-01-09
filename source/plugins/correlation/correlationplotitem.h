@@ -174,7 +174,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition
         WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
-    Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
+    Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows NOTIFY selectedRowsChanged)
 
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
         WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
@@ -453,6 +453,7 @@ private slots:
 signals:
     void rightClick();
     void horizontalScrollPositionChanged();
+    void selectedRowsChanged();
     void numVisibleColumnsChanged();
     void visibleHorizontalFractionChanged();
     void isWideChanged();

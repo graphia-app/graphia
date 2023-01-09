@@ -1115,6 +1115,8 @@ void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginIns
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
     _selectedRows = selectedRows;
+    emit selectedRowsChanged();
+
     rebuildPlot();
 }
 
