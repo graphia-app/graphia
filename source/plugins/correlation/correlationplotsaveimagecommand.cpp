@@ -22,6 +22,30 @@
 #include <QUrl>
 #include <QFileInfo>
 
+// This is quite complicated from a control flow/threading point of view and
+// probably deserves some explanation:
+//
+// 1. The incoming CorrelationPlotItem is first cloned into a member variable,
+// that can be reconfigured without affecting the state (and thus visuals) of the
+// source item.
+//
+// 2. No actual work occurs in ::execute, it simply waits for the work to be
+// completed, which is initiated by a call to ::saveNextImage.
+//
+// 3. ::saveNextImage queues a task that configures the CorrelationPlotItem using
+// the image at the front of the deque of configurations. This must occur on the
+// main thread (and is normally fairly cheap), hence the use of a
+// DeferredExecutor.
+//
+// 4. CorrelationPlotItem has its own thread that does the actual work, which
+// occurs when the configuration is changed from the main thread. When this work
+// is complete the pixmapUpdated signal fires and is handled on the main thread
+// again, where the results are written to file.
+//
+// 5. If there are more configurations, one of these is kicked off by another call
+// to ::saveNextImage, otherwise we're finished and the waiting CV in ::execute is
+// notified.
+
 void CorrelationPlotSaveImageCommand::saveNextImage()
 {
     auto image = _images.front();
