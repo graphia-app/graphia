@@ -1,4 +1,4 @@
-/* Copyright © 2013-2022 Graphia Technologies Ltd.
+/* Copyright © 2013-2023 Graphia Technologies Ltd.
  *
  * This file is part of Graphia.
  *
