@@ -1694,14 +1694,12 @@ void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
     _worker->clone(*target._worker);
 }
 
-void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
+void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& extension)
 {
-    Q_ASSERT(extensions.size() > 0);
-
     const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     auto cpsic = std::make_unique<CorrelationPlotSaveImageCommand>(*this,
-        url.toLocalFile(), extensions.at(0));
+        url.toLocalFile(), extension);
 
     cpsic->addImageConfiguration({}, _selectedRows);
 

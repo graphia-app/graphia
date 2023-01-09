@@ -349,7 +349,7 @@ PluginContent
             fileDialog.accepted.connect(function()
             {
                 screenshot.path = fileDialog.folder.toString();
-                plot.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions);
+                plot.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions[0]);
             });
 
             fileDialog.open();
