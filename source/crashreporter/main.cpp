@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(mainIcon);
 
     auto module = crashedModule(positional.at(0));
-    const auto* videoDriverRegex = R"(^(nvoglv|ig\d+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon|iris_dri).*)";
+    const auto* videoDriverRegex = R"(^(nvoglv|ig.+icd|ati[og]|libGPUSupport|AppleIntel|AMDRadeon|iris_dri).*)";
 
     std::smatch match;
     const bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
