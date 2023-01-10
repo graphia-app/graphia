@@ -220,6 +220,8 @@ public:
     void paint(QPainter* painter) override;
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& extension);
+    Q_INVOKABLE void savePlotImageByAttribute(const QUrl& url,
+        const QString& extension, const QString& attributeName);
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
     Q_INVOKABLE void resetZoom();
 
