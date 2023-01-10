@@ -329,9 +329,7 @@ PluginContent
         id: savePlotImageAction
         enabled: plot.selectedRows.length > 0
 
-        text: qsTr("Save As &Image…")
-        icon.name: "camera-photo"
-        onTriggered:
+        function showSaveImageDialog(onAcceptedFn)
         {
             let folder = screenshot.path !== undefined ? screenshot.path : "";
             let path = Utils.format(qsTr("{0}/{1}-correlation-plot"),
@@ -349,11 +347,15 @@ PluginContent
             fileDialog.accepted.connect(function()
             {
                 screenshot.path = fileDialog.folder.toString();
-                plot.savePlotImage(fileDialog.file, fileDialog.selectedNameFilter.extensions[0]);
+                onAcceptedFn(fileDialog.file, fileDialog.selectedNameFilter.extensions[0]);
             });
 
             fileDialog.open();
         }
+
+        text: qsTr("Save As &Image…")
+        icon.name: "camera-photo"
+        onTriggered: { showSaveImageDialog(plot.savePlotImage); }
     }
 
     Action
