@@ -40,11 +40,11 @@
 // 4. CorrelationPlotItem has its own thread that does the actual work, which
 // occurs when the configuration is changed from the main thread. When this work
 // is complete the pixmapUpdated signal fires and is handled on the main thread
-// again, where the results are written to file.
+// again, where the results are written to file. The image configuration is
+// removed and the CV notified, which tells ::execute to update progress.
 //
 // 5. If there are more configurations, one of these is kicked off by another call
-// to ::saveNextImage, otherwise we're finished and the waiting CV in ::execute is
-// notified.
+// to ::saveNextImage, otherwise we're finished.
 
 void CorrelationPlotSaveImageCommand::saveNextImage()
 {
@@ -97,16 +97,14 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
         _correlationPlotItem.savePlotImage(filename);
 
         _images.pop_front();
+
+        // Notify the command that an image has been written
+        _cv.notify_one();
+
         if(_images.empty())
-        {
             QDesktopServices::openUrl(target);
-
-            // Notify the command that we're finished
-            _cv.notify_one();
-            return;
-        }
-
-        saveNextImage();
+        else
+            saveNextImage();
     });
 
     connect(this, &CorrelationPlotSaveImageCommand::taskAdded,
@@ -116,12 +114,19 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
 bool CorrelationPlotSaveImageCommand::execute()
 {
     std::unique_lock<std::mutex> lock(_mutex);
+    auto totalImages = _images.size();
 
     Q_ASSERT(!_images.empty());
     saveNextImage();
 
-    // Wait for images to be written
-    _cv.wait(lock);
+    while(!_images.empty())
+    {
+        // Wait for an image to be written
+        _cv.wait(lock);
+
+        auto progress = ((totalImages - _images.size()) * 100) / totalImages;
+        setProgress(static_cast<int>(progress));
+    }
 
     return true;
 }
