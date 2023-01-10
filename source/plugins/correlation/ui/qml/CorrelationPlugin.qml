@@ -680,6 +680,20 @@ PluginContent
             MenuUtils.addSeparatorTo(menu);
             MenuUtils.addActionTo(menu, savePlotImageAction);
 
+            let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Image By…"));
+            plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+            {
+                let attributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
+
+                attributeMenuItem.triggered.connect(function()
+                {
+                    savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                    {
+                        plot.savePlotImageByAttribute(filename, extension, attributeName)
+                    });
+                });
+            });
+
             // Initial update
             root.updatePlotMenuState();
 
