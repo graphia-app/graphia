@@ -332,7 +332,7 @@ jobs:
     - name: Build clazy
       run: |
         cd clazy/
-        cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
     - uses: actions/checkout@v2
