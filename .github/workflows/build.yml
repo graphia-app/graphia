@@ -191,7 +191,6 @@ jobs:
         scripts/parse-compile_commands-json.sh
       env:
         BUILD_TYPE: Debug
-        UNITY_BUILD: OFF
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
     - uses: actions/upload-artifact@v2
