@@ -70,6 +70,11 @@ jobs:
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
+    - name: ccache
+      uses: timangus/ccache-action@8dab70db1372d493e19638c83889014f2e9432ca
+      with:
+        variant: sccache
+        key: windows
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@v3
     - name: Compile

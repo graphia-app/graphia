@@ -35,19 +35,19 @@ if(UNIX)
     # We need it because the plugins require symbols in order for certain things to
     # work e.g. dynamic_cast to QObject from IGraph, under clang
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+endif()
 
-    # Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
-    find_program(CCACHE_EXECUTABLE ccache)
-    mark_as_advanced(CCACHE_EXECUTABLE)
-    if(CCACHE_EXECUTABLE)
-        foreach(LANG C CXX)
-            if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
-                NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
-                message(STATUS "Enabling ccache for ${LANG}")
-                set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
-            endif()
-        endforeach()
-    endif()
+# Use ccache, if it's available (https://stackoverflow.com/a/34317588/2721809)
+find_program(CCACHE_EXECUTABLE NAMES sccache ccache)
+mark_as_advanced(CCACHE_EXECUTABLE)
+if(CCACHE_EXECUTABLE)
+    foreach(LANG C CXX)
+        if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND
+            NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
+            message(STATUS "Enabling ${CCACHE_EXECUTABLE} for ${LANG}")
+            set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
+        endif()
+    endforeach()
 endif()
 
 if(APPLE)
@@ -101,14 +101,14 @@ if(MSVC)
 
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)
-    set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
+    set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Z7")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBUILD_SOURCE_DIR=\\\"${CMAKE_SOURCE_DIR}\\\"")
 
 # Always build with symbols
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Z7")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g1")
 else()
