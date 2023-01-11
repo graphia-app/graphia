@@ -82,11 +82,9 @@ if(MSVC)
     # Disable deprecated warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
 
-    # Only do VCAnalyze on CI
+    # Only do MSVC code analysis on CI
     if(DEFINED ENV{CI})
-        set(VC_ANALYZE_FLAGS "/analyze /analyze:ruleset \
-            ${CMAKE_SOURCE_DIR}\\scripts\\VCAnalyze.ruleset")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${VC_ANALYZE_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /analyze")
     endif()
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
