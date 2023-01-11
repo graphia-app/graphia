@@ -326,6 +326,10 @@ jobs:
         modules: ${{ env.QT_MODULES }}
     - uses: actions/checkout@v2
       with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - uses: actions/checkout@v2
+      with:
         repository: KDE/clazy
         path: clazy
     - name: ccache
@@ -340,10 +344,6 @@ jobs:
         cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.ref }}
-        fetch-depth: 0
     - uses: actions/download-artifact@v2
       with:
         name: Static Analysis Build
