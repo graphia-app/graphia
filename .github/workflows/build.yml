@@ -336,6 +336,7 @@ jobs:
     - name: Build clazy
       run: |
         cd clazy/
+        sed -i 's/target_precompile_headers/#target_precompile_headers/' CMakeLists.txt
         cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
