@@ -29,7 +29,6 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clang-tidy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/clazy.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cloc.sh
-    ${CMAKE_CURRENT_LIST_DIR}/scripts/compiler-logs-to-table.pl
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.cfg
     ${CMAKE_CURRENT_LIST_DIR}/scripts/cppcheck.sh
     ${CMAKE_CURRENT_LIST_DIR}/scripts/parse-compile_commands-json.sh
