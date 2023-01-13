@@ -106,6 +106,8 @@ QString u::parentProcessName()
 }
 
 #elif defined(_WIN32) && !defined(__MINGW32__)
+#include "shared/utils/msvcwarningsuppress.h"
+
 #include <windows.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
@@ -134,7 +136,9 @@ static void SetThreadName(char* threadName)
     {
         RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info);
     }
+    MSVC_WARNING_SUPPRESS_NEXTLINE(6320)
     __except(EXCEPTION_EXECUTE_HANDLER)
+    MSVC_WARNING_SUPPRESS_NEXTLINE(6322)
     {
     }
 }
