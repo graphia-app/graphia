@@ -235,7 +235,8 @@ int start(int argc, char *argv[])
     commandLineParser.addHelpOption();
     commandLineParser.addOptions(
     {
-        {{"u", "dontUpdate"}, QObject::tr("Don't update now, but remind later.")}
+        {{"u", "dontUpdate"}, QObject::tr("Don't update now, but remind later.")},
+        {{"m", "startMaximised"}, QObject::tr("Put the application window in maximised state.")}
     });
 
     commandLineParser.process(QCoreApplication::arguments());
@@ -253,6 +254,9 @@ int start(int argc, char *argv[])
             return 0;
         }
     }
+
+    if(commandLineParser.isSet(QStringLiteral("startMaximised")))
+        u::setPref(QStringLiteral("window/maximised"), true);
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
