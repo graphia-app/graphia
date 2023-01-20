@@ -131,8 +131,6 @@ bool GraphMLSaver::save()
     stream.writeStartElement(QStringLiteral("graph"));
     stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
 
-    const std::unique_lock<NodePositions> lock(graphModel->nodePositions());
-
     _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
