@@ -72,20 +72,6 @@ DEFINE_QML_ENUM(
     Constant,
     Winsorization);
 
-// (...although not these ones:)
-
-DEFINE_QML_ENUM(
-    Q_GADGET, ClusteringType,
-    None,
-    Louvain,
-    MCL);
-
-DEFINE_QML_ENUM(
-    Q_GADGET, EdgeReductionType,
-    None,
-    KNN,
-    PercentNN);
-
 class CorrelationPluginInstance;
 
 class CorrelationFileParser : public IParser
