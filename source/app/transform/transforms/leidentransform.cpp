@@ -164,10 +164,11 @@ void LeidenTransform::apply(TransformedGraph& target)
         weights = newWeights;
     };
 
-    auto moveNodes = [&](MutableGraph& graph)
+    auto makeSingletonClusters = [&](MutableGraph& graph)
     {
-        if(cancelled())
-            return false;
+        communities.resetElements();
+        weightedDegrees.resetElements();
+        communityDegrees.clear();
 
         CommunityId nextCommunityId = 0;
         for(auto nodeId : graph.nodeIds())
@@ -180,6 +181,12 @@ void LeidenTransform::apply(TransformedGraph& target)
 
             add(nextCommunityId++, nodeId);
         }
+    };
+
+    auto moveNodes = [&](MutableGraph& graph)
+    {
+        if(cancelled())
+            return false;
 
         bool modified = false;
         std::deque<NodeId> nodeIdQueue;
@@ -295,10 +302,7 @@ void LeidenTransform::apply(TransformedGraph& target)
     {
         setProgress(-1);
 
-        communities.resetElements();
-        weightedDegrees.resetElements();
-        communityDegrees.clear();
-
+        makeSingletonClusters(graph);
         finished = !moveNodes(graph);
 
         if(!finished && !cancelled())
