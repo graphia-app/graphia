@@ -151,7 +151,7 @@ void FastInitialLayout::execute(bool, Dimensionality dimensionality)
         float phi = 0.0f;
         // i = 2 because we've theoretically already positioned the top and bottom
         int i = 2;
-        for(;edgeIdIterator != edgeIds.end(); ++edgeIdIterator)
+        for(; edgeIdIterator != edgeIds.end(); ++edgeIdIterator)
         {
             const auto& edge = graph.edgeById(*edgeIdIterator);
             auto childNodeId = edge.oppositeId(parentNodeId);
