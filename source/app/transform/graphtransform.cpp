@@ -22,6 +22,8 @@
 #include "graph/graph.h"
 #include "graph/graphmodel.h"
 
+#include "shared/commands/icommand.h"
+
 #include "shared/utils/container.h"
 
 static bool hasUnknownAttributes(const std::vector<QString>& attributeNames,
@@ -85,6 +87,17 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
     } while(repeating() && change && !cancelled());
 
     return anyChange;
+}
+
+void GraphTransform::setCommand(ICommand* command)
+{
+    _command = command;
+}
+
+void GraphTransform::setProgress(int percent)
+{
+    if(_command != nullptr)
+        _command->setProgress(percent);
 }
 
 QString GraphTransformFactory::image() const

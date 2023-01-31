@@ -26,6 +26,7 @@
 
 #include "shared/utils/flags.h"
 #include "shared/utils/cancellable.h"
+#include "shared/utils/progressable.h"
 
 #include "transforminfo.h"
 #include "graphtransformattributeparameter.h"
@@ -42,8 +43,9 @@ class GraphComponent;
 class GraphModel;
 class TransformedGraph;
 class Attribute;
+class ICommand;
 
-class GraphTransform : public Cancellable
+class GraphTransform : public Progressable, public Cancellable
 {
     friend class GraphModel;
 
@@ -73,6 +75,9 @@ public:
     // Specifically, it is not a means to reconfigure an existing transform
     const GraphTransformConfig& config() const { return _config; }
 
+    void setCommand(ICommand* command);
+    void setProgress(int percent) override;
+
 private:
     void setIndex(int index) { _index = index; }
     void setConfig(const GraphTransformConfig& config) { _config = config; }
@@ -82,6 +87,7 @@ private:
     bool _repeating = false;
     int _index = -1;
     GraphTransformConfig _config;
+    ICommand* _command = nullptr;
 };
 
 struct DefaultVisualisation
