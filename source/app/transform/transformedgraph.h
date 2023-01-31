@@ -56,8 +56,6 @@ public:
 
     bool onAttributeValuesChangedExternally(const QStringList& changedAttributeNames);
 
-    void setCommand(ICommand* command) { _command = command; }
-
     const std::vector<NodeId>& nodeIds() const override { return _target.nodeIds(); }
     size_t numNodes() const override { return _target.numNodes(); }
     const INode& nodeById(NodeId nodeId) const override { return _target.nodeById(nodeId); }
@@ -83,8 +81,6 @@ public:
     void setPhase(const QString& phase) const override { _source->setPhase(phase); }
     void clearPhase() const override { _source->clearPhase(); }
     QString phase() const override { return _source->phase(); }
-
-    void setProgress(int progress);
 
     MutableGraph& mutableGraph() { return _target; }
 
@@ -120,7 +116,6 @@ private:
     bool _graphChangeOccurred = false;
     bool _changeSignalsEmitted = false;
     bool _autoRebuild = false;
-    ICommand* _command = nullptr;
 
     std::atomic_bool _cancelled;
 

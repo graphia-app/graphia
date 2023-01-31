@@ -127,7 +127,7 @@ public:
 
     bool graphTransformIsValid(const QString& transform) const;
     QStringList transformsWithMissingParametersSetToDefault(const QStringList& transforms) const;
-    void buildTransforms(const QStringList& transforms, ICommand* command = nullptr);
+    void buildTransforms(const QStringList& transforms, Progressable* progressable = nullptr);
     void cancelTransformBuild();
 
     QStringList availableTransformNames() const;

@@ -446,7 +446,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
 
         std::atomic<uint64_t> iteration(0);
         const auto totalIterations = clusterMatrix.columns();
-        target.setProgress(0);
+        setProgress(0);
 
         auto cancelledFn = [this] { return cancelled(); };
 
@@ -457,10 +457,10 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],
                 rowData, MCL_PRUNE_LIMIT, cancelledFn);
 
-            target.setProgress(static_cast<int>((iteration++ * 100) / totalIterations));
+            setProgress(static_cast<int>((iteration++ * 100) / totalIterations));
         });
 
-        target.setProgress(-1);
+        setProgress(-1);
 
         if(cancelled())
             return;

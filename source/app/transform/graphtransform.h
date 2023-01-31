@@ -43,7 +43,6 @@ class GraphComponent;
 class GraphModel;
 class TransformedGraph;
 class Attribute;
-class ICommand;
 
 class GraphTransform : public Progressable, public Cancellable
 {
@@ -75,7 +74,7 @@ public:
     // Specifically, it is not a means to reconfigure an existing transform
     const GraphTransformConfig& config() const { return _config; }
 
-    void setCommand(ICommand* command);
+    void setProgressable(Progressable* progressable);
     void setProgress(int percent) override;
 
 private:
@@ -87,7 +86,7 @@ private:
     bool _repeating = false;
     int _index = -1;
     GraphTransformConfig _config;
-    ICommand* _command = nullptr;
+    Progressable* _progressable = nullptr;
 };
 
 struct DefaultVisualisation

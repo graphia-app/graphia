@@ -42,7 +42,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target)
 
     NodeArray<int> maxDistances(target);
 
-    target.setProgress(0);
+    setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
     std::atomic_int progress(0);
@@ -99,10 +99,10 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target)
 
         maxDistances[source] = maxDistance;
         progress++;
-        target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
+        setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
     });
 
-    target.setProgress(-1);
+    setProgress(-1);
 
     if(cancelled())
         return;

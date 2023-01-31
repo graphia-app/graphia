@@ -98,12 +98,6 @@ bool TransformedGraph::onAttributeValuesChangedExternally(const QStringList& cha
     return true;
 }
 
-void TransformedGraph::setProgress(int progress)
-{
-    if(_command != nullptr)
-        _command->setProgress(progress);
-}
-
 void TransformedGraph::reserve(const Graph& other)
 {
     _target.reserve(other);
@@ -168,7 +162,7 @@ void TransformedGraph::rebuild()
 
         for(auto& transform : _transforms)
         {
-            setProgress(-1); // Indeterminate by default
+            transform->setProgress(-1); // Indeterminate by default
 
             TransformCache::Result result;
             result._config = transform->config();
@@ -225,10 +219,10 @@ void TransformedGraph::rebuild()
 
             newCreatedAttributeNames[transform->index()] = u::toQStringVector(tracker.added());
             newCache.add(std::move(result));
-        }
 
-        // Revert to indeterminate in case any more long running work occurs subsequently
-        setProgress(-1);
+            // Revert to indeterminate in case any more long running work occurs subsequently
+            transform->setProgress(-1);
+        }
 
         if(_cancelled)
         {

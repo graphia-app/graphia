@@ -89,15 +89,15 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
     return anyChange;
 }
 
-void GraphTransform::setCommand(ICommand* command)
+void GraphTransform::setProgressable(Progressable* progressable)
 {
-    _command = command;
+    _progressable = progressable;
 }
 
 void GraphTransform::setProgress(int percent)
 {
-    if(_command != nullptr)
-        _command->setProgress(percent);
+    if(_progressable != nullptr)
+        _progressable->setProgress(percent);
 }
 
 QString GraphTransformFactory::image() const

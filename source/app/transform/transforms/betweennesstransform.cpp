@@ -33,7 +33,7 @@
 void BetweennessTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QStringLiteral("Betweenness"));
-    target.setProgress(0);
+    setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
     const auto& edgeIds = target.edgeIds();
@@ -117,13 +117,13 @@ void BetweennessTransform::apply(TransformedGraph& target)
         }
 
         progress++;
-        target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
+        setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
 
         if(cancelled())
             return;
     });
 
-    target.setProgress(-1);
+    setProgress(-1);
 
     if(cancelled())
         return;

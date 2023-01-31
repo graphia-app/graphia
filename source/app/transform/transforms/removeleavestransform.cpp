@@ -25,7 +25,7 @@
 
 #include <QObject>
 
-static void removeLeaves(TransformedGraph& target, size_t limit = 0)
+static void removeLeaves(TransformedGraph& target, Progressable& progressable, size_t limit = 0)
 {
     const bool unlimited = (limit == 0);
 
@@ -47,10 +47,10 @@ static void removeLeaves(TransformedGraph& target, size_t limit = 0)
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
-            target.setProgress(static_cast<int>((progress++ * 100u) /
+            progressable.setProgress(static_cast<int>((progress++ * 100u) /
                 static_cast<uint64_t>(target.numNodes())));
         }
-        target.setProgress(-1);
+        progressable.setProgress(-1);
 
         removees.clear();
 
@@ -63,14 +63,14 @@ void RemoveLeavesTransform::apply(TransformedGraph& target)
     target.setPhase(QObject::tr("Leaf Removal"));
 
     auto limit = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
-    removeLeaves(target, limit);
+    removeLeaves(target, *this, limit);
 }
 
 void RemoveBranchesTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Branch Removal"));
 
-    removeLeaves(target);
+    removeLeaves(target, *this);
 }
 
 std::unique_ptr<GraphTransform> RemoveLeavesTransformFactory::create(const GraphTransformConfig&) const

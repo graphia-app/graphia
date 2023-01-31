@@ -82,7 +82,7 @@ void KNNTransform::apply(TransformedGraph& target)
             removees.set(*it, false);
         }
 
-        target.setProgress(static_cast<int>((progress++ * 100u) /
+        setProgress(static_cast<int>((progress++ * 100u) /
             static_cast<uint64_t>(target.numNodes())));
     }
 
@@ -106,11 +106,11 @@ void KNNTransform::apply(TransformedGraph& target)
                 rank._mean = static_cast<double>(rank._source + rank._target) * 0.5;
         }
 
-        target.setProgress(static_cast<int>((progress++ * 100u) /
+        setProgress(static_cast<int>((progress++ * 100u) /
             static_cast<uint64_t>(target.numEdges())));
     }
 
-    target.setProgress(-1);
+    setProgress(-1);
 
     _graphModel->createAttribute(QObject::tr("k-NN Source Rank"))
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its source node."))

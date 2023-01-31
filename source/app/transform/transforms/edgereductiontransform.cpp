@@ -53,7 +53,7 @@ void EdgeReductionTransform::apply(TransformedGraph& target)
             removees.set(edgeIds[index], false);
         }
 
-        target.setProgress(static_cast<int>((progress++ * 100u) /
+        setProgress(static_cast<int>((progress++ * 100u) /
             static_cast<uint64_t>(target.numNodes())));
     }
 
@@ -64,11 +64,11 @@ void EdgeReductionTransform::apply(TransformedGraph& target)
         if(removees.get(edgeId))
             target.mutableGraph().removeEdge(edgeId);
 
-        target.setProgress(static_cast<int>((progress++ * 100u) /
+        setProgress(static_cast<int>((progress++ * 100u) /
             static_cast<uint64_t>(target.numEdges())));
     }
 
-    target.setProgress(-1);
+    setProgress(-1);
 }
 
 std::unique_ptr<GraphTransform> EdgeReductionTransformFactory::create(const GraphTransformConfig&) const

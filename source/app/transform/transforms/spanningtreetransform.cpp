@@ -33,7 +33,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
     const bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
 
     target.setPhase(QObject::tr("Spanning Tree"));
-    target.setProgress(-1);
+    setProgress(-1);
 
     EdgeArray<bool> removees(target, true);
     NodeArray<bool> visitedNodes(target, false);
@@ -94,11 +94,11 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
         if(removees.get(edgeId))
             target.mutableGraph().removeEdge(edgeId);
 
-        target.setProgress(static_cast<int>((progress++ * 100u) /
+        setProgress(static_cast<int>((progress++ * 100u) /
             static_cast<uint64_t>(target.numEdges())));
     }
 
-    target.setProgress(-1);
+    setProgress(-1);
 }
 
 std::unique_ptr<GraphTransform> SpanningTreeTransformFactory::create(const GraphTransformConfig&) const

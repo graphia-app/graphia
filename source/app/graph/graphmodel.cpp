@@ -483,10 +483,9 @@ QStringList GraphModel::transformsWithMissingParametersSetToDefault(const QStrin
     return transformsWithDefaults;
 }
 
-void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
+void GraphModel::buildTransforms(const QStringList& transforms, Progressable* progressable)
 {
     _->_transformedGraph.clearTransforms();
-    _->_transformedGraph.setCommand(command);
     _->_transformInfos.clear();
     for(int index = 0; index < transforms.size(); index++)
     {
@@ -515,12 +514,12 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
             graphTransform->setConfig(graphTransformConfig);
             graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
             graphTransform->setInfo(&_->_transformInfos[index]);
+            graphTransform->setProgressable(progressable);
             _->_transformedGraph.addTransform(std::move(graphTransform));
         }
     }
 
     _->_transformedGraph.enableAutoRebuild();
-    _->_transformedGraph.setCommand(nullptr);
 }
 
 void GraphModel::cancelTransformBuild()

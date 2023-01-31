@@ -140,7 +140,7 @@ void LouvainTransform::apply(TransformedGraph& target)
             // pair of connected communities in the base graph
             for(auto edgeId : graph.edgeIds())
             {
-                target.setProgress(static_cast<int>((edgeIndex++ * 100) /
+                setProgress(static_cast<int>((edgeIndex++ * 100) /
                     static_cast<uint64_t>(graph.numEdges())));
 
                 if(cancelled())
@@ -186,7 +186,7 @@ void LouvainTransform::apply(TransformedGraph& target)
         do
         {
             improved = false;
-            target.setProgress(0);
+            setProgress(0);
             uint64_t nodeIndex = 0;
 
             target.setPhase(QStringLiteral("Louvain Iteration %1.%2")
@@ -194,7 +194,7 @@ void LouvainTransform::apply(TransformedGraph& target)
 
             for(auto nodeId : graph.nodeIds())
             {
-                target.setProgress(static_cast<int>((nodeIndex++ * 100) /
+                setProgress(static_cast<int>((nodeIndex++ * 100) /
                     static_cast<uint64_t>(graph.numNodes())));
 
                 if(graph.typeOf(nodeId) == MultiElementType::Tail)
@@ -247,7 +247,7 @@ void LouvainTransform::apply(TransformedGraph& target)
                     break;
             }
 
-            target.setProgress(-1);
+            setProgress(-1);
         }
         while(improved && !cancelled());
 
@@ -259,7 +259,7 @@ void LouvainTransform::apply(TransformedGraph& target)
     bool finished = false;
     do // NOLINT bugprone-infinite-loop
     {
-        target.setProgress(-1);
+        setProgress(-1);
 
         communities.resetElements();
         weightedDegrees.resetElements();
