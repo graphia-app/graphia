@@ -24,13 +24,13 @@
 #include <map>
 #include <queue>
 
-void EccentricityTransform::apply(TransformedGraph& target) const
+void EccentricityTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QStringLiteral("Eccentricity"));
     calculateDistances(target);
 }
 
-void EccentricityTransform::calculateDistances(TransformedGraph& target) const
+void EccentricityTransform::calculateDistances(TransformedGraph& target)
 {
     // Setup the contiguous ids
     NodeIdMap<int> nodeIdToMatrixIndex;

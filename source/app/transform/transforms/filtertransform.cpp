@@ -31,7 +31,7 @@
 
 #include <QObject>
 
-void FilterTransform::apply(TransformedGraph& target) const
+void FilterTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Filtering"));
 

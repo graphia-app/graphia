@@ -29,7 +29,7 @@
 class SpanningTreeTransform : public GraphTransform
 {
 public:
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 };
 
 class SpanningTreeTransformFactory : public GraphTransformFactory

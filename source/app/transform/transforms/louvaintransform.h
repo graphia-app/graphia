@@ -29,7 +29,7 @@ class LouvainTransform : public GraphTransform
 public:
     explicit LouvainTransform(GraphModel* graphModel, bool weighted) :
         _graphModel(graphModel), _weighted(weighted) {}
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 
 private:
     GraphModel* _graphModel = nullptr;

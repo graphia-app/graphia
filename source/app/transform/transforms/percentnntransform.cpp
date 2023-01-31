@@ -28,7 +28,7 @@
 
 #include <QObject>
 
-void PercentNNTransform::apply(TransformedGraph& target) const
+void PercentNNTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("%-NN"));
 

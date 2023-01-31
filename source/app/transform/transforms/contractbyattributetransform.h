@@ -33,7 +33,7 @@ public:
         _graphModel(&graphModel)
     {}
 
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 
 private:
     const GraphModel* _graphModel;

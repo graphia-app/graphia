@@ -53,8 +53,8 @@ public:
     GraphTransform() = default;
     ~GraphTransform() override = default;
 
-    virtual void apply(TransformedGraph&) const {}
-    bool applyAndUpdate(TransformedGraph& target, const GraphModel& graphModel) const;
+    virtual void apply(TransformedGraph&) {}
+    bool applyAndUpdate(TransformedGraph& target, const GraphModel& graphModel);
 
     bool repeating() const { return _repeating; }
     void setRepeating(bool repeating) { _repeating = repeating; }

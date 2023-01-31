@@ -51,7 +51,7 @@ struct AttributeProxyFunctor
     }
 };
 
-void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target) const
+void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Forward Multi-Element Attribute"));
 

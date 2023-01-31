@@ -28,7 +28,7 @@
 
 #include <QObject>
 
-void SpanningTreeTransform::apply(TransformedGraph& target) const
+void SpanningTreeTransform::apply(TransformedGraph& target)
 {
     const bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
 

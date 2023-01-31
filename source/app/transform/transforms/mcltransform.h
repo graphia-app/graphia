@@ -28,7 +28,7 @@ class MCLTransform : public GraphTransform
 {
 public:
     explicit MCLTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 
 private:
     void enableDebugIteration(){ _debugIteration = true; }
@@ -43,7 +43,7 @@ private:
     bool _debugIteration = false;
     bool _debugMatrices = false;
 
-    void calculateMCL(float inflation, TransformedGraph& target) const;
+    void calculateMCL(float inflation, TransformedGraph& target);
 
 private:
     GraphModel* _graphModel = nullptr;

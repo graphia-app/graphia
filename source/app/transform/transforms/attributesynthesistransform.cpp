@@ -44,7 +44,7 @@ static Alert attributeSynthesisTransformConfigIsValid(const GraphTransformConfig
     return {AlertType::None, {}};
 }
 
-void AttributeSynthesisTransform::apply(TransformedGraph& target) const
+void AttributeSynthesisTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Attribute Synthesis"));
 

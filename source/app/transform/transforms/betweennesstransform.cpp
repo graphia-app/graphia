@@ -30,7 +30,7 @@
 #include <map>
 #include <thread>
 
-void BetweennessTransform::apply(TransformedGraph& target) const
+void BetweennessTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QStringLiteral("Betweenness"));
     target.setProgress(0);

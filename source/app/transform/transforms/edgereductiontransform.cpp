@@ -25,7 +25,7 @@
 
 #include <QObject>
 
-void EdgeReductionTransform::apply(TransformedGraph& target) const
+void EdgeReductionTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Edge Reduction"));
 

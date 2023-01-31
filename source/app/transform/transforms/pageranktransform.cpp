@@ -33,7 +33,7 @@
 
 using VectorType = blaze::DynamicVector<float>;
 
-void PageRankTransform::apply(TransformedGraph& target) const
+void PageRankTransform::apply(TransformedGraph& target)
 {
     calculatePageRank(target);
 }

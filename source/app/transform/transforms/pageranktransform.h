@@ -28,7 +28,7 @@ class PageRankTransform : public GraphTransform
 {
 public:
     explicit PageRankTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 
     void enableDebug() { _debug = true; }
     void disableDebug() { _debug = false; }

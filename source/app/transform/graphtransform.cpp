@@ -62,7 +62,7 @@ static bool hasInvalidAttributes(const std::vector<QString>& attributeNames,
     return false;
 }
 
-bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& graphModel) const
+bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& graphModel)
 {
     bool anyChange = false;
     bool change = false;

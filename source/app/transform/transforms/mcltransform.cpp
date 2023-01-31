@@ -284,7 +284,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
     }
 }
 
-void MCLTransform::apply(TransformedGraph& target) const
+void MCLTransform::apply(TransformedGraph& target)
 {
     auto granularity = std::get<double>(
                 config().parameterByName(QStringLiteral("Granularity"))->_value);
@@ -330,7 +330,7 @@ public:
     iterator end() { return iterator(matrix.columns()); }
 };
 
-void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
+void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
 {
     target.setPhase(QStringLiteral("MCL Initialising"));
 

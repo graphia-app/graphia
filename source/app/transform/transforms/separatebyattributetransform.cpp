@@ -25,7 +25,7 @@
 
 #include <QObject>
 
-void SeparateByAttributeTransform::apply(TransformedGraph& target) const
+void SeparateByAttributeTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Contracting"));
 

@@ -58,7 +58,7 @@ static void removeLeaves(TransformedGraph& target, size_t limit = 0)
         target.update();
     }
 }
-void RemoveLeavesTransform::apply(TransformedGraph& target) const
+void RemoveLeavesTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Leaf Removal"));
 
@@ -66,7 +66,7 @@ void RemoveLeavesTransform::apply(TransformedGraph& target) const
     removeLeaves(target, limit);
 }
 
-void RemoveBranchesTransform::apply(TransformedGraph& target) const
+void RemoveBranchesTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Branch Removal"));
 

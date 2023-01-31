@@ -26,11 +26,11 @@ class EccentricityTransform : public GraphTransform
 {
 public:
     explicit EccentricityTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    void apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) override;
 
 private:
     GraphModel* _graphModel = nullptr;
-    void calculateDistances(TransformedGraph& target) const;
+    void calculateDistances(TransformedGraph& target);
 };
 
 class EccentricityTransformFactory : public GraphTransformFactory

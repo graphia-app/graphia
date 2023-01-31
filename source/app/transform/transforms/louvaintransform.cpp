@@ -32,7 +32,7 @@
 
 // https://arxiv.org/abs/0803.0476
 
-void LouvainTransform::apply(TransformedGraph& target) const
+void LouvainTransform::apply(TransformedGraph& target)
 {
     auto resolution = 1.0 - std::get<double>(
         config().parameterByName(QStringLiteral("Granularity"))->_value);

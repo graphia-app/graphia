@@ -25,7 +25,7 @@
 
 #include <QObject>
 
-void EdgeContractionTransform::apply(TransformedGraph& target) const
+void EdgeContractionTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Contracting"));
 

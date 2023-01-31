@@ -25,7 +25,7 @@
 
 #include <QObject>
 
-void ContractByAttributeTransform::apply(TransformedGraph& target) const
+void ContractByAttributeTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Contracting"));
 

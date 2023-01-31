@@ -28,7 +28,7 @@
 
 #include <QObject>
 
-void KNNTransform::apply(TransformedGraph& target) const
+void KNNTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("k-NN"));
 

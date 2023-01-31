@@ -35,7 +35,7 @@ static Alert conditionalAttributeTransformConfigIsValid(const GraphTransformConf
     return {AlertType::None, {}};
 }
 
-void ConditionalAttributeTransform::apply(TransformedGraph& target) const
+void ConditionalAttributeTransform::apply(TransformedGraph& target)
 {
     target.setPhase(QObject::tr("Boolean Attribute"));
 
