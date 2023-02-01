@@ -57,7 +57,7 @@ private:
     void run();
 
 signals:
-    void progress(int percentage);
+    void progressChanged(int percentage);
     void success(IParser*);
     void complete(const QUrl& url, bool success);
 

@@ -559,7 +559,7 @@ public:
     Q_INVOKABLE void startTestCommand();
 
 private slots:
-    void onLoadProgress(int percentage);
+    void onLoadProgressChanged(int percentage);
     void onLoadComplete(const QUrl& url, bool success);
 
     void onBusyChanged() const;

@@ -85,10 +85,7 @@ void ParserThread::run()
 
     _graphModel->mutableGraph().performTransaction([this, &result](IMutableGraph& graph)
     {
-        std::atomic<int> percentage;
-        percentage = -1;
-
-        _parser->setProgressFn([this, &percentage](int newPercentage)
+        _parser->setProgressFn([this, percentage = int(-1)](int newPercentage) mutable
         {
 #ifdef _DEBUG
             if(newPercentage < -1 || newPercentage > 100)
@@ -96,24 +93,16 @@ void ParserThread::run()
 #endif
             if(newPercentage >= 0)
             {
-                bool percentageIncreased = false;
-                int expected = 0, desired = 0;
-
-                do
+                if(newPercentage > percentage)
                 {
-                    expected = percentage.load();
-                    desired = newPercentage > expected ? newPercentage : expected;
-                    percentageIncreased = desired != expected;
+                    percentage = newPercentage;
+                    emit progressChanged(percentage);
                 }
-                while(!percentage.compare_exchange_weak(expected, desired));
-
-                if(percentageIncreased)
-                    emit progress(newPercentage);
             }
             else
             {
                 percentage = newPercentage;
-                emit progress(newPercentage);
+                emit progressChanged(percentage);
             }
         });
 
@@ -134,7 +123,7 @@ void ParserThread::run()
 
         // Extra processing may occur after the actual parsing, so we emit this here
         // in order that the progress indication doesn't just freeze
-        emit progress(-1);
+        emit progressChanged(-1);
     });
 
     if(result)

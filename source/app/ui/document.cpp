@@ -735,7 +735,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
         });
     }
 
-    connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
+    connect(_graphFileParserThread.get(), &ParserThread::progressChanged, this, &Document::onLoadProgressChanged);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::cancelledChanged,
@@ -787,7 +787,7 @@ void Document::onPreferenceChanged(const QString& key, const QVariant&)
     }
 }
 
-void Document::onLoadProgress(int percentage)
+void Document::onLoadProgressChanged(int percentage)
 {
     _loadProgress = percentage;
     emit commandProgressChanged();
