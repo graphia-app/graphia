@@ -507,11 +507,7 @@ void ComponentManager::shrinkComponentsArrayToFit()
 void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
 {
     if(_enabled && changeOccurred)
-    {
-        graph->setPhase(tr("Componentising"));
         update(graph);
-        graph->clearPhase();
-    }
 }
 
 #include <chrono>
