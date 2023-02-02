@@ -218,6 +218,7 @@ void LouvainTransform::apply(TransformedGraph& target)
                 if(graph.typeOf(nodeId) == MultiElementType::Tail)
                     continue;
 
+                // Find total weights of neighbour communities
                 std::map<CommunityId, double> neighbourCommunityWeights;
                 for(auto edgeId : graph.nodeById(nodeId).edgeIds())
                 {
@@ -241,6 +242,7 @@ void LouvainTransform::apply(TransformedGraph& target)
                 double maxDeltaQ = 0.0;
                 auto newCommunityId = communityId;
 
+                // Find the neighbouring community with the greatest delta Q
                 for(auto [neighbourCommunityId, weight] : neighbourCommunityWeights)
                 {
                     auto communityWeight = communityDegrees.at(neighbourCommunityId);
