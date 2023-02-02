@@ -106,6 +106,15 @@ void ParserThread::run()
             }
         });
 
+        _parser->setPhaseFn([this, phase = QString()](const QString& newPhase) mutable
+        {
+            if(newPhase != phase)
+            {
+                phase = newPhase;
+                emit phaseChanged(phase);
+            }
+        });
+
         result = _parser->parse(_url, _graphModel);
 
         if(!result)
@@ -124,6 +133,7 @@ void ParserThread::run()
         // Extra processing may occur after the actual parsing, so we emit this here
         // in order that the progress indication doesn't just freeze
         emit progressChanged(-1);
+        emit phaseChanged({});
     });
 
     if(result)

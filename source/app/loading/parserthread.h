@@ -58,6 +58,7 @@ private:
 
 signals:
     void progressChanged(int percentage);
+    void phaseChanged(const QString& phase);
     void success(IParser*);
     void complete(const QUrl& url, bool success);
 
