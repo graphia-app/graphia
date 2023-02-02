@@ -244,11 +244,6 @@ public:
     // must be used directly
     virtual bool update() { return false; }
 
-    // Informational messages to indicate progress
-    void setPhase(const QString& phase) const override;
-    void clearPhase() const override;
-    virtual QString phase() const;
-
     void dumpToQDebug(int detail) const;
 
 private:
@@ -266,8 +261,6 @@ private:
 
     std::unique_ptr<ComponentManager> _componentManager;
 
-    mutable std::recursive_mutex _phaseMutex;
-    mutable QString _phase;
     GraphConsistencyChecker _graphConsistencyChecker;
 
     void insertNodeArray(IGraphArray* nodeArray) const override;
@@ -316,8 +309,6 @@ signals:
     void edgeMovedBetweenComponents(const Graph*, EdgeId, ComponentId, ComponentId);
 
     void graphChanged(const Graph*, bool changeOccurred);
-
-    void phaseChanged() const; // clazy:exclude=const-signal-or-slot
 };
 
 #endif // GRAPH_H

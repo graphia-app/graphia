@@ -397,27 +397,3 @@ std::vector<NodeId> Graph::neighboursOf(NodeId nodeId) const
 
     return nodeIds;
 }
-
-void Graph::setPhase(const QString& phase) const
-{
-    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-
-    if(phase != _phase)
-    {
-        _phase = phase;
-        emit phaseChanged();
-    }
-}
-
-void Graph::clearPhase() const
-{
-    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-
-    setPhase({});
-}
-
-QString Graph::phase() const
-{
-    const std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-    return _phase;
-}

@@ -96,9 +96,6 @@ public:
     virtual std::vector<EdgeId> edgeIdsBetween(NodeId nodeIdA, NodeId nodeIdB) const = 0;
     virtual EdgeId firstEdgeIdBetween(NodeId nodeIdA, NodeId nodeIdB) const = 0;
     virtual bool edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const = 0;
-
-    virtual void setPhase(const QString& phase) const = 0;
-    virtual void clearPhase() const = 0;
 };
 
 #endif // IGRAPH_H

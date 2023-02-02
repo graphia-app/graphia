@@ -123,10 +123,6 @@ void ParserThread::run()
             // constructed graph, so just clear it out
             graph.clear();
 
-            // Also, we've already failed, so there is nothing else happening we should
-            // be telling the user about
-            graph.clearPhase();
-
             setFailureReason(_parser->failureReason());
         }
 

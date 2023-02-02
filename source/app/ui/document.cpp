@@ -233,9 +233,6 @@ QString Document::commandVerb() const
     if(_graphModel == nullptr)
         return {};
 
-    auto phase = !_commandManager.commandPhase().isEmpty() ?
-        _commandManager.commandPhase() : _graphModel->graph().phase();
-
     if(!_loadComplete)
     {
         if(!_loadPhase.isEmpty())
@@ -244,8 +241,8 @@ QString Document::commandVerb() const
         return QString(tr("Loading %1").arg(_title));
     }
 
-    if(!phase.isEmpty())
-        return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb(), phase);
+    if(!_commandManager.commandPhase().isEmpty())
+        return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb(), _commandManager.commandPhase());
 
     return _commandManager.commandVerb();
 }
@@ -603,8 +600,6 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 
-    connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
-
     connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::attributesChanged); // clazy:exclude=connect-non-signal
     connect(_graphModel.get(), &GraphModel::attributesChanged, this, &Document::setSaveRequired); // clazy:exclude=connect-non-signal
 
@@ -917,7 +912,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     [this](bool, const QString&, const QString& pastParticiple)
     {
         // Commands might set the phase and neglect to unset it
-        _graphModel->mutableGraph().clearPhase();
         _commandManager.clearPhase();
 
         setStatus(pastParticiple);

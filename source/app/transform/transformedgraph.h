@@ -78,10 +78,6 @@ public:
     EdgeId firstEdgeIdBetween(NodeId nodeIdA, NodeId nodeIdB) const override { return _target.firstEdgeIdBetween(nodeIdA, nodeIdB); }
     bool edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const override { return _target.edgeExistsBetween(nodeIdA, nodeIdB); }
 
-    void setPhase(const QString& phase) const override { _source->setPhase(phase); }
-    void clearPhase() const override { _source->clearPhase(); }
-    QString phase() const override { return _source->phase(); }
-
     MutableGraph& mutableGraph() { return _target; }
 
     void reserve(const Graph& other) override;

@@ -641,7 +641,6 @@ void MutableGraph::endTransaction(bool graphChangeOccurred)
         update();
         emit graphChanged(this, _graphChangeOccurred);
         _mutex.unlock();
-        clearPhase();
         emit transactionEnded(this);
     }
 }
