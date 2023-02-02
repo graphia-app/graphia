@@ -63,7 +63,12 @@ public:
 
     virtual int progress() const { return _progress; }
 
-    virtual void setPhase(const QString& phase) { _phase = phase; }
+    void setPhase(const QString& phase) override
+    {
+        Progressable::setPhase(phase);
+        _phase = phase;
+    }
+
     virtual QString phase() const { return _phase; }
 
     virtual void initialise()

@@ -19,20 +19,29 @@
 #ifndef PROGRESSABLE_H
 #define PROGRESSABLE_H
 
+#include <QString>
+
 #include <functional>
 
 using ProgressFn = std::function<void(int)>;
+using PhaseFn = std::function<void(const QString&)>;
 
 class Progressable
 {
 private:
-    ProgressFn _progressFn = [](int){};
+    ProgressFn _progressFn = [](int) {};
+    PhaseFn _phaseFn = [](const QString&) {};
 
 public:
     virtual ~Progressable() = default;
 
     virtual void setProgress(int percent) { _progressFn(percent); }
     void setProgressFn(const ProgressFn& f) { _progressFn = f; }
+
+    // Informational messages to indicate progress
+    virtual void setPhase(const QString& phase) { _phaseFn(phase); }
+    void clearPhase() { setPhase({}); }
+    void setPhaseFn(const PhaseFn& f) { _phaseFn = f; }
 };
 
 #endif // PROGRESSABLE_H
