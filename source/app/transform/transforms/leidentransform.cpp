@@ -27,6 +27,7 @@
 
 #include <map>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <cmath>
 
@@ -180,27 +181,83 @@ void LeidenTransform::apply(TransformedGraph& target)
             add(nextCommunityId++, nodeId);
         }
 
-        size_t subProgressIteration = 1;
         bool modified = false;
-        bool improved = false;
+        std::deque<NodeId> nodeIdQueue;
+
+        for(auto nodeId : graph.nodeIds())
+            nodeIdQueue.push_back(nodeId);
+
+        NodeArray<bool> visited(graph);
+
+        int highestProgress = 0;
+        target.setProgress(0);
+
         do
         {
-            improved = false;
-            setProgress(0);
-            uint64_t nodeIndex = 0;
+            setPhase(QStringLiteral("Leiden Iteration %1")
+                .arg(QString::number(progressIteration)));
 
-            setPhase(QStringLiteral("Leiden Iteration %1.%2")
-                .arg(QString::number(progressIteration), QString::number(subProgressIteration++)));
+            auto nodeId = nodeIdQueue.front();
+            nodeIdQueue.pop_front();
 
-            for(auto nodeId : graph.nodeIds())
+            auto progress = static_cast<int>(
+                (static_cast<uint64_t>(graph.numNodes() - nodeIdQueue.size()) * 100) /
+                static_cast<uint64_t>(graph.numNodes()));
+
+            highestProgress = std::max(highestProgress, progress);
+            target.setProgress(highestProgress);
+
+            if(graph.typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
+            // Find total weights of neighbour communities
+            std::map<CommunityId, double> neighbourCommunityWeights;
+            for(auto edgeId : graph.nodeById(nodeId).edgeIds())
             {
-                setProgress(static_cast<int>((nodeIndex++ * 100) /
-                    static_cast<uint64_t>(graph.numNodes())));
+                auto neighbourNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
 
-                if(graph.typeOf(nodeId) == MultiElementType::Tail)
+                // Skip loop edges
+                if(neighbourNodeId == nodeId)
                     continue;
 
-                std::map<CommunityId, double> neighbourCommunityWeights;
+                if(graph.typeOf(neighbourNodeId) == MultiElementType::Tail)
+                    continue;
+
+                auto neighbourCommunityId = communities.at(neighbourNodeId);
+
+                neighbourCommunityWeights[neighbourCommunityId] += weights[edgeId];
+            }
+
+            auto communityId = communities[nodeId];
+            remove(communityId, nodeId);
+
+            visited.set(nodeId, true);
+
+            double maxDeltaQ = 0.0;
+            auto newCommunityId = communityId;
+
+            // Find the neighbouring community with the greatest delta Q
+            for(auto [neighbourCommunityId, weight] : neighbourCommunityWeights)
+            {
+                auto communityWeight = communityDegrees.at(neighbourCommunityId);
+                auto nodeWeight = weightedDegrees[nodeId];
+
+                auto deltaQ = (resolution * weight) -
+                    ((communityWeight * nodeWeight) / totalWeight);
+
+                if(deltaQ > maxDeltaQ)
+                {
+                    maxDeltaQ = deltaQ;
+                    newCommunityId = neighbourCommunityId;
+                }
+            }
+
+            add(newCommunityId, nodeId);
+
+            if(newCommunityId != communityId)
+            {
+                modified = true;
+
                 for(auto edgeId : graph.nodeById(nodeId).edgeIds())
                 {
                     auto neighbourNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
@@ -212,44 +269,21 @@ void LeidenTransform::apply(TransformedGraph& target)
                     if(graph.typeOf(neighbourNodeId) == MultiElementType::Tail)
                         continue;
 
-                    auto neighbourCommunityId = communities.at(neighbourNodeId);
+                    if(newCommunityId == communities[neighbourNodeId])
+                        continue;
 
-                    neighbourCommunityWeights[neighbourCommunityId] += weights[edgeId];
-                }
-
-                auto communityId = communities[nodeId];
-                remove(communityId, nodeId);
-
-                double maxDeltaQ = 0.0;
-                auto newCommunityId = communityId;
-
-                for(auto [neighbourCommunityId, weight] : neighbourCommunityWeights)
-                {
-                    auto communityWeight = communityDegrees.at(neighbourCommunityId);
-                    auto nodeWeight = weightedDegrees[nodeId];
-
-                    auto deltaQ = (resolution * weight) -
-                        ((communityWeight * nodeWeight) / totalWeight);
-
-                    if(deltaQ > maxDeltaQ)
+                    // Add neighbourNodeId to nodeIdQueue (if not already in there)
+                    if(visited.get(neighbourNodeId))
                     {
-                        maxDeltaQ = deltaQ;
-                        newCommunityId = neighbourCommunityId;
+                        nodeIdQueue.push_back(neighbourNodeId);
+                        visited.set(neighbourNodeId, false);
                     }
                 }
-
-                add(newCommunityId, nodeId);
-
-                if(newCommunityId != communityId)
-                    improved = modified = true;
-
-                if(cancelled())
-                    break;
             }
-
-            setProgress(-1);
         }
-        while(improved && !cancelled());
+        while(!nodeIdQueue.empty() && !cancelled());
+
+        target.setProgress(-1);
 
         return modified;
     };
