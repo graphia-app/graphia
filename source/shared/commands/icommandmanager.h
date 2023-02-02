@@ -27,6 +27,8 @@
 #include <vector>
 #include <type_traits>
 
+class QString;
+
 enum class ExecutePolicy
 {
     Add,        // Add to the execution stack
@@ -104,6 +106,9 @@ public:
     {
         execute(ExecutePolicy::Once, std::make_unique<Command>(commandDescription, executeFn));
     }
+
+    virtual void setPhase(const QString& phase) = 0;
+    void clearPhase() { setPhase({}); }
 };
 
 #endif // ICOMMANDMANAGER_H

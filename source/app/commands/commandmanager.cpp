@@ -63,6 +63,14 @@ void CommandManager::execute(ExecutePolicy policy, ICommandPtr command)
     emit commandQueued();
 }
 
+void CommandManager::setPhase(const QString& phase)
+{
+    const std::unique_lock<std::recursive_mutex> lock(_currentCommandMutex);
+
+    if(_currentCommand != nullptr)
+        _currentCommand->setPhase(phase);
+}
+
 void CommandManager::undo()
 {
     const std::unique_lock<std::recursive_mutex> lock(_queueMutex);

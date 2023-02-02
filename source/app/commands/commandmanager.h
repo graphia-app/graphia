@@ -55,6 +55,8 @@ public:
     void execute(ExecutePolicy policy, ICommandPtr command) override;
     using ICommandManager::execute;
 
+    void setPhase(const QString& phase) override;
+
     void undo();
     void redo();
 
