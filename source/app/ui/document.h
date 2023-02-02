@@ -234,6 +234,7 @@ private:
     QString _log;
 
     int _loadProgress = 0;
+    QString _loadPhase;
     bool _loadComplete = false;
 
     std::atomic_bool _graphChanging;
@@ -560,6 +561,7 @@ public:
 
 private slots:
     void onLoadProgressChanged(int percentage);
+    void onLoadPhaseChanged(const QString& phase);
     void onLoadComplete(const QUrl& url, bool success);
 
     void onBusyChanged() const;

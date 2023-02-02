@@ -736,6 +736,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
     }
 
     connect(_graphFileParserThread.get(), &ParserThread::progressChanged, this, &Document::onLoadProgressChanged);
+    connect(_graphFileParserThread.get(), &ParserThread::phaseChanged, this, &Document::onLoadPhaseChanged);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::cancelledChanged,
@@ -756,6 +757,7 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
         {
             auto saver = factory->create(fileUrl, this, _pluginInstance.get(), uiData, pluginUiData);
             saver->setProgressFn([&command](int percentage){ command.setProgress(percentage); });
+            saver->setPhaseFn([&command](const QString& phase){ command.setPhase(phase); });
             const bool success = saver->save();
             emit saveComplete(success, fileUrl, saverName);
             return success;
@@ -791,6 +793,11 @@ void Document::onLoadProgressChanged(int percentage)
 {
     _loadProgress = percentage;
     emit commandProgressChanged();
+}
+
+void Document::onLoadPhaseChanged(const QString& phase)
+{
+    _loadPhase = phase;
     emit commandVerbChanged();
 }
 
