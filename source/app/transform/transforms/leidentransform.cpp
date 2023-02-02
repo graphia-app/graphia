@@ -33,209 +33,147 @@
 
 // https://www.nature.com/articles/s41598-019-41695-z
 
-void LeidenTransform::apply(TransformedGraph& target)
+using CommunityId = NodeId; // Slight Hack, be careful with this
+
+class Partition
 {
-    auto resolution = 1.0 - std::get<double>(
-        config().parameterByName(QStringLiteral("Granularity"))->_value);
+private:
+    GraphTransform* _transform;
+    MutableGraph _coarseGraph;
+    EdgeArray<double> _weights;
+    double _resolution = 1.0;
 
-    const auto minResolution = 0.5;
-    const auto maxResolution = 30.0;
+    NodeArray<CommunityId> _communities;
+    NodeArray<double> _weightedDegrees;
+    std::map<CommunityId, int> _communityDegrees;
 
-    const auto logMin = std::log10(minResolution);
-    const auto logMax = std::log10(maxResolution);
-    const auto logRange = logMax - logMin;
-
-    resolution = std::pow(10.0f, logMin + (resolution * logRange));
-
-    using CommunityId = NodeId; // Slight Hack, be careful with this
-
-    const auto& edgeIds = target.edgeIds();
-    EdgeArray<double> weights(target, 1.0);
-
-    if(_weighted)
+    void add(CommunityId community, NodeId nodeId)
     {
-        if(config().attributeNames().empty())
-        {
-            addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
-            return;
-        }
-
-        auto attribute = _graphModel->attributeValueByName(
-            config().attributeNames().front());
-
-        for(auto edgeId : edgeIds)
-            weights[edgeId] = attribute.numericValueOf(edgeId);
+        _communities[nodeId] = community;
+        _communityDegrees[community] += static_cast<int>(_weightedDegrees[nodeId]);
     }
 
-    double totalWeight = std::accumulate(edgeIds.begin(), edgeIds.end(), 0.0,
-    [&weights](double d, EdgeId edgeId)
+    void remove(CommunityId community, NodeId nodeId)
     {
-        return d + weights[edgeId];
-    });
+        _communities[nodeId].setToNull();
+        _communityDegrees[community] -= static_cast<int>(_weightedDegrees[nodeId]);
+    }
 
-    std::vector<NodeArray<CommunityId>> iterations;
-    size_t progressIteration = 1;
-    setPhase(QStringLiteral("Leiden Initialising"));
-
-    NodeArray<CommunityId> communities(target);
-    NodeArray<double> weightedDegrees(target);
-    std::map<CommunityId, int> communityDegrees;
-
-    auto add = [&](CommunityId community, NodeId nodeId)
+    void reset()
     {
-        communities[nodeId] = community;
-        communityDegrees[community] += static_cast<int>(weightedDegrees[nodeId]);
-    };
+        _communities.resetElements();
+        _weightedDegrees.resetElements();
+        _communityDegrees.clear();
+    }
 
-    auto remove = [&](CommunityId community, NodeId nodeId)
+public:
+    Partition(GraphTransform* transform, const TransformedGraph& graph, double resolution) :
+        _transform(transform),
+        _coarseGraph(graph.mutableGraph()),
+        _weights(graph, 1.0), _resolution(resolution),
+        _communities(graph), _weightedDegrees(graph)
+    {}
+
+    const NodeArray<CommunityId>& communities() const { return _communities; }
+
+    void setWeight(EdgeId edgeId, double weight)
     {
-        communities[nodeId].setToNull();
-        communityDegrees[community] -= static_cast<int>(weightedDegrees[nodeId]);
-    };
+        Q_ASSERT(_coarseGraph.containsEdgeId(edgeId));
+        _weights[edgeId] = weight;
+    }
 
-    auto relabel = [&](MutableGraph& graph)
+    void relabel()
     {
         std::map<CommunityId, CommunityId> idMap;
         CommunityId nextCommunityId = 0;
 
-        for(auto nodeId : graph.nodeIds())
+        for(auto nodeId : _coarseGraph.nodeIds())
         {
-            if(graph.typeOf(nodeId) == MultiElementType::Tail)
+            if(_coarseGraph.typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
-            auto oldCommunityId = communities[nodeId];
+            auto oldCommunityId = _communities[nodeId];
 
             if(!u::contains(idMap, oldCommunityId))
-                communities[nodeId] = idMap[oldCommunityId] = nextCommunityId++;
+                _communities[nodeId] = idMap[oldCommunityId] = nextCommunityId++;
             else
-                communities[nodeId] = idMap.at(oldCommunityId);
+                _communities[nodeId] = idMap.at(oldCommunityId);
         }
-    };
+    }
 
-    auto coarsen = [&](MutableGraph& graph)
+    void makeSingletonClusters()
     {
-        MutableGraph coarseGraph;
-        EdgeArray<double> newWeights(target, 0.0);
-
-        coarseGraph.performTransaction([&](IMutableGraph&)
-        {
-            // Create a node for each community
-            for(auto nodeId : graph.nodeIds())
-            {
-                if(graph.typeOf(nodeId) == MultiElementType::Tail)
-                    continue;
-
-                auto newNodeId = communities[nodeId];
-
-                if(coarseGraph.containsNodeId(newNodeId))
-                    continue;
-
-                coarseGraph.reserveNodeId(newNodeId);
-                auto assignedNodeId = coarseGraph.addNode(newNodeId);
-                Q_ASSERT(assignedNodeId == newNodeId);
-            }
-
-            uint64_t edgeIndex = 0;
-
-            // Create an edge between community nodes for each
-            // pair of connected communities in the base graph
-            for(auto edgeId : graph.edgeIds())
-            {
-                setProgress(static_cast<int>((edgeIndex++ * 100) /
-                    static_cast<uint64_t>(graph.numEdges())));
-
-                if(cancelled())
-                    break;
-
-                const auto& edge = graph.edgeById(edgeId);
-                auto sourceId = communities.at(edge.sourceId());
-                auto targetId = communities.at(edge.targetId());
-                const double newWeight = weights[edgeId];
-
-                auto newEdgeId = coarseGraph.firstEdgeIdBetween(sourceId, targetId);
-                if(newEdgeId.isNull())
-                    newEdgeId = coarseGraph.addEdge(sourceId, targetId);
-
-                newWeights[newEdgeId] += newWeight;
-            }
-        });
-
-        graph = coarseGraph;
-        weights = newWeights;
-    };
-
-    auto makeSingletonClusters = [&](MutableGraph& graph)
-    {
-        communities.resetElements();
-        weightedDegrees.resetElements();
-        communityDegrees.clear();
+        reset();
 
         CommunityId nextCommunityId = 0;
-        for(auto nodeId : graph.nodeIds())
+        for(auto nodeId : _coarseGraph.nodeIds())
         {
-            if(graph.typeOf(nodeId) == MultiElementType::Tail)
+            if(_coarseGraph.typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
-            for(auto edgeId : graph.nodeById(nodeId).edgeIds())
-                weightedDegrees[nodeId] += weights[edgeId];
+            for(auto edgeId : _coarseGraph.nodeById(nodeId).edgeIds())
+                _weightedDegrees[nodeId] += _weights[edgeId];
 
             add(nextCommunityId++, nodeId);
         }
-    };
+    }
 
-    auto moveNodes = [&](MutableGraph& graph)
+    bool moveNodes()
     {
-        if(cancelled())
+        if(_transform->cancelled())
             return false;
 
         bool modified = false;
         std::deque<NodeId> nodeIdQueue;
 
-        for(auto nodeId : graph.nodeIds())
+        for(auto nodeId : _coarseGraph.nodeIds())
             nodeIdQueue.push_back(nodeId);
 
-        NodeArray<bool> visited(graph);
+        NodeArray<bool> visited(_coarseGraph);
 
         int highestProgress = 0;
-        target.setProgress(0);
+        _transform->setProgress(0);
+
+        double totalWeight = std::accumulate(_coarseGraph.edgeIds().begin(), _coarseGraph.edgeIds().end(), 0.0,
+        [this](double d, EdgeId edgeId)
+        {
+            return d + _weights[edgeId];
+        });
 
         do
         {
-            setPhase(QStringLiteral("Leiden Iteration %1")
-                .arg(QString::number(progressIteration)));
-
             auto nodeId = nodeIdQueue.front();
             nodeIdQueue.pop_front();
 
             auto progress = static_cast<int>(
-                (static_cast<uint64_t>(graph.numNodes() - nodeIdQueue.size()) * 100) /
-                static_cast<uint64_t>(graph.numNodes()));
+                (static_cast<uint64_t>(_coarseGraph.numNodes() - nodeIdQueue.size()) * 100) /
+                static_cast<uint64_t>(_coarseGraph.numNodes()));
 
             highestProgress = std::max(highestProgress, progress);
-            target.setProgress(highestProgress);
+            _transform->setProgress(highestProgress);
 
-            if(graph.typeOf(nodeId) == MultiElementType::Tail)
+            if(_coarseGraph.typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
             // Find total weights of neighbour communities
             std::map<CommunityId, double> neighbourCommunityWeights;
-            for(auto edgeId : graph.nodeById(nodeId).edgeIds())
+            for(auto edgeId : _coarseGraph.nodeById(nodeId).edgeIds())
             {
-                auto neighbourNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
+                auto neighbourNodeId = _coarseGraph.edgeById(edgeId).oppositeId(nodeId);
 
                 // Skip loop edges
                 if(neighbourNodeId == nodeId)
                     continue;
 
-                if(graph.typeOf(neighbourNodeId) == MultiElementType::Tail)
+                if(_coarseGraph.typeOf(neighbourNodeId) == MultiElementType::Tail)
                     continue;
 
-                auto neighbourCommunityId = communities.at(neighbourNodeId);
+                auto neighbourCommunityId = _communities.at(neighbourNodeId);
 
-                neighbourCommunityWeights[neighbourCommunityId] += weights[edgeId];
+                neighbourCommunityWeights[neighbourCommunityId] += _weights[edgeId];
             }
 
-            auto communityId = communities[nodeId];
+            auto communityId = _communities[nodeId];
             remove(communityId, nodeId);
 
             visited.set(nodeId, true);
@@ -246,10 +184,10 @@ void LeidenTransform::apply(TransformedGraph& target)
             // Find the neighbouring community with the greatest delta Q
             for(auto [neighbourCommunityId, weight] : neighbourCommunityWeights)
             {
-                auto communityWeight = communityDegrees.at(neighbourCommunityId);
-                auto nodeWeight = weightedDegrees[nodeId];
+                auto communityWeight = _communityDegrees.at(neighbourCommunityId);
+                auto nodeWeight = _weightedDegrees[nodeId];
 
-                auto deltaQ = (resolution * weight) -
+                auto deltaQ = (_resolution * weight) -
                     ((communityWeight * nodeWeight) / totalWeight);
 
                 if(deltaQ > maxDeltaQ)
@@ -265,18 +203,18 @@ void LeidenTransform::apply(TransformedGraph& target)
             {
                 modified = true;
 
-                for(auto edgeId : graph.nodeById(nodeId).edgeIds())
+                for(auto edgeId : _coarseGraph.nodeById(nodeId).edgeIds())
                 {
-                    auto neighbourNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
+                    auto neighbourNodeId = _coarseGraph.edgeById(edgeId).oppositeId(nodeId);
 
                     // Skip loop edges
                     if(neighbourNodeId == nodeId)
                         continue;
 
-                    if(graph.typeOf(neighbourNodeId) == MultiElementType::Tail)
+                    if(_coarseGraph.typeOf(neighbourNodeId) == MultiElementType::Tail)
                         continue;
 
-                    if(newCommunityId == communities[neighbourNodeId])
+                    if(newCommunityId == _communities[neighbourNodeId])
                         continue;
 
                     // Add neighbourNodeId to nodeIdQueue (if not already in there)
@@ -288,31 +226,121 @@ void LeidenTransform::apply(TransformedGraph& target)
                 }
             }
         }
-        while(!nodeIdQueue.empty() && !cancelled());
+        while(!nodeIdQueue.empty() && !_transform->cancelled());
 
-        target.setProgress(-1);
+        _transform->setProgress(-1);
 
         return modified;
-    };
+    }
+
+    void coarsen()
+    {
+        MutableGraph coarseGraph;
+        EdgeArray<double> newWeights(_weights);
+        newWeights.fill(0.0);
+
+        coarseGraph.performTransaction([&](IMutableGraph&)
+        {
+            // Create a node for each community
+            for(auto nodeId : _coarseGraph.nodeIds())
+            {
+                if(_coarseGraph.typeOf(nodeId) == MultiElementType::Tail)
+                    continue;
+
+                auto newNodeId = _communities[nodeId];
+
+                if(coarseGraph.containsNodeId(newNodeId))
+                    continue;
+
+                coarseGraph.reserveNodeId(newNodeId);
+                auto assignedNodeId = coarseGraph.addNode(newNodeId);
+                Q_ASSERT(assignedNodeId == newNodeId);
+            }
+
+            uint64_t edgeIndex = 0;
+
+            // Create an edge between community nodes for each
+            // pair of connected communities in the base graph
+            for(auto edgeId : _coarseGraph.edgeIds())
+            {
+                _transform->setProgress(static_cast<int>((edgeIndex++ * 100) /
+                    static_cast<uint64_t>(_coarseGraph.numEdges())));
+
+                if(_transform->cancelled())
+                    break;
+
+                const auto& edge = _coarseGraph.edgeById(edgeId);
+                auto sourceId = _communities.at(edge.sourceId());
+                auto targetId = _communities.at(edge.targetId());
+                const double newWeight = _weights[edgeId];
+
+                auto newEdgeId = coarseGraph.firstEdgeIdBetween(sourceId, targetId);
+                if(newEdgeId.isNull())
+                    newEdgeId = coarseGraph.addEdge(sourceId, targetId);
+
+                newWeights[newEdgeId] += newWeight;
+            }
+        });
+
+        _coarseGraph = coarseGraph;
+        _weights = newWeights;
+    }
+};
+
+void LeidenTransform::apply(TransformedGraph& target)
+{
+    auto resolution = 1.0 - std::get<double>(
+        config().parameterByName(QStringLiteral("Granularity"))->_value);
+
+    const auto minResolution = 0.5;
+    const auto maxResolution = 30.0;
+
+    const auto logMin = std::log10(minResolution);
+    const auto logMax = std::log10(maxResolution);
+    const auto logRange = logMax - logMin;
+
+    resolution = std::pow(10.0f, logMin + (resolution * logRange));
+
+    std::vector<NodeArray<CommunityId>> iterations;
+    size_t progressIteration = 1;
+    setPhase(QStringLiteral("Leiden Initialising"));
 
     MutableGraph graph(target.mutableGraph());
+    Partition p(this, target, resolution);
+
+    if(_weighted)
+    {
+        if(config().attributeNames().empty())
+        {
+            addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
+            return;
+        }
+
+        auto attribute = _graphModel->attributeValueByName(
+            config().attributeNames().front());
+
+        for(auto edgeId : target.edgeIds())
+            p.setWeight(edgeId, attribute.numericValueOf(edgeId));
+    }
 
     bool finished = false;
     do // NOLINT bugprone-infinite-loop
     {
         setProgress(-1);
+        setPhase(QStringLiteral("Leiden Iteration %1")
+            .arg(QString::number(progressIteration)));
 
-        makeSingletonClusters(graph);
-        finished = !moveNodes(graph);
+        p.makeSingletonClusters();
+        finished = !p.moveNodes();
 
         if(!finished && !cancelled())
         {
-            relabel(graph);
-            iterations.emplace_back(communities);
+            p.relabel();
+            iterations.emplace_back(p.communities());
 
             setPhase(QStringLiteral("Leiden Iteration %1 Coarsening")
                 .arg(QString::number(progressIteration)));
-            coarsen(graph);
+            p.coarsen();
         }
 
         progressIteration++;
@@ -323,6 +351,8 @@ void LeidenTransform::apply(TransformedGraph& target)
         return;
 
     setPhase(QStringLiteral("Leiden Finalising"));
+
+    NodeArray<CommunityId> communities(target);
 
     // Set each CommunityId to be the same as the NodeId, initially
     for(auto nodeId : target.nodeIds())
