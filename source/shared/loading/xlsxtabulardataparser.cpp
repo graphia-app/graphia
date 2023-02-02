@@ -49,10 +49,9 @@ static int cellCallback(size_t row, size_t column, const XLSXIOCHAR* value, void
     return 0;
 }
 
-bool XlsxTabularDataParser::parse(const QUrl& url, IGraphModel* graphModel)
+bool XlsxTabularDataParser::parse(const QUrl& url, IGraphModel*)
 {
-    if(graphModel != nullptr)
-        graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+    setPhase(QObject::tr("Parsing"));
 
     auto filename = url.toLocalFile().toUtf8();
     xlsxioreader xlsxioread = xlsxioread_open(filename.constData());

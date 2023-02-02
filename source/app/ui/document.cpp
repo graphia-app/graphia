@@ -238,8 +238,8 @@ QString Document::commandVerb() const
 
     if(!_loadComplete)
     {
-        if(!phase.isEmpty())
-            return QString(tr("Loading %1 (%2)").arg(_title, phase));
+        if(!_loadPhase.isEmpty())
+            return QString(tr("Loading %1 (%2)").arg(_title, _loadPhase));
 
         return QString(tr("Loading %1").arg(_title));
     }
@@ -644,7 +644,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
             _bookmarks = completedLoader->bookmarks();
             setLog(completedLoader->log());
 
-            _graphModel->buildTransforms(_graphTransforms);
+            _graphModel->buildTransforms(_graphTransforms, completedLoader);
 
             if(completedParser->cancelled())
                 return;
@@ -700,7 +700,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 sortedTransforms(_pluginInstance->defaultTransforms()));
             _visualisations = _pluginInstance->defaultVisualisations();
 
-            _graphModel->buildTransforms(_graphTransforms);
+            _graphModel->buildTransforms(_graphTransforms, completedParser);
 
             for(auto& visualisation : _visualisations)
             {

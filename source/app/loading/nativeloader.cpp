@@ -142,13 +142,12 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 }
 
 static bool load(const QString& filePath, QByteArray& byteArray,
-                 int maxReadSize = -1, IGraph* graph = nullptr,
-                 Loader* loader = nullptr)
+                 int maxReadSize = -1, Loader* loader = nullptr)
 {
     if(isCompressed(filePath))
     {
-        if(graph != nullptr)
-            graph->setPhase(QObject::tr("Decompressing"));
+        if(loader != nullptr)
+            loader->setPhase(QObject::tr("Decompressing"));
 
         return decompress(filePath, byteArray, maxReadSize, loader);
     }
@@ -291,15 +290,14 @@ bool Loader::parse(const QUrl& url, IGraphModel* igraphModel)
 
     QByteArray byteArray;
 
-    if(!load(url.toLocalFile(), byteArray, -1, &graphModel->mutableGraph(), this))
+    if(!load(url.toLocalFile(), byteArray, -1, this))
     {
         setGenericFailureReason(CURRENT_SOURCE_LOCATION);
         return false;
     }
 
     setProgress(-1);
-
-    graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+    setPhase(QObject::tr("Parsing"));
 
     auto jsonArray = parseJsonFrom(byteArray, this);
 

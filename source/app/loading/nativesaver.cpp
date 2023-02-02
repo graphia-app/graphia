@@ -234,7 +234,7 @@ bool NativeSaver::save()
     if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;
 
-    graph.setPhase(graphModel->pluginName());
+    setPhase(graphModel->pluginName());
     auto pluginData = _pluginInstance->save(graph, *this);
 
     setProgress(-1);
@@ -257,7 +257,7 @@ bool NativeSaver::save()
 
     jsonArray.emplace_back(content);
 
-    graph.setPhase(QObject::tr("Compressing"));
+    setPhase(QObject::tr("Compressing"));
     return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), *this);
 }
 

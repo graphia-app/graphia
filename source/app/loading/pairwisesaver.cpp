@@ -92,7 +92,7 @@ bool PairwiseSaver::save()
 
     auto edgeWeightAttributeName = findEdgeWeightAttributeName(_graphModel);
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
         const auto& edge = _graphModel->graph().edgeById(edgeId);

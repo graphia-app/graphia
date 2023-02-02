@@ -87,7 +87,7 @@ bool GraphMLSaver::save()
     stream.writeEndElement();
 
     // Add attribute keys
-    _graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
+    setPhase(QObject::tr("Attributes"));
     int keyId = 0;
     std::map<QString, QString> idToAttribute;
     std::map<QString, QString> attributeToId;
@@ -131,7 +131,7 @@ bool GraphMLSaver::save()
     stream.writeStartElement(QStringLiteral("graph"));
     stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
+    setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
         runningCount++;
@@ -173,7 +173,7 @@ bool GraphMLSaver::save()
         stream.writeEndElement();
     }
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    setPhase(QObject::tr("Edges"));
     int edgeCount = 0;
     for(auto edgeId : _graphModel->graph().edgeIds())
     {

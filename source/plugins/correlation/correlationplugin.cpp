@@ -855,7 +855,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
     jsonObject["userColumnData"] =_userColumnData.save(progressable);
     jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, &progressable);
 
-    graph.setPhase(QObject::tr("Data"));
+    progressable.setPhase(QObject::tr("Data"));
     jsonObject["continuousData"] = [&]
     {
         json array;
@@ -910,7 +910,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& p
         return array;
     }();
 
-    graph.setPhase(QObject::tr("Correlation Values"));
+    progressable.setPhase(QObject::tr("Correlation Values"));
     jsonObject["correlationValues"] = u::graphArrayAsJson(*_correlationValues, graph.edgeIds(), &progressable);
 
     jsonObject["minimumThreshold"] = _minimumThreshold;
@@ -994,7 +994,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     uint64_t i = 0;
 
-    graph.setPhase(QObject::tr("Data"));
+    parser.setPhase(QObject::tr("Data"));
 
     const char* continuousDataKey =
         dataVersion >= 7 ? "continuousData" : "data";
@@ -1106,7 +1106,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     }
 
     const auto& jsonCorrelationValues = jsonObject[correlationValuesKey];
-    graph.setPhase(QObject::tr("Correlation Values"));
+    parser.setPhase(QObject::tr("Correlation Values"));
     i = 0;
 
     if(dataVersion >= 2)

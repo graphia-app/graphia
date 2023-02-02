@@ -425,7 +425,7 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     auto cancelledFn = [this] { return cancelled(); };
     it.setCancelledFn(cancelledFn);
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+    setPhase(QObject::tr("Parsing"));
 
     SpiritDotParser::DotGraph dot;
     bool success = false;
@@ -440,7 +440,7 @@ bool DotFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(cancelled() || !success || it != end)
         return false;
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
+    setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
 
     return SpiritDotParser::build(*this, dot, *graphModel,

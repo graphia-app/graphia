@@ -40,7 +40,7 @@ bool JSONGraphSaver::save()
     size_t runningCount = 0;
 
     // Node Attributes
-    _graphModel->mutableGraph().setPhase(QObject::tr("Node Attributes"));
+    setPhase(QObject::tr("Node Attributes"));
     for(auto& node : fileObject["graph"]["nodes"])
     {
         const NodeId nodeId = std::stoi(node["id"].get<std::string>());
@@ -66,7 +66,7 @@ bool JSONGraphSaver::save()
     }
 
     // Edge Attributes
-    _graphModel->mutableGraph().setPhase(QObject::tr("Edge Attributes"));
+    setPhase(QObject::tr("Edge Attributes"));
     for(auto& edge : fileObject["graph"]["edges"])
     {
         const EdgeId edgeId = std::stoi(edge["id"].get<std::string>());
@@ -106,7 +106,7 @@ json JSONGraphSaver::graphAsJson(const IGraph& graph, Progressable& progressable
 
     int i= 0;
 
-    graph.setPhase(QObject::tr("Nodes"));
+    progressable.setPhase(QObject::tr("Nodes"));
     i = 0;
     json nodes;
     for(auto nodeId : graph.nodeIds())
@@ -123,7 +123,7 @@ json JSONGraphSaver::graphAsJson(const IGraph& graph, Progressable& progressable
 
     jsonObject["nodes"] = nodes;
 
-    graph.setPhase(QObject::tr("Edges"));
+    progressable.setPhase(QObject::tr("Edges"));
     i = 0;
     json edges;
     for(auto edgeId : graph.edgeIds())

@@ -470,7 +470,7 @@ double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
     return minValue * 0.5;
 }
 
-bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
+bool CorrelationFileParser::parse(const QUrl&, IGraphModel*)
 {
     if(_tabularData.empty() || cancelled())
         return false;
@@ -497,7 +497,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 
     _plugin->setDimensions(numContinuousColumns, numDiscreteColumns, static_cast<size_t>(_dataRect.height()));
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
+    setPhase(QObject::tr("Attributes"));
     if(!_plugin->loadUserData(_tabularData, _dataRect, *this))
         return false;
 
@@ -509,7 +509,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 
     if(_plugin->requiresNormalisation())
     {
-        graphModel->mutableGraph().setPhase(QObject::tr("Normalisation"));
+        setPhase(QObject::tr("Normalisation"));
         _plugin->normalise(this);
     }
 
@@ -518,7 +518,7 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 
     setProgress(-1);
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Correlation"));
+    setPhase(QObject::tr("Correlation"));
     auto edges = _plugin->correlation(*this);
 
     if(cancelled())
@@ -526,11 +526,11 @@ bool CorrelationFileParser::parse(const QUrl&, IGraphModel* graphModel)
 
     _plugin->createAttributes();
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
+    setPhase(QObject::tr("Building Graph"));
     if(!_plugin->createEdges(edges, *this))
         return false;
 
-    graphModel->mutableGraph().clearPhase();
+    clearPhase();
 
     return true;
 }

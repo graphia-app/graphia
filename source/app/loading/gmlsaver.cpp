@@ -42,7 +42,7 @@ bool GMLSaver::save()
     };
 
     std::map<QString, QString> alphanumAttributeNames;
-    _graphModel->mutableGraph().setPhase(QObject::tr("Attributes"));
+    setPhase(QObject::tr("Attributes"));
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         auto cleanName = attributeName;
@@ -106,7 +106,7 @@ bool GMLSaver::save()
         }
     };
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
+    setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
     {
         const QString nodeName = escape(_graphModel->nodeName(nodeId));
@@ -123,7 +123,7 @@ bool GMLSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
     }
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    setPhase(QObject::tr("Edges"));
     for(auto edgeId : _graphModel->graph().edgeIds())
     {
         const auto& edge = _graphModel->graph().edgeById(edgeId);

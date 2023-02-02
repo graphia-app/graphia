@@ -103,10 +103,9 @@ public:
             setProgressFn([parent](int percent) { parent->setProgress(percent); });
     }
 
-    bool parse(const QUrl& url, IGraphModel* graphModel = nullptr) override
+    bool parse(const QUrl& url, IGraphModel* = nullptr) override
     {
-        if(graphModel != nullptr)
-            graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+        setPhase(QObject::tr("Parsing"));
 
         size_t columnIndex = 0;
         size_t rowIndex = 0;

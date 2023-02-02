@@ -61,7 +61,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
     uint64_t i = 0;
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Nodes"));
+    parser.setPhase(QObject::tr("Nodes"));
 
     std::map<std::string, NodeId> stringNodeIdToNodeId;
     for(const auto& jsonNode : jsonNodes)
@@ -119,7 +119,7 @@ bool JsonGraphParser::parseGraphObject(const json& jsonGraphObject, IGraphModel*
 
     i = 0;
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Edges"));
+    parser.setPhase(QObject::tr("Edges"));
     for(const auto& jsonEdge : jsonEdges)
     {
         if(!u::contains(jsonEdge, "source") || !u::contains(jsonEdge, "target"))

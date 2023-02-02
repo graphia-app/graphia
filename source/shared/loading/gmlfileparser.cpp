@@ -329,7 +329,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     auto cancelledFn = [this] { return cancelled(); };
     it.setCancelledFn(cancelledFn);
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Parsing"));
+    setPhase(QObject::tr("Parsing"));
 
     SpiritGmlParser::List gml;
     bool success = false;
@@ -344,7 +344,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel* graphModel)
     if(cancelled() || !success || it != end)
         return false;
 
-    graphModel->mutableGraph().setPhase(QObject::tr("Building Graph"));
+    setPhase(QObject::tr("Building Graph"));
     setProgress(-1);
 
     return SpiritGmlParser::build(*this, gml, *graphModel,
