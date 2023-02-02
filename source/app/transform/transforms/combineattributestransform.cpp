@@ -53,7 +53,7 @@ static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphMode
 
 void CombineAttributesTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Combine Attributes"));
+    setPhase(QObject::tr("Combine Attributes"));
 
     auto alert = combineAttributesTransformConfigIsValid(*_graphModel, config(), true);
     if(alert._type != AlertType::None)

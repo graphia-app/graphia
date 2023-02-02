@@ -53,7 +53,7 @@ struct AttributeProxyFunctor
 
 void ForwardMultiElementAttributeTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Forward Multi-Element Attribute"));
+    setPhase(QObject::tr("Forward Multi-Element Attribute"));
 
     auto alert = forwardMultiElementAttributeTransformConfigIsValid(config());
     if(alert._type != AlertType::None)

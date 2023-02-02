@@ -38,7 +38,7 @@ void PageRankTransform::apply(TransformedGraph& target)
     calculatePageRank(target);
 }
 
-void PageRankTransform::calculatePageRank(TransformedGraph& target) const
+void PageRankTransform::calculatePageRank(TransformedGraph& target)
 {
     // Performs an estimated pagerank calculation optimised to
     // not use a matrix. This dramatically lowers the memory footprint.
@@ -46,7 +46,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     // http://michaelnielsen.org/blog/using-your-laptop-to-compute-pagerank-for-millions-of-webpages/
     NodeArray<float> pageRankScores(target);
 
-    target.setPhase(QStringLiteral("PageRank"));
+    setPhase(QStringLiteral("PageRank"));
 
     // We must do our own componentisation as the graph's set of components
     // won't necessarily be up-to-date
@@ -86,7 +86,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
             if(cancelled())
                 return;
 
-            target.setPhase(QStringLiteral("PageRank Iteration %1").arg(
+            setPhase(QStringLiteral("PageRank Iteration %1").arg(
                                 QString::number(totalIterationCount + 1)));
 
             // Calculate pagerank

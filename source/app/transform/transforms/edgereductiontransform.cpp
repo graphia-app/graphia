@@ -27,7 +27,7 @@
 
 void EdgeReductionTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Edge Reduction"));
+    setPhase(QObject::tr("Edge Reduction"));
 
     auto percentage = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Percentage"))->_value));
     auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));

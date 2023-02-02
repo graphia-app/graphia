@@ -74,7 +74,7 @@ void LouvainTransform::apply(TransformedGraph& target)
 
     std::vector<NodeArray<CommunityId>> iterations;
     size_t progressIteration = 1;
-    target.setPhase(QStringLiteral("Louvain Initialising"));
+    setPhase(QStringLiteral("Louvain Initialising"));
 
     NodeArray<CommunityId> communities(target);
     NodeArray<double> weightedDegrees(target);
@@ -189,7 +189,7 @@ void LouvainTransform::apply(TransformedGraph& target)
             setProgress(0);
             uint64_t nodeIndex = 0;
 
-            target.setPhase(QStringLiteral("Louvain Iteration %1.%2")
+            setPhase(QStringLiteral("Louvain Iteration %1.%2")
                 .arg(QString::number(progressIteration), QString::number(subProgressIteration++)));
 
             for(auto nodeId : graph.nodeIds())
@@ -272,7 +272,7 @@ void LouvainTransform::apply(TransformedGraph& target)
             relabel(graph);
             iterations.emplace_back(communities);
 
-            target.setPhase(QStringLiteral("Louvain Iteration %1 Coarsening")
+            setPhase(QStringLiteral("Louvain Iteration %1 Coarsening")
                 .arg(QString::number(progressIteration)));
             coarsen(graph);
         }
@@ -284,7 +284,7 @@ void LouvainTransform::apply(TransformedGraph& target)
     if(cancelled())
         return;
 
-    target.setPhase(QStringLiteral("Louvain Finalising"));
+    setPhase(QStringLiteral("Louvain Finalising"));
 
     // Set each CommunityId to be the same as the NodeId, initially
     for(auto nodeId : target.nodeIds())

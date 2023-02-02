@@ -30,7 +30,7 @@
 
 void KNNTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("k-NN"));
+    setPhase(QObject::tr("k-NN"));
 
     if(config().attributeNames().empty())
     {

@@ -27,7 +27,7 @@
 
 void ContractByAttributeTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Contracting"));
+    setPhase(QObject::tr("Contracting"));
 
     if(config().attributeNames().empty())
     {

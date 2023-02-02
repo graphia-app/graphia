@@ -32,7 +32,7 @@ void SpanningTreeTransform::apply(TransformedGraph& target)
 {
     const bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
 
-    target.setPhase(QObject::tr("Spanning Tree"));
+    setPhase(QObject::tr("Spanning Tree"));
     setProgress(-1);
 
     EdgeArray<bool> removees(target, true);

@@ -42,7 +42,7 @@ private:
 
     bool _debug = false;
 
-    void calculatePageRank(TransformedGraph& target) const;
+    void calculatePageRank(TransformedGraph& target);
     GraphModel* _graphModel = nullptr;
 };
 

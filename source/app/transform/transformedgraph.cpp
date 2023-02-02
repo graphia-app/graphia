@@ -222,6 +222,7 @@ void TransformedGraph::rebuild()
 
             // Revert to indeterminate in case any more long running work occurs subsequently
             transform->setProgress(-1);
+            transform->clearPhase();
         }
 
         if(_cancelled)
@@ -253,8 +254,6 @@ void TransformedGraph::rebuild()
     enableComponentManagement();
 
     emit graphChanged(this, _changeSignalsEmitted);
-
-    clearPhase();
 }
 
 void TransformedGraph::setCurrentTransform(GraphTransform* currentTransform)

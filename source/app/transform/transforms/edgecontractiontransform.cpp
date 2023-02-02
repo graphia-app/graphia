@@ -27,7 +27,7 @@
 
 void EdgeContractionTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Contracting"));
+    setPhase(QObject::tr("Contracting"));
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);
     if(conditionFn == nullptr)

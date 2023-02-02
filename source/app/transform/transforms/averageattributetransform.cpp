@@ -46,7 +46,7 @@ static Alert averageAttributeTransformConfigIsValid(const GraphModel& graphModel
 
 void AverageAttributeTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Averaging Attribute"));
+    setPhase(QObject::tr("Averaging Attribute"));
 
     auto alert = averageAttributeTransformConfigIsValid(*_graphModel, config());
     if(alert._type != AlertType::None)

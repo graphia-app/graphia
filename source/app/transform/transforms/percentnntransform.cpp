@@ -30,7 +30,7 @@
 
 void PercentNNTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("%-NN"));
+    setPhase(QObject::tr("%-NN"));
 
     if(config().attributeNames().empty())
     {

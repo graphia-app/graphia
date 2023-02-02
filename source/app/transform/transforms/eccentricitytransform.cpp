@@ -26,7 +26,7 @@
 
 void EccentricityTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QStringLiteral("Eccentricity"));
+    setPhase(QStringLiteral("Eccentricity"));
     calculateDistances(target);
 }
 

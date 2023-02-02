@@ -37,7 +37,7 @@ static Alert conditionalAttributeTransformConfigIsValid(const GraphTransformConf
 
 void ConditionalAttributeTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Boolean Attribute"));
+    setPhase(QObject::tr("Boolean Attribute"));
 
     auto alert = conditionalAttributeTransformConfigIsValid(config());
     if(alert._type != AlertType::None)

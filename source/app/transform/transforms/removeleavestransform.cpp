@@ -60,7 +60,7 @@ static void removeLeaves(TransformedGraph& target, Progressable& progressable, s
 }
 void RemoveLeavesTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Leaf Removal"));
+    setPhase(QObject::tr("Leaf Removal"));
 
     auto limit = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
     removeLeaves(target, *this, limit);
@@ -68,7 +68,7 @@ void RemoveLeavesTransform::apply(TransformedGraph& target)
 
 void RemoveBranchesTransform::apply(TransformedGraph& target)
 {
-    target.setPhase(QObject::tr("Branch Removal"));
+    setPhase(QObject::tr("Branch Removal"));
 
     removeLeaves(target, *this);
 }

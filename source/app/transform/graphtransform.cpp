@@ -70,7 +70,6 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
     do
     {
         target.resetChangeOccurred({});
-        target.clearPhase();
         clearPhase();
 
         auto attributeNames = config().referencedAttributeNames();
