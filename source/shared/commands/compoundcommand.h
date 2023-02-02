@@ -132,6 +132,15 @@ public:
         return -1;
     }
 
+    void setPhase(const QString&) override {}
+    QString phase() const override
+    {
+        if(_executing != nullptr)
+            return _executing->phase();
+
+        return {};
+    }
+
 private:
     bool execute() override
     {
