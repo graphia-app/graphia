@@ -79,6 +79,7 @@ public:
     bool edgeExistsBetween(NodeId nodeIdA, NodeId nodeIdB) const override { return _target.edgeExistsBetween(nodeIdA, nodeIdB); }
 
     MutableGraph& mutableGraph() { return _target; }
+    const MutableGraph& mutableGraph() const { return _target; }
 
     void reserve(const Graph& other) override;
     TransformedGraph& operator=(const MutableGraph& other);
