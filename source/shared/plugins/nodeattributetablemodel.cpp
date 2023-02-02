@@ -21,6 +21,7 @@
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/igraph.h"
+#include "shared/commands/icommandmanager.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/attributes/valuetype.h"
 
@@ -171,9 +172,9 @@ void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
 {
     if(changeOccurred)
     {
-        _graph->setPhase(tr("Attribute Table"));
+        _document->commandManager()->setPhase(tr("Attribute Table"));
         update();
-        _graph->clearPhase();
+        _document->commandManager()->clearPhase();
     }
 }
 

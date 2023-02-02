@@ -613,9 +613,9 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
     if(!changed)
         return;
 
-    graph->setPhase(tr("Component Layout"));
+    _commandManager->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
-    graph->clearPhase();
+    _commandManager->clearPhase();
 
     _nextComponentLayoutDataChanged = true;
 

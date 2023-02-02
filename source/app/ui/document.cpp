@@ -918,6 +918,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     {
         // Commands might set the phase and neglect to unset it
         _graphModel->mutableGraph().clearPhase();
+        _commandManager.clearPhase();
 
         setStatus(pastParticiple);
     });
