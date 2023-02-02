@@ -76,6 +76,7 @@ public:
 
     void setProgressable(Progressable* progressable);
     void setProgress(int percent) override;
+    void setPhase(const QString& phase) override;
 
 private:
     void setIndex(int index) { _index = index; }

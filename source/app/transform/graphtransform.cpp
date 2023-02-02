@@ -71,6 +71,7 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target, const GraphModel& 
     {
         target.resetChangeOccurred({});
         target.clearPhase();
+        clearPhase();
 
         auto attributeNames = config().referencedAttributeNames();
 
@@ -98,6 +99,12 @@ void GraphTransform::setProgress(int percent)
 {
     if(_progressable != nullptr)
         _progressable->setProgress(percent);
+}
+
+void GraphTransform::setPhase(const QString& phase)
+{
+    if(_progressable != nullptr)
+        _progressable->setPhase(phase);
 }
 
 QString GraphTransformFactory::image() const
