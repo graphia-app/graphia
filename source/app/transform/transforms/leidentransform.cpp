@@ -33,10 +33,11 @@
 
 // https://www.nature.com/articles/s41598-019-41695-z
 
-using CommunityId = NodeId; // Slight Hack, be careful with this
-
 class Partition
 {
+public:
+    using CommunityId = NodeId; // Slight Hack, be careful with this
+
 private:
     GraphTransform* _transform;
     MutableGraph _coarseGraph;
@@ -301,7 +302,7 @@ void LeidenTransform::apply(TransformedGraph& target)
 
     resolution = std::pow(10.0f, logMin + (resolution * logRange));
 
-    std::vector<NodeArray<CommunityId>> iterations;
+    std::vector<NodeArray<Partition::CommunityId>> iterations;
     size_t progressIteration = 1;
     setPhase(QStringLiteral("Leiden Initialising"));
 
@@ -352,7 +353,7 @@ void LeidenTransform::apply(TransformedGraph& target)
 
     setPhase(QStringLiteral("Leiden Finalising"));
 
-    NodeArray<CommunityId> communities(target);
+    NodeArray<Partition::CommunityId> communities(target);
 
     // Set each CommunityId to be the same as the NodeId, initially
     for(auto nodeId : target.nodeIds())
@@ -379,17 +380,17 @@ void LeidenTransform::apply(TransformedGraph& target)
     }
 
     // Sort communities by size
-    std::map<CommunityId, size_t> communityHistogram;
+    std::map<Partition::CommunityId, size_t> communityHistogram;
     for(auto nodeId : target.nodeIds())
         communityHistogram[communities[nodeId]]++;
-    std::vector<std::pair<CommunityId, size_t>> sortedCommunityHistogram;
+    std::vector<std::pair<Partition::CommunityId, size_t>> sortedCommunityHistogram;
     std::copy(communityHistogram.begin(), communityHistogram.end(),
         std::back_inserter(sortedCommunityHistogram));
     std::sort(sortedCommunityHistogram.begin(), sortedCommunityHistogram.end(),
         [](const auto& a, const auto& b) { return a.second > b.second; });
 
     // Assign cluster numbers to each community
-    std::map<CommunityId, size_t> clusterNumbers;
+    std::map<Partition::CommunityId, size_t> clusterNumbers;
     size_t clusterNumber = 1;
     for(auto [communityId, size] : sortedCommunityHistogram)
     {
