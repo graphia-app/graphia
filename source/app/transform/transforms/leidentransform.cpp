@@ -40,6 +40,7 @@ public:
 
 private:
     GraphTransform* _transform;
+    const TransformedGraph* _graph = nullptr;
     MutableGraph _coarseGraph;
     EdgeArray<double> _weights;
     double _resolution = 1.0;
@@ -68,11 +69,12 @@ private:
     }
 
 public:
-    Partition(GraphTransform* transform, const TransformedGraph& graph, double resolution) :
+    Partition(GraphTransform* transform, const TransformedGraph* graph, double resolution) :
         _transform(transform),
-        _coarseGraph(graph.mutableGraph()),
-        _weights(graph, 1.0), _resolution(resolution),
-        _communities(graph), _weightedDegrees(graph)
+        _graph(graph),
+        _coarseGraph(graph->mutableGraph()),
+        _weights(*graph, 1.0), _resolution(resolution),
+        _communities(*graph), _weightedDegrees(*graph)
     {}
 
     const NodeArray<CommunityId>& communities() const { return _communities; }
@@ -234,7 +236,59 @@ public:
         return modified;
     }
 
-    void coarsen()
+    Partition refine()
+    {
+        Partition pRefined(_transform, _graph, _resolution);
+        pRefined.reset();
+        pRefined.makeSingletonClusters();
+
+        std::map<CommunityId, std::vector<NodeId>> c;
+
+        for(auto nodeId : _coarseGraph.nodeIds())
+        {
+            auto communityId = _communities.at(nodeId);
+            c[communityId].push_back(nodeId);
+        }
+
+        NodeArray<bool> merged(_coarseGraph, false);
+        NodeArray<double> cToSMinusC(_coarseGraph);
+        NodeArray<double> refinedVolumes(_coarseGraph);
+
+        for(auto nodeId : _coarseGraph.nodeIds())
+        {
+            const auto& node = _coarseGraph.nodeById(nodeId);
+
+            for(auto edgeId : node.edgeIds())
+            {
+                const auto& edge = _coarseGraph.edgeById(edgeId);
+                auto neighbourId = edge.oppositeId(nodeId);
+
+                if(_communities.at(nodeId) == _communities.at(neighbourId))
+                    cToSMinusC[nodeId] += _weights[edgeId];
+                else
+                    refinedVolumes[nodeId] += _weights[edgeId];
+            }
+        }
+
+        auto mergeNodesSubset = [&](const std::vector<NodeId>& subset)
+        {
+            for(auto nodeId : subset)
+            {
+                if(merged.get(nodeId))
+                    continue;
+
+                if(0/* node is not well connected*/)
+                    continue;
+            }
+        };
+
+        for(const auto& [communityId, nodeIds] : c)
+            mergeNodesSubset(nodeIds);
+
+        return pRefined;
+    }
+
+    void coarsen(const Partition& p)
     {
         MutableGraph coarseGraph;
         EdgeArray<double> newWeights(_weights);
@@ -248,7 +302,7 @@ public:
                 if(_coarseGraph.typeOf(nodeId) == MultiElementType::Tail)
                     continue;
 
-                auto newNodeId = _communities[nodeId];
+                auto newNodeId = p.communities().at(nodeId);
 
                 if(coarseGraph.containsNodeId(newNodeId))
                     continue;
@@ -271,8 +325,8 @@ public:
                     break;
 
                 const auto& edge = _coarseGraph.edgeById(edgeId);
-                auto sourceId = _communities.at(edge.sourceId());
-                auto targetId = _communities.at(edge.targetId());
+                auto sourceId = p.communities().at(edge.sourceId());
+                auto targetId = p.communities().at(edge.targetId());
                 const double newWeight = _weights[edgeId];
 
                 auto newEdgeId = coarseGraph.firstEdgeIdBetween(sourceId, targetId);
@@ -307,7 +361,7 @@ void LeidenTransform::apply(TransformedGraph& target)
     setPhase(QStringLiteral("Leiden Initialising"));
 
     MutableGraph graph(target.mutableGraph());
-    Partition p(this, target, resolution);
+    Partition p(this, &target, resolution);
 
     if(_weighted)
     {
@@ -334,19 +388,23 @@ void LeidenTransform::apply(TransformedGraph& target)
         p.makeSingletonClusters();
         finished = !p.moveNodes();
 
-        if(!finished && !cancelled())
-        {
-            p.relabel();
-            iterations.emplace_back(p.communities());
+        if(finished || cancelled())
+            break;
 
-            setPhase(QStringLiteral("Leiden Iteration %1 Coarsening")
-                .arg(QString::number(progressIteration)));
-            p.coarsen();
-        }
+        //p.relabel();
+        iterations.emplace_back(p.communities());
+
+        setPhase(QStringLiteral("Leiden Iteration %1 Refining")
+            .arg(QString::number(progressIteration)));
+        auto pRefined = p.refine();
+
+        setPhase(QStringLiteral("Leiden Iteration %1 Coarsening")
+            .arg(QString::number(progressIteration)));
+        p.coarsen(pRefined);
 
         progressIteration++;
     }
-    while(!finished && !cancelled());
+    while(!cancelled());
 
     if(cancelled())
         return;

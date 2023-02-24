@@ -37,6 +37,7 @@
 #include "transform/transforms/edgecontractiontransform.h"
 #include "transform/transforms/mcltransform.h"
 #include "transform/transforms/leidentransform.h"
+#include "transform/transforms/leidentransform2.h"
 #include "transform/transforms/louvaintransform.h"
 #include "transform/transforms/pageranktransform.h"
 #include "transform/transforms/eccentricitytransform.h"
@@ -311,8 +312,9 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Keep Components"),          std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
     _->_graphTransformFactories.emplace(tr("Contract Edges"),           std::make_unique<EdgeContractionTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("MCL Cluster"),              std::make_unique<MCLTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Leiden Cluster"),           std::make_unique<LeidenTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Weighted Leiden Cluster"),  std::make_unique<WeightedLeidenTransformFactory>(this));
+    /*_->_graphTransformFactories.emplace(tr("Leiden Cluster"),           std::make_unique<LeidenTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Weighted Leiden Cluster"),  std::make_unique<WeightedLeidenTransformFactory>(this));*/
+    _->_graphTransformFactories.emplace(tr("Leiden Cluster"),           std::make_unique<LeidenTransformFactory2>(this));
     _->_graphTransformFactories.emplace(tr("Louvain Cluster"),          std::make_unique<LouvainTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Weighted Louvain Cluster"), std::make_unique<WeightedLouvainTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("PageRank"),                 std::make_unique<PageRankTransformFactory>(this));

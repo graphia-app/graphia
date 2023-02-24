@@ -128,6 +128,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/leidentransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/leidentransform2.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/percentnntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.h
@@ -254,6 +255,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/leidentransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/leidentransform2.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/louvaintransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/percentnntransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.cpp
