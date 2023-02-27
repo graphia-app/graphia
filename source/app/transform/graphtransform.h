@@ -38,11 +38,8 @@
 #include <vector>
 #include <memory>
 
-class Graph;
-class GraphComponent;
 class GraphModel;
 class TransformedGraph;
-class Attribute;
 
 class GraphTransform : public Progressable, public Cancellable
 {
