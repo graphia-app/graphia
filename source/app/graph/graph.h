@@ -33,7 +33,6 @@
 #include <mutex>
 #include <algorithm>
 
-class GraphComponent;
 class ComponentManager;
 class ComponentSplitSet;
 class ComponentMergeSet;
