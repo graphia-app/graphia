@@ -54,6 +54,7 @@ QString DeleteNodesCommand::pastParticiple() const
 bool DeleteNodesCommand::execute()
 {
     _edges = _graphModel->mutableGraph().edgesForNodeIds(_nodeIds);
+    _selectionManager->suppressSignals();
     _selectionManager->deselectNodes(_nodeIds);
     _graphModel->mutableGraph().removeNodes(_nodeIds);
     return true;
