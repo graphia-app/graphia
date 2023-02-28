@@ -15,7 +15,7 @@ jobs:
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
-        sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
+        sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} libxkbcommon-x11-dev
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
