@@ -555,6 +555,33 @@ Item
         fileDialog.open();
     }
 
+    Component
+    {
+        id: nodePositionFileImportDialogComponent
+
+        Labs.FileDialog
+        {
+            title: qsTr("Import From File…")
+            nameFilters: "Graphia Node Positions (*.json)"
+        }
+    }
+
+    function importNodePositions()
+    {
+        let folder = misc.fileOpenInitialFolder !== undefined ?
+            misc.fileOpenInitialFolder : "";
+
+        let fileDialog = nodePositionFileImportDialogComponent.createObject(root, {"folder": folder});
+
+        fileDialog.accepted.connect(function()
+        {
+            misc.fileOpenInitialFolder = fileDialog.folder.toString();
+            _document.loadNodePositionsFromFile(fileDialog.file);
+        });
+
+        fileDialog.open();
+    }
+
     function searchWebForNode(nodeId)
     {
         let nodeName = _document.nodeName(nodeId);
@@ -1270,6 +1297,7 @@ Item
         id: misc
         section: "misc"
 
+        property var fileOpenInitialFolder
         property var fileSaveInitialFolder
         property string webSearchEngineUrl
         property bool hasSeenTutorial
