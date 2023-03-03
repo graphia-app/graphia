@@ -1467,6 +1467,7 @@ ApplicationWindow
     Action
     {
         id: exportNodePositionsAction
+        icon.name: "document-save"
         text: qsTr("Export To File…")
         enabled: currentTab && !currentTab.document.busy
 
