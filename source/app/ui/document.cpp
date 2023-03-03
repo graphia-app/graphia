@@ -2918,7 +2918,8 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
             auto name = _graphModel->nodeNames().at(nodeId);
-            auto v = _graphModel->nodePositions().get(nodeId);
+            const auto& nodePositions = _graphModel->nodePositions();
+            auto v = nodePositions.at(nodeId);
 
             positions.push_back(
             {
