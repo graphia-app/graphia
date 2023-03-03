@@ -313,7 +313,7 @@ void LayoutThread::addAllComponents()
         addComponent(componentId);
 }
 
-void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositions)
+void LayoutThread::setNodePositions(const ExactNodePositions& nodePositions)
 {
     _nodeLayoutPositions.set(_graphModel->graph().nodeIds(), nodePositions);
     _graphModel->nodePositions().update(_nodeLayoutPositions);

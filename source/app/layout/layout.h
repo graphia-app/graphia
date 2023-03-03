@@ -226,7 +226,7 @@ public:
 
     void addAllComponents();
 
-    void setStartingNodePositions(const ExactNodePositions& nodePositions);
+    void setNodePositions(const ExactNodePositions& nodePositions);
 
     Layout::Dimensionality dimensionalityMode();
     void setDimensionalityMode(Layout::Dimensionality dimensionalityMode);

@@ -829,7 +829,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     if(_startingNodePositions != nullptr)
     {
-        _layoutThread->setStartingNodePositions(*_startingNodePositions);
+        _layoutThread->setNodePositions(*_startingNodePositions);
         _startingNodePositions.reset();
     }
 
