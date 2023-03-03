@@ -545,6 +545,7 @@ public:
     Q_INVOKABLE void removeEnrichmentResults(int index);
 
     Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
+    Q_INVOKABLE void loadNodePositionsFromFile(const QUrl& fileUrl);
 
     Q_INVOKABLE void cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName);
     Q_INVOKABLE void editAttribute(const QString& attributeName, const AttributeEdits& edits);

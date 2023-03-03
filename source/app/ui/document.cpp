@@ -2947,6 +2947,88 @@ void Document::saveNodePositionsToFile(const QUrl& fileUrl)
     }, {tr("Export Node Positions"), tr("Exporting Node Positions"), tr("Exported Node Positions")});
 }
 
+void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
+{
+    // If we're loading a static layout, ensure any dynamic layout is
+    // stopped or the loaded layout will just get immediately replaced
+    setUserLayoutPaused(true);
+
+    const QString localFileName = fileUrl.toLocalFile();
+
+    commandManager()->executeOnce(
+    [this, localFileName](Command& command)
+    {
+        QFile file(localFileName);
+
+        if(!file.open(QIODevice::ReadOnly))
+            return false;
+
+        auto totalBytes = file.size();
+
+        if(totalBytes == 0)
+            return false;
+
+        decltype(totalBytes) bytesRead = 0;
+        QDataStream input(&file);
+        QByteArray byteArray;
+
+        do
+        {
+            const int ChunkSize = 2 << 16;
+            std::vector<unsigned char> buffer(ChunkSize);
+
+            auto numBytes = input.readRawData(reinterpret_cast<char*>(buffer.data()), ChunkSize);
+            byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
+
+            bytesRead += numBytes;
+
+            command.setProgress(static_cast<int>((bytesRead * 100u) / totalBytes));
+        } while(!input.atEnd());
+
+        command.setProgress(-1);
+        auto jsonArray = parseJsonFrom(byteArray);
+
+        if(jsonArray.is_null() || !jsonArray.is_array())
+            return false;
+
+        auto allObjects = std::all_of(jsonArray.begin(), jsonArray.end(),
+            [](const auto& i) { return i.is_object(); });
+
+        if(!allObjects)
+            return false;
+
+        ExactNodePositions nodePositions(_graphModel->mutableGraph());
+
+        uint64_t i = 0;
+
+        for(const auto& jsonNode : jsonArray)
+        {
+            if(!u::contains(jsonNode, "id") || !u::contains(jsonNode, "position"))
+                return false;
+
+            NodeId nodeId = jsonNode["id"].get<int>();
+
+            if(!_graphModel->mutableGraph().containsNodeId(nodeId))
+                return false;
+
+            auto positionArray = jsonNode["position"];
+
+            if(positionArray.is_null() || !positionArray.is_array() || positionArray.size() != 3)
+                return false;
+
+            QVector3D position(positionArray.at(0), positionArray.at(1), positionArray.at(2));
+            nodePositions.set(nodeId, position);
+
+            command.setProgress(static_cast<int>((i++ * 100u) /
+                static_cast<uint64_t>(jsonArray.size())));
+        }
+
+        _layoutThread->setNodePositions(nodePositions);
+
+        return true;
+    }, {tr("Import Node Positions"), tr("Importing Node Positions"), tr("Imported Node Positions")});
+}
+
 // NOLINTNEXTLINE readability-make-member-function-const
 void Document::cloneAttribute(const QString& sourceAttributeName, const QString& newAttributeName)
 {
