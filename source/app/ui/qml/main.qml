@@ -1480,6 +1480,20 @@ ApplicationWindow
 
     Action
     {
+        id: importNodePositionsAction
+        icon.name: "document-open"
+        text: qsTr("Import From File…")
+        enabled: currentTab && !currentTab.document.busy
+
+        onTriggered: function(source)
+        {
+            if(currentTab)
+                currentTab.importNodePositions();
+        }
+    }
+
+    Action
+    {
         id: overviewModeAction
         icon.name: "view-fullscreen"
         text: qsTr("&Overview Mode")
@@ -2196,6 +2210,7 @@ ApplicationWindow
             PlatformMenuItem { action: pauseLayoutAction }
             PlatformMenuItem { action: toggleLayoutSettingsAction }
             PlatformMenuItem { action: exportNodePositionsAction }
+            PlatformMenuItem { action: importNodePositionsAction }
         }
         PlatformMenu
         {
