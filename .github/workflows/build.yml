@@ -402,7 +402,7 @@ jobs:
       id: is-release-test
       run: |
         GIT_TAG=$(git describe --exact-match --tags || true)
-        if [[ -z "${GIT_TAG}" ]]
+        if [[ -z "${GIT_TAG}" || "${{ github.ref_type }}" != 'tag' ]]
         then
           echo "Not tagged"
           echo "result=false" >> $GITHUB_OUTPUT
