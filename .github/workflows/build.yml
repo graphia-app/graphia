@@ -21,7 +21,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }} qtserialport
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -41,12 +41,12 @@ jobs:
       env:
         CC: gcc-${{ env.GCC_VERSION }}
         CXX: g++-${{ env.GCC_VERSION }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: github.event_name != 'pull_request'
       with:
         name: Linux AppImage
         path: build/gcc/Graphia-*.tar.gz
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Linux Logs
         path: build/gcc/*.log
@@ -66,7 +66,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -89,12 +89,12 @@ jobs:
         WINDOWS_SIGN_PASSWORD: ${{ secrets.WINDOWS_SIGN_PASSWORD }}
         WINDOWS_SIGN_SUBJECTNAME: ${{ secrets.WINDOWS_SIGN_SUBJECTNAME }}
         WINDOWS_SIGN_TSA: ${{ secrets.WINDOWS_SIGN_TSA }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: github.event_name != 'pull_request'
       with:
         name: Windows Installer
         path: build/Graphia-*-installer.exe
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Windows Logs
         path: build/*.log
@@ -118,7 +118,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
         setup-python: false # Python installed above
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -127,7 +127,7 @@ jobs:
       with:
         key: macos
     - uses: seanmiddleditch/gha-setup-ninja@v3
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v3
       with:
         node-version: '12'
     - name: Compile
@@ -144,12 +144,12 @@ jobs:
         APPLE_NOTARIZATION_USERNAME: ${{ secrets.APPLE_NOTARIZATION_USERNAME }}
         APPLE_SIGN_ID: ${{ secrets.APPLE_SIGN_ID }}
         APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       if: github.event_name != 'pull_request'
       with:
         name: macOS Disk Image
         path: build/Graphia-*.dmg
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: macOS Logs
         path: build/*.log
@@ -176,7 +176,7 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -194,11 +194,11 @@ jobs:
         UNITY_BUILD: OFF
         CC: clang-${{ env.CLANG_VERSION }}
         CXX: clang++-${{ env.CLANG_VERSION }}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Build
         path: |
@@ -226,7 +226,7 @@ jobs:
         sudo apt-get install libunwind-${{ env.CLANG_VERSION }}-dev
         sudo apt-get install clang-tidy-${{ env.CLANG_VERSION }}
     - name: Checkout ctcache
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: timangus/ctcache
         path: ctcache
@@ -250,11 +250,11 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
         path: build/clang/
@@ -265,7 +265,7 @@ jobs:
         CTCACHE_DIR: /tmp/clang-tidy-cache
         CTCACHE_CLANG_TIDY: clang-tidy-${{ env.CLANG_VERSION }}
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -290,11 +290,11 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
         path: build/clang/
@@ -303,7 +303,7 @@ jobs:
       env:
         CPPCHECK: cppcheck
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -325,11 +325,11 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         repository: KDE/clazy
         path: clazy
@@ -345,7 +345,7 @@ jobs:
         cmake -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build .
         sudo cmake --build . --target install
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
         path: build/clang/
@@ -354,7 +354,7 @@ jobs:
       env:
         CLAZY: /usr/bin/clazy
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -370,11 +370,11 @@ jobs:
       with:
         version: ${{ env.QT_VERSION }}
         modules: ${{ env.QT_MODULES }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Build
         path: build/clang/
@@ -382,7 +382,7 @@ jobs:
       run: scripts/qmllint.sh
       env:
         BUILD_DIR: build/clang/
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: Static Analysis Logs
         path: build/clang/*.log
@@ -394,7 +394,7 @@ jobs:
     outputs:
       is-release: ${{ steps.is-release-test.outputs.result }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
@@ -426,15 +426,15 @@ jobs:
       - windows
       - macos
     steps:
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Linux AppImage
         path: release/Linux AppImage
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: macOS Disk Image
         path: release/macOS Disk Image
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Windows Installer
         path: release/Windows Installer
@@ -463,27 +463,27 @@ jobs:
       - windows
       - macos
     steps:
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Linux AppImage
         path: prerelease/Linux AppImage
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Linux Logs
         path: prerelease/Linux Logs
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: macOS Disk Image
         path: prerelease/macOS Disk Image
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: macOS Logs
         path: prerelease/macOS Logs
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Windows Installer
         path: prerelease/Windows Installer
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Windows Logs
         path: prerelease/Windows Logs
@@ -506,7 +506,7 @@ jobs:
       - clazy
       - qmllint
     steps:
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Logs
         path: prerelease/Static Analysis Logs
@@ -532,23 +532,23 @@ jobs:
       - clazy
       - qmllint
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
         fetch-depth: 0
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Linux Logs
         path: logs/linux
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: macOS Logs
         path: logs/macos
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Windows Logs
         path: logs/windows
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: Static Analysis Logs
         path: logs/staticanalysis
