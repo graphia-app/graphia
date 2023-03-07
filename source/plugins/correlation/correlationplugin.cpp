@@ -77,6 +77,10 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
         return false;
     }
 
+    // The parser may have updated the dataRect, so update
+    // ours too so that the provenance log is consistent
+    _dataRect = dataRect;
+
     parser.setProgress(-1);
 
     const uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
