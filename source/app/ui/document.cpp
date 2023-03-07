@@ -276,13 +276,19 @@ QString Document::layoutDisplayName() const
     return {};
 }
 
-std::vector<LayoutSetting>& Document::layoutSettings() const
+std::vector<LayoutSetting> Document::layoutSettings() const
 {
-    return _layoutThread->settings();
+    if(_layoutThread != nullptr)
+        return _layoutThread->settings();
+
+    return {};
 }
 
 void Document::updateLayoutDimensionality()
 {
+    if(_graphQuickItem == nullptr)
+        return;
+
     auto newDimensionality = _graphQuickItem->projection() == Projection::TwoDee ?
         Layout::Dimensionality::TwoDee :
         Layout::Dimensionality::ThreeDee;
@@ -313,7 +319,10 @@ void Document::updateLayoutState()
 LayoutPauseState Document::layoutPauseState()
 {
     if(_layoutThread == nullptr)
-        return LayoutPauseState::Paused;
+    {
+        // Running is returned here for the case where we're saving in headless mode
+        return LayoutPauseState::Running;
+    }
 
     if(_userLayoutPaused)
         return LayoutPauseState::Paused;
@@ -1319,7 +1328,10 @@ void Document::switchToOverviewMode(bool doTransition)
 
 int Document::projection() const
 {
-    return static_cast<int>(_graphQuickItem->projection());
+    if(_graphQuickItem != nullptr)
+        return static_cast<int>(_graphQuickItem->projection());
+
+    return static_cast<int>(Projection::Perspective);
 }
 
 void Document::setProjection(int _projection)
@@ -1329,7 +1341,10 @@ void Document::setProjection(int _projection)
 
 int Document::shading2D() const
 {
-    return static_cast<int>(_graphQuickItem->shading2D());
+    if(_graphQuickItem != nullptr)
+        return static_cast<int>(_graphQuickItem->shading2D());
+
+    return static_cast<int>(Shading::Flat);
 }
 
 void Document::setShading2D(int _shading2D)
@@ -1339,7 +1354,10 @@ void Document::setShading2D(int _shading2D)
 
 int Document::shading3D() const
 {
-    return static_cast<int>(_graphQuickItem->shading3D());
+    if(_graphQuickItem != nullptr)
+        return static_cast<int>(_graphQuickItem->shading3D());
+
+    return static_cast<int>(Shading::Smooth);
 }
 
 void Document::setShading3D(int _shading3D)

@@ -179,7 +179,7 @@ public:
 
     QString layoutName() const;
     QString layoutDisplayName() const;
-    std::vector<LayoutSetting>& layoutSettings() const;
+    std::vector<LayoutSetting> layoutSettings() const;
     void updateLayoutDimensionality();
     void updateLayoutState();
     LayoutPauseState layoutPauseState(); // clazy:exclude=qproperty-type-mismatch
