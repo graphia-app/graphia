@@ -470,6 +470,24 @@ double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
     return minValue * 0.5;
 }
 
+template<typename ParseFn>
+static bool parseUsing(const QString& fileType, ParseFn&& parseFn)
+{
+    if(fileType == QStringLiteral("CorrelationCSV"))
+        return parseFn(CsvFileParser());
+
+    if(fileType == QStringLiteral("CorrelationTSV"))
+        return parseFn(TsvFileParser());
+
+    if(fileType == QStringLiteral("CorrelationSSV"))
+        return parseFn(SsvFileParser());
+
+    if(fileType == QStringLiteral("CorrelationXLSX"))
+        return parseFn(XlsxTabularDataParser());
+
+    return false;
+}
+
 bool CorrelationFileParser::parse(const QUrl&, IGraphModel*)
 {
     if(_tabularData.empty() || cancelled())
@@ -647,7 +665,7 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
         if(fileUrl.isEmpty() || fileType.isEmpty())
             return;
 
-        auto parseUsing = [fileUrl, this](auto&& parser)
+        parseUsing(fileType, [fileUrl, this](auto&& parser)
         {
             _cancellableParser = &parser;
             auto atExit = std::experimental::make_scope_exit([this] { _cancellableParser = nullptr; });
@@ -655,7 +673,7 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
             parser.setProgressFn([this](int progress) { setProgress(progress); });
 
             if(!parser.parse(fileUrl))
-                return;
+                return false;
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
 
@@ -664,16 +682,9 @@ bool CorrelationTabularDataParser::parse(const QUrl& fileUrl, const QString& fil
 
             _dataHasNumericalRect = !findLargestNumericalDataRect(*_dataPtr).isEmpty();
             emit dataHasNumericalRectChanged();
-        };
 
-        if(fileType == QStringLiteral("CorrelationCSV"))
-            parseUsing(CsvFileParser());
-        else if(fileType == QStringLiteral("CorrelationTSV"))
-            parseUsing(TsvFileParser());
-        else if(fileType == QStringLiteral("CorrelationSSV"))
-            parseUsing(SsvFileParser());
-        else if(fileType == QStringLiteral("CorrelationXLSX"))
-            parseUsing(XlsxTabularDataParser());
+            return true;
+        });
 
         setProgress(-1);
     });
