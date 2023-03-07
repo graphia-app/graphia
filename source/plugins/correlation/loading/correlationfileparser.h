@@ -97,7 +97,7 @@ public:
 
     static double epsilonFor(const std::vector<double>& data);
 
-    bool parse(const QUrl& url, IGraphModel* graphModel) override;
+    bool parse(const QUrl& fileUrl, IGraphModel* graphModel) override;
     QString log() const override;
 
     static bool canLoad(const QUrl&) { return true; }

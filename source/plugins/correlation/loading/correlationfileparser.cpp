@@ -488,12 +488,42 @@ static bool parseUsing(const QString& fileType, ParseFn&& parseFn)
     return false;
 }
 
-bool CorrelationFileParser::parse(const QUrl&, IGraphModel*)
+bool CorrelationFileParser::parse(const QUrl& fileUrl, IGraphModel*)
 {
+    if(_tabularData.empty())
+    {
+        bool success = parseUsing(_urlTypeName, [this, &fileUrl](auto&& parser)
+        {
+            parser.setProgressFn([this](int progress) { setProgress(progress); });
+
+            if(!parser.parse(fileUrl))
+            {
+                setFailureReason(parser.failureReason());
+                return false;
+            }
+
+            _tabularData = std::move(parser.tabularData());
+
+            return true;
+        });
+
+        if(!success)
+            return false;
+    }
+
     if(_tabularData.empty() || cancelled())
         return false;
 
     _tabularData.setTransposed(_plugin->transpose());
+
+    if(_dataRect.isEmpty())
+    {
+        setProgress(-1);
+        _dataRect = findLargestNumericalDataRect(_tabularData);
+
+        if(_dataRect.isEmpty())
+            _dataRect = findLargestNonNumericalDataRect(_tabularData);
+    }
 
     if(_dataRect.isEmpty() || cancelled())
         return false;
