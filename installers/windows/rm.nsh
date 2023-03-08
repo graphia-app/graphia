@@ -1,0 +1,1 @@
+RMDir /r "$INSTDIR"

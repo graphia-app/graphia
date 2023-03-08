@@ -31,7 +31,10 @@
 
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
-Var INSTDIR_BASE
+Var ACCOUNT_TYPE
+Var ALREADY_RUNNING
+Var ADMIN_INSTALL
+Var USER_INSTALL
 
 Name "${PRODUCT_NAME}"
 
@@ -49,91 +52,110 @@ InstallDir ""
 ; This means that if it's possible to, we become an administrator
 RequestExecutionLevel highest
 
-!macro ConsoleLog message
+!macro ConsoleLog MESSAGE
     System::Call 'kernel32::AttachConsole(i -1)i.r0' ;attach to parent console
     System::Call 'kernel32::GetStdHandle(i -11)i.r0' ;console attached -- get stdout
-    FileWrite $0 "${message}"
+    FileWrite $0 "${MESSAGE}$\r$\n"
 !macroend
 
 !macro CheckIfStillRunning
-    ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
-        $\"IMAGENAME eq ${EXE}$\" | \
-        %SystemRoot%\System32\find /I $\"${EXE}$\""
-    Pop $0 ; The handle for the process
-    ExecCmd::wait $0
-    Pop $0
+    nsProcess::_FindProcess "${EXE}"
+    Pop $ALREADY_RUNNING
+!macroend
+
+!macro NormalisePath PATH
+    nsExec::ExecToStack '"cmd" /q /c "for %a in ($\"${PATH}$\") do echo | set /p=$\"%~fa$\""'
+    Pop $0 ; Exit code, should be 0
+    Pop ${PATH}
+!macroend
+
+; Test if an installation actually exists, i.e. it is not just a stale registry entry
+!macro ValidateInstallation INSTALLATION
+    !insertmacro NormalisePath ${INSTALLATION}
+    ${If} ${INSTALLATION} != ""
+        IfFileExists "${INSTALLATION}\${EXE}" +2
+            StrCpy "${INSTALLATION}" ""
+    ${EndIf}
+!macroend
+
+!macro FatalError MESSAGE
+    MessageBox MB_OK|MB_ICONEXCLAMATION "${MESSAGE}" /SD IDOK
+    !insertmacro ConsoleLog "${MESSAGE}"
+    Abort
 !macroend
 
 !macro ONINIT un
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
         IfSilent 0 notSilent
-            IntCmp $0 1 notRunning
+            IntCmp $ALREADY_RUNNING 603 notRunning
                 !insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
                 Sleep 10000 ; In silent mode, give the app a few seconds to close then...
                 !insertmacro CheckIfStillRunning ; ...check again
 
         notSilent:
-        IntCmp $0 1 notRunning
-            MessageBox MB_OK|MB_ICONEXCLAMATION \
-                "${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
-            !insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
-            Abort
+        IntCmp $ALREADY_RUNNING 603 notRunning
+            !insertmacro FatalError "${PRODUCT_NAME} is still running. Please close it before making changes."
         notRunning:
+
+        UserInfo::GetAccountType
+        Pop $ACCOUNT_TYPE
+        !insertmacro ConsoleLog "Account type: $ACCOUNT_TYPE"
+
+        ; Find existing installations
+        ReadRegStr $ADMIN_INSTALL HKLM "Software\${PRODUCT_NAME}" ""
+        !insertmacro ValidateInstallation $ADMIN_INSTALL
+
+        ReadRegStr $USER_INSTALL HKCU "Software\${PRODUCT_NAME}" ""
+        !insertmacro ValidateInstallation $USER_INSTALL
 
         ${If} $INSTDIR == ""
             ; This only happens in the installer, because the uninstaller already knows INSTDIR
 
             ; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
             ; and whether SMPROGRAMS refers to all users or just the current user
-            SetShellVarContext all
 
-            ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
-            ${If} $0 != ""
-                ; We're already installed as admin, so use this context even if we're
-                ; just a user, otherwise we'll end up confusingly installing two copies
-                StrCpy $INSTDIR "$0"
-
-                UserInfo::GetAccountType
-                Pop $0
-                ${If} $0 != "Admin"
-                    MessageBox MB_OK|MB_ICONEXCLAMATION \
-                        "${PRODUCT_NAME} cannot be updated as its installation directory is not writable. Please contact an administrator." /SD IDOK
-                    !insertmacro ConsoleLog "${PRODUCT_NAME} cannot be updated as its installation directory is not writable."
-                    Abort
-                ${EndIf}
+            ${If} $USER_INSTALL != ""
+                ; There is an existing user install
+                SetShellVarContext current
+                StrCpy $INSTDIR "$USER_INSTALL"
+                !insertmacro ConsoleLog "Found existing user installation: $INSTDIR"
+            ${ElseIf} $ADMIN_INSTALL != ""
+            ${AndIf} $ACCOUNT_TYPE == "Admin"
+                ; There is an existing admin install
+                SetShellVarContext all
+                StrCpy $INSTDIR "$ADMIN_INSTALL"
+                !insertmacro ConsoleLog "Found existing admin installation: $INSTDIR"
             ${Else}
-                UserInfo::GetAccountType
-                Pop $0
-                ${If} $0 == "Admin"
-                        ; If we're an admin, default to installing to C:\Program Files
-                        SetShellVarContext all
-                        StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
+                ${If} $ACCOUNT_TYPE == "Admin"
+                    ; If we're an admin, default to installing to C:\Program Files
+                    SetShellVarContext all
+                    StrCpy $INSTDIR "$PROGRAMFILES64\${PRODUCT_NAME}"
+                    !insertmacro ConsoleLog "Creating new admin installation: $INSTDIR"
                 ${Else}
-                        ; If we're just a user, default to installing to ~\AppData\Local
-                        SetShellVarContext current
-                        StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
+                    ; If we're just a user, default to installing to ~\AppData\Local
+                    SetShellVarContext current
+                    StrCpy $INSTDIR "$LOCALAPPDATA\${PRODUCT_NAME}"
+                    !insertmacro ConsoleLog "Creating new user installation: $INSTDIR"
                 ${EndIf}
             ${EndIf}
-
-            ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
-            ${If} $0 != ""
-                    ; If we're already installed, use the existing directory
-                    StrCpy $INSTDIR "$0"
-            ${Else}
-                    StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
-            ${Endif}
         ${ElseIf} "${un}" == "un"
-            UserInfo::GetAccountType
-            Pop $0
-            ${If} $0 == "Admin"
+            ${If} $ACCOUNT_TYPE == "Admin"
                 SetShellVarContext all
             ${Else}
                 SetShellVarContext current
             ${EndIf}
         ${Else}
             ; When INSTDIR is given on the command line, and we're not making the uninstaller
-            SetShellVarContext current
+            !insertmacro NormalisePath $INSTDIR
+
+            ${If} $INSTDIR == $ADMIN_INSTALL
+                SetShellVarContext all
+                !insertmacro ConsoleLog "Requested directory matches admin installation: $INSTDIR"
+            ${ElseIf} $INSTDIR == $USER_INSTALL
+                SetShellVarContext current
+                !insertmacro ConsoleLog "Requested directory matches user installation: $INSTDIR"
+            ${EndIf}
         ${EndIf}
     FunctionEnd
 !macroend
@@ -141,33 +163,6 @@ RequestExecutionLevel highest
 ; Define the function twice, once for the installer and again for the uninstaller
 !insertmacro ONINIT ""
 !insertmacro ONINIT "un"
-
-!macro REMOVE_OLD_INSTALLATION
-    RMDir /r "$INSTDIR\examples"
-    RMDir /r "$INSTDIR\iconengines"
-    RMDir /r "$INSTDIR\imageformats"
-    RMDir /r "$INSTDIR\networkinformation"
-    RMDir /r "$INSTDIR\platforms"
-    RMDir /r "$INSTDIR\plugins"
-    RMDir /r "$INSTDIR\position"
-    RMDir /r "$INSTDIR\qmltooling"
-    RMDir /r "$INSTDIR\Qt"
-    RMDir /r "$INSTDIR\QtQml"
-    RMDir /r "$INSTDIR\QtQuick"
-    RMDir /r "$INSTDIR\QtTest"
-    RMDir /r "$INSTDIR\QtWebEngine"
-    RMDir /r "$INSTDIR\resources"
-    RMDir /r "$INSTDIR\sqldrivers"
-    RMDir /r "$INSTDIR\styles"
-    RMDir /r "$INSTDIR\tls"
-    RMDir /r "$INSTDIR\translations"
-    Delete "$INSTDIR\*.dll"
-    Delete "$INSTDIR\*.exe"
-    Delete "$INSTDIR\Updater.deps"
-
-    ; Not recursive, in case the user chose to install it to a non-empty directory
-    RMDir "$INSTDIR"
-!macroend
 
 ; Installer Icons
 !insertmacro MUI_DEFAULT MUI_ICON "source\app\icon\Installer.ico"
@@ -218,8 +213,9 @@ Var STARTMENU_FOLDER
 Section "-Main Component"
     SetOutPath "$INSTDIR"
 
-    ; Clear out the target directory first
-    !insertmacro REMOVE_OLD_INSTALLATION
+    ; If there is an uninstaller at the destination, invoke it first
+    IfFileExists "$INSTDIR\Uninstall.exe" 0 +2
+    ExecWait '"$INSTDIR\Uninstall.exe" /S _?=$INSTDIR'
 
     File /r "installer\*.*"
 
@@ -303,7 +299,8 @@ Function Launch
 FunctionEnd
 
 Section "Uninstall"
-    !insertmacro REMOVE_OLD_INSTALLATION
+    Delete "$INSTDIR\Uninstall.exe"
+    !include "rm.nsh"
 
     !insertmacro MUI_STARTMENU_GETFOLDER ${PRODUCT_NAME} $STARTMENU_FOLDER
     Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk"
@@ -311,7 +308,7 @@ Section "Uninstall"
 
     Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
-    DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
+    DeleteRegKey SHCTX "Software\${PRODUCT_NAME}"
 
     DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
