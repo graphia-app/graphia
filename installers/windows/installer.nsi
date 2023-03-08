@@ -106,22 +106,22 @@ RequestExecutionLevel highest
                 UserInfo::GetAccountType
                 Pop $0
                 ${If} $0 == "Admin"
-                        ; If we're an admin, default to installing to C:\Program Files
-                        SetShellVarContext all
-                        StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
+                    ; If we're an admin, default to installing to C:\Program Files
+                    SetShellVarContext all
+                    StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
                 ${Else}
-                        ; If we're just a user, default to installing to ~\AppData\Local
-                        SetShellVarContext current
-                        StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
+                    ; If we're just a user, default to installing to ~\AppData\Local
+                    SetShellVarContext current
+                    StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
                 ${EndIf}
             ${EndIf}
 
             ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
             ${If} $0 != ""
-                    ; If we're already installed, use the existing directory
-                    StrCpy $INSTDIR "$0"
+                ; If we're already installed, use the existing directory
+                StrCpy $INSTDIR "$0"
             ${Else}
-                    StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
+                StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
             ${Endif}
         ${ElseIf} "${un}" == "un"
             UserInfo::GetAccountType
