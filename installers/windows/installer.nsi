@@ -27,7 +27,7 @@
 !define COPYRIGHT "unspecified-copyright"
 !endif
 
-!searchreplace COPYRIGHT "${COPYRIGHT}" "(c)" "©"
+!searchreplace COPYRIGHT "${COPYRIGHT}" "(c)" "Â©"
 
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
@@ -50,75 +50,75 @@ InstallDir ""
 RequestExecutionLevel highest
 
 !macro ConsoleLog message
-	System::Call 'kernel32::AttachConsole(i -1)i.r0' ;attach to parent console
-	System::Call 'kernel32::GetStdHandle(i -11)i.r0' ;console attached -- get stdout
-	FileWrite $0 "${message}"
+    System::Call 'kernel32::AttachConsole(i -1)i.r0' ;attach to parent console
+    System::Call 'kernel32::GetStdHandle(i -11)i.r0' ;console attached -- get stdout
+    FileWrite $0 "${message}"
 !macroend
 
 !macro CheckIfStillRunning
-	ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
-		$\"IMAGENAME eq ${EXE}$\" | \
-		%SystemRoot%\System32\find /I $\"${EXE}$\""
-	Pop $0 ; The handle for the process
-	ExecCmd::wait $0
-	Pop $0
+    ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
+        $\"IMAGENAME eq ${EXE}$\" | \
+        %SystemRoot%\System32\find /I $\"${EXE}$\""
+    Pop $0 ; The handle for the process
+    ExecCmd::wait $0
+    Pop $0
 !macroend
 
 !macro ONINIT un
-	Function ${un}.onInit
-		!insertmacro CheckIfStillRunning
-		IfSilent 0 notSilent
-			IntCmp $0 1 notRunning
-				!insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
-				Sleep 10000 ; In silent mode, give the app a few seconds to close then...
-				!insertmacro CheckIfStillRunning ; ...check again
+    Function ${un}.onInit
+        !insertmacro CheckIfStillRunning
+        IfSilent 0 notSilent
+            IntCmp $0 1 notRunning
+                !insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
+                Sleep 10000 ; In silent mode, give the app a few seconds to close then...
+                !insertmacro CheckIfStillRunning ; ...check again
 
-		notSilent:
-		IntCmp $0 1 notRunning
-			MessageBox MB_OK|MB_ICONEXCLAMATION \
-				"${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
-			!insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
-			Abort
-		notRunning:
+        notSilent:
+        IntCmp $0 1 notRunning
+            MessageBox MB_OK|MB_ICONEXCLAMATION \
+                "${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
+            !insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
+            Abort
+        notRunning:
 
-		${If} $INSTDIR == ""
-			; This only happens in the installer, because the uninstaller already knows INSTDIR
+        ${If} $INSTDIR == ""
+            ; This only happens in the installer, because the uninstaller already knows INSTDIR
 
-			; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
-			; and whether SMPROGRAMS refers to all users or just the current user
-			UserInfo::GetAccountType
-			Pop $0
-			${If} $0 == "Admin"
-				; If we're an admin, default to installing to C:\Program Files
-				SetShellVarContext all
-				StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
-			${Else}
-				; If we're just a user, default to installing to ~\AppData\Local
-				SetShellVarContext current
-				StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
-			${EndIf}
+            ; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
+            ; and whether SMPROGRAMS refers to all users or just the current user
+            UserInfo::GetAccountType
+            Pop $0
+            ${If} $0 == "Admin"
+                ; If we're an admin, default to installing to C:\Program Files
+                SetShellVarContext all
+                StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
+            ${Else}
+                ; If we're just a user, default to installing to ~\AppData\Local
+                SetShellVarContext current
+                StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
+            ${EndIf}
 
-			ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
+            ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
 
-			${If} $0 != ""
-				; If we're already installed, use the existing directory
-				StrCpy $INSTDIR "$0"
-			${Else}
-				StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
-			${Endif}
-		${ElseIf} "${un}" == "un"
-			UserInfo::GetAccountType
-			Pop $0
-			${If} $0 == "Admin"
-				SetShellVarContext all
-			${Else}
-				SetShellVarContext current
-			${EndIf}
-		${Else}
-			; When INSTDIR is given on the command line, and we're not making the uninstaller
-			SetShellVarContext current
-		${EndIf}
-	FunctionEnd
+            ${If} $0 != ""
+                ; If we're already installed, use the existing directory
+                StrCpy $INSTDIR "$0"
+            ${Else}
+                StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
+            ${Endif}
+        ${ElseIf} "${un}" == "un"
+            UserInfo::GetAccountType
+            Pop $0
+            ${If} $0 == "Admin"
+                SetShellVarContext all
+            ${Else}
+                SetShellVarContext current
+            ${EndIf}
+        ${Else}
+            ; When INSTDIR is given on the command line, and we're not making the uninstaller
+            SetShellVarContext current
+        ${EndIf}
+    FunctionEnd
 !macroend
 
 ; Define the function twice, once for the installer and again for the uninstaller
@@ -126,30 +126,30 @@ RequestExecutionLevel highest
 !insertmacro ONINIT "un"
 
 !macro REMOVE_OLD_INSTALLATION
-	RMDir /r "$INSTDIR\examples"
-	RMDir /r "$INSTDIR\iconengines"
-	RMDir /r "$INSTDIR\imageformats"
-	RMDir /r "$INSTDIR\networkinformation"
-	RMDir /r "$INSTDIR\platforms"
-	RMDir /r "$INSTDIR\plugins"
-	RMDir /r "$INSTDIR\position"
-	RMDir /r "$INSTDIR\qmltooling"
-	RMDir /r "$INSTDIR\Qt"
-	RMDir /r "$INSTDIR\QtQml"
-	RMDir /r "$INSTDIR\QtQuick"
-	RMDir /r "$INSTDIR\QtTest"
-	RMDir /r "$INSTDIR\QtWebEngine"
-	RMDir /r "$INSTDIR\resources"
-	RMDir /r "$INSTDIR\sqldrivers"
-	RMDir /r "$INSTDIR\styles"
-	RMDir /r "$INSTDIR\tls"
-	RMDir /r "$INSTDIR\translations"
-	Delete "$INSTDIR\*.dll"
-	Delete "$INSTDIR\*.exe"
-	Delete "$INSTDIR\Updater.deps"
+    RMDir /r "$INSTDIR\examples"
+    RMDir /r "$INSTDIR\iconengines"
+    RMDir /r "$INSTDIR\imageformats"
+    RMDir /r "$INSTDIR\networkinformation"
+    RMDir /r "$INSTDIR\platforms"
+    RMDir /r "$INSTDIR\plugins"
+    RMDir /r "$INSTDIR\position"
+    RMDir /r "$INSTDIR\qmltooling"
+    RMDir /r "$INSTDIR\Qt"
+    RMDir /r "$INSTDIR\QtQml"
+    RMDir /r "$INSTDIR\QtQuick"
+    RMDir /r "$INSTDIR\QtTest"
+    RMDir /r "$INSTDIR\QtWebEngine"
+    RMDir /r "$INSTDIR\resources"
+    RMDir /r "$INSTDIR\sqldrivers"
+    RMDir /r "$INSTDIR\styles"
+    RMDir /r "$INSTDIR\tls"
+    RMDir /r "$INSTDIR\translations"
+    Delete "$INSTDIR\*.dll"
+    Delete "$INSTDIR\*.exe"
+    Delete "$INSTDIR\Updater.deps"
 
-	; Not recursive, in case the user chose to install it to a non-empty directory
-	RMDir "$INSTDIR"
+    ; Not recursive, in case the user chose to install it to a non-empty directory
+    RMDir "$INSTDIR"
 !macroend
 
 ; Installer Icons
@@ -199,111 +199,111 @@ Var STARTMENU_FOLDER
 !insertmacro MUI_LANGUAGE "English"
 
 Section "-Main Component"
-	SetOutPath "$INSTDIR"
+    SetOutPath "$INSTDIR"
 
-	; Clear out the target directory first
-	!insertmacro REMOVE_OLD_INSTALLATION
+    ; Clear out the target directory first
+    !insertmacro REMOVE_OLD_INSTALLATION
 
-	File /r "installer\*.*"
+    File /r "installer\*.*"
 
-	WriteRegStr SHCTX "Software\${PRODUCT_NAME}" "" $INSTDIR
+    WriteRegStr SHCTX "Software\${PRODUCT_NAME}" "" $INSTDIR
 
-	; These registry entries are necessary for the program to show up in the Add/Remove programs dialog
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayName" "${PRODUCT_NAME}"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayIcon" "$INSTDIR\${EXE}"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
-	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "EstimatedSize" "${BUILD_SIZE}"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "InstallLocation" "$INSTDIR"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
-	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
-	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
+    ; These registry entries are necessary for the program to show up in the Add/Remove programs dialog
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayName" "${PRODUCT_NAME}"
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayIcon" "$INSTDIR\${EXE}"
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
+    WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "EstimatedSize" "${BUILD_SIZE}"
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr SHCTX "${UNINSTALL_KEY}" "UninstallString" "$INSTDIR\Uninstall.exe"
+    WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
+    WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
-	; Register protocol handler for dealing with hyperlinks
-	WriteRegStr HKCR "${NATIVE_EXTENSION}" "" "URL:${PRODUCT_NAME} Protocol"
-	WriteRegStr HKCR "${NATIVE_EXTENSION}" "URL Protocol" ""
-	WriteRegStr HKCR "${NATIVE_EXTENSION}\shell\open\command" "" "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+    ; Register protocol handler for dealing with hyperlinks
+    WriteRegStr HKCR "${NATIVE_EXTENSION}" "" "URL:${PRODUCT_NAME} Protocol"
+    WriteRegStr HKCR "${NATIVE_EXTENSION}" "URL Protocol" ""
+    WriteRegStr HKCR "${NATIVE_EXTENSION}\shell\open\command" "" "$\"$INSTDIR\${EXE}$\" $\"%1$\""
 
-	IfFileExists "$INSTDIR\Uninstall.exe" +2 ; Don't make Uninstall.exe if it already exists
-	WriteUninstaller "$INSTDIR\Uninstall.exe"
+    IfFileExists "$INSTDIR\Uninstall.exe" +2 ; Don't make Uninstall.exe if it already exists
+    WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-	!insertmacro MUI_STARTMENU_WRITE_BEGIN ${PRODUCT_NAME}
-		CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER\"
-		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
-	!insertmacro MUI_STARTMENU_WRITE_END
+    !insertmacro MUI_STARTMENU_WRITE_BEGIN ${PRODUCT_NAME}
+        CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER\"
+        CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
+    !insertmacro MUI_STARTMENU_WRITE_END
 
-	!insertmacro UPDATEFILEASSOC
+    !insertmacro UPDATEFILEASSOC
 SectionEnd
 
 ; File Associations
 SectionGroup /e "File associations"
-	Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
-		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native" "${PRODUCT_NAME} File" \
-				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
-		skipFileAssociation:
-	SectionEnd
-	Section "Graph Modelling Language file (.gml)"
-		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
-				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
-		skipFileAssociation:
-	SectionEnd
-	Section "Graph Markup Language file (.graphml)"
-		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "graphml" "${PRODUCT_NAME}.graphml" "${PRODUCT_NAME} GraphML File" \
-				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
-		skipFileAssociation:
-	SectionEnd
-	Section "Biopax OWL file (.owl)"
-		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "owl" "${PRODUCT_NAME}.owl" "${PRODUCT_NAME} OWL File" \
-				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
-		skipFileAssociation:
-	SectionEnd
-	Section "Graphviz DOT file (.dot)"
-		IfSilent skipFileAssociation
-		!insertmacro APP_ASSOCIATE "dot" "${PRODUCT_NAME}.dot" "${PRODUCT_NAME} DOT File" \
-				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"$\"$INSTDIR\${EXE}$\" $\"%1$\""
-		skipFileAssociation:
-	SectionEnd
+    Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
+        IfSilent skipFileAssociation
+        !insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native" "${PRODUCT_NAME} File" \
+            "$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+            "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+        skipFileAssociation:
+    SectionEnd
+    Section "Graph Modelling Language file (.gml)"
+        IfSilent skipFileAssociation
+        !insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
+            "$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+            "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+        skipFileAssociation:
+    SectionEnd
+    Section "Graph Markup Language file (.graphml)"
+        IfSilent skipFileAssociation
+        !insertmacro APP_ASSOCIATE "graphml" "${PRODUCT_NAME}.graphml" "${PRODUCT_NAME} GraphML File" \
+            "$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+            "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+        skipFileAssociation:
+    SectionEnd
+    Section "Biopax OWL file (.owl)"
+        IfSilent skipFileAssociation
+        !insertmacro APP_ASSOCIATE "owl" "${PRODUCT_NAME}.owl" "${PRODUCT_NAME} OWL File" \
+            "$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+            "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+        skipFileAssociation:
+    SectionEnd
+    Section "Graphviz DOT file (.dot)"
+        IfSilent skipFileAssociation
+        !insertmacro APP_ASSOCIATE "dot" "${PRODUCT_NAME}.dot" "${PRODUCT_NAME} DOT File" \
+            "$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+            "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+        skipFileAssociation:
+    SectionEnd
 SectionGroupEnd
 
 Section /o "Desktop shortcut"
-	IfSilent skipDesktopShortcut
-	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
-	skipDesktopShortcut:
+    IfSilent skipDesktopShortcut
+    CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
+    skipDesktopShortcut:
 SectionEnd
 
 ;Launch function
 Function Launch
-	ShellExecAsUser::ShellExecAsUser "open" "$INSTDIR\${EXE}"
+    ShellExecAsUser::ShellExecAsUser "open" "$INSTDIR\${EXE}"
 FunctionEnd
 
 Section "Uninstall"
-	!insertmacro REMOVE_OLD_INSTALLATION
+    !insertmacro REMOVE_OLD_INSTALLATION
 
-	!insertmacro MUI_STARTMENU_GETFOLDER ${PRODUCT_NAME} $STARTMENU_FOLDER
-	Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk"
-	RMDir /r "$SMPROGRAMS\$STARTMENU_FOLDER"
+    !insertmacro MUI_STARTMENU_GETFOLDER ${PRODUCT_NAME} $STARTMENU_FOLDER
+    Delete "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk"
+    RMDir /r "$SMPROGRAMS\$STARTMENU_FOLDER"
 
-	Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
+    Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
-	DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
+    DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
 
-	DeleteRegKey SHCTX "${UNINSTALL_KEY}"
+    DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
-	DeleteRegKey HKCR "${NATIVE_EXTENSION}"
+    DeleteRegKey HKCR "${NATIVE_EXTENSION}"
 
-	!insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native"
-	!insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
-	!insertmacro APP_UNASSOCIATE "graphml" "${PRODUCT_NAME}.graphml"
-	!insertmacro APP_UNASSOCIATE "owl" "${PRODUCT_NAME}.owl"
-	!insertmacro APP_UNASSOCIATE "dot" "${PRODUCT_NAME}.dot"
-	!insertmacro UPDATEFILEASSOC
+    !insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native"
+    !insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
+    !insertmacro APP_UNASSOCIATE "graphml" "${PRODUCT_NAME}.graphml"
+    !insertmacro APP_UNASSOCIATE "owl" "${PRODUCT_NAME}.owl"
+    !insertmacro APP_UNASSOCIATE "dot" "${PRODUCT_NAME}.dot"
+    !insertmacro UPDATEFILEASSOC
 SectionEnd
