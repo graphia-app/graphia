@@ -62,7 +62,6 @@
 #include "shared/utils/static_block.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/consolecapture.h"
-#include "shared/utils/odsconsolecapture.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
@@ -170,7 +169,7 @@ static void configureProxy()
 
 static QString qmlError;
 
-int start(int argc, char *argv[])
+int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 {
     if(u::currentThreadName().isEmpty())
         u::setCurrentThreadName(QStringLiteral(PRODUCT_NAME));
@@ -205,29 +204,6 @@ int start(int argc, char *argv[])
         if(app.activationWindow() == nullptr)
             app.setActivationWindow(QApplication::focusWindow());
     });
-
-    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
-    QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
-    QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
-
-    std::vector<std::shared_ptr<IConsoleCapture>> consoleOutputFiles;
-
-    if(!u::isDebuggerPresent())
-    {
-        auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-
-        consoleOutputFiles =
-        {
-            std::make_shared<IoStreamCapture>(QStringLiteral("%1/cout.txt").arg(appDataLocation), std::cout),
-            std::make_shared<IoStreamCapture>(QStringLiteral("%1/cerr.txt").arg(appDataLocation), std::cerr),
-            std::make_shared<CStreamCapture>(QStringLiteral("%1/stdout.txt").arg(appDataLocation), stdout),
-            std::make_shared<CStreamCapture>(QStringLiteral("%1/stderr.txt").arg(appDataLocation), stderr),
-#ifdef Q_OS_WIN
-            std::make_shared<ODSCapture>(QStringLiteral("%1/outputdebugstring.txt").arg(appDataLocation)),
-#endif
-        };
-    }
 
     QCommandLineParser commandLineParser;
 
@@ -484,6 +460,8 @@ int start(int argc, char *argv[])
         if(!settingsFileName.isEmpty())
             QFile::copy(settingsFileName, QDir(directory).filePath("settings.txt"));
     });
+#else
+    Q_UNUSED(consoleOutputFiles);
 #endif
 
     auto exitCode = QCoreApplication::exec();
@@ -494,9 +472,17 @@ int main(int argc, char *argv[])
 {
     u::setAppPathName(argv[0]);
 
+    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    auto consoleOutputFiles = captureConsoleOutput(
+        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+
     // The "real" main is separate to limit the scope of QtSingleApplication,
     // otherwise a restart causes the exiting instance to get activated
-    auto exitCode = start(argc, argv);
+    auto exitCode = start(argc, argv, consoleOutputFiles);
 
     if(static_cast<ExitType>(exitCode) == ExitType::Restart)
     {
