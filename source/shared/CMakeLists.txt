@@ -79,6 +79,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/consolecapture.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container_combine.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container_randomsample.h
@@ -156,6 +157,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/consolecapture.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/downloadqueue.cpp
@@ -177,6 +179,11 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/updates/update_keys.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
 )
+
+if(MSVC)
+    list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/utils/odsconsolecapture.h)
+    list(APPEND SHARED_SOURCES ${CMAKE_CURRENT_LIST_DIR}/utils/odsconsolecapture.cpp)
+endif()
 
 set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PARENT_SCOPE)
 
