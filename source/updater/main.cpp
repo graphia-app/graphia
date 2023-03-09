@@ -23,6 +23,7 @@
 #include "shared/updates/updates.h"
 #include "shared/utils/container.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/consolecapture.h"
 
 #include <QApplication>
 #include <QQmlApplicationEngine>
@@ -34,6 +35,7 @@
 #include <QTemporaryDir>
 #include <QRegularExpression>
 #include <QQuickStyle>
+#include <QStandardPaths>
 
 #include <QDebug>
 
@@ -73,11 +75,6 @@ QStringList showUpdater(int argc, char *argv[])
     unquotedArguments.replaceInStrings(QRegularExpression(QStringLiteral("^\"(.*)\"$")),
         QStringLiteral(R"(\1)"));
     auto exe = unquotedArguments.at(0);
-
-    QApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
-    QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
-    QApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     Q_INIT_RESOURCE(shared);
     Q_INIT_RESOURCE(update_keys);
@@ -156,6 +153,15 @@ QStringList showUpdater(int argc, char *argv[])
 // NOLINTNEXTLINE bugprone-exception-escape
 int main(int argc, char *argv[])
 {
+    QApplication::setOrganizationName(QStringLiteral("Graphia"));
+    QApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
+    QApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    auto consoleOutputFiles = captureConsoleOutput(
+        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation),
+        QStringLiteral("updater"));
+
     QStringList arguments = showUpdater(argc, argv);
     if(arguments.isEmpty())
     {
