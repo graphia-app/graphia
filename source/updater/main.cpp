@@ -68,6 +68,10 @@ QStringList showUpdater(int argc, char *argv[])
 
     auto arguments = QApplication::arguments();
 
+    std::cerr << "showUpdater:\n";
+    for(const auto& argument : arguments)
+        std::cerr << "  " << argument.toStdString() << "\n";
+
     if(arguments.size() <= 1)
         return {};
 
@@ -76,13 +80,22 @@ QStringList showUpdater(int argc, char *argv[])
         QStringLiteral(R"(\1)"));
     auto exe = unquotedArguments.at(0);
 
+    std::cerr << "exe: " << exe.toStdString() << "\n";
+
     Q_INIT_RESOURCE(shared);
     Q_INIT_RESOURCE(update_keys);
 
     QString status;
     auto update = latestUpdateJson(&status);
+    std::cerr << "update.is_object() " << update.is_object() <<
+        " status " << status.toStdString() << "\n";
+
+    std::cerr << "update:\n";
+    std::cerr << update;
+
     if(update.is_object() && (status.isEmpty() || status == QStringLiteral("failed")))
     {
+        std::cerr << "Processing update 1\n";
         QIcon mainIcon;
         mainIcon.addFile(QStringLiteral(":/Icon512x512.png"));
         mainIcon.addFile(QStringLiteral(":/Icon256x256.png"));
@@ -92,9 +105,11 @@ QStringList showUpdater(int argc, char *argv[])
         mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
         QApplication::setWindowIcon(mainIcon);
 
+        std::cerr << "Processing update 2\n";
         QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
 
         QQmlApplicationEngine engine;
+        std::cerr << "Processing update 3\n";
 
         const QString version = u::contains(update, "version") ?
             QString::fromStdString(update["version"]) :
@@ -104,12 +119,17 @@ QStringList showUpdater(int argc, char *argv[])
             QString::fromStdString(update["changeLog"]) :
             QObject::tr("No release notes available.");
 
+        std::cerr << "Processing update 4\n";
+
         const QTemporaryDir imagesDir;
         engine.rootContext()->setContextProperty(
             QStringLiteral("imagesLocation"), imagesDir.path());
 
+        std::cerr << "Processing update 5\n";
+
         if(u::contains(update, "images") && imagesDir.isValid())
         {
+            std::cerr << "Processing update 6\n";
             for(const auto& image : update["images"])
             {
                 if(!u::contains(image, "filename") || !u::contains(image, "content"))
@@ -119,14 +139,18 @@ QStringList showUpdater(int argc, char *argv[])
                 auto base64EncodedContent = QString::fromStdString(image["content"]);
                 auto content = QByteArray::fromBase64(base64EncodedContent.toUtf8());
 
+                std::cerr << "Processing update 6.1\n";
                 QFile imageFile(QStringLiteral("%1/%2").arg(imagesDir.path(), fileName));
                 if(!imageFile.open(QIODevice::ReadWrite))
                     continue;
 
+                std::cerr << "Processing update 6.2\n";
                 imageFile.write(content);
+                std::cerr << "Processing update 6.3\n";
             }
         }
 
+        std::cerr << "Processing update 7\n";
         engine.rootContext()->setContextProperty(
             QStringLiteral("updatesLocation"), updatesLocation());
 
@@ -136,14 +160,18 @@ QStringList showUpdater(int argc, char *argv[])
         engine.rootContext()->setContextProperty(
             QStringLiteral("changeLog"), changeLog);
 
+        std::cerr << "Processing update 8\n";
         Installer installer(update, version, existingInstallation(exe));
         engine.rootContext()->setContextProperty(
             QStringLiteral("installer"), &installer);
 
+        std::cerr << "Processing update 9\n";
         engine.addImportPath(QStringLiteral("qrc:///qml/"));
         engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        std::cerr << "engine.rootObjects().size() " << engine.rootObjects().size() << "\n";
         Q_ASSERT(!engine.rootObjects().empty());
 
+        std::cerr << "QApplication::exec()\n";
         QApplication::exec();
     }
 
