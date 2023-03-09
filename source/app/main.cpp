@@ -51,8 +51,6 @@
 #include <memory>
 
 #include "application.h"
-#include "consolecapture.h"
-#include "odsconsolecapture.h"
 #include "preferences.h"
 #include "preferenceswatcher.h"
 
@@ -63,6 +61,8 @@
 #include "shared/utils/apppathname.h"
 #include "shared/utils/static_block.h"
 #include "shared/utils/thread.h"
+#include "shared/utils/consolecapture.h"
+#include "shared/utils/odsconsolecapture.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
