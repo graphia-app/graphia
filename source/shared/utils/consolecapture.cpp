@@ -17,6 +17,10 @@
  */
 
 #include "consolecapture.h"
+#include "odsconsolecapture.h"
+#include "debugger.h"
+
+#include <iostream>
 
 IConsoleCapture::IConsoleCapture(const QString &filename) :
     _filename(filename) {}
@@ -63,4 +67,29 @@ CStreamCapture::~CStreamCapture()
 void CStreamCapture::close()
 {
     closeFile();
+}
+
+ConsoleOutputFiles captureConsoleOutput(const QString& path, const QString& prefix)
+{
+    if(u::isDebuggerPresent())
+        return {};
+
+    auto filename = [&](const char* basename)
+    {
+        if(!prefix.isEmpty())
+            return QStringLiteral("%1/%2_%3.txt").arg(path, prefix, basename);
+
+        return QStringLiteral("%1/%2.txt").arg(path, basename);
+    };
+
+    return
+    {
+        std::make_shared<IoStreamCapture>(filename("cout"), std::cout),
+        std::make_shared<IoStreamCapture>(filename("cerr"), std::cerr),
+        std::make_shared<CStreamCapture>(filename("stdout"), stdout),
+        std::make_shared<CStreamCapture>(filename("stderr"), stderr),
+#ifdef Q_OS_WIN
+        std::make_shared<ODSCapture>(filename("outputdebugstring")),
+#endif
+    };
 }

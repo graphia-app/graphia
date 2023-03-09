@@ -61,4 +61,7 @@ public:
     void close() override;
 };
 
+using ConsoleOutputFiles = std::vector<std::shared_ptr<IConsoleCapture>>;
+ConsoleOutputFiles captureConsoleOutput(const QString& path, const QString& prefix = {});
+
 #endif // CONSOLECAPTURE_H
