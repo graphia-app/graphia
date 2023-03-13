@@ -32,6 +32,7 @@
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
 Var INSTDIR_BASE
+Var ACCOUNT_TYPE
 
 Name "${PRODUCT_NAME}"
 
@@ -81,6 +82,9 @@ RequestExecutionLevel highest
             Abort
         notRunning:
 
+        UserInfo::GetAccountType
+        Pop $ACCOUNT_TYPE
+
         ${If} $INSTDIR == ""
             ; This only happens in the installer, because the uninstaller already knows INSTDIR
 
@@ -94,18 +98,14 @@ RequestExecutionLevel highest
                 ; just a user, otherwise we'll end up confusingly installing two copies
                 StrCpy $INSTDIR "$0"
 
-                UserInfo::GetAccountType
-                Pop $0
-                ${If} $0 != "Admin"
+                ${If} $ACCOUNT_TYPE != "Admin"
                     MessageBox MB_OK|MB_ICONEXCLAMATION \
                         "${PRODUCT_NAME} cannot be updated as its installation directory is not writable. Please contact an administrator." /SD IDOK
                     !insertmacro ConsoleLog "${PRODUCT_NAME} cannot be updated as its installation directory is not writable."
                     Abort
                 ${EndIf}
             ${Else}
-                UserInfo::GetAccountType
-                Pop $0
-                ${If} $0 == "Admin"
+                ${If} $ACCOUNT_TYPE == "Admin"
                     ; If we're an admin, default to installing to C:\Program Files
                     SetShellVarContext all
                     StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
@@ -124,9 +124,7 @@ RequestExecutionLevel highest
                 StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
             ${Endif}
         ${ElseIf} "${un}" == "un"
-            UserInfo::GetAccountType
-            Pop $0
-            ${If} $0 == "Admin"
+            ${If} $ACCOUNT_TYPE == "Admin"
                 SetShellVarContext all
             ${Else}
                 SetShellVarContext current
