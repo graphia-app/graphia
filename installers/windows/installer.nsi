@@ -311,7 +311,7 @@ Section "Uninstall"
 
     Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
-    DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
+    DeleteRegKey SHCTX "Software\${PRODUCT_NAME}"
 
     DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
