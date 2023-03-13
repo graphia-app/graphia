@@ -68,6 +68,14 @@ RequestExecutionLevel highest
     Pop ${PATH}
 !macroend
 
+; Test if an installation actually exists, i.e. it is not just a stale registry entry
+!macro ValidateInstallation INSTALLATION
+    ${If} ${INSTALLATION} != ""
+        IfFileExists "${INSTALLATION}\${EXE}" +2
+            StrCpy "${INSTALLATION}" ""
+    ${EndIf}
+!macroend
+
 !macro ONINIT un
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
