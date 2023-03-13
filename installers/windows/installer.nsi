@@ -84,6 +84,7 @@ RequestExecutionLevel highest
 
         UserInfo::GetAccountType
         Pop $ACCOUNT_TYPE
+        !insertmacro ConsoleLog "Account type: $ACCOUNT_TYPE"
 
         ${If} $INSTDIR == ""
             ; This only happens in the installer, because the uninstaller already knows INSTDIR
