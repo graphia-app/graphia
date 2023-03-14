@@ -76,6 +76,12 @@ RequestExecutionLevel highest
     ${EndIf}
 !macroend
 
+!macro FatalError MESSAGE
+    MessageBox MB_OK|MB_ICONEXCLAMATION "${MESSAGE}" /SD IDOK
+    !insertmacro ConsoleLog "${MESSAGE}"
+    Abort
+!macroend
+
 !macro ONINIT un
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
