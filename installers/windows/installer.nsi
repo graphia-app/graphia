@@ -93,10 +93,7 @@ RequestExecutionLevel highest
 
         notSilent:
         IntCmp $ALREADY_RUNNING 603 notRunning
-            MessageBox MB_OK|MB_ICONEXCLAMATION \
-                "${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
-            !insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
-            Abort
+            !insertmacro FatalError "${PRODUCT_NAME} is still running. Please close it before making changes."
         notRunning:
 
         UserInfo::GetAccountType
