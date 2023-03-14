@@ -52,10 +52,10 @@ InstallDir ""
 ; This means that if it's possible to, we become an administrator
 RequestExecutionLevel highest
 
-!macro ConsoleLog message
+!macro ConsoleLog MESSAGE
     System::Call 'kernel32::AttachConsole(i -1)i.r0' ;attach to parent console
     System::Call 'kernel32::GetStdHandle(i -11)i.r0' ;console attached -- get stdout
-    FileWrite $0 "${message}$\r$\n"
+    FileWrite $0 "${MESSAGE}$\r$\n"
 !macroend
 
 !macro CheckIfStillRunning
