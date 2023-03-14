@@ -31,9 +31,10 @@
 
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
-Var INSTDIR_BASE
 Var ACCOUNT_TYPE
 Var ALREADY_RUNNING
+Var ADMIN_INSTALL
+Var USER_INSTALL
 
 Name "${PRODUCT_NAME}"
 
@@ -70,6 +71,7 @@ RequestExecutionLevel highest
 
 ; Test if an installation actually exists, i.e. it is not just a stale registry entry
 !macro ValidateInstallation INSTALLATION
+    !insertmacro NormalisePath ${INSTALLATION}
     ${If} ${INSTALLATION} != ""
         IfFileExists "${INSTALLATION}\${EXE}" +2
             StrCpy "${INSTALLATION}" ""
@@ -100,44 +102,43 @@ RequestExecutionLevel highest
         Pop $ACCOUNT_TYPE
         !insertmacro ConsoleLog "Account type: $ACCOUNT_TYPE"
 
+        ; Find existing installations
+        ReadRegStr $ADMIN_INSTALL HKLM "Software\${PRODUCT_NAME}" ""
+        !insertmacro ValidateInstallation $ADMIN_INSTALL
+
+        ReadRegStr $USER_INSTALL HKCU "Software\${PRODUCT_NAME}" ""
+        !insertmacro ValidateInstallation $USER_INSTALL
+
         ${If} $INSTDIR == ""
             ; This only happens in the installer, because the uninstaller already knows INSTDIR
 
             ; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
             ; and whether SMPROGRAMS refers to all users or just the current user
-            SetShellVarContext all
 
-            ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
-            ${If} $0 != ""
-                ; We're already installed as admin, so use this context even if we're
-                ; just a user, otherwise we'll end up confusingly installing two copies
-                StrCpy $INSTDIR "$0"
-
-                ${If} $ACCOUNT_TYPE != "Admin"
-                    MessageBox MB_OK|MB_ICONEXCLAMATION \
-                        "${PRODUCT_NAME} cannot be updated as its installation directory is not writable. Please contact an administrator." /SD IDOK
-                    !insertmacro ConsoleLog "${PRODUCT_NAME} cannot be updated as its installation directory is not writable."
-                    Abort
-                ${EndIf}
+            ${If} $USER_INSTALL != ""
+                ; There is an existing user install
+                SetShellVarContext current
+                StrCpy $INSTDIR "$USER_INSTALL"
+                !insertmacro ConsoleLog "Found existing user installation: $INSTDIR"
+            ${ElseIf} $ADMIN_INSTALL != ""
+            ${AndIf} $ACCOUNT_TYPE == "Admin"
+                ; There is an existing admin install
+                SetShellVarContext all
+                StrCpy $INSTDIR "$ADMIN_INSTALL"
+                !insertmacro ConsoleLog "Found existing admin installation: $INSTDIR"
             ${Else}
                 ${If} $ACCOUNT_TYPE == "Admin"
                     ; If we're an admin, default to installing to C:\Program Files
                     SetShellVarContext all
-                    StrCpy $INSTDIR_BASE "$PROGRAMFILES64"
+                    StrCpy $INSTDIR "$PROGRAMFILES64\${PRODUCT_NAME}"
+                    !insertmacro ConsoleLog "Creating new admin installation: $INSTDIR"
                 ${Else}
                     ; If we're just a user, default to installing to ~\AppData\Local
                     SetShellVarContext current
-                    StrCpy $INSTDIR_BASE "$LOCALAPPDATA"
+                    StrCpy $INSTDIR "$LOCALAPPDATA\${PRODUCT_NAME}"
+                    !insertmacro ConsoleLog "Creating new user installation: $INSTDIR"
                 ${EndIf}
             ${EndIf}
-
-            ReadRegStr $0 SHCTX "Software\${PRODUCT_NAME}" ""
-            ${If} $0 != ""
-                ; If we're already installed, use the existing directory
-                StrCpy $INSTDIR "$0"
-            ${Else}
-                StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
-            ${Endif}
         ${ElseIf} "${un}" == "un"
             ${If} $ACCOUNT_TYPE == "Admin"
                 SetShellVarContext all
@@ -146,7 +147,15 @@ RequestExecutionLevel highest
             ${EndIf}
         ${Else}
             ; When INSTDIR is given on the command line, and we're not making the uninstaller
-            SetShellVarContext current
+            !insertmacro NormalisePath $INSTDIR
+
+            ${If} $INSTDIR == $ADMIN_INSTALL
+                SetShellVarContext all
+                !insertmacro ConsoleLog "Requested directory matches admin installation: $INSTDIR"
+            ${ElseIf} $INSTDIR == $USER_INSTALL
+                SetShellVarContext current
+                !insertmacro ConsoleLog "Requested directory matches user installation: $INSTDIR"
+            ${EndIf}
         ${EndIf}
     FunctionEnd
 !macroend
