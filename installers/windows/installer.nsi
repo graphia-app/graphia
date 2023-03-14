@@ -62,6 +62,12 @@ RequestExecutionLevel highest
     Pop $ALREADY_RUNNING
 !macroend
 
+!macro NormalisePath PATH
+    nsExec::ExecToStack '"cmd" /q /c "for %a in ($\"${PATH}$\") do echo | set /p=$\"%~fa$\""'
+    Pop $0 ; Exit code, should be 0
+    Pop ${PATH}
+!macroend
+
 !macro ONINIT un
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
