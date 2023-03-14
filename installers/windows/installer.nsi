@@ -58,11 +58,7 @@ RequestExecutionLevel highest
 !macroend
 
 !macro CheckIfStillRunning
-    ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
-        $\"IMAGENAME eq ${EXE}$\" | \
-        %SystemRoot%\System32\find /I $\"${EXE}$\""
-    Pop $0 ; The handle for the process
-    ExecCmd::wait $0
+    nsProcess::_FindProcess "${EXE}"
     Pop $ALREADY_RUNNING
 !macroend
 
@@ -70,13 +66,13 @@ RequestExecutionLevel highest
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
         IfSilent 0 notSilent
-            IntCmp $ALREADY_RUNNING 1 notRunning
+            IntCmp $ALREADY_RUNNING 603 notRunning
                 !insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
                 Sleep 10000 ; In silent mode, give the app a few seconds to close then...
                 !insertmacro CheckIfStillRunning ; ...check again
 
         notSilent:
-        IntCmp $ALREADY_RUNNING 1 notRunning
+        IntCmp $ALREADY_RUNNING 603 notRunning
             MessageBox MB_OK|MB_ICONEXCLAMATION \
                 "${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
             !insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
