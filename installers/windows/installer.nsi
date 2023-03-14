@@ -33,6 +33,7 @@
 
 Var INSTDIR_BASE
 Var ACCOUNT_TYPE
+Var ALREADY_RUNNING
 
 Name "${PRODUCT_NAME}"
 
@@ -62,20 +63,20 @@ RequestExecutionLevel highest
         %SystemRoot%\System32\find /I $\"${EXE}$\""
     Pop $0 ; The handle for the process
     ExecCmd::wait $0
-    Pop $0
+    Pop $ALREADY_RUNNING
 !macroend
 
 !macro ONINIT un
     Function ${un}.onInit
         !insertmacro CheckIfStillRunning
         IfSilent 0 notSilent
-            IntCmp $0 1 notRunning
+            IntCmp $ALREADY_RUNNING 1 notRunning
                 !insertmacro ConsoleLog "Waiting for ${PRODUCT_NAME} to close..."
                 Sleep 10000 ; In silent mode, give the app a few seconds to close then...
                 !insertmacro CheckIfStillRunning ; ...check again
 
         notSilent:
-        IntCmp $0 1 notRunning
+        IntCmp $ALREADY_RUNNING 1 notRunning
             MessageBox MB_OK|MB_ICONEXCLAMATION \
                 "${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
             !insertmacro ConsoleLog "${PRODUCT_NAME} is still running. Please close it before making changes."
