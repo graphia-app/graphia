@@ -246,8 +246,9 @@ Var STARTMENU_FOLDER
 Section "-Main Component"
     SetOutPath "$INSTDIR"
 
-    ; Clear out the target directory first
-    !insertmacro REMOVE_OLD_INSTALLATION
+    ; If there is an uninstaller at the destination, invoke it first
+    IfFileExists "$INSTDIR\Uninstall.exe" 0 +2
+    ExecWait '"$INSTDIR\Uninstall.exe" /S _?=$INSTDIR'
 
     File /r "installer\*.*"
 
