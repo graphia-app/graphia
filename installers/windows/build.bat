@@ -99,7 +99,7 @@ xcopy "%WindowsSdkDir%\redist\ucrt\DLLs\x64\*.*" %UPDATER_DIR% || EXIT /B 1
 
 FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
   SET "filename=%%i"
-  ECHO(!filename:%cd%\%UPDATER_DIR%\=!
+  ECHO !filename:%cd%\%UPDATER_DIR%\=!
 ) >> %INSTALLER_DIR%\Updater.deps
 
 move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
