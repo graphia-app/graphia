@@ -105,6 +105,25 @@ FOR /f "delims=" %%i IN ('dir /S /B /A:-D %UPDATER_DIR%') DO (
 move /Y %UPDATER_DIR%\*.* %INSTALLER_DIR%
 rmdir /s /q %UPDATER_DIR%
 
+set RM_NSH=installers\windows\rm.nsh
+echo. > %RM_NSH%
+
+FOR /d %%i IN (%INSTALLER_DIR%\*) DO (
+  SET "dirname=%%~ni"
+  ECHO RMDir /r "$INSTDIR\!dirname!"
+) >> %RM_NSH%
+
+FOR /f "delims=" %%i IN ('dir /B /A:-D %INSTALLER_DIR%') DO (
+  SET "filename=%%i"
+  ECHO Delete "$INSTDIR\!filename:%cd%\%INSTALLER_DIR%\=!"
+) >> %RM_NSH%
+
+:: Not recursive to avoid catastrophe when a user installs into a non-empty directory
+ECHO RMDir "$INSTDIR" >> %RM_NSH%
+
+echo ------ contents of %RM_NSH%:
+more %RM_NSH%
+
 set SIGNTOOL_ARGS=sign /fd SHA256 /tr %WINDOWS_SIGN_TSA% /td SHA256 /sm /n "%WINDOWS_SIGN_SUBJECTNAME%"
 
 IF DEFINED SIGNING_ENABLED (

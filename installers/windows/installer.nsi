@@ -299,6 +299,7 @@ Function Launch
 FunctionEnd
 
 Section "Uninstall"
+    Delete "$INSTDIR\Uninstall.exe"
     !include "rm.nsh"
 
     !insertmacro MUI_STARTMENU_GETFOLDER ${PRODUCT_NAME} $STARTMENU_FOLDER
