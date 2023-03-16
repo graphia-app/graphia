@@ -33,6 +33,7 @@ Rectangle
     property alias placeholderText: textArea.placeholderText
     property alias cursorPosition: textArea.cursorPosition
     property alias length: textArea.length
+    property alias font: textArea.font
     property alias outlineVisible: outline.outlineVisible
 
     color: "white"
