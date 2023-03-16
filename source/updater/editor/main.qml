@@ -161,7 +161,7 @@ ApplicationWindow
             [
                 {
                     name: "winnt",
-                    command: "INSTALLER_FILE /S"
+                    command: "INSTALLER_FILE /S /D=EXISTING_INSTALL"
                 },
                 {
                     name: "darwin",
