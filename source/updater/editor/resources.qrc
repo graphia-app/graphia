@@ -9,5 +9,6 @@
         <file alias="Icon128x128.png">../../app/icon/Icon128x128.png</file>
         <file alias="Icon256x256.png">../../app/icon/Icon256x256.png</file>
         <file alias="Icon512x512.png">../../app/icon/Icon512x512.png</file>
+        <file>CommandsDialog.qml</file>
     </qresource>
 </RCC>

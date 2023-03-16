@@ -241,7 +241,7 @@ ApplicationWindow
     }
 
     visible: true
-    flags: Qt.Window|Qt.Dialog
+    flags: Qt.Window
 
     title: qsTr("Update Editor") + (root.lastUsedFilename.length > 0 ?
         Utils.format(qsTr(" - {0}"), QmlUtils.baseFileNameForUrl(root.lastUsedFilename)) : "")
@@ -288,6 +288,8 @@ ApplicationWindow
         }
     }
 
+    CommandsDialog { id: commandsDialog }
+
     menuBar: MenuBar
     {
         id: mainMenuBar
@@ -330,6 +332,12 @@ ApplicationWindow
                     settings.hexEncodeUpdatesString = checked;
                     setSaveRequired();
                 }
+            }
+
+            MenuItem
+            {
+                text: qsTr("Commands…")
+                onTriggered: { commandsDialog.show(); }
             }
         }
     }
