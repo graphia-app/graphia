@@ -956,7 +956,7 @@ ApplicationWindow
                     updateObject.payloads[osName].url = url;
                     updateObject.payloads[osName].installerFileName = filename;
                     updateObject.payloads[osName].installerChecksum = "";
-                    updateObject.payloads[osName].command = foundOS.command.replace(/\n/g, "");
+                    updateObject.payloads[osName].command = foundOS.command;
                 }
 
                 let remainingChecksums = Object.keys(updateObject.payloads).length;
