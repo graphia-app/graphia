@@ -1067,13 +1067,14 @@ ApplicationWindow
                 enabled: !root.busy
                 visible: tabBar.count > 0
 
-                property var currentTab: stackLayout.count > 0 ? getTab(currentIndex) : null
+                property var currentTab: tabBar.count > 0 ? getTab(currentIndex) : null
 
                 function createTab()
                 {
                     setSaveRequired();
 
-                    let tab = tabComponent.createObject(stackLayout);
+                    let tab = tabComponent.createObject(null);
+                    tabLayout.insert(tabBar.count, tab);
 
                     let button = tabButtonComponent.createObject(tabBar);
                     tabBar.addItem(button);
@@ -1089,31 +1090,33 @@ ApplicationWindow
 
                 function removeTab(index)
                 {
-                    if(index >= stackLayout.count)
+                    if(index >= tabBar.count)
                     {
                         console.log("TabBar.removeTab: index out of range");
                         return;
                     }
 
-                    tabBar.removeItem(index);
-                    stackLayout.children[index].destroy();
+                    tabBar.removeItem(tabBar.itemAt(index));
+                    let tab = tabLayout.get(index);
+                    tabLayout.remove(index);
+                    tab.destroy();
                 }
 
                 function clear()
                 {
-                    while(stackLayout.count > 0)
+                    while(tabBar.count > 0)
                         removeTab(0);
                 }
 
                 function getTab(index)
                 {
-                    if(index >= stackLayout.count)
+                    if(index >= tabBar.count)
                     {
                         console.log("TabBar.getTab: index out of range");
                         return;
                     }
 
-                    return stackLayout.children[index];
+                    return tabLayout.get(index);
                 }
             }
 
@@ -1126,9 +1129,10 @@ ApplicationWindow
 
                 StackLayout
                 {
-                    id: stackLayout
                     anchors.fill: parent
                     currentIndex: tabBar.currentIndex
+
+                    Repeater { model: ObjectModel { id: tabLayout } }
                 }
             }
         }
