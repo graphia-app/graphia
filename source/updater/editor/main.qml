@@ -166,25 +166,25 @@ ApplicationWindow
                 {
                     name: "darwin",
                     command:
-                        "test -w EXISTING_INSTALL || " +
-                        "{ echo EXISTING_INSTALL is not writeable - admin permissions may be required; exit 1; }; " +
-                        "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |" +
-                        "    tail -n1 | cut -f3-; exit ${PIPESTATUS[0]}) && " +
-                        "(rsync -av \"$VOLUME\"\/Graphia.app/* EXISTING_INSTALL; SYNCED=$?;" +
+                        "test -w EXISTING_INSTALL ||\n" +
+                        "{ echo EXISTING_INSTALL is not writeable - admin permissions may be required; exit 1; };\n" +
+                        "VOLUME=$(hdiutil attach -nobrowse 'INSTALLER_FILE' |\n" +
+                        "    tail -n1 | cut -f3-; exit ${PIPESTATUS[0]}) &&\n" +
+                        "(rsync -av \"$VOLUME\"\/Graphia.app/* EXISTING_INSTALL; SYNCED=$?;\n" +
                         "    (hdiutil detach -force \"$VOLUME\" || exit $?) && exit \"$SYNCED\")"
                 },
                 {
                     name: "linux",
                     command:
-                        "TARGET=$(readlink -f 'EXISTING_INSTALL') &&" +
-                        "TEMP_TARGET=$(tempfile) &&" +
-                        "RESTORE_METADATA=$(stat -c\"chmod %a '${TEMP_TARGET}' &&" +
-                        "   chown %U:%G '${TEMP_TARGET}'\" \"${TARGET}\") &&" +
-                        "COMMAND=\"[ \\\"\\${TAR_FILENAME}\\\" = 'Graphia.AppImage' ] &&" +
-                        "   cat > '${TEMP_TARGET}' && ${RESTORE_METADATA} &&" +
-                        "   mv '${TEMP_TARGET}' '${TARGET}'\" &&" +
-                        "SUDO=$([ ! -w \"${TARGET}\" ] && echo 'pkexec' || echo '') &&" +
-                        "${SUDO} tar -xf INSTALLER_FILE --to-command=\"sh -c \\\"${COMMAND}\\\"\" ||" +
+                        "TARGET=$(readlink -f 'EXISTING_INSTALL') &&\n" +
+                        "TEMP_TARGET=$(tempfile) &&\n" +
+                        "RESTORE_METADATA=$(stat -c\"chmod %a '${TEMP_TARGET}' &&\n" +
+                        "   chown %U:%G '${TEMP_TARGET}'\" \"${TARGET}\") &&\n" +
+                        "COMMAND=\"[ \\\"\\${TAR_FILENAME}\\\" = 'Graphia.AppImage' ] &&\n" +
+                        "   cat > '${TEMP_TARGET}' && ${RESTORE_METADATA} &&\n" +
+                        "   mv '${TEMP_TARGET}' '${TARGET}'\" &&\n" +
+                        "SUDO=$([ ! -w \"${TARGET}\" ] && echo 'pkexec' || echo '') &&\n" +
+                        "${SUDO} tar -xf INSTALLER_FILE --to-command=\"sh -c \\\"${COMMAND}\\\"\" ||\n" +
                         "   (rm -f \"${TEMP_TARGET}\"; exit 1)"
                 },
             ]);
