@@ -288,7 +288,16 @@ ApplicationWindow
         }
     }
 
-    CommandsDialog { id: commandsDialog }
+    CommandsDialog
+    {
+        id: commandsDialog
+
+        onAccepted:
+        {
+            settings.operatingSystems = JSON.stringify(operatingSystems);
+            setSaveRequired();
+        }
+    }
 
     menuBar: MenuBar
     {
@@ -337,7 +346,12 @@ ApplicationWindow
             MenuItem
             {
                 text: qsTr("Commands…")
-                onTriggered: { commandsDialog.show(); }
+                onTriggered:
+                {
+                    commandsDialog.operatingSystems = [];
+                    commandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
+                    commandsDialog.show();
+                }
             }
         }
     }
@@ -390,6 +404,8 @@ ApplicationWindow
 
             tab.resetOsControls();
 
+            let updateOperatingSystems = [];
+
             for(const osName in update.payloads)
             {
                 let url = update.payloads[osName].url;
@@ -400,6 +416,23 @@ ApplicationWindow
                 item.urlText = url;
 
                 root.checksums[url] = checksum;
+
+                updateOperatingSystems.push({name: osName, command: update.payloads[osName].command});
+            }
+
+            let hasCustomCommands = false;
+            for(const updateOS of updateOperatingSystems)
+            {
+                const settingsOS = root.operatingSystems.find(os => os.name === updateOS.name);
+
+                if(updateOS.command !== settingsOS.command)
+                    hasCustomCommands = true;
+            }
+
+            if(hasCustomCommands)
+            {
+                tab.customCommandsChecked = true;
+                tab.customOperatingSystems = updateOperatingSystems;
             }
 
             for(const image of update.images)
@@ -665,6 +698,8 @@ ApplicationWindow
             property alias markdownText: markdownChangelog.text
             property alias previewText: preview.text
             property alias forceInstallationChecked: forceInstallation.checked
+            property alias customCommandsChecked: customCommands.checked
+            property alias customOperatingSystems: customCommandsDialog.operatingSystems
 
             property alias markdownTextArea: markdownChangelog
 
@@ -838,6 +873,40 @@ ApplicationWindow
                                 }
                             }
                         }
+
+                        RowLayout
+                        {
+                            Item { Layout.fillWidth: true }
+
+                            CommandsDialog
+                            {
+                                id: customCommandsDialog
+
+                                onAccepted: { setSaveRequired(); }
+                            }
+
+                            CheckBox
+                            {
+                                id: customCommands
+                                checked: false
+
+                                onCheckedChanged: { setSaveRequired(); }
+                            }
+
+                            Button
+                            {
+                                enabled: customCommands.checked
+                                text: qsTr("Custom Commands")
+
+                                onClicked: function(mouse)
+                                {
+                                    if(customCommandsDialog.operatingSystems.length === 0)
+                                        customCommandsDialog.operatingSystems = JSON.parse(settings.operatingSystems);
+
+                                    customCommandsDialog.show();
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -940,7 +1009,10 @@ ApplicationWindow
                     if(filename.length === 0)
                         filename = "installer";
 
-                    const foundOS = root.operatingSystems.find(os => os.name === osName);
+                    let resolvedOperatingSystems = customCommandsChecked ?
+                        customOperatingSystems : root.operatingSystems;
+
+                    const foundOS = resolvedOperatingSystems.find(os => os.name === osName);
                     if(foundOS === undefined)
                         continue;
 

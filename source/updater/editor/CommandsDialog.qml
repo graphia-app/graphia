@@ -98,7 +98,7 @@ Window
             Button
             {
                 text: qsTr("OK")
-                onClicked:
+                onClicked: function(mouse)
                 {
                     let osCommands = [];
 
@@ -109,26 +109,20 @@ Window
                         osCommands.push({"name": item.name, "command": item.command});
                     }
 
-                    settings.operatingSystems = JSON.stringify(osCommands);
-
                     root.close();
+
+                    root.operatingSystems = osCommands;
+                    root.accepted();
                 }
             }
 
             Button
             {
                 text: qsTr("Cancel")
-                onClicked: root.close();
+                onClicked: function(mouse) { root.close(); }
             }
         }
     }
 
-    onVisibleChanged:
-    {
-        if(!visible)
-            return;
-
-        root.operatingSystems = [];
-        root.operatingSystems = JSON.parse(settings.operatingSystems);
-    }
+    signal accepted()
 }
