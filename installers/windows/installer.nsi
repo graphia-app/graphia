@@ -233,9 +233,9 @@ Section "-Main Component"
     WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
     ; Register protocol handler for dealing with hyperlinks
-    WriteRegStr HKCR "${NATIVE_EXTENSION}" "" "URL:${PRODUCT_NAME} Protocol"
-    WriteRegStr HKCR "${NATIVE_EXTENSION}" "URL Protocol" ""
-    WriteRegStr HKCR "${NATIVE_EXTENSION}\shell\open\command" "" "$\"$INSTDIR\${EXE}$\" $\"%1$\""
+    WriteRegStr SHCTX "Software\Classes\${NATIVE_EXTENSION}" "" "URL:${PRODUCT_NAME} Protocol"
+    WriteRegStr SHCTX "Software\Classes\${NATIVE_EXTENSION}" "URL Protocol" ""
+    WriteRegStr SHCTX "Software\Classes\${NATIVE_EXTENSION}\shell\open\command" "" "$\"$INSTDIR\${EXE}$\" $\"%1$\""
 
     IfFileExists "$INSTDIR\Uninstall.exe" +2 ; Don't make Uninstall.exe if it already exists
     WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -312,7 +312,7 @@ Section "Uninstall"
 
     DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
-    DeleteRegKey HKCR "${NATIVE_EXTENSION}"
+    DeleteRegKey SHCTX "Software\Classes\${NATIVE_EXTENSION}"
 
     !insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}.Native"
     !insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
