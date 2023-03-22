@@ -20,6 +20,9 @@ using json = nlohmann::json;
 #include <QUrl>
 #include <QFile>
 #include <QByteArray>
+#include <QVariant>
+#include <QVariantList>
+#include <QVariantMap>
 
 inline void to_json(json& j, const QString& s)
 {
@@ -42,6 +45,48 @@ void to_json(json& j, ElementId<E> elementId)
     j = static_cast<int>(elementId);
 }
 
+inline void from_json(const json& j, QVariant& v)
+{
+    switch(j.type())
+    {
+    default:
+    case json::value_t::null:               v = {}; break;
+    case json::value_t::boolean:            v = QVariant::fromValue(j.get<bool>()); break;
+    case json::value_t::number_integer:     v = QVariant::fromValue(j.get<int>()); break;
+    case json::value_t::number_unsigned:    v = QVariant::fromValue(j.get<unsigned int>()); break;
+    case json::value_t::number_float:       v = QVariant::fromValue(j.get<float>()); break;
+    case json::value_t::string:             v = QVariant::fromValue(QString::fromStdString(j.get<std::string>())); break;
+    case json::value_t::array:
+    {
+        QVariantList variantList;
+
+        for(const auto& element : j)
+        {
+            QVariant variantElement;
+            from_json(element, variantElement);
+            variantList.append(variantElement);
+        }
+
+        v = variantList;
+        break;
+    }
+    case json::value_t::object:
+    {
+        QVariantMap variantMap;
+
+        for(const auto& element : j.items())
+        {
+            auto key = QString::fromStdString(element.key());
+            QVariant variantValue;
+            from_json(element.value(), variantValue);
+            variantMap.insert(key, variantValue);
+        }
+
+        v = QVariant::fromValue(variantMap);
+        break;
+    }
+    }
+}
 
 template<typename C>
 json jsonArrayFrom(const C& container, Progressable* progressable = nullptr)
