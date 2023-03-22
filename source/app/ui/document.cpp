@@ -819,6 +819,17 @@ void Document::onLoadComplete(const QUrl&, bool success)
         return;
     }
 
+    if(_graphQuickItem == nullptr)
+    {
+        _loadComplete = true;
+
+        connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
+        connect(&_commandManager, &CommandManager::commandPhaseChanged, this, &Document::commandVerbChanged);
+        connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
+
+        return;
+    }
+
     // Final tasks before load is considered complete
     _graphModel->initialiseAttributeRanges();
     _graphModel->initialiseSharedAttributeValues();
