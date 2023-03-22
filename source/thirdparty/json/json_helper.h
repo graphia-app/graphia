@@ -18,6 +18,7 @@ using json = nlohmann::json;
 
 #include <QString>
 #include <QUrl>
+#include <QFile>
 #include <QByteArray>
 
 inline void to_json(json& j, const QString& s)
@@ -93,6 +94,15 @@ inline json parseJsonFrom(const QByteArray& byteArray, IParser* parser = nullptr
     catch(JSONByteArrayIterator::cancelled_exception&) {}
 
     return result;
+}
+
+inline json parseJsonFrom(const QString& filename)
+{
+    QFile file(filename);
+    if(!file.open(QIODeviceBase::ReadOnly))
+        return {};
+
+    return parseJsonFrom(file.readAll());
 }
 
 #endif // JSON_HELPER_H
