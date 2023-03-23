@@ -79,6 +79,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/circularbuffer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/console.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/consolecapture.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/container_combine.h
@@ -157,6 +158,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/colorpalette.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/apppathname.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/console.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/consolecapture.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/crypto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
