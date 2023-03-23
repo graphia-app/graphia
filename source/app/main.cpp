@@ -61,6 +61,7 @@
 #include "shared/utils/apppathname.h"
 #include "shared/utils/static_block.h"
 #include "shared/utils/thread.h"
+#include "shared/utils/console.h"
 #include "shared/utils/consolecapture.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
@@ -480,9 +481,13 @@ int main(int argc, char *argv[])
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
 
+    auto mode = enableConsoleMode();
+
     // The "real" main is separate to limit the scope of QtSingleApplication,
     // otherwise a restart causes the exiting instance to get activated
     auto exitCode = start(argc, argv, consoleOutputFiles);
+
+    restoreConsoleMode(mode);
 
     if(static_cast<ExitType>(exitCode) == ExitType::Restart)
     {
