@@ -53,6 +53,7 @@
 #include "application.h"
 #include "preferences.h"
 #include "preferenceswatcher.h"
+#include "headless.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/scopetimer.h"
@@ -215,13 +216,17 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         {{"u", "dontUpdate"}, QObject::tr("Don't update now, but remind later.")},
         {{"m", "startMaximised"}, QObject::tr("Put the application window in maximised state.")},
         {{"w", "skipWelcome"}, QObject::tr("Don't show the welcome screen on first start.")},
+        {{"p", "parameters"}, QObject::tr("Run in headless mode, using parameters from <file>."), "file"},
     });
 
     commandLineParser.process(QCoreApplication::arguments());
 
     Q_INIT_RESOURCE(update_keys);
 
-    if(!commandLineParser.isSet(QStringLiteral("dontUpdate")) && Updater::updateAvailable())
+    auto dontUpdate = commandLineParser.isSet(QStringLiteral("dontUpdate")) ||
+        commandLineParser.isSet(QStringLiteral("parameters"));
+
+    if(!dontUpdate && Updater::updateAvailable())
     {
         QStringList restartArguments = QCoreApplication::arguments();
         restartArguments[0] = resolvedExeName(restartArguments.at(0));
@@ -289,6 +294,18 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     const ThreadPoolSingleton threadPool;
     const ScopeTimerManager scopeTimerManager;
+
+    if(commandLineParser.isSet(QStringLiteral("parameters")))
+    {
+        auto parametersFilename = commandLineParser.value(QStringLiteral("parameters"));
+        Headless headless(commandLineParser.positionalArguments(), parametersFilename);
+
+        QTimer::singleShot(0, &headless, &Headless::run);
+        QObject::connect(&headless, &Headless::done,
+            QCoreApplication::instance(), &QCoreApplication::quit);
+
+        return QCoreApplication::exec();
+    }
 
     u::definePref(QStringLiteral("visuals/defaultNodeColor"),               "#0000FF");
     u::definePref(QStringLiteral("visuals/defaultEdgeColor"),               "#FFFFFF");
