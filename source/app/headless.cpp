@@ -22,12 +22,15 @@
 #include "app/ui/document.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/console.h"
 
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
 #include <QFileInfo>
 #include <QDir>
+
+#include <algorithm>
 
 #include <json_helper.h>
 
@@ -46,8 +49,11 @@ struct HeadlessState
     QVariantMap _pluginParameters;
     QString _destination;
 
+    bool _displayProgress = false;
+
     HeadlessState(const QStringList& sourceFilenames, const QString& parametersFilename) :
-        _sourceFilenames(sourceFilenames), _parametersFilename(parametersFilename)
+        _sourceFilenames(sourceFilenames), _parametersFilename(parametersFilename),
+        _displayProgress(isRunningInConsole())
     {}
 
     void reset()
@@ -68,9 +74,62 @@ Headless::~Headless() // NOLINT
     // Only here so that we can have a unique_ptr to HeadlessImpl
 }
 
+static std::string progressBarText(size_t width, int percent)
+{
+    const char pre = '[';
+    const char bar = '#';
+    const char blank = ' ';
+    const char post = ']';
+
+    const auto dynamicWidth = width - 2;
+
+    std::string s;
+
+    s += pre;
+
+    if(percent < 0)
+    {
+        for(size_t i = 0; i < dynamicWidth; i++)
+            s += ((i % 2) != 0) ? bar : blank;
+    }
+    else
+    {
+        percent = std::clamp(percent, 0, 100);
+        const auto numBarChars = (static_cast<size_t>(percent) * dynamicWidth) / 100;
+        const auto numNotChars = dynamicWidth - numBarChars;
+
+        s.append(numBarChars, bar);
+        s.append(numNotChars, blank);
+    }
+
+    s += post;
+
+    return s;
+}
+
+static std::string filenameToStdString(const QString& f)
+{
+    return QFileInfo(f).canonicalFilePath().toStdString();
+}
+
 void Headless::processNext()
 {
     _->reset();
+
+    connect(_->_document, &Document::commandProgressChanged, [this]
+    {
+        if(!_->_displayProgress)
+            return;
+
+        const auto columns = consoleWidth();
+        auto verb = _->_document->commandVerb().toStdString();
+        if(!verb.empty()) verb += " ";
+
+        auto progressBarWidth = std::max(static_cast<size_t>(3), columns - (verb.size()));
+
+        std::cout << "\r" << verb << progressBarText(progressBarWidth, _->_document->commandProgress());
+        std::cout.flush();
+    });
 
     connect(_->_document, &Document::loadComplete, [this]
     {
@@ -92,9 +151,12 @@ void Headless::processNext()
         else
             target = _->_destination;
 
-        if(!QFileInfo(target).isWritable())
+        if(!QFileInfo(QFileInfo(target).canonicalPath()).isWritable())
         {
-            std::cerr << target.toStdString() << " is not writable.\n";
+            if(_->_displayProgress)
+                std::cout << "\n";
+
+            std::cerr << filenameToStdString(target) << " is not writable.\n";
             emit done();
             return;
         }
@@ -102,13 +164,23 @@ void Headless::processNext()
         _->_document->saveFile(QUrl::fromLocalFile(target), Application::name(), {}, {});
     });
 
-    connect(_->_document, &Document::saveComplete, this, [this]
+    connect(_->_document, &Document::saveComplete, this, [this](bool success, const QUrl& fileUrl, const QString&)
     {
         _->_document->deleteLater();
         _->_document = nullptr;
 
+        if(_->_displayProgress)
+            std::cout << "\x1b[2K\r"; // Clear line
+
+        auto filename = filenameToStdString(fileUrl.toLocalFile());
+
+        if(success)
+            std::cout << "Wrote " << filename << " successfully.\n";
+        else
+            std::cout << "Failed to write " << filename << ".\n";
+
         _->_sourceFilenames.pop_front();
-        if(_->_sourceFilenames.isEmpty())
+        if(!success || _->_sourceFilenames.isEmpty())
             emit done();
         else
             processNext();
@@ -119,6 +191,9 @@ void Headless::processNext()
 
     if(!success)
     {
+        if(_->_displayProgress)
+            std::cout << "\n";
+
         std::cerr << "Failed to open " << _->_sourceFilenames.at(0).toStdString() << ".\n";
         emit done();
     }
