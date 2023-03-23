@@ -25,6 +25,7 @@
 #include <io.h>
 #else
 #include <unistd.h>
+#include <sys/ioctl.h>
 #endif
 
 bool isRunningInConsole()
@@ -72,4 +73,23 @@ void restoreConsoleMode(DWORD mode)
 #else
     Q_UNUSED(mode);
 #endif
+}
+
+size_t consoleWidth()
+{
+    if(isRunningInConsole())
+    {
+#ifdef Q_OS_WIN
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        if(GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+            return csbi.dwSize.X;
+#else
+        struct winsize w;
+
+        if(ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0)
+            return w.ws_col;
+#endif
+    }
+
+    return 80; // Reasonable default?
 }

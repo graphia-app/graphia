@@ -32,5 +32,6 @@ using DWORD = unsigned long;
 bool isRunningInConsole();
 DWORD enableConsoleMode();
 void restoreConsoleMode(DWORD mode);
+size_t consoleWidth();
 
 #endif // CONSOLE_H
