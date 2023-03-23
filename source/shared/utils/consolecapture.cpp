@@ -19,6 +19,7 @@
 #include "consolecapture.h"
 #include "odsconsolecapture.h"
 #include "debugger.h"
+#include "console.h"
 
 #include <iostream>
 
@@ -71,7 +72,7 @@ void CStreamCapture::close()
 
 ConsoleOutputFiles captureConsoleOutput(const QString& path, const QString& prefix)
 {
-    if(u::isDebuggerPresent())
+    if(isRunningInConsole() || u::isDebuggerPresent())
         return {};
 
     auto filename = [&](const char* basename)
