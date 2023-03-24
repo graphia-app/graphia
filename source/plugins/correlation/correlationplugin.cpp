@@ -647,25 +647,25 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QStringLiteral("transpose"))
         _transpose = (value == QStringLiteral("true"));
     else if(name == QStringLiteral("correlationFilterType"))
-        _correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(value.toInt());
+        _correlationFilterType = qmlEnumFor<CorrelationFilterType>(value);
     else if(name == QStringLiteral("correlationDataType"))
-        _correlationDataType = normaliseQmlEnum<CorrelationDataType>(value.toInt());
+        _correlationDataType = qmlEnumFor<CorrelationDataType>(value);
     else if(name == QStringLiteral("continuousCorrelationType"))
-        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(value.toInt());
+        _continuousCorrelationType = qmlEnumFor<CorrelationType>(value);
     else if(name == QStringLiteral("discreteCorrelationType"))
-        _discreteCorrelationType = normaliseQmlEnum<CorrelationType>(value.toInt());
+        _discreteCorrelationType = qmlEnumFor<CorrelationType>(value);
     else if(name == QStringLiteral("correlationPolarity"))
-        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(value.toInt());
+        _correlationPolarity = qmlEnumFor<CorrelationPolarity>(value);
     else if(name == QStringLiteral("scaling"))
-        _scalingType = normaliseQmlEnum<ScalingType>(value.toInt());
+        _scalingType = qmlEnumFor<ScalingType>(value);
     else if(name == QStringLiteral("normalise"))
-        _normaliseType = normaliseQmlEnum<NormaliseType>(value.toInt());
+        _normaliseType = qmlEnumFor<NormaliseType>(value);
     else if(name == QStringLiteral("missingDataType"))
-        _missingDataType = normaliseQmlEnum<MissingDataType>(value.toInt());
+        _missingDataType = qmlEnumFor<MissingDataType>(value);
     else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
     else if(name == QStringLiteral("clippingType"))
-        _clippingType = normaliseQmlEnum<ClippingType>(value.toInt());
+        _clippingType = qmlEnumFor<ClippingType>(value);
     else if(name == QStringLiteral("clippingValue"))
         _clippingValue = value.toDouble();
     else if(name == QStringLiteral("treatAsBinary"))
