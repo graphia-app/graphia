@@ -22,6 +22,7 @@
 #include <QQmlEngine>
 #include <QCoreApplication>
 #include <QTimer>
+#include <QVariant>
 
 #include <string>
 
@@ -96,9 +97,36 @@ constexpr bool static_strcmp(char const* a, char const* b)
     } \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
 
-#define NORMALISE_QML_ENUM(x, v) \
-    (static_cast<x>(v) < static_cast<x>(0) || static_cast<x>(v) >= x::Max ? \
-    static_cast<x>(0) : static_cast<x>(v))
+template<typename QmlEnumType>
+QmlEnumType normaliseQmlEnum(auto v)
+{
+    auto zero = static_cast<QmlEnumType>(0);
+    auto cast = static_cast<QmlEnumType>(v);
+
+    if(cast < zero || cast >= QmlEnumType::Max)
+        return zero;
+
+    return cast;
+}
+
+template<typename QmlEnumType>
+QmlEnumType qmlEnumFor(const QVariant& v)
+{
+    bool success;
+    int i = v.toInt(&success);
+
+    if(!success)
+    {
+        auto s = v.toString();
+        if(!s.isEmpty())
+        {
+            auto metaEnum = QMetaEnum::fromType<QmlEnumType>();
+            i = metaEnum.keyToValue(s.toUtf8().constData());
+        }
+    }
+
+    return normaliseQmlEnum<QmlEnumType>(i);
+}
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 

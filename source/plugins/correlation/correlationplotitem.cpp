@@ -1225,7 +1225,7 @@ bool CorrelationPlotItem::updateSortMap()
         Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
 
         ColumnSortOrder columnSortOrder;
-        columnSortOrder._type = NORMALISE_QML_ENUM(PlotColumnSortType, qmlColumnSortOrder[QStringLiteral("type")].toInt());
+        columnSortOrder._type = normaliseQmlEnum<PlotColumnSortType>(qmlColumnSortOrder[QStringLiteral("type")].toInt());
         columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder[QStringLiteral("order")].toInt());
 
         if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
@@ -1258,7 +1258,7 @@ bool CorrelationPlotItem::updateSortMap()
             }
         }
 
-        auto plotAveragingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
+        auto plotAveragingType = normaliseQmlEnum<PlotAveragingType>(_averagingType);
         auto offset = _pluginInstance->numDiscreteColumns();
 
         for(size_t col = 0; col < _pluginInstance->numContinuousColumns(); col++)
@@ -1520,10 +1520,10 @@ double CorrelationPlotItem::minColumnWidth() const
     if(_showAllColumns)
         return columnAxisWidth() / static_cast<double>(numVisibleColumns());
 
-    if(NORMALISE_QML_ENUM(PlotAveragingType, _averagingType) == PlotAveragingType::IQR || _groupByAnnotation)
+    if(normaliseQmlEnum<PlotAveragingType>(_averagingType) == PlotAveragingType::IQR || _groupByAnnotation)
         return minColumnBoxPlotWidth;
 
-    if(NORMALISE_QML_ENUM(PlotDispersionType, _dispersionType) != PlotDispersionType::None)
+    if(normaliseQmlEnum<PlotDispersionType>(_dispersionType) != PlotDispersionType::None)
         return minColumnBoxPlotWidth;
 
     return minColumnPixelWidth;

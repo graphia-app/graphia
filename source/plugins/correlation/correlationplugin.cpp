@@ -245,7 +245,7 @@ void CorrelationPluginInstance::createAttributes()
 
     QString correlationAttributeDescription;
 
-    auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType);
+    auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(_correlationDataType);
     switch(correlationDataType)
     {
     default:
@@ -345,7 +345,7 @@ void CorrelationPluginInstance::createAttributes()
         .setFlag(AttributeFlag::AutoRange)
         .setDescription(correlationAttributeDescription);
 
-    auto correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity);
+    auto correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(_correlationPolarity);
     switch(correlationPolarity)
     {
     case CorrelationPolarity::Negative:
@@ -410,7 +410,7 @@ QStringList CorrelationPluginInstance::numericalAttributeNames() const
 
 EdgeList CorrelationPluginInstance::correlation(IParser& parser)
 {
-    auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, _correlationDataType);
+    auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(_correlationDataType);
     switch(correlationDataType)
     {
     default:
@@ -647,25 +647,25 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QStringLiteral("transpose"))
         _transpose = (value == QStringLiteral("true"));
     else if(name == QStringLiteral("correlationFilterType"))
-        _correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, value.toInt());
+        _correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(value.toInt());
     else if(name == QStringLiteral("correlationDataType"))
-        _correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, value.toInt());
+        _correlationDataType = normaliseQmlEnum<CorrelationDataType>(value.toInt());
     else if(name == QStringLiteral("continuousCorrelationType"))
-        _continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, value.toInt());
+        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(value.toInt());
     else if(name == QStringLiteral("discreteCorrelationType"))
-        _discreteCorrelationType = NORMALISE_QML_ENUM(CorrelationType, value.toInt());
+        _discreteCorrelationType = normaliseQmlEnum<CorrelationType>(value.toInt());
     else if(name == QStringLiteral("correlationPolarity"))
-        _correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, value.toInt());
+        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(value.toInt());
     else if(name == QStringLiteral("scaling"))
-        _scalingType = NORMALISE_QML_ENUM(ScalingType, value.toInt());
+        _scalingType = normaliseQmlEnum<ScalingType>(value.toInt());
     else if(name == QStringLiteral("normalise"))
-        _normaliseType = NORMALISE_QML_ENUM(NormaliseType, value.toInt());
+        _normaliseType = normaliseQmlEnum<NormaliseType>(value.toInt());
     else if(name == QStringLiteral("missingDataType"))
-        _missingDataType = NORMALISE_QML_ENUM(MissingDataType, value.toInt());
+        _missingDataType = normaliseQmlEnum<MissingDataType>(value.toInt());
     else if(name == QStringLiteral("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
     else if(name == QStringLiteral("clippingType"))
-        _clippingType = NORMALISE_QML_ENUM(ClippingType, value.toInt());
+        _clippingType = normaliseQmlEnum<ClippingType>(value.toInt());
     else if(name == QStringLiteral("clippingValue"))
         _clippingValue = value.toDouble();
     else if(name == QStringLiteral("treatAsBinary"))
@@ -689,13 +689,13 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
         R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
 
-    auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, _correlationFilterType);
-    auto correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity);
+    auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(_correlationFilterType);
+    auto correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(_correlationPolarity);
 
     const char* filterOperator = nullptr;
     const QString* filterAttribute = nullptr;
 
-    switch(NORMALISE_QML_ENUM(CorrelationPolarity, _correlationPolarity))
+    switch(normaliseQmlEnum<CorrelationPolarity>(_correlationPolarity))
     {
     default:
     case CorrelationPolarity::Positive:
@@ -1155,9 +1155,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _maximumK = jsonObject["maximumK"];
 
     _transpose = jsonObject["transpose"];
-    _scalingType = NORMALISE_QML_ENUM(ScalingType, jsonObject["scaling"]);
-    _normaliseType = NORMALISE_QML_ENUM(NormaliseType, jsonObject["normalisation"]);
-    _missingDataType = NORMALISE_QML_ENUM(MissingDataType, jsonObject["missingDataType"]);
+    _scalingType = normaliseQmlEnum<ScalingType>(jsonObject["scaling"]);
+    _normaliseType = normaliseQmlEnum<NormaliseType>(jsonObject["normalisation"]);
+    _missingDataType = normaliseQmlEnum<MissingDataType>(jsonObject["missingDataType"]);
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
     if(dataVersion >= 10)
@@ -1168,7 +1168,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
             return false;
         }
 
-        _clippingType = NORMALISE_QML_ENUM(ClippingType, jsonObject["clippingType"]);
+        _clippingType = normaliseQmlEnum<ClippingType>(jsonObject["clippingType"]);
         _clippingValue = jsonObject["clippingValue"];
     }
 
@@ -1181,10 +1181,10 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
             return false;
         }
 
-        _correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, jsonObject["correlationDataType"]);
-        _continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, jsonObject["continuousCorrelationType"]);
-        _discreteCorrelationType = NORMALISE_QML_ENUM(CorrelationType, jsonObject["discreteCorrelationType"]);
-        _correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, jsonObject["correlationPolarity"]);
+        _correlationDataType = normaliseQmlEnum<CorrelationDataType>(jsonObject["correlationDataType"]);
+        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["continuousCorrelationType"]);
+        _discreteCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["discreteCorrelationType"]);
+        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(jsonObject["correlationPolarity"]);
     }
     else if(dataVersion >= 3)
     {
@@ -1195,9 +1195,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         }
 
         _correlationDataType = CorrelationDataType::Continuous;
-        _continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, jsonObject["correlationType"]);
+        _continuousCorrelationType = normaliseQmlEnum<CorrelationType>(jsonObject["correlationType"]);
         _discreteCorrelationType = CorrelationType::Jaccard;
-        _correlationPolarity = NORMALISE_QML_ENUM(CorrelationPolarity, jsonObject["correlationPolarity"]);
+        _correlationPolarity = normaliseQmlEnum<CorrelationPolarity>(jsonObject["correlationPolarity"]);
     }
 
     createAttributes();
@@ -1323,13 +1323,13 @@ QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
     };
 
     auto discreteCorrelation = DiscreteCorrelation::create(
-        NORMALISE_QML_ENUM(CorrelationType, correlationType),
+        normaliseQmlEnum<CorrelationType>(correlationType),
         CorrelationFilterType::Threshold);
     if(discreteCorrelation != nullptr)
         return makeVariantMap(discreteCorrelation);
 
     auto continuousCorrelation = ContinuousCorrelation::create(
-        NORMALISE_QML_ENUM(CorrelationType, correlationType),
+        normaliseQmlEnum<CorrelationType>(correlationType),
         CorrelationFilterType::Threshold);
     if(continuousCorrelation != nullptr)
         return makeVariantMap(continuousCorrelation);

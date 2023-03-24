@@ -75,7 +75,7 @@ public:
     ThresholdFilter(const DataVectors&, const QVariantMap& parameters)
     {
         _threshold = parameters[QStringLiteral("minimumThreshold")].toDouble();
-        _polarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
+        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[QStringLiteral("correlationPolarity")].toInt());
     }
 
     using Results = CorrelationVector<DataVectors>;

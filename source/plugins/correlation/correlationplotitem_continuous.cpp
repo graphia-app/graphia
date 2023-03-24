@@ -69,7 +69,7 @@ void CorrelationPlotItem::setContinousYAxisRangeForSelection()
 
 void CorrelationPlotItem::setDispersionVisualType(int dispersionVisualType)
 {
-    dispersionVisualType = static_cast<int>(NORMALISE_QML_ENUM(PlotDispersionVisualType, dispersionVisualType));
+    dispersionVisualType = static_cast<int>(normaliseQmlEnum<PlotDispersionVisualType>(dispersionVisualType));
 
     if(_dispersionVisualType != dispersionVisualType)
     {
@@ -104,7 +104,7 @@ void CorrelationPlotItem::setShowIqrOutliers(bool showIqrOutliers)
 
 void CorrelationPlotItem::setScaleType(int scaleType)
 {
-    scaleType = static_cast<int>(NORMALISE_QML_ENUM(PlotScaleType, scaleType));
+    scaleType = static_cast<int>(normaliseQmlEnum<PlotScaleType>(scaleType));
 
     if(_scaleType != scaleType)
     {
@@ -136,7 +136,7 @@ void CorrelationPlotItem::setScaleByAttributeName(const QString& attributeName)
 
 void CorrelationPlotItem::setAveragingType(int averagingType)
 {
-    averagingType = static_cast<int>(NORMALISE_QML_ENUM(PlotAveragingType, averagingType));
+    averagingType = static_cast<int>(normaliseQmlEnum<PlotAveragingType>(averagingType));
 
     if(_averagingType != averagingType)
     {
@@ -187,7 +187,7 @@ void CorrelationPlotItem::setColorGroupByAnnotationName(const QString& annotatio
 
 void CorrelationPlotItem::setDispersionType(int dispersionType)
 {
-    dispersionType = static_cast<int>(NORMALISE_QML_ENUM(PlotDispersionType, dispersionType));
+    dispersionType = static_cast<int>(normaliseQmlEnum<PlotDispersionType>(dispersionType));
 
     if(_dispersionType != dispersionType)
     {
@@ -532,7 +532,7 @@ void CorrelationPlotItem::plotDispersion(QCPAbstractPlottable* meanPlot,
     double& minY, double& maxY,
     const QVector<double>& stdDevs, const QString& name = tr("Deviation"))
 {
-    auto visualType = NORMALISE_QML_ENUM(PlotDispersionVisualType, _dispersionVisualType);
+    auto visualType = normaliseQmlEnum<PlotDispersionVisualType>(_dispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
         auto* stdDevBars = new QCPErrorBars(_continuousXAxis, _continuousYAxis);
@@ -642,8 +642,8 @@ void CorrelationPlotItem::populateDispersion(QCPAbstractPlottable* meanPlot,
     if(_groupByAnnotation)
         return;
 
-    auto averagingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
-    auto dispersionType = NORMALISE_QML_ENUM(PlotDispersionType, _dispersionType);
+    auto averagingType = normaliseQmlEnum<PlotAveragingType>(_averagingType);
+    auto dispersionType = normaliseQmlEnum<PlotDispersionType>(_dispersionType);
 
     if(averagingType == PlotAveragingType::Individual || averagingType == PlotAveragingType::IQR)
         return;
@@ -693,7 +693,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             double attributeValue = 1.0;
 
-            if(NORMALISE_QML_ENUM(PlotScaleType, _scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
+            if(normaliseQmlEnum<PlotScaleType>(_scaleType) == PlotScaleType::ByAttribute && !_scaleByAttributeName.isEmpty())
             {
                 attributeValue = u::toNumber(_pluginInstance->attributeValueFor(_scaleByAttributeName, static_cast<size_t>(row)));
 
@@ -708,7 +708,7 @@ void CorrelationPlotItem::populateLinePlot()
             {
                 auto value = _pluginInstance->continuousDataAt(static_cast<size_t>(row), _sortMap.at(col));
 
-                switch(NORMALISE_QML_ENUM(PlotScaleType, _scaleType))
+                switch(normaliseQmlEnum<PlotScaleType>(_scaleType))
                 {
                 case PlotScaleType::Log:
                     value = logScale(value, _pluginInstance->continuousEpsilon());
@@ -787,7 +787,7 @@ void CorrelationPlotItem::configureContinuousAxisRect()
         _continuousXAxis->grid()->setZeroLinePen(_continuousXAxis->grid()->pen());
     }
 
-    auto plotAveragingType = NORMALISE_QML_ENUM(PlotAveragingType, _averagingType);
+    auto plotAveragingType = normaliseQmlEnum<PlotAveragingType>(_averagingType);
 
     if(!_groupByAnnotation || _visibleColumnAnnotationNames.empty())
     {

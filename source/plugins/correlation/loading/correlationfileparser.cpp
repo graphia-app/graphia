@@ -835,11 +835,11 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
     if(_dataRect.isEmpty())
         return {};
 
-    auto missingDataType = NORMALISE_QML_ENUM(MissingDataType, parameters[QStringLiteral("missingDataType")].toInt());
+    auto missingDataType = normaliseQmlEnum<MissingDataType>(parameters[QStringLiteral("missingDataType")].toInt());
     auto replacementValue = parameters[QStringLiteral("missingDataValue")].toDouble();
-    auto scalingType = NORMALISE_QML_ENUM(ScalingType, parameters[QStringLiteral("scaling")].toInt());
-    auto normaliseType = NORMALISE_QML_ENUM(NormaliseType, parameters[QStringLiteral("normalise")].toInt());
-    auto clippingType = NORMALISE_QML_ENUM(ClippingType, parameters[QStringLiteral("clippingType")].toInt());
+    auto scalingType = normaliseQmlEnum<ScalingType>(parameters[QStringLiteral("scaling")].toInt());
+    auto normaliseType = normaliseQmlEnum<NormaliseType>(parameters[QStringLiteral("normalise")].toInt());
+    auto clippingType = normaliseQmlEnum<ClippingType>(parameters[QStringLiteral("clippingType")].toInt());
     auto clippingValue = parameters[QStringLiteral("clippingValue")].toDouble();
 
     ContinuousDataVectors dataRows;
@@ -964,10 +964,10 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
         Q_ASSERT(!parameters.isEmpty());
 
         auto maximumK = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toUInt());
-        auto correlationFilterType = NORMALISE_QML_ENUM(CorrelationFilterType, parameters[QStringLiteral("correlationFilterType")].toInt());
-        auto correlationDataType = NORMALISE_QML_ENUM(CorrelationDataType, parameters[QStringLiteral("correlationDataType")].toInt());
-        auto continuousCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("continuousCorrelationType")].toInt());
-        auto discreteCorrelationType = NORMALISE_QML_ENUM(CorrelationType, parameters[QStringLiteral("discreteCorrelationType")].toInt());
+        auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(parameters[QStringLiteral("correlationFilterType")].toInt());
+        auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(parameters[QStringLiteral("correlationDataType")].toInt());
+        auto continuousCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[QStringLiteral("continuousCorrelationType")].toInt());
+        auto discreteCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[QStringLiteral("discreteCorrelationType")].toInt());
 
         if(_dataPtr->numRows() == 0)
             return QVariantMap();

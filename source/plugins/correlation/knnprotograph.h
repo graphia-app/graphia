@@ -80,7 +80,7 @@ public:
         _k = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toInt());
         Q_ASSERT(_k > 0);
         _threshold = parameters[QStringLiteral("minimumThreshold")].toDouble();
-        _polarity = NORMALISE_QML_ENUM(CorrelationPolarity, parameters[QStringLiteral("correlationPolarity")].toInt());
+        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[QStringLiteral("correlationPolarity")].toInt());
 
         for(auto& protoNode : _protoNodes)
             protoNode._protoGraph = this;

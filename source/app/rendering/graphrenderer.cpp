@@ -243,11 +243,11 @@ void GraphRenderer::updateGPUDataIfRequired()
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
     const float textScale = u::pref(QStringLiteral("visuals/textSize")).toFloat();
-    auto textAlignment = NORMALISE_QML_ENUM(TextAlignment, u::pref(QStringLiteral("visuals/textAlignment")).toInt());
+    auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(QStringLiteral("visuals/textAlignment")).toInt());
     auto textColor = Document::contrastingColorForBackground();
-    auto showNodeText = NORMALISE_QML_ENUM(TextState, u::pref(QStringLiteral("visuals/showNodeText")).toInt());
-    auto showEdgeText = NORMALISE_QML_ENUM(TextState, u::pref(QStringLiteral("visuals/showEdgeText")).toInt());
-    auto edgeVisualType = NORMALISE_QML_ENUM(EdgeVisualType, u::pref(QStringLiteral("visuals/edgeVisualType")).toInt());
+    auto showNodeText = normaliseQmlEnum<TextState>(u::pref(QStringLiteral("visuals/showNodeText")).toInt());
+    auto showEdgeText = normaliseQmlEnum<TextState>(u::pref(QStringLiteral("visuals/showEdgeText")).toInt());
+    auto edgeVisualType = normaliseQmlEnum<EdgeVisualType>(u::pref(QStringLiteral("visuals/edgeVisualType")).toInt());
 
     // Ignore the setting if the graph is undirected
     if(!_graphModel->directed())
