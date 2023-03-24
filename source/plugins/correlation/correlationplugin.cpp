@@ -671,7 +671,24 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QStringLiteral("treatAsBinary"))
         _treatAsBinary = value.toBool();
     else if(name == QStringLiteral("dataRect"))
-        _dataRect = value.toRect();
+    {
+        if(value.canConvert<QVariantMap>())
+        {
+            // This happens when the parameters are specified in headless mode
+            auto m = value.value<QVariantMap>();
+
+            if(m.contains(QStringLiteral("x")))         _dataRect.setX(m.value(QStringLiteral("x")).toInt());
+            if(m.contains(QStringLiteral("left")))      _dataRect.setLeft(m.value(QStringLiteral("left")).toInt());
+            if(m.contains(QStringLiteral("right")))     _dataRect.setRight(m.value(QStringLiteral("right")).toInt());
+            if(m.contains(QStringLiteral("y")))         _dataRect.setY(m.value(QStringLiteral("y")).toInt());
+            if(m.contains(QStringLiteral("top")))       _dataRect.setTop(m.value(QStringLiteral("top")).toInt());
+            if(m.contains(QStringLiteral("bottom")))    _dataRect.setBottom(m.value(QStringLiteral("bottom")).toInt());
+            if(m.contains(QStringLiteral("width")))     _dataRect.setWidth(m.value(QStringLiteral("width")).toInt());
+            if(m.contains(QStringLiteral("height")))    _dataRect.setHeight(m.value(QStringLiteral("height")).toInt());
+        }
+        else
+            _dataRect = value.toRect();
+    }
     else if(name == QStringLiteral("additionalTransforms"))
         _additionalTransforms = value.toStringList();
     else if(name == QStringLiteral("additionalVisualisations"))
