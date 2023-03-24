@@ -145,7 +145,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData,
                 else if(isColumnInDataRect)
                     _userColumnData.setValue(dataColumnIndex, tabularData.valueAt(0, rowIndex), value);
             }
-            else if(isColumnInDataRect)
+            else if(isColumnInDataRect && isRowInDataRect)
             {
                 switch(_correlationDataType)
                 {
