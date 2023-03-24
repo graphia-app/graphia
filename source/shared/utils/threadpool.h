@@ -23,7 +23,6 @@
 #include "singleton.h"
 #include "function_traits.h"
 #include "is_std_container.h"
-#include "is_detected.h"
 #include "void_callable_wrapper.h"
 
 #include <QString>
@@ -358,23 +357,17 @@ private:
     {
         static auto execute(Fn& f, It it, size_t index)
         {
-            // Fn argument is an iterator
-            if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, It>)
-            {
-                if constexpr(HasThreadIndexArgument<Fn>)
-                    return f(it, index);
-                else
-                    return f(it);
-            }
+            if constexpr(requires { f(it, index); })
+                return f(it, index);
 
-            // Fn argument is a value/reference
-            if constexpr(std::is_convertible_v<FirstArgumentType<Fn>, typename It::value_type>)
-            {
-                if constexpr(HasThreadIndexArgument<Fn>)
-                    return f(*it, index);
-                else
-                    return f(*it);
-            }
+            if constexpr(requires { f(*it, index); })
+                return f(*it, index);
+
+            if constexpr(requires { f(it); })
+                return f(it);
+
+            if constexpr(requires { f(*it); })
+                return f(*it);
         }
     };
 
@@ -411,12 +404,6 @@ private:
         ResultsExecutor<It, Fn, typename function_traits<Fn>::result_type>;
 
     template<typename It>
-    using computeCostHint_t = decltype(std::declval<It>()->computeCostHint());
-
-    template<typename It> static constexpr bool ItHasComputeCostHint =
-        std::experimental::is_detected_v<computeCostHint_t, It>;
-
-    template<typename It>
     class Coster
     {
     private:
@@ -434,7 +421,7 @@ private:
         // When there is no hinting available, each element is given equal weight
         uint64_t total()
         {
-            if constexpr(ItHasComputeCostHint<It>)
+            if constexpr(requires(It it) { it->computeCostHint(); })
             {
                 uint64_t n = 0;
 
@@ -450,7 +437,7 @@ private:
         uint64_t operator()(It it)
         {
 
-            if constexpr(ItHasComputeCostHint<It>)
+            if constexpr(requires { it->computeCostHint(); })
                 return it->computeCostHint();
             else
                 return 1;

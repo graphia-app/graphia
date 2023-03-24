@@ -163,6 +163,8 @@ add_unit_test(tst_layout layout/tst_layout.cpp)
 add_unit_test(tst_genericplugin loading/tst_genericplugin.cpp)
 add_unit_test(tst_layoutthread layout/tst_layoutthread.cpp)
 add_unit_test(tst_random utils/tst_random.cpp)
+# The web build may not give a pool the two threads this relies on
+add_unit_test(tst_threadpool NO_WASM utils/tst_threadpool.cpp)
 add_unit_test(tst_nodeattributetablemodel plugins/tst_nodeattributetablemodel.cpp)
 
 # The translation catalogues, as they are in the source tree

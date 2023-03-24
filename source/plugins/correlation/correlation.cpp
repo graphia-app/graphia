@@ -24,7 +24,6 @@
 #include "knnprotograph.h"
 
 #include "shared/utils/cancellable.h"
-#include "shared/utils/is_detected.h"
 #include "shared/utils/progressable.h"
 #include "shared/utils/redirects.h"
 
@@ -106,12 +105,6 @@ template<typename Algorithm, template<typename> class FilterMethod>
 class CovarianceCorrelation : public ContinuousCorrelation
 {
 private:
-    template<typename A>
-    using preprocess_t = decltype(std::declval<A>().preprocess(0, ContinuousDataVectors{}));
-
-    template<typename F>
-    using results_t = decltype(std::declval<F>().results());
-
     auto process(const ContinuousDataVectors& vectors, const QVariantMap& parameters,
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
@@ -131,10 +124,7 @@ private:
 
         Algorithm algorithm;
 
-        constexpr bool AlgorithmHasPreprocess =
-            std::experimental::is_detected_v<preprocess_t, Algorithm>;
-
-        if constexpr(AlgorithmHasPreprocess)
+        if constexpr(requires { algorithm.preprocess(0, {}); })
             algorithm.preprocess(size, vectors);
 
         using FM = FilterMethod<ContinuousDataVectors>;
@@ -184,10 +174,7 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool FilterMethodHasResults =
-            std::experimental::is_detected_v<results_t, FM>;
-
-        if constexpr(FilterMethodHasResults)
+        if constexpr(requires { filterMethod.results(); })
             return filterMethod.results();
         else
             return results;
@@ -385,9 +372,6 @@ template<int Denominator, typename AlgorithmInfo, template<typename> class Filte
 class MatchingCorrelation : public DiscreteCorrelation
 {
 private:
-    template<typename F>
-    using results_t = decltype(std::declval<F>().results());
-
     struct Fraction
     {
         int _numerator = 0;
@@ -487,10 +471,7 @@ private:
             progressable->setProgress(-1);
         }
 
-        constexpr bool FilterMethodHasResults =
-            std::experimental::is_detected_v<results_t, FM>;
-
-        if constexpr(FilterMethodHasResults)
+        if constexpr(requires { filterMethod.results(); })
             return filterMethod.results();
         else
             return results;
