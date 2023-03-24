@@ -671,7 +671,24 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
     else if(name == QStringLiteral("treatAsBinary"))
         _treatAsBinary = value.toBool();
     else if(name == QStringLiteral("dataRect"))
-        _dataRect = value.toRect();
+    {
+        if(value.canConvert<QVariantMap>())
+        {
+            // This happens when the parameters are specified in headless mode
+            auto m = value.value<QVariantMap>();
+
+            if(m.contains("x"))         _dataRect.setX(m.value("x").toInt());
+            if(m.contains("left"))      _dataRect.setLeft(m.value("left").toInt());
+            if(m.contains("right"))     _dataRect.setRight(m.value("right").toInt());
+            if(m.contains("y"))         _dataRect.setY(m.value("y").toInt());
+            if(m.contains("top"))       _dataRect.setTop(m.value("top").toInt());
+            if(m.contains("bottom"))    _dataRect.setBottom(m.value("bottom").toInt());
+            if(m.contains("width"))     _dataRect.setWidth(m.value("width").toInt());
+            if(m.contains("height"))    _dataRect.setHeight(m.value("height").toInt());
+        }
+        else
+            _dataRect = value.toRect();
+    }
     else if(name == QStringLiteral("additionalTransforms"))
         _additionalTransforms = value.toStringList();
     else if(name == QStringLiteral("additionalVisualisations"))
