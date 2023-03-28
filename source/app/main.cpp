@@ -495,10 +495,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
+    auto mode = enableConsoleMode();
+
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
-
-    auto mode = enableConsoleMode();
 
     // The "real" main is separate to limit the scope of QtSingleApplication,
     // otherwise a restart causes the exiting instance to get activated
