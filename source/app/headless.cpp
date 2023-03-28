@@ -109,7 +109,12 @@ static std::string progressBarText(size_t width, int percent)
 
 static std::string filenameToStdString(const QString& f)
 {
-    return QFileInfo(f).canonicalFilePath().toStdString();
+    auto canonical = QFileInfo(f).canonicalFilePath().toStdString();
+
+    if(!canonical.empty())
+        return canonical;
+
+    return f.toStdString();
 }
 
 void Headless::processNext()
