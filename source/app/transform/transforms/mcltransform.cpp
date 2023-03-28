@@ -31,6 +31,8 @@
 #include <thread>
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 using MatrixType = blaze::CompressedMatrix<float, blaze::columnMajor>;
 using VectorType = blaze::DynamicVector<float, blaze::columnVector>;
 
@@ -287,7 +289,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
 void MCLTransform::apply(TransformedGraph& target)
 {
     auto granularity = std::get<double>(
-                config().parameterByName(QStringLiteral("Granularity"))->_value);
+                config().parameterByName(u"Granularity"_s)->_value);
 
     if(_debugIteration)
     {
@@ -332,7 +334,7 @@ public:
 
 void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
 {
-    setPhase(QStringLiteral("MCL Initialising"));
+    setPhase(u"MCL Initialising"_s);
 
     auto nodeCount = target.numNodes();
 
@@ -417,7 +419,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
         if(cancelled())
             return;
 
-        setPhase(QStringLiteral("MCL Iteration %1").arg(QString::number(iter + 1)));
+        setPhase(u"MCL Iteration %1"_s.arg(QString::number(iter + 1)));
         if(_debugMatrices)
         {
             matrixStream << "Pre-Expanded Matrix\n";
@@ -552,7 +554,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
     if(_debugIteration)
         qDebug() << iter << "iterations";
 
-    setPhase(QStringLiteral("MCL Interpreting"));
+    setPhase(u"MCL Interpreting"_s);
 
     // Interpret the matrix
     std::vector<std::set<size_t>> clusters;

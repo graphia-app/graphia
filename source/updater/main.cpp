@@ -43,6 +43,8 @@
 
 #include <qtsingleapplication/qtsingleapplication.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 static QString existingInstallation(const QString& exe)
 {
 #if defined(Q_OS_WIN)
@@ -81,18 +83,18 @@ QStringList showUpdater(int argc, char *argv[])
 
     QString status;
     auto update = latestUpdateJson(&status);
-    if(update.is_object() && (status.isEmpty() || status == QStringLiteral("failed")))
+    if(update.is_object() && (status.isEmpty() || status == u"failed"_s))
     {
         QIcon mainIcon;
-        mainIcon.addFile(QStringLiteral(":/Icon512x512.png"));
-        mainIcon.addFile(QStringLiteral(":/Icon256x256.png"));
-        mainIcon.addFile(QStringLiteral(":/Icon128x128.png"));
-        mainIcon.addFile(QStringLiteral(":/Icon64x64.png"));
-        mainIcon.addFile(QStringLiteral(":/Icon32x32.png"));
-        mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
+        mainIcon.addFile(u":/Icon512x512.png"_s);
+        mainIcon.addFile(u":/Icon256x256.png"_s);
+        mainIcon.addFile(u":/Icon128x128.png"_s);
+        mainIcon.addFile(u":/Icon64x64.png"_s);
+        mainIcon.addFile(u":/Icon32x32.png"_s);
+        mainIcon.addFile(u":/Icon16x16.png"_s);
         QApplication::setWindowIcon(mainIcon);
 
-        QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
+        QQuickStyle::setStyle(u::getPref(u"system/uiTheme"_s).toString());
 
         QQmlApplicationEngine engine;
 
@@ -106,7 +108,7 @@ QStringList showUpdater(int argc, char *argv[])
 
         const QTemporaryDir imagesDir;
         engine.rootContext()->setContextProperty(
-            QStringLiteral("imagesLocation"), imagesDir.path());
+            u"imagesLocation"_s, imagesDir.path());
 
         if(u::contains(update, "images") && imagesDir.isValid())
         {
@@ -119,7 +121,7 @@ QStringList showUpdater(int argc, char *argv[])
                 auto base64EncodedContent = QString::fromStdString(image["content"]);
                 auto content = QByteArray::fromBase64(base64EncodedContent.toUtf8());
 
-                QFile imageFile(QStringLiteral("%1/%2").arg(imagesDir.path(), fileName));
+                QFile imageFile(u"%1/%2"_s.arg(imagesDir.path(), fileName));
                 if(!imageFile.open(QIODevice::ReadWrite))
                     continue;
 
@@ -128,20 +130,20 @@ QStringList showUpdater(int argc, char *argv[])
         }
 
         engine.rootContext()->setContextProperty(
-            QStringLiteral("updatesLocation"), updatesLocation());
+            u"updatesLocation"_s, updatesLocation());
 
         engine.rootContext()->setContextProperty(
-            QStringLiteral("version"), version);
+            u"version"_s, version);
 
         engine.rootContext()->setContextProperty(
-            QStringLiteral("changeLog"), changeLog);
+            u"changeLog"_s, changeLog);
 
         Installer installer(update, version, existingInstallation(exe));
         engine.rootContext()->setContextProperty(
-            QStringLiteral("installer"), &installer);
+            u"installer"_s, &installer);
 
-        engine.addImportPath(QStringLiteral("qrc:///qml/"));
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        engine.addImportPath(u"qrc:///qml/"_s);
+        engine.load(QUrl(u"qrc:/main.qml"_s));
         Q_ASSERT(!engine.rootObjects().empty());
 
         QApplication::exec();
@@ -153,14 +155,14 @@ QStringList showUpdater(int argc, char *argv[])
 // NOLINTNEXTLINE bugprone-exception-escape
 int main(int argc, char *argv[])
 {
-    QApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QApplication::setOrganizationName(u"Graphia"_s);
+    QApplication::setOrganizationDomain(u"graphia.app"_s);
     QApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     auto consoleOutputFiles = captureConsoleOutput(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation),
-        QStringLiteral("updater"));
+        u"updater"_s);
 
     QStringList arguments = showUpdater(argc, argv);
     if(arguments.isEmpty())
@@ -170,7 +172,7 @@ int main(int argc, char *argv[])
     }
 
     // Whatever the user chose, don't show them the updater again
-    arguments.append(QStringLiteral("--dontUpdate"));
+    arguments.append(u"--dontUpdate"_s);
 
     std::cerr << "Restarting " << arguments.join(' ').toStdString() << "\n";
     QProcess::startDetached(arguments.at(0), arguments.mid(1));

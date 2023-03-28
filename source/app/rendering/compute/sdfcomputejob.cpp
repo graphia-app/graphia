@@ -26,6 +26,8 @@
 #include <QTime>
 #include <QDir>
 
+using namespace Qt::Literals::StringLiterals;
+
 SDFComputeJob::SDFComputeJob(DoubleBufferedTexture* sdfTexture, GlyphMap* glyphMap) :
     _sdfTexture(sdfTexture),
     _glyphMap(glyphMap)
@@ -92,7 +94,7 @@ void SDFComputeJob::generateSDF()
     QOpenGLBuffer screenQuadDataBuffer;
     QOpenGLShaderProgram sdfShader;
 
-    ShaderTools::loadShaderProgram(sdfShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/sdf.frag"));
+    ShaderTools::loadShaderProgram(sdfShader, u":/shaders/screen.vert"_s, u":/shaders/sdf.frag"_s);
     prepareQuad(screenQuadVAO, screenQuadDataBuffer, sdfShader);
 
     const auto scaleFactor = 4;
@@ -175,7 +177,7 @@ void SDFComputeJob::generateSDF()
     glFlush();
 
     // Debug code to pull out the SDF texture
-    if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
+    if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
     {
         auto pixelCount = static_cast<size_t>(_glyphMap->images().at(0).sizeInBytes()) /
             static_cast<size_t>(scaleFactor * scaleFactor) * _glyphMap->images().size();

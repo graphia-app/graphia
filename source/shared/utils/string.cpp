@@ -27,6 +27,8 @@
 #include <sstream>
 #include <limits>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool u::isNumeric(const std::string& string)
 {
     if(string.empty())
@@ -211,7 +213,7 @@ QString u::formatNumber(double value)
     QString formattedString = QLocale::system().toString(value, 'f', maxDecimalPlacesFor(value));
     formattedString = stripZeroes(formattedString);
 
-    formattedString.replace(QStringLiteral("+"), QString());
+    formattedString.replace(u"+"_s, u""_s);
     return formattedString;
 }
 
@@ -242,8 +244,8 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
         {
             auto exponentValueString = stripZeroes(splitString[1]);
 
-            exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
-            exponentValueString.replace(QStringLiteral("+"), QString());
+            exponentValueString.replace(u"-"_s, u"⁻"_s);
+            exponentValueString.replace(u"+"_s, u""_s);
 
             for(auto& character : exponentValueString)
             {
@@ -251,7 +253,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
                     character = superScript[character.digitValue()];
             }
 
-            formattedString = splitString[0] + QStringLiteral(u"×10") + exponentValueString;
+            formattedString = splitString[0] + u"×10"_s + exponentValueString;
         }
     }
     else
@@ -260,7 +262,7 @@ QString u::formatNumberScientific(double value, int minDecimalPlaces, int maxDec
         formattedString = stripZeroes(formattedString);
     }
 
-    formattedString.replace(QStringLiteral("+"), QString());
+    formattedString.replace(u"+"_s, u""_s);
     return formattedString;
 }
 
@@ -300,7 +302,7 @@ bool u::isHex(const std::string& string)
 
 bool u::isHex(const QString& string)
 {
-    static const QRegularExpression re(QStringLiteral("^[a-fA-F0-9]+$"));
+    static const QRegularExpression re(u"^[a-fA-F0-9]+$"_s);
     return string.size() % 2 == 0 && re.match(string).hasMatch();
 }
 
@@ -358,7 +360,7 @@ QString u::escapeQuotes(QString s)
 QString u::pluralise(size_t count, const QString& singular, const QString& plural)
 {
     if(count == 1)
-        return QStringLiteral("1 %1").arg(singular);
+        return u"1 %1"_s.arg(singular);
 
-    return QStringLiteral("%1 %2").arg(count).arg(plural);
+    return u"%1 %2"_s.arg(count).arg(plural);
 }

@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QCoreApplication>
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace
 {
 QSettings settings()
@@ -77,24 +79,24 @@ void u::setPref(const QString& key, const QVariant& value)
 
 void u::updateOldPrefs()
 {
-    if(u::prefExists(QStringLiteral("visuals/defaultNodeSize")))
+    if(u::prefExists(u"visuals/defaultNodeSize"_s))
     {
-        auto absNodeSize = u::pref(QStringLiteral("visuals/defaultNodeSize")).toFloat();
+        auto absNodeSize = u::pref(u"visuals/defaultNodeSize"_s).toFloat();
         auto normalNodeSize = u::normalise(LimitConstants::minimumNodeSize(),
             LimitConstants::maximumNodeSize(), absNodeSize);
 
-        u::setPref(QStringLiteral("visuals/defaultNormalNodeSize"), normalNodeSize);
-        u::removePref(QStringLiteral("visuals/defaultNodeSize"));
+        u::setPref(u"visuals/defaultNormalNodeSize"_s, normalNodeSize);
+        u::removePref(u"visuals/defaultNodeSize"_s);
     }
 
-    if(u::prefExists(QStringLiteral("visuals/defaultEdgeSize")))
+    if(u::prefExists(u"visuals/defaultEdgeSize"_s))
     {
-        auto absEdgeSize = u::pref(QStringLiteral("visuals/defaultEdgeSize")).toFloat();
+        auto absEdgeSize = u::pref(u"visuals/defaultEdgeSize"_s).toFloat();
         auto normalEdgeSize = u::normalise(LimitConstants::minimumEdgeSize(),
             LimitConstants::maximumEdgeSize(), absEdgeSize);
 
-        u::setPref(QStringLiteral("visuals/defaultNormalEdgeSize"), normalEdgeSize);
-        u::removePref(QStringLiteral("visuals/defaultEdgeSize"));
+        u::setPref(u"visuals/defaultNormalEdgeSize"_s, normalEdgeSize);
+        u::removePref(u"visuals/defaultEdgeSize"_s);
     }
 }
 

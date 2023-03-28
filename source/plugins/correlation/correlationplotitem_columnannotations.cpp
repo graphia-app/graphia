@@ -23,6 +23,8 @@
 
 #include "shared/utils/container.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
 {
     auto* xAxis = axisRect->axis(QCPAxis::atBottom);
@@ -156,19 +158,18 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
             if(!_columnSortOrders.empty())
             {
                 const auto& columnSortOrder = _columnSortOrders.first();
-                auto type = normaliseQmlEnum<PlotColumnSortType>(columnSortOrder[QStringLiteral("type")].toInt());
-                auto text = columnSortOrder[QStringLiteral("text")].toString();
-                auto order = static_cast<Qt::SortOrder>(columnSortOrder[QStringLiteral("order")].toInt());
+                auto type = normaliseQmlEnum<PlotColumnSortType>(columnSortOrder[u"type"_s].toInt());
+                auto text = columnSortOrder[u"text"_s].toString();
+                auto order = static_cast<Qt::SortOrder>(columnSortOrder[u"order"_s].toInt());
 
                 if(type == PlotColumnSortType::ColumnAnnotation && text == columnAnnotation.name())
                 {
-                    prefix += order == Qt::AscendingOrder ?
-                        QStringLiteral(u"▷ ") : QStringLiteral(u"◁ ");
+                    prefix += order == Qt::AscendingOrder ? u"▷ "_s : u"◁ "_s;
                 }
             }
 
             if(_columnAnnotationSelectionModeEnabled)
-                postfix += selected ? QStringLiteral(u" ☑") : QStringLiteral(u" ☐");
+                postfix += selected ? u" ☑"_s : u" ☐"_s;
 
             const double tickPosition = static_cast<double>(y) + 0.5;
             columnAnnotationTicker->addTick(tickPosition, prefix + columnAnnotation.name() + postfix);

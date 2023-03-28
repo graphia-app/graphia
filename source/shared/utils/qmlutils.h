@@ -45,6 +45,8 @@
 #include <QAbstractListModel>
 #include <QKeySequence>
 
+using namespace Qt::Literals::StringLiterals;
+
 class QQmlEngine;
 class QJSEngine;
 
@@ -96,7 +98,7 @@ public:
     Q_INVOKABLE QUrl removeExtension(const QUrl& url) const
     {
         auto fi = QFileInfo(url.toLocalFile());
-        auto removed = QFileInfo(QStringLiteral("%1/%2").arg(fi.path(), fi.completeBaseName()));
+        auto removed = QFileInfo(u"%1/%2"_s.arg(fi.path(), fi.completeBaseName()));
 
         return QUrl::fromLocalFile(removed.filePath());
     }
@@ -285,7 +287,7 @@ public:
 
     Q_INVOKABLE QString redirectUrl(const QString& shortName) const
     {
-        return QStringLiteral("%1/%2").arg(u::getPref(QStringLiteral("servers/redirects")).toString(), shortName);
+        return u"%1/%2"_s.arg(u::getPref(u"servers/redirects"_s).toString(), shortName);
     }
 
     Q_INVOKABLE QString redirectLink(const QString& shortName, const QString& linkText) const

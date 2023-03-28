@@ -26,6 +26,8 @@
 
 #include "../crashhandler.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 ImportAttributesCommand::ImportAttributesCommand(GraphModel* graphModel, const QString& keyAttributeName,
     TabularData* data, int keyColumnIndex, const std::vector<int>& importColumnIndices, bool replace) :
     _graphModel(graphModel), _keyAttributeName(keyAttributeName), _data(std::move(*data)),
@@ -66,10 +68,10 @@ QString ImportAttributesCommand::debugDescription() const
     QString text = description();
 
     for(const auto& attributeName : _createdAttributeNames)
-        text.append(QStringLiteral("\n  %1").arg(attributeName));
+        text.append(u"\n  %1"_s.arg(attributeName));
 
     for(const auto& vector : _replacedUserDataVectors)
-        text.append(QStringLiteral("\n  %1 (replaced)").arg(vector.name()));
+        text.append(u"\n  %1 (replaced)"_s.arg(vector.name()));
 
     return text;
 }
@@ -83,7 +85,7 @@ bool ImportAttributesCommand::execute()
 
     if(keyAttribute == nullptr)
     {
-        auto description = QStringLiteral("ImportAttributesCommand: attribute %1 not found in %2")
+        auto description = u"ImportAttributesCommand: attribute %1 not found in %2"_s
             .arg(_keyAttributeName, _graphModel->availableAttributeNames().join(' '));
         CrashHandler::instance()->submitMinidump(description);
 

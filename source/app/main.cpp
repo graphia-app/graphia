@@ -78,6 +78,7 @@
 
 #include "watchdog.h"
 
+using namespace Qt::Literals::StringLiterals;
 using namespace std::chrono_literals;
 
 static QString resolvedExeName(const QString& baseExeName)
@@ -118,28 +119,28 @@ static void configureXDG()
     }
 
     auto dotDesktopFilename = QDir(applicationsDirname)
-        .filePath(QStringLiteral("%1.desktop").arg(Application::name()));
+        .filePath(u"%1.desktop"_s.arg(Application::name()));
     auto dotDesktopFile = QFile(dotDesktopFilename);
 
-    auto iconsDirname = QDir(genericDirname).filePath(QStringLiteral("icons"));
+    auto iconsDirname = QDir(genericDirname).filePath(u"icons"_s);
     auto iconsDir = QDir(iconsDirname);
-    auto iconFilename = iconsDir.filePath(QStringLiteral("%1.svg").arg(Application::name()));
+    auto iconFilename = iconsDir.filePath(u"%1.svg"_s.arg(Application::name()));
     auto iconPermissions = QFileDevice::ReadOwner|QFileDevice::WriteOwner|
         QFileDevice::ReadGroup|QFileDevice::WriteGroup|QFileDevice::ReadOther;
 
     auto xdgMimeArguments = QStringList
     {
-        QStringLiteral("default"),
-        QStringLiteral("%1.desktop").arg(Application::name()),
-        QStringLiteral("x-scheme-handler/%1").arg(Application::nativeExtension())
+        u"default"_s,
+        u"%1.desktop"_s.arg(Application::name()),
+        u"x-scheme-handler/%1"_s.arg(Application::nativeExtension())
     };
 
     auto success = ((iconsDir.exists() || iconsDir.mkpath(iconsDir.absolutePath())) &&
         dotDesktopFile.open(QIODevice::WriteOnly) && dotDesktopFile.write(dotDesktopFileContent.toUtf8()) >= 0 &&
         (QFileInfo::exists(iconFilename) ||
-            (QFile::copy(QStringLiteral(":/icon/Icon.svg"), iconFilename) &&
+            (QFile::copy(u":/icon/Icon.svg"_s, iconFilename) &&
             QFile::setPermissions(iconFilename, iconPermissions))) &&
-        QProcess::startDetached(QStringLiteral("xdg-mime"), xdgMimeArguments)) || false;
+        QProcess::startDetached(u"xdg-mime"_s, xdgMimeArguments)) || false;
 
     if(!success)
         std::cerr << "Failed to configure for XDG.\n";
@@ -149,11 +150,11 @@ static void configureXDG()
 static void configureProxy()
 {
     QNetworkProxy::ProxyType type = QNetworkProxy::DefaultProxy;
-    auto typePref = u::pref(QStringLiteral("proxy/type")).toString();
+    auto typePref = u::pref(u"proxy/type"_s).toString();
 
-    if(typePref == QStringLiteral("http"))
+    if(typePref == u"http"_s)
         type = QNetworkProxy::HttpProxy;
-    else if(typePref == QStringLiteral("socks5"))
+    else if(typePref == u"socks5"_s)
         type = QNetworkProxy::Socks5Proxy;
 
     QNetworkProxy proxy;
@@ -161,10 +162,10 @@ static void configureProxy()
 
     if(type != QNetworkProxy::DefaultProxy)
     {
-        proxy.setHostName(u::pref(QStringLiteral("proxy/host")).toString());
-        proxy.setPort(static_cast<quint16>(u::pref(QStringLiteral("proxy/port")).toUInt()));
-        proxy.setUser(u::pref(QStringLiteral("proxy/username")).toString());
-        proxy.setPassword(u::pref(QStringLiteral("proxy/password")).toString());
+        proxy.setHostName(u::pref(u"proxy/host"_s).toString());
+        proxy.setPort(static_cast<quint16>(u::pref(u"proxy/port"_s).toUInt()));
+        proxy.setUser(u::pref(u"proxy/username"_s).toString());
+        proxy.setPassword(u::pref(u"proxy/password"_s).toString());
     }
 
     QNetworkProxy::setApplicationProxy(proxy);
@@ -196,7 +197,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     if(!u::isDebuggerPresent() && app.isRunning())
     {
-        if(app.sendMessage(QCoreApplication::arguments().join(QStringLiteral("\n"))))
+        if(app.sendMessage(QCoreApplication::arguments().join(u"\n"_s)))
             return 0;
     }
 
@@ -224,8 +225,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     Q_INIT_RESOURCE(update_keys);
 
-    auto dontUpdate = commandLineParser.isSet(QStringLiteral("dontUpdate")) ||
-        commandLineParser.isSet(QStringLiteral("parameters"));
+    auto dontUpdate = commandLineParser.isSet(u"dontUpdate"_s) ||
+        commandLineParser.isSet(u"parameters"_s);
 
     if(!dontUpdate && Updater::updateAvailable())
     {
@@ -239,24 +240,24 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         }
     }
 
-    if(commandLineParser.isSet(QStringLiteral("startMaximised")))
-        u::setPref(QStringLiteral("window/maximised"), true);
+    if(commandLineParser.isSet(u"startMaximised"_s))
+        u::setPref(u"window/maximised"_s, true);
 
-    if(commandLineParser.isSet(QStringLiteral("skipWelcome")) && !u::prefExists(QStringLiteral("tracking/permission")))
-        u::setPref(QStringLiteral("tracking/permission"), QStringLiteral("anonymous"));
+    if(commandLineParser.isSet(u"skipWelcome"_s) && !u::prefExists(u"tracking/permission"_s))
+        u::setPref(u"tracking/permission"_s, u"anonymous"_s);
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
     QIcon mainIcon;
-    mainIcon.addFile(QStringLiteral(":/icon/Icon512x512.png"));
-    mainIcon.addFile(QStringLiteral(":/icon/Icon256x256.png"));
-    mainIcon.addFile(QStringLiteral(":/icon/Icon128x128.png"));
-    mainIcon.addFile(QStringLiteral(":/icon/Icon64x64.png"));
-    mainIcon.addFile(QStringLiteral(":/icon/Icon32x32.png"));
-    mainIcon.addFile(QStringLiteral(":/icon/Icon16x16.png"));
+    mainIcon.addFile(u":/icon/Icon512x512.png"_s);
+    mainIcon.addFile(u":/icon/Icon256x256.png"_s);
+    mainIcon.addFile(u":/icon/Icon128x128.png"_s);
+    mainIcon.addFile(u":/icon/Icon64x64.png"_s);
+    mainIcon.addFile(u":/icon/Icon32x32.png"_s);
+    mainIcon.addFile(u":/icon/Icon16x16.png"_s);
     QApplication::setWindowIcon(mainIcon);
 
-    QIcon::setThemeName(QStringLiteral("Tango"));
+    QIcon::setThemeName(u"Tango"_s);
 
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context
@@ -270,8 +271,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         QString vendor = OpenGLFunctions::vendor();
         if(!vendor.isEmpty())
         {
-            vendor.replace(QStringLiteral(" "), QStringLiteral("+"));
-            const QString driversUrl = QStringLiteral(R"(https://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+            vendor.replace(u" "_s, u"+"_s);
+            const QString driversUrl = uR"(https://www.google.com/search?q=%1+video+driver+download&btnI)"_s.arg(vendor);
             message = QObject::tr("The installed version of OpenGL is insufficient to run %1. "
                 R"(Please install the latest <a href="%2">video drivers</a> available from )"
                 "your vendor and try again.").arg(Application::name(), driversUrl);
@@ -296,11 +297,11 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     const ThreadPoolSingleton threadPool;
     const ScopeTimerManager scopeTimerManager;
 
-    if(commandLineParser.isSet(QStringLiteral("parameters")))
+    if(commandLineParser.isSet(u"parameters"_s))
     {
         installSignalHandlers();
 
-        auto parametersFilename = commandLineParser.value(QStringLiteral("parameters"));
+        auto parametersFilename = commandLineParser.value(u"parameters"_s);
         Headless headless(commandLineParser.positionalArguments(), parametersFilename);
 
         QTimer::singleShot(0, &headless, &Headless::run);
@@ -312,78 +313,78 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         return QCoreApplication::exec();
     }
 
-    u::definePref(QStringLiteral("visuals/defaultNodeColor"),               "#0000FF");
-    u::definePref(QStringLiteral("visuals/defaultEdgeColor"),               "#FFFFFF");
-    u::definePref(QStringLiteral("visuals/multiElementColor"),              "#FF0000");
-    u::definePref(QStringLiteral("visuals/backgroundColor"),                "#C0C0C0");
-    u::definePref(QStringLiteral("visuals/highlightColor"),                 "#FFFFFF");
+    u::definePref(u"visuals/defaultNodeColor"_s,               "#0000FF");
+    u::definePref(u"visuals/defaultEdgeColor"_s,               "#FFFFFF");
+    u::definePref(u"visuals/multiElementColor"_s,              "#FF0000");
+    u::definePref(u"visuals/backgroundColor"_s,                "#C0C0C0");
+    u::definePref(u"visuals/highlightColor"_s,                 "#FFFFFF");
 
-    u::definePref(QStringLiteral("visuals/defaultNormalNodeSize"),          0.333);
-    u::definePref(QStringLiteral("visuals/defaultNormalEdgeSize"),          0.25);
+    u::definePref(u"visuals/defaultNormalNodeSize"_s,          0.333);
+    u::definePref(u"visuals/defaultNormalEdgeSize"_s,          0.25);
 
-    u::definePref(QStringLiteral("visuals/showNodeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    u::definePref(QStringLiteral("visuals/showEdgeText"),                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    u::definePref(QStringLiteral("visuals/textFont"),                       SharedTools::QtSingleApplication::font().family());
-    u::definePref(QStringLiteral("visuals/textSize"),                       24.0f);
-    u::definePref(QStringLiteral("visuals/edgeVisualType"),                 QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
-    u::definePref(QStringLiteral("visuals/textAlignment"),                  QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
-    u::definePref(QStringLiteral("visuals/showMultiElementIndicators"),     true);
-    u::definePref(QStringLiteral("visuals/savedGradients"),                 Defaults::GRADIENT_PRESETS);
-    u::definePref(QStringLiteral("visuals/defaultGradient"),                Defaults::GRADIENT);
-    u::definePref(QStringLiteral("visuals/savedPalettes"),                  Defaults::PALETTE_PRESETS);
-    u::definePref(QStringLiteral("visuals/defaultPalette"),                 Defaults::PALETTE);
+    u::definePref(u"visuals/showNodeText"_s,                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    u::definePref(u"visuals/showEdgeText"_s,                   QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    u::definePref(u"visuals/textFont"_s,                       SharedTools::QtSingleApplication::font().family());
+    u::definePref(u"visuals/textSize"_s,                       24.0f);
+    u::definePref(u"visuals/edgeVisualType"_s,                 QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
+    u::definePref(u"visuals/textAlignment"_s,                  QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
+    u::definePref(u"visuals/showMultiElementIndicators"_s,     true);
+    u::definePref(u"visuals/savedGradients"_s,                 Defaults::GRADIENT_PRESETS);
+    u::definePref(u"visuals/defaultGradient"_s,                Defaults::GRADIENT);
+    u::definePref(u"visuals/savedPalettes"_s,                  Defaults::PALETTE_PRESETS);
+    u::definePref(u"visuals/defaultPalette"_s,                 Defaults::PALETTE);
 
-    u::definePref(QStringLiteral("visuals/projection"),                     QVariant::fromValue(static_cast<int>(Projection::Perspective)));
+    u::definePref(u"visuals/projection"_s,                     QVariant::fromValue(static_cast<int>(Projection::Perspective)));
 
-    u::definePref(QStringLiteral("visuals/minimumComponentRadius"),         2.0);
-    u::definePref(QStringLiteral("visuals/transitionTime"),                 1.0);
+    u::definePref(u"visuals/minimumComponentRadius"_s,         2.0);
+    u::definePref(u"visuals/transitionTime"_s,                 1.0);
 
-    u::definePref(QStringLiteral("visuals/disableMultisampling"),           false);
+    u::definePref(u"visuals/disableMultisampling"_s,           false);
 
-    u::definePref(QStringLiteral("misc/maxUndoLevels"),                     25);
+    u::definePref(u"misc/maxUndoLevels"_s,                     25);
 
-    u::definePref(QStringLiteral("misc/showGraphMetrics"),                  false);
-    u::definePref(QStringLiteral("misc/showLayoutSettings"),                false);
+    u::definePref(u"misc/showGraphMetrics"_s,                  false);
+    u::definePref(u"misc/showLayoutSettings"_s,                false);
 
-    u::definePref(QStringLiteral("misc/focusFoundNodes"),                   true);
-    u::definePref(QStringLiteral("misc/focusFoundComponents"),              true);
-    u::definePref(QStringLiteral("misc/stayInComponentMode"),               false);
+    u::definePref(u"misc/focusFoundNodes"_s,                   true);
+    u::definePref(u"misc/focusFoundComponents"_s,              true);
+    u::definePref(u"misc/stayInComponentMode"_s,               false);
 
-    u::definePref(QStringLiteral("misc/disableHubbles"),                    false);
+    u::definePref(u"misc/disableHubbles"_s,                    false);
 
-    u::definePref(QStringLiteral("misc/hasSeenTutorial"),                   false);
+    u::definePref(u"misc/hasSeenTutorial"_s,                   false);
 
-    u::definePref(QStringLiteral("misc/autoBackgroundUpdateCheck"),         true);
+    u::definePref(u"misc/autoBackgroundUpdateCheck"_s,         true);
 
-    u::definePref(QStringLiteral("screenshot/width"),                       1920);
-    u::definePref(QStringLiteral("screenshot/height"),                      1080);
-    u::definePref(QStringLiteral("screenshot/path"),
+    u::definePref(u"screenshot/width"_s,                       1920);
+    u::definePref(u"screenshot/height"_s,                      1080);
+    u::definePref(u"screenshot/path"_s,
         QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
 
-    u::definePref(QStringLiteral("servers/redirects"),                      "https://redirects.graphia.app");
-    u::definePref(QStringLiteral("servers/updates"),                        "https://updates.graphia.app");
-    u::definePref(QStringLiteral("servers/crashreports"),                   "https://crashreports.graphia.app");
-    u::definePref(QStringLiteral("servers/tracking"),                       "https://tracking.graphia.app");
+    u::definePref(u"servers/redirects"_s,                      "https://redirects.graphia.app");
+    u::definePref(u"servers/updates"_s,                        "https://updates.graphia.app");
+    u::definePref(u"servers/crashreports"_s,                   "https://crashreports.graphia.app");
+    u::definePref(u"servers/tracking"_s,                       "https://tracking.graphia.app");
 
-    u::definePref(QStringLiteral("proxy/type"),                             "disabled");
+    u::definePref(u"proxy/type"_s,                             "disabled");
 
-    u::definePref(QStringLiteral("system/uiTheme"),                         "Default");
+    u::definePref(u"system/uiTheme"_s,                         "Default");
 
     u::updateOldPrefs();
 
     const PreferencesWatcher preferencesWatcher;
 
     QObject::connect(&preferencesWatcher, &PreferencesWatcher::preferenceChanged,
-        [](const QString& key, const QVariant&) { if(key.startsWith(QStringLiteral("proxy"))) configureProxy(); });
+        [](const QString& key, const QVariant&) { if(key.startsWith(u"proxy"_s)) configureProxy(); });
 
     configureProxy();
 
-    QQuickStyle::setStyle(u::pref(QStringLiteral("system/uiTheme")).toString());
+    QQuickStyle::setStyle(u::pref(u"system/uiTheme"_s).toString());
 
     QStringList selectors; // NOLINT misc-const-correctness
 
 #ifdef Q_OS_MACOS
-    selectors += QStringLiteral("nativemenu");
+    selectors += u"nativemenu"_s;
 #endif
 
     QQmlApplicationEngine engine;
@@ -395,11 +396,11 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString& msg)
     {
         const int r = fprintf(stderr, "%s\n", msg.toLocal8Bit().constData()); Q_ASSERT(r >= 0);
-        qmlError += QStringLiteral("%1\n").arg(msg);
+        qmlError += u"%1\n"_s.arg(msg);
     });
 
-    engine.addImportPath(QStringLiteral("qrc:///qml"));
-    engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+    engine.addImportPath(u"qrc:///qml"_s);
+    engine.load(QUrl(u"qrc:///qml/main.qml"_s));
 
     qInstallMessageHandler(nullptr);
 
@@ -416,7 +417,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
     mainWindow, [mainWindow](const QString& message, QObject*)
     {
-        auto arguments = message.split(QStringLiteral("\n"));
+        auto arguments = message.split(u"\n"_s);
         arguments.pop_front(); // Executable
 
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, arguments));
@@ -442,7 +443,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     keepAliveTimer.start(1s);
 
 #ifndef _DEBUG
-    CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));
+    CrashHandler c(Application::resolvedExe(u"CrashReporter"_s));
     c.onCrash([mainWindow, &consoleOutputFiles](const QString& directory)
     {
         QVariant state;
@@ -495,8 +496,8 @@ int main(int argc, char *argv[])
 {
     u::setAppPathName(argv[0]);
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QCoreApplication::setOrganizationName(u"Graphia"_s);
+    QCoreApplication::setOrganizationDomain(u"graphia.app"_s);
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 

@@ -39,6 +39,8 @@
 #include <variant>
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 // https://www.google.com/search?q=gml-technical-report.pdf
 
 namespace SpiritGmlParser
@@ -157,7 +159,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
     auto processNode = [&](const List& node)
     {
-        const auto* id = findIntValue(node, QStringLiteral("id"));
+        const auto* id = findIntValue(node, u"id"_s);
         if(id == nullptr)
             return false;
 
@@ -169,10 +171,10 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
         for(const auto& attributeWrapper : node)
         {
             const auto& keyValue = attributeWrapper.get();
-            if(keyValue._key == QStringLiteral("id"))
+            if(keyValue._key == u"id"_s)
                 continue;
 
-            if(keyValue._key == QStringLiteral("label"))
+            if(keyValue._key == u"label"_s)
             {
                 // If there is a label attribute, use it as the node name
                 const auto* label = std::get_if<QString>(&keyValue._value);
@@ -199,8 +201,8 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
     auto processEdge = [&](const List& edge)
     {
-        const auto* sourceId = findIntValue(edge, QStringLiteral("source"));
-        const auto* targetId = findIntValue(edge, QStringLiteral("target"));
+        const auto* sourceId = findIntValue(edge, u"source"_s);
+        const auto* targetId = findIntValue(edge, u"target"_s);
 
         if(sourceId == nullptr || targetId == nullptr)
             return false;
@@ -215,7 +217,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
         for(const auto& attributeWrapper : edge)
         {
             const auto& keyValue = attributeWrapper.get();
-            if(keyValue._key == QStringLiteral("source") || keyValue._key == QStringLiteral("target"))
+            if(keyValue._key == u"source"_s || keyValue._key == u"target"_s)
                 continue;
 
             auto attributes = processAttribute(keyValue);
@@ -236,7 +238,7 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
     {
         const auto& key = keyValue.get()._key;
 
-        if(key == QStringLiteral("graph"))
+        if(key == u"graph"_s)
         {
             const auto* graph = std::get_if<List>(&keyValue.get()._value);
 
@@ -256,9 +258,9 @@ bool build(GmlFileParser& parser, const List& gml, IGraphModel& graphModel,
 
                 bool success = true;
 
-                if(type == QStringLiteral("node"))
+                if(type == u"node"_s)
                     success = processNode(*value);
-                else if(type == QStringLiteral("edge"))
+                else if(type == u"edge"_s)
                     edges.push_back(value);
 
                 if(!success || parser.cancelled())

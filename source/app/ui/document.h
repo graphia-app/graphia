@@ -52,6 +52,8 @@
 #include <mutex>
 #include <atomic>
 
+using namespace Qt::Literals::StringLiterals;
+
 class Graph;
 class Application;
 class GraphModel;
@@ -212,10 +214,10 @@ public:
     NodeIdSet nodeIdsForBookmark(const QString& name) const;
 
     size_t executeOnMainThread(DeferredExecutor::TaskFn task,
-        const QString& description = QStringLiteral("GenericTask"));
+        const QString& description = u"GenericTask"_s);
 
     void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-        const QString& description = QStringLiteral("GenericTask"));
+        const QString& description = u"GenericTask"_s);
 
     float nodeSize() const;
     void setNodeSize(float nodeSize);
@@ -528,7 +530,7 @@ public:
     Q_INVOKABLE void cancelCommand();
 
     Q_INVOKABLE void writeTableModelToFile(QAbstractItemModel* model, const QUrl& fileUrl,
-        const QString& extension = QStringLiteral("csv"), const QStringList& columnHeaders = {});
+        const QString& extension = u"csv"_s, const QStringList& columnHeaders = {});
 
     Q_INVOKABLE void copyTableModelColumnToClipboard(QAbstractItemModel* model,
         int column, const QVector<int>& rows);

@@ -28,6 +28,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
                                                    QObject* parent) :
     QAbstractListModel(parent),
@@ -52,12 +54,12 @@ AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
         endResetModel();
     };
 
-    updateFavouriteTransforms(u::pref(QStringLiteral("misc/favouriteTransforms")).toString());
+    updateFavouriteTransforms(u::pref(u"misc/favouriteTransforms"_s).toString());
 
     connect(&_preferencesWatcher, &PreferencesWatcher::preferenceChanged,
     [=](const QString& key, const QVariant& value)
     {
-        if(key == QStringLiteral("misc/favouriteTransforms"))
+        if(key == u"misc/favouriteTransforms"_s)
             updateFavouriteTransforms(value.toString());
     });
 }

@@ -29,6 +29,8 @@
 
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
     const QString& descriptor) :
     _min(statistics._min), _max(statistics._max)
@@ -71,12 +73,12 @@ VisualisationMapping::VisualisationMapping(const u::Statistics& statistics,
 
         auto typeString = QString::fromStdString(type);
 
-        if(typeString.compare(QStringLiteral("minmax"), Qt::CaseInsensitive) == 0)
+        if(typeString.compare(u"minmax"_s, Qt::CaseInsensitive) == 0)
         {
             _min = statistics._min;
             _max = statistics._max;
         }
-        else if(typeString.compare(QStringLiteral("stddev"), Qt::CaseInsensitive) == 0)
+        else if(typeString.compare(u"stddev"_s, Qt::CaseInsensitive) == 0)
         {
             _min = statistics._mean - statistics._stddev;
             _max = statistics._mean + statistics._stddev;

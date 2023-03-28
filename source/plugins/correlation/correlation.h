@@ -40,6 +40,8 @@
 #include <QString>
 #include <QVariantMap>
 
+using namespace Qt::Literals::StringLiterals;
+
 class ICorrelationInfo
 {
 public:
@@ -74,8 +76,8 @@ private:
 public:
     ThresholdFilter(const DataVectors&, const QVariantMap& parameters)
     {
-        _threshold = parameters[QStringLiteral("minimumThreshold")].toDouble();
-        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[QStringLiteral("correlationPolarity")].toInt());
+        _threshold = parameters[u"minimumThreshold"_s].toDouble();
+        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[u"correlationPolarity"_s].toInt());
     }
 
     using Results = CorrelationVector<DataVectors>;
@@ -413,7 +415,7 @@ private:
         Cancellable* cancellable = nullptr, Progressable* progressable = nullptr) const
     {
         const size_t size = vectors.front().size();
-        auto treatAsBinary = parameters[QStringLiteral("treatAsBinary")].toBool();
+        auto treatAsBinary = parameters[u"treatAsBinary"_s].toBool();
 
         if(progressable != nullptr)
             progressable->setProgress(-1);

@@ -24,6 +24,8 @@
 #include <set>
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 TabularData::TabularData(TabularData&& other) noexcept :
     _data(std::move(other._data)),
     _columns(other._columns),
@@ -235,7 +237,7 @@ int TabularData::columnMatchPercentage(size_t columnIndex, const QStringList& re
 QString TabularData::contentIdentityOf(const QUrl& url)
 {
     if(XlsxTabularDataParser::canLoad(url))
-        return QStringLiteral("XLSX");
+        return u"XLSX"_s;
 
     QString identity;
 
@@ -285,9 +287,9 @@ QString TabularData::contentIdentityOf(const QUrl& url)
 
             switch(character)
             {
-            case ',':  identity = QStringLiteral("CSV"); break;
-            case ';':  identity = QStringLiteral("SSV"); break;
-            case '\t': identity = QStringLiteral("TSV"); break;
+            case ',':  identity = u"CSV"_s; break;
+            case ';':  identity = u"SSV"_s; break;
+            case '\t': identity = u"TSV"_s; break;
             }
         }
 

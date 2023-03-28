@@ -49,6 +49,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 #ifdef _DEBUG
 //#define DEBUG_BACKGROUND_UPDATE
 
@@ -64,7 +66,7 @@ static QString tempUpdaterPath()
     if(appDataLocation.isEmpty())
         return {};
 
-    return appDataLocation + QStringLiteral("/Updater");
+    return appDataLocation + u"/Updater"_s;
 }
 
 Updater::Updater()
@@ -89,7 +91,7 @@ Updater::Updater()
 
 void Updater::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == QStringLiteral("misc/autoBackgroundUpdateCheck"))
+    if(key == u"misc/autoBackgroundUpdateCheck"_s)
         enableAutoBackgroundCheck(); // Also disables
 }
 
@@ -100,7 +102,7 @@ Updater::~Updater()
 
 void Updater::enableAutoBackgroundCheck()
 {
-    if(!u::pref(QStringLiteral("misc/autoBackgroundUpdateCheck")).toBool())
+    if(!u::pref(u"misc/autoBackgroundUpdateCheck"_s).toBool())
     {
         disableAutoBackgroundCheck();
         return;
@@ -155,7 +157,7 @@ void Updater::startBackgroundUpdateCheck()
     QTimer::singleShot(0, [this]
     {
         QNetworkRequest request;
-        request.setUrl(QUrl(u::pref(QStringLiteral("servers/updates")).toString()));
+        request.setUrl(QUrl(u::pref(u"servers/updates"_s).toString()));
 
         _state = Updater::State::Update;
         Q_ASSERT(_reply == nullptr);
@@ -172,7 +174,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
 
         if(update.is_null())
         {
-            update["error"] = QStringLiteral("none");
+            update["error"] = u"none"_s;
             return update;
         }
 
@@ -186,7 +188,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         if(!update.is_object() || !urlIsValid)
         {
             // Update isn't valid, for whatever reason
-            update["error"] = QStringLiteral("invalid");
+            update["error"] = u"invalid"_s;
             std::cerr << "Update not valid: " <<
                 (!urlIsValid ? update["url"] : "not an object") << "\n";
             return update;
@@ -195,7 +197,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         if(update["version"] == VERSION)
         {
             // The update is the same version as what we're running
-            update["error"] = QStringLiteral("running");
+            update["error"] = u"running"_s;
             return update;
         }
 
@@ -206,17 +208,17 @@ void Updater::downloadUpdate(QNetworkReply* reply)
             oldUpdate["version"] == update["version"];
 
         // We've got an update marked as installed, but it doesn't match the running version
-        const bool runningVersionDoesntMatchInstalledVersion = (status == QStringLiteral("installed")) &&
+        const bool runningVersionDoesntMatchInstalledVersion = (status == u"installed"_s) &&
             VERSION != oldUpdate["version"];
 
-        const bool previousAttemptFailed = (status == QStringLiteral("failed"));
+        const bool previousAttemptFailed = (status == u"failed"_s);
 
         if(alreadyHaveUpdate && !previousAttemptFailed && !runningVersionDoesntMatchInstalledVersion)
         {
             // We already have this update, and it was either successfully
             // installed, the user has skipped it, or they haven't dealt
             // with it yet
-            update["error"] = status.isEmpty() ? QStringLiteral("existing") : status;
+            update["error"] = status.isEmpty() ? u"existing"_s : status;
         }
         else
             _updateString = updateString;
@@ -242,7 +244,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
         {
             const QString error = update["error"];
             emit noNewUpdateAvailable(error ==
-                QStringLiteral("existing"));
+                u"existing"_s);
             _state = State::Idle;
             return;
         }
@@ -252,7 +254,7 @@ void Updater::downloadUpdate(QNetworkReply* reply)
 
         if(u::contains(update, "httpUserName") && u::contains(update, "httpPassword"))
         {
-            const QString concatenatedCredentials = QStringLiteral("%1:%2")
+            const QString concatenatedCredentials = u"%1:%2"_s
                 .arg(QString::fromStdString(update["httpUserName"]),
                 QString::fromStdString(update["httpPassword"]));
 
@@ -298,7 +300,7 @@ void Updater::saveUpdate(QNetworkReply* reply)
                 const auto& subFileNames = dir.entryList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot);
                 for(const auto& subFileName : subFileNames)
                 {
-                    const QFileInfo info(QStringLiteral("%1/%2").arg(location, subFileName));
+                    const QFileInfo info(u"%1/%2"_s.arg(location, subFileName));
 
                     if(info.isDir())
                         QDir(info.absoluteFilePath()).removeRecursively();
@@ -407,7 +409,7 @@ bool Updater::updateAvailable()
         return false;
 
     // Update has already been skipped or installed
-    if(status == QStringLiteral("skipped") || status == QStringLiteral("installed"))
+    if(status == u"skipped"_s || status == u"installed"_s)
         return false;
 
     return true;
@@ -432,12 +434,12 @@ static bool copyUpdaterToTemporaryLocation(QString& updaterExeFileName)
         return false;
     }
 
-    auto temporaryUpdaterExeFileName = QStringLiteral("%1/%2")
+    auto temporaryUpdaterExeFileName = u"%1/%2"_s
         .arg(destinationDir.path(), updaterExeFileInfo.fileName());
 
     std::vector<std::pair<QString, QString>> filesToCopy;
 
-    auto updaterDepsFileName = QStringLiteral("%1/%2.deps")
+    auto updaterDepsFileName = u"%1/%2.deps"_s
         .arg(updaterExeFileInfo.path(),
         updaterExeFileInfo.completeBaseName());
 
@@ -451,9 +453,9 @@ static bool copyUpdaterToTemporaryLocation(QString& updaterExeFileName)
         while(!textStream.atEnd())
         {
             auto line = textStream.readLine();
-            auto sourceFileName = QStringLiteral("%1/%2")
+            auto sourceFileName = u"%1/%2"_s
                 .arg(sourceDir.path(), line);
-            auto destinationFileName = QStringLiteral("%1/%2")
+            auto destinationFileName = u"%1/%2"_s
                 .arg(destinationDir.path(), line);
 
             filesToCopy.emplace_back(sourceFileName,
@@ -488,7 +490,7 @@ static bool copyUpdaterToTemporaryLocation(QString& updaterExeFileName)
 
 bool Updater::showUpdatePrompt(const QStringList& arguments)
 {
-    auto updaterExeFileName = Application::resolvedExe(QStringLiteral("Updater"));
+    auto updaterExeFileName = Application::resolvedExe(u"Updater"_s);
 
 #ifdef Q_OS_WIN
     if(!copyUpdaterToTemporaryLocation(updaterExeFileName))
@@ -499,9 +501,9 @@ bool Updater::showUpdatePrompt(const QStringList& arguments)
         return false;
 
     auto quotedArguments = arguments;
-    quotedArguments.replaceInStrings(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
-    quotedArguments.replaceInStrings(QRegularExpression(QStringLiteral("^(.*)$")),
-        QStringLiteral(R"("\1")"));
+    quotedArguments.replaceInStrings(u"\""_s, u"\\\""_s);
+    quotedArguments.replaceInStrings(QRegularExpression(u"^(.*)$"_s),
+        u"\"\\1\""_s);
 
     std::cerr << "Starting Updater: " << updaterExeFileName.toStdString() << "\n";
     if(!QProcess::startDetached(updaterExeFileName, quotedArguments))

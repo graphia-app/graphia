@@ -54,6 +54,7 @@
 #include <google_breakpad/processor/stack_frame.h>
 #include <processor/pathname_stripper.h>
 
+using namespace Qt::Literals::StringLiterals;
 using namespace std::chrono_literals;
 
 // clazy:excludeall=lambda-in-connect
@@ -222,7 +223,7 @@ static void uploadReport(const QString& email, const QString& text,
         }
     }
 
-    auto queryUrl = QUrl(u::getPref(QStringLiteral("servers/crashreports")).toString());
+    auto queryUrl = QUrl(u::getPref(u"servers/crashreports"_s).toString());
 
     auto doUpload = [&]
     {
@@ -279,7 +280,7 @@ static void uploadReport(const QString& email, const QString& text,
             return QObject::tr("Could not retrieve submission URL from \"%1\"").arg(queryUrl.toString());
 
         if(postReply->error() != QNetworkReply::NetworkError::NoError)
-            return QStringLiteral("%1 (%2)").arg(postReply->errorString()).arg(postReply->error());
+            return u"%1 (%2)"_s.arg(postReply->errorString()).arg(postReply->error());
 
         return QString();
     };
@@ -316,8 +317,8 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(shared);
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QCoreApplication::setOrganizationName(u"Graphia"_s);
+    QCoreApplication::setOrganizationDomain(u"graphia.app"_s);
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
@@ -330,9 +331,9 @@ int main(int argc, char *argv[])
         {{"s", "submit"}, QObject::tr("Submit the crash report immediately.")},
         {{"d", "description"}, QObject::tr("A description of the crash."), "description", QString()}
     });
-    p.addPositionalArgument(QStringLiteral("FILE"), QObject::tr("The crash report file."));
-    p.addPositionalArgument(QStringLiteral("ATTACHMENTS"),
-        QObject::tr("The attachments directory."), QStringLiteral("[ATTACHMENTS]"));
+    p.addPositionalArgument(u"FILE"_s, QObject::tr("The crash report file."));
+    p.addPositionalArgument(u"ATTACHMENTS"_s,
+        QObject::tr("The attachments directory."), u"[ATTACHMENTS]"_s);
 
     p.process(QApplication::arguments());
     auto positional = p.positionalArguments();
@@ -354,7 +355,7 @@ int main(int argc, char *argv[])
     Report report;
 
     QIcon mainIcon;
-    mainIcon.addFile(QStringLiteral(":/icon.svg"));
+    mainIcon.addFile(u":/icon.svg"_s);
     QApplication::setWindowIcon(mainIcon);
 
     auto module = crashedModule(positional.at(0));
@@ -362,21 +363,21 @@ int main(int argc, char *argv[])
 
     std::smatch match;
     const bool inVideoDriver = std::regex_match(module, match, std::regex(videoDriverRegex));
-    auto emailAddress = u::getPref(QStringLiteral("tracking/emailAddress")).toString();
+    auto emailAddress = u::getPref(u"tracking/emailAddress"_s).toString();
 
-    if(!p.isSet(QStringLiteral("submit")))
+    if(!p.isSet(u"submit"_s))
     {
-        QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
+        QQuickStyle::setStyle(u::getPref(u"system/uiTheme"_s).toString());
 
         QQmlApplicationEngine engine;
 
-        engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
-        engine.rootContext()->setContextProperty(QStringLiteral("glVendor"), OpenGLFunctions::vendor());
-        engine.rootContext()->setContextProperty(QStringLiteral("inVideoDriver"), inVideoDriver);
-        engine.rootContext()->setContextProperty(QStringLiteral("emailAddress"), emailAddress);
+        engine.rootContext()->setContextProperty(u"report"_s, &report);
+        engine.rootContext()->setContextProperty(u"glVendor"_s, OpenGLFunctions::vendor());
+        engine.rootContext()->setContextProperty(u"inVideoDriver"_s, inVideoDriver);
+        engine.rootContext()->setContextProperty(u"emailAddress"_s, emailAddress);
 
-        engine.addImportPath(QStringLiteral("qrc:///qml/"));
-        engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+        engine.addImportPath(u"qrc:///qml/"_s);
+        engine.load(QUrl(u"qrc:/main.qml"_s));
         Q_ASSERT(!engine.rootObjects().empty());
 
         exitCode = QCoreApplication::exec();
@@ -384,7 +385,7 @@ int main(int argc, char *argv[])
     else
     {
         report._email = emailAddress;
-        report._text = p.value(QStringLiteral("description"));
+        report._text = p.value(u"description"_s);
     }
 
     if(exitCode != 127)

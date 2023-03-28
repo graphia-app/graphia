@@ -23,6 +23,8 @@
 #include <QRegularExpression>
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 void Attribute::clearValueFunctions()
 {
     _.intNodeIdFn = nullptr;
@@ -405,8 +407,8 @@ IAttribute& AttributeNumericRange::setMax(double max)
 
 Attribute::Name Attribute::parseAttributeName(QString name)
 {
-    const QString sourceString = QStringLiteral("source.");
-    const QString targetString = QStringLiteral("target.");
+    const QString sourceString = u"source."_s;
+    const QString targetString = u"target."_s;
 
     EdgeNodeType type = EdgeNodeType::None;
 
@@ -433,16 +435,16 @@ Attribute::Name Attribute::parseAttributeName(QString name)
         name = name.mid(0, dotIndex);
     }
 
-    name.replace(QStringLiteral(R"(")"), QLatin1String(""));
-    parameter.replace(QStringLiteral(R"(")"), QLatin1String(""));
+    name.replace(u"\""_s, ""_L1);
+    parameter.replace(u"\""_s, ""_L1);
 
     return {type, name, parameter};
 }
 
 QString Attribute::enquoteAttributeName(const QString& name)
 {
-    const QString sourceString = QStringLiteral("source.");
-    const QString targetString = QStringLiteral("target.");
+    const QString sourceString = u"source."_s;
+    const QString targetString = u"target."_s;
     QString prefix;
     QString postfix;
 
@@ -456,10 +458,9 @@ QString Attribute::enquoteAttributeName(const QString& name)
     }
 
     if(!parsedAttributeName._parameter.isEmpty())
-        postfix = QStringLiteral(R"(."%1")").arg(parsedAttributeName._parameter);
+        postfix = u".\"%1\""_s.arg(parsedAttributeName._parameter);
 
-    return QStringLiteral(R"(%1"%2"%3)").arg(prefix,
-        parsedAttributeName._name, postfix);
+    return u"%1\"%2\"%3"_s.arg(prefix, parsedAttributeName._name, postfix);
 }
 
 Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
@@ -513,14 +514,14 @@ Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& no
 
 QString Attribute::prettify(QString name)
 {
-    static const QRegularExpression sourceRe(QStringLiteral("^source"));
-    static const QRegularExpression targetRe(QStringLiteral("^target"));
+    static const QRegularExpression sourceRe(u"^source"_s);
+    static const QRegularExpression targetRe(u"^target"_s);
 
-    name = name.replace(QStringLiteral("$"), QLatin1String(""));
-    name = name.replace(QStringLiteral(R"(")"), QLatin1String(""));
+    name = name.replace(u"$"_s, u""_s);
+    name = name.replace(u"\""_s, u""_s);
     name = name.replace(sourceRe, QObject::tr("Source"));
     name = name.replace(targetRe, QObject::tr("Target"));
-    name = name.replace(QStringLiteral("."), QStringLiteral(" › "));
+    name = name.replace(u"."_s, u" › "_s);
 
     return name;
 }

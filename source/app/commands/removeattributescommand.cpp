@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <iterator>
 
+using namespace Qt::Literals::StringLiterals;
+
 RemoveAttributesCommand::RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames) :
     _graphModel(graphModel)
 {
@@ -58,7 +60,7 @@ QString RemoveAttributesCommand::debugDescription() const
     QString text = description();
 
     for(const auto& attributeName : _attributeNames)
-        text.append(QStringLiteral("\n  %1").arg(attributeName));
+        text.append(u"\n  %1"_s.arg(attributeName));
 
     return text;
 }

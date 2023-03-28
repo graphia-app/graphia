@@ -32,6 +32,8 @@
 #include <iomanip>
 #include <cstddef>
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace u
 {
     bool isNumeric(const std::string& string);
@@ -91,7 +93,7 @@ namespace u
             int number = 1;
 
             // The name is already used, so generate a new one
-            static const QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
+            static const QRegularExpression re(uR"(^(.*)\((\d+)\)$)"_s);
             auto match = re.match(newName);
             if(match.hasMatch())
             {
@@ -99,7 +101,7 @@ namespace u
                 number = match.captured(2).toInt() + 1;
             }
 
-            newName = QStringLiteral("%1(%2)").arg(newName).arg(number);
+            newName = u"%1(%2)"_s.arg(newName).arg(number);
         }
 
         return newName;

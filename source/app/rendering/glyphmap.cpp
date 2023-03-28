@@ -31,6 +31,8 @@
 #include <memory>
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 static const int TextureSize = 2048;
 
 GlyphMap::GlyphMap(QString fontName) :
@@ -246,7 +248,7 @@ void GlyphMap::renderImages(const QFont &font)
             auto& image = _images.emplace_back(TextureSize, TextureSize, QImage::Format_ARGB32);
             image.fill(Qt::transparent);
 
-            if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
+            if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
                 debugImages.emplace_back(image.copy());
 
             // Reset paint coordinates
@@ -256,7 +258,7 @@ void GlyphMap::renderImages(const QFont &font)
 
         paintGlyphTo(_images.back());
 
-        if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
+        if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
         {
             auto& debugImage = debugImages.back();
             paintGlyphTo(debugImage);
@@ -299,7 +301,7 @@ void GlyphMap::renderImages(const QFont &font)
     }
 
     // Save Glyphmap(s) for debug purposes if needed
-    if(u::pref(QStringLiteral("debug/saveGlyphMaps")).toBool())
+    if(u::pref(u"debug/saveGlyphMaps"_s).toBool())
     {
         for(int i = 0; const auto& debugImage : debugImages)
             debugImage.save(QDir::currentPath() + "/GlyphMap" + QString::number(i++) + ".png");

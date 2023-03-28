@@ -60,8 +60,10 @@
 #include <chrono>
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 const char* const Application::_uri = APP_URI;
-QString Application::_appDir = QStringLiteral(".");
+QString Application::_appDir = u"."_s;
 
 struct UrlType
 {
@@ -153,7 +155,7 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     return nullptr;
 }
 
-QString Application::copyright() { return QStringLiteral(COPYRIGHT).replace(QStringLiteral("(c)"), QStringLiteral(u"©")); }
+QString Application::copyright() { return QStringLiteral(COPYRIGHT).replace(u"(c)"_s, u"©"_s); }
 
 #ifdef Q_OS_MACOS
 #include <corefoundation/CFBundle.h>
@@ -343,8 +345,8 @@ QVariantList Application::saverFileTypes()
     for(auto& saver : _factories)
     {
         QVariantMap map;
-        map.insert(QStringLiteral("name"), saver->name());
-        map.insert(QStringLiteral("extension"), saver->extension());
+        map.insert(u"name"_s, saver->name());
+        map.insert(u"extension"_s, saver->extension());
         saverData.push_back(map);
     }
     return saverData;
@@ -393,7 +395,7 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName,
 
 void Application::checkForUpdates()
 {
-    if(Updater::updateStatus() != QStringLiteral("installed"))
+    if(Updater::updateStatus() != u"installed"_s)
         Updater::resetUpdateStatus();
 
     _updater.startBackgroundUpdateCheck();
@@ -514,7 +516,7 @@ static void deadlock()
 
     std::thread t([&]
     {
-        u::setCurrentThreadName(QStringLiteral("DeadlockThread"));
+        u::setCurrentThreadName(u"DeadlockThread"_s);
 
         const std::unique_lock<std::mutex> lockA(a);
         std::this_thread::sleep_for(1s);
@@ -536,7 +538,7 @@ static void hitch()
 
 static void silentCrashSubmit()
 {
-    CrashHandler::instance()->submitMinidump(QStringLiteral("Silent Test Crash Submit"));
+    CrashHandler::instance()->submitMinidump(u"Silent Test Crash Submit"_s);
 }
 
 // NOLINTNEXTLINE readability-convert-member-functions-to-static
@@ -817,7 +819,7 @@ void Application::updateLoadingCapabilities()
         for(const auto& extension : fileType._extensions)
         {
             if(second)
-                description += QStringLiteral(" ");
+                description += u" "_s;
             else
                 second = true;
 
@@ -825,7 +827,7 @@ void Application::updateLoadingCapabilities()
         }
     }
 
-    description += QStringLiteral(")");
+    description += u")"_s;
 
     _nameFilters.clear();
     _nameFilters.append(description);
@@ -838,14 +840,14 @@ void Application::updateLoadingCapabilities()
         for(const auto& extension : fileType._extensions)
         {
             if(second)
-                description += QStringLiteral(" ");
+                description += u" "_s;
             else
                 second = true;
 
             description += "*." + extension;
         }
 
-        description += QStringLiteral(")");
+        description += u")"_s;
 
         _nameFilters.append(description);
     }

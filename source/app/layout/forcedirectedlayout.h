@@ -27,6 +27,8 @@
 
 #include <vector>
 
+using namespace Qt::Literals::StringLiterals;
+
 struct ForceDirectedDisplacement
 {
     QVector3D _repulsive;
@@ -110,7 +112,7 @@ private:
 public:
     explicit ForceDirectedLayoutFactory(GraphModel* graphModel);
 
-    QString name() const override { return QStringLiteral("ForceDirected"); }
+    QString name() const override { return u"ForceDirected"_s; }
     QString displayName() const override { return QObject::tr("Force Directed"); }
     std::unique_ptr<Layout> create(ComponentId componentId, NodeLayoutPositions& nodePositions,
         Layout::Dimensionality dimensionalityMode) override;

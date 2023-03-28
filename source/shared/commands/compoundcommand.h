@@ -29,6 +29,8 @@
 #include <memory>
 #include <vector>
 
+using namespace Qt::Literals::StringLiterals;
+
 class CompoundCommand : public ICommand
 {
 public:
@@ -88,11 +90,11 @@ public:
 
         for(const auto& command : _commands)
         {
-            auto indent = QStringLiteral("  ");
+            auto indent = u"  "_s;
             auto commandDescription = indent + command->debugDescription();
-            commandDescription.replace(QStringLiteral("\n"), QStringLiteral("\n") + indent);
+            commandDescription.replace(u"\n"_s, u"\n"_s + indent);
 
-            text.append(QStringLiteral("\n%1").arg(commandDescription));
+            text.append(u"\n%1"_s.arg(commandDescription));
         }
 
         return text;

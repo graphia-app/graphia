@@ -28,6 +28,8 @@
 #include "shared/utils/container.h"
 #include "shared/utils/static_block.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 AvailableAttributesModel::Item::Item(const QString& value, const QString& attributeName) :
     _value(value), _attributeName(attributeName)
 {}
@@ -326,18 +328,18 @@ QString AvailableAttributesModel::get(const QModelIndex& index) const
     if(item == nullptr)
         return {};
 
-    QString text = QStringLiteral(R"("%1")").arg(item->value());
+    QString text = u"\"%1\""_s.arg(item->value());
 
     auto* parent = parentItem(index);
     if(u::contains(_attributeItemsWithParameters, parent))
     {
         const QString parentText = get(index.parent());
-        text = QStringLiteral("%1.%2").arg(parentText, text);
+        text = u"%1.%2"_s.arg(parentText, text);
     }
     else if(parent == _sourceNode)
-        text = QStringLiteral("source.%1").arg(text);
+        text = u"source.%1"_s.arg(text);
     else if(parent == _targetNode)
-        text = QStringLiteral("target.%1").arg(text);
+        text = u"target.%1"_s.arg(text);
 
     return text;
 }

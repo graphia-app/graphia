@@ -29,6 +29,8 @@
 
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 ColorPalette::ColorPalette(const QString& descriptor)
 {
     auto jsonDocument = parseJsonFrom(descriptor.toUtf8());
@@ -115,7 +117,7 @@ QColor ColorPalette::get(const QString& value, int index) const
         index = 0;
 
         // Sum up all the sections of digits in the value
-        static const QRegularExpression re(QStringLiteral(R"(([^\d]*)(\d*)([^\d]*))"));
+        static const QRegularExpression re(uR"(([^\d]*)(\d*)([^\d]*))"_s);
         auto i = re.globalMatch(value);
         while(i.hasNext())
         {

@@ -25,6 +25,8 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool GMLSaver::save()
 {
     QFile file(_url.toLocalFile());
@@ -46,10 +48,10 @@ bool GMLSaver::save()
     for(const auto& attributeName : _graphModel->attributeNames())
     {
         auto cleanName = attributeName;
-        static const QRegularExpression re(QStringLiteral(R"([^a-zA-Z\d])"));
+        static const QRegularExpression re(uR"([^a-zA-Z\d])"_s);
         cleanName.remove(re);
         if(cleanName.isEmpty())
-            cleanName = QStringLiteral("Attribute");
+            cleanName = u"Attribute"_s;
 
         // Duplicate attributenames can occur when removing non alphanum chars, append a number.
         if(alphanumAttributeNames.find(cleanName) != alphanumAttributeNames.end())
@@ -68,7 +70,7 @@ bool GMLSaver::save()
         }
 
         if(cleanName.at(0).isDigit())
-            cleanName = QStringLiteral("Attribute") + cleanName;
+            cleanName = u"Attribute"_s + cleanName;
 
         alphanumAttributeNames[attributeName] = cleanName;
 
@@ -92,7 +94,7 @@ bool GMLSaver::save()
             {
                 const QString escapedValue = escape(attribute->stringValueOf(elementId));
                 stream << indent(level) << alphanumAttributeNames[attributeName] << " "
-                       << QStringLiteral(R"("%1")").arg(escapedValue) << "\n";
+                       << u"\"%1\""_s.arg(escapedValue) << "\n";
             }
             else if(attribute->valueType() & ValueType::Numerical)
             {
@@ -114,7 +116,7 @@ bool GMLSaver::save()
         stream << indent(level) << "[\n";
         level++;
         stream << indent(level) << "id " << static_cast<int>(nodeId) << "\n";
-        const QString labelString = QStringLiteral(R"("%1")").arg(nodeName);
+        const QString labelString = u"\"%1\""_s.arg(nodeName);
         stream << indent(level) << "label " << labelString << "\n";
         attributes(nodeId, _graphModel->attributeNames(ElementType::Node));
         stream << indent(--level) << "]\n"; // node

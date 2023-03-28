@@ -27,6 +27,8 @@
 
 #include <QColor>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format, int numMultiSamples)
 {
@@ -400,16 +402,16 @@ GraphRendererCore::GraphRendererCore() :
     glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, &maxSamples);
     _numMultiSamples = std::min(maxSamples, _numMultiSamples);
 
-    ShaderTools::loadShaderProgram(_screenShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/screen.frag"));
-    ShaderTools::loadShaderProgram(_outlineShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/outline.frag"));
-    ShaderTools::loadShaderProgram(_selectionShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/selection.frag"));
+    ShaderTools::loadShaderProgram(_screenShader, u":/shaders/screen.vert"_s, u":/shaders/screen.frag"_s);
+    ShaderTools::loadShaderProgram(_outlineShader, u":/shaders/screen.vert"_s, u":/shaders/outline.frag"_s);
+    ShaderTools::loadShaderProgram(_selectionShader, u":/shaders/screen.vert"_s, u":/shaders/selection.frag"_s);
 
-    ShaderTools::loadShaderProgram(_nodesShader, QStringLiteral(":/shaders/instancednodes.vert"), QStringLiteral(":/shaders/nodecolorads.frag"));
-    ShaderTools::loadShaderProgram(_edgesShader, QStringLiteral(":/shaders/instancededges.vert"), QStringLiteral(":/shaders/edgecolorads.frag"));
+    ShaderTools::loadShaderProgram(_nodesShader, u":/shaders/instancednodes.vert"_s, u":/shaders/nodecolorads.frag"_s);
+    ShaderTools::loadShaderProgram(_edgesShader, u":/shaders/instancededges.vert"_s, u":/shaders/edgecolorads.frag"_s);
 
-    ShaderTools::loadShaderProgram(_selectionMarkerShader, QStringLiteral(":/shaders/2d.vert"), QStringLiteral(":/shaders/selectionMarker.frag"));
+    ShaderTools::loadShaderProgram(_selectionMarkerShader, u":/shaders/2d.vert"_s, u":/shaders/selectionMarker.frag"_s);
 
-    ShaderTools::loadShaderProgram(_textShader, QStringLiteral(":/shaders/textrender.vert"), QStringLiteral(":/shaders/textrender.frag"));
+    ShaderTools::loadShaderProgram(_textShader, u":/shaders/textrender.vert"_s, u":/shaders/textrender.frag"_s);
 
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
@@ -464,10 +466,10 @@ static void setShaderLightingParameters(QOpenGLShaderProgram& program)
 
     for(size_t i = 0; i < numberOfLights; i++)
     {
-        QByteArray positionId = QStringLiteral("lights[%1].position").arg(i).toLatin1();
+        QByteArray positionId = u"lights[%1].position"_s.arg(i).toLatin1();
         program.setUniformValue(positionId.data(), lights.at(i).position);
 
-        QByteArray colorId = QStringLiteral("lights[%1].color").arg(i).toLatin1();
+        QByteArray colorId = u"lights[%1].color"_s.arg(i).toLatin1();
         program.setUniformValue(colorId.data(), lights.at(i).color);
     }
 
@@ -553,7 +555,7 @@ void GraphRendererCore::renderText(GPUGraphData& gpuGraphData)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     _textShader.setUniformValue("tex", 0);
-    _textShader.setUniformValue("textScale", u::pref(QStringLiteral("visuals/textSize")).toFloat());
+    _textShader.setUniformValue("textScale", u::pref(u"visuals/textSize"_s).toFloat());
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
@@ -893,7 +895,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 {
     glViewport(0, 0, _width, _height);
 
-    auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
+    auto backgroundColor = u::pref(u"visuals/backgroundColor"_s).value<QColor>();
 
     glClearColor(static_cast<GLfloat>(backgroundColor.redF()),
         static_cast<GLfloat>(backgroundColor.greenF()),
@@ -920,7 +922,7 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
     _selectionShader.bind();
     _selectionShader.setUniformValue("highlightColor",
-        u::pref(QStringLiteral("visuals/highlightColor")).value<QColor>());
+        u::pref(u"visuals/highlightColor"_s).value<QColor>());
     _selectionShader.release();
 
     _outlineShader.bind();

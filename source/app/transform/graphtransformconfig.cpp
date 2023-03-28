@@ -26,6 +26,8 @@
 #include <QObject>
 #include <QVariantList>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const
 {
     return _lhs == other._lhs &&
@@ -133,9 +135,9 @@ QString GraphTransformConfig::Parameter::valueAsString(bool addQuotes) const
             if(_addQuotes)
             {
                 QString escapedString = s;
-                escapedString.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+                escapedString.replace(u"\""_s, u"\\\""_s);
 
-                return QStringLiteral(R"("%1")").arg(escapedString);
+                return u"\"%1\""_s.arg(escapedString);
             }
 
             return s;
@@ -179,9 +181,9 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             QVariantMap map;
 
-            map.insert(QStringLiteral("lhs"), terminalValueAsString(terminalCondition._lhs));
-            map.insert(QStringLiteral("op"), terminalCondition.opAsString());
-            map.insert(QStringLiteral("rhs"), terminalValueAsString(terminalCondition._rhs));
+            map.insert(u"lhs"_s, terminalValueAsString(terminalCondition._lhs));
+            map.insert(u"op"_s, terminalCondition.opAsString());
+            map.insert(u"rhs"_s, terminalValueAsString(terminalCondition._rhs));
 
             return map;
         }
@@ -190,8 +192,8 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             QVariantMap map;
 
-            map.insert(QStringLiteral("lhs"), terminalValueAsString(unaryCondition._lhs));
-            map.insert(QStringLiteral("op"), unaryCondition.opAsString());
+            map.insert(u"lhs"_s, terminalValueAsString(unaryCondition._lhs));
+            map.insert(u"op"_s, unaryCondition.opAsString());
 
             return map;
         }
@@ -202,9 +204,9 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
             auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
             auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
 
-            map.insert(QStringLiteral("lhs"), lhs);
-            map.insert(QStringLiteral("op"), compoundCondition.opAsString());
-            map.insert(QStringLiteral("rhs"), rhs);
+            map.insert(u"lhs"_s, lhs);
+            map.insert(u"op"_s, compoundCondition.opAsString());
+            map.insert(u"rhs"_s, rhs);
 
             return map;
         }
@@ -235,9 +237,9 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
                 QString operator()(const int& i) const      { return QString::number(i); }
                 QString operator()(const QString& s) const
                 {
-                    const auto attributeWithParameterTemplace = _forDisplay ? QObject::tr("%1%2 › %3") : QStringLiteral(R"($"%1%2"."%3")");
-                    const auto attributeTemplate = _forDisplay ? QObject::tr("%1%2") : QStringLiteral(R"($"%1%2")");
-                    const auto valueTemplate = _forDisplay ? QObject::tr("%1") : QStringLiteral(R"("%1")");
+                    const auto attributeWithParameterTemplace = _forDisplay ? QObject::tr("%1%2 › %3") : u"$\"%1%2\".\"%3\""_s;
+                    const auto attributeTemplate = _forDisplay ? QObject::tr("%1%2") : u"$\"%1%2\""_s;
+                    const auto valueTemplate = _forDisplay ? QObject::tr("%1") : u"\"%1\""_s;
 
                     if(GraphTransformConfigParser::isAttributeName(s))
                     {
@@ -246,8 +248,8 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
                         QString prefix;
                         switch(info._type)
                         {
-                        case Attribute::EdgeNodeType::Source: prefix = _forDisplay ? QObject::tr("Source › ") : QStringLiteral("source."); break;
-                        case Attribute::EdgeNodeType::Target: prefix = _forDisplay ? QObject::tr("Target › ") : QStringLiteral("target."); break;
+                        case Attribute::EdgeNodeType::Source: prefix = _forDisplay ? QObject::tr("Source › ") : u"source."_s; break;
+                        case Attribute::EdgeNodeType::Target: prefix = _forDisplay ? QObject::tr("Target › ") : u"target."_s; break;
                         default: break;
                         }
 
@@ -295,7 +297,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
         QString operator()(GraphTransformConfig::NoCondition) const { return {}; }
         QString operator()(const TerminalCondition& terminalCondition) const
         {
-            return QStringLiteral("%1 %2 %3").arg(
+            return u"%1 %2 %3"_s.arg(
                 terminalValueAsString(terminalCondition._lhs),
                 prettifyOp(terminalCondition.opAsString()),
                 terminalValueAsString(terminalCondition._rhs));
@@ -303,7 +305,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
 
         QString operator()(const UnaryCondition& unaryCondition) const
         {
-            return QStringLiteral("%1 %2").arg(
+            return u"%1 %2"_s.arg(
                 terminalValueAsString(unaryCondition._lhs),
                 prettifyOp(unaryCondition.opAsString()));
         }
@@ -313,7 +315,7 @@ QString GraphTransformConfig::conditionAsString(bool forDisplay) const
             auto lhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._lhs);
             auto rhs = boost::apply_visitor(ConditionVisitor(_forDisplay), compoundCondition._rhs);
 
-            return QStringLiteral("%1 %2 %3").arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
+            return u"%1 %2 %3"_s.arg(lhs, prettifyOp(compoundCondition.opAsString()), rhs);
         }
     };
 
@@ -328,28 +330,28 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     flags.reserve(static_cast<int>(_flags.size()));
     for(const auto& flag : _flags)
         flags.append(flag);
-    map.insert(QStringLiteral("flags"), flags);
+    map.insert(u"flags"_s, flags);
 
-    map.insert(QStringLiteral("action"), _action);
+    map.insert(u"action"_s, _action);
 
     QStringList attributes;
     attributes.reserve(static_cast<int>(_attributes.size()));
     for(const auto& attribute : _attributes)
         attributes.append(Attribute::enquoteAttributeName(attribute));
-    map.insert(QStringLiteral("attributes"), attributes);
+    map.insert(u"attributes"_s, attributes);
 
     QVariantList parameters;
     for(const auto& parameter : _parameters)
     {
         QVariantMap parameterMap;
-        parameterMap.insert(QStringLiteral("name"), parameter._name);
-        parameterMap.insert(QStringLiteral("value"), parameter.valueAsString());
+        parameterMap.insert(u"name"_s, parameter._name);
+        parameterMap.insert(u"value"_s, parameter.valueAsString());
         parameters.append(parameterMap);
     }
-    map.insert(QStringLiteral("parameters"), parameters);
+    map.insert(u"parameters"_s, parameters);
 
     if(hasCondition())
-        map.insert(QStringLiteral("condition"), conditionAsVariantMap());
+        map.insert(u"condition"_s, conditionAsVariantMap());
 
     return map;
 }
@@ -362,29 +364,29 @@ QString GraphTransformConfig::asString(bool forDisplay) const
     {
         if(!forDisplay)
         {
-            s += QStringLiteral("[");
+            s += u"["_s;
             for(const auto& flag : _flags)
             {
                 if(s[s.length() - 1] != '[')
-                    s += QStringLiteral(", ");
+                    s += u", "_s;
 
                 s += flag;
             }
-            s += QStringLiteral("] ");
+            s += u"] "_s;
         }
-        else if(isFlagSet(QStringLiteral("pinned")))
+        else if(isFlagSet(u"pinned"_s))
             s += QObject::tr("📌 ");
     }
 
-    const auto actionTemplate = forDisplay ? QObject::tr("%1") : QStringLiteral(R"("%1")");
-    const auto attributeTemplate = forDisplay ? QObject::tr(" %1") : QStringLiteral(R"( $"%1")");
-    const auto parameterTemplate = forDisplay ?  QObject::tr(" %1 = %2") : QStringLiteral(R"( "%1" = %2)");
+    const auto actionTemplate = forDisplay ? QObject::tr("%1") : u"\"%1\""_s;
+    const auto attributeTemplate = forDisplay ? QObject::tr(" %1") : u" $\"%1\""_s;
+    const auto parameterTemplate = forDisplay ?  QObject::tr(" %1 = %2") : u" \"%1\" = %2"_s;
 
     s += actionTemplate.arg(_action);
 
     if(!_attributes.empty())
     {
-        s += forDisplay ? QObject::tr(" using") : QStringLiteral(" using");
+        s += forDisplay ? QObject::tr(" using") : u" using"_s;
 
         for(const auto& attribute : _attributes)
             s += attributeTemplate.arg(attribute);
@@ -392,7 +394,7 @@ QString GraphTransformConfig::asString(bool forDisplay) const
 
     if(!_parameters.empty())
     {
-        s += forDisplay ? QObject::tr(" with") : QStringLiteral(" with");
+        s += forDisplay ? QObject::tr(" with") : u" with"_s;
 
         for(const auto& parameter : _parameters)
         {
@@ -403,7 +405,7 @@ QString GraphTransformConfig::asString(bool forDisplay) const
 
     if(hasCondition())
     {
-        s += forDisplay ? QObject::tr(" where ") : QStringLiteral(" where ");
+        s += forDisplay ? QObject::tr(" where ") : u" where "_s;
         s += conditionAsString(forDisplay);
     }
 

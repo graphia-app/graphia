@@ -21,6 +21,8 @@
 
 #include "build_defines.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 void FailureReason::setFailureReason(const QString& failureReason)
 {
     _failureReason = failureReason;
@@ -33,7 +35,7 @@ const QString& FailureReason::failureReason() const
 
 void FailureReason::setGenericFailureReason(const source_location& location)
 {
-    _failureReason = QStringLiteral("Failure at %1:%2\n%3\nBuild %4")
+    _failureReason = u"Failure at %1:%2\n%3\nBuild %4"_s
         .arg(location.file_name())
         .arg(location.line())
         .arg(location.function_name(), QStringLiteral(GIT_SHA));

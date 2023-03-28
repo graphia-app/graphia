@@ -26,6 +26,8 @@
 #include "shared/loading/userelementdata.h"
 #include "shared/loading/userdatavector.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 CloneAttributeCommand::CloneAttributeCommand(GraphModel* graphModel, const QString& sourceAttributeName,
     const QString& newAttributeName) :
     _graphModel(graphModel), _sourceAttributeName(sourceAttributeName), _newAttributeName(newAttributeName)
@@ -50,7 +52,7 @@ QString CloneAttributeCommand::debugDescription() const
 {
     QString text = description();
 
-    text.append(QStringLiteral("\n  %1").arg(_createdAttributeNames.front()));
+    text.append(u"\n  %1"_s.arg(_createdAttributeNames.front()));
 
     return text;
 }

@@ -32,6 +32,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 int main(int argc, char *argv[])
 {
     const QApplication app(argc, argv);
@@ -40,8 +42,8 @@ int main(int argc, char *argv[])
 
     execute_static_blocks();
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QCoreApplication::setOrganizationName(u"Graphia"_s);
+    QCoreApplication::setOrganizationDomain(u"graphia.app"_s);
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
     QSettings::setDefaultFormat(QSettings::Format::IniFormat);
@@ -50,19 +52,19 @@ int main(int argc, char *argv[])
         "QmlUtils", &QmlUtils::qmlInstance);
 
     QIcon mainIcon;
-    mainIcon.addFile(QStringLiteral(":/Icon512x512.png"));
-    mainIcon.addFile(QStringLiteral(":/Icon256x256.png"));
-    mainIcon.addFile(QStringLiteral(":/Icon128x128.png"));
-    mainIcon.addFile(QStringLiteral(":/Icon64x64.png"));
-    mainIcon.addFile(QStringLiteral(":/Icon32x32.png"));
-    mainIcon.addFile(QStringLiteral(":/Icon16x16.png"));
+    mainIcon.addFile(u":/Icon512x512.png"_s);
+    mainIcon.addFile(u":/Icon256x256.png"_s);
+    mainIcon.addFile(u":/Icon128x128.png"_s);
+    mainIcon.addFile(u":/Icon64x64.png"_s);
+    mainIcon.addFile(u":/Icon32x32.png"_s);
+    mainIcon.addFile(u":/Icon16x16.png"_s);
     QApplication::setWindowIcon(mainIcon);
 
-    QQuickStyle::setStyle(u::getPref(QStringLiteral("system/uiTheme")).toString());
+    QQuickStyle::setStyle(u::getPref(u"system/uiTheme"_s).toString());
 
     QQmlApplicationEngine engine;
-    engine.addImportPath(QStringLiteral("qrc:///qml/"));
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.addImportPath(u"qrc:///qml/"_s);
+    engine.load(QUrl(u"qrc:/main.qml"_s));
     Q_ASSERT(!engine.rootObjects().empty());
 
     return QCoreApplication::exec();

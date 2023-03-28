@@ -27,6 +27,8 @@
 #include <map>
 #include <type_traits>
 
+using namespace Qt::Literals::StringLiterals;
+
 CxParser::CxParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
@@ -291,7 +293,7 @@ static bool parseCx2(const json& jsonArray, IGraphModel* graphModel,
                 if(name == "n")
                 {
                     graphModel->setNodeName(elementId, attributeValue);
-                    userData.setValueBy(elementId, QStringLiteral("Node Name"), attributeValue);
+                    userData.setValueBy(elementId, u"Node Name"_s, attributeValue);
                     return;
                 }
             }

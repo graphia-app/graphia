@@ -22,6 +22,8 @@
 #include <QUrl>
 #include <QFileInfo>
 
+using namespace Qt::Literals::StringLiterals;
+
 // This is quite complicated from a control flow/threading point of view and
 // probably deserves some explanation:
 //
@@ -83,7 +85,7 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
         if(!image._label.isEmpty())
         {
             QFileInfo fileInfo(_baseFilename);
-            filename = QStringLiteral("%1/%2-%3.%4")
+            filename = u"%1/%2-%3.%4"_s
                 .arg(fileInfo.dir().path(), fileInfo.baseName(),
                 image._label, fileInfo.completeSuffix());
             target = QUrl::fromLocalFile(fileInfo.dir().path());

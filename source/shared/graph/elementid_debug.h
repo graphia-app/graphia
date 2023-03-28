@@ -25,10 +25,12 @@
 #include <QDebug>
 #include <QString>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
 {
     if(id.isNull())
-        d << QStringLiteral("Null");
+        d << u"Null"_s;
     else
         d << static_cast<int>(id);
 

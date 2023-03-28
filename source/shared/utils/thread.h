@@ -24,6 +24,8 @@
 #include <QTextStream>
 #include <QString>
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace u
 {
     inline int currentThreadId();
@@ -91,7 +93,7 @@ QString u::parentProcessName()
 {
     auto ppid = getppid();
 
-    QFile procFile(QStringLiteral("/proc/%1/cmdline").arg(ppid));
+    QFile procFile(u"/proc/%1/cmdline"_s.arg(ppid));
     if(procFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream ts(&procFile);

@@ -27,14 +27,16 @@
 #include <QIcon>
 #include <QHash>
 
+using namespace Qt::Literals::StringLiterals;
+
 static QMessageBox::Icon parseIcon(const QString& text)
 {
     QHash<QString, QMessageBox::Icon> icons =
     {
-        {QStringLiteral("Question"),    QMessageBox::Question},
-        {QStringLiteral("Information"), QMessageBox::Information},
-        {QStringLiteral("Warning"),     QMessageBox::Warning},
-        {QStringLiteral("Critical"),    QMessageBox::Critical},
+        {u"Question"_s,    QMessageBox::Question},
+        {u"Information"_s, QMessageBox::Information},
+        {u"Warning"_s,     QMessageBox::Warning},
+        {u"Critical"_s,    QMessageBox::Critical},
     };
 
     if(icons.contains(text))
@@ -61,15 +63,15 @@ static Button parseButton(const QString& text)
 
     QHash<QString, QMessageBox::ButtonRole> roles =
     {
-        {QStringLiteral("Accept"),      QMessageBox::AcceptRole},
-        {QStringLiteral("Reject"),      QMessageBox::RejectRole},
-        {QStringLiteral("Destructive"), QMessageBox::DestructiveRole},
-        {QStringLiteral("Action"),      QMessageBox::ActionRole},
-        {QStringLiteral("Help"),        QMessageBox::HelpRole},
-        {QStringLiteral("Yes"),         QMessageBox::YesRole},
-        {QStringLiteral("No"),          QMessageBox::NoRole},
-        {QStringLiteral("Apply"),       QMessageBox::ApplyRole},
-        {QStringLiteral("Reset"),       QMessageBox::ResetRole},
+        {u"Accept"_s,      QMessageBox::AcceptRole},
+        {u"Reject"_s,      QMessageBox::RejectRole},
+        {u"Destructive"_s, QMessageBox::DestructiveRole},
+        {u"Action"_s,      QMessageBox::ActionRole},
+        {u"Help"_s,        QMessageBox::HelpRole},
+        {u"Yes"_s,         QMessageBox::YesRole},
+        {u"No"_s,          QMessageBox::NoRole},
+        {u"Apply"_s,       QMessageBox::ApplyRole},
+        {u"Reset"_s,       QMessageBox::ResetRole},
     };
 
     auto role = tokens.at(1).trimmed();
@@ -89,13 +91,13 @@ int main(int argc, char *argv[])
 
     const QApplication app(argc, argv);
 
-    QCoreApplication::setOrganizationName(QStringLiteral("Graphia"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("graphia.app"));
+    QCoreApplication::setOrganizationName(u"Graphia"_s);
+    QCoreApplication::setOrganizationDomain(u"graphia.app"_s);
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     QIcon mainIcon;
-    mainIcon.addFile(QStringLiteral(":/icon/icon.svg"));
+    mainIcon.addFile(u":/icon/icon.svg"_s);
     QApplication::setWindowIcon(mainIcon);
 
     QCommandLineParser p;
@@ -104,7 +106,7 @@ int main(int argc, char *argv[])
     p.addHelpOption();
     p.addOptions(
     {
-        {{"t", "title"},            QObject::tr("Window title."),    "title",           QStringLiteral("MessageBox")},
+        {{"t", "title"},            QObject::tr("Window title."),    "title",           u"MessageBox"_s},
         {{"q", "text"},             QObject::tr("Window text."),     "text",
             QStringLiteral("Lorem ipsum dolor sit amet, consectetur adipiscing elit, "
                 "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
@@ -113,8 +115,8 @@ int main(int argc, char *argv[])
                 "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla "
                 "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in "
                 "culpa qui officia deserunt mollit anim id est laborum.")},
-        {{"i", "icon"},             QObject::tr("Window icon."),     "icon",            QStringLiteral("Question")},
-        {{"b", "button"},           QObject::tr("Window button."),   "button",          QStringLiteral("OK:Accept")},
+        {{"i", "icon"},             QObject::tr("Window icon."),     "icon",            u"Question"_s},
+        {{"b", "button"},           QObject::tr("Window button."),   "button",          u"OK:Accept"_s},
         {{"d", "defaultButton"},    QObject::tr("Default button."),  "defaultButton"},
     });
 
@@ -122,12 +124,12 @@ int main(int argc, char *argv[])
 
     QMessageBox mb;
 
-    mb.setWindowTitle(p.value(QStringLiteral("title")));
-    mb.setText(p.value(QStringLiteral("text")));
-    mb.setIcon(parseIcon(p.value(QStringLiteral("icon"))));
-    auto defaultButtonText = p.value(QStringLiteral("defaultButton"));
+    mb.setWindowTitle(p.value(u"title"_s));
+    mb.setText(p.value(u"text"_s));
+    mb.setIcon(parseIcon(p.value(u"icon"_s)));
+    auto defaultButtonText = p.value(u"defaultButton"_s);
 
-    auto buttonTexts = p.values(QStringLiteral("button"));
+    auto buttonTexts = p.values(u"button"_s);
     for(const auto& buttonText : buttonTexts)
     {
         auto button = parseButton(buttonText);

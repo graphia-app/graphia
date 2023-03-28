@@ -54,6 +54,8 @@
 
 #include <utility>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename Target>
 void initialiseFromGraph(const Graph* graph, Target& target)
 {
@@ -80,9 +82,9 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _layoutChanged(true),
     _performanceCounter(std::chrono::seconds(1))
 {
-    ShaderTools::loadShaderProgram(_debugLinesShader, QStringLiteral(":/shaders/debuglines.vert"), QStringLiteral(":/shaders/debuglines.frag"));
+    ShaderTools::loadShaderProgram(_debugLinesShader, u":/shaders/debuglines.vert"_s, u":/shaders/debuglines.frag"_s);
 
-    _glyphMap = std::make_unique<GlyphMap>(u::pref(QStringLiteral("visuals/textFont")).toString());
+    _glyphMap = std::make_unique<GlyphMap>(u::pref(u"visuals/textFont"_s).toString());
 
     const auto* graph = &_graphModel->graph();
 
@@ -122,7 +124,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         {
             updateGPUData(When::Later);
             update(); // QQuickFramebufferObject::Renderer::update
-        }, QStringLiteral("GraphRenderer::visualsChanged"));
+        }, u"GraphRenderer::visualsChanged"_s);
 
         enableSceneUpdate();
     });
@@ -242,12 +244,12 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
-    const float textScale = u::pref(QStringLiteral("visuals/textSize")).toFloat();
-    auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(QStringLiteral("visuals/textAlignment")).toInt());
+    const float textScale = u::pref(u"visuals/textSize"_s).toFloat();
+    auto textAlignment = normaliseQmlEnum<TextAlignment>(u::pref(u"visuals/textAlignment"_s).toInt());
     auto textColor = Document::contrastingColorForBackground();
-    auto showNodeText = normaliseQmlEnum<TextState>(u::pref(QStringLiteral("visuals/showNodeText")).toInt());
-    auto showEdgeText = normaliseQmlEnum<TextState>(u::pref(QStringLiteral("visuals/showEdgeText")).toInt());
-    auto edgeVisualType = normaliseQmlEnum<EdgeVisualType>(u::pref(QStringLiteral("visuals/edgeVisualType")).toInt());
+    auto showNodeText = normaliseQmlEnum<TextState>(u::pref(u"visuals/showNodeText"_s).toInt());
+    auto showEdgeText = normaliseQmlEnum<TextState>(u::pref(u"visuals/showEdgeText"_s).toInt());
+    auto edgeVisualType = normaliseQmlEnum<EdgeVisualType>(u::pref(u"visuals/edgeVisualType"_s).toInt());
 
     // Ignore the setting if the graph is undirected
     if(!_graphModel->directed())
@@ -521,7 +523,7 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
         executeOnRendererThread([this, nodeId, radius]
         {
             _graphComponentScene->moveFocusToNode(nodeId, radius);
-        }, QStringLiteral("GraphRenderer::moveFocusToNode"));
+        }, u"GraphRenderer::moveFocusToNode"_s);
     }
     else if(mode() == Mode::Overview)
     {
@@ -654,7 +656,7 @@ void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransi
     executeOnRendererThread([this, doTransition]
     {
         finishTransitionToOverviewMode(doTransition);
-    }, QStringLiteral("GraphRenderer::finishTransitionToOverviewMode"));
+    }, u"GraphRenderer::finishTransitionToOverviewMode"_s);
 }
 
 void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
@@ -679,7 +681,7 @@ void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTrans
     executeOnRendererThread([this, doTransition]
     {
         finishTransitionToComponentMode(doTransition);
-    }, QStringLiteral("GraphRenderer::finishTransitionToComponentMode"));
+    }, u"GraphRenderer::finishTransitionToComponentMode"_s);
 }
 
 void GraphRenderer::switchToOverviewMode(bool doTransition)
@@ -719,7 +721,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         else
             finishTransitionToOverviewMode(false);
 
-    }, QStringLiteral("GraphRenderer::switchToOverviewMode"));
+    }, u"GraphRenderer::switchToOverviewMode"_s);
 }
 
 void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId, NodeId nodeId, float radius)
@@ -756,7 +758,7 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
         else
             finishTransitionToComponentMode(false);
 
-    }, QStringLiteral("GraphRenderer::switchToComponentMode"));
+    }, u"GraphRenderer::switchToComponentMode"_s);
 }
 
 void GraphRenderer::onGraphWillChange(const Graph* graph)
@@ -801,7 +803,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
                                                             _selectionManager, this);
         }
         updateGPUData(When::Later);
-    }, QStringLiteral("GraphRenderer::onGraphChanged update"));
+    }, u"GraphRenderer::onGraphChanged update"_s);
 }
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
@@ -819,7 +821,7 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
     {
         componentRendererForId(componentId)->initialise(_graphModel, componentId,
                                                         _selectionManager, this);
-    }, QStringLiteral("GraphRenderer::onComponentAdded"));
+    }, u"GraphRenderer::onComponentAdded"_s);
 }
 
 void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
@@ -827,17 +829,17 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     executeOnRendererThread([this, componentId]
     {
         componentRendererForId(componentId)->cleanup();
-    }, QStringLiteral("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
+    }, u"GraphRenderer::onComponentWillBeRemoved (cleanup) component %1"_s.arg(static_cast<int>(componentId)));
 }
 
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& value)
 {
-    if(key == QStringLiteral("visuals/textFont"))
+    if(key == u"visuals/textFont"_s)
     {
         _glyphMap->setFontName(value.toString());
         updateText();
     }
-    else if(key == QStringLiteral("visuals/backgroundColor"))
+    else if(key == u"visuals/backgroundColor"_s)
         update();
 }
 
@@ -901,7 +903,7 @@ void GraphRenderer::updateText(bool wait)
 
                 updateGPUData(When::Later);
                 update(); // QQuickFramebufferObject::Renderer::update
-            }, QStringLiteral("GraphRenderer::updateText"));
+            }, u"GraphRenderer::updateText"_s);
         });
 
         _gpuComputeThread->enqueue(job);
@@ -973,7 +975,7 @@ void GraphRenderer::processEventQueue()
             case QInputDevice::DeviceType::TouchScreen:
             case QInputDevice::DeviceType::TouchPad:
             {
-                if(u::pref(QStringLiteral("misc/panGestureZooms")).toBool())
+                if(u::pref(u"misc/panGestureZooms"_s).toBool())
                 {
                     _interactor->wheelEvent(wheelEvent->position().toPoint() * _devicePixelRatio,
                         wheelEvent->angleDelta().y());
@@ -1087,7 +1089,7 @@ GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuic
     if(componentIds.size() > 1)
     {
         // We want to focus on multiple nodes, but they span multiple components
-        if(mode() == Mode::Component && u::pref(QStringLiteral("misc/stayInComponentMode")).toBool())
+        if(mode() == Mode::Component && u::pref(u"misc/stayInComponentMode"_s).toBool())
         {
             // Prune the nodeIds we consider for focus down to only those in the focused component
             auto focusedComponentId = _graphComponentScene->componentId();

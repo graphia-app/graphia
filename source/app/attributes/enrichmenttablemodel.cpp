@@ -22,6 +22,8 @@
 #include <QQmlEngine>
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);
@@ -74,13 +76,13 @@ QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
     {
         switch(static_cast<Results>(column))
         {
-        case Results::SelectionA:           return _selectionA.isEmpty() ? QStringLiteral("Selection A") : _selectionA;
-        case Results::SelectionB:           return _selectionB.isEmpty() ? QStringLiteral("Selection B") : _selectionB;
-        case Results::Observed:             return QStringLiteral("Observed");
-        case Results::ExpectedTrial:        return QStringLiteral("Expected");
-        case Results::OverRep:              return QStringLiteral("Representation");
-        case Results::Fishers:              return QStringLiteral("Fishers");
-        case Results::BonferroniAdjusted:   return QStringLiteral("Bonferroni Adjusted");
+        case Results::SelectionA:           return _selectionA.isEmpty() ? u"Selection A"_s : _selectionA;
+        case Results::SelectionB:           return _selectionB.isEmpty() ? u"Selection B"_s : _selectionB;
+        case Results::Observed:             return u"Observed"_s;
+        case Results::ExpectedTrial:        return u"Expected"_s;
+        case Results::OverRep:              return u"Representation"_s;
+        case Results::Fishers:              return u"Fishers"_s;
+        case Results::BonferroniAdjusted:   return u"Bonferroni Adjusted"_s;
         default:
             return {};
         }

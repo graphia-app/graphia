@@ -25,6 +25,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void ContractByAttributeTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("Contracting"));
@@ -39,9 +41,9 @@ void ContractByAttributeTransform::apply(TransformedGraph& target)
 
     GraphTransformConfig::TerminalCondition condition
     {
-        QStringLiteral("$source.%1").arg(attributeName),
+        u"$source.%1"_s.arg(attributeName),
         ConditionFnOp::Equality::Equal,
-        QStringLiteral("$target.%1").arg(attributeName),
+        u"$target.%1"_s.arg(attributeName),
     };
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, condition);

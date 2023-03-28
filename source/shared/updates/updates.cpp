@@ -39,6 +39,8 @@
 #include <algorithm>
 #include <regex>
 
+using namespace Qt::Literals::StringLiterals;
+
 QString updatesLocation()
 {
     auto appDataLocation = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
@@ -46,12 +48,12 @@ QString updatesLocation()
     if(appDataLocation.isEmpty())
         return {};
 
-    return appDataLocation + QStringLiteral("/Updates");
+    return appDataLocation + u"/Updates"_s;
 }
 
 static QString updateFilePath()
 {
-    return QStringLiteral("%1/update.json").arg(updatesLocation());
+    return u"%1/update.json"_s.arg(updatesLocation());
 }
 
 json updateStringToJson(const QString& updateString, QString* status)
@@ -170,7 +172,7 @@ json updateStringToJson(const QString& updateString, QString* status)
 QString fullyQualifiedInstallerFileName(const json& update)
 {
     auto filename = QString::fromStdString(update["installerFileName"]);
-    return QStringLiteral("%1/%2")
+    return u"%1/%2"_s
         .arg(updatesLocation(), filename);
 }
 
@@ -228,7 +230,7 @@ bool clearUpdateStatus()
 
 static QString changeLogFilePath()
 {
-    return QStringLiteral("%1/changeLog.json").arg(updatesLocation());
+    return u"%1/changeLog.json"_s.arg(updatesLocation());
 }
 
 bool storeChangeLogJson(const QString& changeLogString)

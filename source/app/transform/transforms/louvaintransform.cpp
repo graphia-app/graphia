@@ -30,12 +30,14 @@
 #include <algorithm>
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 // https://arxiv.org/abs/0803.0476
 
 void LouvainTransform::apply(TransformedGraph& target)
 {
     auto resolution = 1.0 - std::get<double>(
-        config().parameterByName(QStringLiteral("Granularity"))->_value);
+        config().parameterByName(u"Granularity"_s)->_value);
 
     const auto minResolution = 0.5;
     const auto maxResolution = 30.0;
@@ -74,7 +76,7 @@ void LouvainTransform::apply(TransformedGraph& target)
 
     std::vector<NodeArray<CommunityId>> iterations;
     size_t progressIteration = 1;
-    setPhase(QStringLiteral("Louvain Initialising"));
+    setPhase(u"Louvain Initialising"_s);
 
     NodeArray<CommunityId> communities(target);
     NodeArray<double> weightedDegrees(target);
@@ -189,7 +191,7 @@ void LouvainTransform::apply(TransformedGraph& target)
             setProgress(0);
             uint64_t nodeIndex = 0;
 
-            setPhase(QStringLiteral("Louvain Iteration %1.%2")
+            setPhase(u"Louvain Iteration %1.%2"_s
                 .arg(QString::number(progressIteration), QString::number(subProgressIteration++)));
 
             for(auto nodeId : graph.nodeIds())
@@ -272,7 +274,7 @@ void LouvainTransform::apply(TransformedGraph& target)
             relabel(graph);
             iterations.emplace_back(communities);
 
-            setPhase(QStringLiteral("Louvain Iteration %1 Coarsening")
+            setPhase(u"Louvain Iteration %1 Coarsening"_s
                 .arg(QString::number(progressIteration)));
             coarsen(graph);
         }
@@ -284,7 +286,7 @@ void LouvainTransform::apply(TransformedGraph& target)
     if(cancelled())
         return;
 
-    setPhase(QStringLiteral("Louvain Finalising"));
+    setPhase(u"Louvain Finalising"_s);
 
     // Set each CommunityId to be the same as the NodeId, initially
     for(auto nodeId : target.nodeIds())

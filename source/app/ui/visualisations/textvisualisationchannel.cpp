@@ -25,6 +25,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void TextVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
     elementVisual._text = QString::number(value, 'g', 3);
@@ -37,7 +39,7 @@ void TextVisualisationChannel::apply(const QString& value, ElementVisual& elemen
 
 void TextVisualisationChannel::findErrors(ElementType elementType, VisualisationInfo& info) const
 {
-    if(elementType == ElementType::Edge && u::pref(QStringLiteral("visuals/showEdgeText")).toInt() == static_cast<int>(TextState::Off))
+    if(elementType == ElementType::Edge && u::pref(u"visuals/showEdgeText"_s).toInt() == static_cast<int>(TextState::Off))
         info.addAlert(AlertType::Warning, QObject::tr("Edge Text Disabled"));
 }
 

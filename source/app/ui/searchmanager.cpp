@@ -28,6 +28,8 @@
 
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 SearchManager::SearchManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
 {}
@@ -82,7 +84,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     if(options.test(FindOptions::MatchExact))
     {
         term = QRegularExpression::escape(term);
-        term = QStringLiteral("^%1$").arg(term);
+        term = u"^%1$"_s.arg(term);
     }
     else
     {
@@ -90,7 +92,7 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
             term = QRegularExpression::escape(term);
 
         if(options.test(FindOptions::MatchWholeWords))
-            term = QStringLiteral(R"(\b(%1)\b)").arg(term);
+            term = uR"(\b(%1)\b)"_s.arg(term);
 
         if(!options.test(FindOptions::MatchCase))
             reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);

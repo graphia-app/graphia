@@ -30,6 +30,8 @@
 #include <QUrl>
 #include <QXmlStreamWriter>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool GraphMLSaver::save()
 {
     auto* graphModel = dynamic_cast<GraphModel*>(_graphModel);
@@ -51,39 +53,39 @@ bool GraphMLSaver::save()
 
     stream.writeStartDocument();
 
-    stream.writeStartElement(QStringLiteral("graphml"));
-    stream.writeAttribute(QStringLiteral("xmlns"), QStringLiteral("http://graphml.graphdrawing.org/xmlns"));
-    stream.writeAttribute(QStringLiteral("xmlns:xsi"), QStringLiteral("http://www.w3.org/2001/XMLSchema-instance"));
-    stream.writeAttribute(QStringLiteral("xsi:schemaLocation"), QStringLiteral("http://graphml.graphdrawing.org/xmlns "
-        "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"));
+    stream.writeStartElement(u"graphml"_s);
+    stream.writeAttribute(u"xmlns"_s, u"http://graphml.graphdrawing.org/xmlns"_s);
+    stream.writeAttribute(u"xmlns:xsi"_s, u"http://www.w3.org/2001/XMLSchema-instance"_s);
+    stream.writeAttribute(u"xsi:schemaLocation"_s, u"http://graphml.graphdrawing.org/xmlns "_s +
+        u"http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"_s);
 
-    stream.writeStartElement(QStringLiteral("key"));
-    stream.writeAttribute(QStringLiteral("id"), QStringLiteral("desc"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
-    stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("Description"));
-    stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("string"));
+    stream.writeStartElement(u"key"_s);
+    stream.writeAttribute(u"id"_s, u"desc"_s);
+    stream.writeAttribute(u"for"_s, u"node"_s);
+    stream.writeAttribute(u"attr.name"_s, u"Description"_s);
+    stream.writeAttribute(u"attr.type"_s, u"string"_s);
     stream.writeEndElement();
 
     // Add position attribute keys
-    stream.writeStartElement(QStringLiteral("key"));
-    stream.writeAttribute(QStringLiteral("id"), QStringLiteral("x"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
-    stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("x"));
-    stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
+    stream.writeStartElement(u"key"_s);
+    stream.writeAttribute(u"id"_s, u"x"_s);
+    stream.writeAttribute(u"for"_s, u"node"_s);
+    stream.writeAttribute(u"attr.name"_s, u"x"_s);
+    stream.writeAttribute(u"attr.type"_s, u"float"_s);
     stream.writeEndElement();
 
-    stream.writeStartElement(QStringLiteral("key"));
-    stream.writeAttribute(QStringLiteral("id"), QStringLiteral("y"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
-    stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("y"));
-    stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
+    stream.writeStartElement(u"key"_s);
+    stream.writeAttribute(u"id"_s, u"y"_s);
+    stream.writeAttribute(u"for"_s, u"node"_s);
+    stream.writeAttribute(u"attr.name"_s, u"y"_s);
+    stream.writeAttribute(u"attr.type"_s, u"float"_s);
     stream.writeEndElement();
 
-    stream.writeStartElement(QStringLiteral("key"));
-    stream.writeAttribute(QStringLiteral("id"), QStringLiteral("z"));
-    stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
-    stream.writeAttribute(QStringLiteral("attr.name"), QStringLiteral("z"));
-    stream.writeAttribute(QStringLiteral("attr.type"), QStringLiteral("float"));
+    stream.writeStartElement(u"key"_s);
+    stream.writeAttribute(u"id"_s, u"z"_s);
+    stream.writeAttribute(u"for"_s, u"node"_s);
+    stream.writeAttribute(u"attr.name"_s, u"z"_s);
+    stream.writeAttribute(u"attr.type"_s, u"float"_s);
     stream.writeEndElement();
 
     // Add attribute keys
@@ -100,36 +102,36 @@ bool GraphMLSaver::save()
         if(attribute->hasParameter())
             continue;
 
-        stream.writeStartElement(QStringLiteral("key"));
-        stream.writeAttribute(QStringLiteral("id"), QStringLiteral("d%1").arg(keyId));
-        idToAttribute[QStringLiteral("d%1").arg(keyId)] = attributeName;
-        attributeToId[attributeName] = QStringLiteral("d%1").arg(keyId);
+        stream.writeStartElement(u"key"_s);
+        stream.writeAttribute(u"id"_s, u"d%1"_s.arg(keyId));
+        idToAttribute[u"d%1"_s.arg(keyId)] = attributeName;
+        attributeToId[attributeName] = u"d%1"_s.arg(keyId);
 
         if(attribute->elementType() == ElementType::Node)
-            stream.writeAttribute(QStringLiteral("for"), QStringLiteral("node"));
+            stream.writeAttribute(u"for"_s, u"node"_s);
         if(attribute->elementType() == ElementType::Edge)
-            stream.writeAttribute(QStringLiteral("for"), QStringLiteral("edge"));
+            stream.writeAttribute(u"for"_s, u"edge"_s);
         if(attribute->elementType() == ElementType::Component)
-            stream.writeAttribute(QStringLiteral("for"), QStringLiteral("graph"));
+            stream.writeAttribute(u"for"_s, u"graph"_s);
 
-        stream.writeAttribute(QStringLiteral("attr.name"), attributeName);
+        stream.writeAttribute(u"attr.name"_s, attributeName);
 
         QString valueTypeToString;
         switch(attribute->valueType())
         {
-        case ValueType::Int: valueTypeToString = QStringLiteral("int"); break;
-        case ValueType::Float: valueTypeToString = QStringLiteral("float"); break;
-        case ValueType::String: valueTypeToString = QStringLiteral("string"); break;
-        case ValueType::Numerical: valueTypeToString = QStringLiteral("float"); break;
-        default: valueTypeToString = QStringLiteral("string"); break;
+        case ValueType::Int: valueTypeToString = u"int"_s; break;
+        case ValueType::Float: valueTypeToString = u"float"_s; break;
+        case ValueType::String: valueTypeToString = u"string"_s; break;
+        case ValueType::Numerical: valueTypeToString = u"float"_s; break;
+        default: valueTypeToString = u"string"_s; break;
         }
-        stream.writeAttribute(QStringLiteral("attr.type"), valueTypeToString);
+        stream.writeAttribute(u"attr.type"_s, valueTypeToString);
         stream.writeEndElement();
         keyId++;
     }
 
-    stream.writeStartElement(QStringLiteral("graph"));
-    stream.writeAttribute(QStringLiteral("edgedefault"), QStringLiteral("directed"));
+    stream.writeStartElement(u"graph"_s);
+    stream.writeAttribute(u"edgedefault"_s, u"directed"_s);
 
     setPhase(QObject::tr("Nodes"));
     for(auto nodeId : _graphModel->graph().nodeIds())
@@ -137,36 +139,36 @@ bool GraphMLSaver::save()
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / numElements));
 
-        stream.writeStartElement(QStringLiteral("node"));
-        stream.writeAttribute(QStringLiteral("id"), QStringLiteral("n%1").arg(static_cast<int>(nodeId)));
+        stream.writeStartElement(u"node"_s);
+        stream.writeAttribute(u"id"_s, u"n%1"_s.arg(static_cast<int>(nodeId)));
         for(const auto& nodeAttributeName : _graphModel->attributeNames(ElementType::Node))
         {
             const auto* attribute = _graphModel->attributeByName(nodeAttributeName);
             if(attribute->hasParameter())
                 continue;
 
-            stream.writeStartElement(QStringLiteral("data"));
-            stream.writeAttribute(QStringLiteral("key"), attributeToId.at(nodeAttributeName));
+            stream.writeStartElement(u"data"_s);
+            stream.writeAttribute(u"key"_s, attributeToId.at(nodeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(nodeId).toHtmlEscaped());
             stream.writeEndElement();
         }
 
-        stream.writeStartElement(QStringLiteral("data"));
-        stream.writeAttribute(QStringLiteral("key"), QStringLiteral("desc"));
+        stream.writeStartElement(u"data"_s);
+        stream.writeAttribute(u"key"_s, u"desc"_s);
         stream.writeCharacters(_graphModel->nodeName(nodeId).toHtmlEscaped());
         stream.writeEndElement();
 
         const auto& pos = graphModel->nodePositions().get(nodeId);
-        stream.writeStartElement(QStringLiteral("data"));
-        stream.writeAttribute(QStringLiteral("key"), QStringLiteral("x"));
+        stream.writeStartElement(u"data"_s);
+        stream.writeAttribute(u"key"_s, u"x"_s);
         stream.writeCharacters(QString::number(static_cast<double>(pos.x())));
         stream.writeEndElement();
-        stream.writeStartElement(QStringLiteral("data"));
-        stream.writeAttribute(QStringLiteral("key"), QStringLiteral("y"));
+        stream.writeStartElement(u"data"_s);
+        stream.writeAttribute(u"key"_s, u"y"_s);
         stream.writeCharacters(QString::number(static_cast<double>(pos.y())));
         stream.writeEndElement();
-        stream.writeStartElement(QStringLiteral("data"));
-        stream.writeAttribute(QStringLiteral("key"), QStringLiteral("z"));
+        stream.writeStartElement(u"data"_s);
+        stream.writeAttribute(u"key"_s, u"z"_s);
         stream.writeCharacters(QString::number(static_cast<double>(pos.z())));
         stream.writeEndElement();
 
@@ -181,20 +183,20 @@ bool GraphMLSaver::save()
         setProgress(static_cast<int>(runningCount * 100 / numElements));
 
         const auto& edge = _graphModel->graph().edgeById(edgeId);
-        stream.writeStartElement(QStringLiteral("edge"));
-        stream.writeAttribute(QStringLiteral("id"), QStringLiteral("e%1").arg(edgeCount++));
-        stream.writeAttribute(QStringLiteral("source"),
-                              QStringLiteral("n%1").arg(static_cast<int>(edge.sourceId())));
-        stream.writeAttribute(QStringLiteral("target"),
-                              QStringLiteral("n%1").arg(static_cast<int>(edge.targetId())));
+        stream.writeStartElement(u"edge"_s);
+        stream.writeAttribute(u"id"_s, u"e%1"_s.arg(edgeCount++));
+        stream.writeAttribute(u"source"_s,
+                              u"n%1"_s.arg(static_cast<int>(edge.sourceId())));
+        stream.writeAttribute(u"target"_s,
+                              u"n%1"_s.arg(static_cast<int>(edge.targetId())));
         for(const auto& edgeAttributeName : _graphModel->attributeNames(ElementType::Edge))
         {
             const auto* attribute = _graphModel->attributeByName(edgeAttributeName);
             if(attribute->hasParameter())
                 continue;
 
-            stream.writeStartElement(QStringLiteral("data"));
-            stream.writeAttribute(QStringLiteral("key"), attributeToId.at(edgeAttributeName));
+            stream.writeStartElement(u"data"_s);
+            stream.writeAttribute(u"key"_s, attributeToId.at(edgeAttributeName));
             stream.writeCharacters(attribute->stringValueOf(edgeId).toHtmlEscaped());
             stream.writeEndElement();
         }

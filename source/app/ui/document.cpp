@@ -84,9 +84,11 @@
 #include <QClipboard>
 #include <QQmlEngine>
 
+using namespace Qt::Literals::StringLiterals;
+
 QColor Document::contrastingColorForBackground()
 {
-    auto backColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
+    auto backColor = u::pref(u"visuals/backgroundColor"_s).value<QColor>();
     return u::contrastingColor(backColor);
 }
 
@@ -204,7 +206,7 @@ void Document::maybeEmitBusyChanged()
             timer.restart();
         }
 
-        qDebug().noquote() << QStringLiteral("busy %1%2%3%4%5%6").arg(
+        qDebug().noquote() << u"busy %1%2%3%4%5%6"_s.arg(
             (commandInProgress() ?                  "C" : "."),
             (graphChanging() ?                      "G" : "."),
             (_graphQuickItem->updating() ?          "U" : "."),
@@ -483,7 +485,7 @@ static bool transformIsPinned(const QString& transform)
     GraphTransformConfigParser p;
 
     if(!p.parse(transform)) return false;
-    return p.result().isFlagSet(QStringLiteral("pinned"));
+    return p.result().isFlagSet(u"pinned"_s);
 }
 
 static QStringList sortedTransforms(QStringList transforms)
@@ -697,7 +699,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 setLog(log() + "\n\n" + parserLog);
 
             const auto& graph = _graphModel->mutableGraph();
-            setLog(log() + QStringLiteral("\n\nNodes: %1 Edges: %2")
+            setLog(log() + u"\n\nNodes: %1 Edges: %2"_s
                 .arg(graph.numNodes()).arg(graph.numEdges()));
 
             _graphTransforms = _graphModel->transformsWithMissingParametersSetToDefault(
@@ -724,13 +726,13 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
                 if(!defaultParameters.isEmpty())
                 {
-                    visualisation += QStringLiteral(" with");
+                    visualisation += u" with"_s;
 
                     const auto& parameterKeys = defaultParameters.keys();
                     for(const auto& key : parameterKeys)
                     {
                         auto value = u::escapeQuotes(defaultParameters.value(key).toString());
-                        visualisation += QStringLiteral(R"( %1 = "%2")").arg(key, value);
+                        visualisation += u" %1 = \"%2\""_s.arg(key, value);
                     }
                 }
             }
@@ -777,16 +779,16 @@ void Document::saveFile(const QUrl& fileUrl, const QString& saverName, const QBy
     }
     else
     {
-        QMessageBox::critical(nullptr, tr("Save Error"), QStringLiteral("%1 %2")
+        QMessageBox::critical(nullptr, tr("Save Error"), u"%1 %2"_s
             .arg(tr("Unable to find registered saver with name:"), saverName));
     }
 }
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == QStringLiteral("visuals/backgroundColor"))
+    if(key == u"visuals/backgroundColor"_s)
         emit contrastingColorChanged();
-    else if(key == QStringLiteral("visuals/showEdgeText"))
+    else if(key == u"visuals/showEdgeText"_s)
     {
         // showEdgeText affects the warning state of TextVisualisationChannel
         setVisualisations(_visualisations);
@@ -1028,7 +1030,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
         {
             // If the graph changes then so do our visualisations
             setVisualisations(_visualisations);
-        }, QStringLiteral("Document graphChanged"));
+        }, u"Document graphChanged"_s);
 
         setSaveRequired();
     });
@@ -1044,7 +1046,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
             // This is only called in order to force the UI to refresh the transform
             // controls, in case the attribute ranges have changed
             setTransforms(_graphTransforms);
-        }, QStringLiteral("Document (mutable) graphChanged"));
+        }, u"Document (mutable) graphChanged"_s);
 
         setSaveRequired();
     });
@@ -1234,7 +1236,7 @@ void Document::selectBySharedAttributeValue(const QString& attributeName, QmlNod
         term.append(QRegularExpression::escape(attributeValue));
     }
 
-    term = QStringLiteral("^(%1)$").arg(term);
+    term = u"^(%1)$"_s.arg(term);
 
     auto conditionFn = CreateConditionFnFor::node(*attribute,
         ConditionFnOp::String::MatchesRegex, term);
@@ -1444,8 +1446,8 @@ void Document::resetFind()
 
 static bool shouldMoveFindFocus(bool inOverviewMode)
 {
-    return u::pref(QStringLiteral("misc/focusFoundNodes")).toBool() &&
-        (!inOverviewMode || u::pref(QStringLiteral("misc/focusFoundComponents")).toBool());
+    return u::pref(u"misc/focusFoundNodes"_s).toBool() &&
+        (!inOverviewMode || u::pref(u"misc/focusFoundComponents"_s).toBool());
 }
 
 void Document::selectAndFocusNode(NodeId nodeId)
@@ -1901,8 +1903,8 @@ QStringList Document::availableAttributeNames(int _elementTypes, int _valueTypes
     {
         auto sourceAttributes =_graphModel->availableAttributeNames(ElementType::Node, valueTypes);
         auto targetAttributes = sourceAttributes;
-        sourceAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
-        targetAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
+        sourceAttributes.replaceInStrings(QRegularExpression(u"^"_s), u"source."_s);
+        targetAttributes.replaceInStrings(QRegularExpression(u"^"_s), u"target."_s);
         attributeNames += sourceAttributes + targetAttributes;
     }
 
@@ -1944,11 +1946,11 @@ QVariantMap Document::transform(const QString& transformName) const
 
         auto elementType = transformFactory->elementType();
 
-        map.insert(QStringLiteral("elementType"), static_cast<int>(elementType));
-        map.insert(QStringLiteral("name"), transformName);
-        map.insert(QStringLiteral("description"), transformFactory->description());
-        map.insert(QStringLiteral("image"), transformFactory->image());
-        map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
+        map.insert(u"elementType"_s, static_cast<int>(elementType));
+        map.insert(u"name"_s, transformName);
+        map.insert(u"description"_s, transformFactory->description());
+        map.insert(u"image"_s, transformFactory->image());
+        map.insert(u"requiresCondition"_s, transformFactory->requiresCondition());
 
         QStringList attributeParameterNames;
         QVariantList attributeParameters;
@@ -1958,8 +1960,8 @@ QVariantMap Document::transform(const QString& transformName) const
             attributeParameterNames.append(attributeParameter.name());
             attributeParameters.append(attributeParameterMap);
         }
-        map.insert(QStringLiteral("attributeParameterNames"), attributeParameterNames);
-        map.insert(QStringLiteral("attributeParameters"), attributeParameters);
+        map.insert(u"attributeParameterNames"_s, attributeParameterNames);
+        map.insert(u"attributeParameters"_s, attributeParameters);
 
         QStringList parameterNames;
         QVariantMap parameters;
@@ -1969,21 +1971,21 @@ QVariantMap Document::transform(const QString& transformName) const
             parameterNames.append(parameter.name());
             parameters.insert(parameter.name(), parameterMap);
         }
-        map.insert(QStringLiteral("parameterNames"), parameterNames);
-        map.insert(QStringLiteral("parameters"), parameters);
+        map.insert(u"parameterNames"_s, parameterNames);
+        map.insert(u"parameters"_s, parameters);
 
         QVariantMap defaultVisualisations;
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
             auto attributeName = Attribute::enquoteAttributeName(defaultVisualisation._attributeName);
-            defaultVisualisationMap.insert(QStringLiteral("name"), attributeName);
-            defaultVisualisationMap.insert(QStringLiteral("flags"), static_cast<int>(*defaultVisualisation._attributeFlags));
-            defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation._attributeValueType));
-            defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation._channel);
+            defaultVisualisationMap.insert(u"name"_s, attributeName);
+            defaultVisualisationMap.insert(u"flags"_s, static_cast<int>(*defaultVisualisation._attributeFlags));
+            defaultVisualisationMap.insert(u"valueType"_s, static_cast<int>(defaultVisualisation._attributeValueType));
+            defaultVisualisationMap.insert(u"channelName"_s, defaultVisualisation._channel);
             defaultVisualisations.insert(attributeName, defaultVisualisationMap);
         }
-        map.insert(QStringLiteral("defaultVisualisations"), defaultVisualisations);
+        map.insert(u"defaultVisualisations"_s, defaultVisualisations);
     }
 
     return map;
@@ -1998,8 +2000,8 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 {
     QVariantMap map;
 
-    map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
-    map.insert(QStringLiteral("alertText"), "");
+    map.insert(u"alertType"_s, static_cast<int>(AlertType::None));
+    map.insert(u"alertText"_s, "");
 
     if(_graphModel == nullptr)
         return map;
@@ -2019,8 +2021,8 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 
     auto& transformAlert = alerts.at(0);
 
-    map.insert(QStringLiteral("alertType"), static_cast<int>(transformAlert._type));
-    map.insert(QStringLiteral("alertText"), transformAlert._text);
+    map.insert(u"alertType"_s, static_cast<int>(transformAlert._type));
+    map.insert(u"alertText"_s, transformAlert._text);
 
     return map;
 }
@@ -2045,25 +2047,25 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
     auto parameter = transformFactory->parameter(parameterName);
     if(!parameter.name().isEmpty())
     {
-        map.insert(QStringLiteral("name"), parameter.name());
-        map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.type()));
+        map.insert(u"name"_s, parameter.name());
+        map.insert(u"valueType"_s, static_cast<int>(parameter.type()));
 
-        map.insert(QStringLiteral("hasRange"), parameter.hasRange());
-        map.insert(QStringLiteral("hasMinimumValue"), parameter.hasMin());
-        map.insert(QStringLiteral("hasMaximumValue"), parameter.hasMax());
+        map.insert(u"hasRange"_s, parameter.hasRange());
+        map.insert(u"hasMinimumValue"_s, parameter.hasMin());
+        map.insert(u"hasMaximumValue"_s, parameter.hasMax());
 
-        if(parameter.hasMin()) map.insert(QStringLiteral("minimumValue"), parameter.min());
-        if(parameter.hasMax()) map.insert(QStringLiteral("maximumValue"), parameter.max());
+        if(parameter.hasMin()) map.insert(u"minimumValue"_s, parameter.min());
+        if(parameter.hasMax()) map.insert(u"maximumValue"_s, parameter.max());
 
-        map.insert(QStringLiteral("description"), parameter.description());
-        map.insert(QStringLiteral("initialValue"), parameter.initialValue());
+        map.insert(u"description"_s, parameter.description());
+        map.insert(u"initialValue"_s, parameter.initialValue());
 
         if(!parameter.validatorRegex().isEmpty())
-            map.insert(QStringLiteral("validatorRegex"), parameter.validatorRegex());
+            map.insert(u"validatorRegex"_s, parameter.validatorRegex());
 
         // If it's a StringList parameter, select the first one by default
         if(parameter.type() == ValueType::StringList)
-            map.insert(QStringLiteral("initialIndex"), 0);
+            map.insert(u"initialIndex"_s, 0);
     }
 
     return map;
@@ -2084,10 +2086,10 @@ QVariantMap Document::transformAttributeParameter(const QString& transformName, 
     auto parameter = transformFactory->attributeParameter(parameterName);
     if(!parameter.name().isEmpty())
     {
-        map.insert(QStringLiteral("name"), parameter.name());
-        map.insert(QStringLiteral("elementType"), static_cast<int>(parameter.elementType()));
-        map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.valueType()));
-        map.insert(QStringLiteral("description"), parameter.description());
+        map.insert(u"name"_s, parameter.name());
+        map.insert(u"elementType"_s, static_cast<int>(parameter.elementType()));
+        map.insert(u"valueType"_s, static_cast<int>(parameter.valueType()));
+        map.insert(u"description"_s, parameter.description());
     }
 
     return map;
@@ -2113,39 +2115,39 @@ QVariantMap Document::attribute(const QString& attributeName) const
         default: break;
         }
 
-        map.insert(QStringLiteral("name"), QStringLiteral("%1%2")
+        map.insert(u"name"_s, u"%1%2"_s
             .arg(prefix, parsedAttributeName._name));
 
         const bool hasParameter = attribute.hasParameter();
-        map.insert(QStringLiteral("hasParameter"), hasParameter);
+        map.insert(u"hasParameter"_s, hasParameter);
 
         if(hasParameter)
         {
             if(!parsedAttributeName._parameter.isEmpty())
                 GraphModel::calculateAttributeRange(&graphModel()->mutableGraph(), attribute);
 
-            map.insert(QStringLiteral("parameterValue"), parsedAttributeName._parameter);
-            map.insert(QStringLiteral("isValid"), !parsedAttributeName._parameter.isEmpty());
-            map.insert(QStringLiteral("validParameterValues"), attribute.validParameterValues());
+            map.insert(u"parameterValue"_s, parsedAttributeName._parameter);
+            map.insert(u"isValid"_s, !parsedAttributeName._parameter.isEmpty());
+            map.insert(u"validParameterValues"_s, attribute.validParameterValues());
         }
         else
-            map.insert(QStringLiteral("isValid"), true);
+            map.insert(u"isValid"_s, true);
 
-        map.insert(QStringLiteral("flags"), static_cast<int>(attribute.flags()));
-        map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
-        map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
-        map.insert(QStringLiteral("userDefined"), attribute.userDefined());
-        map.insert(QStringLiteral("editable"), attribute.editable());
+        map.insert(u"flags"_s, static_cast<int>(attribute.flags()));
+        map.insert(u"valueType"_s, static_cast<int>(attribute.valueType()));
+        map.insert(u"elementType"_s, static_cast<int>(attribute.elementType()));
+        map.insert(u"userDefined"_s, attribute.userDefined());
+        map.insert(u"editable"_s, attribute.editable());
 
-        map.insert(QStringLiteral("hasRange"), attribute.numericRange().hasRange());
-        map.insert(QStringLiteral("hasMinimumValue"), attribute.numericRange().hasMin());
-        map.insert(QStringLiteral("hasMaximumValue"), attribute.numericRange().hasMax());
+        map.insert(u"hasRange"_s, attribute.numericRange().hasRange());
+        map.insert(u"hasMinimumValue"_s, attribute.numericRange().hasMin());
+        map.insert(u"hasMaximumValue"_s, attribute.numericRange().hasMax());
 
-        if(attribute.numericRange().hasMin()) map.insert(QStringLiteral("minimumValue"), attribute.numericRange().min());
-        if(attribute.numericRange().hasMax()) map.insert(QStringLiteral("maximumValue"), attribute.numericRange().max());
+        if(attribute.numericRange().hasMin()) map.insert(u"minimumValue"_s, attribute.numericRange().min());
+        if(attribute.numericRange().hasMax()) map.insert(u"maximumValue"_s, attribute.numericRange().max());
 
-        map.insert(QStringLiteral("description"), attribute.description());
-        map.insert(QStringLiteral("ops"), _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
+        map.insert(u"description"_s, attribute.description());
+        map.insert(u"ops"_s, _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
 
         QStringList sharedValues;
         const auto& sharedValueCounts = attribute.sharedValues();
@@ -2153,10 +2155,10 @@ QVariantMap Document::attribute(const QString& attributeName) const
         for(const auto& sharedValueCount : sharedValueCounts)
             sharedValues.append(sharedValueCount._value);
 
-        map.insert(QStringLiteral("sharedValues"), sharedValues);
+        map.insert(u"sharedValues"_s, sharedValues);
     }
     else
-        map.insert(QStringLiteral("isValid"), false);
+        map.insert(u"isValid"_s, false);
 
     return map;
 }
@@ -2345,42 +2347,42 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
     QVariantList numericValues;
     QVariantList stringValues;
 
-    map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
-    map.insert(QStringLiteral("alertText"), "");
-    map.insert(QStringLiteral("minimumNumericValue"), 0.0);
-    map.insert(QStringLiteral("maximumNumericValue"), 1.0);
-    map.insert(QStringLiteral("mappedMinimumNumericValue"), 0.0);
-    map.insert(QStringLiteral("mappedMaximumNumericValue"), 1.0);
-    map.insert(QStringLiteral("hasNumericRange"), true);
-    map.insert(QStringLiteral("numericValues"), numericValues);
-    map.insert(QStringLiteral("stringValues"), stringValues);
-    map.insert(QStringLiteral("numApplications"), 1);
+    map.insert(u"alertType"_s, static_cast<int>(AlertType::None));
+    map.insert(u"alertText"_s, "");
+    map.insert(u"minimumNumericValue"_s, 0.0);
+    map.insert(u"maximumNumericValue"_s, 1.0);
+    map.insert(u"mappedMinimumNumericValue"_s, 0.0);
+    map.insert(u"mappedMaximumNumericValue"_s, 1.0);
+    map.insert(u"hasNumericRange"_s, true);
+    map.insert(u"numericValues"_s, numericValues);
+    map.insert(u"stringValues"_s, stringValues);
+    map.insert(u"numApplications"_s, 1);
 
     if(_graphModel == nullptr)
         return map;
 
     const auto& visualisationInfo = _graphModel->visualisationInfoAtIndex(index);
 
-    map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.statistics()._min);
-    map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.statistics()._max);
-    map.insert(QStringLiteral("mappedMinimumNumericValue"), visualisationInfo.mappedMinimum());
-    map.insert(QStringLiteral("mappedMaximumNumericValue"), visualisationInfo.mappedMaximum());
-    map.insert(QStringLiteral("hasNumericRange"), visualisationInfo.statistics()._range > 0.0);
-    map.insert(QStringLiteral("numApplications"), static_cast<int>(visualisationInfo.numApplications()));
+    map.insert(u"minimumNumericValue"_s, visualisationInfo.statistics()._min);
+    map.insert(u"maximumNumericValue"_s, visualisationInfo.statistics()._max);
+    map.insert(u"mappedMinimumNumericValue"_s, visualisationInfo.mappedMinimum());
+    map.insert(u"mappedMaximumNumericValue"_s, visualisationInfo.mappedMaximum());
+    map.insert(u"hasNumericRange"_s, visualisationInfo.statistics()._range > 0.0);
+    map.insert(u"numApplications"_s, static_cast<int>(visualisationInfo.numApplications()));
 
     const auto& numericValuesVector = visualisationInfo.statistics()._values;
     numericValues.reserve(static_cast<int>(numericValuesVector.size()));
     for(auto value : numericValuesVector)
         numericValues.append(value);
 
-    map.insert(QStringLiteral("numericValues"), numericValues);
+    map.insert(u"numericValues"_s, numericValues);
 
     const auto& stringValuesVector = visualisationInfo.stringValues();
     stringValues.reserve(static_cast<int>(stringValuesVector.size()));
     for(const auto& stringValue : stringValuesVector)
         stringValues.append(stringValue);
 
-    map.insert(QStringLiteral("stringValues"), stringValues);
+    map.insert(u"stringValues"_s, stringValues);
 
     auto alerts = visualisationInfo.alerts();
 
@@ -2395,8 +2397,8 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 
     auto& alert = alerts.at(0);
 
-    map.insert(QStringLiteral("alertType"), static_cast<int>(alert._type));
-    map.insert(QStringLiteral("alertText"), alert._text);
+    map.insert(u"alertType"_s, static_cast<int>(alert._type));
+    map.insert(u"alertText"_s, alert._text);
 
     return map;
 }
@@ -2529,8 +2531,8 @@ void Document::apply(const QStringList& graphTransforms, const QStringList& visu
         commands.emplace_back(std::make_unique<Command>(
             Command::CommandDescription
             {
-                QStringLiteral("Apply Transform Flags"),
-                QStringLiteral("Applying Transform Flags")
+                u"Apply Transform Flags"_s,
+                u"Applying Transform Flags"_s
             },
             [this, graphTransforms](Command&)           { setTransforms(graphTransforms); },
             [this, previousGraphTransforms](Command&)   { setTransforms(previousGraphTransforms); }));
@@ -2596,14 +2598,14 @@ QVariantMap Document::layoutSetting(const QString& name) const
     const auto* setting = _layoutThread->setting(name);
     if(setting != nullptr)
     {
-        map.insert(QStringLiteral("name"), setting->name());
-        map.insert(QStringLiteral("displayName"), setting->displayName());
-        map.insert(QStringLiteral("description"), setting->description());
-        map.insert(QStringLiteral("value"), setting->value());
-        map.insert(QStringLiteral("normalisedValue"), setting->normalisedValue());
-        map.insert(QStringLiteral("minimumValue"), setting->minimumValue());
-        map.insert(QStringLiteral("maximumValue"), setting->maximumValue());
-        map.insert(QStringLiteral("defaultValue"), setting->defaultValue());
+        map.insert(u"name"_s, setting->name());
+        map.insert(u"displayName"_s, setting->displayName());
+        map.insert(u"description"_s, setting->description());
+        map.insert(u"value"_s, setting->value());
+        map.insert(u"normalisedValue"_s, setting->normalisedValue());
+        map.insert(u"minimumValue"_s, setting->minimumValue());
+        map.insert(u"maximumValue"_s, setting->maximumValue());
+        map.insert(u"defaultValue"_s, setting->defaultValue());
     }
 
     return map;
@@ -2627,7 +2629,7 @@ void Document::resetLayoutSettingValue(const QString& name)
 float Document::nodeSize() const
 {
     if(_graphModel == nullptr)
-        return u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
+        return u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
 
     return _graphModel->nodeSize();
 }
@@ -2647,14 +2649,14 @@ void Document::setNodeSize(float nodeSize)
 
 void Document::resetNodeSize()
 {
-    auto defaultNormalNodeSize = u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
+    auto defaultNormalNodeSize = u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
     setNodeSize(defaultNormalNodeSize);
 }
 
 float Document::edgeSize() const
 {
     if(_graphModel == nullptr)
-        return u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+        return u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
 
     return _graphModel->edgeSize();
 }
@@ -2674,7 +2676,7 @@ void Document::setEdgeSize(float edgeSize)
 
 void Document::resetEdgeSize()
 {
-    auto defaultNormalEdgeSize = u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+    auto defaultNormalEdgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
     setEdgeSize(defaultNormalEdgeSize);
 }
 
@@ -2719,15 +2721,15 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
         auto csvEscapedString = [](const QString& string)
         {
-            static const QRegularExpression re(QStringLiteral(R"([",])"));
+            static const QRegularExpression re(u"[\",]"_s);
             if(string.contains(re))
             {
                 QString escaped = string;
 
                 // Encode " as ""
-                escaped.replace(QStringLiteral(R"(")"), QStringLiteral(R"("")"));
+                escaped.replace(u"\""_s, u"\"\""_s);
 
-                return QStringLiteral(R"("%1")").arg(escaped);
+                return u"\"%1\""_s.arg(escaped);
             }
 
             return string;
@@ -2739,16 +2741,16 @@ void Document::writeTableModelToFile(QAbstractItemModel* model, const QUrl& file
 
             // "The IANA standard for TSV achieves simplicity
             // by simply disallowing tabs within fields."
-            return escaped.replace(QStringLiteral("\t"), QString());
+            return escaped.replace(u"\t"_s, u""_s);
         };
 
         std::function<QString(const QString&)> escapedString = csvEscapedString;
-        QString separator = QStringLiteral(",");
+        QString separator = u","_s;
 
-        if(extension == QStringLiteral("tsv"))
+        if(extension == u"tsv"_s)
         {
             escapedString = tsvEscapedString;
-            separator = QStringLiteral("\t");
+            separator = u"\t"_s;
         }
 
         QTextStream stream(&file);
@@ -2806,7 +2808,7 @@ void Document::copyTableModelColumnToClipboard(QAbstractItemModel* model, int co
     for(auto row : rows)
     {
         auto value = model->data(model->index(row, column));
-        text.append(QStringLiteral("%1\n").arg(value.toString()));
+        text.append(u"%1\n"_s.arg(value.toString()));
     }
 
     QApplication::clipboard()->setText(text);
@@ -3108,11 +3110,11 @@ QString Document::graphSizeSummary() const
 
     QString text;
 
-    text += QStringLiteral("Mutable Graph Nodes: %1 Edges: %2\n")
+    text += u"Mutable Graph Nodes: %1 Edges: %2\n"_s
         .arg(_graphModel->mutableGraph().numNodes())
         .arg(_graphModel->mutableGraph().numEdges());
 
-    text += QStringLiteral("Transformed Graph Nodes: %1 Edges: %2 Components: %3")
+    text += u"Transformed Graph Nodes: %1 Edges: %2 Components: %3"_s
         .arg(_graphModel->graph().numNodes())
         .arg(_graphModel->graph().numEdges())
         .arg(_graphModel->graph().numComponents());

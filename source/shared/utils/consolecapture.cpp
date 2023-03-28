@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+using namespace Qt::Literals::StringLiterals;
+
 IConsoleCapture::IConsoleCapture(const QString &filename) :
     _filename(filename) {}
 
@@ -78,9 +80,9 @@ ConsoleOutputFiles captureConsoleOutput(const QString& path, const QString& pref
     auto filename = [&](const char* basename)
     {
         if(!prefix.isEmpty())
-            return QStringLiteral("%1/%2_%3.txt").arg(path, prefix, basename);
+            return u"%1/%2_%3.txt"_s.arg(path, prefix, basename);
 
-        return QStringLiteral("%1/%2.txt").arg(path, basename);
+        return u"%1/%2.txt"_s.arg(path, basename);
     };
 
     return

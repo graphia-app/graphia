@@ -27,6 +27,8 @@
 
 #include "ui/visualisations/visualisationconfigparser.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 ApplyVisualisationsCommand::ApplyVisualisationsCommand(GraphModel* graphModel,
                                                        Document* document,
                                                        QStringList previousVisualisations,
@@ -57,7 +59,7 @@ QString ApplyVisualisationsCommand::debugDescription() const
     auto text = description();
 
     for(const auto& visualisation : diff)
-        text.append(QStringLiteral("\n  %1").arg(visualisation));
+        text.append(u"\n  %1"_s.arg(visualisation));
 
     return text;
 }
@@ -71,7 +73,7 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
     [this, newVisualisations = cancelled() ? previousVisualisations : visualisations]
     {
         _document->setVisualisations(newVisualisations);
-    }, QStringLiteral("setVisualisations"));
+    }, u"setVisualisations"_s);
 }
 
 QStringList ApplyVisualisationsCommand::patchedVisualisations() const
@@ -109,7 +111,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
                 auto visualisationConfig = p.result();
 
                 // c.f. u::findUniqueName
-                const QRegularExpression re(QStringLiteral(R"(^%1\(\d+\))")
+                const QRegularExpression re(uR"(^%1\(\d+\))"_s
                     .arg(visualisationConfig._attributeName));
 
                 for(const auto& createdAttributeName : createdAttributeNames)

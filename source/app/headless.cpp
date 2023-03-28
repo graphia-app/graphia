@@ -152,12 +152,12 @@ void Headless::processNext()
 
         if(dfi.exists() && dfi.isDir())
         {
-            target = QStringLiteral("%1/%2.%3").arg(
+            target = u"%1/%2.%3"_s.arg(
                 _->_destination, sfi.baseName(), Application::nativeExtension());
         }
         else if(_->_destination.isEmpty())
         {
-            target = QStringLiteral("%1/%2.%3").arg(
+            target = u"%1/%2.%3"_s.arg(
                 sfi.dir().path(), sfi.baseName(), Application::nativeExtension());
         }
         else

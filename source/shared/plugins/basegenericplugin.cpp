@@ -33,6 +33,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
@@ -54,16 +56,16 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     auto* userNodeData = &_graphModel->userNodeData();
     auto* userEdgeData = &_graphModel->userEdgeData();
 
-    if(urlTypeName == QStringLiteral("GML"))
+    if(urlTypeName == u"GML"_s)
         return std::make_unique<GmlFileParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName == QStringLiteral("GraphML"))
+    if(urlTypeName == u"GraphML"_s)
         return std::make_unique<GraphMLParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName == QStringLiteral("DOT"))
+    if(urlTypeName == u"DOT"_s)
         return std::make_unique<DotFileParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName.startsWith(QStringLiteral("Pairwise")))
+    if(urlTypeName.startsWith(u"Pairwise"_s))
     {
         std::unique_ptr<IParser> parser;
 
@@ -75,21 +77,21 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
             return pairwiseParser;
         };
 
-        if(urlTypeName == QStringLiteral("PairwiseCSV"))
+        if(urlTypeName == u"PairwiseCSV"_s)
             parser = configurePairwiseParser(std::make_unique<PairwiseCSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("PairwiseSSV"))
+        else if(urlTypeName == u"PairwiseSSV"_s)
             parser = configurePairwiseParser(std::make_unique<PairwiseSSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("PairwiseTSV"))
+        else if(urlTypeName == u"PairwiseTSV"_s)
             parser = configurePairwiseParser(std::make_unique<PairwiseTSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("PairwiseTXT"))
+        else if(urlTypeName == u"PairwiseTXT"_s)
             parser = configurePairwiseParser(std::make_unique<PairwiseTXTFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("PairwiseXLSX"))
+        else if(urlTypeName == u"PairwiseXLSX"_s)
             parser = configurePairwiseParser(std::make_unique<PairwiseXLSXFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
 
         return parser;
     }
 
-    if(urlTypeName.startsWith(QStringLiteral("Matrix")))
+    if(urlTypeName.startsWith(u"Matrix"_s))
     {
         std::unique_ptr<IParser> parser;
 
@@ -103,27 +105,27 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
             return matrixParser;
         };
 
-        if(urlTypeName == QStringLiteral("MatrixCSV"))
+        if(urlTypeName == u"MatrixCSV"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixCSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("MatrixSSV"))
+        else if(urlTypeName == u"MatrixSSV"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("MatrixTSV"))
+        else if(urlTypeName == u"MatrixTSV"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("MatrixXLSX"))
+        else if(urlTypeName == u"MatrixXLSX"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
-        else if(urlTypeName == QStringLiteral("MatrixMatLab"))
+        else if(urlTypeName == u"MatrixMatLab"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixMatLabFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
 
         return parser;
     }
 
-    if(urlTypeName == QStringLiteral("BiopaxOWL"))
+    if(urlTypeName == u"BiopaxOWL"_s)
         return std::make_unique<BiopaxFileParser>(userNodeData);
 
-    if(urlTypeName == QStringLiteral("JSONGraph"))
+    if(urlTypeName == u"JSONGraph"_s)
         return std::make_unique<JsonGraphParser>(userNodeData, userEdgeData);
 
-    if(urlTypeName == QStringLiteral("CX"))
+    if(urlTypeName == u"CX"_s)
         return std::make_unique<CxParser>(userNodeData, userEdgeData);
 
     return nullptr;
@@ -143,8 +145,8 @@ static auto pairwiseColumns(const QVariant& value)
         auto column = static_cast<size_t>(key.toInt());
         auto info = map.value(key).toMap();
         auto type = u::contains(info, "type") ?
-            static_cast<PairwiseColumnType>(info.value(QStringLiteral("type")).toInt()) : PairwiseColumnType::Unused;
-        auto name = u::contains(info, "name") ? info.value(QStringLiteral("name")).toString() : QString();
+            static_cast<PairwiseColumnType>(info.value(u"type"_s).toInt()) : PairwiseColumnType::Unused;
+        auto name = u::contains(info, "name") ? info.value(u"name"_s).toString() : QString();
 
         columns[column] = {type, name};
     }
@@ -154,19 +156,19 @@ static auto pairwiseColumns(const QVariant& value)
 
 void BaseGenericPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QStringLiteral("firstRowIsHeader"))
-        _pairwiseParameters._firstRowIsHeader = (value == QStringLiteral("true"));
-    else if(name == QStringLiteral("columns"))
+    if(name == u"firstRowIsHeader"_s)
+        _pairwiseParameters._firstRowIsHeader = (value == u"true"_s);
+    else if(name == u"columns"_s)
         _pairwiseParameters._columns = pairwiseColumns(value);
-    else if(name == QStringLiteral("minimumThreshold"))
+    else if(name == u"minimumThreshold"_s)
         _adjacencyMatrixParameters._minimumAbsEdgeWeight = value.toDouble();
-    else if(name == QStringLiteral("initialThreshold"))
+    else if(name == u"initialThreshold"_s)
         _adjacencyMatrixParameters._initialAbsEdgeWeightThreshold = value.toDouble();
-    else if(name == QStringLiteral("filterEdges"))
-        _adjacencyMatrixParameters._filterEdges = (value == QStringLiteral("true"));
-    else if(name == QStringLiteral("skipDuplicates"))
-        _adjacencyMatrixParameters._skipDuplicates = (value == QStringLiteral("true"));
-    else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
+    else if(name == u"filterEdges"_s)
+        _adjacencyMatrixParameters._filterEdges = (value == u"true"_s);
+    else if(name == u"skipDuplicates"_s)
+        _adjacencyMatrixParameters._skipDuplicates = (value == u"true"_s);
+    else if(name == u"data"_s && value.canConvert<std::shared_ptr<TabularData>>())
         _preloadedTabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
     else
         qDebug() << "BaseGenericPluginInstance::applyParameter unknown parameter" << name << value;
@@ -193,7 +195,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     for(auto nodeId : selectionManager()->selectedNodes())
     {
         if(!s.isEmpty())
-            s += QStringLiteral(", ");
+            s += u", "_s;
 
         s += graphModel()->nodeName(nodeId);
     }
@@ -234,22 +236,22 @@ void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 // NOLINTNEXTLINE modernize-use-equals-default
 BaseGenericPlugin::BaseGenericPlugin()
 {
-    registerUrlType(QStringLiteral("GML"), QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
-    registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
-    registerUrlType(QStringLiteral("DOT"), QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
-    registerUrlType(QStringLiteral("PairwiseCSV"), QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
-    registerUrlType(QStringLiteral("PairwiseSSV"), QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
-    registerUrlType(QStringLiteral("PairwiseTSV"), QObject::tr("Pairwise TSV File"), QObject::tr("Pairwise TSV Files"), {"tsv"});
-    registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt"});
-    registerUrlType(QStringLiteral("PairwiseXLSX"), QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
-    registerUrlType(QStringLiteral("MatrixCSV"), QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
-    registerUrlType(QStringLiteral("MatrixSSV"), QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
-    registerUrlType(QStringLiteral("MatrixTSV"), QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv"});
-    registerUrlType(QStringLiteral("MatrixXLSX"), QObject::tr("Adjacency Matrix Excel File"), QObject::tr("Adjacency Matrix Excel Files"), {"xlsx"});
-    registerUrlType(QStringLiteral("MatrixMatLab"), QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
-    registerUrlType(QStringLiteral("BiopaxOWL"), QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
-    registerUrlType(QStringLiteral("JSONGraph"), QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
-    registerUrlType(QStringLiteral("CX"), QObject::tr("Cytoscape Exchange File"), QObject::tr("Cytoscape Exchange Files"), {"cx", "cx2"});
+    registerUrlType(u"GML"_s, QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
+    registerUrlType(u"GraphML"_s, QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
+    registerUrlType(u"DOT"_s, QObject::tr("DOT File"), QObject::tr("DOT Files"), {"dot"});
+    registerUrlType(u"PairwiseCSV"_s, QObject::tr("Pairwise CSV File"), QObject::tr("Pairwise CSV Files"), {"csv"});
+    registerUrlType(u"PairwiseSSV"_s, QObject::tr("Pairwise SSV File"), QObject::tr("Pairwise SSV Files"), {"ssv"});
+    registerUrlType(u"PairwiseTSV"_s, QObject::tr("Pairwise TSV File"), QObject::tr("Pairwise TSV Files"), {"tsv"});
+    registerUrlType(u"PairwiseTXT"_s, QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt"});
+    registerUrlType(u"PairwiseXLSX"_s, QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
+    registerUrlType(u"MatrixCSV"_s, QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
+    registerUrlType(u"MatrixSSV"_s, QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
+    registerUrlType(u"MatrixTSV"_s, QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv"});
+    registerUrlType(u"MatrixXLSX"_s, QObject::tr("Adjacency Matrix Excel File"), QObject::tr("Adjacency Matrix Excel Files"), {"xlsx"});
+    registerUrlType(u"MatrixMatLab"_s, QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
+    registerUrlType(u"BiopaxOWL"_s, QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
+    registerUrlType(u"JSONGraph"_s, QObject::tr("JSON Graph File"), QObject::tr("JSON Graph Files"), {"json"});
+    registerUrlType(u"CX"_s, QObject::tr("Cytoscape Exchange File"), QObject::tr("Cytoscape Exchange Files"), {"cx", "cx2"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
@@ -268,22 +270,22 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
     for(const auto& urlType : urlTypes)
     {
         const bool canLoad =
-            (urlType == QStringLiteral("GML") && GmlFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("GraphML") && GraphMLParser::canLoad(url)) ||
-            (urlType == QStringLiteral("DOT") && DotFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseCSV") && PairwiseCSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseSSV") && PairwiseSSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseTSV") && PairwiseTSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseTXT") && PairwiseTXTFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("PairwiseXLSX") && PairwiseXLSXFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatrixCSV") && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatrixSSV") && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatrixTSV") && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatrixXLSX") && AdjacencyMatrixXLSXFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("MatrixMatLab") && AdjacencyMatrixMatLabFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("BiopaxOWL") && BiopaxFileParser::canLoad(url)) ||
-            (urlType == QStringLiteral("JSONGraph") && JsonGraphParser::canLoad(url)) ||
-            (urlType == QStringLiteral("CX") && CxParser::canLoad(url));
+            (urlType == u"GML"_s && GmlFileParser::canLoad(url)) ||
+            (urlType == u"GraphML"_s && GraphMLParser::canLoad(url)) ||
+            (urlType == u"DOT"_s && DotFileParser::canLoad(url)) ||
+            (urlType == u"PairwiseCSV"_s && PairwiseCSVFileParser::canLoad(url)) ||
+            (urlType == u"PairwiseSSV"_s && PairwiseSSVFileParser::canLoad(url)) ||
+            (urlType == u"PairwiseTSV"_s && PairwiseTSVFileParser::canLoad(url)) ||
+            (urlType == u"PairwiseTXT"_s && PairwiseTXTFileParser::canLoad(url)) ||
+            (urlType == u"PairwiseXLSX"_s && PairwiseXLSXFileParser::canLoad(url)) ||
+            (urlType == u"MatrixCSV"_s && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
+            (urlType == u"MatrixSSV"_s && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
+            (urlType == u"MatrixTSV"_s && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
+            (urlType == u"MatrixXLSX"_s && AdjacencyMatrixXLSXFileParser::canLoad(url)) ||
+            (urlType == u"MatrixMatLab"_s && AdjacencyMatrixMatLabFileParser::canLoad(url)) ||
+            (urlType == u"BiopaxOWL"_s && BiopaxFileParser::canLoad(url)) ||
+            (urlType == u"JSONGraph"_s && JsonGraphParser::canLoad(url)) ||
+            (urlType == u"CX"_s && CxParser::canLoad(url));
 
         if(canLoad)
             result.push_back(urlType);
@@ -308,11 +310,11 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
 
 QString BaseGenericPlugin::parametersQmlPath(const QString& urlType) const
 {
-    if(urlType.startsWith(QStringLiteral("Matrix")))
-        return QStringLiteral("qrc:///qml/MatrixParameters.qml");
+    if(urlType.startsWith(u"Matrix"_s))
+        return u"qrc:///qml/MatrixParameters.qml"_s;
 
-    if(urlType.startsWith(QStringLiteral("Pairwise")))
-        return QStringLiteral("qrc:///qml/PairwiseParameters.qml");
+    if(urlType.startsWith(u"Pairwise"_s))
+        return u"qrc:///qml/PairwiseParameters.qml"_s;
 
     return {};
 }

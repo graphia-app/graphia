@@ -48,6 +48,8 @@
 #include <QColor>
 #include <QRect>
 
+using namespace Qt::Literals::StringLiterals;
+
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
@@ -219,14 +221,14 @@ class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<Corre
 public:
     CorrelationPlugin();
 
-    QString name() const override { return QStringLiteral("Correlation"); }
+    QString name() const override { return u"Correlation"_s; }
     QString description() const override
     {
         return tr("Creates a graph where nodes represent rows of data, "
                   "and edges represent correlations between said rows.");
     }
 
-    QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
+    QString imageSource() const override { return u"qrc:///plots.svg"_s; }
 
     int dataVersion() const override { return 14; }
 
@@ -236,8 +238,8 @@ public:
     bool editable() const override { return true; }
     bool directed() const override { return false; }
 
-    QString parametersQmlPath(const QString&) const override { return QStringLiteral("qrc:///qml/CorrelationParameters.qml"); }
-    QString qmlPath() const override { return QStringLiteral("qrc:///qml/CorrelationPlugin.qml"); }
+    QString parametersQmlPath(const QString&) const override { return u"qrc:///qml/CorrelationParameters.qml"_s; }
+    QString qmlPath() const override { return u"qrc:///qml/CorrelationPlugin.qml"_s; }
 
     Q_INVOKABLE QVariantMap correlationInfoFor(int correlationType) const;
 };

@@ -36,6 +36,8 @@
 
 #include <iostream>
 
+using namespace Qt::Literals::StringLiterals;
+
 Watchdog::Watchdog()
 {
     auto *worker = new WatchdogWorker;
@@ -54,7 +56,7 @@ Watchdog::~Watchdog()
 
 void WatchdogWorker::showWarning()
 {
-    const QString messageBoxExe = Application::resolvedExe(QStringLiteral("MessageBox"));
+    const QString messageBoxExe = Application::resolvedExe(u"MessageBox"_s);
 
     if(messageBoxExe.isEmpty())
     {
@@ -64,17 +66,17 @@ void WatchdogWorker::showWarning()
 
     QStringList arguments;
     arguments <<
-        QStringLiteral("-title") << QStringLiteral("Error") <<
-        QStringLiteral("-text") << QString(
+        u"-title"_s << u"Error"_s <<
+        u"-text"_s << QString(
             tr("%1 is not responding. System resources could be under pressure, "
                "so you may optionally wait in case a recovery occurs. "
                "Alternatively, please report a bug if you believe the "
                "freeze is as a result of a software problem."))
             .arg(QCoreApplication::applicationName()) <<
-        QStringLiteral("-icon") << QStringLiteral("Critical") <<
-        QStringLiteral("-button") << QStringLiteral("Wait:Reset") <<
-        QStringLiteral("-button") << QStringLiteral("Close and Report Bug:Destructive") <<
-        QStringLiteral("-defaultButton") << QStringLiteral("Wait");
+        u"-icon"_s << u"Critical"_s <<
+        u"-button"_s << u"Wait:Reset"_s <<
+        u"-button"_s << u"Close and Report Bug:Destructive"_s <<
+        u"-defaultButton"_s << u"Wait"_s;
 
     auto* warningProcess = new QProcess(this);
 
@@ -132,7 +134,7 @@ void WatchdogWorker::startTimer()
 #endif
         });
 
-        u::setCurrentThreadName(QStringLiteral("WatchdogThread"));
+        u::setCurrentThreadName(u"WatchdogThread"_s);
     }
 
     emit reset();

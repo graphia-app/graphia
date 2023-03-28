@@ -25,6 +25,8 @@
 #include <QSurfaceFormat>
 #include <QOpenGLContext>
 
+using namespace Qt::Literals::StringLiterals;
+
 GPUComputeThread::GPUComputeThread() : // NOLINT modernize-use-equals-default
     _surface(std::make_unique<QOffscreenSurface>()),
     _format(std::make_unique<QSurfaceFormat>(QSurfaceFormat::defaultFormat()))
@@ -85,7 +87,7 @@ void GPUComputeThread::run()
 {
     std::unique_lock<std::mutex> lock(_mutex);
 
-    u::setCurrentThreadName(QStringLiteral("ComputeThread"));
+    u::setCurrentThreadName(u"ComputeThread"_s);
 
     QOpenGLContext computeGLContext;
     computeGLContext.setShareContext(_mainGLContext);

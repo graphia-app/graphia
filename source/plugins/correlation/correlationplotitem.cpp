@@ -44,6 +44,8 @@
 #include <vector>
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     QCustomPlot& customPlot) :
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
@@ -239,7 +241,7 @@ void CorrelationPlotWorker::renderPixmap()
         // We don't need to use the surface any more, so give up access to it
         _surface = nullptr;
 
-        u::setCurrentThreadName(QStringLiteral("CorrPlotRender"));
+        u::setCurrentThreadName(u"CorrPlotRender"_s);
         _threadId = u::currentThreadId();
     }
 
@@ -277,7 +279,7 @@ void CorrelationPlotWorker::renderPixmap()
     for(auto& [axis, parameters] : _axisParameters)
         axis->setRange(parameters._zoomedMin, parameters._zoomedMax);
 
-    auto* tooltipLayer = _customPlot->layer(QStringLiteral("tooltipLayer"));
+    auto* tooltipLayer = _customPlot->layer(u"tooltipLayer"_s);
     if(tooltipLayer != nullptr && _updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
         tooltipLayer->replot();
 
@@ -634,7 +636,7 @@ bool CorrelationPlotItem::updateTooltip()
         _itemTracer->setVisible(true);
         _itemTracer->setInterpolating(false);
         _itemTracer->updatePosition();
-        auto itemTracerPosition = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition();
+        auto itemTracerPosition = _itemTracer->anchor(u"position"_s)->pixelPosition();
 
         _hoverLabel->setVisible(true);
 
@@ -821,7 +823,7 @@ void CorrelationPlotItem::configureLegend()
     auto* legend = dynamic_cast<QCPLegend*>(_legendLayoutGrid->elementAt(
         _legendLayoutGrid->rowColToIndex(1, 0)));
 
-    legend->setLayer(QStringLiteral("legend"));
+    legend->setLayer(u"legend"_s);
     legend->clear();
 
     const int marginSize = 5;
@@ -1225,12 +1227,12 @@ bool CorrelationPlotItem::updateSortMap()
         Q_ASSERT(u::containsAllOf(qmlColumnSortOrder, {"type", "text", "order"}));
 
         ColumnSortOrder columnSortOrder;
-        columnSortOrder._type = normaliseQmlEnum<PlotColumnSortType>(qmlColumnSortOrder[QStringLiteral("type")].toInt());
-        columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder[QStringLiteral("order")].toInt());
+        columnSortOrder._type = normaliseQmlEnum<PlotColumnSortType>(qmlColumnSortOrder[u"type"_s].toInt());
+        columnSortOrder._order = static_cast<Qt::SortOrder>(qmlColumnSortOrder[u"order"_s].toInt());
 
         if(columnSortOrder._type == PlotColumnSortType::ColumnAnnotation)
         {
-            auto columnAnnotationName = qmlColumnSortOrder[QStringLiteral("text")].toString();
+            auto columnAnnotationName = qmlColumnSortOrder[u"text"_s].toString();
             columnSortOrder._annotation = _pluginInstance->columnAnnotationByName(columnAnnotationName);
         }
 
@@ -1413,8 +1415,8 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     auto existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
     [type, &text](const auto& value)
     {
-        const bool sameType = (value[QStringLiteral("type")].toInt() == type);
-        const bool sameText = (value[QStringLiteral("text")].toString() == text);
+        const bool sameType = (value[u"type"_s].toInt() == type);
+        const bool sameText = (value[u"text"_s].toString() == text);
         const bool typeIsColumnAnnotation =
             (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
 
@@ -1425,7 +1427,7 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     // that adding it brings it to the front
     if(existing != _columnSortOrders.cend())
     {
-        order = static_cast<Qt::SortOrder>((*existing)[QStringLiteral("order")].toInt());
+        order = static_cast<Qt::SortOrder>((*existing)[u"order"_s].toInt());
 
         if(existing == _columnSortOrders.cbegin())
         {
@@ -1439,9 +1441,9 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     }
 
     QVariantMap newSortOrder;
-    newSortOrder[QStringLiteral("type")] = type;
-    newSortOrder[QStringLiteral("text")] = text;
-    newSortOrder[QStringLiteral("order")] = order;
+    newSortOrder[u"type"_s] = type;
+    newSortOrder[u"text"_s] = text;
+    newSortOrder[u"order"_s] = order;
 
     _columnSortOrders.push_front(newSortOrder);
 
@@ -1562,8 +1564,8 @@ void CorrelationPlotItem::createTooltip()
     if(_tooltipLayer != nullptr)
         return;
 
-    _customPlot.addLayer(QStringLiteral("tooltipLayer"));
-    _tooltipLayer = _customPlot.layer(QStringLiteral("tooltipLayer"));
+    _customPlot.addLayer(u"tooltipLayer"_s);
+    _tooltipLayer = _customPlot.layer(u"tooltipLayer"_s);
     _tooltipLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
     QFont defaultFont10Pt;
@@ -1721,7 +1723,7 @@ void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QStrin
         auto attributeValue = _pluginInstance->attributeValueFor(attributeName,
             static_cast<size_t>(selectedRow));
         static QRegularExpression re(QStringLiteral(R"(\s+)"));
-        attributeValue.replace(re, QStringLiteral("_"));
+        attributeValue.replace(re, u"_"_s);
         images[attributeValue].append(selectedRow); // clazy:exclude=reserve-candidates
     }
 
@@ -1735,10 +1737,10 @@ void CorrelationPlotItem::savePlotImage(const QString& filename)
 {
     QFileInfo fileInfo(filename);
 
-    if(fileInfo.completeSuffix() == QStringLiteral("png"))
+    if(fileInfo.completeSuffix() == u"png"_s)
         _customPlot.savePng(filename);
-    else if(fileInfo.completeSuffix() == QStringLiteral("pdf"))
+    else if(fileInfo.completeSuffix() == u"pdf"_s)
         _customPlot.savePdf(filename);
-    else if(fileInfo.completeSuffix() == QStringLiteral("jpg"))
+    else if(fileInfo.completeSuffix() == u"jpg"_s)
         _customPlot.saveJpg(filename);
 }

@@ -31,6 +31,8 @@
 
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 using VectorType = blaze::DynamicVector<float>;
 
 void PageRankTransform::apply(TransformedGraph& target)
@@ -46,7 +48,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
     // http://michaelnielsen.org/blog/using-your-laptop-to-compute-pagerank-for-millions-of-webpages/
     NodeArray<float> pageRankScores(target);
 
-    setPhase(QStringLiteral("PageRank"));
+    setPhase(u"PageRank"_s);
 
     // We must do our own componentisation as the graph's set of components
     // won't necessarily be up-to-date
@@ -86,7 +88,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target)
             if(cancelled())
                 return;
 
-            setPhase(QStringLiteral("PageRank Iteration %1").arg(
+            setPhase(u"PageRank Iteration %1"_s.arg(
                                 QString::number(totalIterationCount + 1)));
 
             // Calculate pagerank

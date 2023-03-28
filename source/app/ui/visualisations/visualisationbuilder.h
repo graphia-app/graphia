@@ -37,6 +37,8 @@
 #include <QCollator>
 #include <QtGlobal>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename ElementId>
 class VisualisationsBuilder
 {
@@ -164,11 +166,11 @@ public:
         case ValueType::Int:
         case ValueType::Float:
         {
-            const bool invert = config.isFlagSet(QStringLiteral("invert"));
-            const bool perComponent = config.isFlagSet(QStringLiteral("component"));
+            const bool invert = config.isFlagSet(u"invert"_s);
+            const bool perComponent = config.isFlagSet(u"component"_s);
 
             // This is only here to avoid an internal compiler error
-            const auto& mappingValue = QStringLiteral("mapping");
+            const auto& mappingValue = u"mapping"_s;
 
             size_t numApplications = 0;
 

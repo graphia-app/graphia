@@ -30,6 +30,8 @@
 #include <cstdlib>
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     size_t numSampleNodes, size_t maxNodes)
 {
@@ -103,10 +105,10 @@ QVariantMap graphSizeEstimateThreshold(EdgeList edgeList,
     estimatedNumUniqueEdges.shrink_to_fit();
 
     QVariantMap map;
-    map.insert(QStringLiteral("keys"), QVariant::fromValue(keys));
-    map.insert(QStringLiteral("numNodes"), QVariant::fromValue(estimatedNumNodes));
-    map.insert(QStringLiteral("numEdges"), QVariant::fromValue(estimatedNumEdges));
-    map.insert(QStringLiteral("numUniqueEdges"), QVariant::fromValue(estimatedNumUniqueEdges));
+    map.insert(u"keys"_s, QVariant::fromValue(keys));
+    map.insert(u"numNodes"_s, QVariant::fromValue(estimatedNumNodes));
+    map.insert(u"numEdges"_s, QVariant::fromValue(estimatedNumEdges));
+    map.insert(u"numUniqueEdges"_s, QVariant::fromValue(estimatedNumUniqueEdges));
     return map;
 }
 
@@ -196,9 +198,9 @@ QVariantMap graphSizeEstimateKnn(EdgeList edgeList, size_t maximumK,
     estimatedNumUniqueEdges.shrink_to_fit();
 
     QVariantMap map;
-    map.insert(QStringLiteral("keys"), QVariant::fromValue(keys));
-    map.insert(QStringLiteral("numNodes"), QVariant::fromValue(estimatedNumNodes));
-    map.insert(QStringLiteral("numEdges"), QVariant::fromValue(estimatedNumEdges));
-    map.insert(QStringLiteral("numUniqueEdges"), QVariant::fromValue(estimatedNumUniqueEdges));
+    map.insert(u"keys"_s, QVariant::fromValue(keys));
+    map.insert(u"numNodes"_s, QVariant::fromValue(estimatedNumNodes));
+    map.insert(u"numEdges"_s, QVariant::fromValue(estimatedNumEdges));
+    map.insert(u"numUniqueEdges"_s, QVariant::fromValue(estimatedNumUniqueEdges));
     return map;
 }

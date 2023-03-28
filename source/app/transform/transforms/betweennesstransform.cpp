@@ -30,9 +30,11 @@
 #include <map>
 #include <thread>
 
+using namespace Qt::Literals::StringLiterals;
+
 void BetweennessTransform::apply(TransformedGraph& target)
 {
-    setPhase(QStringLiteral("Betweenness"));
+    setPhase(u"Betweenness"_s);
     setProgress(0);
 
     const auto& nodeIds = target.nodeIds();

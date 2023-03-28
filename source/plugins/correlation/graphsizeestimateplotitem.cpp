@@ -27,6 +27,8 @@
 
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 GraphSizeEstimatePlotItem::GraphSizeEstimatePlotItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent)
 {
@@ -55,22 +57,22 @@ void GraphSizeEstimatePlotItem::setThreshold(double threshold)
 
 void GraphSizeEstimatePlotItem::setGraphSizeEstimate(const QVariantMap& graphSizeEstimate)
 {
-    if(!graphSizeEstimate.contains(QStringLiteral("keys")))
+    if(!graphSizeEstimate.contains(u"keys"_s))
         return;
 
-    if(!graphSizeEstimate.contains(QStringLiteral("numNodes")))
+    if(!graphSizeEstimate.contains(u"numNodes"_s))
         return;
 
-    if(!graphSizeEstimate.contains(QStringLiteral("numEdges")))
+    if(!graphSizeEstimate.contains(u"numEdges"_s))
         return;
 
-    if(!graphSizeEstimate.contains(QStringLiteral("numUniqueEdges")))
+    if(!graphSizeEstimate.contains(u"numUniqueEdges"_s))
         return;
 
-    _keys = graphSizeEstimate.value(QStringLiteral("keys")).value<QVector<double>>();
-    _numNodes = graphSizeEstimate.value(QStringLiteral("numNodes")).value<QVector<double>>();
-    _numEdges = graphSizeEstimate.value(QStringLiteral("numEdges")).value<QVector<double>>();
-    _numUniqueEdges = graphSizeEstimate.value(QStringLiteral("numUniqueEdges")).value<QVector<double>>();
+    _keys = graphSizeEstimate.value(u"keys"_s).value<QVector<double>>();
+    _numNodes = graphSizeEstimate.value(u"numNodes"_s).value<QVector<double>>();
+    _numEdges = graphSizeEstimate.value(u"numEdges"_s).value<QVector<double>>();
+    _numUniqueEdges = graphSizeEstimate.value(u"numUniqueEdges"_s).value<QVector<double>>();
 
     buildPlot();
 }
@@ -156,7 +158,7 @@ void GraphSizeEstimatePlotItem::buildPlot()
     logTicker->setLogBase(10);
     logTicker->setSubTickCount(3);
     customPlot().yAxis->setTicker(logTicker);
-    customPlot().yAxis->setNumberFormat(QStringLiteral("eb"));
+    customPlot().yAxis->setNumberFormat(u"eb"_s);
     customPlot().yAxis->setNumberPrecision(0);
     customPlot().yAxis->grid()->setSubGridVisible(true);
 

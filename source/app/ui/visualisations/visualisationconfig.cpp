@@ -22,6 +22,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Parameter& other) const
 {
     return _name == other._name &&
@@ -42,9 +44,9 @@ QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
             if(_addQuotes)
             {
                 QString escapedString = s;
-                escapedString.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+                escapedString.replace(u"\""_s, u"\\\""_s);
 
-                return QStringLiteral(R"("%1")").arg(escapedString);
+                return u"\"%1\""_s.arg(escapedString);
             }
 
             return s;
@@ -62,15 +64,15 @@ QVariantMap VisualisationConfig::asVariantMap() const
     flags.reserve(static_cast<int>(_flags.size()));
     for(const auto& flag : _flags)
         flags.append(flag);
-    map.insert(QStringLiteral("flags"), flags);
+    map.insert(u"flags"_s, flags);
 
-    map.insert(QStringLiteral("attribute"), _attributeName);
-    map.insert(QStringLiteral("channel"), _channelName);
+    map.insert(u"attribute"_s, _attributeName);
+    map.insert(u"channel"_s, _channelName);
 
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
         parameters.insert(parameter._name, parameter.valueAsString(true));
-    map.insert(QStringLiteral("parameters"), parameters);
+    map.insert(u"parameters"_s, parameters);
 
     return map;
 }
@@ -81,27 +83,27 @@ QString VisualisationConfig::asString(bool forDisplay) const
 
     if(!forDisplay && !_flags.empty())
     {
-        s += QStringLiteral("[");
+        s += u"["_s;
         for(const auto& flag : _flags)
         {
             if(s[s.length() - 1] != '[')
-                s += QStringLiteral(", ");
+                s += u", "_s;
 
             s += flag;
         }
-        s += QStringLiteral("] ");
+        s += u"] "_s;
     }
 
-    auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : QStringLiteral(R"("%1" "%2")");
+    auto assignmentTemplate = forDisplay ? QObject::tr("%1 using %2") : u"\"%1\" \"%2\""_s;
 
     s += assignmentTemplate.arg(_attributeName, _channelName);
 
     if(!forDisplay && !_parameters.empty())
     {
-        s += QStringLiteral(" with ");
+        s += u" with "_s;
 
         for(const auto& parameter : _parameters)
-            s += QStringLiteral(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
+            s += u" %1 = %2"_s.arg(parameter._name, parameter.valueAsString(true));
     }
 
     if(forDisplay && !_flags.empty())

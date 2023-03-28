@@ -32,6 +32,8 @@
 #include <QDir>
 #include <QQuickOpenGLUtils>
 
+using namespace Qt::Literals::StringLiterals;
+
 static const int TILE_SIZE = 1024;
 
 // With some of the post-process fragment shaders, rendering at the edges may
@@ -184,7 +186,7 @@ void ScreenshotRenderer::requestScreenshot(const GraphRenderer& renderer, int im
 
     // Need a pixmap to construct the full image
     auto pixmap = QPixmap(imageWidth, imageHeight);
-    auto backgroundColor = u::pref(QStringLiteral("visuals/backgroundColor")).value<QColor>();
+    auto backgroundColor = u::pref(u"visuals/backgroundColor"_s).value<QColor>();
     pixmap.fill(backgroundColor);
 
     auto tileXCount = static_cast<int>(std::ceil(static_cast<float>(screenshotSize.width()) / static_cast<float>(TILE_SIZE)));

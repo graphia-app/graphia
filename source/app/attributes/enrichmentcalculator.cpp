@@ -34,6 +34,8 @@
 
 #include "shared/attributes/iattribute.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 static double combineLogs(double n, double r)
 {
     // NOLINTNEXTLINE concurrency-mt-unsafe
@@ -157,10 +159,10 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(
 
             row[EnrichmentTableModel::Results::SelectionA] = attributeValueA;
             row[EnrichmentTableModel::Results::SelectionB] = attributeValueB;
-            row[EnrichmentTableModel::Results::Observed] = QStringLiteral("%1 of %2")
+            row[EnrichmentTableModel::Results::Observed] = u"%1 of %2"_s
                 .arg(selectedInCategory)
                 .arg(selectedNodes.size());
-            row[EnrichmentTableModel::Results::ExpectedTrial] = QStringLiteral("%1 ± %2 of %3")
+            row[EnrichmentTableModel::Results::ExpectedTrial] = u"%1 ± %2 of %3"_s
                 .arg(QString::number(expectedNo, 'f', 2),
                 QString::number(expectedDev, 'f', 2),
                 QString::number(selectedNodes.size()));

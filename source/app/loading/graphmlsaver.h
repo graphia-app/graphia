@@ -24,14 +24,16 @@
 #include <QString>
 #include <QUrl>
 
+using namespace Qt::Literals::StringLiterals;
+
 class GraphMLSaver : public ISaver
 {
 private:
     const QUrl& _url;
     IGraphModel* _graphModel;
 public:
-    static QString name() { return QStringLiteral("GraphML"); }
-    static QString extension() { return QStringLiteral("graphml"); }
+    static QString name() { return u"GraphML"_s; }
+    static QString extension() { return u"graphml"_s; }
     GraphMLSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };

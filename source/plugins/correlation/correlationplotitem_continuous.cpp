@@ -24,6 +24,8 @@
 #include "shared/utils/statistics.h"
 #include "shared/utils/container_randomsample.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 // NOLINTNEXTLINE readability-make-member-function-const
 void CorrelationPlotItem::setContinousYAxisRange(double min, double max)
 {
@@ -773,15 +775,15 @@ void CorrelationPlotItem::configureContinuousAxisRect()
 
         for(auto& axis : _continuousAxisRect->axes())
         {
-            axis->setLayer(QStringLiteral("axes"));
-            axis->grid()->setLayer(QStringLiteral("grid"));
+            axis->setLayer(u"axes"_s);
+            axis->grid()->setLayer(u"grid"_s);
         }
 
         _axesLayoutGrid->addElement(_continuousAxisRect);
 
         // Layer to keep individual line plots separate from everything else
-        _customPlot.addLayer(QStringLiteral("lineGraphLayer"));
-        _lineGraphLayer = _customPlot.layer(QStringLiteral("lineGraphLayer"));
+        _customPlot.addLayer(u"lineGraphLayer"_s);
+        _lineGraphLayer = _customPlot.layer(u"lineGraphLayer"_s);
 
         // Don't show an emphasised vertical zero line
         _continuousXAxis->grid()->setZeroLinePen(_continuousXAxis->grid()->pen());

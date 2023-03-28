@@ -31,6 +31,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 ChangeLog::ChangeLog(QObject *parent) :
     QObject(parent)
 {
@@ -59,7 +61,7 @@ void ChangeLog::refresh()
         auto base64EncodedContent = QString::fromStdString(image["content"]);
         auto content = QByteArray::fromBase64(base64EncodedContent.toUtf8());
 
-        QFile imageFile(QStringLiteral("%1/%2").arg(_imagesDirectory.path(), fileName));
+        QFile imageFile(u"%1/%2"_s.arg(_imagesDirectory.path(), fileName));
         if(!imageFile.open(QIODevice::ReadWrite))
             continue;
 
@@ -69,8 +71,8 @@ void ChangeLog::refresh()
     _text = QString::fromStdString(changeLog["text"]);
 
     // Adjust the text so that the images in the text correspond to the files on disk
-    auto replacement = QStringLiteral("![\\1](file:///%1/\\2)").arg(_imagesDirectory.path());
-    static const QRegularExpression re(QStringLiteral(R"((?:!\[(.*?)\]\(file:(.*?)\)))"));
+    auto replacement = u"![\\1](file:///%1/\\2)"_s.arg(_imagesDirectory.path());
+    static const QRegularExpression re(uR"((?:!\[(.*?)\]\(file:(.*?)\)))"_s);
     _text = _text.replace(re, replacement);
     emit textChanged();
 

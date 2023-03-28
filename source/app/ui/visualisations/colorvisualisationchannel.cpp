@@ -22,6 +22,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
     elementVisual._outerColor = _colorGradient.get(value);
@@ -75,13 +77,13 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     {
     case ValueType::Int:
     case ValueType::Float:
-        parameters.insert(QStringLiteral("gradient"),
-            u::pref(QStringLiteral("visuals/defaultGradient")).toString());
+        parameters.insert(u"gradient"_s,
+            u::pref(u"visuals/defaultGradient"_s).toString());
         break;
 
     case ValueType::String:
-        parameters.insert(QStringLiteral("palette"),
-            u::pref(QStringLiteral("visuals/defaultPalette")).toString());
+        parameters.insert(u"palette"_s,
+            u::pref(u"visuals/defaultPalette"_s).toString());
         break;
 
     default:
@@ -93,8 +95,8 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
 
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
 {
-    if(name == QStringLiteral("gradient"))
+    if(name == u"gradient"_s)
         _colorGradient = ColorGradient(value);
-    else if(name == QStringLiteral("palette"))
+    else if(name == u"palette"_s)
         _colorPalette = ColorPalette(value);
 }

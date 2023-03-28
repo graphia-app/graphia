@@ -25,6 +25,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 static void removeLeaves(TransformedGraph& target, Progressable& progressable, size_t limit = 0)
 {
     const bool unlimited = (limit == 0);
@@ -62,7 +64,7 @@ void RemoveLeavesTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("Leaf Removal"));
 
-    auto limit = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
+    auto limit = static_cast<size_t>(std::get<int>(config().parameterByName(u"Limit"_s)->_value));
     removeLeaves(target, *this, limit);
 }
 

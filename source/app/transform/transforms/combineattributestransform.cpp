@@ -28,6 +28,8 @@
 #include <QObject>
 #include <QRegularExpression>
 
+using namespace Qt::Literals::StringLiterals;
+
 static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphModel,
     const GraphTransformConfig& config, bool atApplication = false)
 {
@@ -44,7 +46,7 @@ static Alert combineAttributesTransformConfigIsValid(const GraphModel& graphMode
             return {AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture")};
     }
 
-    auto newAttributeName = config.parameterByName(QStringLiteral("Name"))->valueAsString();
+    auto newAttributeName = config.parameterByName(u"Name"_s)->valueAsString();
     if(!GraphModel::attributeNameIsValid(newAttributeName))
         return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
 
@@ -67,8 +69,8 @@ void CombineAttributesTransform::apply(TransformedGraph& target)
     auto firstAttribute = _graphModel->attributeValueByName(attributeNames.at(0));
     auto secondAttribute = _graphModel->attributeValueByName(attributeNames.at(1));
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
-    auto attributeValue = config().parameterByName(QStringLiteral("Attribute Value"))->valueAsString();
+    auto newAttributeName = config().parameterByName(u"Name"_s)->valueAsString();
+    auto attributeValue = config().parameterByName(u"Attribute Value"_s)->valueAsString();
 
     auto combine =
     [&](const auto& elementIds)
@@ -84,8 +86,8 @@ void CombineAttributesTransform::apply(TransformedGraph& target)
             const QString secondValue = secondAttribute.stringValueOf(elementId);
 
             QString replacement = attributeValue;
-            replacement.replace(QStringLiteral(R"(\1)"), firstValue);
-            replacement.replace(QStringLiteral(R"(\2)"), secondValue);
+            replacement.replace(u"\\1"_s, firstValue);
+            replacement.replace(u"\\2"_s, secondValue);
 
             newValues[elementId] = replacement;
             typeIdentity.updateType(newValues[elementId]);

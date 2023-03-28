@@ -28,6 +28,8 @@
 #include <stack>
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 // http://www.biopax.org/owldoc/Level3/
 // Effectively, Entity and all subclasses are Nodes.
 // The members and properties of entities define the edges
@@ -161,13 +163,13 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
             if(isNodeElementName(elementName) && (activeElements.empty() ||
                 !isNodeElementName(activeElements.top())))
             {
-                if(!attributes.hasAttribute(QStringLiteral("rdf:ID")))
+                if(!attributes.hasAttribute(u"rdf:ID"_s))
                 {
                     setFailureReason(QObject::tr("Node element has no id."));
                     return false;
                 }
 
-                auto rdfId = attributes.value(QStringLiteral("rdf:ID")).toString();
+                auto rdfId = attributes.value(u"rdf:ID"_s).toString();
 
                 auto nodeId = graphModel->mutableGraph().addNode();
                 nodes.emplace(rdfId, nodeId);
@@ -183,21 +185,21 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
             {
                 if(!activeNodes.empty())
                 {
-                    if(!attributes.hasAttribute(QStringLiteral("rdf:resource")))
+                    if(!attributes.hasAttribute(u"rdf:resource"_s))
                     {
                         setFailureReason(QObject::tr("Edge element has no resource."));
                         return false;
                     }
 
-                    auto rdfResource = attributes.value(QStringLiteral("rdf:resource"))
-                        .toString().remove(QStringLiteral("#"));
+                    auto rdfResource = attributes.value(u"rdf:resource"_s)
+                        .toString().remove(u"#"_s);
 
                     auto& tempEdge = tempEdges.emplace_back();
 
                     tempEdge._sources.push_back(activeNodeName);
                     tempEdge._targets.push_back(rdfResource);
 
-                    if(elementName == QStringLiteral("right") || elementName == QStringLiteral("controlled"))
+                    if(elementName == u"right"_s || elementName == u"controlled"_s)
                     {
                         tempEdge._targets.push_back(rdfResource);
                         tempEdge._sources.push_back(activeNodeName);
@@ -217,12 +219,12 @@ bool BiopaxFileParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             const auto& data = xsr.text().toString();
 
-            if(activeElements.top() == QStringLiteral("displayName"))
+            if(activeElements.top() == u"displayName"_s)
             {
                 _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), data);
                 graphModel->setNodeName(activeNodeId, data);
             }
-            else if(activeElements.top() == QStringLiteral("comment"))
+            else if(activeElements.top() == u"comment"_s)
                 _userNodeData->setValueBy(activeNodeId, QObject::tr("Comment"), data);
 
             break;

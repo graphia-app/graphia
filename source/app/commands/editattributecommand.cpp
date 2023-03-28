@@ -20,6 +20,8 @@
 
 #include "graph/graphmodel.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 EditAttributeCommand::EditAttributeCommand(GraphModel* graphModel, const QString& attributeName,
     const AttributeEdits& edits) :
     _graphModel(graphModel), _attributeName(attributeName), _edits(edits)
@@ -42,7 +44,7 @@ QString EditAttributeCommand::pastParticiple() const
 
 QString EditAttributeCommand::debugDescription() const
 {
-    auto text = QStringLiteral("%1 %2").arg(description(), _attributeName);
+    auto text = u"%1 %2"_s.arg(description(), _attributeName);
 
     auto appendDetails = [&text](const auto& edits, auto& reverseEdits)
     {
@@ -51,11 +53,11 @@ QString EditAttributeCommand::debugDescription() const
         for(const auto& [elementId, value] : edits)
         {
             auto old = reverseEdits.at(elementId);
-            text += QStringLiteral("\n  %1 -> %2").arg(old, value);
+            text += u"\n  %1 -> %2"_s.arg(old, value);
 
             if(--maxEdits == 0)
             {
-                text += QStringLiteral("\n  ...");
+                text += u"\n  ..."_s;
                 break;
             }
         }

@@ -21,11 +21,13 @@
 
 #include "shared/utils/preferences.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace
 {
 int multisamples()
 {
-    if(u::getPref(QStringLiteral("visuals/disableMultisampling")).toBool())
+    if(u::getPref(u"visuals/disableMultisampling"_s).toBool())
         return 1;
 
     // This is the place where the default number of multisamples is set

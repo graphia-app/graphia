@@ -29,13 +29,15 @@
 #include <set>
 #include <iterator>
 
+using namespace Qt::Literals::StringLiterals;
+
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent),
     _colorMap(new QCPColorMap(customPlot().xAxis, customPlot().yAxis2)),
     _colorScale(new QCPColorScale(&customPlot())),
     _hoverLabel(new QCPItemText(&customPlot()))
 {
-    customPlot().addLayer(QStringLiteral("textLayer"));
+    customPlot().addLayer(u"textLayer"_s);
     customPlot().plotLayout()->setAutoMargins(QCP::MarginSide::msTop | QCP::MarginSide::msLeft);
 
     _colorScale->setLabel(tr("Bonferroni Adjusted P-Value"));
@@ -43,7 +45,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     customPlot().plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
 
-    _textLayer = customPlot().layer(QStringLiteral("textLayer"));
+    _textLayer = customPlot().layer(u"textLayer"_s);
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
     customPlot().yAxis2->setVisible(true);
@@ -52,12 +54,12 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) :
     auto colorScaleTicker = QSharedPointer<QCPAxisTickerText>::create();
     _colorScale->axis()->setTicker(colorScaleTicker);
   
-    colorScaleTicker->addTick(0, QStringLiteral("0"));
-    colorScaleTicker->addTick(0.01, QStringLiteral("0.01"));
-    colorScaleTicker->addTick(0.02, QStringLiteral("0.02"));
-    colorScaleTicker->addTick(0.03, QStringLiteral("0.03"));
-    colorScaleTicker->addTick(0.04, QStringLiteral("0.04"));
-    colorScaleTicker->addTick(0.05, QStringLiteral("0.05"));
+    colorScaleTicker->addTick(0, u"0"_s);
+    colorScaleTicker->addTick(0.01, u"0.01"_s);
+    colorScaleTicker->addTick(0.02, u"0.02"_s);
+    colorScaleTicker->addTick(0.03, u"0.03"_s);
+    colorScaleTicker->addTick(0.04, u"0.04"_s);
+    colorScaleTicker->addTick(0.05, u"0.05"_s);
 
     QCPColorGradient gradient;
     auto insignificantColor = QColor(Qt::gray);
@@ -431,11 +433,11 @@ void EnrichmentHeatmapItem::showTooltip()
 
 void EnrichmentHeatmapItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
-    if(extensions.contains(QStringLiteral("png")))
+    if(extensions.contains(u"png"_s))
         customPlot().savePng(url.toLocalFile());
-    else if(extensions.contains(QStringLiteral("pdf")))
+    else if(extensions.contains(u"pdf"_s))
         customPlot().savePdf(url.toLocalFile());
-    else if(extensions.contains(QStringLiteral("jpg")))
+    else if(extensions.contains(u"jpg"_s))
         customPlot().saveJpg(url.toLocalFile());
 
     QDesktopServices::openUrl(url);

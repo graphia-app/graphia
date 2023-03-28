@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+using namespace Qt::Literals::StringLiterals;
+
 void Installer::signalComplete()
 {
     _complete = true;
@@ -131,8 +133,8 @@ void Installer::start()
         if(success)
         {
             QString command = _details["command"];
-            command.replace(QStringLiteral("EXISTING_INSTALL"), _existingInstallation)
-                .replace(QStringLiteral("INSTALLER_FILE"), _installerFileName);
+            command.replace(u"EXISTING_INSTALL"_s, _existingInstallation)
+                .replace(u"INSTALLER_FILE"_s, _installerFileName);
 
             QStringList arguments(
 #if defined(Q_OS_UNIX)

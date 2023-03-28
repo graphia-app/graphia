@@ -27,6 +27,8 @@
 
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 void CorrelationPlotItem::configureDiscreteAxisRect()
 {
     if(_discreteAxisRect == nullptr)
@@ -37,8 +39,8 @@ void CorrelationPlotItem::configureDiscreteAxisRect()
 
         for(auto& axis : _discreteAxisRect->axes())
         {
-            axis->setLayer(QStringLiteral("axes"));
-            axis->grid()->setLayer(QStringLiteral("grid"));
+            axis->setLayer(u"axes"_s);
+            axis->grid()->setLayer(u"grid"_s);
         }
 
         _axesLayoutGrid->addElement(_discreteAxisRect);

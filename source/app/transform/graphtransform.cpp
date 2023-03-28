@@ -26,6 +26,8 @@
 
 #include "shared/utils/container.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 static bool hasUnknownAttributes(const std::vector<QString>& attributeNames,
     const GraphModel& graphModel, const GraphTransform& transform)
 {
@@ -109,24 +111,24 @@ void GraphTransform::setPhase(const QString& phase)
 QString GraphTransformFactory::image() const
 {
     if(category() == QObject::tr("Attributes"))
-        return QStringLiteral("qrc:///transforms/images/attributes.svg");
+        return u"qrc:///transforms/images/attributes.svg"_s;
 
     if(category() == QObject::tr("Clustering"))
-        return QStringLiteral("qrc:///transforms/images/clustering.svg");
+        return u"qrc:///transforms/images/clustering.svg"_s;
 
     if(category() == QObject::tr("Edge Reduction"))
-        return QStringLiteral("qrc:///transforms/images/edgereduction.svg");
+        return u"qrc:///transforms/images/edgereduction.svg"_s;
 
     if(category() == QObject::tr("Filters"))
-        return QStringLiteral("qrc:///transforms/images/filters.svg");
+        return u"qrc:///transforms/images/filters.svg"_s;
 
     if(category() == QObject::tr("Metrics"))
-        return QStringLiteral("qrc:///transforms/images/metrics.svg");
+        return u"qrc:///transforms/images/metrics.svg"_s;
 
     if(category() == QObject::tr("Structural"))
-        return QStringLiteral("qrc:///transforms/images/structural.svg");
+        return u"qrc:///transforms/images/structural.svg"_s;
 
-    return QStringLiteral("qrc:///transforms/images/default.svg");
+    return u"qrc:///transforms/images/default.svg"_s;
 }
 
 GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const

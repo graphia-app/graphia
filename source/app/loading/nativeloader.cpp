@@ -208,7 +208,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     QString fragment(byteArray);
 
     // Strip off the leading [
-    static const QRegularExpression re(QStringLiteral(R"(^\s*\[\s*)"));
+    static const QRegularExpression re(uR"(^\s*\[\s*)"_s);
     fragment.replace(re, {});
 
     int position = 0;

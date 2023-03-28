@@ -25,6 +25,8 @@
 #include <QRegularExpression>
 #include <QQmlEngine>
 
+using namespace Qt::Literals::StringLiterals;
+
 QmlPreferences::QmlPreferences(QObject* parent) :
     QObject(parent)
 {
@@ -82,7 +84,7 @@ void QmlPreferences::componentComplete()
 
 QString QmlPreferences::preferenceNameByPropertyName(const QString& propertyName)
 {
-    return QStringLiteral("%1/%2").arg(_section, propertyName);
+    return u"%1/%2"_s.arg(_section, propertyName);
 }
 
 QMetaProperty QmlPreferences::propertyByName(const QString& propertyName) const
@@ -99,7 +101,7 @@ QMetaProperty QmlPreferences::propertyByName(const QString& propertyName) const
 
 static QString propertyNameFrom(const QString& preferenceName)
 {
-    static const QRegularExpression sepRegex(QStringLiteral(R"(\/)"));
+    static const QRegularExpression sepRegex(uR"(\/)"_s);
     if(preferenceName.contains(sepRegex))
     {
         auto stringList = preferenceName.split(sepRegex);

@@ -26,6 +26,8 @@
 
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<> constexpr bool EnableBitMaskOperators<Layout::Dimensionality> = true;
 
 static bool layoutIsFinished(const Layout& layout)
@@ -211,7 +213,7 @@ void LayoutThread::run()
 
     do
     {
-        u::setCurrentThreadName(QStringLiteral("Layout >"));
+        u::setCurrentThreadName(u"Layout >"_s);
 
         for(auto& [componentId, layout] : _layouts)
         {
@@ -268,7 +270,7 @@ void LayoutThread::run()
                 qDebug() << "Layout paused" << reason;
             }
 
-            u::setCurrentThreadName(QStringLiteral("Layout ||"));
+            u::setCurrentThreadName(u"Layout ||"_s);
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);

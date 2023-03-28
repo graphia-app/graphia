@@ -27,6 +27,8 @@
 
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 ParserThread::ParserThread(GraphModel& graphModel, const QUrl& url) :
     _graphModel(&graphModel),
     _url(url)
@@ -79,7 +81,7 @@ void ParserThread::reset()
 
 void ParserThread::run()
 {
-    u::setCurrentThreadName(QStringLiteral("Parser"));
+    u::setCurrentThreadName(u"Parser"_s);
 
     bool result = false;
 

@@ -39,6 +39,8 @@
 #include <utility>
 #include <type_traits>
 
+using namespace Qt::Literals::StringLiterals;
+
 class ThreadPool
 {
 private:
@@ -49,7 +51,7 @@ private:
     bool _stop = false;
 
 public:
-    explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
+    explicit ThreadPool(const QString& threadNamePrefix = u"Worker"_s,
         unsigned int numThreads = std::thread::hardware_concurrency());
     virtual ~ThreadPool();
 

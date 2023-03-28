@@ -28,6 +28,8 @@
 #include <QString>
 #include <QElapsedTimer>
 
+using namespace Qt::Literals::StringLiterals;
+
 // Include this header and insert SCOPE_TIMER into your code OR
 // use SCOPE_TIMER_MULTISAMPLES(<numSamples>) OR
 // manually create a ScopeTimer timer(<uniqueName>);
@@ -70,7 +72,7 @@ private:
 #define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__ /* NOLINT cppcoreguidelines-macro-usage */
 #define SCOPE_TIMER_MULTISAMPLES(samples) /* NOLINT cppcoreguidelines-macro-usage */ \
     const ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
-        QStringLiteral("%1:%2 %3") \
+        u"%1:%2 %3"_s \
             .arg(SCOPE_TIMER_FILENAME) \
             .arg(__LINE__) \
             .arg(SCOPE_TIMER_FUNCTION), samples);

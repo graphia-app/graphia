@@ -44,6 +44,8 @@
 #include <functional>
 #include <vector>
 
+using namespace Qt::Literals::StringLiterals;
+
 GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
@@ -496,7 +498,7 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
         {
             if(visible())
                 _previousComponentAlpha[componentId] = 0.0f;
-        }, QStringLiteral("GraphOverviewScene::onComponentAdded (set source alpha to 0)"));
+        }, u"GraphOverviewScene::onComponentAdded (set source alpha to 0)"_s);
     }
 }
 
@@ -514,7 +516,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
 
             _removedComponentIds.emplace_back(componentId);
             _componentAlpha[componentId] = 0.0f;
-        }, QStringLiteral("GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)"));
+        }, u"GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)"_s);
     }
 }
 
@@ -538,7 +540,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
                 _previousComponentAlpha[splitter] = _componentAlpha[oldComponentId];
             }
         }
-    }, QStringLiteral("GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)"));
+    }, u"GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)"_s);
 }
 
 void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
@@ -558,7 +560,7 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
             if(merger != componentMergeSet.newComponentId())
                 _removedComponentIds.emplace_back(merger);
         }
-    }, QStringLiteral("GraphOverviewScene::onComponentsWillMerge (freeze renderers)"));
+    }, u"GraphOverviewScene::onComponentsWillMerge (freeze renderers)"_s);
 }
 
 void GraphOverviewScene::onVisualsChanged(VisualChangeFlags nodeChange, VisualChangeFlags)
@@ -573,7 +575,7 @@ void GraphOverviewScene::onVisualsChanged(VisualChangeFlags nodeChange, VisualCh
         // must force it to be updated when the node sizes changes; this
         // causes each renderer to be reset in ::update
         _renderersRequireReset = true;
-    }, QStringLiteral("GraphOverviewScene::onVisualsChanged (reset renderers)"));
+    }, u"GraphOverviewScene::onVisualsChanged (reset renderers)"_s);
 }
 
 void GraphOverviewScene::onGraphWillChange(const Graph*)
@@ -587,7 +589,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
     if(visible())
     {
         const bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
-        const float duration = !componentLayoutDataChanged ? 0.0f : u::pref(QStringLiteral("visuals/transitionTime")).toFloat();
+        const float duration = !componentLayoutDataChanged ? 0.0f : u::pref(u"visuals/transitionTime"_s).toFloat();
 
         setVisible(true); // Show new components
         setViewportSize(_width, _height);
@@ -629,12 +631,12 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
         // transition away
         _componentIds.insert(_componentIds.end(),
             _removedComponentIds.begin(), _removedComponentIds.end());
-    }, QStringLiteral("GraphOverviewScene::onGraphChanged"));
+    }, u"GraphOverviewScene::onGraphChanged"_s);
 }
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(visible() && key == QStringLiteral("visuals/minimumComponentRadius"))
+    if(visible() && key == u"visuals/minimumComponentRadius"_s)
     {
         _commandManager->executeOnce(
         [this](Command&)
@@ -651,7 +653,7 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
                 _graphRenderer->executeOnRendererThread([this]
                 {
                     this->startComponentLayoutTransition();
-                }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
+                }, u"GraphOverviewScene::onPreferenceChanged"_s);
             }
         }, {tr("Component Layout")});
     }
@@ -672,5 +674,5 @@ void GraphOverviewScene::setProjection(Projection projection)
             componentRenderer->setProjection(projection);
             componentRenderer->doProjectionTransition();
         }
-    }, QStringLiteral("GraphOverviewScene::setProjection"));
+    }, u"GraphOverviewScene::setProjection"_s);
 }

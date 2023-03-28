@@ -26,6 +26,8 @@
 #include <numeric>
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 ScopeTimer::ScopeTimer(const QString& name, size_t numSamples) :
     _name(name), _numSamples(numSamples)
 {
@@ -88,7 +90,7 @@ void ScopeTimerManager::reportToQDebug() const
 
             auto last = static_cast<double>(samples.back()) / 1000000.0;
 
-            qDebug() << name << QStringLiteral("%1/%2/%3/%4/%5 ms (mean/min/max/stddev/last)")
+            qDebug() << name << u"%1/%2/%3/%4/%5 ms (mean/min/max/stddev/last)"_s
                 .arg(mean).arg(min).arg(max).arg(stdDev).arg(last);
         }
         else

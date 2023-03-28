@@ -45,6 +45,7 @@
 #include <thread>
 #include <chrono>
 
+using namespace Qt::Literals::StringLiterals;
 using namespace std::chrono_literals;
 
 static QString postToTrackingServer(const QString& text)
@@ -58,7 +59,7 @@ static QString postToTrackingServer(const QString& text)
     timer.start(10s);
 
     QNetworkRequest request;
-    request.setUrl(u::pref(QStringLiteral("servers/tracking")).toString());
+    request.setUrl(u::pref(u"servers/tracking"_s).toString());
 
     auto* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -105,7 +106,7 @@ static QString postToTrackingServer(const QString& text)
 
 static QString anonymousIdentity()
 {
-    auto anonUser = QStringLiteral("anon");
+    auto anonUser = u"anon"_s;
     QString hostName = QHostInfo::localDomainName();
 
     const json ipRequestJson = {{"action", "getip"}};
@@ -119,7 +120,7 @@ static QString anonymousIdentity()
         // Remove any sections of the hostname that contain non-alpha characters, as
         // they're probably DNS encoded IP addresses or similar such things, and we
         // only really care about the sub-top level domain
-        hostName = hostName.split('.').filter(QRegularExpression(QStringLiteral("^[a-zA-Z]+$"))).join('.');
+        hostName = hostName.split('.').filter(QRegularExpression(u"^[a-zA-Z]+$"_s)).join('.');
     }
 
     if(hostInfo.error() != QHostInfo::NoError || hostName.isEmpty())
@@ -133,7 +134,7 @@ static QString anonymousIdentity()
         anonUser.append('_').append(hash.result().toHex().mid(0, 7));
     }
 
-    auto id = QStringLiteral("%1@%2").arg(anonUser, hostName);
+    auto id = u"%1@%2"_s.arg(anonUser, hostName);
     return id;
 }
 
@@ -141,25 +142,25 @@ void Tracking::submit()
 {
     auto doSubmission = []
     {
-        auto permission = u::pref(QStringLiteral("tracking/permission")).toString();
-        auto identity = u::pref(QStringLiteral("tracking/emailAddress")).toString();
+        auto permission = u::pref(u"tracking/permission"_s).toString();
+        auto identity = u::pref(u"tracking/emailAddress"_s).toString();
 
-        if(permission == QStringLiteral("rejected"))
+        if(permission == u"rejected"_s)
             return;
 
-        if(permission == QStringLiteral("anonymous") || identity.isEmpty())
+        if(permission == u"anonymous"_s || identity.isEmpty())
         {
-            if(!u::prefExists(QStringLiteral("tracking/anonymousId")) ||
-                u::pref(QStringLiteral("tracking/anonymousId")).toString().isEmpty())
+            if(!u::prefExists(u"tracking/anonymousId"_s) ||
+                u::pref(u"tracking/anonymousId"_s).toString().isEmpty())
             {
                 identity = anonymousIdentity();
-                u::setPref(QStringLiteral("tracking/anonymousId"), identity);
+                u::setPref(u"tracking/anonymousId"_s, identity);
             }
             else
-                identity = u::pref(QStringLiteral("tracking/anonymousId")).toString();
+                identity = u::pref(u"tracking/anonymousId"_s).toString();
         }
 
-        auto os = QStringLiteral("%1 %2 %3 %4").arg(
+        auto os = u"%1 %2 %3 %4"_s.arg(
             QSysInfo::kernelType(), QSysInfo::kernelVersion(),
             QSysInfo::productType(), QSysInfo::productVersion());
 

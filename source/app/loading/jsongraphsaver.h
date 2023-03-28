@@ -25,6 +25,8 @@
 
 #include <json_helper.h>
 
+using namespace Qt::Literals::StringLiterals;
+
 class IGraph;
 
 class JSONGraphSaver : public ISaver
@@ -33,8 +35,8 @@ private:
     const QUrl& _url;
     IGraphModel* _graphModel;
 public:
-    static QString name() { return QStringLiteral("JSON Graph"); }
-    static QString extension() { return QStringLiteral("json"); }
+    static QString name() { return u"JSON Graph"_s; }
+    static QString extension() { return u"json"_s; }
 
     static json graphAsJson(const IGraph& graph, Progressable& progressable);
 

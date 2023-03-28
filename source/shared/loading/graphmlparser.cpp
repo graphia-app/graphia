@@ -31,6 +31,8 @@
 #include <stack>
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 // http://graphml.graphdrawing.org/primer/graphml-primer.html
 
 GraphMLParser::GraphMLParser(IUserNodeData* userNodeData, IUserEdgeData* userEdgeData) :
@@ -91,9 +93,9 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
             stack.push(elementName.toString());
             const auto& attributes = xsr.attributes();
 
-            if(elementName == QStringLiteral("graphml"))
+            if(elementName == u"graphml"_s)
                 graphmlElementFound = true;
-            else if(elementName == QStringLiteral("graph"))
+            else if(elementName == u"graph"_s)
             {
                 graphNestLevel++;
 
@@ -103,38 +105,38 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                     qDebug() << "WARNING: nested graphs not supported";
                 }
             }
-            else if(elementName == QStringLiteral("key"))
+            else if(elementName == u"key"_s)
             {
-                if(!attributes.hasAttribute(QStringLiteral("attr.name")))
+                if(!attributes.hasAttribute(u"attr.name"_s))
                     break;
 
-                if(!attributes.hasAttribute(QStringLiteral("for")))
+                if(!attributes.hasAttribute(u"for"_s))
                     break;
 
-                if(!attributes.hasAttribute(QStringLiteral("id")))
+                if(!attributes.hasAttribute(u"id"_s))
                     break;
 
-                const auto& attributeName = attributes.value(QStringLiteral("attr.name"));
-                const auto& keyId = attributes.value(QStringLiteral("id"));
+                const auto& attributeName = attributes.value(u"attr.name"_s);
+                const auto& keyId = attributes.value(u"id"_s);
 
-                if(attributes.value(QStringLiteral("for")) == QStringLiteral("node"))
+                if(attributes.value(u"for"_s) == u"node"_s)
                     nodeAttributes.emplace(keyId.toString(), attributeName.toString());
-                else if(attributes.value(QStringLiteral("for")) == QStringLiteral("edge"))
+                else if(attributes.value(u"for"_s) == u"edge"_s)
                     edgeAttributes.emplace(keyId.toString(), attributeName.toString());
             }
 
             if(graphNestLevel != 1)
                 break;
 
-            if(elementName == QStringLiteral("node"))
+            if(elementName == u"node"_s)
             {
-                if(!attributes.hasAttribute(QStringLiteral("id")))
+                if(!attributes.hasAttribute(u"id"_s))
                 {
                     setFailureReason(QObject::tr("Node has no id."));
                     return false;
                 }
 
-                const auto& nodeName = attributes.value(QStringLiteral("id")).toString();
+                const auto& nodeName = attributes.value(u"id"_s).toString();
 
                 if(u::contains(nodes, nodeName))
                 {
@@ -148,22 +150,22 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
                 _userNodeData->setValueBy(activeNodeId, QObject::tr("Node Name"), nodeName);
                 graphModel->setNodeName(activeNodeId, nodeName);
             }
-            else if(elementName == QStringLiteral("edge"))
+            else if(elementName == u"edge"_s)
             {
-                if(!attributes.hasAttribute(QStringLiteral("source")))
+                if(!attributes.hasAttribute(u"source"_s))
                 {
                     setFailureReason(QObject::tr("Edge missing source."));
                     return false;
                 }
 
-                if(!attributes.hasAttribute(QStringLiteral("target")))
+                if(!attributes.hasAttribute(u"target"_s))
                 {
                     setFailureReason(QObject::tr("Edge missing target."));
                     return false;
                 }
 
-                const auto& sourceName = attributes.value(QStringLiteral("source")).toString();
-                const auto& targetName = attributes.value(QStringLiteral("target")).toString();
+                const auto& sourceName = attributes.value(u"source"_s).toString();
+                const auto& targetName = attributes.value(u"target"_s).toString();
 
                 if(!u::contains(nodes, sourceName) || !u::contains(nodes, targetName))
                 {
@@ -176,18 +178,18 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
                 activeEdgeId = graphModel->mutableGraph().addEdge(sourceId, targetId);
 
-                if(attributes.hasAttribute(QStringLiteral("id")))
+                if(attributes.hasAttribute(u"id"_s))
                 {
-                    auto edgeName = attributes.value(QStringLiteral("id")).toString();
+                    auto edgeName = attributes.value(u"id"_s).toString();
                     _userEdgeData->setValueBy(activeEdgeId, QObject::tr("Edge Name"), edgeName);
                 }
             }
-            else if(elementName == QStringLiteral("data"))
+            else if(elementName == u"data"_s)
             {
-                if(!attributes.hasAttribute(QStringLiteral("key")))
+                if(!attributes.hasAttribute(u"key"_s))
                     break;
 
-                activeKey = attributes.value(QStringLiteral("key")).toString();
+                activeKey = attributes.value(u"key"_s).toString();
             }
 
             break;
@@ -231,17 +233,17 @@ bool GraphMLParser::parse(const QUrl& url, IGraphModel* graphModel)
 
             stack.pop();
 
-            if(elementName == QStringLiteral("graph"))
+            if(elementName == u"graph"_s)
                 graphNestLevel--;
 
             if(graphNestLevel != 1)
                 break;
 
-            if(elementName == QStringLiteral("node") && !activeNodeId.isNull())
+            if(elementName == u"node"_s && !activeNodeId.isNull())
                 activeNodeId.setToNull();
-            else if(elementName == QStringLiteral("edge") && !activeEdgeId.isNull())
+            else if(elementName == u"edge"_s && !activeEdgeId.isNull())
                 activeEdgeId.setToNull();
-            else if(elementName == QStringLiteral("data") && !activeKey.isEmpty())
+            else if(elementName == u"data"_s && !activeKey.isEmpty())
                 activeKey.clear();
 
             break;

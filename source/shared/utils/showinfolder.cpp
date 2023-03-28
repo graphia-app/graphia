@@ -25,19 +25,21 @@
 
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 void u::showInFolder(const QString& path)
 {
 #if defined(Q_OS_WIN32)
     QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(path)});
 #elif defined(Q_OS_MACOS)
     QProcess::execute("/usr/bin/osascript", {"-e",
-        QStringLiteral("tell application \"Finder\" to reveal POSIX file \"%1\"").arg(path)});
+        u"tell application \"Finder\" to reveal POSIX file \"%1\""_s.arg(path)});
     QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to activate"});
 #elif defined(Q_OS_UNIX)
     const QFileInfo fileInfo(path);
 
     // AFAICT, the best we can do on *nix is to open the folder itself
-    QProcess::execute(QStringLiteral("xdg-open"), {fileInfo.absolutePath()});
+    QProcess::execute(u"xdg-open"_s, {fileInfo.absolutePath()});
 #else
     qDebug() << "u::showInFolder not implemented";
 #endif

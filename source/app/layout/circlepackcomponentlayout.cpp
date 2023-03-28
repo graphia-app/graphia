@@ -43,6 +43,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 struct Links
 {
     ComponentId _prev;
@@ -215,7 +217,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     ComponentArray<Links> links(graph);
 
-    auto minimumComponentRadius = u::pref(QStringLiteral("visuals/minimumComponentRadius")).toFloat();
+    auto minimumComponentRadius = u::pref(u"visuals/minimumComponentRadius"_s).toFloat();
     for(auto componentId : sortedComponentIds)
     {
         componentLayoutData[componentId].setRadius(std::max(componentLayoutData[componentId].radius(),

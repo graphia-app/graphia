@@ -25,6 +25,8 @@
 
 #include <thread>
 
+using namespace Qt::Literals::StringLiterals;
+
 CommandManager::CommandManager() :
     _graphChanged(false), _debug(qEnvironmentVariableIntValue("COMMAND_DEBUG"))
 {
@@ -121,7 +123,7 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
         const std::unique_lock<std::recursive_mutex> lock(_mutex);
 
         const QString commandName = command->description().length() > 0 ?
-            command->description() : QStringLiteral("Anon Command");
+            command->description() : u"Anon Command"_s;
         u::setCurrentThreadName(commandName);
 
         _graphChanged = false;
@@ -150,7 +152,7 @@ void CommandManager::executeReal(ICommandPtr command, CommandAction action)
 
                 _stack.push_back(std::move(command));
 
-                auto maxUndoLevels = u::pref(QStringLiteral("misc/maxUndoLevels")).toInt();
+                auto maxUndoLevels = u::pref(u"misc/maxUndoLevels"_s).toInt();
                 if(maxUndoLevels > 0)
                 {
                     // Lose commands at the bottom of the stack until
@@ -420,7 +422,7 @@ QString CommandManager::commandStackSummary() const
 
     if(_currentCommand != nullptr)
     {
-        text.append(QStringLiteral("\n#%1").arg(
+        text.append(u"\n#%1"_s.arg(
             _currentCommand->debugDescription()));
     }
 

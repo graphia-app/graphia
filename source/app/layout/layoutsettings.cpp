@@ -22,6 +22,8 @@
 
 #include <QDebug>
 
+using namespace Qt::Literals::StringLiterals;
+
 float LayoutSettings::value(const QString& name) const
 {
     const auto* v = setting(name);
@@ -87,7 +89,7 @@ LayoutSetting* LayoutSettings::setting(const QString& name)
     if(setting != _settings.end())
         return &(*setting);
 
-    qDebug() << QStringLiteral("Setting") << name << "not found!";
+    qDebug() << u"Setting"_s << name << "not found!";
     return nullptr;
 }
 

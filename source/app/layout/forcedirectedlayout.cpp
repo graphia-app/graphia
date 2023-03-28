@@ -30,6 +30,8 @@
 
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename T> float meanWeightedAvgBuffer(size_t start, size_t end, const T& buffer)
 {
     float average = 0.0f;
@@ -150,8 +152,8 @@ void ForceDirectedLayout::execute(bool firstIteration, Dimensionality dimensiona
 
     barnesHutTree->build(graphComponent(), positions());
 
-    const float SHORT_RANGE = _settings->value(QStringLiteral("ShortRangeRepulseTerm"));
-    const float LONG_RANGE = 0.01f + _settings->value(QStringLiteral("LongRangeRepulseTerm"));
+    const float SHORT_RANGE = _settings->value(u"ShortRangeRepulseTerm"_s);
+    const float LONG_RANGE = 0.01f + _settings->value(u"LongRangeRepulseTerm"_s);
 
     // Repulsive forces
     auto repulsiveResults = parallel_for(nodeIds().begin(), nodeIds().end(),

@@ -28,6 +28,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void PercentNNTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("%-NN"));
@@ -38,11 +40,11 @@ void PercentNNTransform::apply(TransformedGraph& target)
         return;
     }
 
-    auto percent = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Percent"))->_value));
-    auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("Minimum"))->_value));
+    auto percent = static_cast<size_t>(std::get<int>(config().parameterByName(u"Percent"_s)->_value));
+    auto minimum = static_cast<size_t>(std::get<int>(config().parameterByName(u"Minimum"_s)->_value));
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
-    const bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
+    const bool ascending = config().parameterHasValue(u"Rank Order"_s, u"Ascending"_s);
 
     struct PercentNNRank
     {

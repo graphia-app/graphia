@@ -25,6 +25,8 @@
 
 #include <cmath>
 
+using namespace Qt::Literals::StringLiterals;
+
 VisualisationMappingPlotItem::VisualisationMappingPlotItem(QQuickItem* parent) :
     QCustomPlotQuickItem(multisamples(), parent)
 {
@@ -205,8 +207,8 @@ void VisualisationMappingPlotItem::buildPlot()
 
     for(auto* axis : {mainXAxis, mainYAxis, valuesXAxis, valuesYAxis})
     {
-        axis->setLayer(QStringLiteral("axes"));
-        axis->grid()->setLayer(QStringLiteral("grid"));
+        axis->setLayer(u"axes"_s);
+        axis->grid()->setLayer(u"grid"_s);
     }
 
     customPlot().replot(QCustomPlot::rpQueuedReplot);

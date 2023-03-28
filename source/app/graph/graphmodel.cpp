@@ -83,6 +83,8 @@
 #include <vector>
 #include <utility>
 
+using namespace Qt::Literals::StringLiterals;
+
 using NodeVisuals = NodeArray<ElementVisual>;
 using EdgeVisuals = EdgeArray<ElementVisual>;
 
@@ -111,8 +113,8 @@ private:
     TransformInfosMap _transformInfos;
     NodePositions _nodePositions;
 
-    float _nodeSize = u::pref(QStringLiteral("visuals/defaultNormalNodeSize")).toFloat();
-    float _edgeSize = u::pref(QStringLiteral("visuals/defaultNormalEdgeSize")).toFloat();
+    float _nodeSize = u::pref(u"visuals/defaultNormalNodeSize"_s).toFloat();
+    float _edgeSize = u::pref(u"visuals/defaultNormalEdgeSize"_s).toFloat();
 
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
@@ -288,7 +290,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     createAttribute(tr("Node Component Identifier"))
         .setStringValueFn([this](NodeId nodeId)
         {
-            return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
+            return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1));
         })
         .setDescription(tr("A node's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
@@ -297,7 +299,7 @@ GraphModel::GraphModel(const QString& name, IPlugin* plugin) :
     createAttribute(tr("Edge Component Identifier"))
         .setStringValueFn([this](EdgeId edgeId)
         {
-            return QStringLiteral("Component %1").arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
+            return u"Component %1"_s.arg(static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1));
         })
         .setDescription(tr("An edge's component identifier indicates which component it is part of."))
         .setFlag(AttributeFlag::DisableDuringTransform);
@@ -498,7 +500,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, Progressable* pr
         const auto& graphTransformConfig = graphTransformConfigParser.result();
         const auto& action = graphTransformConfig._action;
 
-        if(graphTransformConfig.isFlagSet(QStringLiteral("disabled")))
+        if(graphTransformConfig.isFlagSet(u"disabled"_s))
             continue;
 
         if(!u::contains(_->_graphTransformFactories, action))
@@ -512,7 +514,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, Progressable* pr
         {
             graphTransform->setIndex(index);
             graphTransform->setConfig(graphTransformConfig);
-            graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
+            graphTransform->setRepeating(graphTransformConfig.isFlagSet(u"repeating"_s));
             graphTransform->setInfo(&_->_transformInfos[index]);
             graphTransform->setProgressable(progressable);
             _->_transformedGraph.addTransform(std::move(graphTransform));
@@ -676,7 +678,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         const auto& visualisationConfig = visualisationConfigParser.result();
 
-        if(visualisationConfig.isFlagSet(QStringLiteral("disabled")))
+        if(visualisationConfig.isFlagSet(u"disabled"_s))
             continue;
 
         const auto& attributeName = visualisationConfig._attributeName;
@@ -711,7 +713,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
 
-        if(attribute.elementType() == ElementType::Edge && channelName == QStringLiteral("Text"))
+        if(attribute.elementType() == ElementType::Edge && channelName == u"Text"_s)
             _->_hasValidEdgeTextVisualisation = true;
 
         if(attribute.valueType() == ValueType::String)
@@ -728,7 +730,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
                     sharedValues = attribute.findSharedValuesForElements(graph().edgeIds());
             }
 
-            if(!visualisationConfig.isFlagSet(QStringLiteral("assignByQuantity")))
+            if(!visualisationConfig.isFlagSet(u"assignByQuantity"_s))
             {
                 // Sort in natural order so that e.g. "Thing 1" is always
                 // assigned a visualisation before "Thing 2"
@@ -1097,12 +1099,12 @@ void GraphModel::updateVisuals(bool force)
 
     _->_visualUpdateRequired = false;
 
-    auto nodeColor      = u::pref(QStringLiteral("visuals/defaultNodeColor")).value<QColor>();
-    auto edgeColor      = u::pref(QStringLiteral("visuals/defaultEdgeColor")).value<QColor>();
-    auto multiColor     = u::pref(QStringLiteral("visuals/multiElementColor")).value<QColor>();
+    auto nodeColor      = u::pref(u"visuals/defaultNodeColor"_s).value<QColor>();
+    auto edgeColor      = u::pref(u"visuals/defaultEdgeColor"_s).value<QColor>();
+    auto multiColor     = u::pref(u"visuals/multiElementColor"_s).value<QColor>();
     auto nodeSize       = u::interpolate(LimitConstants::minimumNodeSize(), LimitConstants::maximumNodeSize(), _->_nodeSize);
     auto edgeSize       = u::interpolate(LimitConstants::minimumEdgeSize(), LimitConstants::maximumEdgeSize(), _->_edgeSize);
-    auto meIndicators   = u::pref(QStringLiteral("visuals/showMultiElementIndicators")).toBool();
+    auto meIndicators   = u::pref(u"visuals/showMultiElementIndicators"_s).toBool();
 
     auto newNodeVisuals = _->_nodeVisuals;
     auto newEdgeVisuals = _->_edgeVisuals;
@@ -1265,11 +1267,11 @@ void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
 void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 {
-    if(!name.startsWith(QStringLiteral("visuals")))
+    if(!name.startsWith(u"visuals"_s))
         return;
 
-    const bool force = name.endsWith(QStringLiteral("showNodeText")) ||
-        name.endsWith(QStringLiteral("showEdgeText"));
+    const bool force = name.endsWith(u"showNodeText"_s) ||
+        name.endsWith(u"showEdgeText"_s);
 
     updateVisuals(force);
 }

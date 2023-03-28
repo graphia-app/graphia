@@ -20,11 +20,13 @@
 
 #include "shared/utils/thread.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
 {
     for(unsigned int i = 0U; i < numThreads; i++)
     {
-        auto threadName = QStringLiteral("%1%2").arg(threadNamePrefix).arg(i + 1);
+        auto threadName = u"%1%2"_s.arg(threadNamePrefix).arg(i + 1);
 
         _threads.emplace_back([threadName, this]
         {
@@ -34,7 +36,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
             {
                 while(_tasks.empty() && !_stop)
                 {
-                    u::setCurrentThreadName(QStringLiteral("%1 (idle)").arg(threadName));
+                    u::setCurrentThreadName(u"%1 (idle)"_s.arg(threadName));
 
                     // Block until a new task is queued
                     _waitForNewTask.wait(lock);
@@ -47,7 +49,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, unsigned int numThreads)
                 _tasks.pop();
                 lock.unlock();
 
-                u::setCurrentThreadName(QStringLiteral("%1 (busy)").arg(threadName));
+                u::setCurrentThreadName(u"%1 (busy)"_s.arg(threadName));
                 task();
 
                 lock.lock();

@@ -29,6 +29,8 @@
 
 #include <QVariantMap>
 
+using namespace Qt::Literals::StringLiterals;
+
 template<typename DataVectors>
 class KnnProtoGraph
 {
@@ -77,10 +79,10 @@ public:
     KnnProtoGraph(const DataVectors& vectors, const QVariantMap& parameters) :
         _protoNodes(vectors.size()), _begin(vectors.begin())
     {
-        _k = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toInt());
+        _k = static_cast<size_t>(parameters[u"maximumK"_s].toInt());
         Q_ASSERT(_k > 0);
-        _threshold = parameters[QStringLiteral("minimumThreshold")].toDouble();
-        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[QStringLiteral("correlationPolarity")].toInt());
+        _threshold = parameters[u"minimumThreshold"_s].toDouble();
+        _polarity = normaliseQmlEnum<CorrelationPolarity>(parameters[u"correlationPolarity"_s].toInt());
 
         for(auto& protoNode : _protoNodes)
             protoNode._protoGraph = this;

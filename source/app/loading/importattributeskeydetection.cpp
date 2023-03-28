@@ -24,6 +24,8 @@
 
 #include "shared/utils/static_block.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 ImportAttributesKeyDetection::ImportAttributesKeyDetection() // NOLINT modernize-use-equals-default
 {
     connect(&_watcher, &QFutureWatcher<void>::started, this, &ImportAttributesKeyDetection::busyChanged);
@@ -59,7 +61,7 @@ void ImportAttributesKeyDetection::start()
             for(const auto& attributeName : attributeNames)
             {
                 // Don't match against any non-user defined attributes
-                if(!_document->attribute(attributeName).value(QStringLiteral("userDefined")).toBool())
+                if(!_document->attribute(attributeName).value(u"userDefined"_s).toBool())
                     continue;
 
                 auto values = _document->allAttributeValues(attributeName);
@@ -97,9 +99,9 @@ void ImportAttributesKeyDetection::start()
 
         if(!cancelled())
         {
-            _result.insert(QStringLiteral("attributeName"), bestAttributeName);
-            _result.insert(QStringLiteral("column"), static_cast<int>(bestColumnIndex));
-            _result.insert(QStringLiteral("percent"), bestPercent);
+            _result.insert(u"attributeName"_s, bestAttributeName);
+            _result.insert(u"column"_s, static_cast<int>(bestColumnIndex));
+            _result.insert(u"percent"_s, bestPercent);
         }
 
         emit resultChanged();

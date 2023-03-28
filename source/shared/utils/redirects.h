@@ -5,11 +5,13 @@
 
 #include <QString>
 
+using namespace Qt::Literals::StringLiterals;
+
 namespace u
 {
 static QString redirectLink(const char* shortName, QString linkText = {})
 {
-    auto baseUrl = u::getPref(QStringLiteral("servers/redirects")).toString();
+    auto baseUrl = u::getPref(u"servers/redirects"_s).toString();
 
     if(linkText.isEmpty())
     {

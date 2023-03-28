@@ -22,16 +22,18 @@
 #include "graph/graphmodel.h"
 #include "loading/saverfactory.h"
 
+using namespace Qt::Literals::StringLiterals;
+
 class GMLSaver : public ISaver
 {
 private:
     const QUrl& _url;
     IGraphModel* _graphModel;
-    static QString indent(int level) { return QStringLiteral("    ").repeated(level); }
+    static QString indent(int level) { return u"    "_s.repeated(level); }
 
 public:
-    static QString name() { return QStringLiteral("GML"); }
-    static QString extension() { return QStringLiteral("gml"); }
+    static QString name() { return u"GML"_s; }
+    static QString extension() { return u"gml"_s; }
     GMLSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };

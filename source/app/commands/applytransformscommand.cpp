@@ -27,6 +27,8 @@
 
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
                                                SelectionManager* selectionManager, Document* document,
                                                QStringList previousTransformations,
@@ -66,7 +68,7 @@ QString ApplyTransformsCommand::debugDescription() const
     auto text = description();
 
     for(const auto& transform : diff)
-        text.append(QStringLiteral("\n  %1").arg(transform));
+        text.append(u"\n  %1"_s.arg(transform));
 
     return text;
 }
@@ -79,7 +81,7 @@ void ApplyTransformsCommand::doTransform(const QStringList& transformations, con
     [this, newTransformations = cancelled() ? previousTransformations : transformations]
     {
         _document->setTransforms(newTransformations);
-    }, QStringLiteral("setTransforms"));
+    }, u"setTransforms"_s);
 }
 
 bool ApplyTransformsCommand::execute()

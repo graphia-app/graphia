@@ -44,6 +44,8 @@
 
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 CorrelationPluginInstance::CorrelationPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
@@ -419,9 +421,9 @@ EdgeList CorrelationPluginInstance::correlation(IParser& parser)
         auto continuousCorrelation = ContinuousCorrelation::create(_continuousCorrelationType, _correlationFilterType);
         return continuousCorrelation->edgeList(_continuousDataRows,
             {
-                {QStringLiteral("minimumThreshold"), _minimumThreshold},
-                {QStringLiteral("maximumK"), static_cast<uint>(_maximumK)},
-                {QStringLiteral("correlationPolarity"), static_cast<int>(_correlationPolarity)}
+                {u"minimumThreshold"_s, _minimumThreshold},
+                {u"maximumK"_s, static_cast<uint>(_maximumK)},
+                {u"correlationPolarity"_s, static_cast<int>(_correlationPolarity)}
             }, &parser, &parser);
     }
 
@@ -430,9 +432,9 @@ EdgeList CorrelationPluginInstance::correlation(IParser& parser)
         auto discreteCorrelation = DiscreteCorrelation::create(_discreteCorrelationType, _correlationFilterType);
         return discreteCorrelation->edgeList(_discreteDataRows,
             {
-                {QStringLiteral("minimumThreshold"), _minimumThreshold},
-                {QStringLiteral("maximumK"), static_cast<uint>(_maximumK)},
-                {QStringLiteral("treatAsBinary"), _treatAsBinary}
+                {u"minimumThreshold"_s, _minimumThreshold},
+                {u"maximumK"_s, static_cast<uint>(_maximumK)},
+                {u"treatAsBinary"_s, _treatAsBinary}
             }, &parser, &parser);
     }
     }
@@ -493,7 +495,7 @@ void CorrelationPluginInstance::makeDataColumnNamesUnique()
             for(size_t i = 1; i < indexes.size(); i++)
             {
                 auto clashingIndex = indexes.at(i);
-                auto newName = QStringLiteral("%1(%2)").arg(name).arg(i);
+                auto newName = u"%1(%2)"_s.arg(name).arg(i);
                 setDataColumnName(clashingIndex, newName);
             }
         }
@@ -622,10 +624,10 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 {
     const std::vector<QString> urlTypes =
     {
-        QStringLiteral("CorrelationCSV"),
-        QStringLiteral("CorrelationTSV"),
-        QStringLiteral("CorrelationSSV"),
-        QStringLiteral("CorrelationXLSX")
+        u"CorrelationCSV"_s,
+        u"CorrelationTSV"_s,
+        u"CorrelationSSV"_s,
+        u"CorrelationXLSX"_s
     };
 
     if(u::contains(urlTypes, urlTypeName))
@@ -636,64 +638,64 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 
 void CorrelationPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
-    if(name == QStringLiteral("minimumThreshold"))
+    if(name == u"minimumThreshold"_s)
         _minimumThreshold = value.toDouble();
-    else if(name == QStringLiteral("initialThreshold"))
+    else if(name == u"initialThreshold"_s)
         _initialThreshold = value.toDouble();
-    else if(name == QStringLiteral("maximumK"))
+    else if(name == u"maximumK"_s)
         _maximumK = static_cast<size_t>(value.toUInt());
-    else if(name == QStringLiteral("initialK"))
+    else if(name == u"initialK"_s)
         _initialK = static_cast<size_t>(value.toUInt());
-    else if(name == QStringLiteral("transpose"))
-        _transpose = (value == QStringLiteral("true"));
-    else if(name == QStringLiteral("correlationFilterType"))
+    else if(name == u"transpose"_s)
+        _transpose = (value == u"true"_s);
+    else if(name == u"correlationFilterType"_s)
         _correlationFilterType = qmlEnumFor<CorrelationFilterType>(value);
-    else if(name == QStringLiteral("correlationDataType"))
+    else if(name == u"correlationDataType"_s)
         _correlationDataType = qmlEnumFor<CorrelationDataType>(value);
-    else if(name == QStringLiteral("continuousCorrelationType"))
+    else if(name == u"continuousCorrelationType"_s)
         _continuousCorrelationType = qmlEnumFor<CorrelationType>(value);
-    else if(name == QStringLiteral("discreteCorrelationType"))
+    else if(name == u"discreteCorrelationType"_s)
         _discreteCorrelationType = qmlEnumFor<CorrelationType>(value);
-    else if(name == QStringLiteral("correlationPolarity"))
+    else if(name == u"correlationPolarity"_s)
         _correlationPolarity = qmlEnumFor<CorrelationPolarity>(value);
-    else if(name == QStringLiteral("scaling"))
+    else if(name == u"scaling"_s)
         _scalingType = qmlEnumFor<ScalingType>(value);
-    else if(name == QStringLiteral("normalise"))
+    else if(name == u"normalise"_s)
         _normaliseType = qmlEnumFor<NormaliseType>(value);
-    else if(name == QStringLiteral("missingDataType"))
+    else if(name == u"missingDataType"_s)
         _missingDataType = qmlEnumFor<MissingDataType>(value);
-    else if(name == QStringLiteral("missingDataValue"))
+    else if(name == u"missingDataValue"_s)
         _missingDataReplacementValue = value.toDouble();
-    else if(name == QStringLiteral("clippingType"))
+    else if(name == u"clippingType"_s)
         _clippingType = qmlEnumFor<ClippingType>(value);
-    else if(name == QStringLiteral("clippingValue"))
+    else if(name == u"clippingValue"_s)
         _clippingValue = value.toDouble();
-    else if(name == QStringLiteral("treatAsBinary"))
+    else if(name == u"treatAsBinary"_s)
         _treatAsBinary = value.toBool();
-    else if(name == QStringLiteral("dataRect"))
+    else if(name == u"dataRect"_s)
     {
         if(value.canConvert<QVariantMap>())
         {
             // This happens when the parameters are specified in headless mode
             auto m = value.value<QVariantMap>();
 
-            if(m.contains(QStringLiteral("x")))         _dataRect.setX(m.value(QStringLiteral("x")).toInt());
-            if(m.contains(QStringLiteral("left")))      _dataRect.setLeft(m.value(QStringLiteral("left")).toInt());
-            if(m.contains(QStringLiteral("right")))     _dataRect.setRight(m.value(QStringLiteral("right")).toInt());
-            if(m.contains(QStringLiteral("y")))         _dataRect.setY(m.value(QStringLiteral("y")).toInt());
-            if(m.contains(QStringLiteral("top")))       _dataRect.setTop(m.value(QStringLiteral("top")).toInt());
-            if(m.contains(QStringLiteral("bottom")))    _dataRect.setBottom(m.value(QStringLiteral("bottom")).toInt());
-            if(m.contains(QStringLiteral("width")))     _dataRect.setWidth(m.value(QStringLiteral("width")).toInt());
-            if(m.contains(QStringLiteral("height")))    _dataRect.setHeight(m.value(QStringLiteral("height")).toInt());
+            if(m.contains(u"x"_s))         _dataRect.setX(m.value(u"x"_s).toInt());
+            if(m.contains(u"left"_s))      _dataRect.setLeft(m.value(u"left"_s).toInt());
+            if(m.contains(u"right"_s))     _dataRect.setRight(m.value(u"right"_s).toInt());
+            if(m.contains(u"y"_s))         _dataRect.setY(m.value(u"y"_s).toInt());
+            if(m.contains(u"top"_s))       _dataRect.setTop(m.value(u"top"_s).toInt());
+            if(m.contains(u"bottom"_s))    _dataRect.setBottom(m.value(u"bottom"_s).toInt());
+            if(m.contains(u"width"_s))     _dataRect.setWidth(m.value(u"width"_s).toInt());
+            if(m.contains(u"height"_s))    _dataRect.setHeight(m.value(u"height"_s).toInt());
         }
         else
             _dataRect = value.toRect();
     }
-    else if(name == QStringLiteral("additionalTransforms"))
+    else if(name == u"additionalTransforms"_s)
         _additionalTransforms = value.toStringList();
-    else if(name == QStringLiteral("additionalVisualisations"))
+    else if(name == u"additionalVisualisations"_s)
         _additionalVisualisations = value.toStringList();
-    else if(name == QStringLiteral("data") && value.canConvert<std::shared_ptr<TabularData>>())
+    else if(name == u"data"_s && value.canConvert<std::shared_ptr<TabularData>>())
         _tabularData = std::move(*value.value<std::shared_ptr<TabularData>>());
     else
         qDebug() << "CorrelationPluginInstance::applyParameter unknown parameter" << name << value;
@@ -1314,10 +1316,10 @@ QString CorrelationPluginInstance::log() const
 
 CorrelationPlugin::CorrelationPlugin()
 {
-    registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
-    registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
-    registerUrlType(QStringLiteral("CorrelationSSV"), QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
-    registerUrlType(QStringLiteral("CorrelationXLSX"), QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
+    registerUrlType(u"CorrelationCSV"_s, QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
+    registerUrlType(u"CorrelationTSV"_s, QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
+    registerUrlType(u"CorrelationSSV"_s, QObject::tr("Correlation SSV File"), QObject::tr("Correlation SSV Files"), {"ssv"});
+    registerUrlType(u"CorrelationXLSX"_s, QObject::tr("Correlation Excel File"), QObject::tr("Correlation Excel Files"), {"xlsx"});
 
     qmlRegisterType<CorrelationPluginInstance>("app.graphia", 1, 0, "CorrelationPluginInstance");
     qmlRegisterType<CorrelationPlotItem>("app.graphia", 1, 0, "CorrelationPlot");
@@ -1331,10 +1333,10 @@ QVariantMap CorrelationPlugin::correlationInfoFor(int correlationType) const
     {
         QVariantMap m;
 
-        m.insert(QStringLiteral("name"), correlation->name());
-        m.insert(QStringLiteral("description"), correlation->description());
-        m.insert(QStringLiteral("attributeName"), correlation->attributeName());
-        m.insert(QStringLiteral("attributeDescription"), correlation->attributeDescription());
+        m.insert(u"name"_s, correlation->name());
+        m.insert(u"description"_s, correlation->description());
+        m.insert(u"attributeName"_s, correlation->attributeName());
+        m.insert(u"attributeDescription"_s, correlation->attributeDescription());
 
         return m;
     };

@@ -29,6 +29,8 @@
 #include <QString>
 #include <QTextStream>
 
+using namespace Qt::Literals::StringLiterals;
+
 // Find an attribute that looks like an edge weight
 static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
 {
@@ -40,8 +42,8 @@ static QString findEdgeWeightAttributeName(const IGraphModel* graphModel)
             attribute.valueType() & ValueType::Numerical;
     });
 
-    auto isWeight = [](const QString& attributeName) { return attributeName.contains(QStringLiteral("weight"), Qt::CaseInsensitive); };
-    auto isValue = [](const QString& attributeName) { return attributeName.contains(QStringLiteral("value"), Qt::CaseInsensitive); };
+    auto isWeight = [](const QString& attributeName) { return attributeName.contains(u"weight"_s, Qt::CaseInsensitive); };
+    auto isValue = [](const QString& attributeName) { return attributeName.contains(u"value"_s, Qt::CaseInsensitive); };
 
     edgeAttributeNames.erase(std::remove_if(edgeAttributeNames.begin(), edgeAttributeNames.end(),
     [&isWeight, &isValue](const auto& attributeName)
@@ -86,7 +88,7 @@ bool PairwiseSaver::save()
 
     auto escape = [](QString string)
     {
-        string.replace(QStringLiteral(R"(")"), QStringLiteral(R"(\")"));
+        string.replace(u"\""_s, u"\\\""_s);
         return string;
     };
 
@@ -108,11 +110,11 @@ bool PairwiseSaver::save()
         if(!edgeWeightAttributeName.isEmpty())
         {
             const auto* attribute = _graphModel->attributeByName(edgeWeightAttributeName);
-            stream << QStringLiteral(R"("%1" "%2" %3)""\n").arg(sourceName, targetName)
+            stream << u"\"%1\" \"%2\" %3\n"_s.arg(sourceName, targetName)
                 .arg(attribute->floatValueOf(edgeId));
         }
         else
-            stream << QStringLiteral(R"("%1" "%2")""\n").arg(sourceName, targetName);
+            stream << u"\"%1\" \"%2\"\n"_s.arg(sourceName, targetName);
 
         runningCount++;
         setProgress(static_cast<int>(runningCount * 100 / edgeCount));

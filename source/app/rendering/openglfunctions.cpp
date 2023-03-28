@@ -23,6 +23,8 @@
 #include <QSurfaceFormat>
 #include <QOffscreenSurface>
 
+using namespace Qt::Literals::StringLiterals;
+
 void OpenGLFunctions::resolveOpenGLFunctions()
 {
     const auto* context = QOpenGLContext::currentContext();
@@ -141,7 +143,7 @@ QString OpenGLFunctions::info()
         extensions.append(" ");
     }
 
-    return QStringLiteral("%1\n%2\n%3\n%4\n%5")
+    return u"%1\n%2\n%3\n%4\n%5"_s
         .arg(f.getString(GL_VENDOR),
              f.getString(GL_RENDERER),
              f.getString(GL_VERSION),

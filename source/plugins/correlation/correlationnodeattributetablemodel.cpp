@@ -22,6 +22,8 @@
 
 #include <algorithm>
 
+using namespace Qt::Literals::StringLiterals;
+
 QStringList CorrelationNodeAttributeTableModel::columnNames() const
 {
     auto list = NodeAttributeTableModel::columnNames();
@@ -42,7 +44,7 @@ void CorrelationNodeAttributeTableModel::addDataColumnNames(const std::vector<QS
     std::transform(_dataColumnNames.begin(), _dataColumnNames.end(), _dataColumnNames.begin(),
     [](const auto& columnName)
     {
-        return QStringLiteral("Data Value › %1").arg(columnName);
+        return u"Data Value › %1"_s.arg(columnName);
     });
 
     for(size_t i = 0; i < _dataColumnNames.size(); i++)

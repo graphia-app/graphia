@@ -26,9 +26,11 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 static Alert conditionalAttributeTransformConfigIsValid(const GraphTransformConfig& config)
 {
-    auto newAttributeName = config.parameterByName(QStringLiteral("Name"))->valueAsString();
+    auto newAttributeName = config.parameterByName(u"Name"_s)->valueAsString();
     if(!GraphModel::attributeNameIsValid(newAttributeName))
         return {AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName)};
 
@@ -46,7 +48,7 @@ void ConditionalAttributeTransform::apply(TransformedGraph& target)
         return;
     }
 
-    auto newAttributeName = config().parameterByName(QStringLiteral("Name"))->valueAsString();
+    auto newAttributeName = config().parameterByName(u"Name"_s)->valueAsString();
 
     auto synthesise =
     [&](const auto& elementIds)

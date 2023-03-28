@@ -23,14 +23,16 @@
 
 #include <QString>
 
+using namespace Qt::Literals::StringLiterals;
+
 class PairwiseSaver : public ISaver
 {
 private:
     const QUrl& _url;
     IGraphModel* _graphModel;
 public:
-    static QString name() { return QStringLiteral("Pairwise Text"); }
-    static QString extension() { return QStringLiteral("txt"); }
+    static QString name() { return u"Pairwise Text"_s; }
+    static QString extension() { return u"txt"_s; }
     PairwiseSaver(const QUrl& url, IGraphModel* graphModel) : _url(url), _graphModel(graphModel) {}
     bool save() override;
 };

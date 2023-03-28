@@ -24,9 +24,11 @@
 #include <map>
 #include <queue>
 
+using namespace Qt::Literals::StringLiterals;
+
 void EccentricityTransform::apply(TransformedGraph& target)
 {
-    setPhase(QStringLiteral("Eccentricity"));
+    setPhase(u"Eccentricity"_s);
     calculateDistances(target);
 }
 

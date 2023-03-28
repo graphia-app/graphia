@@ -44,6 +44,8 @@
 #include <limits>
 #include <span>
 
+using namespace Qt::Literals::StringLiterals;
+
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName,
                                              TabularData& tabularData, QRect dataRect) :
     _plugin(plugin), _urlTypeName(urlTypeName),
@@ -473,16 +475,16 @@ double CorrelationFileParser::epsilonFor(const std::vector<double>& data)
 template<typename ParseFn>
 static bool parseUsing(const QString& fileType, ParseFn&& parseFn)
 {
-    if(fileType == QStringLiteral("CorrelationCSV"))
+    if(fileType == u"CorrelationCSV"_s)
         return parseFn(CsvFileParser());
 
-    if(fileType == QStringLiteral("CorrelationTSV"))
+    if(fileType == u"CorrelationTSV"_s)
         return parseFn(TsvFileParser());
 
-    if(fileType == QStringLiteral("CorrelationSSV"))
+    if(fileType == u"CorrelationSSV"_s)
         return parseFn(SsvFileParser());
 
-    if(fileType == QStringLiteral("CorrelationXLSX"))
+    if(fileType == u"CorrelationXLSX"_s)
         return parseFn(XlsxTabularDataParser());
 
     return false;
@@ -633,18 +635,18 @@ QVariantMap CorrelationTabularDataParser::dataRect() const
 {
     QVariantMap m;
 
-    m.insert(QStringLiteral("x"), _dataRect.x());
-    m.insert(QStringLiteral("y"), _dataRect.y());
-    m.insert(QStringLiteral("width"), _dataRect.width());
-    m.insert(QStringLiteral("height"), _dataRect.height());
-    m.insert(QStringLiteral("asQRect"), _dataRect);
+    m.insert(u"x"_s, _dataRect.x());
+    m.insert(u"y"_s, _dataRect.y());
+    m.insert(u"width"_s, _dataRect.width());
+    m.insert(u"height"_s, _dataRect.height());
+    m.insert(u"asQRect"_s, _dataRect);
 
-    m.insert(QStringLiteral("hasMissingValues"), _hasMissingValues);
-    m.insert(QStringLiteral("hasDiscreteValues"), _hasDiscreteValues);
-    m.insert(QStringLiteral("appearsToBeContinuous"), _appearsToBeContinuous);
+    m.insert(u"hasMissingValues"_s, _hasMissingValues);
+    m.insert(u"hasDiscreteValues"_s, _hasDiscreteValues);
+    m.insert(u"appearsToBeContinuous"_s, _appearsToBeContinuous);
 
-    m.insert(QStringLiteral("minValue"), _numericalMinMax.first);
-    m.insert(QStringLiteral("maxValue"), _numericalMinMax.second);
+    m.insert(u"minValue"_s, _numericalMinMax.first);
+    m.insert(u"maxValue"_s, _numericalMinMax.second);
 
     return m;
 }
@@ -835,12 +837,12 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
     if(_dataRect.isEmpty())
         return {};
 
-    auto missingDataType = normaliseQmlEnum<MissingDataType>(parameters[QStringLiteral("missingDataType")].toInt());
-    auto replacementValue = parameters[QStringLiteral("missingDataValue")].toDouble();
-    auto scalingType = normaliseQmlEnum<ScalingType>(parameters[QStringLiteral("scaling")].toInt());
-    auto normaliseType = normaliseQmlEnum<NormaliseType>(parameters[QStringLiteral("normalise")].toInt());
-    auto clippingType = normaliseQmlEnum<ClippingType>(parameters[QStringLiteral("clippingType")].toInt());
-    auto clippingValue = parameters[QStringLiteral("clippingValue")].toDouble();
+    auto missingDataType = normaliseQmlEnum<MissingDataType>(parameters[u"missingDataType"_s].toInt());
+    auto replacementValue = parameters[u"missingDataValue"_s].toDouble();
+    auto scalingType = normaliseQmlEnum<ScalingType>(parameters[u"scaling"_s].toInt());
+    auto normaliseType = normaliseQmlEnum<NormaliseType>(parameters[u"normalise"_s].toInt());
+    auto clippingType = normaliseQmlEnum<ClippingType>(parameters[u"clippingType"_s].toInt());
+    auto clippingValue = parameters[u"clippingValue"_s].toDouble();
 
     ContinuousDataVectors dataRows;
     std::vector<double> rowData;
@@ -867,7 +869,7 @@ ContinuousDataVectors CorrelationTabularDataParser::sampledContinuousDataRows(
 
                 if(!success)
                 {
-                    qDebug() << QStringLiteral("WARNING: non-numeric value at (%1, %2): %3")
+                    qDebug() << u"WARNING: non-numeric value at (%1, %2): %3"_s
                         .arg(columnIndex).arg(rowIndex).arg(value);
                 }
             }
@@ -963,11 +965,11 @@ void CorrelationTabularDataParser::estimateGraphSize(const QVariantMap& paramete
     {
         Q_ASSERT(!parameters.isEmpty());
 
-        auto maximumK = static_cast<size_t>(parameters[QStringLiteral("maximumK")].toUInt());
-        auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(parameters[QStringLiteral("correlationFilterType")].toInt());
-        auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(parameters[QStringLiteral("correlationDataType")].toInt());
-        auto continuousCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[QStringLiteral("continuousCorrelationType")].toInt());
-        auto discreteCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[QStringLiteral("discreteCorrelationType")].toInt());
+        auto maximumK = static_cast<size_t>(parameters[u"maximumK"_s].toUInt());
+        auto correlationFilterType = normaliseQmlEnum<CorrelationFilterType>(parameters[u"correlationFilterType"_s].toInt());
+        auto correlationDataType = normaliseQmlEnum<CorrelationDataType>(parameters[u"correlationDataType"_s].toInt());
+        auto continuousCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[u"continuousCorrelationType"_s].toInt());
+        auto discreteCorrelationType = normaliseQmlEnum<CorrelationType>(parameters[u"discreteCorrelationType"_s].toInt());
 
         if(_dataPtr->numRows() == 0)
             return QVariantMap();

@@ -32,6 +32,8 @@
 
 #include <map>
 
+using namespace Qt::Literals::StringLiterals;
+
 QmlTabularDataHeaderModel::QmlTabularDataHeaderModel(const QmlTabularDataParser* parser,
     ValueType valueTypes, const QStringList& skip) :
     _parser(parser)
@@ -171,12 +173,12 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
 
         std::map<QString, std::function<bool()>> parsers =
         {
-            {QStringLiteral("csv"),     [&tryToParseUsing]{ return tryToParseUsing(CsvFileParser()); }},
-            {QStringLiteral("tsv"),     [&tryToParseUsing]{ return tryToParseUsing(TsvFileParser()); }},
-            {QStringLiteral("ssv"),     [&tryToParseUsing]{ return tryToParseUsing(SsvFileParser()); }},
-            {QStringLiteral("xlsx"),    [&tryToParseUsing]{ return tryToParseUsing(XlsxTabularDataParser()); }},
-            {QStringLiteral("mat"),     [&tryToParseUsing]{ return tryToParseUsing(MatLabFileParser()); }},
-            {QStringLiteral("txt"),     [&tryToParseUsing]{ return tryToParseUsing(TxtFileParser()); }}
+            {u"csv"_s,     [&tryToParseUsing]{ return tryToParseUsing(CsvFileParser()); }},
+            {u"tsv"_s,     [&tryToParseUsing]{ return tryToParseUsing(TsvFileParser()); }},
+            {u"ssv"_s,     [&tryToParseUsing]{ return tryToParseUsing(SsvFileParser()); }},
+            {u"xlsx"_s,    [&tryToParseUsing]{ return tryToParseUsing(XlsxTabularDataParser()); }},
+            {u"mat"_s,     [&tryToParseUsing]{ return tryToParseUsing(MatLabFileParser()); }},
+            {u"txt"_s,     [&tryToParseUsing]{ return tryToParseUsing(TxtFileParser()); }}
         };
 
         auto extension = QFileInfo(fileUrl.toLocalFile()).suffix();

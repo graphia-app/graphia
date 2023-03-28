@@ -28,6 +28,8 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void KNNTransform::apply(TransformedGraph& target)
 {
     setPhase(QObject::tr("k-NN"));
@@ -40,8 +42,8 @@ void KNNTransform::apply(TransformedGraph& target)
 
     auto attribute = _graphModel->attributeValueByName(config().attributeNames().front());
 
-    auto k = static_cast<size_t>(std::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
-    const bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
+    auto k = static_cast<size_t>(std::get<int>(config().parameterByName(u"k"_s)->_value));
+    const bool ascending = config().parameterHasValue(u"Rank Order"_s, u"Ascending"_s);
 
     struct KnnRank
     {

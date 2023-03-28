@@ -28,9 +28,11 @@
 
 #include <QObject>
 
+using namespace Qt::Literals::StringLiterals;
+
 void SpanningTreeTransform::apply(TransformedGraph& target)
 {
-    const bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
+    const bool dfs = config().parameterHasValue(u"Traversal Order"_s, u"Depth First"_s);
 
     setPhase(QObject::tr("Spanning Tree"));
     setProgress(-1);
