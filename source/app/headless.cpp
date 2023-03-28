@@ -272,3 +272,14 @@ void Headless::run()
 
     processNext();
 }
+
+void Headless::cancel()
+{
+    if(_->_document != nullptr)
+    {
+        // The Document destructor cancels and waits for any in progress activity
+        _->_document->disconnect();
+        _->_document->deleteLater();
+        _->_document = nullptr;
+    }
+}

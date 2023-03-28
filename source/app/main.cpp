@@ -64,6 +64,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/console.h"
 #include "shared/utils/consolecapture.h"
+#include "shared/utils/signalhandling.h"
 #include "shared/ui/visualisations/defaultgradients.h"
 #include "shared/ui/visualisations/defaultpalettes.h"
 
@@ -297,12 +298,16 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     if(commandLineParser.isSet(QStringLiteral("parameters")))
     {
+        installSignalHandlers();
+
         auto parametersFilename = commandLineParser.value(QStringLiteral("parameters"));
         Headless headless(commandLineParser.positionalArguments(), parametersFilename);
 
         QTimer::singleShot(0, &headless, &Headless::run);
         QObject::connect(&headless, &Headless::done,
             QCoreApplication::instance(), &QCoreApplication::quit);
+        QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
+            &headless, &Headless::cancel);
 
         return QCoreApplication::exec();
     }

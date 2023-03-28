@@ -41,6 +41,7 @@ public:
 
 public slots:
     void run();
+    void cancel();
 
 signals:
     void done();
