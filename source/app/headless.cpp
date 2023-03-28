@@ -136,8 +136,15 @@ void Headless::processNext()
         std::cout.flush();
     });
 
-    connect(_->_document, &Document::loadComplete, [this]
+    connect(_->_document, &Document::loadComplete, [this](const QUrl& fileUrl, bool success)
     {
+        if(!success)
+        {
+            std::cerr << "Failed to load " << filenameToStdString(fileUrl.toLocalFile()) << ".\n";
+            emit done();
+            return;
+        }
+
         const auto& source = _->_sourceFilenames.at(0);
         QFileInfo sfi(source);
         QFileInfo dfi(_->_destination);
