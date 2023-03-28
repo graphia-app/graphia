@@ -114,6 +114,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/scope_exit.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/signalhandling.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/source_location.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.h
@@ -170,6 +171,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/showinfolder.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/signalhandling.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/static_block.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.cpp
