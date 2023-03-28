@@ -23,21 +23,24 @@
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #include <io.h>
+
+#include <iostream>
 #else
 #include <unistd.h>
 #include <sys/ioctl.h>
 #endif
 
+#ifdef Q_OS_WIN
+static bool runningInConsole = false;
+#endif
+
 bool isRunningInConsole()
 {
 #ifdef Q_OS_WIN
-    if(_isatty(_fileno(stderr)) != 0)
+    return runningInConsole;
 #else
-    if(isatty(fileno(stderr)) != 0)
+    return isatty(fileno(stderr)) != 0;
 #endif
-        return true;
-
-    return false;
 }
 
 DWORD enableConsoleMode()
@@ -45,16 +48,32 @@ DWORD enableConsoleMode()
     DWORD originalMode = 0;
 
 #ifdef Q_OS_WIN
-    if(!isRunningInConsole())
-        return originalMode;
-
-    auto hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    if(hStdout != INVALID_HANDLE_VALUE)
+    if(AttachConsole(ATTACH_PARENT_PROCESS))
     {
-        GetConsoleMode(hStdout, &originalMode) && SetConsoleMode(hStdout,
-            originalMode|
-            ENABLE_VIRTUAL_TERMINAL_PROCESSING|
-            DISABLE_NEWLINE_AUTO_RETURN);
+        runningInConsole = true;
+
+        STARTUPINFO startupInfo = {};
+        GetStartupInfo(&startupInfo);
+
+        if((startupInfo.dwFlags & STARTF_USESTDHANDLES) == 0)
+        {
+            FILE* stdoutStream; freopen_s(&stdoutStream, "CONOUT$", "w", stdout);
+            FILE* stderrStream; freopen_s(&stderrStream, "CONOUT$", "w", stderr);
+            FILE* stdinStream;  freopen_s(&stdinStream,  "CONIN$",  "r", stdin);
+
+            std::cout.clear(); std::wcout.clear();
+            std::cerr.clear(); std::wcerr.clear();
+            std::cin.clear();  std::wcin.clear();
+        }
+
+        auto hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+        if(hStdout != INVALID_HANDLE_VALUE)
+        {
+            GetConsoleMode(hStdout, &originalMode) && SetConsoleMode(hStdout,
+                originalMode|
+                ENABLE_VIRTUAL_TERMINAL_PROCESSING|
+                DISABLE_NEWLINE_AUTO_RETURN);
+        }
     }
 #endif
 
@@ -70,6 +89,8 @@ void restoreConsoleMode(DWORD mode)
     auto hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     if(hStdout != INVALID_HANDLE_VALUE)
         SetConsoleMode(hStdout, mode);
+
+    FreeConsole();
 #else
     Q_UNUSED(mode);
 #endif
