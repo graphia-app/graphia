@@ -178,6 +178,7 @@ void Headless::processNext()
 
     connect(_->_document, &Document::saveComplete, this, [this](bool success, const QUrl& fileUrl, const QString&)
     {
+        _->_document->disconnect();
         _->_document->deleteLater();
         _->_document = nullptr;
 
