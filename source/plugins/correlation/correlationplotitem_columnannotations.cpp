@@ -402,28 +402,26 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
 
 void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRect, const QPoint& pos)
 {
-    const auto& columnAnnotations = _pluginInstance->columnAnnotations();
+    std::vector<const ColumnAnnotation*> columnAnnotations;
+    std::transform(_pluginInstance->columnAnnotations().begin(), _pluginInstance->columnAnnotations().end(),
+        std::back_inserter(columnAnnotations), [](const auto& v) { return &v; });
+
+    if(!_columnAnnotationSelectionModeEnabled)
+    {
+        // Remove any annotations not currently visible, so that looking up by index works
+        columnAnnotations.erase(std::remove_if(columnAnnotations.begin(), columnAnnotations.end(),
+        [this](const auto* v)
+        {
+            return !u::contains(_visibleColumnAnnotationNames, v->name());
+        }), columnAnnotations.end());
+    }
+
     auto index = (static_cast<size_t>(pos.y()) * numVisibleColumnAnnotations()) /
         static_cast<size_t>(axisRect->height());
     if(index >= columnAnnotations.size())
         return;
 
-    std::vector<QString> annotationNames;
-    std::transform(columnAnnotations.begin(), columnAnnotations.end(),
-        std::back_inserter(annotationNames), [](const auto& v) { return v.name(); });
-
-    if(!_columnAnnotationSelectionModeEnabled)
-    {
-        // Remove any annotations not currently visible, so
-        // that looking up by index works
-        annotationNames.erase(std::remove_if(annotationNames.begin(), annotationNames.end(),
-        [this](const auto& v)
-        {
-            return !u::contains(_visibleColumnAnnotationNames, v);
-        }), annotationNames.end());
-    }
-
-    const auto& name = annotationNames.at(index);
+    const auto& name = columnAnnotations.at(index)->name();
 
     if(_columnAnnotationSelectionModeEnabled && pos.x() < 0)
     {
