@@ -930,7 +930,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
 
     auto point = pos - axisRect->topLeft();
 
-    if(point.y() >= axisRect->height())
+    if(point.y() >= axisRect->height() && _showColumnNames)
     {
         // Click is below either/both axes
         if(point.x() < 0)
