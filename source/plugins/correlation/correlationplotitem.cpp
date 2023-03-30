@@ -1005,6 +1005,9 @@ void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
 
     _customPlot.plotLayout()->setMargins(QMargins(0, 0, _rightPadding, 0));
 
+    // Hide tooltips after rebuild
+    _hoverPoint = {-1.0, -1.0};
+
     if(_debug)
         qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
 
