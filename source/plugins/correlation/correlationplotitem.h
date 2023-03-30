@@ -427,6 +427,7 @@ private:
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 
+    QPoint columnAnnotationPositionForPixel(const QCPAxisRect* axisRect, const QPointF& position);
     QCPAbstractPlottable* abstractPlottableUnderCursor(double& keyCoord);
     bool discreteTooltip(const QCPAxisRect* axisRect,
         const QCPAbstractPlottable* plottable, double xCoord);

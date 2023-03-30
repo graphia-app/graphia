@@ -367,6 +367,23 @@ bool CorrelationPlotItem::axisRectIsColumnAnnotations(const QCPAxisRect* axisRec
     return numPlottables == numColumnAnnotations;
 }
 
+QPoint CorrelationPlotItem::columnAnnotationPositionForPixel(const QCPAxisRect* axisRect, const QPointF& position)
+{
+    auto* bottomAxis = axisRect->axis(QCPAxis::atBottom);
+    const auto& bottomRange = bottomAxis->range();
+    auto xf = bottomRange.lower + 0.5 +
+        (static_cast<double>(position.x() * bottomRange.size()) / axisRect->width());
+
+    auto x = static_cast<int>(xf);
+    auto y = static_cast<int>((position.y() * static_cast<double>(numVisibleColumnAnnotations())) /
+        static_cast<double>(axisRect->height()));
+
+    if(y >= static_cast<int>(numVisibleColumnAnnotations()))
+        y = -1;
+
+    return {x, y};
+}
+
 bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
 {
     if(!axisRectIsColumnAnnotations(axisRect))
@@ -376,21 +393,12 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
         return false;
 
     auto rectPoint = _hoverPoint - axisRect->topLeft();
+    auto p = columnAnnotationPositionForPixel(axisRect, rectPoint);
 
-    auto* bottomAxis = axisRect->axis(QCPAxis::atBottom);
-    const auto& bottomRange = bottomAxis->range();
-    auto bottomSize = bottomRange.size();
-    auto xf = bottomRange.lower + 0.5 +
-        (static_cast<double>(rectPoint.x() * bottomSize) / axisRect->width());
-
-    auto x = static_cast<int>(xf);
-    const int y = static_cast<int>((rectPoint.y() * static_cast<double>(numVisibleColumnAnnotations())) /
-        static_cast<double>(axisRect->height()));
-
-    if(x < 0 || y < 0)
+    if(p.x() < 0 || p.y() < 0)
         return false;
 
-    auto text = columnAnnotationValueAt(static_cast<size_t>(x), static_cast<size_t>(y));
+    auto text = columnAnnotationValueAt(static_cast<size_t>(p.x()), static_cast<size_t>(p.y()));
     if(text.isEmpty())
         return false;
 
@@ -416,12 +424,12 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
         }), columnAnnotations.end());
     }
 
-    auto index = (static_cast<size_t>(pos.y()) * numVisibleColumnAnnotations()) /
-        static_cast<size_t>(axisRect->height());
-    if(index >= columnAnnotations.size())
+    auto p = columnAnnotationPositionForPixel(axisRect, pos.toPointF());
+
+    if(p.y() < 0)
         return;
 
-    const auto& name = columnAnnotations.at(index)->name();
+    const auto& name = columnAnnotations.at(p.y())->name();
 
     if(_columnAnnotationSelectionModeEnabled && pos.x() < 0)
     {
