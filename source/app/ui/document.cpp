@@ -650,12 +650,16 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
             _bookmarks = completedLoader->bookmarks();
             setLog(completedLoader->log());
 
-            _graphModel->buildTransforms(_graphTransforms, completedLoader);
+            // Don't waste time building transforms if we're not displaying the graph
+            if(_graphQuickItem != nullptr)
+            {
+                _graphModel->buildTransforms(_graphTransforms, completedLoader);
 
-            if(completedParser->cancelled())
-                return;
+                if(completedParser->cancelled())
+                    return;
 
-            _graphModel->buildVisualisations(_visualisations);
+                _graphModel->buildVisualisations(_visualisations);
+            }
 
             //FIXME make use of this when we can switch algorithms = completedLoader->layoutName();
             _loadedLayoutSettings = completedLoader->layoutSettings();
