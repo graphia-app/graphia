@@ -151,7 +151,7 @@ class Application : public QObject, public IApplication
 public:
     static constexpr const char* NativeFileType = "Native";
 
-    explicit Application(QObject *parent = nullptr);
+    explicit Application(QObject *parent = nullptr, bool enableUpdateCheck = true);
     ~Application() override;
 
     IPlugin* pluginForName(const QString& pluginName) const;

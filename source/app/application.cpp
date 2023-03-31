@@ -114,7 +114,7 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
     return fileTypes;
 }
 
-Application::Application(QObject *parent) :
+Application::Application(QObject *parent, bool enableUpdateCheck) :
     QObject(parent),
     _urlTypeDetails(&_loadedPlugins),
     _pluginDetails(&_loadedPlugins)
@@ -135,7 +135,9 @@ Application::Application(QObject *parent) :
     registerSaverFactory(std::make_unique<PairwiseSaverFactory>());
     registerSaverFactory(std::make_unique<JSONGraphSaverFactory>());
 
-    _updater.enableAutoBackgroundCheck();
+    if(enableUpdateCheck)
+        _updater.enableAutoBackgroundCheck();
+
     loadPlugins();
 }
 

@@ -52,6 +52,7 @@ struct HeadlessState
     bool _displayProgress = false;
 
     HeadlessState(const QStringList& sourceFilenames, const QString& parametersFilename) :
+        _application(nullptr, false),
         _sourceFilenames(sourceFilenames), _parametersFilename(parametersFilename),
         _displayProgress(isRunningInConsole())
     {}
