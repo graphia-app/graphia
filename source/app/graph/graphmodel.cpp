@@ -630,6 +630,22 @@ std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndexOrLater(in
     return attributeNames;
 }
 
+ValueType GraphModel::valueTypeOfTransformAttributeName(const QString& attributeName) const
+{
+    for(auto& t : _->_graphTransformFactories)
+    {
+        const auto& defaultVisualisations = _->_graphTransformFactories.at(t.first)->defaultVisualisations();
+
+        for(const auto& v : defaultVisualisations)
+        {
+            if(v._attributeName == attributeName)
+                return v._attributeValueType;
+        }
+    }
+
+    return ValueType::Unknown;
+}
+
 bool GraphModel::opIsUnary(const QString& op)
 {
     return GraphTransformConfigParser::opIsUnary(op);

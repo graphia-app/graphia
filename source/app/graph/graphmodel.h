@@ -140,6 +140,7 @@ public:
     const TransformInfo& transformInfoAtIndex(int index) const;
     std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
     std::vector<QString> createdAttributeNamesAtTransformIndexOrLater(int firstIndex) const;
+    ValueType valueTypeOfTransformAttributeName(const QString& attributeName) const;
 
     static bool opIsUnary(const QString& op);
 
