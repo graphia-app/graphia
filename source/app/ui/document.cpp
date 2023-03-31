@@ -710,7 +710,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 sortedTransforms(_pluginInstance->defaultTransforms()));
             _visualisations = _pluginInstance->defaultVisualisations();
 
-            _graphModel->buildTransforms(_graphTransforms, completedParser);
+            if(_graphQuickItem != nullptr)
+                _graphModel->buildTransforms(_graphTransforms, completedParser);
 
             for(auto& visualisation : _visualisations)
             {
@@ -723,7 +724,10 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
                 // If the visualisation was not supplied with parameters, apply the defaults
                 const auto& attributeName = p.result()._attributeName;
-                auto valueType = _graphModel->attributeValueByName(attributeName).valueType();
+                ValueType valueType = _graphModel->attributeExists(attributeName) ?
+                    _graphModel->attributeValueByName(attributeName).valueType() :
+                    _graphModel->valueTypeOfTransformAttributeName(attributeName);
+
                 const auto& channelName = p.result()._channelName;
 
                 auto defaultParameters = _graphModel->visualisationDefaultParameters(valueType, channelName);
@@ -741,7 +745,8 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
                 }
             }
 
-            _graphModel->buildVisualisations(_visualisations);
+            if(_graphQuickItem != nullptr)
+                _graphModel->buildVisualisations(_visualisations);
         });
     }
 
