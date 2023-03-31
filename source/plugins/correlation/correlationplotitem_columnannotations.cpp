@@ -429,7 +429,7 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
     if(p.y() < 0)
         return;
 
-    const auto& name = columnAnnotations.at(p.y())->name();
+    const auto& name = columnAnnotations.at(static_cast<size_t>(p.y()))->name();
 
     if(_columnAnnotationSelectionModeEnabled && pos.x() < 0)
     {
