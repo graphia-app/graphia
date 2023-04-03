@@ -223,6 +223,7 @@ void TransformedGraph::rebuild()
             // Revert to indeterminate in case any more long running work occurs subsequently
             transform->setProgress(-1);
             transform->clearPhase();
+            transform->setProgressable(nullptr);
         }
 
         if(_cancelled)
