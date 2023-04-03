@@ -166,6 +166,12 @@ void NodeAttributeTableModel::onUpdateComplete()
     //FIXME is this actually necessary, in addition to
     // the emit in NodeAttributeTableModel::updateColumnNames()?
     emit columnNamesChanged();
+
+    //FIXME indicating a node selection change so that NATV refreshes its
+    // idea of row selection, otherwise it can get out of sync with itself
+    // Ideally this wouldn't be required, but as we all know NATM/NATV is
+    // a total catastrophe and needs a rewrite
+    emit selectionChanged();
 }
 
 void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
