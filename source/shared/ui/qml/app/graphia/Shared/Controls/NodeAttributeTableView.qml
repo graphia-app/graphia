@@ -186,6 +186,7 @@ Item
         selectTargetsMenu.hidden = Qt.binding(() => !pluginContent.directed);
 
         MenuUtils.addActionTo(menu, selectNeighboursTableAction);
+        MenuUtils.addActionTo(menu, cropToSelecitonAction);
 
         tableView._tableMenu = menu;
         MenuUtils.clone(menu, contextMenu);
@@ -211,6 +212,8 @@ Item
     function selectSources()    { selectionModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
     function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
     function selectNeighbours() { selectionModel.selectSourceRows(root.model.neighboursOf(root.selectedRows)); }
+
+    function cropToSelection()  { root.model.cropTo(root.selectedRows); }
 
     Preferences
     {
@@ -316,6 +319,15 @@ Item
         enabled: tableView.rows > 0
 
         onTriggered: { root.selectNeighbours(); }
+    }
+
+    Action
+    {
+        id: cropToSelecitonAction
+        text: qsTr("Crop To Selection")
+        enabled: tableView.rows > 0
+
+        onTriggered: { root.cropToSelection(); }
     }
 
     property int lastClickedColumn: -1

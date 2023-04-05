@@ -103,6 +103,7 @@ public:
     Q_INVOKABLE std::vector<size_t> sourcesOf(const std::vector<size_t>& rows) const;
     Q_INVOKABLE std::vector<size_t> targetsOf(const std::vector<size_t>& rows) const;
     Q_INVOKABLE std::vector<size_t> neighboursOf(const std::vector<size_t>& rows) const;
+    Q_INVOKABLE void cropTo(const std::vector<size_t>& rows) const;
 
     void updateColumnNames();
 

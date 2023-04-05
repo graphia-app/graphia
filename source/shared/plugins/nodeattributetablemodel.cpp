@@ -290,6 +290,19 @@ std::vector<size_t> NodeAttributeTableModel::neighboursOf(const std::vector<size
     });
 }
 
+void NodeAttributeTableModel::cropTo(const std::vector<size_t>& rows) const
+{
+    NodeIdSet nodeIds;
+
+    for(auto row : rows)
+    {
+        auto nodeId = _userNodeData->elementIdForIndex(row);
+        nodeIds.insert(nodeId);
+    }
+
+    _document->selectNodes(nodeIds);
+}
+
 void NodeAttributeTableModel::onAttributesChanged(QStringList added, QStringList removed, QStringList changed, bool graphChanged)
 {
     const std::unique_lock<std::recursive_mutex> lock(_updateMutex);
