@@ -356,6 +356,8 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
 
     u::definePref(u"misc/autoBackgroundUpdateCheck"_s,         true);
 
+    u::definePref(u"find/findByAttributeSortLexically"_s,      true);
+
     u::definePref(u"screenshot/width"_s,                       1920);
     u::definePref(u"screenshot/height"_s,                      1080);
     u::definePref(u"screenshot/path"_s,
