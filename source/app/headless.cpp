@@ -224,6 +224,7 @@ void Headless::run()
     auto parameters = parseJsonFrom(_->_parametersFilename);
     if(parameters.is_null())
     {
+        std::cerr << "Failed to parse " << filenameToStdString(_->_parametersFilename) << ".\n";
         emit done();
         return;
     }
