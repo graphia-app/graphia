@@ -1502,6 +1502,17 @@ void Document::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
     _graphQuickItem->moveFocusToNodes(nodeIds);
 }
 
+void Document::clearSelectedNodes()
+{
+    selectNone();
+}
+
+void Document::selectNodes(const NodeIdSet& nodeIds)
+{
+    _commandManager.execute(ExecutePolicy::Once,
+        makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
 void Document::clearHighlightedNodes()
 {
     if(_graphModel != nullptr)

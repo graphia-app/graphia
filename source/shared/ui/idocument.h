@@ -73,6 +73,9 @@ public:
     virtual void moveFocusToNode(NodeId nodeId) = 0;
     virtual void moveFocusToNodes(const std::vector<NodeId>& nodeIds) = 0;
 
+    virtual void clearSelectedNodes() = 0;
+    virtual void selectNodes(const NodeIdSet& nodeIds) = 0;
+
     virtual void clearHighlightedNodes() = 0;
     virtual void highlightNodes(const NodeIdSet& nodeIds) = 0;
 

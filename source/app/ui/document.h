@@ -157,6 +157,9 @@ public: // IDocument
     void moveFocusToNode(NodeId nodeId) override;
     void moveFocusToNodes(const std::vector<NodeId>& nodeIds) override;
 
+    void clearSelectedNodes() override;
+    void selectNodes(const NodeIdSet& nodeIds) override;
+
     void clearHighlightedNodes() override;
     void highlightNodes(const NodeIdSet& nodeIds) override;
 
