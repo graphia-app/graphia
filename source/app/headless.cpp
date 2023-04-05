@@ -208,7 +208,7 @@ void Headless::processNext()
         if(_->_displayProgress)
             std::cout << "\n";
 
-        std::cerr << "Failed to open " << _->_sourceFilenames.at(0).toStdString() << ".\n";
+        std::cerr << "Failed to open " << filenameToStdString(_->_sourceFilenames.at(0)) << ".\n";
         emit done();
     }
 }
