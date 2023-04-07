@@ -320,11 +320,14 @@ void Document::updateLayoutState()
 
 LayoutPauseState Document::layoutPauseState()
 {
-    if(_layoutThread == nullptr)
+    if(_graphQuickItem == nullptr)
     {
         // Running is returned here for the case where we're saving in headless mode
         return LayoutPauseState::Running;
     }
+
+    if(_layoutThread == nullptr)
+        return LayoutPauseState::Paused;
 
     if(_userLayoutPaused)
         return LayoutPauseState::Paused;
