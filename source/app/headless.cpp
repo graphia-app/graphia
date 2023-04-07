@@ -147,8 +147,8 @@ void Headless::processNext()
         }
 
         const auto& source = _->_sourceFilenames.at(0);
-        QFileInfo sfi(source);
-        QFileInfo dfi(_->_destination);
+        const QFileInfo sfi(source);
+        const QFileInfo dfi(_->_destination);
         QString target;
 
         if(dfi.exists() && dfi.isDir())
@@ -200,7 +200,7 @@ void Headless::processNext()
             processNext();
     });
 
-    bool success = _->_document->openUrl(QUrl::fromLocalFile(_->_sourceFilenames.at(0)),
+    const bool success = _->_document->openUrl(QUrl::fromLocalFile(_->_sourceFilenames.at(0)),
         _->_type, _->_pluginName, _->_pluginParameters);
 
     if(!success)
@@ -264,7 +264,7 @@ void Headless::run()
         }
     }
 
-    QFileInfo dfi(_->_destination);
+    const QFileInfo dfi(_->_destination);
     if(_->_sourceFilenames.size() > 1 && (!dfi.exists() || !dfi.isDir() || !dfi.isWritable()))
     {
         std::cerr << "When processing multiple files, 'destination' must be an existing writable directory.\n";

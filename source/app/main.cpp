@@ -302,7 +302,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
         installSignalHandlers();
 
         auto parametersFilename = commandLineParser.value(u"parameters"_s);
-        Headless headless(commandLineParser.positionalArguments(), parametersFilename);
+        const Headless headless(commandLineParser.positionalArguments(), parametersFilename);
 
         QTimer::singleShot(0, &headless, &Headless::run);
         QObject::connect(&headless, &Headless::done,

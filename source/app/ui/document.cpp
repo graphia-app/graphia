@@ -724,7 +724,7 @@ bool Document::openUrl(const QUrl& url, const QString& type, QString pluginName,
 
                 // If the visualisation was not supplied with parameters, apply the defaults
                 const auto& attributeName = p.result()._attributeName;
-                ValueType valueType = _graphModel->attributeExists(attributeName) ?
+                const ValueType valueType = _graphModel->attributeExists(attributeName) ?
                     _graphModel->attributeValueByName(attributeName).valueType() :
                     _graphModel->valueTypeOfTransformAttributeName(attributeName);
 
@@ -3057,7 +3057,7 @@ void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
             if(!u::contains(jsonNode, "id") || !u::contains(jsonNode, "position"))
                 return false;
 
-            NodeId nodeId = jsonNode["id"].get<int>();
+            const NodeId nodeId = jsonNode["id"].get<int>();
 
             if(!_graphModel->mutableGraph().containsNodeId(nodeId))
                 return false;
@@ -3067,7 +3067,7 @@ void Document::loadNodePositionsFromFile(const QUrl& fileUrl)
             if(positionArray.is_null() || !positionArray.is_array() || positionArray.size() != 3)
                 return false;
 
-            QVector3D position(positionArray.at(0), positionArray.at(1), positionArray.at(2));
+            const QVector3D position(positionArray.at(0), positionArray.at(1), positionArray.at(2));
             nodePositions.set(nodeId, position);
 
             command.setProgress(static_cast<int>((i++ * 100u) /

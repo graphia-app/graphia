@@ -45,9 +45,9 @@ bool isRunningInConsole()
 
 DWORD enableConsoleMode()
 {
+#ifdef Q_OS_WIN
     DWORD originalMode = 0;
 
-#ifdef Q_OS_WIN
     if(AttachConsole(ATTACH_PARENT_PROCESS))
     {
         runningInConsole = true;
@@ -75,9 +75,11 @@ DWORD enableConsoleMode()
                 DISABLE_NEWLINE_AUTO_RETURN);
         }
     }
-#endif
 
     return originalMode;
+#else
+    return 0;
+#endif
 }
 
 void restoreConsoleMode(DWORD mode)

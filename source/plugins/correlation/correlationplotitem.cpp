@@ -1725,7 +1725,7 @@ void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QStrin
     {
         auto attributeValue = _pluginInstance->attributeValueFor(attributeName,
             static_cast<size_t>(selectedRow));
-        static QRegularExpression re(QStringLiteral(R"(\s+)"));
+        const static QRegularExpression re(QStringLiteral(R"(\s+)"));
         attributeValue.replace(re, u"_"_s);
         images[attributeValue].append(selectedRow); // clazy:exclude=reserve-candidates
     }
@@ -1738,7 +1738,7 @@ void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QStrin
 
 void CorrelationPlotItem::savePlotImage(const QString& filename)
 {
-    QFileInfo fileInfo(filename);
+    const QFileInfo fileInfo(filename);
 
     if(fileInfo.completeSuffix() == u"png"_s)
         _customPlot.savePng(filename);

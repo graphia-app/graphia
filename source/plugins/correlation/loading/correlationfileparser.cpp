@@ -494,7 +494,7 @@ bool CorrelationFileParser::parse(const QUrl& fileUrl, IGraphModel*)
 {
     if(_tabularData.empty())
     {
-        bool success = parseUsing(_urlTypeName, [this, &fileUrl](auto&& parser)
+        const bool success = parseUsing(_urlTypeName, [this, &fileUrl](auto&& parser)
         {
             parser.setProgressFn([this](int progress) { setProgress(progress); });
 

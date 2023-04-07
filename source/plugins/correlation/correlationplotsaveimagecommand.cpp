@@ -69,7 +69,7 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
     connect(&_correlationPlotItem, &CorrelationPlotItem::pixmapUpdated,
     [this]
     {
-        std::unique_lock<std::mutex> lock(_mutex);
+        const std::unique_lock<std::mutex> lock(_mutex);
 
         Q_ASSERT(!_images.empty());
         if(_images.empty())
@@ -84,7 +84,7 @@ CorrelationPlotSaveImageCommand::CorrelationPlotSaveImageCommand(
 
         if(!image._label.isEmpty())
         {
-            QFileInfo fileInfo(_baseFilename);
+            const QFileInfo fileInfo(_baseFilename);
             filename = u"%1/%2-%3.%4"_s
                 .arg(fileInfo.dir().path(), fileInfo.baseName(),
                 image._label, fileInfo.completeSuffix());
