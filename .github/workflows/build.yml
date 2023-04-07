@@ -560,7 +560,7 @@ jobs:
           Text::Table::Tiny
     - name: Analyse
       run: |
-        BRANCH=$(echo ${GITHUB_REF#refs/heads/})
+        BRANCH=$(echo ${GITHUB_REF#refs/*/})
         eval "$(ssh-agent -s)"
         echo "${{ secrets.DEFECTS_SSH_PRIVATE_KEY }}" | ssh-add -
         git config --global user.email ""
