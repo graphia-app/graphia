@@ -505,7 +505,7 @@ ApplicationWindow
             case showAllEdgeTextAction:      return TextState.All;
             }
         }
-        property alias showMultiElementIndicators: toggleMultiElementIndicatorsAction.checked
+        property alias showMultiElementIndicators: showMultiElementIndicatorsAction.checked
 
         property double defaultNormalNodeSize
         property double defaultNormalEdgeSize
@@ -1763,7 +1763,7 @@ ApplicationWindow
 
     Action
     {
-        id: toggleMultiElementIndicatorsAction
+        id: showMultiElementIndicatorsAction
         text: qsTr("Show Multi-Element Indicators")
         checkable: true
     }
@@ -2193,7 +2193,7 @@ ApplicationWindow
                 action: toggleEdgeDirectionAction
                 hidden: !currentTab || !currentTab.document.directed
             }
-            PlatformMenuItem { action: toggleMultiElementIndicatorsAction }
+            PlatformMenuItem { action: showMultiElementIndicatorsAction }
             PlatformMenuSeparator {}
             PlatformMenuItem { action: perspecitveProjectionAction }
             PlatformMenuItem { action: orthographicProjectionAction }
