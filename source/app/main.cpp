@@ -329,6 +329,7 @@ int start(int argc, char *argv[], ConsoleOutputFiles& consoleOutputFiles)
     u::definePref(u"visuals/edgeVisualType"_s,                  QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     u::definePref(u"visuals/textAlignment"_s,                   QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
     u::definePref(u"visuals/showMultiElementIndicators"_s,      true);
+    u::definePref(u"visuals/showEdges"_s,                       true);
     u::definePref(u"visuals/savedGradients"_s,                  Defaults::GRADIENT_PRESETS);
     u::definePref(u"visuals/defaultGradient"_s,                 Defaults::GRADIENT);
     u::definePref(u"visuals/savedPalettes"_s,                   Defaults::PALETTE_PRESETS);

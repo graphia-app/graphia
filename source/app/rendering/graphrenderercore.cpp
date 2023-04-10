@@ -805,7 +805,10 @@ void GraphRendererCore::renderGraph()
         gpuGraphData.drawToFramebuffer();
 
         renderNodes(gpuGraphData);
-        renderEdges(gpuGraphData);
+
+        if(u::pref(u"visuals/showEdges"_s).toBool())
+            renderEdges(gpuGraphData);
+
         renderText(gpuGraphData);
     }
 

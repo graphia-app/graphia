@@ -47,6 +47,8 @@ Rectangle
         property double defaultNormalNodeSize
         property double defaultNormalEdgeSize
 
+        property bool showEdges
+
         property var layoutPresets: ""
     }
 
@@ -457,6 +459,7 @@ Rectangle
         LayoutSetting
         {
             id: edgeSizeSetting
+            enabled: visuals.showEdges
             Layout.leftMargin: _buttonMenuOffset
             name: qsTr("Edges")
             description: qsTr("Edge Size")

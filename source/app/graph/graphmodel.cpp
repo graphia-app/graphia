@@ -1287,7 +1287,8 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
         return;
 
     const bool force = name.endsWith(u"showNodeText"_s) ||
-        name.endsWith(u"showEdgeText"_s);
+        name.endsWith(u"showEdgeText"_s) ||
+        name.endsWith(u"showEdges"_s);
 
     updateVisuals(force);
 }

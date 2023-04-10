@@ -506,6 +506,7 @@ ApplicationWindow
             }
         }
         property alias showMultiElementIndicators: showMultiElementIndicatorsAction.checked
+        property alias showEdges: showEdgesAction.checked
 
         property double defaultNormalNodeSize
         property double defaultNormalEdgeSize
@@ -1770,6 +1771,13 @@ ApplicationWindow
 
     Action
     {
+        id: showEdgesAction
+        text: qsTr("Show Edges")
+        checkable: true
+    }
+
+    Action
+    {
         id: testConsoleOutputAction
         text: qsTr("Test Console Output")
         onTriggered: application.testConsoleOutput()
@@ -2194,6 +2202,7 @@ ApplicationWindow
                 hidden: !currentTab || !currentTab.document.directed
             }
             PlatformMenuItem { action: showMultiElementIndicatorsAction }
+            PlatformMenuItem { action: showEdgesAction }
             PlatformMenuSeparator {}
             PlatformMenuItem { action: perspecitveProjectionAction }
             PlatformMenuItem { action: orthographicProjectionAction }
