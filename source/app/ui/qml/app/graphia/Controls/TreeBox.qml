@@ -353,7 +353,7 @@ Item
 
                         Component.onCompleted:
                         {
-                            // Everything thing in here is speculative and relies on the actual internal
+                            // Everything in here is speculative and relies on the actual internal
                             // structure of the delegate implementation, so it could break in future
 
                             let contrastBinding = Qt.binding(() =>
