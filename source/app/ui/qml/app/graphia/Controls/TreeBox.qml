@@ -186,7 +186,7 @@ Item
                     if(!sortFilterProxyModel.sourceModel)
                         return "";
 
-                    let value = model.data(modelIndex(0, row), treeView.sectionRole);
+                    let value = model.data(index(row, 0), treeView.sectionRole);
 
                     if(!value)
                         return "";
@@ -204,7 +204,7 @@ Item
 
                     if(lastSelectedRow >= 0)
                     {
-                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(0, lastSelectedRow));
+                        let sourceIndex = sortFilterProxyModel.mapToSource(index(lastSelectedRow, 0));
 
                         if(root._indexIsSelectable(sourceIndex))
                             root.selectedValue = root.textFor(sourceIndex);
@@ -215,7 +215,7 @@ Item
                     let newSelectedValues = [];
                     for(let row of selectedRows)
                     {
-                        let sourceIndex = sortFilterProxyModel.mapToSource(modelIndex(0, row));
+                        let sourceIndex = sortFilterProxyModel.mapToSource(index(row, 0));
 
                         if(!root._indexIsSelectable(sourceIndex))
                             continue;
@@ -237,7 +237,7 @@ Item
                     if(lastSelectedRow < 0)
                         return null;
 
-                    return sortFilterProxyModel.mapToSource(modelIndex(0, lastSelectedRow));
+                    return sortFilterProxyModel.mapToSource(index(lastSelectedRow, 0));
                 }
 
                 function setSelectedRows(newSelectedRows, row)
@@ -380,7 +380,7 @@ Item
 
                         property var sourceIndex:
                         {
-                            let sfpmIndex = treeView.modelIndex(model.column, model.row);
+                            let sfpmIndex = treeView.index(model.row, model.column);
                             let index = sortFilterProxyModel.mapToSource(sfpmIndex);
                             return index;
                         }
@@ -528,7 +528,7 @@ Item
 
                     for(let row = treeView.topRow; row <= treeView.bottomRow; row++)
                     {
-                        let index = treeView.modelIndex(0, row);
+                        let index = treeView.index(row, 0);
                         let sourceIndex = sortFilterProxyModel.mapToSource(index);
 
                         if(!sourceIndex.valid)
