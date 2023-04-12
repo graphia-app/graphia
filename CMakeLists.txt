@@ -7,8 +7,8 @@ else()
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Core)
-if(Qt6Core_VERSION VERSION_LESS 6.4.0)
-    message(FATAL_ERROR "Qt 6.4.0 or later required")
+if(Qt6Core_VERSION VERSION_LESS 6.5.2)
+    message(FATAL_ERROR "Qt 6.5.2 or later required")
 endif()
 
 include_directories(source)

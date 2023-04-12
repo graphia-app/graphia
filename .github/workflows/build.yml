@@ -1,7 +1,7 @@
 name: Build
 on: [push, pull_request]
 env:
-  QT_VERSION: 6.4.2
+  QT_VERSION: 6.5.2
   QT_MODULES: qtwebengine qtwebchannel qtpositioning
   GCC_VERSION: 11
   CLANG_VERSION: 14
@@ -16,6 +16,10 @@ jobs:
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
         sudo apt install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} libxkbcommon-x11-dev
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt install libxkbcommon-x11-dev libxcb-cursor0
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
