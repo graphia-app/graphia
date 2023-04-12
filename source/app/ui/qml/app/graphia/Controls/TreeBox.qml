@@ -88,7 +88,7 @@ Item
     function textFor(index)
     {
         // AvailableAttributesModel has a 'get' function that
-        // returns more relevant results that QAbstractItemModel::data
+        // returns more relevant results than QAbstractItemModel::data
         if(typeof root.model.get === 'function')
             return root.model.get(index);
         else if(typeof root.model.data === 'function')
