@@ -82,7 +82,9 @@ Item
     {
         treeView.clearSelection();
         treeBoxSearch.visible = false;
-        treeView.positionViewAtRow(0, Qt.AlignLeft|Qt.AlignTop, 0.0);
+
+        if(treeView.isRowLoaded(0))
+            treeView.positionViewAtRow(0, Qt.AlignLeft|Qt.AlignTop, 0.0);
     }
 
     function textFor(index)
@@ -610,6 +612,9 @@ Item
         // Do the selection
         let row = treeView.rowAtIndex(index);
         treeView.selectRow(row);
+
+        if(!treeView.isRowLoaded(row))
+            return;
 
         // Scroll so that it's visible
         treeView.positionViewAtRow(row, Qt.AlignLeft|Qt.AlignVCenter, 0.0);
