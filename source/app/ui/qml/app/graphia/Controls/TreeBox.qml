@@ -155,6 +155,7 @@ Item
 
                 // This might be the way to go in future if ItemSelectionModel allows
                 // for multiple selection, but for the time being (6.4.x) it doesn't
+                // (And for 6.5.0 it doesn't allow for multiple selection via ctrl/shift click)
                 //selectionBehavior: TableView.SelectRows
                 //selectionModel: ItemSelectionModel {}
 
