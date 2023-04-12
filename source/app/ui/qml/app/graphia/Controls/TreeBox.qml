@@ -99,9 +99,8 @@ Item
         return undefined;
     }
 
-    // Just some semi-sensible defaults
-    width: 200
-    height: 100
+    implicitWidth: 240
+    implicitHeight: 160
 
     ColumnLayout
     {
@@ -137,9 +136,6 @@ Item
             TreeView
             {
                 id: treeView
-
-                implicitWidth: contentWidth + (2 * outline.outlineWidth)
-                implicitHeight: contentHeight + (2 * outline.outlineWidth)
 
                 anchors.fill: parent
                 anchors.margins: outline.outlineWidth
@@ -215,6 +211,16 @@ Item
                     else
                         root.selectedValue = undefined;
 
+                    for(let loadedRow = 0; loadedRow <= rows; loadedRow++)
+                    {
+                        if(!isRowLoaded(loadedRow))
+                            continue;
+
+                        let delegateItem = treeView.itemAtIndex(index(loadedRow, 0));
+                        if(delegateItem !== null)
+                            delegateItem.selected = false;
+                    }
+
                     let newSelectedValues = [];
                     for(let row of selectedRows)
                     {
@@ -224,6 +230,10 @@ Item
                             continue;
 
                         newSelectedValues.push(root.textFor(sourceIndex));
+
+                        let delegateItem = treeView.itemAtIndex(index(row, 0));
+                        if(delegateItem !== null)
+                            delegateItem.selected = true;
                     }
 
                     root.selectedValues = newSelectedValues;
@@ -362,13 +372,19 @@ Item
                     implicitWidth: treeViewDelegate.implicitWidth
                     implicitHeight: treeViewDelegate.implicitHeight * (hasSectionRow ? 2 : 1)
 
-                    property alias treeView: treeViewDelegate.treeView
-                    property alias isTreeNode: treeViewDelegate.isTreeNode
-                    property alias expanded: treeViewDelegate.expanded
-                    property alias hasChildren: treeViewDelegate.hasChildren
-                    property alias depth: treeViewDelegate.depth
-                    property alias current: treeViewDelegate.current
-                    property alias selected: treeViewDelegate.selected
+                    required property bool current
+                    required property int depth
+                    required property bool editing
+                    required property bool expanded
+                    required property bool hasChildren
+                    required property bool isTreeNode
+                    required property bool selected
+                    required property var treeView
+
+                    TableView.onReused:
+                    {
+                        selected = treeView.selectedRows.indexOf(model.row) >= 0;
+                    }
 
                     required property int row
                     required property var model
@@ -414,7 +430,14 @@ Item
                         rightPadding: treeView.scrollBarWidth
                         y: hasSectionRow ? implicitHeight : 0
 
-                        selected: treeView.selectedRows.indexOf(model.row) >= 0
+                        current: parent.current
+                        depth: parent.depth
+                        editing: parent.editing
+                        expanded: parent.expanded
+                        hasChildren: parent.hasChildren
+                        isTreeNode: parent.isTreeNode
+                        selected: parent.selected
+                        treeView: parent.treeView
 
                         model: parent.model
                         row: parent.row

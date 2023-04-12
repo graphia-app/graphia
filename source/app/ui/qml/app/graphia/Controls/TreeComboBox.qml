@@ -126,7 +126,7 @@ Item
             y: parent.height
 
             implicitWidth: root.width
-            implicitHeight: Math.min(popupTreeBox.contentHeight, 240)
+            implicitHeight: Math.min(popupTreeBox.implicitHeight, 240)
 
             closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 
