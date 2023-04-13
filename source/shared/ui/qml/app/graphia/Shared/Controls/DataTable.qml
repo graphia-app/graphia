@@ -58,7 +58,7 @@ Rectangle
     function selectRow(row) { root.selectedRows = [row]; }
     function clearSelection() { root.selectedRows = []; }
 
-    onClicked: function(mouse)
+    onClicked: function(column, row, mouse)
     {
         if(mouse.button !== Qt.LeftButton)
             return;
