@@ -35,6 +35,12 @@ Item
     property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
+    property var visibleRows:
+    {
+        let sourceRows = [...Array(tableView.rows).keys()];
+        return sourceRows.map(row => proxyModel.mapToSourceRow(row));
+    }
+
     property alias rowCount: tableView.rows
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
@@ -347,9 +353,7 @@ Item
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            let sourceRows = [...Array(tableView.rows).keys()];
-            let visibleRows = sourceRows.map(row => proxyModel.mapToSourceRow(row));
-            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, visibleRows);
+            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, root.visibleRows);
         }
     }
 
