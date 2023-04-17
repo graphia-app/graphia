@@ -422,6 +422,11 @@ Item
         selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Deselect);
     }
 
+    function clearAndSelectRows(rows)
+    {
+        selectionModel.selectSourceRows(rows, ItemSelectionModel.Clear);
+    }
+
     ItemSelectionModel
     {
         id: selectionModel
@@ -442,7 +447,7 @@ Item
             root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
         }
 
-        function selectSourceRows(sourceRows)
+        function selectSourceRows(sourceRows, action)
         {
             let rows = [];
             for(const sourceRow of sourceRows)
@@ -452,8 +457,11 @@ Item
                     rows.push(proxyRow);
             }
 
+            if(action === undefined)
+                action = ItemSelectionModel.NoUpdate;
+
             let selection = proxyModel.buildRowSelection(rows);
-            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select);
+            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select | action);
 
             root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
         }
