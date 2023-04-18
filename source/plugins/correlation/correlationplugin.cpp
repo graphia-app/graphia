@@ -869,6 +869,61 @@ size_t CorrelationPluginInstance::hcColumn(size_t column) const
     return _continuousHcOrder.at(column);
 }
 
+std::vector<size_t> CorrelationPluginInstance::rowsOfInterestByColumns(const std::vector<size_t>& columns,
+    const std::vector<size_t>& rows, int percentile, double weight)
+{
+    if(rows.empty())
+        return {};
+
+    const auto positiveWeight = weight > 0.0 ? (1.0 + weight) : 1.0;
+    const auto negativeWeight = weight < 0.0 ? (1.0 - weight) : 1.0;
+
+    struct RowScore
+    {
+        size_t _row = 0;
+        double _value = 0.0;
+    };
+
+    std::vector<RowScore> rowScores;
+    rowScores.reserve(rows.size());
+
+    for(auto row : rows)
+    {
+        const auto& dataRow = _continuousDataRows.at(row);
+
+        double columnsSum = 0.0;
+        for(auto column : columns)
+            columnsSum += dataRow.valueAt(column);
+
+        double otherColumnsSum = dataRow.sum() - columnsSum;
+
+        RowScore rowScore
+        {
+            row,
+            (columnsSum * positiveWeight) - (otherColumnsSum * negativeWeight)
+        };
+
+        rowScores.push_back(rowScore);
+    }
+
+    std::sort(rowScores.begin(), rowScores.end(), [](const auto& a, const auto& b)
+    {
+        return a._value > b._value;
+    });
+
+    auto rowsPercentile = std::max(static_cast<size_t>(1),
+        (static_cast<size_t>(percentile) * rows.size()) / 100);
+
+    rowScores.resize(rowsPercentile);
+
+    std::vector<size_t> outRows;
+    outRows.reserve(rowScores.size());
+    for(const auto& rowMean : rowScores)
+        outRows.push_back(rowMean._row);
+
+    return outRows;
+}
+
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, Progressable& progressable) const
 {
     json jsonObject;
