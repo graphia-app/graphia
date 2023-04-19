@@ -71,9 +71,27 @@ PluginContent
 
         onTriggered: function(source)
         {
-            plot.columnAnnotationSelectionModeEnabled = !plot.columnAnnotationSelectionModeEnabled;
-            checked = plot.columnAnnotationSelectionModeEnabled;
+            root.togglePlotMode(PlotMode.ColumnAnnotationSelection);
         }
+    }
+
+    function setPlotMode(mode)
+    {
+        plot.plotMode = plot.plotMode !== mode ? mode : PlotMode.Normal;
+
+        selectColumnAnnotationsAction.checked =
+            (plot.plotMode === PlotMode.ColumnAnnotationSelection);
+    }
+
+    function togglePlotMode(mode)
+    {
+        if(plot.plotMode === mode)
+        {
+            root.setPlotMode(PlotMode.Normal);
+            return;
+        }
+
+        root.setPlotMode(mode);
     }
 
     Action
@@ -945,13 +963,12 @@ PluginContent
                         anchors.topMargin: 4 + plotFlickable.contentY
                         anchors.margins: 4
 
-                        visible: plot.columnAnnotationSelectionModeEnabled
+                        visible: plot.plotMode !== PlotMode.Normal
                         icon.name: "emblem-unreadable"
 
                         onClicked: function(mouse)
                         {
-                            plot.columnAnnotationSelectionModeEnabled =
-                                selectColumnAnnotationsAction.checked = false;
+                            root.setPlotMode(PlotMode.Normal);
                         }
                     }
 

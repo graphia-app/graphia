@@ -374,7 +374,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     connect(this, &CorrelationPlotItem::numVisibleColumnsChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
 
     connect(this, &CorrelationPlotItem::visibleColumnAnnotationNamesChanged, this, &CorrelationPlotItem::minimumHeightChanged);
-    connect(this, &CorrelationPlotItem::columnAnnotationSelectionModeEnabledChanged, this, &CorrelationPlotItem::minimumHeightChanged);
+    connect(this, &CorrelationPlotItem::plotModeChanged, this, &CorrelationPlotItem::minimumHeightChanged);
 }
 
 CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
@@ -1098,7 +1098,7 @@ void CorrelationPlotItem::setShowLegend(bool showLegend)
 
 double CorrelationPlotItem::minimumHeight() const
 {
-    return 150.0 + columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled);
+    return 150.0 + columnAnnotationsHeight();
 }
 
 void CorrelationPlotItem::setPluginInstance(CorrelationPluginInstance* pluginInstance)
@@ -1550,9 +1550,9 @@ double CorrelationPlotItem::columnAxisWidth() const
     return width() - marginWidth;
 }
 
-double CorrelationPlotItem::columnAnnotationsHeight(bool allAttributes) const
+double CorrelationPlotItem::columnAnnotationsHeight() const
 {
-    if(allAttributes)
+    if(_plotMode == PlotMode::ColumnAnnotationSelection)
         return static_cast<double>(_pluginInstance->columnAnnotations().size()) * labelHeight();
 
     return static_cast<double>(_visibleColumnAnnotationNames.size()) * labelHeight();

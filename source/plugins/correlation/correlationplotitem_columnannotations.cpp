@@ -45,7 +45,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     auto* layoutElement = layoutGrid->hasElement(1, layoutColumn) ? layoutGrid->element(1, layoutColumn) : nullptr;
 
     const auto& columnAnnotations = _pluginInstance->columnAnnotations();
-    const bool invisible = !_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty();
+    const bool invisible = _plotMode != PlotMode::ColumnAnnotationSelection && _visibleColumnAnnotationNames.empty();
 
     if(columnAnnotations.empty() || invisible)
     {
@@ -92,7 +92,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
     auto* caXAxis = columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
     auto* caYAxis = columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
 
-    auto h = static_cast<int>(columnAnnotationsHeight(_columnAnnotationSelectionModeEnabled));
+    auto h = static_cast<int>(columnAnnotationsHeight());
     columnAnnotationsAxisRect->setMinimumSize(0, h);
     columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 
@@ -106,7 +106,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
         for(const auto& columnAnnotation : columnAnnotations)
         {
             auto selected = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
-            const bool visible = selected || _columnAnnotationSelectionModeEnabled;
+            const bool visible = selected || _plotMode == PlotMode::ColumnAnnotationSelection;
 
             if(visible)
             {
@@ -168,7 +168,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxisRect* axisRect)
                 }
             }
 
-            if(_columnAnnotationSelectionModeEnabled)
+            if(_plotMode == PlotMode::ColumnAnnotationSelection)
                 postfix += selected ? u" ☑"_s : u" ☐"_s;
 
             const double tickPosition = static_cast<double>(y) + 0.5;
@@ -257,20 +257,23 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     }
 }
 
-bool CorrelationPlotItem::columnAnnotationSelectionModeEnabled() const
+int CorrelationPlotItem::plotMode() const
 {
-    return _columnAnnotationSelectionModeEnabled;
+    return static_cast<int>(_plotMode);
 }
 
-void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
+void CorrelationPlotItem::setPlotMode(int plotModeInt)
 {
-    if(_columnAnnotationSelectionModeEnabled != enabled)
+    auto plotMode = normaliseQmlEnum<PlotMode>(plotModeInt);
+
+    if(_plotMode != plotMode)
     {
-        _columnAnnotationSelectionModeEnabled = enabled;
-        emit columnAnnotationSelectionModeEnabledChanged();
+        _plotMode = plotMode;
+        emit plotModeChanged();
 
         // Disable group by annotation, if no annotations are visible
-        if(!enabled && _groupByAnnotation && _visibleColumnAnnotationNames.empty())
+        if(_plotMode != PlotMode::ColumnAnnotationSelection &&
+           _groupByAnnotation && _visibleColumnAnnotationNames.empty())
         {
             _groupByAnnotation = false;
             emit plotOptionsChanged();
@@ -282,7 +285,7 @@ void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
 
 size_t CorrelationPlotItem::numVisibleColumnAnnotations() const
 {
-    if(_columnAnnotationSelectionModeEnabled)
+    if(_plotMode == PlotMode::ColumnAnnotationSelection)
         return _pluginInstance->columnAnnotations().size();
 
     return _visibleColumnAnnotationNames.size();
@@ -300,7 +303,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
     for(const auto& columnAnnotation : columnAnnotations)
     {
         auto enabled = u::contains(_visibleColumnAnnotationNames, columnAnnotation.name());
-        if(_columnAnnotationSelectionModeEnabled || enabled)
+        if(_plotMode == PlotMode::ColumnAnnotationSelection || enabled)
             visibleRowIndices.push_back({index, enabled});
 
         index++;
@@ -414,7 +417,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
     std::transform(_pluginInstance->columnAnnotations().begin(), _pluginInstance->columnAnnotations().end(),
         std::back_inserter(columnAnnotations), [](const auto& v) { return &v; });
 
-    if(!_columnAnnotationSelectionModeEnabled)
+    if(_plotMode != PlotMode::ColumnAnnotationSelection)
     {
         // Remove any annotations not currently visible, so that looking up by index works
         columnAnnotations.erase(std::remove_if(columnAnnotations.begin(), columnAnnotations.end(),
@@ -432,7 +435,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
 
     const auto& name = columnAnnotations.at(static_cast<size_t>(p.y()))->name();
 
-    if(_columnAnnotationSelectionModeEnabled && pos.x() < 0)
+    if(_plotMode == PlotMode::ColumnAnnotationSelection && pos.x() < 0)
     {
         // Click is on the annotation name itself (with checkbox)
         if(u::contains(_visibleColumnAnnotationNames, name))
@@ -442,7 +445,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
 
         emit visibleColumnAnnotationNamesChanged();
     }
-    else if(_columnAnnotationSelectionModeEnabled &&
+    else if(_plotMode == PlotMode::ColumnAnnotationSelection &&
         !u::contains(_visibleColumnAnnotationNames, name))
     {
         // Clicking anywhere else enables a column annotation
@@ -451,7 +454,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
 
         emit visibleColumnAnnotationNamesChanged();
     }
-    else if(_columnAnnotationSelectionModeEnabled || pos.x() < 0)
+    else if(_plotMode == PlotMode::ColumnAnnotationSelection || pos.x() < 0)
     {
         // ...or selects it as the sort annotation otherwise
         sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);

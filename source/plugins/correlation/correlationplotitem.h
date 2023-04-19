@@ -83,6 +83,11 @@ DEFINE_QML_ENUM(
     DataValue,
     HierarchicalClustering);
 
+DEFINE_QML_ENUM(
+    Q_GADGET, PlotMode,
+    Normal,
+    ColumnAnnotationSelection);
+
 enum class CorrelationPlotUpdateType
 {
     None,
@@ -178,8 +183,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
 
     Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
         WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
-    Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
-        WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
+    Q_PROPERTY(int plotMode READ plotMode WRITE setPlotMode NOTIFY plotModeChanged)
     Q_PROPERTY(bool groupByAnnotation MEMBER _groupByAnnotation WRITE setGroupByAnnotation NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString colorGroupByAnnotationName MEMBER _colorGroupByAnnotationName
         WRITE setColorGroupByAnnotationName NOTIFY plotOptionsChanged)
@@ -296,8 +300,9 @@ private:
     QCPAxis* _continuousYAxis = nullptr;
     QVector<QCPAbstractPlottable*> _meanPlots;
 
+    PlotMode _plotMode = PlotMode::Normal;
+
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
-    bool _columnAnnotationSelectionModeEnabled = false;
     bool _groupByAnnotation = false;
     QString _colorGroupByAnnotationName;
 
@@ -394,10 +399,11 @@ private:
 
     QString elideLabel(const QString& label);
 
+    int plotMode() const;
+    void setPlotMode(int plotModeInt);
+
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
-    bool columnAnnotationSelectionModeEnabled() const;
-    void setColumnAnnotationSelectionModeEnabled(bool enabled);
     size_t numVisibleColumnAnnotations() const;
     QString columnAnnotationValueAt(size_t x, size_t y) const;
 
@@ -411,7 +417,7 @@ private:
     double labelHeight() const;
     double minColumnWidth() const;
     double columnAxisWidth() const;
-    double columnAnnotationsHeight(bool allAttributes) const;
+    double columnAnnotationsHeight() const;
 
     void createTooltip();
 
@@ -467,6 +473,6 @@ signals:
     void minimumHeightChanged();
     void pixmapUpdated();
 
-    void columnAnnotationSelectionModeEnabledChanged();
+    void plotModeChanged();
 };
 #endif // CORRELATIONPLOTITEM_H
