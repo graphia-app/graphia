@@ -257,6 +257,25 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     }
 }
 
+void CorrelationPlotItem::showAllColumnAnnotations()
+{
+    for(const auto& columnAnnotation : _pluginInstance->columnAnnotations())
+        _visibleColumnAnnotationNames.insert(columnAnnotation.name());
+
+    emit visibleColumnAnnotationNamesChanged();
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
+void CorrelationPlotItem::hideAllColumnAnnotations()
+{
+    _visibleColumnAnnotationNames.clear();
+
+    emit visibleColumnAnnotationNamesChanged();
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
 int CorrelationPlotItem::plotMode() const
 {
     return static_cast<int>(_plotMode);

@@ -229,6 +229,9 @@ public:
     Q_INVOKABLE void sortBy(int type, const QString& text = {});
     Q_INVOKABLE void resetZoom();
 
+    Q_INVOKABLE void showAllColumnAnnotations();
+    Q_INVOKABLE void hideAllColumnAnnotations();
+
     void setSelectedRows(const QVector<int>& selectedRows);
     void setScaleType(int scaleType);
     void setScaleByAttributeName(const QString& attributeName);
