@@ -77,10 +77,17 @@ PluginContent
 
     function setPlotMode(mode)
     {
-        plot.plotMode = plot.plotMode !== mode ? mode : PlotMode.Normal;
+        let hideControls = (plot.plotMode !== PlotMode.Normal) && (mode === PlotMode.Normal);
+
+        plot.plotMode = mode;
 
         selectColumnAnnotationsAction.checked =
             (plot.plotMode === PlotMode.ColumnAnnotationSelection);
+
+        if(hideControls)
+            modalControls.hide();
+        else
+            modalControls.show();
     }
 
     function togglePlotMode(mode)
@@ -954,21 +961,30 @@ PluginContent
                         delayedRunning: plot.busy
                     }
 
-                    FloatingButton
+                    SlidingPanel
                     {
+                        id: modalControlsPanel
+
+                        alignment: Qt.AlignTop|Qt.AlignLeft
+
                         anchors.left: parent.left
                         anchors.top: parent.top
 
                         // Have the button move sync with scrolling, so it's always visible
-                        anchors.topMargin: 4 + plotFlickable.contentY
-                        anchors.margins: 4
+                        anchors.topMargin: plotFlickable.contentY
 
-                        visible: plot.plotMode !== PlotMode.Normal
-                        icon.name: "emblem-unreadable"
+                        initiallyOpen: false
+                        disableItemWhenClosed: false
 
-                        onClicked: function(mouse)
+                        item: PlotModalControls
                         {
-                            root.setPlotMode(PlotMode.Normal);
+                            id: modalControls
+
+                            plot: plot
+
+                            onShown: { modalControlsPanel.show(); }
+                            onHidden: { modalControlsPanel.hide(); }
+                            onClosed: { root.setPlotMode(PlotMode.Normal); }
                         }
                     }
 
