@@ -938,19 +938,19 @@ ApplicationWindow
                     if(!item.osEnabledChecked)
                         continue;
 
-                    if(item.urlTextField.length === 0)
+                    if(item.urlTextField.text.trim().length === 0)
                         return false;
 
-                    if(!QmlUtils.urlStringIsValid(item.urlTextField.text))
+                    if(!QmlUtils.urlStringIsValid(item.urlTextField.text.trim()))
                         return false;
 
                     enabledOses.push(item.osName);
                 }
 
                 return enabledOses.length > 0 &&
-                    version.length > 0 &&
-                    targetVersionRegex.length > 0 &&
-                    markdownChangelog.length > 0;
+                    version.text.trim().length > 0 &&
+                    targetVersionRegex.text.trim().length > 0 &&
+                    markdownChangelog.text.trim().length > 0;
             }
 
             property var updateObject: ({})
@@ -972,9 +972,9 @@ ApplicationWindow
             function generateJSON(onComplete)
             {
                 updateObject = {};
-                updateObject.version = version.text;
-                updateObject.targetVersionRegex = targetVersionRegex.text;
-                updateObject.changeLog = markdownChangelog.text;
+                updateObject.version = version.text.trim();
+                updateObject.targetVersionRegex = targetVersionRegex.text.trim();
+                updateObject.changeLog = markdownChangelog.text.trim();
                 updateObject.images = [];
 
                 if(forceInstallation.checked)
@@ -1002,7 +1002,7 @@ ApplicationWindow
                         continue;
 
                     let osName = item.osName;
-                    let url = item.urlText;
+                    let url = item.urlText.trim();
                     let hostname = extractHostname(url);
                     let filename = url.split('/').pop().split('#')[0].split('?')[0];
 
@@ -1081,7 +1081,7 @@ ApplicationWindow
 
                     button.text = Qt.binding(function()
                     {
-                        return tab.versionText.length > 0 ?
+                        return tab.versionText.trim().length > 0 ?
                             tab.versionText : qsTr("New Upgrade");
                     });
 
