@@ -318,7 +318,13 @@ void LouvainTransform::apply(TransformedGraph& target)
     std::copy(communityHistogram.begin(), communityHistogram.end(),
         std::back_inserter(sortedCommunityHistogram));
     std::sort(sortedCommunityHistogram.begin(), sortedCommunityHistogram.end(),
-        [](const auto& a, const auto& b) { return a.second > b.second; });
+    [](const auto& a, const auto& b)
+    {
+        if(a.second == b.second)
+            return a.first > b.first;
+
+        return a.second > b.second;
+    });
 
     // Assign cluster numbers to each community
     std::map<CommunityId, size_t> clusterNumbers;

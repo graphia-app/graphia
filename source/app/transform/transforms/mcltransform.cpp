@@ -615,10 +615,13 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target)
 
     // Sort clusters descending by size
     std::sort(clusters.begin(), clusters.end(),
-        [](const auto& a, const auto& b)
-        {
-            return a.size() > b.size();
-        });
+    [](const auto& a, const auto& b)
+    {
+        if(a.size() == b.size())
+            return *a.begin() > *b.begin();
+
+        return a.size() > b.size();
+    });
 
     NodeArray<QString> clusterNames(target);
     NodeArray<int> clusterSizes(target);
