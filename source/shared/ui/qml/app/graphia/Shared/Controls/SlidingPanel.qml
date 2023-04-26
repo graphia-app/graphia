@@ -83,8 +83,8 @@ Item
     Connections
     {
         target: item
-        function onImplicitWidthChanged()  { if(!root._hidden) root._setSizeToItem(); }
-        function onImplicitHeightChanged() { if(!root._hidden) root._setSizeToItem(); }
+        function onImplicitWidthChanged()  { if(!root._hidden) width = item.implicitWidth; }
+        function onImplicitHeightChanged() { if(!root._hidden) height = item.implicitHeight; }
     }
 
     property bool initiallyOpen: true
