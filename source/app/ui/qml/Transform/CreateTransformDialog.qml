@@ -84,12 +84,17 @@ Window
 
         function toggleFavouriteTransform(transform)
         {
+            if(typeof transform !== "string")
+                return;
+
             let a = favouriteTransformsAsArray();
 
             if(!transformIsFavourite(transform))
                 a.push(transform);
             else
                 a.splice(a.indexOf(transform), 1);
+
+            a = a.filter(i => typeof i === "string");
 
             favouriteTransforms = JSON.stringify(a);
         }
@@ -203,14 +208,19 @@ Window
                 {
                     Layout.fillWidth: true
 
+                    enabled: transformsList.currentIndex !== null
+
                     text: misc.transformIsFavourite(transformsList.selectedValue) ?
                         qsTr("Remove Favourite") : qsTr("Add Favourite")
 
                     onClicked: function(mouse)
                     {
                         let index = transformsList.currentIndex;
-                        misc.toggleFavouriteTransform(transformsList.selectedValue);
-                        transformsList.select(index);
+                        if(index !== null)
+                        {
+                            misc.toggleFavouriteTransform(transformsList.selectedValue);
+                            transformsList.select(index);
+                        }
                     }
                 }
             }

@@ -45,7 +45,10 @@ AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
         favouriteTransforms.reserve(static_cast<int>(jsonArray.size()));
 
         for(const auto& transformName : jsonArray)
-            favouriteTransforms.append(QString::fromStdString(transformName));
+        {
+            if(transformName.is_string())
+                favouriteTransforms.append(QString::fromStdString(transformName));
+        }
 
         beginResetModel();
         _favouriteTransforms = favouriteTransforms;
