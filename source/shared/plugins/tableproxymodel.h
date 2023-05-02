@@ -26,6 +26,8 @@
 #include <QCollator>
 #include <QStringList>
 
+#include <vector>
+#include <map>
 #include <unordered_set>
 #include <deque>
 #include <utility>
@@ -52,6 +54,7 @@ class TableProxyModel : public QSortFilterProxyModel
     Q_PROPERTY(QStringList columnOrder MEMBER _sourceColumnOrder WRITE setColumnOrder NOTIFY columnOrderChanged)
     Q_PROPERTY(QString sortColumn READ sortColumn_ WRITE setSortColumn NOTIFY sortColumnChanged)
     Q_PROPERTY(Qt::SortOrder sortOrder READ sortOrder_ WRITE setSortOrder NOTIFY sortOrderChanged)
+    Q_PROPERTY(bool isRowOrderSet READ isRowOrderSet NOTIFY isRowOrderSetChanged)
 
 private:
     QStandardItemModel _headerModel;
@@ -65,6 +68,7 @@ private:
 
     QCollator _collator;
     std::deque<std::pair<QString, Qt::SortOrder>> _sortColumnAndOrders;
+    std::map<size_t, size_t> _rowOrderMap;
 
     enum Roles
     {
@@ -78,6 +82,8 @@ private:
     void resort();
 
     void onColumnNamesChanged();
+
+    bool isRowOrderSet() const;
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
@@ -102,6 +108,8 @@ public:
     Q_INVOKABLE QItemSelectionRange buildRowSelectionRange(int topRow, int bottomRow);
     Q_INVOKABLE QItemSelection buildRowSelection(const std::vector<size_t>& rows);
 
+    Q_INVOKABLE void setRowOrder(const std::vector<size_t>& rows);
+
     using QSortFilterProxyModel::mapToSource;
 
     void setHiddenColumns(const QStringList& hiddenColumns);
@@ -119,6 +127,7 @@ signals:
 
     void sortColumnChanged(const QString& sortColumn);
     void sortOrderChanged(Qt::SortOrder sortOrder);
+    void isRowOrderSetChanged();
 
     void filterRoleNameChanged();
     void filterPatternSyntaxChanged();

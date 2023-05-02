@@ -113,6 +113,20 @@ QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& row
     return selection;
 }
 
+void TableProxyModel::setRowOrder(const std::vector<size_t>& rows)
+{
+    _rowOrderMap.clear();
+
+    for(size_t i = 0; i < rows.size(); i++)
+    {
+        auto row = rows[i];
+        _rowOrderMap[row] = i;
+    }
+
+    resort();
+    emit isRowOrderSetChanged();
+}
+
 int TableProxyModel::mapToSourceRow(int proxyRow) const
 {
     const QModelIndex proxyIndex = index(proxyRow, 0);
@@ -227,8 +241,10 @@ QString TableProxyModel::sortColumn_() const
 
 void TableProxyModel::setSortColumn(const QString& newSortColumn)
 {
-    if(newSortColumn.isEmpty() || newSortColumn == sortColumn_())
+    if((newSortColumn.isEmpty() || newSortColumn == sortColumn_()) && _rowOrderMap.empty())
         return;
+
+    _rowOrderMap.clear();
 
     auto currentSortOrder = Qt::AscendingOrder;
 
@@ -251,6 +267,7 @@ void TableProxyModel::setSortColumn(const QString& newSortColumn)
     resort();
     emit sortColumnChanged(newSortColumn);
     emit sortOrderChanged(currentSortOrder);
+    emit isRowOrderSetChanged();
 }
 
 Qt::SortOrder TableProxyModel::sortOrder_() const
@@ -263,13 +280,16 @@ Qt::SortOrder TableProxyModel::sortOrder_() const
 
 void TableProxyModel::setSortOrder(Qt::SortOrder newSortOrder)
 {
-    if(_sortColumnAndOrders.empty() || newSortOrder == sortOrder_())
+    if((_sortColumnAndOrders.empty() || newSortOrder == sortOrder_()) && _rowOrderMap.empty())
         return;
+
+    _rowOrderMap.clear();
 
     _sortColumnAndOrders.front().second = newSortOrder;
 
     resort();
     emit sortOrderChanged(newSortOrder);
+    emit isRowOrderSetChanged();
 }
 
 void TableProxyModel::invalidateFilter()
@@ -326,10 +346,27 @@ void TableProxyModel::onColumnNamesChanged()
     invalidateFilter();
 }
 
+bool TableProxyModel::isRowOrderSet() const
+{
+    return !_rowOrderMap.empty();
+}
+
 bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
 {
-    auto rowA = a.row();
-    auto rowB = b.row();
+    auto rowA = static_cast<size_t>(a.row());
+    auto rowB = static_cast<size_t>(b.row());
+
+    auto rowOrderMapContainsA = _rowOrderMap.contains(rowA);
+    auto rowOrderMapContainsB = _rowOrderMap.contains(rowB);
+
+    if(rowOrderMapContainsA && rowOrderMapContainsB)
+        return _rowOrderMap.at(rowA) < _rowOrderMap.at(rowB);
+
+    if(rowOrderMapContainsA)
+        return true;
+
+    if(rowOrderMapContainsB)
+        return false;
 
     for(const auto& sortColumnAndOrder : _sortColumnAndOrders)
     {
@@ -341,8 +378,8 @@ bool TableProxyModel::lessThan(const QModelIndex& a, const QModelIndex& b) const
 
         auto order = sortColumnAndOrder.second;
 
-        auto indexA = sourceModel()->index(rowA, static_cast<int>(column));
-        auto indexB = sourceModel()->index(rowB, static_cast<int>(column));
+        auto indexA = sourceModel()->index(static_cast<int>(rowA), static_cast<int>(column));
+        auto indexB = sourceModel()->index(static_cast<int>(rowB), static_cast<int>(column));
 
         auto valueA = sourceModel()->data(indexA, Qt::DisplayRole);
         auto valueB = sourceModel()->data(indexB, Qt::DisplayRole);

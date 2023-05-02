@@ -429,6 +429,11 @@ Item
         selectionModel.selectSourceRows(rows, ItemSelectionModel.Clear);
     }
 
+    function setRowOrder(rows)
+    {
+        proxyModel.setRowOrder(rows);
+    }
+
     ItemSelectionModel
     {
         id: selectionModel
@@ -667,7 +672,7 @@ Item
                             antialiasing: false
                             width: headerView.sortIndicatorWidth
                             height: headerView.sortIndicatorHeight
-                            visible: proxyModel.sortColumn === headerItem.text && !columnSelectionMode
+                            visible: proxyModel.sortColumn === headerItem.text && !proxyModel.isRowOrderSet && !columnSelectionMode
                             transform: Rotation
                             {
                                 origin.x: sortIndicator.width * 0.5
