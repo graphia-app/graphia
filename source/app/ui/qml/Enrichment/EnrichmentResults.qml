@@ -201,7 +201,7 @@ ApplicationWindow
                 }
 
                 // For some reason QmlUtils isn't available from directly within the sort expression
-                function stringCompare(a, b) { QmlUtils.localeCompareStrings(a, b); }
+                property var stringCompare: QmlUtils.localeCompareStrings
 
                 onClicked: function(column, row, mouse)
                 {
