@@ -156,6 +156,7 @@ public:
 using AdjacencyMatrixTSVFileParser =    AdjacencyMatrixParser<TsvFileParser>;
 using AdjacencyMatrixSSVFileParser =    AdjacencyMatrixParser<SsvFileParser>;
 using AdjacencyMatrixCSVFileParser =    AdjacencyMatrixParser<CsvFileParser>;
+using AdjacencyMatrixTXTFileParser =    AdjacencyMatrixParser<TxtFileParser>;
 using AdjacencyMatrixXLSXFileParser =   AdjacencyMatrixParser<XlsxTabularDataParser>;
 using AdjacencyMatrixMatLabFileParser = AdjacencyMatrixParser<MatLabFileParser>;
 

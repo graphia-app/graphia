@@ -111,6 +111,8 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixSSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == u"MatrixTSV"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTSVFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
+        else if(urlTypeName == u"MatrixTXT"_s)
+            parser = configureMatrixParser(std::make_unique<AdjacencyMatrixTXTFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == u"MatrixXLSX"_s)
             parser = configureMatrixParser(std::make_unique<AdjacencyMatrixXLSXFileParser>(userNodeData, userEdgeData, &_preloadedTabularData));
         else if(urlTypeName == u"MatrixMatLab"_s)
@@ -246,7 +248,8 @@ BaseGenericPlugin::BaseGenericPlugin()
     registerUrlType(u"PairwiseXLSX"_s, QObject::tr("Pairwise Excel File"), QObject::tr("Pairwise Excel Files"), {"xlsx"});
     registerUrlType(u"MatrixCSV"_s, QObject::tr("Adjacency Matrix CSV File"), QObject::tr("Adjacency Matrix CSV Files"), {"csv"});
     registerUrlType(u"MatrixSSV"_s, QObject::tr("Adjacency Matrix SSV File"), QObject::tr("Adjacency Matrix SSV Files"), {"ssv"});
-    registerUrlType(u"MatrixTSV"_s, QObject::tr("Adjacency Matrix File"), QObject::tr("Adjacency Matrix Files"), {"tsv"});
+    registerUrlType(u"MatrixTSV"_s, QObject::tr("Adjacency Matrix TSV File"), QObject::tr("Adjacency Matrix TSV Files"), {"tsv"});
+    registerUrlType(u"MatrixTXT"_s, QObject::tr("Adjacency Matrix TXT File"), QObject::tr("Adjacency Matrix TXT Files"), {"txt"});
     registerUrlType(u"MatrixXLSX"_s, QObject::tr("Adjacency Matrix Excel File"), QObject::tr("Adjacency Matrix Excel Files"), {"xlsx"});
     registerUrlType(u"MatrixMatLab"_s, QObject::tr("Matlab Data File"), QObject::tr("Matlab Data Files"), {"mat"});
     registerUrlType(u"BiopaxOWL"_s, QObject::tr("Biopax OWL File"), QObject::tr("Biopax OWL Files"), {"owl"});
@@ -281,6 +284,7 @@ QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
             (urlType == u"MatrixCSV"_s && AdjacencyMatrixCSVFileParser::canLoad(url)) ||
             (urlType == u"MatrixSSV"_s && AdjacencyMatrixSSVFileParser::canLoad(url)) ||
             (urlType == u"MatrixTSV"_s && AdjacencyMatrixTSVFileParser::canLoad(url)) ||
+            (urlType == u"MatrixTXT"_s && AdjacencyMatrixTXTFileParser::canLoad(url)) ||
             (urlType == u"MatrixXLSX"_s && AdjacencyMatrixXLSXFileParser::canLoad(url)) ||
             (urlType == u"MatrixMatLab"_s && AdjacencyMatrixMatLabFileParser::canLoad(url)) ||
             (urlType == u"BiopaxOWL"_s && BiopaxFileParser::canLoad(url)) ||
@@ -302,7 +306,7 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
         return tr("The file cannot be loaded. The file extension "
             "was used to determine the file's possible type(s): %1. "
             "Please check its contents are of this type.")
-            .arg(urlTypes.join(','));
+            .arg(urlTypes.join(", "));
     }
 
     return {};
