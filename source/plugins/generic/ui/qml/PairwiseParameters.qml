@@ -70,6 +70,7 @@ BaseParameterDialog
         id: loadingInfo
 
         anchors.fill: parent
+        anchors.margins: Constants.margin
         visible: !tabularDataParser.complete || tabularDataParser.failed
 
         Item { Layout.fillHeight: true }
@@ -79,7 +80,7 @@ BaseParameterDialog
             Layout.fillWidth: true
 
             horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WrapAnywhere
+            wrapMode: Text.WordWrap
 
             text:
             {

@@ -160,7 +160,10 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
             parser.setProgressFn([this](int progress) { setProgress(progress); });
 
             if(!parser.parse(fileUrl))
+            {
+                _failureReason = parser.failureReason();
                 return false;
+            }
 
             _dataPtr = std::make_shared<TabularData>(std::move(parser.tabularData()));
             updateColumnTypes();
@@ -203,12 +206,26 @@ bool QmlTabularDataParser::parse(const QUrl& fileUrl)
         }
 
         setProgress(-1);
-        auto result = onParseComplete();
 
-        if(!result)
+        if(!success)
         {
             _dataPtr->reset();
-            _failureReason = result._reason;
+
+            if(_failureReason.isEmpty())
+            {
+                _failureReason = tr("Cannot identify tabular file type. "
+                    "Please ensure the file contains a consistent number of columns.");
+            }
+        }
+        else
+        {
+            auto result = onParseComplete();
+
+            if(!result)
+            {
+                _dataPtr->reset();
+                _failureReason = result._reason;
+            }
         }
     });
 
