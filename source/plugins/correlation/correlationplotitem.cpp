@@ -1558,6 +1558,17 @@ double CorrelationPlotItem::columnAnnotationsHeight() const
     return static_cast<double>(_visibleColumnAnnotationNames.size()) * labelHeight();
 }
 
+std::vector<size_t> CorrelationPlotItem::selectedColumns() const
+{
+    std::vector<size_t> v;
+    v.reserve(_selectedColumns.size());
+
+    for(auto column : _selectedColumns)
+        v.push_back(column);
+
+    return v;
+}
+
 void CorrelationPlotItem::createTooltip()
 {
     if(_tooltipLayer != nullptr)
@@ -1668,6 +1679,7 @@ void CorrelationPlotItem::clone(CorrelationPlotItem& target) const
 
     target._groupByAnnotation               = _groupByAnnotation;
     target._colorGroupByAnnotationName      = _colorGroupByAnnotationName;
+    target._selectedColumns                 = _selectedColumns;
 
     target._elideLabelWidth                 = _elideLabelWidth;
     target._showColumnNames                 = _showColumnNames;

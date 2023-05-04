@@ -188,6 +188,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QString colorGroupByAnnotationName MEMBER _colorGroupByAnnotationName
         WRITE setColorGroupByAnnotationName NOTIFY plotOptionsChanged)
 
+    Q_PROPERTY(std::vector<size_t> selectedColumns READ selectedColumns NOTIFY selectedColumnsChanged)
+
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
@@ -309,6 +311,8 @@ private:
     bool _groupByAnnotation = false;
     QString _colorGroupByAnnotationName;
 
+    std::set<size_t> _selectedColumns;
+
     QCPTextElement* _xAxisLabelTextElement = nullptr;
 
     CorrelationPluginInstance* _pluginInstance = nullptr;
@@ -405,6 +409,8 @@ private:
     int plotMode() const;
     void setPlotMode(int plotModeInt);
 
+    std::vector<size_t> selectedColumns() const;
+
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
     size_t numVisibleColumnAnnotations() const;
@@ -466,6 +472,7 @@ signals:
     void rightClick();
     void horizontalScrollPositionChanged();
     void selectedRowsChanged();
+    void selectedColumnsChanged();
     void numVisibleColumnsChanged();
     void visibleHorizontalFractionChanged();
     void isWideChanged();
