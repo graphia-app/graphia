@@ -447,6 +447,7 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
     }
 
     auto pos = event->pos() - axisRect->topLeft();
+    bool clickOnName = pos.x() < 0;
     auto p = columnAnnotationPositionForPixel(axisRect, pos.toPointF());
 
     if(p.y() < 0)
@@ -454,32 +455,47 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
 
     const auto& name = columnAnnotations.at(static_cast<size_t>(p.y()))->name();
 
-    if(_plotMode == PlotMode::ColumnAnnotationSelection && pos.x() < 0)
+    if(clickOnName && _plotMode != PlotMode::ColumnAnnotationSelection)
     {
-        // Click is on the annotation name itself (with checkbox)
-        if(u::contains(_visibleColumnAnnotationNames, name))
-            _visibleColumnAnnotationNames.erase(name);
-        else
-            _visibleColumnAnnotationNames.insert(name);
-
-        emit visibleColumnAnnotationNamesChanged();
-    }
-    else if(_plotMode == PlotMode::ColumnAnnotationSelection &&
-        !u::contains(_visibleColumnAnnotationNames, name))
-    {
-        // Clicking anywhere else enables a column annotation
-        // when it's disabled...
-        _visibleColumnAnnotationNames.insert(name);
-
-        emit visibleColumnAnnotationNamesChanged();
-    }
-    else if(_plotMode == PlotMode::ColumnAnnotationSelection || pos.x() < 0)
-    {
-        // ...or selects it as the sort annotation otherwise
         sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
         return;
     }
 
-    emit plotOptionsChanged(); // NOLINT
+    switch(_plotMode)
+    {
+    default:
+    case PlotMode::Normal:
+        return;
+
+    case PlotMode::ColumnAnnotationSelection:
+        if(clickOnName)
+        {
+            // Click is on the annotation name itself (with checkbox)
+            if(u::contains(_visibleColumnAnnotationNames, name))
+                _visibleColumnAnnotationNames.erase(name);
+            else
+                _visibleColumnAnnotationNames.insert(name);
+
+            emit visibleColumnAnnotationNamesChanged();
+            emit plotOptionsChanged();
+        }
+        else if(!u::contains(_visibleColumnAnnotationNames, name))
+        {
+            // Clicking anywhere else enables a column annotation
+            // when it's disabled...
+            _visibleColumnAnnotationNames.insert(name);
+
+            emit visibleColumnAnnotationNamesChanged();
+            emit plotOptionsChanged();
+        }
+        else
+        {
+            // ...or selects it as the sort annotation otherwise
+            sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
+            return;
+        }
+        break;
+    }
+
     rebuildPlot();
 }
