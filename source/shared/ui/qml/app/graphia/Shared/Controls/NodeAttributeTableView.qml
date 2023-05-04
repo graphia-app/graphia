@@ -35,13 +35,9 @@ Item
     property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
-    property var visibleRows:
-    {
-        let sourceRows = [...Array(tableView.rows).keys()];
-        return sourceRows.map(row => proxyModel.mapToSourceRow(row));
-    }
+    property var visibleRows: []
 
-    property alias rowCount: tableView.rows
+    property int rowCount: visibleRows.length
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
     property string exportBaseFileName: "attributes"
@@ -213,7 +209,7 @@ Item
         removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
     }
 
-    function selectAll() { selectRows(0, proxyModel.rowCount() - 1); }
+    function selectAll() { if(proxyModel.rowCount() > 0) selectRows(0, proxyModel.rowCount() - 1); }
 
     function selectSources()    { selectionModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
     function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
@@ -262,7 +258,7 @@ Item
     Action
     {
         id: exportTableAction
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
         text: qsTr("Export…")
         icon.name: "document-save"
 
@@ -295,7 +291,7 @@ Item
         id: selectAllTableAction
         text: qsTr("Select All")
         icon.name: "edit-select-all"
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectAll(); }
     }
@@ -304,7 +300,7 @@ Item
     {
         id: selectSourcesTableAction
         text: qsTr("Select Sources")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectSources(); }
     }
@@ -313,7 +309,7 @@ Item
     {
         id: selectTargetsTableAction
         text: qsTr("Select Targets")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectTargets(); }
     }
@@ -322,7 +318,7 @@ Item
     {
         id: selectNeighboursTableAction
         text: qsTr("Select Neighbours")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectNeighbours(); }
     }
@@ -331,7 +327,7 @@ Item
     {
         id: cropToSelecitonAction
         text: qsTr("Crop To Selection")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.cropToSelection(); }
     }
@@ -348,7 +344,7 @@ Item
     Action
     {
         id: copyTableColumnToClipboardAction
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
         text: qsTr("Copy Column To Clipboard")
         icon.name: "document-save"
         onTriggered: function(source)
@@ -1196,7 +1192,10 @@ Item
                     function onSelectionChanged()
                     {
                         proxyModel.invalidateFilter();
-                        selectRows(0, proxyModel.rowCount() - 1);
+
+                        let sourceRows = [...Array(proxyModel.rowCount()).keys()];
+                        root.visibleRows = sourceRows.map(row => proxyModel.mapToSourceRow(row));
+
                         verticalTableViewScrollBar.position = 0;
                     }
                 }
