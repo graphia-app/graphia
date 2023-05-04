@@ -422,8 +422,8 @@ private:
     QCPAxis* configureColumnAnnotations(QCPAxisRect* axisRect);
     void configureLegend();
 
-    void onLeftClick(const QPoint& pos);
-    void onLeftClickColumnAnnotation(const QCPAxisRect* axisRect, const QPoint& pos);
+    void onClick(const QMouseEvent* event);
+    void onClickColumnAnnotation(const QCPAxisRect* axisRect, const QMouseEvent* event);
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 

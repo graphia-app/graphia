@@ -408,7 +408,7 @@ bool CorrelationPlotItem::columnAnnotationTooltip(const QCPAxisRect* axisRect)
     return true;
 }
 
-void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRect, const QPoint& pos)
+void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, const QMouseEvent* event)
 {
     std::vector<const ColumnAnnotation*> columnAnnotations;
     std::transform(_pluginInstance->columnAnnotations().begin(), _pluginInstance->columnAnnotations().end(),
@@ -424,6 +424,7 @@ void CorrelationPlotItem::onLeftClickColumnAnnotation(const QCPAxisRect* axisRec
         }), columnAnnotations.end());
     }
 
+    auto pos = event->pos() - axisRect->topLeft();
     auto p = columnAnnotationPositionForPixel(axisRect, pos.toPointF());
 
     if(p.y() < 0)

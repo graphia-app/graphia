@@ -469,19 +469,10 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
     if(delta.manhattanLength() > 3)
         return;
 
-    switch(event->button())
-    {
-    case Qt::LeftButton:
-        onLeftClick(event->pos());
-        break;
+    onClick(event);
 
-    case Qt::RightButton:
+    if(event->button() == Qt::RightButton)
         emit rightClick();
-        break;
-
-    default:
-        break;
-    }
 
     _tooltipUpdateRequired = true;
 }
@@ -923,14 +914,17 @@ void CorrelationPlotItem::configureLegend()
     legend->setVisible(true);
 }
 
-void CorrelationPlotItem::onLeftClick(const QPoint& pos)
+void CorrelationPlotItem::onClick(const QMouseEvent* event)
 {
-    const auto* axisRect = _customPlot.axisRectAt(pos);
+    if(event->button() != Qt::LeftButton)
+        return;
+
+    const auto* axisRect = _customPlot.axisRectAt(event->pos());
 
     if(axisRect == nullptr)
         return;
 
-    auto point = pos - axisRect->topLeft();
+    auto point = event->pos() - axisRect->topLeft();
 
     if(point.y() >= axisRect->height() && _showColumnNames)
     {
@@ -941,7 +935,7 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
             sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
     }
     else if(CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
-        onLeftClickColumnAnnotation(axisRect, point);
+        onClickColumnAnnotation(axisRect, event);
 }
 
 void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)
