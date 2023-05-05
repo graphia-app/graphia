@@ -215,7 +215,13 @@ Item
     function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
     function selectNeighbours() { selectionModel.selectSourceRows(root.model.neighboursOf(root.selectedRows)); }
 
-    function cropToSelection()  { root.model.cropTo(root.selectedRows); }
+    signal aboutToCrop();
+
+    function cropToSelection()
+    {
+        root.aboutToCrop();
+        root.model.cropTo(root.selectedRows);
+    }
 
     Preferences
     {
