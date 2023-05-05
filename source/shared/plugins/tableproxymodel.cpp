@@ -144,6 +144,8 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 
 TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
+    setDynamicSortFilter(false);
+
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
     connect(this, &TableProxyModel::columnNamesChanged, this, &TableProxyModel::onColumnNamesChanged);
 
