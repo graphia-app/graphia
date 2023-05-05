@@ -789,6 +789,30 @@ void CorrelationPlotItem::configureContinuousAxisRect()
         _continuousXAxis->grid()->setZeroLinePen(_continuousXAxis->grid()->pen());
     }
 
+    auto* selectedColumnsColorMap = new QCPColorMap(_continuousXAxis, _continuousYAxis);
+
+    QCPColorGradient gradient;
+    gradient.setColorStopAt(0.0, QColor(Qt::transparent));
+    auto highlightColor = QApplication::palette().highlight().color();
+    highlightColor.setAlpha(127);
+    gradient.setColorStopAt(1.0, highlightColor);
+
+    selectedColumnsColorMap->setInterpolate(false);
+    selectedColumnsColorMap->setGradient(gradient);
+
+    auto numColumns = static_cast<int>(_pluginInstance->numContinuousColumns());
+    selectedColumnsColorMap->data()->setSize(numColumns, 1);
+    selectedColumnsColorMap->data()->setRange(QCPRange(0, numColumns - 1),
+        QCPRange(-QCPRange::maxRange, QCPRange::maxRange));
+
+    selectedColumnsColorMap->setDataRange(QCPRange(0.0, 1.0));
+
+    for(int column = 0; column < numColumns; column++)
+    {
+        selectedColumnsColorMap->data()->setCell(column, 0,
+            _selectedColumns.contains(_sortMap.at(static_cast<size_t>(column))) ? 1.0 : 0.0);
+    }
+
     auto plotAveragingType = normaliseQmlEnum<PlotAveragingType>(_averagingType);
 
     if(!_groupByAnnotation || _visibleColumnAnnotationNames.empty())

@@ -31,6 +31,9 @@ Rectangle
 
     property CorrelationPlot plot: null
 
+    readonly property alias roiPercentile: percentileSlider.value
+    readonly property alias roiWeight: weightSlider.value
+
     // Don't pass clicks through
     MouseArea { anchors.fill: parent }
 
@@ -78,12 +81,44 @@ Rectangle
             }
         }
 
+        RowLayout
+        {
+            id: rowsOfInterestColumnSelectionControls
+            enabled: plot.selectedColumns.length > 0
+
+            Slider
+            {
+                id: percentileSlider
+
+                live: false
+                value: 5
+                from: 100
+                to: 1
+
+                onValueChanged: { plot.selectRowsOfInterest(); }
+            }
+
+            Slider
+            {
+                id: weightSlider
+
+                live: false
+                value: 0
+                from: -29
+                to: 29
+                stepSize: 0.2
+
+                onValueChanged: { plot.selectRowsOfInterest(); }
+            }
+        }
+
         FloatingButton { action: closeAction }
     }
 
     function show()
     {
         columnAnnotationSelectionControls.visible = (plot.plotMode === PlotMode.ColumnAnnotationSelection);
+        rowsOfInterestColumnSelectionControls.visible = (plot.plotMode === PlotMode.RowsOfInterestColumnSelection);
 
         // Hack to delay emitting shown() until the implicit
         // size of the item has had a chance to be resolved

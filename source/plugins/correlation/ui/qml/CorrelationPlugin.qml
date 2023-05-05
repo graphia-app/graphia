@@ -61,6 +61,22 @@ PluginContent
 
     Action
     {
+        id: findRowsOfInterestAction
+        text: qsTr("Find Rows Of Interest")
+        icon.name: "edit-find"
+
+        enabled: plugin.model.numContinuousColumns > 0
+
+        checkable: true
+
+        onTriggered: function(source)
+        {
+            root.togglePlotMode(PlotMode.RowsOfInterestColumnSelection);
+        }
+    }
+
+    Action
+    {
         id: selectColumnAnnotationsAction
         text: qsTr("Select Visible Column Annotations")
         icon.name: "column-annotations"
@@ -83,6 +99,8 @@ PluginContent
 
         selectColumnAnnotationsAction.checked =
             (plot.plotMode === PlotMode.ColumnAnnotationSelection);
+        findRowsOfInterestAction.checked =
+            (plot.plotMode === PlotMode.RowsOfInterestColumnSelection);
 
         if(hideControls)
             modalControls.hide();
@@ -511,6 +529,9 @@ PluginContent
             let showAllColumnsMenuItem = MenuUtils.addActionTo(menu, toggleShowAllColumns);
             showAllColumnsMenuItem.hidden = Qt.binding(() => !plot.isWide);
 
+            if(plugin.model.numContinuousColumns > 0)
+                MenuUtils.addActionTo(menu, findRowsOfInterestAction);
+
             if(plugin.model.columnAnnotationNames.length > 0)
                 MenuUtils.addActionTo(menu, selectColumnAnnotationsAction);
 
@@ -784,6 +805,11 @@ PluginContent
             ToolBarButton { action: toggleColumnNamesAction }
             ToolBarButton
             {
+                visible: findRowsOfInterestAction.enabled
+                action: findRowsOfInterestAction
+            }
+            ToolBarButton
+            {
                 visible: selectColumnAnnotationsAction.enabled
                 action: selectColumnAnnotationsAction
             }
@@ -828,7 +854,14 @@ PluginContent
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
 
-            onVisibleRowsChanged: { tableView.selectAll(); }
+            onVisibleRowsChanged:
+            {
+                if(plot.plotMode === PlotMode.RowsOfInterestColumnSelection && plot.selectedColumns.length > 0)
+                    plot.selectRowsOfInterest();
+                else
+                    tableView.selectAll();
+            }
+
             onSelectedRowsChanged:
             {
                 // If the tableView's selection is less than complete, highlight
@@ -836,6 +869,8 @@ PluginContent
                 plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
                     tableView.selectedRows : [];
             }
+
+            onAboutToCrop: { root.setPlotMode(PlotMode.Normal); }
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
@@ -944,6 +979,20 @@ PluginContent
                     onIqrStyleChanged: { updateMenu(); }
 
                     horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
+
+                    function selectRowsOfInterest()
+                    {
+                        if(plot.plotMode !== PlotMode.RowsOfInterestColumnSelection || plot.selectedColumns.length === 0)
+                            return;
+
+                        let rows = plugin.model.rowsOfInterestByColumns(plot.selectedColumns,
+                            tableView.visibleRows, modalControls.roiPercentile, modalControls.roiWeight);
+
+                        tableView.setRowOrder(rows);
+                        tableView.clearAndSelectRows(rows);
+                    }
+
+                    onSelectedColumnsChanged: { plot.selectRowsOfInterest(); }
 
                     onRightClick:
                     {

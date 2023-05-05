@@ -928,11 +928,35 @@ void CorrelationPlotItem::onClick(const QMouseEvent* event)
 
     if(point.y() >= axisRect->height() && _showColumnNames)
     {
-        // Click is below either/both axes
-        if(point.x() < 0)
-            sortBy(static_cast<int>(PlotColumnSortType::Natural));
+        if(point.x() >= 0)
+        {
+            if(_plotMode == PlotMode::RowsOfInterestColumnSelection)
+            {
+                auto* axis = axisRect->axis(QCPAxis::atBottom);
+                auto column = static_cast<size_t>(std::round(axis->pixelToCoord(event->pos().x())));
+
+                bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
+
+                if(!toggle)
+                    _selectedColumns.clear();
+
+                auto index = _sortMap.at(column);
+                if(toggle && _selectedColumns.contains(index))
+                    _selectedColumns.erase(index);
+                else
+                    _selectedColumns.insert(index);
+
+                emit selectedColumnsChanged();
+                rebuildPlot();
+            }
+            else
+                sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
+        }
         else
-            sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
+        {
+            // Click is in bottom left
+            sortBy(static_cast<int>(PlotColumnSortType::Natural));
+        }
     }
     else if(CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
         onClickColumnAnnotation(axisRect, event);

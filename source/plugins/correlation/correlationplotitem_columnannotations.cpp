@@ -298,6 +298,12 @@ void CorrelationPlotItem::setPlotMode(int plotModeInt)
             emit plotOptionsChanged();
         }
 
+        if(_plotMode != PlotMode::RowsOfInterestColumnSelection)
+        {
+            _selectedColumns.clear();
+            emit selectedColumnsChanged();
+        }
+
         rebuildPlot();
     }
 }
@@ -494,6 +500,44 @@ void CorrelationPlotItem::onClickColumnAnnotation(const QCPAxisRect* axisRect, c
             sortBy(static_cast<int>(PlotColumnSortType::ColumnAnnotation), name);
             return;
         }
+        break;
+
+    case PlotMode::RowsOfInterestColumnSelection:
+        const auto& plottable = axisRect->plottables().at(0);
+        const auto* qcpColumnAnnotations = dynamic_cast<const QCPColumnAnnotations*>(plottable);
+        const auto* rect = qcpColumnAnnotations->rectAt(
+            static_cast<size_t>(p.x()), *columnAnnotations.at(static_cast<size_t>(p.y())));
+
+        bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
+
+        if(!toggle)
+            _selectedColumns.clear();
+
+        std::vector<size_t> indices;
+
+        for(size_t i = rect->_x; i < rect->_x + rect->_width; i++)
+        {
+            if(_groupByAnnotation)
+            {
+                for(auto j : _annotationGroupMap.at(i))
+                    indices.push_back(j);
+            }
+            else
+                indices.push_back(_sortMap.at(i));
+        }
+
+        bool selected = std::all_of(indices.begin(), indices.end(),
+            [this](size_t index) { return _selectedColumns.contains(index); });
+
+        for(auto index : indices)
+        {
+            if(toggle && selected)
+                _selectedColumns.erase(index);
+            else
+                _selectedColumns.insert(index);
+        }
+
+        emit selectedColumnsChanged();
         break;
     }
 

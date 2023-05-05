@@ -86,7 +86,8 @@ DEFINE_QML_ENUM(
 DEFINE_QML_ENUM(
     Q_GADGET, PlotMode,
     Normal,
-    ColumnAnnotationSelection);
+    ColumnAnnotationSelection,
+    RowsOfInterestColumnSelection);
 
 enum class CorrelationPlotUpdateType
 {
