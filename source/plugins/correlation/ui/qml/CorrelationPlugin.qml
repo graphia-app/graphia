@@ -680,19 +680,22 @@ PluginContent
             MenuUtils.addSeparatorTo(menu);
             MenuUtils.addActionTo(menu, savePlotImageAction);
 
-            let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Images By…"));
-            plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
+            if(plugin.model.sharedValuesAttributeNames.length > 0)
             {
-                let attributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
-
-                attributeMenuItem.triggered.connect(function()
+                let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Images By…"));
+                plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
-                    savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                    let attributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
+
+                    attributeMenuItem.triggered.connect(function()
                     {
-                        plot.savePlotImageByAttribute(filename, extension, attributeName)
+                        savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                        {
+                            plot.savePlotImageByAttribute(filename, extension, attributeName)
+                        });
                     });
                 });
-            });
+            }
 
             // Initial update
             root.updatePlotMenuState();
