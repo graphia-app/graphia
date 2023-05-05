@@ -372,6 +372,9 @@ Item
         checkable: true
         onTriggered: function(source)
         {
+            selectionModel.clear();
+            root.selectedRows = [];
+
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.AscendingOrder;
             root.updateSortActionChecked();
@@ -385,6 +388,9 @@ Item
         checkable: true
         onTriggered: function(source)
         {
+            selectionModel.clear();
+            root.selectedRows = [];
+
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.DescendingOrder;
             root.updateSortActionChecked();
@@ -732,6 +738,9 @@ Item
 
                                 if(mouse.button === Qt.LeftButton)
                                 {
+                                    selectionModel.clear();
+                                    root.selectedRows = [];
+
                                     if(proxyModel.sortColumn === headerItem.text)
                                     {
                                         proxyModel.sortOrder = proxyModel.sortOrder === Qt.DescendingOrder ?
@@ -742,9 +751,6 @@ Item
                                 }
                                 else if(mouse.button === Qt.RightButton)
                                     contextMenu.show();
-
-                                selectionModel.clear();
-                                root.selectedRows = [];
                             }
                         }
 
