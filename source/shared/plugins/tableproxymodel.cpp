@@ -300,6 +300,12 @@ void TableProxyModel::updateSourceModelFilter()
 
 void TableProxyModel::resort()
 {
+    //FIXME: For reasons unknown the below call to invalidate() is often very slow or
+    // sometimes infinite; it seems related to QPersistentModelIndexes, which are
+    // themselves invalidated by doing a model reset hence...
+    beginResetModel();
+    endResetModel();
+
     invalidate();
 
     // The parameters to this don't really matter, because the actual ordering is determined
