@@ -84,14 +84,31 @@ QItemSelectionRange TableProxyModel::buildRowSelectionRange(int topRow, int bott
 
 QItemSelection TableProxyModel::buildRowSelection(const std::vector<size_t>& rows)
 {
+    if(rows.empty())
+        return {};
+
     QItemSelection selection;
     selection.reserve(static_cast<qsizetype>(rows.size()));
 
-    for(auto row : rows)
+    auto sortedRows = rows;
+    std::sort(sortedRows.begin(), sortedRows.end());
+    auto first = sortedRows.front();
+    auto last = first;
+
+    for(auto row : sortedRows)
     {
-        selection.append({index(static_cast<int>(row), 0),
-            index(static_cast<int>(row), columnCount() - 1)});
+        if(row > (last + 1))
+        {
+            selection.append({index(static_cast<int>(first), 0),
+                index(static_cast<int>(last), columnCount() - 1)});
+            first = last = row;
+        }
+        else
+            last = row;
     }
+
+    selection.append({index(static_cast<int>(first), 0),
+        index(static_cast<int>(last), columnCount() - 1)});
 
     return selection;
 }
@@ -127,6 +144,8 @@ int TableProxyModel::mapOrderedToSourceColumn(int proxyColumn) const
 
 TableProxyModel::TableProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
+    setDynamicSortFilter(false);
+
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &TableProxyModel::updateSourceModelFilter);
     connect(this, &TableProxyModel::columnNamesChanged, this, &TableProxyModel::onColumnNamesChanged);
 
@@ -282,6 +301,12 @@ void TableProxyModel::updateSourceModelFilter()
 
 void TableProxyModel::resort()
 {
+    //FIXME: For reasons unknown the below call to invalidate() is often very slow or
+    // sometimes infinite; it seems related to QPersistentModelIndexes, which are
+    // themselves invalidated by doing a model reset hence...
+    beginResetModel();
+    endResetModel();
+
     invalidate();
 
     // The parameters to this don't really matter, because the actual ordering is determined

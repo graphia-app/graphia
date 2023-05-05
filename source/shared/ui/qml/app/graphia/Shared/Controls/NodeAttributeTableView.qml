@@ -35,7 +35,9 @@ Item
     property var model
     property int defaultColumnWidth: 120
     property var selectedRows: []
-    property alias rowCount: tableView.rows
+    property var visibleRows: []
+
+    property int rowCount: visibleRows.length
     property alias sortIndicatorColumn: proxyModel.sortColumn
     property alias sortIndicatorOrder: proxyModel.sortOrder
     property string exportBaseFileName: "attributes"
@@ -206,7 +208,7 @@ Item
         removeSpecificAttributeMenuItem.hidden = Qt.binding(() => !pluginContent.attributeIsEditable(root.lastClickedColumnName));
     }
 
-    function selectAll() { selectRows(0, proxyModel.rowCount() - 1); }
+    function selectAll() { if(proxyModel.rowCount() > 0) selectRows(0, proxyModel.rowCount() - 1); }
 
     function selectSources()    { selectionModel.selectSourceRows(root.model.sourcesOf(root.selectedRows)); }
     function selectTargets()    { selectionModel.selectSourceRows(root.model.targetsOf(root.selectedRows)); }
@@ -253,7 +255,7 @@ Item
     Action
     {
         id: exportTableAction
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
         text: qsTr("Export…")
         icon.name: "document-save"
 
@@ -286,7 +288,7 @@ Item
         id: selectAllTableAction
         text: qsTr("Select All")
         icon.name: "edit-select-all"
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectAll(); }
     }
@@ -295,7 +297,7 @@ Item
     {
         id: selectSourcesTableAction
         text: qsTr("Select Sources")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectSources(); }
     }
@@ -304,7 +306,7 @@ Item
     {
         id: selectTargetsTableAction
         text: qsTr("Select Targets")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectTargets(); }
     }
@@ -313,7 +315,7 @@ Item
     {
         id: selectNeighboursTableAction
         text: qsTr("Select Neighbours")
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
 
         onTriggered: { root.selectNeighbours(); }
     }
@@ -330,14 +332,12 @@ Item
     Action
     {
         id: copyTableColumnToClipboardAction
-        enabled: tableView.rows > 0
+        enabled: root.rowCount > 0
         text: qsTr("Copy Column To Clipboard")
         icon.name: "document-save"
         onTriggered: function(source)
         {
-            let sourceRows = [...Array(tableView.rows).keys()];
-            let visibleRows = sourceRows.map(row => proxyModel.mapToSourceRow(row));
-            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, visibleRows);
+            pluginContent.copyTableModelColumnToClipboard(root.model, lastClickedColumn, root.visibleRows);
         }
     }
 
@@ -356,6 +356,9 @@ Item
         checkable: true
         onTriggered: function(source)
         {
+            selectionModel.clear();
+            root.selectedRows = [];
+
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.AscendingOrder;
             root.updateSortActionChecked();
@@ -369,6 +372,9 @@ Item
         checkable: true
         onTriggered: function(source)
         {
+            selectionModel.clear();
+            root.selectedRows = [];
+
             proxyModel.sortColumn = root.lastClickedColumnName;
             proxyModel.sortOrder = Qt.DescendingOrder;
             root.updateSortActionChecked();
@@ -406,6 +412,11 @@ Item
         selectionModel.change(startRowInclusive, endRowInclusive, ItemSelectionModel.Deselect);
     }
 
+    function clearAndSelectRows(rows)
+    {
+        selectionModel.selectSourceRows(rows, ItemSelectionModel.Clear);
+    }
+
     ItemSelectionModel
     {
         id: selectionModel
@@ -426,7 +437,7 @@ Item
             root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
         }
 
-        function selectSourceRows(sourceRows)
+        function selectSourceRows(sourceRows, action)
         {
             let rows = [];
             for(const sourceRow of sourceRows)
@@ -436,8 +447,11 @@ Item
                     rows.push(proxyRow);
             }
 
+            if(action === undefined)
+                action = ItemSelectionModel.NoUpdate;
+
             let selection = proxyModel.buildRowSelection(rows);
-            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select);
+            selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select | action);
 
             root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
         }
@@ -708,6 +722,9 @@ Item
 
                                 if(mouse.button === Qt.LeftButton)
                                 {
+                                    selectionModel.clear();
+                                    root.selectedRows = [];
+
                                     if(proxyModel.sortColumn === headerItem.text)
                                     {
                                         proxyModel.sortOrder = proxyModel.sortOrder === Qt.DescendingOrder ?
@@ -718,9 +735,6 @@ Item
                                 }
                                 else if(mouse.button === Qt.RightButton)
                                     contextMenu.show();
-
-                                selectionModel.clear();
-                                root.selectedRows = [];
                             }
                         }
 
@@ -1166,7 +1180,14 @@ Item
                     function onSelectionChanged()
                     {
                         proxyModel.invalidateFilter();
-                        selectRows(0, proxyModel.rowCount() - 1);
+
+                        let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
+                        let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
+                        let newSelectedRows = root.selectedRows.filter(row => newVisibleRows.includes(row));
+
+                        root.clearAndSelectRows(newSelectedRows);
+                        root.visibleRows = newVisibleRows;
+
                         verticalTableViewScrollBar.position = 0;
                     }
                 }

@@ -74,6 +74,7 @@ PluginContent
 
             exportBaseFileName: root.baseFileNameNoExtension + "-attributes"
 
+            onVisibleRowsChanged: { tableView.selectAll(); }
             onSelectedRowsChanged:
             {
                 // If the tableView's selection is less than complete, highlight
