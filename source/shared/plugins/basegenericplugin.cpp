@@ -306,7 +306,7 @@ QString BaseGenericPlugin::failureReason(const QUrl& url) const
         return tr("The file cannot be loaded. The file extension "
             "was used to determine the file's possible type(s): %1. "
             "Please check its contents are of this type.")
-            .arg(urlTypes.join(", "));
+            .arg(urlTypes.join(u", "_s));
     }
 
     return {};
