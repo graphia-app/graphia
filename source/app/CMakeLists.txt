@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
+include(CheckIPOSupported)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 
@@ -342,6 +343,11 @@ else()
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop
         DESTINATION share/applications)
+endif()
+
+check_ipo_supported(RESULT result)
+if(result)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 if(UNIX)

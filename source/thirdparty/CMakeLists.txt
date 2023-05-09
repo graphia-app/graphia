@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty_headers.cmake)
+include(CheckIPOSupported)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -65,6 +66,12 @@ if(MSVC)
 else()
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
     set_target_properties(thirdparty_static PROPERTIES COMPILE_FLAGS "-w")
+endif()
+
+check_ipo_supported(RESULT result)
+if(result)
+    set_property(TARGET thirdparty PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set_property(TARGET thirdparty_static PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Core Qml Quick QuickControls2 Network Widgets PrintSupport)

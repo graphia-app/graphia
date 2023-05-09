@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/thirdparty_headers.cmake)
+include(CheckIPOSupported)
 
 set(PluginName "correlation")
 
@@ -60,6 +61,11 @@ add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
 
 if(NOT APPLE AND NOT MSVC)
     install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
+endif()
+
+check_ipo_supported(RESULT result)
+if(result)
+    set_property(TARGET ${PluginName} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 target_link_libraries(${PluginName} thirdparty shared)

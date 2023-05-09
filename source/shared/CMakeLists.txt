@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
+include(CheckIPOSupported)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -196,6 +197,11 @@ set(QML_IMPORT_PATH "${QML_IMPORT_PATH};${CMAKE_CURRENT_LIST_DIR}/ui/qml/" PAREN
 list(APPEND SOURCES ${SHARED_SOURCES})
 
 add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+
+check_ipo_supported(RESULT result)
+if(result)
+    set_property(TARGET shared PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 find_package(Qt6 COMPONENTS REQUIRED Concurrent Qml Widgets Xml)
 target_link_libraries(shared
