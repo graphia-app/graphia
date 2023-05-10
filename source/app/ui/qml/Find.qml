@@ -732,6 +732,8 @@ Rectangle
             findField.forceActiveFocus();
             findField.selectAll();
         }
+        else
+            findField.text = "";
 
         root._visible = true;
 
