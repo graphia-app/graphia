@@ -58,6 +58,7 @@ Rectangle
         _type === Find.ByAttribute && selectMultipleModeAction.checked
 
     property bool _finding: false
+    property bool _suppressFind: false
     property bool _pendingFind: false
 
     // When there is an active search but the nodes mask is disabled, it means
@@ -150,6 +151,9 @@ Rectangle
 
     function _doFind()
     {
+        if(_suppressFind)
+            return;
+
         if(!_visible)
         {
             document.resetFind();
@@ -716,6 +720,7 @@ Rectangle
         if(_visible && findType === _type)
             return;
 
+        _suppressFind = true;
         _closing = false;
 
         if(findType === undefined)
@@ -736,6 +741,7 @@ Rectangle
             findField.text = "";
 
         root._visible = true;
+        _suppressFind = false;
 
         // Restore find state (if appropriate)
         _doFind();
