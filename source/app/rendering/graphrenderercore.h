@@ -70,6 +70,8 @@ struct GPUGraphData : OpenGLFunctions
     Primitive::Rectangle _rectangle;
 
     float alpha() const;
+    float selectionAlpha() const;
+
     float componentAlpha() const;
     float unhighlightAlpha() const;
 

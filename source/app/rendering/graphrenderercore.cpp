@@ -329,6 +329,11 @@ float GPUGraphData::alpha() const
     return _componentAlpha * _unhighlightAlpha;
 }
 
+float GPUGraphData::selectionAlpha() const
+{
+    return ((_componentAlpha * 1.0f) + (_unhighlightAlpha * 2.0f)) / 3.0f;
+}
+
 float GPUGraphData::componentAlpha() const
 {
     return _componentAlpha;
@@ -960,11 +965,9 @@ void GraphRendererCore::renderToFramebuffer(Flags<Type> type)
 
         if(type.test(GraphRendererCore::Type::Selection) && graphData._elementsSelected)
         {
-            // Always render the selection outline fully opaque
-            // (i.e. the same as the component's alpha)
             render2DComposite(*this, _selectionShader,
                 graphData._selectionTexture,
-                graphData.componentAlpha());
+                graphData.selectionAlpha());
         }
     }
 
