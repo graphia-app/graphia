@@ -1010,6 +1010,41 @@ PluginContent
                         delayedRunning: plot.busy
                     }
 
+                    Rectangle
+                    {
+                        implicitWidth: roiInstructionsLayout.implicitWidth
+                        implicitHeight: roiInstructionsLayout.implicitHeight
+
+                        color: palette.light
+                        border.width: 1
+                        border.color: palette.dark
+                        radius: 5
+
+                        Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                        opacity: plot.plotMode === PlotMode.RowsOfInterestColumnSelection &&
+                            plot.selectedColumns.length === 0 ? 1.0 : 0.0
+
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: 48
+
+                        ColumnLayout
+                        {
+                            id: roiInstructionsLayout
+                            anchors.centerIn: parent
+
+                            Text
+                            {
+                                Layout.margins: Constants.margin
+                                Layout.preferredWidth: 256
+                                wrapMode: Text.WordWrap
+
+                                text: qsTr("Click on a column name or a column annotation " +
+                                    "to select. Hold <i>Ctrl</i> and click to select multiple columns.")
+                            }
+                        }
+                    }
+
                     SlidingPanel
                     {
                         id: modalControlsPanel
