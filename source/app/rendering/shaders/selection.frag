@@ -28,12 +28,12 @@ uniform vec4 highlightColor;
 uniform float alpha;
 
 uniform mat3 G[2] = mat3[](
-    mat3( 2.0,  2.0,  2.0,
+    mat3( 1.0,  2.0,  1.0,
           0.0,  0.0,  0.0,
-         -2.0, -2.0, -2.0),
-    mat3( 2.0,  0.0, -2.0,
+         -1.0, -2.0, -1.0),
+    mat3( 1.0,  0.0, -1.0,
           2.0,  0.0, -2.0,
-          2.0,  0.0, -2.0)
+          1.0,  0.0, -1.0)
 );
 
 vec4 multisampledValue(ivec2 coord)
@@ -70,9 +70,7 @@ void main()
         cnv[i] = dp3;
     }
 
-    // Approximate gradient (save a square root)
-    // float outlineAlpha = sqrt(cnv[0] * cnv[0] + cnv[1] * cnv[1]);
-    float outlineAlpha = abs(cnv[0]) + abs(cnv[1]);
+    float outlineAlpha = 1.0 / inversesqrt(cnv[0] * cnv[0] + cnv[1] * cnv[1]);
     outlineAlpha *= 0.25;
 
     float interiorAlpha = I[1][1] * 0.2;
