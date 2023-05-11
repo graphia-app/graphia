@@ -980,8 +980,16 @@ PluginContent
 
                     horizontalScrollPosition: horizontalPlotScrollBar.position / (1.0 - horizontalPlotScrollBar.size)
 
+                    property var _lastSelectedRowsOfInterest: []
+                    property bool selectedRowsDifferFromRowsOfInterest:
+                        plot.plotMode === PlotMode.RowsOfInterestColumnSelection &&
+                        plot._lastSelectedRowsOfInterest.length > 0 &&
+                        !Utils.arraysMatch(tableView.selectedRows, plot._lastSelectedRowsOfInterest)
+
                     function selectRowsOfInterest()
                     {
+                        _lastSelectedRowsOfInterest = [];
+
                         if(plot.plotMode !== PlotMode.RowsOfInterestColumnSelection || plot.selectedColumns.length === 0)
                             return;
 
@@ -990,6 +998,13 @@ PluginContent
 
                         tableView.setRowOrder(rows);
                         tableView.clearAndSelectRows(rows);
+                        _lastSelectedRowsOfInterest = rows;
+                    }
+
+                    onPlotModeChanged:
+                    {
+                        if(plot.plotMode !== PlotMode.RowsOfInterestColumnSelection)
+                            _lastSelectedRowsOfInterest = [];
                     }
 
                     onSelectedColumnsChanged: { plot.selectRowsOfInterest(); }

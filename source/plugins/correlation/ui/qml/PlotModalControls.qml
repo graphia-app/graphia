@@ -173,6 +173,13 @@ Rectangle
                     text: qsTr("The quantity of rows to select and rank.")
                 }
             }
+
+            Button
+            {
+                visible: plot.selectedRowsDifferFromRowsOfInterest
+                text: qsTr("Reselect")
+                onClicked: { plot.selectRowsOfInterest(); }
+            }
         }
 
         FloatingButton { action: closeAction }
