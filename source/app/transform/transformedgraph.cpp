@@ -231,6 +231,7 @@ void TransformedGraph::rebuild()
             // We've been cancelled so rollback to our previous state
             _cache = std::move(oldCache);
             _createdAttributeNames = std::move(oldCreatedAttributeNames);
+            updatedAttributeNames.clear();
             const auto* cachedGraph = _cache.graph();
             *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
 
@@ -250,7 +251,8 @@ void TransformedGraph::rebuild()
         }
     });
 
-    emit attributeValuesChanged(updatedAttributeNames);
+    if(!updatedAttributeNames.empty())
+        emit attributeValuesChanged(updatedAttributeNames);
 
     enableComponentManagement();
 
