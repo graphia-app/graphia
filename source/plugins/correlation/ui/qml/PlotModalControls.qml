@@ -86,7 +86,7 @@ Rectangle
             id: rowsOfInterestColumnSelectionControls
             enabled: plot.selectedColumns.length > 0
 
-            Text { text: qsTr("Local") }
+            Text { text: qsTr("Relative") }
 
             Slider
             {
@@ -101,7 +101,7 @@ Rectangle
                 onValueChanged: { plot.selectRowsOfInterest(); }
             }
 
-            Text { text: qsTr("Global") }
+            Text { text: qsTr("Absolute") }
 
             HelpTooltip
             {
@@ -113,10 +113,10 @@ Rectangle
                     wrapMode: Text.WordWrap
                     text: qsTr("Rows are selected on the basis of weighting the sum of the " +
                         "selected columns against the non-selected columns. Weighting for " +
-                        "the selected columns (denoted Global) tends to find rows which have " +
+                        "the selected columns (denoted <i>Absolute</i>) tends to find rows which have " +
                         "peaks in those columns, regardless of the non-selected columns. In " +
                         "contrast, (negatively) weighting for the non-selected columns " +
-                        "(denoted Local) tends to find rows which have significant values " +
+                        "(denoted <i>Relative</i>) tends to find rows which have significant values " +
                         "specifically in the selected columns.")
                 }
             }
