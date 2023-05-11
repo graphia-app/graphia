@@ -265,7 +265,7 @@ void CorrelationPlotWorker::renderPixmap()
         if(axisRect != nullptr)
         {
             auto numVisibleColumns = (_xAxisMax - _xAxisMin);
-            const bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.3);
+            const bool columnsAreDense = numVisibleColumns > (axisRect->width() * 0.15);
 
             auto* xAxis = axisRect->axis(QCPAxis::atBottom);
             xAxis->setRange(_xAxisMin, _xAxisMax);
