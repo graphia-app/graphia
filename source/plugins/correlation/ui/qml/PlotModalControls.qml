@@ -34,6 +34,14 @@ Rectangle
     readonly property alias roiPercentile: percentileSlider.value
     readonly property alias roiWeight: weightSlider.value
 
+    Preferences
+    {
+        section: "correlation"
+
+        property alias rowsOfInterestPercentile: percentileSlider.value
+        property alias rowsOfInterestWeight: weightSlider.value
+    }
+
     // Don't pass clicks through
     MouseArea { anchors.fill: parent }
 
