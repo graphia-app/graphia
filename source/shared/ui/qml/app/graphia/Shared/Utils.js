@@ -323,7 +323,7 @@ function regexEscape(text)
 }
 
 // This is only a shallow value comparison
-function arrayCompare(a, b)
+function arraysMatch(a, b)
 {
     if(!Array.isArray(a) || !Array.isArray(b))
         return false;
@@ -337,7 +337,7 @@ function arrayCompare(a, b)
     let i = a.length;
     while(i--)
     {
-        if(as[i] !== bs[i])
+        if(as[i] != bs[i]) // Deliberate type coercion
             return false;
     }
 
