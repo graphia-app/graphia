@@ -926,29 +926,35 @@ void CorrelationPlotItem::onClick(const QMouseEvent* event)
 
     auto point = event->pos() - axisRect->topLeft();
 
+    auto selectColumn = [&]
+    {
+        if(point.x() < 0)
+            return;
+
+        auto* axis = axisRect->axis(QCPAxis::atBottom);
+        auto column = static_cast<size_t>(std::round(axis->pixelToCoord(event->pos().x())));
+
+        bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
+
+        if(!toggle)
+            _selectedColumns.clear();
+
+        auto index = _sortMap.at(column);
+        if(toggle && _selectedColumns.contains(index))
+            _selectedColumns.erase(index);
+        else
+            _selectedColumns.insert(index);
+
+        emit selectedColumnsChanged();
+        rebuildPlot();
+    };
+
     if(point.y() >= axisRect->height() && _showColumnNames)
     {
         if(point.x() >= 0)
         {
             if(_plotMode == PlotMode::RowsOfInterestColumnSelection)
-            {
-                auto* axis = axisRect->axis(QCPAxis::atBottom);
-                auto column = static_cast<size_t>(std::round(axis->pixelToCoord(event->pos().x())));
-
-                bool toggle = event->modifiers().testFlag(Qt::ControlModifier);
-
-                if(!toggle)
-                    _selectedColumns.clear();
-
-                auto index = _sortMap.at(column);
-                if(toggle && _selectedColumns.contains(index))
-                    _selectedColumns.erase(index);
-                else
-                    _selectedColumns.insert(index);
-
-                emit selectedColumnsChanged();
-                rebuildPlot();
-            }
+                selectColumn();
             else
                 sortBy(static_cast<int>(PlotColumnSortType::ColumnName));
         }
@@ -960,6 +966,8 @@ void CorrelationPlotItem::onClick(const QMouseEvent* event)
     }
     else if(CorrelationPlotItem::axisRectIsColumnAnnotations(axisRect))
         onClickColumnAnnotation(axisRect, event);
+    else if(_plotMode == PlotMode::RowsOfInterestColumnSelection)
+        selectColumn();
 }
 
 void CorrelationPlotItem::rebuildPlot(InvalidateCache invalidateCache)

@@ -1039,7 +1039,7 @@ PluginContent
                                 Layout.preferredWidth: 256
                                 wrapMode: Text.WordWrap
 
-                                text: qsTr("Click on a column name or a column annotation " +
+                                text: qsTr("Click on a column or a column annotation " +
                                     "to select. Hold <i>Ctrl</i> and click to select multiple columns.")
                             }
                         }
