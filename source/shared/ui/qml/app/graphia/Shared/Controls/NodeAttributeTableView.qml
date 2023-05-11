@@ -1193,8 +1193,12 @@ Item
                     {
                         proxyModel.invalidateFilter();
 
-                        let sourceRows = [...Array(proxyModel.rowCount()).keys()];
-                        root.visibleRows = sourceRows.map(row => proxyModel.mapToSourceRow(row));
+                        let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
+                        let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
+                        let newSelectedRows = root.selectedRows.filter(row => newVisibleRows.includes(row));
+
+                        root.clearAndSelectRows(newSelectedRows);
+                        root.visibleRows = newVisibleRows;
 
                         verticalTableViewScrollBar.position = 0;
                     }
