@@ -188,7 +188,7 @@ Item
         selectTargetsMenu.hidden = Qt.binding(() => !pluginContent.directed);
 
         MenuUtils.addActionTo(menu, selectNeighboursTableAction);
-        MenuUtils.addActionTo(menu, cropToSelecitonAction);
+        MenuUtils.addActionTo(menu, cropToSelectionAction);
 
         tableView._tableMenu = menu;
         MenuUtils.clone(menu, contextMenu);
@@ -325,7 +325,7 @@ Item
 
     Action
     {
-        id: cropToSelecitonAction
+        id: cropToSelectionAction
         text: qsTr("Crop To Selection")
         enabled: root.rowCount > 0
 
