@@ -834,6 +834,22 @@ PluginContent
 
                 contentHeight: Math.max(height, plot.minimumHeight)
                 clip: true
+                interactive: false
+                boundsBehavior: Flickable.StopAtBounds
+
+                MouseArea
+                {
+                    anchors.fill: parent
+                    onWheel: function(wheel)
+                    {
+                        plotFlickable.flick(0.0, wheel.angleDelta.y * 4.0);
+
+                        if(wheel.angleDelta.x < 0.0)
+                            horizontalPlotScrollBar.increase();
+                        else if(wheel.angleDelta.x > 0.0)
+                            horizontalPlotScrollBar.decrease();
+                    }
+                }
 
                 ScrollBar.vertical: ScrollBar
                 {
@@ -955,6 +971,7 @@ PluginContent
                         active: hovered || pressed
                         orientation: Qt.Horizontal
                         size: plot.visibleHorizontalFraction
+                        stepSize: size * 0.1
                     }
                 }
             }

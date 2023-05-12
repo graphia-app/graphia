@@ -761,6 +761,8 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
         if(!updateTooltip()) // If tooltip update fails...
             updatePixmap(CorrelationPlotUpdateType::Render);
     }
+    else
+        event->ignore();
 }
 
 QColor CorrelationPlotItem::colorForRows(const CorrelationPluginInstance* pluginInstance,
