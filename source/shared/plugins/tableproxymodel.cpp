@@ -34,6 +34,9 @@ bool TableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceP
 
 bool TableProxyModel::filterAcceptsColumn(int sourceColumn, const QModelIndex&) const
 {
+    if(sourceColumn < 0 || sourceColumn >= _columnNames.size())
+        return false;
+
     auto columnName = _columnNames.at(sourceColumn);
     return !u::contains(_hiddenColumns, columnName);
 }
