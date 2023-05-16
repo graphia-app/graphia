@@ -133,6 +133,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/spanningtreetransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/typecasttransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/removeleavestransform.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/alert.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/document.h
@@ -258,6 +259,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/spanningtreetransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/typecasttransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/removeleavestransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/document.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcommoninteractor.cpp
