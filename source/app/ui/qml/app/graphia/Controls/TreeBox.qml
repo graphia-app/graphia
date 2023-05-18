@@ -429,6 +429,9 @@ Item
 
                         onClicked:
                         {
+                            // Give the control keyboard focus so that shortcuts work
+                            treeView.forceActiveFocus();
+
                             root.clicked(sourceIndex);
                         }
 
