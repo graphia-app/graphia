@@ -375,6 +375,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
 
     connect(this, &CorrelationPlotItem::visibleColumnAnnotationNamesChanged, this, &CorrelationPlotItem::minimumHeightChanged);
     connect(this, &CorrelationPlotItem::plotModeChanged, this, &CorrelationPlotItem::minimumHeightChanged);
+    connect(this, &CorrelationPlotItem::columnSortOrderPinnedChanged, [this] { if(!_columnSortOrderPinned) rebuildPlot(); });
 }
 
 CorrelationPlotItem::~CorrelationPlotItem() // NOLINT modernize-use-equals-default
@@ -1272,12 +1273,15 @@ bool CorrelationPlotItem::updateSortMap()
         columnSortOrders.emplace_back(columnSortOrder);
     }
 
-    std::vector<double> columnValues;
-    columnValues.resize(numColumns(), std::numeric_limits<double>::lowest());
+    if(_columnDataValueSortOrder.empty())
+        _columnDataValueSortOrder.resize(numColumns());
 
-    if(std::any_of(columnSortOrders.begin(), columnSortOrders.end(),
+    if(!_columnSortOrderPinned && std::any_of(columnSortOrders.begin(), columnSortOrders.end(),
         [](const auto& cso) { return cso._type == PlotColumnSortType::DataValue; }))
     {
+        std::vector<double> columnValues;
+        columnValues.resize(numColumns(), std::numeric_limits<double>::lowest());
+
         for(size_t col = 0; col < _pluginInstance->numDiscreteColumns(); col++)
         {
             columnValues.at(col) = 0.0;
@@ -1336,10 +1340,21 @@ bool CorrelationPlotItem::updateSortMap()
                 break;
             }
         }
+
+        std::vector<size_t> inverseDataValueOrdering(numColumns());
+        std::iota(inverseDataValueOrdering.begin(), inverseDataValueOrdering.end(), 0);
+        std::sort(inverseDataValueOrdering.begin(), inverseDataValueOrdering.end(),
+        [&columnValues](size_t a, size_t b)
+        {
+            return columnValues.at(a) < columnValues.at(b);
+        });
+
+        for(size_t i = 0; i < inverseDataValueOrdering.size(); i++)
+            _columnDataValueSortOrder[inverseDataValueOrdering.at(i)] = i;
     }
 
     std::sort(_sortMap.begin(), _sortMap.end(),
-    [this, &columnSortOrders, &collator, &columnValues](size_t a, size_t b)
+    [this, &columnSortOrders, &collator](size_t a, size_t b)
     {
         for(const auto& columnSortOrder : columnSortOrders)
         {
@@ -1365,7 +1380,8 @@ bool CorrelationPlotItem::updateSortMap()
 
             case PlotColumnSortType::DataValue:
                 return columnSortOrder._order == Qt::AscendingOrder ?
-                    columnValues.at(a) < columnValues.at(b) : columnValues.at(b) < columnValues.at(a);
+                    _columnDataValueSortOrder.at(a) < _columnDataValueSortOrder.at(b) :
+                    _columnDataValueSortOrder.at(b) < _columnDataValueSortOrder.at(a);
 
             case PlotColumnSortType::ColumnAnnotation:
             {
@@ -1439,6 +1455,7 @@ bool CorrelationPlotItem::updateSortMap()
 
 void CorrelationPlotItem::sortBy(int type, const QString& text)
 {
+    const bool columnSortOrderCouldBePinned = columnSortOrderCanBePinned();
     const bool typeIsColumnAnnotation =
         (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
 
@@ -1488,6 +1505,10 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
     _columnSortOrders.push_front(newSortOrder);
 
     emit plotOptionsChanged();
+
+    if(columnSortOrderCouldBePinned != columnSortOrderCanBePinned())
+        emit columnSortOrderCanBePinnedChanged();
+
     rebuildPlot(InvalidateCache::Yes);
 }
 
@@ -1509,6 +1530,15 @@ void CorrelationPlotItem::setColumnSortOrders(const QVector<QVariantMap>& column
 
         rebuildPlot(InvalidateCache::Yes);
     }
+}
+
+bool CorrelationPlotItem::columnSortOrderCanBePinned() const
+{
+    return std::any_of(_columnSortOrders.cbegin(), _columnSortOrders.cend(), [](const auto& value)
+    {
+        return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) ==
+            PlotColumnSortType::DataValue;
+    });
 }
 
 QString CorrelationPlotItem::elideLabel(const QString& label) // NOLINT readability-make-member-function-const

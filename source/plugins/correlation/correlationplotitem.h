@@ -206,6 +206,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
         WRITE setDispersionVisualType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QVector<QVariantMap> columnSortOrders MEMBER _columnSortOrders
         WRITE setColumnSortOrders NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool columnSortOrderCanBePinned READ columnSortOrderCanBePinned NOTIFY columnSortOrderCanBePinnedChanged)
+    Q_PROPERTY(bool columnSortOrderPinned MEMBER _columnSortOrderPinned NOTIFY columnSortOrderPinnedChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(int rightPadding MEMBER _rightPadding WRITE setRightPadding NOTIFY plotOptionsChanged)
@@ -330,6 +332,8 @@ private:
     int _dispersionType = static_cast<int>(PlotDispersionType::None);
     int _dispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     QVector<QVariantMap> _columnSortOrders;
+    bool _columnSortOrderPinned = false;
+    std::vector<size_t> _columnDataValueSortOrder;
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
@@ -404,6 +408,7 @@ private:
 
     bool updateSortMap();
     void setColumnSortOrders(const QVector<QVariantMap>& columnSortOrders); // clazy:exclude=qproperty-type-mismatch
+    bool columnSortOrderCanBePinned() const;
 
     QString elideLabel(const QString& label);
 
@@ -479,6 +484,8 @@ signals:
     void isWideChanged();
     void plotOptionsChanged();
     void visibleColumnAnnotationNamesChanged();
+    void columnSortOrderCanBePinnedChanged();
+    void columnSortOrderPinnedChanged();
     void busyChanged();
     void zoomedChanged();
     void minimumHeightChanged();
