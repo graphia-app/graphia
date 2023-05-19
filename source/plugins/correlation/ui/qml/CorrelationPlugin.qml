@@ -672,7 +672,12 @@ PluginContent
                 if(sortOption.type === PlotColumnSortType.DataValue)
                     sortByMenuItem.hidden = Qt.binding(() => plot.groupByAnnotation);
 
-                let sortFn = function() { plot.sortBy(sortOption.type, sortOption.text); };
+                let sortFn = function()
+                {
+                    plot.sortBy(sortOption.type,
+                        sortOption.type === PlotColumnSortType.ColumnAnnotation ?
+                        sortOption.text : "");
+                };
 
                 if(sortOption.type === PlotColumnSortType.HierarchicalClustering)
                 {
