@@ -426,6 +426,13 @@ Item
             proxyModel.setSubSelection(selectionModel.selection, deselected);
         }
 
+        function _updateSelectedRowsProperty()
+        {
+            let newSelectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+            if(!Utils.arraysMatch(root.selectedRows, newSelectedRows))
+                root.selectedRows = newSelectedRows;
+        }
+
         function change(startRowInclusive, endRowInclusive, action)
         {
             let less = Math.min(startRowInclusive, endRowInclusive);
@@ -433,8 +440,7 @@ Item
 
             let range = proxyModel.buildRowSelectionRange(less, max);
             selectionModel.select([range], ItemSelectionModel.Rows | action);
-
-            root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+            selectionModel._updateSelectedRowsProperty();
         }
 
         function selectSourceRows(sourceRows, action)
@@ -452,8 +458,7 @@ Item
 
             let selection = proxyModel.buildRowSelection(rows);
             selectionModel.select(selection, ItemSelectionModel.Rows | ItemSelectionModel.Select | action);
-
-            root.selectedRows = selectionModel.selectedRows(0).map(index => proxyModel.mapToSourceRow(index.row));
+            selectionModel._updateSelectedRowsProperty();
         }
     }
 
@@ -1183,10 +1188,10 @@ Item
 
                         let allProxyRows = [...Array(proxyModel.rowCount()).keys()];
                         let newVisibleRows = allProxyRows.map(row => proxyModel.mapToSourceRow(row));
-                        let newSelectedRows = root.selectedRows.filter(row => newVisibleRows.includes(row));
-
-                        root.clearAndSelectRows(newSelectedRows);
                         root.visibleRows = newVisibleRows;
+
+                        let newSelectedRows = root.selectedRows.filter(row => newVisibleRows.includes(row));
+                        root.clearAndSelectRows(newSelectedRows);
 
                         verticalTableViewScrollBar.position = 0;
                     }
