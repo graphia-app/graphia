@@ -97,11 +97,16 @@ function clone(from, to)
             let toItem = createQmlItem("PlatformMenuItem", to);
             to.addItem(toItem);
 
-            // Note "action" is specifcally skipped because
-            //   a) the properties it proxies are bound anyway
-            //   b) binding it will cause loops
-            Utils.proxyProperties(fromItem, toItem, ["checkable",
-                "checked", "enabled", "icon", "text", "hidden"]);
+            function bindMenuProperties()
+            {
+                // Note "action" is specifcally skipped because
+                //   a) the properties it proxies are bound anyway
+                //   b) binding it will cause loops
+                Utils.proxyProperties(fromItem, toItem, ["checkable",
+                    "checked", "enabled", "icon", "text", "hidden"]);
+            }
+
+            bindMenuProperties();
 
             // Store a list of ButtonGroups so that we can recreate them
             // in the target menu, later
@@ -117,13 +122,12 @@ function clone(from, to)
 
             if(toItem.triggered !== undefined)
             {
-                toItem.triggered.connect(function(fromItem)
-                {
-                    if(fromItem.action !== null)
-                        return function() { fromItem.action.trigger(); }
-
-                    return function() { fromItem.triggered(); };
-                }(fromItem));
+                // bindMenuProperties is called again after a trigger as MenuItems have a tendency
+                // to set their own properties (checked in particular), which breaks the existing bindings
+                if(fromItem.action !== null)
+                    toItem.triggered.connect(function() { fromItem.action.trigger(); bindMenuProperties(); });
+                else
+                    toItem.triggered.connect(function() { fromItem.triggered(); bindMenuProperties(); });
             }
         }
         else if(fromItem instanceof SharedControls.PlatformMenuSeparator)
