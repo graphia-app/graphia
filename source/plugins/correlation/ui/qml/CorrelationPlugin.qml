@@ -1092,6 +1092,44 @@ PluginContent
                         }
                     }
 
+                    onColumnSortOrderCanBePinnedChanged:
+                    {
+                        pinnedButton.checked = false;
+
+                        if(columnSortOrderCanBePinned)
+                            pinningPanel.show();
+                        else
+                            pinningPanel.hide();
+                    }
+
+                    columnSortOrderPinned: pinnedButton.checked
+
+                    SlidingPanel
+                    {
+                        id: pinningPanel
+
+                        alignment: Qt.AlignBottom|Qt.AlignLeft
+
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.margins: Constants.margin
+
+                        initiallyOpen: false
+                        disableItemWhenClosed: false
+
+                        item: FloatingButton
+                        {
+                            id: pinnedButton
+
+                            checkable: true
+                            icon.name: "pin"
+
+                            ToolTip.visible: hovered
+                            ToolTip.delay: Constants.toolTipDelay
+                            ToolTip.text: qsTr("Fix Data Value Sort Order")
+                        }
+                    }
+
                     ScrollBar
                     {
                         id: horizontalPlotScrollBar
