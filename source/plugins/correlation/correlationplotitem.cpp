@@ -1441,20 +1441,21 @@ bool CorrelationPlotItem::updateSortMap()
 
 void CorrelationPlotItem::sortBy(int type, const QString& text)
 {
+    const bool typeIsColumnAnnotation =
+        (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
+
     auto order = Qt::AscendingOrder;
 
     auto existing = std::find_if(_columnSortOrders.cbegin(), _columnSortOrders.cend(),
-    [type, &text](const auto& value)
+    [type, &text, typeIsColumnAnnotation](const auto& value)
     {
         const bool sameType = (value[u"type"_s].toInt() == type);
         const bool sameText = (value[u"text"_s].toString() == text);
-        const bool typeIsColumnAnnotation =
-            (type == static_cast<int>(PlotColumnSortType::ColumnAnnotation));
 
         return sameType && (!typeIsColumnAnnotation || sameText);
     });
 
-    // If the column has been sorted on before, remove it so
+    // If the type has been sorted on before, remove it so
     // that adding it brings it to the front
     if(existing != _columnSortOrders.cend())
     {
@@ -1469,6 +1470,16 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
         }
 
         _columnSortOrders.erase(existing);
+    }
+
+    if(!typeIsColumnAnnotation)
+    {
+        _columnSortOrders.erase(std::remove_if(_columnSortOrders.begin(), _columnSortOrders.end(),
+        [](const auto& value)
+        {
+            return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) !=
+                PlotColumnSortType::ColumnAnnotation;
+        }), _columnSortOrders.end());
     }
 
     QVariantMap newSortOrder;
