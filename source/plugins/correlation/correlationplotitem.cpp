@@ -1233,10 +1233,8 @@ bool CorrelationPlotItem::updateSortMap()
 {
     auto previousSortmap = _sortMap;
 
-    _sortMap.clear();
-
-    for(size_t i = 0U; i < numColumns(); i++)
-        _sortMap.push_back(i);
+    _sortMap.resize(numColumns());
+    std::iota(_sortMap.begin(), _sortMap.end(), 0);
 
     QCollator collator;
     collator.setNumericMode(true);
