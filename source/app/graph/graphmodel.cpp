@@ -1273,7 +1273,6 @@ void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
     _->_selectedNodeIds = selectionManager->selectedNodes();
     _->_nodesMaskActive = selectionManager->nodesMaskActive();
-    clearHighlightedNodes();
     updateVisuals();
 }
 
