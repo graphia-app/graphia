@@ -808,7 +808,7 @@ PluginContent
             {
                 // If the tableView's selection is less than complete, highlight
                 // the corresponding nodes in the graph, otherwise highlight nothing
-                plugin.model.highlightedRows = tableView.selectedRows.length < rowCount ?
+                plugin.model.highlightedRows = tableView.selectedRows.length < tableView.visibleRows.length ?
                     tableView.selectedRows : [];
             }
 
