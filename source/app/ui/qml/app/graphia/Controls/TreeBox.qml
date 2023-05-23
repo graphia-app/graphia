@@ -232,6 +232,38 @@ Item
                     selectedRows = [];
                 }
 
+                function selectionWithRangeAddedRow(row)
+                {
+                    if(treeView.lastSelectedRow < 0)
+                        return [row];
+
+                    let min = Math.min(row, treeView.lastSelectedRow);
+                    let max = Math.max(row, treeView.lastSelectedRow);
+
+                    let newSelectedRows = treeView.selectedRows;
+
+                    for(let i = min; i <= max; i++)
+                    {
+                        if(newSelectedRows.indexOf(i) < 0)
+                            newSelectedRows.push(i);
+                    }
+
+                    return newSelectedRows;
+                }
+
+                function selectionWithIndividualAddedRow(row)
+                {
+                    let newSelectedRows = treeView.selectedRows;
+                    let metaIndex = newSelectedRows.indexOf(row);
+
+                    if(metaIndex < 0)
+                        newSelectedRows.push(row);
+                    else
+                        newSelectedRows.splice(metaIndex, 1);
+
+                    return newSelectedRows;
+                }
+
                 property var selectedIndex:
                 {
                     if(lastSelectedRow < 0)
@@ -394,30 +426,10 @@ Item
                             if(!sourceIndex || !sourceIndex.valid)
                                 return;
 
-                            if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier) &&
-                                treeView.lastSelectedRow !== -1)
-                            {
-                                let min = Math.min(model.row, treeView.lastSelectedRow);
-                                let max = Math.max(model.row, treeView.lastSelectedRow);
-
-                                newSelectedRows = treeView.selectedRows;
-
-                                for(let i = min; i <= max; i++)
-                                {
-                                    if(newSelectedRows.indexOf(i) < 0)
-                                        newSelectedRows.push(i);
-                                }
-                            }
+                            if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier))
+                                newSelectedRows = treeView.selectionWithRangeAddedRow(model.row);
                             else if(root.allowMultipleSelection && (treeView.modifiers & Qt.ControlModifier))
-                            {
-                                newSelectedRows = treeView.selectedRows;
-                                let metaIndex = newSelectedRows.indexOf(model.row);
-
-                                if(metaIndex < 0)
-                                    newSelectedRows.push(model.row);
-                                else
-                                    newSelectedRows.splice(metaIndex, 1);
-                            }
+                                newSelectedRows = treeView.selectionWithIndividualAddedRow(model.row);
                             else
                                 newSelectedRows = [model.row];
 
