@@ -294,6 +294,39 @@ Item
 
                 property int modifiers: 0
 
+                function keyboardSelect(row)
+                {
+                    let newSelectedRows = [];
+
+                    if(root.allowMultipleSelection && (treeView.modifiers & Qt.ShiftModifier))
+                        newSelectedRows = treeView.selectionWithRangeAddedRow(row);
+                    else
+                        newSelectedRows = [row];
+
+                    treeView.setSelectedRows(newSelectedRows, row);
+                    treeView.positionViewAtRow(row, TableView.Visible);
+                }
+
+                Keys.onUpPressed:
+                {
+                    if(treeView.lastSelectedRow === -1)
+                        return;
+
+                    let newRow = (treeView.lastSelectedRow - 1);
+                    if(newRow >= 0)
+                        keyboardSelect(newRow);
+                }
+
+                Keys.onDownPressed:
+                {
+                    if(treeView.lastSelectedRow === -1)
+                        return;
+
+                    let newRow = (treeView.lastSelectedRow + 1);
+                    if(newRow < treeView.rows)
+                        keyboardSelect(newRow);
+                }
+
                 Keys.onPressed: function(event)
                 {
                     modifiers = event.modifiers;
