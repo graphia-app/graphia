@@ -1108,10 +1108,10 @@ PluginContent
                     {
                         id: pinningPanel
 
-                        alignment: Qt.AlignBottom|Qt.AlignLeft
+                        alignment: Qt.AlignTop|Qt.AlignRight
 
-                        anchors.left: parent.left
-                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.top: parent.top
                         anchors.margins: Constants.margin
 
                         initiallyOpen: false
