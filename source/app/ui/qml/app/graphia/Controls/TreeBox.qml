@@ -472,6 +472,17 @@ Item
                             treeView.setSelectedRows(newSelectedRows, model.row);
                         }
 
+                        onReleased:
+                        {
+                            if(root._acceptancePending)
+                            {
+                                // This is just a workaround to avoid a (benign) Qt warning:
+                                // qt.core.qobject.connect: QObject::disconnect: Unexpected nullptr parameter
+                                root._acceptancePending = false;
+                                root.accepted();
+                            }
+                        }
+
                         onClicked:
                         {
                             // Give the control keyboard focus so that shortcuts work
@@ -485,7 +496,7 @@ Item
                             root.doubleClicked(sourceIndex);
 
                             if(root.selectedValue)
-                                root.accepted();
+                                root._acceptancePending = true;
                         }
                     }
                 }
@@ -675,6 +686,7 @@ Item
 
     Keys.forwardTo: [treeView]
 
+    property bool _acceptancePending: false
     signal accepted()
 
     signal clicked(var index)
