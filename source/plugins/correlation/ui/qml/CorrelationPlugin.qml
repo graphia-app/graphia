@@ -731,14 +731,25 @@ PluginContent
             MenuUtils.addSeparatorTo(menu);
             MenuUtils.addActionTo(menu, savePlotImageAction);
 
+            let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Images By…"));
+            let savePlotImageByRowMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, qsTr("Row"));
+
+            savePlotImageByRowMenuItem.triggered.connect(function()
+            {
+                savePlotImageAction.showSaveImageDialog(function(filename, extension)
+                {
+                    plot.savePlotImageByRow(filename, extension)
+                });
+            });
+
             if(plugin.model.sharedValuesAttributeNames.length > 0)
             {
-                let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Images By…"));
+                MenuUtils.addSeparatorTo(savePlotImageAttributeMenu);
                 plugin.model.sharedValuesAttributeNames.forEach(function(attributeName)
                 {
-                    let attributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
+                    let savePlotImageByAttributeMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, attributeName);
 
-                    attributeMenuItem.triggered.connect(function()
+                    savePlotImageByAttributeMenuItem.triggered.connect(function()
                     {
                         savePlotImageAction.showSaveImageDialog(function(filename, extension)
                         {

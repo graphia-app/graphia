@@ -1790,6 +1790,25 @@ void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& extensio
     _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
 }
 
+void CorrelationPlotItem::savePlotImageByRow(const QUrl& url, const QString& extension)
+{
+    const std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    auto cpsic = std::make_unique<CorrelationPlotSaveImageCommand>(*this,
+        url.toLocalFile(), extension);
+
+    for(auto selectedRow : _selectedRows)
+    {
+        auto rowName = _pluginInstance->rowName(static_cast<size_t>(selectedRow));
+        const static QRegularExpression re(QStringLiteral(R"(\s+)"));
+        rowName.replace(re, u"_"_s);
+
+        cpsic->addImageConfiguration(rowName, {selectedRow});
+    }
+
+    _pluginInstance->commandManager()->execute(ExecutePolicy::Once, std::move(cpsic));
+}
+
 void CorrelationPlotItem::savePlotImageByAttribute(const QUrl& url, const QString& extension,
     const QString& attributeName)
 {
