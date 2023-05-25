@@ -960,6 +960,11 @@ const Attribute* GraphModel::attributeByName(const QString& name) const
     return &_->_attributes.at(attributeName._name);
 }
 
+Attribute* GraphModel::attributeByName(const QString& name)
+{
+    return const_cast<Attribute*>(const_cast<const GraphModel*>(this)->attributeByName(name));
+}
+
 bool GraphModel::attributeExists(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
