@@ -126,6 +126,102 @@ public:
         _exposedAsAttributes.erase(name);
     }
 
+    bool setAttributeType(IGraphModel& graphModel, const QString& attributeName, UserDataVector::Type type)
+    {
+        if(!_inverseExposedAsAttributes.contains(attributeName))
+            return false;
+
+        if(!graphModel.attributeExists(attributeName))
+            return false;
+
+        auto userDataVectorName = _inverseExposedAsAttributes.at(attributeName);
+        const auto* userDataVector = vector(userDataVectorName);
+        auto* attribute = graphModel.attributeByName(attributeName);
+
+        // If the requested type doesn't match the detected
+        // type, check that a conversion is possible
+        if(type != userDataVector->type())
+        {
+            switch(userDataVector->type())
+            {
+            case UserDataVector::Type::Float:
+                if(type == UserDataVector::Type::Int)
+                {
+                    qDebug() << "Can't convert int vector to float, ignoring";
+                    return false;
+                }
+                break;
+
+            case UserDataVector::Type::String:
+                qDebug() << "Can't convert string vector to any other type, ignoring";
+                return false;
+
+            default: break;
+            }
+        }
+
+        switch(type)
+        {
+        case UserDataVector::Type::Float:
+            attribute->setFloatValueFn(
+            [this, userDataVectorName](E elementId)
+            {
+                return valueBy(elementId, userDataVectorName).toFloat();
+            })
+            .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+            {
+                if(!u::isNumeric(value))
+                {
+                    qDebug() << "UserDataVector setValueFn can't convert" << value << "to float, ignoring";
+                    return;
+                }
+
+                setValueBy(elementId, userDataVectorName, value);
+            })
+            .setFlag(AttributeFlag::AutoRange);
+            break;
+
+        case UserDataVector::Type::Int:
+            attribute->setIntValueFn(
+            [this, userDataVectorName](E elementId)
+            {
+                return valueBy(elementId, userDataVectorName).toInt();
+            })
+            .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+            {
+                if(!u::isInteger(value))
+                {
+                    qDebug() << "UserDataVector setValueFn can't convert" << value << "to integer, ignoring";
+                    return;
+                }
+
+                setValueBy(elementId, userDataVectorName, value);
+            })
+            .setFlag(AttributeFlag::AutoRange);
+            break;
+
+        case UserDataVector::Type::Unknown:
+        // Treat the unknown type as strings; the usual reason for this
+        // happening is if the entire vector is empty
+        case UserDataVector::Type::String:
+            attribute->setStringValueFn(
+            [this, userDataVectorName](E elementId)
+            {
+                return valueBy(elementId, userDataVectorName).toString();
+            })
+            .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
+            {
+                setValueBy(elementId, userDataVectorName, value);
+            })
+            .setFlag(AttributeFlag::FindShared);
+            break;
+
+        default: break;
+        }
+
+        return true;
+    }
+
     std::vector<QString> exposeAsAttributes(IGraphModel& graphModel)
     {
         std::vector<QString> createdAttributeNames;
@@ -147,64 +243,7 @@ public:
             _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
             createdAttributeNames.emplace_back(attributeName);
 
-            switch(userDataVector->type())
-            {
-            case UserDataVector::Type::Float:
-                attribute.setFloatValueFn(
-                [this, userDataVectorName](E elementId)
-                {
-                    return valueBy(elementId, userDataVectorName).toFloat();
-                })
-                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
-                {
-                    if(!u::isNumeric(value))
-                    {
-                        qDebug() << "UserDataVector setValueFn can't convert" << value << "to float, ignoring";
-                        return;
-                    }
-
-                    setValueBy(elementId, userDataVectorName, value);
-                })
-                .setFlag(AttributeFlag::AutoRange);
-                break;
-
-            case UserDataVector::Type::Int:
-                attribute.setIntValueFn(
-                [this, userDataVectorName](E elementId)
-                {
-                    return valueBy(elementId, userDataVectorName).toInt();
-                })
-                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
-                {
-                    if(!u::isInteger(value))
-                    {
-                        qDebug() << "UserDataVector setValueFn can't convert" << value << "to integer, ignoring";
-                        return;
-                    }
-
-                    setValueBy(elementId, userDataVectorName, value);
-                })
-                .setFlag(AttributeFlag::AutoRange);
-                break;
-
-            case UserDataVector::Type::Unknown:
-            // Treat the unknown type as strings; the usual reason for this
-            // happening is if the entire vector is empty
-            case UserDataVector::Type::String:
-                attribute.setStringValueFn(
-                [this, userDataVectorName](E elementId)
-                {
-                    return valueBy(elementId, userDataVectorName).toString();
-                })
-                .setSetValueFn([this, userDataVectorName](E elementId, const QString& value)
-                {
-                    setValueBy(elementId, userDataVectorName, value);
-                })
-                .setFlag(AttributeFlag::FindShared);
-                break;
-
-            default: break;
-            }
+            setAttributeType(graphModel, attributeName, userDataVector->type());
 
             attribute.setValueMissingFn([this, userDataVectorName](E elementId)
             {
