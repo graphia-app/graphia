@@ -49,6 +49,7 @@ private:
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
     std::map<QString, QString> _exposedAsAttributes;
+    std::map<QString, QString> _inverseExposedAsAttributes;
 
     void generateElementIdMapping(E elementId)
     {
@@ -67,7 +68,7 @@ public:
 
     QString exposedAttributeName(const QString& vectorName) const override
     {
-        if(u::contains(_exposedAsAttributes, vectorName))
+        if(_exposedAsAttributes.contains(vectorName))
             return _exposedAsAttributes.at(vectorName);
 
         return {};
@@ -75,12 +76,7 @@ public:
 
     std::vector<QString> exposedAttributeNames() const override
     {
-        auto attributeNames = vectorNames();
-
-        std::transform(attributeNames.begin(), attributeNames.end(), attributeNames.begin(),
-            [this](const auto& vectorName) { return _exposedAsAttributes.at(vectorName); });
-
-        return attributeNames;
+        return u::keysFor(_inverseExposedAsAttributes);
     }
 
     void setElementIdForIndex(E elementId, size_t index) override
@@ -126,6 +122,7 @@ public:
     void remove(const QString& name) override
     {
         UserData::remove(name);
+        _inverseExposedAsAttributes.erase(_exposedAsAttributes.at(name));
         _exposedAsAttributes.erase(name);
     }
 
@@ -137,7 +134,7 @@ public:
         {
             const auto* userDataVector = vector(userDataVectorName);
 
-            if(u::contains(_exposedAsAttributes, userDataVectorName))
+            if(_exposedAsAttributes.contains(userDataVectorName))
                 continue;
 
             QString attributeName;
@@ -147,7 +144,7 @@ public:
                 .setUserDefined(true);
 
             _exposedAsAttributes.emplace(userDataVectorName, attributeName);
-
+            _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
             createdAttributeNames.emplace_back(attributeName);
 
             switch(userDataVector->type())
@@ -225,15 +222,13 @@ public:
 
     UserDataVector removeByAttributeName(const QString& attributeName)
     {
-        auto it = std::find_if(_exposedAsAttributes.begin(), _exposedAsAttributes.end(),
-            [&attributeName](const auto& v) { return v.second == attributeName; });
-
         UserDataVector removee;
 
-        if(it != _exposedAsAttributes.end())
+        if(_inverseExposedAsAttributes.contains(attributeName))
         {
-            removee = std::move(*vector(it->first));
-            remove(it->first);
+            const auto& vectorName = _inverseExposedAsAttributes.at(attributeName);
+            removee = std::move(*vector(vectorName));
+            remove(vectorName);
         }
 
         return removee;
