@@ -732,8 +732,9 @@ PluginContent
             MenuUtils.addActionTo(menu, savePlotImageAction);
 
             let savePlotImageAttributeMenu = MenuUtils.addSubMenuTo(menu, qsTr("Save As Images By…"));
-            let savePlotImageByRowMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, qsTr("Row"));
+            savePlotImageAttributeMenu.enabled = Qt.binding(() => plot.selectedRows.length > 0);
 
+            let savePlotImageByRowMenuItem = MenuUtils.addItemTo(savePlotImageAttributeMenu, qsTr("Row"));
             savePlotImageByRowMenuItem.triggered.connect(function()
             {
                 savePlotImageAction.showSaveImageDialog(function(filename, extension)
