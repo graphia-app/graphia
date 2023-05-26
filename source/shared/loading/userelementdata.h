@@ -253,6 +253,21 @@ public:
                 return value(indexFor(elementId), userDataVectorName).toString().isEmpty();
             });
 
+            attribute.setMetaDataFn([this, userDataVectorName]
+            {
+                ValueType valueType;
+                switch(vector(userDataVectorName)->type())
+                {
+                default:
+                case UserDataVector::Type::Unknown: valueType = ValueType::Unknown; break;
+                case UserDataVector::Type::String:  valueType = ValueType::String; break;
+                case UserDataVector::Type::Int:     valueType = ValueType::Int; break;
+                case UserDataVector::Type::Float:   valueType = ValueType::Float; break;
+                }
+
+                return QVariantMap{{u"userDataType"_s, static_cast<int>(valueType)}};
+            });
+
             attribute.setDescription(QString(QObject::tr("%1 is a user defined attribute.")).arg(userDataVectorName));
         }
 

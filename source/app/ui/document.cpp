@@ -2160,6 +2160,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
         map.insert(u"valueType"_s, static_cast<int>(attribute.valueType()));
         map.insert(u"elementType"_s, static_cast<int>(attribute.elementType()));
         map.insert(u"userDefined"_s, attribute.userDefined());
+        map.insert(u"metaData"_s, attribute.metaData());
         map.insert(u"editable"_s, attribute.editable());
 
         map.insert(u"hasRange"_s, attribute.numericRange().hasRange());
