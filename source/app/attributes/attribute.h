@@ -141,7 +141,7 @@ private:
         double floatMin = std::numeric_limits<double>::max();
         double floatMax = std::numeric_limits<double>::lowest();
 
-        std::vector<SharedValue> _sharedValues;
+        std::vector<SharedValue> sharedValues;
 
         Flags<AttributeFlag> flags = AttributeFlag::None;
 
@@ -465,7 +465,7 @@ public:
     template<typename E>
     void updateSharedValuesForElements(const std::vector<E>& elementIds)
     {
-        _._sharedValues = findSharedValuesForElements(elementIds, true);
+        _.sharedValues = findSharedValuesForElements(elementIds, true);
     }
 
     template<typename T, typename E>
@@ -539,7 +539,7 @@ public:
     Attribute& setFlag(AttributeFlag flag) override { _.flags.set(flag); return *this; }
     Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
 
-    std::vector<SharedValue> sharedValues() const override { return _._sharedValues; }
+    std::vector<SharedValue> sharedValues() const override { return _.sharedValues; }
 
     bool userDefined() const override { return _.userDefined; }
     IAttribute& setUserDefined(bool userDefined) override { _.userDefined = userDefined; return *this; }
