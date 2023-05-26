@@ -72,6 +72,8 @@ public:
     template<typename E>
     using SetValueFn = std::function<void(E, const QString&)>;
 
+    using MetaDataFn = std::function<QVariantMap()>;
+
     virtual int intValueOf(NodeId nodeId) const = 0;
     virtual int intValueOf(EdgeId edgeId) const = 0;
     virtual int intValueOf(const IGraphComponent& graphComponent) const = 0;
@@ -149,6 +151,9 @@ public:
 
     virtual bool userDefined() const = 0;
     virtual IAttribute& setUserDefined(bool userDefined) = 0;
+
+    virtual QVariantMap metaData() const = 0;
+    virtual IAttribute& setMetaDataFn(MetaDataFn metaDataFn) = 0;
 
     virtual bool editable() const = 0;
 

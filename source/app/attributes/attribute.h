@@ -147,6 +147,7 @@ private:
 
         // Set if the attribute is derived from user data, i.e. not calculated
         bool userDefined = false;
+        MetaDataFn metaDataFn = []{ return QVariantMap(); };
 
         int parameterIndex = -1;
         QStringList validParameterValues;
@@ -543,6 +544,9 @@ public:
 
     bool userDefined() const override { return _.userDefined; }
     IAttribute& setUserDefined(bool userDefined) override { _.userDefined = userDefined; return *this; }
+
+    QVariantMap metaData() const override { return _.metaDataFn(); }
+    IAttribute& setMetaDataFn(MetaDataFn metaDataFn) override { _.metaDataFn = metaDataFn; return *this; }
 
     bool editable() const override;
 
