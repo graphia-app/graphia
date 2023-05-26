@@ -39,14 +39,51 @@ Window
 
     property var document: null
     property string attributeName: ""
+    property string _selectedAttributeName: ""
 
-    property string selectedAttributeName:
+    property string _attributeName:
     {
-        if(attributeName.length === 0)
-            return attributeList.selectedValue ? attributeList.selectedValue : "";
+        if(root.attributeName.length === 0)
+            return root._selectedAttributeName;
 
-        return attributeName;
+        return root.attributeName;
     }
+
+    property var _selectedAttribute: null
+
+    on_AttributeNameChanged:
+    {
+        if(root.document === null)
+        {
+            root._selectedAttribute = null;
+            return;
+        }
+
+        let attribute = document.attribute(root._attributeName);
+
+        if(!attribute || !attribute.isValid)
+        {
+            root._selectedAttribute = null;
+            return;
+        }
+
+        root._selectedAttribute = attribute;
+        root._selectedType = attribute.valueType;
+    }
+
+    on_SelectedAttributeChanged:
+    {
+        if(!root._selectedAttribute)
+            return;
+
+        dataTypeComboBox.setCurrentValueTo(root._selectedAttribute.valueType);
+        editAllSharedValuesCheckbox.checked = false;
+
+        editAttributeTableModel.combineSharedValues = false;
+        editAttributeTableModel.attributeName = root._attributeName;
+    }
+
+    property var _selectedType: ValueType.Unknown
 
     title: qsTr("Edit Attribute")
     flags: Qt.Window|Qt.Dialog
@@ -61,11 +98,18 @@ Window
         if(document === null)
             return;
 
+        root._selectedAttributeName = "";
+        root._selectedType = ValueType.Unknown;
+
+        editAttributeTableModel.resetAllEdits();
+        editAttributeTableModel.attributeName = root._attributeName;
+        editAttributeTableModel.combineSharedValues = false;
+
         attributeList.model = document.availableAttributesModel();
         editAllSharedValuesCheckbox.checked = false;
-        editAttributeTableModel.attributeName =
-            root.attributeName.length !== 0 ? root.attributeName : "";
-        editAttributeTableModel.combineSharedValues = false;
+        dataTypeComboBox.setCurrentValueTo(root._selectedAttribute ?
+            root._selectedAttribute.valueType : ValueType.Unknown);
+
         headerView.columnDivisorPosition = _defaultColumnDivisor;
         headerView.forceLayout();
         proxyModel.sortColumn = -1;
@@ -137,31 +181,33 @@ Window
         buttons: Labs.MessageDialog.Yes | Labs.MessageDialog.Cancel
         modality: Qt.ApplicationModal
 
-        property string attributeToEdit: ""
-        property bool toggleSharedValuesMode: false
+        property var _yesFn: null
+        property var _cancelFn: null
 
-        function resetFlags()
+        function resetAndClose()
         {
-            attributeToEdit = "";
-            toggleSharedValuesMode = false;
+            this._yesFn = null;
+            this._cancelFn = null;
+            this.close();
         }
 
         onYesClicked:
         {
-            if(attributeToEdit.length > 0)
-                editAttributeTableModel.attributeName = attributeToEdit;
-            else if(toggleSharedValuesMode)
-                editAttributeTableModel.combineSharedValues = editAllSharedValuesCheckbox.checked;
-
-            resetFlags();
+            this._yesFn();
+            resetAndClose();
         }
 
         onCancelClicked:
         {
-            if(toggleSharedValuesMode)
-                editAllSharedValuesCheckbox.checked = !editAllSharedValuesCheckbox.checked;
+            this._cancelFn();
+            resetAndClose();
+        }
 
-            resetFlags();
+        function confirm(yesFn, cancelFn)
+        {
+            this._yesFn = yesFn;
+            this._cancelFn = cancelFn;
+            this.open();
         }
     }
 
@@ -187,6 +233,7 @@ Window
 
                 text: (root.attributeName.length === 0 ? qsTr("Please select an attribute. ") : "") +
                     qsTr("Double click on a value to edit it. " +
+                    "Some attributes can have their type manually changed. " +
                     "For attributes with shared values, selecting <i>Edit All Shared Values</i> " +
                     "allows for bulk editing many attribute values at once.")
             }
@@ -229,49 +276,132 @@ Window
                 if(selectedValue === undefined || editAttributeTableModel.attributeName === selectedValue)
                     return;
 
-                if(editAttributeTableModel.hasEdits)
-                {
-                    confirmDiscard.attributeToEdit = selectedValue;
-                    confirmDiscard.open();
-                }
+                let newValue = selectedValue; // Capture
+                let doSelect = function() { root._selectedAttributeName = newValue; };
+                let cancelSelect = function() { attributeList.select(attributeList.model.find(root._selectedAttributeName)); };
+
+                if(editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged)
+                    confirmDiscard.confirm(doSelect, cancelSelect);
                 else
-                    editAttributeTableModel.attributeName = selectedValue;
+                    doSelect();
             }
         }
 
-        CheckBox
+        RowLayout
         {
-            id: editAllSharedValuesCheckbox
+            visible: tableView.visible && (dataTypeComboBox._canConvert || (root._selectedAttribute &&
+                root._selectedAttribute.sharedValues.length > 0))
 
-            visible:
+            Label
             {
-                if(root.document === null)
-                    return false;
-
-                let attribute = document.attribute(root.selectedAttributeName);
-
-                if(!attribute.isValid)
-                    return false;
-
-                return attribute.sharedValues.length > 0;
+                visible: dataTypeComboBox.visible
+                text: qsTr("Type:")
             }
 
-            text: qsTr("Edit All Shared Values")
-
-            onCheckedChanged:
+            ComboBox
             {
-                if(confirmDiscard.toggleSharedValuesMode)
-                    return;
+                id: dataTypeComboBox
 
-                // Confirm edit discard when going from non-combined to combined
-                if(checked && editAttributeTableModel.hasEdits)
+                textRole: "text"
+                valueRole: "value"
+
+                property bool _canConvert: false
+
+                property bool hasChanged: root._selectedAttribute && _canConvert &&
+                    root._selectedAttribute.valueType !== root._selectedType
+
+                Component.onCompleted:
                 {
-                    confirmDiscard.toggleSharedValuesMode = true;
-                    confirmDiscard.open();
-                    return;
+                    // Indicate edits by bold text, if the underlying contentItem has font.bold
+                    if(dataTypeComboBox.contentItem.font.bold !== undefined)
+                    {
+                        dataTypeComboBox.contentItem.font.bold =
+                            Qt.binding(() => dataTypeComboBox.hasChanged);
+                    }
                 }
 
-                editAttributeTableModel.combineSharedValues = checked;
+                visible: _canConvert
+
+                function update()
+                {
+                    if(root._selectedAttribute && root._selectedAttribute.metaData.userDataType !== undefined)
+                    {
+                        const intValue = {value: ValueType.Int, text: qsTr("Integer")};
+                        const floatValue = {value: ValueType.Float, text: qsTr("Float")};
+                        const stringValue = {value: ValueType.String, text: qsTr("String")};
+
+                        switch(root._selectedAttribute.metaData.userDataType)
+                        {
+                        case ValueType.Int:     model = [intValue, floatValue, stringValue]; break;
+                        case ValueType.Float:   model = [floatValue, stringValue]; break;
+                        case ValueType.String:  model = [stringValue]; break;
+                        default: model = []; break;
+                        }
+                    }
+                    else
+                        model = [];
+
+                    dataTypeComboBox._canConvert = model.length > 1;
+                }
+
+                function setCurrentValueTo(type)
+                {
+                    update();
+
+                    if(type === ValueType.Unknown)
+                        return;
+
+                    for(let i = 0; i < model.length; i++)
+                    {
+                        if(model[i].value === type)
+                        {
+                            dataTypeComboBox.currentIndex = i;
+                            return;
+                        }
+                    }
+
+                    console.log("setCurrentValueTo(", type, "), type not found");
+                    dataTypeComboBox.currentIndex = 0;
+                }
+
+                onCurrentValueChanged:
+                {
+                    if(currentValue === undefined || root._selectedType === currentValue)
+                        return;
+
+                    let newCurrentValue = currentValue; // Capture
+                    let doTypeChange = function () { editAttributeTableModel.resetAllEdits(); root._selectedType = newCurrentValue; };
+                    let cancelTypeChange = function() { dataTypeComboBox.setCurrentValueTo(root._selectedType); };
+
+                    // Confirm edit discard when changing type
+                    if(editAttributeTableModel.hasEdits)
+                        confirmDiscard.confirm(doTypeChange, cancelTypeChange);
+                    else
+                        root._selectedType = newCurrentValue;
+                }
+            }
+
+            CheckBox
+            {
+                id: editAllSharedValuesCheckbox
+
+                visible: root._selectedAttribute &&
+                    root._selectedAttribute.sharedValues.length > 0
+
+                text: qsTr("Edit All Shared Values")
+
+                onCheckedChanged:
+                {
+                    let newChecked = checked; // Capture
+                    let doCheck = function() { editAttributeTableModel.combineSharedValues = newChecked; };
+                    let cancelCheck = function() { editAllSharedValuesCheckbox.checked = false; };
+
+                    // Confirm edit discard when going from non-combined to combined
+                    if(checked && editAttributeTableModel.hasEdits)
+                        confirmDiscard.confirm(doCheck, cancelCheck);
+                    else
+                        doCheck();
+                }
             }
         }
 
@@ -294,7 +424,7 @@ Window
 
         Item
         {
-            visible: root.selectedAttributeName.length > 0
+            visible: root._attributeName.length > 0
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -326,15 +456,10 @@ Window
                         {
                             let emptyHeader = [{ "id": "", "name": ""}];
 
-                            if(root.document === null)
+                            if(!root._selectedAttribute)
                                 return emptyHeader;
 
-                            let attribute = document.attribute(root.selectedAttributeName);
-
-                            if(!attribute.isValid)
-                                return emptyHeader;
-
-                            if(attribute.elementType === ElementType.Node)
+                            if(root._selectedAttribute.elementType === ElementType.Node)
                             {
                                 if(editAttributeTableModel.combineSharedValues)
                                     return [{ "id": qsTr("Number of Nodes"), "name": qsTr("Value")}];
@@ -342,7 +467,7 @@ Window
                                 return [{ "id": qsTr("Node Name"), "name": qsTr("Value")}];
                             }
 
-                            if(attribute.elementType === ElementType.Edge)
+                            if(root._selectedAttribute.elementType === ElementType.Edge)
                             {
                                 if(editAttributeTableModel.combineSharedValues)
                                     return [{ "id": qsTr("Number of Edges"), "name": qsTr("Value")}];
@@ -697,14 +822,10 @@ Window
 
                                 validator:
                                 {
-                                    if(root.document === null)
+                                    if(!root._selectedAttribute)
                                         return null;
 
-                                    let attribute = document.attribute(root.selectedAttributeName);
-                                    if(attribute === null || !attribute.isValid)
-                                        return null;
-
-                                    switch(attribute.valueType)
+                                    switch(root._selectedType)
                                     {
                                     case ValueType.Float:   return _doubleValidator;
                                     case ValueType.Int:     return _intValidator;
@@ -734,11 +855,13 @@ Window
             Button
             {
                 text: qsTr("OK")
-                enabled: root.selectedAttributeName.length > 0 && editAttributeTableModel.hasEdits
+                enabled: root._selectedAttribute &&
+                    (editAttributeTableModel.hasEdits || dataTypeComboBox.hasChanged)
 
                 onClicked: function(mouse)
                 {
-                    document.editAttribute(root.selectedAttributeName, editAttributeTableModel.edits);
+                    document.editAttribute(root._attributeName,
+                        editAttributeTableModel.edits, root._selectedType);
                     root.close();
                 }
             }
