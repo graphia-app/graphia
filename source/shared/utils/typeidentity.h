@@ -41,10 +41,15 @@ public:
     void updateType(const QString& value);
 
     template<typename C>
-    void updateType(const C& values)
+    bool updateType(const C& values)
     {
+        auto oldType = type();
+
+        setType(Type::Unknown);
         for(const auto& value : values)
-            update(value);
+            updateType(value);
+
+        return type() != oldType;
     }
 
     void setType(Type type) { _type = type; }
