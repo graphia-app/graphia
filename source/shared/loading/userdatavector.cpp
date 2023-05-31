@@ -81,6 +81,11 @@ QString UserDataVector::get(size_t index) const
     return _values.at(index);
 }
 
+bool UserDataVector::resetType()
+{
+    return updateType(_values);
+}
+
 json UserDataVector::save(const std::vector<size_t>& indexes) const
 {
     json jsonObject;

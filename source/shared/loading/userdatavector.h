@@ -73,6 +73,8 @@ public:
     bool set(size_t index, const QString& value);
     QString get(size_t index) const;
 
+    bool resetType();
+
     json save(const std::vector<size_t>& indexes = {}) const;
     bool load(const QString& name, const json& jsonObject);
 };
