@@ -160,6 +160,10 @@ public:
             }
         }
 
+        // Reset all flags that will be set below
+        attribute->resetFlag(AttributeFlag::AutoRange);
+        attribute->resetFlag(AttributeFlag::FindShared);
+
         switch(type)
         {
         case UserDataVector::Type::Float:
