@@ -274,6 +274,15 @@ public:
         return createdAttributeNames;
     }
 
+    const UserDataVector* vectorForAttributeName(const QString& attributeName)
+    {
+        if(!_inverseExposedAsAttributes.contains(attributeName))
+            return nullptr;
+
+        const auto& vectorName = _inverseExposedAsAttributes.at(attributeName);
+        return vector(vectorName);
+    }
+
     UserDataVector removeByAttributeName(const QString& attributeName)
     {
         UserDataVector removee;
