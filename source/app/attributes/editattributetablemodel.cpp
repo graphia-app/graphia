@@ -55,7 +55,7 @@ EditAttributeTableModel::EditAttributeTableModel()
         beginResetModel();
 
         // Reset the edits when going from non-combined to combined (as in that case
-        // rows that are combined many have multiple different values)
+        // rows that are combined may have multiple different values)
         if(_combineSharedValues)
         {
             _edits._nodeValues.clear();
