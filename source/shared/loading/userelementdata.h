@@ -135,29 +135,17 @@ public:
             return false;
 
         auto userDataVectorName = _inverseExposedAsAttributes.at(attributeName);
-        const auto* userDataVector = vector(userDataVectorName);
+        auto* userDataVector = vector(userDataVectorName);
         auto* attribute = graphModel.attributeByName(attributeName);
 
-        // If the requested type doesn't match the detected
-        // type, check that a conversion is possible
-        if(type != userDataVector->type())
+        if(!userDataVector->canConvertTo(type))
         {
-            switch(userDataVector->type())
-            {
-            case UserDataVector::Type::Float:
-                if(type == UserDataVector::Type::Int)
-                {
-                    qDebug() << "Can't convert int vector to float, ignoring";
-                    return false;
-                }
-                break;
+            // If the conversion isn't possible, redetect the underlying type
+            // of the vector in case it's been forced into being something its not
+            userDataVector->resetType();
 
-            case UserDataVector::Type::String:
-                qDebug() << "Can't convert string vector to any other type, ignoring";
+            if(!userDataVector->canConvertTo(type))
                 return false;
-
-            default: break;
-            }
         }
 
         // Reset all flags that will be set below
