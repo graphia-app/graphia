@@ -19,12 +19,15 @@
 #include "editattributecommand.h"
 
 #include "graph/graphmodel.h"
+#include "shared/attributes/valuetype.h"
+
+#include <QVariant>
 
 using namespace Qt::Literals::StringLiterals;
 
 EditAttributeCommand::EditAttributeCommand(GraphModel* graphModel, const QString& attributeName,
-    const AttributeEdits& edits) :
-    _graphModel(graphModel), _attributeName(attributeName), _edits(edits)
+    const AttributeEdits& edits, ValueType newType) :
+    _graphModel(graphModel), _attributeName(attributeName), _edits(edits), _newType(newType)
 {}
 
 QString EditAttributeCommand::description() const
@@ -45,6 +48,9 @@ QString EditAttributeCommand::pastParticiple() const
 QString EditAttributeCommand::debugDescription() const
 {
     auto text = u"%1 %2"_s.arg(description(), _attributeName);
+
+    if(_newType != ValueType::Unknown)
+        text += u" %1"_s.arg(QVariant::fromValue(_newType).toString());
 
     auto appendDetails = [&text](const auto& edits, auto& reverseEdits)
     {
@@ -83,21 +89,41 @@ bool EditAttributeCommand::execute()
     if(attribute == nullptr)
         return false;
 
-    auto doEdits = [attribute](const auto& edits, auto& reverseEdits)
+    auto doEdits = [this, attribute](const auto& edits, auto& reverseEdits, auto& userData)
     {
+        if(_newType != ValueType::Unknown && _newType != attribute->valueType())
+        {
+            const auto* userDataVector = userData.vectorForAttributeName(_attributeName);
+            if(userDataVector == nullptr)
+                return false;
+
+            UserDataVector::Type type = UserDataVector::equivalentTypeFor(_newType);
+
+            if(!userDataVector->canConvertTo(type))
+                return false;
+
+            _originalType = attribute->valueType();
+
+            bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
+            Q_ASSERT(success);
+        }
+
         for(const auto& [elementId, value] : edits)
         {
             reverseEdits[elementId] = attribute->stringValueOf(elementId);
             attribute->setValueOf(elementId, value);
         }
+
+        return true;
     };
 
     if(attribute->elementType() == ElementType::Node)
-        doEdits(_edits._nodeValues, _reverseEdits._nodeValues);
-    else if(attribute->elementType() == ElementType::Edge)
-        doEdits(_edits._edgeValues, _reverseEdits._edgeValues);
+        return doEdits(_edits._nodeValues, _reverseEdits._nodeValues, _graphModel->userNodeData());
 
-    return true;
+    if(attribute->elementType() == ElementType::Edge)
+        return doEdits(_edits._edgeValues, _reverseEdits._edgeValues, _graphModel->userEdgeData());
+
+    return false;
 }
 
 void EditAttributeCommand::undo()
@@ -106,16 +132,24 @@ void EditAttributeCommand::undo()
 
     const auto* attribute = _graphModel->attributeByName(_attributeName);
 
-    auto undoEdits = [attribute](auto& reverseEdits)
+    auto undoEdits = [this, attribute](auto& reverseEdits, auto& userData)
     {
         for(const auto& [elementId, value] : reverseEdits)
             attribute->setValueOf(elementId, value);
 
         reverseEdits.clear();
+
+        if(_originalType != ValueType::Unknown)
+        {
+            UserDataVector::Type type = UserDataVector::equivalentTypeFor(_originalType);
+            bool success = userData.setAttributeType(*_graphModel, _attributeName, type);
+            Q_ASSERT(success);
+            _originalType = ValueType::Unknown;
+        }
     };
 
     if(attribute->elementType() == ElementType::Node)
-        undoEdits(_reverseEdits._nodeValues);
+        undoEdits(_reverseEdits._nodeValues, _graphModel->userNodeData());
     else if(attribute->elementType() == ElementType::Edge)
-        undoEdits(_reverseEdits._edgeValues);
+        undoEdits(_reverseEdits._edgeValues, _graphModel->userEdgeData());
 }

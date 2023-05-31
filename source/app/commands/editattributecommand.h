@@ -22,6 +22,7 @@
 #include "app/attributes/attributeedits.h"
 
 #include "shared/commands/icommand.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QString>
 
@@ -34,11 +35,13 @@ private:
 
     QString _attributeName;
     AttributeEdits _edits;
+    ValueType _newType = ValueType::Unknown;
     AttributeEdits _reverseEdits;
+    ValueType _originalType = ValueType::Unknown;
 
 public:
     EditAttributeCommand(GraphModel* graphModel, const QString& attributeName,
-        const AttributeEdits& edits);
+        const AttributeEdits& edits, ValueType newType = ValueType::Unknown);
 
     QString description() const override;
     QString verb() const override;
