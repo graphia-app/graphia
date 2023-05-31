@@ -38,11 +38,6 @@ private:
 
     std::vector<QString> _values;
 
-    int _intMin = std::numeric_limits<int>::max();
-    int _intMax = std::numeric_limits<int>::lowest();
-    double _floatMin = std::numeric_limits<double>::max();
-    double _floatMax = std::numeric_limits<double>::lowest();
-
 public:
     UserDataVector() = default;
     UserDataVector(const UserDataVector&) = default;
@@ -64,11 +59,6 @@ public:
     size_t numValues() const { return _values.size(); }
     size_t numUniqueValues() const;
     void reserve(size_t size) { _values.reserve(size); }
-
-    int intMin() const { return _intMin; }
-    int intMax() const { return _intMax; }
-    double floatMin() const { return _floatMin; }
-    double floatMax() const { return _floatMax; }
 
     bool set(size_t index, const QString& value);
     QString get(size_t index) const;
