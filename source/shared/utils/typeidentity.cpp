@@ -74,3 +74,36 @@ void TypeIdentity::updateType(const QString& value)
         break;
     }
 }
+
+bool TypeIdentity::canConvertTo(Type type) const
+{
+    if(type == _type)
+        return true;
+
+    switch(_type)
+    {
+    case Type::Float:
+        return type == Type::String;
+
+    case Type::String:
+        return false;
+
+    default: return true;
+    }
+
+    return true;
+}
+
+TypeIdentity::Type TypeIdentity::equivalentTypeFor(ValueType valueType)
+{
+    switch(valueType)
+    {
+    default:
+    case ValueType::Unknown:    return Type::Unknown;
+    case ValueType::Int:        return Type::Int;
+    case ValueType::Float:      return Type::Float;
+    case ValueType::String:     return Type::String;
+    }
+
+    return Type::Unknown;
+}

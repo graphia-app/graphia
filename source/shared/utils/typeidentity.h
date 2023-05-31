@@ -19,6 +19,8 @@
 #ifndef TYPEIDENTITY_H
 #define TYPEIDENTITY_H
 
+#include "shared/attributes/valuetype.h"
+
 class QString;
 
 class TypeIdentity
@@ -47,6 +49,10 @@ public:
 
     void setType(Type type) { _type = type; }
     Type type() const { return _type; }
+
+
+    bool canConvertTo(Type type) const;
+    static Type equivalentTypeFor(ValueType valueType);
 };
 
 #endif // TYPEIDENTITY_H
