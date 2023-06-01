@@ -49,6 +49,7 @@ private:
     std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _indexToElementIdMap;
     std::map<QString, QString> _exposedAsAttributes;
+    std::map<QString, ValueType> _exposedAttributeTypes;
     std::map<QString, QString> _inverseExposedAsAttributes;
 
     void generateElementIdMapping(E elementId)
@@ -123,6 +124,7 @@ public:
     {
         UserData::remove(name);
         _inverseExposedAsAttributes.erase(_exposedAsAttributes.at(name));
+        _exposedAttributeTypes.erase(name);
         _exposedAsAttributes.erase(name);
     }
 
@@ -211,6 +213,8 @@ public:
         default: break;
         }
 
+        _exposedAttributeTypes[attributeName] = attribute->valueType();
+
         return true;
     }
 
@@ -235,7 +239,11 @@ public:
             _inverseExposedAsAttributes.emplace(attributeName, userDataVectorName);
             createdAttributeNames.emplace_back(attributeName);
 
-            setAttributeType(graphModel, attributeName, userDataVector->type());
+            auto type = _exposedAttributeTypes.contains(attributeName) ?
+                UserDataVector::equivalentTypeFor(_exposedAttributeTypes.at(attributeName)) :
+                userDataVector->type();
+
+            setAttributeType(graphModel, attributeName, type);
 
             attribute.setValueMissingFn([this, userDataVectorName](E elementId)
             {
@@ -307,6 +315,24 @@ public:
         json jsonObject = UserData::save(progressable, indexes);
         jsonObject["ids"] = jsonIds;
 
+        json attributeTypes = json::object();
+        for(const auto& [attributeName, type] : _exposedAttributeTypes)
+        {
+            const char* typeString = nullptr;
+            switch(type)
+            {
+            case ValueType::Int:    typeString = "Int"; break;
+            case ValueType::Float:  typeString = "Float"; break;
+            case ValueType::String: typeString = "String"; break;
+            default: break;
+            }
+
+            if(typeString != nullptr)
+                attributeTypes[attributeName.toStdString()] = typeString;
+        }
+
+        jsonObject["attributeTypes"] = attributeTypes;
+
         return jsonObject;
     }
 
@@ -349,6 +375,24 @@ public:
 
             if(!haveIndexFor(elementId))
                 setElementIdForIndex(elementId, index++);
+        }
+
+        if(u::contains(jsonObject, "attributeTypes"))
+        {
+            const auto& attributeTypes = jsonObject["attributeTypes"];
+            for(const auto& i : attributeTypes.items())
+            {
+                ValueType type = ValueType::Unknown;
+
+                if(i.value() == "Int")
+                    type = ValueType::Int;
+                else if(i.value() == "Float")
+                    type = ValueType::Float;
+                else if(i.value() == "String")
+                    type = ValueType::String;
+
+                _exposedAttributeTypes[QString::fromStdString(i.key())] = type;
+            }
         }
 
         return true;
