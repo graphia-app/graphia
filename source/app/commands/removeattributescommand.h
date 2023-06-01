@@ -22,11 +22,13 @@
 #include "shared/commands/icommand.h"
 
 #include "shared/loading/userdatavector.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QString>
 #include <QStringList>
 
 #include <vector>
+#include <map>
 
 class GraphModel;
 
@@ -37,7 +39,9 @@ private:
 
     QStringList _attributeNames;
     std::vector<UserDataVector> _removedUserNodeDataVectors;
+    std::map<QString, ValueType> _removedNodeAttributeTypes;
     std::vector<UserDataVector> _removedUserEdgeDataVectors;
+    std::map<QString, ValueType> _removedEdgeAttributeTypes;
 
 public:
     RemoveAttributesCommand(GraphModel* graphModel, const QStringList& attributeNames);

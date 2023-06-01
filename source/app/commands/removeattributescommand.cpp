@@ -79,11 +79,13 @@ bool RemoveAttributesCommand::execute()
 
         if(attribute->elementType() == ElementType::Node)
         {
+            _removedNodeAttributeTypes[attributeName] = attribute->valueType();
             auto v = _graphModel->userNodeData().removeByAttributeName(attributeName);
             _removedUserNodeDataVectors.emplace_back(std::move(v));
         }
         else if(attribute->elementType() == ElementType::Edge)
         {
+            _removedEdgeAttributeTypes[attributeName] = attribute->valueType();
             auto v = _graphModel->userEdgeData().removeByAttributeName(attributeName);
             _removedUserEdgeDataVectors.emplace_back(std::move(v));
         }
@@ -107,6 +109,20 @@ void RemoveAttributesCommand::undo()
     _graphModel->userNodeData().exposeAsAttributes(*_graphModel);
     _graphModel->userEdgeData().exposeAsAttributes(*_graphModel);
 
+    for(const auto& [attributeName, type] : _removedNodeAttributeTypes)
+    {
+        _graphModel->userNodeData().setAttributeType(*_graphModel,
+            attributeName, UserDataVector::equivalentTypeFor(type));
+    }
+
+    for(const auto& [attributeName, type] : _removedEdgeAttributeTypes)
+    {
+        _graphModel->userEdgeData().setAttributeType(*_graphModel,
+            attributeName, UserDataVector::equivalentTypeFor(type));
+    }
+
     _removedUserNodeDataVectors.clear();
+    _removedNodeAttributeTypes.clear();
     _removedUserEdgeDataVectors.clear();
+    _removedEdgeAttributeTypes.clear();
 }
