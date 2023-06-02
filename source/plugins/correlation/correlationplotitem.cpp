@@ -1489,12 +1489,12 @@ void CorrelationPlotItem::sortBy(int type, const QString& text)
 
     if(!typeIsColumnAnnotation)
     {
-        _columnSortOrders.erase(std::remove_if(_columnSortOrders.begin(), _columnSortOrders.end(),
+        _columnSortOrders.erase(std::remove_if(_columnSortOrders.begin(), _columnSortOrders.end(),  // clazy:exclude=strict-iterators,detaching-member
         [](const auto& value)
         {
             return static_cast<PlotColumnSortType>(value[u"type"_s].toInt()) !=
                 PlotColumnSortType::ColumnAnnotation;
-        }), _columnSortOrders.end());
+        }), _columnSortOrders.end());  // clazy:exclude=strict-iterators,detaching-member
     }
 
     QVariantMap newSortOrder;
